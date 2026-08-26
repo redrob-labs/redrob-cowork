@@ -46,6 +46,8 @@ export default {
   "blueprint.starter_command_title": "재사용 가능한 명령 만들기",
   "blueprint.starter_connect_openai_desc": "OpenAI 제공자를 추가하여 새 세션에서 ChatGPT 모델을 사용할 수 있도록 합니다.",
   "blueprint.starter_connect_openai_title": "ChatGPT 연결",
+  "blueprint.starter_connect_redrob_desc": "Redrob 제공자를 추가하여 새 세션에서 다국어 redrob-ai 모델을 사용할 수 있도록 합니다.",
+  "blueprint.starter_connect_redrob_title": "Redrob 연결",
   "blueprint.starter_csv_desc": "스프레드시트 데이터를 정리하거나 생성합니다.",
   "blueprint.starter_csv_prompt": "이 컴퓨터에서 CSV 파일을 만들거나 편집하도록 도와주세요.",
   "blueprint.starter_csv_title": "CSV 작업하기",

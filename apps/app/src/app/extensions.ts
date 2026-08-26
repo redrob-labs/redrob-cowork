@@ -293,4 +293,27 @@ export const BUILT_IN_OPENWORK_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] 
     ],
     lifecycle: { reload: ["config"], detection: ["provider:ollama"] },
   },
+  {
+    schemaVersion: 1,
+    id: "redrob",
+    name: "Redrob",
+    description: "Multilingual OpenAI-compatible inference at https://console.redrob.ai.",
+    source: { format: "openwork-builtin", origin: "builtin", trusted: true },
+    icon: { src: "/ext-redrob.svg" },
+    composer: { prompt: "Use the Redrob provider to " },
+    setup: {
+      instructions: "Set REDROB_API_KEY, then connect the Redrob provider to use the redrob-ai model.",
+      primaryCta: "Connect Redrob",
+    },
+    resources: [
+      { type: "provider", id: "redrob", providerId: "redrob", packageName: "@ai-sdk/openai-compatible", required: true },
+    ],
+    contributions: [
+      { type: "composer-prompt", prompt: "Use the Redrob provider to ", location: "composer" },
+    ],
+    enablement: [
+      { type: "provider-connected", ref: "redrob", label: "Redrob provider" },
+    ],
+    lifecycle: { reload: ["config"], detection: ["provider:redrob"] },
+  },
 ];

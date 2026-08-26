@@ -27,7 +27,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 const LOCALES_DIR = join(REPO_ROOT, "apps/app/src/i18n/locales");
 const APP_SRC = join(REPO_ROOT, "apps/app/src");
 
-const LOCALES = ["ja", "ko", "vi", "pt-BR", "th", "fr", "ca", "es", "ru"];
+const LOCALES = ["ko"];
 const EN_FILE = join(LOCALES_DIR, "en.ts");
 
 const PLURAL_SUFFIXES = ["zero", "one", "two", "few", "many", "other"];

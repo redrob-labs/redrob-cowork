@@ -56,6 +56,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
   google: "Google",
   openrouter: "OpenRouter",
+  redrob: "Redrob",
 };
 
 const OPENWORK_MODELS_PROVIDER_ID = "openwork";

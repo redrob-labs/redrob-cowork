@@ -36,6 +36,7 @@ const SIMPLE_ICON_MISSES = new Set([
   "fireworks",
   "opencode",
   "openwork",
+  "redrob",
 ]);
 
 /** Apex domains for providers whose id does not resolve to their own domain. */
@@ -63,6 +64,7 @@ const PROVIDER_DOMAINS: Record<string, string> = {
   opencode: "opencode.ai",
   openwork: "openworklabs.com",
   abacus: "abacus.ai",
+  redrob: "redrob.io",
 };
 
 /**

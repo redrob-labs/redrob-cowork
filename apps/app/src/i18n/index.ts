@@ -1,43 +1,27 @@
 import en from "./locales/en";
-import ja from "./locales/ja";
 import ko from "./locales/ko";
-import vi from "./locales/vi";
-import ptBR from "./locales/pt-BR";
-import th from "./locales/th";
-import fr from "./locales/fr";
-import ca from "./locales/ca";
-import es from "./locales/es";
-import ru from "./locales/ru";
 export const LANGUAGE_PREF_KEY = "openwork.language";
 
 /**
  * Supported languages
  */
-export type Language = "en" | "ja" | "ko" | "vi" | "pt-BR" | "th" | "fr" | "ca" | "es" | "ru";
+export type Language = "en" | "ko";
 export type Locale = Language;
 
 /**
  * All supported languages - single source of truth
  */
-export const LANGUAGES: Language[] = ["en", "ja", "ko", "vi", "pt-BR", "th", "fr", "ca", "es", "ru"];
+export const LANGUAGES: Language[] = ["en", "ko"];
 
 /**
  * Language options for UI - single source of truth
  */
 export const LANGUAGE_OPTIONS = [
   { value: "en" as Language, label: "English", nativeName: "English" },
-  { value: "ja" as Language, label: "Japanese", nativeName: "日本語" },
   { value: "ko" as Language, label: "Korean", nativeName: "한국어" },
-  { value: "vi" as Language, label: "Vietnamese", nativeName: "Tiếng Việt" },
-  { value: "pt-BR" as Language, label: "Portuguese (BR)", nativeName: "Português (BR)" },
-  { value: "th" as Language, label: "Thai", nativeName: "ไทย" },
-  { value: "fr" as Language, label: "French", nativeName: "Français" },
-  { value: "ca" as Language, label: "Catalan", nativeName: "Català" },
-  { value: "es" as Language, label: "Spanish", nativeName: "Español" },
-  { value: "ru" as Language, label: "Russian", nativeName: "Русский" },
 ] as const;
 
-const PLURAL_SUFFIX_EMPTY_LANGUAGES = new Set<Language>(["ja", "ko", "th"]);
+const PLURAL_SUFFIX_EMPTY_LANGUAGES = new Set<Language>(["ko"]);
 
 /**
  * Current translation strings use an English-style plural suffix placeholder.
@@ -57,15 +41,7 @@ export const pluralSuffix = (locale: Language, count: number): string => {
  */
 const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en,
-  ja,
   ko,
-  vi,
-  "pt-BR": ptBR,
-  th,
-  fr,
-  ca,
-  es,
-  ru,
 };
 
 /**
@@ -122,15 +98,7 @@ const lookupEntry = (loc: Language, candidateKey: string): string | null => {
 
 const pluralRulesByLanguage: Record<Language, Intl.PluralRules> = {
   en: new Intl.PluralRules("en"),
-  ja: new Intl.PluralRules("ja"),
   ko: new Intl.PluralRules("ko"),
-  vi: new Intl.PluralRules("vi"),
-  "pt-BR": new Intl.PluralRules("pt-BR"),
-  th: new Intl.PluralRules("th"),
-  fr: new Intl.PluralRules("fr"),
-  ca: new Intl.PluralRules("ca"),
-  es: new Intl.PluralRules("es"),
-  ru: new Intl.PluralRules("ru"),
 };
 const pluralRule = (loc: Language, count: number): Intl.LDMLPluralRule => {
   return pluralRulesByLanguage[loc].select(count);
