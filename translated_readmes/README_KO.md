@@ -15,7 +15,7 @@ Codex, Claude Code, Cursor 또는 다른 호환 에이전트에 레드롭 워크
 이미 AI 에이전트를 사용하고 있나요? 이 프롬프트를 복사하여 Claude Code, Cursor, Codex, ChatGPT 또는 컴퓨터에서 명령을 실행할 수 있는 모든 에이전트에 붙여넣으세요.
 
 ```text
-Install OpenWork on my computer, set up my first workspace, and open it ready to use. Follow the steps in https://openworklabs.com/start.md?v=hero
+Install Redrob Work on my computer, set up my first workspace, and open it ready to use. Follow the steps in https://openworklabs.com/start.md?v=hero
 ```
 
 1. 레드롭 워크를 설치합니다

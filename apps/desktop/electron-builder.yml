@@ -1,6 +1,6 @@
 extends: ./electron-builder.base.yml
 appId: com.differentai.openwork
-productName: OpenWork
+productName: Redrob Work
 protocols:
   - name: OpenWork
     schemes:

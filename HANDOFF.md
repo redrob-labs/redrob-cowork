@@ -35,7 +35,7 @@ MCPs are one thing: **Connections (MCPs)**.
   - **Connect your account / Reconnect** on the row when member OAuth needs it.
   - Configure from that pane opens Library `connections`.
   - **Scroll:** + panel has a definite `height` (was `maxHeight` only + `overflow-hidden`, so lists clipped with no scroll). Left nav and right list are `overflow-y-auto`. Cap raised 352 → 520.
-- Model select and model picker no longer show the OpenWork Models subscribe promo (composer Configure still goes to `/settings/ai` for providers).
+- Model select and model picker no longer show the Redrob Work Models subscribe promo (composer Configure still goes to `/settings/ai` for providers).
 
 Helpers: `apps/app/src/react-app/domains/session/surface/composer/composer-connections.ts`  
 Tests: `apps/app/tests/composer-connections.test.ts`, `apps/app/tests/library-destination.test.ts` (17 unit tests passed locally). **No test evidence.** Verdict for UI claims is Incomplete until an `.e2e.test.ts` exists.

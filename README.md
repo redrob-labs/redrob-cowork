@@ -1,32 +1,32 @@
-# OpenWork
+# Redrob Work
 
-OpenWork is a free, open-source desktop app made for sharing AI workflows. It is an open-source alternative to Claude Cowork and Codex for macOS, Windows, and Linux.
+Redrob Work is a free, open-source desktop app made for sharing AI workflows. It is an open-source alternative to Claude Cowork and Codex for macOS, Windows, and Linux.
 
-Add one OpenWork MCP to Codex, Claude Code, Cursor, or another compatible agent and reuse the same skills, MCPs, and connected services across your tools, teammates, and machines. Create something once, share it with coworkers or friends, or keep it for yourself.
+Add one Redrob Work MCP to Codex, Claude Code, Cursor, or another compatible agent and reuse the same skills, MCPs, and connected services across your tools, teammates, and machines. Create something once, share it with coworkers or friends, or keep it for yourself.
 
-The desktop app is there when you want a dedicated workspace, but it is not required. You can use OpenWork from the agent you already have. For larger organizations, the admin interface lets you publish capabilities, manage access, and configure shared or per-user connections.
+The desktop app is there when you want a dedicated workspace, but it is not required. You can use Redrob Work from the agent you already have. For larger organizations, the admin interface lets you publish capabilities, manage access, and configure shared or per-user connections.
 
-[**Download OpenWork**](https://openworklabs.com/download)
+[**Download Redrob Work**](https://openworklabs.com/download)
 
-<img width="1481" height="842" alt="OpenWork desktop app" src="https://github.com/user-attachments/assets/66a8dd9b-5260-488c-957d-e54331e78c1c" />
+<img width="1481" height="842" alt="Redrob Work desktop app" src="https://github.com/user-attachments/assets/66a8dd9b-5260-488c-957d-e54331e78c1c" />
 
 ## Install with your AI agent
 
 Already use an AI agent? Copy this prompt and paste it into Claude Code, Cursor, Codex, ChatGPT, or any agent that can run commands on your computer.
 
 ```text
-Install OpenWork on my computer, set up my first workspace, and open it ready to use. Follow the steps in https://openworklabs.com/start.md?v=hero
+Install Redrob Work on my computer, set up my first workspace, and open it ready to use. Follow the steps in https://openworklabs.com/start.md?v=hero
 ```
 
-1. Installs OpenWork
+1. Installs Redrob Work
 2. Creates your workspace
 3. Opens it ready to run
 
-## Use OpenWork from any agent
+## Use Redrob Work from any agent
 
-The OpenWork MCP brings your assigned skills, plugins, MCP connections, Google Workspace, and Microsoft 365 capabilities into any compatible agent.
+The Redrob Work MCP brings your assigned skills, plugins, MCP connections, Google Workspace, and Microsoft 365 capabilities into any compatible agent.
 
-It exposes two tools: `search_capabilities` finds what you can use, and `execute_capability` runs it. After adding the MCP, your client opens a browser so you can sign in and choose your OpenWork organization.
+It exposes two tools: `search_capabilities` finds what you can use, and `execute_capability` runs it. After adding the MCP, your client opens a browser so you can sign in and choose your Redrob Work organization.
 
 ### Codex
 
@@ -65,21 +65,21 @@ Use this remote MCP server URL:
 https://api.openworklabs.com/mcp/agent
 ```
 
-## OpenWork Den
+## Redrob Work Den
 
-OpenWork Den is the control plane for managing OpenWork across a team or organization.
+Redrob Work Den is the control plane for managing Redrob Work across a team or organization.
 
 - Provision inference at scale and control which members and teams can use each model provider.
 - Invite teammates, create teams, and manage access from one place.
 - Set desktop policies, restrict local model access, and control which app versions your organization can use.
 - Publish skills and plugins through marketplaces, then assign them to the organization, a team, or specific people.
-- Import Anthropic-compatible plugins and make their supported skills and remote MCPs available through the OpenWork MCP.
+- Import Anthropic-compatible plugins and make their supported skills and remote MCPs available through the Redrob Work MCP.
 
-<img width="1546" height="915" alt="OpenWork Den organization control plane" src="https://github.com/user-attachments/assets/033dbbfe-5661-4f7c-869c-46278406d6cc" />
+<img width="1546" height="915" alt="Redrob Work Den organization control plane" src="https://github.com/user-attachments/assets/033dbbfe-5661-4f7c-869c-46278406d6cc" />
 
 ## Documentation
 
-[Read the OpenWork docs.](https://openworklabs.com/docs)
+[Read the Redrob Work docs.](https://openworklabs.com/docs)
 
 ## Local development
 
@@ -101,7 +101,7 @@ If a second instance cannot get the profile lock it now says so and exits, inste
 
 ### Headless web (no Electron)
 
-To run the OpenWork UI in a browser against a local `openwork-server` (no desktop shell):
+To run the Redrob Work UI in a browser against a local `openwork-server` (no desktop shell):
 
 ```bash
 pnpm dev:headless-web
@@ -123,7 +123,7 @@ Open the printed Web URL. Cloud sign-in in headless web uses the **copy/paste** 
 
 1. Account → Sign in (opens Den; the paste field opens in Settings)
 2. Sign in on Den
-3. Copy the OpenWork link / one-time code Den shows
+3. Copy the Redrob Work link / one-time code Den shows
 4. Paste it under **Paste sign-in code** → Finish sign-in
 
 Point Den at a local stack with `OPENWORK_DEV_DEN_PROXY_TARGET=http://127.0.0.1:3005` while `pnpm dev:web-local` is running. Set `OPENWORK_DEV_HEADLESS_WEB_DEN_PROXY=0` to disable the Den wiring.

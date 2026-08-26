@@ -31,7 +31,7 @@ const connectConfirmDialogSource = readFileSync(
 
 const publicDistribution = {
   flavor: "public" as const,
-  appName: "OpenWork",
+  appName: "Redrob Work",
   appIdentifier: "com.differentai.openwork",
   protocolScheme: "openwork",
   requireSignin: false,
@@ -40,7 +40,7 @@ const publicDistribution = {
 
 const enterpriseDistribution = {
   flavor: "enterprise" as const,
-  appName: "OpenWork Enterprise",
+  appName: "Redrob Work Enterprise",
   appIdentifier: "com.differentai.openwork",
   protocolScheme: "openwork",
   requireSignin: true,

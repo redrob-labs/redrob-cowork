@@ -1,6 +1,6 @@
 # AGENTS.md
 
-OpenWork is a free, open-source desktop app (macOS, Windows, Linux) for doing
+Redrob Work is a free, open-source desktop app (macOS, Windows, Linux) for doing
 work with AI agents on your own files — an open-source alternative to Claude
 Cowork and Codex, built on OpenCode, running any model from 50+ providers.
 Desktop mode keeps files local; cloud is optional. Three surfaces live in this
@@ -9,17 +9,17 @@ repo:
 - **Desktop app** (`apps/`, `packages/`) — local-first agent workspace: chat on
   files, skills, browser automation, scheduled automations, Anthropic-compatible
   plugins.
-- **OpenWork MCP gateway** (`ee/apps/den-api`) — one URL
+- **Redrob Work MCP gateway** (`ee/apps/den-api`) — one URL
   (`api.openworklabs.com/mcp/agent`) that brings org-assigned skills, plugins,
   and connections (Google Workspace, Microsoft 365, MCPs) into Codex, Claude
   Code, Cursor, or any MCP client via `search_capabilities` /
   `execute_capability`.
-- **OpenWork Den** (`ee/apps/den-*`) — the org control plane: provision
+- **Redrob Work Den** (`ee/apps/den-*`) — the org control plane: provision
   inference, manage teams and access, set desktop policies, publish skills and
   plugins through marketplaces.
 
-The app consumes OpenWork server surfaces (self-hosted or hosted) rather than
-inventing parallel behavior. Anything OpenCode can do is available in OpenWork,
+The app consumes Redrob Work server surfaces (self-hosted or hosted) rather than
+inventing parallel behavior. Anything OpenCode can do is available in Redrob Work,
 even before a dedicated UI exists.
 
 ## Verification (every change)
@@ -54,7 +54,7 @@ even before a dedicated UI exists.
  It does not use `~/.config/openwork/server.json`. Re-running reuses a healthy
  instance; `--replace` restarts it with fresh tokens (`--keep-tokens` to
  keep the previous ones). Cloud sign-in is copy/paste handoff (Den cannot
- redirect grants to localhost): Account → Sign in → copy OpenWork link on Den
+ redirect grants to localhost): Account → Sign in → copy Redrob Work link on Den
  → Paste sign-in code in Settings.
 
 ## Coding
