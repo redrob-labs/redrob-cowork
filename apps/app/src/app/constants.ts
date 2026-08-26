@@ -9,6 +9,10 @@ import {
   type OpenWorkExtensionManifest,
   type OpenWorkExtensionPlatform,
 } from "./extensions";
+import {
+  REDROB_MODEL_ID,
+  REDROB_PROVIDER_ID,
+} from "../react-app/domains/settings/redrob-provider";
 
 export const MODEL_PREF_KEY = "openwork.defaultModel";
 export const SESSION_MODEL_PREF_KEY = "openwork.sessionModels";
@@ -18,8 +22,8 @@ export { LANGUAGE_PREF_KEY } from "../i18n";
 export const HIDE_TITLEBAR_PREF_KEY = "openwork.hideTitlebar";
 
 export const DEFAULT_MODEL: ModelRef = {
-  providerID: "opencode",
-  modelID: "big-pickle",
+  providerID: REDROB_PROVIDER_ID,
+  modelID: REDROB_MODEL_ID,
 };
 
 export const SUGGESTED_PLUGINS: SuggestedPlugin[] = [];

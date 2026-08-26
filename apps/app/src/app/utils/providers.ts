@@ -1,4 +1,5 @@
 import type { ProviderListResponse } from "@opencode-ai/sdk/v2/client";
+import { isRedrobOnlyProviderId } from "@/react-app/domains/settings/redrob-provider";
 
 const PINNED_PROVIDER_ORDER = ["opencode", "openai", "anthropic"] as const;
 
@@ -30,12 +31,15 @@ export const filterProviderList = (
     const trimmed = id.trim();
     return trimmed ? [trimmed] : [];
   }));
-  if (!disabled.size) return value;
+  // Keep only the Redrob allowlist (single source of truth) and drop any
+  // explicitly disabled provider. This is the choke point feeding the model
+  // picker and every provider list, so no other provider ever surfaces.
+  const isAllowed = (id: string) => isRedrobOnlyProviderId(id) && !disabled.has(id.trim());
   return {
-    all: value.all.filter((provider) => !disabled.has(provider.id)),
-    connected: value.connected.filter((id) => !disabled.has(id)),
+    all: value.all.filter((provider) => isAllowed(provider.id)),
+    connected: value.connected.filter((id) => isAllowed(id)),
     default: Object.fromEntries(
-      Object.entries(value.default).filter(([id]) => !disabled.has(id)),
+      Object.entries(value.default).filter(([id]) => isAllowed(id)),
     ),
   };
 };

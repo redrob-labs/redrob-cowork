@@ -30,6 +30,7 @@ import {
   mergeModelOptions,
 } from "@/react-app/domains/connections/provider-auth/assigned-model-options";
 import { isCloudManagedProviderKey } from "@/react-app/domains/connections/provider-auth/cloud-provider-config";
+import { isRedrobOnlyProviderId } from "@/react-app/domains/settings/redrob-provider";
 import {
   Command,
   CommandCollection,
@@ -91,6 +92,7 @@ function useModelOptions(
     });
 
     const options = getConnectedProviderItems(data)
+      .filter((provider) => isRedrobOnlyProviderId(provider.id))
       .flatMap((provider) =>
         Object.entries(provider.models).map(([id, model]) => {
           const summary = getModelBehaviorSummary(provider.id, model, null, provider.name);
@@ -110,7 +112,9 @@ function useModelOptions(
       );
 
     return filterEntitledModelOptions(filterCloudManagedModelOptions(
-      mergeModelOptions(options, fallbackOptions),
+      mergeModelOptions(options, fallbackOptions).filter((option) =>
+        isRedrobOnlyProviderId(option.providerID),
+      ),
       cloudProvidersEnabled,
     ), {
       restrictToCloud,

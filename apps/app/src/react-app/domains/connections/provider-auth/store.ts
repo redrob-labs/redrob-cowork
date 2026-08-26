@@ -98,6 +98,7 @@ import {
   writeStoredDefaultModel,
 } from "../../../kernel/model-config";
 import { DEFAULT_MODEL } from "../../../../app/constants";
+import { isRedrobOnlyProviderId } from "../../settings/redrob-provider";
 
 type ProviderReturnFocusTarget = "none" | "composer";
 type CloudProviderSyncReason =
@@ -1339,6 +1340,12 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
     const availableProvidersById = new Map((availableProviders ?? []).map((provider) => [provider.id, provider]));
     for (const [id, providerMethods] of Object.entries(merged)) {
+      // Redrob-only allowlist: drop every other provider so the connect modal
+      // offers only Redrob and startProviderAuth can never resolve another id.
+      if (!isRedrobOnlyProviderId(id)) {
+        delete merged[id];
+        continue;
+      }
       if (
         !isProviderAllowedByDesktopPolicy({
           providerId: id,
