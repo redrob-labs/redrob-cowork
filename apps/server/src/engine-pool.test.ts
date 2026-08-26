@@ -17,13 +17,13 @@ import { proxyOpencodeRequest, startServer } from "./server.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
 
 const ENV_NAMES = [
-  "OPENWORK_RUNTIME_DB",
-  "OPENWORK_ENGINE_DRAIN_POLL_MS",
-  "OPENWORK_ENGINE_DRAIN_TIMEOUT_MS",
-  "OPENWORK_ENGINE_ABORT_SETTLE_MS",
-  "OPENWORK_ENGINE_MIN_SPAWN_INTERVAL_MS",
-  "OPENWORK_POOL_LOG",
-  "OPENWORK_POOL_STATE",
+  "REDROB_RUNTIME_DB",
+  "REDROB_ENGINE_DRAIN_POLL_MS",
+  "REDROB_ENGINE_DRAIN_TIMEOUT_MS",
+  "REDROB_ENGINE_ABORT_SETTLE_MS",
+  "REDROB_ENGINE_MIN_SPAWN_INTERVAL_MS",
+  "REDROB_POOL_LOG",
+  "REDROB_POOL_STATE",
 ];
 
 const cleanups: Array<() => void | Promise<void>> = [];
@@ -55,8 +55,8 @@ async function writeFakeEngineBin(root: string): Promise<string> {
     "import { appendFileSync, readFileSync } from 'node:fs';",
     "const portIndex = process.argv.indexOf('--port');",
     "const requestedPort = Number(process.argv[portIndex + 1] ?? 0);",
-    "const logPath = process.env.OPENWORK_POOL_LOG;",
-    "const statePath = process.env.OPENWORK_POOL_STATE;",
+    "const logPath = process.env.REDROB_POOL_LOG;",
+    "const statePath = process.env.REDROB_POOL_STATE;",
     "const append = (line) => { if (logPath) appendFileSync(logPath, `${line}\\n`); };",
     "const busySessions = (port, directory) => {",
     "  try {",
@@ -146,13 +146,13 @@ async function createFixture(options?: { bin?: "ready" | "unready" }): Promise<F
   await writeFile(runtimeConfigPath, JSON.stringify({ generation: 1 }));
 
   for (const name of ENV_NAMES) if (!savedEnv.has(name)) savedEnv.set(name, process.env[name]);
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
-  process.env.OPENWORK_POOL_LOG = logPath;
-  process.env.OPENWORK_POOL_STATE = statePath;
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_POOL_LOG = logPath;
+  process.env.REDROB_POOL_STATE = statePath;
   // Fast drain polling and no spawn throttle so the tests exercise the loop
   // rather than the clock.
-  process.env.OPENWORK_ENGINE_DRAIN_POLL_MS = "100";
-  process.env.OPENWORK_ENGINE_MIN_SPAWN_INTERVAL_MS = "0";
+  process.env.REDROB_ENGINE_DRAIN_POLL_MS = "100";
+  process.env.REDROB_ENGINE_MIN_SPAWN_INTERVAL_MS = "0";
 
   const bin = options?.bin === "unready"
     ? await writeUnreadyEngineBin(root)
@@ -189,8 +189,8 @@ async function createFixture(options?: { bin?: "ready" | "unready" }): Promise<F
     cwd: root,
     runtimeConfigPath,
     env: {
-      OPENWORK_POOL_LOG: logPath,
-      OPENWORK_POOL_STATE: statePath,
+      REDROB_POOL_LOG: logPath,
+      REDROB_POOL_STATE: statePath,
       OPENCODE_CONFIG: runtimeConfigPath,
     },
     reservedPorts: () => [],
@@ -695,8 +695,8 @@ describe("engine pool", () => {
   });
 
   test("aborts the remaining sessions once the drain grace period expires", async () => {
-    setEnv("OPENWORK_ENGINE_DRAIN_TIMEOUT_MS", "300");
-    setEnv("OPENWORK_ENGINE_ABORT_SETTLE_MS", "100");
+    setEnv("REDROB_ENGINE_DRAIN_TIMEOUT_MS", "300");
+    setEnv("REDROB_ENGINE_ABORT_SETTLE_MS", "100");
     const fixture = await createFixture();
     const { pool, primary } = await createPool(fixture);
     const oldPort = portOf(primary.url);

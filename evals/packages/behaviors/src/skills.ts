@@ -1,4 +1,4 @@
-import type { Surface } from "@openwork/cdp";
+import type { Surface } from "@redrob/cdp";
 import { evalIn, waitFor } from "./desktop.ts";
 
 const PLUG_BUTTON = 'button[title="Commands, skills, and MCPs"]';

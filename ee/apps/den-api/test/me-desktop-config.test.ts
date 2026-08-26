@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, expect, test } from "bun:test"
 
 function seedRequiredEnv() {
@@ -16,8 +16,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 let app: typeof import("../src/app.js").default
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let session: typeof import("../src/session.js")
 let env: typeof import("../src/env.js").env
 let memberFacingMcpConnectionsEnabled: typeof import("../src/capability-sources/external-mcp-rollout.js")["memberFacingMcpConnectionsEnabled"]
@@ -58,8 +58,8 @@ beforeAll(async () => {
   const [appMod, dbMod, schemaMod, drizzleMod, sessionMod, envMod, rolloutMod] = await Promise.all([
     import("../src/app.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/session.js"),
     import("../src/env.js"),
     import("../src/capability-sources/external-mcp-rollout.js"),

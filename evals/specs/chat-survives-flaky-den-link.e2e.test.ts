@@ -10,9 +10,9 @@ import {
   sendComposerMessage,
   waitFor,
   writeComposerText,
-} from "@openwork/behaviors";
-import { daytonaSandbox, deleteSandboxes, provisionDesktopSandbox } from "@openwork/hosts";
-import type { DisposableHost, Host } from "@openwork/hosts";
+} from "@redrob/behaviors";
+import { daytonaSandbox, deleteSandboxes, provisionDesktopSandbox } from "@redrob/hosts";
+import type { DisposableHost, Host } from "@redrob/hosts";
 import {
   app,
   denLink,
@@ -24,12 +24,12 @@ import {
   server,
   test,
   unmetNeeds,
-} from "@openwork/testkit";
-import type { Den, DenLink, Place, TestNeeds } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { Den, DenLink, Place, TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
   env: ["ANTHROPIC_API_KEY"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -107,9 +107,9 @@ async function placeSurfaces(den: Den, place: Place): Promise<SurfacePlacement> 
   }
 
   const provisioned = await provisionDesktopSandbox({
-    ref: process.env.OPENWORK_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
+    ref: process.env.REDROB_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
     name: "chat-survives-flaky-den-link",
-    reuse: process.env.OPENWORK_EVAL_DAYTONA_SANDBOX?.trim(),
+    reuse: process.env.REDROB_EVAL_DAYTONA_SANDBOX?.trim(),
     log: (line) => console.error(`[openwork/testkit] ${line}`),
   });
   let host: DisposableHost | undefined;
@@ -244,7 +244,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   })()`, { awaitPromise: true, timeoutMs: 60_000 });
   expect(providerConfigured).toBe("ok");
 
-  const preferredModel = process.env.OPENWORK_EVAL_MODEL?.trim() ?? "";
+  const preferredModel = process.env.REDROB_EVAL_MODEL?.trim() ?? "";
   const models = await readAvailableModels(desktopApp);
   const selectable = models.filter((model) => model.selectable);
   const anthropicModels = selectable.filter((model) => /anthropic/i.test(model.providerName) || /^claude-/i.test(model.id));

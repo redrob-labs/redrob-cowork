@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Cloud, X } from "lucide-react";
-import type { AutomationDetail, AutomationSchedule } from "@openwork/types/automations";
+import type { AutomationDetail, AutomationSchedule } from "@redrob/types/automations";
 import { DenButton } from "../../_components/ui/button";
 import { DenInput } from "../../_components/ui/input";
 import { DenSelect } from "../../_components/ui/select";

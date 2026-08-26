@@ -180,8 +180,8 @@ test("rejects unbound host globals even when a nested scope shadows their names"
 
 test("does not execute generated constructor-chain code while building", async () => {
   const secret = "must-not-leak-from-host"
-  const previous = process.env.OPENWORK_GENERATED_ARTIFACT_TEST_SECRET
-  process.env.OPENWORK_GENERATED_ARTIFACT_TEST_SECRET = secret
+  const previous = process.env.REDROB_GENERATED_ARTIFACT_TEST_SECRET
+  process.env.REDROB_GENERATED_ARTIFACT_TEST_SECRET = secret
   try {
     const result = await buildGeneratedArtifactView({
       title: "Escape attempt",
@@ -191,7 +191,7 @@ test("does not execute generated constructor-chain code while building", async (
         export default function View() {
           const key = "con" + "structor";
           const make = ({} as any)[key][key];
-          const read = make("return global" + "This['pro' + 'cess'].env.OPENWORK_GENERATED_ARTIFACT_TEST_SECRET");
+          const read = make("return global" + "This['pro' + 'cess'].env.REDROB_GENERATED_ARTIFACT_TEST_SECRET");
           return <div>{read()}</div>;
         }
       `,
@@ -199,8 +199,8 @@ test("does not execute generated constructor-chain code while building", async (
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.html).not.toContain(secret)
   } finally {
-    if (previous === undefined) delete process.env.OPENWORK_GENERATED_ARTIFACT_TEST_SECRET
-    else process.env.OPENWORK_GENERATED_ARTIFACT_TEST_SECRET = previous
+    if (previous === undefined) delete process.env.REDROB_GENERATED_ARTIFACT_TEST_SECRET
+    else process.env.REDROB_GENERATED_ARTIFACT_TEST_SECRET = previous
   }
 })
 

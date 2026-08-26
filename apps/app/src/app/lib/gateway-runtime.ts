@@ -7,19 +7,19 @@ export type OpenworkGatewayMarker = {
 
 declare global {
   interface Window {
-    __OPENWORK_GATEWAY__?: OpenworkGatewayMarker;
+    __REDROB_GATEWAY__?: OpenworkGatewayMarker;
   }
 }
 
 const DEN_AUTH_TOKEN_STORAGE_KEY = "openwork.den.authToken";
 
 export function isOpenworkGatewayRuntime() {
-  return typeof window !== "undefined" && window.__OPENWORK_GATEWAY__?.version === 1;
+  return typeof window !== "undefined" && window.__REDROB_GATEWAY__?.version === 1;
 }
 
 export function getOpenworkGatewayBuild(): string | null {
   if (!isOpenworkGatewayRuntime()) return null;
-  const build = window.__OPENWORK_GATEWAY__?.build?.trim() ?? "";
+  const build = window.__REDROB_GATEWAY__?.build?.trim() ?? "";
   return build || null;
 }
 

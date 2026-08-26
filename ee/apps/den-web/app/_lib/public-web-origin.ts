@@ -1,5 +1,5 @@
-import { readBaseUrlEnv } from "@openwork/types/url";
-import { denUrls } from "@openwork-ee/utils";
+import { readBaseUrlEnv } from "@redrob/types/url";
+import { denUrls } from "@redrob-ee/utils";
 
 export function readPublicWebOrigin(env: NodeJS.ProcessEnv = process.env): string | null {
   try {

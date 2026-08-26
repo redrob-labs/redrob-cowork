@@ -63,7 +63,7 @@ type SetStateAction<T> = T | ((current: T) => T);
 // den-api): when the two were equal, the marker was stale the instant it
 // was written and every sync tick re-wrote the MCP config.
 const CLOUD_MCP_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
-const LOCAL_OPENWORK_SERVER_RECOVERY_TIMEOUT_MS = 30_000;
+const LOCAL_REDROB_SERVER_RECOVERY_TIMEOUT_MS = 30_000;
 
 async function withLocalOpenworkServerRecoveryTimeout<T>(
   task: Promise<T>,
@@ -220,7 +220,7 @@ export function createConnectionsStore(options: {
       && options.workspaceType() === "local") {
       openworkClient = await withLocalOpenworkServerRecoveryTimeout(
         options.openworkServer.ensureLocalOpenworkServerClient(),
-        options.localOpenworkServerRecoveryTimeoutMs ?? LOCAL_OPENWORK_SERVER_RECOVERY_TIMEOUT_MS,
+        options.localOpenworkServerRecoveryTimeoutMs ?? LOCAL_REDROB_SERVER_RECOVERY_TIMEOUT_MS,
       );
       openworkSnapshot = getOpenworkSnapshot();
       openworkWorkspaceId = options.runtimeWorkspaceId()?.trim()
@@ -405,7 +405,7 @@ export function createConnectionsStore(options: {
 
   const resolveDesktopCommand = async (commandName: "getComputerUseMcpCommand" | "getOpenworkUiMcpCommand", fallbackOnError = true) => {
     try {
-      const command = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.(commandName);
+      const command = await window.__REDROB_ELECTRON__?.invokeDesktop?.(commandName);
       if (Array.isArray(command) && command.every((part) => typeof part === "string") && command.length > 0) {
         return command;
       }
@@ -436,7 +436,7 @@ export function createConnectionsStore(options: {
   const resolveLocalMcpEnvironment = async (entry: McpDirectoryInfo) => {
     if (entry.serverName !== "openwork-ui") return undefined;
     try {
-      const environment = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpEnvironment");
+      const environment = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpEnvironment");
       if (environment && typeof environment === "object" && !Array.isArray(environment)) {
         return Object.fromEntries(
           Object.entries(environment).filter((entry): entry is [string, string] =>
@@ -817,7 +817,7 @@ export function createConnectionsStore(options: {
       let resolvedHeaders: Record<string, string> | undefined;
       if (!resolvedUrl && entry.serverName === "openwork-ui") {
         try {
-          const bridgeInfo = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("getUiControlBridgeInfo");
+          const bridgeInfo = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getUiControlBridgeInfo");
           if (bridgeInfo?.baseUrl) {
             resolvedUrl = `${bridgeInfo.baseUrl}/mcp`;
             if (bridgeInfo.token) {

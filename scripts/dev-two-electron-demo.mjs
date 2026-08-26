@@ -14,13 +14,13 @@ const desktopRequire = createRequire(path.join(desktopRoot, "package.json"));
 const electronCli = desktopRequire.resolve("electron/cli.js");
 const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 export function resolveDemoRoot(env = process.env) {
-  return env.OPENWORK_ELECTRON_DEMO_ROOT?.trim() || path.join(os.tmpdir(), "openwork-two-electron-demo");
+  return env.REDROB_ELECTRON_DEMO_ROOT?.trim() || path.join(os.tmpdir(), "openwork-two-electron-demo");
 }
 
 const demoRoot = resolveDemoRoot();
 const appProfiles = {
   admin: {
-    appIdentifier: "com.differentai.openwork.demo.admin",
+    appIdentifier: "io.redrob.work.demo.admin",
     appName: "OpenWork Demo A",
     bootstrapName: "admin-bootstrap.json",
     cdpFlag: "--admin-cdp",
@@ -31,7 +31,7 @@ const appProfiles = {
     requireSignin: false,
   },
   consumer: {
-    appIdentifier: "com.differentai.openwork.demo.consumer",
+    appIdentifier: "io.redrob.work.demo.consumer",
     appName: "OpenWork Demo B",
     bootstrapName: "consumer-bootstrap.json",
     cdpFlag: "--consumer-cdp",
@@ -322,7 +322,7 @@ function startElectron(profile, env, built, packaged) {
     : built
       ? [
         electronCli,
-        ...(env.OPENWORK_ELECTRON_USE_MOCK_KEYCHAIN === "1" ? ["--use-mock-keychain"] : []),
+        ...(env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN === "1" ? ["--use-mock-keychain"] : []),
         "./electron/main.mjs",
       ]
       : ["dev:electron"];
@@ -398,20 +398,20 @@ export function demoEnv(profile, paths, port, cdpPort) {
     APPDATA: paths.appDataDir,
     HOME: paths.homeDir,
     LOCALAPPDATA: paths.localAppDataDir,
-    OPENWORK_DATA_DIR: paths.dataDir,
-    OPENWORK_DESKTOP_BOOTSTRAP_PATH: paths.bootstrapPath,
-    OPENWORK_DESKTOP_DISABLE_WORKSPACE_RECOVERY: "1",
-    OPENWORK_DEV_MODE: "1",
-    OPENWORK_ENV_STORE: paths.envStorePath,
+    REDROB_DATA_DIR: paths.dataDir,
+    REDROB_DESKTOP_BOOTSTRAP_PATH: paths.bootstrapPath,
+    REDROB_DESKTOP_DISABLE_WORKSPACE_RECOVERY: "1",
+    REDROB_DEV_MODE: "1",
+    REDROB_ENV_STORE: paths.envStorePath,
     OPENCODE_CONFIG_DIR: paths.opencodeConfigDir,
-    VITE_DISABLE_OPENWORK_MODELS: "1",
-    OPENWORK_ELECTRON_APP_IDENTIFIER: profile.appIdentifier,
-    OPENWORK_ELECTRON_APP_NAME: profile.appName,
-    OPENWORK_ELECTRON_DISABLE_PROTOCOL_REGISTRATION: "1",
-    OPENWORK_ELECTRON_REMOTE_DEBUG_PORT: cdpPort,
-    OPENWORK_ELECTRON_SKIP_SHARED_PREPARE: "1",
-    OPENWORK_ELECTRON_USE_MOCK_KEYCHAIN: "1",
-    OPENWORK_ELECTRON_USERDATA: paths.userDataDir,
+    VITE_DISABLE_REDROB_MODELS: "1",
+    REDROB_ELECTRON_APP_IDENTIFIER: profile.appIdentifier,
+    REDROB_ELECTRON_APP_NAME: profile.appName,
+    REDROB_ELECTRON_DISABLE_PROTOCOL_REGISTRATION: "1",
+    REDROB_ELECTRON_REMOTE_DEBUG_PORT: cdpPort,
+    REDROB_ELECTRON_SKIP_SHARED_PREPARE: "1",
+    REDROB_ELECTRON_USE_MOCK_KEYCHAIN: "1",
+    REDROB_ELECTRON_USERDATA: paths.userDataDir,
     PORT: port,
     XDG_CACHE_HOME: paths.cacheHome,
     XDG_CONFIG_HOME: paths.configHome,
@@ -483,7 +483,7 @@ async function main() {
   await assertDemoPortsAvailable(portEntries);
 
   if (built && !existsSync(path.join(repoRoot, "apps", "app", "dist", "index.html"))) {
-    throw new Error("The desktop renderer is not built. Run pnpm --filter @openwork/desktop build:electron first.");
+    throw new Error("The desktop renderer is not built. Run pnpm --filter @redrob/desktop build:electron first.");
   }
 
   const demoRun = requestedRunRoot
@@ -539,7 +539,7 @@ async function main() {
   const denStartup =
     adminPort === appProfiles.admin.port && consumerPort === appProfiles.consumer.port
       ? "pnpm demo:den"
-      : `OPENWORK_EXTRA_APP_PORTS=${adminPort},${consumerPort} pnpm dev:den`;
+      : `REDROB_EXTRA_APP_PORTS=${adminPort},${consumerPort} pnpm dev:den`;
   console.log(`Den startup:   ${denStartup}`);
   console.log("Press Ctrl-C to stop both instances.\n");
 }

@@ -3,11 +3,11 @@ import type {
   OpenworkAffordanceDescriptor,
   OpenworkAffordanceEffects,
   OpenworkProviderRef,
-} from "@openwork/types/openwork-affordance";
+} from "@redrob/types/openwork-affordance";
 import type {
   OpenworkFeatureContribution,
   OpenworkGuidanceDescriptor,
-} from "@openwork/types/openwork-provider";
+} from "@redrob/types/openwork-provider";
 
 export type ConnectSkillDescriptor = {
   name: string;

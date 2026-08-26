@@ -1,7 +1,7 @@
 import React, { type CSSProperties } from "react"
 import { Body, Button, Container, Head, Heading, Hr, Html, Img, Preview, Section, Text } from "@react-email/components"
 
-const LOGO_URL = "https://openworklabs.com/email/openwork-mark.png"
+const LOGO_URL = "https://redrob.io/email/openwork-mark.png"
 
 export type OrganizationInviteEmailProps = {
   inviteLink: string
@@ -44,7 +44,7 @@ export function OrganizationInviteEmail({
           <Text style={styles.footer}>
             You received this email because someone invited you to an OpenWork workspace.
             <br />
-            OpenWork · openworklabs.com
+            OpenWork · redrob.io
           </Text>
         </Container>
       </Body>

@@ -11,7 +11,7 @@ export const metadata = {
   },
   openGraph: {
     ...baseOpenGraph,
-    url: "https://openworklabs.com"
+    url: "https://redrob.io"
   }
 };
 
@@ -21,19 +21,19 @@ const softwareApplicationSchema = {
   name: "OpenWork",
   description:
     "Open source Claude Cowork alternative. Desktop app that lets teams use 50+ LLMs, bring their own provider keys, and ship reusable agent setups with guardrails.",
-  url: "https://openworklabs.com",
+  url: "https://redrob.io",
   applicationCategory: "BusinessApplication",
   operatingSystem: "macOS, Windows, Linux",
   offers: {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
-    url: "https://openworklabs.com/pricing"
+    url: "https://redrob.io/pricing"
   },
   publisher: {
     "@type": "Organization",
     name: "OpenWork",
-    url: "https://openworklabs.com"
+    url: "https://redrob.io"
   }
 };
 

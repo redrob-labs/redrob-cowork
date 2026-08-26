@@ -28,16 +28,16 @@ Use this checklist only when the goal is a fully isolated OpenWork deployment, n
 
 ### Installer artifacts
 
-- Mount the standard release installer files into Den and set `OPENWORK_INSTALLER_ARTIFACTS_DIR` to that mount path.
-- Use `OPENWORK_INSTALLER_RELEASE_TAG` to select the expected standard filenames. The version inside each filename is the tag without a leading `v`.
-- Use `OPENWORK_INSTALLER_RELEASE_REPO` only for the GitHub redirect path when mounted artifacts are not present; it is not an internal artifact registry override.
+- Mount the standard release installer files into Den and set `REDROB_INSTALLER_ARTIFACTS_DIR` to that mount path.
+- Use `REDROB_INSTALLER_RELEASE_TAG` to select the expected standard filenames. The version inside each filename is the tag without a leading `v`.
+- Use `REDROB_INSTALLER_RELEASE_REPO` only for the GitHub redirect path when mounted artifacts are not present; it is not an internal artifact registry override.
 - Mount the same read-only installer artifact PVC across every Den API replica. Den streams the mounted file; it does not fetch, cache, rewrap, or ZIP installer bytes.
 
 See [Installer delivery](/start-here/installer-delivery) for the exact filenames and delivery matrix.
 
 ### Desktop runtime dependencies
 
-- Point `OPENCODE_MODELS_URL` at an internal mirror of the model catalog. The default catalog is `https://models.openworklabs.com/`.
+- Point `OPENCODE_MODELS_URL` at an internal mirror of the model catalog. The default catalog is `https://models.redrob.io/`.
 - The packaged desktop can start the UI-control MCP with `npx -y openwork-ui-mcp`. In a fully isolated environment, provide an internal npm registry or npm mirror that can serve that package to `npx`. OpenWork does not currently document a separate OpenWork-specific registry override for this package; use standard npm configuration for the runtime account.
 - Disable, mirror, or manage desktop updates and GitHub release assets through your internal release process. Do not assume a built-in updater mirror setting unless it has been verified for the desktop release you ship.
 

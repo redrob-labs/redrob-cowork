@@ -1,14 +1,14 @@
 import { afterAll, beforeAll, expect, test } from "bun:test"
-import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 
 const cleanupOrganizationIds: DenTypeId<"organization">[] = []
 const cleanupUserIds: DenTypeId<"user">[] = []
 
 let authModule: typeof import("../src/auth.js")
 let dbModule: typeof import("../src/db.js")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let oauthCredentials: typeof import("../src/capability-sources/oauth-credentials.js")
-let schema: typeof import("@openwork-ee/den-db/schema")
+let schema: typeof import("@redrob-ee/den-db/schema")
 
 beforeAll(async () => {
   process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_gwsreconnect"
@@ -19,9 +19,9 @@ beforeAll(async () => {
 
   authModule = await import("../src/auth.js")
   dbModule = await import("../src/db.js")
-  drizzle = await import("@openwork-ee/den-db/drizzle")
+  drizzle = await import("@redrob-ee/den-db/drizzle")
   oauthCredentials = await import("../src/capability-sources/oauth-credentials.js")
-  schema = await import("@openwork-ee/den-db/schema")
+  schema = await import("@redrob-ee/den-db/schema")
 })
 
 afterAll(async () => {

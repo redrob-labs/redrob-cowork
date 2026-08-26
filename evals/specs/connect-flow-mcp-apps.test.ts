@@ -1,12 +1,12 @@
 import { spawnSync } from "node:child_process"
 import { resolve } from "node:path"
 import { expect } from "vitest"
-import { test } from "@openwork/testkit"
+import { test } from "@redrob/testkit"
 
 const repoRoot = resolve(import.meta.dirname, "../..")
 
 function runInDenApi(args: string[]): { status: number | null; output: string; error?: Error } {
-  const result = spawnSync("pnpm", ["--filter", "@openwork-ee/den-api", ...args], {
+  const result = spawnSync("pnpm", ["--filter", "@redrob-ee/den-api", ...args], {
     cwd: repoRoot,
     encoding: "utf8",
     timeout: 180_000,

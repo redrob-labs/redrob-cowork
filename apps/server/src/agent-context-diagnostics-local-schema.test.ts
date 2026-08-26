@@ -4,7 +4,7 @@ import {
   agentContextDiagnosticsReportSchema as sharedReportSchema,
   agentContextDiagnosticsRequestSchema as sharedRequestSchema,
   type AgentContextDiagnosticsRequest,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 import {
   agentContextDiagnosticsReportSchema as localReportSchema,

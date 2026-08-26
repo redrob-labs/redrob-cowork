@@ -13,15 +13,15 @@ import type { ServerConfig } from "./types.js";
 const WORKSPACE_ID = "ws_runtime_db_primitive";
 
 const roots: string[] = [];
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 
 afterEach(async () => {
   while (roots.length) {
     const root = roots.pop();
     if (root) await rm(root, { recursive: true, force: true });
   }
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 function serverConfig(root: string, configPath: string | null = join(root, "server.json")): ServerConfig {
@@ -67,7 +67,7 @@ function rowCount(db: Database, tableName: string): number {
 describe("runtime DB primitive", () => {
   test("resolves default and env-overridden runtime database paths", async () => {
     const root = await tempRoot();
-    delete process.env.OPENWORK_RUNTIME_DB;
+    delete process.env.REDROB_RUNTIME_DB;
 
     const config = serverConfig(root);
     expect(runtimeDbPath(config)).toBe(join(root, "runtime.sqlite"));
@@ -77,11 +77,11 @@ describe("runtime DB primitive", () => {
     expect(runtimeDbPath(configWithoutPath)).toBe(join(homedir(), ".config", "openwork", "runtime.sqlite"));
 
     const overridePath = join(root, "state", "override.sqlite");
-    process.env.OPENWORK_RUNTIME_DB = ` ${overridePath} `;
+    process.env.REDROB_RUNTIME_DB = ` ${overridePath} `;
     expect(runtimeDbPath(configWithoutPath)).toBe(resolve(overridePath));
     expect(runtimeStorageDir(configWithoutPath)).toBe(join(root, "state"));
 
-    process.env.OPENWORK_RUNTIME_DB = "   ";
+    process.env.REDROB_RUNTIME_DB = "   ";
     expect(runtimeDbPath(config)).toBe(join(root, "runtime.sqlite"));
   });
 
@@ -106,7 +106,7 @@ describe("runtime DB primitive", () => {
   test("keeps each migrated store in its own runtime DB table", async () => {
     const root = await tempRoot();
     const dbPath = join(root, "runtime.sqlite");
-    process.env.OPENWORK_RUNTIME_DB = dbPath;
+    process.env.REDROB_RUNTIME_DB = dbPath;
     const config = serverConfig(root);
 
     await writeSessionGroupState(config, WORKSPACE_ID, {

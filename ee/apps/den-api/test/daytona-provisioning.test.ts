@@ -1,5 +1,5 @@
 import { DaytonaConflictError } from "@daytonaio/sdk"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { beforeAll, describe, expect, test } from "bun:test"
 import type { DaytonaProvisioningRuntime, DaytonaSandboxRuntime } from "../src/workers/daytona.js"
 

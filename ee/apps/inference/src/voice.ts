@@ -1,22 +1,22 @@
 import { createHash } from "node:crypto"
-import { eq, sql } from "@openwork-ee/den-db/drizzle"
+import { eq, sql } from "@redrob-ee/den-db/drizzle"
 import type { Hono } from "hono"
 import {
   InferenceOrgUsageBucketTable,
   InferenceUsageLedgerBucketChargeTable,
   InferenceUsageLedgerEntryTable,
-} from "@openwork-ee/den-db"
-import { createDenTypeId, normalizeDenTypeId } from "@openwork-ee/utils/typeid"
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db"
+import { createDenTypeId, normalizeDenTypeId } from "@redrob-ee/utils/typeid"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import { env } from "./env.js"
 import { findActiveInferenceKey } from "./keys.js"
 import { ensureUsableBuckets } from "./limits.js"
 import { db } from "./db.js"
 
-const OPENWORK_VOICE_REALTIME_MODEL = "gpt-realtime-2"
-const OPENWORK_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe"
+const REDROB_VOICE_REALTIME_MODEL = "gpt-realtime-2"
+const REDROB_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe"
 
-const OPENWORK_VOICE_REALTIME_TOOLS = [
+const REDROB_VOICE_REALTIME_TOOLS = [
   {
     type: "function",
     name: "openwork_snapshot",
@@ -120,7 +120,7 @@ async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestI
     return Response.json({ error: { message: "Managed voice is not configured.", type: "invalid_request_error", code: "openai_realtime_key_missing" } }, { status: 503 })
   }
 
-  const model = readStringField(input, "model") || OPENWORK_VOICE_REALTIME_MODEL
+  const model = readStringField(input, "model") || REDROB_VOICE_REALTIME_MODEL
   const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
     headers: {
@@ -134,7 +134,7 @@ async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestI
         output_modalities: ["audio"],
         audio: {
           input: {
-            transcription: { model: OPENWORK_VOICE_TRANSCRIPTION_MODEL, language: "en" },
+            transcription: { model: REDROB_VOICE_TRANSCRIPTION_MODEL, language: "en" },
             turn_detection: {
               type: "server_vad",
               threshold: 0.58,
@@ -147,7 +147,7 @@ async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestI
         },
         instructions: openworkVoiceRealtimeInstructions(),
         tool_choice: "auto",
-        tools: OPENWORK_VOICE_REALTIME_TOOLS,
+        tools: REDROB_VOICE_REALTIME_TOOLS,
       },
     }),
   })
@@ -176,8 +176,8 @@ async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestI
     clientSecret,
     expiresAt,
     model,
-    transcriptionModel: OPENWORK_VOICE_TRANSCRIPTION_MODEL,
-    tools: OPENWORK_VOICE_REALTIME_TOOLS.map((tool) => tool.name),
+    transcriptionModel: REDROB_VOICE_TRANSCRIPTION_MODEL,
+    tools: REDROB_VOICE_REALTIME_TOOLS.map((tool) => tool.name),
     source: "openwork-models",
     openworkRequestId,
   })

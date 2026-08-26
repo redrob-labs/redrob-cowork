@@ -206,7 +206,7 @@ test("chain repair kill switch preserves system CA export", async () => {
   const env = await resolveSystemCaEnv({
     tlsModule: { getCACertificates: () => [systemCert] },
     userDataDir,
-    parentEnv: { OPENWORK_DISABLE_CHAIN_REPAIR: " 1 " },
+    parentEnv: { REDROB_DISABLE_CHAIN_REPAIR: " 1 " },
     logInfo: () => {},
     loadPlatformCertificates: async () => [],
     chainRepair: {
@@ -270,7 +270,7 @@ test("chain repair total timeout can be shortened by env", async () => {
   const env = await resolveSystemCaEnv({
     tlsModule: { getCACertificates: () => [] },
     userDataDir,
-    parentEnv: { OPENWORK_CHAIN_REPAIR_TIMEOUT_MS: "1500" },
+    parentEnv: { REDROB_CHAIN_REPAIR_TIMEOUT_MS: "1500" },
     logInfo(message) {
       logs.push(String(message));
     },

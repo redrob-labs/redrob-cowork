@@ -1,7 +1,7 @@
 import type { Hono } from "hono"
 import { describeRoute } from "hono-openapi"
 import { z } from "zod"
-import { normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+import { normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { env } from "../../env.js"
 import {
   jsonValidator,

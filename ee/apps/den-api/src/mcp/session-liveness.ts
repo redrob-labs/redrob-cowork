@@ -1,6 +1,6 @@
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { OAuthAccessTokenTable, OAuthRefreshTokenTable } from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { OAuthAccessTokenTable, OAuthRefreshTokenTable } from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 import { cache } from "../cache.js"
 import { db } from "../db.js"
 

@@ -413,9 +413,9 @@ function providerEnvEntries(provider: DenProviderConnection): EnvEntry[] {
 
   const primaryCredential = provider.apiKey?.trim() || entries[0]?.value || "";
   if (provider.source === "openwork" && primaryCredential) {
-    upsertEnvEntry(entries, "OPENWORK_API_KEY", primaryCredential);
+    upsertEnvEntry(entries, "REDROB_CLOUD_API_KEY", primaryCredential);
     const baseUrl = readOpenWorkInferenceBaseUrl(provider.providerConfig);
-    if (baseUrl) upsertEnvEntry(entries, "OPENWORK_INFERENCE_BASE_URL", baseUrl);
+    if (baseUrl) upsertEnvEntry(entries, "REDROB_INFERENCE_BASE_URL", baseUrl);
   }
   return entries;
 }
@@ -535,12 +535,12 @@ async function readLegacyOpenworkConfig(path: string): Promise<JsonRecord | null
 }
 
 function configuredIntervalMs(): number {
-  const configured = Number(process.env.OPENWORK_CLOUD_PROVIDER_SYNC_INTERVAL_MS ?? "");
+  const configured = Number(process.env.REDROB_CLOUD_PROVIDER_SYNC_INTERVAL_MS ?? "");
   return Number.isFinite(configured) && configured > 0 ? configured : defaultIntervalMs;
 }
 
 function configuredReloadRetryMs(): number {
-  const configured = Number(process.env.OPENWORK_ENGINE_RELOAD_RETRY_MS ?? "");
+  const configured = Number(process.env.REDROB_ENGINE_RELOAD_RETRY_MS ?? "");
   return Number.isFinite(configured) && configured > 0 ? configured : 15_000;
 }
 

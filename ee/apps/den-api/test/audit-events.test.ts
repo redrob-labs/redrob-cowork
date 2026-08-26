@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import {
   buildOrganizationAuditAlertLogLine,
   buildOrganizationAuditEvent,

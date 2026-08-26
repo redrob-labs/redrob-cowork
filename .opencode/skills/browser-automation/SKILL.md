@@ -16,7 +16,7 @@ description: Local Redrob Work Electron browser automation with CDP. Use when dr
 `pnpm dev` enables Electron CDP by default:
 
 ```sh
-OPENWORK_ELECTRON_REMOTE_DEBUG_PORT=${OPENWORK_ELECTRON_REMOTE_DEBUG_PORT:-9823}
+REDROB_ELECTRON_REMOTE_DEBUG_PORT=${REDROB_ELECTRON_REMOTE_DEBUG_PORT:-9823}
 ```
 
 The default browser URL for OpenCode browser tools is:
@@ -34,13 +34,13 @@ http://localhost:5173/
 To use a different CDP port, launch with an override:
 
 ```sh
-OPENWORK_ELECTRON_REMOTE_DEBUG_PORT=9830 pnpm dev
+REDROB_ELECTRON_REMOTE_DEBUG_PORT=9830 pnpm dev
 ```
 
 To disable Electron CDP for a run:
 
 ```sh
-OPENWORK_ELECTRON_REMOTE_DEBUG_PORT=0 pnpm dev
+REDROB_ELECTRON_REMOTE_DEBUG_PORT=0 pnpm dev
 ```
 
 ## Background Launch

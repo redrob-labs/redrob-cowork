@@ -13,13 +13,13 @@ import {
   openworkServerConfigPath as resolveOpenworkServerConfigPath,
   opencodeCacheDirs as resolveOpencodeCacheDirs,
   opencodeDataDirs as resolveOpencodeDataDirs,
-} from "@openwork/paths";
+} from "@redrob/paths";
 
 const BROWSER_SESSION_PARTITION = "persist:openwork-browser";
 const NUKE_PARTITIONS = ["default", BROWSER_SESSION_PARTITION];
 const PENDING_NUKE_FILENAME = ".nuke-pending.json";
 const WINDOWS_RETRY_CODES = new Set(["EBUSY", "EPERM", "ENOTEMPTY"]);
-const OPENWORK_CONFIG_FILENAMES = [
+const REDROB_CONFIG_FILENAMES = [
   "server.json",
   "runtime.sqlite",
   "runtime.sqlite-wal",
@@ -38,7 +38,7 @@ const USERDATA_WORKSPACE_FILENAMES = [
   "openwork-server-state.json",
 ];
 const LEGACY_ORCHESTRATOR_DIR_NAME = ["openwork", "orchestrator"].join("-");
-const SHIP_IT_CACHE_DOMAIN = "com.differentai.openwork.ShipIt";
+const SHIP_IT_CACHE_DOMAIN = "io.redrob.work.ShipIt";
 const NUKE_WORKER_FILENAME = "nuke-worker.mjs";
 const NUKE_WORKER_DEADLINE_MS = 60_000;
 const NUKE_WORKER_PARENT_WAIT_MS = 30_000;
@@ -47,15 +47,15 @@ const NUKE_WORKER_PARENT_WAIT_MS = 30_000;
 const PROFILE_SCOPED_ENV_KEYS = [
   "OPENCODE_CONFIG_DIR",
   "OPENCODE_DB",
-  "OPENWORK_DATA_DIR",
-  "OPENWORK_DESKTOP_BOOTSTRAP_PATH",
-  "OPENWORK_DEV_MODE",
-  "OPENWORK_ELECTRON_APP_IDENTIFIER",
-  "OPENWORK_ELECTRON_USERDATA",
-  "OPENWORK_ENV_STORE",
-  "OPENWORK_RUNTIME_DB",
-  "OPENWORK_SERVER_CONFIG",
-  "OPENWORK_TOKEN_STORE",
+  "REDROB_DATA_DIR",
+  "REDROB_DESKTOP_BOOTSTRAP_PATH",
+  "REDROB_DEV_MODE",
+  "REDROB_ELECTRON_APP_IDENTIFIER",
+  "REDROB_ELECTRON_USERDATA",
+  "REDROB_ENV_STORE",
+  "REDROB_RUNTIME_DB",
+  "REDROB_SERVER_CONFIG",
+  "REDROB_TOKEN_STORE",
   "XDG_CACHE_HOME",
   "XDG_CONFIG_HOME",
   "XDG_DATA_HOME",
@@ -64,14 +64,14 @@ const PROFILE_SCOPED_ENV_KEYS = [
 const NUKE_WORKER_ENV_KEYS = [
   "APPDATA",
   "LOCALAPPDATA",
-  "OPENWORK_DATA_DIR",
-  "OPENWORK_DESKTOP_BOOTSTRAP_PATH",
-  "OPENWORK_DEV_MODE",
-  "OPENWORK_ELECTRON_USERDATA",
-  "OPENWORK_ENV_STORE",
-  "OPENWORK_RUNTIME_DB",
-  "OPENWORK_SERVER_CONFIG",
-  "OPENWORK_TOKEN_STORE",
+  "REDROB_DATA_DIR",
+  "REDROB_DESKTOP_BOOTSTRAP_PATH",
+  "REDROB_DEV_MODE",
+  "REDROB_ELECTRON_USERDATA",
+  "REDROB_ENV_STORE",
+  "REDROB_RUNTIME_DB",
+  "REDROB_SERVER_CONFIG",
+  "REDROB_TOKEN_STORE",
   "OPENCODE_CONFIG_DIR",
   "OPENCODE_DB",
   "XDG_CACHE_HOME",
@@ -91,7 +91,7 @@ function envValue(env, key) {
 }
 
 function isTruthyDevMode(env) {
-  return envValue(env, "OPENWORK_DEV_MODE") === "1";
+  return envValue(env, "REDROB_DEV_MODE") === "1";
 }
 
 // A profile is "isolated" when it was launched with its own storage identity:
@@ -100,8 +100,8 @@ function isTruthyDevMode(env) {
 function isIsolatedProfile(env) {
   return (
     isTruthyDevMode(env) ||
-    envValue(env, "OPENWORK_ELECTRON_APP_IDENTIFIER") !== "" ||
-    envValue(env, "OPENWORK_ELECTRON_USERDATA") !== ""
+    envValue(env, "REDROB_ELECTRON_APP_IDENTIFIER") !== "" ||
+    envValue(env, "REDROB_ELECTRON_USERDATA") !== ""
   );
 }
 
@@ -115,7 +115,7 @@ function resolveNukeEnvironment({ env = {}, homedir, platform, userDataPath }) {
   /** @type {Record<string, string | undefined>} */
   const resolvedEnv = { ...env };
   let resolvedHome = homedir;
-  const userDataOverride = envValue(env, "OPENWORK_ELECTRON_USERDATA");
+  const userDataOverride = envValue(env, "REDROB_ELECTRON_USERDATA");
   const resolvedUserDataPath = userDataOverride || userDataPath;
 
   if (isTruthyDevMode(env)) {
@@ -160,14 +160,14 @@ function envStorePath(env, homedir, platform, paths) {
 }
 
 function tokenStorePath(env, serverConfigPath, homedir, paths) {
-  const override = envValue(env, "OPENWORK_TOKEN_STORE");
+  const override = envValue(env, "REDROB_TOKEN_STORE");
   if (override) return paths.resolve(override);
   const configDir = serverConfigPath ? paths.dirname(serverConfigPath) : paths.join(homedir, ".config", "openwork");
   return paths.join(configDir, "tokens.json");
 }
 
 function runtimeDbPath(env, serverConfigPath, homedir, paths) {
-  const override = envValue(env, "OPENWORK_RUNTIME_DB");
+  const override = envValue(env, "REDROB_RUNTIME_DB");
   if (override) return paths.resolve(override);
   const configDir = serverConfigPath ? paths.dirname(serverConfigPath) : paths.join(homedir, ".config", "openwork");
   return paths.join(configDir, "runtime.sqlite");
@@ -206,13 +206,13 @@ function opencodeStateDirs(env, homedir, platform, paths) {
 }
 
 function orchestratorDataDir(env, homedir, paths) {
-  const override = envValue(env, "OPENWORK_DATA_DIR");
+  const override = envValue(env, "REDROB_DATA_DIR");
   if (override) return override;
   return paths.join(homedir, ".openwork", LEGACY_ORCHESTRATOR_DIR_NAME);
 }
 
 function serverDataDir(env, homedir, paths) {
-  const override = envValue(env, "OPENWORK_DATA_DIR");
+  const override = envValue(env, "REDROB_DATA_DIR");
   if (override) return override;
   return paths.join(homedir, ".openwork", "openwork-server");
 }
@@ -291,7 +291,7 @@ function profileScopedDeletePaths(deletePaths, sharedPaths, profileRoot, paths, 
 function addOpenworkConfigFiles(deletePaths, roots, paths) {
   for (const root of roots) {
     if (!root) continue;
-    for (const filename of OPENWORK_CONFIG_FILENAMES) {
+    for (const filename of REDROB_CONFIG_FILENAMES) {
       deletePaths.push(paths.join(root, filename));
     }
   }
@@ -435,7 +435,7 @@ async function writeNukeWorkerPayload(payloadPath, payload) {
 
 function nukeWorkerSpawnEnv(env = process.env) {
   const workerEnv = { ...env, ELECTRON_RUN_AS_NODE: "1" };
-  delete workerEnv["OPENWORK_ELECTRON_REMOTE_DEBUG_PORT"];
+  delete workerEnv["REDROB_ELECTRON_REMOTE_DEBUG_PORT"];
   return workerEnv;
 }
 
@@ -793,7 +793,7 @@ export async function runPendingNukeCleanup(input, options = {}) {
   return pendingCleanupResult({ ran: true, ...verified });
 }
 
-/** @returns {Promise<import("@openwork/types/desktop-ipc").NukeReceipt>} */
+/** @returns {Promise<import("@redrob/types/desktop-ipc").NukeReceipt>} */
 export async function executeNukeFreshStart({ app, session, runtimeManager, uiControlServer, removeWindowsBrandShortcut }, options = {}) {
   const input = {
     ...(options.input ?? {

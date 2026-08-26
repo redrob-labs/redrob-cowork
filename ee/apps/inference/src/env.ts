@@ -1,5 +1,5 @@
 import "./load-env.js";
-import type { DenDbMode, PlanetScaleCredentials } from "@openwork-ee/den-db";
+import type { DenDbMode, PlanetScaleCredentials } from "@redrob-ee/den-db";
 import { z } from "zod";
 
 const EnvSchema = z
@@ -48,7 +48,7 @@ const EnvSchema = z
     }
   });
 
-export const isDevMode = process.env.OPENWORK_DEV_MODE === "1";
+export const isDevMode = process.env.REDROB_DEV_MODE === "1";
 
 const parsed = EnvSchema.parse({
   ...process.env,

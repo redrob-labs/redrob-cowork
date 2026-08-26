@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto"
-import { and, eq, isNull } from "@openwork-ee/den-db/drizzle"
-import { InferenceKeyTable, InferenceOrgUpstreamProviderKeyTable, MemberTable } from "@openwork-ee/den-db"
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+import { and, eq, isNull } from "@redrob-ee/den-db/drizzle"
+import { InferenceKeyTable, InferenceOrgUpstreamProviderKeyTable, MemberTable } from "@redrob-ee/den-db"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 import { db } from "./db.js"
 
 export function sha256(value: string) {

@@ -2,19 +2,19 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { join, resolve } from "node:path";
 import { expect, onTestFinished } from "vitest";
-import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { screenshot } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { screenshot } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
 const providerId = "attachment-upload-mock";
 const modelId = "attachment-upload-model";
 const reply = "attachment upload loading proof";
 const attachmentName = "big-photo.png";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "attaching an image shows its chip instantly and sends with a visible uploading state"
-  : "attachment upload loading state skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "attachment upload loading state skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 const repoRoot = resolve(import.meta.dirname, "../..");
 
@@ -82,7 +82,7 @@ async function startManualApprovalServer(approvalTimeoutMs: number) {
 }
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   // ---------------------------------------------------------------------
   // Part 1 — gateway server contract: manual-approval mode must not park

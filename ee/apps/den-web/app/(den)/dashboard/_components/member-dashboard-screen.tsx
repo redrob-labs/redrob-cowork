@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { DenButton } from "../../_components/ui/button";
 import { useOrgDashboard } from "../_providers/org-dashboard-provider";
 
-const OPEN_APP_URL = "openwork://open";
+const OPEN_APP_URL = "redrob://open";
 
 /**
  * Members have exactly one job on the dashboard: install the app. The

@@ -1,4 +1,4 @@
-import type { AutomationExecutionThread } from "@openwork/types/automations"
+import type { AutomationExecutionThread } from "@redrob/types/automations"
 import { workspaceSessionRoute } from "@/react-app/shell/workspace-routes"
 
 export type AutomationExecutionIdentity = {

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
-import { createDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 
 function seedRequiredEnv() {
   process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_pr8"
@@ -15,8 +15,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 let app: typeof import("../src/app.js").default
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let session: typeof import("../src/session.js")
 
 const organizationId = createDenTypeId("organization")
@@ -37,7 +37,7 @@ const hiddenLegacyConfigObjectId = createDenTypeId("configObject")
 beforeAll(async () => {
   seedRequiredEnv()
   mock.restore()
-  const realDb = (await import("@openwork-ee/den-db")).createDenDb({
+  const realDb = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db
@@ -46,8 +46,8 @@ beforeAll(async () => {
   const [appMod, dbMod, schemaMod, drizzleMod, sessionMod] = await Promise.all([
     import("../src/app.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/session.js"),
   ])
   app = appMod.default

@@ -8,7 +8,7 @@ import { OnboardingShell } from "./onboarding-shell";
 import { OrganizationBrandIdentity, type OrganizationBrand } from "./organization-brand-identity";
 
 const CONNECT_CODE_PATTERN = /^[A-Za-z0-9_-]{24,128}$/;
-const RETURN_TO_OPENWORK_URL = "openwork://open";
+const RETURN_TO_REDROB_URL = "redrob://open";
 
 type ActivationDetails = {
   status: "pending" | "connected";
@@ -70,7 +70,7 @@ function parseActivationDetails(value: unknown): ActivationDetails | null {
 }
 
 function connectUrlFor(code: string, apiBaseUrl: string) {
-  const url = new URL("openwork://connect");
+  const url = new URL("redrob://connect");
   url.searchParams.set("code", code);
   url.searchParams.set("apiBaseUrl", apiBaseUrl);
   return url.toString();
@@ -200,15 +200,15 @@ export function ActivationScreen() {
               <CheckCircle2 className="size-5 shrink-0" aria-hidden="true" />
               Connected to {details.organizationName}
             </div>
-            <a className="den-button-primary w-full justify-center sm:w-fit" href={RETURN_TO_OPENWORK_URL} data-testid="activation-return-openwork">
+            <a className="den-button-primary w-full justify-center sm:w-fit" href={RETURN_TO_REDROB_URL} data-testid="activation-return-openwork">
               Return to OpenWork
               <ExternalLink className="size-4" aria-hidden="true" />
             </a>
             <div className="grid gap-2 rounded-2xl bg-slate-50 p-4">
               <p className="m-0 text-sm text-slate-600">Nothing opened? Copy this OpenWork link and open it from your browser.</p>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <input className="den-input min-w-0 flex-1 text-xs" value={RETURN_TO_OPENWORK_URL} readOnly onFocus={(event) => event.currentTarget.select()} />
-                <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyLink("return", RETURN_TO_OPENWORK_URL)}>
+                <input className="den-input min-w-0 flex-1 text-xs" value={RETURN_TO_REDROB_URL} readOnly onFocus={(event) => event.currentTarget.select()} />
+                <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyLink("return", RETURN_TO_REDROB_URL)}>
                   <Copy className="size-4" aria-hidden="true" />
                   {copied === "return" ? "Copied" : "Copy link"}
                 </button>

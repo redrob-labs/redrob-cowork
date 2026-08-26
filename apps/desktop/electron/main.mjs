@@ -17,7 +17,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { globalOpencodeConfigDir, workspaceOpencodeConfigCandidates } from "@openwork/paths";
+import { globalOpencodeConfigDir, workspaceOpencodeConfigCandidates } from "@redrob/paths";
 
 import { configureFakeMediaForTests, installMediaPermissionHandlers } from "./media-permissions.mjs";
 import { registerMigrationIpc } from "./migration.mjs";
@@ -105,17 +105,17 @@ const {
 const pty = require(["node", "pty"].join("-"));
 const NATIVE_DEEP_LINK_EVENT = "openwork:deep-link-native";
 const AUTOMATION_RUNNER_CREDENTIAL_REJECTED_EVENT = "openwork:automation-runner:credential-rejected";
-const isDevMode = process.env.OPENWORK_DEV_MODE === "1";
+const isDevMode = process.env.REDROB_DEV_MODE === "1";
 const DESKTOP_DISTRIBUTION = resolveDesktopDistribution({
   isPackaged: app.isPackaged,
   packageFlavor: Reflect.get(desktopPackageMetadata, "openworkDistribution"),
-  environmentFlavor: process.env.OPENWORK_DESKTOP_DISTRIBUTION,
+  environmentFlavor: process.env.REDROB_DESKTOP_DISTRIBUTION,
 });
 const TAURI_APP_IDENTIFIER = DESKTOP_DISTRIBUTION.appIdentifier;
 const DEV_APP_IDENTIFIER = `${DESKTOP_DISTRIBUTION.appIdentifier}.dev`;
 const DESKTOP_PROTOCOL_SCHEME = DESKTOP_DISTRIBUTION.protocolScheme;
 const DEFAULT_APP_NAME =
-  (!app.isPackaged ? process.env.OPENWORK_ELECTRON_APP_NAME?.trim() : "") ||
+  (!app.isPackaged ? process.env.REDROB_ELECTRON_APP_NAME?.trim() : "") ||
   (isDevMode ? `${DESKTOP_DISTRIBUTION.appName} - Dev` : DESKTOP_DISTRIBUTION.appName);
 const BLANK_SLATE_LAUNCH = resolveBlankSlateLaunch({
   appName: DEFAULT_APP_NAME,
@@ -131,15 +131,15 @@ await initOpenworkSentry({
 });
 const BASE_APP_IDENTIFIER = isDevMode ? DEV_APP_IDENTIFIER : TAURI_APP_IDENTIFIER;
 const APP_IDENTIFIER = resolveAppIdentifier({
-  appIdentifierOverride: process.env.OPENWORK_ELECTRON_APP_IDENTIFIER,
+  appIdentifierOverride: process.env.REDROB_ELECTRON_APP_IDENTIFIER,
   appRootPath: APP_ROOT,
   baseAppIdentifier: BASE_APP_IDENTIFIER,
   devAppIdentifier: DEV_APP_IDENTIFIER,
-  devProfile: process.env.OPENWORK_DEV_PROFILE,
+  devProfile: process.env.REDROB_DEV_PROFILE,
   isDevMode,
   isPackaged: app.isPackaged,
 });
-if (BLANK_SLATE_LAUNCH.enabled || process.env.OPENWORK_ELECTRON_USE_MOCK_KEYCHAIN === "1") {
+if (BLANK_SLATE_LAUNCH.enabled || process.env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN === "1") {
   // Fresh, isolated development profiles otherwise trigger macOS's native
   // "Login" keychain prompt as soon as Chromium persists an authenticated
   // cookie. That modal blocks the entire Electron main loop and makes the demo
@@ -149,7 +149,7 @@ if (BLANK_SLATE_LAUNCH.enabled || process.env.OPENWORK_ELECTRON_USE_MOCK_KEYCHAI
 }
 const RELEASE_DOWNLOAD_BASE_URL = "https://github.com/different-ai/openwork/releases/latest/download";
 const RELEASE_PAGE_URL = "https://github.com/different-ai/openwork/releases/latest";
-const DOCS_PAGE_URL = "https://openworklabs.com/docs";
+const DOCS_PAGE_URL = "https://redrob.io/docs";
 const applicationMenu = createApplicationMenu({
   appName: APP_NAME,
   docsUrl: DOCS_PAGE_URL,
@@ -201,16 +201,16 @@ function killTerminalsForWebContents(webContentsId) {
 // so in-place migration is a no-op for almost every file. Dev mode uses the
 // separate dev identifier so it can run beside the production app.
 //
-// Dev profile precedence: OPENWORK_ELECTRON_USERDATA (explicit profile path)
-// wins over everything; then OPENWORK_ELECTRON_APP_IDENTIFIER; then
-// OPENWORK_DEV_PROFILE in unpackaged dev; then the legacy identifier default.
+// Dev profile precedence: REDROB_ELECTRON_USERDATA (explicit profile path)
+// wins over everything; then REDROB_ELECTRON_APP_IDENTIFIER; then
+// REDROB_DEV_PROFILE in unpackaged dev; then the legacy identifier default.
 app.setName(APP_NAME);
 app.setAppUserModelId(APP_IDENTIFIER);
 if (BLANK_SLATE_LAUNCH.homePath) app.setPath("home", BLANK_SLATE_LAUNCH.homePath);
 if (
   app.isPackaged
   && !BLANK_SLATE_LAUNCH.enabled
-  && process.env.OPENWORK_ELECTRON_DISABLE_PROTOCOL_REGISTRATION !== "1"
+  && process.env.REDROB_ELECTRON_DISABLE_PROTOCOL_REGISTRATION !== "1"
   && !(process.platform === "linux" && process.env.APPIMAGE)
 ) {
   app.setAsDefaultProtocolClient(DESKTOP_PROTOCOL_SCHEME);
@@ -218,7 +218,7 @@ if (
 const userDataPath = BLANK_SLATE_LAUNCH.userDataPath ?? resolveUserDataPath({
   appDataPath: app.getPath("appData"),
   appIdentifier: APP_IDENTIFIER,
-  userDataOverride: process.env.OPENWORK_ELECTRON_USERDATA,
+  userDataOverride: process.env.REDROB_ELECTRON_USERDATA,
 });
 app.setPath("userData", userDataPath);
 const linuxDesktopIntegration = createLinuxDesktopIntegration({
@@ -657,7 +657,7 @@ async function focusMainWindowFromNotification() {
 
 /**
  * @param {unknown} input
- * @returns {import("@openwork/types/desktop-ipc").DesktopNotificationResult}
+ * @returns {import("@redrob/types/desktop-ipc").DesktopNotificationResult}
  */
 function showDesktopNotification(input) {
   if (!ElectronNotification.isSupported()) {
@@ -933,7 +933,7 @@ if (process.platform === "darwin" && INITIAL_APP_ICON_IMAGE && !INITIAL_APP_ICON
 }
 
 // Expose Chrome DevTools Protocol so the opencode-chrome-devtools plugin can
-// drive the built-in browser panel.  Use OPENWORK_ELECTRON_REMOTE_DEBUG_PORT to
+// drive the built-in browser panel.  Use REDROB_ELECTRON_REMOTE_DEBUG_PORT to
 // pin a specific port; otherwise probe for a free one starting at 9223.
 // Must resolve before app.commandLine.appendSwitch (before `ready`).
 function probePort(port) {
@@ -954,7 +954,7 @@ async function findFreeCdpPort(candidates) {
 }
 
 const explicitCdpPort = Number.parseInt(
-  process.env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT?.trim() ?? "",
+  process.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT?.trim() ?? "",
   10,
 );
 const remoteDebugPort = Number.isFinite(explicitCdpPort) && explicitCdpPort > 0
@@ -966,7 +966,7 @@ if (remoteDebugPort > 0) {
 }
 // Make the resolved port available to the embedded server so it flows into
 // agent instructions via ensureOpenworkAgent → resolveAgentTemplate.
-process.env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT = String(remoteDebugPort);
+process.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT = String(remoteDebugPort);
 if (isDevMode && !app.isPackaged) {
   const cdpAddress = remoteDebugPort > 0 ? `http://127.0.0.1:${remoteDebugPort}` : "disabled";
   console.log(`[openwork] dev profile=${app.getPath("userData")} cdp=${cdpAddress}`);
@@ -987,11 +987,11 @@ if (extraLaunchArgs) {
     }
   }
 }
-configureFakeMediaForTests(app, envFlagEnabled("OPENWORK_ELECTRON_FAKE_MEDIA"));
-const DEFAULT_DEN_BASE_URL = "https://app.openworklabs.com";
+configureFakeMediaForTests(app, envFlagEnabled("REDROB_ELECTRON_FAKE_MEDIA"));
+const DEFAULT_DEN_BASE_URL = "https://app.redrob.io";
 const DEFAULT_LOCAL_BASE_URL = "http://127.0.0.1:4096";
 const FORCE_DESKTOP_REQUIRE_SIGNIN =
-  DESKTOP_DISTRIBUTION.requireSignin || envFlagEnabled("OPENWORK_FORCE_SIGNIN");
+  DESKTOP_DISTRIBUTION.requireSignin || envFlagEnabled("REDROB_FORCE_SIGNIN");
 const DEFAULT_DESKTOP_REQUIRE_SIGNIN = FORCE_DESKTOP_REQUIRE_SIGNIN;
 
 function envFlagEnabled(name) {
@@ -1016,7 +1016,7 @@ const IDLE_ENGINE_INFO = Object.freeze({
   lastStderr: null,
 });
 
-const IDLE_OPENWORK_SERVER_INFO = Object.freeze({
+const IDLE_REDROB_SERVER_INFO = Object.freeze({
   running: false,
   remoteAccessEnabled: false,
   host: null,
@@ -1068,7 +1068,7 @@ const connectLinkReplayGuard = createConnectLinkReplayGuard({
 
 /**
  * @param {string} rawUrl
- * @returns {import("@openwork/types/connect-link").ConnectLinkVerifyResult}
+ * @returns {import("@redrob/types/connect-link").ConnectLinkVerifyResult}
  */
 function verifyConnectLink(rawUrl) {
   return verifyConnectLinkUrl(String(rawUrl ?? ""), {
@@ -1138,7 +1138,7 @@ function forwardedDeepLinks(argv) {
     .filter(
       (entry) =>
         entry.startsWith(`${DESKTOP_PROTOCOL_SCHEME}://`) ||
-        (!app.isPackaged && entry.startsWith("openwork-dev://")) ||
+        (!app.isPackaged && entry.startsWith("redrob-dev://")) ||
         entry.startsWith("https://") ||
         entry.startsWith("http://"),
     );
@@ -1232,8 +1232,8 @@ const runtimeManager = createRuntimeManager({
   app,
   desktopRoot: path.resolve(__dirname, ".."),
   listLocalWorkspacePaths: () => workspaceStore.listLocalWorkspacePaths(),
-  // When OPENWORK_ENCRYPTION_KEY is set, skip the safeStorage provider so it does not shadow the documented env override used by CI/headless/enterprise.
-  localManagedMcpVaultKey: process.env.OPENWORK_ENCRYPTION_KEY?.trim()
+  // When REDROB_ENCRYPTION_KEY is set, skip the safeStorage provider so it does not shadow the documented env override used by CI/headless/enterprise.
+  localManagedMcpVaultKey: process.env.REDROB_ENCRYPTION_KEY?.trim()
     ? undefined
     : createDesktopVaultKeyProvider({
         filePath: path.join(app.getPath("userData"), "local-managed-mcp-vault-key.bin"),
@@ -1337,8 +1337,8 @@ function assertOpenworkServerReady(info) {
 }
 
 async function bootRuntimeForSelectedWorkspace() {
-  if (typeof process.env.OPENWORK_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE === "string") {
-    throw new Error(process.env.OPENWORK_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE);
+  if (typeof process.env.REDROB_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE === "string") {
+    throw new Error(process.env.REDROB_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE);
   }
   const list = await workspaceStore.readWorkspaceState();
   const selectedId = list.selectedId || list.activeId || list.workspaces[0]?.id || "";
@@ -1693,9 +1693,9 @@ function applyNativeTheme(mode) {
 // entry here; handlers receive the ipcMain event followed by the renderer
 // arguments. The @type below asserts this registry against the shared
 // DesktopCommandMap contract (packages/types/src/desktop-ipc.ts): a missing,
-// extra, or renamed command fails `pnpm --filter @openwork/desktop
+// extra, or renamed command fails `pnpm --filter @redrob/desktop
 // typecheck:electron`.
-/** @type {import("@openwork/types/desktop-ipc").DesktopCommandHandlers<import("electron").IpcMainInvokeEvent>} */
+/** @type {import("@redrob/types/desktop-ipc").DesktopCommandHandlers<import("electron").IpcMainInvokeEvent>} */
 const desktopCommandHandlers = {
   "workspaceBootstrap": async (event, ...args) => {
       return workspaceStore.readWorkspaceState();
@@ -1788,9 +1788,9 @@ const desktopCommandHandlers = {
   "appBuildInfo": async (event, ...args) => {
       return {
         version: app.getVersion(),
-        gitSha: process.env.OPENWORK_GIT_SHA ?? null,
-        buildEpoch: process.env.OPENWORK_BUILD_EPOCH ?? null,
-        openworkDevMode: process.env.OPENWORK_DEV_MODE === "1",
+        gitSha: process.env.REDROB_GIT_SHA ?? null,
+        buildEpoch: process.env.REDROB_BUILD_EPOCH ?? null,
+        openworkDevMode: process.env.REDROB_DEV_MODE === "1",
       };
   },
   "desktopNotificationShow": async (event, ...args) => {
@@ -1828,7 +1828,7 @@ const desktopCommandHandlers = {
       }
   },
   "getOpenworkUiMcpCommand": async (event, ...args) => {
-      if (process.env.OPENWORK_DEV_MODE === "1") {
+      if (process.env.REDROB_DEV_MODE === "1") {
         return ["node", path.resolve(__dirname, "../../..", "packages/openwork-ui-mcp/index.mjs")];
       }
       return ["npx", "-y", "openwork-ui-mcp"];
@@ -1857,7 +1857,7 @@ const desktopCommandHandlers = {
   },
   "getOpenworkUiMcpEnvironment": async (event, ...args) => {
       return {
-        OPENWORK_UI_CONTROL_DISCOVERY: path.join(app.getPath("userData"), "openwork-ui-control.json"),
+        REDROB_UI_CONTROL_DISCOVERY: path.join(app.getPath("userData"), "openwork-ui-control.json"),
       };
   },
   "getDesktopBootstrapConfig": async (event, ...args) => {
@@ -2515,7 +2515,7 @@ async function createMainWindow() {
     browserPanel.routeBlockedMainWindowNavigation(url);
   });
 
-  const startUrl = process.env.OPENWORK_ELECTRON_START_URL?.trim() || process.env.ELECTRON_START_URL?.trim();
+  const startUrl = process.env.REDROB_ELECTRON_START_URL?.trim() || process.env.ELECTRON_START_URL?.trim();
   if (startUrl) {
     await mainWindow.loadURL(startUrl);
   } else {
@@ -2574,7 +2574,7 @@ ipcMain.handle("openwork:terminal:create", async (event, options = {}) => {
       ...process.env,
       TERM: "xterm-256color",
       COLORTERM: "truecolor",
-      OPENWORK_TERMINAL: "1",
+      REDROB_TERMINAL: "1",
     },
   });
 
@@ -2633,7 +2633,7 @@ if (!app.requestSingleInstanceLock()) {
     console.error(`[openwork] Another OpenWork dev instance already holds this profile directory:
   ${app.getPath("userData")}
 The second process is exiting so its CDP port is released.
-Run this worktree with an isolated profile: OPENWORK_DEV_PROFILE=auto pnpm dev
+Run this worktree with an isolated profile: REDROB_DEV_PROFILE=auto pnpm dev
 or use: pnpm dev:worktree`);
     app.exit(1);
     setImmediate(() => process.exit(1));

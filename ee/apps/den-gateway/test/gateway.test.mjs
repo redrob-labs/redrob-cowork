@@ -224,8 +224,8 @@ describe("den-gateway static UI", () => {
     const response = await fetch(`${serverBase(gateway)}/`)
     const html = await response.text()
 
-    expect(html).toContain("window.__OPENWORK_GATEWAY__ = {\"version\":1}")
-    expect(html).not.toContain("__OPENWORK_BOOTSTRAP__")
+    expect(html).toContain("window.__REDROB_GATEWAY__ = {\"version\":1}")
+    expect(html).not.toContain("__REDROB_BOOTSTRAP__")
     expect(html).not.toContain("client-token")
     expect(html).not.toContain("host-token")
   })
@@ -239,7 +239,7 @@ describe("den-gateway static UI", () => {
     const health = await fetch(`${base}/__gw/health`)
     const ready = await fetch(`${base}/__gw/ready`)
 
-    expect(await index.text()).toContain("window.__OPENWORK_GATEWAY__ = {\"version\":1,\"build\":\"openwork-0.19.0\"}")
+    expect(await index.text()).toContain("window.__REDROB_GATEWAY__ = {\"version\":1,\"build\":\"openwork-0.19.0\"}")
     await expect(health.json()).resolves.toEqual({ ok: true, service: "den-gateway", build: "openwork-0.19.0" })
     await expect(ready.json()).resolves.toEqual({ ok: true, service: "den-gateway", build: "openwork-0.19.0" })
   })

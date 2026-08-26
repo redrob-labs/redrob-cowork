@@ -106,7 +106,7 @@ export function openworkConfigDir(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
-  const override = envValue(env, "OPENWORK_SERVER_CONFIG");
+  const override = envValue(env, "REDROB_SERVER_CONFIG");
   if (override) return paths.dirname(paths.resolve(override));
   return defaultOpenworkConfigDir(opts);
 }
@@ -115,7 +115,7 @@ export function openworkServerConfigPath(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
-  const override = envValue(env, "OPENWORK_SERVER_CONFIG");
+  const override = envValue(env, "REDROB_SERVER_CONFIG");
   if (override) return paths.resolve(override);
   return paths.join(defaultOpenworkConfigDir(opts), "server.json");
 }
@@ -124,7 +124,7 @@ export function openworkEnvStorePath(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
-  const override = envValue(env, "OPENWORK_ENV_STORE");
+  const override = envValue(env, "REDROB_ENV_STORE");
   if (override) return paths.resolve(override);
   return paths.join(defaultOpenworkConfigDir(opts), "env.json");
 }
@@ -195,9 +195,9 @@ export function desktopBootstrapPath(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
-  const override = envValue(env, "OPENWORK_DESKTOP_BOOTSTRAP_PATH");
+  const override = envValue(env, "REDROB_DESKTOP_BOOTSTRAP_PATH");
   if (override) return override;
-  if (envValue(env, "OPENWORK_DEV_MODE") === "1" && opts?.userDataDir) {
+  if (envValue(env, "REDROB_DEV_MODE") === "1" && opts?.userDataDir) {
     return paths.join(opts.userDataDir, "openwork-dev-data", "home", ".config", "openwork", "desktop-bootstrap.json");
   }
   return paths.join(desktopConfigDir(opts), "openwork", "desktop-bootstrap.json");
@@ -225,7 +225,7 @@ export function openworkServerDataDir(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
-  const override = envValue(env, "OPENWORK_DATA_DIR");
+  const override = envValue(env, "REDROB_DATA_DIR");
   if (override) return expandHomePath(override, opts);
   return paths.join(optionHomeDir(opts), ".openwork", "openwork-server");
 }

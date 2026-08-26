@@ -5,7 +5,7 @@ import { getGithubData } from "../../lib/github";
 import { baseOpenGraph } from "../../lib/seo";
 
 const CLOUD_SIGNUP_URL =
-  "https://app.openworklabs.com?mode=sign-up&intent=models";
+  "https://app.redrob.io?mode=sign-up&intent=models";
 const CALENDAR_URL =
   "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ0M6zjfdm9ntqokfGCWovfuM21J9C2sqB9R6E1v_plXo8MqKswICQET7-ncV4dOVM5W8pFn1RFM";
 const CHANGELOG_URL = "/docs/changelog";
@@ -16,8 +16,8 @@ const glmSchema = {
   "@type": "SoftwareApplication",
   name: "OpenWork — GLM 5.2",
   description:
-    "GLM 5.2 is available through OpenWork Models with 2x usage. Run real agent work on an open model at a fraction of the cost.",
-  url: "https://openworklabs.com/glm-5.2",
+    "GLM 5.2 is available through Redrob Models with 2x usage. Run real agent work on an open model at a fraction of the cost.",
+  url: "https://redrob.io/glm-5.2",
   applicationCategory: "BusinessApplication",
   operatingSystem: "macOS, Windows, Linux",
   offers: {
@@ -29,27 +29,27 @@ const glmSchema = {
   publisher: {
     "@type": "Organization",
     name: "OpenWork",
-    url: "https://openworklabs.com"
+    url: "https://redrob.io"
   }
 };
 
 export const metadata = {
   title: "GLM 5.2 is now in OpenWork — with 2x usage",
   description:
-    "GLM 5.2 is available through OpenWork Models, and we're doubling your usage so you can run real agent work on an open model at a fraction of the cost.",
+    "GLM 5.2 is available through Redrob Models, and we're doubling your usage so you can run real agent work on an open model at a fraction of the cost.",
   alternates: {
     canonical: "/glm-5.2"
   },
   openGraph: {
     ...baseOpenGraph,
-    url: "https://openworklabs.com/glm-5.2"
+    url: "https://redrob.io/glm-5.2"
   }
 };
 
 const features = [
   {
-    title: "OpenWork Models — 2x usage",
-    body: "GLM 5.2 is available through OpenWork Models, our managed way to access leading OSS models without bringing your own keys. We're doubling your usage so your team can run real agent work at a fraction of the cost.",
+    title: "Redrob Models — 2x usage",
+    body: "GLM 5.2 is available through Redrob Models, our managed way to access leading OSS models without bringing your own keys. We're doubling your usage so your team can run real agent work at a fraction of the cost.",
     color: "border-sky-100 bg-sky-50/60"
   },
   {
@@ -96,9 +96,9 @@ export default async function GlmLanding() {
               GLM 5.2, now in the API — with 2x usage
             </h1>
             <p className="mb-6 text-[17px] leading-relaxed text-gray-700">
-              GLM 5.2 is available today through OpenWork Models, and we&apos;re
+              GLM 5.2 is available today through Redrob Models, and we&apos;re
               doubling your usage so you and your team can run real agent work on
-              an open model at a fraction of the cost. OpenWork Models is our
+              an open model at a fraction of the cost. Redrob Models is our
               managed way to get access to leading OSS models without bringing
               your own keys — and we&apos;re continuing to expand the lineup.
             </p>
@@ -139,7 +139,7 @@ export default async function GlmLanding() {
             </h2>
             <p className="mb-6 text-[15px] leading-relaxed text-gray-700">
               Open OpenWork, switch to GLM 5.2 from the model picker, and ask the
-              chat to organize your tasks. No setup, no keys — OpenWork Models
+              chat to organize your tasks. No setup, no keys — Redrob Models
               handles the rest.
             </p>
             <div className="flex flex-wrap items-center gap-3">
@@ -173,7 +173,7 @@ export default async function GlmLanding() {
                 </span>
                 <p className="text-[14px] text-gray-700">
                   Create a free OpenWork Cloud account. After signup, you land
-                  directly on the OpenWork Models page.
+                  directly on the Redrob Models page.
                 </p>
               </div>
               <div className="feature-card">
@@ -182,7 +182,7 @@ export default async function GlmLanding() {
                   Subscribe
                 </span>
                 <p className="text-[14px] text-gray-700">
-                  Subscribe to OpenWork Models ($10/user/mo). GLM 5.2 is included
+                  Subscribe to Redrob Models ($10/user/mo). GLM 5.2 is included
                   with 2x usage. One click to Stripe checkout.
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default async function GlmLanding() {
             </h2>
             <p className="max-w-xl text-[15px] text-gray-600">
               Open source, 50+ models, and managed OSS model access — all in one
-              app. Start free, subscribe to OpenWork Models, and get 2x usage on
+              app. Start free, subscribe to Redrob Models, and get 2x usage on
               GLM 5.2.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">

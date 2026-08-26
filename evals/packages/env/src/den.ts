@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { allocateFreePorts } from "@openwork/cdp";
+import { allocateFreePorts } from "@redrob/cdp";
 import {
   defaultDaytonaExec,
   deleteSandboxes,
@@ -14,11 +14,11 @@ import {
   killLocalPid,
   provisionDenSandbox,
   startMockOnSandbox,
-} from "@openwork/hosts";
-import { denFetch, ensureMemberSession, freshSession, signIn } from "@openwork/behaviors";
+} from "@redrob/hosts";
+import { denFetch, ensureMemberSession, freshSession, signIn } from "@redrob/behaviors";
 import { createConnection } from "mysql2/promise";
 import type { ChildProcess } from "node:child_process";
-import type { DenRef, DenSession } from "@openwork/behaviors";
+import type { DenRef, DenSession } from "@redrob/behaviors";
 import type { DbHandle, Place } from "./place.ts";
 import { ephemeralDatabaseName, localMysqlIsRunning, localRedisIsRunning } from "./place.ts";
 import type { BootedMock, MockBoot, MockHandle } from "./mock.ts";
@@ -74,7 +74,7 @@ export interface Den extends AsyncDisposable {
    * Raw den-api HTTP log text (JSON lines carrying http_route/timestamp).
    * Daytona lane: reads /tmp/den-api.log inside the server sandbox; local
    * lane: reads the spawned den-api service log. Attached Dens
-   * (OPENWORK_EVAL_DEN_API_URL / reuse) throw — their den-api log lives with
+   * (REDROB_EVAL_DEN_API_URL / reuse) throw — their den-api log lives with
    * whoever runs that server. Parsing belongs to the caller.
    */
   apiLog(): Promise<string>;
@@ -143,9 +143,9 @@ function defaultLocalOrg(runId: string): OrgShape {
 
 export function defaultReuseAdmin(): Required<PersonShape> {
   return {
-    email: process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
+    email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
     name: "Alex Eval",
-    password: process.env.OPENWORK_EVAL_DEMO_PASSWORD || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD || "OpenWorkDemo123!",
   };
 }
 
@@ -197,11 +197,11 @@ function spawnService(
   logPath: string,
 ): SpawnedService {
   const logFd = openSync(logPath, "a");
-  const prepared = process.env.OPENWORK_EVAL_DEN_RUNTIME_PREPARED === "1";
+  const prepared = process.env.REDROB_EVAL_DEN_RUNTIME_PREPARED === "1";
   const args = prepared
     ? label === "den-api"
-      ? ["--filter", "@openwork-ee/den-api", "exec", "tsx", "src/main.ts"]
-      : ["--filter", "@openwork-ee/den-web", "exec", "next", "start", "--hostname", "127.0.0.1", "--port", String(port)]
+      ? ["--filter", "@redrob-ee/den-api", "exec", "tsx", "src/main.ts"]
+      : ["--filter", "@redrob-ee/den-web", "exec", "next", "start", "--hostname", "127.0.0.1", "--port", String(port)]
     : [script];
   const child = spawn("pnpm", args, {
     cwd: REPO_ROOT,
@@ -264,13 +264,13 @@ async function waitForAuthProbe(ref: DenRef, service: SpawnedService): Promise<v
 
 async function runDbPush(databaseUrl: string): Promise<void> {
   try {
-    const commands = process.env.OPENWORK_EVAL_DEN_RUNTIME_PREPARED === "1"
+    const commands = process.env.REDROB_EVAL_DEN_RUNTIME_PREPARED === "1"
       ? [
-          ["--filter", "@openwork-ee/den-db", "exec", "node", "--import", "tsx", "./node_modules/drizzle-kit/bin.cjs", "push", "--config", "drizzle.config.ts"],
-          ["--filter", "@openwork-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-fulltext-indexes.ts"],
-          ["--filter", "@openwork-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-schema-repairs.ts"],
+          ["--filter", "@redrob-ee/den-db", "exec", "node", "--import", "tsx", "./node_modules/drizzle-kit/bin.cjs", "push", "--config", "drizzle.config.ts"],
+          ["--filter", "@redrob-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-fulltext-indexes.ts"],
+          ["--filter", "@redrob-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-schema-repairs.ts"],
         ]
-      : [["--filter", "@openwork-ee/den-db", "db:push"]];
+      : [["--filter", "@redrob-ee/den-db", "db:push"]];
     for (const args of commands) {
       await execFileAsync("pnpm", args, {
         cwd: REPO_ROOT,
@@ -307,7 +307,7 @@ async function runDemoOrgSeed(databaseUrl: string, webPort: number, logPath: str
   try {
     const result = await execFileAsync(
       "pnpm",
-      ["--filter", "@openwork-ee/den-api", "seed:demo-org", "--", "--reset"],
+      ["--filter", "@redrob-ee/den-api", "seed:demo-org", "--", "--reset"],
       {
         cwd: REPO_ROOT,
         env: {
@@ -320,7 +320,7 @@ async function runDemoOrgSeed(databaseUrl: string, webPort: number, logPath: str
           // Single-org mode (the unset default) refuses email signup, which the
           // seed's owner bootstrap needs; the demo world is a multi-org Den.
           DEN_ORG_MODE: "multi_org",
-          OPENWORK_DEV_MODE: "1",
+          REDROB_DEV_MODE: "1",
         },
         encoding: "utf8",
         maxBuffer: 64 * 1024 * 1024,
@@ -456,7 +456,7 @@ async function provisionReusedMembers(
       email: person.email,
       password: person.password,
       name: person.name,
-      markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+      markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
     });
   }
   return members;
@@ -552,10 +552,10 @@ async function deleteCreatedOrganization(admin: DenSession, organizationId: stri
 
 function reusedRef(options: ServerOptions): DenRef | null {
   if (options.reuse) return { apiUrl: cleanUrl(options.reuse.apiUrl), webUrl: cleanUrl(options.reuse.webUrl) };
-  const apiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+  const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim();
   if (!apiUrl) return null;
   const cleanApi = cleanUrl(apiUrl);
-  const webUrl = process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim()
+  const webUrl = process.env.REDROB_EVAL_DEN_WEB_URL?.trim()
     || cleanApi.replace("127.0.0.1", "localhost");
   return { apiUrl: cleanApi, webUrl: cleanUrl(webUrl) };
 }
@@ -594,7 +594,7 @@ export async function server(options: ServerOptions): Promise<Den> {
         mocks: bootedMocks.handles,
         async apiLog(): Promise<string> {
           throw new Error(
-            "den.apiLog() is not available for attached Dens (OPENWORK_EVAL_DEN_API_URL / reuse): the den-api log lives with the process that started that server.",
+            "den.apiLog() is not available for attached Dens (REDROB_EVAL_DEN_API_URL / reuse): the den-api log lives with the process that started that server.",
           );
         },
         async [Symbol.asyncDispose](): Promise<void> {
@@ -619,11 +619,11 @@ export async function server(options: ServerOptions): Promise<Den> {
       throw new Error('Den seedProfile "demo-org" is local-only and cannot seed a Daytona Den.');
     }
     if (!daytonaAvailable()) {
-      throw new SkipError("Daytona CLI is unavailable; install and authenticate daytona, then set OPENWORK_EVAL_DAYTONA=1");
+      throw new SkipError("Daytona CLI is unavailable; install and authenticate daytona, then set REDROB_EVAL_DAYTONA=1");
     }
     const base = options.place.denBase();
     if (base.kind !== "daytona") throw new Error("Daytona place returned a local Den base.");
-    const preparedSandbox = process.env.OPENWORK_EVAL_DAYTONA_DEN_SANDBOX?.trim();
+    const preparedSandbox = process.env.REDROB_EVAL_DAYTONA_DEN_SANDBOX?.trim();
     const orgShape = options.org ?? {};
     const isolatePreparedTest = Boolean(preparedSandbox && options.provision !== false);
     const bootstrapAdmin = personDefaults("admin", orgShape.admin, runId);
@@ -741,7 +741,7 @@ export async function server(options: ServerOptions): Promise<Den> {
     };
     const logsDir = join(REPO_ROOT, "evals", "results", ".testkit", database.name);
     await mkdir(logsDir, { recursive: true });
-    if (process.env.OPENWORK_EVAL_DEN_RUNTIME_PREPARED !== "1" && options.web !== false) {
+    if (process.env.REDROB_EVAL_DEN_RUNTIME_PREPARED !== "1" && options.web !== false) {
       // Every ephemeral next dev process otherwise reuses the same Turbopack
       // graph. A stale missing-module node can break /api/den even though
       // /api/ready is healthy.
@@ -775,8 +775,8 @@ export async function server(options: ServerOptions): Promise<Den> {
       DEN_AUTOMATIONS_ENABLED: "true",
       DEN_AUTOMATIONS_RUNTIME_ENABLED: "true",
       DEN_GENERATED_ARTIFACT_VIEWS_ENABLED:
-        process.env.OPENWORK_EVAL_GENERATED_ARTIFACT_VIEWS_E2E_TEST === "1" ? "true" : "false",
-      OPENWORK_DEV_MODE: "1",
+        process.env.REDROB_EVAL_GENERATED_ARTIFACT_VIEWS_E2E_TEST === "1" ? "true" : "false",
+      REDROB_DEV_MODE: "1",
       PROVISIONER_MODE: "stub",
         // The locally booted Den seeds this admin into the platform-admin
         // allowlist so tests can exercise /v1/admin/* capability toggles.

@@ -1,5 +1,5 @@
 {
-  "name": "@openwork/test-evidence",
+  "name": "@redrob/test-evidence",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -19,7 +19,7 @@
     }
   },
   "dependencies": {
-    "@openwork/cdp": "workspace:*",
-    "@openwork/timeline": "workspace:*"
+    "@redrob/cdp": "workspace:*",
+    "@redrob/timeline": "workspace:*"
   }
 }

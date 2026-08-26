@@ -91,7 +91,7 @@ The devcontainer's `docker-compose.yml` includes MySQL. If you're using Daytona'
 
 Just point the app to the production Den:
 1. Open the app via noVNC
-2. Sign in normally (uses production `app.openworklabs.com`)
+2. Sign in normally (uses production `app.redrob.io`)
 3. All cloud features work
 
 ### Option B: Daytona sandbox + local Den
@@ -151,7 +151,7 @@ pnpm install
 **Electron shows blank window:**
 Vite might not be running. Check `tail /tmp/vite.log`. Restart with:
 ```bash
-cd /workspace/apps/app && OPENWORK_DEV_MODE=1 nohup npx vite --host 0.0.0.0 --port 5173 > /tmp/vite.log 2>&1 &
+cd /workspace/apps/app && REDROB_DEV_MODE=1 nohup npx vite --host 0.0.0.0 --port 5173 > /tmp/vite.log 2>&1 &
 ```
 
 **noVNC shows black screen:**

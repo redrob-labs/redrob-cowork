@@ -9,7 +9,7 @@ import {
   desktopPolicyKeys,
   type DesktopPolicyDocumentWrite,
   type DesktopPolicyValue,
-} from "@openwork/types/den/desktop-policies";
+} from "@redrob/types/den/desktop-policies";
 import { DashboardPageTemplate } from "../../_components/ui/dashboard-page-template";
 import { DenButton } from "../../_components/ui/button";
 import { DenInput } from "../../_components/ui/input";

@@ -1,7 +1,7 @@
-import { installConfigSchema, installExperienceConfigSchema } from "@openwork/install-config"
-import { connectLinkClaimsSchema } from "@openwork/connect-link"
-import { and, eq, gt, isNull, or } from "@openwork-ee/den-db/drizzle"
-import { InstallLinkTable, OrganizationTable } from "@openwork-ee/den-db/schema"
+import { installConfigSchema, installExperienceConfigSchema } from "@redrob/install-config"
+import { connectLinkClaimsSchema } from "@redrob/connect-link"
+import { and, eq, gt, isNull, or } from "@redrob-ee/den-db/drizzle"
+import { InstallLinkTable, OrganizationTable } from "@redrob-ee/den-db/schema"
 import { createReadStream } from "node:fs"
 import type { Context, Env, Input } from "hono"
 import type { MiddlewareHandler } from "hono"
@@ -9,7 +9,7 @@ import type { Hono } from "hono"
 import { stream } from "hono/streaming"
 import { describeRoute } from "hono-openapi"
 import { z } from "zod"
-import { OPENWORK_DOWNLOAD_URL } from "../../CONSTS.js"
+import { REDROB_DOWNLOAD_URL } from "../../CONSTS.js"
 import { resolvePublicOrigin } from "../../capability-sources/generic-oauth.js"
 import { organizationInstallLinksEnabled } from "../../capability-sources/install-links-rollout.js"
 import { db } from "../../db.js"
@@ -122,11 +122,11 @@ const defaultInstallerDependencies: InstallExperienceDependencies = {
   resolveConfiguredArtifact: resolveConfiguredInstallerArtifact,
   resolveDirectUrl: (platform, releaseTag) => {
     const fileName = enterpriseDesktopReleaseAssetName(platform, releaseTag)
-    return fileName ? installerReleaseAssetUrl(fileName, { releaseTag }) : OPENWORK_DOWNLOAD_URL
+    return fileName ? installerReleaseAssetUrl(fileName, { releaseTag }) : REDROB_DOWNLOAD_URL
   },
   resolveCloudDirectUrl: (platform, releaseTag) => {
     const fileName = cloudDesktopReleaseAssetName(platform, releaseTag)
-    return fileName ? installerReleaseAssetUrl(fileName, { releaseTag }) : OPENWORK_DOWNLOAD_URL
+    return fileName ? installerReleaseAssetUrl(fileName, { releaseTag }) : REDROB_DOWNLOAD_URL
   },
   mintConnectGrant: mintDesktopConnectGrant,
   previewConnectGrant: previewDesktopConnectGrant,

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, notExists } from "@openwork-ee/den-db/drizzle"
+import { and, desc, eq, inArray, isNull, notExists } from "@redrob-ee/den-db/drizzle"
 import {
   ConfigObjectAccessGrantTable,
   ConfigObjectTable,
@@ -10,8 +10,8 @@ import {
   PluginAccessGrantTable,
   PluginConfigObjectTable,
   PluginTable,
-} from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import {
   listExternalMcpConnections,
   listUsableExternalMcpConnections,

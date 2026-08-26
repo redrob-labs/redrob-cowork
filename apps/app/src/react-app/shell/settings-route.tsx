@@ -71,7 +71,7 @@ import "@/react-app/domains/settings/browser-extension-config";
 import "@/react-app/domains/settings/openwork-voice-config";
 import { useSettingsExtensionController } from "@/react-app/domains/settings/settings-extension-controller";
 import { buildExtensionItems } from "@/react-app/domains/settings/extension-items";
-import { isOpenWorkExtensionEnabled, OPENWORK_EXTENSION_STATE_CHANGED } from "@/react-app/domains/settings/extension-state";
+import { isOpenWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "@/react-app/domains/settings/extension-state";
 import { PreferencesView } from "@/react-app/domains/settings/pages/preferences-view";
 import { GeneralSettingsView } from "@/react-app/domains/settings/pages/general-view";
 import { AuthorizedFoldersPanel } from "@/react-app/domains/settings/panels/authorized-folders-panel";
@@ -200,7 +200,7 @@ import {
   type LibraryCommandItem,
 } from "@/react-app/domains/settings/library";
 
-const ROUTE_OPENWORK_CAPABILITIES: OpenworkServerCapabilities = {
+const ROUTE_REDROB_CAPABILITIES: OpenworkServerCapabilities = {
   skills: { read: true, write: true, source: "openwork" },
   plugins: { read: true, write: true },
   mcp: { read: true, write: true },
@@ -612,7 +612,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     openworkServerClient: openworkClient,
     selectedWorkspaceOpenworkClient: openworkClient,
     openworkServerStatus: openworkClient ? "connected" : "disconnected",
-    openworkServerCapabilities: openworkClient ? ROUTE_OPENWORK_CAPABILITIES : null,
+    openworkServerCapabilities: openworkClient ? ROUTE_REDROB_CAPABILITIES : null,
     selectedWorkspaceDisplay,
     providerItems: providers,
     providerDefaults,
@@ -871,7 +871,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   );
   const [openWorkModelsPromoHidden, setOpenWorkModelsPromoHidden] = useState(isOpenWorkModelsPromoHidden);
   const openWorkModelsPromoEligible = useOpenWorkModelsPromoEligibility();
-  // Entitled = Den/import says OpenWork Models is included. Available = local
+  // Entitled = Den/import says Redrob Models is included. Available = local
   // engine actually exposes selectable openwork models.
   const openWorkModelsEntitled = cloudSession.isSignedIn && hasOpenWorkCloudProvider;
   const openWorkModelsAvailable = hasOpenWorkModelsAvailable({
@@ -1104,10 +1104,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
   useEffect(() => {
     const refresh = () => setExtensionStateVersion((value) => value + 1);
-    window.addEventListener(OPENWORK_EXTENSION_STATE_CHANGED, refresh);
+    window.addEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
     window.addEventListener("storage", refresh);
     return () => {
-      window.removeEventListener(OPENWORK_EXTENSION_STATE_CHANGED, refresh);
+      window.removeEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
       window.removeEventListener("storage", refresh);
     };
   }, []);
@@ -2053,7 +2053,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     }
   }, [notFoundRouteError]);
   const routeOpenworkCapabilities: OpenworkServerCapabilities | null = openworkClient
-    ? ROUTE_OPENWORK_CAPABILITIES
+    ? ROUTE_REDROB_CAPABILITIES
     : null;
   const environmentRuntimeKey = buildOpenworkEnvRuntimeKey({
     baseUrl: openworkServerSnapshot.openworkServerBaseUrl || openworkServerSnapshot.openworkServerUrl,

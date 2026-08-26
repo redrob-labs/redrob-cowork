@@ -1,6 +1,6 @@
 FROM node:22-bookworm-slim
 
-ARG OPENWORK_SERVER_VERSION=0.18.4
+ARG REDROB_SERVER_VERSION=0.18.4
 ARG OPENCODE_VERSION=1.17.11
 ARG OPENCODE_DOWNLOAD_URL=
 
@@ -13,7 +13,7 @@ RUN apt-get update \
     unzip \
   && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g "openwork-server@${OPENWORK_SERVER_VERSION}"
+RUN npm install -g "openwork-server@${REDROB_SERVER_VERSION}"
 
 RUN set -eux; \
   arch="$(dpkg --print-architecture)"; \
@@ -39,11 +39,11 @@ RUN set -eux; \
 # have volumes mounted at /data/openwork-orchestrator, and renaming it here
 # would silently orphan their state. The orchestrator CLI itself is gone; this
 # is only a directory name kept for compatibility.
-ENV OPENWORK_DATA_DIR=/data/openwork-orchestrator
-ENV OPENWORK_SIDECAR_DIR=/data/sidecars
+ENV REDROB_DATA_DIR=/data/openwork-orchestrator
+ENV REDROB_SIDECAR_DIR=/data/sidecars
 
 # The workspace is mounted from the host/volume.
-ENV OPENWORK_WORKSPACE=/workspace
+ENV REDROB_WORKSPACE=/workspace
 
 # Redrob Work host contract surface.
 EXPOSE 8787
@@ -53,4 +53,4 @@ VOLUME ["/workspace", "/data"]
 # Defaults:
 # - Redrob Work server is published intentionally via --host 0.0.0.0
 # - OpenCode is managed by openwork-server and stays internal
-CMD ["/bin/sh", "-lc", "plugin_dir=\"$(npm root -g)/openwork-server/dist/opencode-plugins\"; test -d \"$plugin_dir\"; export OPENWORK_MANAGE_OPENCODE=1 OPENWORK_OPENCODE_BIN=/usr/local/bin/opencode OPENWORK_EXTENSIONS_PLUGIN_DIR=\"$plugin_dir\"; exec openwork-server --workspace \"${OPENWORK_WORKSPACE:-/workspace}\" --host 0.0.0.0 --port \"${OPENWORK_PORT:-8787}\" --cors \"${OPENWORK_CORS_ORIGINS:-*}\" --approval \"${OPENWORK_APPROVAL_MODE:-manual}\""]
+CMD ["/bin/sh", "-lc", "plugin_dir=\"$(npm root -g)/openwork-server/dist/opencode-plugins\"; test -d \"$plugin_dir\"; export REDROB_MANAGE_OPENCODE=1 REDROB_OPENCODE_BIN=/usr/local/bin/opencode REDROB_EXTENSIONS_PLUGIN_DIR=\"$plugin_dir\"; exec openwork-server --workspace \"${REDROB_WORKSPACE:-/workspace}\" --host 0.0.0.0 --port \"${REDROB_PORT:-8787}\" --cors \"${REDROB_CORS_ORIGINS:-*}\" --approval \"${REDROB_APPROVAL_MODE:-manual}\""]

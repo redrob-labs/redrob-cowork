@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { openworkFeatureContributionSchema } from "@openwork/types/openwork-provider";
+import { openworkFeatureContributionSchema } from "@redrob/types/openwork-provider";
 
 import { buildOpenworkProviderContributions } from "./openwork-provider-adapters.js";
 

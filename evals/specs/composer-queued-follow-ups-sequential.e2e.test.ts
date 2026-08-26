@@ -2,15 +2,15 @@ import { createServer } from "node:http";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, onTestFinished } from "vitest";
-import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -317,7 +317,7 @@ test(title, async ({ evidence }) => {
 
   await using app = await desktop({
     name: "sequential-queue",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
     // Provider keys in the runner env (e.g. via infisical) would make the
     // engine register real providers and out-default the deterministic mock.
     env: {
@@ -325,8 +325,8 @@ test(title, async ({ evidence }) => {
       OPENAI_API_KEY: "",
       OPENROUTER_API_KEY: "",
       GOOGLE_GENERATIVE_AI_API_KEY: "",
-      OPENWORK_API_KEY: "",
-      OPENWORK_INFERENCE_BASE_URL: "",
+      REDROB_CLOUD_API_KEY: "",
+      REDROB_INFERENCE_BASE_URL: "",
     },
   });
   // Register the deterministic provider through the workspace's own

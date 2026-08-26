@@ -20,8 +20,8 @@ import { useWorkspace } from "@/react-app/shell/workspace-provider";
 import { useCheckDesktopRestriction } from "@/react-app/domains/cloud/desktop-config-provider";
 import { useDenAuth } from "@/react-app/domains/cloud/den-auth-provider";
 import {
-  OPENWORK_MODELS_PROVIDER_ID,
-  OPENWORK_MODELS_PROVIDER_NAME,
+  REDROB_MODELS_PROVIDER_ID,
+  REDROB_MODELS_PROVIDER_NAME,
 } from "@/react-app/domains/cloud/openwork-models-promo";
 import { getConnectedProviderItems, useProviderListQuery } from "@/react-app/infra/provider-list-query";
 import { filterEntitledModelOptions } from "@/react-app/domains/connections/provider-auth/provider-policy";
@@ -84,8 +84,8 @@ function useModelOptions(
 
   // Apply org-level restrictions (dev #1505) on top of the raw model list
   // so the picker never surfaces blocked options:
-  //   - `allowZenModel` hides the built-in OpenCode provider entries when false
-  //   - `allowCustomProviders` keeps org-managed providers, plus Zen when allowed.
+  //   - `allowZenModel` hides the built-in opencode provider entries when false
+  //   - `allowCustomProviders` keeps org-managed providers, plus the built-in entries when allowed.
   return React.useMemo(() => {
     const restrictToCloud = checkDesktopRestriction({
       restriction: "allowCustomProviders",
@@ -204,9 +204,9 @@ interface ModelSelectProps {
   disabled?: boolean;
   /** When set, "All models" opens the full picker scoped to this session. */
   sessionId?: string;
-  /** Den/import includes OpenWork Models. Kept for callers; picker no longer upsells here. */
+  /** Den/import includes Redrob Models. Kept for callers; picker no longer upsells here. */
   openWorkModelsEntitled?: boolean;
-  /** The server is waiting to reload this workspace with OpenWork Models. */
+  /** The server is waiting to reload this workspace with Redrob Models. */
   openWorkModelsSyncing?: boolean;
   /** Member-scoped models available before a workspace OpenCode client exists. */
   fallbackOptions?: readonly ModelOption[];
@@ -364,14 +364,14 @@ export function ModelSelect({
           {openWorkModelsSyncing ? (
             <div className="mx-1 mb-1 flex items-center gap-2 rounded-md border border-amber-6/60 bg-amber-2/40 px-2 py-1.5">
               <ProviderIcon
-                providerId={OPENWORK_MODELS_PROVIDER_ID}
-                providerName={OPENWORK_MODELS_PROVIDER_NAME}
+                providerId={REDROB_MODELS_PROVIDER_ID}
+                providerName={REDROB_MODELS_PROVIDER_NAME}
                 className="size-3.5 shrink-0 text-amber-11"
                 size={14}
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-xs font-medium text-foreground">
-                  {OPENWORK_MODELS_PROVIDER_NAME}
+                  {REDROB_MODELS_PROVIDER_NAME}
                 </span>
                 <span className="block truncate text-[11px] text-muted-foreground">
                   Included — pending workspace reload…

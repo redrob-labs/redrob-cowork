@@ -4,7 +4,7 @@ import type {
   AgentContextDiagnosticCheckId,
   AgentContextDiagnosticsReport,
   AgentContextDiagnosticsRequest,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 // Keep runtime validation local: Electron imports the compiled server with Node,
 // while the shared types workspace intentionally exports source for app builds.

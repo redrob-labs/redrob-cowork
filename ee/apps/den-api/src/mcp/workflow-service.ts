@@ -1,5 +1,5 @@
-import type { createDenDb } from "@openwork-ee/den-db"
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+import type { createDenDb } from "@redrob-ee/den-db"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import { recordWorkflowRun, recordWorkflowResult } from "../workflow-runs.js"
 import {
   artifactDigest,

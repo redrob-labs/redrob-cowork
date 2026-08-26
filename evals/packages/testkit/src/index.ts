@@ -1,12 +1,12 @@
 import { readFile } from "node:fs/promises";
-import { startWorld as startWorldRaw } from "@openwork/env";
-import type { Place, World, WorldDefinition, WorldTopology } from "@openwork/env";
-import { currentTestEvidence } from "@openwork/test-evidence";
+import { startWorld as startWorldRaw } from "@redrob/env";
+import type { Place, World, WorldDefinition, WorldTopology } from "@redrob/env";
+import { currentTestEvidence } from "@redrob/test-evidence";
 
-export { createDesktopHandoffGrant, signInDesktopAs } from "@openwork/behaviors";
-export type { DesktopHandle } from "@openwork/hosts";
+export { createDesktopHandoffGrant, signInDesktopAs } from "@redrob/behaviors";
+export type { DesktopHandle } from "@redrob/hosts";
 export { test } from "./fixture.ts";
-export * from "@openwork/env";
+export * from "@redrob/env";
 export * from "./brief.ts";
 export * from "./eventually.ts";
 export * from "./link.ts";

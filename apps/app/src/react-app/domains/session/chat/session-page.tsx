@@ -6,7 +6,7 @@ import { Cloud, FileText, Globe, Mic2, MoreHorizontal, PanelRight, TextSearch, Z
 
 import { resolveExtensionIconSrc } from "@/react-app/design-system/extension-icon-src";
 import { t } from "../../../../i18n";
-import { OPENWORK_EXTENSION_CATALOG } from "../../../../app/constants";
+import { REDROB_EXTENSION_CATALOG } from "../../../../app/constants";
 import { buildDenAuthUrl, readDenBootstrapConfig } from "../../../../app/lib/den";
 import { markDesktopSignInInitiated } from "../../../../app/lib/den-sign-in-intent";
 import { type OpenworkServerClient, type OpenworkServerStatus } from "../../../../app/lib/openwork-server";
@@ -88,7 +88,7 @@ import { TerminalDock } from "../terminal/terminal-dock";
 import { useActivePanelTab, usePanelTabStore, useSessionPanelState } from "../panel/panel-tab-store";
 import { useWorkspaceShellLayout } from "../../../shell/workspace-shell-layout";
 import { useControlAction, type OpenworkControlAction } from "../../../shell/control/control-provider";
-import { getExtensionId, isOpenWorkExtensionEnabled, OPENWORK_EXTENSION_STATE_CHANGED } from "../../settings/extension-state";
+import { getExtensionId, isOpenWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "../../settings/extension-state";
 import { cn } from "@/lib/utils";
 import {
   canNavigateSelectedConversationHistory,
@@ -357,7 +357,7 @@ export function SessionPage(props: SessionPageProps) {
   const panelRailActive = activeSidePanel === "panel";
   const voiceRailActive = activeSidePanel === "voice";
   const voiceExtension = useMemo(
-    () => OPENWORK_EXTENSION_CATALOG.find((entry) => getExtensionId(entry) === "openwork-voice") ?? null,
+    () => REDROB_EXTENSION_CATALOG.find((entry) => getExtensionId(entry) === "openwork-voice") ?? null,
     [],
   );
   const voiceExtensionEnabled = voiceExtension ? isOpenWorkExtensionEnabled(voiceExtension) : false;
@@ -426,7 +426,7 @@ export function SessionPage(props: SessionPageProps) {
   // the panel opened and doesn't render the unified panel chrome.
   useEffect(() => {
     if (!isElectronRuntime()) return;
-    const browser = (window as Window).__OPENWORK_ELECTRON__?.browser;
+    const browser = (window as Window).__REDROB_ELECTRON__?.browser;
     if (!browser) return;
     const unsubOpen = browser.onPanelOpened?.(() => {
       if (preserveSidePanelOnPanelOpenRef.current) {
@@ -487,7 +487,7 @@ export function SessionPage(props: SessionPageProps) {
       const url = browserUrlForTarget(target);
       if (isElectronRuntime()) {
         setCurrentSidePanel("panel");
-        void window.__OPENWORK_ELECTRON__?.browser?.createTab?.(url);
+        void window.__REDROB_ELECTRON__?.browser?.createTab?.(url);
       } else {
         window.open(url, "_blank", "noopener,noreferrer");
       }
@@ -566,7 +566,7 @@ export function SessionPage(props: SessionPageProps) {
         return { ok: false, error: `Browser provider is not available yet: ${provider}` };
       }
       setCurrentSidePanel("panel");
-      return window.__OPENWORK_ELECTRON__?.browser?.openUrl?.(url, provider);
+      return window.__REDROB_ELECTRON__?.browser?.openUrl?.(url, provider);
     },
   }), [setCurrentSidePanel]);
   useControlAction(openBrowserUrlControlAction);
@@ -576,13 +576,13 @@ export function SessionPage(props: SessionPageProps) {
     description: "Route all built-in browser traffic through an HTTP/SOCKS proxy (e.g. to browse from another location). Applies to every built-in browser tab until cleared. Pass an empty proxy to restore system network settings.",
     sideEffect: "mutation",
     args: [
-      { name: "proxy", type: "string", description: "Proxy URL like http://user:pass@host:8080 or socks5://host:1080, env:NAME to use the OPENWORK_BROWSER_PROXY_NAME environment variable, or empty to clear." },
+      { name: "proxy", type: "string", description: "Proxy URL like http://user:pass@host:8080 or socks5://host:1080, env:NAME to use the REDROB_BROWSER_PROXY_NAME environment variable, or empty to clear." },
     ],
     previewArgs: { proxy: "env:DE" },
     disabled: !isElectronRuntime(),
     execute: async (args) => {
       const proxy = controlStringArg(args, "proxy") || "";
-      const setProxy = window.__OPENWORK_ELECTRON__?.browser?.setProxy;
+      const setProxy = window.__REDROB_ELECTRON__?.browser?.setProxy;
       if (!setProxy) return { ok: false, error: "Built-in browser is not available." };
       return setProxy(proxy);
     },
@@ -667,10 +667,10 @@ export function SessionPage(props: SessionPageProps) {
   }, [setCurrentSidePanel]);
   useEffect(() => {
     const refresh = () => setExtensionStateVersion((value) => value + 1);
-    window.addEventListener(OPENWORK_EXTENSION_STATE_CHANGED, refresh);
+    window.addEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
     window.addEventListener("storage", refresh);
     return () => {
-      window.removeEventListener(OPENWORK_EXTENSION_STATE_CHANGED, refresh);
+      window.removeEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
       window.removeEventListener("storage", refresh);
     };
   }, []);

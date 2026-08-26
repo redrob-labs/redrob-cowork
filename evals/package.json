@@ -1,5 +1,5 @@
 {
-  "name": "@openwork/evals",
+  "name": "@redrob/evals",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,14 +16,14 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@openwork/behaviors": "workspace:*",
-    "@openwork/cdp": "workspace:*",
-    "@openwork/test-artifacts": "workspace:*",
-    "@openwork/test-evidence": "workspace:*",
-    "@openwork/hosts": "workspace:*",
-    "@openwork/labs": "workspace:*",
-    "@openwork/matchers": "workspace:*",
-    "@openwork/testkit": "workspace:*"
+    "@redrob/behaviors": "workspace:*",
+    "@redrob/cdp": "workspace:*",
+    "@redrob/test-artifacts": "workspace:*",
+    "@redrob/test-evidence": "workspace:*",
+    "@redrob/hosts": "workspace:*",
+    "@redrob/labs": "workspace:*",
+    "@redrob/matchers": "workspace:*",
+    "@redrob/testkit": "workspace:*"
   },
   "devDependencies": {
     "dependency-cruiser": "18.1.0",

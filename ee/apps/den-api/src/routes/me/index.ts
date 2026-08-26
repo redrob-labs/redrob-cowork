@@ -1,11 +1,11 @@
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { AuthAccountTable, AuthUserTable, RateLimitTable } from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId } from "@openwork-ee/utils/typeid"
-import { desktopConfigSchema } from "@openwork/types/den/desktop-policies"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { AuthAccountTable, AuthUserTable, RateLimitTable } from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId } from "@redrob-ee/utils/typeid"
+import { desktopConfigSchema } from "@redrob/types/den/desktop-policies"
 import type { Hono } from "hono"
 import { describeRoute } from "hono-openapi"
 import { z } from "zod"
-import { OPENWORK_DOWNLOAD_URL } from "../../CONSTS.js"
+import { REDROB_DOWNLOAD_URL } from "../../CONSTS.js"
 import { cache } from "../../cache.js"
 import { db } from "../../db.js"
 import { env } from "../../env.js"
@@ -240,7 +240,7 @@ export function registerMeRoutes<T extends { Variables: AuthContextVariables & P
           to: email,
           template: "downloadLink",
           props: {
-            downloadUrl: OPENWORK_DOWNLOAD_URL,
+            downloadUrl: REDROB_DOWNLOAD_URL,
           },
         })
       } catch (error) {

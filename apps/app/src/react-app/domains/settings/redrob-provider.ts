@@ -13,6 +13,14 @@ export const REDROB_API_KEY_ENV = "REDROB_API_KEY";
 export const REDROB_MODEL_ID = "redrob-ai";
 
 /**
+ * Public console where users issue their REDROB_API_KEY. Onboarding links here
+ * (the API base URL above lives under the same host). Kept as a distinct
+ * constant so the human-facing console URL and the machine API base can never
+ * drift out of sync.
+ */
+export const REDROB_CONSOLE_URL = "https://console.redrob.ai";
+
+/**
  * Single source-of-truth allowlist of inference provider ids the app exposes.
  * Redrob is currently the only usable provider: the connect modal, the model
  * picker, and every provider list filter through this so no other provider can

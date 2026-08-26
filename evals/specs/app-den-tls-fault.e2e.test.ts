@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
-import { desktop } from "@openwork/hosts";
-import { startEgressLab } from "@openwork/labs";
-import { clickButton, diagnoseEgressLabProduct, enabledButtons, visibleText, waitUntilInteractive } from "@openwork/behaviors";
-import { matchVerdictExpectations } from "@openwork/matchers";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { startEgressLab } from "@redrob/labs";
+import { clickButton, diagnoseEgressLabProduct, enabledButtons, visibleText, waitUntilInteractive } from "@redrob/behaviors";
+import { matchVerdictExpectations } from "@redrob/matchers";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
 
 /**
  * CORE JOURNEY: a desktop pointed at a Den whose TLS is broken by the corporate
@@ -15,10 +15,10 @@ import { createVisualEvidence, screenshot, validate } from "@openwork/test-evide
  * — it must say something a person can act on, not spin forever.
  */
 
-const optedIn = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const optedIn = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = optedIn
   ? "a desktop pointed at a TLS-intercepted Den never claims it is connected, and diagnostics name the interception"
-  : "app + TLS-broken Den skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in";
+  : "app + TLS-broken Den skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in";
 
 test.skipIf(!optedIn)(title, async () => {
   // The lab re-signs TLS with a CA the app does not trust: a corporate

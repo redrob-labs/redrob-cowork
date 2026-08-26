@@ -1,4 +1,4 @@
-import type { WorkspaceWire } from "@openwork/types/workspace";
+import type { WorkspaceWire } from "@redrob/types/workspace";
 
 export type WorkspaceType = "local" | "remote";
 

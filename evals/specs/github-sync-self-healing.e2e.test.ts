@@ -1,10 +1,10 @@
 import { createHmac, generateKeyPairSync } from "node:crypto";
 import { expect } from "vitest";
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { startMockGithub } from "@openwork/labs";
-import type { MockGithubRepository } from "@openwork/labs";
-import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { startMockGithub } from "@redrob/labs";
+import type { MockGithubRepository } from "@redrob/labs";
+import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
 
 /**
  * CLAIMS — APPROVED NARRATION:
@@ -24,11 +24,11 @@ import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
  *     retries, rename continuity, and reconciliation all happened.
  */
 
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1"
-  && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
+  && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !localPlacement
-  ? "GitHub sync self-healing skipped — needs: local placement without OPENWORK_EVAL_DEN_API_URL"
+  ? "GitHub sync self-healing skipped — needs: local placement without REDROB_EVAL_DEN_API_URL"
   : !mysqlOpen
     ? "GitHub sync self-healing skipped — needs: MySQL on 127.0.0.1:3306"
     : "GitHub sync queues work, retries transient faults, reconciles drift, and survives repository renames";

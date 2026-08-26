@@ -115,7 +115,7 @@ console.log("ok")
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: options.betterAuthUrl,
       DEN_API_PUBLIC_URL: options.apiPublicUrl ?? "",
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       DEN_ORG_MODE: "",
       DEN_MCP_RESOURCE_URL: "",
@@ -234,22 +234,22 @@ describe("getMcpResourceUrl", () => {
 
   test("honors an additional direct API-origin resource", () => {
     runMcpResourceProbe({
-      betterAuthUrl: "https://app.openworklabs.com",
-      additionalResources: " https://api.openworklabs.com/mcp/ ",
-      requestUrl: "https://api.openworklabs.com/mcp/agent",
-      expectedResource: "https://api.openworklabs.com/mcp",
-      metadataUrl: "https://api.openworklabs.com/mcp/agent",
-      expectedMetadataResource: "https://api.openworklabs.com/mcp",
-      expectedAuthorizationServer: "https://app.openworklabs.com/api/auth",
+      betterAuthUrl: "https://app.redrob.io",
+      additionalResources: " https://api.redrob.io/mcp/ ",
+      requestUrl: "https://api.redrob.io/mcp/agent",
+      expectedResource: "https://api.redrob.io/mcp",
+      metadataUrl: "https://api.redrob.io/mcp/agent",
+      expectedMetadataResource: "https://api.redrob.io/mcp",
+      expectedAuthorizationServer: "https://app.redrob.io/api/auth",
     })
   })
 
   test("falls back to the configured resource when the request origin is not allowlisted", () => {
     runMcpResourceProbe({
-      betterAuthUrl: "https://app.openworklabs.com",
+      betterAuthUrl: "https://app.redrob.io",
       route: "agent",
-      requestUrl: "https://api.openworklabs.com/mcp/agent",
-      expectedResource: "https://app.openworklabs.com/api/den/mcp/agent",
+      requestUrl: "https://api.redrob.io/mcp/agent",
+      expectedResource: "https://app.redrob.io/api/den/mcp/agent",
     })
   })
 
@@ -278,16 +278,16 @@ describe("getMcpResourceUrl", () => {
 describe("resolveMcpResourceFromRequest", () => {
   test("checks bare and proxied candidates against a static allowlist", () => {
     expect(resolveMcpResourceFromRequest(
-      "https://api.openworklabs.com/mcp/agent",
-      ["https://api.openworklabs.com/mcp"],
-      "https://app.openworklabs.com/api/den/mcp",
-    )).toBe("https://api.openworklabs.com/mcp")
+      "https://api.redrob.io/mcp/agent",
+      ["https://api.redrob.io/mcp"],
+      "https://app.redrob.io/api/den/mcp",
+    )).toBe("https://api.redrob.io/mcp")
 
     expect(resolveMcpResourceFromRequest(
-      "https://api.openworklabs.com/mcp/agent",
-      ["https://app.openworklabs.com/api/den/mcp"],
-      "https://app.openworklabs.com/api/den/mcp",
-    )).toBe("https://app.openworklabs.com/api/den/mcp")
+      "https://api.redrob.io/mcp/agent",
+      ["https://app.redrob.io/api/den/mcp"],
+      "https://app.redrob.io/api/den/mcp",
+    )).toBe("https://app.redrob.io/api/den/mcp")
 
     expect(resolveMcpResourceFromRequest(
       "https://app.example.com/.well-known/oauth-protected-resource/mcp/agent",
@@ -299,11 +299,11 @@ describe("resolveMcpResourceFromRequest", () => {
 
 describe("deriveDenMcpResource", () => {
   test("keeps hosted web-app and direct API origin behavior unchanged", () => {
-    expect(deriveDenMcpResource("https://app.openworklabs.com", [])).toBe(
-      "https://app.openworklabs.com/api/den/mcp",
+    expect(deriveDenMcpResource("https://app.redrob.io", [])).toBe(
+      "https://app.redrob.io/api/den/mcp",
     )
-    expect(deriveDenMcpResource("https://api.openworklabs.com", [])).toBe(
-      "https://api.openworklabs.com/mcp",
+    expect(deriveDenMcpResource("https://api.redrob.io", [])).toBe(
+      "https://api.redrob.io/mcp",
     )
   })
 })

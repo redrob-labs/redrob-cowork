@@ -2,8 +2,8 @@ import { StreamableHTTPTransport } from "@hono/mcp"
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js"
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { createDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { createDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
 import { Hono } from "hono"
 import { z } from "zod"
@@ -56,7 +56,7 @@ type ConnectionInput = {
 }
 
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
+let schema: typeof import("@redrob-ee/den-db/schema")
 let listExternalMcpTools: typeof import("../src/capability-sources/external-mcp-client.js").listExternalMcpTools
 let createExternalMcpConnection: typeof import("../src/capability-sources/external-mcp-connections.js").createExternalMcpConnection
 let getExternalMcpConnection: typeof import("../src/capability-sources/external-mcp-connections.js").getExternalMcpConnection
@@ -472,7 +472,7 @@ function toolNames(tools: { name: string }[]): string[] {
 beforeAll(async () => {
   seedRequiredEnv()
   mock.restore()
-  const realDb = (await import("@openwork-ee/den-db")).createDenDb({
+  const realDb = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db
@@ -480,7 +480,7 @@ beforeAll(async () => {
 
   const [dbMod, schemaMod, clientMod, connectionsMod, capabilitiesMod, registryMod, envMod] = await Promise.all([
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
+    import("@redrob-ee/den-db/schema"),
     import("../src/capability-sources/external-mcp-client.js"),
     import("../src/capability-sources/external-mcp-connections.js"),
     import("../src/mcp/external-capabilities.js"),
@@ -628,7 +628,7 @@ test("control-healthy: Connections list and search_capabilities both see Slack t
   for (const match of matches) {
     expect(match.score).toBeGreaterThanOrEqual(7)
   }
-  if (process.env.OPENWORK_EVAL_VERBOSE === "1") {
+  if (process.env.REDROB_EVAL_VERBOSE === "1") {
     console.log("E2E_HEALTHY_DISCOVERY", JSON.stringify({ connectionName: "Slack", toolCount: matches.length, status: "available" }))
   }
 })
@@ -1380,7 +1380,7 @@ test("JSON-RPC initialize errors are not mislabeled as OAuth refresh failures", 
   expect("diagnostic" in matches[0].connectionStatus).toBe(false)
   expect(matches[0]?.hint).toContain("Diagnostic reference")
   expect(matches[0]?.hint).not.toContain("Reconnect")
-  if (process.env.OPENWORK_EVAL_VERBOSE === "1") {
+  if (process.env.REDROB_EVAL_VERBOSE === "1") {
     console.log("E2E_CONNECTION_STATUS", JSON.stringify(matches[0]?.connectionStatus))
   }
 })
@@ -1409,7 +1409,7 @@ test("repairing a connector credential makes its live tools discoverable on retr
 
   expect(afterRepair.some((match) => match.kind === "connection_status")).toBe(false)
   expect(toolNames(afterRepair)).toEqual(slackTools.map((tool) => `mcp:${connection.id}:${tool.name}`).sort())
-  if (process.env.OPENWORK_EVAL_VERBOSE === "1") {
+  if (process.env.REDROB_EVAL_VERBOSE === "1") {
     console.log("E2E_RECOVERED_DISCOVERY", JSON.stringify({ connectionName: "Team Chat", toolCount: afterRepair.length, status: "available" }))
   }
 })

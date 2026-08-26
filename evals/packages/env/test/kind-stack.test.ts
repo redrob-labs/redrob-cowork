@@ -55,11 +55,11 @@ function manifestFor(architecture: string): unknown {
 }
 
 function withCleanImageEnv<T>(fn: () => Promise<T>): Promise<T> {
-  const previous = process.env.OPENWORK_EVAL_KUBE_IMAGES;
-  delete process.env.OPENWORK_EVAL_KUBE_IMAGES;
+  const previous = process.env.REDROB_EVAL_KUBE_IMAGES;
+  delete process.env.REDROB_EVAL_KUBE_IMAGES;
   return fn().finally(() => {
-    if (previous === undefined) delete process.env.OPENWORK_EVAL_KUBE_IMAGES;
-    else process.env.OPENWORK_EVAL_KUBE_IMAGES = previous;
+    if (previous === undefined) delete process.env.REDROB_EVAL_KUBE_IMAGES;
+    else process.env.REDROB_EVAL_KUBE_IMAGES = previous;
   });
 }
 
@@ -182,10 +182,10 @@ test("endpoint handles return credentials and stop only their recorded port-forw
     return new Response("ok", { status: 200 });
   };
   const envBefore = {
-    apiUrl: process.env.OPENWORK_EVAL_DEN_API_URL,
-    webUrl: process.env.OPENWORK_EVAL_DEN_WEB_URL,
-    token: process.env.OPENWORK_EVAL_DEN_TOKEN,
-    multiOrg: process.env.OPENWORK_EVAL_DEN_MULTI_ORG,
+    apiUrl: process.env.REDROB_EVAL_DEN_API_URL,
+    webUrl: process.env.REDROB_EVAL_DEN_WEB_URL,
+    token: process.env.REDROB_EVAL_DEN_TOKEN,
+    multiOrg: process.env.REDROB_EVAL_DEN_MULTI_ORG,
   };
   globalThis.fetch = fakeFetch;
   try {
@@ -215,10 +215,10 @@ test("endpoint handles return credentials and stop only their recorded port-forw
     await assert.rejects(() => readFile(join(stateDir, "api-port-forward.pid"), "utf8"), /ENOENT/);
     await assert.rejects(() => readFile(join(stateDir, "web-port-forward.pid"), "utf8"), /ENOENT/);
     assert.deepEqual({
-      apiUrl: process.env.OPENWORK_EVAL_DEN_API_URL,
-      webUrl: process.env.OPENWORK_EVAL_DEN_WEB_URL,
-      token: process.env.OPENWORK_EVAL_DEN_TOKEN,
-      multiOrg: process.env.OPENWORK_EVAL_DEN_MULTI_ORG,
+      apiUrl: process.env.REDROB_EVAL_DEN_API_URL,
+      webUrl: process.env.REDROB_EVAL_DEN_WEB_URL,
+      token: process.env.REDROB_EVAL_DEN_TOKEN,
+      multiOrg: process.env.REDROB_EVAL_DEN_MULTI_ORG,
     }, envBefore);
   } finally {
     globalThis.fetch = previousFetch;

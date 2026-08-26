@@ -13,7 +13,7 @@ cd /workspace
 # the only log destination visible to other sessions (and over HTTP :8090).
 # Default to the workspace so logs are readable from any exec session and over
 # the results HTTP server; the artifacts volume restricts cross-session reads.
-LOG_DIR="${OPENWORK_E2E_REGRESSION_LOG_DIR:-/workspace/evals/results/e2e-regression}"
+LOG_DIR="${REDROB_E2E_REGRESSION_LOG_DIR:-/workspace/evals/results/e2e-regression}"
 mkdir -p "$LOG_DIR"
 exec > >(tee "$LOG_DIR/e2e-regression.log") 2>&1
 
@@ -53,7 +53,7 @@ SQL
 } | "$HOME/mariadb/bin/mariadb" --protocol=tcp -h 127.0.0.1 -P 3306 -uroot openwork_den
 SH
 chmod +x "$H/mark-verified.sh"
-export OPENWORK_EVAL_MARK_VERIFIED_CMD="bash $H/mark-verified.sh {email}"
+export REDROB_EVAL_MARK_VERIFIED_CMD="bash $H/mark-verified.sh {email}"
 
 # Provider keys for vision validation live on the secrets volume when mounted.
 if compgen -G "/daytona-secrets/*.env" > /dev/null; then
@@ -64,10 +64,10 @@ if compgen -G "/daytona-secrets/*.env" > /dev/null; then
 fi
 
 echo "==> E2E regression tests against the same live stack"
-export OPENWORK_EVAL_DEN_API_URL="http://127.0.0.1:8790"
-export OPENWORK_EVAL_DEN_WEB_URL="http://localhost:3005"
-export OPENWORK_EVAL_CDP_URL="http://127.0.0.1:9825"
-export OPENWORK_EVAL_E2E_TESTS="1"
+export REDROB_EVAL_DEN_API_URL="http://127.0.0.1:8790"
+export REDROB_EVAL_DEN_WEB_URL="http://localhost:3005"
+export REDROB_EVAL_CDP_URL="http://127.0.0.1:9825"
+export REDROB_EVAL_E2E_TESTS="1"
 pnpm evals:e2e 2>&1 | tee "$LOG_DIR/e2e-tests.log"
 
 echo "==> DONE"

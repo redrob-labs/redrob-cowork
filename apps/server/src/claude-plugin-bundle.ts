@@ -50,11 +50,11 @@ export type ClaudePluginBundle = {
 };
 
 function githubApiBase(): string {
-  return (process.env.OPENWORK_GITHUB_API_BASE?.trim() || "https://api.github.com").replace(/\/+$/, "");
+  return (process.env.REDROB_GITHUB_API_BASE?.trim() || "https://api.github.com").replace(/\/+$/, "");
 }
 
 function githubRawBase(): string {
-  return (process.env.OPENWORK_GITHUB_RAW_BASE?.trim() || "https://raw.githubusercontent.com").replace(/\/+$/, "");
+  return (process.env.REDROB_GITHUB_RAW_BASE?.trim() || "https://raw.githubusercontent.com").replace(/\/+$/, "");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

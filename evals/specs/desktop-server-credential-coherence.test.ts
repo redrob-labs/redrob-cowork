@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 import { expect } from "vitest";
 
 import { migrateOpenworkServerTokenStore } from "../../apps/desktop/electron/runtime.mjs";

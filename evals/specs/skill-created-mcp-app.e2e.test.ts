@@ -1,23 +1,23 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http"
 import { expect, onTestFinished } from "vitest"
-import { clickButton, createAndSelectWorkspace, denFetch, evalIn, waitFor } from "@openwork/behaviors"
-import { connect, debuggerUrlFor, evaluate, listTargets } from "@openwork/cdp"
-import { desktop } from "@openwork/hosts"
-import { screenshot } from "@openwork/test-evidence"
-import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit"
+import { clickButton, createAndSelectWorkspace, denFetch, evalIn, waitFor } from "@redrob/behaviors"
+import { connect, debuggerUrlFor, evaluate, listTargets } from "@redrob/cdp"
+import { desktop } from "@redrob/hosts"
+import { screenshot } from "@redrob/test-evidence"
+import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit"
 
 const providerId = "skill-created-mcp-app-provider"
 const modelId = "skill-created-mcp-app-model"
 const resourceUri = "ui://openwork/skill-created/v1/view.html"
 const closingReply = "The beautiful tomatoes skill is ready to use."
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1"
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1"
-  && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim()
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1"
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
+  && !process.env.REDROB_EVAL_DEN_API_URL?.trim()
 const mysqlOpen = await localMysqlIsRunning()
 const title = !e2eTestsEnabled
-  ? "skill-created MCP App skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "skill-created MCP App skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !localPlacement
-    ? "skill-created MCP App skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+    ? "skill-created MCP App skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
     : !mysqlOpen
       ? "skill-created MCP App skipped — needs MySQL on 127.0.0.1:3306"
       : "creating a Cloud skill renders the first-party skill-created MCP App"
@@ -121,7 +121,7 @@ async function waitForMountedSkill(app: Awaited<ReturnType<typeof desktop>>, tim
 }
 
 test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout: 360_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] })
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] })
 
   let modelCreateCalls = 0
   const fixture = createServer((request, response) => {
@@ -218,14 +218,14 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
 
   await using app = await desktop({
     name: "skill-created-mcp-app",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
     env: {
       ANTHROPIC_API_KEY: "",
       OPENAI_API_KEY: "",
       OPENROUTER_API_KEY: "",
       GOOGLE_GENERATIVE_AI_API_KEY: "",
-      OPENWORK_API_KEY: "",
-      OPENWORK_INFERENCE_BASE_URL: "",
+      REDROB_CLOUD_API_KEY: "",
+      REDROB_INFERENCE_BASE_URL: "",
     },
   })
   const workspace = await createAndSelectWorkspace(app, {

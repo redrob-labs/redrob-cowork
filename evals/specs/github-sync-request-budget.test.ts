@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 
 const repoRoot = resolve(import.meta.dirname, "../..");
 const retryClassificationTest = "GitHub sync treats 502 and TimeoutError as transient";
@@ -15,7 +15,7 @@ test("GitHub installation-token request budgets and recovery hold in focused run
   try {
     const result = spawnSync("pnpm", [
       "--filter",
-      "@openwork-ee/den-api",
+      "@redrob-ee/den-api",
       "exec",
       "bun",
       "test",
@@ -43,7 +43,7 @@ test("GitHub installation-token request budgets and recovery hold in focused run
 
     const retryResult = spawnSync("pnpm", [
       "--filter",
-      "@openwork-ee/den-api",
+      "@redrob-ee/den-api",
       "exec",
       "bun",
       "test",

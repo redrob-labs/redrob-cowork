@@ -1,8 +1,8 @@
-const ENV_FEEDBACK_URL = String(import.meta.env.VITE_OPENWORK_FEEDBACK_URL ?? "").trim();
-const ENV_APP_VERSION = String(import.meta.env.VITE_OPENWORK_APP_VERSION ?? "").trim();
+const ENV_FEEDBACK_URL = String(import.meta.env.VITE_REDROB_FEEDBACK_URL ?? "").trim();
+const ENV_APP_VERSION = String(import.meta.env.VITE_REDROB_APP_VERSION ?? "").trim();
 
 export const DEFAULT_FEEDBACK_URL =
-  ENV_FEEDBACK_URL || "https://openworklabs.com/feedback";
+  ENV_FEEDBACK_URL || "https://redrob.io/feedback";
 
 type FeedbackUrlOptions = {
   entrypoint: string;

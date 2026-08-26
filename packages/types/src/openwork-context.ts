@@ -6,7 +6,7 @@ import {
 } from "./openwork-affordance.js"
 import { openworkFeatureContributionSchema } from "./openwork-provider.js"
 
-export const OPENWORK_CONTEXT_SCHEMA_VERSION = 1
+export const REDROB_CONTEXT_SCHEMA_VERSION = 1
 
 export const openworkSessionRefSchema = z.object({
   workspaceId: z.string().trim().min(1),
@@ -69,7 +69,7 @@ export const openworkResourceDescriptorSchema = z.object({
 export type OpenworkResourceDescriptor = z.infer<typeof openworkResourceDescriptorSchema>
 
 export const openworkContextSnapshotSchema = z.object({
-  schemaVersion: z.literal(OPENWORK_CONTEXT_SCHEMA_VERSION),
+  schemaVersion: z.literal(REDROB_CONTEXT_SCHEMA_VERSION),
   revision: z.number().int().nonnegative(),
   capturedAt: z.string(),
   screen: openworkScreenSchema,

@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir, platform } from "node:os";
 import { z } from "zod";
-import type { OpenworkAffordanceEffects } from "@openwork/types/openwork-affordance";
-import { automationProposalSchema } from "@openwork/types/automations";
+import type { OpenworkAffordanceEffects } from "@redrob/types/openwork-affordance";
+import { automationProposalSchema } from "@redrob/types/automations";
 import {
   combineInstructionSections,
   composeAgentInstructions,
@@ -135,14 +135,14 @@ const sessionMessagesEnvelopeSchema = z.object({
   items: z.array(sessionMessageSchema),
 }).passthrough();
 
-const OPENWORK_AGENT_SURFACE_INSTRUCTION =
+const REDROB_AGENT_SURFACE_INSTRUCTION =
   `## OpenWork app context
 Use openwork_context when the request depends on the current OpenWork screen, open tabs, split view, focused pane, sidebar, side panel, settings panel, or available app actions.
 Each affordance declares its effects and executor. Use openwork_query only for side-effect-free affordances whose executor is OpenWork. Use openwork_execute for OpenWork commands without activating the desktop window. If executor names another tool, call that exact tool instead.
 Reading another session does not require opening it. Prefer session.search then session.read for transcript questions; use session.create for new chats and a UI command only when the user asks to navigate.
 To open settings or navigate the app, use openwork_execute with ids from openwork_context such as settings.panel.open — never browser_* tools for the OpenWork app itself.`;
 
-const OPENWORK_BROWSER_INSTRUCTION =
+const REDROB_BROWSER_INSTRUCTION =
   `Do NOT use browser_navigate, browser_click, or browser_snapshot to interact with the OpenWork app itself. Those are for browsing external websites.
 
 ## Built-in Browser (external websites)
@@ -309,9 +309,9 @@ function userAppDataDir(): string {
 
 function uiControlDiscoveryPaths(): string[] {
   return [
-    process.env.OPENWORK_UI_CONTROL_DISCOVERY?.trim(),
-    join(userAppDataDir(), "com.differentai.openwork", "openwork-ui-control.json"),
-    join(userAppDataDir(), "com.differentai.openwork.dev", "openwork-ui-control.json"),
+    process.env.REDROB_UI_CONTROL_DISCOVERY?.trim(),
+    join(userAppDataDir(), "io.redrob.work", "openwork-ui-control.json"),
+    join(userAppDataDir(), "io.redrob.work.dev", "openwork-ui-control.json"),
   ].filter((p): p is string => Boolean(p));
 }
 
@@ -761,11 +761,11 @@ async function readOpenWorkSession(rawArgs: unknown): Promise<object> {
 }
 
 function serverUrl(): string {
-  return String(process.env.OPENWORK_SERVER_URL || "").replace(/\/$/, "");
+  return String(process.env.REDROB_SERVER_URL || "").replace(/\/$/, "");
 }
 
 function serverToken(): string {
-  return String(process.env.OPENWORK_SERVER_TOKEN || "");
+  return String(process.env.REDROB_SERVER_TOKEN || "");
 }
 
 function requireOpenWorkServer(): { url: string; token: string } {
@@ -937,7 +937,7 @@ export const OpenWorkExtensionsPreview = async (factoryInput?: unknown) => {
       resolveOpenWorkAutomationInstruction(mergedInput, fetch),
     ]);
     const skillAuthoring = composeSkillAuthoringInstruction(extensionInstruction);
-    if (process.env.OPENWORK_DEV_MODE === "1") {
+    if (process.env.REDROB_DEV_MODE === "1") {
       console.log("[openwork:skill-authoring] system prompt selected", {
         mode: skillAuthoring.mode,
         prompt: skillAuthoring.prompt,
@@ -948,11 +948,11 @@ export const OpenWorkExtensionsPreview = async (factoryInput?: unknown) => {
     // remote skills, session, and browser guidance never overlap by accident.
     const sections = combineInstructionSections(
       createInstructionSection("routing", extensionInstruction),
-      createInstructionSection("agent-surface", OPENWORK_AGENT_SURFACE_INSTRUCTION),
+      createInstructionSection("agent-surface", REDROB_AGENT_SURFACE_INSTRUCTION),
       createInstructionSection("skill-authoring", skillAuthoring.prompt),
       createInstructionSection("connect-skills", skillInstruction),
       createInstructionSection("automations", automationInstruction),
-      createInstructionSection("browser", OPENWORK_BROWSER_INSTRUCTION),
+      createInstructionSection("browser", REDROB_BROWSER_INSTRUCTION),
     );
     output.system.push(...composeAgentInstructions(sections));
   },

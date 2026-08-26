@@ -3,11 +3,11 @@ import { mkdir, readFile, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
-import { go, waitFor } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import type { Surface } from "@openwork/cdp";
-import { chrome } from "@openwork/hosts";
-import type { App } from "@openwork/testkit/stack";
+import { go, waitFor } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import type { Surface } from "@redrob/cdp";
+import { chrome } from "@redrob/hosts";
+import type { App } from "@redrob/testkit/stack";
 import { provider } from "./ctx.ts";
 import type { Provider } from "./ctx.ts";
 import { inPage } from "./inpage.ts";
@@ -205,8 +205,8 @@ async function ensureHeadlessWeb(denWebUrl: string): Promise<HeadlessWebInfo> {
     detached: true,
     env: {
       ...process.env,
-      OPENWORK_WORKSPACE: WEB_DEMO_WORKSPACE,
-      OPENWORK_DEV_DEN_PROXY_TARGET: denWebUrl,
+      REDROB_WORKSPACE: WEB_DEMO_WORKSPACE,
+      REDROB_DEV_DEN_PROXY_TARGET: denWebUrl,
     },
   });
   child.unref();

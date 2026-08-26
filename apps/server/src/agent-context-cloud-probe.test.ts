@@ -10,7 +10,7 @@ import {
 } from "./agent-context-cloud-probe.js";
 
 const TOKEN = "Bearer ow_diagnostics_token_abcdefghijklmnopqrstuvwxyz";
-const ENDPOINT = "https://app.openworklabs.com/api/den/mcp/agent";
+const ENDPOINT = "https://app.redrob.io/api/den/mcp/agent";
 const SESSION_ID = "diagnostics-session-id";
 const PROTOCOL_VERSION = "2025-06-18";
 
@@ -112,7 +112,7 @@ async function waitUntil(predicate: () => boolean): Promise<void> {
 }
 
 afterEach(() => {
-  delete process.env.OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS;
+  delete process.env.REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS;
 });
 
 describe("OpenWork Cloud catalog probe", () => {
@@ -293,11 +293,11 @@ describe("OpenWork Cloud catalog probe", () => {
       [{ config: null }, "cloud_mcp_missing"],
       [{ config: { type: "local", enabled: true } }, "cloud_mcp_not_remote"],
       [{ config: { type: "remote", enabled: false, url: ENDPOINT } }, "cloud_mcp_disabled"],
-      [{ config: { type: "remote", enabled: true, url: "https://app.openworklabs.com/api/den/mcp/agent?token=secret", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
-      [{ config: { type: "remote", enabled: true, url: "https://app.openworklabs.com/api/den/mcp/agent/", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
-      [{ config: { type: "remote", enabled: true, url: "https://app.openworklabs.com/api/den/mcp/agent/status", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
-      [{ config: { type: "remote", enabled: true, url: "https://app.openworklabs.com/api/den/mcp/agentish", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
-      [{ config: { type: "remote", enabled: true, url: "http://app.openworklabs.com/mcp/agent", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
+      [{ config: { type: "remote", enabled: true, url: "https://app.redrob.io/api/den/mcp/agent?token=secret", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
+      [{ config: { type: "remote", enabled: true, url: "https://app.redrob.io/api/den/mcp/agent/", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
+      [{ config: { type: "remote", enabled: true, url: "https://app.redrob.io/api/den/mcp/agent/status", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
+      [{ config: { type: "remote", enabled: true, url: "https://app.redrob.io/api/den/mcp/agentish", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
+      [{ config: { type: "remote", enabled: true, url: "http://app.redrob.io/mcp/agent", headers: { Authorization: TOKEN } } }, "invalid_endpoint"],
       [{ config: { type: "remote", enabled: true, url: "https://localhost.evil/mcp/agent", headers: { Authorization: TOKEN } } }, "untrusted_endpoint"],
     ];
     for (const [overrides, code] of cases) {
@@ -368,7 +368,7 @@ describe("OpenWork Cloud catalog probe", () => {
     }));
     expect(loopback.status).toBe("observed");
 
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS = "https://den.customer.example";
+    process.env.REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS = "https://den.customer.example";
     const trusted = await probeOpenworkCloudCatalog(input({
       config: {
         type: "remote",
@@ -1078,7 +1078,7 @@ describe("OpenWork Cloud catalog probe", () => {
       enterpriseEndpoint,
       enterpriseEndpoint,
     ]);
-    expect(requestedUrls.some((url) => url.includes("openworklabs.com"))).toBe(false);
+    expect(requestedUrls.some((url) => url.includes("redrob.io"))).toBe(false);
     expect(activated).toMatchObject({
       performed: true,
       status: "observed",

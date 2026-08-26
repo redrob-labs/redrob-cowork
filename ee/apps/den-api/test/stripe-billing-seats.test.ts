@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, expect, test } from "bun:test"
 
 const organizationId = createDenTypeId("organization")
@@ -22,8 +22,8 @@ function seedRequiredEnv() {
 
 let stripeBillingModule: typeof import("../src/stripe-billing.js")
 let db: typeof import("../src/db.js").db | null = null
-let schema: typeof import("@openwork-ee/den-db/schema") | null = null
-let drizzle: typeof import("@openwork-ee/den-db/drizzle") | null = null
+let schema: typeof import("@redrob-ee/den-db/schema") | null = null
+let drizzle: typeof import("@redrob-ee/den-db/drizzle") | null = null
 
 async function cleanup() {
   if (!db || !schema || !drizzle) {
@@ -40,8 +40,8 @@ beforeAll(async () => {
   const [stripeBilling, dbModule, schemaModule, drizzleModule] = await Promise.all([
     import("../src/stripe-billing.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
   ])
   stripeBillingModule = stripeBilling
   db = dbModule.db

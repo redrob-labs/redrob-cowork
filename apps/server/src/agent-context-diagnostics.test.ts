@@ -20,7 +20,7 @@ import {
   AGENT_CONTEXT_DIAGNOSTIC_CHECK_IDS,
   agentContextDiagnosticsReportSchema,
   type AgentContextDiagnosticsRequest,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 import {
   classifyEngineMcpTransportCause,
@@ -1016,7 +1016,7 @@ describe("agent context diagnostics analyzer", () => {
     // a trust-configuration state, never a network, TLS, or MCP failure.
     expect(check.message).toContain("not performed");
     expect(check.message).toContain("trust");
-    expect(check.action).toContain("OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS");
+    expect(check.action).toContain("REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS");
     expect(checkById(report, "cloud-endpoint-differential")).toMatchObject({
       status: "skipped",
       code: "runtime_probe_not_performed",
@@ -1073,7 +1073,7 @@ describe("agent context diagnostics analyzer", () => {
       "https://den.customer.example/custom/mcp/agent",
       "https://den.customer.example/custom/mcp/agent",
     ]);
-    expect(fetchCalls.some((call) => call.url.includes("openworklabs.com"))).toBe(false);
+    expect(fetchCalls.some((call) => call.url.includes("redrob.io"))).toBe(false);
     expect(report.mcps).toContainEqual(expect.objectContaining({
       name: "openwork-cloud",
       source: "config.remote",
@@ -2076,8 +2076,8 @@ describe("agent context diagnostics route", () => {
   });
 
   test.serial("types the server-owned diagnostics deadline without capturing it", async () => {
-    const previousTimeout = process.env.OPENWORK_AGENT_DIAGNOSTICS_TIMEOUT_MS;
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_TIMEOUT_MS = "50";
+    const previousTimeout = process.env.REDROB_AGENT_DIAGNOSTICS_TIMEOUT_MS;
+    process.env.REDROB_AGENT_DIAGNOSTICS_TIMEOUT_MS = "50";
     const fixture = await createFixture({
       withRuntime: false,
       workspace: { id: "ws_agent_diagnostics_server_timeout" },
@@ -2114,8 +2114,8 @@ describe("agent context diagnostics route", () => {
       expect(await response.json()).toMatchObject({ code: "agent_diagnostics_timeout" });
       expect(captured).toEqual([]);
     } finally {
-      if (previousTimeout === undefined) delete process.env.OPENWORK_AGENT_DIAGNOSTICS_TIMEOUT_MS;
-      else process.env.OPENWORK_AGENT_DIAGNOSTICS_TIMEOUT_MS = previousTimeout;
+      if (previousTimeout === undefined) delete process.env.REDROB_AGENT_DIAGNOSTICS_TIMEOUT_MS;
+      else process.env.REDROB_AGENT_DIAGNOSTICS_TIMEOUT_MS = previousTimeout;
     }
   });
 
@@ -2273,8 +2273,8 @@ describe("agent context diagnostics route", () => {
   });
 
   test("terminates an incomplete dripping body at the server's absolute deadline", async () => {
-    const previousDeadline = process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = "120";
+    const previousDeadline = process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
+    process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = "120";
     const fixture = await createFixture({
       withRuntime: false,
       workspace: { id: "ws_agent_diagnostics_body_deadline" },
@@ -2298,16 +2298,16 @@ describe("agent context diagnostics route", () => {
     } finally {
       clearInterval(drip);
       socket.destroy();
-      if (previousDeadline === undefined) delete process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
-      else process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = previousDeadline;
+      if (previousDeadline === undefined) delete process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
+      else process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = previousDeadline;
     }
   });
 
   test("rejects a concurrent incomplete request and releases its reservation after timeout", async () => {
-    const previousCooldown = process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS;
-    const previousDeadline = process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS = "0";
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = "150";
+    const previousCooldown = process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS;
+    const previousDeadline = process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
+    process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS = "0";
+    process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = "150";
     const fixture = await createFixture({
       withRuntime: false,
       workspace: { id: "ws_agent_diagnostics_in_flight_reservation" },
@@ -2337,18 +2337,18 @@ describe("agent context diagnostics route", () => {
     } finally {
       incomplete.destroy();
       concurrentIncomplete?.destroy();
-      if (previousCooldown === undefined) delete process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS;
-      else process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS = previousCooldown;
-      if (previousDeadline === undefined) delete process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
-      else process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = previousDeadline;
+      if (previousCooldown === undefined) delete process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS;
+      else process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS = previousCooldown;
+      if (previousDeadline === undefined) delete process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
+      else process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = previousDeadline;
     }
   });
 
   test("caps incomplete diagnostics bodies across workspaces for one server", async () => {
-    const previousCooldown = process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS;
-    const previousDeadline = process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS = "0";
-    process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = "10000";
+    const previousCooldown = process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS;
+    const previousDeadline = process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
+    process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS = "0";
+    process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = "10000";
     const fixture = await createFixture({
       withRuntime: false,
       workspace: { id: "ws_agent_diagnostics_capacity_0" },
@@ -2374,10 +2374,10 @@ describe("agent context diagnostics route", () => {
     } finally {
       for (const socket of held) socket.destroy();
       rejected?.destroy();
-      if (previousCooldown === undefined) delete process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS;
-      else process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS = previousCooldown;
-      if (previousDeadline === undefined) delete process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
-      else process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = previousDeadline;
+      if (previousCooldown === undefined) delete process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS;
+      else process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS = previousCooldown;
+      if (previousDeadline === undefined) delete process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS;
+      else process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS = previousDeadline;
     }
   });
 

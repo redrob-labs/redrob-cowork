@@ -30,7 +30,7 @@ pipe remote scripts directly into a shell. The script downloads the
 into `$HOME/.local/bin` - no npm or npx required.
 
 ```bash
-curl -fsSLo /tmp/openwork-install.sh https://openworklabs.com/install.sh
+curl -fsSLo /tmp/openwork-install.sh https://redrob.io/install.sh
 less /tmp/openwork-install.sh
 sh /tmp/openwork-install.sh
 ```
@@ -47,7 +47,7 @@ Install the desktop app for this OS from the manifest:
 
 ```bash
 openwork-bootstrap install app \
-  --manifest https://openworklabs.com/install-manifest.json \
+  --manifest https://redrob.io/install-manifest.json \
   --json
 ```
 
@@ -73,7 +73,7 @@ as) - they fire automatically the moment a human claims ownership.
 
 ```bash
 openwork-bootstrap cloud bootstrap-workspace \
-  --base-url https://api.openworklabs.com \
+  --base-url https://api.redrob.io \
   --workspace-name "<workspace-name>" \
   --skill-name "First OpenWork Skill" \
   --claim-roles owner \
@@ -126,13 +126,13 @@ If the user says yes:
    the agent they are currently using. The server URL is:
 
    ```text
-   https://api.openworklabs.com/mcp/agent
+   https://api.redrob.io/mcp/agent
    ```
 
 3. For Codex, run:
 
    ```bash
-   codex mcp add openwork --url https://api.openworklabs.com/mcp/agent
+   codex mcp add openwork --url https://api.redrob.io/mcp/agent
    codex mcp login openwork
    ```
 
@@ -140,7 +140,7 @@ If the user says yes:
    the existing entry instead. To switch organizations or recover stale auth,
    run `codex mcp logout openwork` before `codex mcp login openwork`.
 4. For another agent, use its current instructions from
-   `https://openworklabs.com/docs/cloud/run-in-the-cloud/cloud-mcp`; do not guess
+   `https://redrob.io/docs/cloud/run-in-the-cloud/cloud-mcp`; do not guess
    unsupported client commands.
 5. Tell the user to restart or reopen the current agent after setup so the new
    MCP tools are loaded. Do not claim the connection works until the restarted
@@ -172,7 +172,7 @@ You are done only when all are true:
   - `setup.id` is present
   - `skill.id` is present
   - `skillRun.triggered` is `true`
-  - `skillRun.output` is `OPENWORK_BOOTSTRAP_SKILL_TRIGGERED`
+  - `skillRun.output` is `REDROB_BOOTSTRAP_SKILL_TRIGGERED`
   - `claimLinks[0].id` is present
   - `desktop.prepared` is `true`
   - `desktop.bootstrapPath` is present

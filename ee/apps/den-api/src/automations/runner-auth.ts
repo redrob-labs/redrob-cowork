@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto"
 import {
   AUTOMATION_MODEL_ATTENTION_CAPABILITY,
   type AutomationDesktopRunnerCapability,
-} from "@openwork/types/automations"
+} from "@redrob/types/automations"
 import { env } from "../env.js"
 import { firstForwardedValue, publicRequestUrl, trustedForwardedOrigin } from "../request-url.js"
 

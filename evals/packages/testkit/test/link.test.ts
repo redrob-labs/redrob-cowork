@@ -3,7 +3,7 @@ import { createServer, request as httpRequest } from "node:http";
 import test from "node:test";
 import { daytonaLinkCommands, denLink, MAX_LINK_DAYTONA_COMMAND_LENGTH } from "../src/link.ts";
 import type { Server } from "node:http";
-import type { DaytonaExec } from "@openwork/hosts";
+import type { DaytonaExec } from "@redrob/hosts";
 
 const LARGE_BODY = Buffer.alloc(192 * 1024, 97);
 const ADMIN_TOKEN = "a".repeat(64);

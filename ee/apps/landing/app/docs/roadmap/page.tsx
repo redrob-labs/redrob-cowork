@@ -14,7 +14,7 @@ export const metadata = {
     title: "OpenWork Roadmap | Your workspace, on every surface",
     description:
       "The roadmap for the OpenWork desktop app, portable agent capabilities, hosted workspaces, and every surface where work happens.",
-    url: "https://openworklabs.com/roadmap"
+    url: "https://redrob.io/roadmap"
   }
 };
 

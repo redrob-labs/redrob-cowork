@@ -64,8 +64,8 @@ describe("Den DB migration readiness wiring", () => {
     const denDbBuildIndex = dockerfile.indexOf("RUN pnpm --dir /app/ee/packages/den-db run build")
     const denApiBuildIndex = dockerfile.indexOf("pnpm --dir /app/ee/apps/den-api run build")
 
-    assert.notEqual(denDbBuildIndex, -1, "Dockerfile.den builds @openwork-ee/den-db")
-    assert.notEqual(denApiBuildIndex, -1, "Dockerfile.den builds @openwork-ee/den-api")
+    assert.notEqual(denDbBuildIndex, -1, "Dockerfile.den builds @redrob-ee/den-db")
+    assert.notEqual(denApiBuildIndex, -1, "Dockerfile.den builds @redrob-ee/den-api")
     assert.ok(denDbBuildIndex < denApiBuildIndex, "den-db dist assets are built before den-api")
   })
 

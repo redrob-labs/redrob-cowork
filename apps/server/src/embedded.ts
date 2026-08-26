@@ -41,7 +41,7 @@ import type { LocalManagedMcpVaultKeyProvider, ServerConfig } from "./types.js";
 export type EmbeddedServerOptions = CliArgs & {
   /** When true, spawn a managed OpenCode child process. */
   manageOpencode?: boolean;
-  /** Path to the OpenCode binary. Falls back to OPENWORK_OPENCODE_BIN env. */
+  /** Path to the OpenCode binary. Falls back to REDROB_OPENCODE_BIN env. */
   opencodeBin?: string;
   /** Working directory for the managed OpenCode process. */
   opencodeCwd?: string;
@@ -176,7 +176,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
 
   // Bind the HTTP server before spawning the engine: serve-node may fall back
   // to an OS-assigned port on EADDRINUSE, and the engine's spawn-time env
-  // (OPENWORK_SERVER_URL) must point at the port that actually bound, not the
+  // (REDROB_SERVER_URL) must point at the port that actually bound, not the
   // requested one. Proxy requests that land in the short window before the
   // engine is ready fail with opencode_unconfigured and clients retry; the
   // desktop only learns the server URL after this function returns.
@@ -196,20 +196,20 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       const { path: runtimeConfigPath } = await writeOpenworkRuntimeConfigFile(config, workspace.id);
       stopRuntimeConfigFileRefresh = keepOpenworkRuntimeConfigFileFresh(config, workspace.id);
       const cwd = options.opencodeCwd
-        || process.env.OPENWORK_MANAGED_OPENCODE_CWD?.trim()
+        || process.env.REDROB_MANAGED_OPENCODE_CWD?.trim()
         || workspace.path;
       await duringStartup(() => mkdir(cwd, { recursive: true }));
       await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
       const opencodeModelsUrl = await duringStartup(() => resolveOpencodeModelsUrl());
 
-      const opencodeBin = options.opencodeBin || process.env.OPENWORK_OPENCODE_BIN;
+      const opencodeBin = options.opencodeBin || process.env.REDROB_OPENCODE_BIN;
       // Shared by the first spawn and by any later rollover standby, so a
       // replacement engine is identical apart from its port.
       const engineEnv: Record<string, string | undefined> = {
-        ...(process.env.OPENWORK_DEV_MODE ? { OPENWORK_DEV_MODE: process.env.OPENWORK_DEV_MODE } : {}),
-        ...(process.env.OPENWORK_UI_CONTROL_DISCOVERY ? { OPENWORK_UI_CONTROL_DISCOVERY: process.env.OPENWORK_UI_CONTROL_DISCOVERY } : {}),
-        OPENWORK_SERVER_URL: serverUrl,
-        OPENWORK_SERVER_TOKEN: config.token,
+        ...(process.env.REDROB_DEV_MODE ? { REDROB_DEV_MODE: process.env.REDROB_DEV_MODE } : {}),
+        ...(process.env.REDROB_UI_CONTROL_DISCOVERY ? { REDROB_UI_CONTROL_DISCOVERY: process.env.REDROB_UI_CONTROL_DISCOVERY } : {}),
+        REDROB_SERVER_URL: serverUrl,
+        REDROB_SERVER_TOKEN: config.token,
         OPENCODE_CONFIG: runtimeConfigPath,
         OPENCODE_MODELS_URL: opencodeModelsUrl,
       };

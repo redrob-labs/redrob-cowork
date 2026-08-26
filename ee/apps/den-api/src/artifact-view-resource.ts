@@ -1,4 +1,4 @@
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 
 export function artifactViewResourceUri(artifactViewId: string, revisionId: string): string {
   const normalizedViewId = normalizeDenTypeId("artifactView", artifactViewId)

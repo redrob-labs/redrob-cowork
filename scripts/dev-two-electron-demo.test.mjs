@@ -44,7 +44,7 @@ test("uses a non-production temporary demo root by default", () => {
 test("honors an explicit demo root", () => {
   assert.equal(
     resolveDemoRoot({
-      OPENWORK_ELECTRON_DEMO_ROOT: " /tmp/openwork-custom-demo "
+      REDROB_ELECTRON_DEMO_ROOT: " /tmp/openwork-custom-demo "
     }),
     "/tmp/openwork-custom-demo"
   );
@@ -110,32 +110,32 @@ test("points each Electron instance at its own profile folders", async context =
   const adminEnv = demoEnv(profile, run.admin, "5273", "9923");
   const consumerEnv = demoEnv(profile, run.consumer, "5274", "9924");
 
-  assert.equal(adminEnv.OPENWORK_ELECTRON_USERDATA, run.admin.userDataDir);
-  assert.equal(adminEnv.OPENWORK_DATA_DIR, run.admin.dataDir);
+  assert.equal(adminEnv.REDROB_ELECTRON_USERDATA, run.admin.userDataDir);
+  assert.equal(adminEnv.REDROB_DATA_DIR, run.admin.dataDir);
   assert.equal(adminEnv.HOME, run.admin.homeDir);
   assert.equal(adminEnv.XDG_CONFIG_HOME, run.admin.configHome);
   assert.equal(adminEnv.XDG_DATA_HOME, run.admin.dataHome);
   assert.equal(adminEnv.XDG_CACHE_HOME, run.admin.cacheHome);
   assert.equal(adminEnv.XDG_STATE_HOME, run.admin.stateHome);
-  assert.equal(adminEnv.OPENWORK_ENV_STORE, run.admin.envStorePath);
+  assert.equal(adminEnv.REDROB_ENV_STORE, run.admin.envStorePath);
   assert.equal(adminEnv.OPENCODE_CONFIG_DIR, run.admin.opencodeConfigDir);
   assert.equal(adminEnv.APPDATA, run.admin.appDataDir);
   assert.equal(adminEnv.LOCALAPPDATA, run.admin.localAppDataDir);
-  assert.equal(adminEnv.OPENWORK_DEV_MODE, "1");
-  assert.equal(adminEnv.OPENWORK_ELECTRON_USE_MOCK_KEYCHAIN, "1");
-  assert.equal(adminEnv.OPENWORK_ELECTRON_DISABLE_PROTOCOL_REGISTRATION, "1");
+  assert.equal(adminEnv.REDROB_DEV_MODE, "1");
+  assert.equal(adminEnv.REDROB_ELECTRON_USE_MOCK_KEYCHAIN, "1");
+  assert.equal(adminEnv.REDROB_ELECTRON_DISABLE_PROTOCOL_REGISTRATION, "1");
   assert.equal(
-    consumerEnv.OPENWORK_ELECTRON_USERDATA,
+    consumerEnv.REDROB_ELECTRON_USERDATA,
     run.consumer.userDataDir
   );
-  assert.equal(consumerEnv.OPENWORK_DATA_DIR, run.consumer.dataDir);
+  assert.equal(consumerEnv.REDROB_DATA_DIR, run.consumer.dataDir);
   assert.notEqual(
-    adminEnv.OPENWORK_ELECTRON_USERDATA,
-    consumerEnv.OPENWORK_ELECTRON_USERDATA
+    adminEnv.REDROB_ELECTRON_USERDATA,
+    consumerEnv.REDROB_ELECTRON_USERDATA
   );
-  assert.notEqual(adminEnv.OPENWORK_DATA_DIR, consumerEnv.OPENWORK_DATA_DIR);
+  assert.notEqual(adminEnv.REDROB_DATA_DIR, consumerEnv.REDROB_DATA_DIR);
   assert.notEqual(adminEnv.HOME, consumerEnv.HOME);
   assert.notEqual(adminEnv.XDG_CONFIG_HOME, consumerEnv.XDG_CONFIG_HOME);
-  assert.notEqual(adminEnv.OPENWORK_ENV_STORE, consumerEnv.OPENWORK_ENV_STORE);
+  assert.notEqual(adminEnv.REDROB_ENV_STORE, consumerEnv.REDROB_ENV_STORE);
   assert.notEqual(adminEnv.OPENCODE_CONFIG_DIR, consumerEnv.OPENCODE_CONFIG_DIR);
 });

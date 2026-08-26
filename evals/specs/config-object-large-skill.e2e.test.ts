@@ -1,18 +1,18 @@
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
 import { expect } from "vitest";
-import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
+import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
 
 // Reproduces Sentry DEN-API-Z (config object insert) and DEN-API-1K (version
 // update): a SKILL.md whose derived search_text projection exceeds the MySQL
 // TEXT column's 65,535-byte cap failed the whole write with errno 1406 on
 // strict-mode MySQL/Vitess and surfaced as HTTP 500.
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
-const mysqlOverride = Boolean(process.env.OPENWORK_EVAL_MYSQL_URL?.trim());
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
+const mysqlOverride = Boolean(process.env.REDROB_EVAL_MYSQL_URL?.trim());
 const mysqlOpen = !localPlacement || mysqlOverride || (await localMysqlIsRunning());
 const title = !e2eTestsEnabled
-  ? "oversized multibyte skill projection skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "oversized multibyte skill projection skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !mysqlOpen
     ? "oversized multibyte skill projection skipped — needs MySQL on 127.0.0.1:3306"
     : "an oversized multibyte SKILL.md saves cleanly and only its derived search projection is clamped";
@@ -56,7 +56,7 @@ async function activeOrganizationId(session: DenSession): Promise<string> {
 }
 
 test.skipIf(!e2eTestsEnabled || !mysqlOpen)(title, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   const unique = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
   await using den = await server({

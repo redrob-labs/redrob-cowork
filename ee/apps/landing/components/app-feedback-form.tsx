@@ -23,7 +23,7 @@ type Props = {
 type SubmitState = "idle" | "loading" | "success" | "error";
 
 const INITIAL_MESSAGE = "";
-const TEAM_EMAIL = "team@openworklabs.com";
+const TEAM_EMAIL = "team@redrob.io";
 
 export function AppFeedbackForm(props: Props) {
   const mode = props.mode ?? "feedback";

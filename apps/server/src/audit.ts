@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
 import { appendFile, readFile } from "node:fs/promises";
-import { openworkServerDataDir } from "@openwork/paths";
+import { openworkServerDataDir } from "@redrob/paths";
 import type { AuditEntry } from "./types.js";
 import { ensureDir, exists } from "./utils.js";
 

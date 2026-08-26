@@ -30,7 +30,7 @@ not an in-app multi-instance operation.
 ## Local development
 
 ```bash
-pnpm --filter @openwork-ee/diagnostics dev
+pnpm --filter @redrob-ee/diagnostics dev
 ```
 
 Open `http://localhost:3010` and sign in with:
@@ -56,7 +56,7 @@ The same editor is visible on the OpenWork Connect sign-in surface while signed
 out. Run the standalone local MCP smoke journey with:
 
 ```bash
-pnpm --filter @openwork-ee/diagnostics smoke:debug-proxy
+pnpm --filter @redrob-ee/diagnostics smoke:debug-proxy
 ```
 
 The MCP catalog also contains two diagnostics-only authorization tools:
@@ -87,7 +87,7 @@ never submits the target or token; both are owned by the Den operator.
 Create a Vercel project from this repository with **Root Directory** set to
 `ee/apps/diagnostics`. Keep **Include source files outside of the Root
 Directory** enabled so Vercel can install the root pnpm workspace and the
-shared `@openwork/types` package. Link an Upstash Redis database from the
+shared `@redrob/types` package. Link an Upstash Redis database from the
 Vercel Marketplace. Vercel injects the Redis REST URL/token; the app accepts
 either a complete `UPSTASH_REDIS_REST_*` pair or a complete `KV_REST_API_*`
 pair, but never mixes values between the two integrations.
@@ -101,9 +101,9 @@ Set these production environment variables:
 | `DIAGNOSTICS_SIGNING_SECRET` | Signs the one-hour dashboard cookie, short-lived synthetic OAuth access tokens, and stateless MCP session IDs; at least 32 characters. |
 | `DIAGNOSTICS_MCP_BEARER_TOKEN` | Synthetic diagnostic and Connect-intake token shared with Den, at least 24 characters. It also keys organization/client pseudonyms; never use a provider/customer credential. |
 | `DIAGNOSTICS_PROFILE` | `generic`, `microsoft`, or `servicenow`. |
-| `NEXT_PUBLIC_DIAGNOSTICS_ORIGIN` | Fixed production origin, normally `https://diagnostic.openworklabs.com`. Preview deployments use Vercel's deployment-specific `VERCEL_URL` instead. |
+| `NEXT_PUBLIC_DIAGNOSTICS_ORIGIN` | Fixed production origin, normally `https://diagnostic.redrob.io`. Preview deployments use Vercel's deployment-specific `VERCEL_URL` instead. |
 | `DEBUG_PROXY_ACCESS_KEY` | URL-safe random value (16+ characters) required for the Connect debug proxy UI and traffic. It becomes a path segment in generated desktop-compatible URLs. |
-| `DEBUG_PROXY_DEFAULT_UPSTREAM` | Default Den origin. Falls back to `https://app.openworklabs.com`; set it explicitly on the Vercel project. |
+| `DEBUG_PROXY_DEFAULT_UPSTREAM` | Default Den origin. Falls back to `https://app.redrob.io`; set it explicitly on the Vercel project. |
 | `DEBUG_PROXY_ALLOWED_UPSTREAMS` | Comma-separated HTTPS hosts or origins that generated override links may target. The default upstream remains allowed independently. |
 | `DEBUG_PROXY_SLOW_MS` | Optional Agent endpoint delay, clamped to 5,000–10,000 ms; default 7,000 ms. |
 | `DEBUG_PROXY_FLAKY_WINDOW_MS` | Optional per-instance rolling window for `flaky-N`; default 60,000 ms. |
@@ -113,12 +113,12 @@ enabled. Preview deployments derive their OAuth and MCP resource URLs from the
 deployment-specific `VERCEL_URL`; production continues to require the fixed
 `NEXT_PUBLIC_DIAGNOSTICS_ORIGIN` allowlist hostname.
 
-Attach `diagnostic.openworklabs.com` in the project's Vercel **Domains**
+Attach `diagnostic.redrob.io` in the project's Vercel **Domains**
 settings, then create the CNAME value Vercel provides at the DNS provider. The
 stable customer allowlist entry is the same host; the MCP URL is:
 
 ```text
-https://diagnostic.openworklabs.com/mcp
+https://diagnostic.redrob.io/mcp
 ```
 
 Before enabling public DNS, add Vercel Firewall rate-limit rules for `/mcp`,
@@ -163,7 +163,7 @@ response therefore sets a ten-minute, HTTP-only routing cookie that sends those
 browser requests back through the selected scenario. That cookie contains the
 same access-key path already present in the generated URL, is removed before
 forwarding to Den, and is cleared when the debug control page is opened. The
-one-time `openwork://den-auth` handoff also has its encoded Den base URL
+one-time `redrob://den-auth` handoff also has its encoded Den base URL
 rewritten so the desktop exchanges the grant through the selected scenario
 instead of switching back to the upstream origin.
 
@@ -209,15 +209,15 @@ Before promoting a Vercel deployment, run the diagnostics test/build gate and
 the standalone smoke:
 
 ```bash
-pnpm --filter @openwork-ee/diagnostics test
-pnpm --filter @openwork-ee/diagnostics build
-pnpm --filter @openwork-ee/diagnostics smoke:debug-proxy
+pnpm --filter @redrob-ee/diagnostics test
+pnpm --filter @redrob-ee/diagnostics build
+pnpm --filter @redrob-ee/diagnostics smoke:debug-proxy
 ```
 
 After the production deployment is promoted, verify all of the following
 before sharing the allowlist hostname:
 
-1. `GET https://diagnostic.openworklabs.com/health` returns HTTP 200 and
+1. `GET https://diagnostic.redrob.io/health` returns HTTP 200 and
    `{"service":"openwork-diagnostics","status":"ok"}`.
 2. The dashboard redirects to `/login` without a signed session, accepts the
    configured administrator credentials, and signs out by clearing the session.
@@ -289,13 +289,13 @@ OAuth, or MCP.
 
 For a customer-hosted Den, an organization admin enters the same synthetic
 secret in **Org settings → Den egress diagnostic**. Den encrypts it and never
-returns it to the browser. Den uses `https://diagnostic.openworklabs.com` by
+returns it to the browser. Den uses `https://diagnostic.redrob.io` by
 default; set `DEN_DIAGNOSTICS_ORIGIN` only to override that fixed destination.
 `DEN_DIAGNOSTICS_BEARER_TOKEN` remains an optional deployment bootstrap
 fallback:
 
 ```dotenv
-DEN_DIAGNOSTICS_ORIGIN=https://diagnostic.openworklabs.com
+DEN_DIAGNOSTICS_ORIGIN=https://diagnostic.redrob.io
 DEN_DIAGNOSTICS_BEARER_TOKEN=<same synthetic diagnostic token>
 ```
 

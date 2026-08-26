@@ -1,10 +1,10 @@
 extends: ./electron-builder.base.yml
-appId: com.differentai.openwork
+appId: io.redrob.work
 productName: Redrob Work
 protocols:
-  - name: OpenWork
+  - name: Redrob Work
     schemes:
-      - openwork
+      - redrob
 linux:
-  executableName: openwork
-artifactName: openwork-${os}-${arch}-${version}.${ext}
+  executableName: redrob
+artifactName: redrob-${os}-${arch}-${version}.${ext}

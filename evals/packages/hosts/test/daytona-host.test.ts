@@ -199,20 +199,20 @@ test("spawnElectron starts isolated Daytona Electron profiles and writes bootstr
   const firstStart = argsText(startCalls[0]);
   const secondStart = argsText(startCalls[1]);
   assert(firstStart.includes("openwork-test-electron"));
-  assert(firstStart.includes("OPENWORK_ELECTRON_REMOTE_DEBUG_PORT="));
+  assert(firstStart.includes("REDROB_ELECTRON_REMOTE_DEBUG_PORT="));
   assert(firstStart.includes("9825"));
-  assert(firstStart.includes("OPENWORK_ELECTRON_USERDATA="));
+  assert(firstStart.includes("REDROB_ELECTRON_USERDATA="));
   assert(firstStart.includes("/workspace/.openwork-daytona/profiles/owner-"));
   assert(firstStart.includes("/electron-userdata"));
-  assert(firstStart.includes("OPENWORK_DESKTOP_BOOTSTRAP_PATH="));
+  assert(firstStart.includes("REDROB_DESKTOP_BOOTSTRAP_PATH="));
   assert(firstStart.includes("/workspace/.openwork-daytona/profiles/owner-"));
   assert(firstStart.includes("/bootstrap.json"));
   assert(firstStart.includes("DAYTONA_ELECTRON_LOG="));
   assert(/\/tmp\/electron-owner-\d+/.test(firstStart));
   assert(firstStart.includes("--detach"));
-  assert(secondStart.includes("OPENWORK_ELECTRON_REMOTE_DEBUG_PORT="));
+  assert(secondStart.includes("REDROB_ELECTRON_REMOTE_DEBUG_PORT="));
   assert(secondStart.includes("9830"));
-  assert(secondStart.includes("OPENWORK_ELECTRON_USERDATA="));
+  assert(secondStart.includes("REDROB_ELECTRON_USERDATA="));
   assert(secondStart.includes("/workspace/.openwork-daytona/profiles/member-"));
   assert(secondStart.includes("/electron-userdata"));
 });
@@ -336,17 +336,17 @@ test("disposeSurface uses self-match-safe pkill patterns in separate execs", asy
   assert(!chromePkill.includes("--user-data-dir=/tmp/daytona-chrome-browser"));
 });
 
-test("Daytona host requires a sandbox option or OPENWORK_EVAL_DAYTONA_SANDBOX", async () => {
-  const previous = process.env.OPENWORK_EVAL_DAYTONA_SANDBOX;
-  delete process.env.OPENWORK_EVAL_DAYTONA_SANDBOX;
+test("Daytona host requires a sandbox option or REDROB_EVAL_DAYTONA_SANDBOX", async () => {
+  const previous = process.env.REDROB_EVAL_DAYTONA_SANDBOX;
+  delete process.env.REDROB_EVAL_DAYTONA_SANDBOX;
   const { exec } = createFakeExec(() => "https://unused.example.test");
   const host = createDaytonaHost({ log: () => undefined, exec, repoRoot: "/repo" });
 
   try {
     await assert.rejects(host.previewUrl(9825), /create one with bash \.devcontainer\/test-on-daytona\.sh <ref> or pass sandboxId/);
   } finally {
-    if (previous === undefined) delete process.env.OPENWORK_EVAL_DAYTONA_SANDBOX;
-    else process.env.OPENWORK_EVAL_DAYTONA_SANDBOX = previous;
+    if (previous === undefined) delete process.env.REDROB_EVAL_DAYTONA_SANDBOX;
+    else process.env.REDROB_EVAL_DAYTONA_SANDBOX = previous;
   }
 });
 
@@ -465,14 +465,14 @@ test("enterprise TLS edge commands reject steering and port collisions", () => {
 
 test("startDen attaches to preset Den env without running daytona exec", async () => {
   const server = await startRuntimeConfigStub("single_org");
-  const previousApi = process.env.OPENWORK_EVAL_DEN_API_URL;
-  const previousWeb = process.env.OPENWORK_EVAL_DEN_WEB_URL;
+  const previousApi = process.env.REDROB_EVAL_DEN_API_URL;
+  const previousWeb = process.env.REDROB_EVAL_DEN_WEB_URL;
   const { exec, calls } = createFakeExec(() => "https://unused.example.test");
   const host = createDaytonaHost({ sandboxId: "openwork-test-den", log: () => undefined, exec, repoRoot: "/repo" });
 
   try {
-    process.env.OPENWORK_EVAL_DEN_API_URL = "https://den-api.example.test";
-    process.env.OPENWORK_EVAL_DEN_WEB_URL = server.url;
+    process.env.REDROB_EVAL_DEN_API_URL = "https://den-api.example.test";
+    process.env.REDROB_EVAL_DEN_WEB_URL = server.url;
     const handle = await host.startDen();
 
     assert.equal(handle.webUrl, server.url);
@@ -481,10 +481,10 @@ test("startDen attaches to preset Den env without running daytona exec", async (
     assert.equal(handle.hostKind, "daytona");
     assert.equal(calls.length, 0);
   } finally {
-    if (previousApi === undefined) delete process.env.OPENWORK_EVAL_DEN_API_URL;
-    else process.env.OPENWORK_EVAL_DEN_API_URL = previousApi;
-    if (previousWeb === undefined) delete process.env.OPENWORK_EVAL_DEN_WEB_URL;
-    else process.env.OPENWORK_EVAL_DEN_WEB_URL = previousWeb;
+    if (previousApi === undefined) delete process.env.REDROB_EVAL_DEN_API_URL;
+    else process.env.REDROB_EVAL_DEN_API_URL = previousApi;
+    if (previousWeb === undefined) delete process.env.REDROB_EVAL_DEN_WEB_URL;
+    else process.env.REDROB_EVAL_DEN_WEB_URL = previousWeb;
     await server.close();
   }
 });

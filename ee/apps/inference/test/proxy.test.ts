@@ -3,7 +3,7 @@ import { test } from "node:test"
 import { Hono } from "hono"
 import type { InferenceHandledErrorReport, InferenceReporter, InferenceRequestReport } from "../src/inference-reporting.js"
 
-process.env.OPENWORK_DEV_MODE = "1"
+process.env.REDROB_DEV_MODE = "1"
 process.env.DATABASE_URL = "mysql://root:password@127.0.0.1:3306/openwork_den"
 process.env.DEN_DB_ENCRYPTION_KEY = "local-dev-db-encryption-key-please-change-1234567890"
 process.env.OPENROUTER_UPSTREAM_URL = "https://upstream.test/api/v1"

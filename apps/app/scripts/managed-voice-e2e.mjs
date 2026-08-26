@@ -165,7 +165,7 @@ async function startOpenWorkServer({ directory, port, env }) {
   ], {
     cwd: resolve(join(import.meta.dirname, "..", "..", "..")),
     stdio: ["ignore", "pipe", "pipe"],
-    env: { ...process.env, ...env, OPENWORK_DEV_MODE: "1" },
+    env: { ...process.env, ...env, REDROB_DEV_MODE: "1" },
   });
   let stdout = "";
   let stderr = "";
@@ -218,10 +218,10 @@ const server = await startOpenWorkServer({
   directory,
   port,
   env: {
-    OPENWORK_ENV_STORE: join(envDir, "env.json"),
-    OPENWORK_TOKEN_STORE: join(envDir, "tokens.json"),
-    OPENWORK_API_KEY: "ow_inf_e2e",
-    OPENWORK_INFERENCE_BASE_URL: mockBroker.baseUrl,
+    REDROB_ENV_STORE: join(envDir, "env.json"),
+    REDROB_TOKEN_STORE: join(envDir, "tokens.json"),
+    REDROB_CLOUD_API_KEY: "ow_inf_e2e",
+    REDROB_INFERENCE_BASE_URL: mockBroker.baseUrl,
   },
 });
 

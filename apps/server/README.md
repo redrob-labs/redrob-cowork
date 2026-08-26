@@ -25,7 +25,7 @@ Add `--verbose` to print resolved config details on startup. Use `--version` to 
 
 ## Config file
 
-Defaults to `~/.config/openwork/server.json` (override with `OPENWORK_SERVER_CONFIG` or `--config`).
+Defaults to `~/.config/openwork/server.json` (override with `REDROB_SERVER_CONFIG` or `--config`).
 
 ```json
 {
@@ -47,33 +47,33 @@ Defaults to `~/.config/openwork/server.json` (override with `OPENWORK_SERVER_CON
 
 ## Environment variables
 
-- `OPENWORK_SERVER_CONFIG` path to config JSON
-- `OPENWORK_HOST` / `OPENWORK_PORT`
-- `OPENWORK_TOKEN` client bearer token
-- `OPENWORK_HOST_TOKEN` host approval token
-- `OPENWORK_APPROVAL_MODE` (`manual` | `auto`)
-- `OPENWORK_APPROVAL_TIMEOUT_MS`
-- `OPENWORK_WORKSPACES` (JSON array or comma-separated list of paths)
-- `OPENWORK_CORS_ORIGINS` (comma-separated list or `*`)
-- `OPENWORK_OPENCODE_BASE_URL`
-- `OPENWORK_OPENCODE_DIRECTORY`
-- `OPENWORK_OPENCODE_USERNAME`
-- `OPENWORK_OPENCODE_PASSWORD`
+- `REDROB_SERVER_CONFIG` path to config JSON
+- `REDROB_HOST` / `REDROB_PORT`
+- `REDROB_TOKEN` client bearer token
+- `REDROB_HOST_TOKEN` host approval token
+- `REDROB_APPROVAL_MODE` (`manual` | `auto`)
+- `REDROB_APPROVAL_TIMEOUT_MS`
+- `REDROB_WORKSPACES` (JSON array or comma-separated list of paths)
+- `REDROB_CORS_ORIGINS` (comma-separated list or `*`)
+- `REDROB_OPENCODE_BASE_URL`
+- `REDROB_OPENCODE_DIRECTORY`
+- `REDROB_OPENCODE_USERNAME`
+- `REDROB_OPENCODE_PASSWORD`
 
 Token management (scoped tokens):
 
-- `OPENWORK_TOKEN_STORE` path to token store JSON (default: alongside `server.json`)
+- `REDROB_TOKEN_STORE` path to token store JSON (default: alongside `server.json`)
 
 File injection / artifacts:
 
-- `OPENWORK_INBOX_ENABLED` (`1` | `0`)
-- `OPENWORK_INBOX_MAX_BYTES` (default: 50MB, capped)
-- `OPENWORK_OUTBOX_ENABLED` (`1` | `0`)
+- `REDROB_INBOX_ENABLED` (`1` | `0`)
+- `REDROB_INBOX_MAX_BYTES` (default: 50MB, capped)
+- `REDROB_OUTBOX_ENABLED` (`1` | `0`)
 
 Sandbox advertisement (for capability discovery):
 
-- `OPENWORK_SANDBOX_ENABLED` (`1` | `0`)
-- `OPENWORK_SANDBOX_BACKEND` (`docker` | `container` | `none`)
+- `REDROB_SANDBOX_ENABLED` (`1` | `0`)
+- `REDROB_SANDBOX_BACKEND` (`docker` | `container` | `none`)
 
 ## Endpoints
 
@@ -141,4 +141,4 @@ Approvals endpoints:
 - `GET /approvals`
 - `POST /approvals/:id` with `{ "reply": "allow" | "deny" }`
 
-Set `OPENWORK_APPROVAL_MODE=auto` to auto-approve during local development.
+Set `REDROB_APPROVAL_MODE=auto` to auto-approve during local development.

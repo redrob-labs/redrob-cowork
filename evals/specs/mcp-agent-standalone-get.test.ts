@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 
 const repoRoot = resolve(import.meta.dirname, "../..");
 
@@ -12,7 +12,7 @@ test("MCP agent rejects standalone GET without triggering the Bun SDK retry loop
   try {
     const build = spawnSync("pnpm", [
       "--filter",
-      "@openwork-ee/den-api",
+      "@redrob-ee/den-api",
       "run",
       "build:mcp-apps",
     ], {
@@ -34,7 +34,7 @@ test("MCP agent rejects standalone GET without triggering the Bun SDK retry loop
       const reportPath = join(reportDir, `bun-junit-${String(index)}.xml`);
       const result = spawnSync("pnpm", [
         "--filter",
-        "@openwork-ee/den-api",
+        "@redrob-ee/den-api",
         "exec",
         "bun",
         "test",

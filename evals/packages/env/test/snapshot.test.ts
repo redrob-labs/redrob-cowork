@@ -34,7 +34,7 @@ test("buildSnapshot output round-trips through untrusted boot-shape validation",
   const topology = defineWorld({
     den: {
       orgs: { acme: { admin: { name: "Alex" } } },
-      env: { DEN_ORG_MODE: "multi_org", OPENWORK_DEV_MODE: "1" },
+      env: { DEN_ORG_MODE: "multi_org", REDROB_DEV_MODE: "1" },
       web: false,
     },
     apps: {

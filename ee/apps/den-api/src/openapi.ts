@@ -1,4 +1,4 @@
-import { type DenTypeIdName, typeId } from "@openwork-ee/utils/typeid"
+import { type DenTypeIdName, typeId } from "@redrob-ee/utils/typeid"
 import { resolver } from "hono-openapi"
 import { z } from "zod"
 

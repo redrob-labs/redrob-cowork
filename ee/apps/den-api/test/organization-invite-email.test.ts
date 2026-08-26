@@ -1,4 +1,4 @@
-import { renderEmailHtml } from "@openwork/email"
+import { renderEmailHtml } from "@redrob/email"
 import { expect, test } from "bun:test"
 
 test("organization invitation HTML focuses on joining without desktop download prompt", async () => {

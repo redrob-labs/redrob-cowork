@@ -16,7 +16,7 @@
       "purpose": "GitHub API calls for importing and previewing GitHub-hosted Claude Code/Redrob Work plugins.",
       "requirement": "opt-in",
       "blockedEffect": "GitHub plugin import cannot inspect repositories, branches, or plugin manifests.",
-      "override": "OPENWORK_GITHUB_API_BASE"
+      "override": "REDROB_GITHUB_API_BASE"
     },
     {
       "host": "api.githubcopilot.com",
@@ -46,7 +46,7 @@
       "override": "self-hosted Den API origin"
     },
     {
-      "host": "api.openworklabs.com",
+      "host": "api.redrob.io",
       "kind": "fetched",
       "components": ["desktop", "installer", "server"],
       "purpose": "Hosted Redrob Work public API and Redrob Work Connect MCP endpoint used by hosted Cloud and install flows.",
@@ -55,10 +55,10 @@
       "override": "installer apiUrl / self-hosted Den API origin"
     },
     {
-      "host": "api.app.openworklabs.com",
+      "host": "api.app.redrob.io",
       "kind": "fetched",
       "components": ["desktop", "renderer", "server"],
-      "purpose": "Hosted Redrob Work Den API origin derived from app.openworklabs.com for desktop Den API and Redrob Work Connect MCP calls.",
+      "purpose": "Hosted Redrob Work Den API origin derived from app.redrob.io for desktop Den API and Redrob Work Connect MCP calls.",
       "requirement": "required-for-cloud",
       "blockedEffect": "Hosted Cloud desktop configuration, telemetry, sign-out, and Redrob Work Connect MCP calls cannot reach the Den API.",
       "override": "desktop apiBaseUrl / self-hosted Den API origin"
@@ -73,7 +73,7 @@
       "override": "desktop base URL (self-hosted Den replaces this host)"
     },
     {
-      "host": "app.openworklabs.com",
+      "host": "app.redrob.io",
       "kind": "fetched",
       "components": ["desktop", "renderer", "bootstrap"],
       "purpose": "Hosted Redrob Work Cloud web origin; the desktop derives Den API and MCP calls from this base URL.",
@@ -217,7 +217,7 @@
       "override": "MCP server URL setting"
     },
     {
-      "host": "models.openworklabs.com",
+      "host": "models.redrob.io",
       "kind": "fetched",
       "components": ["server"],
       "purpose": "First-party OpenCode model catalog mirror passed to managed OpenCode as OPENCODE_MODELS_URL.",
@@ -232,7 +232,7 @@
       "purpose": "Google OAuth token exchange, refresh, and revocation for Google Workspace connections.",
       "requirement": "opt-in",
       "blockedEffect": "Google Workspace accounts cannot finish OAuth, refresh tokens, or revoke tokens cleanly.",
-      "override": "OPENWORK_GOOGLE_WORKSPACE_TOKEN_BROKER_URL for token exchange/refresh only"
+      "override": "REDROB_GOOGLE_WORKSPACE_TOKEN_BROKER_URL for token exchange/refresh only"
     },
     {
       "host": "release-assets.githubusercontent.com",
@@ -280,13 +280,13 @@
       "override": null
     },
     {
-      "host": "openworklabs.com",
+      "host": "redrob.io",
       "kind": "link-only",
       "components": ["desktop", "renderer"],
       "purpose": "Documentation, feedback, support, and sample Redrob Work links.",
       "requirement": "optional",
       "blockedEffect": "Documentation or feedback links do not open; core app networking is unaffected.",
-      "override": "VITE_OPENWORK_FEEDBACK_URL for the feedback link only"
+      "override": "VITE_REDROB_FEEDBACK_URL for the feedback link only"
     },
     {
       "host": "raw.githubusercontent.com",
@@ -295,7 +295,7 @@
       "purpose": "Raw file downloads for GitHub-hosted plugin manifests, MCP configs, skills, commands, and agents.",
       "requirement": "opt-in",
       "blockedEffect": "GitHub plugin import can discover metadata but cannot download component contents.",
-      "override": "OPENWORK_GITHUB_RAW_BASE"
+      "override": "REDROB_GITHUB_RAW_BASE"
     },
     {
       "host": "registry.npmjs.org",
@@ -322,7 +322,7 @@
       "purpose": "Optional product analytics endpoint when analytics are enabled and a PostHog key is configured.",
       "requirement": "optional",
       "blockedEffect": "Analytics events are dropped silently; user-facing app behavior is unaffected.",
-      "override": "VITE_OPENWORK_POSTHOG_HOST; users can disable analytics with the analyticsEnabled preference"
+      "override": "VITE_REDROB_POSTHOG_HOST; users can disable analytics with the analyticsEnabled preference"
     },
     {
       "host": "www.google.com",

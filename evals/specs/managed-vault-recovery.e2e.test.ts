@@ -2,17 +2,17 @@ import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { expect } from "vitest";
-import { createAndSelectWorkspace, evalIn, go, waitFor } from "@openwork/behaviors";
-import { allocateFreePort } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import type { DesktopHandle } from "@openwork/hosts";
-import { startMockMcp } from "@openwork/labs";
-import { eventually, needs, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { createAndSelectWorkspace, evalIn, go, waitFor } from "@redrob/behaviors";
+import { allocateFreePort } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import type { DesktopHandle } from "@redrob/hosts";
+import { startMockMcp } from "@redrob/labs";
+import { eventually, needs, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_LOCAL_MANAGED_MCP"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_LOCAL_MANAGED_MCP"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -42,7 +42,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 async function serverTarget(app: DesktopHandle): Promise<ServerTarget> {
   return eventually(async () => {
     const info = await evalIn(app, `(async () => {
-      const value = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+      const value = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
       return {
         baseUrl: String(value?.baseUrl ?? value?.connectUrl ?? ""),
         token: String(value?.ownerToken ?? value?.clientToken ?? ""),
@@ -142,11 +142,11 @@ test(title, { timeout: 900_000 }, async ({ evidence }) => {
 
   let app: DesktopHandle | null = null;
   try {
-    // ── Phase 1: desktop launches with OPENWORK_ENCRYPTION_KEY = K1 ──────────
+    // ── Phase 1: desktop launches with REDROB_ENCRYPTION_KEY = K1 ──────────
     app = await desktop({
       name: "managed-vault-recovery",
       profileDir,
-      env: { OPENWORK_ENCRYPTION_KEY: keyOne },
+      env: { REDROB_ENCRYPTION_KEY: keyOne },
     });
     const { workspaceId } = await createAndSelectWorkspace(app, { path: workspacePath });
     const firstTarget = await serverTarget(app);
@@ -192,13 +192,13 @@ test(title, { timeout: 900_000 }, async ({ evidence }) => {
       true,
     );
 
-    // ── Phase 2: quit, relaunch same profile with OPENWORK_ENCRYPTION_KEY = K2 ──
+    // ── Phase 2: quit, relaunch same profile with REDROB_ENCRYPTION_KEY = K2 ──
     await app.stop();
     app = null;
     app = await desktop({
       name: "managed-vault-recovery",
       profileDir,
-      env: { OPENWORK_ENCRYPTION_KEY: keyTwo },
+      env: { REDROB_ENCRYPTION_KEY: keyTwo },
     });
     const relaunched = app;
     const target = await serverTarget(relaunched);

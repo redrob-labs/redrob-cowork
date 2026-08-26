@@ -14,7 +14,7 @@ const mysql = denDbRequire("mysql2/promise");
 const bootstrapPath = join(denDbDir, "dist", "scripts", "bootstrap.js");
 const currentSchemaPath = join(denDbDir, "dist", "current-schema.sql");
 const denDbIndexPath = join(denDbDir, "dist", "index.js");
-const image = process.env.OPENWORK_EVAL_MYSQL_IMAGE?.trim() || "mysql:8.4";
+const image = process.env.REDROB_EVAL_MYSQL_IMAGE?.trim() || "mysql:8.4";
 const containerName = `openwork-custom-ca-mysql-${process.pid}-${Date.now()}`;
 const tmp = mkdtempSync(join(tmpdir(), "openwork-custom-ca-mysql-"));
 const certsDir = join(tmp, "certs");
@@ -57,7 +57,7 @@ function ensureBuildArtifacts() {
 
   const result = run("pnpm", ["--dir", denDbDir, "run", "build"], { timeout: 240_000 });
   ensureSuccess(result, "pnpm --dir ee/packages/den-db run build");
-  console.log("Built @openwork-ee/den-db migration artifacts");
+  console.log("Built @redrob-ee/den-db migration artifacts");
 }
 
 function generateCertificates() {
@@ -215,7 +215,7 @@ function runBootstrap(databaseUrl) {
       DATABASE_URL: databaseUrl,
       DEN_DB_ENCRYPTION_KEY: "openwork-custom-ca-mysql-tls-test-key-1234567890",
       NODE_EXTRA_CA_CERTS: caCert,
-      OPENWORK_DEN_DB_ENV_PATH: join(tmp, "does-not-exist.env"),
+      REDROB_DEN_DB_ENV_PATH: join(tmp, "does-not-exist.env"),
     }),
     timeout: 180_000,
   });

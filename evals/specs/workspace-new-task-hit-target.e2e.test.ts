@@ -1,12 +1,12 @@
 import { expect } from "vitest";
-import { control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "the per-workspace New task plus stays clickable over a long truncated workspace name"
-  : "workspace new-task hit target skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "workspace new-task hit target skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -52,7 +52,7 @@ const plusHitExpression = `(() => {
 })()`;
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   await using app = await desktop({ name: "workspace-new-task-hit-target" });
   await createAndSelectWorkspace(app, {

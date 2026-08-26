@@ -56,7 +56,7 @@ Deployment details worth knowing:
 
 - Older builds read a legacy `~/.config/openwork` path on every OS. Current builds still read it for compatibility; the newest `writtenAt` decides which file applies.
 - Clearing cloud configuration in the app removes bootstrap files entirely, so a fresh MDM-dropped config wins on the next launch.
-- `OPENWORK_DESKTOP_BOOTSTRAP_PATH` points a machine at an isolated bootstrap file for testing; legacy global configuration never crosses that boundary.
+- `REDROB_DESKTOP_BOOTSTRAP_PATH` points a machine at an isolated bootstrap file for testing; legacy global configuration never crosses that boundary.
 
 ## What you do not push through MDM
 

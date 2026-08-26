@@ -5,7 +5,7 @@ import {
   egressDiagnosticRunSchema,
   type EgressDiagnosticRun,
   type EgressDiagnosticStep,
-} from "@openwork/types/den/egress-diagnostics";
+} from "@redrob/types/den/egress-diagnostics";
 import {
   Activity,
   Check,

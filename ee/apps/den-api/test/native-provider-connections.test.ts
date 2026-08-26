@@ -1,4 +1,4 @@
-import { createDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 
 const IDENTITY_SCOPES = [
@@ -61,8 +61,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 let mod: typeof import("../src/capability-sources/native-provider-connections.js")
 let registry: typeof import("../src/capability-sources/provider-registry.js")
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let oauthCredentials: typeof import("../src/capability-sources/oauth-credentials.js")
 let app: typeof import("../src/app.js").default
 let session: typeof import("../src/session.js")
@@ -78,8 +78,8 @@ beforeAll(async () => {
     import("../src/capability-sources/native-provider-connections.js"),
     import("../src/capability-sources/provider-registry.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/capability-sources/oauth-credentials.js"),
     import("../src/app.js"),
     import("../src/session.js"),

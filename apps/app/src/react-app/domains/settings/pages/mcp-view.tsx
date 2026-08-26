@@ -81,7 +81,7 @@ import type { OpenworkClaudePluginPreview } from "../../../../app/lib/openwork-s
 import {
   isOpenWorkExtensionEnabled,
   isOpenWorkExtensionHidden,
-  OPENWORK_EXTENSION_STATE_CHANGED,
+  REDROB_EXTENSION_STATE_CHANGED,
   readExtensionLayout,
   setOpenWorkExtensionEnabled,
   setOpenWorkExtensionHidden,
@@ -711,10 +711,10 @@ export function McpView(props: McpViewProps) {
 
   useEffect(() => {
     const refresh = () => setExtensionStateVersion((value) => value + 1);
-    window.addEventListener(OPENWORK_EXTENSION_STATE_CHANGED, refresh);
+    window.addEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
     window.addEventListener("storage", refresh);
     return () => {
-      window.removeEventListener(OPENWORK_EXTENSION_STATE_CHANGED, refresh);
+      window.removeEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
       window.removeEventListener("storage", refresh);
     };
   }, []);
@@ -723,11 +723,11 @@ export function McpView(props: McpViewProps) {
     if (!isDesktopRuntime()) return;
     void (async () => {
       try {
-        const command = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpCommand");
+        const command = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpCommand");
         if (Array.isArray(command) && command.every((part) => typeof part === "string")) {
           setOpenworkUiMcpCommand(command);
         }
-        const environment = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpEnvironment");
+        const environment = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpEnvironment");
         if (environment && typeof environment === "object" && !Array.isArray(environment)) {
           setOpenworkUiMcpEnvironment(Object.fromEntries(
             Object.entries(environment).filter((entry): entry is [string, string] =>
@@ -735,7 +735,7 @@ export function McpView(props: McpViewProps) {
             ),
           ));
         }
-        const computerUseCommand = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("getComputerUseMcpCommand");
+        const computerUseCommand = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getComputerUseMcpCommand");
         if (Array.isArray(computerUseCommand) && computerUseCommand.every((part) => typeof part === "string")) {
           setComputerUseMcpCommand(computerUseCommand);
         }

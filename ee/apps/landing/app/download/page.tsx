@@ -1,4 +1,4 @@
-import { DownloadOpenWorkCard } from "@openwork/ui/react";
+import { DownloadOpenWorkCard } from "@redrob/ui/react";
 import { SiteFooter } from "../../components/site-footer";
 import { SiteNav } from "../../components/site-nav";
 import { StructuredData } from "../../components/structured-data";
@@ -11,7 +11,7 @@ const downloadSchema = {
   name: "OpenWork",
   description:
     "Open source Claude Cowork alternative. Download the OpenWork desktop app for macOS, Windows, or Linux. No account required.",
-  url: "https://openworklabs.com/download",
+  url: "https://redrob.io/download",
   applicationCategory: "BusinessApplication",
   operatingSystem: "macOS, Windows, Linux",
   offers: {
@@ -22,7 +22,7 @@ const downloadSchema = {
   publisher: {
     "@type": "Organization",
     name: "OpenWork",
-    url: "https://openworklabs.com"
+    url: "https://redrob.io"
   }
 };
 
@@ -35,7 +35,7 @@ export const metadata = {
   },
   openGraph: {
     ...baseOpenGraph,
-    url: "https://openworklabs.com/download"
+    url: "https://redrob.io/download"
   }
 };
 
@@ -72,7 +72,7 @@ export default async function Download() {
           <p className="max-w-md text-[13px] text-gray-500">
             Joining a team?{" "}
             <a
-              href="https://app.openworklabs.com"
+              href="https://app.redrob.io"
               className="text-gray-700 underline underline-offset-2"
             >
               Sign in

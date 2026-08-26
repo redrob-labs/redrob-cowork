@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { denFetch } from "@openwork/behaviors";
+import { denFetch } from "@redrob/behaviors";
 import {
   defineWorld,
   fromSnapshot,
@@ -9,8 +9,8 @@ import {
   SkipError,
   startWorld,
   test,
-} from "@openwork/testkit";
-import type { World } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { World } from "@redrob/testkit";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

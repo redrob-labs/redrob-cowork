@@ -46,9 +46,9 @@ function userAppDataDir() {
 
 function discoveryPaths() {
   return [
-    process.env.OPENWORK_UI_CONTROL_DISCOVERY?.trim(),
-    join(userAppDataDir(), "com.differentai.openwork", DISCOVERY_FILE),
-    join(userAppDataDir(), "com.differentai.openwork.dev", DISCOVERY_FILE),
+    process.env.REDROB_UI_CONTROL_DISCOVERY?.trim(),
+    join(userAppDataDir(), "io.redrob.work", DISCOVERY_FILE),
+    join(userAppDataDir(), "io.redrob.work.dev", DISCOVERY_FILE),
   ].filter(Boolean);
 }
 

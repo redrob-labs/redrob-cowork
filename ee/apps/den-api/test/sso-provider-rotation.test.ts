@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 
 function seedRequiredEnv() {
   process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_sso_provider_rotation"
@@ -24,8 +24,8 @@ const canonicalProviderIds = {
 }
 
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let registerOrganizationSsoConnection: typeof import("../src/sso.js").registerOrganizationSsoConnection
 
 async function cleanup() {
@@ -41,7 +41,7 @@ beforeAll(async () => {
   seedRequiredEnv()
   mock.restore()
 
-  const realDb = (await import("@openwork-ee/den-db")).createDenDb({
+  const realDb = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db
@@ -75,8 +75,8 @@ beforeAll(async () => {
 
   const [dbModule, schemaModule, drizzleModule, ssoModule] = await Promise.all([
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/sso.js"),
   ])
   db = dbModule.db

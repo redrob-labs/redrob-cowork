@@ -12,7 +12,7 @@ import { capturePosthogEvent } from "../lib/posthog-client";
 import { LandingAgentGlyphs } from "./landing-agent-glyphs";
 
 const PROMPT_VARIANT = "hero";
-export const AGENT_START_PROMPT = `Install OpenWork on my computer, set up my first workspace, and open it ready to use. Follow the steps in https://openworklabs.com/start.md?v=${PROMPT_VARIANT}`;
+export const AGENT_START_PROMPT = `Install OpenWork on my computer, set up my first workspace, and open it ready to use. Follow the steps in https://redrob.io/start.md?v=${PROMPT_VARIANT}`;
 
 type CopyMethod = "clipboard" | "execCommand" | "none";
 
@@ -135,7 +135,7 @@ export function LandingHeroPrompt({ className, compact = false }: Props) {
           Install OpenWork on my computer, set up my first workspace, and open it
           ready to use. Follow the steps in{" "}
           <span className="text-[var(--lp-muted)]">
-            https://openworklabs.com/start.md?v={PROMPT_VARIANT}
+            https://redrob.io/start.md?v={PROMPT_VARIANT}
           </span>
           <span
             className="hero-prompt-caret ml-0.5 inline-block h-[1.1em] w-[2px] translate-y-[2px] bg-[#011627]"

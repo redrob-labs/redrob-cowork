@@ -27,8 +27,8 @@ const BEARER = /^Bearer [A-Za-z0-9\-._~+/]+=*$/;
 const REQUEST_ID = /^[A-Za-z0-9_.:-]{1,128}$/;
 const REQUIRED_TERMINAL_PATH = "/mcp/agent";
 const DEFAULT_TRUSTED_ORIGINS = new Set([
-  "https://app.openworklabs.com",
-  "https://api.openworklabs.com",
+  "https://app.redrob.io",
+  "https://api.redrob.io",
 ]);
 
 export type CloudCatalogProbeStatus = "observed" | "not-performed" | "failed";
@@ -307,7 +307,7 @@ function configuredTrustedOrigins(activatedEnterpriseOrigin?: string | null): Se
   // provisioned (written only after a signed activation claim verifies), so
   // it joins the allowlist as an exact origin without an explicit override.
   if (activatedEnterpriseOrigin) origins.add(activatedEnterpriseOrigin);
-  const configured = process.env.OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS ?? "";
+  const configured = process.env.REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS ?? "";
   for (const entry of configured.split(",")) {
     const raw = entry.trim().replace(/\/+$/u, "");
     if (!raw || raw.includes("?") || raw.includes("#")) continue;

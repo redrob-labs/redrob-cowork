@@ -3,7 +3,7 @@ import {
   storedConnectDiagnosticIncidentSchema,
   type ConnectDiagnosticIncident,
   type StoredConnectDiagnosticIncident,
-} from "@openwork/types/den/connect-diagnostics"
+} from "@redrob/types/den/connect-diagnostics"
 import { diagnosticsRedisConfig } from "./config"
 
 const incidentHistoryKey = "openwork:diagnostics:connect-incidents:v1"

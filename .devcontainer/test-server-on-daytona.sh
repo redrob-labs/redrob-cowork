@@ -24,7 +24,7 @@ DEN_WORKER_PROXY_PORT="${DEN_WORKER_PROXY_PORT:-8789}"
 MAX_WAIT="${DAYTONA_SERVER_MAX_WAIT:-240}"
 DEN_GENERATED_ARTIFACT_VIEWS_ENABLED="${DEN_GENERATED_ARTIFACT_VIEWS_ENABLED:-}"
 if [ -z "$DEN_GENERATED_ARTIFACT_VIEWS_ENABLED" ]; then
-  if [ "${OPENWORK_EVAL_GENERATED_ARTIFACT_VIEWS_E2E_TEST:-0}" = "1" ]; then
+  if [ "${REDROB_EVAL_GENERATED_ARTIFACT_VIEWS_E2E_TEST:-0}" = "1" ]; then
     DEN_GENERATED_ARTIFACT_VIEWS_ENABLED="true"
   else
     DEN_GENERATED_ARTIFACT_VIEWS_ENABLED="false"
@@ -127,9 +127,9 @@ DEN_WORKER_PROXY_URL="$(daytona preview-url "$SANDBOX" -p "$DEN_WORKER_PROXY_POR
 # baked URLs to the caller through a trusted runner-side file instead; this
 # write happens on the runner from daytona CLI output only, so sandbox (ref
 # controlled) output can never influence it.
-if [ -n "${OPENWORK_DEN_URLS_FILE:-}" ]; then
+if [ -n "${REDROB_DEN_URLS_FILE:-}" ]; then
   printf 'DEN_WEB_URL=%s\nDEN_API_URL=%s\nDEN_WORKER_PROXY_URL=%s\n' \
-    "$DEN_WEB_URL" "$DEN_API_URL" "$DEN_WORKER_PROXY_URL" > "$OPENWORK_DEN_URLS_FILE"
+    "$DEN_WEB_URL" "$DEN_API_URL" "$DEN_WORKER_PROXY_URL" > "$REDROB_DEN_URLS_FILE"
 fi
 
 echo "==> Checking out $REF..."

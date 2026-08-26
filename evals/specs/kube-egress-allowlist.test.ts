@@ -7,16 +7,16 @@ import {
   denFetch,
   readUsableConnection,
   signIn,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { startMockMcp } from "@openwork/labs";
-import type { MockMcpHandle, MockAuthorizeRequest } from "@openwork/labs";
-import { eventually, sleep, test } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { startMockMcp } from "@redrob/labs";
+import type { MockMcpHandle, MockAuthorizeRequest } from "@redrob/labs";
+import { eventually, sleep, test } from "@redrob/testkit";
 
 const KUBE_CONTEXT = "kind-openwork-kube-lab";
-const apiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
-const webUrl = process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
-const allowedHostIp = process.env.OPENWORK_EVAL_KUBE_ALLOWED_HOST_IP?.trim() ?? "";
+const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
+const webUrl = process.env.REDROB_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
+const allowedHostIp = process.env.REDROB_EVAL_KUBE_ALLOWED_HOST_IP?.trim() ?? "";
 
 interface CommandResult {
   stdout: string;
@@ -32,16 +32,16 @@ function envPort(name: string, defaultPort: number): number | null {
   return Number.isInteger(port) && port >= 1 && port <= 65_535 ? port : null;
 }
 
-const allowedPort = envPort("OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT", 4791);
-const deniedPort = envPort("OPENWORK_EVAL_KUBE_DENIED_MOCK_PORT", 4792);
+const allowedPort = envPort("REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT", 4791);
+const deniedPort = envPort("REDROB_EVAL_KUBE_DENIED_MOCK_PORT", 4792);
 
 function precondition(): string | null {
-  if (!apiUrl) return "set OPENWORK_EVAL_DEN_API_URL";
-  if (!webUrl) return "set OPENWORK_EVAL_DEN_WEB_URL";
-  if (process.env.OPENWORK_EVAL_KUBE_EGRESS_TEST?.trim() !== "1") return "set OPENWORK_EVAL_KUBE_EGRESS_TEST=1";
-  if (!allowedHostIp) return "set OPENWORK_EVAL_KUBE_ALLOWED_HOST_IP";
-  if (allowedPort === null) return "OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT must be a valid port";
-  if (deniedPort === null) return "OPENWORK_EVAL_KUBE_DENIED_MOCK_PORT must be a valid port";
+  if (!apiUrl) return "set REDROB_EVAL_DEN_API_URL";
+  if (!webUrl) return "set REDROB_EVAL_DEN_WEB_URL";
+  if (process.env.REDROB_EVAL_KUBE_EGRESS_TEST?.trim() !== "1") return "set REDROB_EVAL_KUBE_EGRESS_TEST=1";
+  if (!allowedHostIp) return "set REDROB_EVAL_KUBE_ALLOWED_HOST_IP";
+  if (allowedPort === null) return "REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT must be a valid port";
+  if (deniedPort === null) return "REDROB_EVAL_KUBE_DENIED_MOCK_PORT must be a valid port";
   const probe = spawnSync("kubectl", ["--context", KUBE_CONTEXT, "get", "nodes"], {
     encoding: "utf8",
     timeout: 15_000,
@@ -158,8 +158,8 @@ test.skipIf(skipReason !== null)(title, async ({ evidence }) => {
     deniedMock = await startUnauthenticatedMock(deniedPort);
     const den = { apiUrl, webUrl };
     const activeAdmin = await signIn(den, {
-      email: process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-      password: process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+      email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
+      password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
     });
     admin = activeAdmin;
     await deleteConnectionsNamed(activeAdmin, "Kube allowed MCP ");

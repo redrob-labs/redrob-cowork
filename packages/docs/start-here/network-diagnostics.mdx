@@ -37,21 +37,21 @@ Use your Den web origin for `-WebUrl`. Use the separate Den API origin only if y
 
 Settings → Debug includes a cloud catalog diagnostic that probes the managed `openwork-cloud` MCP entry and verifies that Cloud exposes exactly `search_capabilities` and `execute_capability`.
 
-For self-hosted Den origins, set `OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS` before OpenWork launches:
+For self-hosted Den origins, set `REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS` before OpenWork launches:
 
 ```bash
-OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS=https://openwork.example.com
+REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS=https://openwork.example.com
 ```
 
 The value is a comma-separated list of bare origins: scheme, host, and optional port only. Entries must use `https:` except loopback origins, which may use `http:`.
 
-If the Den origin is not trusted, the diagnostic is skipped and sends no credentialed request to that untrusted origin. Cloud MCP itself is unaffected; this variable only controls the diagnostic probe. Set it in the launcher, MDM profile, service wrapper, or shell environment before launch because the in-app environment store strips `OPENWORK_*` and `OPENCODE_*` keys.
+If the Den origin is not trusted, the diagnostic is skipped and sends no credentialed request to that untrusted origin. Cloud MCP itself is unaffected; this variable only controls the diagnostic probe. Set it in the launcher, MDM profile, service wrapper, or shell environment before launch because the in-app environment store strips `REDROB_*` and `OPENCODE_*` keys.
 
 ## Den outbound diagnostic
 
 Den can run an optional, admin-triggered outbound diagnostic from the Den process. It exercises the real container DNS, proxy, TLS trust, firewall, service mesh, and NetworkPolicy path.
 
-- The default diagnostics origin is `https://diagnostic.openworklabs.com`.
+- The default diagnostics origin is `https://diagnostic.redrob.io`.
 - A workspace owner or super-admin starts the check; it is not a background dependency for Den.
 - The diagnostic token must be synthetic and at least 24 characters. Do not use provider or customer credentials.
 - To use an internal diagnostics origin, deploy the diagnostics app at an internally reachable supported runtime/origin, then set `DEN_DIAGNOSTICS_ORIGIN` and `DEN_DIAGNOSTICS_BEARER_TOKEN` for Den. The service README currently documents its runtime and retention model; do not assume a generic Kubernetes package unless your deployment path has been validated.

@@ -73,7 +73,7 @@ Electron renderer via CDP — the auth provider consumes it:
 
 ```js
 window.dispatchEvent(new CustomEvent("openwork:deep-link", {
-  detail: { urls: ["openwork://den-auth?grant=" + grant +
+  detail: { urls: ["redrob://den-auth?grant=" + grant +
     "&denBaseUrl=" + encodeURIComponent(DEN_WEB_URL)] },
 }));
 ```

@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { notImplemented } from "@openwork/labs";
+import { notImplemented } from "@redrob/labs";
 
 export type DenRef = { apiUrl: string; webUrl: string };
 export type DenSession = DenRef & { token: string; email: string; password: string };
@@ -90,7 +90,7 @@ export async function freshSession(session: DenSession): Promise<DenSession> {
 }
 
 export function doInternalMarkEmailVerified(command: string, email: string): void {
-  if (!command.trim()) throw new Error("OPENWORK_EVAL_MARK_VERIFIED_CMD is required to verify a newly-created member.");
+  if (!command.trim()) throw new Error("REDROB_EVAL_MARK_VERIFIED_CMD is required to verify a newly-created member.");
   try {
     execSync(command.replaceAll("{email}", email), { cwd: REPO_ROOT, encoding: "utf8", stdio: "pipe" });
   } catch (error) {
@@ -284,7 +284,7 @@ export async function provisionOrg(den: DenRef, input: ProvisionOrgInput): Promi
   }
 
   const unique = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 12)}`;
-  const password = process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
   const email = `openwork-eval-admin-${unique}@example.test`;
   const name = `OpenWork Eval ${unique}`;
   const signUp = await denFetch(den, "/api/auth/sign-up/email", {
@@ -314,7 +314,7 @@ export async function provisionOrg(den: DenRef, input: ProvisionOrgInput): Promi
       email: memberEmail,
       password,
       name: "OpenWork Eval Member",
-      markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+      markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
     });
     const orgs = await denFetch(den, "/v1/me/orgs", { headers: auth(member) });
     const memberships = isRecord(orgs.body) && Array.isArray(orgs.body.orgs) ? orgs.body.orgs : [];

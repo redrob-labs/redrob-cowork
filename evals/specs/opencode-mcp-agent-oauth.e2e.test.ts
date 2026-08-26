@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { expect } from "vitest";
-import { denFetch, signIn } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { needs, server, SkipError, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { denFetch, signIn } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { needs, server, SkipError, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 // Proves the docs' "Verified" claim for OpenCode: the real `opencode` CLI
 // completes the full public OAuth path against the Den MCP gateway — RFC9728
@@ -18,7 +18,7 @@ import type { TestNeeds } from "@openwork/testkit";
 const MCP_NAME = "openwork";
 const ORGANIZATION_NAME = "OAuth Lab";
 const EXPECTED_TOOLS = ["create_skill", "execute_capability", "search_capabilities"] as const;
-const OPENCODE_BIN = process.env.OPENWORK_EVAL_OPENCODE_BIN?.trim() || "opencode";
+const OPENCODE_BIN = process.env.REDROB_EVAL_OPENCODE_BIN?.trim() || "opencode";
 const COMMAND_TIMEOUT_MS = 60_000;
 const AUTHORIZE_URL_TIMEOUT_MS = 90_000;
 const AUTH_EXIT_TIMEOUT_MS = 60_000;
@@ -27,9 +27,9 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const BROWSER_LAUNCHERS = ["open", "xdg-open", "sensible-browser", "x-www-browser", "www-browser"];
 const POISONED_ACCESS_TOKEN = "eyJhbGciOiJFZERTQSJ9.eyJleHAiOjF9.invalid";
 
-const placementCommand = process.env.OPENWORK_EVAL_DAYTONA?.trim() === "1" ? "daytona" : "docker";
+const placementCommand = process.env.REDROB_EVAL_DAYTONA?.trim() === "1" ? "daytona" : "docker";
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
   commands: [placementCommand, OPENCODE_BIN],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
@@ -430,7 +430,7 @@ async function activeOrganization(admin: DenSession): Promise<{ id: string; slug
 
 test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, async ({ evidence, place }) => {
   needs(requirements);
-  if (process.env.OPENWORK_EVAL_DEN_API_URL?.trim()) {
+  if (process.env.REDROB_EVAL_DEN_API_URL?.trim()) {
     throw new SkipError("The opencode OAuth proof requires a cold managed Den");
   }
 

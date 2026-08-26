@@ -1,5 +1,5 @@
 import { expect, onTestFinished } from "vitest";
-import type { Surface } from "@openwork/cdp";
+import type { Surface } from "@redrob/cdp";
 import {
   assignPluginToMarketplace,
   control,
@@ -17,9 +17,9 @@ import {
   waitFor,
   waitForAssistantReply,
   waitForButtonGone,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   app,
   eventually,
@@ -30,8 +30,8 @@ import {
   server,
   test,
   unmetNeeds,
-} from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * CRITICAL-PATH E2E JOURNEY: a new organization invites a second person, publishes a real
@@ -71,7 +71,7 @@ import type { TestNeeds } from "@openwork/testkit";
 const requirements: TestNeeds = {
   model: "tool-capable",
   env: ["OPENAI_API_KEY"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_CRITICAL_PATH_E2E_JOURNEY"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_CRITICAL_PATH_E2E_JOURNEY"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -131,9 +131,9 @@ function errorText(error: unknown): string {
 }
 
 function resolveProviderTarget(): ProviderTarget {
-  const requestedModelId = process.env.OPENWORK_EVAL_MODEL?.trim() ?? "";
+  const requestedModelId = process.env.REDROB_EVAL_MODEL?.trim() ?? "";
   if (!requestedModelId || requestedModelId.includes("/")) {
-    throw new Error(`OPENWORK_EVAL_MODEL must be the bare OpenAI model id; received ${requestedModelId}.`);
+    throw new Error(`REDROB_EVAL_MODEL must be the bare OpenAI model id; received ${requestedModelId}.`);
   }
   const apiKey = process.env.OPENAI_API_KEY?.trim() ?? "";
   if (!apiKey) throw new Error(`${requestedModelId} requires OPENAI_API_KEY.`);

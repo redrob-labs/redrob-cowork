@@ -1,13 +1,13 @@
 import { fileURLToPath } from "node:url";
 import { expect, test } from "vitest";
-import { createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
+import { createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "Library shows readiness state tabs"
-  : "Library state tabs skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in";
+  : "Library state tabs skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in";
 const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 test.skipIf(!e2eTestsEnabled)(title, async () => {

@@ -1,7 +1,7 @@
 import { expect } from "vitest";
-import { createAndSelectWorkspace, evalIn, go, waitFor } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { desktop } from "@openwork/hosts";
+import { createAndSelectWorkspace, evalIn, go, waitFor } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { desktop } from "@redrob/hosts";
 import {
   faultProxy,
   needs,
@@ -9,10 +9,10 @@ import {
   signInDesktopAs,
   test,
   unmetNeeds,
-} from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
-const requirements: TestNeeds = { optIn: ["OPENWORK_EVAL_E2E_TESTS"] };
+const requirements: TestNeeds = { optIn: ["REDROB_EVAL_E2E_TESTS"] };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Library Add session restore skipped — needs: ${missingRequirements.join(", ")}`

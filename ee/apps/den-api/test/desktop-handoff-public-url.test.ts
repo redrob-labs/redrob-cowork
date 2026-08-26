@@ -67,10 +67,10 @@ describe("desktop handoff public URL", () => {
 
     expect(approveWebHandoffReturnUrlForSignedPreviews({
       orgMode: "multi_org",
-      gatewayOrigin: "https://web.openworklabs.com",
+      gatewayOrigin: "https://web.redrob.io",
       signedPreviewUrls: [],
-      returnUrl: "https://web.openworklabs.com/",
-    })).toBe("https://web.openworklabs.com/signin")
+      returnUrl: "https://web.redrob.io/",
+    })).toBe("https://web.redrob.io/signin")
   })
 
   test("rejects a gateway web returnUrl when the gateway origin is unset", async () => {
@@ -79,7 +79,7 @@ describe("desktop handoff public URL", () => {
     expect(approveWebHandoffReturnUrlForSignedPreviews({
       orgMode: "multi_org",
       signedPreviewUrls: ["https://8787-active.daytonaproxy01.net/signed"],
-      returnUrl: "https://web.openworklabs.com/signin",
+      returnUrl: "https://web.redrob.io/signin",
     })).toBeNull()
   })
 
@@ -88,29 +88,29 @@ describe("desktop handoff public URL", () => {
 
     expect(approveWebHandoffReturnUrlForSignedPreviews({
       orgMode: "multi_org",
-      gatewayOrigin: "https://web.openworklabs.com",
+      gatewayOrigin: "https://web.redrob.io",
       signedPreviewUrls: [],
-      returnUrl: "https://app.openworklabs.com/signin",
+      returnUrl: "https://app.redrob.io/signin",
     })).toBeNull()
   })
 
   test("approves the configured gateway web returnUrl without an active organization", async () => {
     const { resolveApprovedWebHandoffReturnUrl } = await loadDesktopHandoffRoutes()
-    await configureDesktopHandoffEnv({ gatewayOrigin: "https://web.openworklabs.com" })
+    await configureDesktopHandoffEnv({ gatewayOrigin: "https://web.redrob.io" })
 
     expect(await resolveApprovedWebHandoffReturnUrl({
       activeOrganizationId: null,
-      returnUrl: "https://web.openworklabs.com/",
-    })).toBe("https://web.openworklabs.com/signin")
+      returnUrl: "https://web.redrob.io/",
+    })).toBe("https://web.redrob.io/signin")
   })
 
   test("rejects a different web returnUrl origin without an active organization", async () => {
     const { resolveApprovedWebHandoffReturnUrl } = await loadDesktopHandoffRoutes()
-    await configureDesktopHandoffEnv({ gatewayOrigin: "https://web.openworklabs.com" })
+    await configureDesktopHandoffEnv({ gatewayOrigin: "https://web.redrob.io" })
 
     expect(await resolveApprovedWebHandoffReturnUrl({
       activeOrganizationId: null,
-      returnUrl: "https://app.openworklabs.com/signin",
+      returnUrl: "https://app.redrob.io/signin",
     })).toBeNull()
   })
 
@@ -120,7 +120,7 @@ describe("desktop handoff public URL", () => {
 
     expect(await resolveApprovedWebHandoffReturnUrl({
       activeOrganizationId: null,
-      returnUrl: "https://web.openworklabs.com/signin",
+      returnUrl: "https://web.redrob.io/signin",
     })).toBeNull()
   })
 
@@ -139,9 +139,9 @@ describe("desktop handoff public URL", () => {
 
     expect(approveWebHandoffReturnUrlForSignedPreviews({
       orgMode: "multi_org",
-      gatewayOrigin: "https://web.openworklabs.com",
+      gatewayOrigin: "https://web.redrob.io",
       signedPreviewUrls: [],
-      returnUrl: "http://web.openworklabs.com/signin",
+      returnUrl: "http://web.redrob.io/signin",
     })).toBeNull()
   })
 

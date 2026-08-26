@@ -27,8 +27,8 @@ import { ProviderIcon } from "../../../design-system/provider-icon";
 import { useDenAuth } from "../../cloud/den-auth-provider";
 import { usePlatform } from "../../../kernel/platform";
 import {
-  OPENWORK_MODELS_PROVIDER_ID,
-  OPENWORK_MODELS_PROVIDER_NAME,
+  REDROB_MODELS_PROVIDER_ID,
+  REDROB_MODELS_PROVIDER_NAME,
 } from "../../cloud/openwork-models-promo";
 
 export const MODEL_PICKER_DEFAULT_SUBTITLE = "Select a model for this session.";
@@ -56,7 +56,7 @@ export type ModelPickerModalProps = {
   onClose: (options?: { restorePromptFocus?: boolean }) => void;
   /** Den entitlement present. Picker no longer upsells here; callers still pass it. */
   openWorkModelsEntitled?: boolean;
-  /** The server is waiting to reload this workspace with OpenWork Models. */
+  /** The server is waiting to reload this workspace with Redrob Models. */
   openWorkModelsSyncing?: boolean;
   onRefreshOrganizationModels?: () => void | Promise<void>;
   restrictToCloud?: boolean;
@@ -220,7 +220,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     for (const group of providerGroups) {
       if (group.isCloud) queueExpand(group.id);
     }
-    const openwork = providerGroups.find((group) => group.id === OPENWORK_MODELS_PROVIDER_ID);
+    const openwork = providerGroups.find((group) => group.id === REDROB_MODELS_PROVIDER_ID);
     if (openwork) queueExpand(openwork.id);
     if (toExpand.length === 0) return;
     for (const id of toExpand) autoExpandedRef.current.add(id);
@@ -304,10 +304,10 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
           {props.openWorkModelsSyncing ? (
             <div className="mb-3 flex shrink-0 items-center overflow-hidden rounded-2xl border border-amber-6/60 bg-amber-2/40">
               <div className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5">
-                <ProviderIcon providerId={OPENWORK_MODELS_PROVIDER_ID} providerName={OPENWORK_MODELS_PROVIDER_NAME} size={18} className="shrink-0 text-amber-11" />
+                <ProviderIcon providerId={REDROB_MODELS_PROVIDER_ID} providerName={REDROB_MODELS_PROVIDER_NAME} size={18} className="shrink-0 text-amber-11" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 text-[13px] font-medium text-dls-text">
-                    <span>{OPENWORK_MODELS_PROVIDER_NAME}</span>
+                    <span>{REDROB_MODELS_PROVIDER_NAME}</span>
                   </div>
                   <div className="truncate text-[11px] text-dls-secondary">
                     Included on your plan — pending workspace reload.

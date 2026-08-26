@@ -53,14 +53,14 @@ if (!config.readOnly) {
 
 // Bind the HTTP server before spawning the engine: serve-node may fall back
 // to an OS-assigned port on EADDRINUSE, and the engine's spawn-time env
-// (OPENWORK_SERVER_URL) must point at the port that actually bound, not the
+// (REDROB_SERVER_URL) must point at the port that actually bound, not the
 // requested one.
 const server = await startServer(config);
 config.port = server.port;
 const serverUrl = `http://${config.host === "0.0.0.0" ? "127.0.0.1" : config.host}:${server.port}`;
 const workerActivityHeartbeat = startWorkerActivityHeartbeat(config, logger);
 
-if (!config.opencodeBaseUrl && process.env.OPENWORK_MANAGE_OPENCODE === "1") {
+if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
   const workspace = findManagedEngineWorkspace(config.workspaces);
   if (workspace) {
     // Reap engines recorded by servers that died without cleanup. Best
@@ -71,20 +71,20 @@ if (!config.opencodeBaseUrl && process.env.OPENWORK_MANAGE_OPENCODE === "1") {
     // on every runtime-DB write — so disposes always pick up current state.
     const { path: runtimeConfigPath } = await writeOpenworkRuntimeConfigFile(config, workspace.id);
     keepOpenworkRuntimeConfigFileFresh(config, workspace.id);
-    const managedOpencodeCwd = process.env.OPENWORK_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
+    const managedOpencodeCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
     await mkdir(managedOpencodeCwd, { recursive: true });
     await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
     const opencodeModelsUrl = await resolveOpencodeModelsUrl();
     const engineEnv: Record<string, string | undefined> = {
-      ...(process.env.OPENWORK_DEV_MODE ? { OPENWORK_DEV_MODE: process.env.OPENWORK_DEV_MODE } : {}),
-      ...(process.env.OPENWORK_UI_CONTROL_DISCOVERY ? { OPENWORK_UI_CONTROL_DISCOVERY: process.env.OPENWORK_UI_CONTROL_DISCOVERY } : {}),
-      OPENWORK_SERVER_URL: serverUrl,
-      OPENWORK_SERVER_TOKEN: config.token,
+      ...(process.env.REDROB_DEV_MODE ? { REDROB_DEV_MODE: process.env.REDROB_DEV_MODE } : {}),
+      ...(process.env.REDROB_UI_CONTROL_DISCOVERY ? { REDROB_UI_CONTROL_DISCOVERY: process.env.REDROB_UI_CONTROL_DISCOVERY } : {}),
+      REDROB_SERVER_URL: serverUrl,
+      REDROB_SERVER_TOKEN: config.token,
       OPENCODE_CONFIG: runtimeConfigPath,
       OPENCODE_MODELS_URL: opencodeModelsUrl,
     };
     const engineSpawnTemplate: EngineSpawnTemplate = {
-      bin: process.env.OPENWORK_OPENCODE_BIN,
+      bin: process.env.REDROB_OPENCODE_BIN,
       cwd: managedOpencodeCwd,
       runtimeConfigPath,
       env: engineEnv,
@@ -94,7 +94,7 @@ if (!config.opencodeBaseUrl && process.env.OPENWORK_MANAGE_OPENCODE === "1") {
       },
     };
     managedOpencode = await createManagedOpencodeServer({
-      bin: process.env.OPENWORK_OPENCODE_BIN,
+      bin: process.env.REDROB_OPENCODE_BIN,
       cwd: managedOpencodeCwd,
       excludedPorts: [config.port],
       env: engineEnv,
@@ -132,7 +132,7 @@ if (!config.opencodeBaseUrl && process.env.OPENWORK_MANAGE_OPENCODE === "1") {
         serverRunId: managedOpencodeIdentity,
         ownerPid: process.pid,
         authProbe: buildEngineAuthProbeHeader(managedOpencode.username, managedOpencode.password),
-        bin: process.env.OPENWORK_OPENCODE_BIN?.trim() || "opencode",
+        bin: process.env.REDROB_OPENCODE_BIN?.trim() || "opencode",
       }).catch(() => undefined);
     }
     enginePool = createEnginePoolForConfig({

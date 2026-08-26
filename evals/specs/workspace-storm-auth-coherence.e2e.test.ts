@@ -16,8 +16,8 @@
  * be lost, and the wire log must show no non-injected 401/403 from Den.
  */
 import { expect } from "vitest";
-import { control, evalIn, go, waitFor } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
+import { control, evalIn, go, waitFor } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   app,
   eventually,
@@ -30,25 +30,25 @@ import {
   server,
   sleep,
   test,
-} from "@openwork/testkit";
-import type { App, DenClientState, FaultProxy, FaultRequest } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { App, DenClientState, FaultProxy, FaultRequest } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const daytonaEnabled = process.env.OPENWORK_EVAL_DAYTONA === "1";
-const configuredDen = Boolean(process.env.OPENWORK_EVAL_DEN_API_URL?.trim());
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const daytonaEnabled = process.env.REDROB_EVAL_DAYTONA === "1";
+const configuredDen = Boolean(process.env.REDROB_EVAL_DEN_API_URL?.trim());
 const localMysqlRequired = !daytonaEnabled && !configuredDen;
 const mysqlOpen = await localMysqlIsRunning();
 const runnable = e2eTestsEnabled && (!localMysqlRequired || mysqlOpen);
 
 const skipSuffix = !e2eTestsEnabled
-  ? " skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? " skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : localMysqlRequired && !mysqlOpen
     ? " skipped — needs MySQL on 127.0.0.1:3306"
     : "";
 
 /** Total workspace count for the scale attempt; the report names ~20. */
 const STORM_WORKSPACE_TOTAL = (() => {
-  const raw = Number(process.env.OPENWORK_EVAL_WORKSPACE_STORM_COUNT ?? "20");
+  const raw = Number(process.env.REDROB_EVAL_WORKSPACE_STORM_COUNT ?? "20");
   return Number.isInteger(raw) && raw >= 2 ? raw : 20;
 })();
 
@@ -64,7 +64,7 @@ interface WorkspaceListing {
 /** The local server's own workspace registry, read the way the app reads it. */
 async function listWorkspaces(desktopApp: App): Promise<WorkspaceListing> {
   const value = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { error: "local_server_unavailable" };
     const response = await fetch(String(info.baseUrl).replace(/\\/+$/, "") + "/workspaces", {
       headers: { authorization: "Bearer " + String(info.ownerToken ?? info.clientToken ?? "") },
@@ -277,7 +277,7 @@ test.skipIf(!runnable)(
   `${STORM_WORKSPACE_TOTAL} workspaces with rapid round-robin switching keep one coherent Cloud session${skipSuffix}`,
   { timeout: 30 * 60_000 },
   async ({ evidence, place }) => {
-    needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+    needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
     await using den = await server({
       place,
       org: {
@@ -360,7 +360,7 @@ test.skipIf(!runnable)(
   `six workspaces switched under Den overload and a transient 401 burst recover without a reconnect${skipSuffix}`,
   { timeout: 25 * 60_000 },
   async ({ evidence, place }) => {
-    needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+    needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
     await using den = await server({
       place,
       org: {
@@ -457,7 +457,7 @@ test.skipIf(!runnable)(
   `forty zero-dwell toggles between two workspaces settle on one coherent active workspace${skipSuffix}`,
   { timeout: 20 * 60_000 },
   async ({ evidence, place }) => {
-    needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+    needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
     await using den = await server({
       place,
       org: {

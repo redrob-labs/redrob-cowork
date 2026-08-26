@@ -13,13 +13,13 @@ import {
 import os from "node:os";
 import path from "node:path";
 
-/** @typedef {import("@openwork/types/desktop-ipc").DesktopIntegrationIssue} DesktopIntegrationIssue */
-/** @typedef {import("@openwork/types/desktop-ipc").DesktopIntegrationResult} DesktopIntegrationResult */
-/** @typedef {import("@openwork/types/desktop-ipc").DesktopIntegrationStatus} DesktopIntegrationStatus */
+/** @typedef {import("@redrob/types/desktop-ipc").DesktopIntegrationIssue} DesktopIntegrationIssue */
+/** @typedef {import("@redrob/types/desktop-ipc").DesktopIntegrationResult} DesktopIntegrationResult */
+/** @typedef {import("@redrob/types/desktop-ipc").DesktopIntegrationStatus} DesktopIntegrationStatus */
 
-export const OPENWORK_DESKTOP_ID = "com.differentai.openwork.desktop";
-export const OPENWORK_DESKTOP_NAME = "com.differentai.openwork";
-export const OPENWORK_PROTOCOL_MIME = "x-scheme-handler/openwork";
+export const REDROB_DESKTOP_ID = "io.redrob.work.desktop";
+export const REDROB_DESKTOP_NAME = "io.redrob.work";
+export const REDROB_PROTOCOL_MIME = "x-scheme-handler/redrob";
 
 const INTEGRATION_STATE_VERSION = 1;
 const OWNERSHIP_MARKER = "X-OpenWork-Managed";
@@ -92,7 +92,7 @@ function entryHandlesOpenwork(fields) {
   return (fields.get("MimeType") ?? "")
     .split(";")
     .map((value) => value.trim())
-    .includes(OPENWORK_PROTOCOL_MIME);
+    .includes(REDROB_PROTOCOL_MIME);
 }
 
 function entryAcceptsUrl(fields) {
@@ -146,7 +146,7 @@ async function removeDesktopAssociation(filePath, desktopId) {
     }
     if (
       (section !== "[Default Applications]" && section !== "[Added Associations]")
-      || !trimmed.startsWith(`${OPENWORK_PROTOCOL_MIME}=`)
+      || !trimmed.startsWith(`${REDROB_PROTOCOL_MIME}=`)
     ) {
       return line;
     }
@@ -189,11 +189,11 @@ Name=${cleanDesktopValue(appName)}
 Comment=Run agents, skills, and MCP with OpenWork
 Exec=${quoteDesktopExec(appImagePath)} %U
 TryExec=${cleanDesktopValue(appImagePath)}
-Icon=${OPENWORK_DESKTOP_NAME}
-StartupWMClass=${OPENWORK_DESKTOP_NAME}
+Icon=${REDROB_DESKTOP_NAME}
+StartupWMClass=${REDROB_DESKTOP_NAME}
 Terminal=false
 Categories=Development;Utility;
-MimeType=${OPENWORK_PROTOCOL_MIME};
+MimeType=${REDROB_PROTOCOL_MIME};
 X-AppImage-Name=${cleanDesktopValue(appName)}
 X-AppImage-Version=${cleanDesktopValue(appVersion)}
 ${OWNERSHIP_MARKER}=true
@@ -221,10 +221,10 @@ export function createLinuxDesktopIntegration({
   const supported = platform === "linux" && app.isPackaged && appImagePath != null;
   const dataHome = env.XDG_DATA_HOME?.trim() || path.join(homeDir, ".local", "share");
   const configHome = env.XDG_CONFIG_HOME?.trim() || path.join(homeDir, ".config");
-  const desktopEntryPath = path.join(dataHome, "applications", OPENWORK_DESKTOP_ID);
+  const desktopEntryPath = path.join(dataHome, "applications", REDROB_DESKTOP_ID);
   const iconPaths = Object.fromEntries(ICON_SIZES.map((size) => [
     size,
-    path.join(dataHome, "icons", "hicolor", `${size}x${size}`, "apps", `${OPENWORK_DESKTOP_NAME}.png`),
+    path.join(dataHome, "icons", "hicolor", `${size}x${size}`, "apps", `${REDROB_DESKTOP_NAME}.png`),
   ]));
   const iconSources = Object.fromEntries(ICON_SIZES.map((size) => [
     size,
@@ -247,7 +247,7 @@ export function createLinuxDesktopIntegration({
   }
 
   async function queryDefaultHandler() {
-    const result = await runCommand("xdg-mime", ["query", "default", OPENWORK_PROTOCOL_MIME]);
+    const result = await runCommand("xdg-mime", ["query", "default", REDROB_PROTOCOL_MIME]);
     return result.ok && result.stdout.trim() ? result.stdout.trim() : null;
   }
 
@@ -291,7 +291,7 @@ export function createLinuxDesktopIntegration({
     const applicationsRoot = path.join(dataHome, "applications");
     const entries = await readdir(applicationsRoot, { withFileTypes: true }).catch(() => []);
     for (const entry of entries) {
-      if (!entry.isFile() || !entry.name.endsWith(".desktop") || entry.name === OPENWORK_DESKTOP_ID) continue;
+      if (!entry.isFile() || !entry.name.endsWith(".desktop") || entry.name === REDROB_DESKTOP_ID) continue;
       const candidate = await inspectDesktopFile(path.join(applicationsRoot, entry.name), entry.name);
       if (candidate && !candidate.managed) return candidate;
     }
@@ -316,7 +316,7 @@ export function createLinuxDesktopIntegration({
         ICON_SIZES.map((size) => fileExists(iconPaths[size])),
       );
       if (!iconsPresent.every(Boolean)) issues.push("icon");
-      if (handlerDesktopId !== OPENWORK_DESKTOP_ID) issues.push("protocol-handler");
+      if (handlerDesktopId !== REDROB_DESKTOP_ID) issues.push("protocol-handler");
       return {
         supported: true,
         state: issues.length ? "needs_repair" : "integrated",
@@ -395,7 +395,7 @@ export function createLinuxDesktopIntegration({
       const registration = await runCommand("xdg-mime", [
         "default",
         path.basename(before.desktopEntryPath),
-        OPENWORK_PROTOCOL_MIME,
+        REDROB_PROTOCOL_MIME,
       ]);
       if (!registration.ok) {
         return {
@@ -409,7 +409,7 @@ export function createLinuxDesktopIntegration({
       return {
         ok: false,
         status,
-        error: "The external launcher was not selected for openwork:// callbacks.",
+        error: "The external launcher was not selected for redrob:// callbacks.",
       };
     }
     if (
@@ -436,20 +436,20 @@ export function createLinuxDesktopIntegration({
       }));
 
       const state = await readState();
-      if (before.handlerDesktopId && before.handlerDesktopId !== OPENWORK_DESKTOP_ID) {
+      if (before.handlerDesktopId && before.handlerDesktopId !== REDROB_DESKTOP_ID) {
         state.previousProtocolHandler = before.handlerDesktopId;
       }
       state.dismissedAppImages = state.dismissedAppImages.filter((candidate) => candidate !== appImagePath);
       await writeState(state);
 
       await refreshDesktopCaches();
-      const registration = await runCommand("xdg-mime", ["default", OPENWORK_DESKTOP_ID, OPENWORK_PROTOCOL_MIME]);
+      const registration = await runCommand("xdg-mime", ["default", REDROB_DESKTOP_ID, REDROB_PROTOCOL_MIME]);
       if (!registration.ok) {
-        throw new Error(registration.stderr || "xdg-mime could not register openwork://.");
+        throw new Error(registration.stderr || "xdg-mime could not register redrob://.");
       }
       const status = await getStatus();
       if (status.state !== "integrated") {
-        throw new Error("The desktop entry was installed, but the desktop did not select it as the openwork:// handler.");
+        throw new Error("The desktop entry was installed, but the desktop did not select it as the redrob:// handler.");
       }
       return { ok: true, status };
     } catch (error) {
@@ -482,13 +482,13 @@ export function createLinuxDesktopIntegration({
       await rm(desktopEntryPath, { force: true });
       await Promise.all(Object.values(iconPaths).map((target) => rm(target, { force: true })));
 
-      if (before.handlerDesktopId === OPENWORK_DESKTOP_ID) {
+      if (before.handlerDesktopId === REDROB_DESKTOP_ID) {
         const previousPath = await locateDesktopEntry(state.previousProtocolHandler);
         if (state.previousProtocolHandler && previousPath) {
-          await runCommand("xdg-mime", ["default", state.previousProtocolHandler, OPENWORK_PROTOCOL_MIME]);
+          await runCommand("xdg-mime", ["default", state.previousProtocolHandler, REDROB_PROTOCOL_MIME]);
         } else {
-          await removeDesktopAssociation(path.join(configHome, "mimeapps.list"), OPENWORK_DESKTOP_ID);
-          await removeDesktopAssociation(path.join(dataHome, "applications", "mimeapps.list"), OPENWORK_DESKTOP_ID);
+          await removeDesktopAssociation(path.join(configHome, "mimeapps.list"), REDROB_DESKTOP_ID);
+          await removeDesktopAssociation(path.join(dataHome, "applications", "mimeapps.list"), REDROB_DESKTOP_ID);
         }
       }
 

@@ -7,7 +7,7 @@ export type DeepLinkBridgeDetail = {
 
 declare global {
   interface Window {
-    __OPENWORK__?: {
+    __REDROB__?: {
       deepLinks?: string[];
     };
   }
@@ -26,9 +26,9 @@ export function pushPendingDeepLinks(target: Window, urls: readonly string[]): s
     return [];
   }
 
-  target.__OPENWORK__ ??= {};
-  const pending = target.__OPENWORK__.deepLinks ?? [];
-  target.__OPENWORK__.deepLinks = [...pending, ...normalized];
+  target.__REDROB__ ??= {};
+  const pending = target.__REDROB__.deepLinks ?? [];
+  target.__REDROB__.deepLinks = [...pending, ...normalized];
   target.dispatchEvent(
     new CustomEvent<DeepLinkBridgeDetail>(deepLinkBridgeEvent, {
       detail: { urls: normalized },
@@ -38,9 +38,9 @@ export function pushPendingDeepLinks(target: Window, urls: readonly string[]): s
 }
 
 export function drainPendingDeepLinks(target: Window): string[] {
-  const pending = target.__OPENWORK__?.deepLinks ?? [];
-  if (target.__OPENWORK__) {
-    target.__OPENWORK__.deepLinks = [];
+  const pending = target.__REDROB__?.deepLinks ?? [];
+  if (target.__REDROB__) {
+    target.__REDROB__.deepLinks = [];
   }
   return [...pending];
 }

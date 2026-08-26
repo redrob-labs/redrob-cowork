@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 
 const repoRoot = resolve(import.meta.dirname, "../..");
 
@@ -13,7 +13,7 @@ test("MCP endpoints tolerate newer or duplicated protocol-version headers", ({ e
   try {
     const result = spawnSync("pnpm", [
       "--filter",
-      "@openwork-ee/den-api",
+      "@redrob-ee/den-api",
       "exec",
       "bun",
       "test",

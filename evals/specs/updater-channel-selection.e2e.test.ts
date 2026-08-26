@@ -2,19 +2,19 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect } from "vitest";
-import { createAndSelectWorkspace, evalIn, go, waitFor } from "@openwork/behaviors";
-import { allocateFreePort } from "@openwork/cdp";
-import { desktop, localHost } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { createAndSelectWorkspace, evalIn, go, waitFor } from "@redrob/behaviors";
+import { allocateFreePort } from "@redrob/cdp";
+import { desktop, localHost } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const onMac = process.platform === "darwin";
 const enabled = e2eTestsEnabled && onMac;
 const title = enabled
   ? "the macOS updater keeps an Alpha selection through a stale check and relaunch"
   : e2eTestsEnabled
     ? `updater channel selection skipped — needs: run on macOS (Alpha is unavailable on ${process.platform})`
-    : "updater channel selection skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+    : "updater channel selection skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 type UpdaterSnapshot = {
   checks: string[];
@@ -50,7 +50,7 @@ async function installControlledUpdaterBridge(
   options: { delayStable: boolean },
 ): Promise<void> {
   const installed = await evalIn(app, `(() => {
-    const nativeUpdater = window.__OPENWORK_ELECTRON__?.updater;
+    const nativeUpdater = window.__REDROB_ELECTRON__?.updater;
     if (!nativeUpdater?.getChannel || !nativeUpdater.setChannel) return false;
     const state = {
       checks: [],
@@ -161,7 +161,7 @@ async function selectAlpha(app: Parameters<typeof evalIn>[0]): Promise<void> {
 async function readUpdaterSnapshot(app: Parameters<typeof evalIn>[0], label: string): Promise<UpdaterSnapshot> {
   const value = await evalIn(app, `(async () => {
     const state = window.__openworkUpdaterEvalState;
-    const nativeState = await window.__OPENWORK_ELECTRON__?.updater?.getChannel?.();
+    const nativeState = await window.__REDROB_ELECTRON__?.updater?.getChannel?.();
     let preferences = null;
     try {
       preferences = JSON.parse(localStorage.getItem("openwork.preferences") || "null");
@@ -202,7 +202,7 @@ async function quitDesktopGracefully(app: Parameters<typeof evalIn>[0]): Promise
 }
 
 test.skipIf(!enabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   // Alpha is deliberately macOS-only. Daytona Electron surfaces are Linux, so
   // this journey uses the local Mac host instead of producing a vacuous remote

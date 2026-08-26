@@ -33,8 +33,8 @@ function run(command, args, cwd, env) {
 }
 
 function writeSentryBuildConfig() {
-  const dsn = process.env.OPENWORK_DESKTOP_SENTRY_DSN?.trim() ?? "";
-  const tracesSampleRateRaw = process.env.OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE?.trim() ?? "";
+  const dsn = process.env.REDROB_DESKTOP_SENTRY_DSN?.trim() ?? "";
+  const tracesSampleRateRaw = process.env.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE?.trim() ?? "";
   const tracesSampleRate = tracesSampleRateRaw ? Number(tracesSampleRateRaw) : 0.01;
   const config = {
     dsn: dsn || null,
@@ -51,11 +51,11 @@ run(nodeCmd, [resolve(__dirname, "prepare-runtime-node-modules.mjs"), "--outdir"
 writeSentryBuildConfig();
 // Build the server TS → JS so Electron can import it in-process
 run(pnpmCmd, ["--filter", "openwork-server", "build"], repoRoot);
-// OPENWORK_ELECTRON_BUILD tells Vite to emit relative asset paths so
+// REDROB_ELECTRON_BUILD tells Vite to emit relative asset paths so
 // index.html resolves /assets/* correctly when loaded via file:// from
 // inside the packaged .app bundle.
-run(pnpmCmd, ["--filter", "@openwork/app", "build"], repoRoot, {
-  OPENWORK_ELECTRON_BUILD: "1",
+run(pnpmCmd, ["--filter", "@redrob/app", "build"], repoRoot, {
+  REDROB_ELECTRON_BUILD: "1",
 });
 // Copy constants.json next to server dist so the packaged asar can resolve it.
 // Also patch the compiled import path so it works from both dev and packaged layouts.

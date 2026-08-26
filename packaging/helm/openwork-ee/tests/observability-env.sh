@@ -144,7 +144,7 @@ assert_file_contains "$repo_root/packaging/docker/Dockerfile.den" '/app/ee/apps/
 assert_file_not_contains "$repo_root/packaging/docker/Dockerfile.den" '/app/ee/apps/den-api/dist/server.js'
 assert_file_contains "$repo_root/packaging/docker/docker-compose.den-dev.yml" '/app/ee/apps/den-api/dist/main.js'
 assert_file_not_contains "$repo_root/packaging/docker/docker-compose.den-dev.yml" '/app/ee/apps/den-api/dist/server.js'
-assert_file_contains "$repo_root/.devcontainer/start-daytona-server.sh" 'pnpm --filter @openwork-ee/den-api exec tsx watch src/main.ts'
+assert_file_contains "$repo_root/.devcontainer/start-daytona-server.sh" 'pnpm --filter @redrob-ee/den-api exec tsx watch src/main.ts'
 assert_file_not_contains "$repo_root/.devcontainer/start-daytona-server.sh" 'ee/apps/den-api/src/server.ts'
 assert_file_contains "$repo_root/evals/packages/hosts/src/den-stack.ts" '"tsx", "src/main.ts"'
 assert_file_not_contains "$repo_root/evals/packages/hosts/src/den-stack.ts" '"tsx", "src/server.ts"'

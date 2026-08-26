@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
-import { eq, inArray } from "@openwork-ee/den-db/drizzle"
+import { eq, inArray } from "@redrob-ee/den-db/drizzle"
 import {
   AuthUserTable,
   ConfigObjectTable,
@@ -14,8 +14,8 @@ import {
   PluginTable,
   TeamMemberTable,
   TeamTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { Hono, type MiddlewareHandler } from "hono"
 import type { PluginArchActorContext } from "../src/routes/org/plugin-system/access.js"
 import type { OrgRouteVariables } from "../src/routes/org/shared.js"
@@ -128,7 +128,7 @@ function requestContext(actor: string | undefined) {
 
 beforeAll(async () => {
   mock.restore()
-  const realDb = (await import("@openwork-ee/den-db")).createDenDb({
+  const realDb = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db

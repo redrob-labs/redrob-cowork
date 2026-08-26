@@ -4,13 +4,13 @@ import { z } from "zod";
 import { OpenWorkExtensionsPreview } from "./openwork-extensions-preview.js";
 import * as OpenWorkExtensionsPreviewEntry from "./openwork-extensions-preview.js";
 import {
-  OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION,
-  OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION,
-  OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION,
+  REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION,
+  REDROB_EXTENSION_DISCOVERY_INSTRUCTION,
+  REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION,
 } from "./openwork-extensions-preview-steering.js";
 
-const originalServerUrl = process.env.OPENWORK_SERVER_URL;
-const originalServerToken = process.env.OPENWORK_SERVER_TOKEN;
+const originalServerUrl = process.env.REDROB_SERVER_URL;
+const originalServerToken = process.env.REDROB_SERVER_TOKEN;
 const stops: Array<() => void> = [];
 
 const searchResultSchema = z.object({
@@ -77,10 +77,10 @@ const affordanceResultSchema = <T extends z.ZodTypeAny>(id: string, result: T) =
 
 afterEach(() => {
   while (stops.length) stops.pop()?.();
-  if (originalServerUrl === undefined) delete process.env.OPENWORK_SERVER_URL;
-  else process.env.OPENWORK_SERVER_URL = originalServerUrl;
-  if (originalServerToken === undefined) delete process.env.OPENWORK_SERVER_TOKEN;
-  else process.env.OPENWORK_SERVER_TOKEN = originalServerToken;
+  if (originalServerUrl === undefined) delete process.env.REDROB_SERVER_URL;
+  else process.env.REDROB_SERVER_URL = originalServerUrl;
+  if (originalServerToken === undefined) delete process.env.REDROB_SERVER_TOKEN;
+  else process.env.REDROB_SERVER_TOKEN = originalServerToken;
 });
 
 async function transformedSystem(plugin: Awaited<ReturnType<typeof OpenWorkExtensionsPreview>>): Promise<string> {
@@ -212,8 +212,8 @@ function startFakeOpenWorkServer() {
     },
   });
   stops.push(() => server.stop(true));
-  process.env.OPENWORK_SERVER_URL = `http://127.0.0.1:${server.port}`;
-  process.env.OPENWORK_SERVER_TOKEN = "test-token";
+  process.env.REDROB_SERVER_URL = `http://127.0.0.1:${server.port}`;
+  process.env.REDROB_SERVER_TOKEN = "test-token";
   return { requests };
 }
 
@@ -414,8 +414,8 @@ describe("OpenWorkExtensionsPreview session tools", () => {
     expect(connectStateRequest?.search).toBe("?directory=%2Ftmp%2Farchive&provider=anthropic&model=claude-sonnet-4");
     expect(connectSkillsRequest?.search).toBe("");
     expect(output.system.join("\n")).toContain("verified ready for this exact workspace/model");
-    expect(output.system.join("\n")).toContain(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION);
+    expect(output.system.join("\n")).toContain(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION);
+    expect(output.system.join("\n")).not.toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
     expect(output.system.join("\n")).toContain("<name>customer-briefing</name>");
   });
 
@@ -435,8 +435,8 @@ describe("OpenWorkExtensionsPreview session tools", () => {
 
     expect(requests).toEqual([{ query: { directory: "/tmp/archive" } }]);
     expect(output.system.join("\n")).toContain("verified ready for this exact workspace/model");
-    expect(output.system.join("\n")).toContain(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION);
+    expect(output.system.join("\n")).toContain(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION);
+    expect(output.system.join("\n")).not.toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
   });
 
   test("uses neutral transform steering when the engine reports failed Cloud status", async () => {
@@ -454,9 +454,9 @@ describe("OpenWorkExtensionsPreview session tools", () => {
     await plugin["experimental.chat.system.transform"]({}, output);
 
     expect(requests).toEqual([{ query: { directory: "/tmp/archive" } }]);
-    expect(output.system[0]).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
-    expect(output.system.join("\n")).toContain(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION);
+    expect(output.system[0]).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(output.system.join("\n")).toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
+    expect(output.system.join("\n")).not.toContain(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION);
     expect(output.system[0]).not.toContain("not ready");
     expect(output.system[0]).not.toContain("Repair and test");
     expect(output.system[0]).not.toContain("Do not use OpenWork documentation tools");

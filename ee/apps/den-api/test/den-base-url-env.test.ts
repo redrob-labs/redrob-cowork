@@ -30,7 +30,7 @@ function probeDenUrls(overrides: Record<string, string>) {
       DB_MODE: "mysql",
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       ...overrides,
     },
@@ -57,7 +57,7 @@ describe("DEN_BASE_URL environment defaults", () => {
   test("derives local development API and MCP URLs from DEN_BASE_URL and PORT", () => {
     expect(probeDenUrls({
       DEN_BASE_URL: "http://localhost:3005",
-      OPENWORK_DEV_MODE: "1",
+      REDROB_DEV_MODE: "1",
       PORT: "8790",
     })).toEqual({
       betterAuthUrl: "http://localhost:3005",
@@ -133,7 +133,7 @@ describe("DEN_BASE_URL environment defaults", () => {
   test("derives local API URL from BETTER_AUTH_URL and PORT without DEN_BASE_URL", () => {
     expect(probeDenUrls({
       BETTER_AUTH_URL: "http://localhost:3005",
-      OPENWORK_DEV_MODE: "1",
+      REDROB_DEV_MODE: "1",
       PORT: "8790",
     })).toMatchObject({
       betterAuthUrl: "http://localhost:3005",

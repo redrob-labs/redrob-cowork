@@ -36,7 +36,7 @@ const needsSignInStatus: ExternalConnectionStatus = {
     label: "Connect Gmail",
     surface: "openwork_your_connections",
     retry: "search_capabilities",
-    url: "https://app.openworklabs.com/dashboard/connections/emc_gmail",
+    url: "https://app.redrob.io/dashboard/connections/emc_gmail",
   },
 }
 
@@ -112,7 +112,7 @@ test("connection status payloads carry the exact human action and same-server la
       type: "connect",
       label: "Connect Gmail",
       surface: "openwork_your_connections",
-      url: "https://app.openworklabs.com/dashboard/connections/emc_gmail",
+      url: "https://app.redrob.io/dashboard/connections/emc_gmail",
     },
   })
   expect(connectionActionLaunch(payload)).toEqual({
@@ -123,7 +123,7 @@ test("connection status payloads carry the exact human action and same-server la
   const fallback = connectionActionTextFallback(payload)
   expect(fallback).toContain("# Connection needs attention: Gmail")
   expect(fallback).toContain("Action: Connect Gmail")
-  expect(fallback).toContain("Open: https://app.openworklabs.com/dashboard/connections/emc_gmail")
+  expect(fallback).toContain("Open: https://app.redrob.io/dashboard/connections/emc_gmail")
 
   const connected = connectedConnectionActionPayload({ connectionId: "emc_gmail", connectionName: "Gmail" })
   expect(connected.state).toBe("connected")

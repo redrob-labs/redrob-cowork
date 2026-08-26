@@ -37,8 +37,8 @@ type Props = {
   isMobileVisitor: boolean;
 };
 
-const CLOUD_SIGNUP_URL = "https://app.openworklabs.com";
-const GATEWAY_URL = "https://api.openworklabs.com/mcp/agent";
+const CLOUD_SIGNUP_URL = "https://app.redrob.io";
+const GATEWAY_URL = "https://api.redrob.io/mcp/agent";
 
 type ProviderLogoName =
   | "openai"
@@ -416,7 +416,7 @@ export function LandingHome(props: Props) {
                     task.
                   </p>
                   <a
-                    href="https://app.openworklabs.com"
+                    href="https://app.redrob.io"
                     className="lp-pill-secondary lp-pill-sm mt-5"
                   >
                     Open in browser

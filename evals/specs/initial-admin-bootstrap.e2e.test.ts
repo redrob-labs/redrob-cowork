@@ -1,14 +1,14 @@
 import { expect } from "vitest";
-import { clickButton, denFetch, evalIn, fill, signIn, visibleText, waitFor } from "@openwork/behaviors";
-import { localMysqlIsRunning, localRedisIsRunning, queryDenDatabase, server, test } from "@openwork/testkit";
-import { navigate } from "@openwork/cdp";
-import { chrome } from "@openwork/hosts";
+import { clickButton, denFetch, evalIn, fill, signIn, visibleText, waitFor } from "@redrob/behaviors";
+import { localMysqlIsRunning, localRedisIsRunning, queryDenDatabase, server, test } from "@redrob/testkit";
+import { navigate } from "@redrob/cdp";
+import { chrome } from "@redrob/hosts";
 
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const redisOpen = await localRedisIsRunning();
 const title = !localPlacement
-  ? "Initial administrator bootstrap skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+  ? "Initial administrator bootstrap skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
   : !mysqlOpen
     ? "Initial administrator bootstrap skipped — needs MySQL on 127.0.0.1:3306"
     : !redisOpen

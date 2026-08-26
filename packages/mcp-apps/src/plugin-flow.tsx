@@ -1,4 +1,4 @@
-import { pluginFlowPayloadSchema, type PluginFlowPayload } from "@openwork/types/plugin-flow-app"
+import { pluginFlowPayloadSchema, type PluginFlowPayload } from "@redrob/types/plugin-flow-app"
 import { mountMcpApp } from "./shared/bridge"
 import { AppHeader, CardBody, CardFooter, CheckIcon, KeyValueGrid, ShareIcon } from "./shared/ui"
 import "./shared/theme.css"

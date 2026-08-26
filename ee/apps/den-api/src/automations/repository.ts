@@ -7,12 +7,12 @@ import {
   desktopClaimDeadline,
   missedDesktopRunMessage,
   nextAutomationOccurrence,
-} from "@openwork/automations"
+} from "@redrob/automations"
 import type {
   AutomationClaimResult,
   AutomationListItem,
   AutomationRepository,
-} from "@openwork/automations"
+} from "@redrob/automations"
 import type {
   Automation,
   AutomationAction,
@@ -22,8 +22,8 @@ import type {
   AutomationRunEvent,
   AutomationRunEventType,
   AutomationUsage,
-} from "@openwork/types/automations"
-import { and, asc, desc, eq, gt, inArray, lt, lte, or, sql } from "@openwork-ee/den-db/drizzle"
+} from "@redrob/types/automations"
+import { and, asc, desc, eq, gt, inArray, lt, lte, or, sql } from "@redrob-ee/den-db/drizzle"
 import {
   AutomationRevisionTable,
   AutomationRunnerTable,
@@ -31,8 +31,8 @@ import {
   AutomationRunEventTable,
   AutomationRunTable,
   AutomationTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 import { db } from "../db.js"
 import { appLogger } from "../observability/logger.js"
 import { automationUpdateChangedRows } from "./update-result.js"

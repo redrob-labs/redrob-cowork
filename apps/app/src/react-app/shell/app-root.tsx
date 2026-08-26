@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 
+
+
 import { captureAnalyticsEvent, initAnalytics } from "../../app/lib/analytics";
 import {
   createDenClient,
@@ -17,7 +19,7 @@ import {
 } from "../../app/lib/den-session-events";
 import { evalRelaunchDesktopApp } from "../../app/lib/desktop";
 import { Button } from "../../components/ui/button";
-import { t } from "../../i18n";
+import { currentLocale, subscribeToLocale, t } from "../../i18n";
 import { useDenAuth } from "../domains/cloud/den-auth-provider";
 import {
   clearCloudInventoryCache,
@@ -41,6 +43,7 @@ import {
   type OpenworkControlAction,
 } from "./control/control-provider";
 import { OpenworkContextPublisher } from "./openwork-context-publisher";
+import { BottomLeftControls } from "./bottom-left-controls";
 import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
@@ -354,6 +357,11 @@ export function AppRoot() {
   useDesktopFontZoomBehavior();
   useVisualViewportInset();
 
+  // Re-render the whole shell when the active language changes so every
+  // `t(...)` call across the tree picks up the new locale immediately (the
+  // bottom-left language toggle flips this without a reload).
+  useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+
   // Module-level dedupe keeps StrictMode double-mounts from double-counting.
   useEffect(() => {
     if (appOpenedCaptured) return;
@@ -492,6 +500,7 @@ export function AppRoot() {
               <Route path="*" element={<Navigate to="/session" replace />} />
             </Routes>
           </DenSigninGate>
+          <BottomLeftControls />
           <LoadingOverlay />
           </EnterpriseActivationGate>
           <CloudWorkspaceOverlay />

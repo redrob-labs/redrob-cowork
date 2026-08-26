@@ -11,7 +11,7 @@ Please do not open public GitHub issues for security vulnerabilities.
 
 Instead, report vulnerabilities privately to:
 
-- Email: `ben@openworklabs.com`
+- Email: `ben@redrob.io`
 - Subject: `[Redrob Work security] <short summary>`
 
 Please include:

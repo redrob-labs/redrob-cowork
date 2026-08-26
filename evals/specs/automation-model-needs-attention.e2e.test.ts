@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   clickButton,
   denFetch,
@@ -8,10 +8,10 @@ import {
   visibleText,
   waitFor,
   waitForText,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { app, needs, server, test } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { app, needs, server, test } from "@redrob/testkit";
 
 /**
  * CORE JOURNEY: an active Automation keeps its instructions, cadence, and
@@ -176,7 +176,7 @@ async function clickAutomationCard(surface: Surface, name: string): Promise<void
 }
 
 test("an unavailable Automation model needs attention until the owner selects a supported replacement", async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_AUTOMATIONS_E2E_TEST"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_AUTOMATIONS_E2E_TEST"] });
 
   await using den = await server({ place });
   const orgId = await activeOrganizationId(den.admin);

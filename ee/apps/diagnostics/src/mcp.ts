@@ -1,4 +1,4 @@
-import { EGRESS_DIAGNOSTIC_RUN_HEADER } from "@openwork/types/den/egress-diagnostics"
+import { EGRESS_DIAGNOSTIC_RUN_HEADER } from "@redrob/types/den/egress-diagnostics"
 import { diagnosticsConfig, validateProductionConfig } from "./config"
 import { mcpAuthorizationSubject } from "./auth"
 import {

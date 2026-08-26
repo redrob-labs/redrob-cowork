@@ -1,13 +1,13 @@
 import { createServer } from "node:http";
 import { expect, onTestFinished } from "vitest";
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
 import {
   eventually,
   needs,
   server,
   test,
-} from "@openwork/testkit";
+} from "@redrob/testkit";
 
 const PROVIDER_NAME = "Recovery Window Gateway";
 const PROVIDER_KEY = "recovery-window-gateway";
@@ -198,7 +198,7 @@ async function readPresence(admin: DenSession): Promise<Record<string, unknown>>
 }
 
 test("a scheduled Desktop occurrence survives a short runner outage with named missed causes", { timeout: 15 * 60_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   const completionCalls: unknown[] = [];
   const providerBaseUrl = await startProviderMock(completionCalls);
   await using den = await server({

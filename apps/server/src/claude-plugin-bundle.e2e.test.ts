@@ -118,11 +118,11 @@ function startMockOpencode() {
 async function startOpenwork(options?: { branch?: string }) {
   const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-claude-plugin-"));
   roots.push(workspaceRoot);
-  setEnv("OPENWORK_RUNTIME_DB", join(workspaceRoot, "runtime.sqlite"));
+  setEnv("REDROB_RUNTIME_DB", join(workspaceRoot, "runtime.sqlite"));
 
   const github = startMockGithub(options);
-  setEnv("OPENWORK_GITHUB_API_BASE", `http://127.0.0.1:${github.port}`);
-  setEnv("OPENWORK_GITHUB_RAW_BASE", `http://127.0.0.1:${github.port}`);
+  setEnv("REDROB_GITHUB_API_BASE", `http://127.0.0.1:${github.port}`);
+  setEnv("REDROB_GITHUB_RAW_BASE", `http://127.0.0.1:${github.port}`);
 
   const engine = startMockOpencode();
   const config: ServerConfig = {

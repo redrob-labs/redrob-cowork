@@ -4,7 +4,7 @@ import {
   OAuthAccessTokenTable,
   OAuthConsentTable,
   OAuthRefreshTokenTable,
-} from "@openwork-ee/den-db/schema"
+} from "@redrob-ee/den-db/schema"
 
 const selectedRows = {
   sessions: [{ id: "session_one" }, { id: "session_two" }],

@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, mock, test } from "bun:test"
-import { and, eq, inArray, sql } from "@openwork-ee/den-db/drizzle"
+import { and, eq, inArray, sql } from "@redrob-ee/den-db/drizzle"
 import {
   AuthUserTable,
   ConfigObjectAccessGrantTable,
@@ -24,8 +24,8 @@ import {
   PluginTable,
   OrganizationTable,
   TeamTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import type { PluginArchActorContext } from "../src/routes/org/plugin-system/access.js"
 
 function seedRequiredEnv() {
@@ -77,7 +77,7 @@ const createdUserIds: DenTypeId<"user">[] = []
 beforeAll(async () => {
   seedRequiredEnv()
   mock.restore()
-  db = (await import("@openwork-ee/den-db")).createDenDb({
+  db = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db

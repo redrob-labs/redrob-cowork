@@ -1,16 +1,16 @@
 import { expect } from "vitest";
-import { denFetch, freshSession } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { eventually, localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
+import { denFetch, freshSession } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { eventually, localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
 
 const ORGANIZATION_NAME = "Role Change Session Survival";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !e2eTestsEnabled
-  ? "role change session survival skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "role change session survival skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !localPlacement
-    ? "role change session survival skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+    ? "role change session survival skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
     : !mysqlOpen
       ? "role change session survival skipped — needs MySQL on 127.0.0.1:3306"
       : "role upgrades preserve live sessions while demotions revoke them";
@@ -73,7 +73,7 @@ async function sessionStatus(member: DenSession): Promise<number> {
 }
 
 test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   await using den = await server({
     place,

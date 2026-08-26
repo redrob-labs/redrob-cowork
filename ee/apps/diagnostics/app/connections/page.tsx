@@ -1,4 +1,4 @@
-import type { StoredConnectDiagnosticIncident } from "@openwork/types/den/connect-diagnostics"
+import type { StoredConnectDiagnosticIncident } from "@redrob/types/den/connect-diagnostics"
 import {
   connectionIncidentFilters,
   filterConnectionIncidents,

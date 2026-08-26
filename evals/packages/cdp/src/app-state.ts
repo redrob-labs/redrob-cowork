@@ -8,8 +8,8 @@ import type { CdpClient, EvaluateOptions } from "./cdp.ts";
  * and a workspace can be selected while the panel still renders placeholders.
  *
  * This module is the single implementation of that predicate so the lifecycle
- * layer (@openwork/hosts) and the behaviours specs call (@openwork/behaviors)
- * cannot drift apart. It lives in @openwork/cdp because both already depend on
+ * layer (@redrob/hosts) and the behaviours specs call (@redrob/behaviors)
+ * cannot drift apart. It lives in @redrob/cdp because both already depend on
  * it, which keeps the dependency graph acyclic.
  */
 

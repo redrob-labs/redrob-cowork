@@ -1,4 +1,4 @@
-# @openwork/headless-threads
+# @redrob/headless-threads
 
 Drive a native OpenWork thread from code, without rendering the app.
 
@@ -30,12 +30,12 @@ that was not there when the turn was submitted.
 ## Use
 
 ```ts
-import { createHeadlessThreadClient } from "@openwork/headless-threads";
+import { createHeadlessThreadClient } from "@redrob/headless-threads";
 
 const threads = createHeadlessThreadClient({
   baseUrl: "http://127.0.0.1:8787",
   workspaceId: "ws_1",
-  token: process.env.OPENWORK_TOKEN,
+  token: process.env.REDROB_TOKEN,
   defaultModel: { providerId: "anthropic", modelId: "claude-sonnet-5" },
 });
 
@@ -85,7 +85,7 @@ whole contract against fixtures with no wall-clock dependency.
 ## Test
 
 ```bash
-pnpm --filter @openwork/headless-threads test
+pnpm --filter @redrob/headless-threads test
 ```
 
 The end-to-end proof lives with the server it drives, in

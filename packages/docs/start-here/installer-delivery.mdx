@@ -9,15 +9,15 @@ Organization install links help members install the standard OpenWork desktop an
 
 | Deployment style | Download behavior | Required client access |
 | --- | --- | --- |
-| Internet-connected | Den validates the organization install token, then redirects the browser to the exact standard GitHub release asset under `OPENWORK_INSTALLER_RELEASE_REPO` and `OPENWORK_INSTALLER_RELEASE_TAG`. The organization token is not forwarded. | Den web/API, `github.com`, `release-assets.githubusercontent.com`, and `objects.githubusercontent.com` for legacy or rollback paths. |
-| Semi-air-gapped installer delivery | Den streams the matching standard installer from `OPENWORK_INSTALLER_ARTIFACTS_DIR`. | Den web/API only for installer download. Desktop runtime dependencies may still need internet unless mirrored or disabled. |
+| Internet-connected | Den validates the organization install token, then redirects the browser to the exact standard GitHub release asset under `REDROB_INSTALLER_RELEASE_REPO` and `REDROB_INSTALLER_RELEASE_TAG`. The organization token is not forwarded. | Den web/API, `github.com`, `release-assets.githubusercontent.com`, and `objects.githubusercontent.com` for legacy or rollback paths. |
+| Semi-air-gapped installer delivery | Den streams the matching standard installer from `REDROB_INSTALLER_ARTIFACTS_DIR`. | Den web/API only for installer download. Desktop runtime dependencies may still need internet unless mirrored or disabled. |
 | Fully internal installer delivery | Same mounted-artifact path, with Den web/API and installer bytes available entirely inside the isolated network. | Internal Den web/API only for installer download. Full product isolation still requires the broader checklist in [Air-gapped deployment](/start-here/air-gapped-deployment). |
 
 ## Mounted artifact behavior
 
-When `OPENWORK_INSTALLER_ARTIFACTS_DIR` points at a mounted directory and the expected file exists, Den streams that file directly. It does not fetch from GitHub, cache on first request, rewrap, ZIP, or hold the whole installer in memory.
+When `REDROB_INSTALLER_ARTIFACTS_DIR` points at a mounted directory and the expected file exists, Den streams that file directly. It does not fetch from GitHub, cache on first request, rewrap, ZIP, or hold the whole installer in memory.
 
-`OPENWORK_INSTALLER_RELEASE_TAG` selects the expected release version. The standard filenames use the release tag without a leading `v`:
+`REDROB_INSTALLER_RELEASE_TAG` selects the expected release version. The standard filenames use the release tag without a leading `v`:
 
 - `openwork-mac-arm64-<version>.dmg`
 - `openwork-mac-x64-<version>.dmg`
@@ -25,7 +25,7 @@ When `OPENWORK_INSTALLER_ARTIFACTS_DIR` points at a mounted directory and the ex
 - `openwork-linux-x86_64-<version>.AppImage`
 - `openwork-linux-arm64-<version>.AppImage`
 
-`OPENWORK_INSTALLER_RELEASE_REPO` controls the GitHub redirect path when Den does not find a mounted artifact. It is not an internal artifact registry setting.
+`REDROB_INSTALLER_RELEASE_REPO` controls the GitHub redirect path when Den does not find a mounted artifact. It is not an internal artifact registry setting.
 
 For multi-replica Den API deployments, mount the same read-only PVC at the same path on every replica. Connection grants are stored in MySQL, so preview and acceptance can land on different replicas safely, but installer bytes must be equally visible to each replica.
 

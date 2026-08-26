@@ -1,5 +1,5 @@
-import { dumpScreenState, readActiveWorkspaceId } from "@openwork/cdp";
-import type { Surface } from "@openwork/cdp";
+import { dumpScreenState, readActiveWorkspaceId } from "@redrob/cdp";
+import type { Surface } from "@redrob/cdp";
 import type { DenRef, DenSession } from "./den.ts";
 import { createDesktopHandoffGrant } from "./den.ts";
 import { clickButton, control, currentHash, evalIn, go, waitFor, waitForText, waitUntilInteractive } from "./desktop.ts";
@@ -70,7 +70,7 @@ async function completeOrganizationOnboarding(app: Surface): Promise<void> {
       const labels = [...document.querySelectorAll("button")]
         .filter((button) => !button.disabled)
         .map((button) => (button.textContent ?? "").trim());
-      return ["Continue with organization", "Continue to workspace", "Continue without OpenWork Models", "Continue"]
+      return ["Continue with organization", "Continue to workspace", "Continue without Redrob Models", "Continue"]
         .find((candidate) => labels.includes(candidate)) ?? "";
     })()`);
     if (typeof label === "string" && label) {

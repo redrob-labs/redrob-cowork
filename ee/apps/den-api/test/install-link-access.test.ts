@@ -1,5 +1,5 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
-import { generateConnectLinkKeyPair, verifyConnectLinkToken } from "@openwork/connect-link/node"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
+import { generateConnectLinkKeyPair, verifyConnectLinkToken } from "@redrob/connect-link/node"
 import { afterAll, beforeAll, beforeEach, expect, mock, test } from "bun:test"
 import { Hono } from "hono"
 import { mkdtempSync, writeFileSync } from "node:fs"
@@ -364,7 +364,7 @@ test("invitation downloads keep the generic URL when install links are disabled"
     metadata: { capabilities: { installLinks: false } },
   })
 
-  expect(downloadUrl).toBe("https://openworklabs.com/download")
+  expect(downloadUrl).toBe("https://redrob.io/download")
   expect(insertedInstallLinks()).toHaveLength(0)
 })
 
@@ -377,7 +377,7 @@ test("invitation delivery can fall back when install-link storage fails", async 
     metadata: { capabilities: { installLinks: true } },
   })
 
-  expect(downloadUrl).toBe("https://openworklabs.com/download")
+  expect(downloadUrl).toBe("https://redrob.io/download")
   expect(insertedInstallLinks()).toHaveLength(0)
 })
 
@@ -681,7 +681,7 @@ test("zero-config install config mints a short-lived exchange without storing th
 
   expect(response.status).toBe(200)
   const body = await response.json()
-  expect(body.connectUrl).toStartWith("openwork://connect?code=")
+  expect(body.connectUrl).toStartWith("redrob://connect?code=")
   expect(body.activationUrl).toStartWith("http://127.0.0.1:8790/activate?code=")
   expect(body.requireSignin).toBe(true)
   expect(body.desktopVersion).toBe("9.9.9")
@@ -806,7 +806,7 @@ test("install config includes a fresh signed organization handoff while preservi
 
   expect(response.status).toBe(200)
   const body = await response.json()
-  expect(body.connectUrl).toStartWith("openwork://connect?token=")
+  expect(body.connectUrl).toStartWith("redrob://connect?token=")
   expect(body.activationUrl).toStartWith("http://127.0.0.1:8790/activate?code=")
   expect(body.requireSignin).toBe(true)
   expect(body.desktopVersion).toBe("9.9.9")

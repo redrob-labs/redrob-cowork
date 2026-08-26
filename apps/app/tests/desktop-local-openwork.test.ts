@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import type { OpenworkServerInfo } from "../src/app/lib/desktop";
 import {
   isReadyLocalOpenworkServerInfo,
-  LOCAL_OPENWORK_READINESS_RETRY_DELAY_MS,
+  LOCAL_REDROB_READINESS_RETRY_DELAY_MS,
   openworkServerSettingsChanged,
   shouldAttemptDesktopLocalReconnect,
   waitForReadyLocalOpenworkServerInfo,
@@ -94,8 +94,8 @@ describe("waitForReadyLocalOpenworkServerInfo", () => {
 
     expect(calls).toBe(3);
     expect(waits).toEqual([
-      LOCAL_OPENWORK_READINESS_RETRY_DELAY_MS,
-      LOCAL_OPENWORK_READINESS_RETRY_DELAY_MS,
+      LOCAL_REDROB_READINESS_RETRY_DELAY_MS,
+      LOCAL_REDROB_READINESS_RETRY_DELAY_MS,
     ]);
     expect(isReadyLocalOpenworkServerInfo(result)).toBe(true);
   });

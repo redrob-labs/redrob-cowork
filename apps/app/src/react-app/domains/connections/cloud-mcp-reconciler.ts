@@ -26,7 +26,7 @@ import {
   type CloudMcpUserState,
 } from "./cloud-mcp-user-state";
 
-export const OPENWORK_CLOUD_EXPECTED_TOOLS = [
+export const REDROB_CLOUD_EXPECTED_TOOLS = [
   "openwork-cloud_search_capabilities",
   "openwork-cloud_execute_capability",
 ];
@@ -111,8 +111,8 @@ type CleanupClient = {
 
 const repairInFlight = new Map<string, Promise<CloudMcpOperationResult>>();
 
-const APP_VERSION = String(import.meta.env.VITE_OPENWORK_APP_VERSION ?? "").trim();
-const APP_BUILD_SHA = String(import.meta.env.VITE_OPENWORK_BUILD_SHA ?? import.meta.env.VITE_OPENWORK_GIT_SHA ?? "").trim();
+const APP_VERSION = String(import.meta.env.VITE_REDROB_APP_VERSION ?? "").trim();
+const APP_BUILD_SHA = String(import.meta.env.VITE_REDROB_BUILD_SHA ?? import.meta.env.VITE_REDROB_GIT_SHA ?? "").trim();
 
 function normalizeCode(code: string | null | undefined): string {
   return code?.trim().toLowerCase().replace(/[-.]/g, "_") ?? "";

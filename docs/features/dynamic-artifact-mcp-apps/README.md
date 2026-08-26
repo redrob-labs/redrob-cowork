@@ -50,7 +50,7 @@ the `2026-01-26` MCP Apps protocol:
   external code, performs no network requests, and inserts artifact values with
   DOM text APIs rather than HTML interpolation.
 
-The shared payload schema lives in `@openwork/types/workflows` so a host
+The shared payload schema lives in `@redrob/types/workflows` so a host
 can validate the data contract independently of this presentation resource.
 
 ## UI behavior

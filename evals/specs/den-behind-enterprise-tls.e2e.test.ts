@@ -8,7 +8,7 @@ import {
   sendComposerMessage,
   visibleText,
   waitFor,
-} from "@openwork/behaviors";
+} from "@redrob/behaviors";
 import {
   checkedExec,
   daytonaSandbox,
@@ -17,7 +17,7 @@ import {
   desktop,
   enterpriseTlsEdgeDaytonaCommands,
   provisionDesktopSandbox,
-} from "@openwork/hosts";
+} from "@redrob/hosts";
 import {
   app,
   createDesktopHandoffGrant,
@@ -27,12 +27,12 @@ import {
   server,
   test,
   unmetNeeds,
-} from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
   env: ["ANTHROPIC_API_KEY"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
   daytona: true,
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
@@ -94,9 +94,9 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
 
   await using den = await server({ place });
   const provisioned = await provisionDesktopSandbox({
-    ref: process.env.OPENWORK_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
+    ref: process.env.REDROB_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
     name: "den-behind-enterprise-tls",
-    reuse: process.env.OPENWORK_EVAL_DAYTONA_SANDBOX?.trim(),
+    reuse: process.env.REDROB_EVAL_DAYTONA_SANDBOX?.trim(),
     log: (line) => console.error(`[openwork/testkit] ${line}`),
   });
   const profileDir = `/workspace/.openwork-daytona/profiles/enterprise-tls-${process.pid}-${Date.now()}`;
@@ -132,7 +132,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
       });
       const seededWorkspaceNames = await evalIn(
         rawApp,
-        `window.__OPENWORK_ELECTRON__.invokeDesktop("workspaceCreate", {
+        `window.__REDROB_ELECTRON__.invokeDesktop("workspaceCreate", {
           folderPath: ${JSON.stringify(`${profileDir}/continuity-workspace`)},
           name: ${JSON.stringify(PROFILE_MARKER)}
         }).then((state) => state.workspaces.map((workspace) => workspace.displayName))`,
@@ -192,7 +192,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
       });
       const recoveredWorkspaceNames = await evalIn(
         trustedApp,
-        `window.__OPENWORK_ELECTRON__.invokeDesktop("workspaceBootstrap")
+        `window.__REDROB_ELECTRON__.invokeDesktop("workspaceBootstrap")
           .then((state) => state.workspaces.map((workspace) => workspace.displayName))`,
         { awaitPromise: true },
       );
@@ -220,7 +220,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
       })()`, { awaitPromise: true, timeoutMs: 90_000 });
       expect(configured).toBe("ok");
 
-      const preferredModel = process.env.OPENWORK_EVAL_MODEL?.trim() || "";
+      const preferredModel = process.env.REDROB_EVAL_MODEL?.trim() || "";
       const models = await eventually(() => readAvailableModels(trustedApp), {
         within: 60_000,
         label: "Anthropic model catalog after engine reload",

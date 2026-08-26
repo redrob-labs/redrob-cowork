@@ -8,8 +8,8 @@ import {
   resolveUserDataPath,
 } from "./dev-profile.mjs";
 
-const PROD_APP_IDENTIFIER = "com.differentai.openwork";
-const DEV_APP_IDENTIFIER = "com.differentai.openwork.dev";
+const PROD_APP_IDENTIFIER = "io.redrob.work";
+const DEV_APP_IDENTIFIER = "io.redrob.work.dev";
 const APP_DATA_PATH = path.join("tmp", "appData");
 
 function resolveProfile({
@@ -40,7 +40,7 @@ function resolveProfile({
   };
 }
 
-test("unset OPENWORK_DEV_PROFILE keeps the legacy dev identifier", () => {
+test("unset REDROB_DEV_PROFILE keeps the legacy dev identifier", () => {
   const profile = resolveProfile();
 
   assert.equal(profile.appIdentifier, DEV_APP_IDENTIFIER);
@@ -64,14 +64,14 @@ test("named dev profile is sanitized into the dev app identifier", () => {
   assert.equal(profile.userDataPath, path.join(APP_DATA_PATH, `${DEV_APP_IDENTIFIER}.feature-profile-01`));
 });
 
-test("OPENWORK_ELECTRON_USERDATA beats OPENWORK_DEV_PROFILE for the profile directory", () => {
+test("REDROB_ELECTRON_USERDATA beats REDROB_DEV_PROFILE for the profile directory", () => {
   const explicitUserData = path.join("tmp", "explicit-user-data");
   const profile = resolveProfile({ devProfile: "auto", userDataOverride: explicitUserData });
 
   assert.equal(profile.userDataPath, explicitUserData);
 });
 
-test("packaged mode ignores OPENWORK_DEV_PROFILE", () => {
+test("packaged mode ignores REDROB_DEV_PROFILE", () => {
   const profile = resolveProfile({ devProfile: "auto", isPackaged: true });
 
   assert.equal(profile.appIdentifier, DEV_APP_IDENTIFIER);

@@ -211,7 +211,7 @@ existing accessible Base UI primitives** (Switch, Dialog/AlertDialog, `ConfirmMo
 - **Content is rendered escaped** in the panel (stored-XSS guard; §8). [FIX]
 
 ### Agent priming [DECISION: static `## Memory Bank`, search-first]
-Append a static, distinct `## Memory Bank` section to `OPENWORK_AGENT_PROMPT`
+Append a static, distinct `## Memory Bank` section to `REDROB_AGENT_PROMPT`
 (`apps/server/src/openwork-runtime-config.ts:34-66`) — separate from the existing
 `## Memory` (credential-hygiene) section. It must **[FIX B1]**:
 - Be **search-first**: "to save a memory, search for a capability to save a memory, then
@@ -329,7 +329,7 @@ Verify at impl (non-blocking):
 - **Per-PR verification gate (`AGENTS.md`) — applies to every stage above.** Each stage's
   PR must: (a) **run tests with pnpm and report the exact commands + results** in the PR
   body; (b) produce **test evidence** for every experience-affecting change —
-  `evals/results/test-runs/<test-run-id>/test-run.json` from an `@openwork/testkit` test, each
+  `evals/results/test-runs/<test-run-id>/test-run.json` from an `@redrob/testkit` test, each
   frame binding claim → user action → observable assertion → validated screenshot, and
   report `Passed` **only** when the test run exists with observable assertions (else
   `Incomplete`/`Failed` with repro); backend-only/types-only stages may skip but must say

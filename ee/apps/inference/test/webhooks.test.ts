@@ -1,10 +1,10 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { Hono } from "hono"
 import type { OpenRouterUnknownModelUsageReport } from "../src/webhooks.js"
 
-process.env.OPENWORK_DEV_MODE = "1"
+process.env.REDROB_DEV_MODE = "1"
 process.env.DATABASE_URL = "mysql://root:password@127.0.0.1:3306/openwork_den"
 process.env.DEN_DB_ENCRYPTION_KEY = "local-dev-db-encryption-key-please-change-1234567890"
 process.env.INFERENCE_WEBHOOK_SECRET = "local-dev-webhook-secret"

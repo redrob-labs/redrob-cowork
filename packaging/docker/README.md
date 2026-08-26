@@ -258,7 +258,7 @@ Run the install-link migration once against the Den database:
 docker compose -f packaging/docker/docker-compose.den-dev.yml exec den sh -lc "node /app/ee/packages/den-db/dist/scripts/bootstrap.js"
 ```
 
-Set `DEN_BOOTSTRAP_ADMIN_EMAILS` on the Den API service, restart it, open `/admin`, and toggle `Install links` for each org. Optional installer artifact env vars are `OPENWORK_INSTALLER_RELEASE_TAG`, `OPENWORK_INSTALLER_RELEASE_REPO`, and `OPENWORK_INSTALLER_ARTIFACTS_DIR`; see the [operator guide](../../docs/org-install-links.md).
+Set `DEN_BOOTSTRAP_ADMIN_EMAILS` on the Den API service, restart it, open `/admin`, and toggle `Install links` for each org. Optional installer artifact env vars are `REDROB_INSTALLER_RELEASE_TAG`, `REDROB_INSTALLER_RELEASE_REPO`, and `REDROB_INSTALLER_ARTIFACTS_DIR`; see the [operator guide](../../docs/org-install-links.md).
 
 ### Faster inner-loop alternative
 
@@ -315,14 +315,14 @@ Run it locally:
 
 ```bash
 docker run --rm -p 8787:8787 \
-  -e OPENWORK_CONNECT_HOST=127.0.0.1 \
+  -e REDROB_CONNECT_HOST=127.0.0.1 \
   openwork-microsandbox:dev
 ```
 
 Defaults:
-- `OPENWORK_TOKEN=microsandbox-token`
-- `OPENWORK_HOST_TOKEN=microsandbox-host-token`
-- `OPENWORK_APPROVAL_MODE=auto`
+- `REDROB_TOKEN=microsandbox-token`
+- `REDROB_HOST_TOKEN=microsandbox-host-token`
+- `REDROB_APPROVAL_MODE=auto`
 
 Verification:
 - Health: `curl http://127.0.0.1:8787/health`
@@ -330,9 +330,9 @@ Verification:
 - Docker health: `docker inspect --format '{{json .State.Health}}' <container>`
 
 Useful overrides:
-- `OPENWORK_TOKEN` — set your own client bearer token
-- `OPENWORK_HOST_TOKEN` — set your own host/admin token
-- `OPENWORK_CONNECT_HOST` — host name embedded in the printed connect URL
+- `REDROB_TOKEN` — set your own client bearer token
+- `REDROB_HOST_TOKEN` — set your own host/admin token
+- `REDROB_CONNECT_HOST` — host name embedded in the printed connect URL
 - `DOCKER_PLATFORM` — optional platform passed to `docker build`
 
 ---
@@ -362,13 +362,13 @@ Then open:
 
 Recommended env vars:
 
-- `OPENWORK_TOKEN` (client token)
-- `OPENWORK_HOST_TOKEN` (host/owner token)
+- `REDROB_TOKEN` (client token)
+- `REDROB_HOST_TOKEN` (host/owner token)
 
 Optional:
 
-- `OPENWORK_APPROVAL_MODE=auto|manual`
-- `OPENWORK_APPROVAL_TIMEOUT_MS=30000`
+- `REDROB_APPROVAL_MODE=auto|manual`
+- `REDROB_APPROVAL_TIMEOUT_MS=30000`
 
 Persistence:
 

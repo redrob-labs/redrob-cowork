@@ -1,7 +1,7 @@
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { acmeDocs, resolvePlace, startWorld } from "@openwork/testkit/stack";
-import type { Den, Place, World } from "@openwork/testkit/stack";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { acmeDocs, resolvePlace, startWorld } from "@redrob/testkit/stack";
+import type { Den, Place, World } from "@redrob/testkit/stack";
 import { provider } from "./ctx.ts";
 
 const docsOrganization = Object.entries(acmeDocs.topology.den.orgs)[0];

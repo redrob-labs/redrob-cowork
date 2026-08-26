@@ -1,6 +1,6 @@
-import { sql } from "@openwork-ee/den-db/drizzle"
-import { AdminAllowlistTable } from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { sql } from "@redrob-ee/den-db/drizzle"
+import { AdminAllowlistTable } from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { db } from "./db.js"
 import { env } from "./env.js"
 

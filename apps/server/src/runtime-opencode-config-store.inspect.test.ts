@@ -39,13 +39,13 @@ async function withRuntimePath(
   const root = await mkdtemp(join(tmpdir(), "openwork-passive-runtime-inspection-"));
   const stateDir = join(root, "state");
   const dbPath = join(stateDir, "runtime.sqlite");
-  const previousDb = process.env.OPENWORK_RUNTIME_DB;
-  process.env.OPENWORK_RUNTIME_DB = dbPath;
+  const previousDb = process.env.REDROB_RUNTIME_DB;
+  process.env.REDROB_RUNTIME_DB = dbPath;
   try {
     await run({ root, stateDir, dbPath, config: serverConfig(root) });
   } finally {
-    if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-    else process.env.OPENWORK_RUNTIME_DB = previousDb;
+    if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+    else process.env.REDROB_RUNTIME_DB = previousDb;
     await rm(root, { recursive: true, force: true });
   }
 }

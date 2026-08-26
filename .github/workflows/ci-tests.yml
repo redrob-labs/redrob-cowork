@@ -140,13 +140,13 @@ jobs:
         run: pnpm --dir evals run test:pr
 
       - name: Run app unit tests
-        run: pnpm --filter @openwork/app test
+        run: pnpm --filter @redrob/app test
 
       - name: Run server unit tests
         run: pnpm --filter openwork-server test
 
       - name: Run desktop unit tests
-        run: pnpm --filter @openwork/desktop test
+        run: pnpm --filter @redrob/desktop test
 
       - name: Run release script tests
         run: node --test scripts/release/*.test.mjs
@@ -168,10 +168,10 @@ jobs:
           pnpm --filter openwork-server build
 
       - name: Typecheck Electron main against the IPC contract
-        run: pnpm --filter @openwork/desktop typecheck:electron
+        run: pnpm --filter @redrob/desktop typecheck:electron
 
       - name: Run e2e tests
-        run: pnpm --filter @openwork/app test:e2e
+        run: pnpm --filter @redrob/app test:e2e
 
   # Single stable context for branch rulesets to require. Green only when
   # every openwork-tests matrix leg succeeded; runs even when legs fail or

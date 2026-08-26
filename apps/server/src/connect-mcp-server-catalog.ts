@@ -20,14 +20,14 @@ export const CONNECT_MCP_APP_HOST_CAPABILITY_HEADER = "x-openwork-mcp-client-cap
 export const CONNECT_MCP_APP_HOST_CAPABILITY = "mcp-app-host-v1";
 
 const BUILTIN_APP_HOST_CLOUD_ORIGINS = new Set([
-  "https://api.openworklabs.com",
-  "https://app.openworklabs.com",
+  "https://api.redrob.io",
+  "https://app.redrob.io",
   "https://api.openwork.software",
   "https://app.openwork.software",
 ]);
 
 const BUILTIN_APP_HOST_GATEWAY_PROXY_ORIGINS = new Map([
-  ["https://app.openworklabs.com", "https://api.openworklabs.com"],
+  ["https://app.redrob.io", "https://api.redrob.io"],
   ["https://app.openwork.software", "https://api.openwork.software"],
 ]);
 
@@ -147,7 +147,7 @@ async function trustedAppHostCloudEndpoint(cloudMcp: Record<string, unknown>): P
   }
   if (endpoint.username || endpoint.password || endpoint.search || endpoint.hash) return false;
   if (BUILTIN_APP_HOST_CLOUD_ORIGINS.has(endpoint.origin)) return true;
-  if (process.env.OPENWORK_DEV_MODE === "1" && isLoopbackHostname(endpoint.hostname)) return true;
+  if (process.env.REDROB_DEV_MODE === "1" && isLoopbackHostname(endpoint.hostname)) return true;
   const activatedEnterpriseOrigin = await readActivatedEnterpriseDenOrigin();
   return activatedEnterpriseOrigin !== null && endpoint.origin === activatedEnterpriseOrigin;
 }

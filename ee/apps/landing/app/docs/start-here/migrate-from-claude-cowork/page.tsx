@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Migrate from Claude Cowork to OpenWork",
     description:
       "A step-by-step guide to moving your Cowork setup to open-source OpenWork.",
-    url: "https://openworklabs.com/docs/start-here/migrate-from-claude-cowork"
+    url: "https://redrob.io/docs/start-here/migrate-from-claude-cowork"
   }
 };
 

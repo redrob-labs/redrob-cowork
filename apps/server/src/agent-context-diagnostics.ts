@@ -8,7 +8,7 @@ import type {
   AgentContextDiagnosticsRequest,
   AgentContextMcpEvidence,
   AgentContextToolPermission,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 import {
   AGENT_CONTEXT_DIAGNOSTICS_SCHEMA_VERSION,
@@ -61,11 +61,11 @@ import type { McpItem, ServerConfig, WorkspaceInfo } from "./types.js";
 import { exists } from "./utils.js";
 import { opencodeConfigPath } from "./workspace-files.js";
 
-const OPENWORK_CLOUD_MCP_NAME = "openwork-cloud";
+const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
 const CLOUD_MCP_TERMINAL_PATH = "/mcp/agent";
 const REQUIRED_CLOUD_TOOL_IDS = ["search_capabilities", "execute_capability"] as const;
 const REQUIRED_CLOUD_AGENT_TOOL_IDS = REQUIRED_CLOUD_TOOL_IDS.map(
-  (toolId) => `${OPENWORK_CLOUD_MCP_NAME}_${toolId}`,
+  (toolId) => `${REDROB_CLOUD_MCP_NAME}_${toolId}`,
 );
 
 export type McpRegistrationStatus =
@@ -422,7 +422,7 @@ async function inspectMcpInventory(
         signal,
         toolPolicy: {
           agentName: "openwork",
-          mcpName: OPENWORK_CLOUD_MCP_NAME,
+          mcpName: REDROB_CLOUD_MCP_NAME,
           toolIds: [...REQUIRED_CLOUD_AGENT_TOOL_IDS],
         },
       }),
@@ -456,7 +456,7 @@ function cloudEndpointEvidenceUrl(
   config: Record<string, unknown>,
 ): URL | null {
   if (
-    name !== OPENWORK_CLOUD_MCP_NAME
+    name !== REDROB_CLOUD_MCP_NAME
     || (source !== "config.remote" && source !== "engine.config")
     || typeof config.url !== "string"
   ) return null;
@@ -625,8 +625,8 @@ export function cloudCatalogCheck(probe: CloudCatalogProbe): AgentContextDiagnos
         ? "The runtime endpoint probe was not performed: this installation is enterprise activated, but against a different control-plane origin than the configured OpenWork Cloud MCP. No request was sent, so this is a configuration mismatch, not a network, TLS, or MCP failure."
         : "The runtime endpoint probe was not performed because the configured origin is not in the diagnostics trust list; no request was sent, so this is a trust-configuration state, not a network, TLS, or MCP failure.";
       action = probe.enterpriseActivationPresent
-        ? "Reconcile the enterprise activation origin with the configured OpenWork Cloud MCP origin, or have an administrator add the exact endpoint origin to OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS, then rerun diagnostics."
-        : "Activate this installation against your on-prem Den, or have an administrator set OPENWORK_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS on the OpenWork desktop/server process to the exact endpoint origin, then rerun diagnostics.";
+        ? "Reconcile the enterprise activation origin with the configured OpenWork Cloud MCP origin, or have an administrator add the exact endpoint origin to REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS, then rerun diagnostics."
+        : "Activate this installation against your on-prem Den, or have an administrator set REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS on the OpenWork desktop/server process to the exact endpoint origin, then rerun diagnostics.";
       break;
     case "credential_missing":
     case "duplicate_authorization":
@@ -1375,7 +1375,7 @@ export async function runAgentContextDiagnostics(input: {
       googleWorkspace: { legacyConfigured: false },
     };
   }
-  const selectedCloudMcpPresent = Object.hasOwn(runtimeMcpMap(runtime), OPENWORK_CLOUD_MCP_NAME);
+  const selectedCloudMcpPresent = Object.hasOwn(runtimeMcpMap(runtime), REDROB_CLOUD_MCP_NAME);
   const branch = expectedConnectBranch(connectSnapshot);
   const crossWorkspaceSteeringDrift = connectSnapshot.cloudMcpPresent && !selectedCloudMcpPresent;
 
@@ -1389,7 +1389,7 @@ export async function runAgentContextDiagnostics(input: {
   const engineConfigItems = effectiveEngine?.mcps.map((item) => ({
     ...item,
     source: "engine.config" as const,
-    disabledByTools: item.name === OPENWORK_CLOUD_MCP_NAME
+    disabledByTools: item.name === REDROB_CLOUD_MCP_NAME
       ? assessEffectiveToolPolicy(effectiveEngine).status === "denied" || undefined
       : undefined,
   }));
@@ -1397,7 +1397,7 @@ export async function runAgentContextDiagnostics(input: {
   const combinedInventoryItems = [...inventory.items, ...(engineConfigItems ?? [])];
   const inventoryItems = combinedInventoryItems.slice(0, 200);
   const runtimeCloudItem = combinedInventoryItems.find((item) =>
-    item.source === "config.remote" && item.name === OPENWORK_CLOUD_MCP_NAME,
+    item.source === "config.remote" && item.name === REDROB_CLOUD_MCP_NAME,
   );
   if (
     runtimeCloudItem
@@ -1418,7 +1418,7 @@ export async function runAgentContextDiagnostics(input: {
     return inspection;
   };
   const mcps = inventoryItems.map((item) => mcpEvidence(item, registrationForItem(item).status, managedMcpNames));
-  const runtimeCloudConfig = runtimeMcpMap(runtime)[OPENWORK_CLOUD_MCP_NAME] ?? null;
+  const runtimeCloudConfig = runtimeMcpMap(runtime)[REDROB_CLOUD_MCP_NAME] ?? null;
   const runtimeCloudRegistration = runtimeCloudItem && runtimeCloudConfig ? registrationForItem(runtimeCloudItem) : null;
   const staticallyDeniedCloudAgentToolIds = new Set(inventory.toolPolicy.deniedToolIds);
   const effectiveToolPolicy = assessEffectiveToolPolicy(effectiveEngine);
@@ -1711,8 +1711,8 @@ export async function runAgentContextDiagnostics(input: {
           ? "Check the selected workspace engine health and rerun diagnostics."
           : "No policy change is required; confirm catalog and registration evidence because this policy check alone does not prove live tool presence.",
       details: {
-        searchCapabilities: reportedToolPermission(`${OPENWORK_CLOUD_MCP_NAME}_search_capabilities`),
-        executeCapability: reportedToolPermission(`${OPENWORK_CLOUD_MCP_NAME}_execute_capability`),
+        searchCapabilities: reportedToolPermission(`${REDROB_CLOUD_MCP_NAME}_search_capabilities`),
+        executeCapability: reportedToolPermission(`${REDROB_CLOUD_MCP_NAME}_execute_capability`),
         deniedRelevantToolCount: cloudToolPolicyStatus === "unavailable" ? null : deniedCloudAgentToolIds.size,
         staticPolicyScope: inventory.toolPolicy.scope,
         staticPolicyLayerStatus: inventory.toolPolicy.status,
@@ -1968,8 +1968,8 @@ export async function runAgentContextDiagnostics(input: {
             : null,
         prompt,
         connectToolPermissions: {
-          searchCapabilities: reportedToolPermission(`${OPENWORK_CLOUD_MCP_NAME}_search_capabilities`),
-          executeCapability: reportedToolPermission(`${OPENWORK_CLOUD_MCP_NAME}_execute_capability`),
+          searchCapabilities: reportedToolPermission(`${REDROB_CLOUD_MCP_NAME}_search_capabilities`),
+          executeCapability: reportedToolPermission(`${REDROB_CLOUD_MCP_NAME}_execute_capability`),
           deniedRelevantToolCount: cloudToolPolicyStatus === "unavailable" ? null : deniedCloudAgentToolIds.size,
         },
       },

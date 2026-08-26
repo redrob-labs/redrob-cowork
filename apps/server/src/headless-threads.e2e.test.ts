@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { createHeadlessThreadClient } from "@openwork/headless-threads";
+import { createHeadlessThreadClient } from "@redrob/headless-threads";
 
 import { startServer } from "./server.js";
 import type { ServerConfig } from "./types.js";

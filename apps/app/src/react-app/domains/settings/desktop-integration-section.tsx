@@ -21,7 +21,7 @@ import {
 
 function statusDescription(status: DesktopIntegrationStatus) {
   if (status.state === "integrated") {
-    return "OpenWork is in your application launcher and handles openwork:// browser callbacks.";
+    return "OpenWork is in your application launcher and handles redrob:// browser callbacks.";
   }
   if (status.state === "managed_externally") {
     return "This AppImage is integrated by another app. OpenWork will leave its launcher untouched.";
@@ -86,7 +86,7 @@ export function DesktopIntegrationSection() {
       <LayoutSectionHeader>
         <LayoutSectionTitle>AppImage desktop integration</LayoutSectionTitle>
         <LayoutSectionDescription>
-          Control the launcher, icon, and openwork:// callback for this AppImage.
+          Control the launcher, icon, and redrob:// callback for this AppImage.
         </LayoutSectionDescription>
       </LayoutSectionHeader>
 

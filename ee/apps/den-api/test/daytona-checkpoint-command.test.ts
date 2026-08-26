@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { beforeAll, describe, expect, test } from "bun:test"
 
 type DaytonaModule = typeof import("../src/workers/daytona.js")
@@ -37,12 +37,12 @@ describe("Daytona OpenWork checkpoint start command", () => {
       activityToken: "activity-token",
     })
 
-    expect(command).toContain("OPENWORK_STATE_MANIFEST=")
+    expect(command).toContain("REDROB_STATE_MANIFEST=")
     // The engine keeps sessions in opencode.db on the container overlay. It was
     // missing from the manifest, so every recycle onto a new snapshot started
     // the user from scratch.
-    expect(command).toContain("ENGINE_STATE_PATH=${OPENWORK_ENGINE_STATE_PATH:-$HOME/.local/share/opencode}")
-    expect(command).toContain('OPENWORK_STATE_MANIFEST="/tmp/openwork-data /tmp/openwork-workspace $ENGINE_STATE_PATH"')
+    expect(command).toContain("ENGINE_STATE_PATH=${REDROB_ENGINE_STATE_PATH:-$HOME/.local/share/opencode}")
+    expect(command).toContain('REDROB_STATE_MANIFEST="/tmp/openwork-data /tmp/openwork-workspace $ENGINE_STATE_PATH"')
     // Collapse the WAL first so the copied database is self-consistent.
     expect(command).toContain("PRAGMA wal_checkpoint(TRUNCATE)")
     // Credentials are re-materialized every start; never persist them to the volume.

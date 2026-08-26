@@ -30,8 +30,8 @@ function serverConfig(root: string): ServerConfig {
 describe("Connect state inspection", () => {
   test("treats server-scoped cloudMcp as present without scanning workspaces", async () => {
     const root = await mkdtemp(join(tmpdir(), "openwork-connect-state-server-mcp-"));
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
     try {
       const config = serverConfig(root);
       await writeFile(join(root, "connect-state.json"), JSON.stringify({
@@ -52,8 +52,8 @@ describe("Connect state inspection", () => {
         },
       });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
       await rm(root, { recursive: true, force: true });
     }
   });
@@ -111,8 +111,8 @@ describe("Connect state inspection", () => {
   test("fails a snapshot closed when a runtime row exceeds the diagnostics byte limit", async () => {
     const root = await mkdtemp(join(tmpdir(), "openwork-connect-snapshot-inspect-"));
     const dbPath = join(root, "runtime.sqlite");
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = dbPath;
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = dbPath;
     try {
       const config = serverConfig(root);
       config.workspaces = [{
@@ -140,8 +140,8 @@ describe("Connect state inspection", () => {
         },
       });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
       await rm(root, { recursive: true, force: true });
     }
   });
@@ -149,8 +149,8 @@ describe("Connect state inspection", () => {
   test("bounds the number of local runtime rows inspected", async () => {
     const root = await mkdtemp(join(tmpdir(), "openwork-connect-snapshot-inspect-"));
     const dbPath = join(root, "runtime.sqlite");
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = dbPath;
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = dbPath;
     try {
       const config = serverConfig(root);
       config.workspaces = [
@@ -178,8 +178,8 @@ describe("Connect state inspection", () => {
         snapshot: { cloudMcpPresent: true },
       });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
       await rm(root, { recursive: true, force: true });
     }
   });

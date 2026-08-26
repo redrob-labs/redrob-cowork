@@ -245,7 +245,7 @@ function runDefaults(args) {
 
 // Squirrel.Mac's `ShipIt` helper (which swaps the .app on macOS) reads its
 // options from this NSUserDefaults domain.
-const SHIP_IT_DEFAULTS_DOMAIN = "com.differentai.openwork.ShipIt";
+const SHIP_IT_DEFAULTS_DOMAIN = "io.redrob.work.ShipIt";
 
 // Squirrel.Mac defaults to moving the *entire* app bundle through a temp
 // directory. On repeat installs that move can leave the staged bundle missing,
@@ -418,13 +418,13 @@ export function registerUpdaterIpc({
   }
 
   function evalRecoveryReleases() {
-    if (typeof env.OPENWORK_EVAL_RECOVERY_RELEASES === "string") {
+    if (typeof env.REDROB_EVAL_RECOVERY_RELEASES === "string") {
       try {
-        const target = String(env.OPENWORK_EVAL_RECOVERY_TARGET ?? "").split("-");
+        const target = String(env.REDROB_EVAL_RECOVERY_TARGET ?? "").split("-");
         const targetPlatform = target[0];
         const targetArch = target[1];
         const targetDistribution = target.slice(2).join("-");
-        const raw = JSON.parse(env.OPENWORK_EVAL_RECOVERY_RELEASES);
+        const raw = JSON.parse(env.REDROB_EVAL_RECOVERY_RELEASES);
         const stable = Array.isArray(raw) ? raw.filter((release) =>
           stableVersion(release?.version)
           && release?.channel === "stable"
@@ -445,9 +445,9 @@ export function registerUpdaterIpc({
         return [];
       }
     }
-    if (typeof env.OPENWORK_EVAL_RECOVERY_CANDIDATES === "string") {
+    if (typeof env.REDROB_EVAL_RECOVERY_CANDIDATES === "string") {
       try {
-        const raw = JSON.parse(env.OPENWORK_EVAL_RECOVERY_CANDIDATES);
+        const raw = JSON.parse(env.REDROB_EVAL_RECOVERY_CANDIDATES);
         return Array.isArray(raw) ? raw.filter((candidate) =>
           candidate?.verified === true
           && stableVersion(candidate?.version)
@@ -514,7 +514,7 @@ export function registerUpdaterIpc({
     const release = id ? recoveryReleases.find((candidate) => candidate.id === id) : null;
     if (!release) return { ok: false, reason: "That recovery version is no longer available. Retry the release list." };
     if (release.eval) {
-      if (env.OPENWORK_EVAL_RECOVERY_CANDIDATES) {
+      if (env.REDROB_EVAL_RECOVERY_CANDIDATES) {
         recoveryWitness.installRequests.push({ version: release.version, artifactUrl: release.artifact.url });
       } else {
         recoveryWitness.openedArtifactUrls.push(release.artifact.url);

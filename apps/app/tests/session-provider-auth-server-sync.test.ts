@@ -27,7 +27,7 @@ import { createProviderAuthStore } from "../src/react-app/domains/connections/pr
 const originalWindow = globalThis.window;
 const originalFetch = globalThis.fetch;
 const originalConsoleInfo = console.info;
-const originalDeployment = process.env.VITE_OPENWORK_DEPLOYMENT;
+const originalDeployment = process.env.VITE_REDROB_DEPLOYMENT;
 
 const LOCAL_SERVER_ORIGIN = "http://127.0.0.1:7899";
 const REMOTE_SERVER_ORIGIN = "https://worker.example";
@@ -83,7 +83,7 @@ function installWindow(): Storage {
       },
       localStorage,
       location: { origin: "https://self-hosted.example" },
-      __OPENWORK_GATEWAY__: undefined,
+      __REDROB_GATEWAY__: undefined,
     },
   });
   return localStorage;
@@ -281,7 +281,7 @@ function createSessionRouteStore(options: {
 
 describe("session-route cloud provider sync wiring", () => {
   beforeEach(() => {
-    process.env.VITE_OPENWORK_DEPLOYMENT = "web";
+    process.env.VITE_REDROB_DEPLOYMENT = "web";
     console.info = () => undefined;
   });
 
@@ -289,8 +289,8 @@ describe("session-route cloud provider sync wiring", () => {
     Object.defineProperty(globalThis, "window", { configurable: true, value: originalWindow });
     Object.defineProperty(globalThis, "fetch", { configurable: true, value: originalFetch });
     console.info = originalConsoleInfo;
-    if (originalDeployment === undefined) delete process.env.VITE_OPENWORK_DEPLOYMENT;
-    else process.env.VITE_OPENWORK_DEPLOYMENT = originalDeployment;
+    if (originalDeployment === undefined) delete process.env.VITE_REDROB_DEPLOYMENT;
+    else process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
   });
 
   test("startup hydrates assigned organization models without a workspace endpoint", async () => {

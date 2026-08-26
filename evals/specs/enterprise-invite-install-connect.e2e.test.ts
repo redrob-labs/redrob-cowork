@@ -4,17 +4,17 @@ import net from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect } from "vitest";
-import { denFetch, evalIn, signIn, waitFor } from "@openwork/behaviors";
-import { attachSurface, navigate } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { chrome, localHost } from "@openwork/hosts";
-import { startEgressLab } from "@openwork/labs";
-import { needs, server, test, unmetNeeds } from "@openwork/testkit";
+import { denFetch, evalIn, signIn, waitFor } from "@redrob/behaviors";
+import { attachSurface, navigate } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { chrome, localHost } from "@redrob/hosts";
+import { startEgressLab } from "@redrob/labs";
+import { needs, server, test, unmetNeeds } from "@redrob/testkit";
 import { resolveSystemCaEnv } from "../../apps/desktop/electron/runtime.mjs";
-import type { TestNeeds } from "@openwork/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -124,7 +124,7 @@ async function reserveClosedPort(): Promise<number> {
  * nonexistent account), lands on the clean authenticated /install guide with
  * no installer token anywhere, and links a real blank-slate Enterprise desktop
  * by typing the workspace address the guide showed — with the pasted
- * openwork:// URL as the same field's silent recovery. The one-time grant dies
+ * redrob:// URL as the same field's silent recovery. The one-time grant dies
  * after use, and the activation record this flow stamps is exactly what the
  * TLS chain-repair seam consumes, unlocking only the stamped origin on a
  * broken-chain, semi-airgapped network.
@@ -371,7 +371,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
   if (!host) throw new Error("No Electron host: neither placement host nor local fallback is available.");
   const handle = await host.spawnElectron("enterprise-invite-connect", {
     profile: "fresh",
-    env: { OPENWORK_DESKTOP_DISTRIBUTION: "enterprise" },
+    env: { REDROB_DESKTOP_DISTRIBUTION: "enterprise" },
   });
   const desktopSurface = await attachSurface(handle, { timeoutMs: 240_000 });
   try {
@@ -436,7 +436,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     })()`);
     expect(wentBack).toBe(true);
 
-    // Recovery seam of the SAME field: a pasted openwork:// URL carries the
+    // Recovery seam of the SAME field: a pasted redrob:// URL carries the
     // origin and one-time grant, still passes the named confirmation, and
     // signs the desktop in — sign-in IS activation.
     expect(await typeIntoGate(openworkUrl)).toBe("submitted");
@@ -444,7 +444,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
       desktopSurface,
       `Boolean(document.querySelector('[data-testid="organization-server-confirm"]'))
         && document.body.innerText.includes("Confirm and finish sign-in")`,
-      { timeoutMs: 30_000, label: "manual confirmation for the pasted openwork:// URL" },
+      { timeoutMs: 30_000, label: "manual confirmation for the pasted redrob:// URL" },
     );
     const confirmed = await evalIn(desktopSurface, `(() => {
       const confirm = document.querySelector('[data-testid="organization-server-confirm"]');

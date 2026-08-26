@@ -11,7 +11,7 @@ import {
   legacyDesktopBootstrapPath as resolveLegacyDesktopBootstrapPath,
   normalizeWorkspaceRootPath,
   openworkServerConfigPath as resolveOpenworkServerConfigPath,
-} from "@openwork/paths";
+} from "@redrob/paths";
 
 import { openworkWorkspaceDisplayName, selectOpenworkWorkspaceForConnection } from "./remote-workspace.mjs";
 import { exportWorkspaceConfig, importWorkspaceConfig } from "./workspace-archive.mjs";
@@ -116,8 +116,8 @@ const DEFAULT_DESKTOP_BOOTSTRAP_PATH = resolveDesktopBootstrapPath({ homeDir: os
 // LOCALAPPDATA and XDG_CONFIG_HOME. Keep reading that file when the canonical one
 // is missing so existing installs keep their deployment config.
 const LEGACY_DESKTOP_BOOTSTRAP_PATH = resolveLegacyDesktopBootstrapPath({ homeDir: os.homedir() });
-const HOSTED_DESKTOP_WEB_URL = "https://app.openworklabs.com";
-const HOSTED_DESKTOP_API_URL = "https://api.openworklabs.com";
+const HOSTED_DESKTOP_WEB_URL = "https://app.redrob.io";
+const HOSTED_DESKTOP_API_URL = "https://api.redrob.io";
 
 function bootstrapUrlOrigin(value) {
   if (typeof value !== "string" || !value.trim()) return "";
@@ -140,14 +140,14 @@ export function createWorkspaceStore({
   forceRequireSignin,
 }) {
   function desktopBootstrapPath() {
-    if (process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH?.trim()) {
+    if (process.env.REDROB_DESKTOP_BOOTSTRAP_PATH?.trim()) {
       return resolveDesktopBootstrapPath({ env: process.env, homeDir: os.homedir(), userDataDir: app.getPath("userData") });
     }
     // Dev mode swaps process.env.HOME to the sandboxed dev-data home midway
     // through startup (runtime.mjs buildChildEnv -> Object.assign(process.env)),
     // which changes what os.homedir() returns. Resolve the dev-data home
     // deterministically so early and late IPC reads target the same file.
-    if (process.env.OPENWORK_DEV_MODE === "1") {
+    if (process.env.REDROB_DEV_MODE === "1") {
       return resolveDesktopBootstrapPath({ env: process.env, homeDir: os.homedir(), userDataDir: app.getPath("userData") });
     }
     return DEFAULT_DESKTOP_BOOTSTRAP_PATH;
@@ -157,7 +157,7 @@ export function createWorkspaceStore({
     // An explicit bootstrap path defines an isolated installation boundary.
     // Never let a legacy global config cross that boundary: it may contain a
     // completed activation from another distribution or deployment.
-    if (process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH?.trim()) return null;
+    if (process.env.REDROB_DESKTOP_BOOTSTRAP_PATH?.trim()) return null;
     const primary = desktopBootstrapPath();
     if (primary === DEFAULT_DESKTOP_BOOTSTRAP_PATH && LEGACY_DESKTOP_BOOTSTRAP_PATH !== primary) {
       return LEGACY_DESKTOP_BOOTSTRAP_PATH;
@@ -463,7 +463,7 @@ export function createWorkspaceStore({
       legacyExists: legacyPath ? existsSync(legacyPath) : false,
       home: os.homedir(),
       envHome: process.env.HOME ?? null,
-      envOverride: process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH ?? null,
+      envOverride: process.env.REDROB_DESKTOP_BOOTSTRAP_PATH ?? null,
       exists: existsSync(configPath),
       raw: null,
       parsed: null,
@@ -829,7 +829,7 @@ export function createWorkspaceStore({
     let activeId = typeof state?.activeId === "string" ? state.activeId : null;
     let workspaces = Array.isArray(state?.workspaces) ? state.workspaces : [];
     let changed = false;
-    if (!workspaceStateExists && process.env.OPENWORK_DESKTOP_DISABLE_WORKSPACE_RECOVERY !== "1") {
+    if (!workspaceStateExists && process.env.REDROB_DESKTOP_DISABLE_WORKSPACE_RECOVERY !== "1") {
       const recoveredWorkspaces = await recoverWorkspacesFromKnownState();
       if (recoveredWorkspaces.length > 0) {
         const selectedWorkspace = recoveredWorkspaces[0];

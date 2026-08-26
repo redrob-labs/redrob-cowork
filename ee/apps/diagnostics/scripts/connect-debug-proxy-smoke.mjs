@@ -55,7 +55,7 @@ const upstream = createServer(async (request, response) => {
   }
   if (url.pathname === "/api/den/v1/auth/desktop-handoff" && request.method === "POST") {
     observedBrowserCookie = request.headers.cookie ?? ""
-    const openworkUrl = new URL("openwork://den-auth")
+    const openworkUrl = new URL("redrob://den-auth")
     openworkUrl.searchParams.set("grant", "one-time-smoke-grant")
     openworkUrl.searchParams.set("denBaseUrl", `${upstreamOrigin}/api/den`)
     return json(response, 200, { openworkUrl: openworkUrl.toString() })

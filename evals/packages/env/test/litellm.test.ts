@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { liteLlm, liteLlmSandboxName } from "../src/litellm.ts";
-import type { DaytonaExec } from "@openwork/hosts";
+import type { DaytonaExec } from "@redrob/hosts";
 import type { LiteLlmUpstreamRequest, Place } from "../src/index.ts";
 
 const MODEL_ID = "openwork-litellm-unit-model";

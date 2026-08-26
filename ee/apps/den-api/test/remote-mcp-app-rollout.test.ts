@@ -18,7 +18,7 @@ function probe(script: string, value?: string) {
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: "https://den.openwork.test",
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       ...(value === undefined ? {} : { DEN_REMOTE_MCP_APPS_ENABLED: value }),
     },

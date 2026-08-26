@@ -166,5 +166,5 @@ export const sectionAnchors = [
 
 export const securityContact = {
   name: "Omar McAdam",
-  email: "team+security@openworklabs.com"
+  email: "team+security@redrob.io"
 };

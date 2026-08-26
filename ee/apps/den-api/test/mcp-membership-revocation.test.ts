@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { Hono } from "hono"
 import type { MiddlewareHandler } from "hono"
 import type { McpAuthResourceContext } from "../src/mcp/auth.js"
@@ -58,13 +58,13 @@ beforeAll(async () => {
       "http://127.0.0.1:8790/mcp/agent",
       "http://127.0.0.1:8790/mcp/admin",
     ],
-    DEN_MCP_GRANT_ID_CLAIM: "https://openworklabs.com/grant_id",
-    DEN_MCP_ORG_ID_CLAIM: "https://openworklabs.com/org_id",
+    DEN_MCP_GRANT_ID_CLAIM: "https://redrob.io/grant_id",
+    DEN_MCP_ORG_ID_CLAIM: "https://redrob.io/org_id",
     DEN_MCP_OAUTH_RESOURCE: "http://127.0.0.1:8790/mcp/agent",
     DEN_MCP_RESOURCE: "http://127.0.0.1:8790/mcp",
-    DEN_MCP_RESOURCE_CLAIM: "https://openworklabs.com/resource",
+    DEN_MCP_RESOURCE_CLAIM: "https://redrob.io/resource",
     DEN_MCP_RESOURCES: ["http://127.0.0.1:8790/mcp"],
-    DEN_MCP_TOKEN_USE_CLAIM: "https://openworklabs.com/token_use",
+    DEN_MCP_TOKEN_USE_CLAIM: "https://redrob.io/token_use",
   }))
 
   mock.module("../src/db.js", () => ({
@@ -185,9 +185,9 @@ function validMcpJwtPayload(input: { resource: string; clientId?: string }) {
     azp: input.clientId ?? "client_mcp_test",
     scope: "mcp:read mcp:write",
     client_id: input.clientId,
-    "https://openworklabs.com/token_use": "mcp",
-    "https://openworklabs.com/resource": input.resource,
-    "https://openworklabs.com/org_id": createDenTypeId("organization"),
+    "https://redrob.io/token_use": "mcp",
+    "https://redrob.io/resource": input.resource,
+    "https://redrob.io/org_id": createDenTypeId("organization"),
     sid: createDenTypeId("session"),
   }
 }
@@ -262,9 +262,9 @@ test("MCP JWTs without required scopes return insufficient_scope", async () => {
     aud: "http://127.0.0.1:8790/mcp/agent",
     azp: "client_mcp_test",
     scope: "profile",
-    "https://openworklabs.com/token_use": "mcp",
-    "https://openworklabs.com/resource": "http://127.0.0.1:8790/mcp/agent",
-    "https://openworklabs.com/org_id": createDenTypeId("organization"),
+    "https://redrob.io/token_use": "mcp",
+    "https://redrob.io/resource": "http://127.0.0.1:8790/mcp/agent",
+    "https://redrob.io/org_id": createDenTypeId("organization"),
     sid: createDenTypeId("session"),
   }
 
@@ -288,9 +288,9 @@ test("MCP JWTs with the wrong token use are rejected as invalid_token", async ()
     aud: "http://127.0.0.1:8790/mcp/agent",
     azp: "client_mcp_test",
     scope: "mcp:read",
-    "https://openworklabs.com/token_use": "session",
-    "https://openworklabs.com/resource": "http://127.0.0.1:8790/mcp/agent",
-    "https://openworklabs.com/org_id": createDenTypeId("organization"),
+    "https://redrob.io/token_use": "session",
+    "https://redrob.io/resource": "http://127.0.0.1:8790/mcp/agent",
+    "https://redrob.io/org_id": createDenTypeId("organization"),
     sid: createDenTypeId("session"),
   }
 
@@ -311,9 +311,9 @@ test("MCP JWTs for the wrong resource are rejected as invalid_token", async () =
     aud: "http://127.0.0.1:8790/mcp/agent",
     azp: "client_mcp_test",
     scope: "mcp:read",
-    "https://openworklabs.com/token_use": "mcp",
-    "https://openworklabs.com/resource": "http://127.0.0.1:8790/mcp",
-    "https://openworklabs.com/org_id": createDenTypeId("organization"),
+    "https://redrob.io/token_use": "mcp",
+    "https://redrob.io/resource": "http://127.0.0.1:8790/mcp",
+    "https://redrob.io/org_id": createDenTypeId("organization"),
     sid: createDenTypeId("session"),
   }
 
@@ -334,9 +334,9 @@ test("MCP JWTs without session claims are rejected", async () => {
     aud: "http://127.0.0.1:8790/mcp/agent",
     azp: "client_mcp_test",
     scope: "mcp:read mcp:write",
-    "https://openworklabs.com/token_use": "mcp",
-    "https://openworklabs.com/resource": "http://127.0.0.1:8790/mcp/agent",
-    "https://openworklabs.com/org_id": createDenTypeId("organization"),
+    "https://redrob.io/token_use": "mcp",
+    "https://redrob.io/resource": "http://127.0.0.1:8790/mcp/agent",
+    "https://redrob.io/org_id": createDenTypeId("organization"),
   }
 
   const response = await mcpAuth.verifyMcpRequest(new Headers({
@@ -532,9 +532,9 @@ test("MCP JWTs tied to revoked memberships stay forbidden", async () => {
     aud: "http://127.0.0.1:8790/mcp/agent",
     azp: "client_mcp_test",
     scope: "mcp:read mcp:write",
-    "https://openworklabs.com/token_use": "mcp",
-    "https://openworklabs.com/resource": "http://127.0.0.1:8790/mcp/agent",
-    "https://openworklabs.com/org_id": createDenTypeId("organization"),
+    "https://redrob.io/token_use": "mcp",
+    "https://redrob.io/resource": "http://127.0.0.1:8790/mcp/agent",
+    "https://redrob.io/org_id": createDenTypeId("organization"),
     sid: createDenTypeId("session"),
   }
   selectedRows = []

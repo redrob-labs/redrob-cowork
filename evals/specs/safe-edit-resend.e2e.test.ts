@@ -1,10 +1,10 @@
 import { createServer } from "node:http";
 import { expect, onTestFinished } from "vitest";
-import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
 const providerId = "safe-edit-resend-mock";
 const modelId = "safe-edit-resend-model";
@@ -18,10 +18,10 @@ const replies = [
   "Deterministic edited reply.",
   "Deterministic legacy reply.",
 ];
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "edit resend defers history mutation, rolls back failures, and restores stranded sessions"
-  : "safe edit resend skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "safe edit resend skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -189,7 +189,7 @@ async function applyEngineRevert(
 }
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   // The engine also sends small utility requests (session titles) to the same
   // provider, so replies must key off conversation content, never ordinals.
@@ -267,7 +267,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({
     name: "safe-edit-resend",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
     // Provider keys in the runner env (e.g. via infisical) would make the
     // engine register real providers and out-default the deterministic mock.
     env: {
@@ -275,8 +275,8 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
       OPENAI_API_KEY: "",
       OPENROUTER_API_KEY: "",
       GOOGLE_GENERATIVE_AI_API_KEY: "",
-      OPENWORK_API_KEY: "",
-      OPENWORK_INFERENCE_BASE_URL: "",
+      REDROB_CLOUD_API_KEY: "",
+      REDROB_INFERENCE_BASE_URL: "",
     },
   });
   const workspace = await createAndSelectWorkspace(app, {

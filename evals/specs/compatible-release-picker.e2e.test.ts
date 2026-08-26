@@ -1,25 +1,25 @@
 import { expect } from "vitest";
-import { clickButton, evalIn, visibleText } from "@openwork/behaviors";
-import { desktop } from "@openwork/hosts";
-import { eventually, needs, test } from "@openwork/testkit";
+import { clickButton, evalIn, visibleText } from "@redrob/behaviors";
+import { desktop } from "@redrob/hosts";
+import { eventually, needs, test } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "recovery offers only recent stable releases with exact compatible artifacts"
-  : "compatible release picker skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "compatible release picker skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 const currentArtifact = "https://releases.openwork.test/v2.4.0/OpenWork-darwin-arm64.dmg";
 const previousArtifact = "https://releases.openwork.test/v2.3.1/OpenWork-darwin-arm64.dmg";
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   await using recoveryApp = await desktop({
     name: "compatible-release-picker",
     host: place.host(),
     timeoutMs: 30_000,
     env: {
-      OPENWORK_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE: "EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE",
-      OPENWORK_EVAL_RECOVERY_TARGET: "darwin-arm64-public",
-      OPENWORK_EVAL_RECOVERY_RELEASES: JSON.stringify([
+      REDROB_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE: "EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE",
+      REDROB_EVAL_RECOVERY_TARGET: "darwin-arm64-public",
+      REDROB_EVAL_RECOVERY_RELEASES: JSON.stringify([
         { version: "2.4.0", channel: "stable", artifact: { platform: "darwin", arch: "arm64", distribution: "public", url: currentArtifact } },
         { version: "2.3.1", channel: "stable", artifact: { platform: "darwin", arch: "arm64", distribution: "public", url: previousArtifact } },
         { version: "2.3.0", channel: "stable", artifact: { platform: "linux", arch: "x64", distribution: "public", url: "https://incompatible.invalid/OpenWork.AppImage" } },

@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto"
-import { and, desc, eq } from "@openwork-ee/den-db/drizzle"
+import { and, desc, eq } from "@redrob-ee/den-db/drizzle"
 import {
   ConfigObjectVersionTable,
   RemoteMcpAppTable,
-} from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { z } from "zod"
 import { db } from "./db.js"
 import { createGuardedFetch, createRealmSafeFetch } from "./capability-sources/url-guard.js"

@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 
 const repoRoot = resolve(import.meta.dirname, "../..");
 const witnessName = "returns safe connection errors for DCR reconnect and callback initialize failures";

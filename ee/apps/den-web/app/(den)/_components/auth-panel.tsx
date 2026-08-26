@@ -150,7 +150,7 @@ function DesktopHandoffAction({
   organizationName: string | null;
   helperText?: string;
   buttonClassName?: string;
-  /** When true, always show the pasteable openwork:// link (signed-in desktop handoff). */
+  /** When true, always show the pasteable redrob:// link (signed-in desktop handoff). */
   showCopyLinkByDefault?: boolean;
 }) {
   const { status, timedOut } = useDesktopHandoffStatus(grant);

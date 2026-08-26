@@ -1,14 +1,14 @@
 import { expect } from "vitest";
-import { denFetch, evalIn, provisionOrg, waitFor } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { chrome } from "@openwork/hosts";
-import { startMockIdpLab } from "@openwork/labs";
-import { localMysqlIsRunning, server, test } from "@openwork/testkit";
+import { denFetch, evalIn, provisionOrg, waitFor } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { chrome } from "@redrob/hosts";
+import { startMockIdpLab } from "@redrob/labs";
+import { localMysqlIsRunning, server, test } from "@redrob/testkit";
 
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !localPlacement
-  ? "SSO domain verification skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+  ? "SSO domain verification skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
   : !mysqlOpen
     ? "SSO domain verification skipped — needs MySQL on 127.0.0.1:3306"
     : "an unverified SSO connection stays pending and gives the owner complete DNS instructions";

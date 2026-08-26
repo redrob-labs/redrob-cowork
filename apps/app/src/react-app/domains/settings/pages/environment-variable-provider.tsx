@@ -8,12 +8,12 @@ import { clearOpenworkEnvSystemContextCache } from "@/react-app/domains/session/
 import type { EnvironmentVariableItem } from "./environment-variable-table";
 
 const KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
-const RESERVED_PREFIXES = ["OPENWORK_", "OPENCODE_"] as const;
+const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
 const PERSISTABLE_INTERNAL_KEYS = new Set([
-  "OPENWORK_API_KEY",
-  "OPENWORK_MODELS_API_KEY",
-  "OPENWORK_INFERENCE_BASE_URL",
-  "OPENWORK_MODELS_BASE_URL",
+  "REDROB_CLOUD_API_KEY",
+  "REDROB_MODELS_API_KEY",
+  "REDROB_INFERENCE_BASE_URL",
+  "REDROB_MODELS_BASE_URL",
 ]);
 
 export type ApplyEnvironmentChangesResult = { statusMessage?: string } | void;

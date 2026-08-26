@@ -295,9 +295,9 @@ async function startOpenworkServer(paths, serverPort, opencodeBin) {
     cwd: REPO_ROOT,
     env: {
       ...process.env,
-      OPENWORK_MANAGE_OPENCODE: "1",
-      OPENWORK_OPENCODE_BIN: opencodeBin,
-      OPENWORK_SERVER_CONFIG: join(paths.xdgOpenwork, "server.json"),
+      REDROB_MANAGE_OPENCODE: "1",
+      REDROB_OPENCODE_BIN: opencodeBin,
+      REDROB_SERVER_CONFIG: join(paths.xdgOpenwork, "server.json"),
       XDG_CONFIG_HOME: paths.xdg,
       HOME: paths.home,
     },
@@ -420,9 +420,9 @@ async function writeFinalJson(value) {
 }
 
 async function main() {
-  for (const name of ["DEN_API_LOCAL", "OPENWORK_OPENCODE_BIN", "REPRO_DIR"]) envString(name);
+  for (const name of ["DEN_API_LOCAL", "REDROB_OPENCODE_BIN", "REPRO_DIR"]) envString(name);
   const denApiUrl = stripTrailingSlashes(envString("DEN_API_LOCAL"));
-  const opencodeBin = envString("OPENWORK_OPENCODE_BIN");
+  const opencodeBin = envString("REDROB_OPENCODE_BIN");
   const reproDir = envString("REPRO_DIR");
   const delayMs = envDelayMs();
   const activeWindowMs = windowMs();

@@ -1,14 +1,14 @@
 import { expect } from "vitest";
-import { denFetch, evalIn, waitFor } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
-import { needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { denFetch, evalIn, waitFor } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
+import { needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0

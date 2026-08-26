@@ -24,7 +24,7 @@ export type LegacyConfigSweepOptions = {
   now?: Date;
 };
 
-const OPENWORK_PLUGIN_MARKERS = [
+const REDROB_PLUGIN_MARKERS = [
   "openwork-extensions-preview",
   "openwork-capabilities-knowledge",
   "openwork-office-attachments",
@@ -64,7 +64,7 @@ function legacyConfigTargets(homeDir: string): string[] {
 }
 
 function matchesOpenworkPlugin(value: string): boolean {
-  return value.includes("opencode-plugins/openwork-") || OPENWORK_PLUGIN_MARKERS.some((marker) => value.includes(marker));
+  return value.includes("opencode-plugins/openwork-") || REDROB_PLUGIN_MARKERS.some((marker) => value.includes(marker));
 }
 
 function parseJsoncObject(content: string): Record<string, unknown> {

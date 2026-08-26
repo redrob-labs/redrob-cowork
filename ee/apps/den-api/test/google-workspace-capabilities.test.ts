@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, beforeEach, expect, mock, test } from "bun:test"
 import type { OpenApiOperation } from "../src/mcp/policy.js"
 
@@ -385,8 +385,8 @@ process.env.DEN_GOOGLE_API_BASE_URL = fakeGoogleServer.url.origin
 
 let app: typeof import("../src/app.js").default
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let session: typeof import("../src/session.js")
 let upsertConnectedAccount: typeof import("../src/capability-sources/oauth-credentials.js").upsertConnectedAccount
 let buildMcpCatalog: typeof import("../src/mcp/catalog.js").buildMcpCatalog
@@ -444,7 +444,7 @@ function requestForm(path: string, form: FormData) {
 
 beforeAll(async () => {
   mock.restore()
-  const realDb = (await import("@openwork-ee/den-db")).createDenDb({
+  const realDb = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db
@@ -453,8 +453,8 @@ beforeAll(async () => {
   const [appMod, dbMod, schemaMod, drizzleMod, sessionMod, credentialsMod, catalogMod, searchMod] = await Promise.all([
     import("../src/app.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/session.js"),
     import("../src/capability-sources/oauth-credentials.js"),
     import("../src/mcp/catalog.js"),
@@ -1031,10 +1031,10 @@ test("drive share grants user access and sends notification by default", async (
   resetFakeGoogle()
   const response = await request("/v1/capabilities/google-workspace/drive-file-share/file_1", {
     method: "POST",
-    body: { type: "user", emailAddress: "raghav@openworklabs.com" },
+    body: { type: "user", emailAddress: "raghav@redrob.io" },
   })
   expect(response.status).toBe(200)
-  expect(lastDriveSharePayload).toEqual({ type: "user", role: "reader", emailAddress: "raghav@openworklabs.com" })
+  expect(lastDriveSharePayload).toEqual({ type: "user", role: "reader", emailAddress: "raghav@redrob.io" })
   const url = new URL(expectString(lastDriveShareUrl, "drive share URL"))
   expect(url.pathname).toBe("/drive/v3/files/file_1/permissions")
   expect(url.searchParams.get("sendNotificationEmail")).toBe("true")
@@ -1048,10 +1048,10 @@ test("drive share grants domain access", async () => {
   resetFakeGoogle()
   const response = await request("/v1/capabilities/google-workspace/drive-file-share/file_1", {
     method: "POST",
-    body: { type: "domain", domain: "openworklabs.com", sendNotificationEmail: false },
+    body: { type: "domain", domain: "redrob.io", sendNotificationEmail: false },
   })
   expect(response.status).toBe(200)
-  expect(lastDriveSharePayload).toEqual({ type: "domain", role: "reader", domain: "openworklabs.com" })
+  expect(lastDriveSharePayload).toEqual({ type: "domain", role: "reader", domain: "redrob.io" })
   const url = new URL(expectString(lastDriveShareUrl, "drive share URL"))
   expect(url.searchParams.get("sendNotificationEmail")).toBe("false")
   const body: unknown = await response.json()

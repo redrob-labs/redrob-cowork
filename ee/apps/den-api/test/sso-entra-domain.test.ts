@@ -21,7 +21,7 @@ test("ignores mismatched entry point tenant URLs", () => {
 
 test("ignores custom domains for Microsoft Entra issuer URLs", () => {
   expect(isMicrosoftEntraManagedDomain({
-    domain: "openworklabs.com",
+    domain: "redrob.io",
     issuer: `https://sts.windows.net/${tenantId}/`,
     entryPoint: `https://login.microsoftonline.com/${tenantId}/saml2`,
   })).toBe(true)

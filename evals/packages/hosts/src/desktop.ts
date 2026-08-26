@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
-import { timed } from "@openwork/timeline";
-import { attachSurface, describeAppState, dumpScreenState, isInteractive, probeAppStateOnSurface } from "@openwork/cdp";
+import { timed } from "@redrob/timeline";
+import { attachSurface, describeAppState, dumpScreenState, isInteractive, probeAppStateOnSurface } from "@redrob/cdp";
 import { resolveHost } from "./resolve.ts";
-import type { AppStateProbe, AppSurfaceState, AttachedSurface, Surface, SurfaceHandle } from "@openwork/cdp";
+import type { AppStateProbe, AppSurfaceState, AttachedSurface, Surface, SurfaceHandle } from "@redrob/cdp";
 import type { Host } from "./types.ts";
 
 const DEFAULT_TIMEOUT_MS = 180_000;
@@ -34,7 +34,7 @@ async function appendDesktopLog(error: unknown, handle: SurfaceHandle): Promise<
 export interface DesktopOptions {
   name?: string;
   mode?: "spawn" | "attach";
-  /** Explicit CDP endpoint for attach mode; falls back to OPENWORK_EVAL_CDP_URL. */
+  /** Explicit CDP endpoint for attach mode; falls back to REDROB_EVAL_CDP_URL. */
   cdpUrl?: string;
   /**
    * Where this desktop runs. Defaults to the ambient host (`resolveHost()`).
@@ -112,9 +112,9 @@ export async function desktop(opts: DesktopOptions = {}): Promise<DesktopHandle>
   let handle: SurfaceHandle;
 
   if (mode === "attach") {
-    const cdpUrl = opts.cdpUrl?.trim() || process.env.OPENWORK_EVAL_CDP_URL?.trim();
+    const cdpUrl = opts.cdpUrl?.trim() || process.env.REDROB_EVAL_CDP_URL?.trim();
     if (!cdpUrl) {
-      throw new Error('desktop({ mode: "attach" }) requires cdpUrl or OPENWORK_EVAL_CDP_URL to point at a running Electron app.');
+      throw new Error('desktop({ mode: "attach" }) requires cdpUrl or REDROB_EVAL_CDP_URL to point at a running Electron app.');
     }
     handle = {
       name: opts.name ?? "attached-app",

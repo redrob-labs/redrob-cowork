@@ -11,18 +11,18 @@ function runContractProbe() {
   const script = `
 const crypto = await import("node:crypto")
 const { mock } = await import("bun:test")
-const schema = await import("@openwork-ee/den-db/schema")
-const { createDenTypeId } = await import("@openwork-ee/utils/typeid")
+const schema = await import("@redrob-ee/den-db/schema")
+const { createDenTypeId } = await import("@redrob-ee/utils/typeid")
 
 const apiOrigin = process.env.API_ORIGIN
 if (!apiOrigin) throw new Error("Missing API_ORIGIN")
 
 const agentResource = apiOrigin + "/mcp/agent"
 const parentResource = apiOrigin + "/mcp"
-const tokenUseClaim = "https://openworklabs.com/token_use"
-const resourceClaim = "https://openworklabs.com/resource"
-const orgIdClaim = "https://openworklabs.com/org_id"
-const grantIdClaim = "https://openworklabs.com/grant_id"
+const tokenUseClaim = "https://redrob.io/token_use"
+const resourceClaim = "https://redrob.io/resource"
+const orgIdClaim = "https://redrob.io/org_id"
+const grantIdClaim = "https://redrob.io/grant_id"
 const userId = createDenTypeId("user")
 const organizationId = createDenTypeId("organization")
 const sessionId = createDenTypeId("session")
@@ -232,7 +232,7 @@ console.log("ok")
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: API_ORIGIN,
       DEN_API_PUBLIC_URL: API_ORIGIN,
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       DEN_MCP_RESOURCE_URL: "",
       DEN_MCP_ADDITIONAL_RESOURCES: "",

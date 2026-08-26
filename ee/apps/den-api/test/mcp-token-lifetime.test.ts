@@ -29,7 +29,7 @@ function probeAccessTokenLifetime(overrides: Record<string, string>) {
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: "http://127.0.0.1:8790",
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       ...overrides,
     },
@@ -45,7 +45,7 @@ test("MCP OAuth access tokens use a short lifetime", () => {
 test("MCP OAuth access-token test override can shorten the lifetime", () => {
   const result = probeAccessTokenLifetime({
     DEN_MCP_TEST_ACCESS_TOKEN_EXPIRES_IN_SECONDS: "2",
-    OPENWORK_DEV_MODE: "1",
+    REDROB_DEV_MODE: "1",
   })
   expect(result.status).toBe(0)
   expect(result.stdout.trim()).toBe("2")
@@ -54,7 +54,7 @@ test("MCP OAuth access-token test override can shorten the lifetime", () => {
 test("MCP OAuth access-token test override is ignored outside dev mode", () => {
   const result = probeAccessTokenLifetime({
     DEN_MCP_TEST_ACCESS_TOKEN_EXPIRES_IN_SECONDS: "2",
-    OPENWORK_DEV_MODE: "0",
+    REDROB_DEV_MODE: "0",
   })
   expect(result.status).toBe(0)
   expect(result.stdout.trim()).toBe(String(45 * 60))
@@ -64,7 +64,7 @@ test("MCP OAuth access-token test override rejects invalid lifetimes", () => {
   for (const value of ["0", "1.5", "abc", String(45 * 60 + 1)]) {
     const result = probeAccessTokenLifetime({
       DEN_MCP_TEST_ACCESS_TOKEN_EXPIRES_IN_SECONDS: value,
-      OPENWORK_DEV_MODE: "1",
+      REDROB_DEV_MODE: "1",
     })
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain("DEN_MCP_TEST_ACCESS_TOKEN_EXPIRES_IN_SECONDS")
@@ -74,7 +74,7 @@ test("MCP OAuth access-token test override rejects invalid lifetimes", () => {
 test("invalid MCP OAuth access-token test override is ignored outside dev mode", () => {
   const result = probeAccessTokenLifetime({
     DEN_MCP_TEST_ACCESS_TOKEN_EXPIRES_IN_SECONDS: "abc",
-    OPENWORK_DEV_MODE: "0",
+    REDROB_DEV_MODE: "0",
   })
   expect(result.status).toBe(0)
   expect(result.stdout.trim()).toBe(String(45 * 60))

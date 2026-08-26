@@ -51,8 +51,7 @@ type ProviderOAuthSession = ProviderOAuthStartResult & {
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
-  openwork: "OpenWork",
-  opencode: "OpenCode Zen",
+  openwork: "Redrob",
   openai: "OpenAI",
   anthropic: "Anthropic",
   google: "Google",
@@ -60,7 +59,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   redrob: "Redrob",
 };
 
-const OPENWORK_MODELS_PROVIDER_ID = "openwork";
+const REDROB_MODELS_PROVIDER_ID = "openwork";
 
 export type ProviderAuthModalProps = {
   open: boolean;
@@ -151,19 +150,6 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     return normalizedId === "anthropic" || normalizedName === "anthropic";
   };
 
-  const isOpencodeZenProvider = (id: string) => id.trim().toLowerCase() === "opencode";
-
-  const OPENCODE_ZEN_KEY_URL = "https://opencode.ai/auth";
-
-  const openExternalUrl = async (url: string) => {
-    if (!url) return;
-    if (isDesktopRuntime()) {
-      await openDesktopUrl(url);
-      return;
-    }
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
   const isClaudeProMaxMethod = (method: ProviderAuthMethod) => {
     const label = method.label.toLowerCase();
     return method.type === "oauth" && (label.includes("pro/max") || label.includes("create an api key"));
@@ -201,17 +187,17 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
       })
       .sort(compareProviders);
 
-    if (props.showOpenWorkModelsSubscribe && isRedrobOnlyProviderId(OPENWORK_MODELS_PROVIDER_ID)) {
-      const connectedToOpenWork = connected.has(OPENWORK_MODELS_PROVIDER_ID);
+    if (props.showOpenWorkModelsSubscribe && isRedrobOnlyProviderId(REDROB_MODELS_PROVIDER_ID)) {
+      const connectedToOpenWork = connected.has(REDROB_MODELS_PROVIDER_ID);
       return [
         {
-          id: OPENWORK_MODELS_PROVIDER_ID,
-          name: "OpenWork",
+          id: REDROB_MODELS_PROVIDER_ID,
+          name: "Redrob",
           methods: [{ type: "cloud", label: "Subscribe" }],
           connected: connectedToOpenWork,
           env: [],
         },
-        ...nextEntries.filter((entry) => entry.id.trim().toLowerCase() !== OPENWORK_MODELS_PROVIDER_ID),
+        ...nextEntries.filter((entry) => entry.id.trim().toLowerCase() !== REDROB_MODELS_PROVIDER_ID),
       ];
     }
 
@@ -542,7 +528,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     setLocalError(null);
     setSelectedProviderId(entry.id);
 
-    if (props.showOpenWorkModelsSubscribe && entry.id.trim().toLowerCase() === OPENWORK_MODELS_PROVIDER_ID) {
+    if (props.showOpenWorkModelsSubscribe && entry.id.trim().toLowerCase() === REDROB_MODELS_PROVIDER_ID) {
       setView("openwork-subscribe");
       return;
     }
@@ -573,7 +559,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     try {
       await props.onSubmitApiKey(selectedEntry.id, trimmed);
       toast.success(`${selectedEntry.name} connected`, {
-        description: "API key saved locally by OpenCode.",
+        description: "API key saved locally by Redrob.",
       });
       // Close the modal after a successful save
       props.onClose();
@@ -681,15 +667,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
         : "Use OpenAI's device flow when the local browser callback is unreliable.";
     }
     if (method.type === "oauth") {
-      return "Continue in the browser and let OpenWork finish the connection automatically.";
+      return "Continue in the browser and let Redrob finish the connection automatically.";
     }
     if (method.type === "cloud") {
-      return "Subscribe to OpenWork Models.";
+      return "Subscribe to Redrob Models.";
     }
-    if (isOpencodeZenProvider(entry.id)) {
-      return "Sign in to OpenCode Zen with an API key to unlock paid models alongside the free tier.";
-    }
-    return "Paste a secret key that OpenWork stores locally on this device.";
+    return "Paste a secret key that Redrob stores locally on this device.";
   };
 
   return (
@@ -866,28 +849,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     </div>
                   </div>
                   <div className="text-xs text-gray-10">
-                    {isOpencodeZenProvider(selectedEntry.id)
-                      ? "Sign in to OpenCode Zen with an API key from opencode.ai/auth."
-                      : "Paste your API key to connect."}
+                    Paste your API key to connect.
                   </div>
-                  {isOpencodeZenProvider(selectedEntry.id) ? (
-                    <div className="rounded-lg border border-indigo-5/30 bg-indigo-3/15 px-3 py-2.5 text-xs text-indigo-12 space-y-1.5">
-                      <div>
-                        OpenCode Zen gives you access to the best coding models. Free models keep working without a key.
-                      </div>
-                      <button
-                        type="button"
-                        className="text-indigo-11 hover:text-indigo-12 underline underline-offset-2 font-medium"
-                        onClick={() => void openExternalUrl(OPENCODE_ZEN_KEY_URL)}
-                      >
-                        Get an API key →
-                      </button>
-                    </div>
-                  ) : null}
                   <TextInput
                     label="API key"
                     type="password"
-                    placeholder={isOpencodeZenProvider(selectedEntry.id) ? "ock_..." : "sk-..."}
+                    placeholder="sk-..."
                     value={apiKeyInput}
                     onChange={(event) => {
                       setApiKeyInput(event.currentTarget.value);
@@ -918,7 +885,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                 <div className="rounded-xl border border-blue-6/50 bg-blue-2/25 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-12">OpenWork Models</div>
+                      <div className="text-sm font-medium text-gray-12">Redrob Models</div>
                       <div className="text-xs text-gray-10 mt-1">
                         Frontier intelligence, hand picked for your team&apos;s most ambitious work.
                       </div>

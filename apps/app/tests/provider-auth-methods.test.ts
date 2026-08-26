@@ -27,7 +27,7 @@ function installWindow(options: {
       removeEventListener: () => undefined,
       dispatchEvent: () => true,
       location: { origin: options.origin },
-      __OPENWORK_ELECTRON__: options.electronInfo
+      __REDROB_ELECTRON__: options.electronInfo
         ? {
             invokeDesktop: async () => ({
               running: true,

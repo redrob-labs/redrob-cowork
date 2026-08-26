@@ -15,7 +15,7 @@ import {
   Split,
   Undo2,
 } from "lucide-react"
-import { PaperGrainGradient } from "@openwork/ui/react"
+import { PaperGrainGradient } from "@redrob/ui/react"
 import {
   DynamicToolUIPart,
   isFileUIPart,

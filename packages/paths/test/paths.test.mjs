@@ -102,9 +102,9 @@ describe("openwork server config paths", () => {
       .toBe("/home/ada/.config/openwork/server.json");
   });
 
-  test("honors OPENWORK_SERVER_CONFIG", () => {
+  test("honors REDROB_SERVER_CONFIG", () => {
     expect(openworkServerConfigPath({
-      env: { OPENWORK_SERVER_CONFIG: "/tmp/openwork/server.json" },
+      env: { REDROB_SERVER_CONFIG: "/tmp/openwork/server.json" },
       homeDir: "/home/ada",
       platform: "linux",
     })).toBe("/tmp/openwork/server.json");
@@ -112,9 +112,9 @@ describe("openwork server config paths", () => {
 });
 
 describe("openwork env store and desktop bootstrap paths", () => {
-  test("honors OPENWORK_ENV_STORE", () => {
+  test("honors REDROB_ENV_STORE", () => {
     expect(openworkEnvStorePath({
-      env: { OPENWORK_ENV_STORE: "/tmp/openwork/env.json" },
+      env: { REDROB_ENV_STORE: "/tmp/openwork/env.json" },
       homeDir: "/home/ada",
       platform: "linux",
     })).toBe("/tmp/openwork/env.json");
@@ -128,9 +128,9 @@ describe("openwork env store and desktop bootstrap paths", () => {
     })).toBe("/tmp/xdg/openwork/env.json");
   });
 
-  test("honors OPENWORK_DESKTOP_BOOTSTRAP_PATH", () => {
+  test("honors REDROB_DESKTOP_BOOTSTRAP_PATH", () => {
     expect(desktopBootstrapPath({
-      env: { OPENWORK_DESKTOP_BOOTSTRAP_PATH: "/tmp/bootstrap.json" },
+      env: { REDROB_DESKTOP_BOOTSTRAP_PATH: "/tmp/bootstrap.json" },
       homeDir: "/home/ada",
       platform: "linux",
     })).toBe("/tmp/bootstrap.json");
@@ -138,7 +138,7 @@ describe("openwork env store and desktop bootstrap paths", () => {
 
   test("preserves dev-data desktop bootstrap path when userDataDir is injected", () => {
     expect(desktopBootstrapPath({
-      env: { OPENWORK_DEV_MODE: "1" },
+      env: { REDROB_DEV_MODE: "1" },
       homeDir: "/Users/ada",
       platform: "darwin",
       userDataDir: "/tmp/openwork-userdata",

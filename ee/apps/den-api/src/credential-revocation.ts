@@ -1,11 +1,11 @@
-import { and, eq, inArray, isNull } from "@openwork-ee/den-db/drizzle"
+import { and, eq, inArray, isNull } from "@redrob-ee/den-db/drizzle"
 import {
   AuthSessionTable,
   MemberTable,
   OAuthAccessTokenTable,
   OAuthConsentTable,
   OAuthRefreshTokenTable,
-} from "@openwork-ee/den-db/schema"
+} from "@redrob-ee/den-db/schema"
 import { cache } from "./cache.js"
 import { db } from "./db.js"
 

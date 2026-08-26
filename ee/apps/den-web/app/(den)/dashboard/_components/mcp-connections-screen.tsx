@@ -87,7 +87,7 @@ const MCP_REQUIREMENTS_DISCOVERY_DELAY_MS = 500;
 // single-URL requirements discovery.
 const SMART_RESOLVE_DELAY_MS = 800;
 const MCP_TOOL_PAGE_SIZE = 50;
-const MCP_OAUTH_REDIRECT_DOCS_URL = "https://openworklabs.com/docs/cloud/share-with-your-team/shared-mcp-connections#oauth-redirect-url";
+const MCP_OAUTH_REDIRECT_DOCS_URL = "https://redrob.io/docs/cloud/share-with-your-team/shared-mcp-connections#oauth-redirect-url";
 
 function isDiscoverableMcpUrl(value: string): boolean {
   try {

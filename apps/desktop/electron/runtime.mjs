@@ -14,7 +14,7 @@ import {
   openworkEnvStorePath,
   openworkServerConfigPath,
   resolveWorkspaceOpencodeConfigPath,
-} from "@openwork/paths";
+} from "@redrob/paths";
 import {
   dedupeCertificates,
   resolveSystemCaBundle,
@@ -25,8 +25,8 @@ import {
 const __runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 
 const DIRECT_RUNTIME = "direct";
-const OPENWORK_SERVER_PORT_RANGE_START = 48_000;
-const OPENWORK_SERVER_PORT_RANGE_END = 51_000;
+const REDROB_SERVER_PORT_RANGE_START = 48_000;
+const REDROB_SERVER_PORT_RANGE_END = 51_000;
 const MAX_BOOTSTRAP_BYTES = 256 * 1024;
 const MAX_CHAIN_REPAIR_BODY_BYTES = 64 * 1024;
 const MAX_CHAIN_REPAIR_ORIGINS = 3;
@@ -272,7 +272,7 @@ export function selectStickyOpenworkPortWorkspace(requestedWorkspacePaths = [], 
 }
 
 export function resolveEvalLocalServerDelayMs(env = process.env) {
-  const delayMs = Number(env.OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS);
+  const delayMs = Number(env.REDROB_EVAL_LOCAL_SERVER_DELAY_MS);
   return Number.isFinite(delayMs) && delayMs > 0 ? delayMs : 0;
 }
 
@@ -686,10 +686,10 @@ export function resolveUserEnvFilePath(env = process.env) {
 }
 
 const USER_ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
-const USER_ENV_RESERVED_PREFIXES = ["OPENWORK_", "OPENCODE_"];
+const USER_ENV_RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"];
 
 // Synchronous, best-effort; absent or malformed returns {}. Reserved prefixes
-// are stripped so a tampered file can never shadow OPENWORK_* / OPENCODE_*.
+// are stripped so a tampered file can never shadow REDROB_* / OPENCODE_*.
 function loadUserEnvFile(env = process.env) {
   try {
     const raw = readFileSync(resolveUserEnvFilePath(env), "utf8");
@@ -1109,7 +1109,7 @@ async function resolveChainRepairOrigins(options) {
   const env = options.parentEnv ?? {};
   const chainRepair = options.chainRepair ?? {};
   if (chainRepair.origins) return normalizeRepairOrigins(chainRepair.origins);
-  const envOrigins = typeof env.OPENWORK_CHAIN_REPAIR_ORIGINS === "string" ? env.OPENWORK_CHAIN_REPAIR_ORIGINS : "";
+  const envOrigins = typeof env.REDROB_CHAIN_REPAIR_ORIGINS === "string" ? env.REDROB_CHAIN_REPAIR_ORIGINS : "";
   if (envOrigins.trim()) return normalizeRepairOrigins(envOrigins.split(","));
   const bootstrapPath = chainRepair.bootstrapPath ?? desktopBootstrapPath({ env });
   const origin = await readActivatedEnterpriseOrigin(bootstrapPath);
@@ -1124,14 +1124,14 @@ async function repairIncompleteChains(options) {
   const env = options.parentEnv ?? {};
   const chainRepair = options.chainRepair ?? {};
   const logInfo = options.logInfo;
-  if (chainRepair.disabled === true || String(env.OPENWORK_DISABLE_CHAIN_REPAIR ?? "").trim() === "1") {
-    if (typeof logInfo === "function") logInfo("OpenWork runtime: chain repair disabled by OPENWORK_DISABLE_CHAIN_REPAIR.");
+  if (chainRepair.disabled === true || String(env.REDROB_DISABLE_CHAIN_REPAIR ?? "").trim() === "1") {
+    if (typeof logInfo === "function") logInfo("OpenWork runtime: chain repair disabled by REDROB_DISABLE_CHAIN_REPAIR.");
     return { pems: [], timedOut: false };
   }
 
   const origins = await resolveChainRepairOrigins(options);
   if (origins.length === 0) {
-    if (!chainRepair.origins && !String(env.OPENWORK_CHAIN_REPAIR_ORIGINS ?? "").trim() && typeof logInfo === "function") {
+    if (!chainRepair.origins && !String(env.REDROB_CHAIN_REPAIR_ORIGINS ?? "").trim() && typeof logInfo === "function") {
       logInfo("OpenWork runtime: chain repair skipped: no activation record.");
     }
     return { pems: [], timedOut: false };
@@ -1140,7 +1140,7 @@ async function repairIncompleteChains(options) {
   const fetchImpl = chainRepair.fetchImpl ?? globalThis.fetch;
   const tlsModule = options.tlsModule ?? tls;
   const tlsConnectImpl = chainRepair.tlsConnectImpl ?? tls.connect;
-  const totalTimeoutValue = Number(env.OPENWORK_CHAIN_REPAIR_TIMEOUT_MS);
+  const totalTimeoutValue = Number(env.REDROB_CHAIN_REPAIR_TIMEOUT_MS);
   const totalTimeoutMs =
     Number.isFinite(totalTimeoutValue) && totalTimeoutValue >= 1000 && totalTimeoutValue <= 120000
       ? totalTimeoutValue
@@ -1513,7 +1513,7 @@ export function createRuntimeManager({
     // User env is layered first so process.env + any caller overrides always
     // win. See apps/server/src/env-file.ts — all loaders must agree on path +
     // reserved-keys policy.
-    const devPaths = process.env.OPENWORK_DEV_MODE === "1"
+    const devPaths = process.env.REDROB_DEV_MODE === "1"
       ? await ensureDevModePaths()
       : null;
     const userEnvPathEnv = devPaths
@@ -1550,7 +1550,7 @@ export function createRuntimeManager({
       env[pathKey] = pathEnv;
     }
     if (devPaths) {
-      env.OPENWORK_DEV_MODE = "1";
+      env.REDROB_DEV_MODE = "1";
       env.HOME = devPaths.homeDir;
       env.USERPROFILE = devPaths.homeDir;
       env.XDG_CONFIG_HOME = devPaths.xdgConfigHome;
@@ -1614,7 +1614,7 @@ export function createRuntimeManager({
     const candidates = [];
     const seen = new Set();
 
-    for (const key of ["OPENWORK_DOCKER_BIN", "OPENWRK_DOCKER_BIN", "DOCKER_BIN"]) {
+    for (const key of ["REDROB_DOCKER_BIN", "OPENWRK_DOCKER_BIN", "DOCKER_BIN"]) {
       const value = process.env[key]?.trim();
       if (value && !seen.has(value)) {
         seen.add(value);
@@ -1667,7 +1667,7 @@ export function createRuntimeManager({
     }
 
     throw new Error(
-      `Failed to run docker: ${errors.join("; ")} (Set OPENWORK_DOCKER_BIN to your docker binary if needed)`,
+      `Failed to run docker: ${errors.join("; ")} (Set REDROB_DOCKER_BIN to your docker binary if needed)`,
     );
   }
 
@@ -1915,7 +1915,7 @@ export function createRuntimeManager({
       path.resolve(__runtimeDir, "..", "server", "dist", "embedded.js"),
       ...(process.resourcesPath ? [path.resolve(process.resourcesPath, "server", "dist", "embedded.js")] : []),
     ];
-    const candidates = process.env.OPENWORK_DEV_MODE === "1"
+    const candidates = process.env.REDROB_DEV_MODE === "1"
       ? [devPath, ...packagedPaths]
       : [...packagedPaths, devPath];
     const embeddedPath = candidates.find((candidate) => existsSync(candidate));

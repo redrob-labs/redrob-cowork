@@ -2,7 +2,7 @@ import "./load-env.js"
 import { createHash } from "node:crypto"
 import { readFile, realpath, stat } from "node:fs/promises"
 import { extname, resolve, sep } from "node:path"
-import { createJsonStdoutLogger, type JsonObject, type JsonStdoutLogger } from "@openwork-ee/utils/observability"
+import { createJsonStdoutLogger, type JsonObject, type JsonStdoutLogger } from "@redrob-ee/utils/observability"
 import { Hono } from "hono"
 import { env } from "./env.js"
 import { createInstanceFetch, fetchWithConnectRetry, type FetchLike } from "./instance-fetch.js"
@@ -329,7 +329,7 @@ function escapeScriptJson(json: string) {
 function injectGatewayMarker(html: string, buildVersion: string | undefined) {
   const gatewayMarker = { version: 1, ...(buildVersion ? { build: buildVersion } : {}) }
   const marker = escapeScriptJson(JSON.stringify(gatewayMarker))
-  const script = `<script>window.__OPENWORK_GATEWAY__ = ${marker}</script>`
+  const script = `<script>window.__REDROB_GATEWAY__ = ${marker}</script>`
   const headCloseIndex = html.toLowerCase().indexOf("</head>")
   if (headCloseIndex < 0) {
     return `${script}${html}`

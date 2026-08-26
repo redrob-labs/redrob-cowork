@@ -63,10 +63,10 @@ const googleWorkspaceStatusActionSchema = z.object({
 type ActionItem = z.infer<typeof actionSchema>;
 
 const previousEnv = {
-  runtimeDb: process.env.OPENWORK_RUNTIME_DB,
+  runtimeDb: process.env.REDROB_RUNTIME_DB,
   googleClientSecret: process.env.GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET,
-  legacyGoogleClientSecret: process.env.OPENWORK_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET,
-  tokenBrokerUrl: process.env.OPENWORK_GOOGLE_WORKSPACE_TOKEN_BROKER_URL,
+  legacyGoogleClientSecret: process.env.REDROB_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET,
+  tokenBrokerUrl: process.env.REDROB_GOOGLE_WORKSPACE_TOKEN_BROKER_URL,
   legacyTokenBrokerUrl: process.env.GOOGLE_WORKSPACE_TOKEN_BROKER_URL,
 };
 
@@ -80,8 +80,8 @@ function restoreEnv(key: string, value: string | undefined) {
 
 function clearLegacyGoogleWorkspaceEnv() {
   delete process.env.GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET;
-  delete process.env.OPENWORK_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET;
-  delete process.env.OPENWORK_GOOGLE_WORKSPACE_TOKEN_BROKER_URL;
+  delete process.env.REDROB_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET;
+  delete process.env.REDROB_GOOGLE_WORKSPACE_TOKEN_BROKER_URL;
   delete process.env.GOOGLE_WORKSPACE_TOKEN_BROKER_URL;
 }
 
@@ -108,7 +108,7 @@ function serverConfig(root: string): ServerConfig {
 async function boot() {
   const root = await mkdtemp(join(tmpdir(), "openwork-connect-gating-"));
   dirs.push(root);
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   const config = serverConfig(root);
   const server = await startServer(config);
   stops.push(() => server.stop());
@@ -205,10 +205,10 @@ afterEach(async () => {
     const dir = dirs.pop();
     if (dir) await rm(dir, { recursive: true, force: true });
   }
-  restoreEnv("OPENWORK_RUNTIME_DB", previousEnv.runtimeDb);
+  restoreEnv("REDROB_RUNTIME_DB", previousEnv.runtimeDb);
   restoreEnv("GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET", previousEnv.googleClientSecret);
-  restoreEnv("OPENWORK_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET", previousEnv.legacyGoogleClientSecret);
-  restoreEnv("OPENWORK_GOOGLE_WORKSPACE_TOKEN_BROKER_URL", previousEnv.tokenBrokerUrl);
+  restoreEnv("REDROB_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET", previousEnv.legacyGoogleClientSecret);
+  restoreEnv("REDROB_GOOGLE_WORKSPACE_TOKEN_BROKER_URL", previousEnv.tokenBrokerUrl);
   restoreEnv("GOOGLE_WORKSPACE_TOKEN_BROKER_URL", previousEnv.legacyTokenBrokerUrl);
 });
 

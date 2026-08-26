@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: metadataBaseFromOrigin(metadataOrigin),
     title: "OpenWork Cloud",
     description:
-      "Share your OpenWork setup with your team, manage billing, and use OpenWork Cloud from app.openworklabs.com.",
+      "Share your OpenWork setup with your team, manage billing, and use OpenWork Cloud from app.redrob.io.",
     openGraph: {
       title: "OpenWork Cloud",
       description:
@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "OpenWork Cloud",
       description:
-        "Share your OpenWork setup with your team and manage OpenWork Cloud from app.openworklabs.com.",
+        "Share your OpenWork setup with your team and manage OpenWork Cloud from app.redrob.io.",
       images: ["/opengraph-image"]
     },
     icons: {

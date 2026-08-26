@@ -1,7 +1,7 @@
 import { expect } from "vitest";
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { needs, server, test } from "@openwork/testkit";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { needs, server, test } from "@redrob/testkit";
 
 const ORGANIZATION_NAME = "LLM Provider Access Parity";
 const REQUEST_TIMEOUT_MS = 10_000;

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router"
 import { toast } from "sonner"
 import { useQuery } from "@tanstack/react-query"
 
-import { automationProposalSchema, AUTOMATION_FREE_MODEL, type AutomationProposal } from "@openwork/types/automations"
+import { automationProposalSchema, AUTOMATION_FREE_MODEL, type AutomationProposal } from "@redrob/types/automations"
 
 import { createDenClient, readDenSettings } from "@/app/lib/den"
 import { Button } from "@/components/ui/button"

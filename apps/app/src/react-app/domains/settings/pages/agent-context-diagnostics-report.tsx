@@ -10,7 +10,7 @@ import type {
   AgentContextDiagnosticsReport,
   AgentContextOrganizationConnectionSummary,
   AgentContextToolPermission,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";

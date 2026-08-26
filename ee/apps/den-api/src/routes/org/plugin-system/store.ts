@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNull, or } from "@openwork-ee/den-db/drizzle"
+import { and, asc, count, desc, eq, inArray, isNull, or } from "@redrob-ee/den-db/drizzle"
 import {
   AuthUserTable,
   ConfigObjectAccessGrantTable,
@@ -25,9 +25,9 @@ import {
   PluginTable,
   RemoteMcpAppTable,
   TeamTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId } from "@openwork-ee/utils/typeid"
-import { hasSkillFrontmatterName, parseSkillMarkdown } from "@openwork-ee/utils"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId } from "@redrob-ee/utils/typeid"
+import { hasSkillFrontmatterName, parseSkillMarkdown } from "@redrob-ee/utils"
 import type { PluginArchActorContext, PluginArchResourceKind, PluginArchRole } from "./access.js"
 import { isPluginArchOrgAdmin, PluginArchAuthorizationError, pluginArchResourceHasExpandedAudience, requirePluginArchResourceRole, resolvePluginArchGrantRole, resolvePluginArchResourceRole } from "./access.js"
 import { clampCodePoints, clampUtf8Bytes, PROJECTION_TEXT_MAX_BYTES, PROJECTION_TITLE_MAX_CHARS } from "./projection-text.js"
@@ -61,9 +61,9 @@ import {
   DEFAULT_ANTHROPIC_MARKETPLACE_LOGO_URL,
   DEFAULT_ANTHROPIC_MARKETPLACE_NAME,
   DEFAULT_ANTHROPIC_STARTER_PLUGINS,
-  DEFAULT_OPENWORK_MARKETPLACE_DESCRIPTION,
-  DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL,
-  DEFAULT_OPENWORK_MARKETPLACE_NAME,
+  DEFAULT_REDROB_MARKETPLACE_DESCRIPTION,
+  DEFAULT_REDROB_MARKETPLACE_LOGO_URL,
+  DEFAULT_REDROB_MARKETPLACE_NAME,
   type DefaultMarketplacePluginEntry,
 } from "./default-marketplaces.js"
 import { db } from "../../../db.js"
@@ -750,7 +750,7 @@ type PluginMarketplaceSummary = {
   name: string
 }
 
-const DEFAULT_OPENWORK_EXTENSION_MANIFESTS = [
+const DEFAULT_REDROB_EXTENSION_MANIFESTS = [
   {
     schemaVersion: 1,
     id: "openwork-browser",
@@ -780,8 +780,8 @@ const DEFAULT_OPENWORK_EXTENSION_MANIFESTS = [
     composer: { prompt: "Use Computer Use to " },
     setup: { instructions: "Computer Use is Mac only. Grant Accessibility and Screen Recording permissions, then connect the local MCP server in this workspace." },
     resources: [
-      { type: "mcp", id: "computer-use-mcp", label: "Computer Use MCP", mcpServerName: "computer-use", command: ["npx", "-y", "@openwork/handsfree", "mcp"], localCommandRef: "openwork.computerUseMcp", required: true },
-      { type: "native-binary", id: "computer-use-native", label: "macOS accessibility runtime", packageName: "@openwork/handsfree", required: true },
+      { type: "mcp", id: "computer-use-mcp", label: "Computer Use MCP", mcpServerName: "computer-use", command: ["npx", "-y", "@redrob/handsfree", "mcp"], localCommandRef: "openwork.computerUseMcp", required: true },
+      { type: "native-binary", id: "computer-use-native", label: "macOS accessibility runtime", packageName: "@redrob/handsfree", required: true },
     ],
     contributions: [
       { type: "setup-instructions", ref: "openwork.computerUse.setup", location: "settings-detail" },
@@ -865,7 +865,7 @@ const DEFAULT_OPENWORK_EXTENSION_MANIFESTS = [
 ] as const
 
 function defaultOpenWorkManifestForPlugin(row: PluginRow) {
-  return DEFAULT_OPENWORK_EXTENSION_MANIFESTS.find((manifest) => manifest.name === row.name && manifest.description === row.description) ?? null
+  return DEFAULT_REDROB_EXTENSION_MANIFESTS.find((manifest) => manifest.name === row.name && manifest.description === row.description) ?? null
 }
 
 function extensionResourceTypeForConfigObject(objectType: string) {
@@ -2849,15 +2849,15 @@ async function ensureDefaultOpenWorkMarketplace(context: PluginArchActorContext)
       context,
       createdAt: now,
       database: tx,
-      description: DEFAULT_OPENWORK_MARKETPLACE_DESCRIPTION,
-      logoUrl: DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL,
-      name: DEFAULT_OPENWORK_MARKETPLACE_NAME,
+      description: DEFAULT_REDROB_MARKETPLACE_DESCRIPTION,
+      logoUrl: DEFAULT_REDROB_MARKETPLACE_LOGO_URL,
+      name: DEFAULT_REDROB_MARKETPLACE_NAME,
     })
     await ensureDefaultMarketplacePlugins({
       context,
       createdAt: now,
       database: tx,
-      entries: DEFAULT_OPENWORK_EXTENSION_MANIFESTS.map((manifest) => ({ description: manifest.description, name: manifest.name })),
+      entries: DEFAULT_REDROB_EXTENSION_MANIFESTS.map((manifest) => ({ description: manifest.description, name: manifest.name })),
       marketplaceId: marketplace.id,
     })
   })
@@ -2869,20 +2869,20 @@ async function defaultOpenWorkMarketplaceSeedComplete(organizationId: Organizati
     .from(MarketplaceTable)
     .where(and(
       eq(MarketplaceTable.organizationId, organizationId),
-      inArray(MarketplaceTable.name, [DEFAULT_ANTHROPIC_MARKETPLACE_NAME, DEFAULT_OPENWORK_MARKETPLACE_NAME]),
+      inArray(MarketplaceTable.name, [DEFAULT_ANTHROPIC_MARKETPLACE_NAME, DEFAULT_REDROB_MARKETPLACE_NAME]),
       eq(MarketplaceTable.status, "active"),
       isNull(MarketplaceTable.deletedAt),
     ))
   const marketplaceIdByName = new Map(defaultMarketplaces.map((marketplace) => [marketplace.name, marketplace.id]))
   const anthropicMarketplaceId = marketplaceIdByName.get(DEFAULT_ANTHROPIC_MARKETPLACE_NAME)
-  const openWorkMarketplaceId = marketplaceIdByName.get(DEFAULT_OPENWORK_MARKETPLACE_NAME)
+  const openWorkMarketplaceId = marketplaceIdByName.get(DEFAULT_REDROB_MARKETPLACE_NAME)
   if (!anthropicMarketplaceId || !openWorkMarketplaceId) {
     return false
   }
   if (!defaultMarketplaces.some((marketplace) => marketplace.name === DEFAULT_ANTHROPIC_MARKETPLACE_NAME && marketplace.logoUrl === DEFAULT_ANTHROPIC_MARKETPLACE_LOGO_URL)) {
     return false
   }
-  if (!defaultMarketplaces.some((marketplace) => marketplace.name === DEFAULT_OPENWORK_MARKETPLACE_NAME && marketplace.logoUrl === DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL)) {
+  if (!defaultMarketplaces.some((marketplace) => marketplace.name === DEFAULT_REDROB_MARKETPLACE_NAME && marketplace.logoUrl === DEFAULT_REDROB_MARKETPLACE_LOGO_URL)) {
     return false
   }
 
@@ -2903,7 +2903,7 @@ async function defaultOpenWorkMarketplaceSeedComplete(organizationId: Organizati
   }
 
   const anthropicPluginEntries = DEFAULT_ANTHROPIC_STARTER_PLUGINS
-  const openWorkPluginEntries = DEFAULT_OPENWORK_EXTENSION_MANIFESTS.map((manifest) => ({ description: manifest.description, name: manifest.name }))
+  const openWorkPluginEntries = DEFAULT_REDROB_EXTENSION_MANIFESTS.map((manifest) => ({ description: manifest.description, name: manifest.name }))
   const defaultPluginEntries = [...anthropicPluginEntries, ...openWorkPluginEntries]
   const defaultPluginRows = await db
     .select({ id: PluginTable.id, name: PluginTable.name, description: PluginTable.description })

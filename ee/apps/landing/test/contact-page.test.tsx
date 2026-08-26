@@ -26,7 +26,7 @@ describe("Contact page affordances", () => {
 
     expect(html).toContain("Have questions about OpenWork?");
     expect(html).toContain("Prefer to email us instead?");
-    expect(html).toContain("team@openworklabs.com");
+    expect(html).toContain("team@redrob.io");
     expect(html).toContain("Send question");
   });
 

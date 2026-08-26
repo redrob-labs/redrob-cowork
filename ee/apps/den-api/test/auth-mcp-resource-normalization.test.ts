@@ -101,7 +101,7 @@ console.log("ok")
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: API_ORIGIN,
       DEN_API_PUBLIC_URL: API_ORIGIN,
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       DEN_MCP_RESOURCE_URL: "",
       DEN_MCP_ADDITIONAL_RESOURCES: "",

@@ -30,7 +30,7 @@ test("anthropic starter marketplace seeds a non-empty plugin catalog", () => {
 })
 
 test("default marketplace logos pass logo url validation", () => {
-  expect(schemas.marketplaceLogoUrlSchema.safeParse(defaults.DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL).success).toBe(true)
+  expect(schemas.marketplaceLogoUrlSchema.safeParse(defaults.DEFAULT_REDROB_MARKETPLACE_LOGO_URL).success).toBe(true)
   expect(schemas.marketplaceLogoUrlSchema.safeParse(defaults.DEFAULT_ANTHROPIC_MARKETPLACE_LOGO_URL).success).toBe(true)
 })
 

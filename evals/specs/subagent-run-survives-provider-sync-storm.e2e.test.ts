@@ -6,10 +6,10 @@ import {
   selectModel,
   sendComposerMessage,
   waitFor,
-} from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { app, eventually, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { app, eventually, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * REPRODUCTION SPEC for the "aborted messages on almost every message,
@@ -42,7 +42,7 @@ import type { TestNeeds } from "@openwork/testkit";
 
 const requirements: TestNeeds = {
   env: ["ANTHROPIC_API_KEY"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -185,9 +185,9 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
 
   // ── Pick a real Anthropic model through the product picker ─────────────
   // Picker rows carry bare model ids (e.g. "claude-sonnet-4-5"). Sonnet-class
-  // keeps the run affordable; set OPENWORK_EVAL_MODEL=claude-opus-4-8 to
+  // keeps the run affordable; set REDROB_EVAL_MODEL=claude-opus-4-8 to
   // mirror the support report exactly.
-  const preferredModel = process.env.OPENWORK_EVAL_MODEL?.trim() ?? "";
+  const preferredModel = process.env.REDROB_EVAL_MODEL?.trim() ?? "";
   const models = await readAvailableModels(desktopApp);
   const selectable = models.filter((model) => model.selectable);
   const claudes = selectable.filter((model) => /anthropic/i.test(model.providerName) || /^claude-/i.test(model.id));

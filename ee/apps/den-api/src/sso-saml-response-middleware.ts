@@ -1,5 +1,5 @@
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { SsoProviderTable } from "@openwork-ee/den-db/schema"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { SsoProviderTable } from "@redrob-ee/den-db/schema"
 import type { MiddlewareHandler } from "hono"
 import { z } from "zod"
 import { db } from "./db.js"

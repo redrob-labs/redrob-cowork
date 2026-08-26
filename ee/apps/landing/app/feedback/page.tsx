@@ -16,7 +16,7 @@ export const metadata = {
   },
   openGraph: {
     ...baseOpenGraph,
-    url: "https://openworklabs.com/feedback"
+    url: "https://redrob.io/feedback"
   }
 };
 

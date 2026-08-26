@@ -1,16 +1,17 @@
 # AGENTS.md
 
-Redrob Work is a free, open-source desktop app (macOS, Windows, Linux) for doing
-work with AI agents on your own files — an open-source alternative to Claude
-Cowork and Codex, built on OpenCode, running any model from 50+ providers.
-Desktop mode keeps files local; cloud is optional. Three surfaces live in this
-repo:
+Redrob Work (레드롭 워크) is a free, open-source desktop and MCP app (macOS,
+Windows, Linux) for doing work with AI agents on your own files. It is built on
+the OpenCode engine, ships in English and Korean, and uses Redrob as its only
+inference provider (console.redrob.ai, model `redrob-ai`), connected by pasting
+a `REDROB_API_KEY`. Desktop mode keeps files local; cloud is optional. Three
+surfaces live in this repo:
 
 - **Desktop app** (`apps/`, `packages/`) — local-first agent workspace: chat on
   files, skills, browser automation, scheduled automations, Anthropic-compatible
   plugins.
 - **Redrob Work MCP gateway** (`ee/apps/den-api`) — one URL
-  (`api.openworklabs.com/mcp/agent`) that brings org-assigned skills, plugins,
+  (`api.redrob.io/mcp/agent`) that brings org-assigned skills, plugins,
   and connections (Google Workspace, Microsoft 365, MCPs) into Codex, Claude
   Code, Cursor, or any MCP client via `search_capabilities` /
   `execute_capability`.
@@ -25,7 +26,7 @@ even before a dedicated UI exists.
 ## Verification (every change)
 
 - The only proof path is `evals/specs/**/*.test.ts` with `test` from
-  `@openwork/testkit`; app-driving E2E tests use `.e2e.test.ts`. Prose,
+  `@redrob/testkit`; app-driving E2E tests use `.e2e.test.ts`. Prose,
   screenshots, and recordings never decide pass/fail — test evidence does.
 - Skills own the mechanics: `prove-a-pr` → `write-a-spec` → `run-tests` →
   `diagnose-a-red-run` when red → `publish-evidence`. Evidence is ambient; never
@@ -53,9 +54,8 @@ even before a dedicated UI exists.
  `tmp/dev-headless-web.json` for `webUrl`, tokens, logs, and Den proxy URLs.
  It does not use `~/.config/openwork/server.json`. Re-running reuses a healthy
  instance; `--replace` restarts it with fresh tokens (`--keep-tokens` to
- keep the previous ones). Cloud sign-in is copy/paste handoff (Den cannot
- redirect grants to localhost): Account → Sign in → copy Redrob Work link on Den
- → Paste sign-in code in Settings.
+ keep the previous ones). Inference is connected by pasting a `REDROB_API_KEY`
+ issued at console.redrob.ai; there is no separate account sign-in flow.
 
 ## Coding
 

@@ -1,4 +1,4 @@
-import { createDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import type { OpenApiOperation } from "../src/mcp/policy.js"
 
@@ -43,8 +43,8 @@ function isOpenApiDocument(value: unknown): value is TestOpenApiDocument {
 
 let app: typeof import("../src/app.js").default
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 let catalog: ReturnType<typeof import("../src/mcp/catalog.js").buildMcpCatalog>
 let nativeCapabilities: typeof import("../src/mcp/native-capabilities.js")
 let session: typeof import("../src/session.js")
@@ -94,8 +94,8 @@ beforeAll(async () => {
   const [appImport, dbImport, schemaImport, drizzleImport, catalogImport, nativeImport, sessionImport, oauthImport, connectionsImport] = await Promise.all([
     import("../src/app.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/mcp/catalog.js"),
     import("../src/mcp/native-capabilities.js"),
     import("../src/session.js"),

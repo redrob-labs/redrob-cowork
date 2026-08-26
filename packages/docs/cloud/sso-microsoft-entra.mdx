@@ -17,7 +17,7 @@ You need:
 - An OpenWork organization with the Enterprise SSO entitlement.
 - Owner or admin access in that OpenWork organization.
 - Admin access to a Microsoft Entra enterprise application.
-- The final OpenWork auth origin, for example `https://app.openworklabs.com`.
+- The final OpenWork auth origin, for example `https://app.redrob.io`.
 
 ## 1. Create the Entra enterprise app
 
@@ -33,9 +33,9 @@ Set:
 
 | Entra field | Value |
 | --- | --- |
-| Identifier (Entity ID) | The OpenWork auth origin, for example `https://app.openworklabs.com` |
-| Reply URL (Assertion Consumer Service URL) | The ACS URL OpenWork shows after saving SAML, for example `https://app.openworklabs.com/api/auth/sso/saml2/sp/acs/openwork-sso-<org-id>` |
-| Sign on URL | The org-specific OpenWork **Sign-in URL** shown after saving SAML, for example `https://app.openworklabs.com/sso/<org-slug>` |
+| Identifier (Entity ID) | The OpenWork auth origin, for example `https://app.redrob.io` |
+| Reply URL (Assertion Consumer Service URL) | The ACS URL OpenWork shows after saving SAML, for example `https://app.redrob.io/api/auth/sso/saml2/sp/acs/openwork-sso-<org-id>` |
+| Sign on URL | The org-specific OpenWork **Sign-in URL** shown after saving SAML, for example `https://app.redrob.io/sso/<org-slug>` |
 | Relay State | Leave blank |
 
 The Entity ID must be the OpenWork auth origin. Do not use the Entra tenant
@@ -91,7 +91,7 @@ original external email address.
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| `AADSTS700016: Application with identifier 'https://app.openworklabs.com' was not found` | Entra's Entity ID does not match OpenWork's SAML issuer | Set **Identifier (Entity ID)** to the OpenWork auth origin |
+| `AADSTS700016: Application with identifier 'https://app.redrob.io' was not found` | Entra's Entity ID does not match OpenWork's SAML issuer | Set **Identifier (Entity ID)** to the OpenWork auth origin |
 | `/?error=saml_error&error_description=Invalid%20SAML%20response` | Entra is signing with a different certificate than the one saved in OpenWork, or assertions are not signed | Confirm **Signing Option** is `Sign SAML assertion`, then paste Entra's active **Certificate (Base64)** into OpenWork and save |
 | `/?error=unsolicited_response&error_description=IdP-initiated+SSO+not+allowed` | The deployment is running an older OpenWork version that rejects IdP-initiated SAML | Upgrade OpenWork, or launch from the org-specific OpenWork **Sign-in URL** |
 | User reaches Microsoft but cannot continue | The user is not assigned to the enterprise application | Add the user under **Users and groups** |

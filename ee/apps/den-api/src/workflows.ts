@@ -1,12 +1,12 @@
 import type {
   AutomationAction,
-} from "@openwork/types/automations"
+} from "@redrob/types/automations"
 import type {
   WorkflowArtifactSnapshot,
   WorkflowDetail,
   WorkflowVersion,
-} from "@openwork/types/workflows"
-import { and, asc, desc, eq, gt, inArray, isNotNull, isNull } from "@openwork-ee/den-db/drizzle"
+} from "@redrob/types/workflows"
+import { and, asc, desc, eq, gt, inArray, isNotNull, isNull } from "@redrob-ee/den-db/drizzle"
 import {
   AutomationRevisionTable,
   AutomationRunTable,
@@ -20,8 +20,8 @@ import {
   PluginConfigObjectTable,
   PluginTable,
   TeamMemberTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { codemodeCodeDigest, parseCodemodeToolCalls } from "./workflow-runs.js"
 import { db } from "./db.js"
 import { parseCodemodeScriptPayload, validateCodemodeScriptInput } from "./mcp/codemode-script-object.js"

@@ -16,26 +16,26 @@ import {
 
 test("consentVarsFromSource extracts, deduplicates, and sorts only opt-in variables", () => {
   const source = `
-    needs({ optIn: ["OPENWORK_EVAL_ZETA", 'OPENWORK_EVAL_ALPHA'] });
+    needs({ optIn: ["REDROB_EVAL_ZETA", 'REDROB_EVAL_ALPHA'] });
     const requirements = {
       optIn: [
-        "OPENWORK_EVAL_MULTI",
-        "OPENWORK_EVAL_ALPHA",
+        "REDROB_EVAL_MULTI",
+        "REDROB_EVAL_ALPHA",
       ],
     };
-    process.env.OPENWORK_EVAL_DIRECT === "1";
-    process.env.OPENWORK_EVAL_TRIMMED?.trim() === "1";
-    process.env.OPENWORK_EVAL_MODEL?.trim() || "";
-    process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+    process.env.REDROB_EVAL_DIRECT === "1";
+    process.env.REDROB_EVAL_TRIMMED?.trim() === "1";
+    process.env.REDROB_EVAL_MODEL?.trim() || "";
+    process.env.REDROB_EVAL_DEN_API_URL?.trim();
     process.env.UNRELATED === "1";
   `;
 
   assert.deepEqual(consentVarsFromSource(source), [
-    "OPENWORK_EVAL_ALPHA",
-    "OPENWORK_EVAL_DIRECT",
-    "OPENWORK_EVAL_MULTI",
-    "OPENWORK_EVAL_TRIMMED",
-    "OPENWORK_EVAL_ZETA",
+    "REDROB_EVAL_ALPHA",
+    "REDROB_EVAL_DIRECT",
+    "REDROB_EVAL_MULTI",
+    "REDROB_EVAL_TRIMMED",
+    "REDROB_EVAL_ZETA",
   ]);
 });
 
@@ -78,13 +78,13 @@ test("explicit local placement removes inherited remote provisioning inputs", ()
   const options = parseArgs(["app-smoke", "--local"]);
   const childEnv = resolveRunEnvironment(options, {
     PATH: "/bin",
-    OPENWORK_EVAL_DAYTONA: "1",
-    OPENWORK_EVAL_DAYTONA_SANDBOX: "desktop-sandbox",
-    OPENWORK_EVAL_DAYTONA_SANDBOX_ID: "legacy-sandbox",
-    OPENWORK_EVAL_DAYTONA_DEN_SANDBOX: "den-sandbox",
-    OPENWORK_EVAL_DAYTONA_DESKTOP_SANDBOX: "prepared-desktop",
-    OPENWORK_EVAL_DEN_API_URL: "https://den-api.example.test",
-    OPENWORK_EVAL_DEN_WEB_URL: "https://den.example.test",
+    REDROB_EVAL_DAYTONA: "1",
+    REDROB_EVAL_DAYTONA_SANDBOX: "desktop-sandbox",
+    REDROB_EVAL_DAYTONA_SANDBOX_ID: "legacy-sandbox",
+    REDROB_EVAL_DAYTONA_DEN_SANDBOX: "den-sandbox",
+    REDROB_EVAL_DAYTONA_DESKTOP_SANDBOX: "prepared-desktop",
+    REDROB_EVAL_DEN_API_URL: "https://den-api.example.test",
+    REDROB_EVAL_DEN_WEB_URL: "https://den.example.test",
   });
 
   assert.deepEqual(childEnv, { PATH: "/bin" });
@@ -92,19 +92,19 @@ test("explicit local placement removes inherited remote provisioning inputs", ()
 
 test("explicit Daytona and attached Den placement retain their existing behavior", () => {
   const daytona = resolveRunEnvironment(parseArgs(["app-smoke", "--daytona"]), {
-    OPENWORK_EVAL_DEN_API_URL: "https://attached.example.test",
+    REDROB_EVAL_DEN_API_URL: "https://attached.example.test",
   });
-  assert.equal(daytona.OPENWORK_EVAL_DAYTONA, "1");
-  assert.equal(daytona.OPENWORK_EVAL_DEN_API_URL, "https://attached.example.test");
+  assert.equal(daytona.REDROB_EVAL_DAYTONA, "1");
+  assert.equal(daytona.REDROB_EVAL_DEN_API_URL, "https://attached.example.test");
 
   const attached = resolveRunEnvironment(parseArgs(["app-smoke", "--den", "https://den.example.test"]), {});
-  assert.equal(attached.OPENWORK_EVAL_DEN_API_URL, "https://den.example.test");
+  assert.equal(attached.REDROB_EVAL_DEN_API_URL, "https://den.example.test");
 });
 
 test("automatic placement preserves the caller environment", () => {
   const ambient = {
-    OPENWORK_EVAL_DAYTONA: "1",
-    OPENWORK_EVAL_DEN_API_URL: "https://den.example.test",
+    REDROB_EVAL_DAYTONA: "1",
+    REDROB_EVAL_DEN_API_URL: "https://den.example.test",
   };
   assert.deepEqual(resolveRunEnvironment(parseArgs(["app-smoke"]), ambient), ambient);
 });

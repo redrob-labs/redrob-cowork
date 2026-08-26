@@ -1,13 +1,13 @@
 import { expect, test } from "vitest";
-import { createAndSelectWorkspace } from "@openwork/behaviors";
-import { daytonaSandbox, desktop } from "@openwork/hosts";
+import { createAndSelectWorkspace } from "@redrob/behaviors";
+import { daytonaSandbox, desktop } from "@redrob/hosts";
 
-const sandboxA = process.env.OPENWORK_EVAL_DAYTONA_SANDBOX_A?.trim();
-const sandboxB = process.env.OPENWORK_EVAL_DAYTONA_SANDBOX_B?.trim();
+const sandboxA = process.env.REDROB_EVAL_DAYTONA_SANDBOX_A?.trim();
+const sandboxB = process.env.REDROB_EVAL_DAYTONA_SANDBOX_B?.trim();
 const enabled = Boolean(sandboxA && sandboxB);
 
 test.skipIf(!enabled)("two desktops reach interactive workspaces on different Daytona sandboxes", async () => {
-  if (!sandboxA || !sandboxB) throw new Error("Set OPENWORK_EVAL_DAYTONA_SANDBOX_A and OPENWORK_EVAL_DAYTONA_SANDBOX_B.");
+  if (!sandboxA || !sandboxB) throw new Error("Set REDROB_EVAL_DAYTONA_SANDBOX_A and REDROB_EVAL_DAYTONA_SANDBOX_B.");
   expect(sandboxA).not.toBe(sandboxB);
 
   await using appA = await desktop({ host: daytonaSandbox(sandboxA), name: "a" });

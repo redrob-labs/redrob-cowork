@@ -2,10 +2,10 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, onTestFinished, test } from "vitest";
-import type { Surface } from "@openwork/cdp";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { readActiveWorkspaceId } from "@openwork/cdp";
-import { desktop } from "@openwork/hosts";
+import type { Surface } from "@redrob/cdp";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { readActiveWorkspaceId } from "@redrob/cdp";
+import { desktop } from "@redrob/hosts";
 import {
   clickButton,
   createLocalWorkspaceViaUi,
@@ -20,12 +20,12 @@ import {
   waitForAssistantReply,
   waitForText,
   waitUntilTextStable,
-} from "@openwork/behaviors";
+} from "@redrob/behaviors";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "first use without an invite or cloud reaches local task UI with honest model setup"
-  : "first-run local skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in";
+  : "first-run local skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in";
 const prompt = "Create a short welcome checklist for this OpenWork workspace. Use exactly three bullets and mention one thing I can do next.";
 
 interface TaskAvailability {

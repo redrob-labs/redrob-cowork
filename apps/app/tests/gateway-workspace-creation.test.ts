@@ -18,8 +18,8 @@ function installWindow(options: {
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
       location: { origin: options.origin },
-      __OPENWORK_GATEWAY__: options.gateway ? { version: 1 } : undefined,
-      __OPENWORK_ELECTRON__: options.electronInfo
+      __REDROB_GATEWAY__: options.gateway ? { version: 1 } : undefined,
+      __REDROB_ELECTRON__: options.electronInfo
         ? {
             invokeDesktop: async () => ({
               running: true,
@@ -41,7 +41,7 @@ afterEach(() => {
 
 describe("workspace creation policy", () => {
   test("disables workspace creation in gateway runtime", () => {
-    installWindow({ origin: "https://web.openworklabs.com", gateway: true });
+    installWindow({ origin: "https://web.redrob.io", gateway: true });
     expect(canCreateWorkspaces()).toBe(false);
   });
 

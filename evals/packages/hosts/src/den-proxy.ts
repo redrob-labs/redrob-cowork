@@ -13,7 +13,7 @@ const listenPort = Number(process.env.DEN_PROXY_LISTEN_PORT);
 const upstreamPort = Number(process.env.DEN_PROXY_UPSTREAM_PORT);
 const DEN_PREFIX = "/api/den";
 const AUTH_DELAY_CONTROL_PATH = "/__openwork_eval/auth-delay";
-const authDelayControlEnabled = process.env.OPENWORK_EVAL_DEN_PROXY_CONTROL === "1";
+const authDelayControlEnabled = process.env.REDROB_EVAL_DEN_PROXY_CONTROL === "1";
 let authDelayEnabled = false;
 let authDelayCalls = 0;
 const authDelayWaiters = new Set<() => void>();

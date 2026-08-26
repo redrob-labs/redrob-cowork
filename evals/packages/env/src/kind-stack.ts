@@ -2,7 +2,7 @@
  * Kubernetes Den-stack harness for eval environments.
  *
  * This is the kind-backed Den placement: the same eval scenarios target the
- * same OPENWORK_EVAL_DEN_* URLs, but the control plane runs through the Helm
+ * same REDROB_EVAL_DEN_* URLs, but the control plane runs through the Helm
  * chart in a local Kubernetes cluster. Endpoints are exposed with kubectl
  * port-forward instead of kind node port mappings so an existing warm cluster
  * can be reused across profiles without recreating the node config.
@@ -12,12 +12,12 @@ import { openSync } from "node:fs";
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveChromeBinary } from "@openwork/hosts";
+import { resolveChromeBinary } from "@redrob/hosts";
 
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(MODULE_DIR, "..", "..", "..", "..");
 const DEFAULT_STATE_DIR = resolve(MODULE_DIR, "..", "..", "..", "results", ".kube-stack");
-const DEFAULT_ELECTRON_USERDATA = process.env.OPENWORK_EVAL_KUBE_ELECTRON_USERDATA?.trim()
+const DEFAULT_ELECTRON_USERDATA = process.env.REDROB_EVAL_KUBE_ELECTRON_USERDATA?.trim()
   || join(DEFAULT_STATE_DIR, "electron-user-data");
 
 export const KUBE_CLUSTER_NAME = "openwork-kube-lab";
@@ -36,15 +36,15 @@ const CALICO_MANIFEST_URL = "https://raw.githubusercontent.com/projectcalico/cal
 const DEN_API_SERVICE = `${KUBE_RELEASE_NAME}-den-api`;
 const DEN_WEB_SERVICE = `${KUBE_RELEASE_NAME}-den-web`;
 const MYSQL_DEPLOYMENT = "openwork-mysql";
-const DEN_API_PORT = Number(process.env.OPENWORK_EVAL_DEN_PORT ?? 8790);
-const DEN_WEB_PORT = Number(process.env.OPENWORK_EVAL_DEN_WEB_PORT ?? 3005);
+const DEN_API_PORT = Number(process.env.REDROB_EVAL_DEN_PORT ?? 8790);
+const DEN_WEB_PORT = Number(process.env.REDROB_EVAL_DEN_WEB_PORT ?? 3005);
 const DEN_API_URL = `http://127.0.0.1:${DEN_API_PORT}`;
 const DEN_WEB_URL = `http://127.0.0.1:${DEN_WEB_PORT}`;
 const DEN_BASE_URL = `http://localhost:${DEN_API_PORT}`;
 const DEMO_EMAIL = process.env.DEN_DEMO_OWNER_EMAIL ?? "alex@acme.test";
 export const DEMO_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD ?? "OpenWorkDemo123!";
-const LOCAL_IMAGE_TAG = process.env.OPENWORK_EVAL_KUBE_LOCAL_IMAGE_TAG?.trim() || "kube-lab";
-const PUBLISHED_IMAGE_TAG = process.env.OPENWORK_EVAL_KUBE_IMAGE_TAG?.trim() || "latest";
+const LOCAL_IMAGE_TAG = process.env.REDROB_EVAL_KUBE_LOCAL_IMAGE_TAG?.trim() || "kube-lab";
+const PUBLISHED_IMAGE_TAG = process.env.REDROB_EVAL_KUBE_IMAGE_TAG?.trim() || "latest";
 const PUBLISHED_DEN_API_REPOSITORY = "ghcr.io/different-ai/openwork-den-api";
 const PUBLISHED_DEN_WEB_REPOSITORY = "ghcr.io/different-ai/openwork-den-web";
 const LOCAL_DEN_API_REPOSITORY = "openwork-den-api";
@@ -418,7 +418,7 @@ async function publishedImagesSupportPlatform(runtime: KubeRuntime, platform: Ku
 
 export async function resolveKubeImagePlan(options: { exec?: KubeExec; images?: KubeImageMode; log?: (message: string) => void } = {}): Promise<KubeImagePlan> {
   const runtime = createRuntime({ exec: options.exec, log: options.log });
-  const envMode = parseImageMode(process.env.OPENWORK_EVAL_KUBE_IMAGES);
+  const envMode = parseImageMode(process.env.REDROB_EVAL_KUBE_IMAGES);
   const requested = options.images ?? envMode;
   const platform = currentDockerPlatform();
   if (requested === "local") {
@@ -710,13 +710,13 @@ async function ensureHostMockMasquerade(runtime: KubeRuntime, hostIp: string, po
 export async function ensureEgressAllowlist(options: KubeLayerOptions = {}): Promise<void> {
   const runtime = createRuntime(options);
   const allowedHostIp = await resolveAllowedHostIp(runtime);
-  const allowedMockPort = mockPort("OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT", 4791);
-  const deniedMockPort = mockPort("OPENWORK_EVAL_KUBE_DENIED_MOCK_PORT", 4792);
+  const allowedMockPort = mockPort("REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT", 4791);
+  const deniedMockPort = mockPort("REDROB_EVAL_KUBE_DENIED_MOCK_PORT", 4792);
   const template = await readFile(resolve(REPO_ROOT, KUBE_ALLOW_EXTERNAL_EGRESS_TEMPLATE), "utf8");
   const externalManifest = template
-    .replaceAll("${OPENWORK_EVAL_KUBE_ALLOWED_HOST_IP}", allowedHostIp)
-    .replaceAll("${OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT}", String(allowedMockPort));
-  if (externalManifest.includes("${OPENWORK_EVAL_")) {
+    .replaceAll("${REDROB_EVAL_KUBE_ALLOWED_HOST_IP}", allowedHostIp)
+    .replaceAll("${REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT}", String(allowedMockPort));
+  if (externalManifest.includes("${REDROB_EVAL_")) {
     throw new Error(`Unresolved placeholder in ${KUBE_ALLOW_EXTERNAL_EGRESS_TEMPLATE}.`);
   }
   await ensureHostMockMasquerade(runtime, allowedHostIp, allowedMockPort);
@@ -743,12 +743,12 @@ export async function ensureEgressAllowlist(options: KubeLayerOptions = {}): Pro
     { input: externalManifest, timeoutMs: 60_000 },
   );
 
-  process.env.OPENWORK_EVAL_KUBE_EGRESS_TEST = "1";
-  process.env.OPENWORK_EVAL_KUBE_ALLOWED_HOST_IP = allowedHostIp;
-  process.env.OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT = String(allowedMockPort);
-  process.env.OPENWORK_EVAL_KUBE_DENIED_MOCK_PORT = String(deniedMockPort);
+  process.env.REDROB_EVAL_KUBE_EGRESS_TEST = "1";
+  process.env.REDROB_EVAL_KUBE_ALLOWED_HOST_IP = allowedHostIp;
+  process.env.REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT = String(allowedMockPort);
+  process.env.REDROB_EVAL_KUBE_DENIED_MOCK_PORT = String(deniedMockPort);
   runtime.log("Kube egress allowlist enforced for den-api and den-web");
-  runtime.log(`export OPENWORK_EVAL_KUBE_EGRESS_TEST=1 OPENWORK_EVAL_KUBE_ALLOWED_HOST_IP=${allowedHostIp} OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT=${allowedMockPort} OPENWORK_EVAL_KUBE_DENIED_MOCK_PORT=${deniedMockPort}`);
+  runtime.log(`export REDROB_EVAL_KUBE_EGRESS_TEST=1 REDROB_EVAL_KUBE_ALLOWED_HOST_IP=${allowedHostIp} REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT=${allowedMockPort} REDROB_EVAL_KUBE_DENIED_MOCK_PORT=${deniedMockPort}`);
 }
 
 export async function kubeStackTest(options: KubeLayerOptions = {}): Promise<void> {
@@ -808,7 +808,7 @@ export async function ensureSeed(options: KubeLayerOptions = {}): Promise<void> 
     "--",
     "sh",
     "-lc",
-    "cd /app/ee/apps/den-api && OPENWORK_DEV_MODE=1 DEN_DEMO_SEED_ALLOW_NONLOCAL=1 DEN_DEMO_SEED_FETCH_GITHUB=0 node --conditions=development --import tsx scripts/seed-demo-org.ts",
+    "cd /app/ee/apps/den-api && REDROB_DEV_MODE=1 DEN_DEMO_SEED_ALLOW_NONLOCAL=1 DEN_DEMO_SEED_FETCH_GITHUB=0 node --conditions=development --import tsx scripts/seed-demo-org.ts",
   ]), { timeoutMs: 10 * 60_000 });
   if (result.code !== 0) {
     const detail = [result.stderr.trim(), result.stdout.trim()].filter(Boolean).join("\n");
@@ -909,15 +909,15 @@ export async function exposeEndpointHandles(profile: KubeProfileConfig, options:
 export async function exposeEndpoints(profile: KubeProfileConfig, options: KubeLayerOptions = {}): Promise<void> {
   const runtime = createRuntime(options);
   const endpoints = await exposeEndpointHandles(profile, options);
-  process.env.OPENWORK_EVAL_DEN_API_URL = DEN_API_URL;
-  process.env.OPENWORK_EVAL_DEN_WEB_URL = DEN_WEB_URL;
+  process.env.REDROB_EVAL_DEN_API_URL = DEN_API_URL;
+  process.env.REDROB_EVAL_DEN_WEB_URL = DEN_WEB_URL;
   if (profile.orgMode === "multi_org") {
-    process.env.OPENWORK_EVAL_DEN_MULTI_ORG = "1";
+    process.env.REDROB_EVAL_DEN_MULTI_ORG = "1";
   } else {
-    delete process.env.OPENWORK_EVAL_DEN_MULTI_ORG;
+    delete process.env.REDROB_EVAL_DEN_MULTI_ORG;
   }
-  process.env.OPENWORK_EVAL_DEN_TOKEN = endpoints.token;
-  runtime.log(`Kube Den endpoints exported: OPENWORK_EVAL_DEN_API_URL=${DEN_API_URL}, OPENWORK_EVAL_DEN_WEB_URL=${DEN_WEB_URL}${profile.orgMode === "multi_org" ? ", OPENWORK_EVAL_DEN_MULTI_ORG=1" : ""}`);
+  process.env.REDROB_EVAL_DEN_TOKEN = endpoints.token;
+  runtime.log(`Kube Den endpoints exported: REDROB_EVAL_DEN_API_URL=${DEN_API_URL}, REDROB_EVAL_DEN_WEB_URL=${DEN_WEB_URL}${profile.orgMode === "multi_org" ? ", REDROB_EVAL_DEN_MULTI_ORG=1" : ""}`);
 }
 
 function appUserDataHome(): string {
@@ -1009,8 +1009,8 @@ async function ensureApp(cdpCandidates: string[], options: KubeLayerOptions = {}
     }
   }
 
-  if (process.env.OPENWORK_EVAL_KUBE_SURFACE?.trim() !== "electron") {
-    runtime.log("Starting Chrome CDP surface for kube Den web evals (set OPENWORK_EVAL_KUBE_SURFACE=electron to force dev Electron).");
+  if (process.env.REDROB_EVAL_KUBE_SURFACE?.trim() !== "electron") {
+    runtime.log("Starting Chrome CDP surface for kube Den web evals (set REDROB_EVAL_KUBE_SURFACE=electron to force dev Electron).");
     await ensureChromeApp(cdpCandidates, options);
     return;
   }
@@ -1028,7 +1028,7 @@ async function ensureApp(cdpCandidates: string[], options: KubeLayerOptions = {}
   const pid = runtime.spawnDetached("pnpm", ["dev"], {
     stateDir: runtime.stateDir,
     logName: "app",
-    env: { OPENWORK_ELECTRON_USERDATA: appUserDataHome() },
+    env: { REDROB_ELECTRON_USERDATA: appUserDataHome() },
   });
   await writePidState(runtime, "app.pid", pid);
   for (let attempt = 0; attempt < 45; attempt += 1) {

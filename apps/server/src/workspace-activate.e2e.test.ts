@@ -306,8 +306,8 @@ describe("workspace activation", () => {
   test("returns after dispose without waiting for post-refresh MCP registration", async () => {
     const firstRoot = await createWorkspaceRoot();
     const secondRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(firstRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(firstRoot, "runtime.sqlite");
     const mock = startMockOpencode();
     const opencodeBaseUrl = `http://127.0.0.1:${mock.server.port}`;
     const workspaces: ServerConfig["workspaces"] = [
@@ -356,8 +356,8 @@ describe("workspace activation", () => {
       expect((await activation).status).toBe(200);
     } finally {
       heldRegistration.release();
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 

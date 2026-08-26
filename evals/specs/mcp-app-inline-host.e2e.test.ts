@@ -1,10 +1,10 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { expect, onTestFinished } from "vitest";
-import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { connect, debuggerUrlFor, evaluate, listTargets } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { connect, debuggerUrlFor, evaluate, listTargets } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 import { buildGeneratedArtifactViewInWorker } from "../../ee/apps/den-api/src/generated-artifact-view-builder.js";
 
 const providerId = "mcp-app-inline-host-mock";
@@ -14,13 +14,13 @@ const saveToolName = "save_artifact_view";
 const mcpToolName = "render_card";
 const resourceUri = "ui://openwork/artifacts/arv_eval_card/views/avr_eval_card/index.html";
 const closingReply = "The interactive artifact card is ready.";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1"
-  && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
+  && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const title = !e2eTestsEnabled
-  ? "MCP App inline host skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "MCP App inline host skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !localPlacement
-    ? "MCP App inline host skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+    ? "MCP App inline host skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
     : "a generated Artifact saves normally, then initializes and renders structuredContent inline";
 
 async function createWorkspaceForRenderer(
@@ -33,7 +33,7 @@ async function createWorkspaceForRenderer(
   const created = await evalIn(app, `(async () => {
     const port = localStorage.getItem("openwork.server.port");
     const hostToken = localStorage.getItem("openwork.server.hostToken");
-    const invokeDesktop = window.__OPENWORK_ELECTRON__?.invokeDesktop;
+    const invokeDesktop = window.__REDROB_ELECTRON__?.invokeDesktop;
     if (!port || !hostToken || !invokeDesktop) return {
       error: "packaged host prerequisites unavailable",
       missing: [!port ? "port" : null, !hostToken ? "hostToken" : null, !invokeDesktop ? "invokeDesktop" : null].filter(Boolean),
@@ -73,7 +73,7 @@ async function createWorkspaceForRenderer(
     label: "packaged workspace task route",
   });
   const engineStarted = await evalIn(app, `(async () => {
-    const invokeDesktop = window.__OPENWORK_ELECTRON__?.invokeDesktop;
+    const invokeDesktop = window.__REDROB_ELECTRON__?.invokeDesktop;
     if (!invokeDesktop) return "invokeDesktop unavailable";
     await invokeDesktop("engineStart", ${JSON.stringify(path)}, {
       runtime: "direct",
@@ -354,7 +354,7 @@ function sendStream(response: ServerResponse, chunks: Record<string, unknown>[])
 }
 
 test.skipIf(!e2eTestsEnabled || !localPlacement)(title, { timeout: 240_000 }, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   let saveCalls = 0;
   let renderCalls = 0;
@@ -458,14 +458,14 @@ test.skipIf(!e2eTestsEnabled || !localPlacement)(title, { timeout: 240_000 }, as
 
   await using app = await desktop({
     name: "mcp-app-inline-host",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
     env: {
       ANTHROPIC_API_KEY: "",
       OPENAI_API_KEY: "",
       OPENROUTER_API_KEY: "",
       GOOGLE_GENERATIVE_AI_API_KEY: "",
-      OPENWORK_API_KEY: "",
-      OPENWORK_INFERENCE_BASE_URL: "",
+      REDROB_CLOUD_API_KEY: "",
+      REDROB_INFERENCE_BASE_URL: "",
     },
   });
   const workspace = await createWorkspaceForRenderer(app, `/tmp/openwork-mcp-app-inline-host-${Date.now()}`);

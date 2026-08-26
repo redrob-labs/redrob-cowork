@@ -82,7 +82,7 @@ export type AutomationAction = z.infer<typeof automationActionSchema>
 export const AUTOMATION_FREE_MODEL = {
   providerId: "opencode",
   modelId: "big-pickle",
-  providerName: "OpenCode Zen",
+  providerName: "OpenCode",
   modelName: "Big Pickle",
 } as const
 

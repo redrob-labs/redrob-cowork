@@ -10,7 +10,7 @@ const VERSION = "0.1.0"
 // The installed command name. Keep it explicit so setup guides can distinguish
 // bootstrap actions from other OpenWork commands a user may already have.
 const COMMAND_NAME = "openwork-bootstrap"
-const DEFAULT_OPENWORK_MARKETPLACE_NAME = "OpenWork Marketplace"
+const DEFAULT_REDROB_MARKETPLACE_NAME = "OpenWork Marketplace"
 const executableBasename = () => (process.platform === "win32" ? `${COMMAND_NAME}.cmd` : COMMAND_NAME)
 const here = dirname(fileURLToPath(import.meta.url))
 const selfPath = fileURLToPath(import.meta.url)
@@ -70,7 +70,7 @@ function printHelp() {
     "  openwork-bootstrap install [--bin-dir <path>] [--install-dir <path>] [--source <path>] [--json]",
     "  openwork-bootstrap install app --manifest <url-or-file> [--app-dir <path>] [--json]",
     "  openwork-bootstrap doctor [--bin-dir <path>] [--install-dir <path>] [--base-url <url>] [--desktop-bootstrap] [--json]",
-    "  OPENWORK_OWNER_PASSWORD=<password> openwork-bootstrap cloud onboard --base-url <url> --owner-email <email> --org-name <name> --invite-email <email> [--skill-name <name>] [--web-base-url <url>] [--prepare-desktop] [--json]",
+    "  REDROB_OWNER_PASSWORD=<password> openwork-bootstrap cloud onboard --base-url <url> --owner-email <email> --org-name <name> --invite-email <email> [--skill-name <name>] [--web-base-url <url>] [--prepare-desktop] [--json]",
     "  openwork-bootstrap cloud bootstrap-workspace --base-url <url> --workspace-name <name> [--skill-name <name>] [--owner-email <email>] [--teammate-emails a@x.com,b@y.com] [--claim-roles owner,member] [--web-base-url <url>] [--prepare-desktop] [--json]",
     "  openwork-bootstrap cloud claim-link [--role owner] [--desktop-bootstrap-path <path>] [--json]",
     "",
@@ -87,8 +87,8 @@ function printHelp() {
     "Options:",
     "  --web-base-url   Browser-facing origin written into --prepare-desktop's",
     "                   config (used for the app's Sign In button and claim",
-    "                   links). Defaults to https://app.openworklabs.com when",
-    "                   --base-url is the hosted API (api.openworklabs.com);",
+    "                   links). Defaults to https://app.redrob.io when",
+    "                   --base-url is the hosted API (api.redrob.io);",
     "                   set explicitly for self-hosted/custom deployments.",
     "  --json           Print machine-readable JSON",
     "  --version        Print version",
@@ -105,15 +105,15 @@ async function readStdin() {
 }
 
 function defaultInstallDir() {
-  return process.env.OPENWORK_INSTALL_DIR || join(process.env.HOME || process.cwd(), ".openwork", "bootstrap")
+  return process.env.REDROB_INSTALL_DIR || join(process.env.HOME || process.cwd(), ".openwork", "bootstrap")
 }
 
 function defaultBinDir() {
-  return process.env.OPENWORK_BIN_DIR || join(process.env.HOME || process.cwd(), ".local", "bin")
+  return process.env.REDROB_BIN_DIR || join(process.env.HOME || process.cwd(), ".local", "bin")
 }
 
 function defaultAppDir() {
-  return process.env.OPENWORK_APP_DIR || (process.platform === "darwin"
+  return process.env.REDROB_APP_DIR || (process.platform === "darwin"
     ? join(process.env.HOME || process.cwd(), "Applications")
     : process.platform === "win32"
       ? join(process.env.LOCALAPPDATA || join(process.env.HOME || process.cwd(), "AppData", "Local"), "OpenWork")
@@ -132,29 +132,29 @@ function configHomeDir() {
 }
 
 function defaultDesktopBootstrapPath() {
-  return process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH || join(configHomeDir(), "openwork", "desktop-bootstrap.json")
+  return process.env.REDROB_DESKTOP_BOOTSTRAP_PATH || join(configHomeDir(), "openwork", "desktop-bootstrap.json")
 }
 
 function defaultSkillsDir() {
-  return process.env.OPENWORK_SKILLS_DIR || join(configHomeDir(), "opencode", "skills")
+  return process.env.REDROB_SKILLS_DIR || join(configHomeDir(), "opencode", "skills")
 }
 
 function defaultDeviceKeyPath() {
-  return process.env.OPENWORK_DEVICE_KEY_PATH || join(configHomeDir(), "openwork", "bootstrap-device-key.json")
+  return process.env.REDROB_DEVICE_KEY_PATH || join(configHomeDir(), "openwork", "bootstrap-device-key.json")
 }
 
 // The desktop app's `desktop-bootstrap.json` `baseUrl` field is the WEB origin
 // it opens in the user's browser for sign-in (e.g. for "Sign in" and claim
 // links) - it is a different host than the API origin used for CLI/API calls
 // (`--base-url`, `apiBaseUrl`). Reusing the API host here breaks sign-in: the
-// browser opens `https://api.openworklabs.com/?mode=sign-in...` and shows raw
+// browser opens `https://api.redrob.io/?mode=sign-in...` and shows raw
 // API JSON instead of the sign-in page. Derive the correct web host instead
 // of assuming it equals the API host.
 function deriveWebBaseUrl(apiBaseUrl) {
   try {
     const url = new URL(apiBaseUrl)
-    if (url.hostname === "api.openworklabs.com") {
-      return "https://app.openworklabs.com"
+    if (url.hostname === "api.redrob.io") {
+      return "https://app.redrob.io"
     }
     // Local/self-hosted dev: den-web commonly proxies the API at a different
     // port on the same host (see ee/apps/den-web's /api/den proxy). Callers
@@ -394,7 +394,7 @@ function installSingleFile(input) {
 
 async function runInstallApp(args) {
   const json = hasFlag(args.flags, "json")
-  const manifestLocation = getFlag(args.flags, "manifest") || process.env.OPENWORK_INSTALL_MANIFEST
+  const manifestLocation = getFlag(args.flags, "manifest") || process.env.REDROB_INSTALL_MANIFEST
   if (!manifestLocation) throw new Error("missing_required_flag: --manifest")
 
   const appDir = resolve(getFlag(args.flags, "app-dir", defaultAppDir()))
@@ -575,7 +575,7 @@ async function createCloudSkillPlugin(baseUrl, auth, input) {
   if (marketplaces.status !== 200 || !Array.isArray(marketplaces.body?.items)) {
     throw new Error(`marketplace_list_failed: ${marketplaces.status} ${JSON.stringify(marketplaces.body)}`)
   }
-  const marketplace = marketplaces.body.items.find((item) => item?.name === DEFAULT_OPENWORK_MARKETPLACE_NAME) || marketplaces.body.items[0]
+  const marketplace = marketplaces.body.items.find((item) => item?.name === DEFAULT_REDROB_MARKETPLACE_NAME) || marketplaces.body.items[0]
   if (!marketplace?.id) {
     throw new Error("marketplace_missing: no marketplace available for skill plugin")
   }
@@ -762,7 +762,7 @@ async function resolveOwnerPassword(flags) {
   const fromFlag = getFlag(flags, "owner-password")
   if (fromFlag) return fromFlag
 
-  const envName = getFlag(flags, "owner-password-env", "OPENWORK_OWNER_PASSWORD")
+  const envName = getFlag(flags, "owner-password-env", "REDROB_OWNER_PASSWORD")
   const fromEnv = process.env[envName]
   if (fromEnv) return fromEnv
 
@@ -789,7 +789,7 @@ async function runCloudOnboard(args) {
   const orgName = getFlag(args.flags, "org-name")
   const inviteEmail = getFlag(args.flags, "invite-email")
   const skillName = getFlag(args.flags, "skill-name", "First OpenWork Skill")
-  const skillOutput = getFlag(args.flags, "skill-output", "OPENWORK_BOOTSTRAP_SKILL_TRIGGERED")
+  const skillOutput = getFlag(args.flags, "skill-output", "REDROB_BOOTSTRAP_SKILL_TRIGGERED")
   const prepareDesktop = hasFlag(args.flags, "prepare-desktop")
   const desktopBootstrapPath = getFlag(args.flags, "desktop-bootstrap-path", defaultDesktopBootstrapPath())
   const skillsDir = getFlag(args.flags, "skills-dir", defaultSkillsDir())
@@ -868,7 +868,7 @@ async function runCloudOnboard(args) {
 
 async function runCloudBootstrapWorkspace(args) {
   const json = hasFlag(args.flags, "json")
-  const baseUrl = getFlag(args.flags, "base-url", "https://api.openworklabs.com")?.replace(/\/$/, "")
+  const baseUrl = getFlag(args.flags, "base-url", "https://api.redrob.io")?.replace(/\/$/, "")
   const workspaceName = getFlag(args.flags, "workspace-name")
   const skillName = getFlag(args.flags, "skill-name", "First OpenWork Skill")
   const ownerEmail = getFlag(args.flags, "owner-email")
@@ -913,11 +913,11 @@ async function runCloudBootstrapWorkspace(args) {
 
   const skill = {
     ...response.body.skill,
-    skillText: skillText(response.body.skill.title, response.body.skill.output || "OPENWORK_BOOTSTRAP_SKILL_TRIGGERED"),
+    skillText: skillText(response.body.skill.title, response.body.skill.output || "REDROB_BOOTSTRAP_SKILL_TRIGGERED"),
   }
 
   const skillRun = runBootstrapSkill(skill, { trigger: "bootstrap.verify" })
-  if (!skillRun.triggered || skillRun.output !== "OPENWORK_BOOTSTRAP_SKILL_TRIGGERED") {
+  if (!skillRun.triggered || skillRun.output !== "REDROB_BOOTSTRAP_SKILL_TRIGGERED") {
     throw new Error(`skill_trigger_failed: ${JSON.stringify(skillRun)}`)
   }
 

@@ -36,7 +36,7 @@ import {
 } from "./runtime-opencode-config-store.js";
 import { CONNECT_MCP_SERVER_NAME_PREFIX } from "./connect-mcp-server-catalog.js";
 
-const OPENWORK_AGENT_PROMPT = `You are OpenWork.
+const REDROB_AGENT_PROMPT = `You are OpenWork.
 
 When the user refers to "you", they mean the OpenWork app and the current workspace.
 
@@ -108,7 +108,7 @@ export function buildOpenworkRuntimeConfigObjectFromSnapshot(
         description: "OpenWork default agent",
         mode: "primary",
         temperature: 0.2,
-        prompt: OPENWORK_AGENT_PROMPT,
+        prompt: REDROB_AGENT_PROMPT,
         permission: {
           skill: {
             // OpenWork supplies its own current skill routing and no longer

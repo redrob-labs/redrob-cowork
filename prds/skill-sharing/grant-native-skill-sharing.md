@@ -180,10 +180,10 @@ pnpm dev:den:db-push
 DEN_ORG_MODE=multi_org pnpm dev:den:api        # :8790; demo:den also uses multi_org.
                                                # The spec self-diagnoses disabled signup;
                                                # DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP=true also works.
-DEN_DEMO_SEED_FETCH_GITHUB=0 pnpm --filter @openwork-ee/den-api run seed:demo-org -- --reset
-export OPENWORK_EVAL_DEN_API_URL=http://127.0.0.1:8790
-export OPENWORK_EVAL_DEN_WEB_URL=http://localhost:3005
-export OPENWORK_EVAL_MARK_VERIFIED_CMD='docker exec openwork-web-local-mysql mysql -uroot -ppassword openwork_den -e "UPDATE \`user\` SET email_verified = 1 WHERE email = '\''{email}'\''"'
+DEN_DEMO_SEED_FETCH_GITHUB=0 pnpm --filter @redrob-ee/den-api run seed:demo-org -- --reset
+export REDROB_EVAL_DEN_API_URL=http://127.0.0.1:8790
+export REDROB_EVAL_DEN_WEB_URL=http://localhost:3005
+export REDROB_EVAL_MARK_VERIFIED_CMD='docker exec openwork-web-local-mysql mysql -uroot -ppassword openwork_den -e "UPDATE \`user\` SET email_verified = 1 WHERE email = '\''{email}'\''"'
 pnpm --dir evals install && pnpm --dir evals run spec specs/skill-grant-access.test.ts
 ```
 

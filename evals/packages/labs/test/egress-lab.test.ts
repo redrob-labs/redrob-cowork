@@ -13,8 +13,8 @@ import {
   resolveEgressProfileConfig,
   startEgressLab,
 } from "../src/egress.ts";
-import { productDiagnosticsPrecondition } from "@openwork/behaviors";
-import { matchVerdictExpectations } from "@openwork/matchers";
+import { productDiagnosticsPrecondition } from "@redrob/behaviors";
+import { matchVerdictExpectations } from "@redrob/matchers";
 
 function hi(value: number): number {
   return (value >> 8) & 0xff;

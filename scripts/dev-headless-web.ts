@@ -25,7 +25,7 @@ const tmpDir = path.join(cwd, "tmp");
 
 const DEFAULT_WEB_PORT = "5178";
 const DEFAULT_SERVER_PORT = "8778";
-const DEFAULT_DEN_TARGET = "https://app.openworklabs.com";
+const DEFAULT_DEN_TARGET = "https://app.redrob.io";
 
 const ensureTmp = async () => {
   await mkdir(tmpDir, { recursive: true });
@@ -83,12 +83,12 @@ const readBool = (value: string | undefined) => {
 const silent = process.argv.includes("--silent");
 const replaceRequested =
   process.argv.includes("--replace") ||
-  readBool(process.env.OPENWORK_DEV_HEADLESS_WEB_REPLACE);
+  readBool(process.env.REDROB_DEV_HEADLESS_WEB_REPLACE);
 
 const denProxyEnabled =
-  process.env.OPENWORK_DEV_HEADLESS_WEB_DEN_PROXY == null
+  process.env.REDROB_DEV_HEADLESS_WEB_DEN_PROXY == null
     ? true
-    : readBool(process.env.OPENWORK_DEV_HEADLESS_WEB_DEN_PROXY);
+    : readBool(process.env.REDROB_DEV_HEADLESS_WEB_DEN_PROXY);
 
 // Detached: each child leads its own process group, so signals aimed at the
 // launcher (e.g. a terminal session getting reaped) cannot take the stack down.
@@ -200,7 +200,7 @@ if (existingManifest && existingHealthy && !replaceRequested) {
 // --detach: re-spawn this script in its own process group so the stack does
 // not depend on the invoking terminal surviving, then wait for health.
 const detachRequested = process.argv.includes("--detach");
-const isDetachedChild = readBool(process.env.OPENWORK_DEV_HEADLESS_WEB_DETACHED);
+const isDetachedChild = readBool(process.env.REDROB_DEV_HEADLESS_WEB_DETACHED);
 if (detachRequested && !isDetachedChild) {
   const launcherLogPath = path.join(tmpDir, "dev-headless-web.launcher.log");
   const launcherLogFd = openSync(launcherLogPath, "w");
@@ -212,7 +212,7 @@ if (detachRequested && !isDetachedChild) {
     ],
     {
       cwd,
-      env: { ...process.env, OPENWORK_DEV_HEADLESS_WEB_DETACHED: "1" },
+      env: { ...process.env, REDROB_DEV_HEADLESS_WEB_DETACHED: "1" },
       stdio: ["ignore", launcherLogFd, launcherLogFd],
       detached: true,
     },
@@ -261,18 +261,18 @@ if (existingManifest) {
   await killStackPid(existingManifest.pids?.launcher ?? existingManifest.pid);
 }
 
-const remoteAccessEnabled = readBool(process.env.OPENWORK_REMOTE_ACCESS);
+const remoteAccessEnabled = readBool(process.env.REDROB_REMOTE_ACCESS);
 const host = remoteAccessEnabled ? "0.0.0.0" : "127.0.0.1";
 const viteHost = process.env.VITE_HOST ?? process.env.HOST ?? host;
-const publicHost = process.env.OPENWORK_PUBLIC_HOST ?? null;
+const publicHost = process.env.REDROB_PUBLIC_HOST ?? null;
 const clientHost = publicHost ?? (host === "0.0.0.0" ? "127.0.0.1" : host);
-const workspace = path.resolve(process.env.OPENWORK_WORKSPACE ?? cwd);
+const workspace = path.resolve(process.env.REDROB_WORKSPACE ?? cwd);
 const openworkPort = await resolvePort(
-  process.env.OPENWORK_PORT ?? DEFAULT_SERVER_PORT,
+  process.env.REDROB_PORT ?? DEFAULT_SERVER_PORT,
   "127.0.0.1",
 );
 const webPort = await resolvePort(
-  process.env.OPENWORK_WEB_PORT ?? DEFAULT_WEB_PORT,
+  process.env.REDROB_WEB_PORT ?? DEFAULT_WEB_PORT,
   "127.0.0.1",
 );
 // `--replace` starts a new process, so leaked credentials from the previous
@@ -284,14 +284,14 @@ const rotateTokensRequested =
   (replaceRequested && !keepTokensRequested);
 const { token: openworkToken, hostToken: openworkHostToken } =
   resolveHeadlessTokens({
-    envToken: process.env.OPENWORK_TOKEN,
-    envHostToken: process.env.OPENWORK_HOST_TOKEN,
+    envToken: process.env.REDROB_TOKEN,
+    envHostToken: process.env.REDROB_HOST_TOKEN,
     previous: rotateTokensRequested ? null : existingManifest,
     generate: randomUUID,
   });
 const serverConfigPath = resolveHeadlessServerConfigPath(
   cwd,
-  process.env.OPENWORK_DEV_HEADLESS_WEB_CONFIG,
+  process.env.REDROB_DEV_HEADLESS_WEB_CONFIG,
 );
 const webLogPath = path.join(tmpDir, "dev-web.log");
 const headlessLogPath = path.join(tmpDir, "dev-headless.log");
@@ -316,7 +316,7 @@ const webUrl = `http://${clientHost}:${webPort}`;
 // web app itself. Deliberately NOT gateway-marker mode: that runtime assumes
 // a provisioned cloud instance and disables local workspace creation.
 const denTarget = denProxyEnabled
-  ? normalizeDenTarget(process.env.OPENWORK_DEV_DEN_PROXY_TARGET)
+  ? normalizeDenTarget(process.env.REDROB_DEV_DEN_PROXY_TARGET)
   : null;
 const denApiUrl = denTarget ? `${webUrl}/api/den` : null;
 
@@ -324,17 +324,17 @@ const viteEnv = {
   ...process.env,
   HOST: viteHost,
   PORT: String(webPort),
-  VITE_OPENWORK_URL: process.env.VITE_OPENWORK_URL ?? openworkUrl,
-  VITE_OPENWORK_PORT: process.env.VITE_OPENWORK_PORT ?? String(openworkPort),
-  VITE_OPENWORK_TOKEN: process.env.VITE_OPENWORK_TOKEN ?? openworkToken,
+  VITE_REDROB_URL: process.env.VITE_REDROB_URL ?? openworkUrl,
+  VITE_REDROB_PORT: process.env.VITE_REDROB_PORT ?? String(openworkPort),
+  VITE_REDROB_TOKEN: process.env.VITE_REDROB_TOKEN ?? openworkToken,
   // Never put the host token in VITE_*: Vite inlines those into the browser
   // bundle. The owner bearer is enough for the web UI; host-token routes
   // (env secrets, den-session) stay on the server process.
-  VITE_OPENWORK_FORCE_ENV_SETTINGS: "1",
-  VITE_OPENWORK_DEPLOYMENT: process.env.VITE_OPENWORK_DEPLOYMENT ?? "web",
+  VITE_REDROB_FORCE_ENV_SETTINGS: "1",
+  VITE_REDROB_DEPLOYMENT: process.env.VITE_REDROB_DEPLOYMENT ?? "web",
   ...(denTarget && denApiUrl
     ? {
-        OPENWORK_DEV_HEADLESS_DEN_TARGET: denTarget,
+        REDROB_DEV_HEADLESS_DEN_TARGET: denTarget,
         // Den API calls go same-origin through the Vite proxy.
         VITE_DEN_API_BASE_URL: process.env.VITE_DEN_API_BASE_URL ?? denApiUrl,
         // For custom control planes, point the sign-in page at the target's
@@ -348,15 +348,15 @@ const viteEnv = {
 
 const headlessEnv = {
   ...process.env,
-  OPENWORK_WORKSPACE: workspace,
-  OPENWORK_HOST: host,
-  OPENWORK_REMOTE_ACCESS: remoteAccessEnabled ? "1" : "0",
-  OPENWORK_PORT: String(openworkPort),
-  OPENWORK_TOKEN: openworkToken,
-  OPENWORK_HOST_TOKEN: openworkHostToken,
-  OPENWORK_SERVER_CONFIG: serverConfigPath,
-  OPENWORK_MANAGE_OPENCODE: "1",
-  OPENWORK_OPENCODE_BIN: process.env.OPENWORK_OPENCODE_BIN ?? "opencode",
+  REDROB_WORKSPACE: workspace,
+  REDROB_HOST: host,
+  REDROB_REMOTE_ACCESS: remoteAccessEnabled ? "1" : "0",
+  REDROB_PORT: String(openworkPort),
+  REDROB_TOKEN: openworkToken,
+  REDROB_HOST_TOKEN: openworkHostToken,
+  REDROB_SERVER_CONFIG: serverConfigPath,
+  REDROB_MANAGE_OPENCODE: "1",
+  REDROB_OPENCODE_BIN: process.env.REDROB_OPENCODE_BIN ?? "opencode",
 };
 
 const children: ChildProcess[] = [];
@@ -365,7 +365,7 @@ const webProcess = spawnLogged(
   "pnpm",
   [
     "--filter",
-    "@openwork/app",
+    "@redrob/app",
     "exec",
     "vite",
     "--host",
@@ -436,7 +436,7 @@ if (denApiUrl && denTarget) {
     "[dev:headless-web] Cloud sign-in: Account -> sign in opens the Den web flow in this browser",
   );
 } else {
-  logLine("[dev:headless-web] Den disabled (OPENWORK_DEV_HEADLESS_WEB_DEN_PROXY=0)");
+  logLine("[dev:headless-web] Den disabled (REDROB_DEV_HEADLESS_WEB_DEN_PROXY=0)");
 }
 logLine(
   `[dev:headless-web] Web logs: ${path.relative(cwd, webLogPath)}`,

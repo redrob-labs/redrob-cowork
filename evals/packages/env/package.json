@@ -1,5 +1,5 @@
 {
-  "name": "@openwork/env",
+  "name": "@redrob/env",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,10 +11,10 @@
     }
   },
   "dependencies": {
-    "@openwork/behaviors": "workspace:*",
-    "@openwork/cdp": "workspace:*",
-    "@openwork/hosts": "workspace:*",
-    "@openwork/labs": "workspace:*",
+    "@redrob/behaviors": "workspace:*",
+    "@redrob/cdp": "workspace:*",
+    "@redrob/hosts": "workspace:*",
+    "@redrob/labs": "workspace:*",
     "effect": "4.0.0-beta.83",
     "mysql2": "^3.11.3",
     "zod": "^4.3.6"

@@ -8,20 +8,20 @@ import {
   evalIn,
   signIn,
   waitFor,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { allocateFreePort, navigate } from "@openwork/cdp";
-import type { Surface } from "@openwork/cdp";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
-import { startMockMcp } from "@openwork/labs";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { allocateFreePort, navigate } from "@redrob/cdp";
+import type { Surface } from "@redrob/cdp";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
+import { startMockMcp } from "@redrob/labs";
 
-const apiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
-const webUrl = process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
+const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
+const webUrl = process.env.REDROB_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
 const title = !apiUrl
-  ? "library view skipped: set OPENWORK_EVAL_DEN_API_URL to a running Den API"
+  ? "library view skipped: set REDROB_EVAL_DEN_API_URL to a running Den API"
   : !webUrl
-    ? "library view skipped: set OPENWORK_EVAL_DEN_WEB_URL to a running Den Web"
+    ? "library view skipped: set REDROB_EVAL_DEN_WEB_URL to a running Den Web"
     : "members can browse their plugin library and its access provenance";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -97,9 +97,9 @@ async function useMobileViewport(browser: Surface): Promise<void> {
 
 test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const den = { apiUrl, webUrl };
-  const password = process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
   const admin = await signIn(den, {
-    email: process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
+    email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
     password,
   });
   const orgId = await organizationId(admin);
@@ -108,7 +108,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const mockPort = await allocateFreePort();
   await using mock = await startMockMcp({
     port: mockPort,
-    publicUrl: process.env.OPENWORK_EVAL_LIBRARY_MOCK_PUBLIC_URL?.trim() || undefined,
+    publicUrl: process.env.REDROB_EVAL_LIBRARY_MOCK_PUBLIC_URL?.trim() || undefined,
   });
   await deleteConnectionsNamed(admin, "Library Spec Linear ");
   const connection = await createOrgConnection(admin, {
@@ -147,22 +147,22 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     }
   });
 
-  const caseyEmail = process.env.OPENWORK_EVAL_CREATOR_EMAIL?.trim() || "casey.spec@acme.test";
+  const caseyEmail = process.env.REDROB_EVAL_CREATOR_EMAIL?.trim() || "casey.spec@acme.test";
   caseySession = await ensureMemberSession(den, admin, {
     email: caseyEmail,
-    password: process.env.OPENWORK_EVAL_MEMBER_PASSWORD?.trim() || password,
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || password,
     name: "Casey Spec",
-    markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+    markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
   const casey = caseySession;
   await selectOrganization(casey, orgId);
 
-  const novaEmail = process.env.OPENWORK_EVAL_MEMBER_EMAIL?.trim() || "nova.spec@acme.test";
+  const novaEmail = process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "nova.spec@acme.test";
   const nova = await ensureMemberSession(den, admin, {
     email: novaEmail,
-    password: process.env.OPENWORK_EVAL_MEMBER_PASSWORD?.trim() || password,
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || password,
     name: "Nova Spec",
-    markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+    markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
   await selectOrganization(nova, orgId);
 

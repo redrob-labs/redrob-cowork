@@ -80,8 +80,8 @@ one of these paths:
 
 | Deployment | Download behavior | Required client access |
 |---|---|---|
-| Internet-connected | Immediate `302` to the exact standard asset under `OPENWORK_INSTALLER_RELEASE_REPO` and `OPENWORK_INSTALLER_RELEASE_TAG`. The organization token is not forwarded. | Den web/API, `github.com`, `release-assets.githubusercontent.com`, and `objects.githubusercontent.com` for legacy or rollback paths. |
-| Semi-air-gapped | Stream the matching standard installer from `OPENWORK_INSTALLER_ARTIFACTS_DIR`. There is no ZIP or in-memory whole-file buffer. | Den web/API only. |
+| Internet-connected | Immediate `302` to the exact standard asset under `REDROB_INSTALLER_RELEASE_REPO` and `REDROB_INSTALLER_RELEASE_TAG`. The organization token is not forwarded. | Den web/API, `github.com`, `release-assets.githubusercontent.com`, and `objects.githubusercontent.com` for legacy or rollback paths. |
+| Semi-air-gapped | Stream the matching standard installer from `REDROB_INSTALLER_ARTIFACTS_DIR`. There is no ZIP or in-memory whole-file buffer. | Den web/API only. |
 | Fully internal installer delivery | Same mounted-artifact path, with Den web/API and the installer artifact available entirely inside the isolated network. This describes installer bytes only, not full product isolation. | Internal Den web/API only. |
 
 The standard filenames use the release tag without a leading `v`:

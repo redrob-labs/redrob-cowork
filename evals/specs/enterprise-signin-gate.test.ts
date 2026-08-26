@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 import {
   ENTERPRISE_DESKTOP_DISTRIBUTION,
   enterprisePreactivationCommandAllowed,
@@ -148,7 +148,7 @@ test("enterprise onboarding is workspace-address-first with a silent paste recov
     true,
   );
 
-  // The single address field silently accepts a pasted openwork:// URL, and a
+  // The single address field silently accepts a pasted redrob:// URL, and a
   // pasted URL still reaches the explicit origin confirmation before its
   // one-time grant is exchanged.
   expect(gateSource).toContain("const pastedLink = parseManualAuthInput(serverInput);");
@@ -159,7 +159,7 @@ test("enterprise onboarding is workspace-address-first with a silent paste recov
   );
 
   evidence.recordAssertionEvidence(
-    "Pasted openwork:// URLs recover through the same field with confirmation",
+    "Pasted redrob:// URLs recover through the same field with confirmation",
     "parseManualAuthInput runs on the workspace-address input, and a pasted URL's origin reaches the named confirmation before exchangeHandoffAndSignIn.",
     true,
   );

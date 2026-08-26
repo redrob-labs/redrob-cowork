@@ -8,11 +8,11 @@ import {
   selectModel,
   sendComposerMessage,
   waitFor,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { app, eventually, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { app, eventually, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * VOICEOVER SPEC — "New models arrive without breaking your flow."
@@ -39,7 +39,7 @@ import type { TestNeeds } from "@openwork/testkit";
 
 const requirements: TestNeeds = {
   env: ["ANTHROPIC_API_KEY", "OPENAI_API_KEY"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0

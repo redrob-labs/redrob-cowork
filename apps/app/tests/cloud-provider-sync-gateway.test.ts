@@ -8,7 +8,7 @@ import { createProviderAuthStore } from "../src/react-app/domains/connections/pr
 const originalWindow = globalThis.window;
 const originalFetch = globalThis.fetch;
 const originalConsoleInfo = console.info;
-const originalDeployment = process.env.VITE_OPENWORK_DEPLOYMENT;
+const originalDeployment = process.env.VITE_REDROB_DEPLOYMENT;
 
 type RecordedRequest = {
   url: string;
@@ -50,7 +50,7 @@ function installWindow(options: { origin: string; gateway?: boolean }) {
       dispatchEvent: () => true,
       localStorage,
       location: { origin: options.origin },
-      __OPENWORK_GATEWAY__: options.gateway ? { version: 1 } : undefined,
+      __REDROB_GATEWAY__: options.gateway ? { version: 1 } : undefined,
     },
   });
   return localStorage;
@@ -84,8 +84,8 @@ function cloudProviderPayload(options: { conflict?: boolean } = {}) {
     id: "lpr_test",
     source: options.conflict ? "openwork" : "custom",
     providerId: options.conflict ? "openwork" : "openai",
-    name: options.conflict ? "OpenWork Models" : "Team OpenAI",
-    providerConfig: { env: [options.conflict ? "OPENWORK_API_KEY" : "OPENAI_API_KEY"] },
+    name: options.conflict ? "Redrob Models" : "Team OpenAI",
+    providerConfig: { env: [options.conflict ? "REDROB_CLOUD_API_KEY" : "OPENAI_API_KEY"] },
     hasApiKey: true,
     apiKey: "sk-test",
     models: [
@@ -271,7 +271,7 @@ function installProviderSyncFetch(
 
 describe("cloud provider sync in gateway mode", () => {
   beforeEach(() => {
-    process.env.VITE_OPENWORK_DEPLOYMENT = "web";
+    process.env.VITE_REDROB_DEPLOYMENT = "web";
     console.info = () => undefined;
   });
 
@@ -286,14 +286,14 @@ describe("cloud provider sync in gateway mode", () => {
     });
     console.info = originalConsoleInfo;
     if (originalDeployment === undefined) {
-      delete process.env.VITE_OPENWORK_DEPLOYMENT;
+      delete process.env.VITE_REDROB_DEPLOYMENT;
     } else {
-      process.env.VITE_OPENWORK_DEPLOYMENT = originalDeployment;
+      process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
     }
   });
 
   test("returns a server-handled outcome without network calls or error state behind the gateway", async () => {
-    const storage = installWindow({ origin: "https://web.openworklabs.com", gateway: true });
+    const storage = installWindow({ origin: "https://web.redrob.io", gateway: true });
     installCloudSession(storage);
     const requests: RecordedRequest[] = [];
     installProviderSyncFetch(requests);
@@ -370,7 +370,7 @@ describe("cloud provider sync in gateway mode", () => {
 
 describe("cloud provider sync in server-capability mode", () => {
   beforeEach(() => {
-    process.env.VITE_OPENWORK_DEPLOYMENT = "web";
+    process.env.VITE_REDROB_DEPLOYMENT = "web";
     console.info = () => undefined;
   });
 
@@ -378,8 +378,8 @@ describe("cloud provider sync in server-capability mode", () => {
     Object.defineProperty(globalThis, "window", { configurable: true, value: originalWindow });
     Object.defineProperty(globalThis, "fetch", { configurable: true, value: originalFetch });
     console.info = originalConsoleInfo;
-    if (originalDeployment === undefined) delete process.env.VITE_OPENWORK_DEPLOYMENT;
-    else process.env.VITE_OPENWORK_DEPLOYMENT = originalDeployment;
+    if (originalDeployment === undefined) delete process.env.VITE_REDROB_DEPLOYMENT;
+    else process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
   });
 
   test("posts run-now without fetching Den providers in the renderer", async () => {

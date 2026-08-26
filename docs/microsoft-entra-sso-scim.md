@@ -61,7 +61,7 @@ For the Redrob Work Labs test tenant, use:
 - **Redrob Work SSO domain**: `omaropenworklabs.onmicrosoft.com`
 - **Test users**:
   - `omar2@omaropenworklabs.onmicrosoft.com`
-  - `omar_openworklabs.com#EXT#@omaropenworklabs.onmicrosoft.com`
+  - `omar_redrob.io#EXT#@omaropenworklabs.onmicrosoft.com`
 - **Redrob Work organization**: `Omar Azure Test`
 
 As of July 7, 2026, both test users are assigned to the **Redrob Work Labs**

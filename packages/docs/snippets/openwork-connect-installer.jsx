@@ -1,5 +1,5 @@
 export const OpenWorkConnectInstaller = () => {
-  const MCP_SERVER_URL = "https://api.openworklabs.com/mcp/agent";
+  const MCP_SERVER_URL = "https://api.redrob.io/mcp/agent";
   const CODEX_CONNECTIONS_DEEPLINK = "codex://settings/connections";
   const CHATGPT_SETTINGS_URL = "https://chatgpt.com/#settings/Connectors";
   const CODEX_LOGIN_COMMAND = "codex mcp login openwork";
@@ -195,7 +195,7 @@ opencode mcp auth openwork`;
           </div>
         ) : null}
         <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="m-0 text-xs text-gray-500">Works with your OpenWork account — <a href="https://app.openworklabs.com?mode=sign-up" className="font-medium underline">create one free</a>.</p>
+          <p className="m-0 text-xs text-gray-500">Works with your OpenWork account — <a href="https://app.redrob.io?mode=sign-up" className="font-medium underline">create one free</a>.</p>
           <button type="button" aria-label="Copy the OpenWork MCP install command" onClick={() => copy(activeInstall.id, activeInstall.copyText)} className="shrink-0 rounded-lg bg-[#011627] px-4 py-2 text-xs font-medium text-white">
             {copied === activeInstall.id ? "Copied" : copied === "error" ? "Couldn't copy" : "Copy"}
           </button>

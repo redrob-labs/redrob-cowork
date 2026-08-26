@@ -6,19 +6,19 @@
 # Then open the printed Web UI URL — already wired to headless, no config needed.
 #
 # Env overrides (optional, via .env or export):
-#   OPENWORK_TOKEN        — shared client token (auto-generated if unset)
-#   OPENWORK_HOST_TOKEN   — host/admin token (auto-generated if unset)
-#   OPENWORK_WORKSPACE    — host path to mount as workspace (default: ./workspace)
-#   OPENWORK_PORT         — host port to map to container :8787 (default: 8787)
+#   REDROB_TOKEN        — shared client token (auto-generated if unset)
+#   REDROB_HOST_TOKEN   — host/admin token (auto-generated if unset)
+#   REDROB_WORKSPACE    — host path to mount as workspace (default: ./workspace)
+#   REDROB_PORT         — host port to map to container :8787 (default: 8787)
 #   WEB_PORT              — host port to map to container :5173 (default: 5173)
-#   OPENWORK_DEV_ID       — unique ID for this stack (default: default)
-#   OPENWORK_DEV_MODE     — enables isolated OpenCode dev state
-#   OPENWORK_PUBLIC_HOST  — browser-facing host/IP for LAN-accessible URLs
-#   OPENWORK_DOCKER_DEV_MOUNT_HOST_OPENCODE=1 — import host OpenCode config/auth into the isolated dev state
-#   OPENWORK_OPENCODE_CONFIG_DIR      — host OpenCode config dir detection override
-#   OPENWORK_OPENCODE_DATA_DIR        — host OpenCode data dir detection override
-#   OPENWORK_HOST_OPENCODE_CONFIG_DIR — import source for OpenCode config
-#   OPENWORK_HOST_OPENCODE_DATA_DIR   — import source for OpenCode auth/data
+#   REDROB_DEV_ID       — unique ID for this stack (default: default)
+#   REDROB_DEV_MODE     — enables isolated OpenCode dev state
+#   REDROB_PUBLIC_HOST  — browser-facing host/IP for LAN-accessible URLs
+#   REDROB_DOCKER_DEV_MOUNT_HOST_OPENCODE=1 — import host OpenCode config/auth into the isolated dev state
+#   REDROB_OPENCODE_CONFIG_DIR      — host OpenCode config dir detection override
+#   REDROB_OPENCODE_DATA_DIR        — host OpenCode data dir detection override
+#   REDROB_HOST_OPENCODE_CONFIG_DIR — import source for OpenCode config
+#   REDROB_HOST_OPENCODE_DATA_DIR   — import source for OpenCode auth/data
 
 x-shared: &shared
   image: node:22-bookworm-slim
@@ -28,9 +28,9 @@ x-shared: &shared
     - ../../:/app
     - pnpm-store:/root/.local/share/pnpm/store
     - bun-install:/root/.bun
-    - ${OPENWORK_WORKSPACE:-./workspace}:/workspace
-    - ${OPENWORK_HOST_OPENCODE_CONFIG_DIR:-./workspace/.openwork-host-opencode-config}:/persist/.config/opencode:ro
-    - ${OPENWORK_HOST_OPENCODE_DATA_DIR:-./workspace/.openwork-host-opencode-data}:/persist/.openwork-host-opencode-data:ro
+    - ${REDROB_WORKSPACE:-./workspace}:/workspace
+    - ${REDROB_HOST_OPENCODE_CONFIG_DIR:-./workspace/.openwork-host-opencode-config}:/persist/.config/opencode:ro
+    - ${REDROB_HOST_OPENCODE_DATA_DIR:-./workspace/.openwork-host-opencode-data}:/persist/.openwork-host-opencode-data:ro
 
 services:
   openwork-server:
@@ -71,32 +71,32 @@ services:
           curl -fsSL https://opencode.ai/install | bash -s -- --version "$$OPENCODE_VERSION" --no-modify-path
         fi
         export PATH="$$OPENCODE_INSTALL_DIR:$$PATH"
-        export OPENWORK_MANAGE_OPENCODE=1
-        export OPENWORK_OPENCODE_BIN="$$(command -v opencode)"
-        export OPENWORK_EXTENSIONS_PLUGIN_DIR="/app/apps/server/dist/opencode-plugins"
+        export REDROB_MANAGE_OPENCODE=1
+        export REDROB_OPENCODE_BIN="$$(command -v opencode)"
+        export REDROB_EXTENSIONS_PLUGIN_DIR="/app/apps/server/dist/opencode-plugins"
 
         # --- Resolve tokens ---
-        if [ -z "$$OPENWORK_TOKEN" ]; then
-          OPENWORK_TOKEN=$$(cat /proc/sys/kernel/random/uuid)
-          export OPENWORK_TOKEN
+        if [ -z "$$REDROB_TOKEN" ]; then
+          REDROB_TOKEN=$$(cat /proc/sys/kernel/random/uuid)
+          export REDROB_TOKEN
         fi
-        if [ -z "$$OPENWORK_HOST_TOKEN" ]; then
-          OPENWORK_HOST_TOKEN=$$(cat /proc/sys/kernel/random/uuid)
-          export OPENWORK_HOST_TOKEN
+        if [ -z "$$REDROB_HOST_TOKEN" ]; then
+          REDROB_HOST_TOKEN=$$(cat /proc/sys/kernel/random/uuid)
+          export REDROB_HOST_TOKEN
         fi
 
         # Write tokens so the web service can source them
         mkdir -p /app/tmp
-        printf 'OPENWORK_TOKEN=%s\nOPENWORK_HOST_TOKEN=%s\n' \
-          "$$OPENWORK_TOKEN" "$$OPENWORK_HOST_TOKEN" > "/app/tmp/.dev-env-${OPENWORK_DEV_ID:-default}"
+        printf 'REDROB_TOKEN=%s\nREDROB_HOST_TOKEN=%s\n' \
+          "$$REDROB_TOKEN" "$$REDROB_HOST_TOKEN" > "/app/tmp/.dev-env-${REDROB_DEV_ID:-default}"
 
         echo ""
         echo "============================================"
         echo "  Redrob Work server"
-        echo "  Server:     http://localhost:${OPENWORK_PORT:-8787}"
-        echo "  Health:     http://localhost:${OPENWORK_PORT:-8787}/health"
-        echo "  Token:      $$OPENWORK_TOKEN"
-        echo "  Host token: $$OPENWORK_HOST_TOKEN"
+        echo "  Server:     http://localhost:${REDROB_PORT:-8787}"
+        echo "  Health:     http://localhost:${REDROB_PORT:-8787}/health"
+        echo "  Token:      $$REDROB_TOKEN"
+        echo "  Host token: $$REDROB_HOST_TOKEN"
         echo "============================================"
         echo ""
 
@@ -104,13 +104,13 @@ services:
           --workspace /workspace \
           --host 0.0.0.0 \
           --port 8787 \
-          --token "$$OPENWORK_TOKEN" \
-          --host-token "$$OPENWORK_HOST_TOKEN" \
+          --token "$$REDROB_TOKEN" \
+          --host-token "$$REDROB_HOST_TOKEN" \
           --approval auto \
           --cors "*" \
           --verbose
     ports:
-      - "${OPENWORK_PORT:-8787}:8787"
+      - "${REDROB_PORT:-8787}:8787"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8787/health || exit 1"]
       interval: 5s
@@ -119,12 +119,12 @@ services:
       start_period: 90s
     environment:
       CI: "true"
-      OPENWORK_TOKEN: ${OPENWORK_TOKEN:-}
-      OPENWORK_HOST_TOKEN: ${OPENWORK_HOST_TOKEN:-}
-      OPENWORK_DEV_ID: ${OPENWORK_DEV_ID:-default}
-      OPENWORK_DEV_MODE: ${OPENWORK_DEV_MODE:-1}
-      OPENWORK_DEV_OPENCODE_IMPORT_CONFIG_DIR: /persist/.config/opencode
-      OPENWORK_DEV_OPENCODE_IMPORT_DATA_DIR: /persist/.openwork-host-opencode-data
+      REDROB_TOKEN: ${REDROB_TOKEN:-}
+      REDROB_HOST_TOKEN: ${REDROB_HOST_TOKEN:-}
+      REDROB_DEV_ID: ${REDROB_DEV_ID:-default}
+      REDROB_DEV_MODE: ${REDROB_DEV_MODE:-1}
+      REDROB_DEV_OPENCODE_IMPORT_CONFIG_DIR: /persist/.config/opencode
+      REDROB_DEV_OPENCODE_IMPORT_DATA_DIR: /persist/.openwork-host-opencode-data
 
   web:
     <<: *shared
@@ -149,33 +149,33 @@ services:
         corepack enable && corepack prepare pnpm@10.27.0 --activate
 
         # --- Read token written by openwork-server ---
-        if [ -f "/app/tmp/.dev-env-${OPENWORK_DEV_ID:-default}" ]; then
-          . "/app/tmp/.dev-env-${OPENWORK_DEV_ID:-default}"
-          export VITE_OPENWORK_TOKEN="$$OPENWORK_TOKEN"
+        if [ -f "/app/tmp/.dev-env-${REDROB_DEV_ID:-default}" ]; then
+          . "/app/tmp/.dev-env-${REDROB_DEV_ID:-default}"
+          export VITE_REDROB_TOKEN="$$REDROB_TOKEN"
         fi
 
         echo ""
         echo "============================================"
         echo "  Redrob Work web UI"
         echo "  URL:   http://localhost:${WEB_PORT:-5173}"
-          echo "  Token: $${VITE_OPENWORK_TOKEN:-<see openwork-server logs>}"
+          echo "  Token: $${VITE_REDROB_TOKEN:-<see openwork-server logs>}"
         echo "============================================"
         echo ""
 
-        export VITE_OPENWORK_URL="http://${OPENWORK_PUBLIC_HOST:-localhost}:${OPENWORK_PORT:-8787}"
-        export VITE_OPENWORK_PORT="${OPENWORK_PORT:-8787}"
+        export VITE_REDROB_URL="http://${REDROB_PUBLIC_HOST:-localhost}:${REDROB_PORT:-8787}"
+        export VITE_REDROB_PORT="${REDROB_PORT:-8787}"
         export VITE_ALLOWED_HOSTS="all"
         export HOST="0.0.0.0"
         export PORT="5173"
 
-        exec pnpm --filter @openwork/app exec vite \
+        exec pnpm --filter @redrob/app exec vite \
           --host 0.0.0.0 \
           --port 5173 \
           --strictPort
     ports:
       - "${WEB_PORT:-5173}:5173"
     environment:
-      OPENWORK_DEV_ID: ${OPENWORK_DEV_ID:-default}
+      REDROB_DEV_ID: ${REDROB_DEV_ID:-default}
 
 volumes:
   pnpm-store:

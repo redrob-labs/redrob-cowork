@@ -1,10 +1,10 @@
 import { generateKeyPairSync } from "node:crypto";
 import { expect } from "vitest";
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { startMockGithub } from "@openwork/labs";
-import type { MockGithubRepository } from "@openwork/labs";
-import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { startMockGithub } from "@redrob/labs";
+import type { MockGithubRepository } from "@redrob/labs";
+import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
 
 /**
  * CLAIMS:
@@ -25,11 +25,11 @@ import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
  *    duplicate version, and does not fetch the skill file again.
  */
 
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1"
-  && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
+  && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !localPlacement
-  ? "github connector import skipped — needs: local placement without OPENWORK_EVAL_DEN_API_URL"
+  ? "github connector import skipped — needs: local placement without REDROB_EVAL_DEN_API_URL"
   : !mysqlOpen
     ? "github connector import skipped — needs: MySQL on 127.0.0.1:3306"
     : "the GitHub connector lists every installation repository and imports marketplace skills end-to-end";

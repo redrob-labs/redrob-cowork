@@ -22,8 +22,8 @@ Managed file:
 
 `ee/apps/inference/scripts/build-models.mjs` reads `openwork-models.json` and
 generates the Redrob Work provider overlay in memory. It selects the API URL from
-`OPENWORK_DEV_MODE`: dev uses `http://127.0.0.1:8791/api/v1`, otherwise prod
-uses `https://inference.openworklabs.com/api/v1`.
+`REDROB_DEV_MODE`: dev uses `http://127.0.0.1:8791/api/v1`, otherwise prod
+uses `https://console.redrob.ai/api/v1`.
 
 Do not inspect the full `base.json` in chat. Use the scripts so the large source
 model body stays out of context.

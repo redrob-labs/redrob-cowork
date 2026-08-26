@@ -16,7 +16,7 @@
 #   reset           stop + wipe Vite dep cache + truncate log sink + start
 #   restart         alias for reset
 #
-# Dev app: pnpm --filter @openwork/desktop dev:electron launches the Electron
+# Dev app: pnpm --filter @redrob/desktop dev:electron launches the Electron
 # shell with CDP on 127.0.0.1:9823 for chrome-devtools MCP.
 #
 # Teardown ordering:
@@ -31,7 +31,7 @@
 #   - dev log sink file (truncated, not deleted)
 #
 # Explicitly NOT touched by `reset`:
-#   - ~/Library/Application Support/com.differentai.openwork.dev/** (tokens,
+#   - ~/Library/Application Support/io.redrob.work.dev/** (tokens,
 #     workspaces registry, prefs). Use `reset-webview` for WebKit state.
 #   - /Applications/OpenWork.app (prod build never targeted).
 #
@@ -48,11 +48,11 @@ if [[ -z "$REPO_ROOT" ]]; then
   REPO_ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 fi
 
-DEV_LOG_FILE="${OPENWORK_DEV_LOG_FILE:-$HOME/.openwork/debug/openwork-dev.log}"
-PNPM_DEV_LOG="${OPENWORK_PNPM_DEV_LOG:-/tmp/openwork-test/pnpm-dev.log}"
-PNPM_DEV_PID_FILE="${OPENWORK_PNPM_DEV_PID:-/tmp/openwork-test/pnpm-dev.pid}"
-WAIT_HEALTHY_SECS="${OPENWORK_WAIT_HEALTHY_SECS:-90}"
-ELECTRON_CDP_PORT="${OPENWORK_ELECTRON_REMOTE_DEBUG_PORT:-9823}"
+DEV_LOG_FILE="${REDROB_DEV_LOG_FILE:-$HOME/.openwork/debug/openwork-dev.log}"
+PNPM_DEV_LOG="${REDROB_PNPM_DEV_LOG:-/tmp/openwork-test/pnpm-dev.log}"
+PNPM_DEV_PID_FILE="${REDROB_PNPM_DEV_PID:-/tmp/openwork-test/pnpm-dev.pid}"
+WAIT_HEALTHY_SECS="${REDROB_WAIT_HEALTHY_SECS:-90}"
+ELECTRON_CDP_PORT="${REDROB_ELECTRON_REMOTE_DEBUG_PORT:-9823}"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -119,7 +119,7 @@ electron_renderer_cpu() {
 
 probe_electron_page_cdp() {
   node <<'NODE'
-const port = process.env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT || "9823";
+const port = process.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT || "9823";
 const controller = new AbortController();
 const fail = (message) => {
   console.error(message);
@@ -205,7 +205,7 @@ snapshot() {
     echo "  last 5 entries:"
     tail -5 "$DEV_LOG_FILE"
   else
-    echo "  (no sink file yet — run the dev app with OPENWORK_DEV_LOG_FILE set)"
+    echo "  (no sink file yet — run the dev app with REDROB_DEV_LOG_FILE set)"
   fi
 }
 
@@ -284,7 +284,7 @@ diagnose_hang() {
   echo "=== page CDP probe ==="
   local page_probe="skipped"
   if [[ "$browser_json" == *"webSocketDebuggerUrl"* && "$target_json" == *"webSocketDebuggerUrl"* ]]; then
-    if page_probe=$(OPENWORK_ELECTRON_REMOTE_DEBUG_PORT="$ELECTRON_CDP_PORT" probe_electron_page_cdp 2>&1); then
+    if page_probe=$(REDROB_ELECTRON_REMOTE_DEBUG_PORT="$ELECTRON_CDP_PORT" probe_electron_page_cdp 2>&1); then
       echo "  page: responsive ($page_probe)"
       page_probe="ok"
     else
@@ -372,7 +372,7 @@ diagnose_hang() {
       echo "  sample failed for pid=$renderer_pid"
     fi
   elif [[ -n "$renderer_pid" ]]; then
-    echo "  skipped (renderer responsive and CPU not high). Set OPENWORK_FORCE_SAMPLE=1 not currently supported."
+    echo "  skipped (renderer responsive and CPU not high). Set REDROB_FORCE_SAMPLE=1 not currently supported."
   else
     echo "  skipped (no renderer process to sample)."
   fi
@@ -434,8 +434,8 @@ start() {
   cd "$REPO_ROOT"
   local pid
   log "starting pnpm dev:electron (log sink: $DEV_LOG_FILE, CDP: 127.0.0.1:9823)"
-  env OPENWORK_DEV_LOG_FILE="$DEV_LOG_FILE" \
-    nohup pnpm --filter @openwork/desktop dev:electron >"$PNPM_DEV_LOG" 2>&1 &
+  env REDROB_DEV_LOG_FILE="$DEV_LOG_FILE" \
+    nohup pnpm --filter @redrob/desktop dev:electron >"$PNPM_DEV_LOG" 2>&1 &
   pid=$!
   disown "$pid" 2>/dev/null || true
   echo "$pid" >"$PNPM_DEV_PID_FILE"
@@ -490,7 +490,7 @@ reset_webview_state() {
   # Destructive: clears the desktop dev app's WebKit LocalStorage so stale
   # URL overrides / tokens don't leak across code changes. Does NOT touch
   # the openwork-workspaces.json registry or server-side tokens.
-  local webkit_dir="$HOME/Library/WebKit/com.differentai.openwork.dev"
+  local webkit_dir="$HOME/Library/WebKit/io.redrob.work.dev"
   if [[ ! -d "$webkit_dir" ]]; then
     log "no dev WebKit dir found at $webkit_dir"
     return 0

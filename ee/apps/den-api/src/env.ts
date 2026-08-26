@@ -1,14 +1,14 @@
 import os from "node:os"
 import { readFileSync } from "node:fs"
 import path from "node:path"
-import { denUrls } from "@openwork-ee/utils/den-urls"
+import { denUrls } from "@redrob-ee/utils/den-urls"
 import { DEN_WORKER_POLL_INTERVAL_MS } from "./CONSTS.js"
 import { normalizeConfiguredPublicApiBaseUrl } from "./request-url.js"
 import { resolveDenServiceVersion } from "./service-version.js"
 import { denApiAppVersion } from "./version.js"
 import { z } from "zod"
 
-export const DEFAULT_DEN_DIAGNOSTICS_ORIGIN = "https://diagnostic.openworklabs.com"
+export const DEFAULT_DEN_DIAGNOSTICS_ORIGIN = "https://diagnostic.redrob.io"
 
 const EnvSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
@@ -61,7 +61,7 @@ const EnvSchema = z.object({
   LINEAR_COMPLIANCE_TEAM_ID: z.string().optional(),
   LINEAR_API_BASE: z.string().optional(),
   LINEAR_COMPLIANCE_COMPLETED_STATE_ID: z.string().optional(),
-  OPENWORK_DEV_MODE: z.string().optional(),
+  REDROB_DEV_MODE: z.string().optional(),
   DEN_BOTID_PROTECTION_ENABLED: z.string().optional(),
   DEN_ALLOW_PRIVATE_MCP_URLS: z.string().optional(),
   DEN_DIAGNOSTICS_ORIGIN: z.string().optional(),
@@ -80,10 +80,10 @@ const EnvSchema = z.object({
   DEN_API_PUBLIC_URL: z.string().optional(),
   DEN_API_VERSION: z.string().optional(),
   RENDER_GIT_COMMIT: z.string().optional(),
-  OPENWORK_INSTALLER_ARTIFACTS_DIR: z.string().optional(),
-  OPENWORK_INSTALLER_RELEASE_TAG: z.string().optional(),
-  OPENWORK_INSTALLER_RELEASE_REPO: z.string().optional(),
-  OPENWORK_INSTALLER_CACHE_DIR: z.string().optional(),
+  REDROB_INSTALLER_ARTIFACTS_DIR: z.string().optional(),
+  REDROB_INSTALLER_RELEASE_TAG: z.string().optional(),
+  REDROB_INSTALLER_RELEASE_REPO: z.string().optional(),
+  REDROB_INSTALLER_CACHE_DIR: z.string().optional(),
   DEN_DESKTOP_RELEASES_BASE_URL: z.string().optional(),
   DEN_DESKTOP_RELEASES_MODE: z.enum(["github", "static"]).optional(),
   DEN_DESKTOP_DEN_BASE_URL: z.string().optional(),
@@ -112,7 +112,7 @@ const EnvSchema = z.object({
   DEN_AUTOMATIONS_LEASE_MS: z.string().optional(),
   DEN_AUTOMATIONS_RUN_TIMEOUT_MS: z.string().optional(),
   DEN_AUTOMATIONS_RUNNER_CLAIM_DEADLINE_MS: z.string().optional(),
-  OPENWORK_DAYTONA_ENV_PATH: z.string().optional(),
+  REDROB_DAYTONA_ENV_PATH: z.string().optional(),
   RENDER_API_BASE: z.string().optional(),
   RENDER_API_KEY: z.string().optional(),
   RENDER_OWNER_ID: z.string().optional(),
@@ -121,7 +121,7 @@ const EnvSchema = z.object({
   RENDER_WORKER_ROOT_DIR: z.string().optional(),
   RENDER_WORKER_PLAN: z.string().optional(),
   RENDER_WORKER_REGION: z.string().optional(),
-  RENDER_WORKER_OPENWORK_VERSION: z.string().optional(),
+  RENDER_WORKER_REDROB_VERSION: z.string().optional(),
   RENDER_WORKER_NAME_PREFIX: z.string().optional(),
   RENDER_WORKER_PUBLIC_DOMAIN_SUFFIX: z.string().optional(),
   RENDER_CUSTOM_DOMAIN_READY_TIMEOUT_MS: z.string().optional(),
@@ -171,7 +171,7 @@ const EnvSchema = z.object({
   DAYTONA_RUNTIME_WORKSPACE_PATH: z.string().optional(),
   DAYTONA_RUNTIME_DATA_PATH: z.string().optional(),
   DAYTONA_SIDECAR_DIR: z.string().optional(),
-  DAYTONA_OPENWORK_PORT: z.string().optional(),
+  DAYTONA_REDROB_PORT: z.string().optional(),
   DAYTONA_OPENCODE_PORT: z.string().optional(),
   DAYTONA_CREATE_TIMEOUT_SECONDS: z.string().optional(),
   DAYTONA_DELETE_TIMEOUT_SECONDS: z.string().optional(),
@@ -541,7 +541,7 @@ const automationsRuntimeEnabled = parseBooleanFlag(
 const automationsEnabled = automationsRuntimeEnabled
   && parseBooleanFlag(parsed.DEN_AUTOMATIONS_ENABLED ?? "false")
 
-const devMode = (parsed.OPENWORK_DEV_MODE ?? "0").trim() === "1"
+const devMode = (parsed.REDROB_DEV_MODE ?? "0").trim() === "1"
 const port = Number(parsed.PORT ?? "8790")
 const botIdProtectionEnabled = (parsed.DEN_BOTID_PROTECTION_ENABLED ?? "0").trim() === "1"
 const diagnosticsOrigin = normalizeDiagnosticsOrigin(parsed.DEN_DIAGNOSTICS_ORIGIN, devMode)
@@ -590,7 +590,7 @@ const orgMode = parseDenOrgMode(parsed.DEN_ORG_MODE)
 // deployments, Den must not fetch private/reserved addresses on behalf of
 // users. Self-hosted deployments whose MCP servers legitimately live on a
 // private network can opt out with DEN_ALLOW_PRIVATE_MCP_URLS=1; local dev
-// (OPENWORK_DEV_MODE=1) is exempt automatically so evals against a local
+// (REDROB_DEV_MODE=1) is exempt automatically so evals against a local
 // stand-in server keep working.
 const allowPrivateMcpUrls = devMode || (parsed.DEN_ALLOW_PRIVATE_MCP_URLS ?? "0").trim() === "1"
 const allowInsecureInternalRedis = parseBooleanFlag(parsed.DATABASE_REDIS_ALLOW_INSECURE_INTERNAL)
@@ -726,13 +726,13 @@ export const env = {
   }),
   publicUrlTrustedOrigins,
   publicProxyTrustedOrigins,
-  installerArtifactsDir: optionalString(parsed.OPENWORK_INSTALLER_ARTIFACTS_DIR),
+  installerArtifactsDir: optionalString(parsed.REDROB_INSTALLER_ARTIFACTS_DIR),
   // Standard desktop release assets: the release tag to download from,
   // defaulting to the pinned app release this den-api build shipped with.
-  installerReleaseTag: optionalString(parsed.OPENWORK_INSTALLER_RELEASE_TAG) ?? `v${denApiAppVersion.latestAppVersion}`,
-  installerReleaseTagExplicit: optionalString(parsed.OPENWORK_INSTALLER_RELEASE_TAG) !== undefined,
-  installerReleaseRepo: optionalString(parsed.OPENWORK_INSTALLER_RELEASE_REPO) ?? "different-ai/openwork",
-  installerCacheDir: optionalString(parsed.OPENWORK_INSTALLER_CACHE_DIR) ?? path.join(os.tmpdir(), "openwork-desktop-artifacts"),
+  installerReleaseTag: optionalString(parsed.REDROB_INSTALLER_RELEASE_TAG) ?? `v${denApiAppVersion.latestAppVersion}`,
+  installerReleaseTagExplicit: optionalString(parsed.REDROB_INSTALLER_RELEASE_TAG) !== undefined,
+  installerReleaseRepo: optionalString(parsed.REDROB_INSTALLER_RELEASE_REPO) ?? "different-ai/openwork",
+  installerCacheDir: optionalString(parsed.REDROB_INSTALLER_CACHE_DIR) ?? path.join(os.tmpdir(), "openwork-desktop-artifacts"),
   // Desktop-release endpoint overrides for evals/self-host testing. Static mode
   // keeps air-gapped deployments on the committed release snapshot.
   desktopReleasesBaseUrl: optionalString(parsed.DEN_DESKTOP_RELEASES_BASE_URL),
@@ -802,7 +802,7 @@ export const env = {
       parsed.RENDER_WORKER_ROOT_DIR ?? "ee/apps/den-worker-runtime",
     workerPlan: parsed.RENDER_WORKER_PLAN ?? "standard",
     workerRegion: parsed.RENDER_WORKER_REGION ?? "oregon",
-    workerOpenworkVersion: parsed.RENDER_WORKER_OPENWORK_VERSION,
+    workerOpenworkVersion: parsed.RENDER_WORKER_REDROB_VERSION,
     workerNamePrefix: parsed.RENDER_WORKER_NAME_PREFIX ?? "den-worker",
     workerPublicDomainSuffix: parsed.RENDER_WORKER_PUBLIC_DOMAIN_SUFFIX,
     customDomainReadyTimeoutMs: Number(
@@ -831,7 +831,7 @@ export const env = {
     returnUrl: parsed.POLAR_RETURN_URL,
   },
   daytona: {
-    envPath: optionalString(parsed.OPENWORK_DAYTONA_ENV_PATH),
+    envPath: optionalString(parsed.REDROB_DAYTONA_ENV_PATH),
     apiUrl: optionalString(parsed.DAYTONA_API_URL) ?? "https://app.daytona.io/api",
     apiKey: optionalString(parsed.DAYTONA_API_KEY),
     target: optionalString(parsed.DAYTONA_TARGET),
@@ -872,7 +872,7 @@ export const env = {
       optionalString(parsed.DAYTONA_RUNTIME_DATA_PATH) ?? "/tmp/openwork-data",
     sidecarDir:
       optionalString(parsed.DAYTONA_SIDECAR_DIR) ?? "/tmp/openwork-sidecars",
-    openworkPort: Number(parsed.DAYTONA_OPENWORK_PORT ?? "8787"),
+    openworkPort: Number(parsed.DAYTONA_REDROB_PORT ?? "8787"),
     opencodePort: Number(parsed.DAYTONA_OPENCODE_PORT ?? "4096"),
     createTimeoutSeconds: Number(parsed.DAYTONA_CREATE_TIMEOUT_SECONDS ?? "300"),
     deleteTimeoutSeconds: Number(parsed.DAYTONA_DELETE_TIMEOUT_SECONDS ?? "120"),

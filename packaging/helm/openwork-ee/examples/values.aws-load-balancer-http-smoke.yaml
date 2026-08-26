@@ -4,7 +4,7 @@
 # Copy this file, replace every REPLACE_* value, and install with:
 #
 #   helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
-#     --version REPLACE_OPENWORK_VERSION \
+#     --version REPLACE_REDROB_VERSION \
 #     --namespace openwork-ee \
 #     --create-namespace \
 #     -f values.aws-http-smoke.yaml
@@ -15,7 +15,7 @@
 # HTTPS/ACM example for production.
 
 image:
-  tag: "REPLACE_OPENWORK_VERSION"
+  tag: "REPLACE_REDROB_VERSION"
   pullPolicy: IfNotPresent
 
 config:

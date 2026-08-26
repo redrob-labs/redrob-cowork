@@ -21,7 +21,7 @@ const multiProviderList = (): ProviderListResponse => ({
   all: [
     { id: "openai", name: "OpenAI", env: ["OPENAI_API_KEY"], models: {} },
     { id: "anthropic", name: "Anthropic", env: ["ANTHROPIC_API_KEY"], models: {} },
-    { id: "opencode", name: "OpenCode Zen", env: [], models: {} },
+    { id: "opencode", name: "OpenCode", env: [], models: {} },
     { id: REDROB_PROVIDER_ID, name: "Redrob", env: ["REDROB_API_KEY"], models: {} },
   ],
   connected: ["openai", "opencode", REDROB_PROVIDER_ID],

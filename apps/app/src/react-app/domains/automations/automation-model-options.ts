@@ -1,9 +1,9 @@
 import type { DenOrgLlmProvider } from "@/app/lib/den"
 import { getModelBehaviorSummary } from "@/app/lib/model-behavior"
 import type { ModelOption, ProviderListItem } from "@/app/types"
-import type { AutomationModel } from "@openwork/types/automations"
-import { AUTOMATION_FREE_MODEL } from "@openwork/types/automations"
-import { INFERENCE_MODEL_ALIASES } from "@openwork/types/den/inference"
+import type { AutomationModel } from "@redrob/types/automations"
+import { AUTOMATION_FREE_MODEL } from "@redrob/types/automations"
+import { INFERENCE_MODEL_ALIASES } from "@redrob/types/den/inference"
 
 /** providerId → modelId → the local runtime's model record. */
 export type AutomationProviderCatalog = Record<string, Record<string, ProviderListItem["models"][string]>>

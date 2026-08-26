@@ -414,7 +414,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
     const raw = String(input ?? "").trim();
     const envMatch = raw.match(/^env:([A-Za-z0-9_]+)$/i);
     if (!envMatch) return raw;
-    const key = `OPENWORK_BROWSER_PROXY_${envMatch[1].toUpperCase()}`;
+    const key = `REDROB_BROWSER_PROXY_${envMatch[1].toUpperCase()}`;
     const value = String(process.env[key] ?? "").trim();
     if (!value) throw new Error(`No proxy configured: set the ${key} environment variable to a proxy URL.`);
     return value;
@@ -497,9 +497,9 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
       // data: loads are internal plumbing (CDP target-marker pages), not
       // user-visible navigations — don't surface the panel for them.
       if (target === "about:blank" || target.startsWith("data:")) return;
-      // Intercept openwork:// deep links (e.g. den-auth handoff grants) so
+      // Intercept redrob:// deep links (e.g. den-auth handoff grants) so
       // in-app browser auth works without the system protocol handler.
-      if (target.startsWith("openwork://") || target.startsWith("openwork-dev://")) {
+      if (target.startsWith("redrob://") || target.startsWith("redrob-dev://")) {
         if (typeof onDeepLink === "function") {
           onDeepLink([target]);
         }

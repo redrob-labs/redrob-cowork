@@ -238,15 +238,15 @@ async function configuredFixture(
   catalogReads: () => number;
 }> {
   const root = await mkdtemp(join(tmpdir(), prefix));
-  const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-  const previousDevMode = process.env.OPENWORK_DEV_MODE;
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
-  process.env.OPENWORK_DEV_MODE = "1";
+  const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+  const previousDevMode = process.env.REDROB_DEV_MODE;
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_DEV_MODE = "1";
   stops.push(async () => {
-    if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-    else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-    if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-    else process.env.OPENWORK_DEV_MODE = previousDevMode;
+    if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+    else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+    if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+    else process.env.REDROB_DEV_MODE = previousDevMode;
     await rm(root, { recursive: true, force: true });
   });
   await mkdir(join(root, ".git"), { recursive: true });
@@ -625,7 +625,7 @@ describe("MCP Apps host transport", () => {
 
   test("rejects private MCP egress outside explicit development mode", async () => {
     const { config, root } = await configuredFixture("openwork-mcp-app-private-");
-    delete process.env.OPENWORK_DEV_MODE;
+    delete process.env.REDROB_DEV_MODE;
 
     await expect(resolveMcpAppResource({
       serverConfig: config,

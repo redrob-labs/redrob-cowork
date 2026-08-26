@@ -1,5 +1,5 @@
 import { buildResponseHeaders, jsonResponse, rateLimitFormRequest, validateAntiSpamFields, validateTrustedOrigin, verifyFormBotProtection } from "../_lib/security";
-import { EmailSendError, sendEmail, type FeedbackEmailProps } from "@openwork/email";
+import { EmailSendError, sendEmail, type FeedbackEmailProps } from "@redrob/email";
 
 type FeedbackContext = {
   source?: string;
@@ -23,7 +23,7 @@ type FeedbackPayload = {
   context?: FeedbackContext;
 };
 
-const DEFAULT_INTERNAL_FEEDBACK_EMAIL = "team@openworklabs.com";
+const DEFAULT_INTERNAL_FEEDBACK_EMAIL = "team@redrob.io";
 
 function sanitizeValue(value: unknown, maxLength = 240) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
   }
 
   const internalEmail =
-    process.env.OPENWORK_FEEDBACK_EMAIL?.trim() ||
+    process.env.REDROB_FEEDBACK_EMAIL?.trim() ||
     process.env.LOOPS_INTERNAL_FEEDBACK_EMAIL?.trim() ||
     DEFAULT_INTERNAL_FEEDBACK_EMAIL;
 

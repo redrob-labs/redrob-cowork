@@ -1,5 +1,5 @@
 import { expect, onTestFinished } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   clickButton,
   createOrgConnection,
@@ -16,20 +16,20 @@ import {
   waitForConnectionCard,
   waitForText,
   writeComposerText,
-} from "@openwork/behaviors";
-import { app, mcpMock, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import { app, mcpMock, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
   model: "tool-capable",
-  env: ["OPENWORK_EVAL_DEN_API_URL"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_CONNECTOR_E2E_TEST"],
+  env: ["REDROB_EVAL_DEN_API_URL"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_CONNECTOR_E2E_TEST"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Cloud MCP provider capability submission skipped — needs: ${missingRequirements.join(", ")}`
   : "bundled engine provider capability proof allows an organization connector task to submit";
-const modelId = process.env.OPENWORK_EVAL_MODEL?.trim() || "";
+const modelId = process.env.REDROB_EVAL_MODEL?.trim() || "";
 
 test(title, async ({ evidence, place }) => {
   needs(requirements);
@@ -37,8 +37,8 @@ test(title, async ({ evidence, place }) => {
     place,
     mocks: {
       connector: mcpMock({
-        port: Number(process.env.OPENWORK_EVAL_CONNECTOR_MOCK_PORT ?? 3979),
-        publicUrl: process.env.OPENWORK_EVAL_CONNECTOR_MOCK_PUBLIC_URL?.trim() || undefined,
+        port: Number(process.env.REDROB_EVAL_CONNECTOR_MOCK_PORT ?? 3979),
+        publicUrl: process.env.REDROB_EVAL_CONNECTOR_MOCK_PUBLIC_URL?.trim() || undefined,
       }),
     },
   });

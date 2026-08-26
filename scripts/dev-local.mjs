@@ -22,8 +22,8 @@ const apiPort = process.env.DEN_API_PORT?.trim() || process.env.DEN_CONTROLLER_P
 const workerProxyPort = process.env.DEN_WORKER_PROXY_PORT?.trim() || "8789"
 const inferencePort = process.env.INFERENCE_PORT?.trim() || "8791"
 const webPort = process.env.DEN_WEB_PORT?.trim() || "3005"
-const appPort = process.env.OPENWORK_APP_PORT?.trim() || process.env.PORT?.trim() || "5173"
-const extraAppPorts = (process.env.OPENWORK_EXTRA_APP_PORTS?.trim() || "5174")
+const appPort = process.env.REDROB_APP_PORT?.trim() || process.env.PORT?.trim() || "5173"
+const extraAppPorts = (process.env.REDROB_EXTRA_APP_PORTS?.trim() || "5174")
   .split(",")
   .map((value) => value.trim())
   .filter(Boolean)
@@ -209,7 +209,7 @@ async function main() {
   }
 
   console.log("[den] Syncing Den schema...")
-  await run("bash", ["-c", "pnpm --filter @openwork-ee/den-db build && pnpm --filter @openwork-ee/den-db exec node --import tsx ./node_modules/drizzle-kit/bin.cjs push --config drizzle.config.ts --force"], {
+  await run("bash", ["-c", "pnpm --filter @redrob-ee/den-db build && pnpm --filter @redrob-ee/den-db exec node --import tsx ./node_modules/drizzle-kit/bin.cjs push --config drizzle.config.ts --force"], {
     env: {
       ...process.env,
       DATABASE_URL: databaseUrl,
@@ -227,10 +227,10 @@ async function main() {
       "run",
       "dev:local",
       "--output-logs=full",
-        "--filter=@openwork-ee/den-api",
-        "--filter=@openwork-ee/inference",
-        "--filter=@openwork-ee/den-worker-proxy",
-        "--filter=@openwork-ee/den-web",
+        "--filter=@redrob-ee/den-api",
+        "--filter=@redrob-ee/inference",
+        "--filter=@redrob-ee/den-worker-proxy",
+        "--filter=@redrob-ee/den-web",
     ],
     {
       cwd: rootDir,

@@ -8,7 +8,7 @@ export default function OrganizationInvitePreview(props: OrganizationInviteEmail
 }
 
 OrganizationInvitePreview.PreviewProps = {
-  inviteLink: "https://app.openworklabs.com/join-org?invite=invitation_preview",
+  inviteLink: "https://app.redrob.io/join-org?invite=invitation_preview",
   invitedByName: "Ada Lovelace",
   invitedByEmail: "ada@example.com",
   organizationName: "OpenWork Preview",

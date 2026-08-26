@@ -32,8 +32,8 @@ const connectConfirmDialogSource = readFileSync(
 const publicDistribution = {
   flavor: "public" as const,
   appName: "Redrob Work",
-  appIdentifier: "com.differentai.openwork",
-  protocolScheme: "openwork",
+  appIdentifier: "io.redrob.work",
+  protocolScheme: "redrob",
   requireSignin: false,
   requireActivation: false,
 };
@@ -41,8 +41,8 @@ const publicDistribution = {
 const enterpriseDistribution = {
   flavor: "enterprise" as const,
   appName: "Redrob Work Enterprise",
-  appIdentifier: "com.differentai.openwork",
-  protocolScheme: "openwork",
+  appIdentifier: "io.redrob.work",
+  protocolScheme: "redrob",
   requireSignin: true,
   requireActivation: true,
 };
@@ -57,7 +57,7 @@ describe("enterprise desktop activation", () => {
     expect(enterpriseActivationRequired(enterpriseDistribution, {
       enterpriseActivation: {
         activatedAt: "2026-07-27T12:00:00.000Z",
-        denBaseUrl: "https://app.openworklabs.com",
+        denBaseUrl: "https://app.redrob.io",
       },
     })).toBe(false);
   });
@@ -76,10 +76,10 @@ describe("enterprise desktop activation", () => {
 
   test("uses the standard Den auth deep-link shape", () => {
     expect(parseDenAuthDeepLink(
-      "openwork://den-auth?grant=one-time-grant&denBaseUrl=https%3A%2F%2Fapp.openworklabs.com",
+      "redrob://den-auth?grant=one-time-grant&denBaseUrl=https%3A%2F%2Fapp.redrob.io",
     )).toEqual({
       grant: "one-time-grant",
-      denBaseUrl: "https://app.openworklabs.com",
+      denBaseUrl: "https://app.redrob.io",
     });
   });
 

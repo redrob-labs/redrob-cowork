@@ -19,9 +19,9 @@ const clientToken = "owt_cloud_provider_client";
 const hostToken = "owt_cloud_provider_host";
 const roots: string[] = [];
 const stops: Array<() => void | Promise<void>> = [];
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-const previousEnvStore = process.env.OPENWORK_ENV_STORE;
-const previousInterval = process.env.OPENWORK_CLOUD_PROVIDER_SYNC_INTERVAL_MS;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+const previousEnvStore = process.env.REDROB_ENV_STORE;
+const previousInterval = process.env.REDROB_CLOUD_PROVIDER_SYNC_INTERVAL_MS;
 
 type FakeModel = {
   id: string;
@@ -65,9 +65,9 @@ async function responseRecord(response: Response, label: string): Promise<Record
 async function createRoot(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "openwork-cloud-provider-sync-"));
   roots.push(root);
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
-  process.env.OPENWORK_ENV_STORE = join(root, "env.json");
-  process.env.OPENWORK_CLOUD_PROVIDER_SYNC_INTERVAL_MS = "3600000";
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_ENV_STORE = join(root, "env.json");
+  process.env.REDROB_CLOUD_PROVIDER_SYNC_INTERVAL_MS = "3600000";
   return root;
 }
 
@@ -167,12 +167,12 @@ afterEach(async () => {
     const root = roots.pop();
     if (root) await rm(root, { recursive: true, force: true });
   }
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-  if (previousEnvStore === undefined) delete process.env.OPENWORK_ENV_STORE;
-  else process.env.OPENWORK_ENV_STORE = previousEnvStore;
-  if (previousInterval === undefined) delete process.env.OPENWORK_CLOUD_PROVIDER_SYNC_INTERVAL_MS;
-  else process.env.OPENWORK_CLOUD_PROVIDER_SYNC_INTERVAL_MS = previousInterval;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+  if (previousEnvStore === undefined) delete process.env.REDROB_ENV_STORE;
+  else process.env.REDROB_ENV_STORE = previousEnvStore;
+  if (previousInterval === undefined) delete process.env.REDROB_CLOUD_PROVIDER_SYNC_INTERVAL_MS;
+  else process.env.REDROB_CLOUD_PROVIDER_SYNC_INTERVAL_MS = previousInterval;
 });
 
 describe("cloud provider sync gateway", () => {
@@ -284,7 +284,7 @@ describe("cloud provider sync gateway", () => {
     stops.push(() => den.stop(true));
     const sync = new CloudProviderSync({
       config,
-      env: new EnvService({ path: process.env.OPENWORK_ENV_STORE }),
+      env: new EnvService({ path: process.env.REDROB_ENV_STORE }),
       reloadEngine: async () => {
         reloads += 1;
       },
@@ -380,7 +380,7 @@ describe("cloud provider sync gateway", () => {
     // Simulate an upgrade/restart after an older process persisted the cloud
     // credential. The next sync sees the same value, performs no upsert, and
     // must still reclaim ownership so logout removes it.
-    await new EnvService({ path: process.env.OPENWORK_ENV_STORE }).upsertMany([
+    await new EnvService({ path: process.env.REDROB_ENV_STORE }).upsertMany([
       { key: "TEST_PROVIDER_API_KEY", value: "sk-test-provider" },
     ]);
 
@@ -440,7 +440,7 @@ describe("cloud provider sync gateway", () => {
     const globalModels = expectRecord(globalProvider.models, "global runtime provider models");
     expect(Object.keys(globalModels).sort()).toEqual(["model-a", "model-z"]);
     expect(expectRecord(globalModels["model-z"], "model-z runtime config").reasoning).toBe(true);
-    expect((await new EnvService({ path: process.env.OPENWORK_ENV_STORE }).list()).find(
+    expect((await new EnvService({ path: process.env.REDROB_ENV_STORE }).list()).find(
       (entry) => entry.key === "TEST_PROVIDER_API_KEY",
     )?.value).toBe("sk-test-provider");
 
@@ -476,7 +476,7 @@ describe("cloud provider sync gateway", () => {
     const deleteResponse = await fetch(`${base}/den-session`, { method: "DELETE", headers: hostHeaders() });
     expect(deleteResponse.status).toBe(204);
     expect(runtimeProviderMap(await readGlobalRuntimeOpencodeConfig(config)).lpr_test).toBeUndefined();
-    expect((await new EnvService({ path: process.env.OPENWORK_ENV_STORE }).list()).find(
+    expect((await new EnvService({ path: process.env.REDROB_ENV_STORE }).list()).find(
       (entry) => entry.key === "TEST_PROVIDER_API_KEY",
     )).toBeUndefined();
     const clearedStatusResponse = await fetch(`${base}/cloud-provider-sync/status`, { headers: clientHeaders() });

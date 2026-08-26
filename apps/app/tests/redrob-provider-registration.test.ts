@@ -29,7 +29,7 @@ import {
 const originalWindow = globalThis.window;
 const originalFetch = globalThis.fetch;
 const originalConsoleInfo = console.info;
-const originalDeployment = process.env.VITE_OPENWORK_DEPLOYMENT;
+const originalDeployment = process.env.VITE_REDROB_DEPLOYMENT;
 
 const LOCAL_SERVER_ORIGIN = "http://127.0.0.1:7899";
 
@@ -83,7 +83,7 @@ function installWindow(): Storage {
       },
       localStorage,
       location: { origin: "https://self-hosted.example" },
-      __OPENWORK_GATEWAY__: undefined,
+      __REDROB_GATEWAY__: undefined,
     },
   });
   return localStorage;
@@ -205,7 +205,7 @@ function createStore(providers: ProviderListItem[]) {
 
 describe("Redrob provider registration", () => {
   beforeEach(() => {
-    process.env.VITE_OPENWORK_DEPLOYMENT = "web";
+    process.env.VITE_REDROB_DEPLOYMENT = "web";
     console.info = () => undefined;
   });
 
@@ -213,8 +213,8 @@ describe("Redrob provider registration", () => {
     Object.defineProperty(globalThis, "window", { configurable: true, value: originalWindow });
     Object.defineProperty(globalThis, "fetch", { configurable: true, value: originalFetch });
     console.info = originalConsoleInfo;
-    if (originalDeployment === undefined) delete process.env.VITE_OPENWORK_DEPLOYMENT;
-    else process.env.VITE_OPENWORK_DEPLOYMENT = originalDeployment;
+    if (originalDeployment === undefined) delete process.env.VITE_REDROB_DEPLOYMENT;
+    else process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
   });
 
   test("opening the connect modal seeds buildRedrobProviderConfig() into the engine config", async () => {

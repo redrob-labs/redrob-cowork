@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, beforeEach, expect, test } from "bun:test"
 
 const singleOrgSlug = "invite-duplicates-test"
@@ -49,8 +49,8 @@ function seedRequiredEnv() {
 }
 
 let db: typeof import("../src/db.js").db | null = null
-let schema: typeof import("@openwork-ee/den-db/schema") | null = null
-let drizzle: typeof import("@openwork-ee/den-db/drizzle") | null = null
+let schema: typeof import("@redrob-ee/den-db/schema") | null = null
+let drizzle: typeof import("@redrob-ee/den-db/drizzle") | null = null
 let orgs: typeof import("../src/orgs.js") | null = null
 let restoreCacheDependencies: (() => void) | null = null
 const cacheDeleteCalls: string[] = []
@@ -169,8 +169,8 @@ beforeAll(async () => {
   seedRequiredEnv()
   const [dbModule, schemaModule, drizzleModule, orgsModule, cacheModule] = await Promise.all([
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/orgs.js"),
     import("../src/cache.js"),
   ])

@@ -10,9 +10,9 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js"
 import { StreamableHTTPTransport } from "@hono/mcp"
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { OrganizationTable } from "@openwork-ee/den-db/schema"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { OrganizationTable } from "@redrob-ee/den-db/schema"
 import type { Context, Hono } from "hono"
 import type { RequestIdVariables } from "hono/request-id"
 import {

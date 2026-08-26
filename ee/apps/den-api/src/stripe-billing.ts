@@ -1,13 +1,13 @@
 import Stripe from "stripe"
-import { and, eq, isNull, sql } from "@openwork-ee/den-db/drizzle"
+import { and, eq, isNull, sql } from "@redrob-ee/den-db/drizzle"
 import {
   MemberTable,
   OrgSubscriptionStatus,
   OrgSubscriptionType,
   OrgSubscriptionTable,
   OrganizationTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { db } from "./db.js"
 import { env } from "./env.js"
 import type { DenOrgMode } from "./env.js"

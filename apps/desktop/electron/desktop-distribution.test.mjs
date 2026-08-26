@@ -22,8 +22,8 @@ describe("resolveDesktopDistribution", () => {
       {
         flavor: "cloud",
         appName: "Redrob Work Cloud",
-        appIdentifier: "com.differentai.openwork",
-        protocolScheme: "openwork",
+        appIdentifier: "io.redrob.work",
+        protocolScheme: "redrob",
         requireSignin: true,
         requireActivation: false,
       },
@@ -40,8 +40,8 @@ describe("resolveDesktopDistribution", () => {
     assert.deepEqual(distribution, {
       flavor: "enterprise",
       appName: "Redrob Work Enterprise",
-      appIdentifier: "com.differentai.openwork",
-      protocolScheme: "openwork",
+      appIdentifier: "io.redrob.work",
+      protocolScheme: "redrob",
       requireSignin: true,
       requireActivation: true,
     });
@@ -112,7 +112,7 @@ describe("enterpriseActivationComplete", () => {
     assert.equal(enterpriseActivationComplete({
       enterpriseActivation: {
         activatedAt: "2026-07-27T10:00:00.000Z",
-        denBaseUrl: "https://app.openworklabs.com",
+        denBaseUrl: "https://app.redrob.io",
       },
     }), true);
   });

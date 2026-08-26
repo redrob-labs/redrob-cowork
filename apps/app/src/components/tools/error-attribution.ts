@@ -1,4 +1,4 @@
-import { openworkCloudMcpInlineReconnectSchema } from "@openwork/types/den/mcp-connection-action"
+import { openworkCloudMcpInlineReconnectSchema } from "@redrob/types/den/mcp-connection-action"
 
 export type ToolErrorAttribution = {
   label: string
@@ -17,7 +17,7 @@ export type ChatToolReconnectProgress =
   | { phase: "authorization_opened"; authorizeUrl: string }
 export type ChatToolReconnectResult = "connected"
 
-const OPENWORK_CLOUD_CAPABILITY_TOOLS = new Set([
+const REDROB_CLOUD_CAPABILITY_TOOLS = new Set([
   "openwork-cloud_search_capabilities",
   "openwork-cloud_execute_capability",
 ])
@@ -81,7 +81,7 @@ export function reconnectActionFromChatToolResult(
   // capability tools may turn a structured Den response into a UI action.
   // Discovery is included because it performs a live connection probe before
   // the agent can safely proceed to execution.
-  if (!OPENWORK_CLOUD_CAPABILITY_TOOLS.has(toolName)) return null
+  if (!REDROB_CLOUD_CAPABILITY_TOOLS.has(toolName)) return null
 
   const parsed = parseResultRecord(result)
   if (!parsed) return null

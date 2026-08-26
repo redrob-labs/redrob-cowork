@@ -48,8 +48,8 @@ export function isReadyLocalOpenworkServerInfo(
   );
 }
 
-export const LOCAL_OPENWORK_READINESS_MAX_ATTEMPTS = 20;
-export const LOCAL_OPENWORK_READINESS_RETRY_DELAY_MS = 500;
+export const LOCAL_REDROB_READINESS_MAX_ATTEMPTS = 20;
+export const LOCAL_REDROB_READINESS_RETRY_DELAY_MS = 500;
 
 export function openworkServerSettingsChanged(
   previous: OpenworkServerSettings,
@@ -76,14 +76,14 @@ export async function waitForReadyLocalOpenworkServerInfo(options?: {
 }): Promise<OpenworkServerInfo | null> {
   const fetchInfo =
     options?.fetchInfo ?? (() => openworkServerInfo() as Promise<OpenworkServerInfo | null>);
-  const maxAttempts = Math.max(1, options?.maxAttempts ?? LOCAL_OPENWORK_READINESS_MAX_ATTEMPTS);
+  const maxAttempts = Math.max(1, options?.maxAttempts ?? LOCAL_REDROB_READINESS_MAX_ATTEMPTS);
   const wait =
     options?.wait ??
     ((delayMs: number) => new Promise<void>((resolve) => window.setTimeout(resolve, delayMs)));
 
   let lastInfo: OpenworkServerInfo | null = null;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (attempt > 0) await wait(LOCAL_OPENWORK_READINESS_RETRY_DELAY_MS);
+    if (attempt > 0) await wait(LOCAL_REDROB_READINESS_RETRY_DELAY_MS);
     lastInfo = await fetchInfo().catch(() => null);
     if (isReadyLocalOpenworkServerInfo(lastInfo)) return lastInfo;
   }

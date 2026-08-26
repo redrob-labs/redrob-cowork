@@ -17,7 +17,7 @@ Feedback emails reach the team inbox again
 Fixes the in-app feedback email target so reports reach the shared Redrob Work inbox again.
 
 #### Main changes
-Updates the feedback mail link to send reports to `team@openworklabs.com`, restoring the intended shared inbox for in-app feedback.
+Updates the feedback mail link to send reports to `team@redrob.io`, restoring the intended shared inbox for in-app feedback.
 
 #### Lines of code changed since previous release
 81 lines changed since `v0.11.150` (55 insertions, 26 deletions).
@@ -583,7 +583,7 @@ Makes local Docker testing easier from phones and other devices by printing publ
 #### Main changes
 - The legacy Docker dev stack now prints localhost, hostname, and LAN IP URLs for the app, server, and share service.
 - `den-dev-up.sh` derives auth URLs and trusted origins for cross-device testing.
-- Added `OPENWORK_PUBLIC_HOST` and `DEN_PUBLIC_HOST` overrides when auto-detection is wrong.
+- Added `REDROB_PUBLIC_HOST` and `DEN_PUBLIC_HOST` overrides when auto-detection is wrong.
 
 #### Lines of code changed since previous release
 149 lines changed since `v0.11.161` (130 insertions, 19 deletions).

@@ -339,9 +339,9 @@ jobs:
           echo "publish_npm=$publish_npm" >> "$GITHUB_OUTPUT"
           echo "publish_daytona_snapshot=$publish_daytona_snapshot" >> "$GITHUB_OUTPUT"
           {
-            echo "release_body<<__OPENWORK_RELEASE_BODY_EOF__"
+            echo "release_body<<__REDROB_RELEASE_BODY_EOF__"
             printf '%s\n' "$RELEASE_BODY"
-            echo "__OPENWORK_RELEASE_BODY_EOF__"
+            echo "__REDROB_RELEASE_BODY_EOF__"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create release if missing
@@ -478,8 +478,8 @@ jobs:
       # dependency closure. Without this, pnpm may "repair" the intentionally
       # partial workspace with a second all-workspace install before scripts.
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
-      OPENWORK_DESKTOP_SENTRY_DSN: ${{ secrets.OPENWORK_DESKTOP_SENTRY_DSN || vars.OPENWORK_DESKTOP_SENTRY_DSN }}
-      OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
+      REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
+      REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
 
     strategy:
       fail-fast: false
@@ -632,7 +632,7 @@ jobs:
             ${{ runner.os }}-electron-pnpm-
 
       - name: Install dependencies
-        run: pnpm --filter @openwork/desktop... --filter @openwork/app... --filter openwork-server... install --frozen-lockfile --prefer-offline
+        run: pnpm --filter @redrob/desktop... --filter @redrob/app... --filter openwork-server... install --frozen-lockfile --prefer-offline
 
       # The repo commits a permanent 0.0.0-dev placeholder; the release
       # version exists only as the git tag. Stamp it into the workspace so
@@ -695,7 +695,7 @@ jobs:
           # TARGET tells prepare-sidecar.mjs which architecture's opencode binary
           # to download (critical for cross-arch builds like x64 on arm64 mac).
           TARGET: ${{ matrix.target_triple }}
-        run: pnpm --filter @openwork/desktop build:electron
+        run: pnpm --filter @redrob/desktop build:electron
 
       - name: Package Electron (macOS, signed + notarized)
         if: matrix.os_type == 'macos' && env.MACOS_NOTARIZE == 'true'
@@ -909,8 +909,8 @@ jobs:
       SIGN_WINDOWS: ${{ needs.resolve-release.outputs.sign_windows }}
       BENCHMARK_ONLY: ${{ needs.resolve-release.outputs.benchmark_only }}
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
-      OPENWORK_DESKTOP_SENTRY_DSN: ${{ secrets.OPENWORK_DESKTOP_SENTRY_DSN || vars.OPENWORK_DESKTOP_SENTRY_DSN }}
-      OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
+      REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
+      REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
 
     strategy:
       fail-fast: false

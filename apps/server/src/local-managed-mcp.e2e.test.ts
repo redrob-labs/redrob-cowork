@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { EnterpriseMcpClientError } from "@openwork/enterprise-mcp-client";
+import { EnterpriseMcpClientError } from "@redrob/enterprise-mcp-client";
 
 import { ApiError } from "./errors.js";
 import {
@@ -276,12 +276,12 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
   });
 
   test("rolls back a new managed connection when the initial OAuth handshake fails", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-rollback-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_DEV_MODE = "1";
 
     try {
       const engine = startMockOpencode();
@@ -318,21 +318,21 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
       expect(status.status).toBe(404);
       expect(await readRuntimeMcpConfig(config, "ws_managed", "unreachable-oauth")).toBeNull();
     } finally {
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
     }
   });
 
   test("returns safe connection errors for DCR reconnect and callback initialize failures", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
     const previousTelemetry = globalThis.__openworkDesktopTelemetry;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-handshake-errors-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_DEV_MODE = "1";
     const captured: unknown[] = [];
     globalThis.__openworkDesktopTelemetry = {
       captureException: (error) => {
@@ -446,22 +446,22 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
       });
     } finally {
       globalThis.__openworkDesktopTelemetry = previousTelemetry;
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
     }
   }, 30_000);
 
   test("returns actionable input errors without persisting managed connections", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
-    const previousAllowPrivateUrls = process.env.OPENWORK_ALLOW_PRIVATE_MCP_URLS;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
+    const previousAllowPrivateUrls = process.env.REDROB_ALLOW_PRIVATE_MCP_URLS;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-input-errors-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    delete process.env.OPENWORK_DEV_MODE;
-    delete process.env.OPENWORK_ALLOW_PRIVATE_MCP_URLS;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    delete process.env.REDROB_DEV_MODE;
+    delete process.env.REDROB_ALLOW_PRIVATE_MCP_URLS;
 
     try {
       const engine = startMockOpencode();
@@ -508,22 +508,22 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
         expect(status.status).toBe(404);
       }
     } finally {
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
-      if (previousAllowPrivateUrls === undefined) delete process.env.OPENWORK_ALLOW_PRIVATE_MCP_URLS;
-      else process.env.OPENWORK_ALLOW_PRIVATE_MCP_URLS = previousAllowPrivateUrls;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
+      if (previousAllowPrivateUrls === undefined) delete process.env.REDROB_ALLOW_PRIVATE_MCP_URLS;
+      else process.env.REDROB_ALLOW_PRIVATE_MCP_URLS = previousAllowPrivateUrls;
     }
   });
 
   test("owns OAuth, exposes provider tools to OpenCode, refreshes, survives restart, and disconnects", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_DEV_MODE = "1";
 
     try {
       const engine = startMockOpencode();
@@ -660,20 +660,20 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
       expect((await readdir(runtimeStorageDir(restartedConfig)))
         .some((entry) => entry.includes(".openwork-backup-"))).toBe(false);
     } finally {
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
     }
   }, 60_000);
 
   test("quarantines and rebuilds the vault after a secure-storage key change, then reconnects", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-rotation-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_DEV_MODE = "1";
 
     try {
       const engine = startMockOpencode();
@@ -820,20 +820,20 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
       expect((await readdir(storageDir))
         .filter((entry) => entry.startsWith("local-managed-mcp-vault.json.openwork-backup-"))).toHaveLength(1);
     } finally {
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
     }
   }, 60_000);
 
   test("serves the plaintext index read-only while secure storage is unavailable", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-unavailable-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_DEV_MODE = "1";
 
     try {
       const config = createConfig({
@@ -879,20 +879,20 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
       expect(failure).toBeInstanceOf(ApiError);
       expect(failure).toMatchObject({ status: 503, code: "managed_mcp_secure_storage_unavailable" });
     } finally {
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
     }
   });
 
   test("quarantines a legacy v1 vault it cannot decrypt and prunes orphaned gateway runtime entries", async () => {
-    const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDevMode = process.env.OPENWORK_DEV_MODE;
+    const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+    const previousDevMode = process.env.REDROB_DEV_MODE;
     const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-local-managed-mcp-v1-"));
     roots.push(workspaceRoot);
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_DEV_MODE = "1";
 
     try {
       const config = createConfig({
@@ -964,10 +964,10 @@ describe("OpenWork-managed local MCP OAuth gateway", () => {
       expect(await readRuntimeMcpConfig(config, "ws_managed", "legacy-managed")).toBeNull();
       expect(await readRuntimeMcpConfig(config, "ws_managed", "keep-remote")).toMatchObject({ type: "remote" });
     } finally {
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-      if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-      else process.env.OPENWORK_DEV_MODE = previousDevMode;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+      if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+      else process.env.REDROB_DEV_MODE = previousDevMode;
     }
   });
 });

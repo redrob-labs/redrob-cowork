@@ -7,8 +7,8 @@ import {
   OrganizationTable,
   PluginAccessGrantTable,
   PluginTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import type { PluginArchActorContext } from "../src/routes/org/plugin-system/access.js"
 
 process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
@@ -18,7 +18,7 @@ process.env.BETTER_AUTH_SECRET ??= "marketplace-seeding-test-secret-123456"
 process.env.BETTER_AUTH_URL ??= "http://127.0.0.1:8790"
 
 let db: typeof import("../src/db.js").db
-let eq: typeof import("@openwork-ee/den-db/drizzle").eq
+let eq: typeof import("@redrob-ee/den-db/drizzle").eq
 let store: typeof import("../src/routes/org/plugin-system/store.js")
 
 const organizationId = createDenTypeId("organization")
@@ -38,7 +38,7 @@ async function clearSeededRows() {
 beforeAll(async () => {
   const [dbModule, drizzleModule, storeModule] = await Promise.all([
     import("../src/db.js"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/routes/org/plugin-system/store.js"),
   ])
   db = dbModule.db

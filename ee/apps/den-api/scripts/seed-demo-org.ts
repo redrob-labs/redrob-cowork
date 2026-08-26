@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "@openwork-ee/den-db/drizzle"
+import { and, eq, inArray } from "@redrob-ee/den-db/drizzle"
 import {
   AuthUserTable,
   ConfigObjectAccessGrantTable,
@@ -16,8 +16,8 @@ import {
   PluginTable,
   TeamMemberTable,
   TeamTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { auth } from "../src/auth.js"
 import { db } from "../src/db.js"
 import { ensureDefaultDesktopPolicyForOrganization } from "../src/desktop-policies.js"
@@ -183,7 +183,7 @@ const demoPlugins: DemoPlugin[] = [
 
 function assertSafeDevTarget() {
   if (!env.devMode) {
-    throw new Error("Refusing to seed demo data unless OPENWORK_DEV_MODE=1.")
+    throw new Error("Refusing to seed demo data unless REDROB_DEV_MODE=1.")
   }
   if (env.dbMode !== "mysql") {
     throw new Error(`Refusing to seed demo data into DB_MODE=${env.dbMode}; use local MySQL dev mode.`)

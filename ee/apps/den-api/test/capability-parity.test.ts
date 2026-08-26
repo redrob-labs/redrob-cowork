@@ -1,7 +1,7 @@
 import { beforeAll, expect, test } from "bun:test"
 
-import { Tool } from "@openwork/codemode"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { Tool } from "@redrob/codemode"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { Effect } from "effect"
 import { Hono } from "hono"
 import type {

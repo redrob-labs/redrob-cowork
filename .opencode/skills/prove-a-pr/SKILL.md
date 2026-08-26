@@ -44,17 +44,17 @@ description: Prove a PR, prepare merge verification, publish all evidence, check
 ## Satisfy local fallback prerequisites
 
 ```bash
-pnpm --filter @openwork/types build
-pnpm --filter @openwork-ee/den-db build
-pnpm --filter @openwork/email build
+pnpm --filter @redrob/types build
+pnpm --filter @redrob-ee/den-db build
+pnpm --filter @redrob/email build
 pnpm dev:den:mysql
 ```
 
 - Local `server()` requires MySQL at `127.0.0.1:3306`; unbuilt workspace
   dependencies can make den-api imports fail.
-- If the checkout path contains spaces, set `OPENWORK_EVAL_SURFACES_DIR` to a
+- If the checkout path contains spaces, set `REDROB_EVAL_SURFACES_DIR` to a
   space-free path; node-gyp and electron-rebuild otherwise fail.
-- Set `OPENWORK_EVAL_E2E_TESTS=1` for app-driving E2E tests.
+- Set `REDROB_EVAL_E2E_TESTS=1` for app-driving E2E tests.
 
 ## Publish human verification
 

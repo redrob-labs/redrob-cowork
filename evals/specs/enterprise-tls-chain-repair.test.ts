@@ -4,8 +4,8 @@ import net from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
-import { startEgressLab } from "@openwork/labs";
+import { test } from "@redrob/testkit";
+import { startEgressLab } from "@redrob/labs";
 import { resolveSystemCaEnv } from "../../apps/desktop/electron/runtime.mjs";
 
 // The classic corporate misconfig: a private-CA HTTPS server that serves its
@@ -170,12 +170,12 @@ test("enterprise TLS chain repair unlocks exactly the sign-in-stamped activation
     true,
   );
 
-  // Claim 3 — kill switch: with OPENWORK_DISABLE_CHAIN_REPAIR=1 the same
+  // Claim 3 — kill switch: with REDROB_DISABLE_CHAIN_REPAIR=1 the same
   // stamped record must not repair anything and the fetch fails again.
   const disabled = await resolveCaEnvFromActivationRecord({
     bootstrapPath,
     rootPem: lab.rootPem,
-    parentEnv: { OPENWORK_DISABLE_CHAIN_REPAIR: "1" },
+    parentEnv: { REDROB_DISABLE_CHAIN_REPAIR: "1" },
   });
   expect(disabled.logs.some((line) => /chain repair disabled/.test(line))).toBe(true);
   expect(disabled.logs.some((line) => /chain repaired/.test(line))).toBe(false);
@@ -185,7 +185,7 @@ test("enterprise TLS chain repair unlocks exactly the sign-in-stamped activation
   expect(killSwitched.output).toMatch(chainErrorPattern);
   evidence.recordAssertionEvidence(
     "The kill switch keeps the broken chain broken",
-    `With OPENWORK_DISABLE_CHAIN_REPAIR=1 and the same activation record, the runtime logged "chain repair disabled", never logged "chain repaired", and the child fetch failed again with ${chainErrorPattern.exec(killSwitched.output)?.[0] ?? "a chain error"}; the exported bundle carried the root only.`,
+    `With REDROB_DISABLE_CHAIN_REPAIR=1 and the same activation record, the runtime logged "chain repair disabled", never logged "chain repaired", and the child fetch failed again with ${chainErrorPattern.exec(killSwitched.output)?.[0] ?? "a chain error"}; the exported bundle carried the root only.`,
     true,
   );
 

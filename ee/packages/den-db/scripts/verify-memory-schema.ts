@@ -11,7 +11,7 @@
  */
 import "../src/load-env.ts"
 import mysql from "mysql2/promise"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import {
   assertMemoryFulltextIndexExists,
   ensureMemoryFulltextIndex,

@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   denFetch,
   evalIn,
@@ -10,10 +10,10 @@ import {
   visibleText,
   waitFor,
   waitForText,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { app, needs, server, test } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { app, needs, server, test } from "@redrob/testkit";
 
 const REQUEST_TIMEOUT_MS = 10_000;
 const MODEL_TURN_TIMEOUT_MS = 5 * 60_000;
@@ -198,7 +198,7 @@ async function recordProposalScreenshot(desktop: Surface, claims: string[]): Pro
 }
 
 test("chat Automation proposals map Den providers and disclose a safe fallback", async ({ evidence, place }) => {
-  needs({ model: "tool-capable", optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ model: "tool-capable", optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   await using den = await server({ place });
   const orgId = await activeOrganizationId(den.admin);
@@ -214,7 +214,7 @@ test("chat Automation proposals map Den providers and disclose a safe fallback",
     timeoutMs: 120_000,
     label: "session composer",
   });
-  const evalModel = process.env.OPENWORK_EVAL_MODEL?.trim() ?? "";
+  const evalModel = process.env.REDROB_EVAL_MODEL?.trim() ?? "";
   const models = await readAvailableModels(desktop);
   const evalModelOption = models.find((model) =>
     model.selectable && (model.id === evalModel || model.id.endsWith(`/${evalModel}`))
@@ -276,11 +276,11 @@ test("chat Automation proposals map Den providers and disclose a safe fallback",
   const fallbackCard = await waitForProposalCard(desktop, fallbackName, "fallback", false);
   expect(fallbackCard.resolution).toBe("fallback");
   expect(fallbackCard.text).toContain("free starter model");
-  expect(fallbackCard.text).toContain("Runs with OpenCode Zen");
+  expect(fallbackCard.text).toContain("Runs with OpenCode");
   await recordProposalScreenshot(desktop, [
     `A Suggested Automation named ${fallbackName} is visible in the chat`,
     "An amber notice discloses that the unavailable proposed model will use the free starter model",
-    "The proposal says Runs with OpenCode Zen and no provider-unavailable failure is visible",
+    "The proposal says Runs with OpenCode and no provider-unavailable failure is visible",
   ]);
 
   await clickCreateAutomation(desktop, fallbackName);
@@ -294,14 +294,14 @@ test("chat Automation proposals map Den providers and disclose a safe fallback",
     "The fallback was disclosed and created with the free starter model",
     `${fallbackName} showed the fallback notice and was created as ${fallbackModel.providerId}/${fallbackModel.modelId}.`,
     fallbackCard.text.includes("free starter model")
-      && fallbackCard.text.includes("Runs with OpenCode Zen")
+      && fallbackCard.text.includes("Runs with OpenCode")
       && fallbackCreatedCard.createdId.length > 0
       && fallbackModel.providerId === "opencode"
       && fallbackModel.modelId === "big-pickle",
   );
   await recordProposalScreenshot(desktop, [
     `The ${fallbackName} proposal visibly says Automation created and active`,
-    "The created Automation says it runs with OpenCode Zen · Big Pickle",
+    "The created Automation says it runs with OpenCode · Big Pickle",
     "No provider-unavailable error or failed creation message is visible",
   ]);
 

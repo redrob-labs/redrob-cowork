@@ -11,13 +11,13 @@ import {
   provisionOrg,
   seedSessions,
   signIn,
-} from "@openwork/behaviors";
-import { desktop, freePort } from "@openwork/hosts";
+} from "@redrob/behaviors";
+import { desktop, freePort } from "@redrob/hosts";
 import { Effect, Exit, Scope } from "effect";
 import { createConnection } from "mysql2/promise";
 import { z } from "zod";
-import type { ProvisionedOrg } from "@openwork/behaviors";
-import type { DesktopHandle } from "@openwork/hosts";
+import type { ProvisionedOrg } from "@redrob/behaviors";
+import type { DesktopHandle } from "@redrob/hosts";
 import { app as bootApp } from "./desktop-app.ts";
 import type { App } from "./desktop-app.ts";
 import { defaultReuseAdmin, personDefaults, server } from "./den.ts";
@@ -28,13 +28,13 @@ import { resolvePlace, validateDatabaseName } from "./place.ts";
 import type { Place } from "./place.ts";
 import { defineWorld, worldTopologySchema } from "./topology.ts";
 import type { WorldDefinition, WorldOrg, WorldTopology } from "./topology.ts";
-import type { DenRef, DenSession } from "@openwork/behaviors";
+import type { DenRef, DenSession } from "@redrob/behaviors";
 
 const REPO_ROOT = fileURLToPath(new URL("../../../..", import.meta.url));
 const WORLDS_DIR = join(REPO_ROOT, "evals", "results", ".worlds");
 const RESULTS_DIR = join(REPO_ROOT, "evals", "results");
 const DEFAULT_LOCAL_MYSQL_URL = "mysql://root:password@127.0.0.1:3306";
-const SNAPSHOT_ENV_KEY = /^(DEN_|OPENWORK_)[A-Z0-9_]+$/;
+const SNAPSHOT_ENV_KEY = /^(DEN_|REDROB_)[A-Z0-9_]+$/;
 const SNAPSHOT_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const SNAPSHOT_MODEL = /^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,255}$/;
 const SNAPSHOT_FAULT = /^[a-z0-9][a-z0-9-]{0,127}$/;
@@ -234,7 +234,7 @@ function validateUntrustedSnapshot(snapshot: WorldSnapshot): void {
 
   for (const [key, value] of Object.entries(snapshot.topology.den.env ?? {})) {
     if (!SNAPSHOT_ENV_KEY.test(key)) {
-      rejectSnapshotField(`topology.den.env.${key}`, value, "environment keys must match ^(DEN_|OPENWORK_)[A-Z0-9_]+$");
+      rejectSnapshotField(`topology.den.env.${key}`, value, "environment keys must match ^(DEN_|REDROB_)[A-Z0-9_]+$");
     }
     if (value.includes("\0")) {
       rejectSnapshotField(`topology.den.env.${key}`, value, "environment values must not contain NUL bytes");

@@ -22,16 +22,16 @@ From a clean checkout of the exact branch under test:
 ```bash
 pnpm install --frozen-lockfile
 pnpm --dir evals install --frozen-lockfile
-pnpm --filter @openwork/types build
-pnpm --filter @openwork-ee/den-db build
-pnpm --filter @openwork/email build
+pnpm --filter @redrob/types build
+pnpm --filter @redrob-ee/den-db build
+pnpm --filter @redrob/email build
 pnpm dev:den:mysql
 ```
 
 ## Run the exact-head demo tape
 
 ```bash
-OPENWORK_EVAL_E2E_TESTS=1 pnpm evals:e2e remote-mcp-apps
+REDROB_EVAL_E2E_TESTS=1 pnpm evals:e2e remote-mcp-apps
 ```
 
 A valid required proof ends with one passing test, zero failed tests, zero

@@ -83,8 +83,8 @@ import {
 import { normalizeLoginEmail } from "./auth-login-options.js";
 import { getAuthBodyEmail, getSingleOrgEmailSignupPolicyViolation } from "./single-org-signup-policy.js";
 import { readInitialAdminBootstrapGrantFromBody } from "./initial-admin-bootstrap.js";
-import { createDenTypeId, normalizeDenTypeId } from "@openwork-ee/utils/typeid";
-import * as schema from "@openwork-ee/den-db/schema";
+import { createDenTypeId, normalizeDenTypeId } from "@redrob-ee/utils/typeid";
+import * as schema from "@redrob-ee/den-db/schema";
 import { apiKey } from "@better-auth/api-key";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { scim } from "@better-auth/scim";
@@ -93,7 +93,7 @@ import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { deleteSessionCookie } from "better-auth/cookies";
-import { and, eq, gt, sql } from "@openwork-ee/den-db/drizzle";
+import { and, eq, gt, sql } from "@redrob-ee/den-db/drizzle";
 import { emailOTP, jwt, organization } from "better-auth/plugins";
 
 const logger = appLogger.child({ component: "auth" });

@@ -7,7 +7,7 @@ import type {
   AutomationRunEventType,
   AutomationSchedule,
   AutomationUsage,
-} from "@openwork/types/automations"
+} from "@redrob/types/automations"
 import { compatJsonColumn, denTypeIdColumn, encryptedColumn, encryptedMediumTextColumn, timestamps } from "../columns"
 
 const encryptedJsonColumn = <TData>(name: string) => encryptedColumn<TData>(name, {

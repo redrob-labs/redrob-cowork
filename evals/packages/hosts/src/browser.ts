@@ -1,6 +1,6 @@
-import { attachSurface } from "@openwork/cdp";
+import { attachSurface } from "@redrob/cdp";
 import { resolveHost } from "./resolve.ts";
-import type { AttachedSurface, SurfaceHandle } from "@openwork/cdp";
+import type { AttachedSurface, SurfaceHandle } from "@redrob/cdp";
 import type { Host } from "./types.ts";
 
 const DEFAULT_TIMEOUT_MS = 60_000;

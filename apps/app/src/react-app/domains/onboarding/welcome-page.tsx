@@ -22,7 +22,6 @@ type WelcomePageProps = {
   onManualFolderChange?: (value: string) => void;
   onUseManualFolder?: () => void;
   showManualFolder?: boolean;
-  onTeamSignIn?: () => void;
   onJoinOrganization: () => void;
 };
 
@@ -35,7 +34,6 @@ export function WelcomePage({
   onManualFolderChange,
   onUseManualFolder,
   showManualFolder,
-  onTeamSignIn,
   onJoinOrganization,
 }: WelcomePageProps) {
   const { config: shellConfig } = useShellConfig();
@@ -98,31 +96,17 @@ export function WelcomePage({
               </div>
 
               <div className="mt-11 flex flex-col gap-3">
-                {onTeamSignIn ? (
-                  <Button
-                    type="button"
-                    size="lg"
-                    className="h-12 w-full text-[15px] font-semibold"
-                    onClick={onTeamSignIn}
-                    disabled={busy}
-                    data-testid="welcome-team-signin"
-                  >
-                    {t("welcome.sign_in_cloud")}
-                  </Button>
-                ) : null}
-
                 <Button
                   type="button"
                   size="lg"
-                  variant={onTeamSignIn ? "outline" : "default"}
-                  className="h-12 w-full text-[15px] font-medium"
+                  className="h-12 w-full text-[15px] font-semibold"
                   onClick={onGetStarted}
                   disabled={busy}
-                  data-testid="welcome-use-without-cloud"
+                  data-testid="welcome-get-started"
                 >
                   {busy
                     ? t("welcome.creating_workspace")
-                    : (getStartedLabel || t("welcome.use_without_cloud"))}
+                    : (getStartedLabel || t("welcome.get_started"))}
                 </Button>
 
                 <div className="pt-2">

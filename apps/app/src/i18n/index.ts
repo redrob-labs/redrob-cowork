@@ -54,6 +54,20 @@ export const isLanguage = (value: unknown): value is Language => {
 
 let localeValue: Language = "en";
 
+const localeListeners = new Set<() => void>();
+
+/**
+ * Subscribe to locale changes. Mirrors the theme store pattern in
+ * `@/app/theme` so components can re-render via `useSyncExternalStore` when
+ * the active language changes.
+ */
+export const subscribeToLocale = (onChange: () => void) => {
+  localeListeners.add(onChange);
+  return () => {
+    localeListeners.delete(onChange);
+  };
+};
+
 /**
  * Get current locale
  */
@@ -71,6 +85,7 @@ export const setLocale = (newLocale: Language) => {
     newLocale = "en";
   }
 
+  const changed = localeValue !== newLocale;
   localeValue = newLocale;
 
   if (typeof document !== "undefined") {
@@ -83,6 +98,12 @@ export const setLocale = (newLocale: Language) => {
       window.localStorage.setItem(LANGUAGE_PREF_KEY, newLocale);
     } catch (e) {
       console.warn("Failed to persist language preference:", e);
+    }
+  }
+
+  if (changed) {
+    for (const listener of localeListeners) {
+      listener();
     }
   }
 };

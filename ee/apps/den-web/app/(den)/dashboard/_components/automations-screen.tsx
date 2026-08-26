@@ -23,7 +23,7 @@ function statusTone(status: string) {
   return status === "failed" || status === "needs_attention" ? "bg-red-50 text-red-600" : status === "succeeded" || status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-600";
 }
 
-function scheduleLabel(schedule: import("@openwork/types/automations").AutomationSchedule) {
+function scheduleLabel(schedule: import("@redrob/types/automations").AutomationSchedule) {
   if (schedule.kind === "once") return `Once · ${new Date(schedule.at).toLocaleString()} · ${schedule.timezone}`;
   const time = `${String(schedule.hour).padStart(2, "0")}:${String(schedule.minute).padStart(2, "0")}`;
   if (schedule.kind === "daily") return `Daily · ${time} · ${schedule.timezone}`;

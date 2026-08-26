@@ -93,11 +93,11 @@ describe("buildCloudProviderConfig", () => {
       id: "lpr_openwork",
       source: "openwork",
       providerId: "openwork",
-      name: "OpenWork Models",
+      name: "Redrob Models",
       providerConfig: {
         npm: "@openrouter/ai-sdk-provider",
-        api: "https://inference.openworklabs.com/api/v1",
-        env: ["OPENWORK_API_KEY"],
+        api: "https://console.redrob.ai/api/v1",
+        env: ["REDROB_CLOUD_API_KEY"],
       },
       hasApiKey: true,
       models: [],
@@ -109,7 +109,7 @@ describe("buildCloudProviderConfig", () => {
 
     const config = buildCloudProviderConfig(provider);
     expect(config.models).toBe(undefined);
-    expect(config.name).toBe("OpenWork Models");
+    expect(config.name).toBe("Redrob Models");
   });
 
   test("keeps an empty models map for non-openwork cloud providers", () => {

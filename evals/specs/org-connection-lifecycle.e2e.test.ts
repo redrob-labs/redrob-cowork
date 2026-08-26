@@ -1,7 +1,7 @@
 import { expect, onTestFinished, test } from "vitest";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { startMockMcp } from "@openwork/labs";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { startMockMcp } from "@redrob/labs";
 import {
   clickButton,
   createAndSelectWorkspace,
@@ -19,15 +19,15 @@ import {
   waitForButtonGone,
   waitForText,
   createOrgConnection,
-} from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
+} from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
 
-const apiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = !e2eTestsEnabled
-  ? "organization connection lifecycle skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in"
+  ? "organization connection lifecycle skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in"
   : !apiUrl
-    ? "organization connection lifecycle skipped: set OPENWORK_EVAL_DEN_API_URL"
+    ? "organization connection lifecycle skipped: set REDROB_EVAL_DEN_API_URL"
     : "member connects, reconnects, and disconnects an organization OAuth connection";
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -101,21 +101,21 @@ async function waitForNotConnected(app: Surface, name: string): Promise<void> {
 test.skipIf(!apiUrl || !e2eTestsEnabled)(title, async () => {
   const den = {
     apiUrl,
-    webUrl: (process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim() || apiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, ""),
+    webUrl: (process.env.REDROB_EVAL_DEN_WEB_URL?.trim() || apiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, ""),
   };
   const admin = await signIn(den, {
-    email: process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-    password: process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+    email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
   });
   const member = await ensureMemberSession(den, admin, {
-    email: process.env.OPENWORK_EVAL_MEMBER_EMAIL?.trim() || "jordan.demo@acme.test",
-    password: process.env.OPENWORK_EVAL_MEMBER_PASSWORD?.trim() || "OpenWorkDemo123!",
+    email: process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "jordan.demo@acme.test",
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "OpenWorkDemo123!",
     name: "Jordan Demo",
-    markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+    markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
   await using mock = await startMockMcp({
-    port: Number(process.env.OPENWORK_EVAL_LIFECYCLE_MOCK_PORT ?? 3979),
-    publicUrl: process.env.OPENWORK_EVAL_LIFECYCLE_MOCK_PUBLIC_URL?.trim() || undefined,
+    port: Number(process.env.REDROB_EVAL_LIFECYCLE_MOCK_PORT ?? 3979),
+    publicUrl: process.env.REDROB_EVAL_LIFECYCLE_MOCK_PUBLIC_URL?.trim() || undefined,
   });
   await deleteConnectionsNamed(admin, "Meeting Notes ");
   const connection = await createOrgConnection(admin, {

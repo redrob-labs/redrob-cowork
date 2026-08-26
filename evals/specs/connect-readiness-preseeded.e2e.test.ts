@@ -1,8 +1,8 @@
 import { expect, onTestFinished } from "vitest";
-import { createOrgConnection, deleteConnection, denFetch, evalIn, go } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import type { Surface } from "@openwork/cdp";
+import { createOrgConnection, deleteConnection, denFetch, evalIn, go } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import type { Surface } from "@redrob/cdp";
 import {
   app,
   eventually,
@@ -12,13 +12,13 @@ import {
   readConnectState,
   server,
   test,
-} from "@openwork/testkit";
+} from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const remotePlacement = process.env.OPENWORK_EVAL_DAYTONA === "1" || Boolean(process.env.OPENWORK_EVAL_DEN_API_URL?.trim());
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const remotePlacement = process.env.REDROB_EVAL_DAYTONA === "1" || Boolean(process.env.REDROB_EVAL_DEN_API_URL?.trim());
 const mysqlOpen = remotePlacement || await localMysqlIsRunning();
 const title = !e2eTestsEnabled
-  ? "preseeded Connect readiness skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "preseeded Connect readiness skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !mysqlOpen
     ? "preseeded Connect readiness skipped — needs: MySQL on 127.0.0.1:3306 for local placement"
     : "bundled engine connects to preseeded organization skills and connections";
@@ -139,7 +139,7 @@ function healthIsReady(health: Record<string, unknown>): boolean {
 }
 
 test.skipIf(!e2eTestsEnabled || !mysqlOpen)(title, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   const run = Date.now();
   const skillName = `pr3806-connect-proof-${run}`;
   const connectionName = `PR3806 conn ${String(run).slice(-6)}`;

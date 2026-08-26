@@ -1,16 +1,16 @@
 import { expect, onTestFinished, test } from "vitest";
-import { denFetch, ensureMemberSession, evalIn, fill, signIn, waitFor } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
+import { denFetch, ensureMemberSession, evalIn, fill, signIn, waitFor } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
 
-const apiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
-const webUrl = process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
+const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
+const webUrl = process.env.REDROB_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
 const title = !apiUrl
-  ? "team access view skipped: set OPENWORK_EVAL_DEN_API_URL to a running Den API"
+  ? "team access view skipped: set REDROB_EVAL_DEN_API_URL to a running Den API"
   : !webUrl
-    ? "team access view skipped: set OPENWORK_EVAL_DEN_WEB_URL to a running Den Web"
+    ? "team access view skipped: set REDROB_EVAL_DEN_WEB_URL to a running Den Web"
     : "team members can inspect effective plugin access while non-members are denied";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -73,9 +73,9 @@ function pluginIdForAccessItem(item: Record<string, unknown>): string {
 
 test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const den = { apiUrl, webUrl };
-  const password = process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
   const admin = await signIn(den, {
-    email: process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
+    email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
     password,
   });
   const orgId = await organizationId(admin);
@@ -120,12 +120,12 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     }).catch(() => undefined);
   });
 
-  const caseyEmail = process.env.OPENWORK_EVAL_CREATOR_EMAIL?.trim() || "casey.spec@acme.test";
+  const caseyEmail = process.env.REDROB_EVAL_CREATOR_EMAIL?.trim() || "casey.spec@acme.test";
   caseySession = await ensureMemberSession(den, admin, {
     email: caseyEmail,
-    password: process.env.OPENWORK_EVAL_MEMBER_PASSWORD?.trim() || password,
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || password,
     name: "Casey Spec",
-    markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+    markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
   const casey = caseySession;
   await selectOrganization(casey, orgId);
@@ -203,10 +203,10 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
   ).toBe(true);
 
   const nova = await ensureMemberSession(den, admin, {
-    email: process.env.OPENWORK_EVAL_MEMBER_EMAIL?.trim() || "nova.spec@acme.test",
-    password: process.env.OPENWORK_EVAL_MEMBER_PASSWORD?.trim() || password,
+    email: process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "nova.spec@acme.test",
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || password,
     name: "Nova Spec",
-    markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+    markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
   await selectOrganization(nova, orgId);
   const novaAccess = await denFetch(nova, `/v1/teams/${encodeURIComponent(teamId)}/plugin-access`, {

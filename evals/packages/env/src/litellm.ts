@@ -10,11 +10,11 @@ import {
   defaultDaytonaExec,
   deleteSandboxes,
   execInSandbox,
-} from "@openwork/hosts";
+} from "@redrob/hosts";
 import type { Server, ServerResponse } from "node:http";
 import { SkipError } from "./needs.ts";
 import type { Place } from "./place.ts";
-import type { DaytonaExec, DaytonaExecResult } from "@openwork/hosts";
+import type { DaytonaExec, DaytonaExecResult } from "@redrob/hosts";
 
 const IMAGE = "ghcr.io/berriai/litellm:v1.97.0@sha256:468c25f35f3e5ec4e414974f00deab93337b1b4d9953cabcfd3722e59415f834";
 const COMMAND_TIMEOUT_MS = 180_000;

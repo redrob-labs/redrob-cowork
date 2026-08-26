@@ -7,7 +7,7 @@ import { readRuntimeMcpConfig } from "./runtime-opencode-config-store.js";
 import { externalFetch } from "./server-fetch.js";
 import type { ServerConfig } from "./types.js";
 
-const OPENWORK_CLOUD_MCP_NAME = "openwork-cloud";
+const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
 const AUTOMATION_INDEX_URI = "automation://index.json";
 // Automations change as they run, so this snapshot expires quickly. It still
 // spares one Den round trip per message in a burst of conversation.
@@ -83,7 +83,7 @@ export async function readOpenWorkAutomationCatalog(
     const serverCloud = await readConnectCloudMcp(config);
     if (serverCloud) candidates.push(serverCloud);
     for (const workspace of config.workspaces) {
-      const cloud = await readRuntimeMcpConfig(config, workspace.id, OPENWORK_CLOUD_MCP_NAME);
+      const cloud = await readRuntimeMcpConfig(config, workspace.id, REDROB_CLOUD_MCP_NAME);
       if (cloud) candidates.push(cloud);
     }
     const seen = new Set<string>();

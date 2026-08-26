@@ -15,7 +15,7 @@ Published releases are available as an OCI Helm chart:
 
 ```bash
 helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
-  --version REPLACE_OPENWORK_VERSION \
+  --version REPLACE_REDROB_VERSION \
   -f values.prod.yaml
 ```
 
@@ -25,7 +25,7 @@ Create a values file for the target environment:
 
 ```yaml
 image:
-  tag: "REPLACE_OPENWORK_VERSION"
+  tag: "REPLACE_REDROB_VERSION"
 
 config:
   tenancy:

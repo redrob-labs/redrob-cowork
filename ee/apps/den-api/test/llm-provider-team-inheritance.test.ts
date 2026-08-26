@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { serializeSignedCookie } from "better-call"
 
 const API_ORIGIN = "http://127.0.0.1:8790"
@@ -40,8 +40,8 @@ function providerId(payload: unknown) {
 
 let app: typeof import("../src/app.js").default
 let db: typeof import("../src/db.js").db
-let schema: typeof import("@openwork-ee/den-db/schema")
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
 
 const ownerUserId = createDenTypeId("user")
 const futureUserId = createDenTypeId("user")
@@ -64,7 +64,7 @@ beforeAll(async () => {
   seedRequiredEnv()
   mock.restore()
 
-  const realDb = (await import("@openwork-ee/den-db")).createDenDb({
+  const realDb = (await import("@redrob-ee/den-db")).createDenDb({
     databaseUrl: process.env.DATABASE_URL,
     mode: "mysql",
   }).db
@@ -73,8 +73,8 @@ beforeAll(async () => {
   const [appModule, dbModule, schemaModule, drizzleModule] = await Promise.all([
     import("../src/app.js"),
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
   ])
   app = appModule.default
   db = dbModule.db

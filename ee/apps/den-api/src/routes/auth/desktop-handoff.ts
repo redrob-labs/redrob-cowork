@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto"
-import { and, desc, eq, gt, isNull } from "@openwork-ee/den-db/drizzle"
-import { AuthSessionTable, AuthUserTable, DaytonaSandboxTable, DesktopHandoffGrantTable, WorkerTable } from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+import { and, desc, eq, gt, isNull } from "@redrob-ee/den-db/drizzle"
+import { AuthSessionTable, AuthUserTable, DaytonaSandboxTable, DesktopHandoffGrantTable, WorkerTable } from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 import type { Hono } from "hono"
 import { describeRoute } from "hono-openapi"
 import { z } from "zod"
@@ -17,7 +17,7 @@ import { CLOUD_INSTANCE_BACKEND } from "../../workers/cloud-constants.js"
 
 const createGrantSchema = z.object({
   next: z.string().trim().max(128).optional().describe("Optional continuation hint for handoff clients."),
-  desktopScheme: z.string().trim().max(32).optional().describe("Optional desktop URL scheme to use when building the OpenWork deep link."),
+  desktopScheme: z.string().trim().max(32).optional().describe("Optional desktop URL scheme to use when building the Redrob Work deep link."),
   returnUrl: z.string().trim().max(2048).optional().describe("Optional HTTPS OpenWork Cloud web return URL. Accepted only for multi-organization Cloud instances after server-side origin validation."),
 }).meta({ ref: "DesktopHandoffGrantCreateBody" })
 
@@ -122,7 +122,7 @@ function isWebAppHost(hostname: string) {
     return true
   }
 
-  return normalized === "app.openworklabs.com"
+  return normalized === "app.redrob.io"
     || normalized === "app.openwork.software"
     || normalized.startsWith("app.")
     // Cloud Run hostnames serve the den-web frontend, which only exposes the
@@ -190,10 +190,10 @@ function buildOpenworkDeepLink(input: {
   grant: string
   denBaseUrl: string
 }) {
-  const requestedScheme = input.scheme?.trim() || "openwork"
+  const requestedScheme = input.scheme?.trim() || "redrob"
   const scheme = /^[a-z][a-z0-9+.-]*$/i.test(requestedScheme)
     ? requestedScheme
-    : "openwork"
+    : "redrob"
   const url = new URL(`${scheme}://den-auth`)
   url.searchParams.set("grant", input.grant)
   url.searchParams.set("denBaseUrl", input.denBaseUrl)
@@ -449,7 +449,7 @@ export function registerDesktopAuthRoutes<T extends { Variables: AuthContextVari
       grant,
       expiresAt: expiresAt.toISOString(),
       openworkUrl: buildOpenworkDeepLink({
-        scheme: input.desktopScheme || "openwork",
+        scheme: input.desktopScheme || "redrob",
         grant,
         denBaseUrl,
       }),

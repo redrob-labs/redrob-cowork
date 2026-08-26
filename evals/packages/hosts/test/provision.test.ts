@@ -69,9 +69,9 @@ test("connector E2E test env rendering and parsing round-trip the provision cont
   assert.deepEqual(parseConnectorE2eTestEnv(content), facts);
   assert.match(content, /^# provisioned for org-connector-two-members — generated .*; ref=feat\/eval-connector-two-members$/m);
   assert.match(content, /^# provision-created=den,desktop-a$/m);
-  assert.match(content, /OPENWORK_EVAL_MODEL=big-pickle/);
-  const missingApi = content.split("\n").filter((line) => !line.startsWith("OPENWORK_EVAL_DEN_API_URL=")).join("\n");
-  assert.throws(() => parseConnectorE2eTestEnv(missingApi), /OPENWORK_EVAL_DEN_API_URL/);
+  assert.match(content, /REDROB_EVAL_MODEL=big-pickle/);
+  const missingApi = content.split("\n").filter((line) => !line.startsWith("REDROB_EVAL_DEN_API_URL=")).join("\n");
+  assert.throws(() => parseConnectorE2eTestEnv(missingApi), /REDROB_EVAL_DEN_API_URL/);
 });
 
 test("server sandbox names are unique within the same CI process and second", () => {
@@ -130,7 +130,7 @@ test("rendered values are shell-quoted, because the env file is meant to be sour
     created: [],
   });
 
-  assert(content.includes(`OPENWORK_EVAL_DAYTONA_SANDBOX_A='$(touch /tmp/pwned); echo it'"'"'s-here'`));
+  assert(content.includes(`REDROB_EVAL_DAYTONA_SANDBOX_A='$(touch /tmp/pwned); echo it'"'"'s-here'`));
   assert.equal(parseConnectorE2eTestEnv(content).sandboxA, nasty);
 });
 

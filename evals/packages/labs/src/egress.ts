@@ -527,7 +527,7 @@ export function opensslCertificateCommands(input: OpenSslCommandInput): OpenSslC
 }
 
 function opensslBinary(env: NodeJS.ProcessEnv = process.env): string {
-  return env.OPENWORK_EVAL_OPENSSL?.trim() || "openssl";
+  return env.REDROB_EVAL_OPENSSL?.trim() || "openssl";
 }
 
 export function opensslFlavor(env: NodeJS.ProcessEnv = process.env): Promise<OpenSslFlavor> {

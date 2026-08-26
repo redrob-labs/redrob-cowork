@@ -1,12 +1,12 @@
 extends: ./electron-builder.base.yml
-appId: com.differentai.openwork
+appId: io.redrob.work
 productName: Redrob Work Enterprise
 extraMetadata:
   openworkDistribution: enterprise
 protocols:
-  - name: OpenWork Enterprise
+  - name: Redrob Work Enterprise
     schemes:
-      - openwork
+      - redrob
 publish:
   - provider: github
     owner: different-ai
@@ -14,5 +14,5 @@ publish:
     releaseType: release
     channel: enterprise
 linux:
-  executableName: openwork-enterprise
-artifactName: openwork-enterprise-${os}-${arch}-${version}.${ext}
+  executableName: redrob-enterprise
+artifactName: redrob-enterprise-${os}-${arch}-${version}.${ext}

@@ -1,9 +1,9 @@
 import { chmod, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { timed } from "@openwork/timeline";
+import { timed } from "@redrob/timeline";
 import { control, evalIn, waitFor } from "./desktop.ts";
-import type { Surface } from "@openwork/cdp";
+import type { Surface } from "@redrob/cdp";
 
 /**
  * The desktop signs in by opening the system browser and finishing there. To
@@ -98,11 +98,11 @@ export async function signInInBrowser(
     // Signed in means the outcome page, not a submit in flight ("Working...").
     await waitFor(browser, `(() => {
       const text = document.body?.innerText ?? "";
-      // Plain web sign-in redirects into the dashboard; handoff shows "signed in" or the openwork:// code.
+      // Plain web sign-in redirects into the dashboard; handoff shows "signed in" or the redrob:// code.
       if (location.pathname.startsWith("/dashboard")) return true;
       if (/signed in/i.test(text)) return true;
       return [...document.querySelectorAll("input")]
-        .some((input) => (input.value ?? "").startsWith("openwork://"));
+        .some((input) => (input.value ?? "").startsWith("redrob://"));
     })()`, { timeoutMs: 60_000, label: "den sign-in outcome" });
   }, credentials.email);
 }
@@ -113,7 +113,7 @@ export async function signInInBrowser(
  * Observed shape: the app opens `<den>/?mode=sign-up&desktopAuth=1&desktopScheme=openwork`,
  * the person signs in there, and Den shows "You're signed in" with an
  * "Open OpenWork" button plus a readonly input holding the sign-in code —
- * the full `openwork://den-auth?grant=…&denBaseUrl=…` URL a person would
+ * the full `redrob://den-auth?grant=…&denBaseUrl=…` URL a person would
  * copy-paste into the app. Reading that input keeps the grant the real one
  * Den issued for this session.
  */
@@ -121,9 +121,9 @@ export async function readHandoffDeepLink(browser: Surface, { timeoutMs = 60_000
   const found = await waitFor(browser, `(() => {
     const fromInput = [...document.querySelectorAll("input")]
       .map((input) => input.value)
-      .find((value) => typeof value === "string" && value.startsWith("openwork://") && value.includes("grant="));
+      .find((value) => typeof value === "string" && value.startsWith("redrob://") && value.includes("grant="));
     if (fromInput) return fromInput;
-    const fromAnchor = [...document.querySelectorAll('a[href^="openwork://"]')]
+    const fromAnchor = [...document.querySelectorAll('a[href^="redrob://"]')]
       .map((anchor) => anchor.getAttribute("href"))
       .find((href) => typeof href === "string" && href.includes("grant="));
     if (fromAnchor) return fromAnchor;
@@ -137,7 +137,7 @@ export async function readHandoffDeepLink(browser: Surface, { timeoutMs = 60_000
 /**
  * Complete the hop back into the desktop.
  *
- * A real OS dispatches `openwork://den-auth?grant=…` to the app. A container has
+ * A real OS dispatches `redrob://den-auth?grant=…` to the app. A container has
  * no protocol handler registered, so we hand the grant to the product's own
  * documented entry point for exactly this situation (`auth.exchange-grant`,
  * described in-product as signing in with a handoff grant). The grant itself is

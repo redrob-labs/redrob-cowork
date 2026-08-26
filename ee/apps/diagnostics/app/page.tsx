@@ -1,7 +1,7 @@
 import { diagnosticsConfig, validateProductionConfig } from "../src/config"
 import { listWireHistory } from "../src/history-store"
 import type { WireBody, WireExchange } from "../src/contracts"
-import { egressDiagnosticRunSchema } from "@openwork/types/den/egress-diagnostics"
+import { egressDiagnosticRunSchema } from "@redrob/types/den/egress-diagnostics"
 
 export const dynamic = "force-dynamic"
 

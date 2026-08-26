@@ -1,4 +1,4 @@
-import { waitFor } from "@openwork/behaviors";
+import { waitFor } from "@redrob/behaviors";
 import { org } from "../seed.ts";
 import { webTab } from "../surfaces.ts";
 import { shot } from "./shot.ts";

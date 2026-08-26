@@ -1,4 +1,4 @@
-import type { Surface } from "@openwork/cdp";
+import type { Surface } from "@redrob/cdp";
 import { clickButton, currentHash, evalIn, fill, waitFor, waitForText } from "./desktop.ts";
 
 export interface LocalWorkspaceFacts {

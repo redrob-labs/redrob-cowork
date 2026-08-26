@@ -3,11 +3,11 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
-import { electronProfilePaths } from "@openwork/hosts";
+import { electronProfilePaths } from "@redrob/hosts";
 import { readConnectStateFile } from "../src/state.ts";
-import type { CdpClient, Surface } from "@openwork/cdp";
+import type { CdpClient, Surface } from "@redrob/cdp";
 
-const MISSING = "__OPENWORK_TESTKIT_MISSING__";
+const MISSING = "__REDROB_TESTKIT_MISSING__";
 
 function surface(hostKind: string, profileDir?: string, sandboxId?: string): Surface {
   const client: CdpClient = {

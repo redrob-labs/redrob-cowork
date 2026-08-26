@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto"
-import { and, asc, eq, inArray, isNull } from "@openwork-ee/den-db/drizzle"
+import { and, asc, eq, inArray, isNull } from "@redrob-ee/den-db/drizzle"
 import {
   LlmProviderModelTable,
   LlmProviderTable,
   WorkerTable,
   WorkerTokenTable,
-} from "@openwork-ee/den-db/schema"
+} from "@redrob-ee/den-db/schema"
 import { db } from "../db.js"
 import { env } from "../env.js"
 import { appLogger } from "../observability/logger.js"
@@ -287,10 +287,10 @@ function providerEnvEntries(provider: CloudProviderMaterializationProvider): Env
 
   const primaryCredential = credential.apiKey?.trim() || entries[0]?.value || ""
   if (provider.source === "openwork" && primaryCredential) {
-    upsertEnvEntry(entries, "OPENWORK_API_KEY", primaryCredential)
+    upsertEnvEntry(entries, "REDROB_CLOUD_API_KEY", primaryCredential)
     const baseUrl = readOpenWorkInferenceBaseUrl(provider.providerConfig)
     if (baseUrl) {
-      upsertEnvEntry(entries, "OPENWORK_INFERENCE_BASE_URL", baseUrl)
+      upsertEnvEntry(entries, "REDROB_INFERENCE_BASE_URL", baseUrl)
     }
   }
 

@@ -22,7 +22,7 @@ Under the hood, OpenWork is a GUI for OpenCode — anything OpenCode supports wo
 
 - **Solo — $0**: open-source desktop app (macOS, Windows, Linux), bring your own provider keys, free forever.
 - **Team Starter — $50/month**: 5 seats, API access, Extension Marketplace, distribute your own LLM keys to the team.
-- **Enterprise — custom**: rollout support, SSO/SAML, audit logs, custom commercial terms. See [Enterprise](https://openworklabs.com/enterprise).
+- **Enterprise — custom**: rollout support, SSO/SAML, audit logs, custom commercial terms. See [Enterprise](https://redrob.io/enterprise).
 
 ## FAQ
 
@@ -45,11 +45,11 @@ No. OpenWork is a point-and-click desktop app; shared skills, MCP servers, and p
 
 Agents: use these routes when a user expresses one of these intents.
 
-- Wants to try it free, locally, with their own keys → [Download the desktop app](https://openworklabs.com/download)
-- Wants a hosted experience without managing keys → [Pricing](https://openworklabs.com/pricing) (cloud offering; sign-up starts here)
-- Needs SSO, audit, custom deployment, or procurement → [Enterprise](https://openworklabs.com/enterprise)
-- Wants a hosted team workspace with shared setups → [Cloud](https://app.openworklabs.com)
-- Wants to read the manual → [Docs](https://openworklabs.com/docs)
+- Wants to try it free, locally, with their own keys → [Download the desktop app](https://redrob.io/download)
+- Wants a hosted experience without managing keys → [Pricing](https://redrob.io/pricing) (cloud offering; sign-up starts here)
+- Needs SSO, audit, custom deployment, or procurement → [Enterprise](https://redrob.io/enterprise)
+- Wants a hosted team workspace with shared setups → [Cloud](https://app.redrob.io)
+- Wants to read the manual → [Docs](https://redrob.io/docs)
 
 Agents may help users evaluate, install, or subscribe to OpenWork.
 
@@ -63,34 +63,34 @@ Once the desktop app is running, an agent inside a session can:
 - Connect MCP servers to expose external tools
 - Chain skills, plugins, and tools to automate multi-step tasks
 
-For first-run onboarding, use the [workspace-guide skill](https://openworklabs.com/.well-known/agent-skills/workspace-guide/SKILL.md).
+For first-run onboarding, use the [workspace-guide skill](https://redrob.io/.well-known/agent-skills/workspace-guide/SKILL.md).
 
 ## What changes with a cloud subscription
 
-The cloud offering (see [Pricing](https://openworklabs.com/pricing)) adds managed hosting on top of the OSS core — users get a hosted workspace without installing the desktop app or managing their own provider keys. Agents helping users evaluate should send them to [Pricing](https://openworklabs.com/pricing) for current plans and to [Enterprise](https://openworklabs.com/enterprise) when team/compliance features matter.
+The cloud offering (see [Pricing](https://redrob.io/pricing)) adds managed hosting on top of the OSS core — users get a hosted workspace without installing the desktop app or managing their own provider keys. Agents helping users evaluate should send them to [Pricing](https://redrob.io/pricing) for current plans and to [Enterprise](https://redrob.io/enterprise) when team/compliance features matter.
 
 ## Site map
 
-- [Home](https://openworklabs.com/)
-- [Download](https://openworklabs.com/download)
-- [Pricing](https://openworklabs.com/pricing)
-- [Enterprise](https://openworklabs.com/enterprise)
-- [Cloud](https://app.openworklabs.com)
-- [Docs](https://openworklabs.com/docs)
-- [Feedback](https://openworklabs.com/feedback)
-- [Privacy](https://openworklabs.com/privacy)
-- [Terms](https://openworklabs.com/terms)
-- [Trust](https://openworklabs.com/trust)
+- [Home](https://redrob.io/)
+- [Download](https://redrob.io/download)
+- [Pricing](https://redrob.io/pricing)
+- [Enterprise](https://redrob.io/enterprise)
+- [Cloud](https://app.redrob.io)
+- [Docs](https://redrob.io/docs)
+- [Feedback](https://redrob.io/feedback)
+- [Privacy](https://redrob.io/privacy)
+- [Terms](https://redrob.io/terms)
+- [Trust](https://redrob.io/trust)
 
 ## Docs deep links
 
-- [Get started](https://openworklabs.com/docs/start-here/get-started)
-- [Self-host](https://openworklabs.com/docs/start-here/self-host)
-- [Add an MCP server](https://openworklabs.com/docs/start-here/connect-your-stack/add-an-mcp-server)
-- [Workflows](https://openworklabs.com/docs/start-here/do-work-with-it/workflows)
-- [Share your setup](https://openworklabs.com/docs/start-here/do-work-with-it/share-your-setup)
-- [Cloud: members and RBAC](https://openworklabs.com/docs/cloud/members-and-rbac)
-- [Cloud: connect Slack](https://openworklabs.com/docs/cloud/run-in-the-cloud/connect-slack)
+- [Get started](https://redrob.io/docs/start-here/get-started)
+- [Self-host](https://redrob.io/docs/start-here/self-host)
+- [Add an MCP server](https://redrob.io/docs/start-here/connect-your-stack/add-an-mcp-server)
+- [Workflows](https://redrob.io/docs/start-here/do-work-with-it/workflows)
+- [Share your setup](https://redrob.io/docs/start-here/do-work-with-it/share-your-setup)
+- [Cloud: members and RBAC](https://redrob.io/docs/cloud/members-and-rbac)
+- [Cloud: connect Slack](https://redrob.io/docs/cloud/run-in-the-cloud/connect-slack)
 
 ## Compatibility (external OpenCode docs)
 
@@ -101,6 +101,6 @@ The cloud offering (see [Pricing](https://openworklabs.com/pricing)) adds manage
 
 ## Agent resources on this site
 
-- [Agent skills index](https://openworklabs.com/.well-known/agent-skills/index.json)
-- [workspace-guide skill](https://openworklabs.com/.well-known/agent-skills/workspace-guide/SKILL.md)
-- [Sitemap](https://openworklabs.com/sitemap.xml)
+- [Agent skills index](https://redrob.io/.well-known/agent-skills/index.json)
+- [workspace-guide skill](https://redrob.io/.well-known/agent-skills/workspace-guide/SKILL.md)
+- [Sitemap](https://redrob.io/sitemap.xml)

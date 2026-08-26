@@ -3,22 +3,22 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { OPENWORK_CLOUD_EXPECTED_TOOLS, OPENWORK_CLOUD_PLUGIN_CANARIES } from "./cloud-mcp-health.js";
+import { REDROB_CLOUD_EXPECTED_TOOLS, REDROB_CLOUD_PLUGIN_CANARIES } from "./cloud-mcp-health.js";
 import { writeRuntimeOpencodeConfig } from "./runtime-opencode-config-store.js";
 import { startServer } from "./server.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
 
 const CLIENT_TOKEN = "owt_connect_state_client";
 const HOST_TOKEN = "owt_connect_state_host";
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 const stops: Array<() => void | Promise<void>> = [];
 const roots: string[] = [];
 
 afterEach(async () => {
   while (stops.length) await stops.pop()?.();
   while (roots.length) await rm(roots.pop() ?? "", { recursive: true, force: true });
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 async function createRoot(prefix: string): Promise<string> {
@@ -64,7 +64,7 @@ function startMockOpencode() {
         }
         return Response.json({ id, jsonrpc: "2.0", result: {} });
       }
-      if (url.pathname === "/experimental/tool/ids") return Response.json([...OPENWORK_CLOUD_EXPECTED_TOOLS, ...OPENWORK_CLOUD_PLUGIN_CANARIES]);
+      if (url.pathname === "/experimental/tool/ids") return Response.json([...REDROB_CLOUD_EXPECTED_TOOLS, ...REDROB_CLOUD_PLUGIN_CANARIES]);
       return Response.json({ code: "not_found" }, { status: 404 });
     },
   });
@@ -77,7 +77,7 @@ function workspace(id: string, path: string, baseUrl: string): WorkspaceInfo {
 }
 
 async function startOpenwork(workspaces: WorkspaceInfo[], runtimeRoot: string): Promise<{ base: string; config: ServerConfig }> {
-  process.env.OPENWORK_RUNTIME_DB = join(runtimeRoot, "runtime.sqlite");
+  process.env.REDROB_RUNTIME_DB = join(runtimeRoot, "runtime.sqlite");
   const config: ServerConfig = {
     host: "127.0.0.1",
     port: 0,

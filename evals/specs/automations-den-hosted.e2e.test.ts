@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   clickButton,
   createOrgConnection,
@@ -8,9 +8,9 @@ import {
   visibleText,
   waitFor,
   waitForText,
-} from "@openwork/behaviors";
-import { app, mcpMock, needs, server, test } from "@openwork/testkit";
-import type { Surface } from "@openwork/cdp";
+} from "@redrob/behaviors";
+import { app, mcpMock, needs, server, test } from "@redrob/testkit";
+import type { Surface } from "@redrob/cdp";
 
 /**
  * CORE JOURNEY: a person creates an active Automation in the main OpenWork
@@ -30,7 +30,7 @@ import type { Surface } from "@openwork/cdp";
 
 const requirements = {
   model: "tool-capable" as const,
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_AUTOMATIONS_E2E_TEST"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_AUTOMATIONS_E2E_TEST"],
 };
 
 async function setField(surface: Surface, label: string, value: string): Promise<void> {

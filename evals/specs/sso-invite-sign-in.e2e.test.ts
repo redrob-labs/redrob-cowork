@@ -1,15 +1,15 @@
 import { expect } from "vitest";
-import { localMysqlIsRunning, server, test } from "@openwork/testkit";
-import { denFetch, evalIn, provisionOrg, waitFor } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
-import { startMockIdpLab } from "@openwork/labs";
+import { localMysqlIsRunning, server, test } from "@redrob/testkit";
+import { denFetch, evalIn, provisionOrg, waitFor } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
+import { startMockIdpLab } from "@redrob/labs";
 
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !localPlacement
-  ? "SSO invite sign-in skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+  ? "SSO invite sign-in skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
   : !mysqlOpen
     ? "SSO invite sign-in skipped — needs MySQL on 127.0.0.1:3306"
     : "an invited person whose company uses SSO is sent to their identity provider, not asked for a password";

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Check, KeyRound } from "lucide-react";
-import { DownloadOpenWorkCard, type DownloadCardInstallers } from "@openwork/ui/react";
+import { DownloadOpenWorkCard, type DownloadCardInstallers } from "@redrob/ui/react";
 import { DenBadge } from "../../_components/ui/badge";
 import { DenChoiceCard } from "../../_components/ui/choice-card";
 import { DenSectionHeader } from "../../_components/ui/section-header";
@@ -118,12 +118,12 @@ export function MarketplaceOnboardingScreen({
       <section className="mt-12 grid gap-5">
         <DenSectionHeader
           align="center"
-          title="Then bring your own keys, or use OpenWork Models"
+          title="Then bring your own keys, or use Redrob Models"
           description={
             modelsLoading
-              ? "Checking whether OpenWork Models are already on…"
+              ? "Checking whether Redrob Models are already on…"
               : modelsEnabled
-                ? "OpenWork Models are on for this workspace."
+                ? "Redrob Models are on for this workspace."
                 : "Pick one now, change it whenever — both live under Models."
           }
           action={
@@ -138,7 +138,7 @@ export function MarketplaceOnboardingScreen({
           <DenChoiceCard
             testId="onboarding-choice-openwork-models"
             icon={<OpenWorkMark />}
-            title="OpenWork Models"
+            title="Redrob Models"
             subtitle="No API keys, nothing to configure"
             badge={<DenBadge tone="info">Recommended</DenBadge>}
             description="Hand-picked frontier and open models, billed per member. Turn it on and everyone has models in the app immediately."

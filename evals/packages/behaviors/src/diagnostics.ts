@@ -4,11 +4,11 @@ import tls from "node:tls";
 import { fileURLToPath } from "node:url";
 import type { DetailedPeerCertificate } from "node:tls";
 
-import { parseClientHelloVersions } from "@openwork/labs";
-import type { ClientHelloParseResult, EgressLabHandle, EgressLabProfile } from "@openwork/labs";
-import type { TlsFacts, TlsVersionFacts } from "@openwork/matchers";
+import { parseClientHelloVersions } from "@redrob/labs";
+import type { ClientHelloParseResult, EgressLabHandle, EgressLabProfile } from "@redrob/labs";
+import type { TlsFacts, TlsVersionFacts } from "@redrob/matchers";
 
-export type { TlsFacts, TlsVersionFacts } from "@openwork/matchers";
+export type { TlsFacts, TlsVersionFacts } from "@redrob/matchers";
 
 export type DiagnosticVerdict = {
   profile: EgressLabProfile;
@@ -905,7 +905,7 @@ const { X509Certificate } = require("node:crypto");
 const fs = require("node:fs");
 let tls;
 try { tls = require("node:tls"); } catch { tls = {}; }
-const needle = (process.env.OPENWORK_TLS_REPRO_CA_MATCH || "OpenWork Egress Lab").toLowerCase();
+const needle = (process.env.REDROB_TLS_REPRO_CA_MATCH || "OpenWork Egress Lab").toLowerCase();
 function countMatching(certs) {
   let count = 0;
   for (const pem of certs || []) {

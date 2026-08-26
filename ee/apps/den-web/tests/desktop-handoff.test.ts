@@ -6,7 +6,7 @@ import {
 } from "../app/(den)/_lib/desktop-handoff";
 
 test("preserves the complete OpenWork desktop handoff URL", () => {
-  const openworkUrl = "openwork://den-auth?grant=one-time-code&denBaseUrl=https%3A%2F%2Fapi.example.test";
+  const openworkUrl = "redrob://den-auth?grant=one-time-code&denBaseUrl=https%3A%2F%2Fapi.example.test";
   const payload = { grant: "one-time-code", openworkUrl };
 
   expect(getDesktopHandoffOpenworkUrl(payload)).toBe(openworkUrl);
@@ -16,7 +16,7 @@ test("preserves the complete OpenWork desktop handoff URL", () => {
 test("extracts a one-time grant from an OpenWork desktop handoff", () => {
   expect(
     getDesktopGrant(
-      "openwork://den-auth?grant=one-time-code&baseUrl=https%3A%2F%2Fapi.example.test"
+      "redrob://den-auth?grant=one-time-code&baseUrl=https%3A%2F%2Fapi.example.test"
     )
   ).toBe("one-time-code");
 });
@@ -24,7 +24,7 @@ test("extracts a one-time grant from an OpenWork desktop handoff", () => {
 test("rejects missing and malformed desktop handoffs", () => {
   expect(
     getDesktopGrant(
-      "openwork://den-auth?baseUrl=https%3A%2F%2Fapi.example.test"
+      "redrob://den-auth?baseUrl=https%3A%2F%2Fapi.example.test"
     )
   ).toBeNull();
   expect(getDesktopGrant("not a url")).toBeNull();

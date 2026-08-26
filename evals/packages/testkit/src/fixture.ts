@@ -1,5 +1,5 @@
-import { test as evidenceTest } from "@openwork/test-evidence/vitest";
-import { SkipError, resolvePlace } from "@openwork/env";
+import { test as evidenceTest } from "@redrob/test-evidence/vitest";
+import { SkipError, resolvePlace } from "@redrob/env";
 import { setBriefTestRegistrar } from "./brief-internal.ts";
 
 const fixtureTest = evidenceTest.extend<{ place: ReturnType<typeof resolvePlace> }>({

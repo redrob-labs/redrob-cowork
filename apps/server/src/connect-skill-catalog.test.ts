@@ -15,13 +15,13 @@ import { writeRuntimeOpencodeConfig } from "./runtime-opencode-config-store.js";
 import type { ServerConfig } from "./types.js";
 
 const roots: string[] = [];
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 
 afterEach(async () => {
   resetOpenWorkConnectSkillCatalogCacheForTests();
   while (roots.length) await rm(roots.pop() ?? "", { recursive: true, force: true });
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 function skillIndexFetcher(capability = "skill:skill_customer_briefing"): (url: string, init?: RequestInit) => Promise<Response> {
@@ -57,7 +57,7 @@ function skillIndexFetcher(capability = "skill:skill_customer_briefing"): (url: 
 async function serverConfig(): Promise<ServerConfig> {
   const root = await mkdtemp(join(tmpdir(), "openwork-connect-skills-"));
   roots.push(root);
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   const workspace = {
     id: "ws_legacy",
     name: "Legacy",

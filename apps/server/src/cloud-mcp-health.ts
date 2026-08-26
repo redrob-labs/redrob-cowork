@@ -10,23 +10,23 @@ import { externalFetch } from "./server-fetch.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
 import { validateMcpConfig } from "./validators.js";
 
-export const OPENWORK_CLOUD_MCP_NAME = "openwork-cloud";
-export const OPENWORK_CLOUD_EXPECTED_TOOLS = [
+export const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
+export const REDROB_CLOUD_EXPECTED_TOOLS = [
   "openwork-cloud_search_capabilities",
   "openwork-cloud_execute_capability",
 ] satisfies string[];
-const OPENWORK_CLOUD_DIRECT_TOOL_NAMES = [
+const REDROB_CLOUD_DIRECT_TOOL_NAMES = [
   "search_capabilities",
   "execute_capability",
 ] satisfies string[];
-export const OPENWORK_CLOUD_PLUGIN_CANARIES = [
+export const REDROB_CLOUD_PLUGIN_CANARIES = [
   "openwork_docs_search",
   "openwork_query",
 ] satisfies string[];
 
 const POLL_DELAYS_MS = [0, 250, 750, 1500, 3000];
 function engineProbeTimeoutMs(): number {
-  return Number(process.env.OPENWORK_CLOUD_MCP_PROBE_TIMEOUT_MS ?? "") || 5_000;
+  return Number(process.env.REDROB_CLOUD_MCP_PROBE_TIMEOUT_MS ?? "") || 5_000;
 }
 
 type WorkspaceOpencodeClient = ReturnType<typeof createOpencodeClient>;
@@ -214,7 +214,7 @@ export type CloudMcpHealth = {
   };
   desired: {
     present: boolean;
-    name: typeof OPENWORK_CLOUD_MCP_NAME;
+    name: typeof REDROB_CLOUD_MCP_NAME;
     revision: string | null;
     config: RedactedCloudMcpConfig | null;
     token: CloudMcpTokenHealth;
@@ -851,7 +851,7 @@ async function readDesiredState(input: {
   connectCatalogEnabled?: boolean;
 }): Promise<CloudMcpDesiredState> {
   const runtimeConfig = await readRuntimeOpencodeConfig(input.config, input.workspace.id);
-  const entry = runtimeMcpMap(runtimeConfig)[OPENWORK_CLOUD_MCP_NAME];
+  const entry = runtimeMcpMap(runtimeConfig)[REDROB_CLOUD_MCP_NAME];
   if (!entry) {
     const metadata = defaultDesiredMetadata(null, input.connectCatalogEnabled ?? false);
     return { present: false, revision: null, config: null, redactedConfig: null, metadata };
@@ -877,19 +877,19 @@ function locationParams(directory: string | null): { directory?: string } {
 }
 
 function expectedTools(): string[] {
-  return [...OPENWORK_CLOUD_EXPECTED_TOOLS];
+  return [...REDROB_CLOUD_EXPECTED_TOOLS];
 }
 
 function expectedDirectToolNames(): string[] {
-  return [...OPENWORK_CLOUD_DIRECT_TOOL_NAMES];
+  return [...REDROB_CLOUD_DIRECT_TOOL_NAMES];
 }
 
 function prefixedCloudToolId(name: string): string {
-  return `${OPENWORK_CLOUD_MCP_NAME}_${name}`;
+  return `${REDROB_CLOUD_MCP_NAME}_${name}`;
 }
 
 function expectedCanaries(): string[] {
-  return [...OPENWORK_CLOUD_PLUGIN_CANARIES];
+  return [...REDROB_CLOUD_PLUGIN_CANARIES];
 }
 
 function splitPresentMissing(ids: string[], expected: string[]): ToolSnapshot {
@@ -1678,7 +1678,7 @@ function engineInspectionFromStatuses(statuses: Record<string, McpStatus>): Clou
     .slice(0, 50);
   return {
     checked: true,
-    cloudPresent: Boolean(statuses[OPENWORK_CLOUD_MCP_NAME]),
+    cloudPresent: Boolean(statuses[REDROB_CLOUD_MCP_NAME]),
     serverCount: Object.keys(statuses).length,
     servers,
   };
@@ -1748,12 +1748,12 @@ async function inspectOpenworkCloud(input: {
   }
 
   const engineInspection = engineInspectionFromStatuses(statusResult.data ?? {});
-  const cloudStatus = statusResult.data?.[OPENWORK_CLOUD_MCP_NAME];
+  const cloudStatus = statusResult.data?.[REDROB_CLOUD_MCP_NAME];
   if (cloudStatus) {
     input.refreshRegistrationFromLiveStatus?.(
       input.config,
       input.workspace,
-      OPENWORK_CLOUD_MCP_NAME,
+      REDROB_CLOUD_MCP_NAME,
       input.desiredConfig,
       cloudStatus.status,
       "error" in cloudStatus && typeof cloudStatus.error === "string" ? cloudStatus.error : null,
@@ -2034,7 +2034,7 @@ async function readOpenworkCloudMcpHealthInternal(
   const desired = await readDesiredState({ config: input.config, workspace: input.workspace, directory: input.directory });
   let delivery = cloudMcpDeliveryState.snapshot(input.workspace, input.directory, desired.revision);
   const toolDenies = desired.present
-    ? await diagnoseMcpToolDenies(input.workspace.path, OPENWORK_CLOUD_MCP_NAME, expectedTools())
+    ? await diagnoseMcpToolDenies(input.workspace.path, REDROB_CLOUD_MCP_NAME, expectedTools())
     : [];
   const failures: CloudMcpFailure[] = [];
 
@@ -2132,7 +2132,7 @@ async function readOpenworkCloudMcpHealthInternal(
     },
     desired: {
       present: desired.present,
-      name: OPENWORK_CLOUD_MCP_NAME,
+      name: REDROB_CLOUD_MCP_NAME,
       revision: desired.revision,
       config: desired.redactedConfig,
       token: desired.metadata.token,
@@ -2188,7 +2188,7 @@ async function persistDesiredConfig(config: ServerConfig, workspaceId: string, d
     ...current,
     mcp: {
       ...runtimeMcpMap(current),
-      [OPENWORK_CLOUD_MCP_NAME]: desiredConfig,
+      [REDROB_CLOUD_MCP_NAME]: desiredConfig,
     },
   }));
   // Connect is server/account-scoped: keep a host-level copy for catalog + skill injection.
@@ -2230,12 +2230,12 @@ async function pollConnected(input: {
       lastFailure = statusResult.failure;
       continue;
     }
-    const cloudStatus = statusResult.data?.[OPENWORK_CLOUD_MCP_NAME];
+    const cloudStatus = statusResult.data?.[REDROB_CLOUD_MCP_NAME];
     if (cloudStatus) {
       input.refreshRegistrationFromLiveStatus?.(
         input.config,
         input.workspace,
-        OPENWORK_CLOUD_MCP_NAME,
+        REDROB_CLOUD_MCP_NAME,
         input.desiredConfig,
         cloudStatus.status,
       );
@@ -2341,7 +2341,7 @@ export async function reconcileOpenworkCloudMcp(input: {
   }
 
   cloudMcpDeliveryState.markRegistering(input.workspace, input.directory, desiredRevision);
-  const registration = await input.registerRuntimeMcp(input.config, input.workspace, [OPENWORK_CLOUD_MCP_NAME], { throwOnFailure: false });
+  const registration = await input.registerRuntimeMcp(input.config, input.workspace, [REDROB_CLOUD_MCP_NAME], { throwOnFailure: false });
   if (registration.failures.length > 0) {
     const registrationError = registrationFailure(registration.failures);
     cloudMcpDeliveryState.markFailed(input.workspace, input.directory, desiredRevision, registrationError);
@@ -2385,7 +2385,7 @@ export async function reconcilePersistedOpenworkCloudMcp(input: {
   trigger?: string;
 }): Promise<CloudMcpHealth> {
   const runtimeConfig = await readRuntimeOpencodeConfig(input.config, input.workspace.id);
-  const desiredConfig = runtimeMcpMap(runtimeConfig)[OPENWORK_CLOUD_MCP_NAME];
+  const desiredConfig = runtimeMcpMap(runtimeConfig)[REDROB_CLOUD_MCP_NAME];
   if (!desiredConfig) {
     return readOpenworkCloudMcpHealth(input);
   }
@@ -2455,7 +2455,7 @@ export async function refreshOpenworkCloudMcpEngine(input: {
   });
 
   const runtimeConfig = await readRuntimeOpencodeConfig(input.config, input.workspace.id);
-  const desiredConfig = runtimeMcpMap(runtimeConfig)[OPENWORK_CLOUD_MCP_NAME];
+  const desiredConfig = runtimeMcpMap(runtimeConfig)[REDROB_CLOUD_MCP_NAME];
   if (!desiredConfig) {
     return finish(false, await readOpenworkCloudMcpHealth({ ...input, probe: true }), "desired_missing");
   }
@@ -2464,7 +2464,7 @@ export async function refreshOpenworkCloudMcpEngine(input: {
   try {
     const opencode = input.createWorkspaceOpencodeClient(input.config, input.workspace);
     const result = await withEngineProbeTimeout(() => opencode.mcp.disconnect({
-      name: OPENWORK_CLOUD_MCP_NAME,
+      name: REDROB_CLOUD_MCP_NAME,
       ...locationParams(input.directory),
     }));
     steps.push({

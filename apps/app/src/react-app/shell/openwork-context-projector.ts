@@ -1,14 +1,14 @@
 import type {
   OpenworkAffordanceDescriptor,
   OpenworkProviderRef,
-} from "@openwork/types/openwork-affordance";
+} from "@redrob/types/openwork-affordance";
 import type {
   OpenworkConversationLayout,
   OpenworkContextSnapshot,
   OpenworkPanelTab,
   OpenworkResourceDescriptor,
   OpenworkScreen,
-} from "@openwork/types/openwork-context";
+} from "@redrob/types/openwork-context";
 
 import type { PanelTabStore } from "../domains/session/panel/panel-tab-store";
 import type { WorkbenchSnapshot } from "../domains/session/chat/workbench-store";

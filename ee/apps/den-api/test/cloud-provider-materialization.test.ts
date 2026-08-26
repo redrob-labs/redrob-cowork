@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { beforeAll, describe, expect, test } from "bun:test"
 import type { CloudProviderMaterializationProvider } from "../src/llm/cloud-provider-materialization.js"
 
@@ -209,14 +209,14 @@ function makeInstance(input: {
         return jsonResponse({ error: "env_write_failed" }, 500)
       }
       const persistableInternalKeys = new Set([
-        "OPENWORK_API_KEY",
-        "OPENWORK_MODELS_API_KEY",
-        "OPENWORK_INFERENCE_BASE_URL",
-        "OPENWORK_MODELS_BASE_URL",
+        "REDROB_CLOUD_API_KEY",
+        "REDROB_MODELS_API_KEY",
+        "REDROB_INFERENCE_BASE_URL",
+        "REDROB_MODELS_BASE_URL",
       ])
       const hasReservedEntry = bodyEntries(body).some((entry) => (
         typeof entry.key === "string"
-        && /^(OPENWORK_|OPENCODE_)/.test(entry.key)
+        && /^(REDROB_|OPENCODE_)/.test(entry.key)
         && !persistableInternalKeys.has(entry.key)
       ))
       if (hasReservedEntry) {

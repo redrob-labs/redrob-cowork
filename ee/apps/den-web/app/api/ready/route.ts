@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { joinBaseUrl, readBaseUrlEnv } from "@openwork/types/url";
-import { denUrls } from "@openwork-ee/utils";
+import { joinBaseUrl, readBaseUrlEnv } from "@redrob/types/url";
+import { denUrls } from "@redrob-ee/utils";
 
 import { denWebLogger } from "../../../observability/runtime-logger";
 

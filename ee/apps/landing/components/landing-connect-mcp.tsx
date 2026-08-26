@@ -25,8 +25,8 @@ import {
 } from "./openwork-connect-installer-config";
 import type { OpenWorkConnectClientId } from "./openwork-connect-installer-config";
 
-const DOCS_URL = "https://openworklabs.com/docs/cloud/run-in-the-cloud/cloud-mcp#connect-mcp-install-opencode";
-const SIGNUP_URL = "https://app.openworklabs.com?mode=sign-up";
+const DOCS_URL = "https://redrob.io/docs/cloud/run-in-the-cloud/cloud-mcp#connect-mcp-install-opencode";
+const SIGNUP_URL = "https://app.redrob.io?mode=sign-up";
 
 type CopyMethod = "clipboard" | "execCommand" | "none";
 type ClientId = OpenWorkConnectClientId;

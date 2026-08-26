@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import { useCallback, useMemo, useState } from "react";
-import { installConfigSchema, parseInstallLinkInput } from "@openwork/install-config";
+import { installConfigSchema, parseInstallLinkInput } from "@redrob/install-config";
 
 import { clearDenSession, createDenClient, readDenBootstrapConfig, readDenSettings, setDenBootstrapConfig } from "@/app/lib/den";
 import { parseManualAuthInput } from "@/app/lib/manual-auth-input";

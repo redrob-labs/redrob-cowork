@@ -36,14 +36,14 @@ function serverConfig(root: string): ServerConfig {
 
 async function withWorkspace(fn: (input: { root: string; config: ServerConfig }) => Promise<void>) {
   const root = await mkdtemp(join(tmpdir(), "openwork-extensions-export-"));
-  const previousDb = process.env.OPENWORK_RUNTIME_DB;
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  const previousDb = process.env.REDROB_RUNTIME_DB;
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   try {
     await mkdir(join(root, ".git"), { recursive: true });
     await fn({ root, config: serverConfig(root) });
   } finally {
-    if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-    else process.env.OPENWORK_RUNTIME_DB = previousDb;
+    if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+    else process.env.REDROB_RUNTIME_DB = previousDb;
     await rm(root, { recursive: true, force: true });
   }
 }

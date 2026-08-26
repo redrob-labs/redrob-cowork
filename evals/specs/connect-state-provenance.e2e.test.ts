@@ -8,21 +8,21 @@ import {
   readConnectState,
   server,
   test,
-} from "@openwork/testkit";
+} from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !e2eTestsEnabled
-  ? "Connect state provenance skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "Connect state provenance skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !localPlacement
-    ? "Connect state provenance skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+    ? "Connect state provenance skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
     : !mysqlOpen
       ? "Connect state provenance skipped — needs MySQL on 127.0.0.1:3306"
       : "fresh-profile Connect state distinguishes not configured from explicit organization policy";
 
 test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   await using den = await server({
     place,

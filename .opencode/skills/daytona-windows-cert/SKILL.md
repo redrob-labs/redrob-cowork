@@ -12,7 +12,7 @@ runtimes use the operating system trust path.
 
 Use this as the Windows companion to `daytona-electron-test`. For executable
 end-to-end or PR verdict evidence, use an app-driving `.e2e.test.ts` test with
-`@openwork/testkit`; custom VNC screenshots are supplementary. Reuse the repo
+`@redrob/testkit`; custom VNC screenshots are supplementary. Reuse the repo
 support assets instead of copying their logic: `scripts/support/setup-openwork-tls-repro.ps1`,
 `scripts/support/openwork-doctor.ps1`, and `docs/support/enterprise-network-doctor.md`.
 
@@ -211,7 +211,7 @@ daytona exec "$SANDBOX_ID" -- cmd /c 'copy C:\ow\openwork\ca-probe.js C:\ow\ca-p
 const { X509Certificate } = require("node:crypto");
 const tls = require("node:tls");
 
-const needle = (process.env.OPENWORK_TLS_REPRO_CA_MATCH || "OpenWork TLS Repro").toLowerCase();
+const needle = (process.env.REDROB_TLS_REPRO_CA_MATCH || "OpenWork TLS Repro").toLowerCase();
 
 function countMatchingSubjects(certificates) {
   let count = 0;
@@ -282,15 +282,15 @@ captures above remain supplementary setup and debugging evidence.
 The real Windows userData folder is:
 
 ```text
-C:\Users\<User>\AppData\Roaming\com.differentai.openwork
+C:\Users\<User>\AppData\Roaming\io.redrob.work
 ```
 
 It is **not** `C:\Users\<User>\AppData\Roaming\OpenWork`. Because `exec` runs as
 SYSTEM, inspect the interactive user path explicitly:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- cmd /c 'dir "C:\Users\Administrator\AppData\Roaming\com.differentai.openwork\system-ca-bundle.pem"'
-daytona exec "$SANDBOX_ID" -- cmd /c 'findstr /c:"OpenWork TLS Repro" "C:\Users\Administrator\AppData\Roaming\com.differentai.openwork\system-ca-bundle.pem"'
+daytona exec "$SANDBOX_ID" -- cmd /c 'dir "C:\Users\Administrator\AppData\Roaming\io.redrob.work\system-ca-bundle.pem"'
+daytona exec "$SANDBOX_ID" -- cmd /c 'findstr /c:"OpenWork TLS Repro" "C:\Users\Administrator\AppData\Roaming\io.redrob.work\system-ca-bundle.pem"'
 ```
 
 Known gotcha: `system-ca-bundle.pem` is written once at first launch and then
@@ -304,7 +304,7 @@ usually does not bite customers.
   payload:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- cmd /c 'dir "C:\Users\Administrator\AppData\Roaming\com.differentai.openwork"'
+daytona exec "$SANDBOX_ID" -- cmd /c 'dir "C:\Users\Administrator\AppData\Roaming\io.redrob.work"'
 ```
 
 - Pipes and `|` inside `daytona exec ... -- powershell -Command '...'` can be

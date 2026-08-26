@@ -1,9 +1,9 @@
 import { expect } from "vitest";
-import { captureOpenedUrls, clickButton, evalIn, fill, waitFor, waitForText } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { captureOpenedUrls, clickButton, evalIn, fill, waitFor, waitForText } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * The invite points at localhost so the external open the app performs stays
@@ -14,7 +14,7 @@ const INVITE_URL = "http://localhost:59991/join-org?invite=inv_demo123";
 const INVITE_ORIGIN = "http://localhost:59991";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -41,8 +41,8 @@ test(title, async ({ evidence }) => {
   const doors = await evalIn(app, `(() => {
     const join = document.querySelector('[data-testid="welcome-join-org"]');
     return {
+      getStarted: Boolean(document.querySelector('[data-testid="welcome-get-started"]')),
       signIn: Boolean(document.querySelector('[data-testid="welcome-team-signin"]')),
-      useWithoutCloud: Boolean(document.querySelector('[data-testid="welcome-use-without-cloud"]')),
       join: (join?.textContent ?? "").replace(/\\s+/g, " ").trim(),
       onPremLink: document.body.innerText.includes("Using OpenWork on-premises?"),
     };
@@ -51,15 +51,18 @@ test(title, async ({ evidence }) => {
     throw new Error(`Welcome door facts had an unexpected shape: ${JSON.stringify(doors)}`);
   }
 
-  expect(doors.signIn).toBe(true);
-  expect(doors.useWithoutCloud).toBe(true);
+  // Redrob-only onboarding: the cloud-account sign-in door was removed. The
+  // welcome page offers Get started (create workspace) plus the join-org door;
+  // the Redrob API-key step is presented after workspace creation.
+  expect(doors.getStarted).toBe(true);
+  expect(doors.signIn).toBe(false);
   expect(doors.join).toContain("Join your organization");
   expect(doors.join).toContain("Paste your invite link, install link, or server URL");
   expect(doors.onPremLink).toBe(false);
   evidence.recordAssertionEvidence(
-    "Welcome offers three doors and no separate on-premises server link",
-    `signIn=${String(doors.signIn)}; useWithoutCloud=${String(doors.useWithoutCloud)}; join=${doors.join}; onPremLink=${String(doors.onPremLink)}`,
-    doors.signIn === true && doors.useWithoutCloud === true
+    "Welcome offers Get started and Join your organization, with no cloud sign-in door",
+    `getStarted=${String(doors.getStarted)}; signIn=${String(doors.signIn)}; join=${doors.join}; onPremLink=${String(doors.onPremLink)}`,
+    doors.getStarted === true && doors.signIn === false
       && doors.join.includes("Paste your invite link, install link, or server URL")
       && doors.onPremLink === false,
   );
@@ -68,7 +71,7 @@ test(title, async ({ evidence }) => {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
       "The Welcome to OpenWork heading is visible",
-      "Sign in to OpenWork Cloud and Use Without Cloud are offered",
+      "A Get started action is offered and there is no Sign in to Cloud door",
       "Join your organization says to paste an invite link, install link, or server URL",
       "The page does not say Using OpenWork on-premises",
     ]);
@@ -95,7 +98,7 @@ test(title, async ({ evidence }) => {
   await waitForText(app, "Connected to openwork.acme.test. Sign in to continue.", { timeoutMs: 20_000 });
   const savedBaseUrl = await evalIn(
     app,
-    `window.__OPENWORK_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
+    `window.__REDROB_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
     { awaitPromise: true },
   );
   expect(savedBaseUrl).toBe("https://openwork.acme.test");
@@ -121,7 +124,7 @@ test(title, async ({ evidence }) => {
   await waitForText(app, "Trust this organization server?", { timeoutMs: 20_000 });
   const unchangedBaseUrl = await evalIn(
     app,
-    `window.__OPENWORK_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
+    `window.__REDROB_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
     { awaitPromise: true },
   );
   expect(unchangedBaseUrl).toBe("https://openwork.acme.test");
@@ -130,7 +133,7 @@ test(title, async ({ evidence }) => {
 
   const inviteBaseUrl = await evalIn(
     app,
-    `window.__OPENWORK_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
+    `window.__REDROB_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
     { awaitPromise: true },
   );
   expect(inviteBaseUrl).toBe(INVITE_ORIGIN);

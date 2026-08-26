@@ -1,21 +1,21 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { rm } from "node:fs/promises";
 import { expect, onTestFinished } from "vitest";
-import { clickButton, createAndSelectWorkspace, createOrgConnection, denFetch, evalIn, waitFor } from "@openwork/behaviors";
-import { connect, debuggerUrlFor, evaluate, listTargets, navigate } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { chrome, desktop } from "@openwork/hosts";
-import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
+import { clickButton, createAndSelectWorkspace, createOrgConnection, denFetch, evalIn, waitFor } from "@redrob/behaviors";
+import { connect, debuggerUrlFor, evaluate, listTargets, navigate } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { chrome, desktop } from "@redrob/hosts";
+import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
 import { buildGeneratedArtifactViewInWorker } from "../../ee/apps/den-api/src/generated-artifact-view-builder.js";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1"
-  && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
+  && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !e2eTestsEnabled
-  ? "Remote MCP Apps skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "Remote MCP Apps skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !localPlacement
-    ? "Remote MCP Apps skipped — needs local placement without OPENWORK_EVAL_DEN_API_URL"
+    ? "Remote MCP Apps skipped — needs local placement without REDROB_EVAL_DEN_API_URL"
     : !mysqlOpen
       ? "Remote MCP Apps skipped — needs MySQL on 127.0.0.1:3306"
       : "standard MCP Apps refresh after connection changes while standalone URL Apps remain unavailable";
@@ -371,7 +371,7 @@ function contentsFrom(result: Record<string, unknown>) {
 }
 
 test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout: 360_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   process.env.DEN_REMOTE_MCP_APPS_ENABLED = "true";
 
   let standardMcpCalls = 0;
@@ -818,15 +818,15 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
   const desktopProfileDir = `/tmp/openwork-remote-mcp-apps-profile-${Date.now()}`;
   let desktopApp = await desktop({
     name: "remote-mcp-apps",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
-    profileDir: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? undefined : desktopProfileDir,
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    profileDir: process.env.REDROB_EVAL_CDP_URL?.trim() ? undefined : desktopProfileDir,
     env: {
       ANTHROPIC_API_KEY: "",
       OPENAI_API_KEY: "",
       OPENROUTER_API_KEY: "",
       GOOGLE_GENERATIVE_AI_API_KEY: "",
-      OPENWORK_API_KEY: "",
-      OPENWORK_INFERENCE_BASE_URL: "",
+      REDROB_CLOUD_API_KEY: "",
+      REDROB_INFERENCE_BASE_URL: "",
     },
   });
   onTestFinished(async () => {
@@ -1154,7 +1154,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
   await evalIn(desktopApp, "location.reload(); true");
   expect(await waitForMountedProjectAtlas(desktopApp, undefined, 30_000)).toBe(true);
 
-  if (!process.env.OPENWORK_EVAL_CDP_URL?.trim()) {
+  if (!process.env.REDROB_EVAL_CDP_URL?.trim()) {
     const persistedSessionHash = String(await evalIn(desktopApp, "location.hash"));
     expect(persistedSessionHash).toContain("/session/");
     await desktopApp.stop();
@@ -1166,8 +1166,8 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
         OPENAI_API_KEY: "",
         OPENROUTER_API_KEY: "",
         GOOGLE_GENERATIVE_AI_API_KEY: "",
-        OPENWORK_API_KEY: "",
-        OPENWORK_INFERENCE_BASE_URL: "",
+        REDROB_CLOUD_API_KEY: "",
+        REDROB_INFERENCE_BASE_URL: "",
       },
     });
     await waitFor(desktopApp, "Boolean(window.__openworkControl)", { timeoutMs: 30_000, label: "restarted Desktop control" });

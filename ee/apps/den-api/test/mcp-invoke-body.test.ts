@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { beforeAll, expect, test } from "bun:test"
 import { Hono } from "hono"
 import { z } from "zod"
@@ -88,8 +88,8 @@ function createOrganizationApp() {
 }
 
 test("normalizeToolBody parses JSON-encoded string bodies into objects", () => {
-  expect(invokeModule.normalizeToolBody('{"email":"ben+demogods@openworklabs.com","role":"member"}')).toEqual({
-    email: "ben+demogods@openworklabs.com",
+  expect(invokeModule.normalizeToolBody('{"email":"ben+demogods@redrob.io","role":"member"}')).toEqual({
+    email: "ben+demogods@redrob.io",
     role: "member",
   })
   expect(invokeModule.normalizeToolBody('  [{"a":1}]  ')).toEqual([{ a: 1 }])
@@ -110,12 +110,12 @@ test("invitation POST forwarded with an object body passes route validation", as
     env: {},
     operation: inviteOperation,
     principal,
-    toolInput: { body: { email: "ben+demogods@openworklabs.com", role: "member" } },
+    toolInput: { body: { email: "ben+demogods@redrob.io", role: "member" } },
   })
 
   expect(result.isError).toBe(false)
   expect(JSON.parse(result.content[0]?.text ?? "")).toEqual({
-    received: { email: "ben+demogods@openworklabs.com", role: "member" },
+    received: { email: "ben+demogods@redrob.io", role: "member" },
   })
 })
 
@@ -147,7 +147,7 @@ test("read-only MCP principals cannot invoke write operations", async () => {
     env: {},
     operation: inviteOperation,
     principal: createPrincipal(["mcp:read"]),
-    toolInput: { body: { email: "ben+demogods@openworklabs.com", role: "member" } },
+    toolInput: { body: { email: "ben+demogods@redrob.io", role: "member" } },
   })
 
   expect(result.isError).toBe(true)
@@ -198,12 +198,12 @@ test("invitation POST forwarded with a JSON-encoded string body no longer fails 
     env: {},
     operation: inviteOperation,
     principal,
-    toolInput: { body: '{"email":"ben+demogods@openworklabs.com","role":"member"}' },
+    toolInput: { body: '{"email":"ben+demogods@redrob.io","role":"member"}' },
   })
 
   expect(result.isError).toBe(false)
   expect(JSON.parse(result.content[0]?.text ?? "")).toEqual({
-    received: { email: "ben+demogods@openworklabs.com", role: "member" },
+    received: { email: "ben+demogods@redrob.io", role: "member" },
   })
 })
 

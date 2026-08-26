@@ -3,20 +3,20 @@ import { join } from "node:path";
 import { openworkPluginPath } from "./openwork-extensions-plugin-path.js";
 
 function withPluginDir(value: string | undefined, fn: () => void) {
-  const previous = process.env.OPENWORK_EXTENSIONS_PLUGIN_DIR;
+  const previous = process.env.REDROB_EXTENSIONS_PLUGIN_DIR;
   if (value === undefined) {
-    delete process.env.OPENWORK_EXTENSIONS_PLUGIN_DIR;
+    delete process.env.REDROB_EXTENSIONS_PLUGIN_DIR;
   } else {
-    process.env.OPENWORK_EXTENSIONS_PLUGIN_DIR = value;
+    process.env.REDROB_EXTENSIONS_PLUGIN_DIR = value;
   }
 
   try {
     fn();
   } finally {
     if (previous === undefined) {
-      delete process.env.OPENWORK_EXTENSIONS_PLUGIN_DIR;
+      delete process.env.REDROB_EXTENSIONS_PLUGIN_DIR;
     } else {
-      process.env.OPENWORK_EXTENSIONS_PLUGIN_DIR = previous;
+      process.env.REDROB_EXTENSIONS_PLUGIN_DIR = previous;
     }
   }
 }
@@ -30,7 +30,7 @@ function restoreResourcesPath(previous: string | undefined) {
 }
 
 describe("openworkPluginPath", () => {
-  test("prefers OPENWORK_EXTENSIONS_PLUGIN_DIR", () => {
+  test("prefers REDROB_EXTENSIONS_PLUGIN_DIR", () => {
     withPluginDir("/opt/openwork/opencode-plugins", () => {
       const resourcesPath = join("/Applications", "OpenWork.app", "Contents", "Resources");
       const previousResourcesPath = process.resourcesPath;

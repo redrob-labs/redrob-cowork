@@ -1,6 +1,6 @@
 import type { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 import {
-  OPENWORK_CLOUD_MCP_NAME,
+  REDROB_CLOUD_MCP_NAME,
   readOpenworkCloudMcpHealth,
   reconcileOpenworkCloudMcp,
   refreshOpenworkCloudMcpEngine,
@@ -72,7 +72,7 @@ function assertStrictBody(body: Record<string, unknown>, workspace: WorkspaceInf
   if (typeof body.workspaceId === "string" && body.workspaceId.trim() !== workspace.id) {
     throw new ApiError(400, "workspace_id_mismatch", "workspaceId must match the route workspace");
   }
-  if (typeof body.name === "string" && body.name.trim() !== OPENWORK_CLOUD_MCP_NAME) {
+  if (typeof body.name === "string" && body.name.trim() !== REDROB_CLOUD_MCP_NAME) {
     throw new ApiError(400, "invalid_mcp_name", "Only openwork-cloud can be reconciled by this endpoint");
   }
 }

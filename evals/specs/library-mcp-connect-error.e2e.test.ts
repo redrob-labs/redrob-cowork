@@ -1,10 +1,10 @@
 import { expect } from "vitest";
-import { evalIn, waitFor } from "@openwork/behaviors";
-import { app, eventually, mcpMock, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { evalIn, waitFor } from "@redrob/behaviors";
+import { app, eventually, mcpMock, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_LOCAL_MANAGED_MCP"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_LOCAL_MANAGED_MCP"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -129,7 +129,7 @@ test(title, async ({ evidence, place }) => {
     label: "OAuth on this device fields",
   });
   await waitFor(desktop, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").trim();
     const token = String(info?.ownerToken ?? info?.clientToken ?? "").trim();
     return Boolean(baseUrl && token);
@@ -182,7 +182,7 @@ test(title, async ({ evidence, place }) => {
   );
 
   const absent = await evalIn(desktop, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
     const token = String(info?.ownerToken ?? info?.clientToken ?? "");
     if (!baseUrl || !token) return { ok: false, error: "Local server credentials unavailable" };
@@ -247,7 +247,7 @@ test(title, async ({ evidence, place }) => {
 
   const pending = await eventually(async () => {
     const value = await evalIn(desktop, `(async () => {
-      const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+      const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
       const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
       const token = String(info?.ownerToken ?? info?.clientToken ?? "");
       if (!baseUrl || !token) return { ok: false, error: "Local server credentials unavailable" };
@@ -270,7 +270,7 @@ test(title, async ({ evidence, place }) => {
 
   if (pending.status === "needs_auth") {
     const started = await evalIn(desktop, `(async () => {
-      const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+      const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
       const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
       const token = String(info?.ownerToken ?? info?.clientToken ?? "");
       if (!baseUrl || !token) return { ok: false, error: "Local server credentials unavailable" };
@@ -301,7 +301,7 @@ test(title, async ({ evidence, place }) => {
 
   const connected = await eventually(async () => {
     const value = await evalIn(desktop, `(async () => {
-      const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+      const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
       const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
       const token = String(info?.ownerToken ?? info?.clientToken ?? "");
       if (!baseUrl || !token) return { ok: false };

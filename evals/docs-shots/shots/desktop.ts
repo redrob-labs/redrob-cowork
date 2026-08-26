@@ -1,5 +1,5 @@
-import { clickButton, denFetch, waitFor } from "@openwork/behaviors";
-import { connect, debuggerUrlFor, evaluate, listTargets } from "@openwork/cdp";
+import { clickButton, denFetch, waitFor } from "@redrob/behaviors";
+import { connect, debuggerUrlFor, evaluate, listTargets } from "@redrob/cdp";
 import { provider } from "../ctx.ts";
 import { inPage } from "../inpage.ts";
 import { DOCS_APP, DOCS_MEMBER, DOCS_PROMPT_CARDS, org } from "../seed.ts";

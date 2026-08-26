@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { chrome, desktop } from "@openwork/hosts";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
+import { chrome, desktop } from "@redrob/hosts";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
 import {
   assignPluginToMarketplace,
   captureOpenedUrls,
@@ -19,7 +19,7 @@ import {
   visibleText,
   waitForText,
   waitUntilInteractive,
-} from "@openwork/behaviors";
+} from "@redrob/behaviors";
 
 /**
  * CORE JOURNEY: a person opens the app for the first time, signs in to OpenWork
@@ -31,23 +31,23 @@ import {
  *  - The browser hop is real: we capture the URL the app asks the OS to open
  *    (PATH shim over xdg-open, which is what shell.openExternal calls on Linux)
  *    and drive that page in a real Chrome.
- *  - Only the OS protocol dispatch of `openwork://den-auth?grant=…` is bridged,
+ *  - Only the OS protocol dispatch of `redrob://den-auth?grant=…` is bridged,
  *    because a container registers no protocol handler. The grant is the real one
  *    the app generated and the browser approved; it is handed to the product's own
  *    documented entry point for this case.
  */
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const denApiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
-const denWebUrl = (process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim() || denApiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, "");
-const password = process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
-const adminEmail = process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
-const colleagueEmail = process.env.OPENWORK_EVAL_MEMBER_EMAIL?.trim() || "jordan.demo@acme.test";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const denApiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
+const denWebUrl = (process.env.REDROB_EVAL_DEN_WEB_URL?.trim() || denApiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, "");
+const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+const adminEmail = process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
+const colleagueEmail = process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "jordan.demo@acme.test";
 
 const title = !e2eTestsEnabled
-  ? "first-run cloud sharing skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in"
+  ? "first-run cloud sharing skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in"
   : !denApiUrl
-    ? "first-run cloud sharing skipped: set OPENWORK_EVAL_DEN_API_URL to a running Den"
+    ? "first-run cloud sharing skipped: set REDROB_EVAL_DEN_API_URL to a running Den"
     : "first run signs in through the browser, then shares a skill with a colleague via a marketplace";
 
 test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
@@ -103,7 +103,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
 
   // 3. Back to the app with the grant Den issued for this browser session.
   const deepLink = await readHandoffDeepLink(browser, { timeoutMs: 120_000 });
-  expect(deepLink.startsWith("openwork://"), `unexpected deep link: ${deepLink}`).toBe(true);
+  expect(deepLink.startsWith("redrob://"), `unexpected deep link: ${deepLink}`).toBe(true);
   await completeDesktopHandoff(app, deepLink, den.webUrl);
   await waitUntilInteractive(app, { timeoutMs: 180_000 });
   const signedInText = await visibleText(app);
@@ -127,7 +127,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
     email: colleagueEmail,
     password,
     name: "Jordan Demo",
-    markVerifiedCmd: process.env.OPENWORK_EVAL_MARK_VERIFIED_CMD?.trim(),
+    markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
 
   const stamp = Date.now();

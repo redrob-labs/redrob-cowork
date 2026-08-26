@@ -1,7 +1,7 @@
 # OpenWork tests and test evidence
 
 All executable coverage lives in [`specs/**/*.test.ts`](./specs) and imports
-`test` from `@openwork/testkit`. Tests that drive Electron, Den, or another app
+`test` from `@redrob/testkit`. Tests that drive Electron, Den, or another app
 surface use `.e2e.test.ts`.
 
 ## Paved path
@@ -30,7 +30,7 @@ pnpm evals:e2e app-smoke
 
 Run the E2E lane with `pnpm evals:e2e [test-names...]`. Naming a test
 auto-satisfies the opt-in flags declared in its source, but value-bearing
-environment variables such as `OPENWORK_EVAL_MODEL` are never auto-set. Vision
+environment variables such as `REDROB_EVAL_MODEL` are never auto-set. Vision
 judging is deferred by default; add `--with-llm-vision` to judge inline. Use
 `--local` to force isolated local resources, `--daytona` for Daytona resources,
 `--den <url>` to reuse Den, or `--publish --pr <number>` to judge and publish
@@ -47,7 +47,7 @@ See `run-tests` for environment requirements and the cold-boot verdict check.
 
 ## Authoring contract
 
-- Import `test` from `@openwork/testkit`.
+- Import `test` from `@redrob/testkit`.
 - Name app-driving files `<slug>.e2e.test.ts`; app-less tests use `<slug>.test.ts`.
 - Acquire resources in dependency order with `needs()` → `server()` → `app()`.
 - Drive user-visible behavior and assert observable outcomes. Backend, file,
@@ -63,11 +63,11 @@ This is enforced by `pnpm --dir evals run lint:layers`.
 
 | Layer | Contents | Rule |
 | --- | --- | --- |
-| L0 | `@openwork/matchers` | Turn supplied facts into pure findings; no I/O. |
-| L1 | `@openwork/cdp`, `@openwork/labs` | Provide protocol and lab primitives; do not own journeys or test lifecycle. |
-| L2 | `@openwork/behaviors` | Provide framework-free actions and observations over narrow handles. |
-| L3 | `@openwork/env` | Own environment lifecycle and composition; do not depend on Vitest. |
-| L4 | `@openwork/testkit`, `evals/bin/evals.mjs`, and the world CLI | Adapt environments to specs, Vitest, evidence, and command-line entrypoints. |
+| L0 | `@redrob/matchers` | Turn supplied facts into pure findings; no I/O. |
+| L1 | `@redrob/cdp`, `@redrob/labs` | Provide protocol and lab primitives; do not own journeys or test lifecycle. |
+| L2 | `@redrob/behaviors` | Provide framework-free actions and observations over narrow handles. |
+| L3 | `@redrob/env` | Own environment lifecycle and composition; do not depend on Vitest. |
+| L4 | `@redrob/testkit`, `evals/bin/evals.mjs`, and the world CLI | Adapt environments to specs, Vitest, evidence, and command-line entrypoints. |
 
 ## Composable packages and diagnostics
 
@@ -76,25 +76,25 @@ executable coverage is always assembled as a test under `specs/`.
 
 | Package | Owns |
 | --- | --- |
-| `@openwork/env` | environment lifecycle: places, Den server, desktop apps, mocks, worlds/presets/snapshots, kind stack |
-| `@openwork/testkit` | thin Vitest adapter: fixture, needs/skip mapping, evidence bridging, and spec-facing re-exports |
-| `@openwork/cdp` | raw CDP client, targets, `Surface`, and `attachSurface` |
-| `@openwork/labs` | egress, identity-provider, release-feed, and mock-MCP labs |
-| `@openwork/hosts` | local and Daytona hosts and `resolveHost()` |
-| `@openwork/behaviors` | framework-free actions and observations over narrow handles |
-| `@openwork/matchers` | pure findings over facts, with no I/O |
-| `@openwork/test-evidence` | screenshot capture, visual validation, and ambient test-evidence recording used by testkit |
-| `@openwork/timeline` | timing spans for long test journeys |
-| `@openwork/test-artifacts` | index, render, and PR publication for completed test runs |
+| `@redrob/env` | environment lifecycle: places, Den server, desktop apps, mocks, worlds/presets/snapshots, kind stack |
+| `@redrob/testkit` | thin Vitest adapter: fixture, needs/skip mapping, evidence bridging, and spec-facing re-exports |
+| `@redrob/cdp` | raw CDP client, targets, `Surface`, and `attachSurface` |
+| `@redrob/labs` | egress, identity-provider, release-feed, and mock-MCP labs |
+| `@redrob/hosts` | local and Daytona hosts and `resolveHost()` |
+| `@redrob/behaviors` | framework-free actions and observations over narrow handles |
+| `@redrob/matchers` | pure findings over facts, with no I/O |
+| `@redrob/test-evidence` | screenshot capture, visual validation, and ambient test-evidence recording used by testkit |
+| `@redrob/timeline` | timing spans for long test journeys |
+| `@redrob/test-artifacts` | index, render, and PR publication for completed test runs |
 
 Because behaviors and matchers do not depend on a test context, they also power
 the standalone diagnostic script at `evals/scripts/diagnose.mts`. It imports
-only `@openwork/behaviors` and `@openwork/matchers` and can inspect a real
+only `@redrob/behaviors` and `@redrob/matchers` and can inspect a real
 endpoint without creating test evidence.
 
 ## Worlds
 
-A world is a declarative environment topology managed by `@openwork/env`.
+A world is a declarative environment topology managed by `@redrob/env`.
 `defineWorld()` validates a `WorldTopology` and returns a definition that can be
 deep-patched with `.with()`. The topology has:
 
@@ -197,7 +197,7 @@ pnpm --dir evals dev:den -- down --port 8891 --drop-database
 
 The port and database are generated when omitted. The helper starts MySQL,
 pushes the current schema, and prints the eval URL exports and teardown command.
-It also adds the printed `OPENWORK_EVAL_DEN_WEB_URL` to the trusted origins;
+It also adds the printed `REDROB_EVAL_DEN_WEB_URL` to the trusted origins;
 without that origin, Better Auth rejects eval sign-in with
 `403 INVALID_ORIGIN`.
 

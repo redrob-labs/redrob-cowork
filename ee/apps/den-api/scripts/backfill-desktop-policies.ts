@@ -1,8 +1,8 @@
-import { and, asc, eq, isNull } from "@openwork-ee/den-db/drizzle"
-import { DesktopPolicyTable, MemberTable, OrganizationTable } from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
-import { normalizeDesktopAppRestrictions } from "@openwork/types/den/desktop-app-restrictions"
-import type { DesktopPolicyValue } from "@openwork/types/den/desktop-policies"
+import { and, asc, eq, isNull } from "@redrob-ee/den-db/drizzle"
+import { DesktopPolicyTable, MemberTable, OrganizationTable } from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
+import { normalizeDesktopAppRestrictions } from "@redrob/types/den/desktop-app-restrictions"
+import type { DesktopPolicyValue } from "@redrob/types/den/desktop-policies"
 import { db } from "../src/db.js"
 
 const DEFAULT_DESKTOP_POLICY_NAME = "Default desktop policy"

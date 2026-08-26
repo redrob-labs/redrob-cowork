@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { agentContextDiagnosticsRequestSchema } from "@openwork/types/agent-context-diagnostics";
+import { agentContextDiagnosticsRequestSchema } from "@redrob/types/agent-context-diagnostics";
 
 import {
   collectAgentContextDiagnosticObservations,

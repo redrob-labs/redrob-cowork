@@ -12,8 +12,8 @@
 // Run from ee/apps/den-api:
 //   DEN_API_E2E_BASE_URL=... DATABASE_URL=... pnpm exec node evals/agent-test-evidence-unverified-signup.mjs
 
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { AuthUserTable } from "@openwork-ee/den-db/schema"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { AuthUserTable } from "@redrob-ee/den-db/schema"
 import { mkdirSync, writeFileSync } from "node:fs"
 import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"

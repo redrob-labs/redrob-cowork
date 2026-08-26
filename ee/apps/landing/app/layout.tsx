@@ -16,8 +16,8 @@ const organizationSchema = {
   "@type": "Organization",
   name: "OpenWork",
   legalName: "Different AI",
-  url: "https://openworklabs.com",
-  logo: "https://openworklabs.com/openwork-mark.svg",
+  url: "https://redrob.io",
+  logo: "https://redrob.io/openwork-mark.svg",
   sameAs: ["https://github.com/different-ai/openwork"]
 };
 
@@ -34,7 +34,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://openworklabs.com"),
+  metadataBase: new URL("https://redrob.io"),
   title: "OpenWork — Open source Claude Cowork alternative for teams",
   description:
     "Bring your own model and provider, wire in your tools and context, and ship reusable agent setups across your org — with guardrails built in.",

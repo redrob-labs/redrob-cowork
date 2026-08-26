@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { expect, onTestFinished } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 
 const repoRoot = resolve(import.meta.dirname, "../..");
 const workflowPath = join(repoRoot, ".github", "workflows", "release-macos-aarch64.yml");

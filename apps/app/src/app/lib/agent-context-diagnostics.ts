@@ -6,7 +6,7 @@ import {
   type AgentContextDiagnosticsRequest,
   type AgentContextOrganizationConnectionSummary,
   type AgentContextOrganizationConnectionsProbe,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 import type { DenExternalMcpConnection } from "./den";
 

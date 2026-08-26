@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { AUTOMATION_MODEL_ATTENTION_CAPABILITY } from "@openwork/types/automations"
+import { AUTOMATION_MODEL_ATTENTION_CAPABILITY } from "@redrob/types/automations"
 import { createHmac } from "node:crypto"
 
 function seedRequiredEnv() {
@@ -51,17 +51,17 @@ describe("Automation runner credentials", () => {
   })
 
   test("binds a Den Web proxied credential to its trusted public route", () => {
-    const request = new Request("http://api.openworklabs.com/v1/automation-runners/token", {
+    const request = new Request("http://api.redrob.io/v1/automation-runners/token", {
       headers: {
-        "x-forwarded-host": "app.openworklabs.com",
+        "x-forwarded-host": "app.redrob.io",
         "x-forwarded-proto": "https",
         "x-forwarded-prefix": "/api/den",
       },
     })
 
     expect(automationRunnerAudienceFromRequest(request, {
-      trustedOrigins: ["https://app.openworklabs.com"],
-    })).toBe("https://app.openworklabs.com/api/den")
+      trustedOrigins: ["https://app.redrob.io"],
+    })).toBe("https://app.redrob.io/api/den")
   })
 
   test("binds a rotated preview hostname covered by a trusted wildcard", () => {
@@ -110,7 +110,7 @@ describe("Automation runner credentials", () => {
   })
 
   test("ignores an untrusted forwarded runner destination", () => {
-    const request = new Request("https://api.openworklabs.com/v1/automation-runners/token", {
+    const request = new Request("https://api.redrob.io/v1/automation-runners/token", {
       headers: {
         "x-forwarded-host": "attacker.example.com",
         "x-forwarded-proto": "https",
@@ -119,8 +119,8 @@ describe("Automation runner credentials", () => {
     })
 
     expect(automationRunnerAudienceFromRequest(request, {
-      trustedOrigins: ["https://app.openworklabs.com"],
-    })).toBe("https://api.openworklabs.com")
+      trustedOrigins: ["https://app.redrob.io"],
+    })).toBe("https://api.redrob.io")
   })
 
   test("keeps legacy v1 credentials capability-free", () => {

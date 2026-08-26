@@ -1,11 +1,11 @@
 import {
   normalizeDesktopConfig,
   type DesktopConfig as SharedDesktopConfig,
-} from "@openwork/types/den/desktop-policies";
+} from "@redrob/types/den/desktop-policies";
 import {
   AUTOMATION_MODEL_ATTENTION_CAPABILITY,
   AUTOMATION_MODEL_ATTENTION_CAPABILITY_HEADER,
-} from "@openwork/types/automations";
+} from "@redrob/types/automations";
 import type {
   AutomationDetail,
   AutomationDesktopRunnerPresence,
@@ -16,7 +16,7 @@ import type {
   AutomationRunnerTokenResponse,
   CreateAutomation,
   UpdateAutomation,
-} from "@openwork/types/automations";
+} from "@redrob/types/automations";
 
 // Re-export the shared schema under the local alias so React consumers
 // (e.g. the cloud domain's desktop-config provider) can import it alongside
@@ -76,7 +76,7 @@ export const DEFAULT_DEN_AUTH_NAME = "OpenWork User";
 const BUILD_DEN_BASE_URL =
   (typeof import.meta !== "undefined" && typeof import.meta.env?.VITE_DEN_BASE_URL === "string"
     ? import.meta.env.VITE_DEN_BASE_URL
-    : "").trim() || "https://app.openworklabs.com";
+    : "").trim() || "https://app.redrob.io";
 const BUILD_DEN_REQUIRE_SIGNIN =
   (typeof import.meta !== "undefined" && typeof import.meta.env?.VITE_DEN_REQUIRE_SIGNIN === "string"
     ? /^(1|true|yes|on)$/i.test(import.meta.env.VITE_DEN_REQUIRE_SIGNIN.trim())
@@ -95,13 +95,13 @@ function readBuildDenApiBaseUrl(): string {
 }
 
 function readForceEnvDenSettings(): boolean {
-  return (typeof import.meta !== "undefined" && typeof import.meta.env?.VITE_OPENWORK_FORCE_ENV_SETTINGS === "string"
-    ? /^(1|true|yes|on)$/i.test(import.meta.env.VITE_OPENWORK_FORCE_ENV_SETTINGS.trim())
+  return (typeof import.meta !== "undefined" && typeof import.meta.env?.VITE_REDROB_FORCE_ENV_SETTINGS === "string"
+    ? /^(1|true|yes|on)$/i.test(import.meta.env.VITE_REDROB_FORCE_ENV_SETTINGS.trim())
     : false);
 }
 
-export const HOSTED_DEFAULT_DEN_BASE_URL = "https://app.openworklabs.com";
-export const HOSTED_DEFAULT_DEN_API_BASE_URL = "https://api.app.openworklabs.com";
+export const HOSTED_DEFAULT_DEN_BASE_URL = "https://app.redrob.io";
+export const HOSTED_DEFAULT_DEN_API_BASE_URL = "https://api.app.redrob.io";
 export const DEFAULT_DEN_BASE_URL = BUILD_DEN_BASE_URL;
 export const DEN_INFERENCE_PATH = "/dashboard/inference";
 
@@ -650,9 +650,9 @@ export function denOriginComparisonKey(input: string | null | undefined): string
 
 /**
  * True when the effective Den control plane is not the hosted OpenWork Cloud
- * (app.openworklabs.com). Self-hosted deployments point the app at their own
+ * (app.redrob.io). Self-hosted deployments point the app at their own
  * control plane via VITE_DEN_BASE_URL or the desktop bootstrap config, so
- * hosted-only surfaces (e.g. OpenWork Models upsells) should stay hidden.
+ * hosted-only surfaces (e.g. Redrob Models upsells) should stay hidden.
  */
 export function isSelfHostedControlPlane(): boolean {
   return (
@@ -775,7 +775,7 @@ export function getDenMcpUrl(): string {
 
 /**
  * Detects MCP URLs written by older builds that pointed `/mcp` at the bare
- * web-app origin (e.g. `https://app.openworklabs.com/mcp`). Nothing serves
+ * web-app origin (e.g. `https://app.redrob.io/mcp`). Nothing serves
  * MCP there — those entries fail with a 404 and must be reconfigured.
  */
 export function isLegacyWebAppMcpUrl(input: string | null | undefined): boolean {
@@ -791,7 +791,7 @@ export function isLegacyWebAppMcpUrl(input: string | null | undefined): boolean 
 /**
  * Resolve the URL the cloud MCP entry should connect to from a minted
  * token's `resource`. Older den-api builds mint the bare web-app origin
- * (`https://app.openworklabs.com/mcp`) where nothing serves MCP — heal
+ * (`https://app.redrob.io/mcp`) where nothing serves MCP — heal
  * those to the `/api/den` proxy on the same origin instead of trusting
  * them verbatim. Returns null when the resource is unusable so callers
  * can keep their bootstrap-derived URL.
@@ -1065,9 +1065,9 @@ export function buildDenAuthUrl(baseUrl: string, mode: "sign-in" | "sign-up"): s
     || (webReturnOrigin !== null && !canUseCloudWebAuthReturn(webReturnOrigin))
   ) {
     // Desktop app, or local/dev web that cannot receive an approved webAuth
-    // redirect: Den shows the copyable openwork:// / grant handoff instead.
+    // redirect: Den shows the copyable redrob:// / grant handoff instead.
     target.searchParams.set("desktopAuth", "1");
-    target.searchParams.set("desktopScheme", "openwork");
+    target.searchParams.set("desktopScheme", "redrob");
   } else if (webReturnOrigin !== null) {
     target.searchParams.set("webAuth", "1");
     target.searchParams.set("webAuthReturn", webReturnOrigin);

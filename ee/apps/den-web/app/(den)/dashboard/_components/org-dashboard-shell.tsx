@@ -63,7 +63,7 @@ import { buildDenFeedbackUrl } from "../../_lib/feedback";
 import { OrgSelectionScreen } from "./org-selection-screen";
 import { UserProfileDialog } from "./user-profile-dialog";
 
-const OPENWORK_DOCS_URL = "/docs";
+const REDROB_DOCS_URL = "/docs";
 
 type DashboardNavChild = {
   href: string;
@@ -279,7 +279,7 @@ function getDashboardPageTitle(pathname: string, orgSlug: string | null) {
     return "Diagnostics";
   }
   if (pathname.startsWith(getInferenceRoute(orgSlug))) {
-    return "OpenWork Models";
+    return "Redrob Models";
   }
   if (pathname.startsWith(getWebRoute(orgSlug))) {
     return "OpenWork Web";
@@ -443,7 +443,7 @@ export function OrgDashboardShell({ children }: { children: React.ReactNode }) {
         }]
       : []),
   ];
-  // OpenWork Models are a hosted OpenWork Cloud offering; self-hosted
+  // Redrob Models are a hosted Redrob Cloud offering; self-hosted
   // (single-org) deployments only manage their own LLM providers. Default
   // hidden until the runtime config confirms a hosted (multi-org) deployment.
   const showOpenWorkModels = runtimeConfigLoaded && runtimeConfig.orgMode === "multi_org";
@@ -457,7 +457,7 @@ export function OrgDashboardShell({ children }: { children: React.ReactNode }) {
         badge: "Providers",
         children: [
           ...(showOpenWorkModels
-            ? [{ href: getInferenceRoute(activeOrg.slug), label: "OpenWork Models" }]
+            ? [{ href: getInferenceRoute(activeOrg.slug), label: "Redrob Models" }]
             : []),
           { href: getCustomLlmProvidersRoute(activeOrg.slug), label: "Bring your Own Keys" },
         ],
@@ -874,7 +874,7 @@ export function OrgDashboardShell({ children }: { children: React.ReactNode }) {
               </a>
             ) : null}
             <a
-              href={OPENWORK_DOCS_URL}
+              href={REDROB_DOCS_URL}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"

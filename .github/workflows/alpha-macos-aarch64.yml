@@ -64,8 +64,8 @@ jobs:
       # and launch without Gatekeeper friction. Alpha builds are served
       # from GitHub Releases like stable, just from a different tag.
       MACOS_NOTARIZE: ${{ vars.MACOS_NOTARIZE || 'true' }}
-      OPENWORK_DESKTOP_SENTRY_DSN: ${{ secrets.OPENWORK_DESKTOP_SENTRY_DSN || vars.OPENWORK_DESKTOP_SENTRY_DSN }}
-      OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.OPENWORK_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
+      REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
+      REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
 
     steps:
       - name: Checkout
@@ -159,7 +159,7 @@ jobs:
         shell: bash
         env:
           TARGET: aarch64-apple-darwin
-        run: pnpm --filter @openwork/desktop build:electron
+        run: pnpm --filter @redrob/desktop build:electron
 
       - name: Package Electron alpha (macOS, signed + notarized)
         if: env.MACOS_NOTARIZE == 'true'

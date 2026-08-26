@@ -1,9 +1,9 @@
 import { expect } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { evalIn, waitFor, waitForText } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { chrome } from "@openwork/hosts";
-import { needs, server, test } from "@openwork/testkit";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { evalIn, waitFor, waitForText } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { chrome } from "@redrob/hosts";
+import { needs, server, test } from "@redrob/testkit";
 
 /**
  * CORE JOURNEY: the creation surface owns immutable execution placement.
@@ -17,7 +17,7 @@ import { needs, server, test } from "@openwork/testkit";
  */
 
 test("Web creates Cloud-owned Automations while Desktop creation remains local", async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_AUTOMATIONS_E2E_TEST"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_AUTOMATIONS_E2E_TEST"] });
   await using den = await server({ place });
   await using browser = await chrome({
     name: "automation-runtime-placement",

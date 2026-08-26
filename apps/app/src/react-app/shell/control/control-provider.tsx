@@ -16,8 +16,8 @@ import type {
   OpenworkAffordanceEffects,
   OpenworkAffordanceRequest,
   OpenworkAffordanceResult,
-} from "@openwork/types/openwork-affordance";
-import type { OpenworkContextSnapshot } from "@openwork/types/openwork-context";
+} from "@redrob/types/openwork-affordance";
+import type { OpenworkContextSnapshot } from "@redrob/types/openwork-context";
 
 export type OpenworkControlSideEffect = "none" | "navigation" | "mutation" | "external";
 

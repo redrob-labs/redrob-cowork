@@ -1,12 +1,12 @@
 {
-  "name": "@openwork/desktop",
+  "name": "@redrob/desktop",
   "private": true,
   "version": "0.0.0-dev",
-  "desktopName": "com.differentai.openwork",
+  "desktopName": "io.redrob.work",
   "description": "OpenWork desktop shell",
   "author": {
     "name": "OpenWork",
-    "email": "support@openworklabs.com"
+    "email": "support@redrob.io"
   },
   "main": "electron/main.mjs",
   "type": "module",
@@ -29,8 +29,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@opencode-ai/sdk": "^1.18.15",
-    "@openwork/enterprise-mcp-client": "workspace:*",
-    "@openwork/paths": "workspace:*",
+    "@redrob/enterprise-mcp-client": "workspace:*",
+    "@redrob/paths": "workspace:*",
     "@sentry/electron": "^7.16.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@electron/asar": "^3.4.1",
     "@electron/rebuild": "^4.2.0",
-    "@openwork/types": "workspace:*",
+    "@redrob/types": "workspace:*",
     "electron": "^43.2.0",
     "electron-builder": "^26.15.3",
     "electron-devtools-installer": "^4.0.0"

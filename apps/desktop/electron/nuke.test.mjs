@@ -112,7 +112,7 @@ async function tinyDelay(ms = 140) {
 
 test("buildNukeManifest includes default macOS state roots and preserves bootstrap", () => {
   const home = "/Users/alice";
-  const userDataPath = "/Users/alice/Library/Application Support/com.differentai.openwork";
+  const userDataPath = "/Users/alice/Library/Application Support/io.redrob.work";
   const manifest = buildNukeManifest({ env: {}, homedir: home, platform: "darwin", userDataPath });
 
   assert.equal(manifest.bootstrapPath, "/Users/alice/.config/openwork/desktop-bootstrap.json");
@@ -138,7 +138,7 @@ test("buildNukeManifest includes default macOS state roots and preserves bootstr
 
 test("buildNukeManifest wipes session state, server audit data, and workspace registries", () => {
   const home = "/Users/alice";
-  const userDataPath = "/Users/alice/Library/Application Support/com.differentai.openwork";
+  const userDataPath = "/Users/alice/Library/Application Support/io.redrob.work";
   const manifest = buildNukeManifest({
     env: {},
     homedir: home,
@@ -166,7 +166,7 @@ test("buildNukeManifest can include the bootstrap file in the wipe", () => {
     homedir: "/Users/alice",
     platform: "darwin",
     preserveBootstrap: false,
-    userDataPath: "/Users/alice/Library/Application Support/com.differentai.openwork",
+    userDataPath: "/Users/alice/Library/Application Support/io.redrob.work",
   });
 
   assert.equal(manifest.bootstrapPath, bootstrapPath);
@@ -179,11 +179,11 @@ test("buildNukeManifest includes default Linux state roots", () => {
     env: {},
     homedir: "/home/alice",
     platform: "linux",
-    userDataPath: "/home/alice/.config/com.differentai.openwork",
+    userDataPath: "/home/alice/.config/io.redrob.work",
   });
 
   assert.equal(manifest.preserveBootstrapPath, "/home/alice/.config/openwork/desktop-bootstrap.json");
-  assert.ok(manifest.deletePaths.includes("/home/alice/.config/com.differentai.openwork"));
+  assert.ok(manifest.deletePaths.includes("/home/alice/.config/io.redrob.work"));
   assert.ok(manifest.deletePaths.includes("/home/alice/.local/share/opencode"));
   assert.ok(manifest.deletePaths.includes("/home/alice/.config/opencode"));
   assert.ok(manifest.deletePaths.includes("/home/alice/.cache/opencode"));
@@ -199,11 +199,11 @@ test("buildNukeManifest includes Windows path shapes", () => {
     env,
     homedir: "C:\\Users\\Alice",
     platform: "win32",
-    userDataPath: "C:\\Users\\Alice\\AppData\\Roaming\\com.differentai.openwork",
+    userDataPath: "C:\\Users\\Alice\\AppData\\Roaming\\io.redrob.work",
   });
 
   assert.equal(manifest.preserveBootstrapPath, "C:\\Users\\Alice\\AppData\\Local\\openwork\\desktop-bootstrap.json");
-  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\com.differentai.openwork"));
+  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\io.redrob.work"));
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\server.json"));
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\runtime.sqlite"));
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json"));
@@ -214,21 +214,21 @@ test("buildNukeManifest includes Windows path shapes", () => {
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\.config\\openwork\\desktop-bootstrap.json"));
 });
 
-test("buildNukeManifest honors OPENWORK_ELECTRON_USERDATA override", () => {
+test("buildNukeManifest honors REDROB_ELECTRON_USERDATA override", () => {
   const manifest = buildNukeManifest({
-    env: { OPENWORK_ELECTRON_USERDATA: "/tmp/openwork-userdata" },
+    env: { REDROB_ELECTRON_USERDATA: "/tmp/openwork-userdata" },
     homedir: "/Users/alice",
     platform: "darwin",
-    userDataPath: "/Users/alice/Library/Application Support/com.differentai.openwork",
+    userDataPath: "/Users/alice/Library/Application Support/io.redrob.work",
   });
 
   assert.ok(manifest.deletePaths.includes("/tmp/openwork-userdata"));
-  assert.ok(!manifest.deletePaths.includes("/Users/alice/Library/Application Support/com.differentai.openwork"));
+  assert.ok(!manifest.deletePaths.includes("/Users/alice/Library/Application Support/io.redrob.work"));
 });
 
 test("buildNukeManifest redirects HOME/XDG paths in dev mode", () => {
   const manifest = buildNukeManifest({
-    env: { OPENWORK_DEV_MODE: "1" },
+    env: { REDROB_DEV_MODE: "1" },
     homedir: "/Users/alice",
     platform: "darwin",
     userDataPath: "/tmp/openwork-dev-userdata",
@@ -246,9 +246,9 @@ test("buildNukeManifest redirects HOME/XDG paths in dev mode", () => {
 });
 
 test("buildNukeManifest never reaches production state from a non-dev isolated profile", () => {
-  const userDataPath = "/Users/alice/Library/Application Support/com.differentai.openwork.dev.wt2";
+  const userDataPath = "/Users/alice/Library/Application Support/io.redrob.work.dev.wt2";
   const manifest = buildNukeManifest({
-    env: { OPENWORK_ELECTRON_APP_IDENTIFIER: "com.differentai.openwork.dev.wt2" },
+    env: { REDROB_ELECTRON_APP_IDENTIFIER: "io.redrob.work.dev.wt2" },
     homedir: "/Users/alice",
     platform: "darwin",
     userDataPath,
@@ -264,7 +264,7 @@ test("buildNukeManifest never reaches production state from a non-dev isolated p
     "/Users/alice/.local/share/opencode",
     "/Users/alice/Library/Application Support/opencode",
     legacyOrchestratorPath("/Users/alice"),
-    "/Users/alice/Library/Caches/com.differentai.openwork.ShipIt",
+    "/Users/alice/Library/Caches/io.redrob.work.ShipIt",
   ]) {
     assert.ok(!manifest.deletePaths.includes(productionPath), `must not delete ${productionPath}`);
   }
@@ -273,7 +273,7 @@ test("buildNukeManifest never reaches production state from a non-dev isolated p
 test("buildNukeManifest still wipes a dev profile's own orchestrator data dir", () => {
   const devOrchestratorPath = `${legacyOrchestratorPath("/Users/alice")}-dev`;
   const manifest = buildNukeManifest({
-    env: { OPENWORK_DEV_MODE: "1", OPENWORK_DATA_DIR: devOrchestratorPath },
+    env: { REDROB_DEV_MODE: "1", REDROB_DATA_DIR: devOrchestratorPath },
     homedir: "/Users/alice",
     platform: "darwin",
     userDataPath: "/tmp/openwork-dev-userdata",
@@ -285,7 +285,7 @@ test("buildNukeManifest still wipes a dev profile's own orchestrator data dir", 
 
 test("buildNukeManifest ignores an inherited XDG_CONFIG_HOME pointing at production config", () => {
   const manifest = buildNukeManifest({
-    env: { OPENWORK_DEV_MODE: "1", XDG_CONFIG_HOME: "/Users/alice/.config" },
+    env: { REDROB_DEV_MODE: "1", XDG_CONFIG_HOME: "/Users/alice/.config" },
     homedir: "/Users/alice",
     platform: "darwin",
     userDataPath: "/tmp/openwork-dev-userdata",
@@ -487,7 +487,7 @@ test("runPendingNukeCleanup refuses replayed paths outside an isolated profile",
     await writeFile(pendingPath, `${JSON.stringify({ paths: [productionPath, profilePath] })}\n`, "utf8");
 
     const result = await runPendingNukeCleanup({
-      env: { OPENWORK_ELECTRON_APP_IDENTIFIER: "com.differentai.openwork.dev.wt2" },
+      env: { REDROB_ELECTRON_APP_IDENTIFIER: "io.redrob.work.dev.wt2" },
       homedir: path.join(root, "home"),
       platform: process.platform === "win32" ? "win32" : "darwin",
       userDataPath,
@@ -527,10 +527,10 @@ test("nuke worker payload only serializes safe path inputs", () => {
   const nukeInput = buildNukeWorkerNukeInput({
     env: {
       APPDATA: "C:\\Users\\Alice\\AppData\\Roaming",
-      OPENWORK_API_KEY: "secret-api-key",
-      OPENWORK_TOKEN: "secret-token",
-      OPENWORK_ELECTRON_REMOTE_DEBUG_PORT: "9888",
-      OPENWORK_TOKEN_STORE: "C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json",
+      REDROB_CLOUD_API_KEY: "secret-api-key",
+      REDROB_TOKEN: "secret-token",
+      REDROB_ELECTRON_REMOTE_DEBUG_PORT: "9888",
+      REDROB_TOKEN_STORE: "C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json",
       XDG_CONFIG_HOME: "/tmp/config",
     },
     homedir: "/tmp/home",
@@ -550,7 +550,7 @@ test("nuke worker payload only serializes safe path inputs", () => {
 
   assert.equal(payload.nukeInput.env.APPDATA, "C:\\Users\\Alice\\AppData\\Roaming");
   assert.equal(payload.nukeInput.env.XDG_CONFIG_HOME, "/tmp/config");
-  assert.equal(payload.nukeInput.env.OPENWORK_TOKEN_STORE, "C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json");
+  assert.equal(payload.nukeInput.env.REDROB_TOKEN_STORE, "C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json");
   assert.equal(payload.nukeInput.preserveBootstrap, false);
   assert.deepEqual(payload.appArgv, []);
   assert.equal(serialized.includes("secret-api-key"), false);
@@ -558,9 +558,9 @@ test("nuke worker payload only serializes safe path inputs", () => {
   assert.equal(serialized.includes("--secret"), false);
   assert.equal(serialized.includes("0.0.0.0"), false);
   assert.equal(serialized.includes("9888"), false);
-  assert.equal(serialized.includes("OPENWORK_ELECTRON_REMOTE_DEBUG_PORT"), false);
-  assert.equal(serialized.includes("OPENWORK_API_KEY"), false);
-  assert.equal(serialized.includes("OPENWORK_TOKEN\""), false);
+  assert.equal(serialized.includes("REDROB_ELECTRON_REMOTE_DEBUG_PORT"), false);
+  assert.equal(serialized.includes("REDROB_CLOUD_API_KEY"), false);
+  assert.equal(serialized.includes("REDROB_TOKEN\""), false);
 
   const devPayload = buildNukeWorkerPayload({
     parentPid: 123,
@@ -576,7 +576,7 @@ test("nuke worker payload only serializes safe path inputs", () => {
 test("scheduleNukeCleanupWorker launches Electron as Node with a detached safe payload", async () => {
   await withTempDir(async (root) => {
     const input = pendingNukeInput(root);
-    input.env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT = "9888";
+    input.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT = "9888";
     const plan = {
       pendingPath: pendingNukePath(root),
     };
@@ -592,7 +592,7 @@ test("scheduleNukeCleanupWorker launches Electron as Node with a detached safe p
       plan,
       execPath: process.execPath,
       argv: [process.execPath, "--remote-debugging-port=9888", "--remote-debugging-address=0.0.0.0", "--ignored"],
-      env: { SECRET_TOKEN: "do-not-write", XDG_CONFIG_HOME: input.env.XDG_CONFIG_HOME, OPENWORK_ELECTRON_REMOTE_DEBUG_PORT: "9888" },
+      env: { SECRET_TOKEN: "do-not-write", XDG_CONFIG_HOME: input.env.XDG_CONFIG_HOME, REDROB_ELECTRON_REMOTE_DEBUG_PORT: "9888" },
       spawnFn: (command, args, options) => {
         spawnCommand = command;
         spawnArgs = args;
@@ -611,8 +611,8 @@ test("scheduleNukeCleanupWorker launches Electron as Node with a detached safe p
     assert.equal(spawnOptions.stdio, "ignore");
     assert.equal(spawnOptions.shell, undefined);
     assert.equal(spawnOptions.env.ELECTRON_RUN_AS_NODE, "1");
-    assert.equal(spawnOptions.env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT, undefined);
-    assert.equal(payload.nukeInput.env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT, undefined);
+    assert.equal(spawnOptions.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT, undefined);
+    assert.equal(payload.nukeInput.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT, undefined);
     assert.deepEqual(payload.appArgv, []);
     assert.equal(JSON.stringify(payload).includes("do-not-write"), false);
 
@@ -647,7 +647,7 @@ test("nuke cleanup worker waits for parent exit, clears pending path, removes pa
     let launchEnv = {};
 
     const result = await runNukeCleanupWorker(payloadPath, {
-      env: { ELECTRON_RUN_AS_NODE: "1", OPENWORK_ELECTRON_REMOTE_DEBUG_PORT: "9888" },
+      env: { ELECTRON_RUN_AS_NODE: "1", REDROB_ELECTRON_REMOTE_DEBUG_PORT: "9888" },
       relaunchHandleGraceMs: 0,
       spawnApp: (_command, args, options) => {
         launchedAfterParentExit = parent.exitCode !== null;
@@ -661,7 +661,7 @@ test("nuke cleanup worker waits for parent exit, clears pending path, removes pa
     assert.equal(launchedAfterParentExit, true);
     assert.deepEqual(launchedArgs, []);
     assert.equal(launchEnv.ELECTRON_RUN_AS_NODE, undefined);
-    assert.equal(launchEnv.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT, undefined);
+    assert.equal(launchEnv.REDROB_ELECTRON_REMOTE_DEBUG_PORT, undefined);
     assert.equal(await exists(targetPath), false);
     assert.equal(await exists(pendingPath), false);
     assert.equal(await exists(payloadPath), false);
@@ -709,7 +709,7 @@ test("executeNukeFreshStart skips host-wide container cleanup on an isolated pro
       cleanedContainers += 1;
       return { candidates: [], removed: [], errors: [] };
     };
-    const input = { ...pendingNukeInput(root), env: { OPENWORK_DEV_MODE: "1" } };
+    const input = { ...pendingNukeInput(root), env: { REDROB_DEV_MODE: "1" } };
     await mkdir(input.userDataPath, { recursive: true });
 
     await executeNukeFreshStart({

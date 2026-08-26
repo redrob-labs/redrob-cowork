@@ -28,7 +28,7 @@ export type SettingsUpdateStatus = {
   failedAction?: "check" | "download" | "install";
 } | null;
 
-type ElectronUpdaterBridge = NonNullable<Window["__OPENWORK_ELECTRON__"]>["updater"] & {
+type ElectronUpdaterBridge = NonNullable<Window["__REDROB_ELECTRON__"]>["updater"] & {
   onDownloadProgress?: (callback: (data: { transferred: number; total: number; percent: number; bytesPerSecond: number }) => void) => (() => void);
 };
 
@@ -97,7 +97,7 @@ function electronUpdaterBridge(): ElectronUpdaterBridge | null {
   if (import.meta.env.DEV && window.__openworkUpdaterEvalBridge) {
     return window.__openworkUpdaterEvalBridge;
   }
-  return window.__OPENWORK_ELECTRON__?.updater ?? null;
+  return window.__REDROB_ELECTRON__?.updater ?? null;
 }
 
 function describeError(error: unknown) {

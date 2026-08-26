@@ -115,8 +115,8 @@ describe("signed desktop connect links", () => {
   })
 
   test("builds only the dedicated connect route", () => {
-    expect(buildConnectDeepLink("abc.def.ghi")).toBe("openwork://connect?token=abc.def.ghi")
+    expect(buildConnectDeepLink("abc.def.ghi")).toBe("redrob://connect?token=abc.def.ghi")
     expect(buildConnectExchangeDeepLink("abcdefghijklmnopqrstuvwxyz123456", "https://den.example.com/api/den"))
-      .toBe("openwork://connect?code=abcdefghijklmnopqrstuvwxyz123456&apiBaseUrl=https%3A%2F%2Fden.example.com%2Fapi%2Fden")
+      .toBe("redrob://connect?code=abcdefghijklmnopqrstuvwxyz123456&apiBaseUrl=https%3A%2F%2Fden.example.com%2Fapi%2Fden")
   })
 })

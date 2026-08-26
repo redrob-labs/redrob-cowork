@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { expect } from "vitest";
-import { test } from "@openwork/testkit";
+import { test } from "@redrob/testkit";
 import {
   parseInviteLinkInput,
   parseServerUrlInput,
@@ -33,7 +33,7 @@ test("the welcome screen folds the server-URL door into the join-organization fi
     url: "https://openwork.acme.test",
     host: "openwork.acme.test",
   });
-  expect(parseServerUrlInput("openwork://den-auth?grant=abcdefghijkl")).toBeNull();
+  expect(parseServerUrlInput("redrob://den-auth?grant=abcdefghijkl")).toBeNull();
   expect(parseServerUrlInput("raw-sign-in-grant-value")).toBeNull();
 
   expect(welcomeSource).not.toContain("OrganizationServerAffordance");

@@ -5,18 +5,18 @@ import {
 } from "@modelcontextprotocol/ext-apps/server"
 import type { McpUiResourceMeta } from "@modelcontextprotocol/ext-apps"
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
-import { connectionActionAppHtml } from "@openwork/mcp-apps/connection-action"
+import { connectionActionAppHtml } from "@redrob/mcp-apps/connection-action"
 import {
   connectionActionAppResourceUri,
   connectionActionAppSchemaVersion,
   connectionActionPayloadSchema,
   connectionActionToolName,
   type ConnectionActionPayload,
-} from "@openwork/types/connection-action-app"
+} from "@redrob/types/connection-action-app"
 import { z } from "zod"
 import type { ExternalConnectionStatus } from "./external-capabilities.js"
 
-export { connectionActionPayloadSchema } from "@openwork/types/connection-action-app"
+export { connectionActionPayloadSchema } from "@redrob/types/connection-action-app"
 
 export const CONNECTION_ACTION_APP_RESOURCE_URI = connectionActionAppResourceUri
 export const CONNECTION_ACTION_TOOL_NAME = connectionActionToolName

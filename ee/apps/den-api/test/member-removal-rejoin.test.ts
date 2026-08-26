@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, expect, test } from "bun:test"
 
 const singleOrgSlug = "member-removal-rejoin-test"
@@ -36,8 +36,8 @@ function seedRequiredEnv() {
 }
 
 let db: typeof import("../src/db.js").db | null = null
-let schema: typeof import("@openwork-ee/den-db/schema") | null = null
-let drizzle: typeof import("@openwork-ee/den-db/drizzle") | null = null
+let schema: typeof import("@redrob-ee/den-db/schema") | null = null
+let drizzle: typeof import("@redrob-ee/den-db/drizzle") | null = null
 let orgs: typeof import("../src/orgs.js") | null = null
 let scim: typeof import("../src/scim.js") | null = null
 
@@ -129,8 +129,8 @@ beforeAll(async () => {
   seedRequiredEnv()
   const [dbModule, schemaModule, drizzleModule, orgsModule, scimModule] = await Promise.all([
     import("../src/db.js"),
-    import("@openwork-ee/den-db/schema"),
-    import("@openwork-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
     import("../src/orgs.js"),
     import("../src/scim.js"),
   ])

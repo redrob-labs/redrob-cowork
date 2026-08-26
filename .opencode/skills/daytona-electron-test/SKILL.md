@@ -32,14 +32,14 @@ artifact server on port 8090 is available for supplementary captures. Then load
 `run-tests` and run the relevant app-driving E2E test:
 
 ```bash
-OPENWORK_EVAL_E2E_TESTS=1 OPENWORK_EVAL_DAYTONA=1 \
+REDROB_EVAL_E2E_TESTS=1 REDROB_EVAL_DAYTONA=1 \
   pnpm --dir evals exec vitest run --config vitest.config.ts \
   --project e2e specs/<slug>.e2e.test.ts
 ```
 
 Use direct browser tools only for exploration and debugging. New repeatable
 verdict coverage belongs in `evals/specs/<slug>.e2e.test.ts`, imports `test`
-from `@openwork/testkit`, and records ambient evidence; see `write-a-spec`.
+from `@redrob/testkit`, and records ambient evidence; see `write-a-spec`.
 
 Use `browser_list` to connect when manual inspection is needed.
 Refresh the snapshot with `bash .devcontainer/create-daytona-openwork-snapshot.sh`
@@ -75,7 +75,7 @@ source every `/daytona-secrets/*.env` file before Electron starts.
 - **Artifacts volume:** use `openwork-eval-artifacts:/daytona-artifacts` for
   screenshots, validation notes, and recordings that survive sandbox deletion.
 
-Validation standard: use `daytona-flow-validator`. The `@openwork/testkit`
+Validation standard: use `daytona-flow-validator`. The `@redrob/testkit`
 ambient test evidence and its observable assertions determine the verdict;
 publish the existing test run with `publish-evidence`. Custom screenshot indexes and video are
 supplementary, with video reserved for motion such as streaming or animations.
@@ -401,9 +401,9 @@ bash .devcontainer/test-server-on-daytona.sh <branch-or-commit>
 
 2. Seed the server sandbox with demo org, marketplace, and plugin data. The seed
 must use the same encryption key as `.devcontainer/start-daytona-server.sh`, and
-`@openwork/email` must be built before the seed imports Den email helpers:
+`@redrob/email` must be built before the seed imports Den email helpers:
 ```bash
-daytona exec <server-sandbox> -- 'cd /workspace && pnpm --filter @openwork/email build && cd /workspace/ee/apps/den-api && OPENWORK_DEV_MODE=1 DATABASE_URL=mysql://root:password@127.0.0.1:3306/openwork_den DEN_DB_ENCRYPTION_KEY=daytona-den-db-encryption-key-please-change-1234567890 BETTER_AUTH_SECRET=local-dev-secret-not-for-production-use!! BETTER_AUTH_URL=http://localhost:3005 pnpm exec tsx scripts/seed-demo-org.ts --reset'
+daytona exec <server-sandbox> -- 'cd /workspace && pnpm --filter @redrob/email build && cd /workspace/ee/apps/den-api && REDROB_DEV_MODE=1 DATABASE_URL=mysql://root:password@127.0.0.1:3306/openwork_den DEN_DB_ENCRYPTION_KEY=daytona-den-db-encryption-key-please-change-1234567890 BETTER_AUTH_SECRET=local-dev-secret-not-for-production-use!! BETTER_AUTH_URL=http://localhost:3005 pnpm exec tsx scripts/seed-demo-org.ts --reset'
 ```
 
 3. Start Electron against the printed Den Web/API URLs:
@@ -412,7 +412,7 @@ bash .devcontainer/test-on-daytona.sh <branch-or-commit> --den-base-url <DEN_WEB
 ```
 
 4. Sign in from Electron using the seeded demo account. Create a desktop handoff
-grant from the Den API, paste the `openwork://den-auth?...` URL into Cloud
+grant from the Den API, paste the `redrob://den-auth?...` URL into Cloud
 Account -> `Paste sign-in code`, and choose `Acme Robotics`:
 ```bash
 TOKEN=$(curl -s -X POST '<DEN_API_URL>/api/auth/sign-in/email' -H 'content-type: application/json' --data '{"email":"alex@acme.test","password":"OpenWorkDemo123!"}' | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).token))')

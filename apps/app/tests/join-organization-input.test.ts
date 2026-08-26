@@ -31,7 +31,7 @@ describe("join organization input classification", () => {
     expect(parseInviteLinkInput("https://den.acme.test/join-org")).toBeNull();
     expect(parseInviteLinkInput("https://den.acme.test/join-org?invite=")).toBeNull();
     expect(parseInviteLinkInput("https://den.acme.test/install?token=abc")).toBeNull();
-    expect(parseInviteLinkInput("openwork://den-auth?grant=abcdefghijkl")).toBeNull();
+    expect(parseInviteLinkInput("redrob://den-auth?grant=abcdefghijkl")).toBeNull();
     expect(parseInviteLinkInput("not a url")).toBeNull();
   });
 
@@ -44,7 +44,7 @@ describe("join organization input classification", () => {
       url: "http://localhost:3005",
       host: "localhost:3005",
     });
-    expect(parseServerUrlInput("openwork://den-auth?grant=abcdefghijkl")).toBeNull();
+    expect(parseServerUrlInput("redrob://den-auth?grant=abcdefghijkl")).toBeNull();
     expect(parseServerUrlInput("den.acme.test")).toBeNull();
     expect(parseServerUrlInput("raw-sign-in-grant-value")).toBeNull();
   });
@@ -76,17 +76,23 @@ describe("welcome one-field contract", () => {
     expect(source).toContain('clearDenSession({ includeBaseUrls: false });');
   });
 
-  test("the welcome page has one join door and no separate server-URL affordance", () => {
+  test("the welcome page has one join door and no cloud sign-in affordance", () => {
     const pageSource = readFileSync(welcomePagePath, "utf8");
     const routeSource = readFileSync(welcomeRoutePath, "utf8");
 
-    expect(pageSource).toContain('data-testid="welcome-team-signin"');
-    expect(pageSource).toContain('data-testid="welcome-use-without-cloud"');
+    // Redrob-only onboarding: get-started (create workspace) is the single
+    // primary action, plus the join-org door. The cloud-account sign-in
+    // choices were removed in favor of the Redrob API-key onboarding step.
+    expect(pageSource).toContain('data-testid="welcome-get-started"');
     expect(pageSource).toContain('data-testid="welcome-join-org"');
+    expect(pageSource).not.toContain('data-testid="welcome-team-signin"');
+    expect(pageSource).not.toContain("welcome.sign_in_cloud");
     expect(pageSource).not.toContain("OrganizationServerAffordance");
     expect(pageSource).not.toContain("organizationServerUrl");
     expect(routeSource).not.toContain("OrganizationServerAffordance");
     expect(routeSource).not.toContain("handleOrganizationServerSave");
+    expect(routeSource).not.toContain("handleTeamSignIn");
     expect(routeSource).toContain("<JoinOrganizationDialog");
+    expect(routeSource).toContain("<RedrobKeyStep");
   });
 });

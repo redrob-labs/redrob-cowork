@@ -513,11 +513,11 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       .slice(0, 1)
       .map((key) => ({ key, value: trimmedKey }));
     if (provider.source === "openwork") {
-      if (!entries.some((entry) => entry.key === "OPENWORK_API_KEY")) {
-        entries.unshift({ key: "OPENWORK_API_KEY", value: trimmedKey });
+      if (!entries.some((entry) => entry.key === "REDROB_CLOUD_API_KEY")) {
+        entries.unshift({ key: "REDROB_CLOUD_API_KEY", value: trimmedKey });
       }
       const baseUrl = readCloudProviderBaseUrl(provider);
-      if (baseUrl) entries.push({ key: "OPENWORK_INFERENCE_BASE_URL", value: baseUrl });
+      if (baseUrl) entries.push({ key: "REDROB_INFERENCE_BASE_URL", value: baseUrl });
     }
     if (entries.length === 0) return;
     await openworkClient.upsertUserEnv(entries);
@@ -892,8 +892,8 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       return false;
     }
 
-    // Prefer runtime OPENCODE_CONFIG injection (server SQLite) so OpenCode Zen
-    // and other built-in/env-backed providers can be disabled without editing
+    // Prefer runtime OPENCODE_CONFIG injection (server SQLite) so the built-in
+    // opencode and other built-in/env-backed providers can be disabled without editing
     // the user's opencode.jsonc. Fall back to project config only when the
     // managed runtime endpoint is unavailable.
     const c = options.client();
@@ -2191,13 +2191,13 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
 
     try {
-      // OpenCode Zen is built-in / env-backed. Credential removal alone leaves
-      // it connected — disable it via runtime OPENCODE_CONFIG injection.
+      // The built-in opencode provider is env-backed. Credential removal alone
+      // leaves it connected - disable it via runtime OPENCODE_CONFIG injection.
       if (resolved.toLowerCase() === DESKTOP_RESTRICTION_OPENCODE_PROVIDER_ID) {
         try {
           await removeProviderAuthCredentials(resolved);
         } catch {
-          // Zen may have no stored credentials; disable still applies.
+          // It may have no stored credentials; disable still applies.
         }
         await ensureProjectProviderDisabledState(resolved, true);
         await refreshProviders({ dispose: true });

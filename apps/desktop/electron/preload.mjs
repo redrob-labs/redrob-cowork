@@ -59,7 +59,7 @@ try {
   desktopDistribution = null;
 }
 
-contextBridge.exposeInMainWorld("__OPENWORK_ELECTRON__", {
+contextBridge.exposeInMainWorld("__REDROB_ELECTRON__", {
   invokeDesktop(command, ...args) {
     return ipcRenderer.invoke("openwork:desktop", command, ...args);
   },
@@ -215,13 +215,13 @@ contextBridge.exposeInMainWorld("__OPENWORK_ELECTRON__", {
     initialDeepLinks: [],
     platform: normalizePlatform(process.platform),
     version: process.versions.electron,
-    evalFatalBootstrapFailure: process.env.OPENWORK_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE ?? null,
+    evalFatalBootstrapFailure: process.env.REDROB_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE ?? null,
   },
 });
 
 if (
-  process.env.OPENWORK_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE
-  && (process.env.OPENWORK_EVAL_RECOVERY_CANDIDATES || process.env.OPENWORK_EVAL_RECOVERY_RELEASES)
+  process.env.REDROB_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE
+  && (process.env.REDROB_EVAL_RECOVERY_CANDIDATES || process.env.REDROB_EVAL_RECOVERY_RELEASES)
 ) {
   contextBridge.exposeInMainWorld("__openworkRecoveryControl", {
     snapshot() {

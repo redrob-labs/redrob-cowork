@@ -7,7 +7,7 @@ import {
   agentContextOrganizationConnectionSummarySchema,
   isAgentContextDiagnosticTextSafe as isSharedTextSafe,
   sanitizeAgentContextDiagnosticText as sanitizeSharedText,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 import {
   agentContextDiagnosticCheckRuntimeSchema,
   isAgentContextDiagnosticTextSafe as isLocalTextSafe,

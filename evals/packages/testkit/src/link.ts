@@ -3,11 +3,11 @@ import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
-import { allocateFreePort } from "@openwork/cdp";
-import { checkedExec, defaultDaytonaExec } from "@openwork/hosts";
+import { allocateFreePort } from "@redrob/cdp";
+import { checkedExec, defaultDaytonaExec } from "@redrob/hosts";
 import type { ChildProcess } from "node:child_process";
-import type { DenRef } from "@openwork/behaviors";
-import type { DaytonaExec } from "@openwork/hosts";
+import type { DenRef } from "@redrob/behaviors";
+import type { DaytonaExec } from "@redrob/hosts";
 
 const DAYTONA_LINK_SCRIPT = "/tmp/openwork-den-link-server.mjs";
 const DAYTONA_LINK_PID = "/tmp/openwork-den-link-server.pid";

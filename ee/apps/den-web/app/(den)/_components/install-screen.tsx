@@ -1,6 +1,6 @@
 "use client";
 
-import { detectPlatform, DownloadPlatformGrid, type DetectedPlatform, type DownloadPlatformGroup, type DownloadPlatformOption } from "@openwork/ui/react";
+import { detectPlatform, DownloadPlatformGrid, type DetectedPlatform, type DownloadPlatformGroup, type DownloadPlatformOption } from "@redrob/ui/react";
 import { Check, ChevronDown, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
@@ -25,7 +25,7 @@ type InstallConfig = {
   distribution: "cloud" | "enterprise";
 };
 
-const RETURN_TO_OPENWORK_URL = "openwork://open";
+const RETURN_TO_REDROB_URL = "redrob://open";
 const INSTALL_PLATFORMS: InstallPlatform[] = ["mac-arm64", "mac-x64", "win-x64", "linux-x64", "linux-arm64"];
 
 
@@ -439,7 +439,7 @@ export function InstallScreen() {
             ) : (
               <div className="grid gap-5 text-left">
                 <DownloadPlatformGrid groups={downloadGroups} />
-                <a className="den-button-secondary w-fit" href={RETURN_TO_OPENWORK_URL}>
+                <a className="den-button-secondary w-fit" href={RETURN_TO_REDROB_URL}>
                   I already installed OpenWork
                 </a>
               </div>

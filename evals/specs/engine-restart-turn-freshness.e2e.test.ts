@@ -7,17 +7,17 @@ import {
   evalIn,
   selectModel,
   waitFor,
-} from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop, localHost } from "@openwork/hosts";
-import { eventually, needs, test } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop, localHost } from "@redrob/hosts";
+import { eventually, needs, test } from "@redrob/testkit";
 
 const providerId = "engine-restart-freshness-mock";
 const modelId = "engine-restart-freshness-model";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "multiple sessions generate fresh replies after the bundled engine restarts"
-  : "engine restart turn freshness skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "engine restart turn freshness skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 interface TranscriptMessage {
   role: string;
@@ -148,7 +148,7 @@ function assertTranscript(
 }
 
 test.skipIf(!e2eTestsEnabled)(title, { timeout: 600_000 }, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   const runId = Date.now();
   const p1a = `P1a-${runId}`;

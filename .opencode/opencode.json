@@ -6,7 +6,7 @@
     "openwork": {
       "type": "remote",
       "enabled": true,
-      "url": "https://api.openworklabs.com/mcp/agent",
+      "url": "https://api.redrob.io/mcp/agent",
       "oauth": {}
     }
   }

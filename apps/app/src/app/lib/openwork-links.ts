@@ -22,8 +22,8 @@ export type ConnectDeepLink = {
 
 function isSupportedDeepLinkProtocol(protocol: string): boolean {
   const normalized = protocol.toLowerCase();
-  return normalized === "openwork:"
-    || normalized === "openwork-dev:"
+  return normalized === "redrob:"
+    || normalized === "redrob-dev:"
     || normalized === "https:"
     || normalized === "http:";
 }
@@ -155,7 +155,7 @@ export function parseConnectDeepLink(rawUrl: string): ConnectDeepLink | null {
   // Unlike sibling parsers, organization connect credentials only ride the
   // dedicated desktop scheme, never ordinary web URLs.
   const protocol = url.protocol.toLowerCase();
-  if (protocol !== "openwork:" && protocol !== "openwork-dev:") {
+  if (protocol !== "redrob:" && protocol !== "redrob-dev:") {
     return null;
   }
 
@@ -183,7 +183,7 @@ function normalizeDebugDeepLinkInput(rawValue: string): string {
   const trimmed = rawValue.trim();
   if (!trimmed) return "";
 
-  const directMatch = trimmed.match(/(?:openwork-dev|openwork|https?):\/\/[^\s"'<>]+/i);
+  const directMatch = trimmed.match(/(?:redrob-dev|redrob|https?):\/\/[^\s"'<>]+/i);
   if (directMatch) return directMatch[0];
 
   return trimmed;

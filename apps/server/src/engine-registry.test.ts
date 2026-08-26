@@ -25,8 +25,8 @@ type Fixture = {
 
 async function createFixture(): Promise<Fixture> {
   const root = await mkdtemp(join(tmpdir(), "openwork-engine-registry-"));
-  const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   const config = { configPath: join(root, "server.json") } as unknown as ServerConfig;
   const cleanups: Array<() => void | Promise<void>> = [];
   return {
@@ -41,8 +41,8 @@ async function createFixture(): Promise<Fixture> {
           // Best-effort cleanup.
         }
       }
-      if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+      if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
       await rm(root, { recursive: true, force: true });
     },
   };

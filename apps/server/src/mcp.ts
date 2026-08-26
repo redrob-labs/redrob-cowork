@@ -1,5 +1,5 @@
 import { minimatch } from "minimatch";
-import { resolveGlobalOpencodeConfigPath } from "@openwork/paths";
+import { resolveGlobalOpencodeConfigPath } from "@redrob/paths";
 import type { McpItem, ServerConfig } from "./types.js";
 import { sanitizeDiagnosticString } from "./diagnostic-sanitizer.js";
 import { readJsoncFile } from "./jsonc.js";
@@ -23,7 +23,7 @@ export type McpToolDeny = {
 
 type McpToolAllow = McpToolDeny;
 
-const OPENWORK_CLOUD_DIAGNOSTIC_TOOL_IDS = [
+const REDROB_CLOUD_DIAGNOSTIC_TOOL_IDS = [
   "openwork-cloud_search_capabilities",
   "openwork-cloud_execute_capability",
 ];
@@ -73,7 +73,7 @@ function getToolIdsForDiagnostics(name: string, toolIds: string[]): string[] {
 }
 
 function diagnosticToolIdsForMcp(name: string): string[] {
-  return name === "openwork-cloud" ? OPENWORK_CLOUD_DIAGNOSTIC_TOOL_IDS : [];
+  return name === "openwork-cloud" ? REDROB_CLOUD_DIAGNOSTIC_TOOL_IDS : [];
 }
 
 function permissionCandidates(name: string, toolId: string): string[] {

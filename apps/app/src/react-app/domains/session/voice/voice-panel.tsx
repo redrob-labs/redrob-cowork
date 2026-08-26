@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronDown, ChevronRight, Loader2, Mic2, MicOff, Radio, SendHorizontal, Sparkles, Square, X } from "lucide-react";
-import { PaperGrainGradient } from "@openwork/ui/react";
+import { PaperGrainGradient } from "@redrob/ui/react";
 
 import { desktopFetch } from "@/app/lib/desktop";
 import type { OpenworkServerClient, OpenworkSessionMessage } from "@/app/lib/openwork-server";
@@ -249,7 +249,7 @@ function setRealtimeDiagnostics(text: string) {
 }
 
 async function requestMacMicrophoneAccess() {
-  const ask = window.__OPENWORK_ELECTRON__?.system?.askMicrophoneAccess;
+  const ask = window.__REDROB_ELECTRON__?.system?.askMicrophoneAccess;
   if (!ask) return true;
   const result = await ask();
   if (result.platform !== "darwin") return true;

@@ -1,7 +1,7 @@
 import { expect } from "vitest";
-import { denFetch, provisionOrg } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { needs, server, test } from "@openwork/testkit";
+import { denFetch, provisionOrg } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { needs, server, test } from "@redrob/testkit";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

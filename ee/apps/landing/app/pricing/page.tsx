@@ -18,7 +18,7 @@ const pricingSchema = {
       name: "Solo",
       price: "0",
       priceCurrency: "USD",
-      url: "https://app.openworklabs.com?mode=sign-up",
+      url: "https://app.redrob.io?mode=sign-up",
       availability: "https://schema.org/InStock",
       description: "Free forever. Open source desktop app with bring-your-own-keys."
     },
@@ -27,7 +27,7 @@ const pricingSchema = {
       name: "Team Starter",
       price: "10",
       priceCurrency: "USD",
-      url: "https://app.openworklabs.com/dashboard/billing",
+      url: "https://app.redrob.io/dashboard/billing",
       availability: "https://schema.org/InStock",
       priceSpecification: {
         "@type": "UnitPriceSpecification",
@@ -41,7 +41,7 @@ const pricingSchema = {
     {
       "@type": "Offer",
       name: "Enterprise",
-      url: "https://openworklabs.com/enterprise",
+      url: "https://redrob.io/enterprise",
       description:
         "Custom pricing. SSO/SAML and SCIM, bring your own inference, desktop policies and version controls, managed deployment, custom skill development, MCP consulting, and custom commercial terms."
     }
@@ -57,7 +57,7 @@ export const metadata = {
   },
   openGraph: {
     ...baseOpenGraph,
-    url: "https://openworklabs.com/pricing"
+    url: "https://redrob.io/pricing"
   }
 };
 

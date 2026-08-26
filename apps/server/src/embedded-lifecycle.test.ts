@@ -19,11 +19,11 @@ const PROVIDER_ID = "lifecycle_anthropic";
 const PROVIDER = { id: "anthropic", name: "Anthropic", env: ["ANTHROPIC_API_KEY"] };
 const ENV_NAMES: string[] = [
   "HOME",
-  "OPENWORK_DEV_MODE",
-  "OPENWORK_RUNTIME_DB",
-  "OPENWORK_ENCRYPTION_KEY",
-  "OPENWORK_OPENCODE_BASE_URL",
-  "OPENWORK_LIFECYCLE_LOG",
+  "REDROB_DEV_MODE",
+  "REDROB_RUNTIME_DB",
+  "REDROB_ENCRYPTION_KEY",
+  "REDROB_OPENCODE_BASE_URL",
+  "REDROB_LIFECYCLE_LOG",
   "OPENCODE_MODELS_URL",
 ];
 
@@ -50,10 +50,10 @@ async function writeFakeOpencodeBin(root: string): Promise<string> {
     "import { appendFileSync } from 'node:fs';",
     "const portIndex = process.argv.indexOf('--port');",
     "const requestedPort = Number(process.argv[portIndex + 1] ?? 0);",
-    "const logPath = process.env.OPENWORK_LIFECYCLE_LOG;",
+    "const logPath = process.env.REDROB_LIFECYCLE_LOG;",
     "const append = (line) => { if (logPath) appendFileSync(logPath, `${line}\\n`); };",
-    "append(`vault-key:${process.env.OPENWORK_ENCRYPTION_KEY ? 'present' : 'absent'}`);",
-    "append(`server-url:${process.env.OPENWORK_SERVER_URL ?? ''}`);",
+    "append(`vault-key:${process.env.REDROB_ENCRYPTION_KEY ? 'present' : 'absent'}`);",
+    "append(`server-url:${process.env.REDROB_SERVER_URL ?? ''}`);",
     "const server = Bun.serve({",
     "  hostname: '127.0.0.1',",
     "  port: requestedPort,",
@@ -71,7 +71,7 @@ async function writeUnreadyOpencodeBin(root: string): Promise<string> {
   await writeFile(binPath, [
     "#!/usr/bin/env bun",
     "import { appendFileSync } from 'node:fs';",
-    "const logPath = process.env.OPENWORK_LIFECYCLE_LOG;",
+    "const logPath = process.env.REDROB_LIFECYCLE_LOG;",
     "process.on('SIGTERM', () => { if (logPath) appendFileSync(logPath, 'SIGTERM\\n'); process.exit(0); });",
     "if (logPath) appendFileSync(logPath, 'READY\\n');",
     "setInterval(() => undefined, 1000);",
@@ -88,11 +88,11 @@ async function createFixture(): Promise<Fixture> {
   const handles: EmbeddedServerHandle[] = [];
 
   process.env.HOME = join(root, "home");
-  process.env.OPENWORK_DEV_MODE = "1";
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
-  process.env.OPENWORK_LIFECYCLE_LOG = logPath;
+  process.env.REDROB_DEV_MODE = "1";
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_LIFECYCLE_LOG = logPath;
   process.env.OPENCODE_MODELS_URL = "https://catalog.example.test/models";
-  delete process.env.OPENWORK_OPENCODE_BASE_URL;
+  delete process.env.REDROB_OPENCODE_BASE_URL;
 
   return {
     root,
@@ -236,13 +236,13 @@ describe("embedded server lifecycle", () => {
 
   test.serial("does not expose the vault encryption key to managed OpenCode", async () => {
     const fixture = await createFixture();
-    process.env.OPENWORK_ENCRYPTION_KEY = "server-only-vault-key";
+    process.env.REDROB_ENCRYPTION_KEY = "server-only-vault-key";
     let managed: Awaited<ReturnType<typeof managedOpencodeModule.createManagedOpencodeServer>> | null = null;
     try {
       managed = await managedOpencodeModule.createManagedOpencodeServer({
         bin: fixture.opencodeBin,
         cwd: fixture.root,
-        env: { OPENWORK_LIFECYCLE_LOG: fixture.logPath },
+        env: { REDROB_LIFECYCLE_LOG: fixture.logPath },
       });
       expect(await logLines(fixture.logPath)).toContain("vault-key:absent");
     } finally {
@@ -259,7 +259,7 @@ describe("embedded server lifecycle", () => {
         bin,
         cwd: fixture.root,
         timeoutMs: 500,
-        env: { OPENWORK_LIFECYCLE_LOG: fixture.logPath },
+        env: { REDROB_LIFECYCLE_LOG: fixture.logPath },
       })).rejects.toThrow("Timeout waiting for OpenCode server");
       expect(await logLines(fixture.logPath)).toContain("READY");
       expect((await logLines(fixture.logPath)).filter((line) => line === "SIGTERM")).toHaveLength(1);

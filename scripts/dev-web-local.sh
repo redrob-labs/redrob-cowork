@@ -93,7 +93,7 @@ docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" down -v >/dev/null 2>&1 || 
 docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --wait mysql
 
 echo "Running Den migrations..."
-pnpm --filter @openwork-ee/den-db db:push <<'EOF'
+pnpm --filter @redrob-ee/den-db db:push <<'EOF'
 y
 EOF
 
@@ -107,7 +107,7 @@ echo "Den web:        $DEN_WEB_ORIGIN"
 (
   cd "$ROOT_DIR/ee/apps/den-controller"
   env \
-    OPENWORK_DEV_MODE=1 \
+    REDROB_DEV_MODE=1 \
     DATABASE_URL="$DATABASE_URL" \
     BETTER_AUTH_SECRET="$BETTER_AUTH_SECRET" \
     BETTER_AUTH_URL="$BETTER_AUTH_URL" \
@@ -120,13 +120,13 @@ DEN_PID=$!
 (
   cd "$ROOT_DIR/ee/apps/den-web"
   env \
-    OPENWORK_DEV_MODE=1 \
+    REDROB_DEV_MODE=1 \
     NEXT_PUBLIC_POSTHOG_KEY= \
     NEXT_PUBLIC_POSTHOG_API_KEY= \
     DEN_API_BASE="http://127.0.0.1:$DEN_API_PORT" \
     DEN_AUTH_FALLBACK_BASE="http://127.0.0.1:$DEN_API_PORT" \
     DEN_AUTH_ORIGIN="$DEN_WEB_ORIGIN" \
-    NEXT_PUBLIC_OPENWORK_AUTH_CALLBACK_URL="$DEN_WEB_ORIGIN" \
+    NEXT_PUBLIC_REDROB_AUTH_CALLBACK_URL="$DEN_WEB_ORIGIN" \
     pnpm exec next dev --hostname 0.0.0.0 --port "$DEN_WEB_PORT"
 ) &
 WEB_PID=$!

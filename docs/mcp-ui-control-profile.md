@@ -233,7 +233,7 @@ The exact list depends on the current Redrob Work route and state. Common action
 ## Requirements
 
 - **Redrob Work desktop** must be running. The MCP server connects to Redrob Work's local bridge which starts automatically when the desktop app launches.
-- **macOS** is the primary supported platform. The bridge uses Electron IPC and writes a discovery file to `~/Library/Application Support/com.differentai.openwork/`.
+- **macOS** is the primary supported platform. The bridge uses Electron IPC and writes a discovery file to `~/Library/Application Support/io.redrob.work/`.
 - The MCP server runs as a **stdio** process — your MCP client spawns it and communicates over stdin/stdout.
 
 ## How it works under the hood

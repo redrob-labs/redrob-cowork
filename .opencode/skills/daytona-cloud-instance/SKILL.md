@@ -53,7 +53,7 @@ daytona preview-url "$SERVER_SANDBOX" -p 8090
 For local and Daytona cloud testing, run Den API with:
 
 ```bash
-OPENWORK_DEV_MODE=1
+REDROB_DEV_MODE=1
 ```
 
 In dev mode, email verification is disabled by default so seeded/demo users can sign in without a real inbox. Override explicitly when needed:
@@ -106,9 +106,9 @@ origin/HMR problems.
 Build and run production Den Web in the server sandbox:
 
 ```bash
-daytona exec "$SERVER_SANDBOX" -- 'bash -lc '\''cd /workspace && pnpm --filter @openwork-ee/den-web build'\'''
+daytona exec "$SERVER_SANDBOX" -- 'bash -lc '\''cd /workspace && pnpm --filter @redrob-ee/den-web build'\'''
 daytona exec "$SERVER_SANDBOX" -- 'bash -lc '\''pkill -f "next dev --hostname 0.0.0.0 --port 3005" || true; pkill -f "next-server" || true'\'''
-daytona exec "$SERVER_SANDBOX" -- 'bash -lc '\''cd /workspace && nohup pnpm --filter @openwork-ee/den-web exec next start --hostname 0.0.0.0 --port 3005 > /tmp/den-web-prod.log 2>&1 &'\'''
+daytona exec "$SERVER_SANDBOX" -- 'bash -lc '\''cd /workspace && nohup pnpm --filter @redrob-ee/den-web exec next start --hostname 0.0.0.0 --port 3005 > /tmp/den-web-prod.log 2>&1 &'\'''
 ```
 
 Then verify:

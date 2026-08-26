@@ -28,14 +28,14 @@ export const desktopPolicyDefinitions = [
     id: "allowCustomProviders",
     name: "Custom providers",
     description:
-      "Allow users to add and use models that are not deployed through OpenWork Cloud.",
+      "Allow users to add and use models that are not deployed through Redrob Cloud.",
     userNotice:
       "Your organization administrator has disabled adding custom providers.",
     defaultValue: true,
   },
   {
     id: "allowZenModel",
-    name: "Enable OpenCode Zen Models",
+    name: "Enable OpenCode Models",
     description: "Allow users to use the built in models provided by OpenCode.",
     userNotice: "Your administrator has disabled access to OpenCode Models.",
     defaultValue: true,

@@ -8,7 +8,7 @@ import {
   EGRESS_DIAGNOSTIC_RUN_HEADER,
   EGRESS_DIAGNOSTIC_SIGNATURE_HEADER,
   egressDiagnosticRunSchema,
-} from "@openwork/types/den/egress-diagnostics"
+} from "@redrob/types/den/egress-diagnostics"
 import { runEgressDiagnostic } from "../src/egress-diagnostics"
 
 const origin = "https://diagnostic.openwork.test"
@@ -32,7 +32,7 @@ function expectConfiguredOrigin(expectedOrigin: string, configuredOrigin?: strin
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: "https://den.openwork.test",
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       TEST_EXPECTED_ORIGIN: expectedOrigin,
       ...(configuredOrigin ? { DEN_DIAGNOSTICS_ORIGIN: configuredOrigin } : {}),
@@ -93,7 +93,7 @@ function healthyDiagnosticFetch(seen: Request[]): typeof fetch {
 
 describe("Den private-cloud egress diagnostic", () => {
   test("defaults to the OpenWork Labs diagnostic host and accepts an operator override", () => {
-    expectConfiguredOrigin("https://diagnostic.openworklabs.com")
+    expectConfiguredOrigin("https://diagnostic.redrob.io")
     expectConfiguredOrigin("https://diagnostic.customer.example", "https://diagnostic.customer.example/")
   })
 

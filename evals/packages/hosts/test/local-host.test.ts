@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { allocateFreePort } from "@openwork/cdp";
+import { allocateFreePort } from "@redrob/cdp";
 import { electronProfilePaths, electronSurfaceEnv, freePort, resolveChromeBinary } from "../src/local.ts";
 
 const ENV_KEYS = [
@@ -14,20 +14,20 @@ const ENV_KEYS = [
   "HOME",
   "LOCALAPPDATA",
   "OPENCODE_CONFIG_DIR",
-  "OPENWORK_DATA_DIR",
-  "OPENWORK_DESKTOP_BOOTSTRAP_PATH",
-  "OPENWORK_DESKTOP_DISABLE_WORKSPACE_RECOVERY",
-  "OPENWORK_DEV_MODE",
-  "OPENWORK_ELECTRON_APP_IDENTIFIER",
-  "OPENWORK_ELECTRON_APP_NAME",
-  "OPENWORK_ELECTRON_DISABLE_PROTOCOL_REGISTRATION",
-  "OPENWORK_ELECTRON_REMOTE_DEBUG_PORT",
-  "OPENWORK_ELECTRON_SKIP_SHARED_PREPARE",
-  "OPENWORK_ELECTRON_USE_MOCK_KEYCHAIN",
-  "OPENWORK_ELECTRON_USERDATA",
-  "OPENWORK_ENV_STORE",
+  "REDROB_DATA_DIR",
+  "REDROB_DESKTOP_BOOTSTRAP_PATH",
+  "REDROB_DESKTOP_DISABLE_WORKSPACE_RECOVERY",
+  "REDROB_DEV_MODE",
+  "REDROB_ELECTRON_APP_IDENTIFIER",
+  "REDROB_ELECTRON_APP_NAME",
+  "REDROB_ELECTRON_DISABLE_PROTOCOL_REGISTRATION",
+  "REDROB_ELECTRON_REMOTE_DEBUG_PORT",
+  "REDROB_ELECTRON_SKIP_SHARED_PREPARE",
+  "REDROB_ELECTRON_USE_MOCK_KEYCHAIN",
+  "REDROB_ELECTRON_USERDATA",
+  "REDROB_ENV_STORE",
   "PORT",
-  "VITE_DISABLE_OPENWORK_MODELS",
+  "VITE_DISABLE_REDROB_MODELS",
   "XDG_CACHE_HOME",
   "XDG_CONFIG_HOME",
   "XDG_DATA_HOME",
@@ -65,7 +65,7 @@ test("electronSurfaceEnv matches the isolated Electron demo contract", () => {
   const paths = electronProfilePaths(root);
   const env = electronSurfaceEnv(paths, {
     appName: "OpenWork Eval probe",
-    appIdentifier: "com.differentai.openwork.eval.probe",
+    appIdentifier: "io.redrob.work.eval.probe",
     port: 5123,
     cdpPort: 9123,
   });
@@ -80,17 +80,17 @@ test("electronSurfaceEnv matches the isolated Electron demo contract", () => {
   assert.equal(env.APPDATA, paths.appDataDir);
   assert.equal(env.HOME, paths.homeDir);
   assert.equal(env.LOCALAPPDATA, paths.localAppDataDir);
-  assert.equal(env.OPENWORK_DATA_DIR, paths.dataDir);
-  assert.equal(env.OPENWORK_DESKTOP_BOOTSTRAP_PATH, paths.bootstrapPath);
-  assert.equal(env.OPENWORK_ENV_STORE, paths.envStorePath);
+  assert.equal(env.REDROB_DATA_DIR, paths.dataDir);
+  assert.equal(env.REDROB_DESKTOP_BOOTSTRAP_PATH, paths.bootstrapPath);
+  assert.equal(env.REDROB_ENV_STORE, paths.envStorePath);
   assert.equal(env.OPENCODE_CONFIG_DIR, paths.opencodeConfigDir);
-  assert.equal(env.OPENWORK_ELECTRON_USERDATA, paths.userDataDir);
+  assert.equal(env.REDROB_ELECTRON_USERDATA, paths.userDataDir);
   assert.equal(env.PORT, "5123");
-  assert.equal(env.OPENWORK_ELECTRON_REMOTE_DEBUG_PORT, "9123");
-  assert.equal(env.OPENWORK_ELECTRON_APP_NAME, "OpenWork Eval probe");
-  assert.equal(env.OPENWORK_ELECTRON_APP_IDENTIFIER, "com.differentai.openwork.eval.probe");
-  assert.equal(env.OPENWORK_ELECTRON_SKIP_SHARED_PREPARE, "1");
-  assert.equal(env.OPENWORK_ELECTRON_USE_MOCK_KEYCHAIN, "1");
+  assert.equal(env.REDROB_ELECTRON_REMOTE_DEBUG_PORT, "9123");
+  assert.equal(env.REDROB_ELECTRON_APP_NAME, "OpenWork Eval probe");
+  assert.equal(env.REDROB_ELECTRON_APP_IDENTIFIER, "io.redrob.work.eval.probe");
+  assert.equal(env.REDROB_ELECTRON_SKIP_SHARED_PREPARE, "1");
+  assert.equal(env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN, "1");
   assert.equal(env.XDG_CACHE_HOME, paths.cacheHome);
   assert.equal(env.XDG_CONFIG_HOME, paths.configHome);
   assert.equal(env.XDG_DATA_HOME, paths.dataHome);

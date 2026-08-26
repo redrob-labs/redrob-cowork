@@ -18,7 +18,7 @@ const execFileAsync = promisify(execFile);
 test("normal launches remain unchanged", () => {
   const env = {
     HOME: "/Users/installed",
-    OPENWORK_DESKTOP_BOOTSTRAP_PATH: "/Users/installed/.config/openwork/desktop-bootstrap.json",
+    REDROB_DESKTOP_BOOTSTRAP_PATH: "/Users/installed/.config/openwork/desktop-bootstrap.json",
   };
   const originalEnv = { ...env };
   const profile = prepareBlankSlateProfile({
@@ -67,7 +67,7 @@ test("blank-slate launches receive unique temporary roots and a visible name", a
     assert.ok(first.rootPath.startsWith(tmpdir()));
     assert.notEqual(first.rootPath, second.rootPath);
     assert.ok(first.userDataPath.startsWith(first.rootPath));
-    assert.ok(!first.rootPath.includes("com.differentai.openwork"));
+    assert.ok(!first.rootPath.includes("io.redrob.work"));
   } finally {
     await Promise.all([
       rm(first.rootPath, { recursive: true, force: true }),
@@ -94,13 +94,13 @@ test("process profile hides an installed bootstrap before workspace-store loads"
     try {
       const store = createWorkspaceStore({
         app: { getPath: () => processBlankSlateProfile.userDataPath },
-        defaultDenBaseUrl: "https://api.openworklabs.com",
+        defaultDenBaseUrl: "https://api.redrob.io",
         defaultRequireSignin: true,
         forceRequireSignin: true,
       });
       console.log(JSON.stringify({
         bootstrap: store.readDesktopBootstrapConfigSync(),
-        bootstrapPath: process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH,
+        bootstrapPath: process.env.REDROB_DESKTOP_BOOTSTRAP_PATH,
         rootPath: processBlankSlateProfile.rootPath,
       }));
     } finally {
@@ -112,12 +112,12 @@ test("process profile hides an installed bootstrap before workspace-store loads"
     const { stdout } = await execFileAsync(process.execPath, ["--input-type=module", "--eval", script], {
       env: {
         ...process.env,
-        OPENWORK_DESKTOP_BOOTSTRAP_PATH: installedBootstrapPath,
+        REDROB_DESKTOP_BOOTSTRAP_PATH: installedBootstrapPath,
       },
     });
     const result = JSON.parse(stdout);
     assert.deepEqual(result.bootstrap, {
-      baseUrl: "https://api.openworklabs.com",
+      baseUrl: "https://api.redrob.io",
       requireSignin: true,
       fromFile: false,
     });
@@ -138,8 +138,8 @@ function registerPlatformIsolationTest(platform, temporaryDirectory, rootPath) {
     const paths = platform === "win32" ? path.win32 : path.posix;
     const env = {
       HOME: paths.join(paths.parse(rootPath).root, "installed", "home"),
-      OPENWORK_DESKTOP_DISTRIBUTION: "enterprise",
-      OPENWORK_SERVER_CONFIG: paths.join(paths.parse(rootPath).root, "installed", "server.json"),
+      REDROB_DESKTOP_DISTRIBUTION: "enterprise",
+      REDROB_SERVER_CONFIG: paths.join(paths.parse(rootPath).root, "installed", "server.json"),
     };
     const createdDirectories = [];
     const profile = prepareBlankSlateProfile({
@@ -155,8 +155,8 @@ function registerPlatformIsolationTest(platform, temporaryDirectory, rootPath) {
     });
 
     assert.ok(profile);
-    assert.equal(env.OPENWORK_DESKTOP_DISTRIBUTION, "enterprise");
-    assert.ok(!Object.hasOwn(env, "OPENWORK_DEV_MODE"));
+    assert.equal(env.REDROB_DESKTOP_DISTRIBUTION, "enterprise");
+    assert.ok(!Object.hasOwn(env, "REDROB_DEV_MODE"));
     assert.equal(env.HOME, profile.homePath);
     assert.equal(env.USERPROFILE, profile.homePath);
     for (const key of BLANK_SLATE_PATH_ENV_KEYS) {

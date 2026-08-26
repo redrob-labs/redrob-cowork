@@ -26,8 +26,8 @@ function resolveDefaultServerUrl(): string {
   if (isDesktopRuntime()) return "http://127.0.0.1:4096";
 
   const openworkUrl =
-    typeof import.meta.env?.VITE_OPENWORK_URL === "string"
-      ? import.meta.env.VITE_OPENWORK_URL.trim()
+    typeof import.meta.env?.VITE_REDROB_URL === "string"
+      ? import.meta.env.VITE_REDROB_URL.trim()
       : "";
   if (openworkUrl) {
     return `${openworkUrl.replace(/\/+$/, "")}/opencode`;

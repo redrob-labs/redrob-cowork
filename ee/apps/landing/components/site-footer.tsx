@@ -31,7 +31,7 @@ export function SiteFooter() {
             Desktop
           </Link>
           <a
-            href="https://app.openworklabs.com"
+            href="https://app.redrob.io"
             target="_blank"
             rel="noreferrer"
             className="whitespace-nowrap transition-colors hover:text-gray-800"

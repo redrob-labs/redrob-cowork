@@ -22,7 +22,7 @@ import {
 
 const originalWindow = globalThis.window;
 const originalFetch = globalThis.fetch;
-const originalDeployment = process.env.VITE_OPENWORK_DEPLOYMENT;
+const originalDeployment = process.env.VITE_REDROB_DEPLOYMENT;
 
 function restoreEnv(key: string, value: string | undefined) {
   if (value === undefined) delete process.env[key];
@@ -104,9 +104,9 @@ function installWindow(options: {
       setTimeout: () => 1,
       clearTimeout: () => undefined,
       location: { origin: options.origin },
-      __OPENWORK_GATEWAY__: options.gateway ? { version: 1 } : undefined,
-      __OPENWORK_BOOTSTRAP__: options.bootstrapToken ? { token: options.bootstrapToken } : undefined,
-      __OPENWORK_ELECTRON__: electronBridgeInstalled
+      __REDROB_GATEWAY__: options.gateway ? { version: 1 } : undefined,
+      __REDROB_BOOTSTRAP__: options.bootstrapToken ? { token: options.bootstrapToken } : undefined,
+      __REDROB_ELECTRON__: electronBridgeInstalled
         ? {
             invokeDesktop: async (command: string) => {
               if (command !== "openworkServerInfo") {
@@ -135,7 +135,7 @@ function installWindow(options: {
 
 describe("gateway runtime mode", () => {
   beforeEach(() => {
-    process.env.VITE_OPENWORK_DEPLOYMENT = "web";
+    process.env.VITE_REDROB_DEPLOYMENT = "web";
   });
 
   afterEach(() => {
@@ -148,14 +148,14 @@ describe("gateway runtime mode", () => {
       value: originalFetch,
     });
     if (originalDeployment === undefined) {
-      delete process.env.VITE_OPENWORK_DEPLOYMENT;
+      delete process.env.VITE_REDROB_DEPLOYMENT;
     } else {
-      process.env.VITE_OPENWORK_DEPLOYMENT = originalDeployment;
+      process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
     }
   });
 
   test("resolves OpenWork server traffic through the gateway origin with the Den session token", async () => {
-    const storage = installWindow({ origin: "https://web.openworklabs.com", gateway: true });
+    const storage = installWindow({ origin: "https://web.redrob.io", gateway: true });
     storage.setItem("openwork.den.authToken", "den-session-token");
     storage.setItem("openwork.server.urlOverride", "https://direct-instance.example.com");
     storage.setItem("openwork.server.token", "stale-instance-token");
@@ -163,7 +163,7 @@ describe("gateway runtime mode", () => {
     const connection = await resolveOpenworkConnection();
 
     expect(connection).toEqual({
-      normalizedBaseUrl: "https://web.openworklabs.com",
+      normalizedBaseUrl: "https://web.redrob.io",
       resolvedToken: "den-session-token",
       resolvedHostToken: "",
       hostInfo: null,
@@ -173,14 +173,14 @@ describe("gateway runtime mode", () => {
 
   test("keeps Den web on the configured origin and Den API calls on the gateway origin", () => {
     const storage = installWindow({ origin: "https://gw.example", gateway: true });
-    storage.setItem("openwork.den.baseUrl", "https://app.openworklabs.com");
+    storage.setItem("openwork.den.baseUrl", "https://app.redrob.io");
     storage.setItem("openwork.den.authToken", "den-session-token");
 
     expect(resolveDenBaseUrls("https://gw.example")).toEqual({
-      baseUrl: "https://app.openworklabs.com",
+      baseUrl: "https://app.redrob.io",
       apiBaseUrl: "https://gw.example/api/den",
     });
-    expect(readDenSettings().baseUrl).toBe("https://app.openworklabs.com");
+    expect(readDenSettings().baseUrl).toBe("https://app.redrob.io");
     expect(readDenSettings().apiBaseUrl).toBe("https://gw.example/api/den");
     expect(readDenSettings().authToken).toBe("den-session-token");
   });
@@ -190,7 +190,7 @@ describe("gateway runtime mode", () => {
 
     const authUrl = new URL(buildDenAuthUrl(readDenSettings().baseUrl, "sign-up"));
 
-    expect(authUrl.origin).toBe("https://app.openworklabs.com");
+    expect(authUrl.origin).toBe("https://app.redrob.io");
     expect(authUrl.searchParams.get("mode")).toBe("sign-up");
     expect(authUrl.searchParams.get("webAuth")).toBe("1");
     expect(authUrl.searchParams.get("webAuthReturn")).toBe("https://gw.example");
@@ -218,7 +218,7 @@ describe("gateway runtime mode", () => {
     await client.getSession();
 
     expect(requestedUrls).toEqual([
-      "https://app.openworklabs.com/api/auth/sign-in/email",
+      "https://app.redrob.io/api/auth/sign-in/email",
       "https://gw.example/api/den/v1/me",
     ]);
   });
@@ -230,19 +230,19 @@ describe("gateway runtime mode", () => {
   });
 
   test("returns a stable gateway bootstrap snapshot for React external stores", () => {
-    installWindow({ origin: "https://web.openworklabs.com", gateway: true });
+    installWindow({ origin: "https://web.redrob.io", gateway: true });
 
     const first = readDenBootstrapConfig();
     const second = readDenBootstrapConfig();
 
     expect(second).toBe(first);
-    expect(first.baseUrl).toBe("https://app.openworklabs.com");
-    expect(first.apiBaseUrl).toBe("https://web.openworklabs.com/api/den");
+    expect(first.baseUrl).toBe("https://app.redrob.io");
+    expect(first.apiBaseUrl).toBe("https://web.redrob.io/api/den");
   });
 
   test("does not hydrate an instance bootstrap token into server storage behind the gateway", () => {
     const storage = installWindow({
-      origin: "https://web.openworklabs.com",
+      origin: "https://web.redrob.io",
       gateway: true,
       bootstrapToken: "instance-token-must-not-store",
     });
@@ -317,7 +317,7 @@ describe("gateway runtime mode", () => {
 
 describe("non-gateway connection modes", () => {
   beforeEach(() => {
-    process.env.VITE_OPENWORK_DEPLOYMENT = "web";
+    process.env.VITE_REDROB_DEPLOYMENT = "web";
   });
 
   afterEach(() => {
@@ -330,9 +330,9 @@ describe("non-gateway connection modes", () => {
       value: originalFetch,
     });
     if (originalDeployment === undefined) {
-      delete process.env.VITE_OPENWORK_DEPLOYMENT;
+      delete process.env.VITE_REDROB_DEPLOYMENT;
     } else {
-      process.env.VITE_OPENWORK_DEPLOYMENT = originalDeployment;
+      process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
     }
   });
 
@@ -350,17 +350,17 @@ describe("non-gateway connection modes", () => {
 
   test("force-env settings overwrite stale localStorage openwork-server credentials", () => {
     const previous = {
-      url: process.env.VITE_OPENWORK_URL,
-      port: process.env.VITE_OPENWORK_PORT,
-      token: process.env.VITE_OPENWORK_TOKEN,
-      hostToken: process.env.VITE_OPENWORK_HOST_TOKEN,
-      force: process.env.VITE_OPENWORK_FORCE_ENV_SETTINGS,
+      url: process.env.VITE_REDROB_URL,
+      port: process.env.VITE_REDROB_PORT,
+      token: process.env.VITE_REDROB_TOKEN,
+      hostToken: process.env.VITE_REDROB_HOST_TOKEN,
+      force: process.env.VITE_REDROB_FORCE_ENV_SETTINGS,
     };
-    process.env.VITE_OPENWORK_URL = "http://127.0.0.1:8787";
-    process.env.VITE_OPENWORK_PORT = "8787";
-    process.env.VITE_OPENWORK_TOKEN = "fresh-token";
-    process.env.VITE_OPENWORK_HOST_TOKEN = "fresh-host-token";
-    process.env.VITE_OPENWORK_FORCE_ENV_SETTINGS = "1";
+    process.env.VITE_REDROB_URL = "http://127.0.0.1:8787";
+    process.env.VITE_REDROB_PORT = "8787";
+    process.env.VITE_REDROB_TOKEN = "fresh-token";
+    process.env.VITE_REDROB_HOST_TOKEN = "fresh-host-token";
+    process.env.VITE_REDROB_FORCE_ENV_SETTINGS = "1";
 
     const storage = installWindow({ origin: "http://127.0.0.1:5173" });
     storage.setItem("openwork.server.urlOverride", "http://127.0.0.1:9999");
@@ -377,27 +377,27 @@ describe("non-gateway connection modes", () => {
         remoteAccessEnabled: false,
       });
     } finally {
-      restoreEnv("VITE_OPENWORK_URL", previous.url);
-      restoreEnv("VITE_OPENWORK_PORT", previous.port);
-      restoreEnv("VITE_OPENWORK_TOKEN", previous.token);
-      restoreEnv("VITE_OPENWORK_HOST_TOKEN", previous.hostToken);
-      restoreEnv("VITE_OPENWORK_FORCE_ENV_SETTINGS", previous.force);
+      restoreEnv("VITE_REDROB_URL", previous.url);
+      restoreEnv("VITE_REDROB_PORT", previous.port);
+      restoreEnv("VITE_REDROB_TOKEN", previous.token);
+      restoreEnv("VITE_REDROB_HOST_TOKEN", previous.hostToken);
+      restoreEnv("VITE_REDROB_FORCE_ENV_SETTINGS", previous.force);
     }
   });
 
   test("force-env without a VITE host token clears a leftover browser host token", () => {
     const previous = {
-      url: process.env.VITE_OPENWORK_URL,
-      port: process.env.VITE_OPENWORK_PORT,
-      token: process.env.VITE_OPENWORK_TOKEN,
-      hostToken: process.env.VITE_OPENWORK_HOST_TOKEN,
-      force: process.env.VITE_OPENWORK_FORCE_ENV_SETTINGS,
+      url: process.env.VITE_REDROB_URL,
+      port: process.env.VITE_REDROB_PORT,
+      token: process.env.VITE_REDROB_TOKEN,
+      hostToken: process.env.VITE_REDROB_HOST_TOKEN,
+      force: process.env.VITE_REDROB_FORCE_ENV_SETTINGS,
     };
-    process.env.VITE_OPENWORK_URL = "http://127.0.0.1:8787";
-    process.env.VITE_OPENWORK_PORT = "8787";
-    process.env.VITE_OPENWORK_TOKEN = "fresh-token";
-    delete process.env.VITE_OPENWORK_HOST_TOKEN;
-    process.env.VITE_OPENWORK_FORCE_ENV_SETTINGS = "1";
+    process.env.VITE_REDROB_URL = "http://127.0.0.1:8787";
+    process.env.VITE_REDROB_PORT = "8787";
+    process.env.VITE_REDROB_TOKEN = "fresh-token";
+    delete process.env.VITE_REDROB_HOST_TOKEN;
+    process.env.VITE_REDROB_FORCE_ENV_SETTINGS = "1";
 
     const storage = installWindow({ origin: "http://127.0.0.1:5178" });
     storage.setItem("openwork.server.hostToken", "leaked-host-token");
@@ -407,11 +407,11 @@ describe("non-gateway connection modes", () => {
       expect(readOpenworkServerSettings().hostToken).toBeUndefined();
       expect(storage.getItem("openwork.server.hostToken")).toBeNull();
     } finally {
-      restoreEnv("VITE_OPENWORK_URL", previous.url);
-      restoreEnv("VITE_OPENWORK_PORT", previous.port);
-      restoreEnv("VITE_OPENWORK_TOKEN", previous.token);
-      restoreEnv("VITE_OPENWORK_HOST_TOKEN", previous.hostToken);
-      restoreEnv("VITE_OPENWORK_FORCE_ENV_SETTINGS", previous.force);
+      restoreEnv("VITE_REDROB_URL", previous.url);
+      restoreEnv("VITE_REDROB_PORT", previous.port);
+      restoreEnv("VITE_REDROB_TOKEN", previous.token);
+      restoreEnv("VITE_REDROB_HOST_TOKEN", previous.hostToken);
+      restoreEnv("VITE_REDROB_FORCE_ENV_SETTINGS", previous.force);
     }
   });
 
@@ -462,20 +462,20 @@ describe("non-gateway connection modes", () => {
 
     try {
       const settings = readDenSettings();
-      expect(settings.baseUrl).toBe("https://app.openworklabs.com");
+      expect(settings.baseUrl).toBe("https://app.redrob.io");
       expect(settings.apiBaseUrl).toBe("http://127.0.0.1:5178/api/den");
 
       // Every Den client derives its API base the same way, so requests go
       // through the same-origin proxy even when created from the web base.
       const client = createDenClient({ baseUrl: settings.baseUrl, token: "den-token" });
       expect(client.baseUrls.apiBaseUrl).toBe("http://127.0.0.1:5178/api/den");
-      expect(client.baseUrls.baseUrl).toBe("https://app.openworklabs.com");
+      expect(client.baseUrls.baseUrl).toBe("https://app.redrob.io");
 
       // Sign-in still opens the real Den web app, not the proxy origin.
       // Loopback cannot use webAuth return URLs against hosted Den, so the
       // URL uses desktopAuth (copy link / paste grant) instead.
       const authUrl = new URL(buildDenAuthUrl(settings.baseUrl, "sign-in"));
-      expect(authUrl.origin).toBe("https://app.openworklabs.com");
+      expect(authUrl.origin).toBe("https://app.redrob.io");
       expect(authUrl.searchParams.get("desktopAuth")).toBe("1");
       expect(authUrl.searchParams.get("webAuth")).toBeNull();
     } finally {
@@ -488,25 +488,25 @@ describe("non-gateway connection modes", () => {
 
     const authUrl = new URL(buildDenAuthUrl(readDenSettings().baseUrl, "sign-in"));
 
-    expect(authUrl.origin).toBe("https://app.openworklabs.com");
+    expect(authUrl.origin).toBe("https://app.redrob.io");
     expect(authUrl.searchParams.get("desktopAuth")).toBe("1");
-    expect(authUrl.searchParams.get("desktopScheme")).toBe("openwork");
+    expect(authUrl.searchParams.get("desktopScheme")).toBe("redrob");
     expect(authUrl.searchParams.get("webAuth")).toBeNull();
     expect(authUrl.searchParams.get("webAuthReturn")).toBeNull();
   });
 
   test("force-env clears a stale stored Den base URL on web bootstrap init", async () => {
-    const previous = process.env.VITE_OPENWORK_FORCE_ENV_SETTINGS;
-    process.env.VITE_OPENWORK_FORCE_ENV_SETTINGS = "1";
+    const previous = process.env.VITE_REDROB_FORCE_ENV_SETTINGS;
+    process.env.VITE_REDROB_FORCE_ENV_SETTINGS = "1";
     const storage = installWindow({ origin: "http://127.0.0.1:5178" });
     storage.setItem("openwork.den.baseUrl", "http://127.0.0.1:8779");
 
     try {
       await initializeDenBootstrapConfig();
       expect(storage.getItem("openwork.den.baseUrl")).toBeNull();
-      expect(readDenSettings().baseUrl).toBe("https://app.openworklabs.com");
+      expect(readDenSettings().baseUrl).toBe("https://app.redrob.io");
     } finally {
-      restoreEnv("VITE_OPENWORK_FORCE_ENV_SETTINGS", previous);
+      restoreEnv("VITE_REDROB_FORCE_ENV_SETTINGS", previous);
     }
   });
 

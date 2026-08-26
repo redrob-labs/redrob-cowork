@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto"
-import type { AutomationClaimResult, AutomationListItem } from "@openwork/automations"
-import { AUTOMATION_MIN_CLAIM_WINDOW_MS, desktopRunnerConnected } from "@openwork/automations"
+import type { AutomationClaimResult, AutomationListItem } from "@redrob/automations"
+import { AUTOMATION_MIN_CLAIM_WINDOW_MS, desktopRunnerConnected } from "@redrob/automations"
 import type {
   AutomationDesktopRunnerCapability,
   AutomationDesktopRunnerPresence,
@@ -11,7 +11,7 @@ import type {
   AutomationAction,
   CreateAutomationDefinition,
   UpdateAutomation,
-} from "@openwork/types/automations"
+} from "@redrob/types/automations"
 import { env } from "../env.js"
 import { isActiveAutomationOwner, resolveAutomationModelAccess } from "./authority.js"
 import { shouldApplyAutomationModelAccessFailure } from "./model-attention-rollout.js"

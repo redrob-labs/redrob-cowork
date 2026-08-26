@@ -14,7 +14,7 @@ import type {
   OAuthTokens,
 } from "@modelcontextprotocol/sdk/shared/auth.js"
 import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js"
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import type { ExternalMcpConnectionRow } from "./external-mcp-connections.js"
 import {
   clearExternalMcpTokensForIdentity,

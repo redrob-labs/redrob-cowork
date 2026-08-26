@@ -13,15 +13,15 @@ import { createWorkspaceKvStore, isRecord, workspaceKvStoreCacheStatsForTests } 
 
 const WORKSPACE_ID = "ws_workspace_kv_store";
 const roots: string[] = [];
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 
 afterEach(async () => {
   while (roots.length) {
     const root = roots.pop();
     if (root) await rm(root, { recursive: true, force: true });
   }
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 function serverConfig(root: string): ServerConfig {
@@ -48,7 +48,7 @@ async function tempWorkspace(): Promise<{ root: string; dbPath: string; config: 
   const root = await mkdtemp(join(tmpdir(), "openwork-workspace-kv-store-"));
   roots.push(root);
   const dbPath = join(root, "runtime.sqlite");
-  process.env.OPENWORK_RUNTIME_DB = dbPath;
+  process.env.REDROB_RUNTIME_DB = dbPath;
   return { root, dbPath, config: serverConfig(root) };
 }
 

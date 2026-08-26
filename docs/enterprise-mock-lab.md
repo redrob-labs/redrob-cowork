@@ -76,7 +76,7 @@ From the repository root, install dependencies once, generate a fresh local admi
 pnpm install
 export ENTERPRISE_MOCK_LAB_ADMIN_SECRET="$(node -e 'console.log(require("node:crypto").randomBytes(32).toString("base64url"))')"
 printf 'Local lab admin secret: %s\n' "$ENTERPRISE_MOCK_LAB_ADMIN_SECRET"
-pnpm --filter @openwork-ee/enterprise-mock-lab dev
+pnpm --filter @redrob-ee/enterprise-mock-lab dev
 ```
 
 Open `http://127.0.0.1:8794` and paste the generated admin secret. The control plane starts with no mock instances; creating an instance does not start it automatically.
@@ -349,11 +349,11 @@ No single test is allowed to stand in for all the others.
 
 | Layer | What it proves | Command or owner |
 | --- | --- | --- |
-| Contract/unit | Scenario schema, profile provenance, fault applicability, revisions, redaction, deterministic state | `pnpm --filter @openwork/enterprise-mcp-mock-server test` |
-| Package quality | Public TypeScript surface and distributable build | `pnpm --filter @openwork/enterprise-mcp-mock-server check` |
+| Contract/unit | Scenario schema, profile provenance, fault applicability, revisions, redaction, deterministic state | `pnpm --filter @redrob/enterprise-mcp-mock-server test` |
+| Package quality | Public TypeScript surface and distributable build | `pnpm --filter @redrob/enterprise-mcp-mock-server check` |
 | Protocol integration | OAuth discovery/token path, MCP initialize/lifecycle, pagination, tool calls, JSON/SSE, exact injected failures | Package integration tests |
-| Control-plane security | Loopback configuration, login/rate limit, session cookie, Origin/CSRF, write-only secrets, safe errors | `pnpm --filter @openwork-ee/enterprise-mock-lab test` |
-| App build | EE app imports only the public package contract and compiles as a standalone process | `pnpm --filter @openwork-ee/enterprise-mock-lab build` |
+| Control-plane security | Loopback configuration, login/rate limit, session cookie, Origin/CSRF, write-only secrets, safe errors | `pnpm --filter @redrob-ee/enterprise-mock-lab test` |
+| App build | EE app imports only the public package contract and compiles as a standalone process | `pnpm --filter @redrob-ee/enterprise-mock-lab build` |
 | Browser journey | Real lab process and browser: create, start, inject fault, match first phase, reset, recover, delete | The legacy flow runner was removed; executable coverage lives in `evals/specs/`. |
 | Future Den consumer | Den connects over the instance URL and renders the same phase/category without importing the lab | Separate follow-up PR and Den-specific tests |
 | Live-provider conformance | Target tenant, product, patch, permissions, policy, schemas, and provider IDs match reality | Approved Microsoft/ServiceNow test tenant; never silently run by this lab |

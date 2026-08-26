@@ -24,7 +24,7 @@ const sidebarItems: SidebarItem[] = [
   { label: "Web", badge: "ALPHA" },
   { label: "Extensions" },
   { label: "Models", expandable: true, screen: "models" },
-  { label: "OpenWork Models", child: true },
+  { label: "Redrob Models", child: true },
   { label: "Bring your Own Keys", child: true, screen: "models" },
   { label: "Members", screen: "members" },
   { label: "Analytics", screen: "analytics" },

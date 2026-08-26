@@ -1,6 +1,6 @@
 import { expect, onTestFinished } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
 import {
   assignPluginToMarketplace,
   clickButton,
@@ -13,10 +13,10 @@ import {
   readResolvedMarketplace,
   signIn,
   waitFor,
-} from "@openwork/behaviors";
-import type { DenRef, DenSession } from "@openwork/behaviors";
-import { localMysqlIsRunning, needs, selfHostServer, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenRef, DenSession } from "@redrob/behaviors";
+import { localMysqlIsRunning, needs, selfHostServer, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * CORE JOURNEY: a truly empty, self-hosted-shaped Den is claimed by its configured
@@ -30,14 +30,14 @@ import type { TestNeeds } from "@openwork/testkit";
  * authorized after it.
  */
 
-const requirements: TestNeeds = { optIn: ["OPENWORK_EVAL_E2E_TESTS"] };
+const requirements: TestNeeds = { optIn: ["REDROB_EVAL_E2E_TESTS"] };
 const missingRequirements = unmetNeeds(requirements, process.env);
-const daytonaPlacement = process.env.OPENWORK_EVAL_DAYTONA === "1";
+const daytonaPlacement = process.env.REDROB_EVAL_DAYTONA === "1";
 const mysqlOpen = await localMysqlIsRunning();
 const title = missingRequirements.length > 0
   ? `self-host onboarding skipped — needs: ${missingRequirements.join(", ")}`
   : daytonaPlacement
-    ? "self-host onboarding skipped — needs: local placement (unset OPENWORK_EVAL_DAYTONA)"
+    ? "self-host onboarding skipped — needs: local placement (unset REDROB_EVAL_DAYTONA)"
     : !mysqlOpen
       ? "self-host onboarding skipped — needs: MySQL on 127.0.0.1:3306"
       : "a fresh self-hosted Den onboards its first owner, constrains the org, and serves the skill-sharing journey";

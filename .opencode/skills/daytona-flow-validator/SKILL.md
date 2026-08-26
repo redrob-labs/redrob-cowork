@@ -25,7 +25,7 @@ action must follow this loop:
 
 If any assertion is missing, the flow is not validated yet.
 
-Use the relevant `evals/specs/**/*.test.ts` test with `@openwork/testkit` for a
+Use the relevant `evals/specs/**/*.test.ts` test with `@redrob/testkit` for a
 verdict because it binds assertions and captures into one ambient test run.
 App-driving E2E tests use `.e2e.test.ts`. Use manual CDP only to debug; use
 `write-a-spec` for new repeatable coverage and `run-tests` to execute it.

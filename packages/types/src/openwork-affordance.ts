@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const OPENWORK_AFFORDANCE_SCHEMA_VERSION = 1
+export const REDROB_AFFORDANCE_SCHEMA_VERSION = 1
 
 export const openworkAffordanceKindSchema = z.enum(["query", "command", "guidance"])
 export type OpenworkAffordanceKind = z.infer<typeof openworkAffordanceKindSchema>

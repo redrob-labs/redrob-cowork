@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { EnterpriseMcpProfileId } from "@openwork/labs";
+import type { EnterpriseMcpProfileId } from "@redrob/labs";
 
 export interface WorldPerson {
   email?: string;
@@ -122,7 +122,7 @@ const worldAppSchema = z.strictObject({
   sessions: z.array(z.string().trim().min(1)).max(30).readonly().optional(),
 });
 
-// Keep these values aligned with EnterpriseMcpProfileId in @openwork/labs.
+// Keep these values aligned with EnterpriseMcpProfileId in @redrob/labs.
 const enterpriseMcpProfileIdSchema = z.enum([
   "synthetic-enterprise-oauth-mcp",
   "servicenow-inbound-quickstart",

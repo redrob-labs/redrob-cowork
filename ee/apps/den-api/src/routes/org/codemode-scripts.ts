@@ -8,7 +8,7 @@ import {
   workflowTestResultSchema,
   workflowVersionSchema,
   generatedArtifactViewSchema,
-} from "@openwork/types/workflows"
+} from "@redrob/types/workflows"
 import {
   createWorkflowVersion,
   deleteWorkflowSnapshotContent,

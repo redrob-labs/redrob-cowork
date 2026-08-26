@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Generates a dedicated Ed25519 keypair for signing connect links
-// (openwork://connect?token=<JWT>).
+// (redrob://connect?token=<JWT>).
 //
 //   node scripts/generate-connect-link-keypair.mjs [kid]
 //

@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto"
 import { Daytona, DaytonaConflictError, type CreateSandboxFromImageParams, type CreateSandboxFromSnapshotParams, type Sandbox } from "@daytonaio/sdk"
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { DaytonaSandboxTable, WorkerTable } from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { DaytonaSandboxTable, WorkerTable } from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { db } from "../db.js"
 import { env } from "../env.js"
 import { appLogger } from "../observability/logger.js"
@@ -333,8 +333,8 @@ function checkpointEnvironmentScript() {
   // It was missing from the checkpoint, so every recycle onto a new snapshot
   // started the user from scratch. Resolved from $HOME in-shell so it tracks
   // the image instead of a hardcoded /root.
-  return `ENGINE_STATE_PATH=\${OPENWORK_ENGINE_STATE_PATH:-\$HOME/.local/share/opencode}
-OPENWORK_STATE_MANIFEST="${checkpointStateManifest()} \$ENGINE_STATE_PATH"
+  return `ENGINE_STATE_PATH=\${REDROB_ENGINE_STATE_PATH:-\$HOME/.local/share/opencode}
+REDROB_STATE_MANIFEST="${checkpointStateManifest()} \$ENGINE_STATE_PATH"
 CHECKPOINT_DIR=${shellQuote(checkpointDir())}
 RESTORE_MARKER=${shellQuote(checkpointRestoreMarkerPath())}
 LAST_FLUSH_MARKER=${shellQuote(checkpointLastFlushMarkerPath())}
@@ -348,7 +348,7 @@ function checkpointFlushFunctions(input: { failOnError: boolean }) {
   if [ ! -e "$LAST_FLUSH_MARKER" ]; then
     return 0
   fi
-  for state_path in $OPENWORK_STATE_MANIFEST; do
+  for state_path in $REDROB_STATE_MANIFEST; do
     changed_entry=$(find "$state_path" -newer "$LAST_FLUSH_MARKER" -print -quit 2>/dev/null || true)
     if [ -n "$changed_entry" ]; then
       return 0
@@ -379,7 +379,7 @@ flush_checkpoint() {
   epoch=$(date +%s)
   tmp_checkpoint=${shellQuote(env.daytona.sidecarDir)}/ckpt-$epoch.tar
   set --
-  for state_path in $OPENWORK_STATE_MANIFEST; do
+  for state_path in $REDROB_STATE_MANIFEST; do
     set -- "$@" "\${state_path#/}"
   done
   # Collapse the WAL so the copied database is self-consistent and small. Best
@@ -418,26 +418,26 @@ export function buildOpenWorkStartCommand(input: ProvisionInput) {
     "if ! command -v opencode >/dev/null 2>&1; then echo 'opencode binary missing from Daytona runtime image; rebuild and republish the Daytona snapshot' >&2; exit 1; fi",
   ].join("; ")
   const openworkServe = [
-    "OPENWORK_DATA_DIR=",
+    "REDROB_DATA_DIR=",
     shellQuote(env.daytona.runtimeDataPath),
-    " OPENWORK_SERVER_CONFIG=",
+    " REDROB_SERVER_CONFIG=",
     shellQuote(`${env.daytona.runtimeDataPath}/server.json`),
-    " OPENWORK_TOKEN=",
+    " REDROB_TOKEN=",
     shellQuote(input.clientToken),
-    " OPENWORK_HOST_TOKEN=",
+    " REDROB_HOST_TOKEN=",
     shellQuote(input.hostToken),
-    " OPENWORK_MANAGE_OPENCODE=",
+    " REDROB_MANAGE_OPENCODE=",
     shellQuote("1"),
-    " OPENWORK_OPENCODE_BIN=",
+    " REDROB_OPENCODE_BIN=",
     shellQuote("/usr/local/bin/opencode"),
-    " OPENWORK_WEB_ROOT=",
+    " REDROB_WEB_ROOT=",
     shellQuote("/opt/openwork/web"),
     // The instance still serves its own SPA copy for direct/debug access, but
     // without a bootstrap token that path is intentionally inert; the gateway
     // is the supported entry.
-    " OPENWORK_WEB_BOOTSTRAP_TOKEN=",
+    " REDROB_WEB_BOOTSTRAP_TOKEN=",
     shellQuote("0"),
-    " OPENWORK_EXTENSIONS_PLUGIN_DIR=",
+    " REDROB_EXTENSIONS_PLUGIN_DIR=",
     shellQuote("/opt/openwork/opencode-plugins"),
     " DEN_RUNTIME_PROVIDER=",
     shellQuote("daytona"),

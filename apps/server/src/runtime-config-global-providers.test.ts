@@ -45,8 +45,8 @@ async function readJsonObject(response: Response): Promise<Record<string, unknow
 async function createTempRoot() {
   const root = await mkdtemp(join(tmpdir(), "openwork-global-providers-"));
   roots.push(root);
-  previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   return root;
 }
 
@@ -76,8 +76,8 @@ afterEach(async () => {
     const root = roots.pop();
     if (root) await rm(root, { recursive: true, force: true });
   }
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 describe("global runtime providers", () => {

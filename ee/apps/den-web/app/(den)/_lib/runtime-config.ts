@@ -11,11 +11,11 @@ export type DenWebRuntimeConfig = {
   singleOrgSsoConfigured: boolean;
 };
 
-export const DEFAULT_OPENWORK_WEB_URL = "https://web.openworklabs.com";
+export const DEFAULT_REDROB_WEB_URL = "https://web.redrob.io";
 
 export const EMPTY_RUNTIME_CONFIG: DenWebRuntimeConfig = {
   openworkAppConnectUrl: "",
-  openworkWebUrl: DEFAULT_OPENWORK_WEB_URL,
+  openworkWebUrl: DEFAULT_REDROB_WEB_URL,
   openworkAuthCallbackUrl: "",
   orgMode: "single_org",
   singleOrgName: "OpenWork",
@@ -48,7 +48,7 @@ function normalizeRuntimeConfig(value: unknown): DenWebRuntimeConfig {
   const singleOrgSlug = readStringProperty(value, "singleOrgSlug");
   return {
     openworkAppConnectUrl: readStringProperty(value, "openworkAppConnectUrl"),
-    openworkWebUrl: readStringProperty(value, "openworkWebUrl") || DEFAULT_OPENWORK_WEB_URL,
+    openworkWebUrl: readStringProperty(value, "openworkWebUrl") || DEFAULT_REDROB_WEB_URL,
     openworkAuthCallbackUrl: readStringProperty(value, "openworkAuthCallbackUrl"),
     orgMode: normalizeOrgMode(readStringProperty(value, "orgMode")),
     singleOrgName: singleOrgName || "OpenWork",

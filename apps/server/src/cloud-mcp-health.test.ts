@@ -8,8 +8,8 @@ import {
   CloudMcpDeliveryStateStore,
   calculateCloudMcpDesiredRevision,
   clearOpenworkCloudMcpProbeFlights,
-  OPENWORK_CLOUD_EXPECTED_TOOLS,
-  OPENWORK_CLOUD_PLUGIN_CANARIES,
+  REDROB_CLOUD_EXPECTED_TOOLS,
+  REDROB_CLOUD_PLUGIN_CANARIES,
   readOpenworkCloudMcpHealth,
 } from "./cloud-mcp-health.js";
 import { sanitizeDiagnosticValue } from "./diagnostic-sanitizer.js";
@@ -25,7 +25,7 @@ const workspace: WorkspaceInfo = {
   workspaceType: "local",
 };
 
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 const previousFetch = globalThis.fetch;
 const roots: string[] = [];
 const runtimeDbRoots: string[] = [];
@@ -50,8 +50,8 @@ afterEach(async () => {
   } else {
     while (runtimeDbRoots.length) await rm(runtimeDbRoots.pop() ?? "", { recursive: true, force: true });
   }
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 async function createRoot(prefix: string): Promise<string> {
@@ -118,7 +118,7 @@ function startMockOpencode(initialMode: DirectProbeMode) {
       }
       if (url.pathname === "/experimental/tool/ids") {
         if (toolIdsBarrier) await toolIdsBarrier.enter();
-        return Response.json([...OPENWORK_CLOUD_EXPECTED_TOOLS, ...OPENWORK_CLOUD_PLUGIN_CANARIES]);
+        return Response.json([...REDROB_CLOUD_EXPECTED_TOOLS, ...REDROB_CLOUD_PLUGIN_CANARIES]);
       }
       if (url.pathname === "/cloud-mcp/mcp/agent" && request.method === "POST") {
         const body: unknown = await request.json();
@@ -226,7 +226,7 @@ async function setupDirectProbeHarness(mode: DirectProbeMode, workspaceIds = ["w
   const config = serverConfig(primary.path, primary);
   config.workspaces = workspaces;
   config.authorizedRoots = workspaces.map((entry) => entry.path);
-  process.env.OPENWORK_RUNTIME_DB = await createRuntimeDbPath("openwork-cloud-health-runtime-");
+  process.env.REDROB_RUNTIME_DB = await createRuntimeDbPath("openwork-cloud-health-runtime-");
   const directUrl = `${baseUrl}/cloud-mcp/mcp/agent`;
   const desiredConfig = {
     type: "remote",
@@ -317,7 +317,7 @@ describe("cloud MCP health foundation", () => {
   test("desired revisions detect token metadata change without embedding raw tokens", () => {
     const config = {
       type: "remote",
-      url: "https://api.openworklabs.com/mcp/agent",
+      url: "https://api.redrob.io/mcp/agent",
       headers: { Authorization: "Bearer owt_super_secret" },
       oauth: false,
     };
@@ -356,7 +356,7 @@ describe("cloud MCP health foundation", () => {
   test("diagnoses project and global OpenCode tool denies for exact Cloud IDs", () => {
     const denies = diagnoseMcpToolDeniesFromConfigs({
       name: "openwork-cloud",
-      toolIds: [...OPENWORK_CLOUD_EXPECTED_TOOLS],
+      toolIds: [...REDROB_CLOUD_EXPECTED_TOOLS],
       projectConfig: {
         tools: {
           "openwork-cloud_search_capabilities": false,
@@ -379,7 +379,7 @@ describe("cloud MCP health foundation", () => {
   test("project tool allows override global denies for matching Cloud tool IDs", () => {
     const denies = diagnoseMcpToolDeniesFromConfigs({
       name: "openwork-cloud",
-      toolIds: [...OPENWORK_CLOUD_EXPECTED_TOOLS],
+      toolIds: [...REDROB_CLOUD_EXPECTED_TOOLS],
       projectConfig: {
         tools: {
           "openwork-cloud_search_capabilities": true,
@@ -401,7 +401,7 @@ describe("cloud MCP health foundation", () => {
   test("plugin canary denies are not reported as Cloud tool denies", () => {
     const denies = diagnoseMcpToolDeniesFromConfigs({
       name: "openwork-cloud",
-      toolIds: [...OPENWORK_CLOUD_EXPECTED_TOOLS],
+      toolIds: [...REDROB_CLOUD_EXPECTED_TOOLS],
       projectConfig: {
         tools: {
           openwork_query: false,
@@ -423,7 +423,7 @@ describe("cloud MCP health foundation", () => {
 
     expect(health.usable).toBe(true);
     expect(health.phase).toBe("ready");
-    expect(health.tools.present.sort()).toEqual([...OPENWORK_CLOUD_EXPECTED_TOOLS].sort());
+    expect(health.tools.present.sort()).toEqual([...REDROB_CLOUD_EXPECTED_TOOLS].sort());
     expect(health.tools.missing).toEqual([]);
     expect(health.tools.direct.checked).toBe(false);
     expect(directFetchCount).toBe(0);

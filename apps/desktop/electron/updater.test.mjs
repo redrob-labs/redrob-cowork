@@ -87,7 +87,7 @@ async function registerFakeUpdaterIpc({ version }) {
 describe("staleUpdaterStatePaths", () => {
   it("targets the ShipIt cache on macOS", { skip: process.platform !== "darwin" }, () => {
     assert.deepEqual(staleUpdaterStatePaths(fakeApp), [
-      "/Users/test/Library/Caches/com.differentai.openwork.ShipIt",
+      "/Users/test/Library/Caches/io.redrob.work.ShipIt",
     ]);
   });
 
@@ -475,7 +475,7 @@ releaseDate: '2026-08-11T00:00:00.000Z'
         return "";
       } },
       env: {
-        OPENWORK_EVAL_RECOVERY_CANDIDATES: JSON.stringify([
+        REDROB_EVAL_RECOVERY_CANDIDATES: JSON.stringify([
           { version: "1.2.2", verified: false, artifactUrl: "https://tampered.invalid/openwork.dmg" },
         ]),
       },

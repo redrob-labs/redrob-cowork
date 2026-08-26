@@ -1,12 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { expect } from "vitest";
-import { listSessions } from "@openwork/behaviors";
-import { needs, soloWorkspace, startWorld, test } from "@openwork/testkit";
+import { listSessions } from "@redrob/behaviors";
+import { needs, soloWorkspace, startWorld, test } from "@redrob/testkit";
 
 const titles: readonly string[] = ["Q3 report", "Invoice cleanup"];
 
 test("a world declaratively seeds desktop sessions", { timeout: 300_000 }, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_WORLD_SESSIONS_E2E"] });
+  needs({ optIn: ["REDROB_EVAL_WORLD_SESSIONS_E2E"] });
 
   await using world = await startWorld(soloWorkspace.with({
     apps: { main: { sessions: titles } },

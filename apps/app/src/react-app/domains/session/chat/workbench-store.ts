@@ -1,4 +1,4 @@
-import type { OpenworkSessionRef } from "@openwork/types/openwork-context";
+import type { OpenworkSessionRef } from "@redrob/types/openwork-context";
 import { create } from "zustand";
 
 export type WorkbenchPane = "primary" | "secondary";

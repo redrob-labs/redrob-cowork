@@ -1,9 +1,9 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { expect, onTestFinished } from "vitest";
-import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { clickButton, control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
 const providerId = "clamp-html-errors-mock";
 const modelId = "clamp-html-errors-model";
@@ -11,10 +11,10 @@ const mcpToolName = "explode_html";
 const closingReply = "The session recovered after the failed upstream call.";
 const htmlSummary = "Upstream returned an HTML error page (502 Bad Gateway)";
 const htmlError = `<!DOCTYPE html><html><head><title>502 Bad Gateway</title></head><body><h1>502 Bad Gateway</h1>${"Z".repeat(1_024 * 1_024)}</body></html>`;
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "large HTML tool errors are summarized once without breaking the session"
-  : "large HTML tool errors skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "large HTML tool errors skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -148,7 +148,7 @@ function sendStream(response: ServerResponse, chunks: Record<string, unknown>[])
 }
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   let toolsListed = 0;
   let toolCalls = 0;
@@ -257,7 +257,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({
     name: "clamp-html-errors",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
     // Provider keys in the runner env (e.g. via infisical) would make the
     // engine register real providers and out-default the deterministic mock.
     env: {
@@ -265,8 +265,8 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
       OPENAI_API_KEY: "",
       OPENROUTER_API_KEY: "",
       GOOGLE_GENERATIVE_AI_API_KEY: "",
-      OPENWORK_API_KEY: "",
-      OPENWORK_INFERENCE_BASE_URL: "",
+      REDROB_CLOUD_API_KEY: "",
+      REDROB_INFERENCE_BASE_URL: "",
     },
   });
   const workspace = await createAndSelectWorkspace(app, {

@@ -5,7 +5,7 @@ import {
   EnterpriseMcpClientError,
   EnterpriseMcpLifecycleDeadlineError,
   EnterpriseMcpOAuthContractError,
-} from "@openwork/enterprise-mcp-client"
+} from "@redrob/enterprise-mcp-client"
 import {
   ExternalMcpDiagnosticTracker,
   catalogDiagnosticError,
@@ -1183,7 +1183,7 @@ describe("external MCP diagnostics", () => {
     expect(html).toContain("OpenWork Connect")
     expect(html).toContain("background: #f8fbff")
     expect(html).not.toContain("@keyframes")
-    expect(html).not.toContain("openwork://")
+    expect(html).not.toContain("redrob://")
     expect(html).not.toContain("Open OpenWork")
   })
 

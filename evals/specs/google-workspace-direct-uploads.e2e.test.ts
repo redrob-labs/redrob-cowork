@@ -4,11 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect } from "vitest";
-import { denFetch } from "@openwork/behaviors";
-import { startMockGoogle } from "@openwork/labs";
-import { localMysqlIsRunning, needs, server, test } from "@openwork/testkit";
-import type { DenSession } from "@openwork/behaviors";
-import type { MockGoogleHandle } from "@openwork/labs";
+import { denFetch } from "@redrob/behaviors";
+import { startMockGoogle } from "@redrob/labs";
+import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
+import type { DenSession } from "@redrob/behaviors";
+import type { MockGoogleHandle } from "@redrob/labs";
 
 /**
  * CLAIMS:
@@ -26,11 +26,11 @@ import type { MockGoogleHandle } from "@openwork/labs";
  * the extension action call plus the provider witness, not UI presentation.
  */
 
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1"
-  && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
+  && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !localPlacement
-  ? "google workspace direct uploads skipped — needs: local placement without OPENWORK_EVAL_DEN_API_URL"
+  ? "google workspace direct uploads skipped — needs: local placement without REDROB_EVAL_DEN_API_URL"
   : !mysqlOpen
     ? "google workspace direct uploads skipped — needs: MySQL on 127.0.0.1:3306"
     : "workspace paths upload directly to Google without model-visible bytes";

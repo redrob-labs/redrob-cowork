@@ -1,13 +1,13 @@
-import { denFetch } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
+import { denFetch } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
 import { expect } from "vitest";
-import { localMysqlIsRunning, needs, queryDenDatabase, server, test } from "@openwork/testkit";
+import { localMysqlIsRunning, needs, queryDenDatabase, server, test } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const localPlacement = process.env.OPENWORK_EVAL_DAYTONA !== "1" && !process.env.OPENWORK_EVAL_DEN_API_URL?.trim();
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1" && !process.env.REDROB_EVAL_DEN_API_URL?.trim();
 const mysqlOpen = await localMysqlIsRunning();
 const title = !e2eTestsEnabled
-  ? "skill authoring session freshness skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "skill authoring session freshness skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : !localPlacement
     ? "skill authoring session freshness skipped — needs a real local Den"
     : !mysqlOpen
@@ -33,7 +33,7 @@ function auth(session: DenSession, orgId?: string): Record<string, string> {
 }
 
 test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   const unique = `${Date.now().toString(36)}${process.pid.toString(36)}`;
   const organizationName = `Skill Freshness ${unique}`;

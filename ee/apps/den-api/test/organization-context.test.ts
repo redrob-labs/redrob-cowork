@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { beforeAll, expect, mock, test } from "bun:test"
 import { Hono } from "hono"
 

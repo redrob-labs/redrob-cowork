@@ -1,10 +1,10 @@
 import { expect } from "vitest";
-import { evalIn } from "@openwork/behaviors";
-import { app, mcpMock, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { evalIn } from "@redrob/behaviors";
+import { app, mcpMock, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_LOCAL_MANAGED_MCP"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_LOCAL_MANAGED_MCP"],
   placement: "local",
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
@@ -32,7 +32,7 @@ test(title, async ({ evidence, place }) => {
   const name = `local-managed-${Date.now()}`;
 
   const started = await evalIn(desktop, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
     const token = String(info?.ownerToken ?? info?.clientToken ?? "");
     if (!baseUrl || !token) return { ok: false, error: "Local server credentials unavailable" };
@@ -64,7 +64,7 @@ test(title, async ({ evidence, place }) => {
   expect(callback.ok).toBe(true);
 
   const connected = await evalIn(desktop, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
     const token = String(info?.ownerToken ?? info?.clientToken ?? "");
     const response = await fetch(

@@ -9,8 +9,8 @@
  * secret; this is a manual pre-deploy step.
  *
  * Usage:
- *   pnpm --filter @openwork-ee/den-api migrate:skills-to-plugins        # dry run
- *   pnpm --filter @openwork-ee/den-api migrate:skills-to-plugins -- --yes
+ *   pnpm --filter @redrob-ee/den-api migrate:skills-to-plugins        # dry run
+ *   pnpm --filter @redrob-ee/den-api migrate:skills-to-plugins -- --yes
  *
  * Incident recovery after the legacy tables have already been dropped:
  *   1. Restore a PlanetScale backup to a branch.
@@ -19,11 +19,11 @@
  *   3. Run against production using the PlanetScale serverless driver over HTTPS
  *      (DATABASE_URL is NOT reachable externally):
  *      DATABASE_HOST=... DATABASE_USERNAME=... DATABASE_PASSWORD=... DEN_DB_ENCRYPTION_KEY=... \
- *        pnpm --filter @openwork-ee/den-api migrate:skills-to-plugins -- --table-prefix recovered_ --yes
+ *        pnpm --filter @redrob-ee/den-api migrate:skills-to-plugins -- --table-prefix recovered_ --yes
  *   4. Drop the recovered_* tables after verifying the migrated plugins.
  */
-import { createDenDb, type DenDbMode } from "@openwork-ee/den-db"
-import { and, asc, eq, isNull, sql } from "@openwork-ee/den-db/drizzle"
+import { createDenDb, type DenDbMode } from "@redrob-ee/den-db"
+import { and, asc, eq, isNull, sql } from "@redrob-ee/den-db/drizzle"
 import {
   ConfigObjectAccessGrantTable,
   ConfigObjectTable,
@@ -34,12 +34,12 @@ import {
   PluginAccessGrantTable,
   PluginConfigObjectTable,
   PluginTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import {
-  DEFAULT_OPENWORK_MARKETPLACE_DESCRIPTION,
-  DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL,
-  DEFAULT_OPENWORK_MARKETPLACE_NAME,
+  DEFAULT_REDROB_MARKETPLACE_DESCRIPTION,
+  DEFAULT_REDROB_MARKETPLACE_LOGO_URL,
+  DEFAULT_REDROB_MARKETPLACE_NAME,
 } from "../src/routes/org/plugin-system/default-marketplaces.js"
 
 const tablePrefix = resolveTablePrefix()
@@ -255,7 +255,7 @@ async function ensureDefaultOpenWorkMarketplace(input: {
     .from(MarketplaceTable)
     .where(and(
       eq(MarketplaceTable.organizationId, input.organizationId),
-      eq(MarketplaceTable.name, DEFAULT_OPENWORK_MARKETPLACE_NAME),
+      eq(MarketplaceTable.name, DEFAULT_REDROB_MARKETPLACE_NAME),
       isNull(MarketplaceTable.deletedAt),
     ))
     .limit(1))[0]
@@ -265,9 +265,9 @@ async function ensureDefaultOpenWorkMarketplace(input: {
     await input.database.insert(MarketplaceTable).values({
       id: marketplaceId,
       organizationId: input.organizationId,
-      name: DEFAULT_OPENWORK_MARKETPLACE_NAME,
-      description: DEFAULT_OPENWORK_MARKETPLACE_DESCRIPTION,
-      logoUrl: DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL,
+      name: DEFAULT_REDROB_MARKETPLACE_NAME,
+      description: DEFAULT_REDROB_MARKETPLACE_DESCRIPTION,
+      logoUrl: DEFAULT_REDROB_MARKETPLACE_LOGO_URL,
       status: "active",
       createdByOrgMembershipId: input.createdByOrgMembershipId,
       deletedAt: null,

@@ -43,9 +43,9 @@ test("MCP JWT verification pins issuer, audience, and signing algorithm", () => 
 })
 
 test("Den JWT keys pin EdDSA and retain rotated keys during the MCP token lifetime", () => {
-  expect(getDenJwtOptions({ issuer: "https://api.openworklabs.com/api/auth" })).toEqual({
+  expect(getDenJwtOptions({ issuer: "https://api.redrob.io/api/auth" })).toEqual({
     jwt: {
-      issuer: "https://api.openworklabs.com/api/auth",
+      issuer: "https://api.redrob.io/api/auth",
     },
     jwks: {
       keyPairConfig: {

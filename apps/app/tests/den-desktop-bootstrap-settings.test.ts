@@ -67,7 +67,7 @@ describe("desktop Den bootstrap settings", () => {
       value: {
         localStorage: memoryStorage(),
         dispatchEvent: () => true,
-        __OPENWORK_ELECTRON__: {
+        __REDROB_ELECTRON__: {
           invokeDesktop: async (command: string, payload?: { baseUrl: string; apiBaseUrl?: string | null; requireSignin: boolean }) => {
             if (command === "getDesktopBootstrapConfig") return bootstrapConfig;
             if (command === "setDesktopBootstrapConfig" && payload) {
@@ -143,7 +143,7 @@ describe("desktop Den bootstrap settings", () => {
       value: {
         localStorage: memoryStorage(),
         dispatchEvent: () => true,
-        __OPENWORK_ELECTRON__: {
+        __REDROB_ELECTRON__: {
           meta: {
             desktopBootstrap: {
               baseUrl: "https://preload.example.com",

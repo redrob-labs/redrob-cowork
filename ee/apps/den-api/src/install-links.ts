@@ -1,8 +1,8 @@
-import { and, eq, gt, isNull, or } from "@openwork-ee/den-db/drizzle"
-import { InstallLinkTable } from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+import { and, eq, gt, isNull, or } from "@redrob-ee/den-db/drizzle"
+import { InstallLinkTable } from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 import { createHash, randomBytes } from "node:crypto"
-import { OPENWORK_DOWNLOAD_URL } from "./CONSTS.js"
+import { REDROB_DOWNLOAD_URL } from "./CONSTS.js"
 import { organizationInstallLinksEnabled } from "./capability-sources/install-links-rollout.js"
 import { db } from "./db.js"
 import { env } from "./env.js"
@@ -69,9 +69,9 @@ export async function resolveInvitationDownloadUrl(input: InvitationDownloadUrlI
       createdByUserId: normalizeDenTypeId("user", input.createdByUserId),
       metadata: input.metadata,
     })
-    return installLink?.installPageUrl ?? OPENWORK_DOWNLOAD_URL
+    return installLink?.installPageUrl ?? REDROB_DOWNLOAD_URL
   } catch (error) {
     logger.error("invite install link failed", { organization_id: input.organizationId, error })
-    return OPENWORK_DOWNLOAD_URL
+    return REDROB_DOWNLOAD_URL
   }
 }

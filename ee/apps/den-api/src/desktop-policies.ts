@@ -1,12 +1,12 @@
-import { and, asc, eq, inArray, isNull, or } from "@openwork-ee/den-db/drizzle"
+import { and, asc, eq, inArray, isNull, or } from "@redrob-ee/den-db/drizzle"
 import {
   DesktopPolicyMemberTable,
   DesktopPolicyTable,
   MemberTable,
   TeamMemberTable,
   TeamTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import {
   allDesktopPolicies,
   calculateEffectiveDesktopPolicy,
@@ -16,7 +16,7 @@ import {
   selectEffectiveOnboardingPromptConfig,
   type DesktopConfig,
   type DesktopPolicyValue,
-} from "@openwork/types/den/desktop-policies"
+} from "@redrob/types/den/desktop-policies"
 import { db } from "./db.js"
 
 export type DesktopPolicyId = typeof DesktopPolicyTable.$inferSelect.id

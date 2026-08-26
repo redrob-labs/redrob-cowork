@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import { briefTest, claim, testBrief } from "@openwork/testkit";
+import { briefTest, claim, testBrief } from "@redrob/testkit";
 import { normalizeWorkspaceRootPath } from "../../packages/paths/index.mjs";
 import { prepareRuntimeWorkspaceRoot } from "../../apps/desktop/electron/runtime.mjs";
 

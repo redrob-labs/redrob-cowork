@@ -5,14 +5,14 @@ import {
 } from "@modelcontextprotocol/ext-apps/server"
 import type { McpUiResourceMeta } from "@modelcontextprotocol/ext-apps"
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
-import { pluginFlowAppHtml } from "@openwork/mcp-apps/plugin-flow"
+import { pluginFlowAppHtml } from "@redrob/mcp-apps/plugin-flow"
 import {
   pluginFlowAppSchemaVersion,
   pluginFlowPayloadSchema,
   type PluginFlowPayload,
-} from "@openwork/types/plugin-flow-app"
+} from "@redrob/types/plugin-flow-app"
 
-export { pluginFlowPayloadSchema } from "@openwork/types/plugin-flow-app"
+export { pluginFlowPayloadSchema } from "@redrob/types/plugin-flow-app"
 
 export const PLUGIN_FLOW_APP_RESOURCE_URI = "ui://openwork/plugin-flow/v1/view.html"
 export const PLUGIN_FLOW_TOOL_NAME = "plugin_flow"

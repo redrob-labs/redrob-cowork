@@ -5,7 +5,7 @@ import {
   resolveDesktopPolicyDocumentWrite,
   selectEffectiveOnboardingPromptConfig,
   selectEffectiveOnboardingPrompts,
-} from "@openwork/types/den/desktop-policies";
+} from "@redrob/types/den/desktop-policies";
 import { createDenClient, normalizeDenDesktopConfig } from "../src/app/lib/den";
 import {
   CONNECT_STATE_PUSH_MAX_ATTEMPTS,

@@ -161,7 +161,7 @@ async function startManagedOpencodeServer(
   };
   // The managed engine needs its own provider environment, but never the key
   // that decrypts OpenWork-owned OAuth credentials.
-  delete env.OPENWORK_ENCRYPTION_KEY;
+  delete env.REDROB_ENCRYPTION_KEY;
   const injectedEnv = Object.entries({
     ...(options.env ?? {}),
     OPENCODE_SERVER_USERNAME: username,

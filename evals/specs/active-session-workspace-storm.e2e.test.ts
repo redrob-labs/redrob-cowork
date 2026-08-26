@@ -7,8 +7,8 @@ import {
   selectModel,
   waitFor,
   writeComposerText,
-} from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
+} from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   app,
   eventually,
@@ -22,22 +22,22 @@ import {
   server,
   sleep,
   test,
-} from "@openwork/testkit";
-import type { App } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { App } from "@redrob/testkit";
 
 const providerId = "active-session-storm-mock";
 const modelId = "mock-agent-workload-model";
 const modelName = "Active session storm model";
 const workspaceCount = 3;
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const daytonaEnabled = process.env.OPENWORK_EVAL_DAYTONA === "1";
-const configuredDen = Boolean(process.env.OPENWORK_EVAL_DEN_API_URL?.trim());
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const daytonaEnabled = process.env.REDROB_EVAL_DAYTONA === "1";
+const configuredDen = Boolean(process.env.REDROB_EVAL_DEN_API_URL?.trim());
 const localServicesRequired = !daytonaEnabled && !configuredDen;
 const mysqlOpen = await localMysqlIsRunning();
 const redisOpen = await localRedisIsRunning();
 const runnable = e2eTestsEnabled && (!localServicesRequired || (mysqlOpen && redisOpen));
 const skipSuffix = !e2eTestsEnabled
-  ? " skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? " skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : localServicesRequired && !mysqlOpen
     ? " skipped — needs MySQL on 127.0.0.1:3306"
     : localServicesRequired && !redisOpen
@@ -45,9 +45,9 @@ const skipSuffix = !e2eTestsEnabled
       : "";
 
 function workloadMinutes(): number {
-  const value = Number(process.env.OPENWORK_EVAL_ACTIVE_SESSION_STORM_MINUTES ?? "2");
+  const value = Number(process.env.REDROB_EVAL_ACTIVE_SESSION_STORM_MINUTES ?? "2");
   if (!Number.isFinite(value) || value < 1 || value > 5) {
-    throw new Error("OPENWORK_EVAL_ACTIVE_SESSION_STORM_MINUTES must be a number from 1 through 5.");
+    throw new Error("REDROB_EVAL_ACTIVE_SESSION_STORM_MINUTES must be a number from 1 through 5.");
   }
   return value;
 }
@@ -58,7 +58,7 @@ const slowToolMs = Math.round(configuredMinutes * 60_000);
 // slow tools overlap. A one-minute override remains useful for quick iteration
 // and gets a 35-second switching window so startup skew cannot make it flaky.
 const routeStormMs = Math.min(60_000, Math.max(35_000, slowToolMs - 25_000));
-const diagnosticProfileDir = process.env.OPENWORK_EVAL_ACTIVE_SESSION_STORM_PROFILE_DIR?.trim();
+const diagnosticProfileDir = process.env.REDROB_EVAL_ACTIVE_SESSION_STORM_PROFILE_DIR?.trim();
 
 interface WorkspacePlan {
   index: number;
@@ -277,7 +277,7 @@ function agentWorkloads(plans: WorkspacePlan[]) {
 
 async function listWorkspaces(desktopApp: App): Promise<WorkspaceListing> {
   const value = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { error: "local_server_unavailable" };
     const response = await fetch(String(info.baseUrl).replace(/\\/+$/, "") + "/workspaces", {
       headers: { Authorization: "Bearer " + String(info.ownerToken ?? info.clientToken ?? "") },
@@ -316,7 +316,7 @@ async function createWorkspace(desktopApp: App, path: string): Promise<string> {
 
 async function configureWorkspaces(desktopApp: App, plans: WorkspacePlan[], baseUrl: string): Promise<void> {
   const result = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { error: "local_server_unavailable" };
     const root = String(info.baseUrl).replace(/\\/+$/, "");
     const headers = {
@@ -389,7 +389,7 @@ async function openExactSessionRoute(desktopApp: App, plan: WorkspacePlan): Prom
 
 async function readSessionFacts(desktopApp: App, workspaceId: string, sessionId: string): Promise<SessionFacts> {
   const value = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { ok: false, status: 0, error: "local_server_unavailable" };
     const response = await fetch(
       String(info.baseUrl).replace(/\\/+$/, "") + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)})
@@ -454,14 +454,14 @@ async function readSurfaceFacts(desktopApp: App, marker: string): Promise<Surfac
 async function readEngineRuntimeFacts(desktopApp: App): Promise<EngineRuntimeFacts> {
   return parseEngineRuntimeFacts(await evalIn(
     desktopApp,
-    `window.__OPENWORK_ELECTRON__.invokeDesktop("runtimeStatus")`,
+    `window.__REDROB_ELECTRON__.invokeDesktop("runtimeStatus")`,
     { awaitPromise: true, timeoutMs: 15_000 },
   ));
 }
 
 async function readWorkspaceFileFacts(desktopApp: App, plan: WorkspacePlan): Promise<WorkspaceFileFacts> {
   const value = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { status: 0, content: "" };
     const response = await fetch(
       String(info.baseUrl).replace(/\\/+$/, "") + "/workspace/" + encodeURIComponent(${JSON.stringify(plan.workspaceId)})
@@ -519,7 +519,7 @@ async function allowVisibleToolPermission(desktopApp: App): Promise<boolean> {
 
 async function approvePendingToolPermissions(desktopApp: App, plan: WorkspacePlan): Promise<number> {
   const result = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { error: "local_server_unavailable" };
     const root = String(info.baseUrl).replace(/\\/+$/, "")
       + "/workspace/" + encodeURIComponent(${JSON.stringify(plan.workspaceId)}) + "/opencode";
@@ -593,7 +593,7 @@ test.skipIf(!runnable)(
   `three workspaces keep independent live tool runs through exact-route switching${skipSuffix}`,
   { timeout: 25 * 60_000 },
   async ({ evidence, place }) => {
-    needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+    needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
     const runId = `${Date.now().toString(36)}-${process.pid}`;
     const plans = buildPlans(runId);
     await using den = await server({

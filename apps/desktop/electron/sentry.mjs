@@ -54,7 +54,7 @@ function readBuildConfig(app) {
 export async function initOpenworkSentry({ app, distribution, packageMetadata }) {
   const buildConfig = readBuildConfig(app);
   const dsn = buildConfig.dsn;
-  if (!dsn || envFlagEnabled("OPENWORK_DESKTOP_SENTRY_DISABLED")) return false;
+  if (!dsn || envFlagEnabled("REDROB_DESKTOP_SENTRY_DISABLED")) return false;
 
   sentry = await import("@sentry/electron/main");
   const appVersion = resolveOpenworkSentryAppVersion({ app, packageMetadata });
@@ -64,7 +64,7 @@ export async function initOpenworkSentry({ app, distribution, packageMetadata })
   sentry.init({
     dsn,
     release,
-    environment: process.env.OPENWORK_DESKTOP_SENTRY_ENVIRONMENT?.trim() || (app.isPackaged ? "production" : "development"),
+    environment: process.env.REDROB_DESKTOP_SENTRY_ENVIRONMENT?.trim() || (app.isPackaged ? "production" : "development"),
     sendDefaultPii: false,
     integrations: (defaultIntegrations) => defaultIntegrations.filter(
       (integration) => !["BrowserWindowSession", "ElectronMinidump", "MainProcessSession", "SentryMinidump"].includes(integration.name),

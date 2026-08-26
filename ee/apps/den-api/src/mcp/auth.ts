@@ -1,7 +1,7 @@
 import * as crypto from "node:crypto"
-import { eq } from "@openwork-ee/den-db/drizzle"
-import { OAuthAccessTokenTable } from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
+import { eq } from "@redrob-ee/den-db/drizzle"
+import { OAuthAccessTokenTable } from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
 import { verifyJwsAccessToken } from "better-auth/oauth2"
 import {
   auth,

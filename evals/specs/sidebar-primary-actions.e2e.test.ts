@@ -1,13 +1,13 @@
 import { expect } from "vitest";
-import { control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "the sidebar offers New task and Notifications as primary actions, and the bell is not duplicated in the session header"
-  : "sidebar primary actions skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "sidebar primary actions skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 /** Labels of the top-level rows, which all live in the sidebar header block. */
 const primaryActionLabels = `(() => {
@@ -55,7 +55,7 @@ function sessionCount(value: unknown): number {
 }
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   await using app = await desktop({ name: "sidebar-primary-actions" });
   await createAndSelectWorkspace(app, {

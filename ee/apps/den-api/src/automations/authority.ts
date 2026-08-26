@@ -1,14 +1,14 @@
-import { and, eq, inArray, isNull, or } from "@openwork-ee/den-db/drizzle"
+import { and, eq, inArray, isNull, or } from "@redrob-ee/den-db/drizzle"
 import {
   LlmProviderAccessTable,
   LlmProviderModelTable,
   LlmProviderTable,
   MemberTable,
   TeamMemberTable,
-} from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId } from "@openwork-ee/utils/typeid"
-import { AUTOMATION_FREE_MODEL } from "@openwork/types/automations"
-import { INFERENCE_MODEL_ALIASES } from "@openwork/types/den/inference"
+} from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId } from "@redrob-ee/utils/typeid"
+import { AUTOMATION_FREE_MODEL } from "@redrob/types/automations"
+import { INFERENCE_MODEL_ALIASES } from "@redrob/types/den/inference"
 import { db } from "../db.js"
 import { calculateDesktopPolicyForOrgMember } from "../desktop-policies.js"
 
@@ -167,7 +167,7 @@ export async function resolveAutomationModelAccessWithStore(
       return {
         ok: false,
         code: "model_access_lost",
-        message: "The selected OpenCode Zen model is no longer available. Choose a supported model to resume this Automation.",
+        message: "The selected free starter model is no longer available. Choose a supported model to resume this Automation.",
       }
     }
     return {
@@ -190,10 +190,10 @@ export async function resolveAutomationModelAccessWithStore(
     }
     const provider = await store.findOpenWorkProvider(input)
     if (!provider) {
-      return { ok: false, code: "provider_unavailable", message: "OpenWork Models are not available for the Automation owner." }
+      return { ok: false, code: "provider_unavailable", message: "Redrob Models are not available for the Automation owner." }
     }
     if (!await store.canAccessProvider({ member, providerRecordId: provider.id })) {
-      return { ok: false, code: "model_access_lost", message: "The Automation owner no longer has access to OpenWork Models." }
+      return { ok: false, code: "model_access_lost", message: "The Automation owner no longer has access to Redrob Models." }
     }
     return {
       ok: true,

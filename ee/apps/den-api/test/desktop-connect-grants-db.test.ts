@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, expect, test } from "bun:test"
 
 // MySQL integration coverage for the multi-replica trust boundary. Run after
@@ -16,8 +16,8 @@ const installLinkId = createDenTypeId("installLink")
 const createdByUserId = createDenTypeId("user")
 
 let db: typeof import("../src/db.js").db
-let drizzle: typeof import("@openwork-ee/den-db/drizzle")
-let schema: typeof import("@openwork-ee/den-db/schema")
+let drizzle: typeof import("@redrob-ee/den-db/drizzle")
+let schema: typeof import("@redrob-ee/den-db/schema")
 let grants: typeof import("../src/desktop-connect-grants.js")
 
 async function clearRows() {
@@ -32,8 +32,8 @@ async function clearRows() {
 beforeAll(async () => {
   const modules = await Promise.all([
     import("../src/db.js"),
-    import("@openwork-ee/den-db/drizzle"),
-    import("@openwork-ee/den-db/schema"),
+    import("@redrob-ee/den-db/drizzle"),
+    import("@redrob-ee/den-db/schema"),
     import("../src/desktop-connect-grants.js"),
   ])
   db = modules[0].db

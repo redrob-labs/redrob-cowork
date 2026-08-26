@@ -7,7 +7,7 @@ let fromTable: unknown = null
 let joinedTables: unknown[] = []
 let findEnterpriseAuthRequirementForEmailDomain: typeof import("../src/enterprise-auth-requirement.js").findEnterpriseAuthRequirementForEmailDomain
 let resolveNonSsoSignInMethodForEmail: typeof import("../src/enterprise-auth-requirement.js").resolveNonSsoSignInMethodForEmail
-let schema: typeof import("@openwork-ee/den-db/schema")
+let schema: typeof import("@redrob-ee/den-db/schema")
 
 function createQueryBuilder() {
   const builder = {
@@ -40,7 +40,7 @@ mock.module("../src/db.js", () => ({
 
 beforeAll(async () => {
   const [schemaModule, requirementModule] = await Promise.all([
-    import("@openwork-ee/den-db/schema"),
+    import("@redrob-ee/den-db/schema"),
     import("../src/enterprise-auth-requirement.js"),
   ])
   schema = schemaModule

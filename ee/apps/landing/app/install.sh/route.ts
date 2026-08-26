@@ -8,7 +8,7 @@
 // specific bootstrap command. It does not use npm or npx.
 //
 // Usage (the docs tell users to download + inspect before running):
-//   curl -fsSLo /tmp/openwork-install.sh https://openworklabs.com/install.sh
+//   curl -fsSLo /tmp/openwork-install.sh https://redrob.io/install.sh
 //   less /tmp/openwork-install.sh
 //   sh /tmp/openwork-install.sh
 export const dynamic = "force-static";
@@ -19,9 +19,9 @@ const installScript = `#!/usr/bin/env sh
 # No admin privileges, no npm, no npx.
 set -eu
 
-CLI_URL="\${OPENWORK_BOOTSTRAP_CLI_URL:-https://openworklabs.com/openwork-bootstrap.mjs}"
-BIN_DIR="\${OPENWORK_BIN_DIR:-$HOME/.local/bin}"
-INSTALL_DIR="\${OPENWORK_INSTALL_DIR:-$HOME/.openwork/bootstrap}"
+CLI_URL="\${REDROB_BOOTSTRAP_CLI_URL:-https://redrob.io/openwork-bootstrap.mjs}"
+BIN_DIR="\${REDROB_BIN_DIR:-$HOME/.local/bin}"
+INSTALL_DIR="\${REDROB_INSTALL_DIR:-$HOME/.openwork/bootstrap}"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "openwork-bootstrap requires Node.js 20+ (node not found on PATH)." >&2

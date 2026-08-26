@@ -5,15 +5,15 @@ import {
 } from "@modelcontextprotocol/ext-apps/server"
 import type { McpUiResourceMeta } from "@modelcontextprotocol/ext-apps"
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
-import { skillCreatedAppHtml } from "@openwork/mcp-apps/skill-created"
+import { skillCreatedAppHtml } from "@redrob/mcp-apps/skill-created"
 import {
   skillCreatedAppSchemaVersion,
   skillCreatedPayloadSchema,
   type SkillCreatedPayload,
-} from "@openwork/types/skill-created-app"
+} from "@redrob/types/skill-created-app"
 import { z } from "zod"
 
-export { skillCreatedPayloadSchema } from "@openwork/types/skill-created-app"
+export { skillCreatedPayloadSchema } from "@redrob/types/skill-created-app"
 
 export const SKILL_CREATED_APP_RESOURCE_URI = "ui://openwork/skill-created/v1/view.html"
 export const CREATE_SKILL_TOOL_NAME = "create_skill"

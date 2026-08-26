@@ -1,6 +1,6 @@
 ---
 name: build-a-witness
-description: Mock a provider, add a mock, fake the API for tests. Use when building a deterministic provider witness for @openwork/testkit specs.
+description: Mock a provider, add a mock, fake the API for tests. Use when building a deterministic provider witness for @redrob/testkit specs.
 ---
 
 # Skill: Build a Witness

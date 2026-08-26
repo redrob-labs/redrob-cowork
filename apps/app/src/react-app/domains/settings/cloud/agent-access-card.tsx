@@ -19,7 +19,7 @@ import {
 } from "@/react-app/domains/settings/settings-section";
 import { useCloudSession } from "@/react-app/domains/settings/cloud/cloud-session-provider";
 import {
-  OPENWORK_CLOUD_EXPECTED_TOOLS,
+  REDROB_CLOUD_EXPECTED_TOOLS,
   clearCloudMcpDisabledIntent,
   cloudMcpDisplaySummary,
   runOpenworkCloudMcpEngineRefresh,
@@ -90,7 +90,7 @@ function missingCloudMcpContextMessage(input: {
 
 export function readyCloudMcpToolIds(health: OpenworkCloudMcpHealth | null): string[] {
   if (!health?.usable) return [];
-  return health.tools.present.filter((tool) => OPENWORK_CLOUD_EXPECTED_TOOLS.some((expected) => expected === tool));
+  return health.tools.present.filter((tool) => REDROB_CLOUD_EXPECTED_TOOLS.some((expected) => expected === tool));
 }
 
 export function AgentAccessCard(props: {

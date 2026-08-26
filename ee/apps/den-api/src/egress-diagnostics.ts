@@ -10,7 +10,7 @@ import {
   type EgressDiagnosticRun,
   type EgressDiagnosticStep,
   type EgressDiagnosticStepId,
-} from "@openwork/types/den/egress-diagnostics"
+} from "@redrob/types/den/egress-diagnostics"
 
 type DiagnosticFetch = typeof fetch
 

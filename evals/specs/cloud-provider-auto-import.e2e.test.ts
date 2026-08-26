@@ -1,8 +1,8 @@
 import { expect, onTestFinished } from "vitest";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { denFetch, evalIn, go, readAvailableModels, waitFor } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { app, needs, server, test } from "@openwork/testkit";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { denFetch, evalIn, go, readAvailableModels, waitFor } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { app, needs, server, test } from "@redrob/testkit";
 
 const ORGANIZATION_NAME = "Cloud Provider Auto Import";
 const PROVIDER_NAME = "Automatic Team Models";
@@ -80,7 +80,7 @@ async function deleteProvider(admin: DenSession, orgId: string, providerId: stri
 }
 
 test("granted cloud providers appear automatically in settings and the model picker", async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   await using den = await server({
     place,
     org: {

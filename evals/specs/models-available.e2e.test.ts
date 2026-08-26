@@ -1,7 +1,7 @@
 import { expect, onTestFinished, test } from "vitest";
-import type { Surface } from "@openwork/cdp";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
+import type { Surface } from "@redrob/cdp";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
 import {
   createAndSelectWorkspace,
   denFetch,
@@ -18,18 +18,18 @@ import {
   waitFor,
   waitForText,
   writeComposerText,
-} from "@openwork/behaviors";
-import type { DenRef, DenSession } from "@openwork/behaviors";
+} from "@redrob/behaviors";
+import type { DenRef, DenSession } from "@redrob/behaviors";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const apiUrl = process.env.OPENWORK_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
 const appTitle = e2eTestsEnabled
   ? "available models are selectable and a disappeared model blocks until recovery"
-  : "models available skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in";
+  : "models available skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in";
 const managedTitle = !e2eTestsEnabled
-  ? "managed models empty recovery skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in"
+  ? "managed models empty recovery skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in"
   : !apiUrl
-    ? "managed models empty recovery skipped: set OPENWORK_EVAL_DEN_API_URL"
+    ? "managed models empty recovery skipped: set REDROB_EVAL_DEN_API_URL"
     : "managed organization empty-models notice stays usable (live recovery after publish is a pinned defect)";
 const emptyMessage = "Your organization hasn't published any models for you yet.";
 const guidance = "The model you were using is no longer available, please select a different model for this session.";
@@ -303,11 +303,11 @@ test.skipIf(!e2eTestsEnabled)(appTitle, async () => {
 test.skipIf(!e2eTestsEnabled || !apiUrl)(managedTitle, async () => {
   const den: DenRef = {
     apiUrl,
-    webUrl: (process.env.OPENWORK_EVAL_DEN_WEB_URL?.trim() || apiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, ""),
+    webUrl: (process.env.REDROB_EVAL_DEN_WEB_URL?.trim() || apiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, ""),
   };
   const admin = await signIn(den, {
-    email: process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-    password: process.env.OPENWORK_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+    email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
   });
   const state: ManagedModelState = {
     orgId: "",

@@ -22,13 +22,13 @@ async function withIsolatedBootstrapStore(callback) {
   const xdg = path.join(root, "xdg");
   const previousHome = process.env.HOME;
   const previousXdg = process.env.XDG_CONFIG_HOME;
-  const previousOverride = process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH;
-  const previousDevMode = process.env.OPENWORK_DEV_MODE;
+  const previousOverride = process.env.REDROB_DESKTOP_BOOTSTRAP_PATH;
+  const previousDevMode = process.env.REDROB_DEV_MODE;
 
   process.env.HOME = home;
   process.env.XDG_CONFIG_HOME = xdg;
-  delete process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH;
-  delete process.env.OPENWORK_DEV_MODE;
+  delete process.env.REDROB_DESKTOP_BOOTSTRAP_PATH;
+  delete process.env.REDROB_DEV_MODE;
 
   try {
     const module = await import(`./workspace-store.mjs?bootstrap-test=${Date.now()}-${Math.random()}`);
@@ -51,8 +51,8 @@ async function withIsolatedBootstrapStore(callback) {
   } finally {
     restoreEnv("HOME", previousHome);
     restoreEnv("XDG_CONFIG_HOME", previousXdg);
-    restoreEnv("OPENWORK_DESKTOP_BOOTSTRAP_PATH", previousOverride);
-    restoreEnv("OPENWORK_DEV_MODE", previousDevMode);
+    restoreEnv("REDROB_DESKTOP_BOOTSTRAP_PATH", previousOverride);
+    restoreEnv("REDROB_DEV_MODE", previousDevMode);
   }
 }
 
@@ -77,8 +77,8 @@ test("recovers missing desktop workspace state from token store paths", async ()
     "utf8",
   );
 
-  const previous = process.env.OPENWORK_SERVER_CONFIG;
-  process.env.OPENWORK_SERVER_CONFIG = path.join(root, "missing-server.json");
+  const previous = process.env.REDROB_SERVER_CONFIG;
+  process.env.REDROB_SERVER_CONFIG = path.join(root, "missing-server.json");
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
@@ -97,8 +97,8 @@ test("recovers missing desktop workspace state from token store paths", async ()
     assert.equal(persisted.workspaces.length, 1);
     assert.equal(persisted.selectedWorkspaceId, state.workspaces[0].id);
   } finally {
-    if (previous === undefined) delete process.env.OPENWORK_SERVER_CONFIG;
-    else process.env.OPENWORK_SERVER_CONFIG = previous;
+    if (previous === undefined) delete process.env.REDROB_SERVER_CONFIG;
+    else process.env.REDROB_SERVER_CONFIG = previous;
   }
 });
 
@@ -120,8 +120,8 @@ test("keeps persisted empty desktop workspace state authoritative", async () => 
     "utf8",
   );
 
-  const previous = process.env.OPENWORK_SERVER_CONFIG;
-  process.env.OPENWORK_SERVER_CONFIG = path.join(root, "missing-server.json");
+  const previous = process.env.REDROB_SERVER_CONFIG;
+  process.env.REDROB_SERVER_CONFIG = path.join(root, "missing-server.json");
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
@@ -134,7 +134,7 @@ test("keeps persisted empty desktop workspace state authoritative", async () => 
     assert.deepEqual(state.workspaces, []);
     assert.equal(state.selectedId, "");
   } finally {
-    restoreEnv("OPENWORK_SERVER_CONFIG", previous);
+    restoreEnv("REDROB_SERVER_CONFIG", previous);
   }
 });
 
@@ -158,8 +158,8 @@ test("prefers server config workspaces when desktop state is missing", async () 
     "utf8",
   );
 
-  const previous = process.env.OPENWORK_SERVER_CONFIG;
-  process.env.OPENWORK_SERVER_CONFIG = serverConfig;
+  const previous = process.env.REDROB_SERVER_CONFIG;
+  process.env.REDROB_SERVER_CONFIG = serverConfig;
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
@@ -173,18 +173,18 @@ test("prefers server config workspaces when desktop state is missing", async () 
     assert.equal(state.workspaces[0].path, oldWorkspaceReal);
     assert.equal(state.workspaces[0].name, "From Server");
   } finally {
-    if (previous === undefined) delete process.env.OPENWORK_SERVER_CONFIG;
-    else process.env.OPENWORK_SERVER_CONFIG = previous;
+    if (previous === undefined) delete process.env.REDROB_SERVER_CONFIG;
+    else process.env.REDROB_SERVER_CONFIG = previous;
   }
 });
 
 test("does not create a default workspace when desktop state is absent", async () => {
   const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
   const userData = path.join(root, "userData");
-  const previousDevMode = process.env.OPENWORK_DEV_MODE;
-  const previousServerConfig = process.env.OPENWORK_SERVER_CONFIG;
-  process.env.OPENWORK_DEV_MODE = "1";
-  process.env.OPENWORK_SERVER_CONFIG = path.join(root, "missing-server.json");
+  const previousDevMode = process.env.REDROB_DEV_MODE;
+  const previousServerConfig = process.env.REDROB_SERVER_CONFIG;
+  process.env.REDROB_DEV_MODE = "1";
+  process.env.REDROB_SERVER_CONFIG = path.join(root, "missing-server.json");
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
@@ -197,8 +197,8 @@ test("does not create a default workspace when desktop state is absent", async (
     assert.equal(state.workspaces.length, 0);
     await assert.rejects(readFile(path.join(userData, "openwork-dev-data", "home", "OpenWork", ".opencode", "openwork.json"), "utf8"));
   } finally {
-    restoreEnv("OPENWORK_DEV_MODE", previousDevMode);
-    restoreEnv("OPENWORK_SERVER_CONFIG", previousServerConfig);
+    restoreEnv("REDROB_DEV_MODE", previousDevMode);
+    restoreEnv("REDROB_SERVER_CONFIG", previousServerConfig);
   }
 });
 
@@ -231,8 +231,8 @@ test("normalizes recovered remote OpenWork entries before persisting", async () 
     "utf8",
   );
 
-  const previous = process.env.OPENWORK_SERVER_CONFIG;
-  process.env.OPENWORK_SERVER_CONFIG = serverConfig;
+  const previous = process.env.REDROB_SERVER_CONFIG;
+  process.env.REDROB_SERVER_CONFIG = serverConfig;
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
@@ -248,8 +248,8 @@ test("normalizes recovered remote OpenWork entries before persisting", async () 
     assert.equal(state.workspaces[0].openworkWorkspaceId, "ws_remote");
     assert.equal(state.selectedId, "rem_ws_remote");
   } finally {
-    if (previous === undefined) delete process.env.OPENWORK_SERVER_CONFIG;
-    else process.env.OPENWORK_SERVER_CONFIG = previous;
+    if (previous === undefined) delete process.env.REDROB_SERVER_CONFIG;
+    else process.env.REDROB_SERVER_CONFIG = previous;
   }
 });
 
@@ -353,13 +353,13 @@ test("desktop bootstrap migrates a newer legacy writtenAt to canonical", async (
 test("explicit desktop bootstrap path never inherits legacy activation state", async () => {
   await withIsolatedBootstrapStore(async ({ store, legacyPath, root }) => {
     const explicitPath = path.join(root, "isolated", "desktop-bootstrap.json");
-    process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH = explicitPath;
+    process.env.REDROB_DESKTOP_BOOTSTRAP_PATH = explicitPath;
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://app.openworklabs.com",
+      baseUrl: "https://app.redrob.io",
       requireSignin: true,
       enterpriseActivation: {
         activatedAt: "2026-07-27T13:30:23.342Z",
-        denBaseUrl: "https://app.openworklabs.com/api/den",
+        denBaseUrl: "https://app.redrob.io/api/den",
       },
     });
 
@@ -373,7 +373,7 @@ test("explicit desktop bootstrap path never inherits legacy activation state", a
 test("explicit desktop bootstrap path still reads its configured bootstrap", async () => {
   await withIsolatedBootstrapStore(async ({ store, root }) => {
     const explicitPath = path.join(root, "isolated", "desktop-bootstrap.json");
-    process.env.OPENWORK_DESKTOP_BOOTSTRAP_PATH = explicitPath;
+    process.env.REDROB_DESKTOP_BOOTSTRAP_PATH = explicitPath;
     await writeBootstrapConfig(explicitPath, {
       baseUrl: "https://enterprise.example.com",
       requireSignin: true,
@@ -389,7 +389,7 @@ test("explicit desktop bootstrap path still reads its configured bootstrap", asy
 test("desktop bootstrap prefers an older legacy organization config over a newer canonical hosted default", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://app.openworklabs.com/api/den/",
+      baseUrl: "https://app.redrob.io/api/den/",
       apiBaseUrl: "https://api.unrelated.example",
       requireSignin: false,
       writtenAt: "2026-07-10T13:00:00.000Z",
@@ -418,7 +418,7 @@ test("desktop bootstrap keeps an older canonical organization config over a newe
       writtenAt: "2026-07-09T12:00:00.000Z",
     });
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://api.openworklabs.com/v1/",
+      baseUrl: "https://api.redrob.io/v1/",
       apiBaseUrl: "https://api.unrelated.example",
       requireSignin: false,
       writtenAt: "2026-07-10T13:00:00.000Z",
@@ -538,12 +538,12 @@ test("enterprise activation is preserved, required activation is overrideable, a
       forceRequireSignin: true,
     });
     await store.setDesktopBootstrapConfig({
-      baseUrl: "https://app.openworklabs.com",
+      baseUrl: "https://app.redrob.io",
       requireSignin: false,
       requireActivation: false,
       enterpriseActivation: {
         activatedAt: "2026-07-27T12:00:00.000Z",
-        denBaseUrl: "https://app.openworklabs.com",
+        denBaseUrl: "https://app.redrob.io",
       },
     });
 
@@ -552,7 +552,7 @@ test("enterprise activation is preserved, required activation is overrideable, a
     assert.equal(config.requireActivation, false);
     assert.deepEqual(config.enterpriseActivation, {
       activatedAt: "2026-07-27T12:00:00.000Z",
-      denBaseUrl: "https://app.openworklabs.com",
+      denBaseUrl: "https://app.redrob.io",
     });
     const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
     assert.equal(persisted.requireSignin, true);
@@ -566,7 +566,7 @@ test("enterprise activation is preserved, required activation is overrideable, a
 test("an omitted requireActivation is never materialized into the shared bootstrap file", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath }) => {
     await store.setDesktopBootstrapConfig({
-      baseUrl: "https://app.openworklabs.com",
+      baseUrl: "https://app.redrob.io",
       requireSignin: true,
     });
 

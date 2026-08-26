@@ -150,7 +150,7 @@ describe("tool part mapper", () => {
           type: "connect",
           label: "Connect Acme Tracker",
           surface: "openwork_your_connections",
-          url: "https://app.openworklabs.com/dashboard/your-connections?connectionId=emc_acme",
+          url: "https://app.redrob.io/dashboard/your-connections?connectionId=emc_acme",
         },
       },
     });

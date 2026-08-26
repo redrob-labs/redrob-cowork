@@ -25,8 +25,8 @@ import type {
   AutomationSchedule,
   AutomationState,
   CreateAutomation,
-} from "@openwork/types/automations"
-import { AUTOMATION_FREE_MODEL } from "@openwork/types/automations"
+} from "@redrob/types/automations"
+import { AUTOMATION_FREE_MODEL } from "@redrob/types/automations"
 
 import { createDenClient, DenApiError, readDenSettings } from "@/app/lib/den"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"

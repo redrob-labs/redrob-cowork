@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { resolveWorkspaceOpencodeConfigPath } from "@openwork/paths";
+import { resolveWorkspaceOpencodeConfigPath } from "@redrob/paths";
 
 export function opencodeConfigPath(workspaceRoot: string): string {
   return resolveWorkspaceOpencodeConfigPath(workspaceRoot);

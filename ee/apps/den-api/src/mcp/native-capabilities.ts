@@ -1,4 +1,4 @@
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import type { Hono } from "hono"
 import { listNativeProviderUsableEntries, type NativeProviderConnectionEntry } from "../capability-sources/native-provider-connections.js"
 import type { McpPrincipal } from "./auth.js"

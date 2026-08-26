@@ -1,5 +1,5 @@
 {
-  "name": "@openwork/behaviors",
+  "name": "@redrob/behaviors",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -31,9 +31,9 @@
     }
   },
   "dependencies": {
-    "@openwork/cdp": "workspace:*",
-    "@openwork/labs": "workspace:*",
-    "@openwork/matchers": "workspace:*",
-    "@openwork/timeline": "workspace:*"
+    "@redrob/cdp": "workspace:*",
+    "@redrob/labs": "workspace:*",
+    "@redrob/matchers": "workspace:*",
+    "@redrob/timeline": "workspace:*"
   }
 }

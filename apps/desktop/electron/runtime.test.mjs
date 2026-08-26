@@ -161,11 +161,11 @@ describe("selectStickyOpenworkPortWorkspace", () => {
 
 describe("resolveEvalLocalServerDelayMs", () => {
   it("enables only positive finite eval delays", () => {
-    assert.equal(resolveEvalLocalServerDelayMs({ OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS: "3000" }), 3000);
-    assert.equal(resolveEvalLocalServerDelayMs({ OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS: "0" }), 0);
-    assert.equal(resolveEvalLocalServerDelayMs({ OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS: "-1" }), 0);
-    assert.equal(resolveEvalLocalServerDelayMs({ OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS: "Infinity" }), 0);
-    assert.equal(resolveEvalLocalServerDelayMs({ OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS: "invalid" }), 0);
+    assert.equal(resolveEvalLocalServerDelayMs({ REDROB_EVAL_LOCAL_SERVER_DELAY_MS: "3000" }), 3000);
+    assert.equal(resolveEvalLocalServerDelayMs({ REDROB_EVAL_LOCAL_SERVER_DELAY_MS: "0" }), 0);
+    assert.equal(resolveEvalLocalServerDelayMs({ REDROB_EVAL_LOCAL_SERVER_DELAY_MS: "-1" }), 0);
+    assert.equal(resolveEvalLocalServerDelayMs({ REDROB_EVAL_LOCAL_SERVER_DELAY_MS: "Infinity" }), 0);
+    assert.equal(resolveEvalLocalServerDelayMs({ REDROB_EVAL_LOCAL_SERVER_DELAY_MS: "invalid" }), 0);
   });
 });
 
@@ -237,7 +237,7 @@ describe("embeddedServerImportUrl", () => {
 describe("resolveOpenworkServerConfigPath", () => {
   it("respects explicit server config path", () => {
     assert.equal(
-      resolveOpenworkServerConfigPath({ OPENWORK_SERVER_CONFIG: "/tmp/openwork/server.json" }),
+      resolveOpenworkServerConfigPath({ REDROB_SERVER_CONFIG: "/tmp/openwork/server.json" }),
       "/tmp/openwork/server.json",
     );
   });

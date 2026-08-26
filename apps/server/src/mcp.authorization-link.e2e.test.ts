@@ -12,7 +12,7 @@ const connectUrl = "https://connect.example.test/salesforce/start";
 const toolName = "request_salesforce_authorization";
 
 function findEngine(): string | null {
-  const explicit = process.env.OPENWORK_TEST_OPENCODE_PATH;
+  const explicit = process.env.REDROB_TEST_OPENCODE_PATH;
   if (explicit && existsSync(explicit)) return explicit;
   const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
   const name = process.platform === "darwin"

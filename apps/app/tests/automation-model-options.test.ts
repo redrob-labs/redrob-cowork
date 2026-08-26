@@ -24,19 +24,19 @@ describe("Automation model options", () => {
     expect(automationModelOptions([])).toEqual([{
       providerId: "opencode",
       modelId: "big-pickle",
-      providerName: "OpenCode Zen",
+      providerName: "OpenCode",
       modelName: "Big Pickle",
       accessKind: "free",
     }])
   })
 
-  test("removes the free starter model when desktop policy disables OpenCode Zen", () => {
+  test("removes the free starter model when desktop policy disables the free starter", () => {
     expect(automationModelOptions([], { includeFreeStarter: false })).toEqual([])
   })
 
   test("expands the member's managed OpenWork aliases even when Den stores no model rows", () => {
     const options = automationModelOptions([
-      provider({ id: "lpr_member_openwork", source: "openwork", name: "OpenWork Models" }),
+      provider({ id: "lpr_member_openwork", source: "openwork", name: "Redrob Models" }),
     ])
 
     expect(options.some((option) => option.providerId === "openwork" && option.modelId === "z-ai/glm-5.2")).toBe(true)
@@ -141,7 +141,7 @@ describe("Automation proposal model resolution", () => {
     const free = { providerId: "opencode", modelId: "big-pickle", variant: "low" }
     expect(resolveProposalModel(free, [])).toEqual({ model: free, resolution: "exact" })
 
-    const managedProvider = provider({ id: "lpr_managed", source: "openwork", name: "OpenWork Models" })
+    const managedProvider = provider({ id: "lpr_managed", source: "openwork", name: "Redrob Models" })
     const managedOption = automationModelOptions([managedProvider]).find((option) => option.accessKind === "openwork_managed")
     expect(managedOption).toBeDefined()
     if (!managedOption) throw new Error("Expected an enabled OpenWork managed model")

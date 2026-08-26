@@ -7,7 +7,7 @@ function seedRequiredEnv() {
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
   process.env.DEN_ORG_MODE = "multi_org"
-  process.env.OPENWORK_DEV_MODE = "0"
+  process.env.REDROB_DEV_MODE = "0"
 }
 
 type EnterpriseRequirement = {

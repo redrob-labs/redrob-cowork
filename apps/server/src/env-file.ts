@@ -1,7 +1,7 @@
 import { platform } from "node:os";
 import { chmod, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { openworkEnvStorePath } from "@openwork/paths";
+import { openworkEnvStorePath } from "@redrob/paths";
 
 import { ensureDir, exists } from "./utils.js";
 
@@ -19,12 +19,12 @@ const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 // We refuse writes to these and strip them when reading for injection, so a
 // tampered file cannot shadow auth credentials, token paths, or process
 // identity.
-const RESERVED_PREFIXES = ["OPENWORK_", "OPENCODE_"] as const;
+const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
 const PERSISTABLE_INTERNAL_KEYS = new Set([
-  "OPENWORK_API_KEY",
-  "OPENWORK_MODELS_API_KEY",
-  "OPENWORK_INFERENCE_BASE_URL",
-  "OPENWORK_MODELS_BASE_URL",
+  "REDROB_CLOUD_API_KEY",
+  "REDROB_MODELS_API_KEY",
+  "REDROB_INFERENCE_BASE_URL",
+  "REDROB_MODELS_BASE_URL",
 ]);
 
 export type EnvRecord = {

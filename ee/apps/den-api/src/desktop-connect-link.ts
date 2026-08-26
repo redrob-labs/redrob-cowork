@@ -5,8 +5,8 @@ import {
   CONNECT_LINK_DEFAULT_TTL_HOURS,
   CONNECT_LINK_VERSION,
   type ConnectLinkClaims,
-} from "@openwork/connect-link"
-import { signConnectLinkToken } from "@openwork/connect-link/node"
+} from "@redrob/connect-link"
+import { signConnectLinkToken } from "@redrob/connect-link/node"
 import { env } from "./env.js"
 
 export type DesktopConnectLinkInput = {

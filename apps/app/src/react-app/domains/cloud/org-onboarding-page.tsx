@@ -94,7 +94,7 @@ type BrandingRestartState = {
   warning: string | null;
 };
 
-type OnboardingUpdaterBridge = NonNullable<Window["__OPENWORK_ELECTRON__"]>["updater"];
+type OnboardingUpdaterBridge = NonNullable<Window["__REDROB_ELECTRON__"]>["updater"];
 
 declare global {
   interface Window {
@@ -106,7 +106,7 @@ function onboardingUpdaterBridge(): OnboardingUpdaterBridge | undefined {
   if (import.meta.env.DEV && window.__openworkOnboardingUpdaterEvalBridge) {
     return window.__openworkOnboardingUpdaterEvalBridge;
   }
-  return window.__OPENWORK_ELECTRON__?.updater;
+  return window.__REDROB_ELECTRON__?.updater;
 }
 
 async function stageOnboardingUpdate(
@@ -647,7 +647,7 @@ export function ResourceSelectionPage({ autoContinue = false }: { autoContinue?:
   }, [navigate, providers, selectedDefault]);
 
   const handleContinue = useCallback(async (optionsArg?: { requestReload?: boolean }) => {
-    if (!window.__OPENWORK_ELECTRON__?.shell?.relaunch) {
+    if (!window.__REDROB_ELECTRON__?.shell?.relaunch) {
       finishOnboarding({ requestReload: optionsArg?.requestReload });
       return;
     }

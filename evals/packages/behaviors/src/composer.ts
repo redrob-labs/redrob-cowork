@@ -1,4 +1,4 @@
-import type { Surface } from "@openwork/cdp";
+import type { Surface } from "@redrob/cdp";
 import { control, evalIn, waitFor } from "./desktop.ts";
 
 export interface ComposerState {

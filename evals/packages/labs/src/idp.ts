@@ -221,8 +221,8 @@ function requestedIssuer(value: string | undefined): URL | null {
 }
 
 function configuredMockIdpIssuer(input: MockIdpConfig): URL | null {
-  const evalIssuer = process.env.OPENWORK_EVAL_DEN_API_URL?.trim() ? DEFAULT_EVAL_ISSUER : undefined;
-  return requestedIssuer(input.issuer) ?? requestedIssuer(process.env.OPENWORK_EVAL_MOCK_IDP_ISSUER) ?? requestedIssuer(evalIssuer);
+  const evalIssuer = process.env.REDROB_EVAL_DEN_API_URL?.trim() ? DEFAULT_EVAL_ISSUER : undefined;
+  return requestedIssuer(input.issuer) ?? requestedIssuer(process.env.REDROB_EVAL_MOCK_IDP_ISSUER) ?? requestedIssuer(evalIssuer);
 }
 
 export function normalizeDomain(value: string | undefined): string {

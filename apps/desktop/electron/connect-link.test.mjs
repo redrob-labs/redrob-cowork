@@ -29,7 +29,7 @@ const publicKeys = { [KID]: publicKeyPem };
 
 /**
  * @param {Record<string, unknown>} [overrides]
- * @returns {import("@openwork/types/connect-link").ConnectLinkClaims}
+ * @returns {import("@redrob/types/connect-link").ConnectLinkClaims}
  */
 function claims(overrides = {}) {
   return {
@@ -65,7 +65,7 @@ function verifyAt(token, nowEpochSeconds = NOW, extra = {}) {
   return verifyConnectLinkToken({ token, publicKeys, nowEpochSeconds, ...extra });
 }
 
-/** @param {import("@openwork/types/connect-link").ConnectLinkVerifyResult} result */
+/** @param {import("@redrob/types/connect-link").ConnectLinkVerifyResult} result */
 function failureOf(result) {
   assert.equal(result.ok, false);
   if (result.ok !== false) throw new Error("expected a failure result");
@@ -73,10 +73,10 @@ function failureOf(result) {
 }
 
 test("extracts only dedicated desktop connect links", () => {
-  assert.equal(extractConnectLinkToken("openwork://connect?token=a.b.c"), "a.b.c");
-  assert.equal(extractConnectLinkToken("openwork-dev://connect?token=a.b.c"), "a.b.c");
-  assert.equal(extractConnectLinkToken("openwork:///connect?token=a.b.c"), "a.b.c");
-  assert.equal(extractConnectLinkToken("openwork://den-auth?grant=x"), null);
+  assert.equal(extractConnectLinkToken("redrob://connect?token=a.b.c"), "a.b.c");
+  assert.equal(extractConnectLinkToken("redrob-dev://connect?token=a.b.c"), "a.b.c");
+  assert.equal(extractConnectLinkToken("redrob:///connect?token=a.b.c"), "a.b.c");
+  assert.equal(extractConnectLinkToken("redrob://den-auth?grant=x"), null);
   assert.equal(extractConnectLinkToken("https://connect?token=a.b.c"), null);
 });
 
@@ -84,7 +84,7 @@ test("verifies an exact signed organization target end to end", () => {
   const expected = claims();
   const token = mint(expected);
   const result = verifyConnectLinkUrl(
-    `openwork://connect?token=${encodeURIComponent(token)}`,
+    `redrob://connect?token=${encodeURIComponent(token)}`,
     { publicKeys, nowEpochSeconds: NOW },
   );
   assert.equal(result.ok, true);
@@ -108,7 +108,7 @@ test("resolves a keyless exchange through the exact HTTPS Den endpoint", async (
       apiBaseUrl,
     },
   });
-  const rawUrl = `openwork://connect?code=${code}&apiBaseUrl=${encodeURIComponent(apiBaseUrl)}`;
+  const rawUrl = `redrob://connect?code=${code}&apiBaseUrl=${encodeURIComponent(apiBaseUrl)}`;
   assert.deepEqual(extractConnectExchange(rawUrl), { code, apiBaseUrl });
 
   const calls = [];
@@ -193,10 +193,10 @@ test("startup branding applies a saved icon and skips an absent one", async () =
 test("fails closed for ambiguous, insecure, mismatched, expired, and replayed exchanges", async () => {
   const code = "abcdefghijklmnopqrstuvwxyz123456";
   const apiBaseUrl = "https://api.openwork.acme.example.com";
-  const rawUrl = `openwork://connect?code=${code}&apiBaseUrl=${encodeURIComponent(apiBaseUrl)}`;
+  const rawUrl = `redrob://connect?code=${code}&apiBaseUrl=${encodeURIComponent(apiBaseUrl)}`;
   assert.equal(extractConnectExchange(`${rawUrl}&token=a.b.c`), null);
 
-  const insecure = `openwork://connect?code=${code}&apiBaseUrl=${encodeURIComponent("http://den.example.com")}`;
+  const insecure = `redrob://connect?code=${code}&apiBaseUrl=${encodeURIComponent("http://den.example.com")}`;
   assert.equal(failureOf(await resolveConnectExchangeUrl(insecure, {
     mode: "preview",
     fetcher: () => Promise.reject(new Error("must not fetch")),

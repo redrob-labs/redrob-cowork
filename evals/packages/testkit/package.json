@@ -1,5 +1,5 @@
 {
-  "name": "@openwork/testkit",
+  "name": "@redrob/testkit",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,12 +12,12 @@
     "./stack": "./src/stack.ts"
   },
   "dependencies": {
-    "@openwork/behaviors": "workspace:*",
-    "@openwork/cdp": "workspace:*",
-    "@openwork/env": "workspace:*",
-    "@openwork/test-evidence": "workspace:*",
-    "@openwork/hosts": "workspace:*",
-    "@openwork/labs": "workspace:*",
+    "@redrob/behaviors": "workspace:*",
+    "@redrob/cdp": "workspace:*",
+    "@redrob/env": "workspace:*",
+    "@redrob/test-evidence": "workspace:*",
+    "@redrob/hosts": "workspace:*",
+    "@redrob/labs": "workspace:*",
     "mysql2": "^3.11.3",
     "vitest": "^3.2.4"
   }

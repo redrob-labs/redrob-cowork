@@ -10,10 +10,10 @@ import {
   sendComposerMessage,
   waitFor,
   waitForAssistantReply,
-} from "@openwork/behaviors";
-import type { DenSession, ModelFacts } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop as launchDesktop } from "@openwork/hosts";
+} from "@redrob/behaviors";
+import type { DenSession, ModelFacts } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop as launchDesktop } from "@redrob/hosts";
 import {
   eventually,
   liteLlm,
@@ -22,8 +22,8 @@ import {
   SkipError,
   test,
   unmetNeeds,
-} from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const ORGANIZATION_NAME = "Den Lab";
 const PROVIDER_NAME = "LiteLLM Gateway";
@@ -34,8 +34,8 @@ const PROVIDER_ENV = "LITELLM_WITNESS_API_KEY";
 const REPLY = "The deterministic LiteLLM route is working.";
 const REQUEST_TIMEOUT_MS = 10_000;
 const TEST_CONNECTION_TIMEOUT_MS = 60_000;
-const placementCommand = process.env.OPENWORK_EVAL_DAYTONA?.trim() === "1" ? "daytona" : "docker";
-const requirements: TestNeeds = { optIn: ["OPENWORK_EVAL_E2E_TESTS"], commands: [placementCommand] };
+const placementCommand = process.env.REDROB_EVAL_DAYTONA?.trim() === "1" ? "daytona" : "docker";
+const requirements: TestNeeds = { optIn: ["REDROB_EVAL_E2E_TESTS"], commands: [placementCommand] };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Den LiteLLM provider route skipped — needs: ${missingRequirements.join(", ")}`
@@ -155,7 +155,7 @@ async function runDirectProviderSync(
   input: { baseUrl: string; token: string; orgId: string },
 ): Promise<Record<string, unknown>> {
   const value = await evalIn(desktop, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl || !info.hostToken) return { error: "local_server_unavailable" };
     const request = async (path, method, body) => {
       const response = await fetch(String(info.baseUrl).replace(/\\/+$/, "") + path, {
@@ -222,7 +222,7 @@ async function seedRendererDenSession(
 
 test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, async ({ evidence, place }) => {
   needs(requirements);
-  if (process.env.OPENWORK_EVAL_DEN_API_URL?.trim()) {
+  if (process.env.REDROB_EVAL_DEN_API_URL?.trim()) {
     throw new SkipError("The LiteLLM provider proof requires a cold managed Den");
   }
 

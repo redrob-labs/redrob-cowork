@@ -11,10 +11,10 @@ import {
   workflowArtifactSchemaVersion,
   type ArtifactFreshness,
   type WorkflowArtifactPayload,
-} from "@openwork/types/workflows"
+} from "@redrob/types/workflows"
 import { z } from "zod"
 
-export { workflowArtifactPayloadSchema } from "@openwork/types/workflows"
+export { workflowArtifactPayloadSchema } from "@redrob/types/workflows"
 
 export const WORKFLOW_ARTIFACT_APP_RESOURCE_URI = "ui://openwork/workflow-artifact/v1/view.html"
 export const WORKFLOW_ARTIFACT_APP_TOOL_NAME = "render_workflow_artifact"

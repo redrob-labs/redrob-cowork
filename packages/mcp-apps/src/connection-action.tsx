@@ -1,4 +1,4 @@
-import { connectionActionPayloadSchema, type ConnectionActionPayload } from "@openwork/types/connection-action-app"
+import { connectionActionPayloadSchema, type ConnectionActionPayload } from "@redrob/types/connection-action-app"
 import { mountMcpApp } from "./shared/bridge"
 import { AlertIcon, AppHeader, ArrowIcon, CardBody, CardFooter, CheckIcon, KeyValueGrid, PlugIcon, type Tone } from "./shared/ui"
 import "./shared/theme.css"

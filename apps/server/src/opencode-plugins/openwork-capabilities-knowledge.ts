@@ -39,7 +39,7 @@ export function automationRuntimeKnowledge(runtimeProvider = process.env.DEN_RUN
   ].map((line) => `- ${line}`).join("\n");
 }
 
-const OPENWORK_CAPABILITIES_KNOWLEDGE = `You are running inside OpenWork.
+const REDROB_CAPABILITIES_KNOWLEDGE = `You are running inside OpenWork.
 
 CRITICAL: To navigate or control the OpenWork app (open settings, add providers, etc.), use openwork_context then openwork_execute, NOT browser tools. For example, to open settings: openwork_execute({id:"settings.panel.open", args:{panel:"general"}}).
 
@@ -82,11 +82,11 @@ Here is what you can help users with:
 - \`Settings > Library\` and custom MCP commands/URLs are also for a custom or local MCP server that is not available through OpenWork Cloud.
 
 ## Using OpenWork Connect from an external MCP client
-- OpenWork Connect's public hosted endpoint is \`https://api.openworklabs.com/mcp/agent\`. \`app.openworklabs.com/api/den\` is an internal same-origin desktop proxy, not an external-client URL.
-- OpenCode is verified with native remote MCP OAuth. Codex is setup-only until native proof is rerun on this exact branch, but its add/login/reconnect commands remain: \`codex mcp add openwork --url https://api.openworklabs.com/mcp/agent\`, \`codex mcp login openwork\`, and \`codex mcp logout openwork\` then \`codex mcp login openwork\`. Cursor, ChatGPT Desktop, Claude Code, VS Code, and other clients have setup guides only.
+- OpenWork Connect's public hosted endpoint is \`https://api.redrob.io/mcp/agent\`. \`app.redrob.io/api/den\` is an internal same-origin desktop proxy, not an external-client URL.
+- OpenCode is verified with native remote MCP OAuth. Codex is setup-only until native proof is rerun on this exact branch, but its add/login/reconnect commands remain: \`codex mcp add openwork --url https://api.redrob.io/mcp/agent\`, \`codex mcp login openwork\`, and \`codex mcp logout openwork\` then \`codex mcp login openwork\`. Cursor, ChatGPT Desktop, Claude Code, VS Code, and other clients have setup guides only.
 - Cursor setup covers Cursor Desktop and Cursor Web/Agents. Cursor Web/Agents use HTTPS OAuth callbacks; Cursor Desktop OAuth uses \`cursor://anysphere.cursor-mcp/oauth/callback\`, which OpenWork accepts through an exact private-use allowlist with PKCE S256 enforced. For ChatGPT, use ChatGPT Settings > MCP servers.
-- OpenWork Connect OAuth uses RFC9728 discovery, authorization/browser sign-in at \`https://app.openworklabs.com/api/auth\`, the exact resource \`https://api.openworklabs.com/mcp/agent\`, dynamic client registration fallback, and PKCE S256. For OpenCode, add the remote config then run \`opencode mcp auth openwork\`; reconnect or switch orgs with \`opencode mcp logout openwork\` then \`opencode mcp auth openwork\`. The organization chosen in the browser is pinned into the token.
-- \`/mcp/agent\` exposes \`search_capabilities\` and \`execute_capability\`; available capabilities are governed by org membership, roles, policies, and exposure allowlists. Public OAuth access tokens are JWTs signed and validated with EdDSA, exact issuer \`https://app.openworklabs.com/api/auth\`, exact audience \`https://api.openworklabs.com/mcp/agent\`, and a 45-minute expiry. Refresh tokens are opaque rotating grants with a 30-day inactivity window plus a 30-second rotation overlap for near-simultaneous refreshes; because OpenWork stores only token hashes, replay during overlap can issue another successor, while replay after the overlap returns \`invalid_grant\` and revokes the client/user family. Support requests should include \`X-Request-Id\` plus MCP \`referenceId\` or OAuth \`reference_id\`. For setup details, read packages/docs/cloud/run-in-the-cloud/cloud-mcp.mdx.
+- OpenWork Connect OAuth uses RFC9728 discovery, authorization/browser sign-in at \`https://app.redrob.io/api/auth\`, the exact resource \`https://api.redrob.io/mcp/agent\`, dynamic client registration fallback, and PKCE S256. For OpenCode, add the remote config then run \`opencode mcp auth openwork\`; reconnect or switch orgs with \`opencode mcp logout openwork\` then \`opencode mcp auth openwork\`. The organization chosen in the browser is pinned into the token.
+- \`/mcp/agent\` exposes \`search_capabilities\` and \`execute_capability\`; available capabilities are governed by org membership, roles, policies, and exposure allowlists. Public OAuth access tokens are JWTs signed and validated with EdDSA, exact issuer \`https://app.redrob.io/api/auth\`, exact audience \`https://api.redrob.io/mcp/agent\`, and a 45-minute expiry. Refresh tokens are opaque rotating grants with a 30-day inactivity window plus a 30-second rotation overlap for near-simultaneous refreshes; because OpenWork stores only token hashes, replay during overlap can issue another successor, while replay after the overlap returns \`invalid_grant\` and revokes the client/user family. Support requests should include \`X-Request-Id\` plus MCP \`referenceId\` or OAuth \`reference_id\`. For setup details, read packages/docs/cloud/run-in-the-cloud/cloud-mcp.mdx.
 
 ## Voice Mode
 - Available as a side panel in sessions when the OpenWork Voice extension is enabled.
@@ -149,7 +149,7 @@ let docsCache: Promise<DocsEntry[]> | null = null;
 function docsCandidates(): string[] {
   const here = dirname(fileURLToPath(import.meta.url));
   return [
-    process.env.OPENWORK_DOCS_DIR?.trim() ?? "",
+    process.env.REDROB_DOCS_DIR?.trim() ?? "",
     join(here, "..", "openwork-docs"),
     join(here, "..", "..", "openwork-docs"),
     resolve(here, "..", "..", "..", "..", "packages", "docs"),
@@ -245,7 +245,7 @@ function excerpt(content: string, query: string): string {
 
 export const OpenWorkCapabilitiesKnowledge = async () => ({
   "experimental.chat.system.transform": async (_input: unknown, output: { system: string[] }) => {
-    output.system.push(OPENWORK_CAPABILITIES_KNOWLEDGE);
+    output.system.push(REDROB_CAPABILITIES_KNOWLEDGE);
   },
   tool: {
     openwork_docs_search: {

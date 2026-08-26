@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { createAutomationSchema, createCloudAutomationSchema, updateAutomationSchema } from "@openwork/types/automations"
+import { createAutomationSchema, createCloudAutomationSchema, updateAutomationSchema } from "@redrob/types/automations"
 import { automationRevisionDigest } from "./contracts"
 
 const schedule = { kind: "daily" as const, timezone: "UTC", hour: 9, minute: 0 }

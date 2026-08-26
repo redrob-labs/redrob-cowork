@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ArtifactFreshness, WorkflowArtifactSnapshot } from "@openwork/types/workflows";
+import type { ArtifactFreshness, WorkflowArtifactSnapshot } from "@redrob/types/workflows";
 
 function decode(value: string) {
   return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");

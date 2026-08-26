@@ -67,17 +67,17 @@ describe("markdown safety and links", () => {
   });
 
   test("keeps chat file link actions separate from simple surface links", () => {
-    const markdown = `[Open docs](./docs/readme.md) and [OpenWork](https://openworklabs.com)`;
+    const markdown = `[Open docs](./docs/readme.md) and [OpenWork](https://redrob.io)`;
     const chatHtml = renderMarkdownHtml(markdown);
     expect(chatHtml).toContain("data-openwork-link-chevron");
     expect(chatHtml).toContain("data-openwork-link-href");
-    expect(chatHtml).toContain('href="https://openworklabs.com"');
+    expect(chatHtml).toContain('href="https://redrob.io"');
 
     const surfaceHtml = renderPrimitiveMarkdownHtml(markdown, "surface");
     expect(surfaceHtml).not.toContain("data-openwork-link-chevron");
     expect(surfaceHtml).not.toContain("data-openwork-link-href");
     expect(surfaceHtml).toContain('href="./docs/readme.md"');
-    expect(surfaceHtml).toContain('href="https://openworklabs.com"');
+    expect(surfaceHtml).toContain('href="https://redrob.io"');
   });
 });
 

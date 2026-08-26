@@ -1,8 +1,8 @@
 import { expect, onTestFinished } from "vitest";
-import { createAndSelectWorkspace, denFetch, evalIn, readAvailableModels } from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { desktop } from "@openwork/hosts";
-import { eventually, needs, server, signInDesktopAs, test } from "@openwork/testkit";
+import { createAndSelectWorkspace, denFetch, evalIn, readAvailableModels } from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { desktop } from "@redrob/hosts";
+import { eventually, needs, server, signInDesktopAs, test } from "@redrob/testkit";
 
 const ORGANIZATION_NAME = "Cloud Provider Before Workspace";
 const PROVIDER_NAME = "First Workspace Models";
@@ -65,7 +65,7 @@ async function localServerRequest(
   input: { method?: string; body?: Record<string, unknown>; host?: boolean } = {},
 ): Promise<Record<string, unknown>> {
   const result = await evalIn(app, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { status: 0, body: { error: "local_server_unavailable" } };
     const headers = { "content-type": "application/json" };
     if (${input.host === true}) headers["x-openwork-host-token"] = String(info.hostToken ?? "");
@@ -85,7 +85,7 @@ async function localServerRequest(
 }
 
 test("managed models survive sign-in before the first workspace exists", async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   await using den = await server({
     place,
     org: {

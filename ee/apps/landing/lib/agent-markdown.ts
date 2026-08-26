@@ -13,13 +13,13 @@ const home = `# OpenWork
 
 ## Primary calls-to-action
 
-- **Download for free** — [Desktop](https://openworklabs.com/download)
-- **Open in your browser** — [OpenWork Web](https://app.openworklabs.com)
-- **Team plans** — [Pricing](https://openworklabs.com/pricing) (first 5 seats free, then \\$10 per seat/mo)
-- **Sign in to the hosted workspace** — [Cloud](https://app.openworklabs.com)
-- **SSO / audit / procurement** — [Enterprise](https://openworklabs.com/enterprise)
-- **Docs** — [openworklabs.com/docs](https://openworklabs.com/docs)
-- **Migrate from Claude Cowork** — [Migration guide](https://openworklabs.com/docs/start-here/migrate-from-claude-cowork)
+- **Download for free** — [Desktop](https://redrob.io/download)
+- **Open in your browser** — [OpenWork Web](https://app.redrob.io)
+- **Team plans** — [Pricing](https://redrob.io/pricing) (first 5 seats free, then \\$10 per seat/mo)
+- **Sign in to the hosted workspace** — [Cloud](https://app.redrob.io)
+- **SSO / audit / procurement** — [Enterprise](https://redrob.io/enterprise)
+- **Docs** — [redrob.io/docs](https://redrob.io/docs)
+- **Migrate from Claude Cowork** — [Migration guide](https://redrob.io/docs/start-here/migrate-from-claude-cowork)
 
 ## How it compares
 
@@ -61,7 +61,7 @@ const pricing = `# OpenWork pricing — free, team, and enterprise
 - macOS and Linux downloads
 - Bring your own provider keys
 - Free forever
-- CTA: [Get Started for free](https://app.openworklabs.com?mode=sign-up)
+- CTA: [Get Started for free](https://app.redrob.io?mode=sign-up)
 
 ## Team Starter — \\$10 / seat / month
 
@@ -69,7 +69,7 @@ const pricing = `# OpenWork pricing — free, team, and enterprise
 - API access
 - Extension Marketplace
 - Bring your own LLM keys, distributed to your team
-- CTA: [Start team plan](https://app.openworklabs.com/dashboard/billing)
+- CTA: [Start team plan](https://app.redrob.io/dashboard/billing)
 
 ## Enterprise — Custom pricing
 
@@ -81,7 +81,7 @@ const pricing = `# OpenWork pricing — free, team, and enterprise
 - Custom skill development and MCP consulting
 - Enterprise rollout support and custom commercial terms
 - Existing organizations already using SSO or desktop policies keep full access (grandfathered)
-- CTA: [Talk to us](https://openworklabs.com/enterprise#book)
+- CTA: [Talk to us](https://redrob.io/enterprise#book)
 
 Prices exclude taxes.
 `
@@ -107,9 +107,9 @@ const enterprise = `# A privacy-first alternative to Claude Cowork for your orga
 
 ## Next step
 
-- [Book a call](https://openworklabs.com/enterprise#book)
-- [Security Review](https://openworklabs.com/trust) — data handling, subprocessors, and incident SLA
-- See [Pricing](https://openworklabs.com/pricing) for tier comparison
+- [Book a call](https://redrob.io/enterprise#book)
+- [Security Review](https://redrob.io/trust) — data handling, subprocessors, and incident SLA
+- See [Pricing](https://redrob.io/pricing) for tier comparison
 `
 
 const trust = `# Trust & Security
@@ -145,16 +145,16 @@ const trust = `# Trust & Security
 
 ## Security contact
 
-Omar McAdam — team+security@openworklabs.com
+Omar McAdam — team+security@redrob.io
 `
 
 const glm52 = `# GLM 5.2 is now in OpenWork — with 2x usage
 
-> GLM 5.2 is available through OpenWork Models, and we're doubling your usage so you can run real agent work on an open model at a fraction of the cost.
+> GLM 5.2 is available through Redrob Models, and we're doubling your usage so you can run real agent work on an open model at a fraction of the cost.
 
 ## What's new
 
-- **GLM 5.2 in OpenWork Models** — managed OSS model access with 2x usage, no keys required
+- **GLM 5.2 in Redrob Models** — managed OSS model access with 2x usage, no keys required
 - **Run your day from chat** — tasks organize into In progress / Done / Requires attention; move them by asking
 - **Split screen** — two windows side by side, less tab-switching
 - **Voice mode** — control the OpenWork UI by voice
@@ -162,8 +162,8 @@ const glm52 = `# GLM 5.2 is now in OpenWork — with 2x usage
 
 ## How it works
 
-1. **Sign up** — [Get Started for free](https://app.openworklabs.com?mode=sign-up&intent=models)
-2. **Subscribe** — OpenWork Models at $10/user/mo includes GLM 5.2 with 2x usage
+1. **Sign up** — [Get Started for free](https://app.redrob.io?mode=sign-up&intent=models)
+2. **Subscribe** — Redrob Models at $10/user/mo includes GLM 5.2 with 2x usage
 3. **Open the app** — switch to GLM 5.2 from the model picker
 
 ## What to try first
@@ -172,9 +172,9 @@ Open OpenWork, switch to GLM 5.2, and ask the chat to organize your tasks.
 
 ## Links
 
-- [Try GLM 5.2 in OpenWork](https://app.openworklabs.com?mode=sign-up&intent=models)
-- [Download the app](https://openworklabs.com/download)
-- [Full changelog](https://openworklabs.com/docs/changelog)
+- [Try GLM 5.2 in OpenWork](https://app.redrob.io?mode=sign-up&intent=models)
+- [Download the app](https://redrob.io/download)
+- [Full changelog](https://redrob.io/docs/changelog)
 `
 
 const download = `# Get Started with OpenWork
@@ -183,7 +183,7 @@ const download = `# Get Started with OpenWork
 
 ## Start here
 
-- [Get Started for free](https://app.openworklabs.com?mode=sign-up)
+- [Get Started for free](https://app.redrob.io?mode=sign-up)
 - Create or select your workspace.
 - Follow the Cloud app's desktop app access flow.
 
@@ -195,7 +195,7 @@ const download = `# Get Started with OpenWork
 
 ## After signing up
 
-Once the desktop app is running, use the [workspace-guide skill](https://openworklabs.com/.well-known/agent-skills/workspace-guide/SKILL.md) for first-run orientation.
+Once the desktop app is running, use the [workspace-guide skill](https://redrob.io/.well-known/agent-skills/workspace-guide/SKILL.md) for first-run orientation.
 `
 
 const connect = `# OpenWork Connect
@@ -205,8 +205,8 @@ const connect = `# OpenWork Connect
 - Org-level authentication, roles, allowlists, and audit apply to every call
 - Works in OpenWork and any MCP-compatible client
 - First 5 seats are free
-- [Get started free](https://app.openworklabs.com?mode=sign-up)
-- [Read the docs](https://openworklabs.com/docs)
+- [Get started free](https://app.redrob.io?mode=sign-up)
+- [Read the docs](https://redrob.io/docs)
 `
 
 const cloud = `# OpenWork Cloud
@@ -217,8 +217,8 @@ const cloud = `# OpenWork Cloud
 - Deploy skills and MCP servers to every seat
 - Manage members, policies, usage, and audit
 - OpenWork Web and the Connect MCP gateway are built in
-- [Get started free](https://app.openworklabs.com?mode=sign-up)
-- [Explore Connect](https://openworklabs.com/connect)
+- [Get started free](https://app.redrob.io?mode=sign-up)
+- [Explore Connect](https://redrob.io/connect)
 `
 
 export const agentMarkdown: Record<string, string> = {

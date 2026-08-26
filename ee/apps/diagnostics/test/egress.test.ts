@@ -5,7 +5,7 @@ import {
   EGRESS_DIAGNOSTIC_RUN_HEADER,
   EGRESS_DIAGNOSTIC_SIGNATURE_HEADER,
   EGRESS_DIAGNOSTIC_STEP_HEADER,
-} from "@openwork/types/den/egress-diagnostics"
+} from "@redrob/types/den/egress-diagnostics"
 import {
   GET as egressGet,
   HEAD as egressHead,

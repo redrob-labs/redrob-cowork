@@ -1,4 +1,4 @@
-# robots.txt for openworklabs.com
+# robots.txt for redrob.io
 # OpenWork is open source — crawl, index, train, and build on this content freely.
 # Agents are welcome to help users discover, sign up for, and use OpenWork.
 
@@ -8,4 +8,4 @@ Allow: /
 # Content Signals (contentsignals.org, draft-romm-aipref-contentsignals)
 Content-Signal: ai-train=yes, search=yes, ai-input=yes
 
-Sitemap: https://openworklabs.com/sitemap.xml
+Sitemap: https://redrob.io/sitemap.xml

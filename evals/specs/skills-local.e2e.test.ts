@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { expect, test } from "vitest";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
 import {
   clickButton,
   control,
@@ -15,12 +15,12 @@ import {
   revealMenuRow,
   waitFor,
   waitUntilInteractive,
-} from "@openwork/behaviors";
+} from "@redrob/behaviors";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "local skills load quickly and stay usable from the composer"
-  : "skills local skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in";
+  : "skills local skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in";
 const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 test.skipIf(!e2eTestsEnabled)(title, async () => {

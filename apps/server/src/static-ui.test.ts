@@ -7,7 +7,7 @@ import { startServer } from "./server.js";
 import type { ServerConfig } from "./types.js";
 
 const IMMUTABLE_CACHE = "public, max-age=31536000, immutable";
-const WEB_BOOTSTRAP_TOKEN_ENV = "OPENWORK_WEB_BOOTSTRAP_TOKEN";
+const WEB_BOOTSTRAP_TOKEN_ENV = "REDROB_WEB_BOOTSTRAP_TOKEN";
 
 async function createWebRoot() {
   const root = join(tmpdir(), `openwork-static-ui-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -22,20 +22,20 @@ async function createWebRoot() {
 }
 
 async function withWebRoot(root: string | null, run: () => Promise<void>) {
-  const previous = process.env.OPENWORK_WEB_ROOT;
+  const previous = process.env.REDROB_WEB_ROOT;
   if (root) {
-    process.env.OPENWORK_WEB_ROOT = root;
+    process.env.REDROB_WEB_ROOT = root;
   } else {
-    delete process.env.OPENWORK_WEB_ROOT;
+    delete process.env.REDROB_WEB_ROOT;
   }
 
   try {
     await run();
   } finally {
     if (previous === undefined) {
-      delete process.env.OPENWORK_WEB_ROOT;
+      delete process.env.REDROB_WEB_ROOT;
     } else {
-      process.env.OPENWORK_WEB_ROOT = previous;
+      process.env.REDROB_WEB_ROOT = previous;
     }
   }
 }
@@ -92,7 +92,7 @@ function serverConfig(root: string, port: number): ServerConfig {
 }
 
 describe("serveStaticUi", () => {
-  test("is a no-op when OPENWORK_WEB_ROOT is unset", async () => {
+  test("is a no-op when REDROB_WEB_ROOT is unset", async () => {
     await withWebRoot(null, async () => {
       const response = await serveStaticUi(new Request("http://openwork.test/"), staticConfig());
       expect(response).toBeNull();
@@ -184,7 +184,7 @@ describe("serveStaticUi", () => {
         const response = await serveStaticUi(new Request("http://openwork.test/"), staticConfig("tok<\u2028>\u2029&"));
         if (!response) throw new Error("expected index response");
         const body = await response.text();
-        expect(body).toContain("<script>window.__OPENWORK_BOOTSTRAP__ = {\"token\":\"tok\\u003c\\u2028\\u003e\\u2029\\u0026\"}</script></head>");
+        expect(body).toContain("<script>window.__REDROB_BOOTSTRAP__ = {\"token\":\"tok\\u003c\\u2028\\u003e\\u2029\\u0026\"}</script></head>");
         expect(body).not.toContain("tok<");
       });
     });
@@ -199,7 +199,7 @@ describe("serveStaticUi", () => {
           if (!response) throw new Error("expected index response");
           const body = await response.text();
           expect(body).toContain("App shell");
-          expect(body).not.toContain("__OPENWORK_BOOTSTRAP__");
+          expect(body).not.toContain("__REDROB_BOOTSTRAP__");
         });
       });
     }

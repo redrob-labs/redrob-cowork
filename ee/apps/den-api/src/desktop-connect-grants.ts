@@ -6,9 +6,9 @@ import {
   CONNECT_LINK_VERSION,
   connectLinkClaimsSchema,
   type ConnectLinkClaims,
-} from "@openwork/connect-link"
-import { and, eq, gt, isNull, lt } from "@openwork-ee/den-db/drizzle"
-import { DesktopConnectGrantTable, InstallLinkTable } from "@openwork-ee/den-db/schema"
+} from "@redrob/connect-link"
+import { and, eq, gt, isNull, lt } from "@redrob-ee/den-db/drizzle"
+import { DesktopConnectGrantTable, InstallLinkTable } from "@redrob-ee/den-db/schema"
 import { db } from "./db.js"
 import type { DesktopConnectLinkInput } from "./desktop-connect-link.js"
 

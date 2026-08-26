@@ -1,8 +1,8 @@
 import { createServer } from "node:http";
 import { expect, onTestFinished } from "vitest";
-import { control, createAndSelectWorkspace, evalIn, waitFor, waitForText } from "@openwork/behaviors";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { control, createAndSelectWorkspace, evalIn, waitFor, waitForText } from "@redrob/behaviors";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
 const providerId = "session-title-failure-mock";
 const modelId = "session-title-main-model";
@@ -10,10 +10,10 @@ const inaccessibleTitleModelId = "session-title-inaccessible-model";
 const reply = "the conversation completed safely";
 const warningTitle = "Automatic task title did not complete";
 const warningBody = "Your conversation is safe.";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "a failed background title model stays non-fatal and produces a persistent warning"
-  : "session title failure warning skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "session title failure warning skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -27,7 +27,7 @@ function newestSession(value: unknown): Record<string, unknown> {
 }
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   const mock = createServer((request, response) => {
     const url = request.url ?? "";
@@ -78,7 +78,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   if (!address || typeof address === "string") throw new Error("Mock provider did not bind a TCP port.");
   const baseUrl = `http://127.0.0.1:${address.port}/v1`;
 
-  const electronNodeDir = process.env.OPENWORK_EVAL_ELECTRON_NODEDIR?.trim();
+  const electronNodeDir = process.env.REDROB_EVAL_ELECTRON_NODEDIR?.trim();
   await using app = await desktop({
     name: "session-title-failure-warning",
     env: electronNodeDir ? { npm_config_nodedir: electronNodeDir } : undefined,

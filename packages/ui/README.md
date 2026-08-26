@@ -1,8 +1,8 @@
-# @openwork/ui
+# @redrob/ui
 
 Shared UI primitives for OpenWork apps.
 
-This package ships one entrypoint: `@openwork/ui/react`, used by `apps/app`
+This package ships one entrypoint: `@redrob/ui/react`, used by `apps/app`
 and `ee/apps/den-web`. (A Solid flavor existed during the Solid-to-React
 migration and was removed once the last Solid consumer disappeared.)
 

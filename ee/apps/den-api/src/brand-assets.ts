@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto"
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import path from "node:path"
 import sharp from "sharp"
 import type { ManagedBrandAssetMetadata } from "./organization-limits.js"

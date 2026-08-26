@@ -1,5 +1,5 @@
-import { Tool, toolError } from "@openwork/codemode"
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+import { Tool, toolError } from "@redrob/codemode"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import { Effect } from "effect"
 import type { Hono } from "hono"
 import { z } from "zod"

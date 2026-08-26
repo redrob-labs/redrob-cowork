@@ -361,7 +361,7 @@ echo detached`;
     const detachScript = `python3 - <<PYEOF
 import subprocess
 log = open("/tmp/warmup-electron.log", "ab", buffering=0)
-subprocess.Popen(["bash", "-lc", "cd /workspace && env OPENWORK_ELECTRON_USERDATA=/tmp/warmup-profile OPENWORK_ELECTRON_REMOTE_DEBUG_PORT=9825 bash .devcontainer/start-daytona-electron.sh"], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
+subprocess.Popen(["bash", "-lc", "cd /workspace && env REDROB_ELECTRON_USERDATA=/tmp/warmup-profile REDROB_ELECTRON_REMOTE_DEBUG_PORT=9825 bash .devcontainer/start-daytona-electron.sh"], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
 PYEOF
 echo detached`;
     await execInSandbox(exec, sandbox, detachScript, { timeoutMs: 30_000, context: `first boot detach for ${sandbox}` });
@@ -465,7 +465,7 @@ function lineWriter(log: (line: string) => void): LineWriter {
 
 function runDenProvisionScript(ref: string, repoRoot: string, bootstrapAdminEmail: string | undefined, log: (line: string) => void, urlsFile: string): Promise<LocalProcessResult> {
   return new Promise((resolve, reject) => {
-    const env: NodeJS.ProcessEnv = { ...process.env, OPENWORK_DEN_URLS_FILE: urlsFile };
+    const env: NodeJS.ProcessEnv = { ...process.env, REDROB_DEN_URLS_FILE: urlsFile };
     if (bootstrapAdminEmail) env.DEN_BOOTSTRAP_ADMIN_EMAILS = bootstrapAdminEmail;
     const child = spawn("bash", [".devcontainer/test-server-on-daytona.sh", ref, "--seed", "--name", serverSandboxName()], {
       cwd: repoRoot,
@@ -569,8 +569,8 @@ async function previewUrl(exec: DaytonaExec, sandbox: string, port: number): Pro
 }
 
 async function proveDenSeed(apiUrl: string, webUrl: string, sandbox: string, reused: boolean): Promise<void> {
-  const email = process.env.OPENWORK_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
-  const password = process.env.OPENWORK_EVAL_DEMO_PASSWORD ?? "OpenWorkDemo123!";
+  const email = process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD ?? "OpenWorkDemo123!";
   const url = `${apiUrl.replace(/\/+$/, "")}/api/auth/sign-in/email`;
   // A freshly-booted stack was observed answering public sign-in with bare
   // 403s for its first ~minute, then recovering on its own — so the window is
@@ -864,14 +864,14 @@ export function renderConnectorE2eTestEnv(facts: ConnectorE2eTestEnv): string {
   return [
     `${ENV_HEADER_PREFIX} — generated ${new Date().toISOString()}${ENV_REF_MARKER}${facts.ref}`,
     `${ENV_CREATED_PREFIX}${facts.created.join(",")}`,
-    "OPENWORK_EVAL_E2E_TESTS=1",
-    "OPENWORK_EVAL_CONNECTOR_E2E_TEST=1",
-    `OPENWORK_EVAL_DEN_API_URL=${shellQuote(facts.denApiUrl)}`,
-    `OPENWORK_EVAL_DEN_WEB_URL=${shellQuote(facts.denWebUrl)}`,
-    `OPENWORK_EVAL_DAYTONA_SANDBOX_A=${shellQuote(facts.sandboxA)}`,
-    `OPENWORK_EVAL_DAYTONA_SANDBOX_B=${shellQuote(facts.sandboxB)}`,
-    `OPENWORK_EVAL_CONNECTOR_MOCK_PUBLIC_URL=${shellQuote(facts.mockUrl)}`,
-    "OPENWORK_EVAL_MODEL=big-pickle",
+    "REDROB_EVAL_E2E_TESTS=1",
+    "REDROB_EVAL_CONNECTOR_E2E_TEST=1",
+    `REDROB_EVAL_DEN_API_URL=${shellQuote(facts.denApiUrl)}`,
+    `REDROB_EVAL_DEN_WEB_URL=${shellQuote(facts.denWebUrl)}`,
+    `REDROB_EVAL_DAYTONA_SANDBOX_A=${shellQuote(facts.sandboxA)}`,
+    `REDROB_EVAL_DAYTONA_SANDBOX_B=${shellQuote(facts.sandboxB)}`,
+    `REDROB_EVAL_CONNECTOR_MOCK_PUBLIC_URL=${shellQuote(facts.mockUrl)}`,
+    "REDROB_EVAL_MODEL=big-pickle",
     "",
   ].join("\n");
 }
@@ -889,9 +889,9 @@ export function parseConnectorE2eTestEnv(content: string): ConnectorE2eTestEnv {
     return value;
   }
 
-  required("OPENWORK_EVAL_E2E_TESTS");
-  required("OPENWORK_EVAL_CONNECTOR_E2E_TEST");
-  required("OPENWORK_EVAL_MODEL");
+  required("REDROB_EVAL_E2E_TESTS");
+  required("REDROB_EVAL_CONNECTOR_E2E_TEST");
+  required("REDROB_EVAL_MODEL");
   // Header comments are read by line scan, not regex: `.*` before a literal
   // backtracks polynomially on adversarial input (CodeQL js/polynomial-redos).
   const header = commentLine(content, ENV_HEADER_PREFIX);
@@ -903,11 +903,11 @@ export function parseConnectorE2eTestEnv(content: string): ConnectorE2eTestEnv {
   if (createdText === null) throw new Error("Missing provision-created in connector spec env header.");
 
   return {
-    denApiUrl: required("OPENWORK_EVAL_DEN_API_URL"),
-    denWebUrl: required("OPENWORK_EVAL_DEN_WEB_URL"),
-    sandboxA: required("OPENWORK_EVAL_DAYTONA_SANDBOX_A"),
-    sandboxB: required("OPENWORK_EVAL_DAYTONA_SANDBOX_B"),
-    mockUrl: required("OPENWORK_EVAL_CONNECTOR_MOCK_PUBLIC_URL"),
+    denApiUrl: required("REDROB_EVAL_DEN_API_URL"),
+    denWebUrl: required("REDROB_EVAL_DEN_WEB_URL"),
+    sandboxA: required("REDROB_EVAL_DAYTONA_SANDBOX_A"),
+    sandboxB: required("REDROB_EVAL_DAYTONA_SANDBOX_B"),
+    mockUrl: required("REDROB_EVAL_CONNECTOR_MOCK_PUBLIC_URL"),
     ref,
     created: createdText.split(",").map((id) => id.trim()).filter(Boolean),
   };

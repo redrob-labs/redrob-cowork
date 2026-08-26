@@ -1,5 +1,5 @@
 extends: electron-builder.yml
-appId: com.differentai.openwork.demo.consumer
+appId: io.redrob.work.demo.consumer
 productName: Redrob Work Demo B
 protocols: []
 directories:

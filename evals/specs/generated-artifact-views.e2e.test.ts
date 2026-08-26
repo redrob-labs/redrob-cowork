@@ -1,12 +1,12 @@
 import { expect } from "vitest"
-import { needs, server, test } from "@openwork/testkit"
-import { denFetch, evalIn, waitFor } from "@openwork/behaviors"
-import type { DenSession } from "@openwork/behaviors"
-import { navigate } from "@openwork/cdp"
-import { chrome } from "@openwork/hosts"
+import { needs, server, test } from "@redrob/testkit"
+import { denFetch, evalIn, waitFor } from "@redrob/behaviors"
+import type { DenSession } from "@redrob/behaviors"
+import { navigate } from "@redrob/cdp"
+import { chrome } from "@redrob/hosts"
 
 const requirements = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_GENERATED_ARTIFACT_VIEWS_E2E_TEST"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_GENERATED_ARTIFACT_VIEWS_E2E_TEST"],
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

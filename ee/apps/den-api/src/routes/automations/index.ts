@@ -22,7 +22,7 @@ import {
   createAutomationSchema,
   createCloudAutomationSchema,
   updateAutomationSchema,
-} from "@openwork/types/automations"
+} from "@redrob/types/automations"
 import {
   jsonValidator,
   orgMemberRoute,

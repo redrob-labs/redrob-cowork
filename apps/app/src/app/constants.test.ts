@@ -5,13 +5,13 @@ declare const expect: (value: unknown) => {
 };
 
 import {
-  OPENWORK_EXTENSION_CATALOG,
+  REDROB_EXTENSION_CATALOG,
   filterOpenWorkExtensionCatalogForPlatform,
   resolveOpenWorkExtensionCatalogPlatform,
 } from "./constants";
 
 function filteredIds(platform: "darwin" | "linux" | "windows" | "web") {
-  return filterOpenWorkExtensionCatalogForPlatform(OPENWORK_EXTENSION_CATALOG, platform)
+  return filterOpenWorkExtensionCatalogForPlatform(REDROB_EXTENSION_CATALOG, platform)
     .flatMap((entry) => entry.id ? [entry.id] : []);
 }
 

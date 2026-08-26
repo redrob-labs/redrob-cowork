@@ -135,25 +135,25 @@ const connectCatalogResponseSchema = z.object({
   instruction: z.string(),
 }).passthrough();
 
-export const OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION =
+export const REDROB_EXTENSION_DISCOVERY_INSTRUCTION =
   "If the user asks for something you cannot do with obvious built-in tools, check OpenWork extensions before saying the capability is unavailable. Use openwork_query with id extension.actions to inspect available extension actions, then openwork_execute with id extension.call for the matching action.";
 
-export const OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION =
+export const REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION =
   "Skill creation: Cloud. When the user asks to create a skill, retrieve and follow the listed create-skill remote skill by calling openwork-cloud_execute_capability with its exact <capability>. Create the skill in OpenWork Cloud as a private plugin, not in the workspace. For later steps, use share-plugin when the user wants a specific person or team to use a skill, and use add-to-marketplace or add-user-to-marketplace only when the user asks. Use a workspace-local skill only when the user explicitly requests one. Do not create both copies.";
 
-export const OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION =
+export const REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION =
   "Skill creation: Local. Create or update a workspace-local skill only when the user requests one. Keep one skill in .opencode/skills/<skill-name>/SKILL.md, validate it, and re-read it after writing. Do not create a Cloud copy.";
 
-export const OPENWORK_CLOUD_CONNECTION_INSTRUCTION =
+export const REDROB_CLOUD_CONNECTION_INSTRUCTION =
   "The OpenWork Cloud connection is verified ready for this exact workspace/model. For org-connected services, use openwork-cloud_search_capabilities with 2-4 keyword variants, then openwork-cloud_execute_capability with an exact returned name — and only mention services that search (or available_skills) actually returns. When a search result has kind mcp_app, execute that exact capability normally so OpenWork can render its originating standard MCP App; do not import it, ask for a standalone HTML URL, or require a generated direct-tool name. When a remote skill is listed under available_skills, call openwork-cloud_execute_capability with its <capability> directly; do not treat the local OpenCode skill list as the full inventory. Local OpenWork extensions remain available through openwork_query/openwork_execute with extension.actions and extension.call. Settings > Extensions is the member inventory surface for org and local apps. A successful search proves OpenWork Cloud itself is authorized, so a downstream connector failure does not mean OpenWork Cloud needs to be reconnected. If a result has kind connection_status, execute that exact capability once so OpenWork renders an actionable connection card, then name connectionStatus.connectionName and relay connectionStatus.action exactly: use Your Connections for the member, the organization Connections dashboard for an org admin, or the provider admin console for a provider-side failure. After the requested human fixes that connector, search again in the same task because results are live, not cached, so unchanged retries return the same error.";
 
-export const OPENWORK_CONNECT_SIGN_IN_INSTRUCTION =
-  `${OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION} OpenWork Cloud is not signed in or no desired agent access configuration exists for this workspace. Direct the user to sign in to OpenWork and connect the service in Settings → Connect.`;
+export const REDROB_CONNECT_SIGN_IN_INSTRUCTION =
+  `${REDROB_EXTENSION_DISCOVERY_INSTRUCTION} OpenWork Cloud is not signed in or no desired agent access configuration exists for this workspace. Direct the user to sign in to OpenWork and connect the service in Settings → Connect.`;
 
-export const OPENWORK_CONNECT_DISABLED_INSTRUCTION =
-  `${OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION} OpenWork Cloud agent access is explicitly disabled for this workspace. Explain that the user can enable agent access in Settings → Connect.`;
+export const REDROB_CONNECT_DISABLED_INSTRUCTION =
+  `${REDROB_EXTENSION_DISCOVERY_INSTRUCTION} OpenWork Cloud agent access is explicitly disabled for this workspace. Explain that the user can enable agent access in Settings → Connect.`;
 
-const OPENWORK_CLOUD_MCP_NAME = "openwork-cloud";
+const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -201,11 +201,11 @@ function readProviderModel(input: unknown): ProviderModel | undefined {
 }
 
 function serverUrl(): string {
-  return String(process.env.OPENWORK_SERVER_URL || "").replace(/\/$/, "");
+  return String(process.env.REDROB_SERVER_URL || "").replace(/\/$/, "");
 }
 
 function serverToken(): string {
-  return String(process.env.OPENWORK_SERVER_TOKEN || "");
+  return String(process.env.REDROB_SERVER_TOKEN || "");
 }
 
 function requireOpenWorkServer(): { url: string; token: string } {
@@ -253,7 +253,7 @@ function engineStatusPayload(result: unknown): unknown {
 }
 
 function readEngineMcpStatus(result: unknown): EngineMcpStatusResult {
-  const entry = getRecordProperty(engineStatusPayload(result), OPENWORK_CLOUD_MCP_NAME);
+  const entry = getRecordProperty(engineStatusPayload(result), REDROB_CLOUD_MCP_NAME);
   if (entry === undefined) return { found: false };
   if (typeof entry === "string") return { found: true, status: readString(entry) };
   return { found: true, status: readNestedString(entry, ["status"]) };
@@ -327,34 +327,34 @@ export async function resolveOpenWorkAutomationInstruction(_input?: unknown, fet
 }
 
 export function composeOpenWorkExtensionDiscoveryInstruction(state: OpenWorkExtensionConnectState | null): string {
-  if (!state) return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
-  if (state.workspace?.resolution && state.workspace.resolution !== "resolved") return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
+  if (!state) return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
+  if (state.workspace?.resolution && state.workspace.resolution !== "resolved") return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
   const health = state.cloudHealth;
-  if (health?.usable === true && health.usableByCurrentModel !== false) return OPENWORK_CLOUD_CONNECTION_INSTRUCTION;
-  if (health?.phase === "engine_disabled" || health?.firstFailure?.code === "engine_disabled" || health?.firstFailure?.code === "cloud_mcp_disabled") return OPENWORK_CONNECT_DISABLED_INSTRUCTION;
+  if (health?.usable === true && health.usableByCurrentModel !== false) return REDROB_CLOUD_CONNECTION_INSTRUCTION;
+  if (health?.phase === "engine_disabled" || health?.firstFailure?.code === "engine_disabled" || health?.firstFailure?.code === "cloud_mcp_disabled") return REDROB_CONNECT_DISABLED_INSTRUCTION;
   if (health) {
-    if (!health.desired.present || health.firstFailure?.code === "cloud_mcp_missing") return OPENWORK_CONNECT_SIGN_IN_INSTRUCTION;
-    return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
+    if (!health.desired.present || health.firstFailure?.code === "cloud_mcp_missing") return REDROB_CONNECT_SIGN_IN_INSTRUCTION;
+    return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
   }
-  if (!state.connectCatalogEnabled || state.googleWorkspace.legacyConfigured) return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
-  return OPENWORK_CONNECT_SIGN_IN_INSTRUCTION;
+  if (!state.connectCatalogEnabled || state.googleWorkspace.legacyConfigured) return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
+  return REDROB_CONNECT_SIGN_IN_INSTRUCTION;
 }
 
 export function composeSteeringFromEngineMcpStatus(status: string | undefined): string {
-  if (status === "connected") return OPENWORK_CLOUD_CONNECTION_INSTRUCTION;
-  if (status === "disabled") return OPENWORK_CONNECT_DISABLED_INSTRUCTION;
-  if (status === "needs_auth" || status === "needs_client_registration") return OPENWORK_CONNECT_SIGN_IN_INSTRUCTION;
-  return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
+  if (status === "connected") return REDROB_CLOUD_CONNECTION_INSTRUCTION;
+  if (status === "disabled") return REDROB_CONNECT_DISABLED_INSTRUCTION;
+  if (status === "needs_auth" || status === "needs_client_registration") return REDROB_CONNECT_SIGN_IN_INSTRUCTION;
+  return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
 }
 
 export function composeSkillAuthoringInstruction(extensionInstruction: string): {
   mode: "cloud" | "local";
   prompt: string;
 } {
-  if (extensionInstruction === OPENWORK_CLOUD_CONNECTION_INSTRUCTION) {
-    return { mode: "cloud", prompt: OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION };
+  if (extensionInstruction === REDROB_CLOUD_CONNECTION_INSTRUCTION) {
+    return { mode: "cloud", prompt: REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION };
   }
-  return { mode: "local", prompt: OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION };
+  return { mode: "local", prompt: REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION };
 }
 
 export function resetOpenWorkExtensionDiscoveryInstructionCacheForTests(): void {
@@ -375,12 +375,12 @@ export async function resolveOpenWorkExtensionDiscoveryInstruction(
       const engineStatus = await fetchEngineMcpStatus(input, engine);
       if (engineStatus.found) return composeSteeringFromEngineMcpStatus(engineStatus.status);
     } catch {
-      return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
+      return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
     }
   }
   try {
     return composeOpenWorkExtensionDiscoveryInstruction(await fetchOpenWorkConnectState(input, fetcher));
   } catch {
-    return OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION;
+    return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
   }
 }

@@ -367,7 +367,7 @@ export function LlmProvidersScreen() {
             <DenOptionCard
               type="checkbox"
               testId="models-access-zen"
-              title="Allow OpenCode Zen models"
+              title="Allow OpenCode models"
               checked={zenAllowed}
               disabled={accessFormDisabled}
               onChange={(checked) => {
@@ -412,7 +412,7 @@ export function LlmProvidersScreen() {
             <DenSectionHeader
               className="border-b border-gray-100 px-6 py-4"
               title="OpenWork Model Keys"
-              description="Members in this organization with an OpenWork Models key."
+              description="Members in this organization with a Redrob Models key."
             />
             <DenTable columns={openWorkKeyColumns} rows={openWorkKeyRows} getRowKey={(row) => row.id} />
           </section>

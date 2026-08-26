@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import type {
   AutomationAuthorityMember,
   AutomationAuthorityModel,
@@ -26,7 +26,7 @@ const member: AutomationAuthorityMember = { id: createDenTypeId("member") }
 const openWorkProvider: AutomationAuthorityProvider = {
   id: createDenTypeId("llmProvider"),
   source: "openwork",
-  name: "OpenWork Models",
+  name: "Redrob Models",
 }
 const customProvider: AutomationAuthorityProvider = {
   id: createDenTypeId("llmProvider"),
@@ -86,7 +86,7 @@ describe("Automation normalized model authority", () => {
     }, store)).toMatchObject({ ok: false, code: "model_access_lost" })
   })
 
-  test("rejects the legacy free starter model when desktop policy disables OpenCode Zen", async () => {
+  test("rejects the legacy free starter model when desktop policy disables the free starter", async () => {
     const result = await resolveAutomationModelAccessWithStore({
       ...base,
       providerId: "opencode",

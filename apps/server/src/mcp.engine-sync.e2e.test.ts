@@ -24,7 +24,7 @@ type EngineRequest = {
 };
 
 // Keep the engine sync retry backoff tiny so failure-path tests stay fast.
-process.env.OPENWORK_MCP_SYNC_RETRY_DELAY_MS = "10";
+process.env.REDROB_MCP_SYNC_RETRY_DELAY_MS = "10";
 
 const stops: Array<() => void | Promise<void>> = [];
 const roots: string[] = [];
@@ -165,8 +165,8 @@ const POSTHOG_CONFIG = {
 describe("runtime MCP engine sync", () => {
   test("hot-adds a runtime MCP into the running engine when added", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -183,15 +183,15 @@ describe("runtime MCP engine sync", () => {
       expect(addRequest?.body).toEqual({ name: "posthog", config: POSTHOG_CONFIG });
       expect(addRequest?.search).toContain(`directory=${encodeURIComponent(workspaceRoot)}`);
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("hot-syncs an external engine without treating its response as trusted registration evidence", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(
@@ -214,15 +214,15 @@ describe("runtime MCP engine sync", () => {
         POSTHOG_CONFIG,
       )).toBe("not-recorded");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("keeps accepted delivery separate from bounded normalized registration evidence", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     const rawErrorCanary = "MCP_PROVIDER_RAW_ERROR_CANARY";
     const oversizedCanary = "MCP_OVERSIZED_RESPONSE_CANARY";
     try {
@@ -333,17 +333,17 @@ describe("runtime MCP engine sync", () => {
       // failures; Cloud readiness verifies the actual state with GET /mcp.
       expect(listBody.engineSync).toMatchObject({ status: "ok", failures: [] });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("records transport-failure provenance and performs one deferred re-sync", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousDeferredDelay = process.env.OPENWORK_MCP_SYNC_DEFERRED_DELAY_MS;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_MCP_SYNC_DEFERRED_DELAY_MS = "50";
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    const previousDeferredDelay = process.env.REDROB_MCP_SYNC_DEFERRED_DELAY_MS;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_MCP_SYNC_DEFERRED_DELAY_MS = "50";
     let posthogPosts = 0;
     try {
       const mock = startMockOpencode({
@@ -376,17 +376,17 @@ describe("runtime MCP engine sync", () => {
       expect(inspectEngineMcpRegistrationDetails(openwork.config, workspace, "posthog", POSTHOG_CONFIG).source)
         .toBe("engine_status");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
-      if (previousDeferredDelay === undefined) delete process.env.OPENWORK_MCP_SYNC_DEFERRED_DELAY_MS;
-      else process.env.OPENWORK_MCP_SYNC_DEFERRED_DELAY_MS = previousDeferredDelay;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
+      if (previousDeferredDelay === undefined) delete process.env.REDROB_MCP_SYNC_DEFERRED_DELAY_MS;
+      else process.env.REDROB_MCP_SYNC_DEFERRED_DELAY_MS = previousDeferredDelay;
     }
   });
 
   test("serializes workspace MCP sync and coalesces concurrent requests into one latest-state trailing pass", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     let releaseFirstRegistration: (response: Response) => void = () => undefined;
     const firstRegistrationReleased = new Promise<Response>((resolve) => {
       releaseFirstRegistration = resolve;
@@ -449,15 +449,15 @@ describe("runtime MCP engine sync", () => {
       expect(maxRegistrationsInFlight).toBe(1);
     } finally {
       releaseFirstRegistration(Response.json({ posthog: { status: "connected" } }));
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("does not overlap startup registration with explicit cloud reconciliation", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     let releaseStartupRegistration: (response: Response) => void = () => undefined;
     const startupRegistrationReleased = new Promise<Response>((resolve) => {
       releaseStartupRegistration = resolve;
@@ -522,15 +522,15 @@ describe("runtime MCP engine sync", () => {
       expect(maxRegistrationsInFlight).toBe(1);
     } finally {
       releaseStartupRegistration(Response.json({ posthog: { status: "connected" } }));
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("scopes registration evidence to the concrete OpenWork server instance", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const engineA = startMockOpencode();
       const engineB = startMockOpencode();
@@ -558,15 +558,15 @@ describe("runtime MCP engine sync", () => {
       )).toBe("not-recorded");
       expect(engineB.requests.some((entry) => entry.method === "POST" && entry.pathname === "/mcp")).toBe(false);
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("invalidates registration evidence when the engine endpoint changes", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const engineA = startMockOpencode();
       const engineB = startMockOpencode();
@@ -591,15 +591,15 @@ describe("runtime MCP engine sync", () => {
       expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("invalidates registration evidence when a managed engine restarts at the same endpoint", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const engine = startMockOpencode();
       const baseUrl = `http://127.0.0.1:${engine.server.port}`;
@@ -637,15 +637,15 @@ describe("runtime MCP engine sync", () => {
       expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("revokes registration evidence when the managed engine is no longer alive", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     let isAlive = true;
     try {
       const engine = startMockOpencode();
@@ -668,15 +668,15 @@ describe("runtime MCP engine sync", () => {
       expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("invalidates registration evidence on stop and requires a new server generation", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const engine = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
@@ -702,17 +702,17 @@ describe("runtime MCP engine sync", () => {
       await syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
       expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("expires registration evidence after the bounded freshness window", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    const previousMaxAge = process.env.OPENWORK_MCP_REGISTRATION_MAX_AGE_MS;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
-    process.env.OPENWORK_MCP_REGISTRATION_MAX_AGE_MS = "100";
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    const previousMaxAge = process.env.REDROB_MCP_REGISTRATION_MAX_AGE_MS;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    process.env.REDROB_MCP_REGISTRATION_MAX_AGE_MS = "100";
     try {
       const engine = startMockOpencode({
         mcpResponseForName: (name) => name === "posthog"
@@ -738,17 +738,17 @@ describe("runtime MCP engine sync", () => {
       expect(inspectEngineMcpRegistrationDetails(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
         .toMatchObject({ status: "not-recorded", errorSummary: null });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
-      if (previousMaxAge === undefined) delete process.env.OPENWORK_MCP_REGISTRATION_MAX_AGE_MS;
-      else process.env.OPENWORK_MCP_REGISTRATION_MAX_AGE_MS = previousMaxAge;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
+      if (previousMaxAge === undefined) delete process.env.REDROB_MCP_REGISTRATION_MAX_AGE_MS;
+      else process.env.REDROB_MCP_REGISTRATION_MAX_AGE_MS = previousMaxAge;
     }
   });
 
   test("invalidates registration evidence before an engine reload attempt", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     let rejectDispose = false;
     try {
       const engine = startMockOpencode({
@@ -775,15 +775,15 @@ describe("runtime MCP engine sync", () => {
       expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("cloud plugin install writes a remote MCP and hot-syncs it into the engine", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -840,15 +840,15 @@ describe("runtime MCP engine sync", () => {
         config: { type: "remote", url: "https://example.com/mcp", enabled: true },
       });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("cloud plugin install warns for dropped MCP payloads while still installing skills", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -922,15 +922,15 @@ describe("runtime MCP engine sync", () => {
       expect((await readRuntimeOpencodeConfig(openwork.config, "ws_1")).mcp?.broken).toBeUndefined();
       expect(mock.requests.some((entry) => entry.method === "POST" && entry.pathname === "/mcp")).toBe(false);
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("re-registers runtime MCPs with the engine after a reload", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -955,15 +955,15 @@ describe("runtime MCP engine sync", () => {
       expect(syncIndex).toBeGreaterThan(disposeIndex);
       expect(mock.requests[syncIndex]?.body).toEqual({ name: "posthog", config: POSTHOG_CONFIG });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("pushes toggled enabled state to the engine", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -987,15 +987,15 @@ describe("runtime MCP engine sync", () => {
       expect(syncRequest).toBeDefined();
       expect(syncRequest?.body).toEqual({ name: "posthog", config: { ...POSTHOG_CONFIG, enabled: false } });
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("disconnects a removed MCP from the engine", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -1020,15 +1020,15 @@ describe("runtime MCP engine sync", () => {
       expect(disconnectRequest).toBeDefined();
       expect(disconnectRequest?.search).toContain(`directory=${encodeURIComponent(workspaceRoot)}`);
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("reload keeps registering remaining MCPs when one entry fails", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode({ failMcpNames: ["bad"] });
       const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
@@ -1073,16 +1073,16 @@ describe("runtime MCP engine sync", () => {
       expect(listBody.engineSync?.failures.map((failure) => failure.name)).toContain("bad");
       expect(listBody.engineSync?.failures.map((failure) => failure.name)).not.toContain("posthog");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("startup sync pushes runtime MCPs for every workspace", async () => {
     const rootA = await createWorkspaceRoot();
     const rootB = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(rootA, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(rootA, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
       const baseUrl = `http://127.0.0.1:${mock.server.port}`;
@@ -1116,15 +1116,15 @@ describe("runtime MCP engine sync", () => {
       expect(byName.get("posthog")).toContain(`directory=${encodeURIComponent(rootA)}`);
       expect(byName.get("stripe")).toContain(`directory=${encodeURIComponent(rootB)}`);
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
   test("MCP add still succeeds when the engine is unreachable", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const openwork = await startOpenworkServer(workspaceRoot, "http://127.0.0.1:9");
 
@@ -1137,8 +1137,8 @@ describe("runtime MCP engine sync", () => {
       const body = await response.json() as { items: Array<{ name: string }> };
       expect(body.items.some((item) => item.name === "posthog")).toBe(true);
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 
@@ -1150,8 +1150,8 @@ describe("runtime MCP engine sync", () => {
   // The desktop client uses this code to escalate to a full engine restart.
   test("engine reload reports engine-unreachable when the engine is down", async () => {
     const workspaceRoot = await createWorkspaceRoot();
-    const previousDb = process.env.OPENWORK_RUNTIME_DB;
-    process.env.OPENWORK_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
+    const previousDb = process.env.REDROB_RUNTIME_DB;
+    process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const openwork = await startOpenworkServer(workspaceRoot, "http://127.0.0.1:9");
 
@@ -1163,8 +1163,8 @@ describe("runtime MCP engine sync", () => {
       const body = await response.json() as { code?: string };
       expect(body.code).toBe("opencode_engine_unreachable");
     } finally {
-      if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-      else process.env.OPENWORK_RUNTIME_DB = previousDb;
+      if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+      else process.env.REDROB_RUNTIME_DB = previousDb;
     }
   });
 });

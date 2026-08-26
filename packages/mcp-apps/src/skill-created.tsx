@@ -1,4 +1,4 @@
-import { skillCreatedPayloadSchema } from "@openwork/types/skill-created-app"
+import { skillCreatedPayloadSchema } from "@redrob/types/skill-created-app"
 import { mountMcpApp } from "./shared/bridge"
 import { AppHeader, ArrowIcon, CardBody, CardFooter, CheckIcon, KeyValueGrid } from "./shared/ui"
 import "./shared/theme.css"

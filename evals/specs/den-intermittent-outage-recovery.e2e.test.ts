@@ -1,6 +1,6 @@
 import { expect } from "vitest";
-import { evalIn, go, waitFor } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
+import { evalIn, go, waitFor } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
 import {
   app,
   eventually,
@@ -11,17 +11,17 @@ import {
   readDenClientState,
   server,
   test,
-} from "@openwork/testkit";
-import type { App, DesktopHandle, FaultProxy } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { App, DesktopHandle, FaultProxy } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const daytonaEnabled = process.env.OPENWORK_EVAL_DAYTONA === "1";
-const configuredDen = Boolean(process.env.OPENWORK_EVAL_DEN_API_URL?.trim());
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const daytonaEnabled = process.env.REDROB_EVAL_DAYTONA === "1";
+const configuredDen = Boolean(process.env.REDROB_EVAL_DEN_API_URL?.trim());
 const localMysqlRequired = !daytonaEnabled && !configuredDen;
 const mysqlOpen = await localMysqlIsRunning();
 const runnable = e2eTestsEnabled && (!localMysqlRequired || mysqlOpen);
 const title = !e2eTestsEnabled
-  ? "desktop intermittent Den connection loss skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? "desktop intermittent Den connection loss skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : localMysqlRequired && !mysqlOpen
     ? "desktop intermittent Den connection loss skipped — needs MySQL on 127.0.0.1:3306"
     : "desktop survives intermittent Den connection loss: engine stays up, health stays honest, Connect recovers";
@@ -52,7 +52,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 async function readEngineIdentity(desktopApp: DesktopHandle): Promise<EngineIdentity> {
   const value = await evalIn(desktopApp, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("engineInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("engineInfo");
     return {
       pid: typeof info?.pid === "number" ? info.pid : null,
       baseUrl: typeof info?.baseUrl === "string" ? info.baseUrl : "",
@@ -250,7 +250,7 @@ async function waitForRecoveredRequest(
 }
 
 test.skipIf(!runnable)(title, { timeout: 1_500_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   const stamp = Date.now();
   await using den = await server({

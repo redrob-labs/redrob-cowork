@@ -1,4 +1,4 @@
-import type { DownloadCardInstallers } from "@openwork/ui/react";
+import type { DownloadCardInstallers } from "@redrob/ui/react";
 
 const FALLBACK_RELEASE = "https://github.com/different-ai/openwork/releases";
 

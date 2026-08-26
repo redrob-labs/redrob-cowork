@@ -1,18 +1,18 @@
 import { createServer } from "node:http";
 import { expect, onTestFinished } from "vitest";
-import { control, createAndSelectWorkspace, evalIn, waitFor, waitForText } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { control, createAndSelectWorkspace, evalIn, waitFor, waitForText } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
 const providerId = "session-loading-idle-mock";
 const modelId = "session-loading-idle-model";
 const reply = "session loading idle proof";
 const renamedTitle = "Session loading stays idle";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "completed session loading stays idle after snapshot refetch and rename"
-  : "session loading idle skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "session loading idle skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -41,7 +41,7 @@ const stopDisabledExpression = `(() => {
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   const mock = createServer((request, response) => {
     const url = request.url ?? "";

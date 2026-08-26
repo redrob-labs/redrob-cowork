@@ -6,7 +6,7 @@ import {
   agentContextDiagnosticsReportSchema,
   type AgentContextDiagnosticCheck,
   type AgentContextDiagnosticsReport,
-} from "@openwork/types/agent-context-diagnostics";
+} from "@redrob/types/agent-context-diagnostics";
 
 import { serializeAgentContextDiagnosticsReport } from "../src/app/lib/agent-context-diagnostics";
 import {
@@ -383,7 +383,7 @@ describe("AgentContextDiagnosticsReportView", () => {
   });
 
   test("does not export the obsolete client cloud-catalog probe contract", async () => {
-    const contract = await import("@openwork/types/agent-context-diagnostics");
+    const contract = await import("@redrob/types/agent-context-diagnostics");
     expect("agentContextCloudCatalogProbeSchema" in contract).toBe(false);
     expect("agentContextCloudCatalogProbeCodeSchema" in contract).toBe(false);
   });

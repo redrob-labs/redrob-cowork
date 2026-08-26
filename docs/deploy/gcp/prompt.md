@@ -28,7 +28,7 @@ Customer inputs:
 - Organization name: `{{ORGANIZATION_NAME}}`
 - Initial owner email: `{{INITIAL_OWNER_EMAIL}}`
 - Platform/bootstrap admin email, if separate: `{{PLATFORM_ADMIN_EMAIL_OR_SAME_AS_OWNER}}`
-- Redrob Work version: `{{OPENWORK_VERSION_OR_LATEST_RELEASE}}` where `latest` means check GitHub releases and the published Helm chart before deploying.
+- Redrob Work version: `{{REDROB_VERSION_OR_LATEST_RELEASE}}` where `latest` means check GitHub releases and the published Helm chart before deploying.
 - Administrator setup code: `{{OPERATOR_PROVIDES_CODE_OR_AGENT_GENERATES_ONE}}`. If the agent generates the code, give it to me through an agreed secure channel and never print it in task logs.
 
 Agent-created resource names and defaults (change if required):

@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile --trust-lockfile --filter openwork-server... 
 
 FROM node:22-bookworm-slim
 
-ARG OPENWORK_SERVER_VERSION
+ARG REDROB_SERVER_VERSION
 ARG OPENCODE_VERSION
 ARG OPENCODE_DOWNLOAD_URL=
 
@@ -30,7 +30,7 @@ COPY --from=openwork-builder /src/constants.json /usr/local/constants.json
 COPY packaging/docker/microsandbox-entrypoint.sh /usr/local/bin/microsandbox-entrypoint.sh
 
 RUN set -eux; \
-  test -n "$OPENWORK_SERVER_VERSION"; \
+  test -n "$REDROB_SERVER_VERSION"; \
   test -n "$OPENCODE_VERSION"; \
   arch="$(dpkg --print-architecture)"; \
   case "$arch" in \
@@ -56,19 +56,19 @@ RUN test -f /opt/openwork/opencode-plugins/openwork-extensions-preview.js \
   && test -f /opt/openwork/opencode-plugins/openwork-office-attachments.js \
   && test -f /opt/openwork/opencode-plugins/openwork-anthropic-adaptive-thinking.js \
   && test -f /opt/openwork/opencode-plugins/openwork-anthropic-tool-schema.js \
-  && test "$(openwork-server --version)" = "$OPENWORK_SERVER_VERSION" \
+  && test "$(openwork-server --version)" = "$REDROB_SERVER_VERSION" \
   && opencode --version
 
-ENV OPENWORK_EXTENSIONS_PLUGIN_DIR=/opt/openwork/opencode-plugins
-ENV OPENWORK_DATA_DIR=/data/openwork-server
-ENV OPENWORK_SIDECAR_DIR=/data/sidecars
-ENV OPENWORK_WORKSPACE=/workspace
+ENV REDROB_EXTENSIONS_PLUGIN_DIR=/opt/openwork/opencode-plugins
+ENV REDROB_DATA_DIR=/data/openwork-server
+ENV REDROB_SIDECAR_DIR=/data/sidecars
+ENV REDROB_WORKSPACE=/workspace
 
 EXPOSE 8787
 
 VOLUME ["/workspace", "/data"]
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=12 \
-  CMD /bin/sh -c 'curl -fsS "http://127.0.0.1:${OPENWORK_PORT:-8787}/health" >/dev/null || exit 1'
+  CMD /bin/sh -c 'curl -fsS "http://127.0.0.1:${REDROB_PORT:-8787}/health" >/dev/null || exit 1'
 
 ENTRYPOINT ["/usr/local/bin/microsandbox-entrypoint.sh"]

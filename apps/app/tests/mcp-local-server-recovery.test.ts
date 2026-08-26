@@ -10,7 +10,7 @@ const originalWindow = globalThis.window;
 function installDesktopWindow() {
   Object.defineProperty(globalThis, "window", {
     configurable: true,
-    value: { __OPENWORK_ELECTRON__: {} },
+    value: { __REDROB_ELECTRON__: {} },
   });
 }
 

@@ -14,7 +14,7 @@ import { readRuntimeMcpConfig } from "./runtime-opencode-config-store.js";
 import { externalFetch } from "./server-fetch.js";
 import type { ServerConfig } from "./types.js";
 
-const OPENWORK_CLOUD_MCP_NAME = "openwork-cloud";
+const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
 const SKILL_INDEX_URI = "skill://index.json";
 const SKILL_INDEX_SCHEMA = "https://schemas.agentskills.io/discovery/0.2.0/schema.json";
 const CATALOG_CACHE_TTL_MS = 30_000;
@@ -104,7 +104,7 @@ export async function readOpenWorkConnectSkillCatalog(
     const candidates: Array<{ cloud: Record<string, unknown>; source: "server" | "workspace" }> = [];
     if (serverCloud) candidates.push({ cloud: serverCloud, source: "server" });
     for (const workspace of config.workspaces) {
-      const cloud = await readRuntimeMcpConfig(config, workspace.id, OPENWORK_CLOUD_MCP_NAME);
+      const cloud = await readRuntimeMcpConfig(config, workspace.id, REDROB_CLOUD_MCP_NAME);
       if (cloud) candidates.push({ cloud, source: "workspace" });
     }
 
@@ -142,7 +142,7 @@ type InjectedMarketplaceSkill = {
 };
 
 function logInjectedMarketplaceSkills(skills: InjectedMarketplaceSkill[]): void {
-  if (process.env.OPENWORK_DEV_MODE !== "1") return;
+  if (process.env.REDROB_DEV_MODE !== "1") return;
   console.log("[openwork:skills] marketplace skills injected into prompt", {
     count: skills.length,
     skills,

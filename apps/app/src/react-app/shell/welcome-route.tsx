@@ -19,7 +19,9 @@ import { useLocal } from "../kernel/local-provider";
 import { usePlatform } from "../kernel/platform";
 import { WelcomePage } from "../domains/onboarding/welcome-page";
 import { ProviderSelectionStep } from "../domains/onboarding/provider-selection-step";
+import { RedrobKeyStep } from "../domains/onboarding/redrob-key-step";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
+import { REDROB_API_KEY_ENV, REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
 import { CreateWorkspaceModal } from "../domains/workspace/create-workspace-modal";
 import type { CreateWorkspaceOptions } from "../domains/workspace/types";
 import {
@@ -33,8 +35,7 @@ import { JoinOrganizationDialog } from "../domains/cloud/join-organization-dialo
 import { resolveOpenworkConnection } from "./openwork-connection";
 import { captureAnalyticsEvent } from "../../app/lib/analytics";
 import { buildOpenworkWorkspaceBaseUrl, createOpenworkServerClient } from "../../app/lib/openwork-server";
-import { buildDenAuthUrl, DEFAULT_DEN_BASE_URL, readDenSettings } from "../../app/lib/den";
-import { markDesktopSignInInitiated } from "../../app/lib/den-sign-in-intent";
+import { readDenSettings } from "../../app/lib/den";
 import { denSettingsChangedEvent } from "../../app/lib/den-session-events";
 import { writeActiveWorkspaceId, writeLastSessionFor, writeWorkspaceProjectDimension } from "./session-memory";
 import { workspaceSessionRoute } from "./workspace-routes";
@@ -69,6 +70,9 @@ type WelcomeState = {
   createError: string | null;
   remoteBusy: boolean;
   remoteError: string | null;
+  redrobKeyStep: boolean;
+  redrobKeyBusy: boolean;
+  redrobKeyError: string | null;
   providerStep: boolean;
   attributionStep: boolean;
   pendingRoute: string | null;
@@ -85,7 +89,11 @@ type WelcomeAction =
   | { type: "remote:start" }
   | { type: "remote:error"; error: string }
   | { type: "remote:finish" }
-  | { type: "provider-step"; workspaceId: string; sessionId: string | null }
+  | { type: "redrob-key-step"; workspaceId: string; sessionId: string | null }
+  | { type: "redrob-key:start" }
+  | { type: "redrob-key:error"; error: string }
+  | { type: "redrob-key:finish" }
+  | { type: "provider-step" }
   | { type: "attribution-step"; route: string };
 
 const initialWelcomeState: WelcomeState = {
@@ -94,6 +102,9 @@ const initialWelcomeState: WelcomeState = {
   createError: null,
   remoteBusy: false,
   remoteError: null,
+  redrobKeyStep: false,
+  redrobKeyBusy: false,
+  redrobKeyError: null,
   providerStep: false,
   attributionStep: false,
   pendingRoute: null,
@@ -119,8 +130,22 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
       return { ...state, remoteError: action.error };
     case "remote:finish":
       return { ...state, remoteBusy: false };
+    case "redrob-key-step":
+      return {
+        ...state,
+        redrobKeyStep: true,
+        redrobKeyError: null,
+        pendingWorkspaceId: action.workspaceId,
+        pendingSessionId: action.sessionId,
+      };
+    case "redrob-key:start":
+      return { ...state, redrobKeyBusy: true, redrobKeyError: null };
+    case "redrob-key:error":
+      return { ...state, redrobKeyBusy: false, redrobKeyError: action.error };
+    case "redrob-key:finish":
+      return { ...state, redrobKeyBusy: false };
     case "provider-step":
-      return { ...state, providerStep: true, pendingWorkspaceId: action.workspaceId, pendingSessionId: action.sessionId };
+      return { ...state, redrobKeyStep: false, providerStep: true };
     case "attribution-step":
       return { ...state, providerStep: false, attributionStep: true, pendingRoute: action.route };
   }
@@ -252,8 +277,9 @@ export function WelcomeRoute() {
           if (targetSessionId) writeLastSessionFor(targetWorkspaceId, targetSessionId);
         }
         dispatch({ type: "close" });
-        // Show the provider selection step before navigating to the session.
-        dispatch({ type: "provider-step", workspaceId: targetWorkspaceId, sessionId: targetSessionId });
+        // Redrob-only onboarding: prompt for the console.redrob.ai API key
+        // before the provider/attribution steps and the session redirect.
+        dispatch({ type: "redrob-key-step", workspaceId: targetWorkspaceId, sessionId: targetSessionId });
 
       } catch (error) {
         dispatch({
@@ -353,12 +379,41 @@ export function WelcomeRoute() {
     await handleCreateWorkspace("starter", folder);
   }, [handleCreateWorkspace, manualFolder]);
 
-  const handleTeamSignIn = useCallback(() => {
-    markOnboardingComplete();
-    const settings = readDenSettings();
-    markDesktopSignInInitiated();
-    platform.openLink(buildDenAuthUrl(settings.baseUrl || DEFAULT_DEN_BASE_URL, "sign-in"));
-  }, [markOnboardingComplete, platform]);
+  const advanceToProviderStep = useCallback(() => {
+    dispatch({ type: "provider-step" });
+  }, []);
+
+  const handleOpenRedrobConsole = useCallback(() => {
+    platform.openLink(REDROB_CONSOLE_URL);
+  }, [platform]);
+
+  const handleSubmitRedrobKey = useCallback(
+    async (apiKey: string) => {
+      const trimmed = apiKey.trim();
+      if (!trimmed) return;
+      dispatch({ type: "redrob-key:start" });
+      try {
+        const { normalizedBaseUrl, resolvedToken, resolvedHostToken } =
+          await resolveOpenworkConnection();
+        if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
+          throw new Error(t("welcome.redrob_key_error_server"));
+        }
+        await createOpenworkServerClient({
+          baseUrl: normalizedBaseUrl,
+          token: resolvedToken || undefined,
+          hostToken: resolvedHostToken || undefined,
+        }).upsertUserEnv([{ key: REDROB_API_KEY_ENV, value: trimmed }]);
+        dispatch({ type: "redrob-key:finish" });
+        advanceToProviderStep();
+      } catch (error) {
+        dispatch({
+          type: "redrob-key:error",
+          error: error instanceof Error ? error.message : t("welcome.redrob_key_error_server"),
+        });
+      }
+    },
+    [advanceToProviderStep],
+  );
 
   const finishOnboarding = useCallback(() => {
     markOnboardingComplete();
@@ -399,7 +454,6 @@ export function WelcomeRoute() {
         onManualFolderChange={setManualFolder}
         onUseManualFolder={handleUseManualFolder}
         showManualFolder={import.meta.env.DEV && isDesktopRuntime()}
-        onTeamSignIn={handleTeamSignIn}
         onJoinOrganization={() => setJoinOrganizationOpen(true)}
       />
       <JoinOrganizationDialog
@@ -431,11 +485,20 @@ export function WelcomeRoute() {
             : t("app.local_disabled_reason")
         }
       />
+      {state.redrobKeyStep ? (
+        <RedrobKeyStep
+          busy={state.redrobKeyBusy}
+          error={state.redrobKeyError}
+          onSubmitKey={handleSubmitRedrobKey}
+          onOpenConsole={handleOpenRedrobConsole}
+          onSkip={advanceToProviderStep}
+        />
+      ) : null}
       {state.providerStep ? (
         <ProviderSelectionStep
           showOpenWorkModels={showOpenWorkModelsPromo}
           onOpenWorkModels={() => {
-            // Land on the OpenWork Models value-prop page when already
+            // Land on the Redrob Models value-prop page when already
             // signed in to Den; otherwise start sign-up. Previously this
             // always opened a bare sign-up page — payment before value.
             platform.openLink(getOpenWorkModelsActionUrl(denAuth.isSignedIn, "sign-up"));

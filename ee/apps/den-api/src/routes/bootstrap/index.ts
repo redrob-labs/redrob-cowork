@@ -1,4 +1,4 @@
-import { and, eq, gt, isNotNull, isNull } from "@openwork-ee/den-db/drizzle"
+import { and, eq, gt, isNotNull, isNull } from "@redrob-ee/den-db/drizzle"
 import {
   ConfigObjectAccessGrantTable,
   ConfigObjectTable,
@@ -14,8 +14,8 @@ import {
   RateLimitTable,
   WorkspaceBootstrapTable,
   WorkspaceClaimTable,
-} from "@openwork-ee/den-db/schema"
-import { createDenTypeId, normalizeDenTypeId, parseSkillMarkdown } from "@openwork-ee/utils"
+} from "@redrob-ee/den-db/schema"
+import { createDenTypeId, normalizeDenTypeId, parseSkillMarkdown } from "@redrob-ee/utils"
 import { createHash, randomBytes } from "node:crypto"
 import type { Hono } from "hono"
 import { describeRoute } from "hono-openapi"
@@ -30,16 +30,16 @@ import { seedDefaultOrganizationRoles, setSessionActiveOrganization } from "../.
 import { clampUtf8Bytes, PROJECTION_TEXT_MAX_BYTES } from "../org/plugin-system/projection-text.js"
 import type { AuthContextVariables } from "../../session.js"
 import {
-  DEFAULT_OPENWORK_MARKETPLACE_DESCRIPTION,
-  DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL,
-  DEFAULT_OPENWORK_MARKETPLACE_NAME,
+  DEFAULT_REDROB_MARKETPLACE_DESCRIPTION,
+  DEFAULT_REDROB_MARKETPLACE_LOGO_URL,
+  DEFAULT_REDROB_MARKETPLACE_NAME,
 } from "../org/plugin-system/default-marketplaces.js"
 
 const BOOTSTRAP_TTL_MS = 1000 * 60 * 60 * 24
 const BOOTSTRAP_RATE_LIMIT_WINDOW_MS = 1000 * 60 * 60
 const BOOTSTRAP_RATE_LIMIT_MAX = 5
 const CLAIM_TOKEN_BYTES = 32
-const STARTER_SKILL_OUTPUT = "OPENWORK_BOOTSTRAP_SKILL_TRIGGERED"
+const STARTER_SKILL_OUTPUT = "REDROB_BOOTSTRAP_SKILL_TRIGGERED"
 
 const bootstrapWorkspaceSchema = z.object({
   workspaceName: z.string().trim().min(2).max(120),
@@ -331,9 +331,9 @@ export function registerBootstrapRoutes<T extends { Variables: AuthContextVariab
         await tx.insert(MarketplaceTable).values({
           id: marketplaceId,
           organizationId,
-          name: DEFAULT_OPENWORK_MARKETPLACE_NAME,
-          description: DEFAULT_OPENWORK_MARKETPLACE_DESCRIPTION,
-          logoUrl: DEFAULT_OPENWORK_MARKETPLACE_LOGO_URL,
+          name: DEFAULT_REDROB_MARKETPLACE_NAME,
+          description: DEFAULT_REDROB_MARKETPLACE_DESCRIPTION,
+          logoUrl: DEFAULT_REDROB_MARKETPLACE_LOGO_URL,
           status: "active",
           createdByOrgMembershipId: setupMemberId,
           deletedAt: null,

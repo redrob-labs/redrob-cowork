@@ -4,7 +4,7 @@ Effective date: April 4, 2026
 
 DIFFERENT AI, INC., doing business as OpenWork ("we," "our," or "us"), is committed to protecting your privacy. This Privacy Policy explains how your personal information is collected, used, and disclosed by OpenWork.
 
-This Privacy Policy applies to our website ([openworklabs.com](https://openworklabs.com) and its associated subdomains), our Desktop App, and our Cloud Service (collectively, our "Service"). By accessing or using our Service, you signify that you have read, understood, and agree to our collection, storage, use, and disclosure of your personal information as described in this Privacy Policy and our [Terms of Use](/terms).
+This Privacy Policy applies to our website ([redrob.io](https://redrob.io) and its associated subdomains), our Desktop App, and our Cloud Service (collectively, our "Service"). By accessing or using our Service, you signify that you have read, understood, and agree to our collection, storage, use, and disclosure of your personal information as described in this Privacy Policy and our [Terms of Use](/terms).
 
 ## Definitions and key terms
 
@@ -20,7 +20,7 @@ To help explain things as clearly as possible in this Privacy Policy, every time
 - **Personal Data:** any information that directly, indirectly, or in connection with other information — including a personal identification number — allows for the identification or identifiability of a natural person.
 - **Service:** refers to the service provided by OpenWork as described in the relative terms (if available) and on this platform.
 - **Third-party service:** refers to service providers, partners, and others who provide content, functionality, or services in connection with our Service, including analytics providers, payment processors, and authentication providers.
-- **Website:** OpenWork's marketing website, which can be accessed via this URL: [openworklabs.com](https://openworklabs.com).
+- **Website:** OpenWork's marketing website, which can be accessed via this URL: [redrob.io](https://redrob.io).
 - **Desktop App:** the OpenWork desktop application, distributed for macOS, Windows, and Linux.
 - **Cloud Service:** the OpenWork cloud-hosted web application, accessible via a web browser and providing functionality similar to the Desktop App.
 - **You:** a person or entity that accesses or uses the Service.
@@ -169,7 +169,7 @@ The rights you have to request updates or corrections to the information OpenWor
 
 Customers have the right to request the restriction of certain uses and disclosures of personally identifiable information as follows. You can update or correct your profile information, change communication preferences, or request deletion of personal information maintained about you on our systems (subject to the following paragraphs). Such updates, corrections, changes and deletions will have no effect on other information that we maintain, or information that we have provided to third parties in accordance with this Privacy Policy prior to such update, correction, change or deletion. To protect your privacy and security, we may take reasonable steps (such as requesting a unique password) to verify your identity before granting you profile access, making corrections, or processing a deletion request. You are responsible for maintaining the secrecy of your unique password and account information at all times.
 
-For account, workspace, or organization deletion, the primary method is self-service after signing in to the Service. Use the available account or workspace settings and destructive deletion controls for the account, workspace, or organization you want to delete. If you cannot sign in, cannot access the relevant workspace controls, or have a broader privacy request, contact us at [team@openworklabs.com](mailto:team@openworklabs.com).
+For account, workspace, or organization deletion, the primary method is self-service after signing in to the Service. Use the available account or workspace settings and destructive deletion controls for the account, workspace, or organization you want to delete. If you cannot sign in, cannot access the relevant workspace controls, or have a broader privacy request, contact us at [team@redrob.io](mailto:team@redrob.io).
 
 If you are a member of an organization or workspace that is controlled by a customer or another organization owner, deleting your individual account removes or de-identifies user-owned personally identifiable information where reasonably practicable and deletes organizations or workspaces that you own where applicable. Limited information such as your name, corporate email address, role, activity records, audit logs, comments, historical references, and other organization-controlled data may remain visible to that organization or customer, or may be retained by us, where necessary to provide the Service, maintain security and audit records, comply with law, resolve disputes, enforce agreements, or follow the organization/customer's instructions.
 
@@ -290,7 +290,7 @@ GDPR adds some new requirements regarding how companies should protect individua
 
 We are committed to helping our customers meet the data subject rights requirements of GDPR. OpenWork processes or stores all personal data in fully vetted, DPA compliant vendors. Upon account deletion, we dispose of all personal data in accordance with our Terms of Use and this Privacy Policy within thirty (30) days. Backups may retain data for up to ninety (90) days before permanent removal.
 
-You have the right to access, update, retrieve, and remove your personal data at any time. To exercise these rights, please contact us at [team@openworklabs.com](mailto:team@openworklabs.com).
+You have the right to access, update, retrieve, and remove your personal data at any time. To exercise these rights, please contact us at [team@redrob.io](mailto:team@redrob.io).
 
 ## United States Resident Rights
 
@@ -316,7 +316,7 @@ If you are a resident of a state that permits it, you may authorize an agent to 
 
 ### Appeal Process
 
-If we deny your privacy rights request, you may appeal our decision by emailing us at [team@openworklabs.com](mailto:team@openworklabs.com) within sixty (60) days of receiving the denial. Your appeal must include sufficient information to identify the original request and a description of the basis for your appeal. We will respond to your appeal within the time period required by applicable law. If we deny your appeal, you have the right to contact the Attorney General of your state.
+If we deny your privacy rights request, you may appeal our decision by emailing us at [team@redrob.io](mailto:team@redrob.io) within sixty (60) days of receiving the denial. Your appeal must include sufficient information to identify the original request and a description of the basis for your appeal. We will respond to your appeal within the time period required by applicable law. If we deny your appeal, you have the right to contact the Attorney General of your state.
 
 ## No Coding Advice
 
@@ -334,4 +334,4 @@ This Privacy Policy, together with our Terms of Use and any applicable supplemen
 
 Don't hesitate to contact us if you have any questions.
 
-- Via Email: [team@openworklabs.com](mailto:team@openworklabs.com)
+- Via Email: [team@redrob.io](mailto:team@redrob.io)

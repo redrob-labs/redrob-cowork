@@ -1,6 +1,6 @@
 "use client";
 
-import { detectPlatform, type DetectedPlatform } from "@openwork/ui/react";
+import { detectPlatform, type DetectedPlatform } from "@redrob/ui/react";
 import { useEffect, useState } from "react";
 import {
   getDesktopHandoffGrant,
@@ -23,7 +23,7 @@ import { OnboardingCard } from "./onboarding-card";
 import { OnboardingShell } from "./onboarding-shell";
 import { OrganizationBrandIdentity, type OrganizationBrand } from "./organization-brand-identity";
 
-const OPENWORK_DOWNLOAD_URL = "https://openworklabs.com/download";
+const REDROB_DOWNLOAD_URL = "https://redrob.io/download";
 
 function ReturnToOpenWorkStatus({
   openworkUrl,
@@ -331,7 +331,7 @@ export function JoinOrgSuccess({
             <div className="grid gap-3">
               <div className="den-notice is-error">{actionError}</div>
               {desktopAuthRequested ? null : (
-                <a href={OPENWORK_DOWNLOAD_URL} className="den-button-secondary min-h-12 w-full">
+                <a href={REDROB_DOWNLOAD_URL} className="den-button-secondary min-h-12 w-full">
                   Open the public download page
                 </a>
               )}

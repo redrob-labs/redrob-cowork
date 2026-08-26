@@ -25,7 +25,7 @@ function probeAutomations(options: { enabled?: string; runtimeEnabled?: string }
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),
       BETTER_AUTH_URL: "https://den.openwork.test",
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       ...(options.enabled === undefined ? {} : { DEN_AUTOMATIONS_ENABLED: options.enabled }),
       ...(options.runtimeEnabled === undefined
@@ -56,7 +56,7 @@ function probeAutomationRoutes(options: { enabled?: string; runtimeEnabled?: str
       DEN_DB_ENCRYPTION_KEY: "test-db-encryption-key-with-enough-entropy",
       BETTER_AUTH_SECRET: "test-auth-secret-with-enough-entropy-123456789",
       BETTER_AUTH_URL: "https://den.openwork.test",
-      OPENWORK_DEV_MODE: "0",
+      REDROB_DEV_MODE: "0",
       PROVISIONER_MODE: "stub",
       ...(options.enabled === undefined ? {} : { DEN_AUTOMATIONS_ENABLED: options.enabled }),
       ...(options.runtimeEnabled === undefined

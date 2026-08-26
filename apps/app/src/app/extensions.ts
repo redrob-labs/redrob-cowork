@@ -151,7 +151,7 @@ export function isTrustedBuiltInExtension(manifest: OpenWorkExtensionManifest | 
   return manifest?.source.origin === "builtin" && manifest.source.trusted;
 }
 
-export const BUILT_IN_OPENWORK_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = [
+export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = [
   {
     schemaVersion: 1,
     id: "openwork-browser",
@@ -204,7 +204,7 @@ export const BUILT_IN_OPENWORK_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] 
         id: "computer-use-mcp",
         label: "Computer Use MCP",
         mcpServerName: "computer-use",
-        command: ["npx", "-y", "@openwork/handsfree", "mcp"],
+        command: ["npx", "-y", "@redrob/handsfree", "mcp"],
         localCommandRef: "openwork.computerUseMcp",
         required: true,
       },
@@ -212,7 +212,7 @@ export const BUILT_IN_OPENWORK_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] 
         type: "native-binary",
         id: "computer-use-native",
         label: "macOS accessibility runtime",
-        packageName: "@openwork/handsfree",
+        packageName: "@redrob/handsfree",
         required: true,
       },
     ],

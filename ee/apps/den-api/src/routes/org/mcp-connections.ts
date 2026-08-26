@@ -8,8 +8,8 @@ import {
   EnterpriseMcpOAuthContractError,
   selectRecoverableAuthorizationServerIssuer,
   validateMcpAuthorizationResponseIssuer,
-} from "@openwork/enterprise-mcp-client"
-import { and, desc, eq, inArray, isNull } from "@openwork-ee/den-db/drizzle"
+} from "@redrob/enterprise-mcp-client"
+import { and, desc, eq, inArray, isNull } from "@redrob-ee/den-db/drizzle"
 import {
   ConnectedAccountTable,
   ConfigObjectTable,
@@ -19,8 +19,8 @@ import {
   PluginTable,
   type ExternalMcpOAuthConfiguration,
   type ExternalMcpToolPolicy,
-} from "@openwork-ee/den-db/schema"
-import { normalizeDenTypeId, type DenTypeId } from "@openwork-ee/utils/typeid"
+} from "@redrob-ee/den-db/schema"
+import { normalizeDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { db } from "../../db.js"
 import { env } from "../../env.js"
 import { appLogger } from "../../observability/logger.js"

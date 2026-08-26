@@ -5,12 +5,12 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { allocateFreePorts } from "@openwork/cdp";
-import { SkipError, ephemeralDatabaseName, localMysqlIsRunning, localRedisIsRunning, trustedOrigins } from "@openwork/env";
-import { freePort, killLocalPid } from "@openwork/hosts";
+import { allocateFreePorts } from "@redrob/cdp";
+import { SkipError, ephemeralDatabaseName, localMysqlIsRunning, localRedisIsRunning, trustedOrigins } from "@redrob/env";
+import { freePort, killLocalPid } from "@redrob/hosts";
 import type { ChildProcess } from "node:child_process";
-import type { DenRef } from "@openwork/behaviors";
-import type { DbHandle, Place } from "@openwork/env";
+import type { DenRef } from "@redrob/behaviors";
+import type { DbHandle, Place } from "@redrob/env";
 
 const execFileAsync = promisify(execFile);
 const REPO_ROOT = fileURLToPath(new URL("../../../..", import.meta.url));
@@ -58,11 +58,11 @@ function spawnService(
   logPath: string,
 ): SpawnedService {
   const logFd = openSync(logPath, "a");
-  const prepared = process.env.OPENWORK_EVAL_DEN_RUNTIME_PREPARED === "1";
+  const prepared = process.env.REDROB_EVAL_DEN_RUNTIME_PREPARED === "1";
   const args = prepared
     ? label === "den-api"
-      ? ["--filter", "@openwork-ee/den-api", "exec", "tsx", "src/main.ts"]
-      : ["--filter", "@openwork-ee/den-web", "exec", "next", "start", "--hostname", "127.0.0.1", "--port", String(port)]
+      ? ["--filter", "@redrob-ee/den-api", "exec", "tsx", "src/main.ts"]
+      : ["--filter", "@redrob-ee/den-web", "exec", "next", "start", "--hostname", "127.0.0.1", "--port", String(port)]
     : [script];
   const child = spawn("pnpm", args, {
     cwd: REPO_ROOT,
@@ -129,13 +129,13 @@ async function waitForAuthProbe(ref: DenRef, service: SpawnedService): Promise<v
 // mirrored from server.ts (keep in sync)
 async function runDbPush(databaseUrl: string): Promise<void> {
   try {
-    const commands = process.env.OPENWORK_EVAL_DEN_RUNTIME_PREPARED === "1"
+    const commands = process.env.REDROB_EVAL_DEN_RUNTIME_PREPARED === "1"
       ? [
-          ["--filter", "@openwork-ee/den-db", "exec", "node", "--import", "tsx", "./node_modules/drizzle-kit/bin.cjs", "push", "--config", "drizzle.config.ts"],
-          ["--filter", "@openwork-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-fulltext-indexes.ts"],
-          ["--filter", "@openwork-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-schema-repairs.ts"],
+          ["--filter", "@redrob-ee/den-db", "exec", "node", "--import", "tsx", "./node_modules/drizzle-kit/bin.cjs", "push", "--config", "drizzle.config.ts"],
+          ["--filter", "@redrob-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-fulltext-indexes.ts"],
+          ["--filter", "@redrob-ee/den-db", "exec", "node", "--import", "tsx", "scripts/ensure-schema-repairs.ts"],
         ]
-      : [["--filter", "@openwork-ee/den-db", "db:push"]];
+      : [["--filter", "@redrob-ee/den-db", "db:push"]];
     for (const args of commands) {
       await execFileAsync("pnpm", args, {
         cwd: REPO_ROOT,
@@ -168,7 +168,7 @@ async function stopServices(services: SpawnedService[]): Promise<void> {
 
 export async function selfHostServer(options: SelfHostServerOptions): Promise<SelfHostDen & AsyncDisposable> {
   if (options.place.kind === "daytona") {
-    throw new SkipError("selfHostServer requires local placement; unset OPENWORK_EVAL_DAYTONA");
+    throw new SkipError("selfHostServer requires local placement; unset REDROB_EVAL_DAYTONA");
   }
   if (!await localMysqlIsRunning()) {
     throw new Error("Local Den requires MySQL on 127.0.0.1:3306. Run: pnpm dev:den:mysql");
@@ -211,7 +211,7 @@ export async function selfHostServer(options: SelfHostServerOptions): Promise<Se
       DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP: String(options.allowPublicSignup ?? false),
       DEN_REQUIRE_EMAIL_VERIFICATION: "false",
       DEN_PASSWORD_BREACH_SCREENING_ENABLED: "false",
-      OPENWORK_DEV_MODE: "1",
+      REDROB_DEV_MODE: "1",
       PROVISIONER_MODE: "stub",
     };
 

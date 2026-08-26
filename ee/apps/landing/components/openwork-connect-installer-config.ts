@@ -1,4 +1,4 @@
-export const MCP_SERVER_URL = "https://api.openworklabs.com/mcp/agent";
+export const MCP_SERVER_URL = "https://api.redrob.io/mcp/agent";
 export const CODEX_CONNECTIONS_DEEPLINK = "codex://settings/connections";
 export const CHATGPT_SETTINGS_URL = "https://chatgpt.com/#settings/Connectors";
 export type OpenWorkConnectClientId =

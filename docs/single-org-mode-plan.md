@@ -362,8 +362,8 @@ Baseline check on 2026-07-05 after dependency repair:
 
 1. `pnpm install --frozen-lockfile` completed successfully with pnpm 11.7.0.
 2. First `pnpm dev:web-local` runtime attempt started MySQL and schema sync but
-   `den-api` failed because `@openwork/install-config` had no `dist/index.js`.
-3. `pnpm --filter @openwork/install-config build` fixed the missing package
+   `den-api` failed because `@redrob/install-config` had no `dist/index.js`.
+3. `pnpm --filter @redrob/install-config build` fixed the missing package
    artifact.
 4. Restarted `pnpm dev:web-local`; all services came up:
    - Den API: `http://127.0.0.1:8788`
@@ -395,10 +395,10 @@ Current test-evidence follow-up:
 
 Validation update on 2026-07-05:
 
-1. `pnpm --filter @openwork-ee/den-api exec bun test test/single-org-mode.test.ts test/single-org-route-guards.test.ts`
+1. `pnpm --filter @redrob-ee/den-api exec bun test test/single-org-mode.test.ts test/single-org-route-guards.test.ts`
    passed 8 tests.
-2. `pnpm --filter @openwork-ee/den-api exec tsc --noEmit` passed.
-3. `pnpm --filter @openwork-ee/den-web exec tsc --noEmit` passed.
+2. `pnpm --filter @redrob-ee/den-api exec tsc --noEmit` passed.
+3. `pnpm --filter @redrob-ee/den-web exec tsc --noEmit` passed.
 4. `git diff --check` passed.
 5. `bash -n packaging/docker/den-dev-up.sh` passed.
 6. `docker compose -f packaging/docker/docker-compose.den-dev.yml config | rg "DEN_ORG_MODE|DEN_SINGLE_ORG|DEN_REQUIRE_EMAIL_VERIFICATION"`

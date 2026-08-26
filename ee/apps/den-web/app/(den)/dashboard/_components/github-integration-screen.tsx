@@ -18,7 +18,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { StaticSeededGradient } from "@openwork/ui/react";
+import { StaticSeededGradient } from "@redrob/ui/react";
 import {
   getGithubIntegrationAccountRoute,
   getGithubIntegrationRoute,

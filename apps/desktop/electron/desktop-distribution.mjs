@@ -1,8 +1,8 @@
 export const PUBLIC_DESKTOP_DISTRIBUTION = Object.freeze({
   flavor: "public",
   appName: "Redrob Work",
-  appIdentifier: "com.differentai.openwork",
-  protocolScheme: "openwork",
+  appIdentifier: "io.redrob.work",
+  protocolScheme: "redrob",
   requireSignin: false,
   requireActivation: false,
 });
@@ -10,8 +10,8 @@ export const PUBLIC_DESKTOP_DISTRIBUTION = Object.freeze({
 export const CLOUD_DESKTOP_DISTRIBUTION = Object.freeze({
   flavor: "cloud",
   appName: "Redrob Work Cloud",
-  appIdentifier: "com.differentai.openwork",
-  protocolScheme: "openwork",
+  appIdentifier: "io.redrob.work",
+  protocolScheme: "redrob",
   requireSignin: true,
   requireActivation: false,
 });
@@ -19,8 +19,8 @@ export const CLOUD_DESKTOP_DISTRIBUTION = Object.freeze({
 export const ENTERPRISE_DESKTOP_DISTRIBUTION = Object.freeze({
   flavor: "enterprise",
   appName: "Redrob Work Enterprise",
-  appIdentifier: "com.differentai.openwork",
-  protocolScheme: "openwork",
+  appIdentifier: "io.redrob.work",
+  protocolScheme: "redrob",
   requireSignin: true,
   requireActivation: true,
 });

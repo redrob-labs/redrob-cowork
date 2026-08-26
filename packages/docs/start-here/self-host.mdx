@@ -3,7 +3,7 @@ title: "Self-host"
 description: "Run OpenWork on your own server or infrastructure."
 ---
 
-Most users just use the [desktop app](https://openworklabs.com/download). Self-hosting is for teams that want OpenWork to run on their own server, VPC, or private cloud and then connect the desktop app to it remotely.
+Most users just use the [desktop app](https://redrob.io/download). Self-hosting is for teams that want OpenWork to run on their own server, VPC, or private cloud and then connect the desktop app to it remotely.
 
 Want hosted workspaces, team Collections, or shared providers without running infra? Use [OpenWork Cloud](/cloud/get-started) instead. Rolling this out across a company? [Book a call](https://calendar.app.google/86QpCENvhfEzDFLu5) about [Enterprise](/cloud/enterprise).
 
@@ -14,7 +14,7 @@ OpenWork is split into normal services:
 - **OpenWork app**: the desktop or web client people use.
 - **Den web**: the web app for sign-in, worker launch, and connect links if you want a cloud-style setup.
 - **Den controller**: the control plane for auth, workers, and provisioning.
-- **Inference service**: optional OpenWork Models proxy and metering service.
+- **Inference service**: optional Redrob Models proxy and metering service.
 
 If you only need one private remote workspace, deploy the worker runtime. If you want OpenWork Cloud-style accounts, teams, and organization management, deploy Den web, Den controller, and optionally the inference service.
 
@@ -88,7 +88,7 @@ SSO (SAML/OIDC) is in the current rollout and is designed to run against your ow
 
 For isolated Kubernetes deployments without approved outbound access to the Have I Been Pwned Pwned Passwords range API, the Helm chart disables external breached-password lookup by default. Email/password sign-in lockout remains local. If your deployment approves that external lookup, enable it in Helm. See [Air-gapped deployment](/start-here/air-gapped-deployment) for the broader isolation checklist.
 
-If you do not deploy Den, worker access is token-based with `OPENWORK_TOKEN` and `OPENWORK_HOST_TOKEN`.
+If you do not deploy Den, worker access is token-based with `REDROB_TOKEN` and `REDROB_HOST_TOKEN`.
 
 ## Minimal working stack
 

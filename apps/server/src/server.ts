@@ -2,7 +2,7 @@ import { readFile, writeFile, rm, stat } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
-import { resolveGlobalOpencodeConfigPath } from "@openwork/paths";
+import { resolveGlobalOpencodeConfigPath } from "@redrob/paths";
 import type { ApprovalRequest, Capabilities, ServerConfig, WorkspaceInfo, Actor, ReloadReason, ReloadTrigger, TokenScope } from "./types.js";
 import { agentContextDiagnosticsRequestSchema } from "./agent-context-diagnostics-schema.js";
 import { ApprovalService } from "./approvals.js";
@@ -151,8 +151,8 @@ export {
 const SERVER_VERSION = pkg.version;
 const OPENCODE_VERSION = constants.opencodeVersion.trim().replace(/^v/, "");
 
-const OPENWORK_VOICE_REALTIME_MODEL = "gpt-realtime-2";
-const OPENWORK_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
+const REDROB_VOICE_REALTIME_MODEL = "gpt-realtime-2";
+const REDROB_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
 let desktopCloudSyncQueue: Promise<void> = Promise.resolve();
 const agentDiagnosticsLastRunByServer = new WeakMap<ServerConfig, Map<string, number>>();
 const agentDiagnosticsInFlightByServer = new WeakMap<ServerConfig, Set<string>>();
@@ -181,7 +181,7 @@ function agentDiagnosticsActorWorkspaceKey(actor: Actor | undefined, workspaceId
 
 function requireAgentDiagnosticsRateLimit(config: ServerConfig, actor: Actor | undefined, workspaceId: string): void {
   const now = Date.now();
-  const configured = Number(process.env.OPENWORK_AGENT_DIAGNOSTICS_COOLDOWN_MS ?? "3000");
+  const configured = Number(process.env.REDROB_AGENT_DIAGNOSTICS_COOLDOWN_MS ?? "3000");
   const cooldownMs = Number.isFinite(configured) && configured >= 0 ? configured : 3_000;
   const key = agentDiagnosticsActorWorkspaceKey(actor, workspaceId);
   const agentDiagnosticsLastRun = agentDiagnosticsLastRunByServer.get(config) ?? new Map<string, number>();
@@ -229,7 +229,7 @@ function reserveAgentDiagnosticsRun(
   };
 }
 
-const OPENWORK_VOICE_REALTIME_TOOLS = [
+const REDROB_VOICE_REALTIME_TOOLS = [
   {
     type: "function",
     name: "openwork_snapshot",
@@ -507,7 +507,7 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
     "";
   if (storedKey) return storedKey;
 
-  return process.env.OPENWORK_OPENAI_REALTIME_API_KEY?.trim() ||
+  return process.env.REDROB_OPENAI_REALTIME_API_KEY?.trim() ||
     process.env.OPENAI_REALTIME_API_KEY?.trim() ||
     process.env.OPENAI_API_KEY?.trim() ||
     "";
@@ -516,18 +516,18 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
 async function resolveOpenWorkModelsVoiceConfig(env: EnvService): Promise<{ baseUrl: string; apiKey: string } | null> {
   const records = await env.list();
   const apiKey =
-    records.find((entry) => entry.key === "OPENWORK_API_KEY")?.value.trim() ||
-    records.find((entry) => entry.key === "OPENWORK_MODELS_API_KEY")?.value.trim() ||
-    process.env.OPENWORK_API_KEY?.trim() ||
-    process.env.OPENWORK_MODELS_API_KEY?.trim() ||
+    records.find((entry) => entry.key === "REDROB_CLOUD_API_KEY")?.value.trim() ||
+    records.find((entry) => entry.key === "REDROB_MODELS_API_KEY")?.value.trim() ||
+    process.env.REDROB_CLOUD_API_KEY?.trim() ||
+    process.env.REDROB_MODELS_API_KEY?.trim() ||
     "";
   if (!apiKey) return null;
 
   const baseUrl =
-    records.find((entry) => entry.key === "OPENWORK_INFERENCE_BASE_URL")?.value.trim() ||
-    records.find((entry) => entry.key === "OPENWORK_MODELS_BASE_URL")?.value.trim() ||
-    process.env.OPENWORK_INFERENCE_BASE_URL?.trim() ||
-    process.env.OPENWORK_MODELS_BASE_URL?.trim() ||
+    records.find((entry) => entry.key === "REDROB_INFERENCE_BASE_URL")?.value.trim() ||
+    records.find((entry) => entry.key === "REDROB_MODELS_BASE_URL")?.value.trim() ||
+    process.env.REDROB_INFERENCE_BASE_URL?.trim() ||
+    process.env.REDROB_MODELS_BASE_URL?.trim() ||
     "";
   if (!baseUrl) return null;
   return { apiKey, baseUrl: baseUrl.replace(/\/+$/, "") };
@@ -597,13 +597,13 @@ async function createOpenAiRealtimeVoiceSession(env: EnvService, input: unknown)
       if (error instanceof ApiError && error.status === 503) {
         const fallbackKey = await resolveOpenAiRealtimeApiKey(env);
         if (fallbackKey) {
-          console.warn("[voice] OpenWork Models broker returned 503 — falling back to direct OpenAI Realtime.");
+          console.warn("[voice] Redrob Models broker returned 503 - falling back to direct OpenAI Realtime.");
           return createDirectOpenAiVoiceSession(fallbackKey, input);
         }
         throw new ApiError(
           503,
           "openwork_models_voice_unavailable",
-          "OpenWork Models voice is active but the server is not fully configured. Ask your admin to add an OpenAI key, or save your own OPENAI_API_KEY in Environment settings.",
+          "Redrob Models voice is active but the server is not fully configured. Ask your admin to add an OpenAI key, or save your own OPENAI_API_KEY in Environment settings.",
         );
       }
       throw error;
@@ -615,7 +615,7 @@ async function createOpenAiRealtimeVoiceSession(env: EnvService, input: unknown)
     throw new ApiError(
       400,
       "openai_api_key_missing",
-      "OpenAI API key missing. Save OPENAI_API_KEY in OpenWork Environment Variables or configure the Voice Mode extension.",
+      "OpenAI API key missing. Save OPENAI_API_KEY in Redrob Environment Variables or configure the Voice Mode extension.",
     );
   }
 
@@ -641,7 +641,7 @@ async function createManagedVoiceSession(config: { baseUrl: string; apiKey: stri
   if (!response.ok) {
     const errorPayload = isRecord(payload) && isRecord(payload.error) ? payload.error : null;
     const message = typeof errorPayload?.message === "string" ? errorPayload.message : response.statusText;
-    throw new ApiError(response.status, "openwork_models_voice_failed", message || "OpenWork Models could not create a voice session");
+    throw new ApiError(response.status, "openwork_models_voice_failed", message || "Redrob Models could not create a voice session");
   }
   if (
     !isRecord(payload) ||
@@ -651,21 +651,21 @@ async function createManagedVoiceSession(config: { baseUrl: string; apiKey: stri
     !Array.isArray(payload.tools) ||
     payload.tools.some((tool) => typeof tool !== "string")
   ) {
-    throw new ApiError(502, "openwork_models_voice_invalid_response", "OpenWork Models did not return a usable Realtime session payload");
+    throw new ApiError(502, "openwork_models_voice_invalid_response", "Redrob Models did not return a usable Realtime session payload");
   }
   return {
     ok: true,
     clientSecret: payload.clientSecret,
     expiresAt: typeof payload.expiresAt === "number" ? payload.expiresAt : null,
     model: payload.model,
-    transcriptionModel: typeof payload.transcriptionModel === "string" ? payload.transcriptionModel : OPENWORK_VOICE_TRANSCRIPTION_MODEL,
+    transcriptionModel: typeof payload.transcriptionModel === "string" ? payload.transcriptionModel : REDROB_VOICE_TRANSCRIPTION_MODEL,
     tools: payload.tools,
     ...(typeof payload.source === "string" ? { source: payload.source } : {}),
   };
 }
 
 async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
-  const model = readStringField(input, "model") || OPENWORK_VOICE_REALTIME_MODEL;
+  const model = readStringField(input, "model") || REDROB_VOICE_REALTIME_MODEL;
   const sessionContext = readStringField(input, "sessionContext").slice(0, 6_000);
   const response = await externalFetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
@@ -680,7 +680,7 @@ async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
         output_modalities: ["audio"],
         audio: {
           input: {
-            transcription: { model: OPENWORK_VOICE_TRANSCRIPTION_MODEL, language: "en" },
+            transcription: { model: REDROB_VOICE_TRANSCRIPTION_MODEL, language: "en" },
             turn_detection: {
               type: "server_vad",
               threshold: 0.58,
@@ -693,7 +693,7 @@ async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
         },
         instructions: openworkVoiceRealtimeInstructions(sessionContext),
         tool_choice: "auto",
-        tools: OPENWORK_VOICE_REALTIME_TOOLS,
+        tools: REDROB_VOICE_REALTIME_TOOLS,
       },
     }),
   });
@@ -722,8 +722,8 @@ async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
     clientSecret,
     expiresAt,
     model,
-    transcriptionModel: OPENWORK_VOICE_TRANSCRIPTION_MODEL,
-    tools: OPENWORK_VOICE_REALTIME_TOOLS.map((tool) => tool.name),
+    transcriptionModel: REDROB_VOICE_TRANSCRIPTION_MODEL,
+    tools: REDROB_VOICE_REALTIME_TOOLS.map((tool) => tool.name),
   };
 }
 
@@ -791,7 +791,7 @@ function writeStdoutLogLine(line: string) {
 }
 
 export function createServerLogger(config: ServerConfig, writeLine: ServerLogWriter = writeStdoutLogLine): ServerLogger {
-  const runId = process.env.OPENWORK_RUN_ID ?? shortId();
+  const runId = process.env.REDROB_RUN_ID ?? shortId();
   const host = hostname().trim();
   const resource: Record<string, string> = {
     "service.name": "openwork-server",
@@ -940,7 +940,7 @@ export function assertOpencodeProxyAllowed(actor: Actor, method: string, proxyPa
   // Prevent viewers from self-approving OpenCode permission requests via the
   // proxy. OpenCode uses /permission/:requestId/reply (and historically also
   // a session-scoped variant). Collaborators must be allowed: the SPA's only
-  // credential is the collaborator-scoped client token (OPENWORK_TOKEN), so
+  // credential is the collaborator-scoped client token (REDROB_TOKEN), so
   // an owner-only gate made every interactive permission dialog un-answerable
   // (403 "Only owner tokens can reply") and left tool calls stuck in
   // "running" forever (#1918).
@@ -1258,7 +1258,7 @@ function opencodeUnreachableError(error: unknown, path: string): ApiError {
 }
 
 function agentDiagnosticsTimeoutMs(): number {
-  const configured = Number(process.env.OPENWORK_AGENT_DIAGNOSTICS_TIMEOUT_MS);
+  const configured = Number(process.env.REDROB_AGENT_DIAGNOSTICS_TIMEOUT_MS);
   return Number.isFinite(configured) && configured > 0 ? configured : 24_000;
 }
 
@@ -1813,33 +1813,33 @@ function buildCapabilities(config: ServerConfig): Capabilities {
 }
 
 function resolveSandboxBackend(): Capabilities["sandbox"]["backend"] {
-  const raw = (process.env.OPENWORK_SANDBOX_BACKEND ?? "").trim().toLowerCase();
+  const raw = (process.env.REDROB_SANDBOX_BACKEND ?? "").trim().toLowerCase();
   if (raw === "docker") return "docker";
   if (raw === "container") return "container";
   return "none";
 }
 
 function resolveSandboxEnabled(backend: Capabilities["sandbox"]["backend"]): boolean {
-  const raw = (process.env.OPENWORK_SANDBOX_ENABLED ?? "").trim().toLowerCase();
+  const raw = (process.env.REDROB_SANDBOX_ENABLED ?? "").trim().toLowerCase();
   if (["1", "true", "yes", "on"].includes(raw)) return true;
   if (["0", "false", "no", "off"].includes(raw)) return false;
   return backend !== "none";
 }
 
 function resolveInboxEnabled(): boolean {
-  const raw = (process.env.OPENWORK_INBOX_ENABLED ?? "").trim().toLowerCase();
+  const raw = (process.env.REDROB_INBOX_ENABLED ?? "").trim().toLowerCase();
   if (!raw) return true;
   return ["1", "true", "yes", "on"].includes(raw);
 }
 
 function resolveOutboxEnabled(): boolean {
-  const raw = (process.env.OPENWORK_OUTBOX_ENABLED ?? "").trim().toLowerCase();
+  const raw = (process.env.REDROB_OUTBOX_ENABLED ?? "").trim().toLowerCase();
   if (!raw) return true;
   return ["1", "true", "yes", "on"].includes(raw);
 }
 
 function resolveInboxMaxBytes(): number {
-  const raw = (process.env.OPENWORK_INBOX_MAX_BYTES ?? "").trim();
+  const raw = (process.env.REDROB_INBOX_MAX_BYTES ?? "").trim();
   const parsed = raw ? Number(raw) : NaN;
   if (Number.isFinite(parsed) && parsed > 0) {
     return Math.trunc(parsed);
@@ -1850,17 +1850,17 @@ function resolveInboxMaxBytes(): number {
   return 250_000_000;
 }
 
-// Dev-only log sink target. When OPENWORK_DEV_LOG_FILE is set to a path, the
+// Dev-only log sink target. When REDROB_DEV_LOG_FILE is set to a path, the
 // /dev/log endpoint accepts JSON payloads and appends them to that file so an
 // operator can `tail -f` the file to see live browser activity. Returning null
 // disables the endpoint entirely.
 function resolveDevLogPath(): string | null {
-  const raw = (process.env.OPENWORK_DEV_LOG_FILE ?? "").trim();
+  const raw = (process.env.REDROB_DEV_LOG_FILE ?? "").trim();
   return raw.length > 0 ? raw : null;
 }
 
 function resolveBrowserProvider(): Capabilities["toolProviders"]["browser"] {
-  const raw = (process.env.OPENWORK_BROWSER_PROVIDER ?? "").trim().toLowerCase();
+  const raw = (process.env.REDROB_BROWSER_PROVIDER ?? "").trim().toLowerCase();
   if (raw === "sandbox-headless") {
     return { enabled: true, placement: "in-sandbox", mode: "headless" };
   }
@@ -3785,7 +3785,7 @@ async function readAgentDiagnosticsJsonBody(request: Request): Promise<unknown> 
     "agent_diagnostics_request_timeout",
     "Agent diagnostics request body timed out",
   );
-  const configuredDeadlineMs = Number(process.env.OPENWORK_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS);
+  const configuredDeadlineMs = Number(process.env.REDROB_AGENT_DIAGNOSTICS_BODY_TIMEOUT_MS);
   const deadlineMs = Number.isFinite(configuredDeadlineMs) && configuredDeadlineMs >= 50
     ? Math.min(configuredDeadlineMs, 10_000)
     : AGENT_DIAGNOSTICS_DEFAULT_BODY_DEADLINE_MS;
@@ -3929,8 +3929,8 @@ export function resolveOpencodeConfigFilePath(scope: "project" | "global", works
 }
 
 function getRuntimeControlConfig(): { baseUrl: string; token: string } | null {
-  const baseUrl = process.env.OPENWORK_CONTROL_BASE_URL?.trim() ?? "";
-  const token = process.env.OPENWORK_CONTROL_TOKEN?.trim() ?? "";
+  const baseUrl = process.env.REDROB_CONTROL_BASE_URL?.trim() ?? "";
+  const token = process.env.REDROB_CONTROL_TOKEN?.trim() ?? "";
   if (!baseUrl || !token) return null;
   return { baseUrl: baseUrl.replace(/\/+$/, ""), token };
 }
@@ -4081,7 +4081,7 @@ function parseOpencodeErrorBody(input: string): unknown {
 // dispose froze every later pass and the status it reports). Overridable for
 // tests.
 function opencodeDisposeTimeoutMs(): number {
-  const configured = Number(process.env.OPENWORK_ENGINE_DISPOSE_TIMEOUT_MS ?? "");
+  const configured = Number(process.env.REDROB_ENGINE_DISPOSE_TIMEOUT_MS ?? "");
   return Number.isFinite(configured) && configured > 0 ? configured : 30_000;
 }
 
@@ -4638,12 +4638,12 @@ async function readBoundedEngineMcpRegistrationResponse(response: Response): Pro
 
 // Read lazily so tests can shrink the delay at runtime.
 function engineMcpSyncRetryDelayMs(): number {
-  const parsed = Number(process.env.OPENWORK_MCP_SYNC_RETRY_DELAY_MS ?? "750");
+  const parsed = Number(process.env.REDROB_MCP_SYNC_RETRY_DELAY_MS ?? "750");
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 750;
 }
 
 function engineMcpDeferredSyncDelayMs(): number {
-  const parsed = Number(process.env.OPENWORK_MCP_SYNC_DEFERRED_DELAY_MS ?? "12000");
+  const parsed = Number(process.env.REDROB_MCP_SYNC_DEFERRED_DELAY_MS ?? "12000");
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 12_000;
 }
 
@@ -4932,7 +4932,7 @@ function reconcileEngineMcpWorkspaceIdentity(
 }
 
 function engineMcpRegistrationMaxAgeMs(): number {
-  const configured = Number(process.env.OPENWORK_MCP_REGISTRATION_MAX_AGE_MS);
+  const configured = Number(process.env.REDROB_MCP_REGISTRATION_MAX_AGE_MS);
   if (!Number.isFinite(configured) || configured < 1) return ENGINE_MCP_REGISTRATION_MAX_AGE_MS;
   return Math.min(ENGINE_MCP_REGISTRATION_MAX_AGE_MS, Math.round(configured));
 }

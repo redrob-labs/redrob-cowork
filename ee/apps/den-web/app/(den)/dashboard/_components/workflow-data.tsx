@@ -6,7 +6,7 @@ import {
   workflowDetailSchema,
   workflowTestResultSchema,
   type WorkflowCapability,
-} from "@openwork/types/workflows";
+} from "@redrob/types/workflows";
 import { getErrorMessage, requestJson } from "../../_lib/den-flow";
 
 export type WorkflowDraft = {

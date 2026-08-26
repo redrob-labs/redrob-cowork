@@ -4,12 +4,12 @@ import {
   composeOpenWorkExtensionDiscoveryInstruction,
   composeSkillAuthoringInstruction,
   composeSteeringFromEngineMcpStatus,
-  OPENWORK_CLOUD_CONNECTION_INSTRUCTION,
-  OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION,
-  OPENWORK_CONNECT_DISABLED_INSTRUCTION,
-  OPENWORK_CONNECT_SIGN_IN_INSTRUCTION,
-  OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION,
-  OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION,
+  REDROB_CLOUD_CONNECTION_INSTRUCTION,
+  REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION,
+  REDROB_CONNECT_DISABLED_INSTRUCTION,
+  REDROB_CONNECT_SIGN_IN_INSTRUCTION,
+  REDROB_EXTENSION_DISCOVERY_INSTRUCTION,
+  REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION,
   resetOpenWorkExtensionDiscoveryInstructionCacheForTests,
   resolveOpenWorkExtensionDiscoveryInstruction,
   type OpenWorkEngineMcpStatusClient,
@@ -19,8 +19,8 @@ import {
 type CloudHealth = NonNullable<OpenWorkExtensionConnectState["cloudHealth"]>;
 type CloudFailure = NonNullable<CloudHealth["firstFailure"]>;
 
-const originalServerUrl = process.env.OPENWORK_SERVER_URL;
-const originalServerToken = process.env.OPENWORK_SERVER_TOKEN;
+const originalServerUrl = process.env.REDROB_SERVER_URL;
+const originalServerToken = process.env.REDROB_SERVER_TOKEN;
 
 const UNCHANGED_EXTENSION_DISCOVERY_INSTRUCTION =
   "If the user asks for something you cannot do with obvious built-in tools, check OpenWork extensions before saying the capability is unavailable. Use openwork_query with id extension.actions to inspect available extension actions, then openwork_execute with id extension.call for the matching action.";
@@ -31,10 +31,10 @@ beforeEach(() => {
 
 afterEach(() => {
   resetOpenWorkExtensionDiscoveryInstructionCacheForTests();
-  if (originalServerUrl === undefined) delete process.env.OPENWORK_SERVER_URL;
-  else process.env.OPENWORK_SERVER_URL = originalServerUrl;
-  if (originalServerToken === undefined) delete process.env.OPENWORK_SERVER_TOKEN;
-  else process.env.OPENWORK_SERVER_TOKEN = originalServerToken;
+  if (originalServerUrl === undefined) delete process.env.REDROB_SERVER_URL;
+  else process.env.REDROB_SERVER_URL = originalServerUrl;
+  if (originalServerToken === undefined) delete process.env.REDROB_SERVER_TOKEN;
+  else process.env.REDROB_SERVER_TOKEN = originalServerToken;
 });
 
 function health(overrides: Partial<NonNullable<OpenWorkExtensionConnectState["cloudHealth"]>> = {}): NonNullable<OpenWorkExtensionConnectState["cloudHealth"]> {
@@ -92,19 +92,19 @@ function engineMcpClient(result: unknown, requests: unknown[] = []): OpenWorkEng
 
 describe("composeSteeringFromEngineMcpStatus", () => {
   test("maps engine MCP statuses to steering instructions", () => {
-    expect(composeSteeringFromEngineMcpStatus("connected")).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
-    expect(composeSteeringFromEngineMcpStatus("disabled")).toBe(OPENWORK_CONNECT_DISABLED_INSTRUCTION);
-    expect(composeSteeringFromEngineMcpStatus("needs_auth")).toBe(OPENWORK_CONNECT_SIGN_IN_INSTRUCTION);
-    expect(composeSteeringFromEngineMcpStatus("needs_client_registration")).toBe(OPENWORK_CONNECT_SIGN_IN_INSTRUCTION);
-    expect(composeSteeringFromEngineMcpStatus("failed")).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
-    expect(composeSteeringFromEngineMcpStatus("starting")).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
-    expect(composeSteeringFromEngineMcpStatus(undefined)).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus("connected")).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus("disabled")).toBe(REDROB_CONNECT_DISABLED_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus("needs_auth")).toBe(REDROB_CONNECT_SIGN_IN_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus("needs_client_registration")).toBe(REDROB_CONNECT_SIGN_IN_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus("failed")).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus("starting")).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(composeSteeringFromEngineMcpStatus(undefined)).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
   });
 });
 
 describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
   test("keeps the fallback instruction byte-identical when state is unavailable or generic discovery is gated", () => {
-    expect(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION).toBe(UNCHANGED_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(REDROB_EXTENSION_DISCOVERY_INSTRUCTION).toBe(UNCHANGED_EXTENSION_DISCOVERY_INSTRUCTION);
     expect(composeOpenWorkExtensionDiscoveryInstruction(null)).toBe(UNCHANGED_EXTENSION_DISCOVERY_INSTRUCTION);
     expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(null), connectCatalogEnabled: false })).toBe(UNCHANGED_EXTENSION_DISCOVERY_INSTRUCTION);
   });
@@ -114,50 +114,50 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
   });
 
   test("steers ready Connect users to verified openwork-cloud capabilities first", () => {
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).toContain("verified ready for this exact workspace/model");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).toContain("use openwork-cloud_search_capabilities");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).toContain("available_skills");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).not.toContain("Skill creation:");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).not.toContain("Gmail");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).not.toContain("image generation");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).toContain("relay connectionStatus.action exactly");
-    expect(OPENWORK_CLOUD_CONNECTION_INSTRUCTION).toContain("results are live, not cached");
-    expect(composeOpenWorkExtensionDiscoveryInstruction(state(health()))).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
-    expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(health()), connectCatalogEnabled: false })).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
-    expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(health()), googleWorkspace: { legacyConfigured: true } })).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).toContain("verified ready for this exact workspace/model");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).toContain("use openwork-cloud_search_capabilities");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).toContain("available_skills");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).not.toContain("Skill creation:");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).not.toContain("Gmail");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).not.toContain("image generation");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).toContain("relay connectionStatus.action exactly");
+    expect(REDROB_CLOUD_CONNECTION_INSTRUCTION).toContain("results are live, not cached");
+    expect(composeOpenWorkExtensionDiscoveryInstruction(state(health()))).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
+    expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(health()), connectCatalogEnabled: false })).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
+    expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(health()), googleWorkspace: { legacyConfigured: true } })).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
   });
 
   test("selects one compact skill-authoring prompt from verified Cloud access", () => {
-    expect(composeSkillAuthoringInstruction(OPENWORK_CLOUD_CONNECTION_INSTRUCTION)).toEqual({
+    expect(composeSkillAuthoringInstruction(REDROB_CLOUD_CONNECTION_INSTRUCTION)).toEqual({
       mode: "cloud",
-      prompt: OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION,
+      prompt: REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION,
     });
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("Skill creation: Cloud");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("retrieve and follow the listed create-skill remote skill");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("openwork-cloud_execute_capability");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("exact <capability>");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("OpenWork Cloud as a private plugin");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("use share-plugin when the user wants a specific person or team to use a skill");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("add-to-marketplace");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("add-user-to-marketplace");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("workspace-local skill");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("Do not create both copies");
-    expect(OPENWORK_CLOUD_SKILL_AUTHORING_INSTRUCTION).not.toContain("Skill creation: Local");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("Skill creation: Cloud");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("retrieve and follow the listed create-skill remote skill");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("openwork-cloud_execute_capability");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("exact <capability>");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("OpenWork Cloud as a private plugin");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("use share-plugin when the user wants a specific person or team to use a skill");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("add-to-marketplace");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("add-user-to-marketplace");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("workspace-local skill");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).toContain("Do not create both copies");
+    expect(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION).not.toContain("Skill creation: Local");
 
     for (const instruction of [
-      OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION,
-      OPENWORK_CONNECT_SIGN_IN_INSTRUCTION,
-      OPENWORK_CONNECT_DISABLED_INSTRUCTION,
+      REDROB_EXTENSION_DISCOVERY_INSTRUCTION,
+      REDROB_CONNECT_SIGN_IN_INSTRUCTION,
+      REDROB_CONNECT_DISABLED_INSTRUCTION,
     ]) {
       expect(composeSkillAuthoringInstruction(instruction)).toEqual({
         mode: "local",
-        prompt: OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION,
+        prompt: REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION,
       });
     }
-    expect(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION).toContain("Skill creation: Local");
-    expect(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION).toContain("only when the user requests one");
-    expect(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION).toContain(".opencode/skills/<skill-name>/SKILL.md");
-    expect(OPENWORK_LOCAL_SKILL_AUTHORING_INSTRUCTION).not.toContain("Skill creation: Cloud");
+    expect(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION).toContain("Skill creation: Local");
+    expect(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION).toContain("only when the user requests one");
+    expect(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION).toContain(".opencode/skills/<skill-name>/SKILL.md");
+    expect(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION).not.toContain("Skill creation: Cloud");
   });
 
   test("keeps neutral steering when provider projection is missing", () => {
@@ -173,7 +173,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
       },
     })));
 
-    expect(instruction).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(instruction).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
   });
 
   test("uses neutral, signed-out, and disabled branches", () => {
@@ -187,7 +187,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
         message: "missing",
       },
     })), connectCatalogEnabled: false });
-    expect(neutral).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(neutral).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
 
     expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(health({
       usable: false,
@@ -199,7 +199,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
         recommendedAction: "Connect OpenWork Cloud",
         message: "missing",
       },
-    })), connectCatalogEnabled: false })).toBe(OPENWORK_CONNECT_SIGN_IN_INSTRUCTION);
+    })), connectCatalogEnabled: false })).toBe(REDROB_CONNECT_SIGN_IN_INSTRUCTION);
 
     expect(composeOpenWorkExtensionDiscoveryInstruction({ ...state(health({
       usable: false,
@@ -210,7 +210,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
         recommendedAction: "Enable",
         message: "disabled",
       },
-    })), connectCatalogEnabled: false })).toBe(OPENWORK_CONNECT_DISABLED_INSTRUCTION);
+    })), connectCatalogEnabled: false })).toBe(REDROB_CONNECT_DISABLED_INSTRUCTION);
   });
 
   test("keeps neutral steering for probe-side server failures", () => {
@@ -224,7 +224,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
         recommendedAction: "Check network",
         message: "probe failed",
       },
-    })))).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    })))).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
 
     expect(composeOpenWorkExtensionDiscoveryInstruction(state(health({
       usable: false,
@@ -236,7 +236,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
         recommendedAction: "Run reconcile",
         message: "missing",
       },
-    })))).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    })))).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
   });
 
   test("keeps neutral steering for cloud_tools_missing regardless of server engine health", () => {
@@ -262,8 +262,8 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
       },
     })));
 
-    expect(withoutEngine).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
-    expect(failedEngine).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(withoutEngine).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(failedEngine).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
   });
 
   test("treats unknown workspace as neutral instead of borrowing another workspace", () => {
@@ -271,7 +271,7 @@ describe("composeOpenWorkExtensionDiscoveryInstruction", () => {
       ...state(null),
       workspace: { resolution: "unknown", id: null, directory: "/tmp/unknown", reason: "No workspace has this exact OpenCode directory" },
     });
-    expect(instruction).toBe(OPENWORK_EXTENSION_DISCOVERY_INSTRUCTION);
+    expect(instruction).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
   });
 
   test("never emits degraded wording or no-tool-use guidance", () => {
@@ -349,7 +349,7 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
       { client, directory: "/tmp/factory" },
     );
 
-    expect(instruction).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
+    expect(instruction).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
     expect(requests).toEqual([{ query: { directory: "/tmp/ws_1" } }]);
     expect(serverFetchCalls).toBe(0);
   });
@@ -362,7 +362,7 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
       return Response.json({ message: "unexpected" }, { status: 500 });
     };
 
-    expect(await resolveOpenWorkExtensionDiscoveryInstruction({}, serverFetch, { client })).toBe(OPENWORK_CONNECT_SIGN_IN_INSTRUCTION);
+    expect(await resolveOpenWorkExtensionDiscoveryInstruction({}, serverFetch, { client })).toBe(REDROB_CONNECT_SIGN_IN_INSTRUCTION);
     expect(serverFetchCalls).toBe(0);
   });
 
@@ -397,8 +397,8 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
   });
 
   test("falls back to server connect state when engine has no openwork-cloud entry", async () => {
-    process.env.OPENWORK_SERVER_URL = "http://openwork.test";
-    process.env.OPENWORK_SERVER_TOKEN = "test-token";
+    process.env.REDROB_SERVER_URL = "http://openwork.test";
+    process.env.REDROB_SERVER_TOKEN = "test-token";
     const client = engineMcpClient({ data: { other: { status: "connected" } } });
     let serverFetchCalls = 0;
     const serverFetch = async (): Promise<Response> => {
@@ -415,13 +415,13 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
       });
     };
 
-    expect(await resolveOpenWorkExtensionDiscoveryInstruction({ context: { directory: "/tmp/ws_1" } }, serverFetch, { client })).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
+    expect(await resolveOpenWorkExtensionDiscoveryInstruction({ context: { directory: "/tmp/ws_1" } }, serverFetch, { client })).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
     expect(serverFetchCalls).toBe(1);
   });
 
   test("fetches verified health for the current directory/model without caching stale failures", async () => {
-    process.env.OPENWORK_SERVER_URL = "http://openwork.test/";
-    process.env.OPENWORK_SERVER_TOKEN = "test-token";
+    process.env.REDROB_SERVER_URL = "http://openwork.test/";
+    process.env.REDROB_SERVER_TOKEN = "test-token";
     const urls: string[] = [];
     const authorizations: Array<string | null> = [];
     let calls = 0;
@@ -455,7 +455,7 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
       model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
     };
     expect(await resolveOpenWorkExtensionDiscoveryInstruction(input, fakeFetch)).toBe(UNCHANGED_EXTENSION_DISCOVERY_INSTRUCTION);
-    expect(await resolveOpenWorkExtensionDiscoveryInstruction(input, fakeFetch)).toBe(OPENWORK_CLOUD_CONNECTION_INSTRUCTION);
+    expect(await resolveOpenWorkExtensionDiscoveryInstruction(input, fakeFetch)).toBe(REDROB_CLOUD_CONNECTION_INSTRUCTION);
     expect(calls).toBe(2);
     expect(urls).toEqual([
       "http://openwork.test/experimental/connect/state?directory=%2Ftmp%2Fws_1&provider=anthropic&model=claude-sonnet-4",
@@ -465,8 +465,8 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
   });
 
   test("passes workspace id and worktree from plugin context", async () => {
-    process.env.OPENWORK_SERVER_URL = "http://openwork.test";
-    process.env.OPENWORK_SERVER_TOKEN = "test-token";
+    process.env.REDROB_SERVER_URL = "http://openwork.test";
+    process.env.REDROB_SERVER_TOKEN = "test-token";
     let requested = "";
     const fakeFetch = async (url: string): Promise<Response> => {
       requested = url;
@@ -487,8 +487,8 @@ describe("resolveOpenWorkExtensionDiscoveryInstruction", () => {
   });
 
   test("fails open when connect state fetching or parsing fails", async () => {
-    process.env.OPENWORK_SERVER_URL = "http://openwork.test";
-    process.env.OPENWORK_SERVER_TOKEN = "test-token";
+    process.env.REDROB_SERVER_URL = "http://openwork.test";
+    process.env.REDROB_SERVER_TOKEN = "test-token";
     const failingFetch = async (): Promise<Response> => {
       throw new Error("network unavailable");
     };

@@ -10,14 +10,14 @@ describe("OpenWork capabilities knowledge plugin", () => {
     await plugin["experimental.chat.system.transform"]({}, output);
 
     const knowledge = output.system.join("\n");
-    expect(knowledge).toContain("https://api.openworklabs.com/mcp/agent");
-    expect(knowledge).toContain("app.openworklabs.com/api/den");
+    expect(knowledge).toContain("https://api.redrob.io/mcp/agent");
+    expect(knowledge).toContain("app.redrob.io/api/den");
     expect(knowledge).toContain("internal same-origin desktop proxy");
     expect(knowledge).toContain("OpenCode is verified");
     expect(knowledge).toContain("Codex is setup-only");
     expect(knowledge).toContain("cursor://anysphere.cursor-mcp/oauth/callback");
     expect(knowledge).toContain("Settings > MCP servers");
-    expect(knowledge).toContain("https://app.openworklabs.com/api/auth");
+    expect(knowledge).toContain("https://app.redrob.io/api/auth");
     expect(knowledge).toContain("RFC9728 discovery");
     expect(knowledge).toContain("PKCE S256");
     expect(knowledge).toContain("opencode mcp auth openwork");
@@ -39,13 +39,13 @@ describe("OpenWork capabilities knowledge plugin", () => {
     expect(knowledge).toContain("Settings > Debug");
     expect(knowledge).toContain("custom or local MCP server");
     expect(knowledge).not.toContain("Access tokens are opaque");
-    expect(knowledge).not.toContain("https://api.openworklabs.com/mcp`");
+    expect(knowledge).not.toContain("https://api.redrob.io/mcp`");
     expect(knowledge).not.toContain("openwork-ui-mcp");
     expect(knowledge).not.toContain("openwork_extensions_export");
   });
 
   test("retrieves Slack connection guidance from bundled docs", async () => {
-    process.env.OPENWORK_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
+    process.env.REDROB_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
 
     const plugin = await OpenWorkCapabilitiesKnowledge();
     const search = await plugin.tool.openwork_docs_search.execute({ query: "how can i connect slack", limit: 3 });
@@ -64,7 +64,7 @@ describe("OpenWork capabilities knowledge plugin", () => {
   });
 
   test("retrieves the Connect-first member flow from bundled docs", async () => {
-    process.env.OPENWORK_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
+    process.env.REDROB_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
 
     const plugin = await OpenWorkCapabilitiesKnowledge();
     const search = await plugin.tool.openwork_docs_search.execute({ query: "connect gmail calendar slack", limit: 3 });
@@ -82,7 +82,7 @@ describe("OpenWork capabilities knowledge plugin", () => {
   });
 
   test("does not expose the retired local skill import guide", async () => {
-    process.env.OPENWORK_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
+    process.env.REDROB_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
 
     const plugin = await OpenWorkCapabilitiesKnowledge();
     const search = await plugin.tool.openwork_docs_search.execute({ query: "import a skill", limit: 10 });
@@ -91,15 +91,15 @@ describe("OpenWork capabilities knowledge plugin", () => {
   });
 
   test("reads current Cloud MCP endpoint and proxy guidance from bundled docs", async () => {
-    process.env.OPENWORK_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
+    process.env.REDROB_DOCS_DIR = resolve(import.meta.dir, "../../../../packages/docs");
 
     const plugin = await OpenWorkCapabilitiesKnowledge();
     const read = await plugin.tool.openwork_docs_read.execute({
       path: "cloud/run-in-the-cloud/cloud-mcp.mdx",
     });
 
-    expect(read).toContain("https://api.openworklabs.com/mcp/agent");
-    expect(read).toContain("app.openworklabs.com/api/den");
+    expect(read).toContain("https://api.redrob.io/mcp/agent");
+    expect(read).toContain("app.redrob.io/api/den");
     expect(read).toContain("internal same-origin desktop proxy");
     expect(read).toContain("OpenCode | Verified");
     expect(read).toContain("Codex | Setup only");

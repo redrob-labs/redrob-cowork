@@ -1,12 +1,12 @@
 import { expect, test } from "vitest";
-import { createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { createVisualEvidence, screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
+import { createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { createVisualEvidence, screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "app boots with a control route and meaningful visible content"
-  : "app smoke skipped: set OPENWORK_EVAL_E2E_TESTS=1 to opt in";
+  : "app smoke skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in";
 
 test.skipIf(!e2eTestsEnabled)(title, async () => {
   await using app = await desktop({ name: "app-smoke" });

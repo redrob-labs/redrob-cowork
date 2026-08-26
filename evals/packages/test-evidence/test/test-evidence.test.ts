@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import type { CdpClient, Surface } from "@openwork/cdp";
+import type { CdpClient, Surface } from "@redrob/cdp";
 import { withTestEvidence } from "../src/ambient.ts";
 import { screenshot } from "../src/screenshot.ts";
 import type { ScreenshotArtifact } from "../src/screenshot.ts";

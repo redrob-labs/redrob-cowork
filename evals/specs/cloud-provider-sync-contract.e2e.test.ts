@@ -1,9 +1,9 @@
 import { expect, onTestFinished } from "vitest";
-import { denFetch, evalIn, go, readAvailableModels, waitFor } from "@openwork/behaviors";
-import type { DenSession, ModelFacts } from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { app, eventually, needs, server, sleep, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { denFetch, evalIn, go, readAvailableModels, waitFor } from "@redrob/behaviors";
+import type { DenSession, ModelFacts } from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { app, eventually, needs, server, sleep, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * ACCEPTANCE TEST for #3671: org-published LLM providers never finish syncing
@@ -49,7 +49,7 @@ const QUIET_DELAY_MS = 30_000;
 const OBSERVATION_WINDOW_MS = 60_000;
 // Intended poll cadence: one sync pass per 5 minutes (defaultIntervalMs =
 // 5 * 60 * 1_000, apps/server/src/cloud-provider-sync.ts:132; the testkit
-// desktop sets no OPENWORK_CLOUD_PROVIDER_SYNC_INTERVAL_MS override, so the
+// desktop sets no REDROB_CLOUD_PROVIDER_SYNC_INTERVAL_MS override, so the
 // env branch at cloud-provider-sync.ts:481-484 stays on the default). Each
 // pass issues exactly ONE GET /v1/llm-providers/:llmProviderId/connect per
 // provider (fetchProviders, cloud-provider-sync.ts:294-306), so a 60s window
@@ -61,7 +61,7 @@ const CONNECT_BOUND_PER_PROVIDER = 3;
 // which makes per-provider rate = total / provider count.
 const CONNECT_ROUTE = "/v1/llm-providers/:llmProviderId/connect";
 
-const requirements: TestNeeds = { optIn: ["OPENWORK_EVAL_E2E_TESTS"] };
+const requirements: TestNeeds = { optIn: ["REDROB_EVAL_E2E_TESTS"] };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `cloud provider sync contract skipped — needs: ${missingRequirements.join(", ")}`

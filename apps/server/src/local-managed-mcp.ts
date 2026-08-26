@@ -32,7 +32,7 @@ import {
   type EnterpriseMcpOAuthPersistence,
   type EnterpriseMcpPersistenceContext,
   type EnterpriseMcpRequestPhase,
-} from "@openwork/enterprise-mcp-client";
+} from "@redrob/enterprise-mcp-client";
 import { ApiError } from "./errors.js";
 import { sanitizeDiagnosticString } from "./diagnostic-sanitizer.js";
 import { backupTimestamp } from "./legacy-config-sweep.js";
@@ -183,7 +183,7 @@ function secureVaultStorageUnavailable(): ApiError {
   return new ApiError(
     503,
     "managed_mcp_secure_storage_unavailable",
-    "Secure storage for OpenWork-managed MCP credentials is unavailable. Start through OpenWork Desktop or set OPENWORK_ENCRYPTION_KEY.",
+    "Secure storage for OpenWork-managed MCP credentials is unavailable. Start through OpenWork Desktop or set REDROB_ENCRYPTION_KEY.",
   );
 }
 
@@ -197,7 +197,7 @@ async function resolveVaultKey(config: ServerConfig): Promise<Buffer> {
       throw secureVaultStorageUnavailable();
     }
   }
-  const configured = process.env.OPENWORK_ENCRYPTION_KEY?.trim();
+  const configured = process.env.REDROB_ENCRYPTION_KEY?.trim();
   if (configured) return createHash("sha256").update(configured).digest();
   throw secureVaultStorageUnavailable();
 }

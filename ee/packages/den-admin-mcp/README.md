@@ -65,5 +65,5 @@ Boots the server over real stdio JSON-RPC and exercises every tool:
 
 ```sh
 # defaults to the local dev database (docker compose mysql + seed:demo-org)
-pnpm --filter @openwork-ee/den-admin-mcp test
+pnpm --filter @redrob-ee/den-admin-mcp test
 ```

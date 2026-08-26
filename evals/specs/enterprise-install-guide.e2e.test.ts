@@ -1,8 +1,8 @@
 import { expect } from "vitest";
-import { clickButton, evalIn, fill, waitFor } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { screenshot } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
+import { clickButton, evalIn, fill, waitFor } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { screenshot } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
 import {
   localMysqlIsRunning,
   localRedisIsRunning,
@@ -10,18 +10,18 @@ import {
   selfHostServer,
   test,
   unmetNeeds,
-} from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
-const requirements: TestNeeds = { optIn: ["OPENWORK_EVAL_E2E_TESTS"] };
+const requirements: TestNeeds = { optIn: ["REDROB_EVAL_E2E_TESTS"] };
 const missingRequirements = unmetNeeds(requirements, process.env);
-const daytonaPlacement = process.env.OPENWORK_EVAL_DAYTONA === "1";
+const daytonaPlacement = process.env.REDROB_EVAL_DAYTONA === "1";
 const mysqlOpen = await localMysqlIsRunning();
 const redisOpen = await localRedisIsRunning();
 const title = missingRequirements.length > 0
   ? `enterprise install guide skipped — needs: ${missingRequirements.join(", ")}`
   : daytonaPlacement
-    ? "enterprise install guide skipped — needs: local placement (unset OPENWORK_EVAL_DAYTONA)"
+    ? "enterprise install guide skipped — needs: local placement (unset REDROB_EVAL_DAYTONA)"
     : !mysqlOpen
       ? "enterprise install guide skipped — needs: MySQL on 127.0.0.1:3306"
       : !redisOpen

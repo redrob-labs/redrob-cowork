@@ -17,7 +17,7 @@ open -a "Redrob Work" --args --blank-slate
 Direct binary (useful for CDP-driven testing):
 
 ```bash
-OPENWORK_ELECTRON_REMOTE_DEBUG_PORT=9898 \
+REDROB_ELECTRON_REMOTE_DEBUG_PORT=9898 \
   "dist-electron/mac-arm64/Redrob Work Enterprise.app/Contents/MacOS/Redrob Work Enterprise" --blank-slate
 ```
 
@@ -35,7 +35,7 @@ and redirects every persisted path into it before any other module loads:
 - Electron `userData` and `home`
 - `HOME`/`USERPROFILE`, `XDG_CONFIG_HOME`/`DATA`/`CACHE`/`STATE`,
   `APPDATA`/`LOCALAPPDATA`
-- desktop bootstrap (`OPENWORK_DESKTOP_BOOTSTRAP_PATH`) — an enterprise build
+- desktop bootstrap (`REDROB_DESKTOP_BOOTSTRAP_PATH`) — an enterprise build
   therefore starts at the activation gate, not an inherited control plane
 - Redrob Work server config, env store, token store, runtime DB, data dir
 - OpenCode config dir and database
@@ -43,7 +43,7 @@ and redirects every persisted path into it before any other module loads:
 It also:
 
 - enables Chromium's mock keychain so the real login keychain is never touched
-- skips `openwork://` protocol registration, Windows shortcut writes, brand
+- skips `redrob://` protocol registration, Windows shortcut writes, brand
   icon/name persistence, and Linux desktop integration
 - suffixes the window title with `Test profile`
 - spawns a detached cleanup worker on quit that removes the whole temporary

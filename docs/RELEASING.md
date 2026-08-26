@@ -160,7 +160,7 @@ gh release view vX.Y.Z --repo different-ai/openwork   # published, not draft
 - Asset count looks right (macOS + Linux + Windows + updater `latest*.yml`
   manifests — the desktop updater 404s until the manifests are published)
 - `npm view openwork-server version` shows the new version
-- `curl -s https://api.openworklabs.com/v1/app-version` lists the new version
+- `curl -s https://api.redrob.io/v1/app-version` lists the new version
   once den-api's cache refreshes (≤5 minutes)
 
 ## Where versions live now

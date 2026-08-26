@@ -1,4 +1,4 @@
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 import { beforeAll, describe, expect, test } from "bun:test"
 import { Hono, type MiddlewareHandler } from "hono"
 import type { OrganizationContext } from "../src/orgs.js"

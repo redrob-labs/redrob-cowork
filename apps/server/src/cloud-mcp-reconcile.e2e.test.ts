@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { OPENWORK_CLOUD_EXPECTED_TOOLS, OPENWORK_CLOUD_PLUGIN_CANARIES, clearOpenworkCloudMcpProbeFlights, cloudMcpDeliveryState } from "./cloud-mcp-health.js";
+import { REDROB_CLOUD_EXPECTED_TOOLS, REDROB_CLOUD_PLUGIN_CANARIES, clearOpenworkCloudMcpProbeFlights, cloudMcpDeliveryState } from "./cloud-mcp-health.js";
 import {
   CONNECT_MCP_SERVER_INDEX_SCHEMA_VERSION,
   CONNECT_MCP_SERVER_INDEX_URI,
@@ -50,8 +50,8 @@ type CloudConfig = {
 const CLIENT_TOKEN = "owt_cloud_mcp_client";
 const HOST_TOKEN = "owt_cloud_mcp_host";
 const APP_HOST_AUTHORIZATION = "Bearer owt_secret_app_host_token";
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
-const previousDevMode = process.env.OPENWORK_DEV_MODE;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
+const previousDevMode = process.env.REDROB_DEV_MODE;
 const stops: Array<() => void | Promise<void>> = [];
 const roots: string[] = [];
 const runtimeDbRoots: string[] = [];
@@ -70,10 +70,10 @@ afterEach(async () => {
     while (runtimeDbRoots.length) await rm(runtimeDbRoots.pop() ?? "", { recursive: true, force: true });
   }
   cloudConfigsByOpenworkBase.clear();
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
-  if (previousDevMode === undefined) delete process.env.OPENWORK_DEV_MODE;
-  else process.env.OPENWORK_DEV_MODE = previousDevMode;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
+  if (previousDevMode === undefined) delete process.env.REDROB_DEV_MODE;
+  else process.env.REDROB_DEV_MODE = previousDevMode;
 });
 
 async function createRoot(prefix = "openwork-cloud-mcp-"): Promise<string> {
@@ -89,7 +89,7 @@ async function createRuntimeDbRoot(): Promise<string> {
 }
 
 function allReadyToolIds(): string[] {
-  return [...OPENWORK_CLOUD_EXPECTED_TOOLS, ...OPENWORK_CLOUD_PLUGIN_CANARIES];
+  return [...REDROB_CLOUD_EXPECTED_TOOLS, ...REDROB_CLOUD_PLUGIN_CANARIES];
 }
 
 function startMockOpencode(options: MockOpencodeOptions = {}) {
@@ -218,7 +218,7 @@ function workspace(id: string, path: string, baseUrl: string, extra?: Partial<Wo
 
 async function startOpenwork(workspaces: WorkspaceInfo[]): Promise<{ base: string; config: ServerConfig }> {
   const runtimeRoot = await createRuntimeDbRoot();
-  process.env.OPENWORK_RUNTIME_DB = join(runtimeRoot, "runtime.sqlite");
+  process.env.REDROB_RUNTIME_DB = join(runtimeRoot, "runtime.sqlite");
   const config: ServerConfig = {
     host: "127.0.0.1",
     port: 0,
@@ -280,7 +280,7 @@ function delivery(body: Record<string, unknown>): Record<string, unknown> {
 
 const CLOUD_CONFIG: CloudConfig = {
   type: "remote",
-  url: "https://api.openworklabs.com/mcp/agent",
+  url: "https://api.redrob.io/mcp/agent",
   enabled: true,
   headers: { Authorization: "Bearer owt_secret_cloud_token" },
   oauth: false,
@@ -335,7 +335,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
     expect(body.usable).toBe(true);
     expect(body.usableByCurrentModel).toBe(true);
     const tools = requireRecord(body.tools, "tools");
-    expect(requireArray(tools.present, "tools.present").sort()).toEqual([...OPENWORK_CLOUD_EXPECTED_TOOLS].sort());
+    expect(requireArray(tools.present, "tools.present").sort()).toEqual([...REDROB_CLOUD_EXPECTED_TOOLS].sort());
     expect(requireRecord(tools.direct, "tools.direct")).toMatchObject({
       checked: true,
       present: ["search_capabilities", "execute_capability"],
@@ -364,7 +364,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
   });
 
   test("keeps provider descriptors private while purging stale runtime endpoints", async () => {
-    process.env.OPENWORK_DEV_MODE = "1";
+    process.env.REDROB_DEV_MODE = "1";
     const root = await createRoot();
     const connectionId = "emc_01privateapphostcatalog";
     const mockOptions: MockOpencodeOptions = {
@@ -437,7 +437,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
     const openwork = await startOpenwork([workspace("ws_1", root, `http://127.0.0.1:${mock.server.port}`)]);
 
     const cases: Array<{ config: Record<string, unknown>; code: string }> = [
-      { config: { ...CLOUD_CONFIG, url: "https://api.openworklabs.com/mcp" }, code: "cloud_endpoint_invalid" },
+      { config: { ...CLOUD_CONFIG, url: "https://api.redrob.io/mcp" }, code: "cloud_endpoint_invalid" },
       { config: { ...CLOUD_CONFIG, enabled: false }, code: "cloud_mcp_disabled" },
       { config: { ...CLOUD_CONFIG, headers: {} }, code: "invalid_mcp_token" },
       { config: { ...CLOUD_CONFIG, oauth: {} }, code: "invalid_mcp_token" },
@@ -479,7 +479,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
     const openwork = await startOpenwork([workspace("ws_1", root, `http://127.0.0.1:${mock.server.port}`)]);
     await writeRuntimeOpencodeConfig(openwork.config, "ws_1", (current) => ({
       ...current,
-      mcp: { "openwork-cloud": { ...CLOUD_CONFIG, url: "https://api.openworklabs.com/mcp" } },
+      mcp: { "openwork-cloud": { ...CLOUD_CONFIG, url: "https://api.redrob.io/mcp" } },
     }));
 
     const body = await responseRecord(await getHealth(openwork.base));
@@ -522,8 +522,8 @@ describe("openwork-cloud MCP strict reconcile", () => {
   });
 
   test("health probe timeout is bounded", async () => {
-    const previousTimeout = process.env.OPENWORK_CLOUD_MCP_PROBE_TIMEOUT_MS;
-    process.env.OPENWORK_CLOUD_MCP_PROBE_TIMEOUT_MS = "25";
+    const previousTimeout = process.env.REDROB_CLOUD_MCP_PROBE_TIMEOUT_MS;
+    process.env.REDROB_CLOUD_MCP_PROBE_TIMEOUT_MS = "25";
     try {
       const root = await createRoot();
       const mock = startMockOpencode({ initialConnected: true, delayMcpStatusMs: 100 });
@@ -537,8 +537,8 @@ describe("openwork-cloud MCP strict reconcile", () => {
       expect(body.usable).toBe(false);
       expect(firstFailure(body).code).toBe("opencode_engine_unreachable");
     } finally {
-      if (previousTimeout === undefined) delete process.env.OPENWORK_CLOUD_MCP_PROBE_TIMEOUT_MS;
-      else process.env.OPENWORK_CLOUD_MCP_PROBE_TIMEOUT_MS = previousTimeout;
+      if (previousTimeout === undefined) delete process.env.REDROB_CLOUD_MCP_PROBE_TIMEOUT_MS;
+      else process.env.REDROB_CLOUD_MCP_PROBE_TIMEOUT_MS = previousTimeout;
     }
   });
 
@@ -612,8 +612,8 @@ describe("openwork-cloud MCP strict reconcile", () => {
   test("current OpenCode engines that exclude MCP tool IDs use direct tools/list plus provider capability", async () => {
     const root = await createRoot();
     const mock = startMockOpencode({
-      toolIds: [...OPENWORK_CLOUD_PLUGIN_CANARIES],
-      providerToolIds: [...OPENWORK_CLOUD_PLUGIN_CANARIES],
+      toolIds: [...REDROB_CLOUD_PLUGIN_CANARIES],
+      providerToolIds: [...REDROB_CLOUD_PLUGIN_CANARIES],
       cloudToolsAsSse: true,
     });
     const openwork = await startOpenwork([workspace("ws_1", root, `http://127.0.0.1:${mock.server.port}`)]);
@@ -628,16 +628,16 @@ describe("openwork-cloud MCP strict reconcile", () => {
       source: "provider_capability",
       modelExists: true,
       toolCalling: true,
-      missing: [...OPENWORK_CLOUD_EXPECTED_TOOLS],
+      missing: [...REDROB_CLOUD_EXPECTED_TOOLS],
     });
-    expect(requireArray(requireRecord(body.tools, "tools").present, "tools.present").sort()).toEqual([...OPENWORK_CLOUD_EXPECTED_TOOLS].sort());
+    expect(requireArray(requireRecord(body.tools, "tools").present, "tools.present").sort()).toEqual([...REDROB_CLOUD_EXPECTED_TOOLS].sort());
   });
 
   test("reports provider projection missing when fallback provider model lacks tool calling", async () => {
     const root = await createRoot();
     const mock = startMockOpencode({
-      toolIds: [...OPENWORK_CLOUD_PLUGIN_CANARIES],
-      providerToolIds: [...OPENWORK_CLOUD_PLUGIN_CANARIES],
+      toolIds: [...REDROB_CLOUD_PLUGIN_CANARIES],
+      providerToolIds: [...REDROB_CLOUD_PLUGIN_CANARIES],
       providerToolCalling: false,
     });
     const openwork = await startOpenwork([workspace("ws_1", root, `http://127.0.0.1:${mock.server.port}`)]);
@@ -649,7 +649,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
       source: "provider_capability",
       modelExists: true,
       toolCalling: false,
-      missing: [...OPENWORK_CLOUD_EXPECTED_TOOLS],
+      missing: [...REDROB_CLOUD_EXPECTED_TOOLS],
     });
   });
 
@@ -659,7 +659,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
       // Global IDs include Cloud MCP tools…
       toolIds: allReadyToolIds(),
       // …but the per-model experimental list does not (OpenCode ToolRegistry quirk).
-      providerToolIds: [...OPENWORK_CLOUD_PLUGIN_CANARIES],
+      providerToolIds: [...REDROB_CLOUD_PLUGIN_CANARIES],
       providerToolCalling: true,
       cloudToolsAsSse: true,
     });
@@ -681,7 +681,7 @@ describe("openwork-cloud MCP strict reconcile", () => {
 
   test("reports extension canary missing when docs canary is present but extension canary is absent", async () => {
     const root = await createRoot();
-    const mock = startMockOpencode({ toolIds: [...OPENWORK_CLOUD_EXPECTED_TOOLS, "openwork_docs_search"] });
+    const mock = startMockOpencode({ toolIds: [...REDROB_CLOUD_EXPECTED_TOOLS, "openwork_docs_search"] });
     const openwork = await startOpenwork([workspace("ws_1", root, `http://127.0.0.1:${mock.server.port}`)]);
 
     const body = await responseRecord(await reconcile(openwork.base));

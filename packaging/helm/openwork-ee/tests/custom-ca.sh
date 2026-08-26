@@ -124,7 +124,7 @@ YAML
 helm template openwork-ee "$chart_dir" -f "$installer_values" > "$installer_rendered"
 assert_contains "$installer_rendered" 'name: installer-artifacts'
 assert_contains "$installer_rendered" 'claimName: "installer-artifacts-pvc"'
-assert_contains "$installer_rendered" 'name: OPENWORK_INSTALLER_ARTIFACTS_DIR'
+assert_contains "$installer_rendered" 'name: REDROB_INSTALLER_ARTIFACTS_DIR'
 assert_contains "$installer_rendered" 'name: custom-ca'
 assert_contains "$installer_rendered" 'name: NODE_EXTRA_CA_CERTS'
 

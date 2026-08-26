@@ -5,7 +5,7 @@ const EXTENSION_LAYOUT_KEY = "openwork.extensions.layout";
 const EXTENSION_DISABLED_KEY_PREFIX = "openwork.extension.disabled.";
 const EXTENSION_ENABLED_KEY_PREFIX = "openwork.extension.enabled.";
 const EXTENSION_HIDDEN_KEY_PREFIX = "openwork.extension.hidden.";
-export const OPENWORK_EXTENSION_STATE_CHANGED = "openwork:extension-state-changed";
+export const REDROB_EXTENSION_STATE_CHANGED = "openwork:extension-state-changed";
 
 /** Whether the inventory shows tiles or dense rows. Remembered across sessions; defaults to the dense list. */
 export function readExtensionLayout(): ExtensionLayout {
@@ -47,7 +47,7 @@ export function setOpenWorkExtensionEnabled(entry: McpDirectoryInfo, enabled: bo
       window.localStorage.removeItem(enabledKey);
     }
   }
-  window.dispatchEvent(new CustomEvent(OPENWORK_EXTENSION_STATE_CHANGED, {
+  window.dispatchEvent(new CustomEvent(REDROB_EXTENSION_STATE_CHANGED, {
     detail: { id, enabled },
   }));
 }
@@ -66,7 +66,7 @@ export function setOpenWorkExtensionHidden(entryOrId: McpDirectoryInfo | string,
   if (typeof window === "undefined") return;
   const key = `${EXTENSION_HIDDEN_KEY_PREFIX}${id}`;
   window.localStorage.setItem(key, hidden ? "1" : "0");
-  window.dispatchEvent(new CustomEvent(OPENWORK_EXTENSION_STATE_CHANGED, {
+  window.dispatchEvent(new CustomEvent(REDROB_EXTENSION_STATE_CHANGED, {
     detail: { id, hidden },
   }));
 }

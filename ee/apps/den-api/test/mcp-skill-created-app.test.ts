@@ -19,7 +19,7 @@ const payload = skillCreatedPayloadSchema.parse({
   pluginId: "plugin_tomatoes",
   skillId: "configObject_tomatoes",
   description: "Use beautiful tomatoes whenever the user says go.",
-  libraryUrl: "https://app.openworklabs.com/dashboard/library/plugins/plugin_tomatoes",
+  libraryUrl: "https://app.redrob.io/dashboard/library/plugins/plugin_tomatoes",
 })
 
 const updatedPayload = skillCreatedPayloadSchema.parse({

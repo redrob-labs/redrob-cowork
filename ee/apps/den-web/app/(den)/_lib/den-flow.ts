@@ -994,7 +994,7 @@ export function buildOpenworkDeepLink(
     params.set("workerName", workerName);
   }
 
-  return `openwork://connect-remote?${params.toString()}`;
+  return `redrob://connect-remote?${params.toString()}`;
 }
 
 export function buildOpenworkAppConnectUrl(

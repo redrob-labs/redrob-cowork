@@ -17,7 +17,7 @@ const USAGE = `Usage:
 
 The up command creates an isolated database, initializes it with
 db:bootstrap, starts den-api in multi-org dev mode, waits for /health, and prints the
-OPENWORK_EVAL_DEN_* exports. The generated trusted origins always include the
+REDROB_EVAL_DEN_* exports. The generated trusted origins always include the
 printed web URL; omitting it causes Better Auth 403 INVALID_ORIGIN responses.`;
 
 interface DevDenState {
@@ -127,7 +127,7 @@ function denEnvironment(state: DevDenState): NodeJS.ProcessEnv {
   const trustedOrigins = `${state.apiUrl},${state.webUrl}`;
   return {
     ...process.env,
-    OPENWORK_DEV_MODE: "1",
+    REDROB_DEV_MODE: "1",
     PORT: String(state.port),
     DEN_API_PORT: String(state.port),
     DEN_API_PUBLIC_URL: state.apiUrl,
@@ -170,10 +170,10 @@ async function waitForHealth(state: DevDenState): Promise<void> {
 function printEnvironment(state: DevDenState): void {
   const trustedOrigins = `${state.apiUrl},${state.webUrl}`;
   console.log(`Health passed: ${state.apiUrl}/health`);
-  console.log(`export OPENWORK_EVAL_DEN_API_URL="${state.apiUrl}"`);
-  console.log(`export OPENWORK_EVAL_DEN_WEB_URL="${state.webUrl}"`);
+  console.log(`export REDROB_EVAL_DEN_API_URL="${state.apiUrl}"`);
+  console.log(`export REDROB_EVAL_DEN_WEB_URL="${state.webUrl}"`);
   console.log(`# DEN_BETTER_AUTH_TRUSTED_ORIGINS="${trustedOrigins}"`);
-  console.log("# The trusted origins include OPENWORK_EVAL_DEN_WEB_URL; otherwise sign-in fails with 403 INVALID_ORIGIN.");
+  console.log("# The trusted origins include REDROB_EVAL_DEN_WEB_URL; otherwise sign-in fails with 403 INVALID_ORIGIN.");
   console.log(`Log: ${relative(REPO_ROOT, state.logPath)}`);
   console.log(`Tear down: pnpm --dir evals dev:den -- down --port ${state.port} --drop-database`);
 }
@@ -203,12 +203,12 @@ async function applySchema(state: DevDenState): Promise<void> {
   // is. Plain db:migrate is not an option here: the ledger is baselined, so on
   // an empty database it has nothing to create the base tables from.
   console.log(`Bootstrapping ${state.database} from the current schema snapshot...`);
-  await run("pnpm", ["--filter", "@openwork-ee/den-db", "db:bootstrap"], denEnvironment(state));
+  await run("pnpm", ["--filter", "@redrob-ee/den-db", "db:bootstrap"], denEnvironment(state));
 }
 
 async function seedDemoOrg(state: DevDenState): Promise<void> {
   console.log("Seeding the demo organization...");
-  await run("pnpm", ["--filter", "@openwork-ee/den-api", "seed:demo-org"], {
+  await run("pnpm", ["--filter", "@redrob-ee/den-api", "seed:demo-org"], {
     ...denEnvironment(state),
     DEN_DEMO_SEED_FETCH_GITHUB: "0",
   });
@@ -236,7 +236,7 @@ async function up(portValue: string | undefined, databaseValue: string | undefin
   await ensurePortFree(port);
 
   const logFd = openSync(state.logPath, "w");
-  const child = spawn("pnpm", ["--filter", "@openwork-ee/den-api", "dev:local"], {
+  const child = spawn("pnpm", ["--filter", "@redrob-ee/den-api", "dev:local"], {
     cwd: REPO_ROOT,
     detached: true,
     env: denEnvironment(state),

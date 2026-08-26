@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto"
 import { bodyLimit } from "hono/body-limit"
 import { describeRoute } from "hono-openapi"
 import { z } from "zod"
-import type { DenTypeId } from "@openwork-ee/utils/typeid"
+import type { DenTypeId } from "@redrob-ee/utils/typeid"
 import { env } from "../../env.js"
 import { cloudTransportRoute, jsonValidator, orgMemberRoute, paramValidator, queryValidator } from "../../middleware/index.js"
 import { invalidRequestSchema, jsonResponse, unauthorizedSchema } from "../../openapi.js"
@@ -219,8 +219,8 @@ const driveFileParamSchema = z.object({
 
 const shareDriveFileBodySchema = z.object({
   type: z.enum(["user", "domain"]).describe("Use type=user to share with one person, or type=domain to share with the entire organization."),
-  emailAddress: z.string().trim().email().max(320).optional().describe("Required when type=user; pass the person's email address, for example raghav@openworklabs.com."),
-  domain: z.string().trim().min(1).max(255).optional().describe("Required when type=domain; pass the organization's Google Workspace domain, for example openworklabs.com."),
+  emailAddress: z.string().trim().email().max(320).optional().describe("Required when type=user; pass the person's email address, for example raghav@redrob.io."),
+  domain: z.string().trim().min(1).max(255).optional().describe("Required when type=domain; pass the organization's Google Workspace domain, for example redrob.io."),
   role: z.enum(["reader", "commenter", "writer"]).default("reader").describe("Drive permission role to grant."),
   sendNotificationEmail: z.boolean().default(true).describe("Whether Google should email the recipient about the new access."),
 }).strict().superRefine((input, context) => {
@@ -1228,7 +1228,7 @@ export function registerGoogleWorkspaceRoutes<T extends { Variables: OrgRouteVar
     describeRoute({
       tags: ["Capability Sources"],
       summary: "Share a Google Drive file with a person or the organization",
-      description: "Creates a Drive permission for one file using the calling member's Google Workspace account. To share with one person pass type=user plus emailAddress; to share with the entire organization pass type=domain plus the org's Google Workspace domain (e.g. openworklabs.com). Sharing files not created through OpenWork needs the Full Drive access feature enabled by an admin.",
+      description: "Creates a Drive permission for one file using the calling member's Google Workspace account. To share with one person pass type=user plus emailAddress; to share with the entire organization pass type=domain plus the org's Google Workspace domain (e.g. redrob.io). Sharing files not created through OpenWork needs the Full Drive access feature enabled by an admin.",
       responses: {
         200: jsonResponse("Google Drive file shared.", shareDriveFileResponseSchema),
         400: jsonResponse("The share request was invalid.", invalidRequestSchema),

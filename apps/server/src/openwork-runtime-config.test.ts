@@ -19,15 +19,15 @@ let previousDb: string | undefined;
 afterEach(async () => {
   while (cleanups.length) cleanups.pop()?.();
   while (roots.length) await rm(roots.pop()!, { recursive: true, force: true });
-  if (previousDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousDb;
+  if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousDb;
 });
 
 async function setup() {
   const root = await mkdtemp(join(tmpdir(), "openwork-runtime-config-file-"));
   roots.push(root);
-  previousDb = process.env.OPENWORK_RUNTIME_DB;
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  previousDb = process.env.REDROB_RUNTIME_DB;
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   const config: ServerConfig = {
     host: "127.0.0.1",
     port: 0,

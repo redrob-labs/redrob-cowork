@@ -1,7 +1,7 @@
 export const DEN_MCP_DEFAULT_ACCESS_TOKEN_EXPIRES_IN_SECONDS = 45 * 60
 
 function accessTokenExpiresInSeconds() {
-  if (process.env.OPENWORK_DEV_MODE?.trim() !== "1") return DEN_MCP_DEFAULT_ACCESS_TOKEN_EXPIRES_IN_SECONDS
+  if (process.env.REDROB_DEV_MODE?.trim() !== "1") return DEN_MCP_DEFAULT_ACCESS_TOKEN_EXPIRES_IN_SECONDS
 
   const configured = process.env.DEN_MCP_TEST_ACCESS_TOKEN_EXPIRES_IN_SECONDS?.trim()
   if (!configured) return DEN_MCP_DEFAULT_ACCESS_TOKEN_EXPIRES_IN_SECONDS

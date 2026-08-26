@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterEach, describe, it } from "node:test";
 
 import {
-  OPENWORK_DESKTOP_ID,
+  REDROB_DESKTOP_ID,
   buildOpenworkDesktopEntry,
   createLinuxDesktopIntegration,
   quoteDesktopExec,
@@ -83,7 +83,7 @@ async function createHarness(options = {}) {
 // Simulates the next launch of the same install: same XDG dirs and state, but a
 // possibly different AppImage path and app version.
 function relaunchAt(harness, appImagePath, options = {}) {
-  let defaultHandler = options.defaultHandler ?? OPENWORK_DESKTOP_ID;
+  let defaultHandler = options.defaultHandler ?? REDROB_DESKTOP_ID;
   const dialogs = [];
   const integration = createLinuxDesktopIntegration({
     app: { isPackaged: true, getVersion: () => options.version ?? "0.18.7" },
@@ -132,8 +132,8 @@ describe("Linux AppImage desktop integration", () => {
       distribution: "public",
     });
     assert.match(entry, /^Exec=".*" %U$/m);
-    assert.match(entry, /^MimeType=x-scheme-handler\/openwork;$/m);
-    assert.match(entry, /^StartupWMClass=com\.differentai\.openwork$/m);
+    assert.match(entry, /^MimeType=x-scheme-handler\/redrob;$/m);
+    assert.match(entry, /^StartupWMClass=io\.redrob\.work$/m);
   });
 
   it("is unavailable outside a packaged Linux AppImage", async () => {
@@ -148,7 +148,7 @@ describe("Linux AppImage desktop integration", () => {
     const result = await harness.integration.install();
     assert.equal(result.ok, true);
     assert.equal(result.status.state, "integrated");
-    assert.equal(harness.getDefaultHandler(), OPENWORK_DESKTOP_ID);
+    assert.equal(harness.getDefaultHandler(), REDROB_DESKTOP_ID);
 
     const desktopEntry = await readFile(harness.integration.paths.desktopEntryPath, "utf8");
     assert.match(desktopEntry, new RegExp(`^Exec=${quoteDesktopExec(harness.appImagePath)} %U$`, "m"));
@@ -180,7 +180,7 @@ describe("Linux AppImage desktop integration", () => {
       resourcesPath: path.join(first.root, "resources"),
       runCommand: async (command, args) => {
         if (command === "xdg-mime" && args[0] === "query") {
-          return { ok: true, stdout: `${OPENWORK_DESKTOP_ID}\n`, stderr: "" };
+          return { ok: true, stdout: `${REDROB_DESKTOP_ID}\n`, stderr: "" };
         }
         return { ok: true, stdout: "", stderr: "" };
       },
@@ -270,7 +270,7 @@ Type=Application
 Name=OpenWork
 Exec=${quoteDesktopExec(harness.appImagePath)} %U
 TryExec=${harness.appImagePath}
-MimeType=x-scheme-handler/openwork;
+MimeType=x-scheme-handler/redrob;
 `);
 
     const status = await harness.integration.getStatus();
@@ -282,14 +282,14 @@ MimeType=x-scheme-handler/openwork;
   });
 
   it("registers an externally managed canonical launcher without rewriting it", async () => {
-    const harness = await createHarness({ defaultHandler: OPENWORK_DESKTOP_ID });
+    const harness = await createHarness({ defaultHandler: REDROB_DESKTOP_ID });
     await mkdir(path.dirname(harness.integration.paths.desktopEntryPath), { recursive: true });
     const original = `[Desktop Entry]
 Type=Application
 Name=Manager-owned OpenWork
 Exec=${quoteDesktopExec(harness.appImagePath)} %U
 TryExec=${harness.appImagePath}
-MimeType=x-scheme-handler/openwork;
+MimeType=x-scheme-handler/redrob;
 `;
     await writeFile(harness.integration.paths.desktopEntryPath, original);
     const result = await harness.integration.install({ useExternalLauncher: true });
@@ -318,7 +318,7 @@ Type=Application
 Name=OpenWork
 Exec=${quoteDesktopExec(harness.appImagePath)} %U
 TryExec=${harness.appImagePath}
-MimeType=x-scheme-handler/openwork;
+MimeType=x-scheme-handler/redrob;
 `;
     await writeFile(managerPath, managerEntry);
 

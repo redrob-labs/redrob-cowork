@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, expect, setSystemTime, test } from "bun:test"
-import { createDenTypeId } from "@openwork-ee/utils/typeid"
+import { createDenTypeId } from "@redrob-ee/utils/typeid"
 
 const organizationId = createDenTypeId("organization")
 const memberId = createDenTypeId("member")

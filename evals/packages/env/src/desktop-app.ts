@@ -1,7 +1,7 @@
-import { createAndSelectWorkspace, signInDesktopAs } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { desktop } from "@openwork/hosts";
-import type { DesktopHandle, Host } from "@openwork/hosts";
+import { createAndSelectWorkspace, signInDesktopAs } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { desktop } from "@redrob/hosts";
+import type { DesktopHandle, Host } from "@redrob/hosts";
 import type { Den } from "./den.ts";
 import type { Place } from "./place.ts";
 
@@ -39,9 +39,9 @@ export interface App extends DesktopHandle {
 export async function app(options: AppOptions): Promise<App> {
   if (options.signIn === false) {
     const env: Record<string, string> = {};
-    if (options.model) env.OPENWORK_EVAL_MODEL = options.model;
+    if (options.model) env.REDROB_EVAL_MODEL = options.model;
     if (options.localServerDelayMs !== undefined) {
-      env.OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS = String(options.localServerDelayMs);
+      env.REDROB_EVAL_LOCAL_SERVER_DELAY_MS = String(options.localServerDelayMs);
     }
     const surface = await desktop({
       name: "testkit-fresh",
@@ -77,9 +77,9 @@ export async function app(options: AppOptions): Promise<App> {
     throw new Error(`Unknown Den member ${JSON.stringify(options.as)}. Available: ${available}`);
   }
   const env: Record<string, string> = {};
-  if (options.model) env.OPENWORK_EVAL_MODEL = options.model;
+  if (options.model) env.REDROB_EVAL_MODEL = options.model;
   if (options.localServerDelayMs !== undefined) {
-    env.OPENWORK_EVAL_LOCAL_SERVER_DELAY_MS = String(options.localServerDelayMs);
+    env.REDROB_EVAL_LOCAL_SERVER_DELAY_MS = String(options.localServerDelayMs);
   }
   const surface = await desktop({
     name: `testkit-${options.as}`,

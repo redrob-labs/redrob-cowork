@@ -290,7 +290,7 @@ export function toggleWorkspaceRightSidebar(state: UiState): UiState {
 }
 
 function syncApplicationMenuVisible(visible: boolean): void {
-  void globalThis.window?.__OPENWORK_ELECTRON__?.invokeDesktop?.("__setApplicationMenuVisible", visible);
+  void globalThis.window?.__REDROB_ELECTRON__?.invokeDesktop?.("__setApplicationMenuVisible", visible);
 }
 
 type UiStateStore = UiState & {

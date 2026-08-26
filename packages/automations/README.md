@@ -1,4 +1,4 @@
-# `@openwork/automations`
+# `@redrob/automations`
 
 Pure, infrastructure-free Automations domain shared by hosted and on-prem Den.
 

@@ -6,10 +6,10 @@ import {
   selectModel,
   sendComposerMessage,
   waitFor,
-} from "@openwork/behaviors";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { app, eventually, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { app, eventually, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 /**
  * ACCEPTANCE TAPE — a config reload moves new work to a fresh engine without
@@ -24,7 +24,7 @@ import type { TestNeeds } from "@openwork/testkit";
 
 const requirements: TestNeeds = {
   env: ["ANTHROPIC_API_KEY"],
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_ENGINE_ROLLOVER_E2E_TEST"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_ENGINE_ROLLOVER_E2E_TEST"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -55,7 +55,7 @@ function readGenerations(value: unknown): Generation[] {
   });
 }
 
-const runtimeStatusExpression = `window.__OPENWORK_ELECTRON__.invokeDesktop("runtimeStatus")`;
+const runtimeStatusExpression = `window.__REDROB_ELECTRON__.invokeDesktop("runtimeStatus")`;
 
 test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async ({ evidence, place }) => {
   needs(requirements);
@@ -93,7 +93,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
 
   const restarted = await evalIn(
     desktopApp,
-    `window.__OPENWORK_ELECTRON__.invokeDesktop("engineRestart", { engineRollover: true })`,
+    `window.__REDROB_ELECTRON__.invokeDesktop("engineRestart", { engineRollover: true })`,
     { awaitPromise: true, timeoutMs: 120_000 },
   );
   expect(isRecord(restarted) && restarted.running === true).toBe(true);

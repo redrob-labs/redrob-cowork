@@ -12,16 +12,16 @@ import {
   readAvailableModels,
   visibleText,
   waitForText,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
 import {
   app,
   eventually,
   needs,
   server,
   test,
-} from "@openwork/testkit";
+} from "@redrob/testkit";
 
 const PROVIDER_NAME = "Automation Reliability Gateway";
 const PROVIDER_KEY = "automation-reliability-gateway";
@@ -327,7 +327,7 @@ async function triggerManualRun(
 }
 
 test("a Desktop Automation completes through UI, API, schedule, thread, and receipt", { timeout: 20 * 60_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   const completionBodies: unknown[] = [];
   const providerBaseUrl = await startProviderMock(completionBodies);
   await using den = await server({
@@ -510,7 +510,7 @@ test("a Desktop Automation completes through UI, API, schedule, thread, and rece
 });
 
 test("a Desktop Automation recovers across restart before execution and while work is queued", { timeout: 20 * 60_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   const completionBodies: unknown[] = [];
   const providerBaseUrl = await startProviderMock(completionBodies);
   await using den = await server({
@@ -606,7 +606,7 @@ test("a Desktop Automation recovers across restart before execution and while wo
 });
 
 test("a Desktop Automation records a provider outage and succeeds after recovery", { timeout: 10 * 60_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   const completionBodies: unknown[] = [];
   const providerControl = { unavailable: true };
   const providerBaseUrl = await startProviderMock(completionBodies, providerControl);
@@ -658,7 +658,7 @@ test("a Desktop Automation records a provider outage and succeeds after recovery
 });
 
 test("Desktop runner claims are idempotent and expired leases recover safely", { timeout: 5 * 60_000 }, async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
   const completionBodies: unknown[] = [];
   const providerBaseUrl = await startProviderMock(completionBodies);
   await using den = await server({

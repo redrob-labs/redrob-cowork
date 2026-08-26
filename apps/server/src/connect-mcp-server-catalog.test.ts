@@ -20,18 +20,18 @@ import { readRuntimeOpencodeConfig, writeRuntimeOpencodeConfig } from "./runtime
 import type { ServerConfig } from "./types.js";
 
 const roots: string[] = [];
-const previousRuntimeDb = process.env.OPENWORK_RUNTIME_DB;
+const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 
 afterEach(async () => {
   while (roots.length) await rm(roots.pop() ?? "", { recursive: true, force: true });
-  if (previousRuntimeDb === undefined) delete process.env.OPENWORK_RUNTIME_DB;
-  else process.env.OPENWORK_RUNTIME_DB = previousRuntimeDb;
+  if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
+  else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
 });
 
 async function fixtureConfig(): Promise<ServerConfig> {
   const root = await mkdtemp(join(tmpdir(), "openwork-connect-mcp-servers-"));
   roots.push(root);
-  process.env.OPENWORK_RUNTIME_DB = join(root, "runtime.sqlite");
+  process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   return {
     host: "127.0.0.1",
     port: 0,
@@ -57,7 +57,7 @@ function indexFetcher(
     connectionId: "emc_01k28e8q8pf8r9sff9mhyqxved",
     name: "Project Atlas",
     description: null,
-    url: "https://api.openworklabs.com/mcp/agent/connections/emc_01k28e8q8pf8r9sff9mhyqxved",
+    url: "https://api.redrob.io/mcp/agent/connections/emc_01k28e8q8pf8r9sff9mhyqxved",
   }],
 ) {
   return async (url: string, init?: RequestInit) => {
@@ -89,7 +89,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     const requests: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
     const index = await readOpenWorkConnectMcpServerIndex({
       type: "remote",
-      url: "https://api.openworklabs.com/mcp/agent",
+      url: "https://api.redrob.io/mcp/agent",
       headers: { Authorization: "Bearer member-token" },
     }, "Bearer private-app-host-token", indexFetcher(requests));
 
@@ -107,11 +107,11 @@ describe("OpenWork Connect MCP server catalog", () => {
   test("keeps hosted api-origin provider proxies on the credential-bound app gateway origin", async () => {
     const index = await readOpenWorkConnectMcpServerIndex({
       type: "remote",
-      url: "https://app.openworklabs.com/api/den/mcp/agent",
+      url: "https://app.redrob.io/api/den/mcp/agent",
     }, "Bearer private-app-host-token", indexFetcher([]));
 
     expect(index?.servers[0]?.url).toBe(
-      "https://app.openworklabs.com/api/den/mcp/agent/connections/emc_01k28e8q8pf8r9sff9mhyqxved",
+      "https://app.redrob.io/api/den/mcp/agent/connections/emc_01k28e8q8pf8r9sff9mhyqxved",
     );
   });
 
@@ -119,7 +119,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     const config = await fixtureConfig();
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
-        "openwork-cloud": { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+        "openwork-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
         "user-server": { type: "remote", url: "https://user.example/mcp" },
         "openwork-connect-stale": { type: "remote", url: "https://cloud.example/stale" },
       },
@@ -130,7 +130,7 @@ describe("OpenWork Connect MCP server catalog", () => {
       workspace: config.workspaces[0]!,
       cloudMcp: {
         type: "remote",
-        url: "https://api.openworklabs.com/mcp/agent",
+        url: "https://api.redrob.io/mcp/agent",
         headers: { Authorization: "Bearer member-token" },
       },
       appHostAuthorization: "Bearer private-app-host-token",
@@ -143,7 +143,7 @@ describe("OpenWork Connect MCP server catalog", () => {
       appHostNames: [connectMcpAppHostName(connectionId)],
       removedNames: ["openwork-connect-stale"],
     });
-    expect(runtime.mcp?.["openwork-cloud"]).toEqual({ type: "remote", url: "https://api.openworklabs.com/mcp/agent" });
+    expect(runtime.mcp?.["openwork-cloud"]).toEqual({ type: "remote", url: "https://api.redrob.io/mcp/agent" });
     expect(runtime.mcp?.["user-server"]).toEqual({ type: "remote", url: "https://user.example/mcp" });
     expect(runtime.mcp?.["openwork-connect-stale"]).toBeUndefined();
     expect(Object.keys(runtime.mcp ?? {}).some((name) => name.startsWith("openwork-connect-"))).toBe(false);
@@ -153,7 +153,7 @@ describe("OpenWork Connect MCP server catalog", () => {
         connectionId,
         name: "Project Atlas",
         description: null,
-        url: `https://api.openworklabs.com/mcp/agent/connections/${connectionId}`,
+        url: `https://api.redrob.io/mcp/agent/connections/${connectionId}`,
       }],
     });
   });
@@ -164,14 +164,14 @@ describe("OpenWork Connect MCP server catalog", () => {
     const requests: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
-        "openwork-cloud": { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+        "openwork-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       },
     }));
     await writeOpenWorkConnectMcpAppHostAuthorization(
       config,
       "ws_1",
       "Bearer private-app-host-token",
-      "https://api.openworklabs.com/mcp/agent",
+      "https://api.redrob.io/mcp/agent",
     );
 
     const result = await refreshOpenWorkConnectMcpAppHostCatalog(config, "ws_1", indexFetcher(requests));
@@ -186,14 +186,14 @@ describe("OpenWork Connect MCP server catalog", () => {
     const connectionId = "emc_01lastknowngood";
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
-        "openwork-cloud": { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+        "openwork-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       },
     }));
     await writeOpenWorkConnectMcpAppHostAuthorization(
       config,
       "ws_1",
       "Bearer private-app-host-token",
-      "https://api.openworklabs.com/mcp/agent",
+      "https://api.redrob.io/mcp/agent",
     );
     await writeOpenWorkConnectMcpAppHostCatalog(config, "ws_1", {
       schemaVersion: "openwork.connect/mcp-servers/1",
@@ -201,7 +201,7 @@ describe("OpenWork Connect MCP server catalog", () => {
         connectionId,
         name: "Last known good",
         description: null,
-        url: `https://api.openworklabs.com/mcp/agent/connections/${connectionId}`,
+        url: `https://api.redrob.io/mcp/agent/connections/${connectionId}`,
       }],
     });
 
@@ -223,7 +223,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     const result = await reconcileOpenWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
-      cloudMcp: { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+      cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       fetcher: async () => new Response(null, { status: 404 }),
     });
     expect(result).toEqual({
@@ -246,7 +246,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     const result = await reconcileOpenWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
-      cloudMcp: { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+      cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       appHostAuthorization: "Bearer private-app-host-token",
       fetcher: indexFetcher([], []),
     });
@@ -267,7 +267,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     await reconcileOpenWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
-      cloudMcp: { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+      cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       appHostAuthorization: "Bearer private-app-host-token",
       fetcher: indexFetcher(trustedRequests),
     });
@@ -294,7 +294,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     const result = await reconcileOpenWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
-      cloudMcp: { type: "remote", url: "https://api.openworklabs.com/mcp/agent" },
+      cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       appHostAuthorization: "Bearer private-app-host-token",
       fetcher: indexFetcher([], [{
         connectionId: "emc_01crossorigin",
@@ -313,13 +313,13 @@ describe("OpenWork Connect MCP server catalog", () => {
     const result = await reconcileOpenWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
-      cloudMcp: { type: "remote", url: "https://app.openworklabs.com/api/den/mcp/agent" },
+      cloudMcp: { type: "remote", url: "https://app.redrob.io/api/den/mcp/agent" },
       appHostAuthorization: "Bearer private-app-host-token",
       fetcher: indexFetcher([], [{
         connectionId: "emc_01crossorigin",
         name: "Wrong proxy path",
         description: null,
-        url: "https://api.openworklabs.com/mcp/agent/connections/another-connection",
+        url: "https://api.redrob.io/mcp/agent/connections/another-connection",
       }]),
     });
 

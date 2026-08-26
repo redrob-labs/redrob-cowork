@@ -9,8 +9,8 @@ import { SiteFooter } from "../../components/site-footer";
 import { SiteNav } from "../../components/site-nav";
 import { getGithubData } from "../../lib/github";
 
-const CLOUD_SIGNUP_URL = "https://app.openworklabs.com";
-const GATEWAY_URL = "https://api.openworklabs.com/mcp/agent";
+const CLOUD_SIGNUP_URL = "https://app.redrob.io";
+const GATEWAY_URL = "https://api.redrob.io/mcp/agent";
 
 export const metadata: Metadata = {
   title: "OpenWork Connect — the MCP gateway for your team",

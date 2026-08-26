@@ -1,5 +1,5 @@
-import { describeAppState, dumpScreenState, evaluateOnSurface, isInteractive, probeAppStateOnSurface } from "@openwork/cdp";
-import type { AppStateProbe, EvaluateOptions, Surface } from "@openwork/cdp";
+import { describeAppState, dumpScreenState, evaluateOnSurface, isInteractive, probeAppStateOnSurface } from "@redrob/cdp";
+import type { AppStateProbe, EvaluateOptions, Surface } from "@redrob/cdp";
 
 export interface SessionToolCall {
   capability: string;
@@ -31,7 +31,7 @@ export async function evalIn(
   expression: string,
   opts: EvaluateOptions & { reattachAttempts?: number } = {},
 ): Promise<unknown> {
-  // Target healing lives in @openwork/cdp; behaviours just evaluate.
+  // Target healing lives in @redrob/cdp; behaviours just evaluate.
   return evaluateOnSurface(app, expression, {
     ...opts,
     timeoutMs: opts.timeoutMs ?? DEFAULT_DOM_PROBE_TIMEOUT_MS,

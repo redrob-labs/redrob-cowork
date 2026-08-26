@@ -5,7 +5,7 @@ import {
   connectionActionAppSchemaVersion,
   connectionActionPayloadSchema,
   connectionActionToolName,
-} from "@openwork/types/connection-action-app";
+} from "@redrob/types/connection-action-app";
 
 import { safeStringify } from "@/app/utils";
 import { normalizeErrorText } from "@/lib/error-text";

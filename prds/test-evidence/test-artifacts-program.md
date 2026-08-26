@@ -6,8 +6,8 @@ auditable; screenshots and HTML views are test artifacts, not standalone proof.
 
 ## Current contract
 
-`@openwork/test-evidence` provides the ambient recorder used by
-`@openwork/testkit`:
+`@redrob/test-evidence` provides the ambient recorder used by
+`@redrob/testkit`:
 
 - `screenshot()` captures a `ScreenshotArtifact` and records it ambiently.
 - `validate()` records visual expectations against the matching screenshot.
@@ -30,7 +30,7 @@ judgments. Git SHA and branch metadata bind publication to the tested commit.
 
 ## Artifact indexing and publication
 
-`@openwork/test-artifacts` owns compatible reading, the local artifact index,
+`@redrob/test-artifacts` owns compatible reading, the local artifact index,
 and PR publication:
 
 ```bash
@@ -63,6 +63,6 @@ current authoring path.
 ## Verification path
 
 New app-driving coverage uses `evals/specs/*.e2e.test.ts` with `test` from
-`@openwork/testkit`. Run one test with `pnpm evals:e2e <name>` and publish the
+`@redrob/testkit`. Run one test with `pnpm evals:e2e <name>` and publish the
 result through `publish-evidence`. Missing or skipped evidence is `Incomplete`,
 never `Passed`.

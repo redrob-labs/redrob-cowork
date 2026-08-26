@@ -12,23 +12,23 @@ import {
   waitFor,
   waitForAssistantReply,
   writeComposerText,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import { navigate } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
-import { app, mcpMock, needs, server, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import { navigate } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
+import { app, mcpMock, needs, server, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
   model: "tool-capable",
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Workflows skipped — needs: ${missingRequirements.join(", ")}`
   : "Workflows: a 40-step question becomes one step, gets saved, and a teammate reuses it";
-const modelId = process.env.OPENWORK_EVAL_MODEL?.trim() || "";
+const modelId = process.env.REDROB_EVAL_MODEL?.trim() || "";
 
 let requestId = 0;
 

@@ -12,14 +12,14 @@ module.exports = {
       name: "env-is-framework-free",
       severity: "error",
       from: { path: "^packages/env(?:/|$)" },
-      to: { path: "^(?:vitest|@openwork/(?:test-evidence|testkit))(?:/|$)" },
+      to: { path: "^(?:vitest|@redrob/(?:test-evidence|testkit))(?:/|$)" },
     },
     // Layers below fixtures must not depend on fixture or test-framework packages.
     {
       name: "layers-below-fixtures",
       severity: "error",
       from: { path: "^packages/(?:behaviors|matchers|cdp|labs|hosts|timeline)(?:/|$)" },
-      to: { path: "^(?:vitest|@openwork/(?:testkit|env|test-evidence))(?:/|$)" },
+      to: { path: "^(?:vitest|@redrob/(?:testkit|env|test-evidence))(?:/|$)" },
     },
     // Reusable packages must not depend on runner implementation modules.
     {

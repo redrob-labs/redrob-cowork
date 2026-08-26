@@ -1,4 +1,4 @@
-import type { Surface } from "@openwork/cdp";
+import type { Surface } from "@redrob/cdp";
 import type { DenSession } from "./den.ts";
 import { denFetch } from "./den.ts";
 import { evalIn, fill, waitFor } from "./desktop.ts";

@@ -143,7 +143,7 @@ function isBlockedHostname(hostname: string, allowLoopback: boolean): boolean {
 }
 
 export function assertProbeUrlAllowed(url: string, options?: { allowLoopback?: boolean }) {
-  const allowLoopback = options?.allowLoopback ?? process.env.OPENWORK_DEV_MODE === "1"
+  const allowLoopback = options?.allowLoopback ?? process.env.REDROB_DEV_MODE === "1"
   const parsed = new URL(url)
   if (isBlockedHostname(parsed.hostname, allowLoopback)) {
     throw new EndpointProbeBlockedError(`Probing ${parsed.hostname} is not allowed.`)

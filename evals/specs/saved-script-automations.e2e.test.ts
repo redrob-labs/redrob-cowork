@@ -1,9 +1,9 @@
 import { expect } from "vitest"
-import { createOrgConnection, denFetch } from "@openwork/behaviors"
-import { mcpMock, needs, server, test } from "@openwork/testkit"
+import { createOrgConnection, denFetch } from "@redrob/behaviors"
+import { mcpMock, needs, server, test } from "@redrob/testkit"
 
 const requirements = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS", "OPENWORK_EVAL_SAVED_SCRIPT_AUTOMATIONS_E2E_TEST"],
+  optIn: ["REDROB_EVAL_E2E_TESTS", "REDROB_EVAL_SAVED_SCRIPT_AUTOMATIONS_E2E_TEST"],
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

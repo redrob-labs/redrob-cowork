@@ -1,14 +1,14 @@
 import { expect } from "vitest";
-import { control, createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import { desktop } from "@openwork/hosts";
-import { needs, test } from "@openwork/testkit";
+import { control, createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import { desktop } from "@redrob/hosts";
+import { needs, test } from "@redrob/testkit";
 
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "markdown artifacts autosave without Save/Discard buttons and format from the right-click menu"
-  : "markdown editor autosave skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1";
+  : "markdown editor autosave skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 
 const activeArtifactPath = "artifacts/overflow-tab-12.md";
 const untouchedArtifactPath = "artifacts/overflow-tab-11.md";
@@ -71,11 +71,11 @@ async function rightClick(app: Surface, selector: string): Promise<void> {
 }
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
 
   await using app = await desktop({
     name: "markdown-editor-autosave",
-    mode: process.env.OPENWORK_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
+    mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
   });
   const workspace = await createAndSelectWorkspace(app, {
     path: `/tmp/openwork-markdown-editor-autosave-${Date.now()}`,

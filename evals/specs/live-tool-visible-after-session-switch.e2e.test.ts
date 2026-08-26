@@ -6,8 +6,8 @@ import {
   selectModel,
   waitFor,
   writeComposerText,
-} from "@openwork/behaviors";
-import { screenshot } from "@openwork/test-evidence";
+} from "@redrob/behaviors";
+import { screenshot } from "@redrob/test-evidence";
 import {
   app,
   eventually,
@@ -17,21 +17,21 @@ import {
   needs,
   server,
   test,
-} from "@openwork/testkit";
-import type { App } from "@openwork/testkit";
+} from "@redrob/testkit";
+import type { App } from "@redrob/testkit";
 
 const providerId = "live-tool-switch-mock";
 const modelId = "live-tool-switch-model";
 const modelName = "Live tool switch model";
-const e2eTestsEnabled = process.env.OPENWORK_EVAL_E2E_TESTS === "1";
-const daytonaEnabled = process.env.OPENWORK_EVAL_DAYTONA === "1";
-const configuredDen = Boolean(process.env.OPENWORK_EVAL_DEN_API_URL?.trim());
+const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
+const daytonaEnabled = process.env.REDROB_EVAL_DAYTONA === "1";
+const configuredDen = Boolean(process.env.REDROB_EVAL_DEN_API_URL?.trim());
 const localServicesRequired = !daytonaEnabled && !configuredDen;
 const mysqlOpen = await localMysqlIsRunning();
 const redisOpen = await localRedisIsRunning();
 const runnable = e2eTestsEnabled && (!localServicesRequired || (mysqlOpen && redisOpen));
 const skipSuffix = !e2eTestsEnabled
-  ? " skipped — needs: set OPENWORK_EVAL_E2E_TESTS=1"
+  ? " skipped — needs: set REDROB_EVAL_E2E_TESTS=1"
   : localServicesRequired && !mysqlOpen
     ? " skipped — needs MySQL on 127.0.0.1:3306"
     : localServicesRequired && !redisOpen
@@ -93,7 +93,7 @@ function parseVisibleToolFact(value: unknown): VisibleToolFact {
 
 async function configureWorkspaces(appSurface: App, workspaceIds: string[], baseUrl: string): Promise<void> {
   const result = await evalIn(appSurface, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return "local_server_unavailable";
     const root = String(info.baseUrl).replace(/\\/+$/, "");
     const headers = {
@@ -186,7 +186,7 @@ async function clickSessionRow(appSurface: App, workspaceId: string, sessionId: 
 
 async function readSessionFacts(appSurface: App, workspaceId: string, sessionId: string): Promise<SessionFacts> {
   const value = await evalIn(appSurface, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return { sessionId: "", text: "", tools: [] };
     const response = await fetch(
       String(info.baseUrl).replace(/\\/+$/, "") + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)})
@@ -222,7 +222,7 @@ async function readSessionFacts(appSurface: App, workspaceId: string, sessionId:
 
 async function approvePendingPermission(appSurface: App, workspaceId: string, sessionId: string): Promise<number> {
   const value = await evalIn(appSurface, `(async () => {
-    const info = await window.__OPENWORK_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
     if (!info?.running || !info.baseUrl) return [];
     const root = String(info.baseUrl).replace(/\\/+$/, "")
       + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/opencode";
@@ -292,7 +292,7 @@ test.skipIf(!runnable)(
   `a tool started while away is visible after returning to its chat${skipSuffix}`,
   { timeout: 12 * 60_000 },
   async ({ evidence, place }) => {
-    needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
+    needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
     const runId = `${Date.now().toString(36)}-${process.pid}`;
     const promptMarker = `LIVE-TOOL-SWITCH-${runId}`;
     const firstMarker = `FIRST-${promptMarker}`;

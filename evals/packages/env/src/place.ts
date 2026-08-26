@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { connect } from "node:net";
-import { provisionDesktopSandbox, deleteSandboxes, daytonaSandbox } from "@openwork/hosts";
+import { provisionDesktopSandbox, deleteSandboxes, daytonaSandbox } from "@redrob/hosts";
 import { createConnection } from "mysql2/promise";
 import type { RowDataPacket } from "mysql2";
 import type {
@@ -8,7 +8,7 @@ import type {
   ElectronSurfaceOptions,
   Host,
   SurfaceHandle,
-} from "@openwork/hosts";
+} from "@redrob/hosts";
 
 const DEFAULT_MYSQL_URL = "mysql://root:password@127.0.0.1:3306";
 
@@ -86,9 +86,9 @@ async function canConnect(port: number, host: string): Promise<boolean> {
 }
 
 export async function localMysqlIsRunning(): Promise<boolean> {
-  // Probe the same MySQL the run will actually use: OPENWORK_EVAL_MYSQL_URL
+  // Probe the same MySQL the run will actually use: REDROB_EVAL_MYSQL_URL
   // overrides the default, so the probe must honor it too.
-  const url = new URL(process.env.OPENWORK_EVAL_MYSQL_URL?.trim() || DEFAULT_MYSQL_URL);
+  const url = new URL(process.env.REDROB_EVAL_MYSQL_URL?.trim() || DEFAULT_MYSQL_URL);
   const port = url.port ? Number(url.port) : 3306;
   return canConnect(port, url.hostname || "127.0.0.1");
 }
@@ -272,10 +272,10 @@ class DaytonaPlace implements Place {
 
 /** Resolve placement once; resources never inspect placement environment again. */
 export function resolvePlace(env: NodeJS.ProcessEnv = process.env): Place {
-  const useDaytona = env.OPENWORK_EVAL_DAYTONA?.trim() === "1";
+  const useDaytona = env.REDROB_EVAL_DAYTONA?.trim() === "1";
   if (useDaytona) {
-    const ref = env.OPENWORK_EVAL_REF?.trim() || env.GITHUB_SHA?.trim() || "dev";
-    return new DaytonaPlace(ref, env.OPENWORK_EVAL_DAYTONA_DESKTOP_SANDBOX?.trim());
+    const ref = env.REDROB_EVAL_REF?.trim() || env.GITHUB_SHA?.trim() || "dev";
+    return new DaytonaPlace(ref, env.REDROB_EVAL_DAYTONA_DESKTOP_SANDBOX?.trim());
   }
-  return new LocalPlace(env.OPENWORK_EVAL_MYSQL_URL?.trim() || DEFAULT_MYSQL_URL);
+  return new LocalPlace(env.REDROB_EVAL_MYSQL_URL?.trim() || DEFAULT_MYSQL_URL);
 }

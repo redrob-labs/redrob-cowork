@@ -3,13 +3,13 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect, onTestFinished } from "vitest";
-import { createAndSelectWorkspace, evalIn, waitFor } from "@openwork/behaviors";
-import { desktop } from "@openwork/hosts";
-import { needs, test, unmetNeeds } from "@openwork/testkit";
-import type { TestNeeds } from "@openwork/testkit";
+import { createAndSelectWorkspace, evalIn, waitFor } from "@redrob/behaviors";
+import { desktop } from "@redrob/hosts";
+import { needs, test, unmetNeeds } from "@redrob/testkit";
+import type { TestNeeds } from "@redrob/testkit";
 
 const requirements: TestNeeds = {
-  optIn: ["OPENWORK_EVAL_E2E_TESTS"],
+  optIn: ["REDROB_EVAL_E2E_TESTS"],
 };
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
@@ -143,7 +143,7 @@ test(title, async ({ evidence }) => {
   })()`)).toBe(true);
 
   const switchedServer = await evalIn(app, `(async () => {
-    const invoke = window.__OPENWORK_ELECTRON__?.invokeDesktop;
+    const invoke = window.__REDROB_ELECTRON__?.invokeDesktop;
     if (!invoke) return false;
     localStorage.setItem("openwork.server.urlOverride", ${JSON.stringify(server.appBaseUrl)});
     localStorage.setItem("openwork.server.token", ${JSON.stringify(serverToken)});

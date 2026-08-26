@@ -14,8 +14,8 @@ const usage = `Usage: node evals/bin/evals.mjs [test-names...] [flags]
 Run E2E tests:
   --with-llm-vision  Judge vision claims inline (default: defer judging)
   --local            Force isolated local resources and clear inherited remote placement
-  --daytona          Set OPENWORK_EVAL_DAYTONA=1
-  --den <url>        Set OPENWORK_EVAL_DEN_API_URL=<url>
+  --daytona          Set REDROB_EVAL_DAYTONA=1
+  --den <url>        Set REDROB_EVAL_DEN_API_URL=<url>
 
 Judge then publish evidence:
   --publish         Enter judge-then-publish mode
@@ -45,10 +45,10 @@ Publish exit codes:
 export function consentVarsFromSource(text) {
   const variables = new Set();
   const optInPattern = /optIn\s*:\s*\[([^\]]*)\]/gs;
-  const envPattern = /process\.env\.(OPENWORK_EVAL_[A-Z0-9_]+)(?:\?\.trim\(\))?\s*===\s*"1"/g;
+  const envPattern = /process\.env\.(REDROB_EVAL_[A-Z0-9_]+)(?:\?\.trim\(\))?\s*===\s*"1"/g;
 
   for (const match of text.matchAll(optInPattern)) {
-    for (const literal of match[1].matchAll(/["'](OPENWORK_EVAL_[A-Z0-9_]+)["']/g)) {
+    for (const literal of match[1].matchAll(/["'](REDROB_EVAL_[A-Z0-9_]+)["']/g)) {
       variables.add(literal[1]);
     }
   }
@@ -132,13 +132,13 @@ export function parseArgs(args) {
 }
 
 const REMOTE_PLACEMENT_ENV = [
-  "OPENWORK_EVAL_DAYTONA",
-  "OPENWORK_EVAL_DAYTONA_SANDBOX",
-  "OPENWORK_EVAL_DAYTONA_SANDBOX_ID",
-  "OPENWORK_EVAL_DAYTONA_DEN_SANDBOX",
-  "OPENWORK_EVAL_DAYTONA_DESKTOP_SANDBOX",
-  "OPENWORK_EVAL_DEN_API_URL",
-  "OPENWORK_EVAL_DEN_WEB_URL",
+  "REDROB_EVAL_DAYTONA",
+  "REDROB_EVAL_DAYTONA_SANDBOX",
+  "REDROB_EVAL_DAYTONA_SANDBOX_ID",
+  "REDROB_EVAL_DAYTONA_DEN_SANDBOX",
+  "REDROB_EVAL_DAYTONA_DESKTOP_SANDBOX",
+  "REDROB_EVAL_DEN_API_URL",
+  "REDROB_EVAL_DEN_WEB_URL",
 ];
 
 /** Resolve the child environment before any test process can provision resources. */
@@ -148,8 +148,8 @@ export function resolveRunEnvironment(options, env = process.env) {
     for (const name of REMOTE_PLACEMENT_ENV) delete childEnv[name];
     return childEnv;
   }
-  if (options.daytona) childEnv.OPENWORK_EVAL_DAYTONA = "1";
-  if (options.den !== undefined) childEnv.OPENWORK_EVAL_DEN_API_URL = options.den;
+  if (options.daytona) childEnv.REDROB_EVAL_DAYTONA = "1";
+  if (options.den !== undefined) childEnv.REDROB_EVAL_DEN_API_URL = options.den;
   return childEnv;
 }
 
@@ -292,8 +292,8 @@ function run(options) {
   const runStartedAt = Date.now();
   const resolved = resolveTestNames(options.testNames);
   const childEnv = resolveRunEnvironment(options);
-  childEnv.OPENWORK_EVAL_E2E_TESTS = "1";
-  const consented = new Set(["OPENWORK_EVAL_E2E_TESTS"]);
+  childEnv.REDROB_EVAL_E2E_TESTS = "1";
+  const consented = new Set(["REDROB_EVAL_E2E_TESTS"]);
 
   for (const file of resolved) {
     for (const variable of consentVarsFromSource(readFileSync(file, "utf8"))) {
@@ -302,8 +302,8 @@ function run(options) {
       consented.add(variable);
     }
   }
-  if (options.withLlmVision) delete childEnv.OPENWORK_EVAL_VISION;
-  else childEnv.OPENWORK_EVAL_VISION = "defer";
+  if (options.withLlmVision) delete childEnv.REDROB_EVAL_VISION;
+  else childEnv.REDROB_EVAL_VISION = "defer";
   const outputDir = join(evalsDir, "results/.testkit");
   mkdirSync(outputDir, { recursive: true });
   const outputFile = join(outputDir, `cli-run-${Date.now()}.json`);
@@ -340,7 +340,7 @@ function run(options) {
   process.stdout.write(`${JSON.stringify({
     command: "evals:e2e",
     lane: "e2e",
-    daytona: childEnv.OPENWORK_EVAL_DAYTONA?.trim() === "1",
+    daytona: childEnv.REDROB_EVAL_DAYTONA?.trim() === "1",
     placement: options.local
       ? "local"
       : options.daytona

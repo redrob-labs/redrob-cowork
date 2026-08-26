@@ -1,4 +1,4 @@
-import { WorkerTable } from "@openwork-ee/den-db/schema"
+import { WorkerTable } from "@redrob-ee/den-db/schema"
 import { env } from "../env.js"
 import { appLogger } from "../observability/logger.js"
 import {
@@ -273,7 +273,7 @@ fi
 attempt=0
 while [ "$attempt" -lt 3 ]; do
   attempt=$((attempt + 1))
-  if OPENWORK_MANAGE_OPENCODE=1 OPENWORK_OPENCODE_BIN=./bin/opencode OPENWORK_EXTENSIONS_PLUGIN_DIR="$plugin_dir" openwork-server --workspace /tmp/workspace --host 0.0.0.0 --port "\${PORT:-10000}" --cors '*' --approval manual --verbose; then
+  if REDROB_MANAGE_OPENCODE=1 REDROB_OPENCODE_BIN=./bin/opencode REDROB_EXTENSIONS_PLUGIN_DIR="$plugin_dir" openwork-server --workspace /tmp/workspace --host 0.0.0.0 --port "\${PORT:-10000}" --cors '*' --approval manual --verbose; then
     exit 0
   fi
   status=$?
@@ -293,8 +293,8 @@ exit 1
     autoDeploy: "no",
     rootDir: env.render.workerRootDir,
     envVars: [
-      { key: "OPENWORK_TOKEN", value: input.clientToken },
-      { key: "OPENWORK_HOST_TOKEN", value: input.hostToken },
+      { key: "REDROB_TOKEN", value: input.clientToken },
+      { key: "REDROB_HOST_TOKEN", value: input.hostToken },
       { key: "DEN_WORKER_ID", value: input.workerId },
     ],
     serviceDetails: {

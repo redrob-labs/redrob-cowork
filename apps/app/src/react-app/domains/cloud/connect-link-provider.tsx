@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-import type { ConnectLinkClaims, ConnectLinkTransport, ConnectLinkVerifyErrorCode } from "@openwork/types/connect-link";
+import type { ConnectLinkClaims, ConnectLinkTransport, ConnectLinkVerifyErrorCode } from "@redrob/types/connect-link";
 
 import { refreshDenBootstrapConfigFromShell } from "../../../app/lib/den";
 import { connectLinkAccept, connectLinkVerify } from "../../../app/lib/desktop";

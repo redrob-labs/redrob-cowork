@@ -18,7 +18,7 @@ spec:
   egress:
     - to:
         - ipBlock:
-            cidr: ${OPENWORK_EVAL_KUBE_ALLOWED_HOST_IP}/32
+            cidr: ${REDROB_EVAL_KUBE_ALLOWED_HOST_IP}/32
       ports:
         - protocol: TCP
-          port: ${OPENWORK_EVAL_KUBE_ALLOWED_MOCK_PORT}
+          port: ${REDROB_EVAL_KUBE_ALLOWED_MOCK_PORT}

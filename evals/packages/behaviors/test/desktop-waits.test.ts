@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { waitFor } from "../src/desktop.ts";
-import type { CdpClient, Surface } from "@openwork/cdp";
+import type { CdpClient, Surface } from "@redrob/cdp";
 
 function fakeSurface(valueForExpression: (expression: string) => unknown): Surface {
   const client: CdpClient = {

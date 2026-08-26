@@ -100,7 +100,7 @@ export type ExtensionItemBuildInput = {
 };
 
 const MCP_IMPORT_PATH_PREFIX = "opencode.jsonc#mcp.";
-const OPENWORK_PROVIDED_SKILL_NAMES = new Set([
+const REDROB_PROVIDED_SKILL_NAMES = new Set([
   "workspace-guide",
   "skill-creator",
 ]);
@@ -109,7 +109,7 @@ export function isOpenworkProvidedSkill(skill: Pick<SkillCard, "name" | "path">)
   const normalizedName = skill.name.trim().toLowerCase();
   const normalizedPath = skill.path.replace(/\\/g, "/").toLowerCase();
   return normalizedPath.includes("/.opencode/skills/") &&
-    OPENWORK_PROVIDED_SKILL_NAMES.has(normalizedName);
+    REDROB_PROVIDED_SKILL_NAMES.has(normalizedName);
 }
 
 export function isToggleControlledExtension(entry: McpDirectoryInfo) {

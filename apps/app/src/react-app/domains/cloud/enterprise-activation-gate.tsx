@@ -51,7 +51,7 @@ function EnterpriseActivationPage() {
   const submitServer = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // The address field quietly accepts a pasted openwork:// sign-in link as
+    // The address field quietly accepts a pasted redrob:// sign-in link as
     // the recovery path when the browser round trip cannot come back.
     const pastedLink = parseManualAuthInput(serverInput);
     if (pastedLink?.baseUrl && pastedLink.grant) {

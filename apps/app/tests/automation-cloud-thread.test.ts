@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import type { AutomationExecutionThread } from "@openwork/types/automations"
+import type { AutomationExecutionThread } from "@redrob/types/automations"
 import {
   automationExecutionThreadRoute,
   automationExecutionIdentity,

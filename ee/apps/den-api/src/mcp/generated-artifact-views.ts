@@ -11,7 +11,7 @@ import {
   generatedArtifactViewSchema,
   type GeneratedArtifactView,
   type GeneratedArtifactViewCsp,
-} from "@openwork/types/workflows"
+} from "@redrob/types/workflows"
 import { z } from "zod"
 import { workflowArtifactTextFallback, type WorkflowArtifactLoadResult } from "./workflow-artifact-app.js"
 

@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join, posix } from "node:path";
-import { evalIn } from "@openwork/behaviors";
-import { defaultDaytonaExec, electronProfilePaths, execInSandbox } from "@openwork/hosts";
-import type { Surface } from "@openwork/cdp";
+import { evalIn } from "@redrob/behaviors";
+import { defaultDaytonaExec, electronProfilePaths, execInSandbox } from "@redrob/hosts";
+import type { Surface } from "@redrob/cdp";
 
 export interface DenClientState {
   authTokenPresent: boolean;
@@ -73,7 +73,7 @@ export async function readConnectState(app: Surface): Promise<ConnectState> {
     let baseUrl = "";
     let token = "";
     try {
-      const invokeDesktop = window.__OPENWORK_ELECTRON__ && window.__OPENWORK_ELECTRON__.invokeDesktop;
+      const invokeDesktop = window.__REDROB_ELECTRON__ && window.__REDROB_ELECTRON__.invokeDesktop;
       if (invokeDesktop) {
         const info = await invokeDesktop("openworkServerInfo");
         if (info && info.running === true) {
@@ -141,7 +141,7 @@ export async function readCloudMcpHealth(
     let baseUrl = "";
     let token = "";
     try {
-      const invokeDesktop = window.__OPENWORK_ELECTRON__ && window.__OPENWORK_ELECTRON__.invokeDesktop;
+      const invokeDesktop = window.__REDROB_ELECTRON__ && window.__REDROB_ELECTRON__.invokeDesktop;
       if (invokeDesktop) {
         const info = await invokeDesktop("openworkServerInfo");
         if (info && info.running === true) {
@@ -234,8 +234,8 @@ export async function readConnectStateFile(
       if (!/^\/[A-Za-z0-9._/-]+$/.test(path)) {
         throw new Error(`Unsafe connect-state path ${JSON.stringify(path)}: only absolute paths containing letters, digits and . _ / - are allowed.`);
       }
-      const output = await exec(sandbox, `if [ -f "${path}" ]; then cat "${path}"; else echo __OPENWORK_TESTKIT_MISSING__; fi`);
-      if (output.trim() !== "__OPENWORK_TESTKIT_MISSING__") {
+      const output = await exec(sandbox, `if [ -f "${path}" ]; then cat "${path}"; else echo __REDROB_TESTKIT_MISSING__; fi`);
+      if (output.trim() !== "__REDROB_TESTKIT_MISSING__") {
         text = output;
         break;
       }

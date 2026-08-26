@@ -7,7 +7,7 @@ Research snapshot: **2026-08-21**, Alchemy `2.0.0-beta.72`.
 
 ## Executive summary
 
-Alchemy, Effect, and `@openwork/testkit` solve different problems:
+Alchemy, Effect, and `@redrob/testkit` solve different problems:
 
 - **Effect** is a runtime and composition model for typed failures,
   dependencies, concurrency, retries, interruption, and scoped acquisition and
@@ -29,7 +29,7 @@ organizations should remain scoped Effect resources or application fixtures.
 
 The recommendation is:
 
-1. Keep the public `@openwork/testkit` API, Vitest runner, witnesses, claims,
+1. Keep the public `@redrob/testkit` API, Vitest runner, witnesses, claims,
    ambient evidence, and verdict rules unchanged.
 2. Introduce Effect behind that API and migrate one lifecycle at a time.
 3. Build one custom Alchemy provider for a suite-owned Daytona desktop sandbox
@@ -92,10 +92,10 @@ witness, evidence, or verdict semantics.
 Alchemy would **not** replace:
 
 - `evals/specs/**/*.test.ts` or Vitest;
-- `@openwork/test-evidence`, `briefTest`, `prove.<claim>()`, screenshots, or PR
+- `@redrob/test-evidence`, `briefTest`, `prove.<claim>()`, screenshots, or PR
   publication;
-- `@openwork/labs` deterministic provider witnesses;
-- `@openwork/behaviors`, CDP surfaces, or matchers;
+- `@redrob/labs` deterministic provider witnesses;
+- `@redrob/behaviors`, CDP surfaces, or matchers;
 - requirement checks and named skips from `needs()`;
 - product code or production deployment;
 - Daytona, Docker, MySQL, Redis, Electron, or their underlying APIs.
@@ -169,7 +169,7 @@ reconciles. It must not be presented as universal drift detection.
 evals/specs + Vitest
         |
         v
-@openwork/testkit public Promise/AsyncDisposable facade       unchanged
+@redrob/testkit public Promise/AsyncDisposable facade       unchanged
         |
         v
 internal Effect programs and Layers                           new
@@ -178,8 +178,8 @@ internal Effect programs and Layers                           new
   - LocalDatabase / LocalProcess / MockRuntime
   - DenRuntime / DesktopRuntime / DaytonaClient
         |
-        +--> existing @openwork/hosts, @openwork/labs,
-        |    @openwork/behaviors, @openwork/cdp
+        +--> existing @redrob/hosts, @redrob/labs,
+        |    @redrob/behaviors, @redrob/cdp
         |
         `--> optional Alchemy stack adapter                    gated pilot
                `--> Redrob Work DaytonaDesktopSandbox provider
@@ -410,7 +410,7 @@ No production lifecycle moves in this phase.
 3. Prove an internal Effect Scope can return an existing `AsyncDisposable`
    facade, that ambient evidence survives Effect fibers, and that a Vitest abort
    signal interrupts the fiber and closes the Scope.
-4. Exercise a fake lifecycle provider from a normal `@openwork/testkit`
+4. Exercise a fake lifecycle provider from a normal `@redrob/testkit`
    app-less spec, using Alchemy core rather than `alchemy/Test/Vitest`. Cover
    create, update, replace, repeated reconcile, partial failure, delete, and
    not-found delete.
@@ -458,7 +458,7 @@ requirements
 ```
 
 Keep organization provisioning as an application fixture in testkit; moving
-the current private provisioning/deletion functions to `@openwork/behaviors`
+the current private provisioning/deletion functions to `@redrob/behaviors`
 is not part of this phase. Keep attached Den as a non-owning Layer. Preserve
 existing logs and endpoint shapes.
 

@@ -19,14 +19,14 @@ import {
   waitFor,
   waitForAssistantReply,
   waitUntilInteractive,
-} from "@openwork/behaviors";
-import type { DenSession } from "@openwork/behaviors";
-import type { Surface } from "@openwork/cdp";
-import { navigate } from "@openwork/cdp";
-import { screenshot, validate } from "@openwork/test-evidence";
-import type { ScreenshotArtifact } from "@openwork/test-evidence";
-import { chrome } from "@openwork/hosts";
-import { app, needs, server, test } from "@openwork/testkit";
+} from "@redrob/behaviors";
+import type { DenSession } from "@redrob/behaviors";
+import type { Surface } from "@redrob/cdp";
+import { navigate } from "@redrob/cdp";
+import { screenshot, validate } from "@redrob/test-evidence";
+import type { ScreenshotArtifact } from "@redrob/test-evidence";
+import { chrome } from "@redrob/hosts";
+import { app, needs, server, test } from "@redrob/testkit";
 
 const providerId = "analytics-witness";
 const defaultModelId = "model-default";
@@ -91,7 +91,7 @@ async function prepareElectronNativeBinding(): Promise<void> {
   // (its gyp build is a stamp-only no-op that produces no build/Release binding).
   try {
     await access(join(source, "prebuilds", `${process.platform}-${process.arch}.node`));
-    process.env.OPENWORK_ELECTRON_SKIP_NATIVE_REBUILD = "1";
+    process.env.REDROB_ELECTRON_SKIP_NATIVE_REBUILD = "1";
     return;
   } catch {
     // No prebuild for this platform: fall through to the temp-dir rebuild.
@@ -127,7 +127,7 @@ async function prepareElectronNativeBinding(): Promise<void> {
     });
     await mkdir(join(source, "build", "Release"), { recursive: true });
     await copyFile(join(moduleCopy, "build", "Release", "better_sqlite3.node"), join(source, "build", "Release", "better_sqlite3.node"));
-    process.env.OPENWORK_ELECTRON_SKIP_NATIVE_REBUILD = "1";
+    process.env.REDROB_ELECTRON_SKIP_NATIVE_REBUILD = "1";
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -504,9 +504,9 @@ async function validateFrame(shot: ScreenshotArtifact, expectations: string[], d
 }
 
 test("two members visibly drive default and manual model analytics end to end", async ({ evidence, place }) => {
-  needs({ optIn: ["OPENWORK_EVAL_E2E_TESTS"] });
-  if (process.env.OPENWORK_EVAL_DAYTONA === "1" || process.env.OPENWORK_EVAL_DEN_API_URL?.trim()) {
-    throw new Error("This E2E test requires a cold local Den; unset OPENWORK_EVAL_DAYTONA and OPENWORK_EVAL_DEN_API_URL.");
+  needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
+  if (process.env.REDROB_EVAL_DAYTONA === "1" || process.env.REDROB_EVAL_DEN_API_URL?.trim()) {
+    throw new Error("This E2E test requires a cold local Den; unset REDROB_EVAL_DAYTONA and REDROB_EVAL_DEN_API_URL.");
   }
 
   const orgName = `Model Analytics Demo ${Date.now()}`;

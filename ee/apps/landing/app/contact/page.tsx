@@ -12,7 +12,7 @@ export const metadata = {
   },
   openGraph: {
     ...baseOpenGraph,
-    url: "https://openworklabs.com/contact",
+    url: "https://redrob.io/contact",
   },
 };
 
