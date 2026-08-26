@@ -27,7 +27,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 const LOCALES_DIR = join(REPO_ROOT, "apps/app/src/i18n/locales");
 const APP_SRC = join(REPO_ROOT, "apps/app/src");
 
-const LOCALES = ["ja", "zh", "vi", "pt-BR", "th", "fr", "ca", "es", "ru"];
+const LOCALES = ["ja", "vi", "pt-BR", "th", "fr", "ca", "es", "ru"];
 const EN_FILE = join(LOCALES_DIR, "en.ts");
 
 const PLURAL_SUFFIXES = ["zero", "one", "two", "few", "many", "other"];
@@ -200,7 +200,7 @@ if (shouldRun("--missing")) {
   console.log();
 }
 
-// Locales without plurals (e.g. Chinese, Japanese) use the bare key while en
+// Locales without plurals (e.g. Japanese) use the bare key while en
 // defines suffixed variants — that's not orphan. The reverse (locale has a
 // suffix en doesn't) is also fine: the runtime falls back to en's bare or
 // other-suffix key.

@@ -20,7 +20,7 @@ You can also help translate the app UI via:
 
 - `apps/app/src/i18n/`
 
-Currently available app UI locales: English (`en`), Japanese (`ja`), Simplified Chinese (`zh`), Vietnamese (`vi`), Brazilian Portuguese (`pt-BR`), Russian (`ru`).
+Currently available app UI locales: English (`en`), Japanese (`ja`), Vietnamese (`vi`), Brazilian Portuguese (`pt-BR`), Russian (`ru`).
 
 Locale files live in `apps/app/src/i18n/locales/`.
 
