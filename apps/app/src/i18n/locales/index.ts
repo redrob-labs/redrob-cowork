@@ -3,6 +3,7 @@
  */
 export { default as en } from "./en";
 export { default as ja } from "./ja";
+export { default as ko } from "./ko";
 export { default as vi } from "./vi";
 export { default as ptBR } from "./pt-BR";
 export { default as fr } from "./fr";
