@@ -215,7 +215,7 @@ export type ResetOpenworkMode = "onboarding" | "all";
 
 export type WorkspaceBlueprintStarterKind = "prompt" | "session" | "action";
 
-export type WorkspaceBlueprintStarterAction = "connect-openai" | "connect-redrob";
+export type WorkspaceBlueprintStarterAction = "connect-openai";
 
 export type WorkspaceBlueprintStarter = {
   id?: string | null;

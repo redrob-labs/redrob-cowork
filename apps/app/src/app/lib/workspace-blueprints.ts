@@ -169,13 +169,6 @@ export function defaultBlueprintStartersForPreset(preset: string): WorkspaceBlue
           action: "connect-openai",
         },
         {
-          id: "starter-connect-redrob",
-          kind: "action",
-          title: t("blueprint.starter_connect_redrob_title"),
-          description: t("blueprint.starter_connect_redrob_desc"),
-          action: "connect-redrob",
-        },
-        {
           id: "browser-automation",
           kind: "session",
           title: t("blueprint.starter_chrome_title"),

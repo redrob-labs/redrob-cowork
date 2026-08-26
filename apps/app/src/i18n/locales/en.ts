@@ -51,8 +51,6 @@ export default {
   "blueprint.starter_command_title": "Create a reusable command",
   "blueprint.starter_connect_openai_desc": "Add your OpenAI provider so ChatGPT models are ready in new sessions.",
   "blueprint.starter_connect_openai_title": "Connect ChatGPT",
-  "blueprint.starter_connect_redrob_desc": "Add the Redrob provider so the multilingual redrob-ai model is ready in new sessions.",
-  "blueprint.starter_connect_redrob_title": "Connect Redrob",
   "blueprint.starter_csv_desc": "Clean up or generate spreadsheet data.",
   "blueprint.starter_csv_prompt": "Help me create or edit CSV files on this computer.",
   "blueprint.starter_csv_title": "Work on a CSV",

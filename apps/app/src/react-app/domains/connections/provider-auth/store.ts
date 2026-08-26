@@ -98,7 +98,11 @@ import {
   writeStoredDefaultModel,
 } from "../../../kernel/model-config";
 import { DEFAULT_MODEL } from "../../../../app/constants";
-import { isRedrobOnlyProviderId } from "../../settings/redrob-provider";
+import {
+  REDROB_PROVIDER_ID,
+  buildRedrobProviderConfig,
+  isRedrobOnlyProviderId,
+} from "../../settings/redrob-provider";
 
 type ProviderReturnFocusTarget = "none" | "composer";
 type CloudProviderSyncReason =
@@ -718,6 +722,30 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     await openworkClient.patchConfig(openworkWorkspaceId, {
       opencode: { provider: update },
     });
+  };
+
+  /**
+   * Seed the built-in Redrob provider into the engine's runtime config so it
+   * appears in the provider list (connect modal + model picker) with the
+   * console.redrob.ai base URL and the `redrob-ai` model. Redrob is not a
+   * models.dev catalog provider, so without this write the Redrob-only
+   * allowlist would collapse every surface to an empty list. The API key is
+   * never written here; it is supplied via REDROB_API_KEY / the key input.
+   * Best-effort: registration failures must not block opening the modal.
+   */
+  const ensureRedrobProviderRegistered = async (): Promise<boolean> => {
+    // Already present in the engine list: nothing to seed, avoid a reload.
+    if (options.providers().some((provider) => provider.id?.trim() === REDROB_PROVIDER_ID)) {
+      return false;
+    }
+    const { canUseOpenworkServer } = await resolveOpenworkConfigTarget("write");
+    if (!canUseOpenworkServer) return false;
+    try {
+      await patchRuntimeProviders({ [REDROB_PROVIDER_ID]: buildRedrobProviderConfig() });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const patchRuntimeProviderAndImportedCloudProviders = async (
@@ -2226,6 +2254,12 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }));
 
     try {
+      // Register Redrob in the engine config first so it survives the
+      // Redrob-only allowlist and shows an API-key input for a fresh user.
+      // Refresh the provider list only when a new registration was written.
+      if (await ensureRedrobProviderRegistered()) {
+        await refreshProviders({ dispose: true });
+      }
       const methods = await loadProviderAuthMethods(getProviderAuthWorkerType());
       mutateState((current) => ({
         ...current,

@@ -46,7 +46,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
 
 /**
  * Type guard to validate if a value is a Language
- * Replaces long chains like: value === "en" || value === "ja"
+ * Replaces long chains like: value === "en" || value === "ko"
  */
 export const isLanguage = (value: unknown): value is Language => {
   return typeof value === "string" && LANGUAGES.includes(value as Language);
