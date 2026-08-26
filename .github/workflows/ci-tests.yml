@@ -1,4 +1,4 @@
-name: OpenWork Tests
+name: Redrob Work Tests
 
 on:
   pull_request:
@@ -187,6 +187,6 @@ jobs:
         run: |
           echo "openwork-tests result: $RESULT"
           if [ "$RESULT" != "success" ]; then
-            echo "One or more OpenWork Tests matrix legs did not succeed; blocking merge." >&2
+            echo "One or more Redrob Work Tests matrix legs did not succeed; blocking merge." >&2
             exit 1
           fi

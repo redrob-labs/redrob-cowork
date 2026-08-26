@@ -1,4 +1,4 @@
-OpenWork EE has been rendered with:
+Redrob Work EE has been rendered with:
 
   DEN_BASE_URL={{ .Values.config.public.webOrigin }}
 

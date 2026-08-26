@@ -1,11 +1,11 @@
 ---
 name: daytona-windows-cert
-description: "test on Windows, enterprise CA, corporate certificate, GPO cert, TLS fetch failed, Windows sandbox, daytona windows, self-hosted cert. Use when validating OpenWork Windows enterprise TLS/OS-trust fixes in a Daytona Windows sandbox."
+description: "test on Windows, enterprise CA, corporate certificate, GPO cert, TLS fetch failed, Windows sandbox, daytona windows, self-hosted cert. Use when validating Redrob Work Windows enterprise TLS/OS-trust fixes in a Daytona Windows sandbox."
 ---
 
 # Skill: Daytona Windows Enterprise Certificate Test
 
-Run the verified Windows repro for OpenWork enterprise TLS behavior: install a
+Run the verified Windows repro for Redrob Work enterprise TLS behavior: install a
 fake corporate CA into the Windows machine store, serve healthy and broken HTTPS
 control planes, install a Windows build, and prove the desktop app and spawned
 runtimes use the operating system trust path.
@@ -22,7 +22,7 @@ support assets instead of copying their logic: `scripts/support/setup-openwork-t
 - User is validating an enterprise CA, corporate certificate, GPO cert, or
   self-hosted cert path on Windows.
 - User reports `TLS fetch failed`, `fetch failed`, or a certificate-specific
-  failure when connecting OpenWork to a self-hosted control plane.
+  failure when connecting Redrob Work to a self-hosted control plane.
 - User needs to prove the Windows app uses OS trust and spawned runtimes receive
   the OS trust bundle via `NODE_EXTRA_CA_CERTS`.
 
@@ -38,7 +38,7 @@ daytona version
 
 - `gh` must be authenticated to `different-ai/openwork` and able to create/delete
   temporary public prereleases.
-- Have a Windows OpenWork build or installer ready. Keep secrets and customer
+- Have a Windows Redrob Work build or installer ready. Keep secrets and customer
   materials out of the temporary release asset.
 
 ## 1. Create the Windows sandbox
@@ -92,7 +92,7 @@ Do not inspect app UI state, userData, or installed app settings through SYSTEM
 profile paths.
 
 Human GUI access is: Daytona Dashboard -> sandbox -> ⋮ menu -> **VNC** ->
-Connect. Use `exec` for setup and logs; use VNC to drive the installed OpenWork
+Connect. Use `exec` for setup and logs; use VNC to drive the installed Redrob Work
 app and observe the user-visible result.
 
 ## 3. Get the app build in
@@ -262,10 +262,10 @@ the bundled Mozilla roots do not.
 
 ### Verify the installed app via VNC
 
-Drive the installed OpenWork Windows app through VNC, not `daytona exec`.
+Drive the installed Redrob Work Windows app through VNC, not `daytona exec`.
 
 1. Open Daytona Dashboard -> sandbox -> ⋮ menu -> **VNC** -> Connect.
-2. Launch or install OpenWork as the interactive user.
+2. Launch or install Redrob Work as the interactive user.
 3. Point the self-hosted/control-plane URL at `https://poc.openwork.test:8443`.
    The request should succeed.
 4. Repeat against `https://poc.openwork.test:9443`. The request should fail with

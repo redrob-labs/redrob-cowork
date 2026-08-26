@@ -13,8 +13,8 @@ behavior and production bootstrap-token UX remain follow-up work.
 
 ## Goal
 
-Make self-hosted OpenWork EE deployments behave like one customer-owned
-workspace by default, while keeping hosted OpenWork Cloud multi-org.
+Make self-hosted Redrob Work EE deployments behave like one customer-owned
+workspace by default, while keeping hosted Redrob Work Cloud multi-org.
 
 The internal model should still use organizations, members, roles, SSO, SCIM,
 workers, plugins, API keys, and MCP resources. The product experience should
@@ -34,7 +34,7 @@ Recommended defaults:
 
 - Helm chart: `single_org`
 - Local development: `single_org` unless a developer opts into multi-org
-- Hosted OpenWork Cloud: `multi_org`
+- Hosted Redrob Work Cloud: `multi_org`
 
 Suggested Helm values:
 
@@ -42,7 +42,7 @@ Suggested Helm values:
 config:
   tenancy:
     mode: single_org
-    singleOrgName: OpenWork
+    singleOrgName: Redrob Work
     singleOrgSlug: default
     ownerEmails: ""
     allowPublicSignup: "false"
@@ -450,9 +450,9 @@ validating worker output.
 6. How should existing customer DBs with multiple orgs behave when
    `DEN_ORG_MODE=single_org` is enabled: fail fast, choose a configured slug, or
    migrate one org?
-7. Should self-host docs call Den web "OpenWork Cloud" after Helm defaults to
-   single-org mode, or rename that surface in docs to "OpenWork web" /
-   "OpenWork admin" for private deployments?
+7. Should self-host docs call Den web "Redrob Work Cloud" after Helm defaults to
+   single-org mode, or rename that surface in docs to "Redrob Work web" /
+   "Redrob Work admin" for private deployments?
 
 ## Documentation Updates Needed
 
@@ -460,7 +460,7 @@ Self-host and packaging docs need to stop describing the Helm path as if users
 must understand multi-org creation.
 
 - `packages/docs/start-here/self-host.mdx`: distinguish single-org private
-  deployments from hosted OpenWork Cloud. The current "Cloud-style accounts,
+  deployments from hosted Redrob Work Cloud. The current "Cloud-style accounts,
   teams, and organization management" wording conflicts with a single-org Helm
   default.
 - `packages/docs/start-here/self-host.mdx`: fix the "Minimal Working Stack"
@@ -469,7 +469,7 @@ must understand multi-org creation.
   single-org deployments still use org-scoped RBAC internally, while hosted cloud
   remains multi-org.
 - `packaging/docker/README.md`: avoid calling every local/private web surface
-  "OpenWork Cloud web app" after single-org mode lands.
+  "Redrob Work Cloud web app" after single-org mode lands.
 
 ## Proposed First Milestone
 

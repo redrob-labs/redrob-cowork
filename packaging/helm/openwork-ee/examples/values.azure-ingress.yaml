@@ -1,4 +1,4 @@
-# Azure AKS starter values for a first OpenWork EE self-host install.
+# Azure AKS starter values for a first Redrob Work EE self-host install.
 #
 # Follow docs/azure-aks-helm.md to create the VNet, AKS subnet, delegated
 # MySQL subnet, AKS cluster, and Azure Database for MySQL Flexible Server.
@@ -58,7 +58,7 @@ secret:
     initialAdminBootstrapCode: "REPLACE_BOOTSTRAP_CODE"
     # Optional SMTP settings for invitations and other transactional email.
     # SMTP delivery requires both emailFrom and smtpHost.
-    emailFrom: "OpenWork <no-reply@example.com>"
+    emailFrom: "Redrob Work <no-reply@example.com>"
     smtpHost: ""
     smtpPort: "587"
     smtpUser: ""

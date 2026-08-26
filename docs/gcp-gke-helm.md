@@ -1,20 +1,20 @@
-# Deploy OpenWork EE on Google Cloud with GKE and Helm
+# Deploy Redrob Work EE on Google Cloud with GKE and Helm
 
 Status: self-host operator guide
 Related: `packaging/helm/openwork-ee`, `packaging/helm/openwork-ee/examples/values.gcp-ingress.yaml`
 
-This is the recommended Google Cloud path for a first production-like OpenWork
+This is the recommended Google Cloud path for a first production-like Redrob Work
 EE self-host install. Use Helm on GKE Autopilot with Cloud SQL for MySQL. For
 web/API exposure, use GKE Ingress with Google-managed certificates, a reserved
 global IP address, and explicit backend health checks.
 
 Google recommends Gateway API for new L7 traffic management, and GKE Ingress is
-in maintenance mode. The current OpenWork chart emits Ingress resources, so GKE
+in maintenance mode. The current Redrob Work chart emits Ingress resources, so GKE
 Ingress is the simplest supported GCP path today. Treat Gateway API support as a
 future chart/platform hardening item.
 
 Do not use raw Kubernetes `LoadBalancer` Services as the normal GCP path for
-OpenWork. GKE `LoadBalancer` Services are useful for TCP services and quick
+Redrob Work. GKE `LoadBalancer` Services are useful for TCP services and quick
 smoke tests, but the customer-facing web app and SSO flow need HTTP(S) load
 balancing, host routing, managed certificates, and backend health checks.
 
@@ -24,13 +24,13 @@ balancing, host routing, managed certificates, and backend health checks.
 - Den Web on port `3005`
 - optional inference service, disabled by default
 - one Cloud SQL for MySQL database
-- one single-org OpenWork deployment
+- one single-org Redrob Work deployment
 - one external GKE Ingress backed by a Google Cloud Application Load Balancer
 - one Google-managed certificate covering web and API hosts
 
 Google Cloud owns the GKE cluster, Autopilot compute lifecycle, VPC networking,
 Cloud Load Balancing, managed certificates, Cloud SQL, IAM, and firewall rules.
-The OpenWork Helm chart owns OpenWork Deployments, Services, ConfigMaps,
+The Redrob Work Helm chart owns Redrob Work Deployments, Services, ConfigMaps,
 Secrets, health probes, the optional Ingress, and the database migration Job.
 The `BackendConfig` and `ManagedCertificate` resources in this guide are
 GKE-specific platform resources applied alongside the chart.
@@ -38,11 +38,11 @@ GKE-specific platform resources applied alongside the chart.
 ## Use Helm or something else?
 
 Use Helm on GKE for Google Cloud unless the customer explicitly cannot run
-Kubernetes. The OpenWork EE release artifact is already a Helm chart, and GKE
+Kubernetes. The Redrob Work EE release artifact is already a Helm chart, and GKE
 Autopilot keeps the first customer path small while still supporting migration
 Jobs, separate web/API services, SSO-ready HTTPS, and later enterprise network
 controls. The practical gap to fill is GCP-specific ingress and database
-guidance, not a different OpenWork packaging format.
+guidance, not a different Redrob Work packaging format.
 
 ## Prerequisites
 
@@ -169,20 +169,20 @@ Example database URL:
 mysql://openwork:<password>@<cloud-sql-private-ip>:3306/openwork_den
 ```
 
-This guide uses direct private IP because the current OpenWork chart does not
+This guide uses direct private IP because the current Redrob Work chart does not
 inject Cloud SQL Auth Proxy sidecars. Cloud SQL Auth Proxy is a stronger future
 hardening path when the chart supports sidecars or an operator-managed proxy
 pattern.
 
 If the Cloud SQL instance enforces encrypted client connections, use
 `?sslaccept=accept` for the simple private-MySQL smoke path. This keeps TLS on
-without requiring a cloud CA bundle to be mounted into the OpenWork image. Use
+without requiring a cloud CA bundle to be mounted into the Redrob Work image. Use
 strict certificate verification later, after you provide the required CA bundle,
 with a hardened value such as `sslmode=verify-ca` or `sslmode=verify-full`.
 Verify the same URL works for both the migration Job and runtime pods before
 testing the browser flow.
 
-Before installing OpenWork, verify network access from the cluster:
+Before installing Redrob Work, verify network access from the cluster:
 
 ```bash
 kubectl run mysql-client \
@@ -231,7 +231,7 @@ spec:
 YAML
 ```
 
-Create explicit backend health checks for the two OpenWork services:
+Create explicit backend health checks for the two Redrob Work services:
 
 ```bash
 kubectl apply -n openwork-ee -f - <<'YAML'
@@ -261,7 +261,7 @@ spec:
 YAML
 ```
 
-The Helm values annotate the OpenWork Services so GKE associates these
+The Helm values annotate the Redrob Work Services so GKE associates these
 `BackendConfig` objects with the Google Cloud backend services.
 
 ## 4. Prepare Helm values
@@ -290,7 +290,7 @@ To send transactional email, configure SMTP in the same values file:
 ```yaml
 secret:
   values:
-    emailFrom: "OpenWork <no-reply@example.com>"
+    emailFrom: "Redrob Work <no-reply@example.com>"
     smtpHost: "smtp.example.com"
     smtpPort: "587"
     smtpUser: "openwork@example.com"
@@ -305,7 +305,7 @@ add those keys to the existing Kubernetes Secret referenced by
 `SMTP_HOST`; leave `smtpHost` blank only when SMTP-backed transactional email
 should be disabled.
 
-Use a values file, not a long list of `--set` flags. Several OpenWork values are
+Use a values file, not a long list of `--set` flags. Several Redrob Work values are
 comma-separated strings, such as `config.public.corsOrigins`, and plain `--set`
 parsing commonly breaks them.
 
@@ -328,7 +328,7 @@ grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SM
 
 Redact secrets before sharing rendered manifests or terminal output.
 
-## 5. Install OpenWork
+## 5. Install Redrob Work
 
 Published chart releases live in GHCR:
 
@@ -494,7 +494,7 @@ For releases that include initial-administrator bootstrap, inject the
 release-documented one-time setup secret through the Kubernetes Secret referenced
 by `secret.existingSecret`. Do not store the code in the values file or a
 ConfigMap. Then open `https://openwork.example.com/setup`, enter the configured
-owner email and one-time operator code, and create the first account. OpenWork
+owner email and one-time operator code, and create the first account. Redrob Work
 creates the singleton organization, grants owner and configured platform-admin
 access, and signs the administrator in. Public signup remains disabled. After
 the first user exists, the setup code cannot bootstrap another account.
@@ -520,16 +520,16 @@ Configure the IdP application with this callback URL:
 https://openwork.example.com/api/auth/sso/callback/openwork-sso-<org-id>
 ```
 
-In OpenWork, sign in as the owner, open the organization SSO settings, and enter
+In Redrob Work, sign in as the owner, open the organization SSO settings, and enter
 the IdP issuer/client details. After saving, the organization sign-in path is:
 
 ```text
 https://openwork.example.com/sso/<singleOrgSlug>
 ```
 
-For SAML, OpenWork shows the generated ACS URL and metadata URL after the SAML
+For SAML, Redrob Work shows the generated ACS URL and metadata URL after the SAML
 connection is registered. Use those values in the IdP rather than guessing.
-OpenWork rejects unsigned or weak SAML responses, so configure the IdP to sign
+Redrob Work rejects unsigned or weak SAML responses, so configure the IdP to sign
 assertions.
 
 After SSO is configured, root sign-in shows the SSO-only experience for the
@@ -540,14 +540,14 @@ single organization. Password sign-in for that organization is rejected.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Ingress does not reconcile | HTTP load balancing add-on is disabled or Ingress annotation is wrong | Keep HTTP load balancing enabled and use `kubernetes.io/ingress.class: gce` |
-| Backends are unhealthy | GKE load balancer health checks do not match OpenWork readiness endpoints | Apply the `BackendConfig` resources and keep the service annotations from the starter values |
+| Backends are unhealthy | GKE load balancer health checks do not match Redrob Work readiness endpoints | Apply the `BackendConfig` resources and keep the service annotations from the starter values |
 | Ingress events report `TimeoutSec should be less than checkIntervalSec` | The backend health-check timeout is greater than or equal to its effective interval | Set `checkIntervalSec: 15` and `timeoutSec: 5` on both `BackendConfig` resources |
 | Managed certificate is not `Active` | DNS does not point at the load balancer or provisioning is still running | Point both hosts at the reserved global IP and wait; check `kubectl describe managedcertificate` |
 | Migration Job fails to connect to MySQL | Private services access, VPC, credentials, IP, or TLS mode are wrong | Test from `mysql-client`, confirm the private IP, and confirm GKE and Cloud SQL share VPC reachability |
 | Migration Job logs show `self-signed certificate in certificate chain` | Strict certificate verification is being used without the cloud MySQL CA bundle | Use `?sslaccept=accept` for the smoke path or mount/configure the CA bundle before strict verification |
 | `ImagePullBackOff` from GHCR | Private image or missing pull token | Add `imagePullSecrets` |
 | Browser auth loops or CORS errors | Public origins do not match DNS/TLS | Set `webOrigin`, `apiOrigin`, `corsOrigins`, `betterAuthTrustedOrigins`, and `authCallbackUrl` to the final HTTPS domains |
-| SSO callback rejected | IdP callback URL does not match OpenWork | Use the callback/ACS URL shown by OpenWork for that org/provider |
+| SSO callback rejected | IdP callback URL does not match Redrob Work | Use the callback/ACS URL shown by Redrob Work for that org/provider |
 | SSO settings show Enterprise gating | `DEN_PLAN_GATING_ENABLED=true` or org is not entitled | Leave plan gating off for self-host smoke tests, or grant enterprise entitlement |
 
 ## 12. Cleanup

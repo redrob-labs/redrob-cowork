@@ -9,7 +9,7 @@ ARG DEN_GATEWAY_VERSION=""
 ENV DEN_GATEWAY_VERSION=${DEN_GATEWAY_VERSION}
 ENV PORT=8788
 
-# The gateway serves the OpenWork web build itself, so the app and Den end up on
+# The gateway serves the Redrob Work web build itself, so the app and Den end up on
 # one origin. That is what removes the need for cross-origin patches, and it is
 # why the SPA is baked in here rather than served from a separate CDN origin.
 ENV DEN_GATEWAY_WEB_ROOT=/opt/openwork/web

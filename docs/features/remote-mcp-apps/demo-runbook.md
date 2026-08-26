@@ -112,5 +112,5 @@ ordinary Connect when Apps are disabled.
   are expected, not a resource-loading failure.
 
 The hosted SOL gallery may be checked separately as an external observation,
-but its reachability is not OpenWork compatibility proof and it is not part of
+but its reachability is not Redrob Work compatibility proof and it is not part of
 this required demo.

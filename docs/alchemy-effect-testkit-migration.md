@@ -1,4 +1,4 @@
-# Alchemy + Effect migration proposal for OpenWork testkit
+# Alchemy + Effect migration proposal for Redrob Work testkit
 
 Status: **Proposed**
 Decision requested: approve an Effect-first refactor and one gated Alchemy
@@ -15,8 +15,8 @@ Alchemy, Effect, and `@openwork/testkit` solve different problems:
 - **Alchemy** is a desired-state engine built on Effect. It adds resource
   identity, dependency graphs, plan/apply/destroy, provider lifecycle methods,
   and persisted state.
-- **OpenWork testkit** is an application/E2E harness. It decides placement,
-  starts local or Daytona resources, drives OpenWork, records witness evidence,
+- **Redrob Work testkit** is an application/E2E harness. It decides placement,
+  starts local or Daytona resources, drives Redrob Work, records witness evidence,
   and maps outcomes to Passed/Incomplete/Failed.
 
 The current testkit is mostly **ephemeral orchestration**, not infrastructure
@@ -86,7 +86,7 @@ Stack program
 A custom provider implements required `reconcile` and `delete` behavior plus
 optional hooks such as `read`, `diff`, and `list` as an Effect Layer. A stage
 isolates physical resources and state. Alchemy's Vitest adapter can deploy and
-destroy stacks, but it does not provide OpenWork's application-driving,
+destroy stacks, but it does not provide Redrob Work's application-driving,
 witness, evidence, or verdict semantics.
 
 Alchemy would **not** replace:
@@ -101,17 +101,17 @@ Alchemy would **not** replace:
 - Daytona, Docker, MySQL, Redis, Electron, or their underlying APIs.
 
 It would replace only selected imperative **external-resource lifecycle** code
-after an OpenWork-specific provider exists. Alchemy has no built-in Daytona
+after an Redrob Work-specific provider exists. Alchemy has no built-in Daytona
 provider, so adopting it does not remove the need to understand or test the
 Daytona lifecycle.
 
-There is also a known runner incompatibility in the reviewed versions. OpenWork
+There is also a known runner incompatibility in the reviewed versions. Redrob Work
 evals use Vitest `^3.2.4`. `alchemy@2.0.0-beta.72` requires Effect
 `>=4.0.0-beta.105` and depends on the matching Effect 4 `@effect/vitest`, whose
 peer range requires Vitest `>=4.1.0 <5`. The Alchemy Vitest adapter therefore
-cannot be installed as the OpenWork test fixture without upgrading the eval
+cannot be installed as the Redrob Work test fixture without upgrading the eval
 runner. This proposal does not upgrade Vitest: the pilot may use only Alchemy's
-core programmatic lifecycle behind OpenWork's existing fixture. If pnpm cannot
+core programmatic lifecycle behind Redrob Work's existing fixture. If pnpm cannot
 isolate Alchemy's transitive Vitest 4 from the Vitest 3 runner, the Alchemy
 pilot stops. The repository's existing Effect `4.0.0-beta.83` also does not
 satisfy Alchemy's peer floor, so the isolated eval workspace would initially
@@ -129,7 +129,7 @@ Effect adoption and Alchemy adoption are separate decisions.
 | Dependency graph | Service/Layer composition | Resource inputs/outputs | Call order and nested helpers |
 | Recovery after process death | No; the process is gone | Possible through state or deterministic identity plus `read` | No automatic recovery |
 | Drift/reconciliation | Application-defined | Provider-defined plan/apply | Recreate, reuse, or health-check |
-| Best OpenWork fit | Processes, DB handles, mocks, desktop, fixtures | Owned remote sandboxes/snapshots if discoverable | Spec API, evidence, user journeys |
+| Best Redrob Work fit | Processes, DB handles, mocks, desktop, fixtures | Owned remote sandboxes/snapshots if discoverable | Spec API, evidence, user journeys |
 
 Alchemy is not an always-on controller. A killed CI job still needs a later
 rerun or janitor to invoke reconciliation/deletion. Its normal plan is also
@@ -153,7 +153,7 @@ reconciles. It must not be presented as universal drift detection.
 ## Non-goals
 
 - Rewriting all specs to `Effect.gen`.
-- Replacing OpenWork's `test` fixture with `alchemy/Test/Vitest`.
+- Replacing Redrob Work's `test` fixture with `alchemy/Test/Vitest`.
 - Treating users, org membership, OAuth grants, or seeded product data as IaC.
 - Persisting test credentials in Alchemy props, outputs, or state.
 - Managing an attached Den, an externally supplied reuse, or a borrowed
@@ -182,7 +182,7 @@ internal Effect programs and Layers                           new
         |    @openwork/behaviors, @openwork/cdp
         |
         `--> optional Alchemy stack adapter                    gated pilot
-               `--> OpenWork DaytonaDesktopSandbox provider
+               `--> Redrob Work DaytonaDesktopSandbox provider
 ```
 
 ### Stable public boundary
@@ -273,7 +273,7 @@ explicitly: `external`, `suite-owned`, or `test-owned`, plus the component that
 is allowed to delete it. A borrowed per-test handle never deletes a
 suite-owned sandbox; global setup owns its cleanup.
 
-The first provider should expose one `OpenWork.DaytonaDesktopSandbox` resource
+The first provider should expose one `Redrob Work.DaytonaDesktopSandbox` resource
 inside the suite preparer. Its desired props contain only non-secret identity
 and configuration: requested git ref, snapshot name, retry-stable ownership ID,
 and a resolved Daytona organization/account/target fingerprint. Returned
@@ -310,7 +310,7 @@ Provider rules:
   unsupported, and TTL cleanup uses a separately ownership-filtered janitor;
 - caller-provided `reuse` is represented as an external reference outside the
   Stack, never as a managed Resource;
-- `alchemy unsafe nuke` is not part of any OpenWork workflow.
+- `alchemy unsafe nuke` is not part of any Redrob Work workflow.
 
 If Daytona CLI/API behavior cannot support those rules, the Alchemy pilot is a
 no-go. Wrapping the same create/delete script in a provider without reliable
@@ -402,7 +402,7 @@ No production lifecycle moves in this phase.
 
 1. Pin exact `alchemy`, `effect`, and `@effect/platform-node` versions in the
    isolated `evals/` workspace; do not depend on `@next` and do not add
-   `@effect/vitest` to OpenWork's runner.
+   `@effect/vitest` to Redrob Work's runner.
 2. Use an Effect version satisfying Alchemy's reviewed
    `>=4.0.0-beta.105` peer range. Verify pnpm + Node.js 22 execution,
    TypeScript 5.9, Vitest 3.2, ESM exports, and the existing eval tsconfig. Bun
@@ -423,7 +423,7 @@ No production lifecycle moves in this phase.
    state without adopting `alchemy/Test/Vitest`.
 7. Measure install-size and cold-import impact of Alchemy's transitive graph.
 
-**Gate:** stop Alchemy work if it requires replacing the OpenWork test fixture,
+**Gate:** stop Alchemy work if it requires replacing the Redrob Work test fixture,
 requires upgrading Vitest, leaks a second Vitest into runner resolution,
 requires Bun, or cannot run through the existing pnpm/Vitest lane. Effect-only
 work may continue.
@@ -471,7 +471,7 @@ janitor and forced-termination proof.
 
 ### Phase 3: one Alchemy Daytona pilot (5-8 engineer-days)
 
-1. Add the `OpenWork.DaytonaDesktopSandbox` resource/provider in a pilot-only
+1. Add the `Redrob Work.DaytonaDesktopSandbox` resource/provider in a pilot-only
    internal package or module.
 2. Use an in-memory state store for provider lifecycle tests and run-scoped
    local state for one real E2E journey.
@@ -595,7 +595,7 @@ rollout.
 - Local and Daytona implementations can share orchestration while differing at
   capability boundaries.
 - Incremental adoption is possible behind Promise and `AsyncDisposable` APIs.
-- OpenWork already has limited Effect 4 usage in `packages/codemode` and
+- Redrob Work already has limited Effect 4 usage in `packages/codemode` and
   `ee/apps/den-api`, so the concepts are not entirely new to the repository.
 
 ### Costs of Effect-first
@@ -609,7 +609,7 @@ rollout.
 - Effect 4 is currently beta in this repository, so version pinning and upgrade
   work remain real.
 - Alchemy's peer floor is newer than the Effect beta currently pinned elsewhere
-  in OpenWork, creating temporary version skew even though evals are isolated.
+  in Redrob Work, creating temporary version skew even though evals are isolated.
 - Scoped finalizers improve timeout and in-process failure handling but do not
   clean detached processes or databases after a killed runner; a janitor is a
   separate mechanism.
@@ -629,11 +629,11 @@ rollout.
 - Alchemy's README labels the project alpha and its current v2 package is beta;
   breaking changes should be expected.
 - The reviewed Alchemy/Effect Vitest adapter requires Vitest 4.1+, while
-  OpenWork evals use Vitest 3.2; using the adapter would force an unrelated
+  Redrob Work evals use Vitest 3.2; using the adapter would force an unrelated
   runner migration.
 - It brings a broad IaC dependency graph into an otherwise narrow eval
   workspace.
-- There is no built-in Daytona provider. OpenWork must own `read`, `diff`,
+- There is no built-in Daytona provider. Redrob Work must own `read`, `diff`,
   `reconcile`, `delete`, auth, ownership, and upgrade compatibility.
 - Most testkit resources are short-lived runtime resources; modeling them in
   persisted desired state would be conceptual and operational overhead.
@@ -648,12 +648,12 @@ rollout.
   a dedicated endpoint-lifetime design.
 - A custom provider can become the same homegrown provisioner behind a more
   complex interface. Alchemy is valuable only if the provider truly converges.
-- Alchemy's documented test posture favors real cloud resources. OpenWork must
+- Alchemy's documented test posture favors real cloud resources. Redrob Work must
   retain deterministic witnesses because identity, failure, and policy claims
   require controlled observations.
 - Alchemy cannot clean up after a dead runner without a subsequent command or
   external janitor.
-- Adopting Alchemy's Vitest adapter directly could conflict with OpenWork's
+- Adopting Alchemy's Vitest adapter directly could conflict with Redrob Work's
   evidence fixture and skip mapping; this proposal avoids that coupling.
 
 ## Alternatives considered
@@ -716,7 +716,7 @@ testkit foundation until the provider meets every go/no-go criterion.
 The likely end state is a hybrid:
 
 ```text
-Vitest + OpenWork evidence contract
+Vitest + Redrob Work evidence contract
   + Effect for test resource orchestration
   + Alchemy for a small set of owned, recoverable remote resources
 ```
@@ -727,7 +727,7 @@ problem.
 
 ## References
 
-OpenWork:
+Redrob Work:
 
 - `evals/README.md`
 - `evals/packages/testkit/src/fixture.ts`

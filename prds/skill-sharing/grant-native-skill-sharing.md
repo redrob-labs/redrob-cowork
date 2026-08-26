@@ -16,7 +16,7 @@ browsable catalogs.
   with provenance on every row.
 - Org admins can set a sharing posture (Open / Team-scoped / Curated) without
   a deploy.
-- Marketplaces keep working exactly as today for catalogs (OpenWork defaults,
+- Marketplaces keep working exactly as today for catalogs (Redrob Work defaults,
   Anthropic starters, GitHub imports). Nothing is deleted.
 
 ## Short answer
@@ -320,10 +320,10 @@ asserting each posture's allow/deny matrix.
 
 ## North-star demo
 
-1. I ask OpenWork to create a skill that formats my standup notes; it
+1. I ask Redrob Work to create a skill that formats my standup notes; it
    confirms the skill is ready to use — no publish step, nowhere to browse.
 2. In the same chat I ask it to use the skill, and it just works.
-3. I say "share it with Ben"; Ben asks his own OpenWork to use it and it
+3. I say "share it with Ben"; Ben asks his own Redrob Work to use it and it
    works for him too, labeled "Shared by Laurent".
 4. I open the dashboard library and see mine, Ben sees "shared with me", and
    the org catalogs sit untouched in Catalogs.

@@ -1,6 +1,6 @@
 # Test Evidence and Test Artifacts Program
 
-OpenWork's executable verification records assertions, visual validations, and
+Redrob Work's executable verification records assertions, visual validations, and
 screenshots as one test run. Test evidence determines whether a claim is
 auditable; screenshots and HTML views are test artifacts, not standalone proof.
 

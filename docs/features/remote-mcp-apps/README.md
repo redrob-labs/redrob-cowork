@@ -1,7 +1,7 @@
 # Native MCP Apps
 
-OpenWork supports MCP Apps delivered by standard MCP servers connected through
-OpenWork Connect. A server advertises the stable
+Redrob Work supports MCP Apps delivered by standard MCP servers connected through
+Redrob Work Connect. A server advertises the stable
 `io.modelcontextprotocol/ui` extension, a tool binds an exact UI resource with
 `_meta.ui.resourceUri`, the host reads that resource with `resources/read`, and
 tool inputs and results move over the standard MCP Apps bridge.
@@ -17,7 +17,7 @@ resource loading or a standalone URL-App installation path.
 ## Standard MCP server path
 
 Connect continues to own server configuration, authentication, access grants,
-per-member credentials, and tool policy. The OpenWork Cloud control server
+per-member credentials, and tool policy. The Redrob Work Cloud control server
 publishes a member-scoped resource at:
 
 ```text
@@ -66,7 +66,7 @@ The app-host view preserves:
 - one server identity per Connect connection, preserving the same-server
   tool-call boundary.
 
-OpenWork access grants, disabled-tool policy, and approval rules still apply at
+Redrob Work access grants, disabled-tool policy, and approval rules still apply at
 the proxy boundary. The App-host credential authorizes only this bounded proxy
 surface; it is not a provider credential and grants no direct cross-server
 access.
@@ -80,7 +80,7 @@ Native MCP Apps fail closed behind two existing gates:
 
 Both default off. No additional user-facing flag controls standalone URL Apps.
 When either native-App gate is off, ordinary connected MCP tools remain
-available through `search_capabilities` and `execute_capability`, but OpenWork
+available through `search_capabilities` and `execute_capability`, but Redrob Work
 removes MCP App classification and launch metadata, publishes no provider App
 endpoint in the member index, clears the private App-host catalog, and renders
 no App UI. Reconciliation also removes and disconnects stale

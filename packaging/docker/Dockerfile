@@ -45,12 +45,12 @@ ENV OPENWORK_SIDECAR_DIR=/data/sidecars
 # The workspace is mounted from the host/volume.
 ENV OPENWORK_WORKSPACE=/workspace
 
-# OpenWork host contract surface.
+# Redrob Work host contract surface.
 EXPOSE 8787
 
 VOLUME ["/workspace", "/data"]
 
 # Defaults:
-# - OpenWork server is published intentionally via --host 0.0.0.0
+# - Redrob Work server is published intentionally via --host 0.0.0.0
 # - OpenCode is managed by openwork-server and stays internal
 CMD ["/bin/sh", "-lc", "plugin_dir=\"$(npm root -g)/openwork-server/dist/opencode-plugins\"; test -d \"$plugin_dir\"; export OPENWORK_MANAGE_OPENCODE=1 OPENWORK_OPENCODE_BIN=/usr/local/bin/opencode OPENWORK_EXTENSIONS_PLUGIN_DIR=\"$plugin_dir\"; exec openwork-server --workspace \"${OPENWORK_WORKSPACE:-/workspace}\" --host 0.0.0.0 --port \"${OPENWORK_PORT:-8787}\" --cors \"${OPENWORK_CORS_ORIGINS:-*}\" --approval \"${OPENWORK_APPROVAL_MODE:-manual}\""]

@@ -6,14 +6,14 @@
       "components": ["server"],
       "purpose": "Google Workspace OAuth authorization page opened when a user connects Google Workspace.",
       "requirement": "opt-in",
-      "blockedEffect": "Users cannot complete Google Workspace sign-in from OpenWork.",
+      "blockedEffect": "Users cannot complete Google Workspace sign-in from Redrob Work.",
       "override": null
     },
     {
       "host": "api.github.com",
       "kind": "fetched",
       "components": ["server"],
-      "purpose": "GitHub API calls for importing and previewing GitHub-hosted Claude Code/OpenWork plugins.",
+      "purpose": "GitHub API calls for importing and previewing GitHub-hosted Claude Code/Redrob Work plugins.",
       "requirement": "opt-in",
       "blockedEffect": "GitHub plugin import cannot inspect repositories, branches, or plugin manifests.",
       "override": "OPENWORK_GITHUB_API_BASE"
@@ -40,43 +40,43 @@
       "host": "api.openwork.software",
       "kind": "fetched",
       "components": ["server"],
-      "purpose": "Legacy hosted OpenWork Connect API origin retained for older Cloud configurations.",
+      "purpose": "Legacy hosted Redrob Work Connect API origin retained for older Cloud configurations.",
       "requirement": "optional",
-      "blockedEffect": "Older hosted configurations that still use the legacy API origin cannot reconcile OpenWork Connect or native MCP Apps.",
+      "blockedEffect": "Older hosted configurations that still use the legacy API origin cannot reconcile Redrob Work Connect or native MCP Apps.",
       "override": "self-hosted Den API origin"
     },
     {
       "host": "api.openworklabs.com",
       "kind": "fetched",
       "components": ["desktop", "installer", "server"],
-      "purpose": "Hosted OpenWork public API and OpenWork Connect MCP endpoint used by hosted Cloud and install flows.",
+      "purpose": "Hosted Redrob Work public API and Redrob Work Connect MCP endpoint used by hosted Cloud and install flows.",
       "requirement": "required-for-cloud",
-      "blockedEffect": "Hosted install checks, OpenWork Connect, or legacy hosted API configurations cannot reach OpenWork Cloud.",
+      "blockedEffect": "Hosted install checks, Redrob Work Connect, or legacy hosted API configurations cannot reach Redrob Work Cloud.",
       "override": "installer apiUrl / self-hosted Den API origin"
     },
     {
       "host": "api.app.openworklabs.com",
       "kind": "fetched",
       "components": ["desktop", "renderer", "server"],
-      "purpose": "Hosted OpenWork Den API origin derived from app.openworklabs.com for desktop Den API and OpenWork Connect MCP calls.",
+      "purpose": "Hosted Redrob Work Den API origin derived from app.openworklabs.com for desktop Den API and Redrob Work Connect MCP calls.",
       "requirement": "required-for-cloud",
-      "blockedEffect": "Hosted Cloud desktop configuration, telemetry, sign-out, and OpenWork Connect MCP calls cannot reach the Den API.",
+      "blockedEffect": "Hosted Cloud desktop configuration, telemetry, sign-out, and Redrob Work Connect MCP calls cannot reach the Den API.",
       "override": "desktop apiBaseUrl / self-hosted Den API origin"
     },
     {
       "host": "app.openwork.software",
       "kind": "fetched",
       "components": ["server"],
-      "purpose": "Legacy hosted OpenWork Cloud web origin retained for older desktop configurations.",
+      "purpose": "Legacy hosted Redrob Work Cloud web origin retained for older desktop configurations.",
       "requirement": "optional",
-      "blockedEffect": "Older hosted configurations that still derive Den MCP calls from the legacy web origin cannot reconcile OpenWork Connect or native MCP Apps.",
+      "blockedEffect": "Older hosted configurations that still derive Den MCP calls from the legacy web origin cannot reconcile Redrob Work Connect or native MCP Apps.",
       "override": "desktop base URL (self-hosted Den replaces this host)"
     },
     {
       "host": "app.openworklabs.com",
       "kind": "fetched",
       "components": ["desktop", "renderer", "bootstrap"],
-      "purpose": "Hosted OpenWork Cloud web origin; the desktop derives Den API and MCP calls from this base URL.",
+      "purpose": "Hosted Redrob Work Cloud web origin; the desktop derives Den API and MCP calls from this base URL.",
       "requirement": "required-for-cloud",
       "blockedEffect": "Hosted Cloud sign-in, org settings, marketplace, and remote workspace flows cannot load.",
       "override": "desktop base URL (self-hosted Den replaces this host)"
@@ -105,7 +105,7 @@
       "components": ["server"],
       "purpose": "Source-code comment pointing maintainers to the Claude Code plugin format reference.",
       "requirement": "optional",
-      "blockedEffect": "No runtime effect; it is not opened or fetched by OpenWork.",
+      "blockedEffect": "No runtime effect; it is not opened or fetched by Redrob Work.",
       "override": null
     },
     {
@@ -123,7 +123,7 @@
       "components": ["den"],
       "purpose": "Container registry for self-hosted Den API, web, inference images, and Helm chart pulls.",
       "requirement": "required",
-      "blockedEffect": "A self-hosted Den deployment cannot pull OpenWork images or the Helm chart from GitHub Container Registry.",
+      "blockedEffect": "A self-hosted Den deployment cannot pull Redrob Work images or the Helm chart from GitHub Container Registry.",
       "override": "container registry mirror / Helm image.repository values"
     },
     {
@@ -150,7 +150,7 @@
       "components": ["renderer"],
       "purpose": "Sample link in the deterministic demo transcript used to exercise link rendering.",
       "requirement": "optional",
-      "blockedEffect": "Clicking that sample Linear link fails; OpenWork functionality is unaffected.",
+      "blockedEffect": "Clicking that sample Linear link fails; Redrob Work functionality is unaffected.",
       "override": null
     },
     {
@@ -238,9 +238,9 @@
       "host": "release-assets.githubusercontent.com",
       "kind": "redirect-target",
       "components": ["desktop", "installer"],
-      "purpose": "Current GitHub release-asset download target reached after github.com redirects installer and updater downloads. Verified live against a real OpenWork release asset.",
+      "purpose": "Current GitHub release-asset download target reached after github.com redirects installer and updater downloads. Verified live against a real Redrob Work release asset.",
       "requirement": "required-in-practice",
-      "blockedEffect": "OpenWork downloads start from github.com and then fail partway through when the redirect target is blocked.",
+      "blockedEffect": "Redrob Work downloads start from github.com and then fail partway through when the redirect target is blocked.",
       "override": null
     },
     {
@@ -249,7 +249,7 @@
       "components": ["desktop", "installer"],
       "purpose": "Legacy GitHub release-asset download target. GitHub has migrated to release-assets.githubusercontent.com, but allow both so older clients and any staged rollback keep working.",
       "requirement": "required-in-practice",
-      "blockedEffect": "OpenWork downloads start from github.com and then fail partway through if GitHub serves this legacy redirect target and it is blocked.",
+      "blockedEffect": "Redrob Work downloads start from github.com and then fail partway through if GitHub serves this legacy redirect target and it is blocked.",
       "override": null
     },
     {
@@ -283,7 +283,7 @@
       "host": "openworklabs.com",
       "kind": "link-only",
       "components": ["desktop", "renderer"],
-      "purpose": "Documentation, feedback, support, and sample OpenWork links.",
+      "purpose": "Documentation, feedback, support, and sample Redrob Work links.",
       "requirement": "optional",
       "blockedEffect": "Documentation or feedback links do not open; core app networking is unaffected.",
       "override": "VITE_OPENWORK_FEEDBACK_URL for the feedback link only"
@@ -303,14 +303,14 @@
       "components": ["desktop", "renderer"],
       "purpose": "npx package resolution for openwork-ui-mcp and development-only MCP helper commands.",
       "requirement": "required-in-practice",
-      "blockedEffect": "The OpenWork UI-control MCP is silently unavailable when npx cannot download openwork-ui-mcp.",
+      "blockedEffect": "The Redrob Work UI-control MCP is silently unavailable when npx cannot download openwork-ui-mcp.",
       "override": "npm registry configuration used by npx"
     },
     {
       "host": "schemas.agentskills.io",
       "kind": "schema-string",
       "components": ["server"],
-      "purpose": "Skill index $schema identifier used for validation; OpenWork does not fetch the schema URL.",
+      "purpose": "Skill index $schema identifier used for validation; Redrob Work does not fetch the schema URL.",
       "requirement": "optional",
       "blockedEffect": "No runtime network effect.",
       "override": null

@@ -1,18 +1,18 @@
 ---
 name: openwork-models
-description: Manage OpenWork inference model aliases, openwork model overlays, discounts, validation, and automated base model refreshes from models.dev. Use when adding, removing, discounting, auditing, or updating OpenWork models, including requests like "update the models" that should trigger the GitHub update-models workflow and report when its PR merges.
+description: Manage Redrob Work inference model aliases, openwork model overlays, discounts, validation, and automated base model refreshes from models.dev. Use when adding, removing, discounting, auditing, or updating Redrob Work models, including requests like "update the models" that should trigger the GitHub update-models workflow and report when its PR merges.
 ---
 
-# OpenWork Models
+# Redrob Work Models
 
-Use this skill for OpenWork inference model changes. The source of truth for
+Use this skill for Redrob Work inference model changes. The source of truth for
 available upstream models is:
 
 - `ee/apps/inference/src/models/base.json`
 - provider key: `openrouter`
 - model map: `openrouter.models`
 
-The editable OpenWork model list is:
+The editable Redrob Work model list is:
 
 - `ee/apps/inference/src/models/openwork-models.json`
 
@@ -21,7 +21,7 @@ Managed file:
 - `packages/types/src/den/inference.ts`
 
 `ee/apps/inference/scripts/build-models.mjs` reads `openwork-models.json` and
-generates the OpenWork provider overlay in memory. It selects the API URL from
+generates the Redrob Work provider overlay in memory. It selects the API URL from
 `OPENWORK_DEV_MODE`: dev uses `http://127.0.0.1:8791/api/v1`, otherwise prod
 uses `https://inference.openworklabs.com/api/v1`.
 
@@ -37,7 +37,7 @@ node .opencode/skills/openwork-models/scripts/extract-source-models.mjs
 node .opencode/skills/openwork-models/scripts/extract-source-models.mjs --query "zai 5.1"
 ```
 
-Manage OpenWork models:
+Manage Redrob Work models:
 
 ```bash
 node .opencode/skills/openwork-models/scripts/openwork-models.mjs search "zai 5.1"

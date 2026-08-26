@@ -48,7 +48,7 @@ package() {
   install -d "${pkgdir}/usr/share/applications"
   cat > "${pkgdir}/usr/share/applications/openwork.desktop" <<'EOF'
 [Desktop Entry]
-Name=OpenWork
+Name=Redrob Work
 Comment=Run agents, skills, and MCP workflows
 Exec=openwork %U
 Terminal=false

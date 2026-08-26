@@ -9,16 +9,16 @@ installed profile.
 Packaged app (macOS):
 
 ```bash
-open -a "OpenWork Enterprise" --args --blank-slate
+open -a "Redrob Work Enterprise" --args --blank-slate
 # or any flavor:
-open -a "OpenWork" --args --blank-slate
+open -a "Redrob Work" --args --blank-slate
 ```
 
 Direct binary (useful for CDP-driven testing):
 
 ```bash
 OPENWORK_ELECTRON_REMOTE_DEBUG_PORT=9898 \
-  "dist-electron/mac-arm64/OpenWork Enterprise.app/Contents/MacOS/OpenWork Enterprise" --blank-slate
+  "dist-electron/mac-arm64/Redrob Work Enterprise.app/Contents/MacOS/Redrob Work Enterprise" --blank-slate
 ```
 
 Dev mode:
@@ -37,7 +37,7 @@ and redirects every persisted path into it before any other module loads:
   `APPDATA`/`LOCALAPPDATA`
 - desktop bootstrap (`OPENWORK_DESKTOP_BOOTSTRAP_PATH`) — an enterprise build
   therefore starts at the activation gate, not an inherited control plane
-- OpenWork server config, env store, token store, runtime DB, data dir
+- Redrob Work server config, env store, token store, runtime DB, data dir
 - OpenCode config dir and database
 
 It also:

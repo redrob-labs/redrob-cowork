@@ -1,11 +1,11 @@
 ---
 name: daytona-cloud-instance
-description: Daytona cloud instance, Den server, OpenWork Cloud, Marketplace onboarding, desktop plus cloud e2e, frame proof. Use when launching, validating, or recording Daytona cloud/Den flows.
+description: Daytona cloud instance, Den server, Redrob Work Cloud, Marketplace onboarding, desktop plus cloud e2e, frame proof. Use when launching, validating, or recording Daytona cloud/Den flows.
 ---
 
 # Daytona Cloud Instance
 
-Use this skill to launch or validate an OpenWork Cloud/Den Daytona server sandbox and collect useful URLs for desktop sign-in and Marketplace onboarding demos.
+Use this skill to launch or validate a Redrob Work Cloud/Den Daytona server sandbox and collect useful URLs for desktop sign-in and Marketplace onboarding demos.
 
 ## Goal
 
@@ -156,9 +156,9 @@ For founder/designer proof, record the actual journey:
 2. User signs in on Den.
 3. Den dashboard explains Marketplaces contain plugins and assigned marketplaces sync to desktop.
 4. Pretend download/open desktop handoff.
-5. Desktop signed-out Marketplace nudge says OpenWork works without an account.
-6. Desktop signs in to OpenWork Cloud.
-7. Marketplace refresh shows `OpenWork Marketplace` and org marketplaces.
+5. Desktop signed-out Marketplace nudge says Redrob Work works without an account.
+6. Desktop signs in to Redrob Work Cloud.
+7. Marketplace refresh shows `Redrob Work Marketplace` and org marketplaces.
 8. Built-ins show `Built-in`, with no install/remove actions.
 9. A live org plugin installs and appears in My Extensions as `Connected`.
 10. Workspace files materialize under `.opencode`.
