@@ -25,17 +25,18 @@ even before a dedicated UI exists.
 
 ## Verification (every change)
 
-- The only proof path is `evals/specs/**/*.test.ts` with `test` from
-  `@redrob/testkit`; app-driving E2E tests use `.e2e.test.ts`. Prose,
-  screenshots, and recordings never decide pass/fail — test evidence does.
-- Skills own the mechanics: `prove-a-pr` → `write-a-spec` → `run-tests` →
-  `diagnose-a-red-run` when red → `publish-evidence`. Evidence is ambient; never
-  create or pass test-evidence recorder handles.
-- Verdicts: `Passed` only when every claim has an observable assertion in the
-  test run; otherwise `Incomplete` or `Failed` with repro steps. Skips are never
-  passed.
-- Prefer Daytona when credentials are available; local fallback is an expected
-  OSS path, not a failure. Report which lane ran.
+- The proof path is the repo's own checks: `pnpm typecheck`, the unit suites
+  (`pnpm --filter @redrob/app test`, `pnpm --filter redrob-server test`,
+  `pnpm --filter @redrob/desktop test`), `pnpm build`, and the app-driving smoke
+  scripts (`pnpm test:e2e`, `apps/app/scripts/*.mjs`). Prose, screenshots, and
+  recordings never decide pass/fail — a command's exit code and output do.
+- New runtime behavior needs an observable assertion in the matching unit suite
+  (`apps/app/tests/**`, `apps/server/**/tests`, `apps/desktop/**/tests`).
+- Skills own the mechanics: `prove-a-pr` for the verdict, `diagnose-a-red-run`
+  when a check is red.
+- Verdicts: `Passed` only when every claim has an observable assertion in a run
+  you executed; otherwise `Incomplete` or `Failed` with repro steps. Skips are
+  never passed.
 - Docs/comments, types-only, and inert agent config may skip runtime proof — say so.
 
 ## Pull requests

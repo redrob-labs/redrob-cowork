@@ -126,18 +126,12 @@ jobs:
         continue-on-error: true
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', 'evals/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
-
-      - name: Install eval workspace
-        run: pnpm --dir evals install --frozen-lockfile --prefer-offline
-
-      - name: Run eval spec lane
-        run: pnpm --dir evals run test:pr
 
       - name: Run app unit tests
         run: pnpm --filter @redrob/app test
@@ -150,9 +144,6 @@ jobs:
 
       - name: Run release script tests
         run: node --test scripts/release/*.test.mjs
-
-      - name: Run eval runner unit tests
-        run: pnpm test:eval-runner
 
       - name: Check outbound access manifest
         run: pnpm check:outbound-access

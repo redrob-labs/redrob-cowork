@@ -12,7 +12,7 @@ import {
 
 const args = parseArgs(process.argv.slice(2));
 const directory = args.get("dir") ?? process.cwd();
-const outDir = resolve(args.get("out") ?? join(process.cwd(), "evals", "results", `managed-voice-${Date.now()}`));
+const outDir = resolve(args.get("out") ?? join(process.cwd(), "tmp", "managed-voice", `${Date.now()}`));
 
 const proofFrames = [];
 const results = {

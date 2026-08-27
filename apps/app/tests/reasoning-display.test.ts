@@ -4,7 +4,7 @@ import { DEFAULT_SHOW_THINKING } from "../src/react-app/kernel/local-provider";
 
 // The legacy SessionTranscript markup test was removed with the legacy
 // message list (#2016). Reasoning markup for the current transcript is
-// covered by the UI evals (evals/) which drive the real app.
+// covered by the app-driving smoke scripts in apps/app/scripts.
 describe("reasoning display", () => {
   test("defaults reasoning visibility on", () => {
     expect(DEFAULT_SHOW_THINKING).toBe(true);
