@@ -112,7 +112,7 @@ describe("agent context diagnostics renderer transport", () => {
           method: "POST",
           headers: {
             Authorization: `Bearer ${bearerToken}`,
-            "X-Redrob Work-Host-Token": hostToken,
+            "X-Redrob-Host-Token": hostToken,
           },
           body: "{}",
         },
