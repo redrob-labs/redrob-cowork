@@ -1,4 +1,3 @@
-import { DEFAULT_DEN_BASE_URL, normalizeDenBaseUrl } from "./den";
 import { normalizeRedrobServerUrl } from "./redrob-server";
 
 export type RemoteWorkspaceDefaults = {
@@ -7,17 +6,6 @@ export type RemoteWorkspaceDefaults = {
   directory?: string | null;
   displayName?: string | null;
   autoConnect?: boolean;
-};
-
-export type DenAuthDeepLink = {
-  grant: string;
-  denBaseUrl: string;
-};
-
-export type ConnectDeepLink = {
-  /** The full deep link, relayed verbatim to the main process for verification. */
-  rawUrl: string;
-  key: string;
 };
 
 function isSupportedDeepLinkProtocol(protocol: string): boolean {
@@ -111,74 +99,6 @@ export function stripRemoteConnectQuery(rawUrl: string): string | null {
   return `${url.pathname}${search ? `?${search}` : ""}${url.hash}`;
 }
 
-export function parseDenAuthDeepLink(rawUrl: string): DenAuthDeepLink | null {
-  let url: URL;
-  try {
-    url = new URL(rawUrl);
-  } catch {
-    return null;
-  }
-
-  const protocol = url.protocol.toLowerCase();
-  if (!isSupportedDeepLinkProtocol(protocol)) {
-    return null;
-  }
-
-  const routeHost = url.hostname.toLowerCase();
-  const routePath = url.pathname.replace(/^\/+/, "").toLowerCase();
-  const routeSegments = routePath.split("/").filter(Boolean);
-  const routeTail = routeSegments[routeSegments.length - 1] ?? "";
-  if (routeHost !== "den-auth" && routePath !== "den-auth" && routeTail !== "den-auth") {
-    return null;
-  }
-
-  const grant = url.searchParams.get("grant")?.trim() ?? "";
-  const denBaseUrl = normalizeDenBaseUrl(url.searchParams.get("denBaseUrl")?.trim() ?? "") ?? DEFAULT_DEN_BASE_URL;
-  if (!grant) {
-    return null;
-  }
-
-  return {
-    grant,
-    denBaseUrl,
-  };
-}
-
-export function parseConnectDeepLink(rawUrl: string): ConnectDeepLink | null {
-  let url: URL;
-  try {
-    url = new URL(rawUrl);
-  } catch {
-    return null;
-  }
-
-  // Unlike sibling parsers, organization connect credentials only ride the
-  // dedicated desktop scheme, never ordinary web URLs.
-  const protocol = url.protocol.toLowerCase();
-  if (protocol !== "redrob:" && protocol !== "redrob-dev:") {
-    return null;
-  }
-
-  const routeHost = url.hostname.toLowerCase();
-  const routePath = url.pathname.replace(/^\/+/, "").toLowerCase();
-  const routeSegments = routePath.split("/").filter(Boolean);
-  const routeTail = routeSegments[routeSegments.length - 1] ?? "";
-  if (routeHost !== "connect" && routePath !== "connect" && routeTail !== "connect") {
-    return null;
-  }
-
-  const token = url.searchParams.get("token")?.trim() ?? "";
-  const code = url.searchParams.get("code")?.trim() ?? "";
-  const apiBaseUrl = url.searchParams.get("apiBaseUrl")?.trim() ?? "";
-  const signed = Boolean(token) && !code && !apiBaseUrl;
-  const exchange = !token && /^[A-Za-z0-9_-]{24,128}$/.test(code) && Boolean(apiBaseUrl);
-  if (!signed && !exchange) {
-    return null;
-  }
-
-  return { rawUrl, key: signed ? `signed:${token}` : `exchange:${apiBaseUrl}:${code}` };
-}
-
 function normalizeDebugDeepLinkInput(rawValue: string): string {
   const trimmed = rawValue.trim();
   if (!trimmed) return "";
@@ -191,15 +111,9 @@ function normalizeDebugDeepLinkInput(rawValue: string): string {
 
 export function parseDebugDeepLinkInput(rawValue: string):
   | { kind: "remote"; link: RemoteWorkspaceDefaults }
-  | { kind: "auth"; link: DenAuthDeepLink }
   | null {
   const normalized = normalizeDebugDeepLinkInput(rawValue);
   if (!normalized) return null;
-
-  const denAuthLink = parseDenAuthDeepLink(normalized);
-  if (denAuthLink) {
-    return { kind: "auth", link: denAuthLink };
-  }
 
   const remoteConnectLink = parseRemoteConnectDeepLink(normalized);
   if (remoteConnectLink) {

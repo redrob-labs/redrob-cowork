@@ -1,16 +1,6 @@
 /** @jsxImportSource react */
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import type { DenDesktopConfig } from "../../../../app/lib/den";
-import {
-  isAlphaChannelAllowedByDesktopConfig,
-  isAlphaUpdateAllowed,
-  isUpdateAllowed,
-  isUpdateAllowedByDesktopConfig,
-  resolveAutomaticStableDesktopUpdate,
-  resolveDesktopUpdateChannel,
-  resolveFreshStableDesktopUpdate,
-} from "../../../../app/lib/version-gate";
 import type { ReleaseChannel } from "../../../../app/types";
 import { isElectronRuntime, safeStringify } from "../../../../app/utils";
 import { t } from "../../../../i18n";
@@ -43,8 +33,6 @@ type UseElectronUpdaterStateOptions = {
   onReleaseChannelChange: (next: ReleaseChannel) => void;
   updateAutoCheck: boolean;
   updateAutoDownload: boolean;
-  desktopConfig: DenDesktopConfig | null | undefined;
-  refreshDesktopConfig: () => Promise<DenDesktopConfig>;
   setError: (message: string | null) => void;
 };
 
@@ -140,8 +128,6 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
     onReleaseChannelChange,
     updateAutoCheck,
     updateAutoDownload,
-    desktopConfig,
-    refreshDesktopConfig,
     setError,
   } = options;
   const [updateStatus, setUpdateStatus] = useState<SettingsUpdateStatus>(null);
@@ -157,54 +143,6 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
   const releaseChannelRequestRef = useRef(0);
   const availableReleaseChannelRef = useRef<ReleaseChannel | null>(null);
   const downloadedReleaseChannelRef = useRef<ReleaseChannel | null>(null);
-  const desktopConfigRef = useRef(desktopConfig);
-  desktopConfigRef.current = desktopConfig;
-  const policyReleaseChannel = resolveDesktopUpdateChannel(
-    releaseChannel,
-    desktopConfig,
-  );
-
-  const resolvePolicyReleaseChannel = useCallback(
-    async (channel: ReleaseChannel) => {
-      if (
-        channel !== "alpha" ||
-        !isAlphaChannelAllowedByDesktopConfig(desktopConfig)
-      ) {
-        return {
-          channel: resolveDesktopUpdateChannel(channel, desktopConfig),
-          desktopConfig,
-        };
-      }
-
-      const freshDesktopConfig = await refreshDesktopConfig();
-      return {
-        channel: resolveDesktopUpdateChannel(channel, freshDesktopConfig),
-        desktopConfig: freshDesktopConfig,
-      };
-    },
-    [desktopConfig, refreshDesktopConfig],
-  );
-
-  useEffect(() => {
-    if (policyReleaseChannel !== releaseChannel) {
-      onReleaseChannelChange(policyReleaseChannel);
-    }
-    if (isAlphaChannelAllowedByDesktopConfig(desktopConfig)) return;
-    if (
-      availableReleaseChannelRef.current === "alpha" ||
-      downloadedReleaseChannelRef.current === "alpha"
-    ) {
-      availableReleaseChannelRef.current = null;
-      downloadedReleaseChannelRef.current = null;
-      setUpdateStatus(null);
-    }
-  }, [
-    desktopConfig,
-    onReleaseChannelChange,
-    policyReleaseChannel,
-    releaseChannel,
-  ]);
-
   useEffect(() => {
     if (!isElectronRuntime()) {
       dispatchEnvState({ type: "unsupported", reason: ELECTRON_UPDATER_UNSUPPORTED_REASON });
@@ -221,11 +159,11 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       .then(async (state) => {
         if (cancelled) return;
         dispatchEnvState({ type: "app-version", appVersion: state.currentVersion ?? null });
-        if (state.channel && state.channel !== policyReleaseChannel && bridge.setChannel) {
-          const nextState = await bridge.setChannel(policyReleaseChannel);
+        if (state.channel && state.channel !== releaseChannel && bridge.setChannel) {
+          const nextState = await bridge.setChannel(releaseChannel);
           if (cancelled) return;
           dispatchEnvState({ type: "app-version", appVersion: nextState.currentVersion ?? null });
-          if (nextState.channel && nextState.channel !== policyReleaseChannel) {
+          if (nextState.channel && nextState.channel !== releaseChannel) {
             onReleaseChannelChange(nextState.channel);
           }
         }
@@ -238,7 +176,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
     return () => {
       cancelled = true;
     };
-  }, [onReleaseChannelChange, policyReleaseChannel]);
+  }, [onReleaseChannelChange, releaseChannel]);
 
   const downloadUpdate = useCallback(async (channelOverride?: ReleaseChannel) => {
     const releaseChannelRequestId = releaseChannelRequestRef.current;
@@ -256,28 +194,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       channelOverride ??
       availableReleaseChannelRef.current ??
       releaseChannel;
-    const releaseChannelResolution = await resolvePolicyReleaseChannel(
-      requestedReleaseChannel,
-    ).catch((error: unknown) => {
-      if (isCurrentReleaseChannel()) {
-        setUpdateStatus({
-          state: "error",
-          message: describeError(error),
-          failedAction: "download",
-        });
-      }
-      return null;
-    });
-    if (!releaseChannelResolution || !isCurrentReleaseChannel()) return;
-    if (releaseChannelResolution.channel !== requestedReleaseChannel) {
-      onReleaseChannelChange(releaseChannelResolution.channel);
-      await bridge.setChannel?.(releaseChannelResolution.channel);
-      if (!isCurrentReleaseChannel()) return;
-      availableReleaseChannelRef.current = null;
-      downloadedReleaseChannelRef.current = null;
-      setUpdateStatus(null);
-      return;
-    }
+    if (!isCurrentReleaseChannel()) return;
 
     // Subscribe to incremental progress events from the main process so
     // the UI updates in real time instead of staying stuck at 0 bytes.
@@ -312,19 +229,8 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         });
         return;
       }
-      if (
-        releaseChannelResolution.channel === "alpha" &&
-        !isAlphaChannelAllowedByDesktopConfig(desktopConfigRef.current)
-      ) {
-        onReleaseChannelChange("stable");
-        await bridge.setChannel?.("stable");
-        availableReleaseChannelRef.current = null;
-        downloadedReleaseChannelRef.current = null;
-        setUpdateStatus(null);
-        return;
-      }
       availableReleaseChannelRef.current = null;
-      downloadedReleaseChannelRef.current = releaseChannelResolution.channel;
+      downloadedReleaseChannelRef.current = releaseChannel;
       setUpdateStatus((current) => ({
         ...(current ?? {}),
         state: "ready",
@@ -365,86 +271,13 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
 
     setUpdateStatus({ state: "checking" });
     try {
-      let targetVersion: string | undefined;
-      const releaseChannelResolution = await resolvePolicyReleaseChannel(
-        requestedReleaseChannel,
-      );
-      if (!isCurrentRequest()) return;
-      const activeReleaseChannel = releaseChannelResolution.channel;
-      const freshDesktopConfig = releaseChannelResolution.desktopConfig;
-      if (activeReleaseChannel !== requestedReleaseChannel) {
-        onReleaseChannelChange(activeReleaseChannel);
-        await bridge.setChannel?.(activeReleaseChannel);
-        if (!isCurrentRequest()) return;
-      }
-      if (manual && activeReleaseChannel === "stable") {
-        const channelState = await bridge.getChannel?.();
-        if (!isCurrentRequest()) return;
-        const currentVersion = channelState?.currentVersion ?? appVersion;
-        if (!currentVersion) {
-          throw new Error("Could not determine the installed Redrob Work version.");
-        }
-
-        const selection = await resolveFreshStableDesktopUpdate({
-          currentVersion,
-          refreshDesktopConfig,
-        });
-        if (!isCurrentRequest()) return;
-        if (!selection) {
-          throw new Error("Den returned an invalid desktop release inventory.");
-        }
-        if (selection.kind === "blocked") {
-          setUpdateStatus({
-            state: "blocked",
-            lastCheckedAt: Date.now(),
-            version: selection.latestPublishedVersion,
-            message: t("settings.update_blocked_org", undefined, {
-              version: selection.latestPublishedVersion,
-            }),
-          });
-          return;
-        }
-        if (selection.kind === "current") {
-          setUpdateStatus({
-            state: "idle",
-            lastCheckedAt: Date.now(),
-            version: selection.latestPublishedVersion,
-          });
-          return;
-        }
-        targetVersion = selection.targetVersion;
-      }
-
-      let result = await bridge.check(activeReleaseChannel, targetVersion);
+      // With no control plane there is no organization update policy: the
+      // electron-updater feed for the selected channel is the only authority
+      // on what version is available.
+      const result = await bridge.check(requestedReleaseChannel);
       if (!isCurrentRequest()) return;
       dispatchEnvState({ type: "app-version", appVersion: result.currentVersion ?? null });
-      let checkedReleaseChannel = result.channel ?? activeReleaseChannel;
-      if (
-        !result.reason &&
-        !manual &&
-        checkedReleaseChannel === "stable" &&
-        result.available &&
-        result.latestVersion &&
-        !targetVersion &&
-        !isUpdateAllowedByDesktopConfig(result.latestVersion, freshDesktopConfig)
-      ) {
-        const currentVersion = result.currentVersion ?? appVersion;
-        const fallbackTargetVersion = currentVersion
-          ? await resolveAutomaticStableDesktopUpdate({
-              currentVersion,
-              latestVersion: result.latestVersion,
-              desktopConfig: freshDesktopConfig,
-            })
-          : null;
-        if (!isCurrentRequest()) return;
-        if (fallbackTargetVersion) {
-          targetVersion = fallbackTargetVersion;
-          result = await bridge.check(checkedReleaseChannel, targetVersion);
-          if (!isCurrentRequest()) return;
-          dispatchEnvState({ type: "app-version", appVersion: result.currentVersion ?? null });
-          checkedReleaseChannel = result.channel ?? checkedReleaseChannel;
-        }
-      }
+      const checkedReleaseChannel = result.channel ?? requestedReleaseChannel;
       if (result.reason === "unavailable") {
         setUpdateStatus({
           state: "idle",
@@ -460,17 +293,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         });
         return;
       }
-      const latestDesktopConfig = checkedReleaseChannel === "alpha"
-        ? desktopConfigRef.current
-        : freshDesktopConfig;
-      const availableAllowed = result.available && result.latestVersion
-        ? targetVersion
-          ? result.latestVersion === targetVersion
-          : checkedReleaseChannel === "alpha"
-            ? await isAlphaUpdateAllowed(result.latestVersion, latestDesktopConfig)
-            : await isUpdateAllowed(result.latestVersion, latestDesktopConfig)
-        : result.available;
-      if (!isCurrentRequest()) return;
+      const availableAllowed = result.available;
       const nextStatus: Exclude<SettingsUpdateStatus, null> = availableAllowed
         ? {
             state: "available",
@@ -502,7 +325,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         failedAction: "check",
       });
     }
-  }, [appVersion, downloadUpdate, onReleaseChannelChange, refreshDesktopConfig, releaseChannel, resolvePolicyReleaseChannel, setError, updateAutoDownload]);
+  }, [appVersion, downloadUpdate, onReleaseChannelChange, releaseChannel, setError, updateAutoDownload]);
 
   const checkForUpdates = useCallback(
     (channelOverride?: ReleaseChannel) => runCheckForUpdates(channelOverride, true),
@@ -510,7 +333,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
   );
 
   useEffect(() => {
-    const key = `${policyReleaseChannel}:${appVersion ?? "unknown"}`;
+    const key = `${releaseChannel}:${appVersion ?? "unknown"}`;
     if (!shouldScheduleElectronUpdateAutoCheck({
       updateAutoCheck,
       updateEnv,
@@ -519,7 +342,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
     })) return;
     autoCheckKeyRef.current = key;
     void runCheckForUpdates(undefined, false);
-  }, [appVersion, policyReleaseChannel, runCheckForUpdates, updateAutoCheck, updateEnv?.supported]);
+  }, [appVersion, releaseChannel, runCheckForUpdates, updateAutoCheck, updateEnv?.supported]);
 
   // Run a check when the native "Check for Updates..." menu item was used.
   const updateCheckRequestedAt = useUpdateCheckRequestStore((state) => state.requestedAt);
@@ -541,18 +364,6 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       return;
     }
     try {
-      if (downloadedReleaseChannelRef.current === "alpha") {
-        const releaseChannelResolution = await resolvePolicyReleaseChannel("alpha");
-        if (!isCurrentReleaseChannel()) return;
-        if (releaseChannelResolution.channel !== "alpha") {
-          onReleaseChannelChange(releaseChannelResolution.channel);
-          await bridge.setChannel?.(releaseChannelResolution.channel);
-          if (!isCurrentReleaseChannel()) return;
-          downloadedReleaseChannelRef.current = null;
-          setUpdateStatus(null);
-          return;
-        }
-      }
       const result = await bridge.installAndRestart();
       if (!isCurrentReleaseChannel()) return;
       if (!result?.ok) {
@@ -578,7 +389,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         failedAction: "install",
       });
     }
-  }, [onReleaseChannelChange, resolvePolicyReleaseChannel, runCheckForUpdates, setError]);
+  }, [runCheckForUpdates, setError]);
 
   const setReleaseChannel = useCallback(
     async (next: ReleaseChannel) => {
@@ -587,9 +398,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       checkRequestRef.current += 1;
       const bridge = electronUpdaterBridge();
       try {
-        const releaseChannelResolution = await resolvePolicyReleaseChannel(next);
-        if (releaseChannelRequestRef.current !== requestId) return;
-        const allowedReleaseChannel = releaseChannelResolution.channel;
+        const allowedReleaseChannel = next;
         onReleaseChannelChange(allowedReleaseChannel);
         if (!bridge?.setChannel) return;
         const state = await bridge.setChannel(allowedReleaseChannel);
@@ -608,7 +417,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         });
       }
     },
-    [checkForUpdates, onReleaseChannelChange, resolvePolicyReleaseChannel],
+    [checkForUpdates, onReleaseChannelChange],
   );
 
   return {

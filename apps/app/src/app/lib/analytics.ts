@@ -14,7 +14,6 @@
  *   (`window.__redrob.record("analytics.<event>")`) so coded evals can
  *   assert instrumentation without any analytics backend.
  */
-import { denSessionUpdatedEvent, type DenSessionUpdatedDetail } from "./den-session-events";
 import { recordInspectorEvent } from "./app-inspector";
 import { resolvePosthogKey } from "./analytics-key";
 
@@ -104,23 +103,6 @@ export function captureAnalyticsEvent(event: string, properties: AnalyticsProper
   }
 }
 
-/**
- * Link the anonymous distinct id to the signed-in Den user so DAU and
- * retention survive sign-in. Sends only the user id — no email or name.
- */
-function identify(denUserId: string) {
-  if (!POSTHOG_KEY || !isAnalyticsEnabled()) return;
-  queue.push({
-    event: "$identify",
-    properties: {
-      ...baseProperties(),
-      distinct_id: denUserId,
-      $anon_distinct_id: getAnalyticsDistinctId(),
-    },
-    timestamp: new Date().toISOString(),
-  });
-}
-
 export async function flushAnalytics(): Promise<void> {
   if (queue.length === 0 || !POSTHOG_KEY) return;
   const batch = queue.splice(0, MAX_BATCH);
@@ -167,8 +149,10 @@ export function takeTaskRunStart(sessionId: string): number | null {
 }
 
 /**
- * One-time setup: flush loop, unload flush, and cloud sign-in listener.
- * Mounted from AppRoot.
+ * One-time setup: flush loop and unload flush. Mounted from AppRoot.
+ *
+ * There is no identify() call: the app is local-only, so there is no account
+ * to link the anonymous distinct id to.
  */
 export function initAnalytics() {
   if (initialized || typeof window === "undefined") return;
@@ -179,13 +163,6 @@ export function initAnalytics() {
   window.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") void flushAnalytics();
   });
-
-  window.addEventListener(denSessionUpdatedEvent, ((event: CustomEvent<DenSessionUpdatedDetail>) => {
-    if (event.detail?.status !== "success") return;
-    const userId = event.detail.user?.id?.trim() ?? "";
-    if (userId) identify(userId);
-    captureAnalyticsEvent("cloud_signed_in", {});
-  }) as EventListener);
 }
 
 export function disposeAnalytics() {
