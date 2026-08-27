@@ -2,7 +2,6 @@
 import { useEffect, useReducer, useRef, useState, type ReactNode, type SetStateAction } from "react";
 import {
   BookOpen,
-  ArrowUpRight,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -32,14 +31,11 @@ import type { EnablementResult } from "../../../../app/extensions";
 import { ExtensionCard, type ExtensionLayout } from "../../../design-system/extension-card";
 import { ExtensionDetailModal } from "../../../design-system/extension-detail-modal";
 import {
-  resolveExtensionInventoryGroup,
   type ExtensionInventoryGroup,
-  type ExtensionItem,
 } from "../extension-items";
 import {
   extensionFilterLabel,
   extensionInventoryFilters,
-  extensionTaxonomyLabel,
   matchesExtensionFilter,
   taxonomyForDirectoryEntry,
   type ExtensionInventoryFilter,
@@ -48,7 +44,6 @@ import {
 import { SettingsGroupHeader, RefreshButton } from "../settings-section";
 import { SettingsListSearchInput } from "../settings-list";
 import {
-  openDesktopUrl,
   openDesktopPath,
   readOpencodeConfig,
   revealDesktopItemInDir,

@@ -35,11 +35,6 @@ export type DiagnosticsScopeIdentitySignals = {
   workspaceCredential: string;
   workspaceId: string;
   workspaceType: string;
-  denBaseUrl: string;
-  denCredential: string;
-  denSignedIn: boolean;
-  organizationId: string;
-  principalId: string;
 };
 
 /**

@@ -252,63 +252,6 @@ export function createExtensionsStore(options: {
 
   const formatSkillPath = (location: string) => location.replace(/[/\\]SKILL\.md$/i, "");
 
-  const readWorkspaceRedrobConfigRecord = async (): Promise<Record<string, unknown>> => {
-    const root = options.selectedWorkspaceRoot().trim();
-    const isLocalWorkspace = options.workspaceType() === "local";
-    const { redrobSnapshot, redrobClient, redrobWorkspaceId, hasRedrobTarget } =
-      await resolveWorkspaceServerTarget();
-    const canUseRedrobServer =
-      hasRedrobTarget &&
-      redrobSnapshot.redrobServerCapabilities?.config?.read !== false;
-
-    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
-      const config = await redrobClient.getConfig(redrobWorkspaceId);
-      return config.redrob ?? {};
-    }
-
-    if (hasRedrobTarget) {
-      return {};
-    }
-
-    if (isLocalWorkspace && isDesktopRuntime() && root) {
-      return await workspaceRedrobRead({ workspacePath: root }) as unknown as Record<string, unknown>;
-    }
-
-    return {};
-  };
-
-  const writeWorkspaceRedrobConfigRecord = async (config: Record<string, unknown>) => {
-    const root = options.selectedWorkspaceRoot().trim();
-    const isLocalWorkspace = options.workspaceType() === "local";
-    const { redrobSnapshot, redrobClient, redrobWorkspaceId, hasRedrobTarget } =
-      await resolveWorkspaceServerTarget();
-    const canUseRedrobServer =
-      hasRedrobTarget &&
-      redrobSnapshot.redrobServerCapabilities?.config?.write !== false;
-
-    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
-      await redrobClient.patchConfig(redrobWorkspaceId, { redrob: config });
-      return true;
-    }
-
-    if (hasRedrobTarget) {
-      return false;
-    }
-
-    if (isLocalWorkspace && isDesktopRuntime() && root) {
-      const result = (await workspaceRedrobWrite({
-        workspacePath: root,
-        config: config as never,
-      })) as { ok: boolean; stderr?: string; stdout?: string };
-      if (!result.ok) {
-        throw new Error(result.stderr || result.stdout || "Failed to write .opencode/redrob.json");
-      }
-      return true;
-    }
-
-    return false;
-  };
-
   const deleteWorkspaceSkill = async (name: string) => {
     const isRemoteWorkspace = options.workspaceType() === "remote";
     const isLocalWorkspace = options.workspaceType() === "local";

@@ -24,7 +24,6 @@ import { buildRedrobEnvRuntimeKey } from "@/app/lib/redrob-env-runtime";
 import {
   collectAgentContextDiagnosticObservations,
   isAgentContextDiagnosticsWorkspaceAllowed,
-  resolveOrganizationConnectionsProbe,
 } from "@/app/lib/agent-context-diagnostics";
 import {
   getInitialThemeMode,
@@ -57,8 +56,6 @@ import {
   workspaceLabel,
 } from "@/react-app/shell/route-workspaces";
 import { createConnectionsStore, useConnectionsStoreSnapshot } from "@/react-app/domains/connections/store";
-import { cleanupRedrobCloudMcpAfterSignOut } from "@/react-app/domains/connections/cloud-mcp-reconciler";
-import { useOrgMcpConnections } from "@/react-app/domains/connections/use-org-mcp-connections";
 import { createRedrobServerStore, useRedrobServerStoreSnapshot } from "@/react-app/domains/connections/redrob-server-store";
 import { createProviderAuthStore, useProviderAuthStoreSnapshot } from "@/react-app/domains/connections/provider-auth/store";
 import ProviderAuthModal from "@/react-app/domains/connections/provider-auth/provider-auth-modal";
@@ -78,18 +75,7 @@ import { AuthorizedFoldersPanel } from "@/react-app/domains/settings/panels/auth
 import { SettingsStack } from "@/react-app/domains/settings/settings-section";
 import { AdvancedView } from "@/react-app/domains/settings/pages/advanced-view";
 import { AppearanceView } from "@/react-app/domains/settings/pages/appearance-view";
-import { CloudAccountView } from "@/react-app/domains/settings/pages/cloud-account-view";
-import {
-  connectPluginsForComposer,
-  EMPTY_CONNECT_CAPABILITY_INVENTORY,
-  type ConnectCapabilityInventory,
-} from "@/react-app/domains/session/surface/connect-capability-inventory";
-import {
-  loadConnectCapabilities,
-  readCachedConnectCapabilities,
-} from "@/react-app/domains/connections/cloud-inventory-cache";
 import { createOpaqueDiagnosticsScopeKey } from "@/react-app/domains/settings/pages/agent-context-diagnostics-section";
-import { CloudProvidersView } from "@/react-app/domains/settings/pages/cloud-providers-view";
 import { MemoryView } from "@/react-app/domains/settings/pages/memory-view";
 import { useFeatureFlagsPreferences } from "@/react-app/domains/settings/state/feature-flags-preferences";
 import { DebugView } from "@/react-app/domains/settings/pages/debug-view";
@@ -100,9 +86,6 @@ import { RecoveryView } from "@/react-app/domains/settings/pages/recovery-view";
 import { UpdatesView } from "@/react-app/domains/settings/pages/updates-view";
 import { useDebugViewModel } from "@/react-app/domains/settings/state/debug-view-model";
 import { useElectronUpdaterState } from "@/react-app/domains/settings/state/electron-updater-state";
-import { CloudSessionProvider, useCloudSession } from "@/react-app/domains/settings/cloud/cloud-session-provider";
-import { useDenSession } from "@/react-app/domains/settings/cloud/use-den-session";
-import { useControlAction, type RedrobControlAction } from "./control/control-provider";
 import { useBootState } from "./boot-state";
 import { SettingsShell } from "@/react-app/domains/settings/shell/settings-shell";
 import { SettingsContent } from "@/react-app/domains/settings/shell/panel";
@@ -125,18 +108,6 @@ import {
   type WorkspaceList,
   revealDesktopItemInDir,
 } from "@/app/lib/desktop";
-import { isDesktopProviderBlocked } from "@/app/cloud/desktop-app-restrictions";
-import { useCheckDesktopRestriction, useDesktopConfig } from "@/react-app/domains/cloud/desktop-config-provider";
-import { useRestrictionNotice } from "@/react-app/domains/cloud/restriction-notice-provider";
-import { useCloudProviderAutoSync } from "@/react-app/domains/cloud/use-cloud-provider-auto-sync";
-import {
-  hasRedrobWorkModelsAvailable,
-  hideRedrobWorkModelsPromo,
-  useRedrobWorkModelsPromoEligibility,
-  isRedrobWorkModelsPromoHidden,
-  redrobModelsPromoChangedEvent,
-  shouldShowRedrobWorkModelsSyncing,
-} from "@/react-app/domains/cloud/redrob-models-promo";
 import {
   isDesktopRuntime,
   isElectronRuntime,
@@ -171,7 +142,6 @@ import { CommandPalette } from "./command-palette";
 import { buildCommandPaletteSessions } from "./command-palette-sessions";
 import { useCommandPaletteShortcut } from "./use-shell-shortcuts";
 import { buildFeedbackUrl } from "@/app/lib/feedback";
-import { getDenInferenceUrl, type DenSettings } from "@/app/lib/den";
 import { readActiveWorkspaceId, writeActiveWorkspaceId } from "./session-memory";
 import {
   globalExtensionsRoute,
@@ -215,16 +185,6 @@ async function reloadEngineOrRestartDesktop(
   if (restartedEngine) {
     await afterRestart?.();
   }
-}
-
-function isRedrobWorkCloudProvider(provider: {
-  providerId?: string | null;
-  source?: string | null;
-  sourceProviderId?: string | null;
-}) {
-  return [provider.providerId, provider.source, provider.sourceProviderId].some(
-    (value) => value?.trim().toLowerCase() === "redrob",
-  );
 }
 
 function normalizeComputerUsePermissions(value: unknown) {
@@ -295,8 +255,6 @@ export function parseSettingsPath(pathname: string): {
     case "recovery":
     case "debug":
       return { tab: head, redirectPath: null };
-    case "cloud-account":
-    case "cloud-providers":
     case "memory":
       return { tab: head, redirectPath: null };
     case "connect":
@@ -305,11 +263,6 @@ export function parseSettingsPath(pathname: string): {
       return { tab: "extensions", redirectPath: "extensions/skills", extensionsSection: "skills" };
     case "mcp":
       return { tab: "extensions", redirectPath: "extensions/mcps", extensionsSection: "mcps" };
-    case "cloud-marketplaces":
-      return { tab: "extensions", redirectPath: "extensions", extensionsSection: "all" };
-    case "den":
-    case "cloud-workers":
-      return { tab: "cloud-account", redirectPath: "cloud-account" };
     case "extensions":
       if (tail === "mcp") return { tab: "extensions", redirectPath: "extensions/mcps", extensionsSection: "mcps" };
       if (
@@ -320,8 +273,7 @@ export function parseSettingsPath(pathname: string): {
         || tail === "commands"
         || tail === "agents"
         || tail === "plugins"
-        || tail === "needs-sign-in"
-        || tail === "needs-admin-setup"
+        || tail === "available"
         || tail === "ready"
       ) {
         return { tab: "extensions", redirectPath: null, extensionsSection: tail };
@@ -430,9 +382,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     toggleMemory,
   } = useFeatureFlagsPreferences();
   const platform = usePlatform();
-  const checkDesktopRestriction = useCheckDesktopRestriction();
-  const restrictionNotice = useRestrictionNotice();
-  const desktopConfig = useDesktopConfig();
   const reloadCoordinator = useReloadCoordinator();
   const [embeddedPath, setEmbeddedPath] = useState(props.initialPath ?? "general");
   const route = props.embedded
@@ -701,7 +650,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         providerDefaults: () => routeStateRef.current.providerDefaults,
         providerConnectedIds: () => routeStateRef.current.providerConnectedIds,
         disabledProviders: () => routeStateRef.current.disabledProviders,
-        checkDesktopAppRestriction: checkDesktopRestriction,
         providerBaseUrl: () => routeStateRef.current.providerBaseUrl,
         selectedWorkspaceDisplay: () => routeStateRef.current.selectedWorkspaceDisplay,
         selectedWorkspaceRoot: () => routeStateRef.current.selectedWorkspaceRoot,
@@ -724,7 +672,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           });
         },
       }),
-    [checkDesktopRestriction, redrobServerStore, reloadCoordinator.markReloadRequired],
+    [redrobServerStore, reloadCoordinator.markReloadRequired],
   );
   const extensionsStore = useMemo(
     () =>
@@ -761,183 +709,22 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const connectionsSnapshot = useConnectionsStoreSnapshot(connectionsStore);
   const providerAuthSnapshot = useProviderAuthStoreSnapshot(providerAuthStore);
   const extensionsSnapshot = useExtensionsStoreSnapshot(extensionsStore);
-  const orgMcpConnections = useOrgMcpConnections();
 
   const redrobServerStatusForMcp = redrobServerSnapshot.redrobServerStatus;
   useEffect(() => {
     if (redrobServerStatusForMcp !== "connected") return;
     // The first MCP read races the redrob-server store's initial health
     // check (a fresh store always starts "disconnected"), so it falls back
-    // to config files where server-runtime (config.remote) entries — notably
-    // the cloud control MCP — don't exist. Without this re-read the built-in
-    // cards show "Tap to connect" until the next full remount even though
-    // the entries are configured and healthy.
+    // to config files where server-runtime (config.remote) entries do not
+    // exist. Without this re-read the built-in cards show "Tap to connect"
+    // until the next full remount even though the entries are configured
+    // and healthy.
     void connectionsStore.refreshMcpServers();
   }, [connectionsStore, redrobServerStatusForMcp]);
 
-  useEffect(() => {
-    if (redrobServerStatusForMcp !== "connected") return;
-    // Same race for the Cloud Providers rows: the provider-auth store's
-    // start() read fires while this store still reports "disconnected", so
-    // it takes the legacy (empty) config read and the rows sit on "Syncing"
-    // even though the server's /cloud-provider-sync/status already lists the
-    // providers as synced. Re-derive from the server once it is reachable.
-    void providerAuthStore.refreshImportedCloudProviders();
-  }, [redrobServerStatusForMcp, providerAuthStore]);
-
-  const cleanupCloudMcpForSignOut = useCallback(async (settings: DenSettings) => {
-    const client = routeStateRef.current.selectedWorkspaceRedrobClient;
-    const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!client || !workspaceId || !orgId) return;
-    // Settings only has a safe, exact OpenCode client/directory for the active
-    // workspace here, so sign-out cleanup is intentionally scoped to that
-    // workspace instead of guessing across every configured worker.
-    await cleanupRedrobCloudMcpAfterSignOut({
-      context: {
-        denBaseUrl: settings.baseUrl,
-        serverBaseUrl: client.baseUrl,
-        workspaceId,
-        orgId,
-      },
-      redrobClient: client,
-      opencodeClient: routeStateRef.current.activeClient,
-      directory: routeStateRef.current.selectedWorkspaceRoot,
-    });
-    setCloudMcpHealth(null);
-    await refreshMcpServersRef.current?.();
-  }, []);
-  const denSession = useDenSession({
-    developerMode,
-    onBeforeSignedOut: cleanupCloudMcpForSignOut,
-    openLink: (url) => platform.openLink(url),
-  });
-  const cloudSession = useCloudSession();
-  const connectScope = useMemo(
-    () => ({
-      baseUrl: cloudSession.baseUrl,
-      organizationId: cloudSession.activeOrganization?.id?.trim() ?? "",
-    }),
-    [cloudSession.activeOrganization?.id, cloudSession.baseUrl],
-  );
-  const [connectCapabilities, setConnectCapabilities] = useState<ConnectCapabilityInventory>(
-    () => readCachedConnectCapabilities(connectScope) ?? EMPTY_CONNECT_CAPABILITY_INVENTORY,
-  );
-  const [connectCapabilitiesLoading, setConnectCapabilitiesLoading] = useState(false);
-  const connectCapabilitiesRequestRef = useRef(0);
-  const refreshConnectCapabilities = useCallback(async (options?: { force?: boolean }) => {
-    const requestId = connectCapabilitiesRequestRef.current + 1;
-    connectCapabilitiesRequestRef.current = requestId;
-    if (!cloudSession.isSignedIn || !connectScope.organizationId) {
-      setConnectCapabilities(EMPTY_CONNECT_CAPABILITY_INVENTORY);
-      setConnectCapabilitiesLoading(false);
-      return;
-    }
-    // Paint what the app already fetched, then revalidate behind it.
-    const cached = readCachedConnectCapabilities(connectScope);
-    if (cached) setConnectCapabilities(cached);
-    setConnectCapabilitiesLoading(!cached);
-    try {
-      const inventory = await loadConnectCapabilities({
-        client: cloudSession.client,
-        scope: connectScope,
-        maxAgeMs: options?.force ? 0 : undefined,
-      });
-      if (connectCapabilitiesRequestRef.current === requestId) {
-        setConnectCapabilities(inventory);
-      }
-    } catch {
-      if (connectCapabilitiesRequestRef.current === requestId && !cached) {
-        setConnectCapabilities(EMPTY_CONNECT_CAPABILITY_INVENTORY);
-      }
-    } finally {
-      if (connectCapabilitiesRequestRef.current === requestId) setConnectCapabilitiesLoading(false);
-    }
-  }, [cloudSession.client, cloudSession.isSignedIn, connectScope]);
-
-  // Not gated on the Extensions tab: the inventory should be warm before the
-  // user gets there, and the fetch is deduped by the shared cloud cache.
-  useEffect(() => {
-    void refreshConnectCapabilities({ force: true });
-  }, [refreshConnectCapabilities]);
-
-  const hasRedrobWorkCloudProvider = useMemo(
-    () =>
-      providerAuthSnapshot.cloudOrgProviders.some(isRedrobWorkCloudProvider) ||
-      Object.values(providerAuthSnapshot.importedCloudProviders ?? {}).some(isRedrobWorkCloudProvider),
-    [providerAuthSnapshot.cloudOrgProviders, providerAuthSnapshot.importedCloudProviders],
-  );
-  const [redrobModelsPromoHidden, setRedrobWorkModelsPromoHidden] = useState(isRedrobWorkModelsPromoHidden);
-  const redrobModelsPromoEligible = useRedrobWorkModelsPromoEligibility();
-  // Entitled = Den/import says Redrob Models is included. Available = local
-  // engine actually exposes selectable redrob models.
-  const redrobModelsEntitled = cloudSession.isSignedIn && hasRedrobWorkCloudProvider;
-  const redrobModelsAvailable = hasRedrobWorkModelsAvailable({
-    providerConnectedIds,
-    providers,
-  });
-  const showRedrobWorkModelsSyncing = shouldShowRedrobWorkModelsSyncing({
-    entitled: redrobModelsEntitled,
-    available: redrobModelsAvailable,
-    workspaceReady: Boolean(selectedWorkspaceId && activeClient),
-    reloadPending: providerAuthSnapshot.cloudProviderServerSync?.reloadPending === true,
-  });
-  const showRedrobWorkModelsSubscribe =
-    redrobModelsPromoEligible &&
-    !redrobModelsEntitled &&
-    !redrobModelsAvailable &&
-    !redrobModelsPromoHidden;
-  const showRedrobWorkModelsConnect =
-    redrobModelsPromoEligible &&
-    !redrobModelsEntitled &&
-    !redrobModelsAvailable &&
-    redrobModelsPromoHidden;
-
-  useEffect(() => {
-    const handlePromoChanged = () => setRedrobWorkModelsPromoHidden(isRedrobWorkModelsPromoHidden());
-    window.addEventListener(redrobModelsPromoChangedEvent, handlePromoChanged);
-    return () => window.removeEventListener(redrobModelsPromoChangedEvent, handlePromoChanged);
-  }, []);
-
-  const dismissRedrobWorkModelsPromo = useCallback(() => {
-    hideRedrobWorkModelsPromo();
-    setRedrobWorkModelsPromoHidden(true);
-  }, []);
-
-  const subscribeToRedrobWorkModels = useCallback(() => {
-    providerAuthStore.closeProviderAuthModal();
-    const accountPath = selectedWorkspaceId
-      ? workspaceSettingsRoute(selectedWorkspaceId, "cloud-account")
-      : "/settings/cloud-account";
-    navigate(accountPath);
-    window.setTimeout(() => {
-      platform.openLink(getDenInferenceUrl(cloudSession.baseUrl));
-    }, 0);
-  }, [cloudSession.baseUrl, navigate, platform, providerAuthStore, selectedWorkspaceId]);
-
   const handleOpenProviderAuth = useCallback(() => {
-    if (providerAuthStore.isProviderAddRestricted()) {
-      restrictionNotice.show({
-        title: t("restrictions.add_custom_providers_disabled_title"),
-        message: t("restrictions.add_custom_providers_disabled_message"),
-      });
-      return;
-    }
-
     void providerAuthStore.openProviderAuthModal();
-  }, [providerAuthStore, restrictionNotice]);
-
-  useEffect(() => {
-    if (!activeClient || !selectedWorkspaceId) return;
-    // Org policy may force Zen off. Never force it back on — that races user Disconnect.
-    if (!checkDesktopRestriction({ restriction: "allowZenModel" })) return;
-
-    void providerAuthStore
-      .ensureProjectProviderDisabledState("opencode", true)
-      .catch((error) => {
-        console.warn("[desktop-app-restrictions] failed to sync Zen restriction", error);
-      });
-  }, [activeClient, checkDesktopRestriction, providerAuthStore, selectedWorkspaceId, selectedWorkspaceRoot]);
+  }, [providerAuthStore]);
 
   const shareWorkspaceState = useShareWorkspaceState({
     workspaces,
@@ -972,8 +759,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     onReleaseChannelChange,
     updateAutoCheck,
     updateAutoDownload,
-    desktopConfig: desktopConfig.config,
-    refreshDesktopConfig: desktopConfig.refreshFresh,
     setError: (message) => {
       if (message) {
         // Auto-checks can fail without any user action; alert + log to the
@@ -1036,8 +821,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       setLibraryCommands([]);
       setLibraryAgents([]);
     }
-    await refreshConnectCapabilities({ force: true });
-  }, [opencodeClient, refreshConnectCapabilities, selectedWorkspaceRoot]);
+  }, [opencodeClient, selectedWorkspaceRoot]);
   useEffect(() => {
     void loadLibraryLists();
   }, [loadLibraryLists]);
@@ -1045,16 +829,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const handleModelPickerLoadError = useCallback((error: unknown) => {
     toast.error(error instanceof Error ? error.message : t("app.unknown_error"));
   }, []);
-  const handleModelPickerOpen = useCallback(() => {
-    void providerAuthStore.runCloudProviderSync("model_picker_open");
-  }, [providerAuthStore]);
   const modelPicker = useModelPicker({
     client: opencodeClient,
     baseUrl: opencodeBaseUrl,
     workspaceRoot: selectedWorkspaceRoot,
-    onOpen: handleModelPickerOpen,
     onLoadError: handleModelPickerLoadError,
-    cloudProvidersEnabled: cloudSession.isSignedIn,
   });
   const currentCloudMcpModel = useMemo<RedrobCloudMcpProviderModelContext | null>(() => {
     const provider = local.prefs.defaultModel?.providerID.trim() ?? "";
@@ -1741,32 +1520,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     };
   }, [connectionsStore, extensionsStore, redrobServerStore, providerAuthStore]);
 
-  const refreshMarketplaceAction = useMemo<RedrobControlAction>(() => ({
-    id: "extensions.refresh-marketplace",
-    label: "Refresh marketplace extensions",
-    description: "Force a fresh sync of organization marketplace plugins from the cloud.",
-    sideEffect: "mutation",
-    execute: async () => {
-      await extensionsStore.refreshCloudOrgMarketplaces({ force: true });
-      return { marketplaceCount: extensionsStore.cloudOrgMarketplaces().length };
-    },
-  }), [extensionsStore]);
-  useControlAction(refreshMarketplaceAction);
-
-  // Periodically reconcile workspace-imported cloud providers from Den while
-  // signed in (dev #1509 "auto-sync cloud providers"). Mounted here because
-  // the settings route owns the provider-auth store.
-  useCloudProviderAutoSync(providerAuthStore.runCloudProviderSync);
-
-  // Keep the Den cloud MCP configured with a fresh first-party token while
-  // signed in: connects on sign-in, re-mints on org switch and before expiry.
-  useCloudProviderAutoSync(() => connectionsStore.syncCloudControlMcp());
-
-  useEffect(() => {
-    if (route.tab !== "cloud-providers" && route.tab !== "ai") return;
-    void providerAuthStore.runCloudProviderSync("settings_cloud_opened");
-  }, [providerAuthStore, route.tab]);
-
   useEffect(() => {
     redrobServerStore.syncFromOptions();
     connectionsStore.syncFromOptions();
@@ -1871,7 +1624,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       },
     };
   }, [computerUsePermissions, connectionsSnapshot, extensionStateVersion, providerConnectedIds, userEnvKeys]);
-  const builtInExtensionsDisabled = checkDesktopRestriction({ restriction: "allowBuiltInExtensions" });
   const restartExtensionLocalServer = useCallback(async () => {
     if (!isDesktopRuntime()) return false;
     try {
@@ -1932,26 +1684,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       quickConnect: quickConnectCatalog,
       mcpServers: connectionsSnapshot.mcpServers,
       installedSkills: extensionsStore.skills(),
-      importedCloudPlugins: extensionsSnapshot.importedCloudPlugins,
-      pendingCloudPluginChanges: extensionsSnapshot.pendingCloudPluginChanges,
-      cloudMarketplaces: extensionsSnapshot.cloudOrgMarketplaces,
-      orgMcpConnections: orgMcpConnections.connections,
       enablementContext,
       isBuiltInConnected: extensionController.isConnected,
     }),
-    [connectionsSnapshot.mcpServers, enablementContext, extensionController, extensionsSnapshot, extensionsStore, orgMcpConnections.connections, quickConnectCatalog],
+    [connectionsSnapshot.mcpServers, enablementContext, extensionController, extensionsSnapshot, extensionsStore, quickConnectCatalog],
   );
-  // Every connection the organization provisioned for this member, connected
-  // or not: one that still needs the member's sign-in is the whole reason the
-  // "Needs your attention" group exists, so it must not be filtered out here.
-  const orgMcpConnectionItems = extensionItems.orgMcpConnectionItems;
-  const organizationConnectionsProbe = resolveOrganizationConnectionsProbe({
-    signedIn: cloudSession.isSignedIn,
-    activeOrganizationId: cloudSession.activeOrganization?.id,
-    loading: orgMcpConnections.loading,
-    loaded: orgMcpConnections.loaded,
-    error: orgMcpConnections.error,
-  });
   const diagnosticsClient = selectedWorkspaceEndpoint?.client ?? redrobClient;
   const diagnosticsWorkspaceAllowed = isAgentContextDiagnosticsWorkspaceAllowed(selectedWorkspace);
   const diagnosticsAvailable = Boolean(
@@ -1971,17 +1708,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     workspaceCredential: selectedWorkspaceEndpoint?.token ?? token,
     workspaceId: runtimeWorkspaceId?.trim() ?? "",
     workspaceType: diagnosticsWorkspaceType,
-    denBaseUrl: cloudSession.baseUrl,
-    denCredential: cloudSession.authToken,
-    denSignedIn: cloudSession.isSignedIn,
-    organizationId: cloudSession.activeOrganization?.id ?? "signed-out",
-    principalId: cloudSession.user?.id ?? "signed-out",
   }), [
-    cloudSession.activeOrganization?.id,
-    cloudSession.authToken,
-    cloudSession.baseUrl,
-    cloudSession.isSignedIn,
-    cloudSession.user?.id,
     diagnosticsClient,
     diagnosticsWorkspaceType,
     runtimeWorkspaceId,
@@ -1999,16 +1726,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     ) {
       throw new Error("Agent diagnostics require a connected workspace.");
     }
-    const observations = await collectAgentContextDiagnosticObservations({
-      organizationConnections: orgMcpConnections.connections,
-      organizationConnectionsProbe,
-      workspaceType: selectedWorkspace.workspaceType,
-    });
+    const observations = collectAgentContextDiagnosticObservations();
     return client.runAgentContextDiagnostics(workspaceId, observations);
   }, [
     redrobClient,
-    organizationConnectionsProbe,
-    orgMcpConnections.connections,
     runtimeWorkspaceId,
     selectedWorkspace,
     selectedWorkspaceEndpoint,
@@ -2186,10 +1907,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     return <Navigate to={target} replace state={location.state} />;
   }
 
-  const openCloudAccountSettings = () => {
-    navigateSettingsPath("cloud-account");
-  };
-
   const settingsView = (() => {
     switch (route.tab) {
       case "general":
@@ -2243,36 +1960,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             canDisconnectProvider={(provider) =>
               provider.id.trim().toLowerCase() === "opencode" || provider.source !== "env"
             }
-            canAddProviders={!providerAuthStore.isProviderAddRestricted()}
-            organizationName={cloudSession.activeOrgName}
-            cloudProviderIds={new Set([
-              ...Object.values(providerAuthSnapshot.importedCloudProviders ?? {}).map((p) => p.providerId),
-              ...(redrobModelsEntitled || redrobModelsAvailable ? ["redrob"] : []),
-            ])}
-            showRedrobWorkModelsSubscribe={showRedrobWorkModelsSubscribe}
-            showRedrobWorkModelsConnect={showRedrobWorkModelsConnect}
-            showRedrobWorkModelsSyncing={showRedrobWorkModelsSyncing}
-            onSubscribeRedrobWorkModels={subscribeToRedrobWorkModels}
-            onDismissRedrobWorkModels={dismissRedrobWorkModelsPromo}
-            cloudProvidersView={
-              <CloudProvidersView
-                embedded
-                checkDesktopAppRestriction={checkDesktopRestriction}
-                cloudOrgProviders={providerAuthSnapshot.cloudOrgProviders}
-                connectCloudProvider={providerAuthStore.connectCloudProvider}
-                importedCloudProviders={providerAuthSnapshot.importedCloudProviders}
-                importsUnavailable={
-                  redrobServerSnapshot.redrobServerCapabilities?.config?.read === false ||
-                  redrobServerSnapshot.redrobServerCapabilities?.config?.write === false
-                }
-                lastSyncError={providerAuthSnapshot.lastSyncError}
-                redrobServerAvailable={Boolean(redrobServerSnapshot.redrobServerClient)}
-                onOpenAccount={openCloudAccountSettings}
-                refreshCloudOrgProviders={providerAuthStore.refreshCloudOrgProviders}
-                runCloudProviderSync={providerAuthStore.runCloudProviderSync}
-                serverSync={providerAuthSnapshot.cloudProviderServerSync}
-              />
-            }
+            canAddProviders
           />
         );
       case "preferences":
@@ -2324,16 +2012,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
               navigateSettingsPath(path);
             }}
             onRefresh={() => {
-              // Force-sync the cloud MCP first (re-mint token + rewrite
-              // config, bypassing the freshness marker) so Refresh really
-              // means "make everything current now", then refresh the rest.
-              void connectionsStore.syncCloudControlMcp({ force: true }).then(() => {
-                void connectionsStore.refreshMcpServers();
-              });
+              void connectionsStore.refreshMcpServers();
               void extensionsStore.refreshPlugins();
-              void extensionsStore.refreshCloudOrgMarketplaces({ force: true });
-              void orgMcpConnections.refresh();
-              void refreshConnectCapabilities({ force: true });
             }}
             mcpView={({ initialFilter, onFilterChange, initialState, onStateChange, detailId, onDetailIdChange, onRefresh }) => (
               <McpView
@@ -2350,7 +2030,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
                 setSelectedMcp={(name) => connectionsStore.setSelectedMcp(name)}
                 quickConnect={extensionItems.quickConnectEntries}
                 enablementContext={enablementContext}
-                builtInExtensionsDisabled={builtInExtensionsDisabled}
                 connectMcp={(entry) => {
                   return connectionsStore.connectMcp(entry);
                 }}
@@ -2369,38 +2048,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
                     : undefined
                 }
                 readConfigFile={(scope) => connectionsStore.readMcpConfigFile(scope)}
-                installedSkills={[
-                  ...extensionItems.installedSkills,
-                  ...connectCapabilities.skills.filter(
-                    (skill) => !extensionItems.installedSkills.some(
-                      (installed) => installed.name.toLowerCase() === skill.name.toLowerCase(),
-                    ),
-                  ),
-                ]}
+                installedSkills={extensionItems.installedSkills}
                 installedCommands={libraryCommands}
                 installedAgents={libraryAgents}
-                availableConnectMcpServers={connectCapabilities.mcpServers.filter(
-                  (entry) => !orgMcpConnectionItems.some((item) =>
-                    item.name.localeCompare(entry.name, undefined, { sensitivity: "accent" }) === 0
-                  ),
-                )}
-                availableConnectMcpStatuses={connectCapabilities.mcpStatuses}
-                inventoryLoading={connectCapabilitiesLoading || (orgMcpConnections.loading && !orgMcpConnections.loaded)}
-                installedPlugins={connectPluginsForComposer(connectCapabilities.plugins)}
-                orgMcpItems={orgMcpConnectionItems}
-                organizationName={cloudSession.activeOrgName}
-                orgMcpError={orgMcpConnections.error}
                 uninstallSkill={(name) => { void extensionsStore.uninstallSkill(name); }}
-                removeCloudPlugin={(pluginId) => { void extensionsStore.removeCloudOrgPlugin(pluginId); }}
-                orgMcpConnectingId={orgMcpConnections.connectingId}
-                connectOrgMcp={(connectionId) => { void orgMcpConnections.connect(connectionId); }}
-                reconnectOrgMcp={(connectionId) => { void orgMcpConnections.connect(connectionId, { forceFreshAuthorization: true }); }}
-                orgMcpDisconnectingId={orgMcpConnections.disconnectingId}
-                disconnectOrgMcp={(connectionId) => { void orgMcpConnections.disconnect(connectionId); }}
                 readSkill={(name) => extensionsStore.readSkill(name)}
                 previewClaudePlugin={(url) => extensionsStore.previewClaudePlugin(url)}
                 installClaudePlugin={(url) => extensionsStore.installClaudePlugin(url)}
-                createLibraryItem={(kind, input) => extensionsStore.createLibraryItem(kind, input)}
                 onLibraryListsRefresh={loadLibraryLists}
                 initialFilter={initialFilter}
                 onFilterChange={onFilterChange}
@@ -2414,34 +2068,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
           />
         );
-      case "cloud-account":
-        return (
-          <CloudAccountView
-            developerMode={developerMode}
-            session={denSession}
-          />
-        );
       case "memory":
         return <MemoryView client={redrobServerSnapshot.redrobServerClient} />;
-      case "cloud-providers":
-        return (
-          <CloudProvidersView
-            checkDesktopAppRestriction={checkDesktopRestriction}
-            cloudOrgProviders={providerAuthSnapshot.cloudOrgProviders}
-            connectCloudProvider={providerAuthStore.connectCloudProvider}
-            importedCloudProviders={providerAuthSnapshot.importedCloudProviders}
-            importsUnavailable={
-              redrobServerSnapshot.redrobServerCapabilities?.config?.read === false ||
-              redrobServerSnapshot.redrobServerCapabilities?.config?.write === false
-            }
-            lastSyncError={providerAuthSnapshot.lastSyncError}
-            redrobServerAvailable={Boolean(redrobServerSnapshot.redrobServerClient)}
-            onOpenAccount={openCloudAccountSettings}
-            refreshCloudOrgProviders={providerAuthStore.refreshCloudOrgProviders}
-            runCloudProviderSync={providerAuthStore.runCloudProviderSync}
-            serverSync={providerAuthSnapshot.cloudProviderServerSync}
-          />
-        );
       case "advanced":
         return (
           <AdvancedView
@@ -2512,8 +2140,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             alphaChannelSupported={
               isElectronRuntime() &&
               isMacPlatform() &&
-              readDesktopDistributionInfo().flavor === "public" &&
-              desktopConfig.config.allowAlphaUpdates !== false
+              readDesktopDistributionInfo().flavor === "public"
             }
           />
         );
@@ -2637,35 +2264,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         error={providerAuthSnapshot.providerAuthError}
         preferredProviderId={providerAuthSnapshot.providerAuthPreferredProviderId}
         workerType={providerAuthSnapshot.providerAuthWorkerType}
-        // Hide any provider the org blocks at the desktop layer so users
-        // can't connect a forbidden one (dev #1505). Same helper covers
-        // opencode-provider gating via the `allowZenModel` restriction.
-        // We also strip the matching key from `authMethods` because the
-        // modal builds its entry list from `Object.keys(authMethods)`,
-        // not from `providers`.
-        providers={providerAuthSnapshot.providerAuthProviders.filter(
-          (provider) =>
-            !isDesktopProviderBlocked({
-              providerId: provider.id,
-              checkRestriction: checkDesktopRestriction,
-            }),
-        )}
+        providers={providerAuthSnapshot.providerAuthProviders}
         connectedProviderIds={providerConnectedIds}
-        authMethods={Object.fromEntries(
-          Object.entries(providerAuthSnapshot.providerAuthMethods).filter(
-            ([providerId]) =>
-              !isDesktopProviderBlocked({
-                providerId,
-                checkRestriction: checkDesktopRestriction,
-              }),
-          ),
-        )}
+        authMethods={providerAuthSnapshot.providerAuthMethods}
         onSelect={providerAuthStore.startProviderAuth}
         onSubmitApiKey={providerAuthStore.submitProviderApiKey}
         onSubmitOAuth={providerAuthStore.completeProviderAuthOAuth}
         onRefreshProviders={providerAuthStore.refreshProviders}
-        showRedrobWorkModelsSubscribe={showRedrobWorkModelsSubscribe}
-        onSubscribeRedrobWorkModels={subscribeToRedrobWorkModels}
         onClose={() => providerAuthStore.closeProviderAuthModal()}
       />
       <RenameWorkspaceModal
@@ -2756,9 +2361,5 @@ export function SettingsRoute() {
 }
 
 export function SettingsSurface(props: SettingsSurfaceProps) {
-  return (
-    <CloudSessionProvider>
-      <SettingsRouteContent {...props} />
-    </CloudSessionProvider>
-  );
+  return <SettingsRouteContent {...props} />;
 }

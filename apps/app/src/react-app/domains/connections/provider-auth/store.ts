@@ -7,14 +7,11 @@ import type {
 } from "@opencode-ai/sdk/v2/client";
 
 import { t } from "../../../../i18n";
-import { getRedrobGatewayOrigin } from "../../../../app/lib/gateway-runtime";
 import { unwrap, waitForHealthy } from "../../../../app/lib/opencode";
 import {
   readOpencodeConfig,
   writeOpencodeConfig,
   engineRestart,
-  workspaceRedrobRead,
-  workspaceRedrobWrite,
 } from "../../../../app/lib/desktop";
 import { RedrobServerError } from "../../../../app/lib/redrob-server";
 import type {
@@ -29,9 +26,7 @@ import {
 } from "../../../../app/utils/providers";
 import { getReactQueryClient } from "../../../infra/query-client";
 import {
-  clearProviderListQueries,
   ensureProviderListQuery,
-  getConnectedProviderItems,
 } from "../../../infra/provider-list-query";
 import type { RedrobServerStoreSnapshot } from "../redrob-server-store";
 
@@ -55,7 +50,6 @@ import {
   readStoredDefaultModel,
   writeStoredDefaultModel,
 } from "../../../kernel/model-config";
-import { DEFAULT_MODEL } from "../../../../app/constants";
 import {
   REDROB_PROVIDER_ID,
   buildRedrobProviderConfig,
@@ -251,68 +245,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   ) => {
     if (Object.is(state[key], value)) return;
     mutateState((current) => ({ ...current, [key]: value }));
-  };
-
-  const readWorkspaceRedrobConfigRecord = async (): Promise<
-    Record<string, unknown>
-  > => {
-    const root = options.selectedWorkspaceRoot().trim();
-    const isLocalWorkspace =
-      options.selectedWorkspaceDisplay().workspaceType === "local";
-    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
-      await resolveRedrobConfigTarget("read");
-
-    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
-      const config = await redrobClient.getConfig(redrobWorkspaceId);
-      return config.redrob ?? {};
-    }
-
-    if (hasRedrobTarget) {
-      return {};
-    }
-
-    if (isLocalWorkspace && isDesktopRuntime() && root) {
-      return (await workspaceRedrobRead({
-        workspacePath: root,
-      })) as unknown as Record<string, unknown>;
-    }
-
-    return {};
-  };
-
-  const writeWorkspaceRedrobConfigRecord = async (
-    config: Record<string, unknown>,
-  ) => {
-    const root = options.selectedWorkspaceRoot().trim();
-    const isLocalWorkspace =
-      options.selectedWorkspaceDisplay().workspaceType === "local";
-    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
-      await resolveRedrobConfigTarget("write");
-
-    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
-      await redrobClient.patchConfig(redrobWorkspaceId, { redrob: config });
-      return true;
-    }
-
-    if (hasRedrobTarget) {
-      return false;
-    }
-
-    if (isLocalWorkspace && isDesktopRuntime() && root) {
-      const result = await workspaceRedrobWrite({
-        workspacePath: root,
-        config: config as never,
-      });
-      const typed = result as { ok: boolean; stderr?: string; stdout?: string };
-      if (!typed.ok) {
-        throw new Error(
-          typed.stderr || typed.stdout || "Failed to write .opencode/redrob.json",
-        );
-      }
-      return true;
-    }
-
-    return false;
   };
 
   const readProjectConfigFile = async () => {
@@ -1191,28 +1123,10 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
   }
 
-  /** Nothing restricts adding a provider: there is no organization policy. */
-  function isProviderAddRestricted(_providerId?: string | null) {
-    return false;
-  }
-
   async function openProviderAuthModal(optionsArg?: {
     returnFocusTarget?: ProviderReturnFocusTarget;
     preferredProviderId?: string;
   }) {
-    if (isProviderAddRestricted(optionsArg?.preferredProviderId)) {
-      const message = t("providers.custom_providers_disabled");
-      mutateState((current) => ({
-        ...current,
-        providerAuthReturnFocusTarget: "none",
-        providerAuthPreferredProviderId: null,
-        providerAuthBusy: false,
-        providerAuthModalOpen: false,
-        providerAuthError: message,
-      }));
-      throw new Error(message);
-    }
-
     mutateState((current) => ({
       ...current,
       providerAuthReturnFocusTarget: optionsArg?.returnFocusTarget ?? "none",
@@ -1270,12 +1184,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     };
   };
 
-  const currentWorkspaceKey = () =>
-    `${options.selectedWorkspaceRoot().trim()}::${options.runtimeWorkspaceId() ?? ""}`;
-
   const syncFromOptions = () => {
-    const workspaceKey = currentWorkspaceKey();
-    lastWorkspaceKey = workspaceKey;
     refreshSnapshot();
     emitChange();
   };
@@ -1285,7 +1194,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     // StrictMode double-mount re-arms after dispose.
     disposed = false;
     started = true;
-    lastWorkspaceKey = currentWorkspaceKey();
 
     // One-time local cleanup for installs that previously imported
     // organization-managed providers: those `lpr_*` blocks are now orphans no
@@ -1337,7 +1245,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     submitProviderApiKey,
     disconnectProvider,
     ensureProjectProviderDisabledState,
-    isProviderAddRestricted,
     openProviderAuthModal,
     closeProviderAuthModal,
   };
