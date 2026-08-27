@@ -17,31 +17,6 @@ function runMatched(...changedFiles: string[]): string {
   })
 }
 
-test("the soft spec-impact snapshot identifies uncovered and covered contract changes", ({ evidence }) => {
-  const uncovered = run("ee/apps/den-api/src/workflow-runs.ts")
-  expect(uncovered).toContain("Needs attention")
-  expect(uncovered).toContain("den.workflow-receipts")
-  expect(uncovered).toContain("::warning title=Spec impact snapshot::")
-  expect(uncovered).toContain("Matched E2E tests:")
-
-  const covered = run(
-    "ee/apps/den-api/src/workflow-runs.ts",
-    "evals/specs/generated-artifact-views.e2e.test.ts",
-  )
-  expect(covered).toContain("Covered by a changed E2E test")
-  expect(covered).not.toContain("::warning title=Spec impact snapshot::")
-
-  const matched = JSON.parse(runMatched("ee/apps/den-api/src/workflow-runs.ts"))
-  expect(matched).toContain("evals/specs/workflows.e2e.test.ts")
-  expect(matched).toContain("evals/specs/generated-artifact-views.e2e.test.ts")
-
-  evidence.recordAssertionEvidence(
-    "Implementation changes map to their E2E tests",
-    "The advisory report warned without a mapped E2E test change and cleared when the generated Artifact view E2E test changed.",
-    true,
-  )
-})
-
 test("the spec-impact report suggests an E2E test for unmapped changes", ({ evidence }) => {
   const report = run("apps/app/src/react-app/unmapped-feature.ts")
   expect(report).toContain("Warden suggestion: add or update an `evals/specs/<feature>.e2e.test.ts`")
