@@ -1721,7 +1721,7 @@ function withCors(response: Response, request: Request, config: ServerConfig) {
   headers.set("Access-Control-Allow-Origin", allowOrigin);
   headers.set(
     "Access-Control-Allow-Headers",
-    "Authorization, Content-Type, X-Redrob Work-Host-Token, X-Redrob Work-Client-Id, X-OpenCode-Directory, X-Opencode-Directory, x-opencode-directory",
+    "Authorization, Content-Type, X-Redrob-Host-Token, X-Redrob-Client-Id, X-OpenCode-Directory, X-Opencode-Directory, x-opencode-directory",
   );
   headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   headers.set("Vary", "Origin");

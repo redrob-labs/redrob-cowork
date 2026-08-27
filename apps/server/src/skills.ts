@@ -196,11 +196,11 @@ export async function listSkills(workspaceRoot: string, includeGlobal: boolean):
   }
 
   if (includeGlobal) {
-    const globalRedrob Work = join(homedir(), ".config", "opencode", "skills");
+    const globalOpencode = join(homedir(), ".config", "opencode", "skills");
     const globalClaude = join(homedir(), ".claude", "skills");
     const globalAgents = join(homedir(), ".agents", "skills");
     const globalAgentLegacy = join(homedir(), ".agent", "skills");
-    dirs.push({ dir: globalRedrob Work, scope: "global" });
+    dirs.push({ dir: globalOpencode, scope: "global" });
     dirs.push({ dir: globalClaude, scope: "global" });
     dirs.push({ dir: globalAgents, scope: "global" });
     dirs.push({ dir: globalAgentLegacy, scope: "global" });
