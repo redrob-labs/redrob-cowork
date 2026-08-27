@@ -17,19 +17,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useWorkspace } from "@/react-app/shell/workspace-provider";
-import { useCheckDesktopRestriction } from "@/react-app/domains/cloud/desktop-config-provider";
-import { useDenAuth } from "@/react-app/domains/cloud/den-auth-provider";
-import {
-  REDROB_MODELS_PROVIDER_ID,
-  REDROB_MODELS_PROVIDER_NAME,
-} from "@/react-app/domains/cloud/redrob-models-promo";
 import { getConnectedProviderItems, useProviderListQuery } from "@/react-app/infra/provider-list-query";
-import { filterEntitledModelOptions } from "@/react-app/domains/connections/provider-auth/provider-policy";
-import {
-  filterCloudManagedModelOptions,
-  mergeModelOptions,
-} from "@/react-app/domains/connections/provider-auth/assigned-model-options";
-import { isCloudManagedProviderKey } from "@/react-app/domains/connections/provider-auth/cloud-provider-config";
+import { mergeModelOptions } from "@/react-app/domains/connections/provider-auth/assigned-model-options";
 import { isRedrobOnlyProviderId } from "@/react-app/domains/settings/redrob-provider";
 import {
   Command,
@@ -56,10 +45,8 @@ function getProviderDisplayName(providerId: string) {
 function useModelOptions(
   open: boolean,
   fallbackOptions: readonly ModelOption[],
-  cloudProvidersEnabled: boolean,
 ) {
   const { client, opencodeBaseUrl, selectedWorkspaceRoot } = useWorkspace();
-  const checkDesktopRestriction = useCheckDesktopRestriction();
 
   const { data, refetch } = useProviderListQuery({
     client,
@@ -82,15 +69,7 @@ function useModelOptions(
     return () => window.removeEventListener(newProvidersEvent, handler);
   }, [client, refetch]);
 
-  // Apply org-level restrictions (dev #1505) on top of the raw model list
-  // so the picker never surfaces blocked options:
-  //   - `allowZenModel` hides the built-in opencode provider entries when false
-  //   - `allowCustomProviders` keeps org-managed providers, plus the built-in entries when allowed.
   return React.useMemo(() => {
-    const restrictToCloud = checkDesktopRestriction({
-      restriction: "allowCustomProviders",
-    });
-
     const options = getConnectedProviderItems(data)
       .filter((provider) => isRedrobOnlyProviderId(provider.id))
       .flatMap((provider) =>
@@ -111,16 +90,10 @@ function useModelOptions(
         }),
       );
 
-    return filterEntitledModelOptions(filterCloudManagedModelOptions(
-      mergeModelOptions(options, fallbackOptions).filter((option) =>
-        isRedrobOnlyProviderId(option.providerID),
-      ),
-      cloudProvidersEnabled,
-    ), {
-      restrictToCloud,
-      checkRestriction: checkDesktopRestriction,
-    });
-  }, [checkDesktopRestriction, cloudProvidersEnabled, data, fallbackOptions]);
+    return mergeModelOptions(options, fallbackOptions).filter((option) =>
+      isRedrobOnlyProviderId(option.providerID),
+    );
+  }, [data, fallbackOptions]);
 }
 
 type ModelSelectItem = {
@@ -204,11 +177,7 @@ interface ModelSelectProps {
   disabled?: boolean;
   /** When set, "All models" opens the full picker scoped to this session. */
   sessionId?: string;
-  /** Den/import includes Redrob Models. Kept for callers; picker no longer upsells here. */
-  redrobModelsEntitled?: boolean;
-  /** The server is waiting to reload this workspace with Redrob Models. */
-  redrobModelsSyncing?: boolean;
-  /** Member-scoped models available before a workspace OpenCode client exists. */
+  /** Models available before a workspace OpenCode client exists. */
   fallbackOptions?: readonly ModelOption[];
   behaviorValue?: string | null;
   behaviorLabel?: string;
@@ -224,7 +193,6 @@ export function ModelSelect({
   onChange,
   disabled = false,
   sessionId,
-  redrobModelsSyncing = false,
   fallbackOptions = [],
   behaviorValue = null,
   behaviorLabel,
@@ -234,8 +202,7 @@ export function ModelSelect({
   const [search, setSearch] = React.useState("");
   const [thinkingFor, setThinkingFor] = React.useState<ModelOption | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
-  const denAuth = useDenAuth();
-  const catalogOptions = useModelOptions(open, fallbackOptions, denAuth.isSignedIn);
+  const catalogOptions = useModelOptions(open, fallbackOptions);
   const modelOptions = React.useMemo(
     () => overlaySelectedBehavior(catalogOptions, value, {
       value: behaviorValue,
@@ -244,9 +211,6 @@ export function ModelSelect({
     }),
     [behaviorLabel, behaviorOptions, behaviorValue, catalogOptions, value],
   );
-  const checkDesktopRestriction = useCheckDesktopRestriction();
-  const canAddProviders = !checkDesktopRestriction({ restriction: "allowCustomProviders" });
-
   const focusSearchInput = React.useCallback(() => {
     window.requestAnimationFrame(() => {
       const input = searchInputRef.current;
@@ -337,7 +301,7 @@ export function ModelSelect({
           }
         >
           <span className="max-w-48 truncate">
-            {hideValue || (!denAuth.isSignedIn && isCloudManagedProviderKey(value.providerID))
+            {hideValue
               ? "Select model"
               : (selectedOption?.title ?? value.modelID ?? "Select model")}
           </span>
@@ -361,24 +325,6 @@ export function ModelSelect({
             />
           </CommandHeader>
           <CommandEmpty>No models found.</CommandEmpty>
-          {redrobModelsSyncing ? (
-            <div className="mx-1 mb-1 flex items-center gap-2 rounded-md border border-amber-6/60 bg-amber-2/40 px-2 py-1.5">
-              <ProviderIcon
-                providerId={REDROB_MODELS_PROVIDER_ID}
-                providerName={REDROB_MODELS_PROVIDER_NAME}
-                className="size-3.5 shrink-0 text-amber-11"
-                size={14}
-              />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-medium text-foreground">
-                  {REDROB_MODELS_PROVIDER_NAME}
-                </span>
-                <span className="block truncate text-[11px] text-muted-foreground">
-                  Included — pending workspace reload…
-                </span>
-              </span>
-            </div>
-          ) : null}
           <CommandList>
             {(group: ModelSelectGroup) => (
               <CommandGroup
@@ -427,17 +373,17 @@ export function ModelSelect({
               </CommandGroup>
             )}
           </CommandList>
-          {canAddProviders ? (
-            <div className="border-t border-border px-2 py-1.5">
-              <button
-                type="button"
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={handleConnectProvider}
-              >
-                Connect more providers
-              </button>
-            </div>
-          ) : null}
+          {/* Always offered: with no organization policy, adding a provider is
+              never restricted. */}
+          <div className="border-t border-border px-2 py-1.5">
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              onClick={handleConnectProvider}
+            >
+              Connect more providers
+            </button>
+          </div>
           {/* Link to full model picker */}
           <div className="border-t border-border px-2 py-1.5">
             <button
