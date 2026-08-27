@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { t } from "../../../../i18n";
 import { TextInput } from "../../../design-system/text-input";
-import { createDenClient, readDenSettings } from "../../../../app/lib/den";
 import {
   slugifyLibraryItemName,
   type CreateLibraryItemInput,
@@ -34,13 +33,10 @@ const libraryFieldClass = [
   "focus-visible:border-transparent focus-visible:ring-0",
 ].join(" ");
 
-type MarketplaceOption = { id: string; name: string };
-
 export type AddLibraryItemModalProps = {
   open: boolean;
   kind: LibraryAuthorableKind | null;
   busy?: boolean;
-  cloud?: boolean;
   onClose: () => void;
   onCreate: (input: CreateLibraryItemInput) => Promise<string>;
 };
@@ -125,9 +121,6 @@ export function AddLibraryItemModal(props: AddLibraryItemModalProps) {
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
   const [components, setComponents] = useState<LibraryPluginComponentDraft[]>([]);
-  const [shareOrgWide, setShareOrgWide] = useState(false);
-  const [marketplaceId, setMarketplaceId] = useState("");
-  const [marketplaces, setMarketplaces] = useState<MarketplaceOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -138,32 +131,9 @@ export function AddLibraryItemModal(props: AddLibraryItemModalProps) {
     setInstructions("");
     setComponents([]);
     setShareOrgWide(false);
-    setMarketplaceId("");
     setError(null);
     setSubmitting(false);
   }, [props.open, kind]);
-
-  useEffect(() => {
-    if (!props.open || !props.cloud || kind !== "plugin") return;
-    const settings = readDenSettings();
-    const token = settings.authToken?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!token || !orgId) return;
-    let cancelled = false;
-    void createDenClient({
-      baseUrl: settings.baseUrl,
-      token,
-    }).listOrgMarketplaces(orgId).then((items) => {
-      if (!cancelled) {
-        setMarketplaces(items.map((item) => ({ id: item.id, name: item.name })));
-      }
-    }).catch(() => {
-      if (!cancelled) setMarketplaces([]);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [props.open, props.cloud, kind]);
 
   const handleClose = () => {
     if (submitting) return;
@@ -221,8 +191,6 @@ export function AddLibraryItemModal(props: AddLibraryItemModalProps) {
         name: trimmedName,
         description: description.trim(),
         instructions: instructions.trim(),
-        orgWide: shareOrgWide,
-        marketplaceId: marketplaceId || undefined,
         components: kind === "plugin" ? components : undefined,
       });
       props.onClose();
@@ -382,47 +350,6 @@ export function AddLibraryItemModal(props: AddLibraryItemModalProps) {
               )}
             </div>
 
-            {props.cloud ? (
-              <div className="flex flex-col gap-4">
-                <h2 className="text-[16px] font-semibold">{t("extensions.add_plugin_share")}</h2>
-                <label className="flex items-start gap-3 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={shareOrgWide}
-                    disabled={busy}
-                    className="mt-0.5"
-                    onChange={(event) => setShareOrgWide(event.currentTarget.checked)}
-                  />
-                  <span>
-                    {t("extensions.add_plugin_share_org")}
-                    <span className="block text-xs text-dls-secondary">
-                      {t("extensions.add_plugin_share_org_hint")}
-                    </span>
-                  </span>
-                </label>
-                <label className="block">
-                  <div className="mb-1.5 text-xs font-medium text-dls-secondary">
-                    {t("extensions.add_plugin_collection")}
-                  </div>
-                  <select
-                    value={marketplaceId}
-                    disabled={busy}
-                    className={`w-full px-3 py-2 text-sm ${libraryFieldClass}`}
-                    onChange={(event) => setMarketplaceId(event.currentTarget.value)}
-                  >
-                    <option value="">{t("extensions.add_plugin_collection_none")}</option>
-                    {marketplaces.map((marketplace) => (
-                      <option key={marketplace.id} value={marketplace.id}>
-                        {marketplace.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-1.5 text-xs text-dls-secondary">
-                    {t("extensions.add_plugin_collection_hint")}
-                  </p>
-                </label>
-              </div>
-            ) : null}
           </div>
         ) : (
           <div className="flex flex-col gap-5">
@@ -482,46 +409,6 @@ export function AddLibraryItemModal(props: AddLibraryItemModalProps) {
                 </label>
               </>
             )}
-            {props.cloud ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                  <p className="shrink-0 font-mono text-[11px] font-medium tracking-[0.12em] text-dls-secondary">
-                    {t("extensions.add_access_label")}
-                  </p>
-                  <span className="h-px flex-1 bg-dls-border" />
-                </div>
-                <div role="radiogroup" aria-label={t("extensions.add_access_label")} className="flex flex-col gap-1">
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={!shareOrgWide}
-                    disabled={busy}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3.5 py-3 text-left ${shareOrgWide ? "" : "bg-dls-hover"}`}
-                    onClick={() => setShareOrgWide(false)}
-                  >
-                    <span className={`mt-0.5 flex size-[17px] shrink-0 items-center justify-center rounded-full ${shareOrgWide ? "border-[1.5px] border-dls-border" : "bg-foreground"}`} />
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">{t("extensions.add_access_just_me")}</span>
-                      <span className="block text-[13px] text-dls-secondary">{t("extensions.add_access_just_me_hint")}</span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={shareOrgWide}
-                    disabled={busy}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3.5 py-3 text-left ${shareOrgWide ? "bg-dls-hover" : ""}`}
-                    onClick={() => setShareOrgWide(true)}
-                  >
-                    <span className={`mt-0.5 flex size-[17px] shrink-0 items-center justify-center rounded-full ${shareOrgWide ? "bg-foreground" : "border-[1.5px] border-dls-border"}`} />
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">{t("extensions.add_access_everyone")}</span>
-                      <span className="block text-[13px] text-dls-secondary">{t("extensions.add_access_everyone_hint")}</span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            ) : null}
           </div>
         )}
 

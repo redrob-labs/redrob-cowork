@@ -6,18 +6,11 @@ import { Toaster } from "@/components/ui/sonner";
 import { isWebDeployment } from "@/app/lib/redrob-deployment";
 import { hydrateRedrobServerSettingsFromEnv } from "@/app/lib/redrob-server";
 import { isDesktopRuntime } from "@/app/utils";
-import { ConnectLinkProvider } from "@/react-app/domains/cloud/connect-link-provider";
-import { DenAuthProvider } from "@/react-app/domains/cloud/den-auth-provider";
-import { AutomationRunnerBridge } from "@/react-app/domains/automations/automation-runner-bridge";
-import { BrandThemeProvider } from "@/react-app/domains/cloud/brand-theme";
-import { DesktopConfigProvider } from "@/react-app/domains/cloud/desktop-config-provider";
-import { RestrictionNoticeProvider } from "@/react-app/domains/cloud/restriction-notice-provider";
 import { LocalProvider } from "@/react-app/kernel/local-provider";
 import { ServerProvider } from "@/react-app/kernel/server-provider";
 import { ArchitectureMismatchGate } from "./architecture-mismatch-gate";
 import { BootStateProvider } from "./boot-state";
 import { DesktopRuntimeBoot } from "./desktop-runtime-boot";
-import { useEnterpriseActivationRequired } from "@/react-app/domains/cloud/enterprise-activation-gate";
 import { startDebugLogger, stopDebugLogger } from "./debug-logger";
 import { resolveRedrobConnection } from "./redrob-connection";
 import { ReloadCoordinatorProvider } from "./reload-coordinator";
@@ -48,27 +41,14 @@ type AppProvidersProps = {
   children: ReactNode;
 };
 
-function EnterpriseAwareAppProviders({ children }: AppProvidersProps) {
-  const activationRequired = useEnterpriseActivationRequired();
-  if (activationRequired) {
-    return <ConnectLinkProvider>{children}</ConnectLinkProvider>;
-  }
+function LocalAppProviders({ children }: AppProvidersProps) {
   return (
     <>
       <DesktopRuntimeBoot />
-      <ConnectLinkProvider>
-        <DesktopConfigProvider>
-          <BrandThemeProvider>
-            <RestrictionNoticeProvider>
-              <LocalProvider>
-                <AutomationRunnerBridge />
-                <ReloadCoordinatorProvider>{children}</ReloadCoordinatorProvider>
-                <Toaster />
-              </LocalProvider>
-            </RestrictionNoticeProvider>
-          </BrandThemeProvider>
-        </DesktopConfigProvider>
-      </ConnectLinkProvider>
+      <LocalProvider>
+        <ReloadCoordinatorProvider>{children}</ReloadCoordinatorProvider>
+        <Toaster />
+      </LocalProvider>
     </>
   );
 }
@@ -93,9 +73,7 @@ export function AppProviders({ children }: AppProvidersProps) {
     <BootStateProvider>
       <ServerProvider defaultUrl={defaultUrl}>
         <ArchitectureMismatchGate>
-          <DenAuthProvider>
-            <EnterpriseAwareAppProviders>{children}</EnterpriseAwareAppProviders>
-          </DenAuthProvider>
+          <LocalAppProviders>{children}</LocalAppProviders>
         </ArchitectureMismatchGate>
       </ServerProvider>
     </BootStateProvider>

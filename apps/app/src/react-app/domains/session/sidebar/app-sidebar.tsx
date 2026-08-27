@@ -31,7 +31,6 @@ import { LazyMotion, Reorder, domMax, m, useDragControls } from "motion/react";
 
 import { getDisplaySessionTitle } from "../../../../app/lib/session-title";
 import type { WorkspaceInfo } from "../../../../app/lib/desktop";
-import { RedrobWorkDenHelpLink } from "../../workspace/redrob-den-help-link";
 import { NotificationBell } from "../../../shell/notification-center";
 import type {
   WorkspaceConnectionState,
@@ -45,7 +44,6 @@ import {
   isWindowsPlatform,
 } from "../../../../app/utils";
 import { t } from "../../../../i18n";
-import { useBrandLogoUrl } from "../../cloud/brand-theme";
 import { canCreateWorkspaces } from "../../../../app/lib/workspace-creation-policy";
 
 import {
@@ -691,7 +689,6 @@ function RemoteConnectionIssueCard(props: {
             >
               {props.message}
             </div>
-            <RedrobWorkDenHelpLink />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {props.canRecover ? (
                 <Button
@@ -1036,7 +1033,6 @@ export function AppSidebar(props: AppSidebarProps) {
     sessionNumberShortcutByTarget,
   };
 
-  const brandLogoUrl = useBrandLogoUrl();
   const pinnedIds = useSessionManagementStore((state) => state.pinnedIds);
   const pinnedSessions = React.useMemo(() => {
     const sessionsById = new Map<string, GlobalPinnedSessionEntry>();
@@ -1068,18 +1064,6 @@ export function AppSidebar(props: AppSidebarProps) {
         className="border-e-0 group-data-[side=left]:border-e-0 mac:**:data-[sidebar=sidebar]:bg-transparent"
       >
         <div className="hidden h-12 mac:block mac:titlebar-drag"/>
-        {brandLogoUrl ? (
-          <div
-            data-testid="brand-logo"
-            className="flex h-14 shrink-0 items-center px-3 pb-3 pt-2 mac:pt-0"
-          >
-            <img
-              src={brandLogoUrl}
-              alt="Organization logo"
-              className="max-h-9 w-auto max-w-[140px] object-contain object-left"
-            />
-          </div>
-        ) : null}
         {props.conversationHistory ? (
           <div
             className="flex shrink-0 items-center justify-end gap-0.5 px-2 pb-1 max-lg:hidden mac:absolute mac:right-1.5 mac:top-[7px] mac:z-50 mac:p-0 mac:titlebar-no-drag"
