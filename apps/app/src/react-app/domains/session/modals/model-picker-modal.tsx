@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Check, ChevronDown, ChevronRight, RefreshCw, Search, Star } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Search, Star } from "lucide-react";
 
 import {
   Dialog,
@@ -19,17 +19,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
-import { readDenSettings } from "@/app/lib/den";
 import { modelEquals, resolveProviderDisplayName } from "../../../../app/utils";
 import type { ModelOption, ModelRef } from "../../../../app/types";
 import { isRecommendedModel } from "../../../../app/defaults";
 import { ProviderIcon } from "../../../design-system/provider-icon";
-import { useDenAuth } from "../../cloud/den-auth-provider";
-import { usePlatform } from "../../../kernel/platform";
-import {
-  REDROB_MODELS_PROVIDER_ID,
-  REDROB_MODELS_PROVIDER_NAME,
-} from "../../cloud/redrob-models-promo";
 
 export const MODEL_PICKER_DEFAULT_SUBTITLE = "Select a model for this session.";
 export const MODEL_PICKER_UNAVAILABLE_SUBTITLE = "The model you were using is no longer available, please select a different model for this session.";
@@ -42,8 +35,6 @@ export type ModelPickerModalProps = {
   open: boolean;
   options: ModelOption[];
   disabledProviders?: string[];
-  organizationModelsEmpty?: boolean;
-  organizationModelsSettingsUrl?: string;
   query: string;
   setQuery: (value: string) => void;
   subtitle?: string;
@@ -55,18 +46,13 @@ export type ModelPickerModalProps = {
   onOpenSettings: () => void;
   onClose: (options?: { restorePromptFocus?: boolean }) => void;
   /** Den entitlement present. Picker no longer upsells here; callers still pass it. */
-  redrobModelsEntitled?: boolean;
   /** The server is waiting to reload this workspace with Redrob Models. */
-  redrobModelsSyncing?: boolean;
-  onRefreshOrganizationModels?: () => void | Promise<void>;
-  restrictToCloud?: boolean;
 };
 
 type ProviderGroup = {
   id: string;
   name: string;
   isNew: boolean;
-  isCloud: boolean;
   isDisabled: boolean;
   hasCurrent: boolean;
   recommended: ModelOption[];
@@ -76,53 +62,22 @@ type ProviderGroup = {
 export type ModelPickerEmptyState = {
   messageKey: string;
   showConnectProvider: boolean;
-  showRefreshOrganizationModels: boolean;
-  showOrganizationModelsSettings: boolean;
 };
 
 export function resolveModelPickerEmptyState(input: {
   providerGroupCount: number;
   query: string;
-  organizationModelsEmpty: boolean;
-  restrictToCloud: boolean;
-  organizationModelsSettingsUrl?: string;
 }): ModelPickerEmptyState | null {
   if (input.providerGroupCount > 0) return null;
   if (input.query.trim()) {
-    return {
-      messageKey: "models.no_models_match_search",
-      showConnectProvider: false,
-      showRefreshOrganizationModels: false,
-      showOrganizationModelsSettings: false,
-    };
+    return { messageKey: "models.no_models_match_search", showConnectProvider: false };
   }
-  if (input.organizationModelsEmpty) {
-    return {
-      messageKey: "models.organization_models_empty",
-      showConnectProvider: false,
-      showRefreshOrganizationModels: true,
-      showOrganizationModelsSettings: Boolean(input.organizationModelsSettingsUrl),
-    };
-  }
-  return {
-    messageKey: "models.no_models_available",
-    showConnectProvider: !input.restrictToCloud,
-    showRefreshOrganizationModels: false,
-    showOrganizationModelsSettings: false,
-  };
+  return { messageKey: "models.no_models_available", showConnectProvider: true };
 }
 
 export function ModelPickerModal(props: ModelPickerModalProps) {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [expandedProviders, setExpandedProviders] = useState<Set<string>>(new Set());
-  const [refreshingOrganizationModels, setRefreshingOrganizationModels] = useState(false);
-  const denAuth = useDenAuth();
-  const platform = usePlatform();
-  const organizationModelsSettingsUrl = props.organizationModelsSettingsUrl;
-  const organizationProviderLabel = useMemo(
-    () => readDenSettings().activeOrgName?.trim() || t("settings.provider_source_organization"),
-    [denAuth.status],
-  );
 
   const disabledSet = useMemo(
     () => new Set(props.disabledProviders ?? []),
@@ -166,7 +121,6 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
           id: opt.providerID,
           name: opt.description ?? resolveProviderDisplayName(opt.providerID),
           isNew: !!opt.isRecommended,
-          isCloud: opt.source === "cloud",
           isDisabled: disabledSet.has(opt.providerID),
           hasCurrent: false,
           recommended: [],
@@ -217,11 +171,6 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     };
     const current = providerGroups.find((group) => group.hasCurrent);
     if (current) queueExpand(current.id);
-    for (const group of providerGroups) {
-      if (group.isCloud) queueExpand(group.id);
-    }
-    const redrob = providerGroups.find((group) => group.id === REDROB_MODELS_PROVIDER_ID);
-    if (redrob) queueExpand(redrob.id);
     if (toExpand.length === 0) return;
     for (const id of toExpand) autoExpandedRef.current.add(id);
     setExpandedProviders((prev) => {
@@ -244,22 +193,9 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     [props.onSelect],
   );
 
-  const handleRefreshOrganizationModels = useCallback(async () => {
-    if (!props.onRefreshOrganizationModels || refreshingOrganizationModels) return;
-    setRefreshingOrganizationModels(true);
-    try {
-      await props.onRefreshOrganizationModels();
-    } finally {
-      setRefreshingOrganizationModels(false);
-    }
-  }, [props.onRefreshOrganizationModels, refreshingOrganizationModels]);
-
   const emptyState = resolveModelPickerEmptyState({
     providerGroupCount: providerGroups.length,
     query: props.query,
-    organizationModelsEmpty: Boolean(props.organizationModelsEmpty),
-    restrictToCloud: Boolean(props.restrictToCloud),
-    organizationModelsSettingsUrl,
   });
 
   // Escape
@@ -301,22 +237,6 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
             />
           </div>
 
-          {props.redrobModelsSyncing ? (
-            <div className="mb-3 flex shrink-0 items-center overflow-hidden rounded-2xl border border-amber-6/60 bg-amber-2/40">
-              <div className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5">
-                <ProviderIcon providerId={REDROB_MODELS_PROVIDER_ID} providerName={REDROB_MODELS_PROVIDER_NAME} size={18} className="shrink-0 text-amber-11" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-[13px] font-medium text-dls-text">
-                    <span>{REDROB_MODELS_PROVIDER_NAME}</span>
-                  </div>
-                  <div className="truncate text-[11px] text-dls-secondary">
-                    Included on your plan — pending workspace reload.
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
           {/* Content */}
           <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 -mr-1">
             {emptyState ? (
@@ -324,17 +244,6 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                 <div className="text-sm text-dls-secondary">
                   {t(emptyState.messageKey)}
                 </div>
-                {emptyState.showRefreshOrganizationModels ? (
-                  <Button variant="outline" onClick={() => void handleRefreshOrganizationModels()} disabled={refreshingOrganizationModels}>
-                    <RefreshCw className={`mr-1 size-3 ${refreshingOrganizationModels ? "animate-spin" : ""}`} />
-                    {refreshingOrganizationModels ? t("models.refreshing_organization_models") : t("models.refresh_organization_models")}
-                  </Button>
-                ) : null}
-                {emptyState.showOrganizationModelsSettings && organizationModelsSettingsUrl ? (
-                  <Button variant="ghost" onClick={() => platform.openLink(organizationModelsSettingsUrl)}>
-                    {t("models.manage_organization_models")}
-                  </Button>
-                ) : null}
                 {emptyState.showConnectProvider ? (
                   <Button variant="outline" onClick={props.onOpenSettings}>
                     {t("models.connect_provider")}
@@ -352,7 +261,6 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                   onToggleExpand={() => toggleProvider(group.id)}
                   onToggleProvider={props.onToggleProvider}
                   onSelect={handleSelect}
-                  organizationProviderLabel={organizationProviderLabel}
                 />
               ))
             )}
@@ -382,7 +290,6 @@ function ProviderAccordion({
   onToggleExpand,
   onToggleProvider,
   onSelect,
-  organizationProviderLabel,
 }: {
   group: ProviderGroup;
   expanded: boolean;
@@ -391,7 +298,6 @@ function ProviderAccordion({
   onToggleExpand: () => void;
   onToggleProvider?: (providerId: string, enabled: boolean) => void;
   onSelect: (opt: ModelOption) => void;
-  organizationProviderLabel: string;
 }) {
   const totalModels = group.recommended.length + group.other.length;
   const Chevron = expanded ? ChevronDown : ChevronRight;
@@ -418,9 +324,6 @@ function ProviderAccordion({
           <span className="flex shrink-0 items-center gap-1.5">
             {group.isNew ? (
               <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">New</span>
-            ) : null}
-            {group.isCloud ? (
-              <span className="rounded-md bg-blue-3/50 px-1.5 py-0.5 text-[10px] font-medium text-blue-11/70">{organizationProviderLabel}</span>
             ) : null}
             {group.hasCurrent ? (
               <span className="rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">Current</span>

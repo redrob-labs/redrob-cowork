@@ -2,9 +2,6 @@ src/react-app/domains/session/chat/session-page.tsx(10,57): error TS2307: Cannot
 src/react-app/domains/session/chat/session-page.tsx(11,44): error TS2307: Cannot find module '../../../../app/lib/den-sign-in-intent' or its corresponding type declarations.
 src/react-app/domains/session/chat/session-page.tsx(53,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
 src/react-app/domains/session/chat/session-page.tsx(73,54): error TS2307: Cannot find module '../../connections/use-session-mcp-maintenance' or its corresponding type declarations.
-src/react-app/domains/session/modals/model-picker-modal.tsx(22,33): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
-src/react-app/domains/session/modals/model-picker-modal.tsx(27,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
-src/react-app/domains/session/modals/model-picker-modal.tsx(32,8): error TS2307: Cannot find module '../../cloud/redrob-models-promo' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(27,51): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(37,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(38,44): error TS2307: Cannot find module '../../../../app/lib/den-sign-in-intent' or its corresponding type declarations.
@@ -112,6 +109,7 @@ src/react-app/shell/session-route.tsx(965,48): error TS2339: Property 'cloudProv
 src/react-app/shell/session-route.tsx(980,5): error TS2353: Object literal may only specify known properties, and 'cloudProvidersEnabled' does not exist in type 'UseModelPickerInput'.
 src/react-app/shell/session-route.tsx(1046,14): error TS7006: Parameter 'providerId' implicitly has an 'any' type.
 src/react-app/shell/session-route.tsx(1601,41): error TS2551: Property 'refreshCloudOrgProviders' does not exist on type '{ subscribe: (listener: () => void) => () => void; getSnapshot: () => ProviderAuthStoreSnapshot; start: () => void; dispose: () => void; syncFromOptions: () => void; startProviderAuth: (providerId?: string | undefined, methodIndex?: number | undefined) => Promise<...>; ... 7 more ...; closeProviderAuthModal: (option...'. Did you mean 'refreshProviders'?
+src/react-app/shell/session-route.tsx(2930,7): error TS2322: Type '{ open: boolean; options: ModelOption[]; organizationModelsEmpty: any; organizationModelsSettingsUrl: string | undefined; query: string; setQuery: Dispatch<SetStateAction<string>>; ... 12 more ...; restrictToCloud: any; }' is not assignable to type 'IntrinsicAttributes & ModelPickerModalProps'.
 src/react-app/shell/settings-route.tsx(27,3): error TS2305: Module '"@/app/lib/agent-context-diagnostics"' has no exported member 'resolveOrganizationConnectionsProbe'.
 src/react-app/shell/settings-route.tsx(60,51): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-mcp-reconciler' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(61,38): error TS2307: Cannot find module '@/react-app/domains/connections/use-org-mcp-connections' or its corresponding type declarations.
