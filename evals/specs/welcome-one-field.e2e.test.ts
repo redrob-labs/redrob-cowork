@@ -36,7 +36,7 @@ test(title, async ({ evidence }) => {
     env: { PATH: `${capture.binDir}:${process.env.PATH ?? ""}` },
   });
   expect(app.readiness.route).toContain("/welcome");
-  await waitForText(app, "Welcome to OpenWork");
+  await waitForText(app, "Welcome to Redrob Work");
 
   const doors = await evalIn(app, `(() => {
     const join = document.querySelector('[data-testid="welcome-join-org"]');
@@ -44,7 +44,7 @@ test(title, async ({ evidence }) => {
       getStarted: Boolean(document.querySelector('[data-testid="welcome-get-started"]')),
       signIn: Boolean(document.querySelector('[data-testid="welcome-team-signin"]')),
       join: (join?.textContent ?? "").replace(/\\s+/g, " ").trim(),
-      onPremLink: document.body.innerText.includes("Using OpenWork on-premises?"),
+      onPremLink: document.body.innerText.includes("Using Redrob Work on-premises?"),
     };
   })()`);
   if (!isRecord(doors) || typeof doors.join !== "string") {
@@ -70,10 +70,10 @@ test(title, async ({ evidence }) => {
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "The Welcome to OpenWork heading is visible",
+      "The Welcome to Redrob Work heading is visible",
       "A Get started action is offered and there is no Sign in to Cloud door",
       "Join your organization says to paste an invite link, install link, or server URL",
-      "The page does not say Using OpenWork on-premises",
+      "The page does not say Using Redrob Work on-premises",
     ]);
     expect(seen.ok, seen.why).toBe(true);
   }
@@ -93,26 +93,26 @@ test(title, async ({ evidence }) => {
   // Branch 1: a plain organization server URL is saved as the control plane.
   // On desktop the control plane persists in the shell's desktop-bootstrap.json
   // (not localStorage), so read it back through the bridge.
-  await fill(app, "#join-organization-input", "https://openwork.acme.test");
+  await fill(app, "#join-organization-input", "https://redrob.acme.test");
   await clickButton(app, "Connect");
-  await waitForText(app, "Connected to openwork.acme.test. Sign in to continue.", { timeoutMs: 20_000 });
+  await waitForText(app, "Connected to redrob.acme.test. Sign in to continue.", { timeoutMs: 20_000 });
   const savedBaseUrl = await evalIn(
     app,
     `window.__REDROB_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
     { awaitPromise: true },
   );
-  expect(savedBaseUrl).toBe("https://openwork.acme.test");
+  expect(savedBaseUrl).toBe("https://redrob.acme.test");
   evidence.recordAssertionEvidence(
     "Pasting a server URL points the app at that organization server",
-    `status=Connected to openwork.acme.test; savedBaseUrl=${String(savedBaseUrl)}`,
-    savedBaseUrl === "https://openwork.acme.test",
+    `status=Connected to redrob.acme.test; savedBaseUrl=${String(savedBaseUrl)}`,
+    savedBaseUrl === "https://redrob.acme.test",
   );
 
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
       "The join dialog field label mentions invite link, install link, or server URL",
-      "The dialog confirms it connected to openwork.acme.test",
+      "The dialog confirms it connected to redrob.acme.test",
     ]);
     expect(seen.ok, seen.why).toBe(true);
   }
@@ -127,7 +127,7 @@ test(title, async ({ evidence }) => {
     `window.__REDROB_ELECTRON__.invokeDesktop("getDesktopBootstrapConfig").then((config) => config.baseUrl)`,
     { awaitPromise: true },
   );
-  expect(unchangedBaseUrl).toBe("https://openwork.acme.test");
+  expect(unchangedBaseUrl).toBe("https://redrob.acme.test");
   await clickButton(app, "Trust and open invite");
   await waitForText(app, "Your invite opened in the browser", { timeoutMs: 20_000 });
 

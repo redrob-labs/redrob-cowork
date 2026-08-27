@@ -26,7 +26,7 @@ export function hashConnectionIncidentIdentity(
   value: string,
 ): string {
   return createHmac("sha256", diagnosticsConfig().bearerToken)
-    .update("openwork-connect-diagnostics-v1\0")
+    .update("redrob-connect-diagnostics-v1\0")
     .update(kind)
     .update("\0")
     .update(value.trim())

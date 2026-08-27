@@ -13,7 +13,7 @@ import {
   parseDynamicToolUIPart,
   parseStructuredOutputUIPart,
 } from "../src/react-app/domains/session/sync/parse-tool-parts";
-import { parseOpenWorkSessionCreateResult } from "../src/components/tools/openwork-session-create";
+import { parseRedrobWorkSessionCreateResult } from "../src/components/tools/redrob-session-create";
 
 afterEach(() => {
   getReactQueryClient().clear();
@@ -117,7 +117,7 @@ describe("tool part mapper", () => {
     const part = writeToolPart("completed", { configObjectId: "script_1" });
     if (part.state.status !== "completed") throw new Error("Expected completed fixture");
     part.state.metadata = {
-      openworkMcpApp: {
+      redrobMcpApp: {
         content: [{ type: "text", text: "Fallback" }],
         structuredContent: { schemaVersion: "1", value: 42 },
         _meta: { receiptId: "receipt_1" },
@@ -126,7 +126,7 @@ describe("tool part mapper", () => {
 
     expect(parseDynamicToolUIPart(part)?.callProviderMetadata).toEqual({
       opencode: { partId: "part-write" },
-      openwork: {
+      redrob: {
         mcpResult: {
           content: [{ type: "text", text: "Fallback" }],
           structuredContent: { schemaVersion: "1", value: 42 },
@@ -149,7 +149,7 @@ describe("tool part mapper", () => {
         action: {
           type: "connect",
           label: "Connect Acme Tracker",
-          surface: "openwork_your_connections",
+          surface: "redrob_your_connections",
           url: "https://app.redrob.io/dashboard/your-connections?connectionId=emc_acme",
         },
       },
@@ -158,7 +158,7 @@ describe("tool part mapper", () => {
     expect(parseDynamicToolUIPart(writeToolPart("error", {}, {}, error))).toMatchObject({
       state: "output-error",
       callProviderMetadata: {
-        openwork: {
+        redrob: {
           mcpResult: {
             structuredContent: {
               schemaVersion: "1",
@@ -166,9 +166,9 @@ describe("tool part mapper", () => {
               state: "needs_connection",
             },
             _meta: {
-              "openwork/mcpApp": {
+              "redrob/mcpApp": {
                 toolName: "connection_action",
-                resourceUri: "ui://openwork/connection-action/v1/view.html",
+                resourceUri: "ui://redrob/connection-action/v1/view.html",
                 arguments: { connectionId: "emc_acme" },
               },
             },
@@ -199,7 +199,7 @@ describe("tool part mapper", () => {
   });
 
   test("parses session creation output for rich chat rendering", () => {
-    expect(parseOpenWorkSessionCreateResult(JSON.stringify({
+    expect(parseRedrobWorkSessionCreateResult(JSON.stringify({
       ok: true,
       workspaceId: "workspace-a",
       workspace: "Research",
@@ -240,7 +240,7 @@ describe("tool part mapper", () => {
   });
 
   test("session sync defers empty in-progress write tools until input arrives", () => {
-    const syncInput = { workspaceId: "workspace-a", baseUrl: "http://127.0.0.1:1234", openworkToken: "token" };
+    const syncInput = { workspaceId: "workspace-a", baseUrl: "http://127.0.0.1:1234", redrobToken: "token" };
     const cleanup = __createWorkspaceSessionSyncForTest(syncInput);
     const release = trackWorkspaceSessionSync(syncInput, "session-a");
 
@@ -292,7 +292,7 @@ describe("tool part mapper", () => {
     const syncInput = {
       workspaceId: "workspace-a",
       baseUrl: "http://127.0.0.1:1234",
-      openworkToken: "token",
+      redrobToken: "token",
       onSessionCreated: (session: Session) => createdIds.push(session.id),
       onSessionDeleted: (sessionId: string) => deletedIds.push(sessionId),
     };

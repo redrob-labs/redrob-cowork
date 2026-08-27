@@ -10,11 +10,11 @@ import {
 } from "lucide-react";
 
 import type {
-  OpenworkAuditEntry,
-  OpenworkRuntimeConfigStatus,
-  OpenworkServerCapabilities,
-  OpenworkServerDiagnostics,
-} from "../../../../app/lib/openwork-server";
+  RedrobAuditEntry,
+  RedrobRuntimeConfigStatus,
+  RedrobServerCapabilities,
+  RedrobServerDiagnostics,
+} from "../../../../app/lib/redrob-server";
 import type { NukeManifestPreview } from "../../../../app/lib/desktop";
 import type {
   OpencodeConnectStatus,
@@ -42,10 +42,10 @@ import {
 } from "./agent-context-diagnostics-section";
 import { AgentAccessCard } from "@/react-app/domains/settings/cloud/agent-access-card";
 import type {
-  OpenworkCloudMcpHealth,
-  OpenworkCloudMcpProviderModelContext,
-  OpenworkServerClient,
-} from "@/app/lib/openwork-server";
+  RedrobCloudMcpHealth,
+  RedrobCloudMcpProviderModelContext,
+  RedrobServerClient,
+} from "@/app/lib/redrob-server";
 
 const sectionHeaderClass = "flex flex-col gap-1 pb-2";
 const sectionTitleClass = "text-[15px] font-semibold tracking-[-0.2px] text-dls-text";
@@ -64,7 +64,7 @@ type RuntimeSummary = {
   appVersionLabel: string;
   appCommitLabel: string;
   opencodeVersionLabel: string;
-  openworkServerVersionLabel: string;
+  redrobServerVersionLabel: string;
 };
 
 type StatusPill = {
@@ -92,10 +92,10 @@ export type DebugViewProps = {
   developerMode: boolean;
   agentContextDiagnostics: AgentContextDiagnosticsSectionProps;
   agentAccess?: {
-    client: OpenworkServerClient | null;
+    client: RedrobServerClient | null;
     workspaceId: string | null;
-    currentModel: OpenworkCloudMcpProviderModelContext | null;
-    onHealthChange?: (health: OpenworkCloudMcpHealth | null) => void;
+    currentModel: RedrobCloudMcpProviderModelContext | null;
+    onHealthChange?: (health: RedrobCloudMcpHealth | null) => void;
   } | null;
   busy: boolean;
   anyActiveRuns: boolean;
@@ -105,7 +105,7 @@ export type DebugViewProps = {
   runtimeSummary: RuntimeSummary;
   runtimeDebugReportJson: string;
   bootstrapConfigDebugJson: string;
-  runtimeConfigStatus: OpenworkRuntimeConfigStatus | null;
+  runtimeConfigStatus: RedrobRuntimeConfigStatus | null;
   runtimeConfigStatusError: string | null;
   runtimeDebugStatus: string | null;
   onCopyRuntimeDebugReport: () => void | Promise<void>;
@@ -150,33 +150,33 @@ export type DebugViewProps = {
   resetModalBusy: boolean;
   resetStatus: string | null;
   opencodeRestarting: boolean;
-  openworkServerRestarting: boolean;
+  redrobServerRestarting: boolean;
   opencodeServiceStatus: ServiceStatus;
-  openworkServiceStatus: ServiceStatus;
+  redrobServiceStatus: ServiceStatus;
   opencodeLogStatus: string | null;
-  openworkLogStatus: string | null;
+  redrobLogStatus: string | null;
   onCopyOpencodeLogs: () => void | Promise<void>;
   onExportOpencodeLogs: () => void | Promise<void>;
-  onCopyOpenworkLogs: () => void | Promise<void>;
-  onExportOpenworkLogs: () => void | Promise<void>;
+  onCopyRedrobLogs: () => void | Promise<void>;
+  onExportRedrobLogs: () => void | Promise<void>;
   serviceRestartError: string | null;
   onRestartOpencode: () => void | Promise<void>;
-  onRestartOpenworkServer: () => void | Promise<void>;
+  onRestartRedrobServer: () => void | Promise<void>;
   engineCard: RuntimeServiceCard;
   opencodeConnectCard: OpenCodeConnectDebugCard;
-  openworkCard: RuntimeServiceCard;
-  openworkServerDiagnostics: OpenworkServerDiagnostics | null;
+  redrobCard: RuntimeServiceCard;
+  redrobServerDiagnostics: RedrobServerDiagnostics | null;
   runtimeWorkspaceId: string | null;
-  openworkServerCapabilities: OpenworkServerCapabilities | null;
+  redrobServerCapabilities: RedrobServerCapabilities | null;
   pendingPermissions: unknown;
   events: unknown;
   workspaceDebugEvents: unknown;
   workspaceDebugEventsStatus: string | null;
   safeStringify: (value: unknown) => string;
   onClearWorkspaceDebugEvents: () => void | Promise<void>;
-  openworkAuditEntries: OpenworkAuditEntry[];
-  openworkAuditStatus: StatusPill;
-  openworkAuditError: string | null;
+  redrobAuditEntries: RedrobAuditEntry[];
+  redrobAuditStatus: StatusPill;
+  redrobAuditError: string | null;
   opencodeConnectStatus: OpencodeConnectStatus | null;
   opencodeDevModeEnabled: boolean;
   nukeConfigBusy: boolean;
@@ -190,10 +190,10 @@ export type DebugViewProps = {
   onCloseNukeDialog: () => void;
   onSetNukeConfirmationText: (value: string) => void;
   onSetNukeDeleteBootstrap: (value: boolean) => void | Promise<void>;
-  onConfirmNukeOpenworkAndOpencodeConfig: () => void | Promise<void>;
+  onConfirmNukeRedrobAndOpencodeConfig: () => void | Promise<void>;
 };
 
-function formatActor(entry: OpenworkAuditEntry) {
+function formatActor(entry: RedrobAuditEntry) {
   if (entry.actor.type === "host") return t("settings.audit_actor_host");
   if (entry.actor.clientId) return entry.actor.clientId;
   if (entry.actor.tokenHash) return entry.actor.tokenHash;
@@ -260,7 +260,7 @@ function ExecutionDetails(props: { execution: OpencodeExecutionSnapshot }) {
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-wider text-blue-11">OpenCode execution</div>
-          <div className="text-[11px] text-dls-secondary">Command, working directory, and OpenWork-injected environment.</div>
+          <div className="text-[11px] text-dls-secondary">Command, working directory, and Redrob Work-injected environment.</div>
         </div>
         <div className="shrink-0 rounded-full border border-blue-7/30 bg-blue-7/10 px-2 py-1 text-[10px] font-medium text-blue-11">
           redacted
@@ -300,7 +300,7 @@ function formatManagedFileTime(value: number | null | undefined): string {
 }
 
 function RuntimeConfigOwnershipCard(props: {
-  status: OpenworkRuntimeConfigStatus | null;
+  status: RedrobRuntimeConfigStatus | null;
   error: string | null;
 }) {
   return (
@@ -516,8 +516,8 @@ export function DebugView(props: DebugViewProps) {
             {t("settings.debug_opencode_version", { version: props.runtimeSummary.opencodeVersionLabel })}
           </div>
           <div>
-            {t("settings.debug_openwork_server_version", {
-              version: props.runtimeSummary.openworkServerVersionLabel,
+            {t("settings.debug_redrob_server_version", {
+              version: props.runtimeSummary.redrobServerVersionLabel,
             })}
           </div>
         </div>
@@ -551,21 +551,21 @@ export function DebugView(props: DebugViewProps) {
 
         <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
           <ServiceCard
-            title={t("settings.openwork_server_label")}
-            description={t("settings.openwork_config_sidecar_desc")}
-            pill={props.openworkCard}
-            lines={props.openworkCard.lines}
-            stdout={props.openworkCard.stdout ?? null}
-            stderr={props.openworkCard.stderr ?? null}
-            execution={props.openworkCard.execution ?? null}
-            error={props.openworkCard.error ?? null}
-            restarting={props.openworkServerRestarting}
-            restartLabel={t("settings.restart_openwork_server")}
-            onRestart={props.onRestartOpenworkServer}
-            serviceStatus={props.openworkServiceStatus}
-            logStatus={props.openworkLogStatus}
-            onCopyLogs={props.onCopyOpenworkLogs}
-            onExportLogs={props.onExportOpenworkLogs}
+            title={t("settings.redrob_server_label")}
+            description={t("settings.redrob_config_sidecar_desc")}
+            pill={props.redrobCard}
+            lines={props.redrobCard.lines}
+            stdout={props.redrobCard.stdout ?? null}
+            stderr={props.redrobCard.stderr ?? null}
+            execution={props.redrobCard.execution ?? null}
+            error={props.redrobCard.error ?? null}
+            restarting={props.redrobServerRestarting}
+            restartLabel={t("settings.restart_redrob_server")}
+            onRestart={props.onRestartRedrobServer}
+            serviceStatus={props.redrobServiceStatus}
+            logStatus={props.redrobLogStatus}
+            onCopyLogs={props.onCopyRedrobLogs}
+            onExportLogs={props.onExportRedrobLogs}
             isDesktop={isDesktop}
           />
 
@@ -629,7 +629,7 @@ export function DebugView(props: DebugViewProps) {
           <div className={sectionHeaderClass}>
             <div className={sectionTitleClass}>Agent access</div>
             <div className={sectionDescClass}>
-              Test and repair OpenWork Cloud MCP access for this workspace.
+              Test and repair Redrob Work Cloud MCP access for this workspace.
             </div>
           </div>
           <AgentAccessCard
@@ -644,52 +644,52 @@ export function DebugView(props: DebugViewProps) {
       {/* Section: Diagnostics */}
       <div className={cardClass}>
         <div className={sectionHeaderClass}>
-          <div className={sectionTitleClass}>{t("settings.openwork_diagnostics_title")}</div>
+          <div className={sectionTitleClass}>{t("settings.redrob_diagnostics_title")}</div>
           <div className={sectionDescClass}>
             <span className="font-mono text-[11px] text-dls-secondary">
-              {props.openworkServerDiagnostics?.version ?? "—"}
+              {props.redrobServerDiagnostics?.version ?? "—"}
             </span>
           </div>
         </div>
 
-        {props.openworkServerDiagnostics ? (
+        {props.redrobServerDiagnostics ? (
           <div className="grid gap-2 text-[12px] text-dls-secondary md:grid-cols-2">
-            <div>{t("settings.diag_started", { time: formatUptime(props.openworkServerDiagnostics.uptimeMs) })}</div>
+            <div>{t("settings.diag_started", { time: formatUptime(props.redrobServerDiagnostics.uptimeMs) })}</div>
             <div>
               {t("settings.diag_read_only", {
-                value: props.openworkServerDiagnostics.readOnly ? "true" : "false",
+                value: props.redrobServerDiagnostics.readOnly ? "true" : "false",
               })}
             </div>
             <div>
               {t("settings.diag_approval", {
-                mode: props.openworkServerDiagnostics.approval.mode,
-                ms: String(props.openworkServerDiagnostics.approval.timeoutMs),
+                mode: props.redrobServerDiagnostics.approval.mode,
+                ms: String(props.redrobServerDiagnostics.approval.timeoutMs),
               })}
             </div>
-            <div>{t("settings.diag_workspaces", { count: String(props.openworkServerDiagnostics.workspaceCount) })}</div>
+            <div>{t("settings.diag_workspaces", { count: String(props.redrobServerDiagnostics.workspaceCount) })}</div>
             <div>
               {t("settings.diag_selected_workspace", {
-                id: props.openworkServerDiagnostics.selectedWorkspaceId ?? "—",
+                id: props.redrobServerDiagnostics.selectedWorkspaceId ?? "—",
               })}
             </div>
             <div>
               {t("settings.diag_runtime_workspace", {
-                id: props.openworkServerDiagnostics.activeWorkspaceId ?? "—",
+                id: props.redrobServerDiagnostics.activeWorkspaceId ?? "—",
               })}
             </div>
             <div>
               {t("settings.diag_config_path", {
-                path: props.openworkServerDiagnostics.server.configPath ?? t("settings.diag_default"),
+                path: props.redrobServerDiagnostics.server.configPath ?? t("settings.diag_default"),
               })}
             </div>
             <div>
               {t("settings.diag_token_source", {
-                source: props.openworkServerDiagnostics.tokenSource.client,
+                source: props.redrobServerDiagnostics.tokenSource.client,
               })}
             </div>
             <div>
               {t("settings.diag_host_token_source", {
-                source: props.openworkServerDiagnostics.tokenSource.host,
+                source: props.redrobServerDiagnostics.tokenSource.host,
               })}
             </div>
           </div>
@@ -708,17 +708,17 @@ export function DebugView(props: DebugViewProps) {
                 : t("settings.worker_unresolved")}
             </div>
           </div>
-          {props.openworkServerCapabilities ? (
+          {props.redrobServerCapabilities ? (
             <div className="grid gap-2 text-[12px] text-dls-secondary md:grid-cols-2">
-              <div>{t("settings.cap_skills", { value: formatCapability(props.openworkServerCapabilities.skills) })}</div>
-              <div>{t("settings.cap_plugins", { value: formatCapability(props.openworkServerCapabilities.plugins) })}</div>
-              <div>{t("settings.cap_mcp", { value: formatCapability(props.openworkServerCapabilities.mcp) })}</div>
-              <div>{t("settings.cap_commands", { value: formatCapability(props.openworkServerCapabilities.commands) })}</div>
-              <div>{t("settings.cap_config", { value: formatCapability(props.openworkServerCapabilities.config) })}</div>
+              <div>{t("settings.cap_skills", { value: formatCapability(props.redrobServerCapabilities.skills) })}</div>
+              <div>{t("settings.cap_plugins", { value: formatCapability(props.redrobServerCapabilities.plugins) })}</div>
+              <div>{t("settings.cap_mcp", { value: formatCapability(props.redrobServerCapabilities.mcp) })}</div>
+              <div>{t("settings.cap_commands", { value: formatCapability(props.redrobServerCapabilities.commands) })}</div>
+              <div>{t("settings.cap_config", { value: formatCapability(props.redrobServerCapabilities.config) })}</div>
               <div>
                 {t("settings.cap_browser_tools", {
                   value: (() => {
-                    const browser = props.openworkServerCapabilities.toolProviders?.browser;
+                    const browser = props.redrobServerCapabilities.toolProviders?.browser;
                     if (!browser?.enabled) return t("settings.disabled");
                     return `${browser.mode} · ${browser.placement}`;
                   })(),
@@ -727,7 +727,7 @@ export function DebugView(props: DebugViewProps) {
               <div>
                 {t("settings.cap_file_tools", {
                   value: (() => {
-                    const files = props.openworkServerCapabilities.toolProviders?.files;
+                    const files = props.redrobServerCapabilities.toolProviders?.files;
                     if (!files) return t("config.unavailable");
                     return [
                       files.injection ? t("settings.cap_inbox_on") : t("settings.cap_inbox_off"),
@@ -738,8 +738,8 @@ export function DebugView(props: DebugViewProps) {
               </div>
               <div>
                 {t("settings.cap_sandbox", {
-                  value: props.openworkServerCapabilities.sandbox
-                    ? `${props.openworkServerCapabilities.sandbox.backend} (${props.openworkServerCapabilities.sandbox.enabled ? t("settings.on") : t("settings.off")})`
+                  value: props.redrobServerCapabilities.sandbox
+                    ? `${props.redrobServerCapabilities.sandbox.backend} (${props.redrobServerCapabilities.sandbox.enabled ? t("settings.on") : t("settings.off")})`
                     : t("config.unavailable"),
                 })}
               </div>
@@ -762,14 +762,14 @@ export function DebugView(props: DebugViewProps) {
             <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">
               {t("settings.audit_log_title")}
             </div>
-            <div className={`rounded-full border px-2 py-1 text-[11px] font-medium ${props.openworkAuditStatus.className}`}>
-              {props.openworkAuditStatus.label}
+            <div className={`rounded-full border px-2 py-1 text-[11px] font-medium ${props.redrobAuditStatus.className}`}>
+              {props.redrobAuditStatus.label}
             </div>
           </div>
-          {props.openworkAuditError ? <StatusBanner tone="error" message={props.openworkAuditError} /> : null}
-          {props.openworkAuditEntries.length > 0 ? (
+          {props.redrobAuditError ? <StatusBanner tone="error" message={props.redrobAuditError} /> : null}
+          {props.redrobAuditEntries.length > 0 ? (
             <div className="divide-y divide-dls-border/60">
-              {props.openworkAuditEntries.map((entry) => (
+              {props.redrobAuditEntries.map((entry) => (
                 <div key={entry.id} className="flex items-start justify-between gap-4 py-2">
                   <div className="min-w-0">
                     <div className="truncate text-sm text-dls-text">{entry.summary}</div>
@@ -1048,7 +1048,7 @@ export function DebugView(props: DebugViewProps) {
           <div className="rounded-xl border border-green-7/25 bg-green-3/10 px-3 py-2 text-[12px] leading-relaxed text-green-11">
             Safe default: use <strong>Prepare migration data</strong> first. It writes the Electron snapshot only and does
             not replace, quit, or delete the Tauri app. The install handoff keeps rollback backup at{" "}
-            <code className="font-mono">OpenWork.app.migrate-bak</code>.
+            <code className="font-mono">Redrob Work.app.migrate-bak</code>.
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -1119,7 +1119,7 @@ export function DebugView(props: DebugViewProps) {
               size="sm"
               onClick={() => void props.onInstallElectronPreviewFromTauri()}
               disabled={props.electronMigrationBusy || !props.electronMigrationUrl.trim()}
-              title="Requires a trusted artifact URL. macOS keeps OpenWork.app.migrate-bak for rollback."
+              title="Requires a trusted artifact URL. macOS keeps Redrob Work.app.migrate-bak for rollback."
             >
               Start install handoff…
             </Button>
@@ -1208,12 +1208,12 @@ export function DebugView(props: DebugViewProps) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">
-                {t("settings.reset_openwork_title")}
+                {t("settings.reset_redrob_title")}
               </div>
               <div className="text-[12px] text-dls-secondary">
                 {props.opencodeDevModeEnabled
-                  ? t("settings.reset_openwork_desc_dev")
-                  : t("settings.reset_openwork_desc_prod")}
+                  ? t("settings.reset_redrob_desc_dev")
+                  : t("settings.reset_redrob_desc_prod")}
               </div>
             </div>
             <div
@@ -1346,7 +1346,7 @@ export function DebugView(props: DebugViewProps) {
           <AlertDialogCancel disabled={props.nukeConfigBusy}>{t("settings.nuke_cancel")}</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
-            onClick={() => void props.onConfirmNukeOpenworkAndOpencodeConfig()}
+            onClick={() => void props.onConfirmNukeRedrobAndOpencodeConfig()}
             disabled={!canConfirmNuke}
           >
             {props.nukeConfigBusy ? t("settings.removing_local_state") : t("settings.nuke_confirm_button")}

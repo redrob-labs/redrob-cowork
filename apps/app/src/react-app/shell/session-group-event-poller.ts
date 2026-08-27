@@ -1,7 +1,7 @@
-import type { OpenworkSessionGroupEvent } from "@/app/lib/openwork-server";
+import type { RedrobSessionGroupEvent } from "@/app/lib/redrob-server";
 
 export type SessionGroupEventResponse = {
-  items: OpenworkSessionGroupEvent[];
+  items: RedrobSessionGroupEvent[];
   gap?: boolean;
   reset?: boolean;
 };
@@ -19,7 +19,7 @@ export class SessionGroupEventPoller {
   async poll(
     key: string,
     request: (options: { since: number }) => Promise<SessionGroupEventResponse>,
-    apply: (items: OpenworkSessionGroupEvent[]) => Promise<void>,
+    apply: (items: RedrobSessionGroupEvent[]) => Promise<void>,
   ): Promise<void> {
     const currentCursor = this.cursorByWorkspace.get(key) ?? 0;
     try {

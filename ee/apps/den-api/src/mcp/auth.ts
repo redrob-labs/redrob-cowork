@@ -398,7 +398,7 @@ export async function verifyMcpRequest(headers: Headers, optionsInput?: string |
     if (grantLiveness === "check_failed") {
       return mcpJsonResponse(503, {
         error: "mcp_grant_check_unavailable",
-        message: "OpenWork could not verify the token grant. Retry shortly.",
+        message: "Redrob Work could not verify the token grant. Retry shortly.",
         referenceId,
       }, undefined, { "retry-after": "10" })
     }
@@ -428,7 +428,7 @@ export async function verifyMcpRequest(headers: Headers, optionsInput?: string |
     if (sessionLiveness === "check_failed") {
       return mcpJsonResponse(503, {
         error: "mcp_session_check_unavailable",
-        message: "OpenWork could not verify the token session. Retry shortly.",
+        message: "Redrob Work could not verify the token session. Retry shortly.",
         referenceId,
       }, undefined, { "retry-after": "10" })
     }

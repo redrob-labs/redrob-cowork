@@ -16,14 +16,14 @@ test.skipIf(!e2eTestsEnabled)(title, async () => {
   // when the app runs in a sandbox. NOT the repo root either: opening the whole
   // monorepo makes the engine scan node_modules and blocks the renderer past
   // 240s. createLocalWorkspace creates the folder, so it need not pre-exist.
-  const workspace = await createAndSelectWorkspace(app, { path: `/tmp/openwork-app-smoke-${Date.now()}` });
+  const workspace = await createAndSelectWorkspace(app, { path: `/tmp/redrob-app-smoke-${Date.now()}` });
   expect(workspace.workspaceId).toBeTruthy();
-  const route = await evalIn(app, "window.__openworkControl.snapshot().route");
+  const route = await evalIn(app, "window.__redrobControl.snapshot().route");
   expect(route).toBeTruthy();
   await waitFor(app, "document.body.innerText.trim().length > 40", { timeoutMs: 30_000, label: "rendered body text" });
   const shot = await screenshot(app);
   const seen = await validate(shot, [
-    "A ready OpenWork workspace composer with meaningful visible content is on screen",
+    "A ready Redrob Work workspace composer with meaningful visible content is on screen",
     "No generic error or 'Something went wrong' crash message is visible",
   ]);
   expect(seen.ok, seen.why).toBe(true);

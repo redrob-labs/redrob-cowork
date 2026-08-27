@@ -10,7 +10,7 @@ const requirements: TestNeeds = {
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Local managed MCP OAuth skipped — needs: ${missingRequirements.join(", ")}`
-  : "OpenWork owns local MCP OAuth while OpenCode consumes the gateway tools";
+  : "Redrob Work owns local MCP OAuth while OpenCode consumes the gateway tools";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -32,7 +32,7 @@ test(title, async ({ evidence, place }) => {
   const name = `local-managed-${Date.now()}`;
 
   const started = await evalIn(desktop, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
     const token = String(info?.ownerToken ?? info?.clientToken ?? "");
     if (!baseUrl || !token) return { ok: false, error: "Local server credentials unavailable" };
@@ -64,7 +64,7 @@ test(title, async ({ evidence, place }) => {
   expect(callback.ok).toBe(true);
 
   const connected = await evalIn(desktop, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     const baseUrl = String(info?.baseUrl ?? info?.connectUrl ?? "").replace(/\\/+$/, "");
     const token = String(info?.ownerToken ?? info?.clientToken ?? "");
     const response = await fetch(
@@ -78,7 +78,7 @@ test(title, async ({ evidence, place }) => {
   expect(connected.body).toMatchObject({ status: "connected", hasCredential: true, enabled: true });
 
   evidence.recordAssertionEvidence(
-    "The desktop's embedded OpenWork server owns the provider OAuth callback and credential",
+    "The desktop's embedded Redrob Work server owns the provider OAuth callback and credential",
     `Created ${name}; the provider redirected to the local callback; public state reported connected with a credential present.`,
     connected.body.status === "connected" && connected.body.hasCredential === true,
   );

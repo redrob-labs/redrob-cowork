@@ -29,7 +29,7 @@ import { createDenTypeId, normalizeDenTypeId, type DenTypeId } from "@redrob-ee/
 import type { PluginArchActorContext } from "../src/routes/org/plugin-system/access.js"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_pr6"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_pr6"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "local-dev-secret-not-for-production-use!!"
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -1503,7 +1503,7 @@ describe("marketplace cloud readiness payload", () => {
       remoteId: `target-${connectorTargetId}`,
       targetKind: "repository_branch",
       externalTargetRef: "main",
-      targetConfigJson: { branch: "main", repositoryFullName: "openwork/test", installationId: 1 },
+      targetConfigJson: { branch: "main", repositoryFullName: "redrob/test", installationId: 1 },
       createdAt: now,
       updatedAt: now,
     })

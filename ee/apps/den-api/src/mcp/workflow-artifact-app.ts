@@ -16,7 +16,7 @@ import { z } from "zod"
 
 export { workflowArtifactPayloadSchema } from "@redrob/types/workflows"
 
-export const WORKFLOW_ARTIFACT_APP_RESOURCE_URI = "ui://openwork/workflow-artifact/v1/view.html"
+export const WORKFLOW_ARTIFACT_APP_RESOURCE_URI = "ui://redrob/workflow-artifact/v1/view.html"
 export const WORKFLOW_ARTIFACT_APP_TOOL_NAME = "render_workflow_artifact"
 export const LEGACY_WORKFLOW_ARTIFACT_TOOL_NAME = "render_dynamic_artifact"
 export const WORKFLOW_ARTIFACT_APP_SCHEMA_VERSION = workflowArtifactSchemaVersion
@@ -84,7 +84,7 @@ export const WORKFLOW_ARTIFACT_APP_HTML = String.raw`<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>OpenWork Workflow Artifact</title>
+  <title>Redrob Work Workflow Artifact</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -163,7 +163,7 @@ export const WORKFLOW_ARTIFACT_APP_HTML = String.raw`<!doctype html>
   <script>
     (function () {
       'use strict';
-      var INIT_ID = 'openwork-workflow-artifact:init';
+      var INIT_ID = 'redrob-workflow-artifact:init';
       var activeTab = 'preview';
       var payload = null;
       var panel = document.getElementById('panel');
@@ -422,7 +422,7 @@ export const WORKFLOW_ARTIFACT_APP_HTML = String.raw`<!doctype html>
         id: INIT_ID,
         method: 'ui/initialize',
         params: {
-          appInfo: { name: 'OpenWork Workflow Artifact', version: '1.0.0' },
+          appInfo: { name: 'Redrob Work Workflow Artifact', version: '1.0.0' },
           appCapabilities: {},
           protocolVersion: '2026-01-26'
         }
@@ -512,7 +512,7 @@ export function registerAgentWorkflowArtifactApp(input: {
 export function registerAgentWorkflowArtifactResource(server: McpServer) {
   registerAppResource(
     server,
-    "OpenWork Workflow Artifact",
+    "Redrob Work Workflow Artifact",
     WORKFLOW_ARTIFACT_APP_RESOURCE_URI,
     {
       description: "A data-first Preview, Data, and Lineage view for an immutable Workflow result.",

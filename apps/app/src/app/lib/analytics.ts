@@ -1,5 +1,5 @@
 /**
- * Product analytics for the OpenWork desktop app (PostHog, zero-dependency).
+ * Product analytics for the Redrob Work desktop app (PostHog, zero-dependency).
  *
  * Principles (mirrors `den-telemetry.ts`):
  * - Never send message content, file paths, code, or prompts. Only event
@@ -11,7 +11,7 @@
  *   Preferences) turns everything off; an explicitly blank PostHog key means
  *   no network.
  * - Every capture is mirrored into the local app inspector
- *   (`window.__openwork.record("analytics.<event>")`) so coded evals can
+ *   (`window.__redrob.record("analytics.<event>")`) so coded evals can
  *   assert instrumentation without any analytics backend.
  */
 import { denSessionUpdatedEvent, type DenSessionUpdatedDetail } from "./den-session-events";
@@ -29,8 +29,8 @@ const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com";
 const POSTHOG_KEY = resolvePosthogKey(import.meta.env.VITE_REDROB_POSTHOG_KEY, import.meta.env.DEV);
 const POSTHOG_HOST = (ENV_POSTHOG_HOST || DEFAULT_POSTHOG_HOST).replace(/\/+$/, "");
 
-const PREFS_STORAGE_KEY = "openwork.preferences";
-const DISTINCT_ID_STORAGE_KEY = "openwork.analytics.distinctId";
+const PREFS_STORAGE_KEY = "redrob.preferences";
+const DISTINCT_ID_STORAGE_KEY = "redrob.analytics.distinctId";
 const FLUSH_INTERVAL_MS = 10_000;
 const MAX_BATCH = 50;
 

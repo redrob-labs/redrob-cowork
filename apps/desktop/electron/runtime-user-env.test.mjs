@@ -9,9 +9,9 @@ test("resolves the user env store from the effective desktop profile", () => {
   assert.equal(
     resolveUserEnvFilePath({
       HOME: "/Users/example",
-      XDG_CONFIG_HOME: "/tmp/openwork-dev-profile/config",
+      XDG_CONFIG_HOME: "/tmp/redrob-dev-profile/config",
     }),
-    path.join("/tmp/openwork-dev-profile/config", "openwork", "env.json"),
+    path.join("/tmp/redrob-dev-profile/config", "redrob", "env.json"),
   );
 });
 

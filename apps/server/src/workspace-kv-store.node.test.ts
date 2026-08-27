@@ -71,7 +71,7 @@ async function setSessionGroupSchemaVersion(dbPath: string, schemaVersion: numbe
 
 if (typeof process.versions.bun !== "string") {
   test("workspace kv store uses Node SQLite with one shared connection per runtime DB", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openwork-workspace-kv-node-"));
+    const root = await mkdtemp(join(tmpdir(), "redrob-workspace-kv-node-"));
     const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
     const dbPath = join(root, "runtime.sqlite");
     process.env.REDROB_RUNTIME_DB = dbPath;

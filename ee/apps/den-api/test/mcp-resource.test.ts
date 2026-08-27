@@ -17,8 +17,8 @@ describe("deriveDenMcpResource", () => {
     expect(deriveDenMcpResource("https://app.redrob.io", [])).toBe(
       "https://app.redrob.io/api/den/mcp",
     )
-    expect(deriveDenMcpResource("https://app.openwork.software", [])).toBe(
-      "https://app.openwork.software/api/den/mcp",
+    expect(deriveDenMcpResource("https://app.redrob.software", [])).toBe(
+      "https://app.redrob.software/api/den/mcp",
     )
     expect(deriveDenMcpResource("https://den-web-abc123.run.app", [])).toBe(
       "https://den-web-abc123.run.app/api/den/mcp",
@@ -62,7 +62,7 @@ describe("deriveDenMcpResource", () => {
 describe("isHostedWebAppHost", () => {
   test("matches app.* and *.run.app hosts", () => {
     expect(isHostedWebAppHost("app.redrob.io", [])).toBe(true)
-    expect(isHostedWebAppHost("APP.OPENWORK.SOFTWARE", [])).toBe(true)
+    expect(isHostedWebAppHost("APP.REDROB.SOFTWARE", [])).toBe(true)
     expect(isHostedWebAppHost("den-web-abc.run.app", [])).toBe(true)
   })
 

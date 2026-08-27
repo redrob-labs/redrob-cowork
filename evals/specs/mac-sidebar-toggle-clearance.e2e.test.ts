@@ -11,7 +11,7 @@ import { needs, test } from "@redrob/testkit";
  * lands on the session title that the collapsed header reserves space for.
  *
  * The `mac:` Tailwind variant only resolves under
- * `html.openwork-electron.openwork-platform-mac`, which the Electron preload
+ * `html.redrob-electron.redrob-platform-mac`, which the Electron preload
  * adds solely when `process.platform === "darwin"`. On any other platform the
  * floating toggle is `display: none` and every claim below would pass
  * vacuously, so this spec refuses to run there rather than reporting a green
@@ -175,7 +175,7 @@ test.skipIf(!enabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({ name: "mac-sidebar-toggle-clearance" });
   await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-mac-sidebar-toggle-clearance-${Date.now()}`,
+    path: `/tmp/redrob-mac-sidebar-toggle-clearance-${Date.now()}`,
   });
 
   await waitFor(app, `Boolean(document.querySelector('[data-slot="sidebar-trigger"]'))`, {

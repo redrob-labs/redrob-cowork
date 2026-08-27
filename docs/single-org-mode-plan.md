@@ -2,7 +2,7 @@
 
 Status: implemented first pass
 Owner: self-host / enterprise
-Related: `packaging/helm/openwork-ee`, `ee/apps/den-api/src/auth.ts`, `ee/apps/den-api/src/orgs.ts`, `ee/apps/den-web/app/(den)`
+Related: `packaging/helm/redrob-ee`, `ee/apps/den-api/src/auth.ts`, `ee/apps/den-api/src/orgs.ts`, `ee/apps/den-web/app/(den)`
 
 Implementation note: this document started as the plan for the subagent split.
 The first pass now implements the default `single_org` mode, singleton org
@@ -158,9 +158,9 @@ Frontend:
 
 Packaging and docs:
 
-- `packaging/helm/openwork-ee/values.yaml`
-- `packaging/helm/openwork-ee/templates/configmap.yaml`
-- `packaging/helm/openwork-ee/README.md`
+- `packaging/helm/redrob-ee/values.yaml`
+- `packaging/helm/redrob-ee/templates/configmap.yaml`
+- `packaging/helm/redrob-ee/README.md`
 - `packages/docs/start-here/self-host.mdx`
 
 ## Implementation Work Packages
@@ -175,9 +175,9 @@ Owner: Helm/config worker
 Files:
 
 - `ee/apps/den-api/src/env.ts`
-- `packaging/helm/openwork-ee/values.yaml`
-- `packaging/helm/openwork-ee/templates/configmap.yaml`
-- `packaging/helm/openwork-ee/README.md`
+- `packaging/helm/redrob-ee/values.yaml`
+- `packaging/helm/redrob-ee/templates/configmap.yaml`
+- `packaging/helm/redrob-ee/README.md`
 - `packages/docs/start-here/self-host.mdx`
 
 Tasks:
@@ -380,8 +380,8 @@ Baseline check on 2026-07-05 after dependency repair:
 Helm render checks after config work:
 
 ```bash
-helm template openwork-ee ./packaging/helm/openwork-ee --set image.tag=test | rg "DEN_ORG_MODE|DEN_SINGLE"
-helm template openwork-ee ./packaging/helm/openwork-ee --set config.tenancy.mode=multi_org --set image.tag=test | rg "DEN_ORG_MODE"
+helm template redrob-ee ./packaging/helm/redrob-ee --set image.tag=test | rg "DEN_ORG_MODE|DEN_SINGLE"
+helm template redrob-ee ./packaging/helm/redrob-ee --set config.tenancy.mode=multi_org --set image.tag=test | rg "DEN_ORG_MODE"
 ```
 
 Local `helm` is not installed in the current Codex environment, so use CI or an
@@ -411,13 +411,13 @@ Validation update on 2026-07-05:
     `evals/results/2026-07-05T15-25-15-884Z/fraimz.html`.
 9. Native `helm version --short` failed because Helm is not installed locally.
    Helm validation was completed through OrbStack Docker instead:
-   - `docker run --rm -v /Users/omar/code/openwork/packaging/helm/openwork-ee:/chart:ro alpine/helm:3.15.4 version --short`
+   - `docker run --rm -v /Users/omar/code/redrob/packaging/helm/redrob-ee:/chart:ro alpine/helm:3.15.4 version --short`
      returned `v3.15.4+gfa9efb0`.
-   - `docker run --rm -v /Users/omar/code/openwork/packaging/helm/openwork-ee:/chart:ro alpine/helm:3.15.4 lint /chart --set image.tag=test`
+   - `docker run --rm -v /Users/omar/code/redrob/packaging/helm/redrob-ee:/chart:ro alpine/helm:3.15.4 lint /chart --set image.tag=test`
      passed with 0 chart failures.
-   - `docker run --rm -v /Users/omar/code/openwork/packaging/helm/openwork-ee:/chart:ro alpine/helm:3.15.4 template openwork-ee /chart --set image.tag=test --show-only templates/configmap.yaml`
+   - `docker run --rm -v /Users/omar/code/redrob/packaging/helm/redrob-ee:/chart:ro alpine/helm:3.15.4 template redrob-ee /chart --set image.tag=test --show-only templates/configmap.yaml`
      rendered `DEN_ORG_MODE: "single_org"` and singleton settings.
-   - `docker run --rm -v /Users/omar/code/openwork/packaging/helm/openwork-ee:/chart:ro alpine/helm:3.15.4 template openwork-ee /chart --set image.tag=test --set config.tenancy.mode=multi_org --show-only templates/configmap.yaml`
+   - `docker run --rm -v /Users/omar/code/redrob/packaging/helm/redrob-ee:/chart:ro alpine/helm:3.15.4 template redrob-ee /chart --set image.tag=test --set config.tenancy.mode=multi_org --show-only templates/configmap.yaml`
      rendered `DEN_ORG_MODE: "multi_org"`.
 
 ## Orchestration Plan

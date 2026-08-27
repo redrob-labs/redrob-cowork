@@ -34,7 +34,7 @@ test("connection-action and plugin-flow cards publish standard MCP App contracts
 
   evidence.recordAssertionEvidence(
     "Connection steering is an MCP App",
-    "The gateway serves ui://openwork/connection-action/v1/view.html with an app-only connection_action tool, and connection_status payloads map to schema-valid cards carrying the exact human action plus a same-server openwork/mcpApp launch.",
+    "The gateway serves ui://redrob/connection-action/v1/view.html with an app-only connection_action tool, and connection_status payloads map to schema-valid cards carrying the exact human action plus a same-server redrob/mcpApp launch.",
     true,
   )
   evidence.recordAssertionEvidence(

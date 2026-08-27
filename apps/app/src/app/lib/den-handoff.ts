@@ -16,7 +16,7 @@ import {
 } from "./den-sign-in-intent";
 
 type DenClient = ReturnType<typeof createDenClient>;
-export const DEN_HANDOFF_AUTO_CONTINUE_KEY = "openwork.den.handoffAutoContinueAt";
+export const DEN_HANDOFF_AUTO_CONTINUE_KEY = "redrob.den.handoffAutoContinueAt";
 
 export type HandoffActiveOrg = {
   id: string;
@@ -62,7 +62,7 @@ export async function exchangeHandoffAndSignIn(
   grant: string,
   options: ExchangeHandoffOptions,
 ): Promise<ExchangeHandoffResult> {
-  const fallback = options.fallbackErrorMessage ?? "Failed to sign in to OpenWork Cloud.";
+  const fallback = options.fallbackErrorMessage ?? "Failed to sign in to Redrob Work Cloud.";
   const storedSettings = readDenSettings();
   const apiBaseUrl = options.apiBaseUrl ?? (
     storedSettings.baseUrl === resolveDenBaseUrls(options.baseUrl).baseUrl

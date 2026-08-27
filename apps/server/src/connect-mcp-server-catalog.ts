@@ -12,23 +12,23 @@ import { externalFetch } from "./server-fetch.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
 import { createWorkspaceKvStore } from "./workspace-kv-store.js";
 
-export const CONNECT_MCP_SERVER_INDEX_URI = "openwork://connect/mcp-servers/index.json";
-export const CONNECT_MCP_SERVER_INDEX_SCHEMA_VERSION = "openwork.connect/mcp-servers/1";
-export const CONNECT_MCP_APP_HOST_NAME_PREFIX = "openwork-app-host-connect-";
-export const CONNECT_MCP_SERVER_NAME_PREFIX = "openwork-connect-";
-export const CONNECT_MCP_APP_HOST_CAPABILITY_HEADER = "x-openwork-mcp-client-capabilities";
+export const CONNECT_MCP_SERVER_INDEX_URI = "redrob://connect/mcp-servers/index.json";
+export const CONNECT_MCP_SERVER_INDEX_SCHEMA_VERSION = "redrob.connect/mcp-servers/1";
+export const CONNECT_MCP_APP_HOST_NAME_PREFIX = "redrob-app-host-connect-";
+export const CONNECT_MCP_SERVER_NAME_PREFIX = "redrob-connect-";
+export const CONNECT_MCP_APP_HOST_CAPABILITY_HEADER = "x-redrob-mcp-client-capabilities";
 export const CONNECT_MCP_APP_HOST_CAPABILITY = "mcp-app-host-v1";
 
 const BUILTIN_APP_HOST_CLOUD_ORIGINS = new Set([
   "https://api.redrob.io",
   "https://app.redrob.io",
-  "https://api.openwork.software",
-  "https://app.openwork.software",
+  "https://api.redrob.software",
+  "https://app.redrob.software",
 ]);
 
 const BUILTIN_APP_HOST_GATEWAY_PROXY_ORIGINS = new Map([
   ["https://app.redrob.io", "https://api.redrob.io"],
-  ["https://app.openwork.software", "https://api.openwork.software"],
+  ["https://app.redrob.software", "https://api.redrob.software"],
 ]);
 
 const indexSchema = z.object({
@@ -46,14 +46,14 @@ const appHostCredentialSchema = z.object({
   origin: z.string().url(),
 });
 
-export type OpenWorkConnectMcpServerIndex = z.infer<typeof indexSchema>;
+export type RedrobWorkConnectMcpServerIndex = z.infer<typeof indexSchema>;
 
-const emptyIndex = (): OpenWorkConnectMcpServerIndex => ({
+const emptyIndex = (): RedrobWorkConnectMcpServerIndex => ({
   schemaVersion: CONNECT_MCP_SERVER_INDEX_SCHEMA_VERSION,
   servers: [],
 });
 
-const appHostCatalogStore = createWorkspaceKvStore<OpenWorkConnectMcpServerIndex>({
+const appHostCatalogStore = createWorkspaceKvStore<RedrobWorkConnectMcpServerIndex>({
   tableName: "connect_mcp_app_host_catalogs",
   valueColumn: "catalog_json",
   parse: (json) => {
@@ -67,9 +67,9 @@ const appHostCatalogStore = createWorkspaceKvStore<OpenWorkConnectMcpServerIndex
   serialize: (value) => JSON.stringify(value),
 });
 
-type OpenWorkConnectMcpAppHostCredential = z.infer<typeof appHostCredentialSchema>;
+type RedrobWorkConnectMcpAppHostCredential = z.infer<typeof appHostCredentialSchema>;
 
-const appHostAuthorizationStore = createWorkspaceKvStore<OpenWorkConnectMcpAppHostCredential | null>({
+const appHostAuthorizationStore = createWorkspaceKvStore<RedrobWorkConnectMcpAppHostCredential | null>({
   tableName: "connect_mcp_app_host_authorizations",
   valueColumn: "authorization_json",
   parse: (json) => {
@@ -101,7 +101,7 @@ function endpointOrigin(value: unknown): string | null {
 
 function normalizeAppHostProxyUrl(
   cloudMcpUrl: unknown,
-  server: OpenWorkConnectMcpServerIndex["servers"][number],
+  server: RedrobWorkConnectMcpServerIndex["servers"][number],
 ): string | null {
   if (typeof cloudMcpUrl !== "string") return null;
   let cloudEndpoint: URL;
@@ -158,23 +158,23 @@ export function connectMcpAppHostName(connectionId: string): string {
   return `${CONNECT_MCP_APP_HOST_NAME_PREFIX}${digest}`;
 }
 
-export async function readOpenWorkConnectMcpAppHostCatalog(
+export async function readRedrobWorkConnectMcpAppHostCatalog(
   config: ServerConfig,
   workspaceId: string,
-): Promise<OpenWorkConnectMcpServerIndex> {
+): Promise<RedrobWorkConnectMcpServerIndex> {
   return await appHostCatalogStore.get(config, workspaceId) ?? emptyIndex();
 }
 
-export async function writeOpenWorkConnectMcpAppHostCatalog(
+export async function writeRedrobWorkConnectMcpAppHostCatalog(
   config: ServerConfig,
   workspaceId: string,
-  catalog: OpenWorkConnectMcpServerIndex,
+  catalog: RedrobWorkConnectMcpServerIndex,
 ): Promise<void> {
   const parsed = indexSchema.safeParse(catalog);
   await appHostCatalogStore.set(config, workspaceId, parsed.success ? parsed.data : emptyIndex());
 }
 
-export async function readOpenWorkConnectMcpAppHostAuthorization(
+export async function readRedrobWorkConnectMcpAppHostAuthorization(
   config: ServerConfig,
   workspaceId: string,
   endpointUrl: string,
@@ -185,7 +185,7 @@ export async function readOpenWorkConnectMcpAppHostAuthorization(
   return privateAppHostAuthorization(credential.authorization);
 }
 
-export async function writeOpenWorkConnectMcpAppHostAuthorization(
+export async function writeRedrobWorkConnectMcpAppHostAuthorization(
   config: ServerConfig,
   workspaceId: string,
   value: string,
@@ -200,23 +200,23 @@ export async function writeOpenWorkConnectMcpAppHostAuthorization(
   );
 }
 
-export async function findOpenWorkConnectMcpAppHostServer(
+export async function findRedrobWorkConnectMcpAppHostServer(
   config: ServerConfig,
   workspaceId: string,
   reference: { connectionId?: string; serverName?: string },
-): Promise<OpenWorkConnectMcpServerIndex["servers"][number] | null> {
-  const catalog = await readOpenWorkConnectMcpAppHostCatalog(config, workspaceId);
+): Promise<RedrobWorkConnectMcpServerIndex["servers"][number] | null> {
+  const catalog = await readRedrobWorkConnectMcpAppHostCatalog(config, workspaceId);
   return catalog.servers.find((server) => (
     (reference.connectionId !== undefined && server.connectionId === reference.connectionId)
     || (reference.serverName !== undefined && connectMcpAppHostName(server.connectionId) === reference.serverName)
   )) ?? null;
 }
 
-export async function readOpenWorkConnectMcpServerIndex(
+export async function readRedrobWorkConnectMcpServerIndex(
   cloudMcp: Record<string, unknown>,
   appHostAuthorization: string,
   fetcher: McpFetch = externalFetch,
-): Promise<OpenWorkConnectMcpServerIndex | null> {
+): Promise<RedrobWorkConnectMcpServerIndex | null> {
   if (!await trustedAppHostCloudEndpoint(cloudMcp)) return null;
   const text = await readMcpResourceText({
     config: {
@@ -228,12 +228,12 @@ export async function readOpenWorkConnectMcpServerIndex(
     },
     uri: CONNECT_MCP_SERVER_INDEX_URI,
     fetcher,
-    clientName: "openwork-server-connect-mcp-catalog",
+    clientName: "redrob-server-connect-mcp-catalog",
   });
   if (text === null) return null;
   const parsed = indexSchema.safeParse(JSON.parse(text));
   if (!parsed.success) return null;
-  const servers: OpenWorkConnectMcpServerIndex["servers"] = [];
+  const servers: RedrobWorkConnectMcpServerIndex["servers"] = [];
   for (const server of parsed.data.servers) {
     const url = normalizeAppHostProxyUrl(cloudMcp.url, server);
     if (!url) return null;
@@ -247,26 +247,26 @@ export async function readOpenWorkConnectMcpServerIndex(
  * cached catalog may be stale. Unlike startup reconciliation, an unavailable
  * opportunistic refresh preserves the last known-good catalog.
  */
-export async function refreshOpenWorkConnectMcpAppHostCatalog(
+export async function refreshRedrobWorkConnectMcpAppHostCatalog(
   config: ServerConfig,
   workspaceId: string,
   fetcher?: McpFetch,
 ): Promise<{ status: "synced" | "unavailable"; appHostNames: string[] }> {
-  const cloudMcp = await readRuntimeMcpConfig(config, workspaceId, "openwork-cloud");
+  const cloudMcp = await readRuntimeMcpConfig(config, workspaceId, "redrob-cloud");
   if (!cloudMcp || !await trustedAppHostCloudEndpoint(cloudMcp)) {
     return { status: "unavailable", appHostNames: [] };
   }
-  const appHostAuthorization = await readOpenWorkConnectMcpAppHostAuthorization(
+  const appHostAuthorization = await readRedrobWorkConnectMcpAppHostAuthorization(
     config,
     workspaceId,
     String(cloudMcp.url),
   );
   if (!appHostAuthorization) return { status: "unavailable", appHostNames: [] };
 
-  const index = await readOpenWorkConnectMcpServerIndex(cloudMcp, appHostAuthorization, fetcher).catch(() => null);
+  const index = await readRedrobWorkConnectMcpServerIndex(cloudMcp, appHostAuthorization, fetcher).catch(() => null);
   if (!index) return { status: "unavailable", appHostNames: [] };
 
-  await writeOpenWorkConnectMcpAppHostCatalog(config, workspaceId, index);
+  await writeRedrobWorkConnectMcpAppHostCatalog(config, workspaceId, index);
   return {
     status: "synced",
     appHostNames: index.servers.map((server) => connectMcpAppHostName(server.connectionId)).sort(),
@@ -275,10 +275,10 @@ export async function refreshOpenWorkConnectMcpAppHostCatalog(
 
 /**
  * Keeps provider descriptors private to the Desktop App host and removes any
- * legacy OpenWork-owned provider endpoints from the model-facing runtime.
+ * legacy Redrob Work-owned provider endpoints from the model-facing runtime.
  * User-authored MCP configurations and durable provider records are untouched.
  */
-export async function reconcileOpenWorkConnectMcpServers(input: {
+export async function reconcileRedrobWorkConnectMcpServers(input: {
   config: ServerConfig;
   workspace: WorkspaceInfo;
   cloudMcp: Record<string, unknown>;
@@ -287,7 +287,7 @@ export async function reconcileOpenWorkConnectMcpServers(input: {
 }): Promise<{ status: "synced" | "unavailable"; appHostNames: string[]; removedNames: string[] }> {
   const trustedCloudEndpoint = await trustedAppHostCloudEndpoint(input.cloudMcp);
   if (trustedCloudEndpoint && input.appHostAuthorization !== undefined) {
-    await writeOpenWorkConnectMcpAppHostAuthorization(
+    await writeRedrobWorkConnectMcpAppHostAuthorization(
       input.config,
       input.workspace.id,
       input.appHostAuthorization,
@@ -295,17 +295,17 @@ export async function reconcileOpenWorkConnectMcpServers(input: {
     );
   }
   const appHostAuthorization = trustedCloudEndpoint
-    ? await readOpenWorkConnectMcpAppHostAuthorization(
+    ? await readRedrobWorkConnectMcpAppHostAuthorization(
       input.config,
       input.workspace.id,
       String(input.cloudMcp.url),
     )
     : null;
   const index = trustedCloudEndpoint && appHostAuthorization
-    ? await readOpenWorkConnectMcpServerIndex(input.cloudMcp, appHostAuthorization, input.fetcher).catch(() => null)
+    ? await readRedrobWorkConnectMcpServerIndex(input.cloudMcp, appHostAuthorization, input.fetcher).catch(() => null)
     : null;
   const privateCatalog = index ?? emptyIndex();
-  await writeOpenWorkConnectMcpAppHostCatalog(input.config, input.workspace.id, privateCatalog);
+  await writeRedrobWorkConnectMcpAppHostCatalog(input.config, input.workspace.id, privateCatalog);
 
   let removedNames: string[] = [];
   await writeRuntimeOpencodeConfig(input.config, input.workspace.id, (current) => {

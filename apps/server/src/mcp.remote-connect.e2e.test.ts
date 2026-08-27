@@ -31,7 +31,7 @@ function serverConfig(workspaceRoot: string): ServerConfig {
 
 describe("mcp remote connect flow", () => {
   test("adds, lists, and removes a remote MCP without OAuth", async () => {
-    const workspaceRoot = await mkdtemp(join(tmpdir(), "openwork-mcp-remote-e2e-"));
+    const workspaceRoot = await mkdtemp(join(tmpdir(), "redrob-mcp-remote-e2e-"));
     const previousDb = process.env.REDROB_RUNTIME_DB;
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     const config = serverConfig(workspaceRoot);
@@ -55,7 +55,7 @@ describe("mcp remote connect flow", () => {
       expect(item?.source).toBe("config.remote");
 
       await expect(readFile(join(workspaceRoot, "opencode.jsonc"), "utf8")).rejects.toThrow();
-      await expect(stat(join(workspaceRoot, ".opencode", "openwork.json"))).rejects.toThrow();
+      await expect(stat(join(workspaceRoot, ".opencode", "redrob.json"))).rejects.toThrow();
       expect((await readRuntimeOpencodeConfig(config, WORKSPACE_ID)).mcp?.["simple-remote"]?.url).toBe("https://example.com/mcp");
 
       const removed = await removeMcp(config, WORKSPACE_ID, "simple-remote");

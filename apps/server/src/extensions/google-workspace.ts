@@ -2,7 +2,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:
 import { createServer, type Server } from "node:http";
 import { chmod, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
-import { openworkServerConfigPath } from "@redrob/paths";
+import { redrobServerConfigPath } from "@redrob/paths";
 
 import { ApiError } from "../errors.js";
 import { externalFetch } from "../server-fetch.js";
@@ -56,7 +56,7 @@ export const GOOGLE_WORKSPACE_EXTENSION_ACTIONS = [
     extensionId: GOOGLE_WORKSPACE_EXTENSION_ID,
     action: "status",
     title: "Google Workspace status",
-    description: "Check whether Google Workspace is connected and ready for OpenWork extension actions.",
+    description: "Check whether Google Workspace is connected and ready for Redrob Work extension actions.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
@@ -111,12 +111,12 @@ export const GOOGLE_WORKSPACE_EXTENSION_ACTIONS = [
     extensionId: GOOGLE_WORKSPACE_EXTENSION_ID,
     action: "gmail_create_reply_draft",
     title: "Create Gmail reply draft",
-    description: "Create a Gmail draft reply in an existing thread. This does not send email. Requires Gmail read access (gmail.readonly scope). OpenWork appends the quoted conversation automatically; do not include quoted history. Returns draftUrl and threadUrl; always share draftUrl with the user so they can review and send in Gmail.",
+    description: "Create a Gmail draft reply in an existing thread. This does not send email. Requires Gmail read access (gmail.readonly scope). Redrob Work appends the quoted conversation automatically; do not include quoted history. Returns draftUrl and threadUrl; always share draftUrl with the user so they can review and send in Gmail.",
     inputSchema: {
       type: "object",
       properties: {
         messageId: { type: "string", description: "Gmail message id to reply to." },
-        body: { type: "string", description: "Plain text reply body. Write plain prose with no markdown syntax; do not include quoted history because OpenWork appends it automatically." },
+        body: { type: "string", description: "Plain text reply body. Write plain prose with no markdown syntax; do not include quoted history because Redrob Work appends it automatically." },
         replyAll: { type: "boolean", description: "Reply to everyone on the original message. Defaults to true." },
       },
       required: ["messageId", "body"],
@@ -170,7 +170,7 @@ export const GOOGLE_WORKSPACE_EXTENSION_ACTIONS = [
     extensionId: GOOGLE_WORKSPACE_EXTENSION_ID,
     action: "drive_search_files",
     title: "Search Drive files",
-    description: "Search files available to OpenWork through the connected Google Drive scope. With full Drive access enabled, this searches the entire Drive.",
+    description: "Search files available to Redrob Work through the connected Google Drive scope. With full Drive access enabled, this searches the entire Drive.",
     inputSchema: {
       type: "object",
       properties: {
@@ -185,7 +185,7 @@ export const GOOGLE_WORKSPACE_EXTENSION_ACTIONS = [
     extensionId: GOOGLE_WORKSPACE_EXTENSION_ID,
     action: "drive_read_file",
     title: "Read Drive file",
-    description: "Read a Drive file available to OpenWork by file id.",
+    description: "Read a Drive file available to Redrob Work by file id.",
     inputSchema: {
       type: "object",
       properties: {
@@ -199,7 +199,7 @@ export const GOOGLE_WORKSPACE_EXTENSION_ACTIONS = [
     extensionId: GOOGLE_WORKSPACE_EXTENSION_ID,
     action: "drive_update_file",
     title: "Update Drive file",
-    description: "Replace the plain text content of a Drive file available to OpenWork by file id.",
+    description: "Replace the plain text content of a Drive file available to Redrob Work by file id.",
     inputSchema: {
       type: "object",
       properties: {
@@ -299,7 +299,7 @@ function readStringField(value: unknown, key: string): string {
 }
 
 function configDir(config: ServerConfig): string {
-  return dirname(config.configPath?.trim() || openworkServerConfigPath());
+  return dirname(config.configPath?.trim() || redrobServerConfigPath());
 }
 
 function googleWorkspaceCredentials() {
@@ -608,7 +608,7 @@ async function refreshGoogleWorkspaceVault(record: Record<string, unknown>) {
 async function googleWorkspaceAccessToken(config: ServerConfig): Promise<{ record: Record<string, unknown>; accessToken: string }> {
   const vault = await readGoogleWorkspaceVault(config);
   const record = googleWorkspacePrimaryRecord(vault);
-  if (!record) throw new ApiError(400, "google_workspace_not_connected", "Connect Google Workspace in OpenWork Settings to use this tool.");
+  if (!record) throw new ApiError(400, "google_workspace_not_connected", "Connect Google Workspace in Redrob Work Settings to use this tool.");
   const refreshed = await refreshGoogleWorkspaceVault(record);
   const refreshedAccountId = googleWorkspaceAccountId(refreshed);
   if (refreshedAccountId) {
@@ -785,7 +785,7 @@ function gmailRawMessage(input: { to: string[]; cc?: string[]; bcc?: string[]; s
     body,
   ].filter((line): line is string => typeof line === "string").join("\r\n");
 
-  const boundary = `openwork-${randomBytes(16).toString("hex")}`;
+  const boundary = `redrob-${randomBytes(16).toString("hex")}`;
   return [
     ...headers,
     "MIME-Version: 1.0",
@@ -1308,11 +1308,11 @@ export async function googleWorkspaceRunScopeSmokeTest(config: ServerConfig) {
   if (!email) throw new Error("Google account email is unavailable.");
   await fetchGoogleJson("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1", { headers: { Authorization: `Bearer ${accessToken}` } });
   const createdAt = new Date().toISOString();
-  const driveBoundary = `openwork_${randomBytes(8).toString("hex")}`;
+  const driveBoundary = `redrob_${randomBytes(8).toString("hex")}`;
   const driveFile = await fetchGoogleJson("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink", {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": `multipart/related; boundary=${driveBoundary}` },
-    body: multipartRelatedBody({ name: "OpenWork Google Workspace smoke test.txt", mimeType: "text/plain" }, `OpenWork Google Workspace smoke test created at ${createdAt}.`, driveBoundary),
+    body: multipartRelatedBody({ name: "Redrob Work Google Workspace smoke test.txt", mimeType: "text/plain" }, `Redrob Work Google Workspace smoke test created at ${createdAt}.`, driveBoundary),
   });
   if (isRecord(driveFile) && typeof driveFile.id === "string") {
     const response = await externalFetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(driveFile.id)}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -1321,7 +1321,7 @@ export async function googleWorkspaceRunScopeSmokeTest(config: ServerConfig) {
   const draft = await fetchGoogleJson("https://gmail.googleapis.com/gmail/v1/users/me/drafts", {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ message: { raw: base64UrlString(gmailRawMessage({ to: [email], subject: "OpenWork Google Workspace smoke test draft", body: `This draft was created by OpenWork to verify Gmail draft access at ${createdAt}.\nOpenWork does not send this email automatically.` })) } }),
+    body: JSON.stringify({ message: { raw: base64UrlString(gmailRawMessage({ to: [email], subject: "Redrob Work Google Workspace smoke test draft", body: `This draft was created by Redrob Work to verify Gmail draft access at ${createdAt}.\nRedrob Work does not send this email automatically.` })) } }),
   });
   return googleWorkspaceStatusPayload(record, {
     testStatus: "Calendar read, Drive file create/read, and Gmail draft creation verified.",
@@ -1421,7 +1421,7 @@ export function createGoogleWorkspaceConnectFlowManager(config: ServerConfig) {
         try {
           const flow = flows.get(flowId);
           if (!flow) {
-            await finish(googleWorkspaceCallbackPage(410, "Google Workspace connection expired", "Return to OpenWork and start connection again."));
+            await finish(googleWorkspaceCallbackPage(410, "Google Workspace connection expired", "Return to Redrob Work and start connection again."));
             return;
           }
           const url = new URL(request.url ?? "/", "http://127.0.0.1");
@@ -1445,7 +1445,7 @@ export function createGoogleWorkspaceConnectFlowManager(config: ServerConfig) {
             await finish(googleWorkspaceCallbackPage(400, "Google Workspace connection failed", "Invalid OAuth callback."));
             return;
           }
-          await finish(googleWorkspaceCallbackPage(200, "Google Workspace authorization received", "You can return to OpenWork while it finishes connecting."));
+          await finish(googleWorkspaceCallbackPage(200, "Google Workspace authorization received", "You can return to Redrob Work while it finishes connecting."));
           try {
             const token = await exchangeGoogleWorkspaceCode({ code, redirectUri: flow.redirectUri, verifier: flow.verifier });
             if (!isRecord(token) || typeof token.access_token !== "string") throw new Error("Google OAuth response did not include an access token.");
@@ -1467,7 +1467,7 @@ export function createGoogleWorkspaceConnectFlowManager(config: ServerConfig) {
             flow.account = account;
           } catch (exchangeError) {
             flow.status = "failed";
-            flow.error = `Google authorized OpenWork, but token exchange failed: ${exchangeError instanceof Error ? exchangeError.message : String(exchangeError)}`;
+            flow.error = `Google authorized Redrob Work, but token exchange failed: ${exchangeError instanceof Error ? exchangeError.message : String(exchangeError)}`;
           }
         } catch (callbackError) {
           const flow = flows.get(flowId);

@@ -17,7 +17,7 @@ Run from the repo root. Prefer a stable sandbox name when the user wants to hand
 
 ```bash
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-SANDBOX="openwork-cloud-demo-seeded"
+SANDBOX="redrob-cloud-demo-seeded"
 
 bash .devcontainer/test-server-on-daytona.sh "$BRANCH" --name "$SANDBOX"
 ```
@@ -25,7 +25,7 @@ bash .devcontainer/test-server-on-daytona.sh "$BRANCH" --name "$SANDBOX"
 If the sandbox name already exists, choose a dated suffix instead, for example:
 
 ```bash
-SANDBOX="openwork-cloud-demo-seeded-$(date +%Y%m%d-%H%M)"
+SANDBOX="redrob-cloud-demo-seeded-$(date +%Y%m%d-%H%M)"
 bash .devcontainer/test-server-on-daytona.sh "$BRANCH" --name "$SANDBOX"
 ```
 
@@ -42,14 +42,14 @@ DEN_WORKER_PROXY_URL="<printed Worker Proxy URL>"
 Seed the sandbox after the Den stack is healthy. The seed uses the same encryption and auth secrets as `.devcontainer/start-daytona-server.sh`.
 
 ```bash
-daytona exec "$SANDBOX" -- 'bash -lc '\''cd /workspace && pnpm --filter @redrob/email build && cd /workspace/ee/apps/den-api && REDROB_DEV_MODE=1 DATABASE_URL=mysql://root:password@127.0.0.1:3306/openwork_den DEN_DB_ENCRYPTION_KEY=daytona-den-db-encryption-key-please-change-1234567890 BETTER_AUTH_SECRET=daytona-den-auth-secret-please-change-1234567890 BETTER_AUTH_URL="'"$DEN_WEB_URL"'" pnpm exec tsx scripts/seed-demo-org.ts --reset'\'''
+daytona exec "$SANDBOX" -- 'bash -lc '\''cd /workspace && pnpm --filter @redrob/email build && cd /workspace/ee/apps/den-api && REDROB_DEV_MODE=1 DATABASE_URL=mysql://root:password@127.0.0.1:3306/redrob_den DEN_DB_ENCRYPTION_KEY=daytona-den-db-encryption-key-please-change-1234567890 BETTER_AUTH_SECRET=daytona-den-auth-secret-please-change-1234567890 BETTER_AUTH_URL="'"$DEN_WEB_URL"'" pnpm exec tsx scripts/seed-demo-org.ts --reset'\'''
 ```
 
 Expected seeded credentials:
 
 ```text
 Email: alex@acme.test
-Password: OpenWorkDemo123!
+Password: RedrobWorkDemo123!
 ```
 
 Expected seed summary:
@@ -98,7 +98,7 @@ Validate the demo account through Den Web auth. This is the most relevant browse
 ```bash
 curl -fsS -X POST "$DEN_WEB_URL/api/auth/sign-in/email" \
   -H 'Content-Type: application/json' \
-  --data '{"email":"alex@acme.test","password":"OpenWorkDemo123!"}'
+  --data '{"email":"alex@acme.test","password":"RedrobWorkDemo123!"}'
 ```
 
 Also validate direct Den API auth if the user will connect desktop or debug handoff:
@@ -106,7 +106,7 @@ Also validate direct Den API auth if the user will connect desktop or debug hand
 ```bash
 curl -fsS -X POST "$DEN_API_URL/api/auth/sign-in/email" \
   -H 'Content-Type: application/json' \
-  --data '{"email":"alex@acme.test","password":"OpenWorkDemo123!"}'
+  --data '{"email":"alex@acme.test","password":"RedrobWorkDemo123!"}'
 ```
 
 Both auth calls should return `redirect: false`, a `token`, and user `Alex Chen`.
@@ -127,7 +127,7 @@ Daytona cloud demo is running and seeded.
 
 **Credentials**
 - Email: `alex@acme.test`
-- Password: `OpenWorkDemo123!`
+- Password: `RedrobWorkDemo123!`
 
 **Seeded Data**
 - Org: `Acme Robotics`

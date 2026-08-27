@@ -68,7 +68,7 @@ function numberField(value: unknown): number {
 async function executeControl(app: Surface, action: string, args?: unknown): Promise<unknown> {
   const value = await evalIn(
     app,
-    `window.__openworkControl.execute(${JSON.stringify(action)}, ${JSON.stringify(args ?? null)})`,
+    `window.__redrobControl.execute(${JSON.stringify(action)}, ${JSON.stringify(args ?? null)})`,
     { awaitPromise: true },
   );
   if (!isRecord(value) || value.ok !== true) throw new Error(`Control action ${action} failed: ${JSON.stringify(value)}`);
@@ -180,7 +180,7 @@ async function createProofProvider(admin: DenSession, state: ManagedModelState):
       source: "models_dev",
       providerId: "openai",
       modelIds: [modelId],
-      apiKey: "sk-openwork-local-eval-only",
+      apiKey: "sk-redrob-local-eval-only",
       memberIds: [state.ownerMemberId],
       teamIds: [],
     }),
@@ -211,7 +211,7 @@ async function restoreManagedState(admin: DenSession, state: ManagedModelState):
 test.skipIf(!e2eTestsEnabled)(appTitle, async () => {
   await using app = await desktop({ name: "models-available" });
   await using visualEvidence = createVisualEvidence("models-available");
-  const workspacePath = `/tmp/openwork-models-available-${Date.now()}`;
+  const workspacePath = `/tmp/redrob-models-available-${Date.now()}`;
   await ensureSession(app, workspacePath);
 
   // The engine's model catalog can land after the picker first paints its
@@ -307,7 +307,7 @@ test.skipIf(!e2eTestsEnabled || !apiUrl)(managedTitle, async () => {
   };
   const admin = await signIn(den, {
     email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!",
   });
   const state: ManagedModelState = {
     orgId: "",
@@ -328,7 +328,7 @@ test.skipIf(!e2eTestsEnabled || !apiUrl)(managedTitle, async () => {
   // Workspace first, then the org sign-in: the org's managed-model policy
   // then lands on an existing composer. (Signed-in-first has no workspace
   // affordance to drive: the org shell offers no Add workspace entry there.)
-  const workspacePath = `/tmp/openwork-managed-models-${Date.now()}`;
+  const workspacePath = `/tmp/redrob-managed-models-${Date.now()}`;
   await createAndSelectWorkspace(app, { path: workspacePath });
   await signInDesktopAs(app, den, admin);
   // Completes organization onboarding if it appears, and reselects the

@@ -18,7 +18,7 @@ const MAX_ACTIVE_PROBES = 16;
 const STALE_ENGINE_EVIDENCE_MS = 60_000;
 const MCP_ACCEPT = "application/json, text/event-stream";
 const MCP_PROTOCOL_VERSION = "2025-06-18";
-const INITIALIZE_REQUEST_ID = "openwork-agent-diagnostics-initialize";
+const INITIALIZE_REQUEST_ID = "redrob-agent-diagnostics-initialize";
 const TOOL_ID = /^[A-Za-z][A-Za-z0-9_.:-]*$/;
 const SAFE_RESPONSE_HEADER = /^[!-~]+$/;
 const SAFE_REFERENCE_ID = /^[A-Za-z0-9._:-]{1,64}$/;
@@ -113,7 +113,7 @@ export type CloudEngineRegistrationStatus =
   | "not-recorded";
 
 /**
- * Cached engine-side evidence for the exact managed OpenWork Cloud entry.
+ * Cached engine-side evidence for the exact managed Redrob Work Cloud entry.
  * This is a comparison input for the differential verdict; it never gates
  * whether the independent runtime probe is allowed to run.
  */
@@ -181,7 +181,7 @@ export type CloudCatalogProbeFetch = (
   init?: RequestInit,
 ) => Promise<Response>;
 
-export type ProbeOpenworkCloudCatalogInput = {
+export type ProbeRedrobCloudCatalogInput = {
   workspaceId: string;
   workspaceType: "local" | "remote";
   runtimeConfigAvailable?: boolean;
@@ -295,7 +295,7 @@ function isLoopbackHostname(hostname: string): boolean {
 }
 
 /**
- * Origins the credentialed diagnostic request may reach: built-in OpenWork
+ * Origins the credentialed diagnostic request may reach: built-in Redrob Work
  * Cloud origins plus exact administrator-configured diagnostic origins. An
  * enterprise/on-prem Den origin must be provisioned through the same explicit
  * administrator setting; the desktop bootstrap's Den activation state is not
@@ -363,7 +363,7 @@ function authorizationHeader(config: Record<string, unknown>): { value: string |
  * by its own check. Only structural, trust, credential, and privacy
  * boundaries can skip the probe.
  */
-function prepare(input: ProbeOpenworkCloudCatalogInput): PreparedProbe | CloudCatalogProbeCode {
+function prepare(input: ProbeRedrobCloudCatalogInput): PreparedProbe | CloudCatalogProbeCode {
   if (input.workspaceType !== "local") return "remote_workspace_unavailable";
   if (input.runtimeConfigAvailable === false) return "runtime_config_unavailable";
   if (!isRecord(input.config)) return "cloud_mcp_missing";
@@ -812,7 +812,7 @@ async function performProbe(
         method: "initialize",
         params: {
           capabilities: {},
-          clientInfo: { name: "openwork-server-agent-context-diagnostics", version: "1.0.0" },
+          clientInfo: { name: "redrob-server-agent-context-diagnostics", version: "1.0.0" },
           protocolVersion: MCP_PROTOCOL_VERSION,
         },
       },
@@ -834,7 +834,7 @@ async function performProbe(
           method: "initialize",
           params: {
             capabilities: {},
-            clientInfo: { name: "openwork-server-agent-context-diagnostics", version: "1.0.0" },
+            clientInfo: { name: "redrob-server-agent-context-diagnostics", version: "1.0.0" },
             protocolVersion: MCP_PROTOCOL_VERSION,
           },
         },
@@ -1008,15 +1008,15 @@ export function differentialCloudVerdict(
 
 /**
  * Performs one credential-safe direct verification of the exact
- * runtime-managed OpenWork Cloud entry supplied by the caller, running the
+ * runtime-managed Redrob Work Cloud entry supplied by the caller, running the
  * complete bounded MCP handshake (initialize, initialized notification,
- * tools/list, best-effort session termination) on the OpenWork runtime's own
+ * tools/list, best-effort session termination) on the Redrob Work runtime's own
  * fetch stack. This function never discovers another MCP, follows redirects,
  * calls a tool, mutates configuration, or returns endpoint, credential,
  * header, response-body, or caught-error values.
  */
-export async function probeOpenworkCloudCatalog(
-  input: ProbeOpenworkCloudCatalogInput,
+export async function probeRedrobCloudCatalog(
+  input: ProbeRedrobCloudCatalogInput,
 ): Promise<CloudCatalogProbe> {
   const clock = input.clock ?? input.now ?? Date.now;
   const startedAt = clock();

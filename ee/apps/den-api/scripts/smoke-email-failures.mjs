@@ -6,7 +6,7 @@
  * been built to `dist/`):
  *
  *   docker exec -e REDROB_DEV_MODE=0 \
- *     openwork-den-dev-<id>-den-1 \
+ *     redrob-den-dev-<id>-den-1 \
  *     node ee/apps/den-api/scripts/smoke-email-failures.mjs
  *
  * Expected output:

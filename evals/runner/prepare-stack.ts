@@ -18,7 +18,7 @@ export type StackPreparation =
 
 declare module "vitest" {
   export interface ProvidedContext {
-    openworkStackPreparation: StackPreparation;
+    redrobStackPreparation: StackPreparation;
   }
 }
 
@@ -36,7 +36,7 @@ async function readable(path: string): Promise<boolean> {
 }
 
 async function prepareLocal(): Promise<StackPreparation> {
-  console.error("[openwork/evals] preparing shared local Den and Electron runtime once...");
+  console.error("[redrob/evals] preparing shared local Den and Electron runtime once...");
   const runtimeBuilds = [
     "@redrob/email",
     "@redrob/install-config",
@@ -72,7 +72,7 @@ async function prepareDaytona(argv: readonly string[]): Promise<{ preparation: S
   const workerCount = suiteWorkerCount(argv, process.env);
   const ref = process.env.REDROB_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev";
   const created = new Set<string>();
-  const log = (line: string): void => console.error(`[openwork/evals] ${line}`);
+  const log = (line: string): void => console.error(`[redrob/evals] ${line}`);
   try {
     const slots = await Promise.all(Array.from({ length: workerCount }, async (_, index) => {
       const [den, desktop] = await Promise.all([
@@ -91,7 +91,7 @@ async function prepareDaytona(argv: readonly string[]): Promise<{ preparation: S
       ]);
       return { denSandbox: den.sandbox, desktopSandbox: desktop.sandbox };
     }));
-    console.error(`[openwork/evals] prepared ${slots.length} isolated Daytona worker slot${slots.length === 1 ? "" : "s"}.`);
+    console.error(`[redrob/evals] prepared ${slots.length} isolated Daytona worker slot${slots.length === 1 ? "" : "s"}.`);
     return {
       preparation: { kind: "daytona", slots },
       cleanup: async () => {
@@ -106,15 +106,15 @@ async function prepareDaytona(argv: readonly string[]): Promise<{ preparation: S
 
 export default async function setup(project: TestProject): Promise<() => Promise<void>> {
   if (!shouldPrepareSuite(process.argv) || process.env.REDROB_EVAL_DEN_API_URL?.trim()) {
-    project.provide("openworkStackPreparation", { kind: "none" });
+    project.provide("redrobStackPreparation", { kind: "none" });
     return async () => undefined;
   }
   if (process.env.REDROB_EVAL_DAYTONA?.trim() === "1") {
     const prepared = await prepareDaytona(process.argv);
-    project.provide("openworkStackPreparation", prepared.preparation);
+    project.provide("redrobStackPreparation", prepared.preparation);
     return prepared.cleanup;
   }
   const preparation = await prepareLocal();
-  project.provide("openworkStackPreparation", preparation);
+  project.provide("redrobStackPreparation", preparation);
   return async () => undefined;
 }

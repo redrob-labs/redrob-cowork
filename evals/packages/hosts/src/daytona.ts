@@ -77,7 +77,7 @@ const STANDARD_NOVNC_PORT = 6080;
 const STANDARD_ARTIFACTS_PORT = 8090;
 const HTTPS_URL = /https:\/\/[^\s"'<>)]+/;
 const ENV_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
-const ENTERPRISE_TLS_RUNTIME_ROOT = "/tmp/openwork-enterprise-tls-runtime";
+const ENTERPRISE_TLS_RUNTIME_ROOT = "/tmp/redrob-enterprise-tls-runtime";
 const MAX_ENTERPRISE_TLS_RUNTIME_SOURCE_BYTES = 64 * 1024;
 const ENTERPRISE_TLS_BASE64_CHUNK_LENGTH = 8 * 1024;
 /** Conservative ceiling for each complete Daytona argv command string. */
@@ -329,7 +329,7 @@ export function enterpriseTlsEdgeDaytonaCommands(options: EnterpriseTlsEdgeDayto
   if (new Set([candidatePort, negativePort, adminPort]).size !== 3) {
     throw new Error("Enterprise TLS edge candidate, negative, and admin ports must be distinct.");
   }
-  const manifestPath = options.manifestPath ?? "/tmp/openwork-enterprise-tls-edge.json";
+  const manifestPath = options.manifestPath ?? "/tmp/redrob-enterprise-tls-edge.json";
   if (!manifestPath.startsWith("/")) throw new Error("Enterprise TLS edge manifestPath must be absolute.");
   const sources = ENTERPRISE_TLS_RUNTIME_SOURCES.map(({ local, remote }) => ({
     content: readFileSync(fileURLToPath(local)),
@@ -340,7 +340,7 @@ export function enterpriseTlsEdgeDaytonaCommands(options: EnterpriseTlsEdgeDayto
     throw new Error(`Enterprise TLS runtime source is ${sourceBytes} bytes; maximum is ${MAX_ENTERPRISE_TLS_RUNTIME_SOURCE_BYTES}.`);
   }
   const script = ENTERPRISE_TLS_RUNTIME_SOURCES[0].remote;
-  const log = "/tmp/openwork-enterprise-tls-edge.log";
+  const log = "/tmp/redrob-enterprise-tls-edge.log";
   const adminToken = randomBytes(32).toString("hex");
   if (!/^[a-f0-9]{32,}$/.test(adminToken)) throw new Error("Enterprise TLS admin token must be at least 32 hex characters.");
   const remote = (command: string) => {
@@ -582,7 +582,7 @@ export function createDaytonaHost(options: DaytonaHostOptions): DaytonaHost {
       throw new Error("Electron profileDir must not be empty.");
     }
     const callerOwnedProfile = opts.profileDir !== undefined;
-    const profileRoot = opts.profileDir ?? `/workspace/.openwork-daytona/profiles/${safeName}-${spawnStamp}`;
+    const profileRoot = opts.profileDir ?? `/workspace/.redrob-daytona/profiles/${safeName}-${spawnStamp}`;
     const userDataDir = `${profileRoot}/electron-userdata`;
     const bootstrapPath = `${profileRoot}/bootstrap.json`;
     const port = await allocateSandboxPort(electronPorts, exec, sandbox);

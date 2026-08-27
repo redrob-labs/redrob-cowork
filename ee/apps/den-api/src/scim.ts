@@ -41,7 +41,7 @@ function decodeBase64Url(value: string) {
 }
 
 export function buildOrganizationScimProviderId(organizationId: OrganizationId) {
-  return `openwork-scim-${organizationId}`
+  return `redrob-scim-${organizationId}`
 }
 
 function maybeString(value: unknown) {

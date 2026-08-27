@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { createOpenworkServerClient } from "../src/app/lib/openwork-server";
+import { createRedrobServerClient } from "../src/app/lib/redrob-server";
 import { createClient } from "../src/app/lib/opencode";
 import type { ResolvedWorkspaceEndpoint } from "../src/app/lib/workspace-endpoint";
 import type { ProviderListItem, WorkspaceDisplay } from "../src/app/types";
-import { createSessionOpenworkServer } from "../src/react-app/domains/connections/provider-auth/session-openwork-server";
+import { createSessionRedrobServer } from "../src/react-app/domains/connections/provider-auth/session-redrob-server";
 import { createProviderAuthStore } from "../src/react-app/domains/connections/provider-auth/store";
 import {
   REDROB_BASE_URL,
@@ -20,7 +20,7 @@ import {
  * provider, a fresh user could open an empty connect modal.
  *
  * This drives the real store's `openProviderAuthModal()` through a local
- * OpenWork server endpoint and asserts it PATCHes the workspace config with
+ * Redrob Work server endpoint and asserts it PATCHes the workspace config with
  * exactly `buildRedrobProviderConfig()` (base URL + `redrob-ai` model + the
  * indicAssist/detectLanguage extras). It exercises the real builder, so the
  * test fails if the wiring is removed.
@@ -124,7 +124,7 @@ function installFetchMock(requests: RecordedRequest[]) {
         return jsonResponse({ updatedAt: 1 });
       }
       if (url.pathname === "/workspace/ws_1/config" && method === "GET") {
-        return jsonResponse({ opencode: {}, openwork: {} });
+        return jsonResponse({ opencode: {}, redrob: {} });
       }
       if (url.pathname === "/workspace/ws_1/engine/reload") {
         return jsonResponse({ ok: true, reloadedAt: 1 });
@@ -148,7 +148,7 @@ function installFetchMock(requests: RecordedRequest[]) {
 }
 
 function makeEndpoint(): ResolvedWorkspaceEndpoint {
-  const client = createOpenworkServerClient({ baseUrl: LOCAL_SERVER_ORIGIN, token: "client-token" });
+  const client = createRedrobServerClient({ baseUrl: LOCAL_SERVER_ORIGIN, token: "client-token" });
   const mountedBaseUrl = `${LOCAL_SERVER_ORIGIN}/workspace/ws_1`;
   return {
     baseUrl: LOCAL_SERVER_ORIGIN,
@@ -164,7 +164,7 @@ function makeEndpoint(): ResolvedWorkspaceEndpoint {
 function createStore(providers: ProviderListItem[]) {
   const opencodeClient = createClient("https://engine.example", "/tmp/workspace_test", {
     token: "engine-token",
-    mode: "openwork",
+    mode: "redrob",
   });
   const workspace = {
     id: "workspace_test",
@@ -187,7 +187,7 @@ function createStore(providers: ProviderListItem[]) {
     providerBaseUrl: () => "https://engine.example",
     selectedWorkspaceRoot: () => "/tmp/workspace_test",
     runtimeWorkspaceId: () => "ws_1",
-    openworkServer: createSessionOpenworkServer({
+    redrobServer: createSessionRedrobServer({
       endpoint: () => makeEndpoint(),
       hostToken: () => "host-token-live",
     }),

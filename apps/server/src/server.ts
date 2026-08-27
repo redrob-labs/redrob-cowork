@@ -47,9 +47,9 @@ import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
 import { ReloadEventStore } from "./events.js";
 import { computeReloadFingerprint } from "./reload-fingerprint.js";
 import { startReloadWatchers } from "./reload-watcher.js";
-import { opencodeConfigPath, openworkConfigPath, projectCommandsDir, projectSkillsDir } from "./workspace-files.js";
+import { opencodeConfigPath, redrobConfigPath, projectCommandsDir, projectSkillsDir } from "./workspace-files.js";
 import { ensureDir, exists, hashToken, shortId } from "./utils.js";
-import { defaultWorkspaceOpenworkConfig, ensureWorkspaceFiles, readRawOpencodeConfig } from "./workspace-init.js";
+import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles, readRawOpencodeConfig } from "./workspace-init.js";
 import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./validators.js";
 import { TokenService } from "./tokens.js";
 import { resetManagedProviderAuthCache, syncManagedProviderAuth } from "./managed-provider-auth.js";
@@ -66,7 +66,7 @@ import {
   applyMaterializedBlueprintSessions,
   normalizeBlueprintSessionTemplates,
   readMaterializedBlueprintSessions,
-  sanitizeOpenworkTemplateConfig,
+  sanitizeRedrobTemplateConfig,
 } from "./blueprint-sessions.js";
 import { resolveWorkspaceOpencodeConnection } from "./opencode-connection.js";
 import { seedOpencodeSessionMessages } from "./opencode-db.js";
@@ -109,8 +109,8 @@ import {
   startLocalManagedMcpAuthorization,
 } from "./local-managed-mcp.js";
 import {
-  markOpenworkCloudMcpStale,
-  reconcilePersistedOpenworkCloudMcp,
+  markRedrobCloudMcpStale,
+  reconcilePersistedRedrobCloudMcp,
   type CloudMcpHealth,
 } from "./cloud-mcp-health.js";
 import { runAgentContextDiagnostics } from "./agent-context-diagnostics.js";
@@ -129,13 +129,13 @@ import {
   writeRuntimeOpencodeConfig,
 } from "./runtime-opencode-config-store.js";
 import {
-  hasOpenworkWorkspaceConfig,
-  mergeOpenworkWorkspaceConfigs,
-  readOpenworkWorkspaceConfig,
-  seedOpenworkWorkspaceConfigIfEmpty,
-  writeOpenworkWorkspaceConfig,
-} from "./openwork-workspace-config-store.js";
-import { buildOpenworkRuntimeConfigObject, openworkRuntimeConfigFilePath, writeOpenworkRuntimeConfigFile } from "./openwork-runtime-config.js";
+  hasRedrobWorkspaceConfig,
+  mergeRedrobWorkspaceConfigs,
+  readRedrobWorkspaceConfig,
+  seedRedrobWorkspaceConfigIfEmpty,
+  writeRedrobWorkspaceConfig,
+} from "./redrob-workspace-config-store.js";
+import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
 import { CloudProviderSync, parseCloudProviderDenSession } from "./cloud-provider-sync.js";
@@ -232,24 +232,24 @@ function reserveAgentDiagnosticsRun(
 const REDROB_VOICE_REALTIME_TOOLS = [
   {
     type: "function",
-    name: "openwork_snapshot",
-    description: "Read the current OpenWork UI control snapshot: route, status, narration, and visible action metadata.",
+    name: "redrob_snapshot",
+    description: "Read the current Redrob Work UI control snapshot: route, status, narration, and visible action metadata.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     type: "function",
-    name: "openwork_list_actions",
-    description: "List semantic OpenWork UI actions. Call this before openwork_execute_action when you do not know the exact action id.",
+    name: "redrob_list_actions",
+    description: "List semantic Redrob Work UI actions. Call this before redrob_execute_action when you do not know the exact action id.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     type: "function",
-    name: "openwork_execute_action",
-    description: "Execute a semantic OpenWork UI action by id. Prefer this over screen coordinates or DOM guessing.",
+    name: "redrob_execute_action",
+    description: "Execute a semantic Redrob Work UI action by id. Prefer this over screen coordinates or DOM guessing.",
     parameters: {
       type: "object",
       properties: {
-        actionId: { type: "string", description: "The action id from openwork_list_actions, such as composer.set_text or composer.send." },
+        actionId: { type: "string", description: "The action id from redrob_list_actions, such as composer.set_text or composer.send." },
         args: { type: "object", description: "Optional JSON arguments for the action.", additionalProperties: true },
       },
       required: ["actionId"],
@@ -274,21 +274,21 @@ const USER_OPENCODE_RUNTIME_CONFIG_KEYS = ["default_agent", "plugin", "mcp", "di
 type LegacyRuntimeConfigKey = typeof LEGACY_RUNTIME_CONFIG_KEYS[number];
 type UserOpencodeRuntimeConfigKey = typeof USER_OPENCODE_RUNTIME_CONFIG_KEYS[number];
 
-function legacyRuntimeConfigFromOpenworkConfig(openwork: Record<string, unknown>): {
+function legacyRuntimeConfigFromRedrobConfig(redrob: Record<string, unknown>): {
   config: RuntimeOpencodeConfig;
   keys: LegacyRuntimeConfigKey[];
 } {
   const keys: LegacyRuntimeConfigKey[] = [];
-  const plugin = Array.isArray(openwork.plugin) ? openwork.plugin.filter((item) => typeof item === "string") : [];
+  const plugin = Array.isArray(redrob.plugin) ? redrob.plugin.filter((item) => typeof item === "string") : [];
   const mcp: Record<string, Record<string, unknown>> = {};
-  if (isRecord(openwork.mcp)) {
-    for (const [name, value] of Object.entries(openwork.mcp)) {
+  if (isRecord(redrob.mcp)) {
+    for (const [name, value] of Object.entries(redrob.mcp)) {
       if (isRecord(value)) mcp[name] = value;
     }
   }
-  const permission = isRecord(openwork.permission) ? openwork.permission : null;
+  const permission = isRecord(redrob.permission) ? redrob.permission : null;
   const externalDirectory = permission && isRecord(permission.external_directory) ? permission.external_directory : null;
-  const provider = isRecord(openwork.provider) ? openwork.provider : null;
+  const provider = isRecord(redrob.provider) ? redrob.provider : null;
 
   if (plugin.length) keys.push("plugin");
   if (Object.keys(mcp).length) keys.push("mcp");
@@ -306,8 +306,8 @@ function legacyRuntimeConfigFromOpenworkConfig(openwork: Record<string, unknown>
   };
 }
 
-function removeLegacyRuntimeConfig(openwork: Record<string, unknown>): Record<string, unknown> {
-  const next = { ...openwork };
+function removeLegacyRuntimeConfig(redrob: Record<string, unknown>): Record<string, unknown> {
+  const next = { ...redrob };
   for (const key of LEGACY_RUNTIME_CONFIG_KEYS) {
     delete next[key];
   }
@@ -319,7 +319,7 @@ function userRuntimeConfigFromOpencodeConfig(opencode: Record<string, unknown>):
   keys: UserOpencodeRuntimeConfigKey[];
 } {
   const keys: UserOpencodeRuntimeConfigKey[] = [];
-  const defaultAgent = opencode.default_agent === "openwork" ? "openwork" : undefined;
+  const defaultAgent = opencode.default_agent === "redrob" ? "redrob" : undefined;
   const plugin = Array.isArray(opencode.plugin) ? opencode.plugin.filter((item) => typeof item === "string") : undefined;
   const mcp: Record<string, Record<string, unknown>> = {};
   if (isRecord(opencode.mcp)) {
@@ -442,7 +442,7 @@ async function readManagedRuntimeConfigDebug(config: ServerConfig): Promise<{
   managedFileRebuiltAt: number | null;
   managedFileContentRedacted: string | null;
 }> {
-  const managedFilePath = openworkRuntimeConfigFilePath(config);
+  const managedFilePath = redrobRuntimeConfigFilePath(config);
   try {
     const [metadata, content] = await Promise.all([
       stat(managedFilePath),
@@ -513,7 +513,7 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
     "";
 }
 
-async function resolveOpenWorkModelsVoiceConfig(env: EnvService): Promise<{ baseUrl: string; apiKey: string } | null> {
+async function resolveRedrobWorkModelsVoiceConfig(env: EnvService): Promise<{ baseUrl: string; apiKey: string } | null> {
   const records = await env.list();
   const apiKey =
     records.find((entry) => entry.key === "REDROB_CLOUD_API_KEY")?.value.trim() ||
@@ -533,7 +533,7 @@ async function resolveOpenWorkModelsVoiceConfig(env: EnvService): Promise<{ base
   return { apiKey, baseUrl: baseUrl.replace(/\/+$/, "") };
 }
 
-function openworkVoiceRealtimeInstructions(sessionContext: string) {
+function redrobVoiceRealtimeInstructions(sessionContext: string) {
   const trimmedContext = sessionContext.trim();
   const contextSection = trimmedContext
     ? `
@@ -546,12 +546,12 @@ ${trimmedContext}`
     : "";
   return `# Role and Objective
 
-You are OpenWork Voice Mode, a voice-first control layer inside OpenWork.
-Help the user control OpenWork by using the semantic OpenWork UI tools.
+You are Redrob Work Voice Mode, a voice-first control layer inside Redrob Work.
+Help the user control Redrob Work by using the semantic Redrob Work UI tools.
 
 # Tool Policy
 
-- Prefer openwork_snapshot, openwork_list_actions, and openwork_execute_action over visual guessing.
+- Prefer redrob_snapshot, redrob_list_actions, and redrob_execute_action over visual guessing.
 - If the user asks to write or draft something, use composer.set_text.
 - If the user asks to send or run the current prompt, use composer.send.
 - For navigation, settings, session, transcript, and composer work, inspect the action list first if the action id is unknown.
@@ -562,7 +562,7 @@ Help the user control OpenWork by using the semantic OpenWork UI tools.
 
 - Be concise, calm, and direct.
 - If audio is unclear, ask the user to repeat it instead of guessing.
-- Ignore background speech that is not addressed to OpenWork.
+- Ignore background speech that is not addressed to Redrob Work.
 - Summarize tool results briefly and offer the next useful step.${contextSection}`;
 }
 
@@ -589,7 +589,7 @@ function readOpenAiClientSecret(payload: unknown): { clientSecret: string; expir
 }
 
 async function createOpenAiRealtimeVoiceSession(env: EnvService, input: unknown) {
-  const managedVoice = await resolveOpenWorkModelsVoiceConfig(env);
+  const managedVoice = await resolveRedrobWorkModelsVoiceConfig(env);
   if (managedVoice) {
     try {
       return await createManagedVoiceSession(managedVoice, input);
@@ -602,7 +602,7 @@ async function createOpenAiRealtimeVoiceSession(env: EnvService, input: unknown)
         }
         throw new ApiError(
           503,
-          "openwork_models_voice_unavailable",
+          "redrob_models_voice_unavailable",
           "Redrob Models voice is active but the server is not fully configured. Ask your admin to add an OpenAI key, or save your own OPENAI_API_KEY in Environment settings.",
         );
       }
@@ -641,7 +641,7 @@ async function createManagedVoiceSession(config: { baseUrl: string; apiKey: stri
   if (!response.ok) {
     const errorPayload = isRecord(payload) && isRecord(payload.error) ? payload.error : null;
     const message = typeof errorPayload?.message === "string" ? errorPayload.message : response.statusText;
-    throw new ApiError(response.status, "openwork_models_voice_failed", message || "Redrob Models could not create a voice session");
+    throw new ApiError(response.status, "redrob_models_voice_failed", message || "Redrob Models could not create a voice session");
   }
   if (
     !isRecord(payload) ||
@@ -651,7 +651,7 @@ async function createManagedVoiceSession(config: { baseUrl: string; apiKey: stri
     !Array.isArray(payload.tools) ||
     payload.tools.some((tool) => typeof tool !== "string")
   ) {
-    throw new ApiError(502, "openwork_models_voice_invalid_response", "Redrob Models did not return a usable Realtime session payload");
+    throw new ApiError(502, "redrob_models_voice_invalid_response", "Redrob Models did not return a usable Realtime session payload");
   }
   return {
     ok: true,
@@ -691,7 +691,7 @@ async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
             },
           },
         },
-        instructions: openworkVoiceRealtimeInstructions(sessionContext),
+        instructions: redrobVoiceRealtimeInstructions(sessionContext),
         tool_choice: "auto",
         tools: REDROB_VOICE_REALTIME_TOOLS,
       },
@@ -794,7 +794,7 @@ export function createServerLogger(config: ServerConfig, writeLine: ServerLogWri
   const runId = process.env.REDROB_RUN_ID ?? shortId();
   const host = hostname().trim();
   const resource: Record<string, string> = {
-    "service.name": "openwork-server",
+    "service.name": "redrob-server",
     "service.version": SERVER_VERSION,
     "service.instance.id": runId,
   };
@@ -969,7 +969,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   try {
     await reconcileLocalManagedMcpRuntimeEntries(config);
   } catch (error) {
-    logger.log("warn", "Failed to reconcile OpenWork-managed MCP connections during startup.", {
+    logger.log("warn", "Failed to reconcile Redrob Work-managed MCP connections during startup.", {
       error: error instanceof Error ? error.message : "unknown",
     });
   }
@@ -1168,7 +1168,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
         const requestCanceled = isExpectedRequestCancellation(error, request.signal);
         if (!(error instanceof ApiError) && !requestCanceled) {
           captureServerException(error, { method: request.method, route: url.pathname, requestSignal: request.signal });
-          console.error("[openwork-server] Unhandled error:", error);
+          console.error("[redrob-server] Unhandled error:", error);
         }
         const apiError = error instanceof ApiError
           ? error
@@ -1217,7 +1217,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     try {
       await reconcileLocalManagedMcpRuntimeEntries(config);
     } catch (error) {
-      logger.log("warn", "Failed to update OpenWork-managed MCP loopback routes after binding the server port.", {
+      logger.log("warn", "Failed to update Redrob Work-managed MCP loopback routes after binding the server port.", {
         error: error instanceof Error ? error.message : "unknown",
       });
     }
@@ -1357,8 +1357,8 @@ export async function proxyOpencodeRequest(input: {
 
   const headers = new Headers(input.request.headers);
   headers.delete("authorization");
-  headers.delete("x-openwork-host-token");
-  headers.delete("x-openwork-client-id");
+  headers.delete("x-redrob-host-token");
+  headers.delete("x-redrob-client-id");
   headers.delete("host");
   headers.delete("origin");
 
@@ -1721,7 +1721,7 @@ function withCors(response: Response, request: Request, config: ServerConfig) {
   headers.set("Access-Control-Allow-Origin", allowOrigin);
   headers.set(
     "Access-Control-Allow-Headers",
-    "Authorization, Content-Type, X-OpenWork-Host-Token, X-OpenWork-Client-Id, X-OpenCode-Directory, X-Opencode-Directory, x-opencode-directory",
+    "Authorization, Content-Type, X-Redrob Work-Host-Token, X-Redrob Work-Client-Id, X-OpenCode-Directory, X-Opencode-Directory, x-opencode-directory",
   );
   headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   headers.set("Vary", "Origin");
@@ -1739,12 +1739,12 @@ async function requireClient(request: Request, config: ServerConfig, tokens: Tok
   if (!scope) {
     throw new ApiError(401, "unauthorized", "Invalid bearer token");
   }
-  const clientId = request.headers.get("x-openwork-client-id") ?? undefined;
+  const clientId = request.headers.get("x-redrob-client-id") ?? undefined;
   return { type: "remote", clientId, tokenHash: hashToken(token), scope };
 }
 
 function requireHostToken(request: Request, config: ServerConfig): Actor {
-  const hostToken = request.headers.get("x-openwork-host-token");
+  const hostToken = request.headers.get("x-redrob-host-token");
   if (hostToken && hostToken === config.hostToken) {
     return { type: "host", tokenHash: hashToken(hostToken), scope: "owner" };
   }
@@ -1752,7 +1752,7 @@ function requireHostToken(request: Request, config: ServerConfig): Actor {
 }
 
 async function requireHost(request: Request, config: ServerConfig, tokens: TokenService): Promise<Actor> {
-  const hostToken = request.headers.get("x-openwork-host-token");
+  const hostToken = request.headers.get("x-redrob-host-token");
   if (hostToken && hostToken === config.hostToken) {
     return { type: "host", tokenHash: hashToken(hostToken), scope: "owner" };
   }
@@ -1767,7 +1767,7 @@ async function requireHost(request: Request, config: ServerConfig, tokens: Token
   if (scope !== "owner") {
     throw new ApiError(401, "unauthorized", "Invalid host token");
   }
-  const clientId = request.headers.get("x-openwork-client-id") ?? undefined;
+  const clientId = request.headers.get("x-redrob-client-id") ?? undefined;
   return { type: "remote", clientId, tokenHash: hashToken(bearer), scope };
 }
 
@@ -1786,7 +1786,7 @@ function buildCapabilities(config: ServerConfig): Capabilities {
     serverVersion: SERVER_VERSION,
     opencodeVersion: OPENCODE_VERSION,
     providerSync: true,
-    skills: { read: true, write: writeEnabled, source: "openwork" },
+    skills: { read: true, write: writeEnabled, source: "redrob" },
     plugins: { read: true, write: writeEnabled },
     mcp: { read: true, write: writeEnabled },
     commands: { read: true, write: writeEnabled },
@@ -1804,8 +1804,8 @@ function buildCapabilities(config: ServerConfig): Capabilities {
       files: {
         injection: writeEnabled && inboxEnabled,
         outbox: outboxEnabled,
-        inboxPath: ".opencode/openwork/inbox/",
-        outboxPath: ".opencode/openwork/outbox/",
+        inboxPath: ".opencode/redrob/inbox/",
+        outboxPath: ".opencode/redrob/outbox/",
         maxBytes,
       },
     },
@@ -2127,7 +2127,7 @@ function createRoutes(
       throw new ApiError(
         400,
         "agent_diagnostics_workspace_unsupported",
-        "Agent diagnostics must run on the OpenWork server that owns a local workspace",
+        "Agent diagnostics must run on the Redrob Work server that owns a local workspace",
       );
     }
     // Reserve before consuming untrusted bytes and hold the reservation through
@@ -2185,19 +2185,19 @@ function createRoutes(
 
   addRoute(routes, "GET", "/workspace/:id/config", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    const openwork = await readOpenworkConfigForWorkspace(config, workspace);
+    const redrob = await readRedrobConfigForWorkspace(config, workspace);
     const opencode = mergeOpencodeConfigs(
       await readOpencodeConfig(workspace.path),
       await readRuntimeOpencodeConfig(config, workspace.id),
     );
     const lastAudit = await readLastAudit(workspace.path, workspace.id);
-    return jsonResponse({ opencode, openwork, updatedAt: lastAudit?.timestamp ?? null });
+    return jsonResponse({ opencode, redrob, updatedAt: lastAudit?.timestamp ?? null });
   });
 
   addRoute(routes, "GET", "/workspace/:id/desktop-cloud-sync", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    const openwork = await readOpenworkConfigForWorkspace(config, workspace);
-    return jsonResponse(readDesktopCloudSyncState(openwork));
+    const redrob = await readRedrobConfigForWorkspace(config, workspace);
+    return jsonResponse(readDesktopCloudSyncState(redrob));
   });
 
   addRoute(routes, "POST", "/workspace/:id/desktop-cloud-sync", "client", async (ctx) => {
@@ -2211,17 +2211,17 @@ function createRoutes(
     }
 
     const result = await enqueueDesktopCloudSync(async () => {
-      const openwork = await readOpenworkConfigForWorkspace(config, workspace);
+      const redrob = await readRedrobConfigForWorkspace(config, workspace);
       const installed = await readInstalledCloudPlugins(config, workspace.id);
       const cloudImports = {
         ...installed,
-        providers: readWorkspaceCloudImports(openwork).providers,
+        providers: readWorkspaceCloudImports(redrob).providers,
       };
-      const next = syncDesktopCloudResources({ openwork: { ...openwork, cloudImports }, snapshot });
+      const next = syncDesktopCloudResources({ redrob: { ...redrob, cloudImports }, snapshot });
       // The plugin DB owns plugins/marketplaces, but provider import baselines live in
       // the workspace config. Writing the merged cloudImports back erased providers
       // and drove the provider-sync dispose/create loop.
-      await writeOpenworkWorkspaceConfig(config, workspace.id, (current) => ({
+      await writeRedrobWorkspaceConfig(config, workspace.id, (current) => ({
         ...current,
         desktopCloudSync: next.state,
       }));
@@ -2230,7 +2230,7 @@ function createRoutes(
         workspaceId: workspace.id,
         actor: ctx.actor ?? { type: "remote" },
         action: "desktop_cloud_sync.update",
-        target: openworkConfigPath(workspace.path),
+        target: redrobConfigPath(workspace.path),
         summary: "Updated desktop cloud sync state",
         timestamp: Date.now(),
       });
@@ -2262,7 +2262,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "cloud_plugins.install",
       summary: `Install cloud plugin ${resolved.plugin.name}`,
-      paths: [openworkConfigPath(workspace.path), join(workspace.path, ".opencode")],
+      paths: [redrobConfigPath(workspace.path), join(workspace.path, ".opencode")],
     });
 
     const result = await installCloudPlugin({
@@ -2286,7 +2286,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "cloud_plugins.install",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Installed cloud plugin ${resolved.plugin.name}`,
       timestamp: Date.now(),
     });
@@ -2334,7 +2334,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "cloud_plugins.install",
       summary: `Install Claude plugin ${bundle.resolved.plugin.name} from ${bundle.preview.source.owner}/${bundle.preview.source.repo}`,
-      paths: [openworkConfigPath(workspace.path), join(workspace.path, ".opencode")],
+      paths: [redrobConfigPath(workspace.path), join(workspace.path, ".opencode")],
     });
 
     const result = await installCloudPlugin({
@@ -2351,7 +2351,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "cloud_plugins.install",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Installed Claude plugin ${bundle.resolved.plugin.name} from ${url}`,
       timestamp: Date.now(),
     });
@@ -2386,7 +2386,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "cloud_plugins.remove",
       summary: `Remove cloud plugin ${pluginId}`,
-      paths: [openworkConfigPath(workspace.path), join(workspace.path, ".opencode")],
+      paths: [redrobConfigPath(workspace.path), join(workspace.path, ".opencode")],
     });
 
     const removed = await removeCloudPlugin({
@@ -2401,7 +2401,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "cloud_plugins.remove",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Removed cloud plugin ${removed.name}`,
       timestamp: Date.now(),
     });
@@ -2433,7 +2433,7 @@ function createRoutes(
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
     const folders = parseAuthorizedFoldersPayload(body.folders, workspace.path);
-    const configPath = openworkConfigPath(workspace.path);
+    const configPath = redrobConfigPath(workspace.path);
 
     await requireApproval(ctx, {
       workspaceId: workspace.id,
@@ -2488,7 +2488,7 @@ function createRoutes(
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    const configPath = openworkConfigPath(workspace.path);
+    const configPath = redrobConfigPath(workspace.path);
 
     await requireApproval(ctx, {
       workspaceId: workspace.id,
@@ -2497,31 +2497,31 @@ function createRoutes(
       paths: [configPath],
     });
 
-    // Resolve the effective openwork config (DB, migrating any legacy file
+    // Resolve the effective redrob config (DB, migrating any legacy file
     // contents in on read) so legacy runtime keys are detected wherever they
     // currently live.
-    let openworkError: string | null = null;
-    let openworkData: Record<string, unknown> = {};
+    let redrobError: string | null = null;
+    let redrobData: Record<string, unknown> = {};
     try {
-      openworkData = await readOpenworkConfigForWorkspace(config, workspace);
+      redrobData = await readRedrobConfigForWorkspace(config, workspace);
     } catch (error) {
       if (error instanceof ApiError && error.code === "invalid_json") {
-        openworkError = error.message;
+        redrobError = error.message;
       } else {
         throw error;
       }
     }
-    const legacy = legacyRuntimeConfigFromOpenworkConfig(openworkData);
+    const legacy = legacyRuntimeConfigFromRedrobConfig(redrobData);
     const user = userRuntimeConfigFromOpencodeConfig(await readOpencodeConfig(workspace.path));
     if (!legacy.keys.length && !user.keys.length) {
-      return jsonResponse({ migrated: false, keys: [], legacyKeys: [], userOpencodeKeys: [], updatedAt: null, legacyError: openworkError });
+      return jsonResponse({ migrated: false, keys: [], legacyKeys: [], userOpencodeKeys: [], updatedAt: null, legacyError: redrobError });
     }
 
     await writeRuntimeOpencodeConfig(config, workspace.id, (current) => (
       mergeLegacyRuntimeConfig(mergeLegacyRuntimeConfig(current, legacy.config), user.config)
     ));
-    if (legacy.keys.length && !openworkError) {
-      await writeOpenworkConfigForWorkspace(config, workspace, removeLegacyRuntimeConfig(openworkData), false);
+    if (legacy.keys.length && !redrobError) {
+      await writeRedrobConfigForWorkspace(config, workspace, removeLegacyRuntimeConfig(redrobData), false);
     }
     await removeUserRuntimeConfigFromOpencode(workspace.path, user.keys);
 
@@ -2538,7 +2538,7 @@ function createRoutes(
     });
     emitReloadEvent(ctx.reloadEvents, workspace, "config", buildConfigTrigger(configPath));
 
-    return jsonResponse({ migrated: true, keys, legacyKeys: legacy.keys, userOpencodeKeys: user.keys, updatedAt, legacyError: openworkError });
+    return jsonResponse({ migrated: true, keys, legacyKeys: legacy.keys, userOpencodeKeys: user.keys, updatedAt, legacyError: redrobError });
   });
 
   addRoute(routes, "POST", "/workspace/:id/runtime-config/disabled-providers", "client", async (ctx) => {
@@ -2553,7 +2553,7 @@ function createRoutes(
     }));
 
     if (result.changed) {
-      emitReloadEvent(ctx.reloadEvents, workspace, "config", buildConfigTrigger(openworkRuntimeConfigFilePath(config)));
+      emitReloadEvent(ctx.reloadEvents, workspace, "config", buildConfigTrigger(redrobRuntimeConfigFilePath(config)));
     }
 
     return jsonResponse({
@@ -2604,7 +2604,7 @@ function createRoutes(
       provider: mergeRuntimeProviderUpdate(current.provider, providerPatch),
     }));
 
-    const fileResult = await writeOpenworkRuntimeConfigFile(config, workspace.id);
+    const fileResult = await writeRedrobRuntimeConfigFile(config, workspace.id);
     const shouldReload = result.changed || fileResult.changed;
     // A rollover-capable pool can apply this immediately without disposing
     // the generation that owns live sessions. Legacy/external engines keep
@@ -2629,7 +2629,7 @@ function createRoutes(
       ok: true,
       changed: result.changed,
       provider: runtimeProviderMap(result.config),
-      runtimeConfigPath: openworkRuntimeConfigFilePath(config),
+      runtimeConfigPath: redrobRuntimeConfigFilePath(config),
       reload: shouldReload ? (reloadDeferred ? "deferred" : "reloaded") : "skipped",
     });
   });
@@ -2637,19 +2637,19 @@ function createRoutes(
   addRoute(routes, "GET", "/workspace/:id/runtime-config", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const runtime = await readRuntimeOpencodeConfig(config, workspace.id);
-    // Report legacy runtime keys from the effective (DB-backed) openwork config
+    // Report legacy runtime keys from the effective (DB-backed) redrob config
     // so the status reflects post-migration state, while still surfacing parse
     // errors from a malformed legacy file.
-    const fileStatus = await readOpenworkConfigForStatus(workspace.path);
-    const effectiveOpenwork = fileStatus.error ? {} : await readOpenworkConfigForWorkspace(config, workspace);
-    const legacy = legacyRuntimeConfigFromOpenworkConfig(effectiveOpenwork);
+    const fileStatus = await readRedrobConfigForStatus(workspace.path);
+    const effectiveRedrob = fileStatus.error ? {} : await readRedrobConfigForWorkspace(config, workspace);
+    const legacy = legacyRuntimeConfigFromRedrobConfig(effectiveRedrob);
     const rawOpencode = await readRawOpencodeConfig(opencodeConfigPath(workspace.path));
     const persistedOpencode = await readOpencodeConfig(workspace.path);
     const globalOpencodePath = resolveOpencodeConfigFilePath("global", workspace.path);
     const rawGlobalOpencode = await readRawOpencodeConfig(globalOpencodePath);
     const emptyGlobalOpencode: Record<string, unknown> = {};
     const globalOpencode = (await readJsoncFile(globalOpencodePath, emptyGlobalOpencode, { allowInvalid: true })).data;
-    const effectiveRuntime = await buildOpenworkRuntimeConfigObject(config, workspace.id);
+    const effectiveRuntime = await buildRedrobRuntimeConfigObject(config, workspace.id);
     const user = userRuntimeConfigFromOpencodeConfig(persistedOpencode);
     const managedFile = await readManagedRuntimeConfigDebug(config);
     const sweep = await readLegacyConfigSweepState(config);
@@ -2682,8 +2682,8 @@ function createRoutes(
           config: effectiveRuntime,
         },
       },
-      legacyOpenwork: {
-        path: openworkConfigPath(workspace.path),
+      legacyRedrob: {
+        path: redrobConfigPath(workspace.path),
         keys: legacy.keys,
         error: fileStatus.error,
       },
@@ -2768,22 +2768,22 @@ function createRoutes(
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
     const opencode = body.opencode as Record<string, unknown> | undefined;
-    const openwork = body.openwork as Record<string, unknown> | undefined;
+    const redrob = body.redrob as Record<string, unknown> | undefined;
     let runtimeChanged = false;
 
-    if (!opencode && !openwork) {
-      throw new ApiError(400, "invalid_payload", "opencode or openwork updates required");
+    if (!opencode && !redrob) {
+      throw new ApiError(400, "invalid_payload", "opencode or redrob updates required");
     }
 
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "config.patch",
       summary: "Patch workspace config",
-      paths: [opencode || openwork ? openworkConfigPath(workspace.path) : null].filter(Boolean) as string[],
+      paths: [opencode || redrob ? redrobConfigPath(workspace.path) : null].filter(Boolean) as string[],
     });
 
     if (opencode) {
-      const configPath = openworkConfigPath(workspace.path);
+      const configPath = redrobConfigPath(workspace.path);
       const nextOpencode = ensurePlainObject(opencode);
       const { permission, provider, ...topLevelUpdates } = nextOpencode;
       const logicalUpdates: Record<string, unknown> = { ...topLevelUpdates };
@@ -2826,10 +2826,10 @@ function createRoutes(
         runtimeChanged = result.changed;
       }
     }
-    if (openwork) {
-      await writeOpenworkWorkspaceConfig(config, workspace.id, (current) => ({
+    if (redrob) {
+      await writeRedrobWorkspaceConfig(config, workspace.id, (current) => ({
         ...current,
-        ...openwork,
+        ...redrob,
       }));
     }
 
@@ -2838,7 +2838,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "config.patch",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: "Patched workspace config",
       timestamp: Date.now(),
     });
@@ -2846,7 +2846,7 @@ function createRoutes(
     // A no-op provider patch (for example cloud sync reconciling an identical
     // block) must not force an engine reload; that caused a dispose/create loop.
     if (opencode && runtimeChanged) {
-      emitReloadEvent(ctx.reloadEvents, workspace, "config", buildConfigTrigger(openworkConfigPath(workspace.path)));
+      emitReloadEvent(ctx.reloadEvents, workspace, "config", buildConfigTrigger(redrobConfigPath(workspace.path)));
     }
 
     return jsonResponse({ updatedAt: Date.now() });
@@ -2896,7 +2896,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "plugins.add",
       summary: `Add plugin ${spec}`,
-      paths: [openworkConfigPath(workspace.path)],
+      paths: [redrobConfigPath(workspace.path)],
     });
     const changed = await addPlugin(config, workspace.id, spec);
     await recordAudit(workspace.path, {
@@ -2904,7 +2904,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "plugins.add",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Added ${spec}`,
       timestamp: Date.now(),
     });
@@ -2929,7 +2929,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "plugins.remove",
       summary: `Remove plugin ${name}`,
-      paths: [openworkConfigPath(workspace.path)],
+      paths: [redrobConfigPath(workspace.path)],
     });
     const removed = await removePlugin(config, workspace.id, name);
     await recordAudit(workspace.path, {
@@ -2937,7 +2937,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "plugins.remove",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Removed ${name}`,
       timestamp: Date.now(),
     });
@@ -3163,8 +3163,8 @@ function createRoutes(
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "mcp.add",
-      summary: `Add OpenWork-managed MCP ${name}`,
-      paths: [openworkConfigPath(workspace.path)],
+      summary: `Add Redrob Work-managed MCP ${name}`,
+      paths: [redrobConfigPath(workspace.path)],
     });
     await createLocalManagedMcpConnection(config, {
       workspaceId: workspace.id,
@@ -3193,7 +3193,7 @@ function createRoutes(
         throw new ApiError(
           502,
           "managed_mcp_connection_failed",
-          `OpenWork could not start sign-in with this MCP server. Check the server URL, OAuth settings, and network connection, then try again.${cause ? ` (${cause})` : ""}`,
+          `Redrob Work could not start sign-in with this MCP server. Check the server URL, OAuth settings, and network connection, then try again.${cause ? ` (${cause})` : ""}`,
           cause ? { cause } : undefined,
         );
       }
@@ -3204,8 +3204,8 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "mcp.add",
-      target: openworkConfigPath(workspace.path),
-      summary: `Added OpenWork-managed MCP ${name}`,
+      target: redrobConfigPath(workspace.path),
+      summary: `Added Redrob Work-managed MCP ${name}`,
       timestamp: Date.now(),
     });
     emitReloadEvent(ctx.reloadEvents, workspace, "mcp", { type: "mcp", name, action: "added" });
@@ -3238,7 +3238,7 @@ function createRoutes(
       await syncRuntimeMcpToOpencodeEngine(config, workspace, [connection.name], undefined, engineMcpServerState).catch(() => undefined);
     }
     return new Response(
-      `<!doctype html><meta charset="utf-8"><title>Connected</title><main style="font:16px system-ui;padding:40px;max-width:560px"><h1>Connected</h1><p>${connection.name} is ready in OpenWork. You can close this window.</p><script>setTimeout(()=>window.close(),1200)</script></main>`,
+      `<!doctype html><meta charset="utf-8"><title>Connected</title><main style="font:16px system-ui;padding:40px;max-width:560px"><h1>Connected</h1><p>${connection.name} is ready in Redrob Work. You can close this window.</p><script>setTimeout(()=>window.close(),1200)</script></main>`,
       { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } },
     );
   });
@@ -3254,7 +3254,7 @@ function createRoutes(
   addRoute(routes, "DELETE", "/mcp/managed/:workspaceId/:name", "none", managedGatewayHandler);
 
   // Portable export of installed skills and MCP servers (including
-  // OpenWork-managed runtime MCPs that only live in the runtime DB), so
+  // Redrob Work-managed runtime MCPs that only live in the runtime DB), so
   // agents can package them into marketplace plugins. Read-only; MCP
   // secrets (headers/environment) are always redacted.
   addRoute(routes, "POST", "/workspace/:id/extensions/export", "client", async (ctx) => {
@@ -3294,7 +3294,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "mcp.add",
       summary: `Add MCP ${name}`,
-      paths: [openworkConfigPath(workspace.path)],
+      paths: [redrobConfigPath(workspace.path)],
     });
     const result = await addMcp(config, workspace.id, name, configPayload);
     // Hot-add into the running engine so connect/auth works immediately,
@@ -3311,7 +3311,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "mcp.add",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Added MCP ${name}`,
       timestamp: Date.now(),
     });
@@ -3333,7 +3333,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "mcp.remove",
       summary: `Remove MCP ${name}`,
-      paths: [openworkConfigPath(workspace.path)],
+      paths: [redrobConfigPath(workspace.path)],
     });
     const managedRemoved = await deleteLocalManagedMcp(config, workspace.id, name);
     const removed = managedRemoved || await removeMcp(config, workspace.id, name);
@@ -3342,7 +3342,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action: "mcp.remove",
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `Removed MCP ${name}`,
       timestamp: Date.now(),
     });
@@ -3377,7 +3377,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action,
       summary,
-      paths: [openworkConfigPath(workspace.path)],
+      paths: [redrobConfigPath(workspace.path)],
     });
     const managedUpdated = await setLocalManagedMcpEnabled(config, workspace.id, name, enabled);
     const updated = managedUpdated || await setMcpEnabled(config, workspace.id, name, enabled);
@@ -3396,7 +3396,7 @@ function createRoutes(
       workspaceId: workspace.id,
       actor: ctx.actor ?? { type: "remote" },
       action,
-      target: openworkConfigPath(workspace.path),
+      target: redrobConfigPath(workspace.path),
       summary: `${enabled ? "Enabled" : "Disabled"} MCP ${name}`,
       timestamp: Date.now(),
     });
@@ -3425,8 +3425,8 @@ function createRoutes(
         workspaceId: workspace.id,
         actor: ctx.actor ?? { type: "remote" },
         action: "mcp.auth.remove",
-        target: openworkConfigPath(workspace.path),
-        summary: `Logged out OpenWork-managed MCP ${name}`,
+        target: redrobConfigPath(workspace.path),
+        summary: `Logged out Redrob Work-managed MCP ${name}`,
         timestamp: Date.now(),
       });
       return jsonResponse({ ok: true });
@@ -3961,23 +3961,23 @@ async function readOpencodeConfig(workspaceRoot: string): Promise<Record<string,
   return data;
 }
 
-async function readOpenworkConfig(workspaceRoot: string): Promise<Record<string, unknown>> {
-  const path = openworkConfigPath(workspaceRoot);
+async function readRedrobConfig(workspaceRoot: string): Promise<Record<string, unknown>> {
+  const path = redrobConfigPath(workspaceRoot);
   if (!(await exists(path))) return {};
   try {
     const raw = await readFile(path, "utf8");
     return JSON.parse(raw) as Record<string, unknown>;
   } catch {
-    throw new ApiError(422, "invalid_json", "Failed to parse openwork.json");
+    throw new ApiError(422, "invalid_json", "Failed to parse redrob.json");
   }
 }
 
-async function readOpenworkConfigForStatus(workspaceRoot: string): Promise<{
+async function readRedrobConfigForStatus(workspaceRoot: string): Promise<{
   data: Record<string, unknown>;
   error: string | null;
 }> {
   try {
-    return { data: await readOpenworkConfig(workspaceRoot), error: null };
+    return { data: await readRedrobConfig(workspaceRoot), error: null };
   } catch (error) {
     if (error instanceof ApiError && error.code === "invalid_json") {
       return { data: {}, error: error.message };
@@ -3987,49 +3987,49 @@ async function readOpenworkConfigForStatus(workspaceRoot: string): Promise<{
 }
 
 /**
- * Resolve the effective per-workspace openwork config from the runtime DB,
- * migrating a legacy `.opencode/openwork.json` file into the DB on first read.
+ * Resolve the effective per-workspace redrob config from the runtime DB,
+ * migrating a legacy `.opencode/redrob.json` file into the DB on first read.
  *
  * The DB is the source of truth. The file is only consulted to seed the DB
  * once (back-compat for workspaces created before the file->DB migration), and
  * is never written afterwards. Returns the merged view ({...file, ...db}) so a
  * partially-migrated install still surfaces every key.
  */
-async function readOpenworkConfigForWorkspace(
+async function readRedrobConfigForWorkspace(
   config: ServerConfig,
   workspace: WorkspaceInfo,
 ): Promise<Record<string, unknown>> {
-  const stored = await readOpenworkWorkspaceConfig(config, workspace.id);
-  if (Object.keys(stored).length > 0 || (await hasOpenworkWorkspaceConfig(config, workspace.id))) {
+  const stored = await readRedrobWorkspaceConfig(config, workspace.id);
+  if (Object.keys(stored).length > 0 || (await hasRedrobWorkspaceConfig(config, workspace.id))) {
     return stored;
   }
-  const legacy = await readOpenworkConfigForStatus(workspace.path);
+  const legacy = await readRedrobConfigForStatus(workspace.path);
   if (Object.keys(legacy.data).length === 0) {
     if (workspace.workspaceType !== "remote" && workspace.path.trim()) {
-      return seedOpenworkWorkspaceConfigIfEmpty(
+      return seedRedrobWorkspaceConfigIfEmpty(
         config,
         workspace.id,
-        defaultWorkspaceOpenworkConfig(workspace.path, workspace.preset ?? "starter"),
+        defaultWorkspaceRedrobConfig(workspace.path, workspace.preset ?? "starter"),
       );
     }
     return {};
   }
   // Migrate-on-read: copy the legacy file contents into the DB once.
-  await seedOpenworkWorkspaceConfigIfEmpty(config, workspace.id, legacy.data);
-  return mergeOpenworkWorkspaceConfigs(legacy.data, await readOpenworkWorkspaceConfig(config, workspace.id));
+  await seedRedrobWorkspaceConfigIfEmpty(config, workspace.id, legacy.data);
+  return mergeRedrobWorkspaceConfigs(legacy.data, await readRedrobWorkspaceConfig(config, workspace.id));
 }
 
 /**
- * Persist a full openwork config document for a workspace to the runtime DB.
+ * Persist a full redrob config document for a workspace to the runtime DB.
  * Replaces the legacy file write path; the file is no longer written.
  */
-async function writeOpenworkConfigForWorkspace(
+async function writeRedrobConfigForWorkspace(
   config: ServerConfig,
   workspace: WorkspaceInfo,
   payload: Record<string, unknown>,
   merge: boolean,
 ): Promise<void> {
-  await writeOpenworkWorkspaceConfig(config, workspace.id, (current) =>
+  await writeRedrobWorkspaceConfig(config, workspace.id, (current) =>
     merge ? { ...current, ...payload } : payload,
   );
 }
@@ -4210,7 +4210,7 @@ async function postEngineRefreshSync(
   activeState: EngineMcpServerState | undefined,
 ): Promise<void> {
   const directory = resolveOpencodeDirectory(workspace);
-  markOpenworkCloudMcpStale(workspace, directory);
+  markRedrobCloudMcpStale(workspace, directory);
   return enqueueWorkspaceMcpRefreshSync({
     config,
     workspace,
@@ -4253,7 +4253,7 @@ async function runWorkspaceMcpRefreshSync(input: WorkspaceMcpRefreshRequest): Pr
     logRuntimeMcpSyncError({ config, workspace, trigger, error });
   }
   try {
-    const health = await reconcilePersistedOpenworkCloudMcp({
+    const health = await reconcilePersistedRedrobCloudMcp({
       config,
       workspace,
       directory,
@@ -4281,7 +4281,7 @@ async function runWorkspaceMcpRefreshSync(input: WorkspaceMcpRefreshRequest): Pr
   try {
     const engineWorkspace = resolveEngineRuntimeWorkspace(config);
     if (trigger === "engine_reload" && engineWorkspace.id === workspace.id) {
-      await writeOpenworkRuntimeConfigFile(config, workspace.id);
+      await writeRedrobRuntimeConfigFile(config, workspace.id);
     }
   } catch {
     // Best-effort: the fresh-keeper listener still converges eventually.
@@ -4368,7 +4368,7 @@ async function runRuntimeMcpSyncToOpencodeEngine(
   if (connection.authHeader) headers.Authorization = connection.authHeader;
 
   // Keep going past per-entry failures: one dead or invalid MCP must not
-  // block re-registration of every entry after it (e.g. openwork-ui) on
+  // block re-registration of every entry after it (e.g. redrob-ui) on
   // each engine reload.
   const failures: EngineMcpSyncFailure[] = [];
   const registrations: EngineMcpRegistrationResult[] = [];
@@ -4750,7 +4750,7 @@ type EngineMcpServerState = {
 const ENGINE_MCP_REGISTRATION_MAX_AGE_MS = 15 * 60_000;
 // Registration status is point-in-time evidence from a dynamic POST /mcp,
 // not a durable statement about a later engine process. Scope it to one
-// OpenWork server generation and expire it even when the endpoint is stable.
+// Redrob Work server generation and expire it even when the endpoint is stable.
 const engineMcpServerStateByConfig = new WeakMap<ServerConfig, EngineMcpServerState>();
 const trustedOpencodeProcessByConfig = new WeakMap<ServerConfig, TrustedOpencodeProcessIdentity>();
 let nextEngineMcpServerGeneration = 0;
@@ -4778,7 +4778,7 @@ function clearEngineMcpServerEvidence(state: EngineMcpServerState): void {
 
 /**
  * Bind diagnostics evidence to one OpenCode process generation owned by this
- * OpenWork server. The opaque identity is hashed immediately and never
+ * Redrob Work server. The opaque identity is hashed immediately and never
  * reported. External engines without a trusted per-boot identity still hot
  * sync normally, but their cached registration result cannot authorize a
  * credentialed diagnostics probe.
@@ -4837,7 +4837,7 @@ export function createEnginePoolForConfig(input: {
         await postEngineRefreshSync(poolConfig, workspace, activeEngineMcpServerState(poolConfig));
         await syncAllWorkspacesRuntimeMcpToEngine(poolConfig);
       },
-      writeRuntimeConfigFile: (poolConfig, workspaceId) => writeOpenworkRuntimeConfigFile(poolConfig, workspaceId),
+      writeRuntimeConfigFile: (poolConfig, workspaceId) => writeRedrobRuntimeConfigFile(poolConfig, workspaceId),
       registerTrusted: (poolConfig, generation) => registerTrustedOpencodeProcess(poolConfig, generation),
       clearTrusted: (poolConfig, identity) => clearTrustedOpencodeProcess(poolConfig, identity),
       logger: createServerLogger(config),
@@ -5262,7 +5262,7 @@ function logPersistedCloudMcpReconcileResult(input: {
     `Cloud MCP ${input.trigger} reconciliation left connected service tools unavailable for workspace ${input.workspace.id}.`,
     {
       "workspace.id": input.workspace.id,
-      "mcp.name": "openwork-cloud",
+      "mcp.name": "redrob-cloud",
       "mcp.trigger": input.trigger,
       "mcp.failure.code": failure?.code ?? "unknown",
       "mcp.failure.stage": failure?.stage ?? "unknown",
@@ -5318,7 +5318,7 @@ function logPersistedCloudMcpReconcileError(input: {
     `Cloud MCP ${input.trigger} reconciliation crashed for workspace ${input.workspace.id}.`,
     {
       "workspace.id": input.workspace.id,
-      "mcp.name": "openwork-cloud",
+      "mcp.name": "redrob-cloud",
       "mcp.trigger": input.trigger,
       "mcp.failure.code": "cloud_mcp_reconcile_exception",
       "mcp.failure.message": input.error instanceof Error ? input.error.message : String(input.error),
@@ -5390,7 +5390,7 @@ async function exportWorkspace(
   const sensitiveMode = options?.sensitiveMode ?? "auto";
   const rawOpencode = await readOpencodeConfig(workspace.path);
   let opencode = sanitizePortableOpencodeConfig(rawOpencode);
-  const openwork = sanitizeOpenworkTemplateConfig(await readOpenworkConfigForWorkspace(config, workspace));
+  const redrob = sanitizeRedrobTemplateConfig(await readRedrobConfigForWorkspace(config, workspace));
   const skills = await listSkills(workspace.path, false);
   const commands = await listCommands(workspace.path, "workspace");
   let files = await listPortableFiles(workspace.path);
@@ -5427,7 +5427,7 @@ async function exportWorkspace(
     workspaceId: workspace.id,
     exportedAt: Date.now(),
     opencode,
-    openwork,
+    redrob,
     skills: skillContents,
     commands: commandContents,
     ...(files.length ? { files } : {}),
@@ -5481,13 +5481,13 @@ async function importWorkspace(config: ServerConfig, workspace: WorkspaceInfo, p
   }
 
   if (
-    input.openwork !== undefined &&
-    changedPath("openwork", workspaceImportRelativePath(workspace, openworkConfigPath(workspace.path)))
+    input.redrob !== undefined &&
+    changedPath("redrob", workspaceImportRelativePath(workspace, redrobConfigPath(workspace.path)))
   ) {
-    if (input.modes.openwork === "replace") {
-      await writeOpenworkConfigForWorkspace(config, workspace, input.openwork, false);
+    if (input.modes.redrob === "replace") {
+      await writeRedrobConfigForWorkspace(config, workspace, input.redrob, false);
     } else {
-      await writeOpenworkConfigForWorkspace(config, workspace, input.openwork, true);
+      await writeRedrobConfigForWorkspace(config, workspace, input.redrob, true);
     }
   }
 
@@ -5544,13 +5544,13 @@ async function materializeBlueprintSessions(config: ServerConfig, workspace: Wor
   existing: Array<{ templateId: string; sessionId: string }>;
   openSessionId: string | null;
 }> {
-  const openwork = await readOpenworkConfigForWorkspace(config, workspace);
-  const templates = normalizeBlueprintSessionTemplates(openwork);
+  const redrob = await readRedrobConfigForWorkspace(config, workspace);
+  const templates = normalizeBlueprintSessionTemplates(redrob);
   if (!templates.length) {
     return { ok: true, created: [], existing: [], openSessionId: null };
   }
 
-  const existing = readMaterializedBlueprintSessions(openwork);
+  const existing = readMaterializedBlueprintSessions(redrob);
   if (existing.length > 0) {
     const preferredTemplate = templates.find((template) => template.openOnFirstLoad) ?? templates[0] ?? null;
     const openSessionId = preferredTemplate
@@ -5577,12 +5577,12 @@ async function materializeBlueprintSessions(config: ServerConfig, workspace: Wor
   }
 
   const now = Date.now();
-  const nextOpenwork = applyMaterializedBlueprintSessions(
-    openwork,
+  const nextRedrob = applyMaterializedBlueprintSessions(
+    redrob,
     created.map(({ templateId, sessionId }) => ({ templateId, sessionId })),
     now,
   );
-  await writeOpenworkConfigForWorkspace(config, workspace, nextOpenwork, false);
+  await writeRedrobConfigForWorkspace(config, workspace, nextRedrob, false);
 
   const preferredTemplate = templates.find((template) => template.openOnFirstLoad) ?? templates[0] ?? null;
   const openSessionId = preferredTemplate

@@ -4,7 +4,7 @@ import { AppHeader, ArrowIcon, CardBody, CardFooter, CheckIcon, KeyValueGrid } f
 import "./shared/theme.css"
 
 mountMcpApp({
-  name: "OpenWork Skill Saved",
+  name: "Redrob Work Skill Saved",
   waitingLabel: "Finishing your skill...",
   schema: skillCreatedPayloadSchema,
   render: (payload, app) => {

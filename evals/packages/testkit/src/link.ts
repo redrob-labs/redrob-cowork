@@ -9,8 +9,8 @@ import type { ChildProcess } from "node:child_process";
 import type { DenRef } from "@redrob/behaviors";
 import type { DaytonaExec } from "@redrob/hosts";
 
-const DAYTONA_LINK_SCRIPT = "/tmp/openwork-den-link-server.mjs";
-const DAYTONA_LINK_PID = "/tmp/openwork-den-link-server.pid";
+const DAYTONA_LINK_SCRIPT = "/tmp/redrob-den-link-server.mjs";
+const DAYTONA_LINK_PID = "/tmp/redrob-den-link-server.pid";
 const DAYTONA_LINK_BASE64 = `${DAYTONA_LINK_SCRIPT}.b64`;
 const MAX_LINK_SCRIPT_BYTES = 512 * 1024;
 const DAYTONA_LINK_BASE64_CHUNK_LENGTH = 8 * 1024;

@@ -59,10 +59,10 @@ async function installControlledUpdaterBridge(
       stableResolved: false,
       finishStable: null,
     };
-    window.__openworkUpdaterEvalState = state;
-    window.__openworkApplyDesktopConfig?.({ allowAlphaUpdates: true });
-    window.__openworkSetDesktopConfigRefreshResult?.({ allowAlphaUpdates: true });
-    window.__openworkUpdaterEvalBridge = {
+    window.__redrobUpdaterEvalState = state;
+    window.__redrobApplyDesktopConfig?.({ allowAlphaUpdates: true });
+    window.__redrobSetDesktopConfigRefreshResult?.({ allowAlphaUpdates: true });
+    window.__redrobUpdaterEvalBridge = {
       getChannel: () => nativeUpdater.getChannel(),
       setChannel: async (channel) => {
         state.setChannels.push(channel);
@@ -160,11 +160,11 @@ async function selectAlpha(app: Parameters<typeof evalIn>[0]): Promise<void> {
 
 async function readUpdaterSnapshot(app: Parameters<typeof evalIn>[0], label: string): Promise<UpdaterSnapshot> {
   const value = await evalIn(app, `(async () => {
-    const state = window.__openworkUpdaterEvalState;
+    const state = window.__redrobUpdaterEvalState;
     const nativeState = await window.__REDROB_ELECTRON__?.updater?.getChannel?.();
     let preferences = null;
     try {
-      preferences = JSON.parse(localStorage.getItem("openwork.preferences") || "null");
+      preferences = JSON.parse(localStorage.getItem("redrob.preferences") || "null");
     } catch {}
     return {
       checks: Array.isArray(state?.checks) ? [...state.checks] : [],
@@ -207,7 +207,7 @@ test.skipIf(!enabled)(title, async ({ evidence }) => {
   // Alpha is deliberately macOS-only. Daytona Electron surfaces are Linux, so
   // this journey uses the local Mac host instead of producing a vacuous remote
   // pass in a platform where the picker cannot exist.
-  const profileDir = await mkdtemp(join(tmpdir(), "openwork-updater-channel-eval-"));
+  const profileDir = await mkdtemp(join(tmpdir(), "redrob-updater-channel-eval-"));
   const workspacePath = join(profileDir, "workspace");
   // Local storage is scoped to the dev-server origin. Pin both launches to the
   // same Vite port so this is a genuine relaunch of one renderer origin, just
@@ -222,16 +222,16 @@ test.skipIf(!enabled)(title, async ({ evidence }) => {
       ({ workspaceId } = await createAndSelectWorkspace(firstApp, { path: workspacePath }));
       await installControlledUpdaterBridge(firstApp, { delayStable: true });
       await openUpdates(firstApp, workspaceId);
-      await waitFor(firstApp, `window.__openworkUpdaterEvalState?.stableStarted === true`, {
+      await waitFor(firstApp, `window.__redrobUpdaterEvalState?.stableStarted === true`, {
         timeoutMs: 30_000,
         label: "initial Stable update check in flight",
       });
 
       await selectAlpha(firstApp);
       await waitFor(firstApp, `(() => {
-        const state = window.__openworkUpdaterEvalState;
+        const state = window.__redrobUpdaterEvalState;
         let preferences = null;
-        try { preferences = JSON.parse(localStorage.getItem("openwork.preferences") || "null"); } catch {}
+        try { preferences = JSON.parse(localStorage.getItem("redrob.preferences") || "null"); } catch {}
         return state?.checks?.includes("alpha")
           && state?.setChannels?.includes("alpha")
           && preferences?.releaseChannel === "alpha"
@@ -239,7 +239,7 @@ test.skipIf(!enabled)(title, async ({ evidence }) => {
       })()`, { timeoutMs: 30_000, label: "Alpha selected and checked" });
 
       const finishedStable = await evalIn(firstApp, `(() => {
-        const finish = window.__openworkUpdaterEvalState?.finishStable;
+        const finish = window.__redrobUpdaterEvalState?.finishStable;
         if (typeof finish !== "function") return false;
         finish();
         return true;
@@ -275,7 +275,7 @@ test.skipIf(!enabled)(title, async ({ evidence }) => {
       await go(relaunchedApp, "/session");
       await installControlledUpdaterBridge(relaunchedApp, { delayStable: false });
       await openUpdates(relaunchedApp, workspaceId);
-      await waitFor(relaunchedApp, `window.__openworkUpdaterEvalState?.checks?.includes("alpha")`, {
+      await waitFor(relaunchedApp, `window.__redrobUpdaterEvalState?.checks?.includes("alpha")`, {
         timeoutMs: 30_000,
         label: "Alpha check after relaunch",
       });

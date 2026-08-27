@@ -13,10 +13,10 @@ import { app, mcpMock, needs, server, test } from "@redrob/testkit";
 import type { Surface } from "@redrob/cdp";
 
 /**
- * CORE JOURNEY: a person creates an active Automation in the main OpenWork
+ * CORE JOURNEY: a person creates an active Automation in the main Redrob Work
  * app, keeps its authenticated desktop runner connected, and Den wakes that
  * runner to claim the scheduled occurrence exactly once. The desktop executes
- * it with the selected model and a current OpenWork Connect integration.
+ * it with the selected model and a current Redrob Work Connect integration.
  * The app reveals the durable receipt and execution thread. Deactivation
  * stops future claims without becoming a cancellation control; reactivation
  * computes a new future occurrence.

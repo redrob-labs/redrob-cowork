@@ -32,8 +32,8 @@ briefTest(testBrief({
   );
 
   const deviceRoots = [
-    "\\\\.\\pipe\\openwork",
-    "//./PIPE/openwork",
+    "\\\\.\\pipe\\redrob",
+    "//./PIPE/redrob",
     "\\\\.\\PhysicalDrive0",
   ];
   for (const deviceRoot of deviceRoots) {

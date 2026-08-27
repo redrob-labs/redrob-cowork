@@ -15,8 +15,8 @@ test.skipIf(!enabled)("two desktops reach interactive workspaces on different Da
 
   const stamp = Date.now();
   const [workspaceA, workspaceB] = await Promise.all([
-    createAndSelectWorkspace(appA, { path: `/tmp/openwork-two-sandboxes-a-${stamp}` }),
-    createAndSelectWorkspace(appB, { path: `/tmp/openwork-two-sandboxes-b-${stamp}` }),
+    createAndSelectWorkspace(appA, { path: `/tmp/redrob-two-sandboxes-a-${stamp}` }),
+    createAndSelectWorkspace(appB, { path: `/tmp/redrob-two-sandboxes-b-${stamp}` }),
   ]);
 
   expect(appA.handle.sandboxId).toBe(sandboxA);

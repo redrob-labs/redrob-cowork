@@ -37,7 +37,7 @@ export interface SelectedWorkspaceFacts {
 }
 
 export async function signInDesktopAs(app: Surface, den: DenRef, member: DenSession): Promise<void> {
-  await waitFor(app, "Boolean(window.__openworkControl?.listActions?.().some((action) => action.id === 'auth.exchange-grant'))", {
+  await waitFor(app, "Boolean(window.__redrobControl?.listActions?.().some((action) => action.id === 'auth.exchange-grant'))", {
     timeoutMs: 60_000,
     label: "auth.exchange-grant action registered",
   });
@@ -47,11 +47,11 @@ export async function signInDesktopAs(app: Surface, den: DenRef, member: DenSess
   } catch (error) {
     if (!messageText(error).includes("Already acting: auth.exchange-grant")) throw error;
   }
-  await waitForDenState(app, den, "Boolean((localStorage.getItem('openwork.den.authToken') ?? '').trim())", {
+  await waitForDenState(app, den, "Boolean((localStorage.getItem('redrob.den.authToken') ?? '').trim())", {
     timeoutMs: 45_000,
     label: "persisted den auth token",
   });
-  await waitForDenState(app, den, "Boolean((localStorage.getItem('openwork.den.activeOrgId') ?? '').trim())", {
+  await waitForDenState(app, den, "Boolean((localStorage.getItem('redrob.den.activeOrgId') ?? '').trim())", {
     timeoutMs: 60_000,
     label: "active org resolved",
   });
@@ -123,13 +123,13 @@ export async function createAndSelectWorkspace(
   if (route.includes("/welcome")) {
     const workspace = await createLocalWorkspaceViaUi(app, input);
     await clickButton(app, "Skip and use the free model", { timeoutMs: 90_000 });
-    await waitForText(app, "How did you hear about OpenWork?", { timeoutMs: 90_000 });
+    await waitForText(app, "How did you hear about Redrob Work?", { timeoutMs: 90_000 });
     await clickButton(app, "Skip", { timeoutMs: 15_000 });
     // Only now is the workspace actually selected: resolving before the
     // onboarding steps finish reads an id the app has not adopted yet.
     workspaceId = workspace.id;
     if (!workspaceId) {
-      await waitFor(app, `Boolean(localStorage.getItem("openwork.react.activeWorkspace"))
+      await waitFor(app, `Boolean(localStorage.getItem("redrob.react.activeWorkspace"))
         || /\\/workspace\\/[^/?#]+/.test(window.location.hash)`, {
         timeoutMs: 180_000,
         label: "workspace selected after onboarding",
@@ -140,7 +140,7 @@ export async function createAndSelectWorkspace(
     if (route.includes("/onboarding")) await completeOrganizationOnboarding(app);
     workspaceId = await resolveWorkspaceId(app);
     if (!workspaceId) {
-      await waitFor(app, `window.__openworkControl.listActions()
+      await waitFor(app, `window.__redrobControl.listActions()
         .some((action) => action.id === "workspace.create" && !action.disabled)`, {
         timeoutMs: 60_000,
         label: "workspace.create enabled",
@@ -150,7 +150,7 @@ export async function createAndSelectWorkspace(
       await control(app, "workspace.create", input, { timeoutMs: 60_000 });
       // The app does not always put a new workspace in the hash, so wait for its
       // own active-workspace state to settle instead of matching a route shape.
-      await waitFor(app, `Boolean(localStorage.getItem("openwork.react.activeWorkspace"))
+      await waitFor(app, `Boolean(localStorage.getItem("redrob.react.activeWorkspace"))
         || /\\/workspace\\/[^/?#]+/.test(window.location.hash)`, {
         timeoutMs: 120_000,
         label: "created workspace selected",

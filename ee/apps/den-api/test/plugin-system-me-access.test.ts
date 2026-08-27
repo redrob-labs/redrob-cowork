@@ -21,7 +21,7 @@ import type { OrgRouteVariables } from "../src/routes/org/shared.js"
 
 const API_ORIGIN = "http://127.0.0.1:8790"
 
-process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_meaccess"
+process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_meaccess"
 process.env.DB_MODE ??= "mysql"
 process.env.DEN_DB_ENCRYPTION_KEY ??= "me-access-test-encryption-key-1234567890"
 process.env.BETTER_AUTH_SECRET ??= "me-access-test-secret-123456789012"
@@ -49,7 +49,7 @@ const removedGrantPluginId = createDenTypeId("plugin")
 const marketplaceId = createDenTypeId("marketplace")
 const configObjectId = createDenTypeId("configObject")
 const directGrantedAt = new Date("2026-02-01T10:00:00.000Z")
-const sourceRepositoryUrl = "https://github.com/openworklabs/member-library"
+const sourceRepositoryUrl = "https://github.com/redroblabs/member-library"
 
 async function cleanup() {
   await db.delete(PluginConfigObjectTable).where(eq(PluginConfigObjectTable.organizationId, organizationId))

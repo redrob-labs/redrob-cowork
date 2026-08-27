@@ -3,7 +3,7 @@ import { createDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 import { afterAll, beforeAll, expect, mock, test } from "bun:test"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_pr7"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_pr7"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "local-dev-secret-not-for-production-use!!"
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -280,7 +280,7 @@ test("public client metadata exposes only the deployment-wide web callback", asy
   const publicOrigin = process.env.DEN_API_PUBLIC_URL ?? "http://127.0.0.1:8790"
   expect(await response.json()).toEqual({
     client_id: new URL("/oauth/client-metadata.json", publicOrigin).toString(),
-    client_name: "OpenWork",
+    client_name: "Redrob Work",
     application_type: "web",
     redirect_uris: [new URL("/v1/mcp-connections/oauth/callback", publicOrigin).toString()],
     grant_types: ["authorization_code", "refresh_token"],
@@ -1087,7 +1087,7 @@ test("version-two legacy callbacks use enterprise issuer validation", async () =
   const response = await app.fetch(new Request(callbackUrl))
   expect(response.status).toBe(400)
   const html = await response.text()
-  expect(html).toContain("OpenWork could not register or identify its OAuth client with the authorization server")
+  expect(html).toContain("Redrob Work could not register or identify its OAuth client with the authorization server")
   expect(html).not.toContain("The provider did not grant authorization")
 })
 

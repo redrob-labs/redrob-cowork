@@ -104,16 +104,16 @@ function PasswordFeedbackList({ messages }: { messages: string[] }) {
 }
 
 function DesktopHandoffCopyLink({
-  openworkUrl,
+  redrobUrl,
   label,
 }: {
-  openworkUrl: string;
+  redrobUrl: string;
   label: string;
 }) {
   const [copied, setCopied] = useState(false);
 
-  async function copyOpenworkUrl() {
-    await navigator.clipboard.writeText(openworkUrl);
+  async function copyRedrobUrl() {
+    await navigator.clipboard.writeText(redrobUrl);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
@@ -124,12 +124,12 @@ function DesktopHandoffCopyLink({
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
           className="den-input min-w-0 flex-1 text-xs"
-          value={openworkUrl}
+          value={redrobUrl}
           readOnly
           onFocus={(event) => event.currentTarget.select()}
-          aria-label="OpenWork sign-in link"
+          aria-label="Redrob Work sign-in link"
         />
-        <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyOpenworkUrl()}>
+        <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyRedrobUrl()}>
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
@@ -138,14 +138,14 @@ function DesktopHandoffCopyLink({
 }
 
 function DesktopHandoffAction({
-  openworkUrl,
+  redrobUrl,
   grant,
   organizationName,
   helperText,
   buttonClassName = "den-button-primary w-full",
   showCopyLinkByDefault = false,
 }: {
-  openworkUrl: string;
+  redrobUrl: string;
   grant: string | null;
   organizationName: string | null;
   helperText?: string;
@@ -161,7 +161,7 @@ function DesktopHandoffAction({
   if (status === "consumed") {
     return (
       <div className="den-frame-inset rounded-[1.5rem] px-4 py-3 text-center text-sm font-medium text-emerald-700" data-testid="desktop-connected" aria-live="polite">
-        ✓ Connected — OpenWork is set up for {resolvedOrganizationName}
+        ✓ Connected — Redrob Work is set up for {resolvedOrganizationName}
       </div>
     );
   }
@@ -171,13 +171,13 @@ function DesktopHandoffAction({
       <div className="den-frame-inset grid gap-3 rounded-[1.5rem] px-4 py-3 text-sm text-[var(--dls-text-secondary)]" data-testid="desktop-handoff-troubleshoot" aria-live="polite">
         <p className="m-0">
           Nothing opened?{" "}
-          <button type="button" className="font-medium text-[var(--dls-text-primary)] underline-offset-4 hover:underline" onClick={() => window.location.assign(openworkUrl)}>
-            Open OpenWork again
+          <button type="button" className="font-medium text-[var(--dls-text-primary)] underline-offset-4 hover:underline" onClick={() => window.location.assign(redrobUrl)}>
+            Open Redrob Work again
           </button>
         </p>
         <DesktopHandoffCopyLink
-          openworkUrl={openworkUrl}
-          label="Still stuck? Paste this sign-in code in OpenWork:"
+          redrobUrl={redrobUrl}
+          label="Still stuck? Paste this sign-in code in Redrob Work:"
         />
       </div>
     );
@@ -188,9 +188,9 @@ function DesktopHandoffAction({
       <button
         type="button"
         className={buttonClassName}
-        onClick={() => window.location.assign(openworkUrl)}
+        onClick={() => window.location.assign(redrobUrl)}
       >
-        Open OpenWork
+        Open Redrob Work
         <ArrowRight className="h-4 w-4" />
       </button>
       {helperText ? (
@@ -200,8 +200,8 @@ function DesktopHandoffAction({
       ) : null}
       {showCopyLink ? (
         <DesktopHandoffCopyLink
-          openworkUrl={openworkUrl}
-          label={showTroubleshoot ? "Nothing opened? Paste this sign-in code in OpenWork:" : "Or paste this sign-in code in OpenWork:"}
+          redrobUrl={redrobUrl}
+          label={showTroubleshoot ? "Nothing opened? Paste this sign-in code in Redrob Work:" : "Or paste this sign-in code in Redrob Work:"}
         />
       ) : null}
     </div>
@@ -291,7 +291,7 @@ export function AuthPanel({
   const isSingleOrgSsoMode = isSingleOrgMode && runtimeConfig.singleOrgSsoConfigured;
   const isSingleOrgPrivateSignup = isSingleOrgSignupDisabled(runtimeConfig, runtimeConfigLoaded);
   const visibleAuthMode = resolveVisibleAuthMode({ authMode, runtimeConfig, runtimeConfigLoaded });
-  const singleOrgName = runtimeConfig.singleOrgName || "OpenWork";
+  const singleOrgName = runtimeConfig.singleOrgName || "Redrob Work";
   const singleOrgSlug = runtimeConfig.singleOrgSlug.trim();
   const emailFirstInvite = emailFirstInvitationId?.trim() ?? "";
 
@@ -360,7 +360,7 @@ export function AuthPanel({
   const emailFirstContent: PanelContent =
     emailFirstStep === "email"
       ? {
-          title: "Start using OpenWork",
+          title: "Start using Redrob Work",
           copy: "Enter your email and we'll send you to the right sign-in step.",
           submitLabel: "Next",
         }
@@ -390,7 +390,7 @@ export function AuthPanel({
         }
       : {
           title: "Create your account.",
-          copy: "Set up your OpenWork Cloud account.",
+          copy: "Set up your Redrob Work Cloud account.",
           submitLabel: "Sign up",
           ...signUpContent,
         };
@@ -506,7 +506,7 @@ export function AuthPanel({
   const startSingleOrgSso = () => {
     if (!singleOrgSlug) return;
     const nextUrl = new URL(`/sso/${encodeURIComponent(singleOrgSlug)}`, window.location.origin);
-    nextUrl.searchParams.set("callbackURL", getSocialCallbackUrl(runtimeConfig.openworkAuthCallbackUrl));
+    nextUrl.searchParams.set("callbackURL", getSocialCallbackUrl(runtimeConfig.redrobAuthCallbackUrl));
     const trimmedEmail = email.trim();
     if (trimmedEmail) {
       nextUrl.searchParams.set("loginHint", trimmedEmail);
@@ -522,7 +522,7 @@ export function AuthPanel({
     }
 
     const nextUrl = new URL(target, window.location.origin);
-    nextUrl.searchParams.set("callbackURL", getSocialCallbackUrl(runtimeConfig.openworkAuthCallbackUrl));
+    nextUrl.searchParams.set("callbackURL", getSocialCallbackUrl(runtimeConfig.redrobAuthCallbackUrl));
     const trimmedEmail = email.trim();
     if (trimmedEmail) {
       nextUrl.searchParams.set("loginHint", trimmedEmail);
@@ -619,7 +619,7 @@ export function AuthPanel({
   /* ------------------------------------------------------------------ */
   // Gate on the session user (not authInfo feedback). Otherwise a hydrated
   // desktop session still renders the email-first form underneath the Open
-  // OpenWork button.
+  // Redrob Work button.
   const isSignedInWithDesktopHandoff = Boolean(desktopAuthRequested && user && !authError);
   const signedInEmail = user?.email?.trim() || "";
   const emailFirstPanelActive = emailFirstFlow && !isSingleOrgSsoMode && !verificationRequired && !isPasswordResetRequest;
@@ -647,14 +647,14 @@ export function AuthPanel({
 
         {desktopRedirectUrl ? (
           <DesktopHandoffAction
-            openworkUrl={desktopRedirectUrl}
+            redrobUrl={desktopRedirectUrl}
             grant={desktopGrant}
             organizationName={isSingleOrgMode ? singleOrgName : null}
             showCopyLinkByDefault
           />
         ) : (
           <div className="den-frame-inset rounded-[1.5rem] px-4 py-3 text-center text-sm text-[var(--dls-text-secondary)]" aria-live="polite">
-            Preparing your OpenWork sign-in link...
+            Preparing your Redrob Work sign-in link...
           </div>
         )}
 
@@ -689,7 +689,7 @@ export function AuthPanel({
 
         {desktopAuthRequested && desktopRedirectUrl ? (
           <DesktopHandoffAction
-            openworkUrl={desktopRedirectUrl}
+            redrobUrl={desktopRedirectUrl}
             grant={desktopGrant}
             organizationName={isSingleOrgMode ? singleOrgName : null}
             helperText="Sign in below, then click above to return to the app."
@@ -931,7 +931,7 @@ export function AuthPanel({
 
       {desktopAuthRequested && desktopRedirectUrl ? (
         <DesktopHandoffAction
-          openworkUrl={desktopRedirectUrl}
+          redrobUrl={desktopRedirectUrl}
           grant={desktopGrant}
           organizationName={isSingleOrgMode ? singleOrgName : null}
           helperText="Sign in below, then click above to return to the app."

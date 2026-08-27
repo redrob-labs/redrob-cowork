@@ -19,17 +19,17 @@ const title = e2eTestsEnabled
   : "reliable app recovery skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
 const profileMarker = "reliable-recovery-profile-marker";
 const fatalFailure = "EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE: dlopen(/private/tmp/runtime.node): invalid code signature";
-const verifiedArtifact = "https://releases.openwork.test/v1.8.2/OpenWork-darwin-arm64.dmg";
+const verifiedArtifact = "https://releases.redrob.test/v1.8.2/Redrob Work-darwin-arm64.dmg";
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
-  const profileDir = `/tmp/openwork-reliable-recovery-${process.pid}-${Date.now()}`;
+  const profileDir = `/tmp/redrob-reliable-recovery-${process.pid}-${Date.now()}`;
   const provisioned = daytonaEnabled
     ? await provisionDesktopSandbox({
         ref: process.env.REDROB_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
         name: "reliable-app-recovery",
         reuse: process.env.REDROB_EVAL_DAYTONA_SANDBOX?.trim(),
-        log: (line) => console.error(`[openwork/testkit] ${line}`),
+        log: (line) => console.error(`[redrob/testkit] ${line}`),
       })
     : null;
   const host = provisioned ? daytonaSandbox(provisioned.sandbox) : localHost();
@@ -57,15 +57,15 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
         REDROB_EVAL_FATAL_DESKTOP_BOOTSTRAP_FAILURE: fatalFailure,
         REDROB_EVAL_RECOVERY_CANDIDATES: JSON.stringify([
           { version: "1.8.2", verified: true, artifactUrl: verifiedArtifact },
-          { version: "1.8.1", verified: false, artifactUrl: "https://tampered.invalid/OpenWork.dmg" },
+          { version: "1.8.1", verified: false, artifactUrl: "https://tampered.invalid/Redrob Work.dmg" },
         ]),
       },
     });
 
     const recoveryObserverAvailable = await evalIn(
       recoveryApp,
-      `typeof window.__openworkRecoveryControl?.snapshot === "function"
-        && typeof window.__openworkRecoveryControl?.select === "function"`,
+      `typeof window.__redrobRecoveryControl?.snapshot === "function"
+        && typeof window.__redrobRecoveryControl?.select === "function"`,
     );
     expect(
       recoveryObserverAvailable,
@@ -73,7 +73,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     ).toBe(true);
 
     const text = await visibleText(recoveryApp);
-    expect(text).toMatch(/OpenWork (couldn't|could not) start/i);
+    expect(text).toMatch(/Redrob Work (couldn't|could not) start/i);
     expect(text).toContain("Restore previous version");
     expect(text).not.toContain(fatalFailure);
     expect(text).not.toMatch(/GitHub|open an issue|download.*manually/i);
@@ -88,20 +88,20 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     const offeredVersions = await eventually(
       () => evalIn(
         recoveryApp,
-        `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.candidates.map((candidate) => candidate.version))`,
+        `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.candidates.map((candidate) => candidate.version))`,
         { awaitPromise: true },
       ),
       { within: 5_000, label: "verified recovery candidates", until: (versions) => Array.isArray(versions) && versions.length === 1 },
     );
     expect(offeredVersions).toEqual(["1.8.2"]);
 
-    await evalIn(recoveryApp, `window.__openworkRecoveryControl.select("1.8.1")`, { awaitPromise: true });
-    expect(await evalIn(recoveryApp, `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.installRequests)`, { awaitPromise: true })).toEqual([]);
-    expect(await evalIn(recoveryApp, `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.quitRequested)`, { awaitPromise: true })).toBe(false);
+    await evalIn(recoveryApp, `window.__redrobRecoveryControl.select("1.8.1")`, { awaitPromise: true });
+    expect(await evalIn(recoveryApp, `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.installRequests)`, { awaitPromise: true })).toEqual([]);
+    expect(await evalIn(recoveryApp, `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.quitRequested)`, { awaitPromise: true })).toBe(false);
 
     await clickButton(recoveryApp, "Restore previous version", { timeoutMs: 5_000 });
     const installRequests = await eventually(
-      () => evalIn(recoveryApp, `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.installRequests)`, { awaitPromise: true }),
+      () => evalIn(recoveryApp, `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.installRequests)`, { awaitPromise: true }),
       {
         within: 5_000,
         label: "verified previous recovery install intent",
@@ -109,7 +109,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
       },
     );
     expect(installRequests).toEqual([{ version: "1.8.2", artifactUrl: verifiedArtifact }]);
-    expect(await evalIn(recoveryApp, `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.quitRequested)`, { awaitPromise: true })).toBe(false);
+    expect(await evalIn(recoveryApp, `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.quitRequested)`, { awaitPromise: true })).toBe(false);
     evidence.recordAssertionEvidence(
       "Fatal bootstrap recovery selected one verified previous release without losing the profile",
       "The recovery observer recorded exactly one verified install request, no invalid request, and no quit intent.",

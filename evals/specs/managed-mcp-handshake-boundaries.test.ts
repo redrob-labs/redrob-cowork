@@ -9,7 +9,7 @@ const witnessName = "returns safe connection errors for DCR reconnect and callba
 test("managed MCP handshake boundaries separate provider failures from internal defects", ({ evidence }) => {
   const result = spawnSync("pnpm", [
     "--filter",
-    "openwork-server",
+    "redrob-server",
     "test",
     "src/local-managed-mcp.e2e.test.ts",
     "--test-name-pattern",

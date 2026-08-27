@@ -53,7 +53,7 @@ test("needs only accepts opt-in gates set exactly to 1", () => {
 });
 
 test("needs reports an unavailable command", () => {
-  const command = "openwork-impossible-command-for-testkit-test";
+  const command = "redrob-impossible-command-for-testkit-test";
   assert.throws(
     () => checkNeeds({ commands: [command] }, {}),
     (error) => error instanceof SkipError && error.message.includes(`install ${command}`),

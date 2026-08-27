@@ -79,7 +79,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
   const orgName = `Okta SCIM Lifecycle ${runId}`;
   const managedDomain = "okta-scim.test";
   const managedEmail = `avery.${runId}@${managedDomain}`;
-  const controlPassword = "OpenWorkEval123!";
+  const controlPassword = "RedrobWorkEval123!";
 
   await using den = await server({
     place,
@@ -89,7 +89,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     },
   });
   const control = await inviteMember(den, "control", {
-    email: `control.${runId}@openwork.test`,
+    email: `control.${runId}@redrob.test`,
     name: "Control Member",
     password: controlPassword,
   });
@@ -119,7 +119,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
   const adminHeaders = {
     authorization: `Bearer ${den.admin.token}`,
     cookie: sessionCookie,
-    "x-openwork-org-id": organizationId,
+    "x-redrob-org-id": organizationId,
   };
   const sso = await denFetch(den.ref, "/v1/sso/saml", {
     method: "POST",
@@ -127,7 +127,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     body: JSON.stringify({
       issuer: `http://127.0.0.1/okta/exk-${runId}`,
       domain: managedDomain,
-      entryPoint: `https://okta.example.test/app/openwork/exk-${runId}/sso/saml`,
+      entryPoint: `https://okta.example.test/app/redrob/exk-${runId}/sso/saml`,
       cert: "okta-test-signing-certificate",
       audience: den.ref.apiUrl,
     }),

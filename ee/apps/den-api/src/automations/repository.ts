@@ -599,8 +599,8 @@ export class DenAutomationRepository implements AutomationRepository {
       const revision = revisions[0]
       if (!revision) return null
       const engineKind = revision.action?.kind === "saved_script"
-        ? "openwork-cloud-codemode-v1"
-        : "openwork-cloud-agent-v1"
+        ? "redrob-cloud-codemode-v1"
+        : "redrob-cloud-agent-v1"
       await tx.update(AutomationRunTable).set({
         status: "running",
         lease_owner: input.leaseOwner,
@@ -998,7 +998,7 @@ export class DenAutomationRepository implements AutomationRepository {
           lease_expires_at: new Date(input.now + input.leaseMs),
           heartbeat_at: new Date(input.now),
           attempt_count: selected.run.attempt_count + 1,
-          engine_kind: "openwork-desktop-runner-v1",
+          engine_kind: "redrob-desktop-runner-v1",
           started_at: selected.run.started_at ?? new Date(input.now),
           updated_at: new Date(input.now),
         }).where(and(eq(AutomationRunTable.id, selected.run.id), eq(AutomationRunTable.status, "queued")))

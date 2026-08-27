@@ -27,8 +27,8 @@ import type { TestNeeds } from "@redrob/testkit";
 
 const ORGANIZATION_NAME = "Den Lab";
 const PROVIDER_NAME = "LiteLLM Gateway";
-const PROVIDER_KEY = "openwork-litellm-witness";
-const MODEL_ID = "openwork-litellm-witness-model";
+const PROVIDER_KEY = "redrob-litellm-witness";
+const MODEL_ID = "redrob-litellm-witness-model";
 const MODEL_NAME = "Witness Model";
 const PROVIDER_ENV = "LITELLM_WITNESS_API_KEY";
 const REPLY = "The deterministic LiteLLM route is working.";
@@ -68,7 +68,7 @@ async function organizationId(session: DenSession): Promise<string> {
 async function testConnection(admin: DenSession, orgId: string, baseUrl: string, apiKey: string): Promise<Record<string, unknown>> {
   const response = await denFetch(admin, "/v1/llm-providers/test-connection", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({ api: baseUrl, apiKey, modelIds: [MODEL_ID] }),
     signal: AbortSignal.timeout(TEST_CONNECTION_TIMEOUT_MS),
   });
@@ -81,7 +81,7 @@ async function testConnection(admin: DenSession, orgId: string, baseUrl: string,
 async function createProvider(admin: DenSession, orgId: string, baseUrl: string, apiKey: string): Promise<string> {
   const result = await denFetch(admin, "/v1/llm-providers", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: PROVIDER_NAME,
       source: "custom",
@@ -111,7 +111,7 @@ async function createProvider(admin: DenSession, orgId: string, baseUrl: string,
 async function deleteProvider(admin: DenSession, orgId: string, providerId: string): Promise<void> {
   await denFetch(admin, `/v1/llm-providers/${encodeURIComponent(providerId)}`, {
     method: "DELETE",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 }
@@ -126,8 +126,8 @@ interface SyncFacts {
 
 async function readSyncStatus(desktop: Parameters<typeof evalIn>[0]): Promise<SyncFacts> {
   const value = await evalIn(desktop, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return { error: "missing local server credentials" };
     const response = await fetch("http://127.0.0.1:" + port + "/cloud-provider-sync/status", {
       headers: { Authorization: "Bearer " + token },
@@ -155,7 +155,7 @@ async function runDirectProviderSync(
   input: { baseUrl: string; token: string; orgId: string },
 ): Promise<Record<string, unknown>> {
   const value = await evalIn(desktop, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     if (!info?.running || !info.baseUrl || !info.hostToken) return { error: "local_server_unavailable" };
     const request = async (path, method, body) => {
       const response = await fetch(String(info.baseUrl).replace(/\\/+$/, "") + path, {
@@ -163,7 +163,7 @@ async function runDirectProviderSync(
         headers: {
           Authorization: "Bearer " + String(info.hostToken),
           "Content-Type": "application/json",
-          "x-openwork-host-token": String(info.hostToken),
+          "x-redrob-host-token": String(info.hostToken),
         },
         body: JSON.stringify(body),
       });
@@ -214,7 +214,7 @@ async function seedRendererDenSession(
   if (!isRecord(value) || value.ok !== true) {
     throw new Error(`Seeding the renderer Den session failed: ${JSON.stringify(value)}`);
   }
-  await waitFor(desktop, "Boolean((localStorage.getItem('openwork.den.authToken') ?? '').trim())", {
+  await waitFor(desktop, "Boolean((localStorage.getItem('redrob.den.authToken') ?? '').trim())", {
     timeoutMs: 45_000,
     label: "persisted Den auth token after session seed",
   });
@@ -315,7 +315,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, asy
     mobile: false,
   });
   await go(desktop, `/workspace/${workspaceId}/session`);
-  await waitFor(desktop, "Boolean(window.__openworkControl)", {
+  await waitFor(desktop, "Boolean(window.__redrobControl)", {
     timeoutMs: 120_000,
     label: "desktop session control",
   });

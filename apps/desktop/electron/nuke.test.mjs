@@ -17,10 +17,10 @@ import {
 } from "./nuke.mjs";
 import { runNukeCleanupWorker } from "./nuke-worker.mjs";
 
-const LEGACY_ORCHESTRATOR_DIR_NAME = ["openwork", "orchestrator"].join("-");
+const LEGACY_ORCHESTRATOR_DIR_NAME = ["redrob", "orchestrator"].join("-");
 
 function legacyOrchestratorPath(home) {
-  return path.join(home, ".openwork", LEGACY_ORCHESTRATOR_DIR_NAME);
+  return path.join(home, ".redrob", LEGACY_ORCHESTRATOR_DIR_NAME);
 }
 
 async function exists(targetPath) {
@@ -33,7 +33,7 @@ async function exists(targetPath) {
 }
 
 async function withTempDir(fn) {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-nuke-test-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-nuke-test-"));
   try {
     await fn(root);
   } finally {
@@ -51,7 +51,7 @@ function pendingNukeInput(root) {
 }
 
 function pendingNukePath(root) {
-  return path.join(root, "xdg", "openwork", ".nuke-pending.json");
+  return path.join(root, "xdg", "redrob", ".nuke-pending.json");
 }
 
 async function writePendingNuke(root, pending) {
@@ -80,7 +80,7 @@ function fakeRuntimeManager() {
   return {
     dispose: async () => {},
     prepareFreshRuntime: async () => {},
-    sandboxCleanupOpenworkContainers: async () => ({ candidates: [], removed: [], errors: [] }),
+    sandboxCleanupRedrobContainers: async () => ({ candidates: [], removed: [], errors: [] }),
   };
 }
 
@@ -115,18 +115,18 @@ test("buildNukeManifest includes default macOS state roots and preserves bootstr
   const userDataPath = "/Users/alice/Library/Application Support/io.redrob.work";
   const manifest = buildNukeManifest({ env: {}, homedir: home, platform: "darwin", userDataPath });
 
-  assert.equal(manifest.bootstrapPath, "/Users/alice/.config/openwork/desktop-bootstrap.json");
-  assert.equal(manifest.preserveBootstrapPath, "/Users/alice/.config/openwork/desktop-bootstrap.json");
-  assert.deepEqual(manifest.partitions, ["default", "persist:openwork-browser"]);
+  assert.equal(manifest.bootstrapPath, "/Users/alice/.config/redrob/desktop-bootstrap.json");
+  assert.equal(manifest.preserveBootstrapPath, "/Users/alice/.config/redrob/desktop-bootstrap.json");
+  assert.deepEqual(manifest.partitions, ["default", "persist:redrob-browser"]);
   assert.ok(manifest.deletePaths.includes(userDataPath));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/server.json"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/runtime.sqlite"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/runtime.sqlite-wal"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/runtime.sqlite-shm"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/runtime-opencode-config.json"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/engine-instances.json"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/tokens.json"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/openwork/env.json"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/server.json"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/runtime.sqlite"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/runtime.sqlite-wal"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/runtime.sqlite-shm"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/runtime-opencode-config.json"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/engine-instances.json"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/tokens.json"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.config/redrob/env.json"));
   assert.ok(manifest.deletePaths.includes("/Users/alice/.local/share/opencode"));
   assert.ok(manifest.deletePaths.includes("/Users/alice/Library/Application Support/opencode"));
   assert.ok(manifest.deletePaths.includes("/Users/alice/.config/opencode"));
@@ -148,19 +148,19 @@ test("buildNukeManifest wipes session state, server audit data, and workspace re
   });
 
   assert.ok(manifest.deletePaths.includes("/Users/alice/.local/state/opencode"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/.openwork/openwork-server"));
-  assert.ok(manifest.deletePaths.includes(`${userDataPath}/openwork-workspaces.json`));
-  assert.ok(manifest.deletePaths.includes(`${userDataPath}/openwork-server-tokens.json`));
-  assert.ok(manifest.deletePaths.includes(`${userDataPath}/openwork-server-state.json`));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/project/.opencode/openwork"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/project/.opencode/openwork.json"));
-  assert.ok(manifest.deletePaths.includes("/Users/alice/other/.opencode/openwork"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/.redrob/redrob-server"));
+  assert.ok(manifest.deletePaths.includes(`${userDataPath}/redrob-workspaces.json`));
+  assert.ok(manifest.deletePaths.includes(`${userDataPath}/redrob-server-tokens.json`));
+  assert.ok(manifest.deletePaths.includes(`${userDataPath}/redrob-server-state.json`));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/project/.opencode/redrob"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/project/.opencode/redrob.json"));
+  assert.ok(manifest.deletePaths.includes("/Users/alice/other/.opencode/redrob"));
   assert.ok(!manifest.deletePaths.includes("/Users/alice/project/.opencode"));
   assert.ok(!manifest.deletePaths.includes("/Users/alice/project"));
 });
 
 test("buildNukeManifest can include the bootstrap file in the wipe", () => {
-  const bootstrapPath = "/Users/alice/.config/openwork/desktop-bootstrap.json";
+  const bootstrapPath = "/Users/alice/.config/redrob/desktop-bootstrap.json";
   const manifest = buildNukeManifest({
     env: {},
     homedir: "/Users/alice",
@@ -182,7 +182,7 @@ test("buildNukeManifest includes default Linux state roots", () => {
     userDataPath: "/home/alice/.config/io.redrob.work",
   });
 
-  assert.equal(manifest.preserveBootstrapPath, "/home/alice/.config/openwork/desktop-bootstrap.json");
+  assert.equal(manifest.preserveBootstrapPath, "/home/alice/.config/redrob/desktop-bootstrap.json");
   assert.ok(manifest.deletePaths.includes("/home/alice/.config/io.redrob.work"));
   assert.ok(manifest.deletePaths.includes("/home/alice/.local/share/opencode"));
   assert.ok(manifest.deletePaths.includes("/home/alice/.config/opencode"));
@@ -202,27 +202,27 @@ test("buildNukeManifest includes Windows path shapes", () => {
     userDataPath: "C:\\Users\\Alice\\AppData\\Roaming\\io.redrob.work",
   });
 
-  assert.equal(manifest.preserveBootstrapPath, "C:\\Users\\Alice\\AppData\\Local\\openwork\\desktop-bootstrap.json");
+  assert.equal(manifest.preserveBootstrapPath, "C:\\Users\\Alice\\AppData\\Local\\redrob\\desktop-bootstrap.json");
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\io.redrob.work"));
-  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\server.json"));
-  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\runtime.sqlite"));
-  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json"));
-  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\openwork\\env.json"));
+  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\redrob\\server.json"));
+  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\redrob\\runtime.sqlite"));
+  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\redrob\\tokens.json"));
+  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\redrob\\env.json"));
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\opencode"));
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\AppData\\Roaming\\opencode"));
   assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\.cache\\opencode"));
-  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\.config\\openwork\\desktop-bootstrap.json"));
+  assert.ok(manifest.deletePaths.includes("C:\\Users\\Alice\\.config\\redrob\\desktop-bootstrap.json"));
 });
 
 test("buildNukeManifest honors REDROB_ELECTRON_USERDATA override", () => {
   const manifest = buildNukeManifest({
-    env: { REDROB_ELECTRON_USERDATA: "/tmp/openwork-userdata" },
+    env: { REDROB_ELECTRON_USERDATA: "/tmp/redrob-userdata" },
     homedir: "/Users/alice",
     platform: "darwin",
     userDataPath: "/Users/alice/Library/Application Support/io.redrob.work",
   });
 
-  assert.ok(manifest.deletePaths.includes("/tmp/openwork-userdata"));
+  assert.ok(manifest.deletePaths.includes("/tmp/redrob-userdata"));
   assert.ok(!manifest.deletePaths.includes("/Users/alice/Library/Application Support/io.redrob.work"));
 });
 
@@ -231,17 +231,17 @@ test("buildNukeManifest redirects HOME/XDG paths in dev mode", () => {
     env: { REDROB_DEV_MODE: "1" },
     homedir: "/Users/alice",
     platform: "darwin",
-    userDataPath: "/tmp/openwork-dev-userdata",
+    userDataPath: "/tmp/redrob-dev-userdata",
   });
 
   assert.equal(
     manifest.preserveBootstrapPath,
-    "/tmp/openwork-dev-userdata/openwork-dev-data/home/.config/openwork/desktop-bootstrap.json",
+    "/tmp/redrob-dev-userdata/redrob-dev-data/home/.config/redrob/desktop-bootstrap.json",
   );
-  assert.ok(manifest.deletePaths.includes("/tmp/openwork-dev-userdata"));
-  assert.ok(manifest.deletePaths.includes("/tmp/openwork-dev-userdata/openwork-dev-data/xdg/data/opencode"));
-  assert.ok(manifest.deletePaths.includes("/tmp/openwork-dev-userdata/openwork-dev-data/config/opencode"));
-  assert.ok(manifest.deletePaths.includes("/tmp/openwork-dev-userdata/openwork-dev-data/xdg/cache/opencode"));
+  assert.ok(manifest.deletePaths.includes("/tmp/redrob-dev-userdata"));
+  assert.ok(manifest.deletePaths.includes("/tmp/redrob-dev-userdata/redrob-dev-data/xdg/data/opencode"));
+  assert.ok(manifest.deletePaths.includes("/tmp/redrob-dev-userdata/redrob-dev-data/config/opencode"));
+  assert.ok(manifest.deletePaths.includes("/tmp/redrob-dev-userdata/redrob-dev-data/xdg/cache/opencode"));
   assert.ok(!manifest.deletePaths.some((targetPath) => targetPath.startsWith("/Users/alice/")));
 });
 
@@ -256,9 +256,9 @@ test("buildNukeManifest never reaches production state from a non-dev isolated p
 
   assert.ok(manifest.deletePaths.includes(userDataPath));
   for (const productionPath of [
-    "/Users/alice/.config/openwork",
-    "/Users/alice/.config/openwork/tokens.json",
-    "/Users/alice/.config/openwork/runtime.sqlite",
+    "/Users/alice/.config/redrob",
+    "/Users/alice/.config/redrob/tokens.json",
+    "/Users/alice/.config/redrob/runtime.sqlite",
     "/Users/alice/.config/opencode",
     "/Users/alice/.cache/opencode",
     "/Users/alice/.local/share/opencode",
@@ -276,7 +276,7 @@ test("buildNukeManifest still wipes a dev profile's own orchestrator data dir", 
     env: { REDROB_DEV_MODE: "1", REDROB_DATA_DIR: devOrchestratorPath },
     homedir: "/Users/alice",
     platform: "darwin",
-    userDataPath: "/tmp/openwork-dev-userdata",
+    userDataPath: "/tmp/redrob-dev-userdata",
   });
 
   assert.ok(manifest.deletePaths.includes(devOrchestratorPath));
@@ -288,7 +288,7 @@ test("buildNukeManifest ignores an inherited XDG_CONFIG_HOME pointing at product
     env: { REDROB_DEV_MODE: "1", XDG_CONFIG_HOME: "/Users/alice/.config" },
     homedir: "/Users/alice",
     platform: "darwin",
-    userDataPath: "/tmp/openwork-dev-userdata",
+    userDataPath: "/tmp/redrob-dev-userdata",
   });
 
   assert.ok(!manifest.deletePaths.some((targetPath) => targetPath.startsWith("/Users/alice/")));
@@ -299,7 +299,7 @@ test("buildNukeManifest excludes paths that would remove ~/.opencode/bin", () =>
     env: { OPENCODE_CONFIG_DIR: "/Users/alice/.opencode" },
     homedir: "/Users/alice",
     platform: "darwin",
-    userDataPath: "/tmp/openwork-userdata",
+    userDataPath: "/tmp/redrob-userdata",
   });
 
   assert.ok(!manifest.deletePaths.includes("/Users/alice/.opencode"));
@@ -312,7 +312,7 @@ test("sanitizeDesktopBootstrapConfig strips secrets and keeps deployment fields"
     baseUrl: " https://den.example.com ",
     apiBaseUrl: " https://api.den.example.com ",
     requireSignin: true,
-    brandAppName: " Acme OpenWork ",
+    brandAppName: " Acme Redrob Work ",
     brandLogoUrl: " https://cdn.example.com/logo.png ",
     brandIconUrl: " https://cdn.example.com/icon.png ",
     handoff: { grant: "secret", denBaseUrl: "https://den.example.com" },
@@ -324,7 +324,7 @@ test("sanitizeDesktopBootstrapConfig strips secrets and keeps deployment fields"
     baseUrl: "https://den.example.com",
     apiBaseUrl: "https://api.den.example.com",
     requireSignin: true,
-    brandAppName: "Acme OpenWork",
+    brandAppName: "Acme Redrob Work",
     brandLogoUrl: "https://cdn.example.com/logo.png",
     brandIconUrl: "https://cdn.example.com/icon.png",
     writtenAt,
@@ -416,7 +416,7 @@ test("runPendingNukeCleanup removes the sentinel after all pending paths are gon
 test("runPendingNukeCleanup retains the choice to remove bootstrap state", async () => {
   await withTempDir(async (root) => {
     const input = pendingNukeInput(root);
-    const bootstrapPath = path.join(input.env.XDG_CONFIG_HOME, "openwork", "desktop-bootstrap.json");
+    const bootstrapPath = path.join(input.env.XDG_CONFIG_HOME, "redrob", "desktop-bootstrap.json");
     await mkdir(path.dirname(bootstrapPath), { recursive: true });
     await writeFile(bootstrapPath, JSON.stringify({ baseUrl: "https://den.example.com" }), "utf8");
     await writePendingNuke(root, {
@@ -476,8 +476,8 @@ test("runPendingNukeCleanup rewrites only failed paths and removes them on the n
 test("runPendingNukeCleanup refuses replayed paths outside an isolated profile", async () => {
   await withTempDir(async (root) => {
     const userDataPath = path.join(root, "userData");
-    const productionPath = path.join(root, "home", ".config", "openwork", "tokens.json");
-    const profilePath = path.join(userDataPath, "openwork-server-tokens.json");
+    const productionPath = path.join(root, "home", ".config", "redrob", "tokens.json");
+    const profilePath = path.join(userDataPath, "redrob-server-tokens.json");
     await mkdir(path.dirname(productionPath), { recursive: true });
     await mkdir(userDataPath, { recursive: true });
     await writeFile(productionPath, "production secrets", "utf8");
@@ -530,7 +530,7 @@ test("nuke worker payload only serializes safe path inputs", () => {
       REDROB_CLOUD_API_KEY: "secret-api-key",
       REDROB_TOKEN: "secret-token",
       REDROB_ELECTRON_REMOTE_DEBUG_PORT: "9888",
-      REDROB_TOKEN_STORE: "C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json",
+      REDROB_TOKEN_STORE: "C:\\Users\\Alice\\AppData\\Roaming\\redrob\\tokens.json",
       XDG_CONFIG_HOME: "/tmp/config",
     },
     homedir: "/tmp/home",
@@ -543,14 +543,14 @@ test("nuke worker payload only serializes safe path inputs", () => {
     nukeInput,
     appExecutablePath: process.execPath,
     appArgv: ["--remote-debugging-port=9888", "--remote-debugging-address=0.0.0.0", "--secret=token"],
-    pendingPath: "/tmp/config/openwork/.nuke-pending.json",
+    pendingPath: "/tmp/config/redrob/.nuke-pending.json",
     nowMs: 1_000,
   });
   const serialized = JSON.stringify(payload);
 
   assert.equal(payload.nukeInput.env.APPDATA, "C:\\Users\\Alice\\AppData\\Roaming");
   assert.equal(payload.nukeInput.env.XDG_CONFIG_HOME, "/tmp/config");
-  assert.equal(payload.nukeInput.env.REDROB_TOKEN_STORE, "C:\\Users\\Alice\\AppData\\Roaming\\openwork\\tokens.json");
+  assert.equal(payload.nukeInput.env.REDROB_TOKEN_STORE, "C:\\Users\\Alice\\AppData\\Roaming\\redrob\\tokens.json");
   assert.equal(payload.nukeInput.preserveBootstrap, false);
   assert.deepEqual(payload.appArgv, []);
   assert.equal(serialized.includes("secret-api-key"), false);
@@ -567,7 +567,7 @@ test("nuke worker payload only serializes safe path inputs", () => {
     nukeInput,
     appExecutablePath: process.execPath,
     appArgv: ["/repo/apps/desktop/electron/main.mjs", "--remote-debugging-port=9888"],
-    pendingPath: "/tmp/config/openwork/.nuke-pending.json",
+    pendingPath: "/tmp/config/redrob/.nuke-pending.json",
     nowMs: 1_000,
   });
   assert.deepEqual(devPayload.appArgv, ["/repo/apps/desktop/electron/main.mjs"]);
@@ -705,7 +705,7 @@ test("executeNukeFreshStart skips host-wide container cleanup on an isolated pro
   await withTempDir(async (root) => {
     const runtimeManager = fakeRuntimeManager();
     let cleanedContainers = 0;
-    runtimeManager.sandboxCleanupOpenworkContainers = async () => {
+    runtimeManager.sandboxCleanupRedrobContainers = async () => {
       cleanedContainers += 1;
       return { candidates: [], removed: [], errors: [] };
     };
@@ -729,7 +729,7 @@ test("executeNukeFreshStart still cleans containers on the default profile", asy
   await withTempDir(async (root) => {
     const runtimeManager = fakeRuntimeManager();
     let cleanedContainers = 0;
-    runtimeManager.sandboxCleanupOpenworkContainers = async () => {
+    runtimeManager.sandboxCleanupRedrobContainers = async () => {
       cleanedContainers += 1;
       return { candidates: [], removed: [], errors: [] };
     };
@@ -847,7 +847,7 @@ test("executeNukeFreshStart relaunches directly when no paths remain pending", a
 test("executeNukeFreshStart removes the bootstrap when preservation is disabled", async () => {
   await withTempDir(async (root) => {
     const input = { ...pendingNukeInput(root), preserveBootstrap: false };
-    const bootstrapPath = path.join(input.env.XDG_CONFIG_HOME, "openwork", "desktop-bootstrap.json");
+    const bootstrapPath = path.join(input.env.XDG_CONFIG_HOME, "redrob", "desktop-bootstrap.json");
     await mkdir(path.dirname(bootstrapPath), { recursive: true });
     await writeFile(bootstrapPath, JSON.stringify({ baseUrl: "https://den.example.com" }), "utf8");
     await mkdir(input.userDataPath, { recursive: true });

@@ -52,7 +52,7 @@ if (!RUN_REFRESH_LIFECYCLE_CHILD) {
 }
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DB_MODE = process.env.DB_MODE ?? "mysql"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = "y".repeat(32)
@@ -579,7 +579,7 @@ childTest("session liveness check failures 503 resource requests but fail open r
   await db.insert(schema.OAuthAccessTokenTable).values({
     id: createDenTypeId("oauthAccessToken"),
     token: hashStoredOAuthToken(failOpenAccessSecret),
-    clientId: "openwork-desktop",
+    clientId: "redrob-desktop",
     sessionId: grant.sessionId,
     userId,
     referenceId: organizationId,
@@ -815,7 +815,7 @@ childTest("dead sessions leave consent-bound tokens valid while sid-only tokens 
   await db.insert(schema.OAuthAccessTokenTable).values({
     id: createDenTypeId("oauthAccessToken"),
     token: hashStoredOAuthToken(sidOnlyAccessSecret),
-    clientId: "openwork-desktop",
+    clientId: "redrob-desktop",
     sessionId: grant.sessionId,
     userId,
     referenceId: organizationId,

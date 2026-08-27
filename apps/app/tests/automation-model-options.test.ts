@@ -34,13 +34,13 @@ describe("Automation model options", () => {
     expect(automationModelOptions([], { includeFreeStarter: false })).toEqual([])
   })
 
-  test("expands the member's managed OpenWork aliases even when Den stores no model rows", () => {
+  test("expands the member's managed Redrob Work aliases even when Den stores no model rows", () => {
     const options = automationModelOptions([
-      provider({ id: "lpr_member_openwork", source: "openwork", name: "Redrob Models" }),
+      provider({ id: "lpr_member_redrob", source: "redrob", name: "Redrob Models" }),
     ])
 
-    expect(options.some((option) => option.providerId === "openwork" && option.modelId === "z-ai/glm-5.2")).toBe(true)
-    expect(options.some((option) => option.providerId === "lpr_member_openwork")).toBe(false)
+    expect(options.some((option) => option.providerId === "redrob" && option.modelId === "z-ai/glm-5.2")).toBe(true)
+    expect(options.some((option) => option.providerId === "lpr_member_redrob")).toBe(false)
   })
 
   test("keeps authorized custom providers on their concrete Den provider IDs", () => {
@@ -141,10 +141,10 @@ describe("Automation proposal model resolution", () => {
     const free = { providerId: "opencode", modelId: "big-pickle", variant: "low" }
     expect(resolveProposalModel(free, [])).toEqual({ model: free, resolution: "exact" })
 
-    const managedProvider = provider({ id: "lpr_managed", source: "openwork", name: "Redrob Models" })
-    const managedOption = automationModelOptions([managedProvider]).find((option) => option.accessKind === "openwork_managed")
+    const managedProvider = provider({ id: "lpr_managed", source: "redrob", name: "Redrob Models" })
+    const managedOption = automationModelOptions([managedProvider]).find((option) => option.accessKind === "redrob_managed")
     expect(managedOption).toBeDefined()
-    if (!managedOption) throw new Error("Expected an enabled OpenWork managed model")
+    if (!managedOption) throw new Error("Expected an enabled Redrob Work managed model")
     const managed = { providerId: managedOption.providerId, modelId: managedOption.modelId, variant: "high" }
     expect(resolveProposalModel(managed, [managedProvider])).toEqual({ model: managed, resolution: "exact" })
   })
@@ -161,11 +161,11 @@ describe("Automation proposal model resolution", () => {
     })
   })
 
-  test("does not map through OpenWork provider records", () => {
+  test("does not map through Redrob Work provider records", () => {
     const managed = provider({
       ...customProvider,
       id: "lpr_managed",
-      source: "openwork",
+      source: "redrob",
     })
     expect(resolveProposalModel(
       { providerId: "deepseek", modelId: "deepseek-v4-flash" },

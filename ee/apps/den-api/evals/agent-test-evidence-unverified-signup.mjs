@@ -7,7 +7,7 @@
 //
 // Required:
 //   DEN_API_E2E_BASE_URL=http://127.0.0.1:18990
-//   DATABASE_URL=mysql://root:password@127.0.0.1:33307/openwork_agent_signup
+//   DATABASE_URL=mysql://root:password@127.0.0.1:33307/redrob_agent_signup
 //
 // Run from ee/apps/den-api:
 //   DEN_API_E2E_BASE_URL=... DATABASE_URL=... pnpm exec node evals/agent-test-evidence-unverified-signup.mjs

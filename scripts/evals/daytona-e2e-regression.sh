@@ -46,11 +46,11 @@ set -euo pipefail
 email="${1:?email is required}"
 escaped_email="${email//\'/\'\'}"
 {
-  printf "SET @openwork_eval_email = '%s';\n" "$escaped_email"
+  printf "SET @redrob_eval_email = '%s';\n" "$escaped_email"
   cat <<'SQL'
-UPDATE `user` SET email_verified = 1 WHERE email = @openwork_eval_email;
+UPDATE `user` SET email_verified = 1 WHERE email = @redrob_eval_email;
 SQL
-} | "$HOME/mariadb/bin/mariadb" --protocol=tcp -h 127.0.0.1 -P 3306 -uroot openwork_den
+} | "$HOME/mariadb/bin/mariadb" --protocol=tcp -h 127.0.0.1 -P 3306 -uroot redrob_den
 SH
 chmod +x "$H/mark-verified.sh"
 export REDROB_EVAL_MARK_VERIFIED_CMD="bash $H/mark-verified.sh {email}"

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, expect, mock, test } from "bun:test"
 import { createDenTypeId } from "@redrob-ee/utils/typeid"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_scim_provider_rotation"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_scim_provider_rotation"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -12,7 +12,7 @@ const organizationId = createDenTypeId("organization")
 const scimOnlyUserId = createDenTypeId("user")
 const scimAndSsoUserId = createDenTypeId("user")
 const legacyProviderId = `legacy-scim-${organizationId}`
-const canonicalProviderId = `openwork-scim-${organizationId}`
+const canonicalProviderId = `redrob-scim-${organizationId}`
 const legacyProviderRowId = createDenTypeId("scimProvider")
 const generatedProviderRowId = createDenTypeId("scimProvider")
 const groupId = createDenTypeId("scimGroup")

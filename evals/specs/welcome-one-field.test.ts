@@ -29,9 +29,9 @@ test("the welcome screen folds the server-URL door into the join-organization fi
     host: "den.acme.test",
   });
   expect(parseInviteLinkInput("https://den.acme.test/install?token=abc")).toBeNull();
-  expect(parseServerUrlInput("https://openwork.acme.test/")).toEqual({
-    url: "https://openwork.acme.test",
-    host: "openwork.acme.test",
+  expect(parseServerUrlInput("https://redrob.acme.test/")).toEqual({
+    url: "https://redrob.acme.test",
+    host: "redrob.acme.test",
   });
   expect(parseServerUrlInput("redrob://den-auth?grant=abcdefghijkl")).toBeNull();
   expect(parseServerUrlInput("raw-sign-in-grant-value")).toBeNull();
@@ -51,7 +51,7 @@ test("the welcome screen folds the server-URL door into the join-organization fi
 
   evidence.recordAssertionEvidence(
     "The welcome screen has one paste field for invite links, install links, server URLs, and sign-in codes",
-    "The separate Using OpenWork on-premises affordance is gone from Welcome; the join dialog classifies install link, then invite link, then server URL, then sign-in code, and requires explicit host confirmation before opening web invites.",
+    "The separate Using Redrob Work on-premises affordance is gone from Welcome; the join dialog classifies install link, then invite link, then server URL, then sign-in code, and requires explicit host confirmation before opening web invites.",
     true,
   );
 });

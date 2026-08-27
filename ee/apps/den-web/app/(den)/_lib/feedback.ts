@@ -6,7 +6,7 @@ export function buildDenFeedbackUrl(options?: {
   topic?: string;
 }) {
   const params = new URLSearchParams({
-    source: "openwork-web-app",
+    source: "redrob-web-app",
     deployment: "web",
     entrypoint: options?.pathname ?? "dashboard"
   });

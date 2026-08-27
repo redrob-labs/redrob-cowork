@@ -96,7 +96,7 @@ async function createProvider(
 ): Promise<string> {
   const result = await denFetch(admin, "/v1/llm-providers", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: PROVIDER_NAME,
       source: "custom",
@@ -131,7 +131,7 @@ async function createAutomation(
 ): Promise<string> {
   const result = await denFetch(admin, "/v1/automations", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: input.name,
       instructions: `Synthetic recovery-window occurrence for ${input.name}.`,

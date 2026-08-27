@@ -8,12 +8,12 @@ import {
 } from "../../../app/lib/den";
 import { recordInspectorEvent } from "../../../app/lib/app-inspector";
 import {
-  OpenworkServerError,
-  type OpenworkCloudMcpFailure,
-  type OpenworkCloudMcpHealth,
-  type OpenworkCloudMcpProviderModelContext,
-  type OpenworkServerClient,
-} from "../../../app/lib/openwork-server";
+  RedrobServerError,
+  type RedrobCloudMcpFailure,
+  type RedrobCloudMcpHealth,
+  type RedrobCloudMcpProviderModelContext,
+  type RedrobServerClient,
+} from "../../../app/lib/redrob-server";
 import { unwrap } from "../../../app/lib/opencode";
 import type { Client, McpServerEntry, McpStatusMap } from "../../../app/types";
 import { attemptSilentMcpReauth } from "./mcp-silent-reauth";
@@ -23,7 +23,7 @@ import {
   readCloudMcpUserState,
 } from "./cloud-mcp-user-state";
 import {
-  runOpenworkCloudMcpReconciler,
+  runRedrobCloudMcpReconciler,
   type CloudMcpClient,
 } from "./cloud-mcp-reconciler";
 
@@ -32,12 +32,12 @@ export const SESSION_MCP_MAINTENANCE_TIMEOUT_MS = 2 * 60 * 1000;
 export const CLOUD_MCP_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
 export const CLOUD_MCP_MAINTENANCE_RETRY_DELAYS_MS = [1_000, 3_000];
 
-type CloudMcpMaintenanceClient = CloudMcpClient & Pick<OpenworkServerClient, "listMcp">;
+type CloudMcpMaintenanceClient = CloudMcpClient & Pick<RedrobServerClient, "listMcp">;
 
 const maintenanceInFlight = new Map<string, symbol>();
 
 export type CloudMcpMaintenanceIssue = Pick<
-  OpenworkCloudMcpFailure,
+  RedrobCloudMcpFailure,
   "code" | "stage" | "retryable" | "recommendedAction" | "message"
 >;
 
@@ -45,7 +45,7 @@ export type CloudMcpBackgroundSyncResult =
   | {
       outcome: "ready";
       status: "synced" | "unchanged";
-      health: OpenworkCloudMcpHealth;
+      health: RedrobCloudMcpHealth;
     }
   | {
       outcome: "skipped";
@@ -57,7 +57,7 @@ export type CloudMcpBackgroundSyncResult =
       outcome: "failed";
       status: "failed";
       issue: CloudMcpMaintenanceIssue;
-      health: OpenworkCloudMcpHealth | null;
+      health: RedrobCloudMcpHealth | null;
     };
 
 export type SessionCloudMcpMaintenanceState = {
@@ -84,12 +84,12 @@ function genericCloudMcpMaintenanceIssue(input?: {
     stage: "engine_delivery",
     retryable: input?.retryable ?? true,
     recommendedAction: "Retry, then open Settings → Connect if the problem continues.",
-    message: input?.message ?? "OpenWork could not verify connected service tools for this workspace.",
+    message: input?.message ?? "Redrob Work could not verify connected service tools for this workspace.",
   };
 }
 
 function failedCloudMcpBackgroundSync(input: {
-  health: OpenworkCloudMcpHealth | null;
+  health: RedrobCloudMcpHealth | null;
   issue?: CloudMcpMaintenanceIssue;
   code?: string;
   message?: string;
@@ -103,12 +103,12 @@ function failedCloudMcpBackgroundSync(input: {
 }
 
 export function getSessionMcpMaintenanceTargetKey(input: {
-  client: Pick<OpenworkServerClient, "baseUrl">;
+  client: Pick<RedrobServerClient, "baseUrl">;
   cloudSignedIn: boolean;
   denBaseUrl?: string | null;
   orgId?: string | null;
   workspaceId: string;
-  providerModel?: OpenworkCloudMcpProviderModelContext;
+  providerModel?: RedrobCloudMcpProviderModelContext;
 }): string {
   return JSON.stringify([
     input.denBaseUrl?.trim().replace(/\/+$/, "") ?? "",
@@ -179,7 +179,7 @@ export async function syncCloudControlMcpInBackground(input: {
   now?: number;
   settings?: DenSettings;
   mintToken?: () => Promise<DenMcpToken | null>;
-  providerModel?: OpenworkCloudMcpProviderModelContext;
+  providerModel?: RedrobCloudMcpProviderModelContext;
 }): Promise<CloudMcpBackgroundSyncResult> {
   const workspaceId = input.workspaceId.trim();
   const settings = input.settings ?? readDenSettings();
@@ -205,7 +205,7 @@ export async function syncCloudControlMcpInBackground(input: {
   try {
     listed = await input.client.listMcp(workspaceId);
   } catch (error) {
-    if (error instanceof OpenworkServerError) {
+    if (error instanceof RedrobServerError) {
       return failedCloudMcpBackgroundSync({ health: null, code: error.code, message: error.message });
     }
     throw error;
@@ -225,7 +225,7 @@ export async function syncCloudControlMcpInBackground(input: {
   }
   const configuredUrl = typeof configured?.config.url === "string" ? configured.config.url : null;
 
-  const result = await runOpenworkCloudMcpReconciler({
+  const result = await runRedrobCloudMcpReconciler({
     mode: "repair",
     client: input.client,
     context: {
@@ -269,7 +269,7 @@ export async function syncCloudControlMcpInBackground(input: {
       return failedCloudMcpBackgroundSync({
         health: result.health,
         code: "cloud_mcp_token_mint_failed",
-        message: "OpenWork could not refresh Cloud authentication for connected service tools.",
+        message: "Redrob Work could not refresh Cloud authentication for connected service tools.",
       });
     }
   }
@@ -340,12 +340,12 @@ export async function healWorkspaceMcpInBackground(input: {
 
 export function useSessionMcpMaintenance(input: {
   cloudSignedIn: boolean;
-  client: OpenworkServerClient | null;
+  client: RedrobServerClient | null;
   workspaceId: string | null;
   opencodeClient: Client | null;
   directory: string;
   engineReloadBusy?: boolean;
-  providerModel?: OpenworkCloudMcpProviderModelContext;
+  providerModel?: RedrobCloudMcpProviderModelContext;
 }): SessionCloudMcpMaintenanceState {
   const [cloudMcpState, setCloudMcpState] = useState<SessionCloudMcpMaintenanceState>(
     IDLE_CLOUD_MCP_MAINTENANCE_STATE,

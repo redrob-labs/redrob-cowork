@@ -334,7 +334,7 @@ test(title, async ({ evidence }) => {
   // spawn, so no config PATCH, engine reload, or renderer reload is needed —
   // reloading mid-session detaches the renderer's engine event stream and
   // would starve the live busy status this spec asserts on.
-  const workspacePath = `/tmp/openwork-sequential-queue-${Date.now()}`;
+  const workspacePath = `/tmp/redrob-sequential-queue-${Date.now()}`;
   await mkdir(workspacePath, { recursive: true });
   await writeFile(join(workspacePath, "opencode.json"), `${JSON.stringify({
     $schema: "https://opencode.ai/config.json",
@@ -349,11 +349,11 @@ test(title, async ({ evidence }) => {
   }, null, 2)}\n`);
   const workspace = await createAndSelectWorkspace(app, { path: workspacePath });
   const credentials = parseRuntimeCredentials(await evalIn(app, `JSON.stringify({
-    port: localStorage.getItem("openwork.server.port") ?? "",
-    token: localStorage.getItem("openwork.server.token") ?? "",
+    port: localStorage.getItem("redrob.server.port") ?? "",
+    token: localStorage.getItem("redrob.server.token") ?? "",
   })`));
   await waitForEngineReady(credentials, workspace.workspaceId);
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "new task action enabled",
   });

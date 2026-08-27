@@ -21,8 +21,8 @@ const publicCorsAllowMethods = ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE",
 const publicCorsAllowHeaders = [
   "Authorization",
   "Content-Type",
-  "X-OpenWork-Host-Token",
-  "X-OpenWork-Client-Id",
+  "X-Redrob Work-Host-Token",
+  "X-Redrob Work-Client-Id",
   "X-OpenCode-Directory",
   "X-Opencode-Directory",
   "x-opencode-directory",
@@ -160,7 +160,7 @@ async function consumeRateLimit(input: {
 }
 
 async function resolveWorkerTokenScope(workerId: WorkerId, request: Request): Promise<WorkerTokenScope | "invalid" | null> {
-  const hostToken = request.headers.get("x-openwork-host-token")?.trim() || null
+  const hostToken = request.headers.get("x-redrob-host-token")?.trim() || null
   const bearerToken = readBearerToken(request)
   const candidateTokens: Array<{ token: string; requiredScope: WorkerTokenScope | null }> = []
   if (hostToken) {
@@ -268,7 +268,7 @@ async function getSignedPreviewUrl(workerId: WorkerId) {
     await sandbox.refreshData()
 
     const expiresInSeconds = normalizedSignedPreviewExpirySeconds()
-    const preview = await sandbox.getSignedPreviewUrl(env.daytona.openworkPort, expiresInSeconds)
+    const preview = await sandbox.getSignedPreviewUrl(env.daytona.redrobPort, expiresInSeconds)
 
     await db
       .update(DaytonaSandboxTable)

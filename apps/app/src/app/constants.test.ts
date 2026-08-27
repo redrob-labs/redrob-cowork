@@ -6,29 +6,29 @@ declare const expect: (value: unknown) => {
 
 import {
   REDROB_EXTENSION_CATALOG,
-  filterOpenWorkExtensionCatalogForPlatform,
-  resolveOpenWorkExtensionCatalogPlatform,
+  filterRedrobWorkExtensionCatalogForPlatform,
+  resolveRedrobWorkExtensionCatalogPlatform,
 } from "./constants";
 
 function filteredIds(platform: "darwin" | "linux" | "windows" | "web") {
-  return filterOpenWorkExtensionCatalogForPlatform(REDROB_EXTENSION_CATALOG, platform)
+  return filterRedrobWorkExtensionCatalogForPlatform(REDROB_EXTENSION_CATALOG, platform)
     .flatMap((entry) => entry.id ? [entry.id] : []);
 }
 
-describe("OpenWork extension catalog platform filter", () => {
+describe("Redrob Work extension catalog platform filter", () => {
   test("resolves browser runtime to web and desktop runtime to OS", () => {
-    expect(resolveOpenWorkExtensionCatalogPlatform("web", "macos")).toEqual("web");
-    expect(resolveOpenWorkExtensionCatalogPlatform("desktop", "macos")).toEqual("darwin");
-    expect(resolveOpenWorkExtensionCatalogPlatform("desktop", "windows")).toEqual("windows");
-    expect(resolveOpenWorkExtensionCatalogPlatform("desktop", "linux")).toEqual("linux");
+    expect(resolveRedrobWorkExtensionCatalogPlatform("web", "macos")).toEqual("web");
+    expect(resolveRedrobWorkExtensionCatalogPlatform("desktop", "macos")).toEqual("darwin");
+    expect(resolveRedrobWorkExtensionCatalogPlatform("desktop", "windows")).toEqual("windows");
+    expect(resolveRedrobWorkExtensionCatalogPlatform("desktop", "linux")).toEqual("linux");
   });
 
   test("hides desktop-only extensions in web", () => {
-    expect(filteredIds("web")).toEqual(["openwork-voice", "ollama", "redrob"]);
+    expect(filteredIds("web")).toEqual(["redrob-voice", "ollama", "redrob"]);
   });
 
-  test("keeps OpenWork Browser desktop-only and Computer Use mac-only", () => {
-    expect(filteredIds("darwin")).toEqual(["openwork-browser", "computer-use", "openwork-voice", "ollama", "redrob"]);
-    expect(filteredIds("linux")).toEqual(["openwork-browser", "openwork-voice", "ollama", "redrob"]);
+  test("keeps Redrob Work Browser desktop-only and Computer Use mac-only", () => {
+    expect(filteredIds("darwin")).toEqual(["redrob-browser", "computer-use", "redrob-voice", "ollama", "redrob"]);
+    expect(filteredIds("linux")).toEqual(["redrob-browser", "redrob-voice", "ollama", "redrob"]);
   });
 });

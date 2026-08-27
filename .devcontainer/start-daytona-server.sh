@@ -17,7 +17,7 @@ cd "$REPO_DIR"
 DEN_API_PORT="${DEN_API_PORT:-8788}"
 DEN_WEB_PORT="${DEN_WEB_PORT:-3005}"
 DEN_WORKER_PROXY_PORT="${DEN_WORKER_PROXY_PORT:-8789}"
-PNPM_STORE="${PNPM_STORE:-$REPO_DIR/.openwork-daytona/pnpm-store}"
+PNPM_STORE="${PNPM_STORE:-$REPO_DIR/.redrob-daytona/pnpm-store}"
 
 DEN_API_PUBLIC_URL="${DEN_API_PUBLIC_URL:-http://localhost:$DEN_API_PORT}"
 DEN_WEB_PUBLIC_URL="${DEN_WEB_PUBLIC_URL:-http://localhost:$DEN_WEB_PORT}"
@@ -31,7 +31,7 @@ export DEN_ORG_MODE="${DEN_ORG_MODE:-multi_org}"
 # Eval sign-ups must not depend on the HIBP API.
 export DEN_PASSWORD_BREACH_SCREENING_ENABLED="${DEN_PASSWORD_BREACH_SCREENING_ENABLED:-false}"
 export DEN_GENERATED_ARTIFACT_VIEWS_ENABLED="${DEN_GENERATED_ARTIFACT_VIEWS_ENABLED:-false}"
-export DATABASE_URL="${DATABASE_URL:-mysql://root:password@127.0.0.1:3306/openwork_den}"
+export DATABASE_URL="${DATABASE_URL:-mysql://root:password@127.0.0.1:3306/redrob_den}"
 export DEN_DB_ENCRYPTION_KEY="${DEN_DB_ENCRYPTION_KEY:-daytona-den-db-encryption-key-please-change-1234567890}"
 export BETTER_AUTH_SECRET="${BETTER_AUTH_SECRET:-daytona-den-auth-secret-please-change-1234567890}"
 export BETTER_AUTH_URL="${BETTER_AUTH_URL:-$DEN_WEB_PUBLIC_URL}"
@@ -103,7 +103,7 @@ wait_for_http() {
 }
 
 echo "==> Starting MySQL..."
-run_root service mysql start >/tmp/openwork-mysql-service.log 2>&1 || run_root service mariadb start >/tmp/openwork-mysql-service.log 2>&1
+run_root service mysql start >/tmp/redrob-mysql-service.log 2>&1 || run_root service mariadb start >/tmp/redrob-mysql-service.log 2>&1
 
 for _ in $(seq 1 60); do
   if mysql -uroot -ppassword -e "SELECT 1" >/dev/null 2>&1; then
@@ -118,7 +118,7 @@ for _ in $(seq 1 60); do
 done
 
 "${MYSQL_ROOT_CMD[@]}" <<'SQL'
-CREATE DATABASE IF NOT EXISTS openwork_den;
+CREATE DATABASE IF NOT EXISTS redrob_den;
 ALTER USER 'root'@'localhost' IDENTIFIED BY 'password';
 CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
@@ -127,8 +127,8 @@ FLUSH PRIVILEGES;
 SQL
 
 echo "==> Installing dependencies if needed..."
-mkdir -p "$PNPM_STORE" .openwork-daytona
-baseline=.openwork-daytona/pnpm-lock.sha256
+mkdir -p "$PNPM_STORE" .redrob-daytona
+baseline=.redrob-daytona/pnpm-lock.sha256
 current="$(sha256sum pnpm-lock.yaml | cut -d " " -f 1)"
 if [ ! -d node_modules ] || [ ! -f "$baseline" ] || [ "$(cat "$baseline")" != "$current" ]; then
   CI=1 pnpm install --store-dir "$PNPM_STORE" --frozen-lockfile || CI=1 pnpm install --store-dir "$PNPM_STORE"
@@ -174,7 +174,7 @@ wait_for_http "http://127.0.0.1:$DEN_API_PORT/health" "Den API" 180
 
 if [ "${RUN_SEED:-0}" = "1" ]; then
   demo_email="${DEN_DEMO_OWNER_EMAIL:-alex@acme.test}"
-  demo_password="${DEN_DEMO_OWNER_PASSWORD:-OpenWorkDemo123!}"
+  demo_password="${DEN_DEMO_OWNER_PASSWORD:-RedrobWorkDemo123!}"
   signin_ok() {
     curl -sf -o /dev/null -X POST "http://127.0.0.1:$DEN_API_PORT/api/auth/sign-in/email" \
       -H 'content-type: application/json' \
@@ -277,7 +277,7 @@ nohup env \
 
 wait_for_http "http://127.0.0.1:$DEN_WEB_PORT/api/den/health" "Den Web" 180
 
-cat > .openwork-daytona/server-env <<EOF
+cat > .redrob-daytona/server-env <<EOF
 DEN_API_URL=$DEN_API_PUBLIC_URL
 DEN_WEB_URL=$DEN_WEB_PUBLIC_URL
 DEN_WORKER_PROXY_URL=$DEN_WORKER_PROXY_PUBLIC_URL

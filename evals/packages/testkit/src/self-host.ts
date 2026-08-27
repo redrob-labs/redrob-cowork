@@ -113,7 +113,7 @@ async function waitForAuthProbe(ref: DenRef, service: SpawnedService): Promise<v
       const response = await fetch(url, {
         method: "POST",
         headers: { "content-type": "application/json", origin: ref.webUrl },
-        body: JSON.stringify({ email: `probe-${Date.now()}@openwork.test`, password: "not-a-real-password" }),
+        body: JSON.stringify({ email: `probe-${Date.now()}@redrob.test`, password: "not-a-real-password" }),
         signal: AbortSignal.timeout(5_000),
       });
       if (response.status !== 403 && response.status < 500) return;
@@ -159,10 +159,10 @@ async function runDbPush(databaseUrl: string): Promise<void> {
 // mirrored from server.ts (keep in sync)
 async function stopServices(services: SpawnedService[]): Promise<void> {
   for (const service of services) {
-    await killLocalPid(service.pid, { log: (line) => console.error(`[openwork/testkit] ${line}`) })
-      .catch((error: unknown) => console.error(`[openwork/testkit] ${service.label} cleanup failed: ${messageText(error)}`));
+    await killLocalPid(service.pid, { log: (line) => console.error(`[redrob/testkit] ${line}`) })
+      .catch((error: unknown) => console.error(`[redrob/testkit] ${service.label} cleanup failed: ${messageText(error)}`));
     await freePort(service.port)
-      .catch((error: unknown) => console.error(`[openwork/testkit] ${service.label} port cleanup failed: ${messageText(error)}`));
+      .catch((error: unknown) => console.error(`[redrob/testkit] ${service.label} port cleanup failed: ${messageText(error)}`));
   }
 }
 
@@ -180,7 +180,7 @@ export async function selfHostServer(options: SelfHostServerOptions): Promise<Se
   const services: SpawnedService[] = [];
   let database: DbHandle | undefined;
   try {
-    database = await options.place.db(ephemeralDatabaseName("openwork_selfhost_eval"));
+    database = await options.place.db(ephemeralDatabaseName("redrob_selfhost_eval"));
     await runDbPush(database.url);
     const [apiPort, webPort] = await allocateFreePorts(2);
     if (apiPort === undefined || webPort === undefined) throw new Error("Could not allocate Den API/Web ports.");
@@ -243,7 +243,7 @@ export async function selfHostServer(options: SelfHostServerOptions): Promise<Se
         disposed = true;
         await stopServices(services);
         await database?.drop().catch((error: unknown) => {
-          console.error(`[openwork/testkit] ephemeral database cleanup failed: ${messageText(error)}`);
+          console.error(`[redrob/testkit] ephemeral database cleanup failed: ${messageText(error)}`);
         });
       },
     };

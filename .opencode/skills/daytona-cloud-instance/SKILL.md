@@ -70,7 +70,7 @@ Validate the escape hatch against Den API directly before recording UI:
 ```bash
 curl -fsS -X POST "$DEN_API_URL/api/auth/sign-in/email" \
   -H 'Content-Type: application/json' \
-  --data '{"email":"alex@acme.test","password":"OpenWorkDemo123!"}'
+  --data '{"email":"alex@acme.test","password":"RedrobWorkDemo123!"}'
 ```
 
 If this returns `403` asking for verification, Den API is not running the branch
@@ -90,7 +90,7 @@ Validate seeded auth if present:
 ```bash
 curl -fsS -X POST "$DEN_WEB_URL/api/auth/sign-in/email" \
   -H 'Content-Type: application/json' \
-  --data '{"email":"alex@acme.test","password":"OpenWorkDemo123!"}'
+  --data '{"email":"alex@acme.test","password":"RedrobWorkDemo123!"}'
 ```
 
 If the Den Web proxy returns `503` but the direct Den API request succeeds,
@@ -132,14 +132,14 @@ For a desktop Marketplace proof, inject the validated Den session into the
 Electron renderer with the exact storage keys the app reads:
 
 ```js
-localStorage.setItem('openwork.den.baseUrl', DEN_WEB_URL)
-localStorage.setItem('openwork.den.apiBaseUrl', DEN_API_URL)
-localStorage.setItem('openwork.den.authToken', TOKEN)
-localStorage.setItem('openwork.den.activeOrgId', ORG_ID)
-localStorage.setItem('openwork.den.activeOrgSlug', ORG_SLUG)
-localStorage.setItem('openwork.den.activeOrgName', ORG_NAME)
-window.dispatchEvent(new CustomEvent('openwork-den-settings-changed'))
-window.dispatchEvent(new CustomEvent('openwork-den-session-updated', { detail: { token: TOKEN } }))
+localStorage.setItem('redrob.den.baseUrl', DEN_WEB_URL)
+localStorage.setItem('redrob.den.apiBaseUrl', DEN_API_URL)
+localStorage.setItem('redrob.den.authToken', TOKEN)
+localStorage.setItem('redrob.den.activeOrgId', ORG_ID)
+localStorage.setItem('redrob.den.activeOrgSlug', ORG_SLUG)
+localStorage.setItem('redrob.den.activeOrgName', ORG_NAME)
+window.dispatchEvent(new CustomEvent('redrob-den-settings-changed'))
+window.dispatchEvent(new CustomEvent('redrob-den-session-updated', { detail: { token: TOKEN } }))
 ```
 
 Use this only as a Daytona workaround. The final report must distinguish:

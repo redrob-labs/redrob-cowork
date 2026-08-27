@@ -25,15 +25,15 @@ What it does:
 - Prints randomized host URLs so multiple stacks can run side by side
 
 Production-oriented EE images:
-- `Dockerfile.den` -> `ghcr.io/different-ai/openwork-den-api`
-- `Dockerfile.den-web` -> `ghcr.io/different-ai/openwork-den-web`
-- `Dockerfile.inference` -> `ghcr.io/different-ai/openwork-inference`
+- `Dockerfile.den` -> `ghcr.io/redrob-labs/redrob-work-den-api`
+- `Dockerfile.den-web` -> `ghcr.io/redrob-labs/redrob-work-den-web`
+- `Dockerfile.inference` -> `ghcr.io/redrob-labs/redrob-work-inference`
 
 These images are intended for Terraform, Helm, ECS, EKS, and customer-cloud deployments. Prefer immutable tags or digests in production.
 
 Publish flow:
 - Release tags like `v0.17.1` publish images tagged `v0.17.1`, `0.17.1`, `sha-<commit>`, and `latest`.
-- The same workflow publishes the Helm chart to `oci://ghcr.io/different-ai/charts/openwork-ee` with chart version `0.17.1`.
+- The same workflow publishes the Helm chart to `oci://ghcr.io/different-ai/charts/redrob-ee` with chart version `0.17.1`.
 - Manual publishes from a branch require `push=true` and an explicit `chart_version`.
 
 Health and smoke expectations:
@@ -54,7 +54,7 @@ The seed is local/dev-only, idempotent for the `acme-robotics-demo` org, and doe
 Default demo login:
 
 - Email: `alex@acme.test`
-- Password: `OpenWorkDemo123!`
+- Password: `RedrobWorkDemo123!`
 
 For the Docker stack with randomized MySQL ports, source the printed runtime env file first and pass `DEN_MYSQL_URL` as `DATABASE_URL`:
 
@@ -153,7 +153,7 @@ OTEL_TRACES_EXPORTER=otlp \
 OTEL_METRICS_EXPORTER=otlp \
 OTEL_LOGS_EXPORTER=otlp \
 OTEL_TRACES_SAMPLER=parentbased_always_on \
-docker compose -p openwork-den-otel \
+docker compose -p redrob-den-otel \
   -f packaging/docker/docker-compose.den-dev.yml \
   -f packaging/docker/docker-compose.otel-lgtm.yml \
   up --build --wait
@@ -217,7 +217,7 @@ docker buildx build \
   --secret id=sentry_project,env=SENTRY_PROJECT \
   --secret id=sentry_release,env=SENTRY_RELEASE \
   --secret id=sentry_dist,env=SENTRY_DIST \
-  -t openwork-den-api:sentry .
+  -t redrob-den-api:sentry .
 ```
 
 For custom Den Web images, `DEN_WEB_UPLOAD_SENTRY_SOURCEMAPS=1` requires
@@ -238,7 +238,7 @@ docker buildx build \
   --secret id=sentry_url,env=SENTRY_URL \
   --secret id=sentry_release,env=SENTRY_RELEASE \
   --secret id=sentry_dist,env=SENTRY_DIST \
-  -t openwork-den-web:sentry .
+  -t redrob-den-web:sentry .
 ```
 
 The EE image publish workflow never passes repository Sentry secrets to
@@ -273,7 +273,7 @@ pnpm dev:den
 Or from the Redrob Work enterprise root:
 
 ```bash
-pnpm --dir _repos/openwork dev:den
+pnpm --dir _repos/redrob dev:den
 ```
 
 What it does:
@@ -303,12 +303,12 @@ pnpm dev:den:mysql:down
 
 ## Pre-baked Micro-Sandbox Image
 
-For micro-sandbox work, use the pre-baked image that compiles `openwork-server` from source and downloads the pinned `opencode` binary during `docker build`.
+For micro-sandbox work, use the pre-baked image that compiles `redrob-server` from source and downloads the pinned `opencode` binary during `docker build`.
 
 Build it from the repo root:
 
 ```bash
-./scripts/build-microsandbox-openwork-image.sh
+./scripts/build-microsandbox-redrob-image.sh
 ```
 
 Run it locally:
@@ -316,7 +316,7 @@ Run it locally:
 ```bash
 docker run --rm -p 8787:8787 \
   -e REDROB_CONNECT_HOST=127.0.0.1 \
-  openwork-microsandbox:dev
+  redrob-microsandbox:dev
 ```
 
 Defaults:
@@ -343,8 +343,8 @@ This is a minimal packaging template to run the Redrob Work Host contract in a s
 
 It runs:
 
-- `openwork-server` published on `0.0.0.0:8787` (the only published surface)
-- Managed `opencode` launched internally by `openwork-server`
+- `redrob-server` published on `0.0.0.0:8787` (the only published surface)
+- Managed `opencode` launched internally by `redrob-server`
 
 ### Local run (compose)
 

@@ -6,15 +6,15 @@ import {
 } from "@redrob/types/den/connect-diagnostics"
 import { diagnosticsRedisConfig } from "./config"
 
-const incidentHistoryKey = "openwork:diagnostics:connect-incidents:v1"
+const incidentHistoryKey = "redrob:diagnostics:connect-incidents:v1"
 const maximumIncidentHistory = 10_000
 const retentionMs = CONNECT_DIAGNOSTIC_RETENTION_SECONDS * 1_000
 
 declare global {
-  var __openworkDiagnosticsConnectIncidents: StoredConnectDiagnosticIncident[] | undefined
+  var __redrobDiagnosticsConnectIncidents: StoredConnectDiagnosticIncident[] | undefined
 }
 
-const localIncidents = globalThis.__openworkDiagnosticsConnectIncidents ??= []
+const localIncidents = globalThis.__redrobDiagnosticsConnectIncidents ??= []
 
 type RedisReply = { result?: unknown; error?: string }
 

@@ -139,8 +139,8 @@ test(title, async ({ evidence, place }) => {
   expect(signInOk, `Browser sign-in failed: ${JSON.stringify(rawSignIn)}`).toBe(true);
 
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(den.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(den.admin.token)};
   })()`);
   expect(tokenStored).toBe(true);
   await navigate(browser.client, `${den.ref.webUrl}/admin`);
@@ -191,7 +191,7 @@ test(title, async ({ evidence, place }) => {
     const section = row?.querySelector('[data-testid="admin-usage-section"]');
     const reset = section?.querySelector('[data-testid="admin-usage-reset-open"]');
     return Boolean(section)
-      && (section?.textContent ?? "").includes("OpenWork model consumption")
+      && (section?.textContent ?? "").includes("Redrob Work model consumption")
       && (section?.textContent ?? "").includes("No organization consumption windows are available for this user.")
       && reset?.disabled === true;
   })()`, {
@@ -204,7 +204,7 @@ test(title, async ({ evidence, place }) => {
     const text = section?.textContent ?? "";
     const reset = section?.querySelector('[data-testid="admin-usage-reset-open"]');
     return {
-      heading: text.includes("OpenWork model consumption"),
+      heading: text.includes("Redrob Work model consumption"),
       empty: text.includes("No organization consumption windows are available for this user."),
       resetDisabled: reset?.disabled === true,
       hasWindowUsage: text.includes("Shared:") || text.includes("No current five-hour, weekly, or monthly windows.")
@@ -217,7 +217,7 @@ test(title, async ({ evidence, place }) => {
     && emptyUsageState.hasWindowUsage === false;
   expect(emptyUsageProved, JSON.stringify(emptyUsageState)).toBe(true);
   evidence.recordAssertionEvidence(
-    "An expanded user shows OpenWork model consumption's explicit empty state, no window usage, and a disabled reset",
+    "An expanded user shows Redrob Work model consumption's explicit empty state, no window usage, and a disabled reset",
     JSON.stringify(emptyUsageState),
     emptyUsageProved,
   );
@@ -226,13 +226,13 @@ test(title, async ({ evidence, place }) => {
   {
     const shot = await screenshot(browser);
     const seen = await validate(shot, [
-      "An expanded user row shows a section headed OpenWork model consumption",
+      "An expanded user row shows a section headed Redrob Work model consumption",
       "That section says no organization consumption windows are available for this user",
     ]);
     expect(seen.ok, seen.why).toBe(true);
   }
 
-  const addedEmail = `added-admin-${stamp}@openwork.test`;
+  const addedEmail = `added-admin-${stamp}@redrob.test`;
   const addedNote = `Admin model limits eval ${stamp}`;
   let addedAdminId = "";
   try {

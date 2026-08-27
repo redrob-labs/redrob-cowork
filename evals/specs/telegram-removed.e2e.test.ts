@@ -68,8 +68,8 @@ test(title, async ({ evidence, place }) => {
     label: "Den Web origin before admin auth token handoff",
   });
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(den.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(den.admin.token)};
   })()`);
   expect(tokenStored).toBe(true);
 

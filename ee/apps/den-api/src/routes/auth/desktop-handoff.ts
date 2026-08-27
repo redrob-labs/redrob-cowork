@@ -18,7 +18,7 @@ import { CLOUD_INSTANCE_BACKEND } from "../../workers/cloud-constants.js"
 const createGrantSchema = z.object({
   next: z.string().trim().max(128).optional().describe("Optional continuation hint for handoff clients."),
   desktopScheme: z.string().trim().max(32).optional().describe("Optional desktop URL scheme to use when building the Redrob Work deep link."),
-  returnUrl: z.string().trim().max(2048).optional().describe("Optional HTTPS OpenWork Cloud web return URL. Accepted only for multi-organization Cloud instances after server-side origin validation."),
+  returnUrl: z.string().trim().max(2048).optional().describe("Optional HTTPS Redrob Work Cloud web return URL. Accepted only for multi-organization Cloud instances after server-side origin validation."),
 }).meta({ ref: "DesktopHandoffGrantCreateBody" })
 
 const exchangeGrantSchema = z.object({
@@ -32,7 +32,7 @@ const statusGrantSchema = z.object({
 const desktopHandoffGrantResponseSchema = z.object({
   grant: z.string(),
   expiresAt: z.string().datetime(),
-  openworkUrl: z.string().url(),
+  redrobUrl: z.string().url(),
   returnUrl: z.string().url().optional(),
 }).meta({ ref: "DesktopHandoffGrantResponse" })
 
@@ -123,7 +123,7 @@ function isWebAppHost(hostname: string) {
   }
 
   return normalized === "app.redrob.io"
-    || normalized === "app.openwork.software"
+    || normalized === "app.redrob.software"
     || normalized.startsWith("app.")
     // Cloud Run hostnames serve the den-web frontend, which only exposes the
     // Den API behind its /api/den proxy path (see #1807).
@@ -185,7 +185,7 @@ export function resolveDesktopDenBaseUrl(request: Request) {
   return origin
 }
 
-function buildOpenworkDeepLink(input: {
+function buildRedrobDeepLink(input: {
   scheme?: string | null
   grant: string
   denBaseUrl: string
@@ -402,7 +402,7 @@ export function registerDesktopAuthRoutes<T extends { Variables: AuthContextVari
       hide: true,
       tags: ["Authentication"],
       summary: "Create desktop handoff grant",
-      description: "Creates a short-lived handoff grant for a signed-in web user. Desktop clients receive an OpenWork deep link; approved Cloud web clients also receive a validated return URL.",
+      description: "Creates a short-lived handoff grant for a signed-in web user. Desktop clients receive an Redrob Work deep link; approved Cloud web clients also receive a validated return URL.",
       responses: {
         200: jsonResponse("Desktop handoff grant created successfully.", desktopHandoffGrantResponseSchema),
         400: jsonResponse("The handoff request body or Cloud web return URL was invalid.", createGrantBadRequestSchema),
@@ -448,7 +448,7 @@ export function registerDesktopAuthRoutes<T extends { Variables: AuthContextVari
     return c.json({
       grant,
       expiresAt: expiresAt.toISOString(),
-      openworkUrl: buildOpenworkDeepLink({
+      redrobUrl: buildRedrobDeepLink({
         scheme: input.desktopScheme || "redrob",
         grant,
         denBaseUrl,

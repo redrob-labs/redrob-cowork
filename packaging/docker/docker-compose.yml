@@ -1,5 +1,5 @@
 services:
-  openwork-host:
+  redrob-host:
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
       # Optional: REDROB_APPROVAL_TIMEOUT_MS: "30000"
       # Historical path retained so existing ./data volumes keep working.
       # Only a directory name; the orchestrator CLI itself is gone.
-      REDROB_DATA_DIR: /data/openwork-orchestrator
+      REDROB_DATA_DIR: /data/redrob-orchestrator
       REDROB_SIDECAR_DIR: /data/sidecars
     volumes:
       # Mount an existing project/workspace here.

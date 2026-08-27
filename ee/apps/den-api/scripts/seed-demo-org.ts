@@ -70,7 +70,7 @@ const DEMO_ORG_NAME = process.env.DEN_DEMO_ORG_NAME?.trim() || "Acme Robotics"
 const DEMO_ORG_SLUG = process.env.DEN_DEMO_ORG_SLUG?.trim() || "acme-robotics-demo"
 const DEMO_EMAIL_DOMAIN = process.env.DEN_DEMO_EMAIL_DOMAIN?.trim() || "acme.test"
 const DEMO_OWNER_EMAIL = process.env.DEN_DEMO_OWNER_EMAIL?.trim() || `alex@${DEMO_EMAIL_DOMAIN}`
-const DEMO_OWNER_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD?.trim() || "OpenWorkDemo123!"
+const DEMO_OWNER_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD?.trim() || "RedrobWorkDemo123!"
 const SHOULD_FETCH_GITHUB = (process.env.DEN_DEMO_SEED_FETCH_GITHUB ?? "1").trim() !== "0"
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN?.trim()
 const GITHUB_REPO = "anthropics/knowledge-work-plugins"
@@ -201,7 +201,7 @@ function assertSafeDevTarget() {
 function githubHeaders() {
   return {
     Accept: "application/vnd.github+json",
-    "User-Agent": "openwork-den-demo-seed",
+    "User-Agent": "redrob-den-demo-seed",
     ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
   }
 }

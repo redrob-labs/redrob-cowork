@@ -39,7 +39,7 @@ test.skipIf(!optedIn)(title, async () => {
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "An OpenWork screen offering to sign in to OpenWork Cloud is visible",
+      "An Redrob Work screen offering to sign in to Redrob Work Cloud is visible",
       "No error or 'Something went wrong' crash message is visible yet",
     ]);
     expect(seen.ok, seen.why).toBe(true);
@@ -48,10 +48,10 @@ test.skipIf(!optedIn)(title, async () => {
 
   // Attempting to reach the Den is what exercises the broken edge. The
   // affordance differs by surface, so use whichever the app is showing.
-  // Pick from actual enabled buttons: "Sync with OpenWork Cloud" appears in the
+  // Pick from actual enabled buttons: "Sync with Redrob Work Cloud" appears in the
   // text but is not a control, which a text match would wrongly select.
   const buttons = await enabledButtons(app);
-  const signInLabel = ["Sign in to OpenWork Cloud", "Sign in", "Sync with OpenWork Cloud"]
+  const signInLabel = ["Sign in to Redrob Work Cloud", "Sign in", "Sync with Redrob Work Cloud"]
     .find((label) => buttons.includes(label));
   expect(signInLabel, `no sign-in button on screen. Buttons: ${buttons.join(" | ")}`).toBeDefined();
   if (!signInLabel) throw new Error("unreachable: no sign-in affordance");
@@ -67,7 +67,7 @@ test.skipIf(!optedIn)(title, async () => {
   // TLS-intercepted Den is that sign-in produces no in-app feedback (the desktop
   // hands off to a browser), so what we require here is the absence of a false
   // positive rather than a specific error string.
-  for (const claim of ["Signed in as", "Synced", "Connected to OpenWork Cloud"]) {
+  for (const claim of ["Signed in as", "Synced", "Connected to Redrob Work Cloud"]) {
     expect(afterText.includes(claim), `app claimed "${claim}" while the Den is TLS-intercepted`).toBe(false);
   }
 

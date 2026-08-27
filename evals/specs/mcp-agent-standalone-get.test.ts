@@ -8,7 +8,7 @@ import { test } from "@redrob/testkit";
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 test("MCP agent rejects standalone GET without triggering the Bun SDK retry loop", ({ evidence }) => {
-  const reportDir = mkdtempSync(join(tmpdir(), "openwork-mcp-agent-standalone-get-"));
+  const reportDir = mkdtempSync(join(tmpdir(), "redrob-mcp-agent-standalone-get-"));
   try {
     const build = spawnSync("pnpm", [
       "--filter",

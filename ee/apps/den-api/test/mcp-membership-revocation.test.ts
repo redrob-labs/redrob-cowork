@@ -5,7 +5,7 @@ import type { MiddlewareHandler } from "hono"
 import type { McpAuthResourceContext } from "../src/mcp/auth.js"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -52,7 +52,7 @@ beforeAll(async () => {
       handler: () => Promise.resolve(new Response(JSON.stringify({ keys: [] }), { status: 200 })),
     },
     DEN_MCP_OPAQUE_ACCESS_TOKEN_PREFIX: "ow_mcp_at_",
-    DEN_MCP_FIRST_PARTY_CLIENT_ID: "openwork-desktop",
+    DEN_MCP_FIRST_PARTY_CLIENT_ID: "redrob-desktop",
     DEN_MCP_FIRST_PARTY_RESOURCES: [
       "http://127.0.0.1:8790/mcp",
       "http://127.0.0.1:8790/mcp/agent",
@@ -200,7 +200,7 @@ function selectActiveSessionAndMembership() {
 function validFirstPartyOpaqueTokenRow() {
   return {
     token: mcpAuth.hashOpaqueMcpSecret(OPAQUE_SECRET),
-    clientId: "openwork-desktop",
+    clientId: "redrob-desktop",
     userId: createDenTypeId("user"),
     sessionId: createDenTypeId("session"),
     referenceId: createDenTypeId("organization"),
@@ -401,7 +401,7 @@ test("first-party opaque desktop tokens remain accepted on parent and admin MCP 
 test("JWT client_id cannot make external tokens use first-party resource aliases", async () => {
   jwtPayload = validMcpJwtPayload({
     resource: "http://127.0.0.1:8790/mcp",
-    clientId: "openwork-desktop",
+    clientId: "redrob-desktop",
   })
   selectActiveSessionAndMembership()
 

@@ -160,7 +160,7 @@ async function startManagedOpencodeServer(
     OPENCODE_SERVER_PASSWORD: password,
   };
   // The managed engine needs its own provider environment, but never the key
-  // that decrypts OpenWork-owned OAuth credentials.
+  // that decrypts Redrob Work-owned OAuth credentials.
   delete env.REDROB_ENCRYPTION_KEY;
   const injectedEnv = Object.entries({
     ...(options.env ?? {}),

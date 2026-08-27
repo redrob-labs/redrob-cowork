@@ -14,11 +14,11 @@ const posthogEnabled = process.env.VERCEL_ENV === "production";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "OpenWork",
+  name: "Redrob Work",
   legalName: "Different AI",
   url: "https://redrob.io",
-  logo: "https://redrob.io/openwork-mark.svg",
-  sameAs: ["https://github.com/different-ai/openwork"]
+  logo: "https://redrob.io/redrob-mark.svg",
+  sameAs: ["https://github.com/redrob-labs/redrob-work"]
 };
 
 const inter = Inter({
@@ -35,7 +35,7 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata = {
   metadataBase: new URL("https://redrob.io"),
-  title: "OpenWork — Open source Claude Cowork alternative for teams",
+  title: "Redrob Work — Open source Claude Cowork alternative for teams",
   description:
     "Bring your own model and provider, wire in your tools and context, and ship reusable agent setups across your org — with guardrails built in.",
   alternates: {
@@ -47,7 +47,7 @@ export const metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "OpenWork",
+    siteName: "Redrob Work",
     locale: "en_US",
     images: ["/og-image-clean.png"]
   },

@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, expect, mock, test } from "bun:test"
 import type { OpenApiOperation } from "../src/mcp/policy.js"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_gwscaps"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_gwscaps"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "local-dev-secret-not-for-production-use!!"
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -588,7 +588,7 @@ test("calendar create requests a Google Meet link when asked", async () => {
   if (typeof requestId !== "string") {
     throw new Error("Expected calendar create requestId to be a string")
   }
-  expect(requestId.startsWith("openwork-")).toBe(true)
+  expect(requestId.startsWith("redrob-")).toBe(true)
   const solutionKey = expectRecord(createRequest.conferenceSolutionKey, "calendar create conferenceSolutionKey")
   expect(solutionKey.type).toBe("hangoutsMeet")
 
@@ -626,7 +626,7 @@ test("calendar patch adds a Google Meet link without creating a duplicate", asyn
   if (typeof requestId !== "string") {
     throw new Error("Expected calendar update requestId to be a string")
   }
-  expect(requestId.startsWith("openwork-")).toBe(true)
+  expect(requestId.startsWith("redrob-")).toBe(true)
   const solutionKey = expectRecord(createRequest.conferenceSolutionKey, "calendar update conferenceSolutionKey")
   expect(solutionKey.type).toBe("hangoutsMeet")
 
@@ -1093,7 +1093,7 @@ test("no connected account returns needs_connection", async () => {
   const body: unknown = await response.json()
   expect(body).toEqual({
     error: "needs_connection",
-    message: "Connect your Google account first: open Settings > Connect and use Connect your account on the Google Workspace row, or connect from the OpenWork Cloud dashboard.",
+    message: "Connect your Google account first: open Settings > Connect and use Connect your account on the Google Workspace row, or connect from the Redrob Work Cloud dashboard.",
   })
 })
 

@@ -36,7 +36,7 @@ test.skipIf(missingRequirements.length > 0 || daytonaPlacement || !mysqlOpen || 
   needs(requirements);
 
   const ownerEmail = `owner+${Date.now().toString(36)}@enterprise-install.test`;
-  const password = "OpenWorkEval123!";
+  const password = "RedrobWorkEval123!";
   await using den = await selfHostServer({
     place,
     name: "Enterprise Install Guide",
@@ -80,7 +80,7 @@ test.skipIf(missingRequirements.length > 0 || daytonaPlacement || !mysqlOpen || 
 
   const rawGuide = await evalIn(browser, `(async () => {
     const headers = new Headers({ Accept: "application/json" });
-    const storedToken = localStorage.getItem("openwork:web:auth-token")?.trim();
+    const storedToken = localStorage.getItem("redrob:web:auth-token")?.trim();
     if (storedToken) headers.set("Authorization", "Bearer " + storedToken);
     const response = await fetch("/api/den/v1/me/install-config", { credentials: "include", headers });
     const config = await response.json();
@@ -93,7 +93,7 @@ test.skipIf(missingRequirements.length > 0 || daytonaPlacement || !mysqlOpen || 
       steps,
       fourthStep: Boolean(document.querySelector('[data-testid="install-guide"] > li:nth-child(4)')),
       cloudReturnControl: [...document.querySelectorAll("a")]
-        .some((anchor) => (anchor.textContent ?? "").trim() === "I already installed OpenWork"),
+        .some((anchor) => (anchor.textContent ?? "").trim() === "I already installed Redrob Work"),
       mintedToken: resources.some((url) => url.includes("/install-links") || url.includes("/v1/install-config?token=")),
     });
   })()`, { awaitPromise: true });

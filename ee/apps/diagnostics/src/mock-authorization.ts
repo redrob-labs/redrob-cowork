@@ -4,14 +4,14 @@ import { diagnosticsRedisConfig } from "./config"
 export const mockAuthorizationLifetimeMs = 5 * 60 * 1000
 export const mockAuthorizationChallengeLifetimeMs = 2 * 60 * 1000
 
-const redisKeyPrefix = "openwork:diagnostics:mock-authorization:v1"
+const redisKeyPrefix = "redrob:diagnostics:mock-authorization:v1"
 const subjectPattern = /^[a-f0-9]{64}$/u
 
 declare global {
-  var __openworkDiagnosticsMockAuthorizations: Map<string, number> | undefined
+  var __redrobDiagnosticsMockAuthorizations: Map<string, number> | undefined
 }
 
-const localAuthorizations = globalThis.__openworkDiagnosticsMockAuthorizations ??= new Map()
+const localAuthorizations = globalThis.__redrobDiagnosticsMockAuthorizations ??= new Map()
 
 type RedisReply = { result?: unknown; error?: string }
 

@@ -25,7 +25,7 @@ export interface UrlCapture {
 }
 
 export async function captureOpenedUrls(): Promise<UrlCapture> {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-open-external-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-open-external-"));
   const logPath = join(dir, "opened-urls.log");
   await writeFile(logPath, "", "utf8");
   const shim = join(dir, "xdg-open");
@@ -110,9 +110,9 @@ export async function signInInBrowser(
 /**
  * Read the deep link the browser is handed once sign-in completes.
  *
- * Observed shape: the app opens `<den>/?mode=sign-up&desktopAuth=1&desktopScheme=openwork`,
+ * Observed shape: the app opens `<den>/?mode=sign-up&desktopAuth=1&desktopScheme=redrob`,
  * the person signs in there, and Den shows "You're signed in" with an
- * "Open OpenWork" button plus a readonly input holding the sign-in code —
+ * "Open Redrob Work" button plus a readonly input holding the sign-in code —
  * the full `redrob://den-auth?grant=…&denBaseUrl=…` URL a person would
  * copy-paste into the app. Reading that input keeps the grant the real one
  * Den issued for this session.
@@ -127,7 +127,7 @@ export async function readHandoffDeepLink(browser: Surface, { timeoutMs = 60_000
       .map((anchor) => anchor.getAttribute("href"))
       .find((href) => typeof href === "string" && href.includes("grant="));
     if (fromAnchor) return fromAnchor;
-    const inText = (document.body?.innerText ?? "").match(/openwork:\\/\\/[^\\s"']+grant=[^\\s"']+/);
+    const inText = (document.body?.innerText ?? "").match(/redrob:\\/\\/[^\\s"']+grant=[^\\s"']+/);
     return inText ? inText[0] : false;
   })()`, { timeoutMs, label: "handoff deep link in the browser" });
   if (typeof found !== "string") throw new Error("Could not read a handoff deep link from the browser page.");

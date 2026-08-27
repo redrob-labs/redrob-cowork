@@ -8,13 +8,13 @@ import {
   CONNECT_MCP_APP_HOST_CAPABILITY_HEADER,
   CONNECT_MCP_SERVER_INDEX_URI,
   connectMcpAppHostName,
-  type OpenWorkConnectMcpServerIndex,
-  readOpenWorkConnectMcpAppHostCatalog,
-  readOpenWorkConnectMcpServerIndex,
-  reconcileOpenWorkConnectMcpServers,
-  refreshOpenWorkConnectMcpAppHostCatalog,
-  writeOpenWorkConnectMcpAppHostAuthorization,
-  writeOpenWorkConnectMcpAppHostCatalog,
+  type RedrobWorkConnectMcpServerIndex,
+  readRedrobWorkConnectMcpAppHostCatalog,
+  readRedrobWorkConnectMcpServerIndex,
+  reconcileRedrobWorkConnectMcpServers,
+  refreshRedrobWorkConnectMcpAppHostCatalog,
+  writeRedrobWorkConnectMcpAppHostAuthorization,
+  writeRedrobWorkConnectMcpAppHostCatalog,
 } from "./connect-mcp-server-catalog.js";
 import { readRuntimeOpencodeConfig, writeRuntimeOpencodeConfig } from "./runtime-opencode-config-store.js";
 import type { ServerConfig } from "./types.js";
@@ -29,7 +29,7 @@ afterEach(async () => {
 });
 
 async function fixtureConfig(): Promise<ServerConfig> {
-  const root = await mkdtemp(join(tmpdir(), "openwork-connect-mcp-servers-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-connect-mcp-servers-"));
   roots.push(root);
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   return {
@@ -37,7 +37,7 @@ async function fixtureConfig(): Promise<ServerConfig> {
     port: 0,
     token: "test",
     hostToken: "host",
-    configPath: join(root, "openwork.json"),
+    configPath: join(root, "redrob.json"),
     approval: { mode: "auto", timeoutMs: 1_000 },
     corsOrigins: ["*"],
     workspaces: [{ id: "ws_1", name: "One", path: root, preset: "starter", workspaceType: "local" }],
@@ -53,7 +53,7 @@ async function fixtureConfig(): Promise<ServerConfig> {
 
 function indexFetcher(
   requests: Array<{ url: string; headers: Headers; body: Record<string, unknown> }>,
-  servers: OpenWorkConnectMcpServerIndex["servers"] = [{
+  servers: RedrobWorkConnectMcpServerIndex["servers"] = [{
     connectionId: "emc_01k28e8q8pf8r9sff9mhyqxved",
     name: "Project Atlas",
     description: null,
@@ -75,7 +75,7 @@ function indexFetcher(
           uri: CONNECT_MCP_SERVER_INDEX_URI,
           mimeType: "application/json",
           text: JSON.stringify({
-            schemaVersion: "openwork.connect/mcp-servers/1",
+            schemaVersion: "redrob.connect/mcp-servers/1",
             servers,
           }),
         }],
@@ -84,10 +84,10 @@ function indexFetcher(
   };
 }
 
-describe("OpenWork Connect MCP server catalog", () => {
+describe("Redrob Work Connect MCP server catalog", () => {
   test("reads the member catalog through an authenticated MCP resource", async () => {
     const requests: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
-    const index = await readOpenWorkConnectMcpServerIndex({
+    const index = await readRedrobWorkConnectMcpServerIndex({
       type: "remote",
       url: "https://api.redrob.io/mcp/agent",
       headers: { Authorization: "Bearer member-token" },
@@ -105,7 +105,7 @@ describe("OpenWork Connect MCP server catalog", () => {
   });
 
   test("keeps hosted api-origin provider proxies on the credential-bound app gateway origin", async () => {
-    const index = await readOpenWorkConnectMcpServerIndex({
+    const index = await readRedrobWorkConnectMcpServerIndex({
       type: "remote",
       url: "https://app.redrob.io/api/den/mcp/agent",
     }, "Bearer private-app-host-token", indexFetcher([]));
@@ -115,17 +115,17 @@ describe("OpenWork Connect MCP server catalog", () => {
     );
   });
 
-  test("reconciles only OpenWork-owned proxy entries and preserves user MCPs", async () => {
+  test("reconciles only Redrob Work-owned proxy entries and preserves user MCPs", async () => {
     const config = await fixtureConfig();
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
-        "openwork-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
+        "redrob-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
         "user-server": { type: "remote", url: "https://user.example/mcp" },
-        "openwork-connect-stale": { type: "remote", url: "https://cloud.example/stale" },
+        "redrob-connect-stale": { type: "remote", url: "https://cloud.example/stale" },
       },
     }));
     const connectionId = "emc_01k28e8q8pf8r9sff9mhyqxved";
-    const result = await reconcileOpenWorkConnectMcpServers({
+    const result = await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: {
@@ -141,14 +141,14 @@ describe("OpenWork Connect MCP server catalog", () => {
     expect(result).toEqual({
       status: "synced",
       appHostNames: [connectMcpAppHostName(connectionId)],
-      removedNames: ["openwork-connect-stale"],
+      removedNames: ["redrob-connect-stale"],
     });
-    expect(runtime.mcp?.["openwork-cloud"]).toEqual({ type: "remote", url: "https://api.redrob.io/mcp/agent" });
+    expect(runtime.mcp?.["redrob-cloud"]).toEqual({ type: "remote", url: "https://api.redrob.io/mcp/agent" });
     expect(runtime.mcp?.["user-server"]).toEqual({ type: "remote", url: "https://user.example/mcp" });
-    expect(runtime.mcp?.["openwork-connect-stale"]).toBeUndefined();
-    expect(Object.keys(runtime.mcp ?? {}).some((name) => name.startsWith("openwork-connect-"))).toBe(false);
-    expect(await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).toEqual({
-      schemaVersion: "openwork.connect/mcp-servers/1",
+    expect(runtime.mcp?.["redrob-connect-stale"]).toBeUndefined();
+    expect(Object.keys(runtime.mcp ?? {}).some((name) => name.startsWith("redrob-connect-"))).toBe(false);
+    expect(await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).toEqual({
+      schemaVersion: "redrob.connect/mcp-servers/1",
       servers: [{
         connectionId,
         name: "Project Atlas",
@@ -164,20 +164,20 @@ describe("OpenWork Connect MCP server catalog", () => {
     const requests: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
-        "openwork-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
+        "redrob-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       },
     }));
-    await writeOpenWorkConnectMcpAppHostAuthorization(
+    await writeRedrobWorkConnectMcpAppHostAuthorization(
       config,
       "ws_1",
       "Bearer private-app-host-token",
       "https://api.redrob.io/mcp/agent",
     );
 
-    const result = await refreshOpenWorkConnectMcpAppHostCatalog(config, "ws_1", indexFetcher(requests));
+    const result = await refreshRedrobWorkConnectMcpAppHostCatalog(config, "ws_1", indexFetcher(requests));
 
     expect(result).toEqual({ status: "synced", appHostNames: [connectMcpAppHostName(connectionId)] });
-    expect((await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).servers[0]?.connectionId).toBe(connectionId);
+    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).servers[0]?.connectionId).toBe(connectionId);
     expect(requests.every((request) => request.headers.get("authorization") === "Bearer private-app-host-token")).toBe(true);
   });
 
@@ -186,17 +186,17 @@ describe("OpenWork Connect MCP server catalog", () => {
     const connectionId = "emc_01lastknowngood";
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
-        "openwork-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
+        "redrob-cloud": { type: "remote", url: "https://api.redrob.io/mcp/agent" },
       },
     }));
-    await writeOpenWorkConnectMcpAppHostAuthorization(
+    await writeRedrobWorkConnectMcpAppHostAuthorization(
       config,
       "ws_1",
       "Bearer private-app-host-token",
       "https://api.redrob.io/mcp/agent",
     );
-    await writeOpenWorkConnectMcpAppHostCatalog(config, "ws_1", {
-      schemaVersion: "openwork.connect/mcp-servers/1",
+    await writeRedrobWorkConnectMcpAppHostCatalog(config, "ws_1", {
+      schemaVersion: "redrob.connect/mcp-servers/1",
       servers: [{
         connectionId,
         name: "Last known good",
@@ -205,22 +205,22 @@ describe("OpenWork Connect MCP server catalog", () => {
       }],
     });
 
-    const result = await refreshOpenWorkConnectMcpAppHostCatalog(
+    const result = await refreshRedrobWorkConnectMcpAppHostCatalog(
       config,
       "ws_1",
       async () => new Response(null, { status: 503 }),
     );
 
     expect(result).toEqual({ status: "unavailable", appHostNames: [] });
-    expect((await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).servers[0]?.connectionId).toBe(connectionId);
+    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).servers[0]?.connectionId).toBe(connectionId);
   });
 
   test("fails closed and purges prior runtime entries when Cloud has no index", async () => {
     const config = await fixtureConfig();
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
-      mcp: { "openwork-connect-existing": { type: "remote", url: "https://cloud.example/existing" } },
+      mcp: { "redrob-connect-existing": { type: "remote", url: "https://cloud.example/existing" } },
     }));
-    const result = await reconcileOpenWorkConnectMcpServers({
+    const result = await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
@@ -229,21 +229,21 @@ describe("OpenWork Connect MCP server catalog", () => {
     expect(result).toEqual({
       status: "unavailable",
       appHostNames: [],
-      removedNames: ["openwork-connect-existing"],
+      removedNames: ["redrob-connect-existing"],
     });
-    expect((await readRuntimeOpencodeConfig(config, "ws_1")).mcp?.["openwork-connect-existing"]).toBeUndefined();
-    expect((await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
+    expect((await readRuntimeOpencodeConfig(config, "ws_1")).mcp?.["redrob-connect-existing"]).toBeUndefined();
+    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
   });
 
-  test("an empty index removes prior OpenWork-owned provider servers", async () => {
+  test("an empty index removes prior Redrob Work-owned provider servers", async () => {
     const config = await fixtureConfig();
     await writeRuntimeOpencodeConfig(config, "ws_1", () => ({
       mcp: {
         "user-server": { type: "remote", url: "https://user.example/mcp" },
-        "openwork-connect-existing": { type: "remote", url: "https://cloud.example/existing" },
+        "redrob-connect-existing": { type: "remote", url: "https://cloud.example/existing" },
       },
     }));
-    const result = await reconcileOpenWorkConnectMcpServers({
+    const result = await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
@@ -254,17 +254,17 @@ describe("OpenWork Connect MCP server catalog", () => {
     expect(result).toEqual({
       status: "synced",
       appHostNames: [],
-      removedNames: ["openwork-connect-existing"],
+      removedNames: ["redrob-connect-existing"],
     });
     const runtime = await readRuntimeOpencodeConfig(config, "ws_1");
-    expect(runtime.mcp?.["openwork-connect-existing"]).toBeUndefined();
+    expect(runtime.mcp?.["redrob-connect-existing"]).toBeUndefined();
     expect(runtime.mcp?.["user-server"]).toEqual({ type: "remote", url: "https://user.example/mcp" });
   });
 
   test("never sends the persisted App-host credential to an untrusted reconcile endpoint", async () => {
     const config = await fixtureConfig();
     const trustedRequests: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
-    await reconcileOpenWorkConnectMcpServers({
+    await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
@@ -274,7 +274,7 @@ describe("OpenWork Connect MCP server catalog", () => {
     expect(trustedRequests.length).toBeGreaterThan(0);
 
     let untrustedRequests = 0;
-    const result = await reconcileOpenWorkConnectMcpServers({
+    const result = await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: { type: "remote", url: "https://attacker.example/mcp/agent" },
@@ -286,12 +286,12 @@ describe("OpenWork Connect MCP server catalog", () => {
 
     expect(untrustedRequests).toBe(0);
     expect(result.status).toBe("unavailable");
-    expect((await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
+    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
   });
 
   test("rejects a catalog that points the private App-host credential at another origin", async () => {
     const config = await fixtureConfig();
-    const result = await reconcileOpenWorkConnectMcpServers({
+    const result = await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: { type: "remote", url: "https://api.redrob.io/mcp/agent" },
@@ -305,12 +305,12 @@ describe("OpenWork Connect MCP server catalog", () => {
     });
 
     expect(result).toEqual({ status: "unavailable", appHostNames: [], removedNames: [] });
-    expect((await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
+    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
   });
 
   test("rejects a hosted api-origin descriptor that is not the exact connection proxy", async () => {
     const config = await fixtureConfig();
-    const result = await reconcileOpenWorkConnectMcpServers({
+    const result = await reconcileRedrobWorkConnectMcpServers({
       config,
       workspace: config.workspaces[0]!,
       cloudMcp: { type: "remote", url: "https://app.redrob.io/api/den/mcp/agent" },
@@ -324,6 +324,6 @@ describe("OpenWork Connect MCP server catalog", () => {
     });
 
     expect(result).toEqual({ status: "unavailable", appHostNames: [], removedNames: [] });
-    expect((await readOpenWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
+    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, "ws_1")).servers).toEqual([]);
   });
 });

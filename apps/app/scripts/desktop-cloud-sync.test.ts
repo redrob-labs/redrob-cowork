@@ -4,9 +4,9 @@ import {
   derivePendingCloudPluginChanges,
   readPendingCloudSyncChanges,
 } from "../src/app/cloud/desktop-cloud-sync";
-import type { OpenworkDesktopCloudSyncChange } from "../src/app/lib/openwork-server";
+import type { RedrobDesktopCloudSyncChange } from "../src/app/lib/redrob-server";
 
-function change(input: Partial<OpenworkDesktopCloudSyncChange> & Pick<OpenworkDesktopCloudSyncChange, "id" | "kind" | "resourceKind">): OpenworkDesktopCloudSyncChange {
+function change(input: Partial<RedrobDesktopCloudSyncChange> & Pick<RedrobDesktopCloudSyncChange, "id" | "kind" | "resourceKind">): RedrobDesktopCloudSyncChange {
   return {
     marketplaceId: undefined,
     pluginId: undefined,

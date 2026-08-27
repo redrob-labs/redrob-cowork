@@ -155,12 +155,12 @@ export function ActivationScreen() {
 
   if (state.kind === "expired" || state.kind === "error") {
     const message = state.kind === "expired"
-      ? "This one-time activation link has expired. Return to the install page and open OpenWork again."
+      ? "This one-time activation link has expired. Return to the install page and open Redrob Work again."
       : state.message;
     return (
       <OnboardingShell state="activation-error" width="wide">
         <section className="grid gap-5 rounded-[1.75rem] border border-slate-200/80 bg-white p-6 sm:p-8" data-testid="activation-page">
-          <p className="den-eyebrow">OpenWork Desktop</p>
+          <p className="den-eyebrow">Redrob Work Desktop</p>
           <h1 className="den-title-lg">This computer still needs approval.</h1>
           <p className="den-copy" role="alert">{message}</p>
           <button type="button" className="den-button-secondary w-fit" onClick={() => window.history.back()}>
@@ -190,7 +190,7 @@ export function ActivationScreen() {
           <p className="den-copy">
             {connected
               ? `${details.organizationName}'s setup and branding are ready in ${details.brand.appName}.`
-              : `OpenWork will show ${details.organizationName} and its server before anything changes.`}
+              : `Redrob Work will show ${details.organizationName} and its server before anything changes.`}
           </p>
         </div>
 
@@ -200,12 +200,12 @@ export function ActivationScreen() {
               <CheckCircle2 className="size-5 shrink-0" aria-hidden="true" />
               Connected to {details.organizationName}
             </div>
-            <a className="den-button-primary w-full justify-center sm:w-fit" href={RETURN_TO_REDROB_URL} data-testid="activation-return-openwork">
-              Return to OpenWork
+            <a className="den-button-primary w-full justify-center sm:w-fit" href={RETURN_TO_REDROB_URL} data-testid="activation-return-redrob">
+              Return to Redrob Work
               <ExternalLink className="size-4" aria-hidden="true" />
             </a>
             <div className="grid gap-2 rounded-2xl bg-slate-50 p-4">
-              <p className="m-0 text-sm text-slate-600">Nothing opened? Copy this OpenWork link and open it from your browser.</p>
+              <p className="m-0 text-sm text-slate-600">Nothing opened? Copy this Redrob Work link and open it from your browser.</p>
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input className="den-input min-w-0 flex-1 text-xs" value={RETURN_TO_REDROB_URL} readOnly onFocus={(event) => event.currentTarget.select()} />
                 <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyLink("return", RETURN_TO_REDROB_URL)}>
@@ -220,27 +220,27 @@ export function ActivationScreen() {
             <button
               type="button"
               className="den-button-primary w-full justify-center sm:w-fit"
-              data-testid="activation-open-openwork"
+              data-testid="activation-open-redrob"
               onClick={() => {
                 setOpenAttempted(true);
                 window.location.assign(connectUrl);
               }}
             >
-              Open OpenWork
+              Open Redrob Work
               <ExternalLink className="size-4" aria-hidden="true" />
             </button>
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-              {openAttempted ? "Waiting for OpenWork to accept this setup…" : "Waiting for your approval…"}
+              {openAttempted ? "Waiting for Redrob Work to accept this setup…" : "Waiting for your approval…"}
             </div>
             {openAttempted ? (
               <div className="grid gap-2 rounded-2xl bg-slate-50 p-4" data-testid="activation-open-fallback">
-                <p className="m-0 text-sm text-slate-600">OpenWork did not appear? Copy this one-time link and open it anywhere that handles OpenWork links.</p>
+                <p className="m-0 text-sm text-slate-600">Redrob Work did not appear? Copy this one-time link and open it anywhere that handles Redrob Work links.</p>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <input className="den-input min-w-0 flex-1 text-xs" value={connectUrl} readOnly onFocus={(event) => event.currentTarget.select()} />
                   <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyLink("connect", connectUrl)}>
                     <Copy className="size-4" aria-hidden="true" />
-                    {copied === "connect" ? "Copied" : "Copy OpenWork link"}
+                    {copied === "connect" ? "Copied" : "Copy Redrob Work link"}
                   </button>
                 </div>
               </div>

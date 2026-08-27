@@ -52,7 +52,7 @@ test("create_skill publishes a standard MCP App contract and text fallback", ({ 
 
   evidence.recordAssertionEvidence(
     "create_skill is a standard MCP App tool",
-    "The gateway lists one create_skill tool with ui://openwork/skill-created/v1/view.html, model/app visibility, compatibility metadata, and a CSP-closed text/html;profile=mcp-app resource.",
+    "The gateway lists one create_skill tool with ui://redrob/skill-created/v1/view.html, model/app visibility, compatibility metadata, and a CSP-closed text/html;profile=mcp-app resource.",
     true,
   )
   evidence.recordAssertionEvidence(

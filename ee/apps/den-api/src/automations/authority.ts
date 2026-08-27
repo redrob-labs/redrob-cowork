@@ -21,7 +21,7 @@ export type AutomationAuthorityMember = {
 
 export type AutomationAuthorityProvider = {
   id: ProviderId
-  source: "models_dev" | "custom" | "openwork"
+  source: "models_dev" | "custom" | "redrob"
   name: string
 }
 
@@ -36,7 +36,7 @@ export type AutomationModelSelection = {
 }
 
 export type ResolvedAutomationModel = AutomationModelSelection & {
-  accessKind: "free" | "openwork_managed" | "authorized_custom"
+  accessKind: "free" | "redrob_managed" | "authorized_custom"
   providerRecordId: string | null
   providerName: string
   modelName: string
@@ -54,7 +54,7 @@ export type AutomationAuthorityResult =
 
 export type AutomationModelAuthorityStore = {
   findActiveMember(input: { organizationId: string; ownerMemberId: string }): Promise<AutomationAuthorityMember | null>
-  findOpenWorkProvider(input: { organizationId: string; ownerMemberId: string }): Promise<AutomationAuthorityProvider | null>
+  findRedrobWorkProvider(input: { organizationId: string; ownerMemberId: string }): Promise<AutomationAuthorityProvider | null>
   findProvider(input: { organizationId: string; providerId: string }): Promise<AutomationAuthorityProvider | null>
   findModel(input: { providerRecordId: ProviderId; modelId: string }): Promise<AutomationAuthorityModel | null>
   canAccessProvider(input: { member: AutomationAuthorityMember; providerRecordId: ProviderId }): Promise<boolean>
@@ -71,12 +71,12 @@ const databaseAuthorityStore: AutomationModelAuthorityStore = {
     return members[0] ?? null
   },
 
-  async findOpenWorkProvider(input) {
+  async findRedrobWorkProvider(input) {
     const providers = await db.select().from(LlmProviderTable).where(and(
       eq(LlmProviderTable.organizationId, normalizeDenTypeId("organization", input.organizationId)),
       eq(LlmProviderTable.createdByOrgMembershipId, normalizeDenTypeId("member", input.ownerMemberId)),
-      eq(LlmProviderTable.source, "openwork"),
-      eq(LlmProviderTable.providerId, "openwork"),
+      eq(LlmProviderTable.source, "redrob"),
+      eq(LlmProviderTable.providerId, "redrob"),
     )).limit(1)
     return providers[0] ?? null
   },
@@ -127,7 +127,7 @@ const databaseAuthorityStore: AutomationModelAuthorityStore = {
   },
 }
 
-function enabledOpenWorkModel(modelId: string) {
+function enabledRedrobWorkModel(modelId: string) {
   const model = Object.entries(INFERENCE_MODEL_ALIASES)
     .find(([candidate]) => candidate === modelId)?.[1]
   return model?.enabled === true ? model : null
@@ -183,12 +183,12 @@ export async function resolveAutomationModelAccessWithStore(
     }
   }
 
-  if (input.providerId === "openwork") {
-    const model = enabledOpenWorkModel(input.modelId)
+  if (input.providerId === "redrob") {
+    const model = enabledRedrobWorkModel(input.modelId)
     if (!model) {
-      return { ok: false, code: "model_access_lost", message: "The selected OpenWork-managed model is not available." }
+      return { ok: false, code: "model_access_lost", message: "The selected Redrob Work-managed model is not available." }
     }
-    const provider = await store.findOpenWorkProvider(input)
+    const provider = await store.findRedrobWorkProvider(input)
     if (!provider) {
       return { ok: false, code: "provider_unavailable", message: "Redrob Models are not available for the Automation owner." }
     }
@@ -198,18 +198,18 @@ export async function resolveAutomationModelAccessWithStore(
     return {
       ok: true,
       value: {
-        accessKind: "openwork_managed",
+        accessKind: "redrob_managed",
         providerRecordId: provider.id,
         providerId: input.providerId,
         modelId: input.modelId,
         providerName: provider.name,
-        modelName: model.displayName.replace(/^OpenWork:\s*/, ""),
+        modelName: model.displayName.replace(/^Redrob Work:\s*/, ""),
       },
     }
   }
 
   const provider = await store.findProvider(input)
-  if (!provider || provider.source === "openwork") {
+  if (!provider || provider.source === "redrob") {
     return { ok: false, code: "provider_unavailable", message: "The selected model provider is no longer available." }
   }
   const model = await store.findModel({ providerRecordId: provider.id, modelId: input.modelId })

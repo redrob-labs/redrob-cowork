@@ -69,7 +69,7 @@ async function mintMcpToken(session: DenSession, orgId: string): Promise<string>
     method: "POST",
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({}),
   });
@@ -187,8 +187,8 @@ test(title, async ({ evidence, place }) => {
     label: "Den Web origin before admin auth token handoff",
   });
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(den.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(den.admin.token)};
   })()`);
   expect(tokenStored).toBe(true);
 
@@ -245,7 +245,7 @@ test(title, async ({ evidence, place }) => {
     timeoutMs: 30_000,
     label: "Den Web origin after the OAuth popup completed",
   });
-  await evalIn(browser, `localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)})`);
+  await evalIn(browser, `localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)})`);
   await navigate(browser.client, toolTesterUrl);
   await waitFor(browser, `location.pathname === "/dashboard/tool-tester"
     && new URLSearchParams(location.search).get("connectionId") === ${JSON.stringify(connection.id)}
@@ -299,7 +299,7 @@ test(title, async ({ evidence, place }) => {
     if (!inspector) return false;
     const tabs = [...inspector.querySelectorAll('[role="tab"]')];
     return (inspector.textContent ?? "").includes("Tool completed")
-      && (inspector.textContent ?? "").includes("OpenWork")
+      && (inspector.textContent ?? "").includes("Redrob Work")
       && (inspector.textContent ?? "").includes("HTTP 200")
       && (inspector.textContent ?? "").includes("Tool result")
       && (inspector.textContent ?? "").includes(${JSON.stringify(marker)})
@@ -325,7 +325,7 @@ test(title, async ({ evidence, place }) => {
 
   const sessionOnlyCaption = await evalIn(
     browser,
-    `document.body.innerText.includes("Kept in this browser for this session only — OpenWork never stores run results.")`,
+    `document.body.innerText.includes("Kept in this browser for this session only — Redrob Work never stores run results.")`,
   );
   const orgKillSwitchPresent = await evalIn(browser, `(() => {
     const toggle = document.querySelector('[role="switch"][aria-label="Tools enabled for your organization"]');
@@ -335,7 +335,7 @@ test(title, async ({ evidence, place }) => {
   expect(orgKillSwitchPresent).toBe(true);
   evidence.recordAssertionEvidence(
     "The page exposes the organization kill switch and session-only run-history notice",
-    "The org toggle was enabled and the Recent runs caption said OpenWork never stores run results.",
+    "The org toggle was enabled and the Recent runs caption said Redrob Work never stores run results.",
     sessionOnlyCaption === true && orgKillSwitchPresent === true,
   );
   await evalIn(browser, `(() => {
@@ -347,7 +347,7 @@ test(title, async ({ evidence, place }) => {
     const shot = await screenshot(browser);
     const seen = await validate(shot, [
       "The dedicated Tool Tester page shows a completed mock_echo run",
-      "A clear trace reads OpenWork, HTTP 200, and Tool result",
+      "A clear trace reads Redrob Work, HTTP 200, and Tool result",
       "The result is visible with Result, Request, and Response tabs available",
       "No error banner or crash message is visible",
     ]);

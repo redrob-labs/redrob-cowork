@@ -473,11 +473,11 @@ export async function createOrgSubscriptionCheckoutSession(input: {
   cancelUrl: string
 }) {
   const priceId = requirePriceIdForSubscriptionType(input.subscriptionType)
-  const openworkProduct = input.subscriptionType === SEAT_SUBSCRIPTION_TYPE ? "openwork_seats" : "openwork_models"
+  const redrobProduct = input.subscriptionType === SEAT_SUBSCRIPTION_TYPE ? "redrob_seats" : "redrob_models"
   const metadata = {
     org_id: input.organizationId,
     created_by_org_member_id: input.orgMemberId,
-    openwork_product: openworkProduct,
+    redrob_product: redrobProduct,
     subscription_type: input.subscriptionType,
   }
   const customer = await findOrCreateStripeCustomer({
@@ -487,7 +487,7 @@ export async function createOrgSubscriptionCheckoutSession(input: {
     metadata: {
       org_id: input.organizationId,
       created_by_org_member_id: input.orgMemberId,
-      openwork_product: openworkProduct,
+      redrob_product: redrobProduct,
     },
   })
 
@@ -669,11 +669,11 @@ async function createSeatSubscriptionFromSetupCheckoutSession(session: Stripe.Ch
       metadata: {
         org_id: metadata.organizationId,
         created_by_org_member_id: metadata.orgMemberId ?? "",
-        openwork_product: "openwork_seats",
+        redrob_product: "redrob_seats",
         subscription_type: SEAT_SUBSCRIPTION_TYPE,
       },
     },
-    { idempotencyKey: `openwork-seat-subscription-${session.id}` },
+    { idempotencyKey: `redrob-seat-subscription-${session.id}` },
   )
 
   return upsertOrgSubscriptionFromStripe(subscription, eventId)

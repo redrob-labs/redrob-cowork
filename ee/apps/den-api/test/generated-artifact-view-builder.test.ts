@@ -30,7 +30,7 @@ test("server-builds React source into a deterministic self-contained MCP App", a
   expect(second.ok).toBe(true)
   if (!first.ok || !second.ok) return
   expect(first.html).toStartWith("<!doctype html>")
-  expect(first.html).toContain('<div id="openwork-artifact-view-root"></div>')
+  expect(first.html).toContain('<div id="redrob-artifact-view-root"></div>')
   expect(first.html).toContain("ui/initialize")
   expect(first.html).toContain("ResizeObserver")
   expect(first.html).toContain("ui/notifications/size-changed")

@@ -1,6 +1,6 @@
 import { INFERENCE_MODEL_ALIASES } from "@redrob/types/den/inference"
 
-const REDROB_PROVIDER_ID = "openwork"
+const REDROB_PROVIDER_ID = "redrob"
 
 export type ModelCatalogEntry = {
   alias: string

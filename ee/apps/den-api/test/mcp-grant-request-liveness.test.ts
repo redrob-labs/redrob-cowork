@@ -19,7 +19,7 @@ const OAuthRefreshTokenTable = { sessionId: "refresh.sessionId" }
 const OrganizationTable = { id: "organization.id" }
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -84,7 +84,7 @@ beforeAll(async () => {
       handler: () => Promise.resolve(Response.json({ keys: [] })),
     },
     DEN_MCP_OPAQUE_ACCESS_TOKEN_PREFIX: "ow_mcp_at_",
-    DEN_MCP_FIRST_PARTY_CLIENT_ID: "openwork-desktop",
+    DEN_MCP_FIRST_PARTY_CLIENT_ID: "redrob-desktop",
     DEN_MCP_FIRST_PARTY_RESOURCES: ["http://127.0.0.1:8790/mcp", AGENT_RESOURCE],
     DEN_MCP_GRANT_ID_CLAIM: GRANT_CLAIM,
     DEN_MCP_ORG_ID_CLAIM: "https://redrob.io/org_id",

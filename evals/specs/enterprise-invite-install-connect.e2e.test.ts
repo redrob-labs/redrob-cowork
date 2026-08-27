@@ -67,7 +67,7 @@ async function fetchLabInChild(url: string, env: NodeJS.ProcessEnv): Promise<{ s
 // Exactly the record the enterprise gate stamps after a confirmed exchange
 // (enterprise-activation-gate.tsx, exchangeConfirmedGrant).
 async function writeStampedBootstrap(denBaseUrl: string): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-invite-connect-activation-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-invite-connect-activation-"));
   const bootstrapPath = join(dir, "desktop-bootstrap.json");
   const stamped = {
     baseUrl: denBaseUrl,
@@ -82,7 +82,7 @@ async function resolveCaEnvFromRecord(options: {
   bootstrapPath: string;
   rootPem: string;
 }): Promise<{ caEnv: NodeJS.ProcessEnv; logs: string[] }> {
-  const userDataDir = await mkdtemp(join(tmpdir(), "openwork-invite-connect-chain-"));
+  const userDataDir = await mkdtemp(join(tmpdir(), "redrob-invite-connect-chain-"));
   const logs: string[] = [];
   const caEnv: NodeJS.ProcessEnv = await resolveSystemCaEnv({
     tlsModule: { getCACertificates: () => [] },
@@ -135,9 +135,9 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
   const runId = `${Date.now().toString(36)}${process.pid.toString(36)}`;
   const orgName = `Acme Robotics ${runId}`;
   const invitee = {
-    email: `maya+${runId}@openwork.test`,
+    email: `maya+${runId}@redrob.test`,
     name: "Maya Chen",
-    password: "OpenWorkEval123!",
+    password: "RedrobWorkEval123!",
   };
 
   await using den = await server({
@@ -254,7 +254,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     const resources = performance.getEntriesByType("resource").map((entry) => entry.name);
     const hrefs = [...document.querySelectorAll("a[href]")].map((anchor) => anchor.href);
     const headers = new Headers({ Accept: "application/json" });
-    const storedToken = localStorage.getItem("openwork:web:auth-token")?.trim();
+    const storedToken = localStorage.getItem("redrob:web:auth-token")?.trim();
     if (storedToken) headers.set("Authorization", "Bearer " + storedToken);
     const configResponse = await fetch("/api/den/v1/me/install-config", {
       credentials: "include",
@@ -269,9 +269,9 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
       distribution: config?.distribution,
       downloadHrefs: hrefs.filter((href) => href.includes("/v1/me/install/")),
       cloudDownloadSurface: [...document.querySelectorAll("h1")]
-        .some((heading) => (heading.textContent ?? "").trim() === "Download OpenWork"),
+        .some((heading) => (heading.textContent ?? "").trim() === "Download Redrob Work"),
       cloudReturnControl: [...document.querySelectorAll("a")]
-        .some((anchor) => (anchor.textContent ?? "").trim() === "I already installed OpenWork"),
+        .some((anchor) => (anchor.textContent ?? "").trim() === "I already installed Redrob Work"),
       enterpriseGuide: Boolean(document.querySelector('[data-testid="install-guide"]')),
       skipControl: Boolean(document.querySelector('[data-testid="install-skip-download"]')),
       workspaceControl: Boolean(document.querySelector('[data-testid="install-workspace-address"]')),
@@ -357,11 +357,11 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
   const handoff = await denFetch(den.ref, "/v1/auth/desktop-handoff", {
     method: "POST",
     headers: { authorization: `Bearer ${member.token}` },
-    body: JSON.stringify({ desktopScheme: "openwork" }),
+    body: JSON.stringify({ desktopScheme: "redrob" }),
   });
-  const openworkUrl = stringField(handoff.body, "openworkUrl");
+  const redrobUrl = stringField(handoff.body, "redrobUrl");
   const grant = stringField(handoff.body, "grant");
-  if (!handoff.response.ok || !openworkUrl || !grant) {
+  if (!handoff.response.ok || !redrobUrl || !grant) {
     throw new Error(`Desktop handoff mint failed: HTTP ${handoff.response.status} ${handoff.text.slice(0, 400)}`);
   }
 
@@ -387,7 +387,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
       return JSON.stringify({
         heading: text.includes("Link this app to your organization"),
         serverField: Boolean(document.querySelector('#organization-server-input')),
-        linkField: Boolean(document.querySelector('#enterprise-openwork-link')),
+        linkField: Boolean(document.querySelector('#enterprise-redrob-link')),
         methodToggle: Boolean(document.querySelector('[data-testid="enterprise-connection-method-toggle"]')),
       });
     })()`)));
@@ -397,7 +397,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     expect(isRecord(gate) && gate.methodToggle === false).toBe(true);
     evidence.recordAssertionEvidence(
       "The enterprise blank slate asks one question: the workspace address",
-      "The packaged-policy gate renders Link this app to your organization with only the organization-server-input form; no OpenWork link field and no method toggle exist.",
+      "The packaged-policy gate renders Link this app to your organization with only the organization-server-input form; no Redrob Work link field and no method toggle exist.",
       true,
     );
 
@@ -439,7 +439,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     // Recovery seam of the SAME field: a pasted redrob:// URL carries the
     // origin and one-time grant, still passes the named confirmation, and
     // signs the desktop in — sign-in IS activation.
-    expect(await typeIntoGate(openworkUrl)).toBe("submitted");
+    expect(await typeIntoGate(redrobUrl)).toBe("submitted");
     await waitFor(
       desktopSurface,
       `Boolean(document.querySelector('[data-testid="organization-server-confirm"]'))
@@ -467,7 +467,7 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
     });
     expect(reused.response.ok).toBe(false);
     evidence.recordAssertionEvidence(
-      "Pasting the complete OpenWork URL signs the desktop in exactly once",
+      "Pasting the complete Redrob Work URL signs the desktop in exactly once",
       `After confirming ${webOrigin} the enterprise gate unmounted (sign-in is activation), and replaying the same grant against /v1/auth/desktop-handoff/exchange failed with HTTP ${reused.response.status}: the credential is single-use.`,
       !reused.response.ok,
     );
@@ -512,11 +512,11 @@ test(title, { timeout: 1_800_000 }, async ({ evidence, place }) => {
   const finalShot = await screenshot(browser);
   const seen = await validate(finalShot, distribution === "cloud"
     ? [
-        "The page is an OpenWork download guide",
+        "The page is an Redrob Work download guide",
         "Desktop download choices are visible",
       ]
     : [
-        "The page is an OpenWork install or setup guide",
+        "The page is an Redrob Work install or setup guide",
         "A step mentions connecting or a workspace address",
       ]);
   expect(seen.ok, seen.why).toBe(true);

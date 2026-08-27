@@ -27,7 +27,7 @@ afterEach(async () => {
 });
 
 async function makeWorkspace(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-import-preview-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-import-preview-"));
   tempDirs.push(dir);
   await mkdir(join(dir, ".opencode"), { recursive: true });
   return dir;
@@ -108,7 +108,7 @@ async function requestWorkspaceImportWithPreview(
 async function silenceExpectedServerError<T>(run: () => Promise<T>): Promise<T> {
   const originalError = console.error;
   console.error = (...args: unknown[]) => {
-    if (args[0] === "[openwork-server] Unhandled error:") return;
+    if (args[0] === "[redrob-server] Unhandled error:") return;
     originalError(...args);
   };
   try {
@@ -121,7 +121,7 @@ async function silenceExpectedServerError<T>(run: () => Promise<T>): Promise<T> 
 async function waitForPendingApproval(baseUrl: string): Promise<string> {
   for (let attempt = 0; attempt < 50; attempt += 1) {
     const response = await fetch(`${baseUrl}/approvals`, {
-      headers: { "X-OpenWork-Host-Token": "host-token" },
+      headers: { "X-Redrob Work-Host-Token": "host-token" },
     });
     expect(response.status).toBe(200);
     const body = await response.json() as { items: Array<{ id: string }> };
@@ -150,7 +150,7 @@ describe("workspace import preview", () => {
       opencode: {
         plugin: ["old-plugin", "new-plugin"],
       },
-      openwork: {
+      redrob: {
         blueprint: {
           materialized: {
             sessions: { items: [{ templateId: "old", sessionId: "ses_123" }] },
@@ -181,7 +181,7 @@ describe("workspace import preview", () => {
     });
     expect(preview.changes.map((change) => [change.kind, change.action, change.path])).toEqual([
       ["opencode", "update", "opencode.jsonc"],
-      ["openwork", "create", ".opencode/openwork.json"],
+      ["redrob", "create", ".opencode/redrob.json"],
       ["skill", "update", ".opencode/skills/demo/SKILL.md"],
       ["skill", "create", ".opencode/skills/new-skill/SKILL.md"],
       ["command", "update", ".opencode/commands/old.md"],
@@ -305,7 +305,7 @@ describe("workspace import preview", () => {
 
   test("preview route returns public changes and no-op import does not audit", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
     await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
 
@@ -355,7 +355,7 @@ describe("workspace import preview", () => {
 
   test("no-op import validates preview fingerprint shape", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
     await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
 
@@ -394,7 +394,7 @@ describe("workspace import preview", () => {
 
   test("changed import requires a reviewed preview fingerprint", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
@@ -437,7 +437,7 @@ describe("workspace import preview", () => {
 
   test("import route writes changed items and records audit", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
@@ -483,7 +483,7 @@ describe("workspace import preview", () => {
 
   test("replace import route removes extra skills, commands, and portable files", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
 
     const keepSkill = {
@@ -554,7 +554,7 @@ describe("workspace import preview", () => {
 
   test("replace import route honors empty sections", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
 
     await mkdir(join(workspace, ".opencode", "skills", "old-skill"), { recursive: true });
@@ -603,7 +603,7 @@ describe("workspace import preview", () => {
 
   test("import route rejects a stale reviewed preview", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
     await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
 
@@ -657,7 +657,7 @@ describe("workspace import preview", () => {
 
   test("import route revalidates the preview after approval", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
     await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
 
@@ -689,7 +689,7 @@ describe("workspace import preview", () => {
       const approvalResponse = await fetch(`${baseUrl}/approvals/${approvalId}`, {
         method: "POST",
         headers: {
-          "X-OpenWork-Host-Token": "host-token",
+          "X-Redrob Work-Host-Token": "host-token",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ reply: "allow" }),
@@ -718,7 +718,7 @@ describe("workspace import preview", () => {
 
   test("import route validates preview fingerprint shape", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
@@ -755,7 +755,7 @@ describe("workspace import preview", () => {
 
   test("replace import keeps existing items when an incoming write fails", async () => {
     const workspace = await makeWorkspace();
-    const dataDir = await mkdtemp(join(tmpdir(), "openwork-import-preview-data-"));
+    const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
 
     await mkdir(join(workspace, ".opencode", "skills", "old"), { recursive: true });

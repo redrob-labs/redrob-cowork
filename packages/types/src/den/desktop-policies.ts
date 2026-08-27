@@ -69,9 +69,9 @@ export const desktopPolicyDefinitions = [
     id: "allowBuiltInExtensions",
     name: "Built-in Extensions",
     description:
-      "Allow users to see and use OpenWork's built-in extensions, including browser, image, and local-provider extensions.",
+      "Allow users to see and use Redrob Work's built-in extensions, including browser, image, and local-provider extensions.",
     userNotice:
-      "Your organization administrator has disabled built-in OpenWork extensions.",
+      "Your organization administrator has disabled built-in Redrob Work extensions.",
     defaultValue: true,
   },
   {

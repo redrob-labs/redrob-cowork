@@ -12,7 +12,7 @@ ENV PORT=8788
 # The gateway serves the Redrob Work web build itself, so the app and Den end up on
 # one origin. That is what removes the need for cross-origin patches, and it is
 # why the SPA is baked in here rather than served from a separate CDN origin.
-ENV DEN_GATEWAY_WEB_ROOT=/opt/openwork/web
+ENV DEN_GATEWAY_WEB_ROOT=/opt/redrob/web
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml /app/
 COPY patches /app/patches
@@ -51,10 +51,10 @@ RUN pnpm --dir /app/apps/app run build:web
 
 RUN pnpm --dir /app/ee/apps/den-gateway run build
 
-RUN mkdir -p /opt/openwork \
-  && cp -R /app/apps/app/dist /opt/openwork/web \
-  && test -f /opt/openwork/web/index.html \
-  && test -d /opt/openwork/web/assets
+RUN mkdir -p /opt/redrob \
+  && cp -R /app/apps/app/dist /opt/redrob/web \
+  && test -f /opt/redrob/web/index.html \
+  && test -d /opt/redrob/web/assets
 
 EXPOSE 8788
 

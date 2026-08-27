@@ -15,10 +15,10 @@ const MAX_ORGANIZATION_CONNECTION_OBSERVATIONS = 200;
 
 export function isAgentContextDiagnosticsWorkspaceAllowed(workspace: {
   workspaceType: "local" | "remote";
-  remoteType?: "openwork" | "opencode" | null;
+  remoteType?: "redrob" | "opencode" | null;
 } | null): boolean {
   if (!workspace) return false;
-  return workspace.workspaceType === "local" || workspace.remoteType === "openwork";
+  return workspace.workspaceType === "local" || workspace.remoteType === "redrob";
 }
 
 function summarizeOrganizationConnection(

@@ -176,7 +176,7 @@ export const automationExecutionTargetSchema = z.enum(["desktop", "cloud"])
 export type AutomationExecutionTarget = z.infer<typeof automationExecutionTargetSchema>
 
 export const AUTOMATION_MODEL_ATTENTION_CAPABILITY = "model_attention_v1" as const
-export const AUTOMATION_MODEL_ATTENTION_CAPABILITY_HEADER = "x-openwork-automation-model-attention" as const
+export const AUTOMATION_MODEL_ATTENTION_CAPABILITY_HEADER = "x-redrob-automation-model-attention" as const
 export const automationDesktopRunnerCapabilitySchema = z.literal(AUTOMATION_MODEL_ATTENTION_CAPABILITY)
 export type AutomationDesktopRunnerCapability = z.infer<typeof automationDesktopRunnerCapabilitySchema>
 
@@ -337,7 +337,7 @@ const actionCreateAutomationSchema = z.object({
   if (!validPair) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Action-based Automations are created by Web and run in OpenWork Cloud.",
+      message: "Action-based Automations are created by Web and run in Redrob Work Cloud.",
       path: ["executionTarget"],
     })
   }

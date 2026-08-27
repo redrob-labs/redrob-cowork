@@ -110,8 +110,8 @@ marketplace-attached"; everything downstream keeps working.
    Keep "Do not send `marketplaceId` or `orgWide`."
 7. Sweep steering copy that asserts the old behavior
    (`mcp/agent.ts:117`, `apps/server/src/opencode-plugins/
-   openwork-extensions-preview-steering.ts:141`,
-   `openwork-capabilities-knowledge.ts:95`) — update only if they state
+   redrob-extensions-preview-steering.ts:141`,
+   `redrob-capabilities-knowledge.ts:95`) — update only if they state
    "unusable until published".
 
 **Proof (spec acceptance, run with `bun test` — this program uses spec
@@ -119,7 +119,7 @@ acceptance criteria and E2E suites instead of standalone visual reports, per pro
 
 - New suite `ee/apps/den-api/test/grant-native-capabilities.test.ts`
   (pattern: copy of `test/marketplace-capabilities.test.ts` harness, own
-  `openwork_test_*` database):
+  `redrob_test_*` database):
   - A1 creator: plugin+skill with member `manager` grant, **no marketplace**
     → search finds it, execute returns raw SKILL.md content, descriptors
     include it, `marketplace` is null/omitted in payloads.
@@ -150,7 +150,7 @@ acceptance criteria and E2E suites instead of standalone visual reports, per pro
   rows because its consumer requires marketplace ids — grant-only skills reach
   chat via search/execute/descriptors, not that route. Revisit in P3.
 - **Step-7 outcome:** steering copy in `mcp/agent.ts`,
-  `openwork-extensions-preview-steering.ts`, `openwork-capabilities-knowledge.ts`
+  `redrob-extensions-preview-steering.ts`, `redrob-capabilities-knowledge.ts`
   made no stale "unusable until published" claims — unchanged.
 - Proof: `bun test test/grant-native-capabilities.test.ts
   test/marketplace-capabilities.test.ts test/marketplace-cloud-readiness.test.ts
@@ -183,7 +183,7 @@ DEN_ORG_MODE=multi_org pnpm dev:den:api        # :8790; demo:den also uses multi
 DEN_DEMO_SEED_FETCH_GITHUB=0 pnpm --filter @redrob-ee/den-api run seed:demo-org -- --reset
 export REDROB_EVAL_DEN_API_URL=http://127.0.0.1:8790
 export REDROB_EVAL_DEN_WEB_URL=http://localhost:3005
-export REDROB_EVAL_MARK_VERIFIED_CMD='docker exec openwork-web-local-mysql mysql -uroot -ppassword openwork_den -e "UPDATE \`user\` SET email_verified = 1 WHERE email = '\''{email}'\''"'
+export REDROB_EVAL_MARK_VERIFIED_CMD='docker exec redrob-web-local-mysql mysql -uroot -ppassword redrob_den -e "UPDATE \`user\` SET email_verified = 1 WHERE email = '\''{email}'\''"'
 pnpm --dir evals install && pnpm --dir evals run spec specs/skill-grant-access.test.ts
 ```
 

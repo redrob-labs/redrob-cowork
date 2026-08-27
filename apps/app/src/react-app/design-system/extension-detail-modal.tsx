@@ -41,7 +41,7 @@ export type ExtensionDetailModalProps = {
   iconSlug?: string;
   iconSrc?: string;
   taxonomy?: ExtensionTaxonomy;
-  /** Show the local stdio wrapper setup used by the OpenWork UI MCP. */
+  /** Show the local stdio wrapper setup used by the Redrob Work UI MCP. */
   uiControl?: boolean;
   connected?: boolean;
   connectedLabel?: string;
@@ -122,14 +122,14 @@ const taxonomyDesc: Record<ExtensionTaxonomy, string> = {
   skill: "A reusable workflow that your agent can execute on demand.",
   command: "A slash command the composer can run in this workspace.",
   agent: "A named agent the composer can run a session as.",
-  plugin: "Extends OpenWork with additional capabilities managed by your organization.",
+  plugin: "Extends Redrob Work with additional capabilities managed by your organization.",
 };
 
 const uiControlClientConfig = `{
   "mcpServers": {
-    "openwork-ui": {
+    "redrob-ui": {
       "command": "npx",
-      "args": ["-y", "openwork-ui-mcp"]
+      "args": ["-y", "redrob-ui-mcp"]
     }
   }
 }`;
@@ -137,7 +137,7 @@ const uiControlClientConfig = `{
 function uiControlOpencodeConfig(command: string[], environment?: Record<string, string>) {
   return JSON.stringify({
     mcp: {
-      "openwork-ui": {
+      "redrob-ui": {
         type: "local",
         command,
         ...(environment ? { environment } : {}),
@@ -147,13 +147,13 @@ function uiControlOpencodeConfig(command: string[], environment?: Record<string,
   }, null, 2);
 }
 
-const fallbackUiControlCommand = ["npx", "-y", "openwork-ui-mcp"];
+const fallbackUiControlCommand = ["npx", "-y", "redrob-ui-mcp"];
 
 const fallbackUiControlOpencodeConfig = `{
   "mcp": {
-    "openwork-ui": {
+    "redrob-ui": {
       "type": "local",
-      "command": ["npx", "-y", "openwork-ui-mcp"],
+      "command": ["npx", "-y", "redrob-ui-mcp"],
       "enabled": true
     }
   }
@@ -783,8 +783,8 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2 text-sm leading-relaxed text-muted-foreground">
-            <div>OpenWork desktop starts a private localhost bridge automatically.</div>
-            <div>Your MCP client starts <span className="font-mono text-card-foreground">openwork-ui-mcp</span> over stdio; the wrapper discovers the bridge and proxies UI tools to it.</div>
+            <div>Redrob Work desktop starts a private localhost bridge automatically.</div>
+            <div>Your MCP client starts <span className="font-mono text-card-foreground">redrob-ui-mcp</span> over stdio; the wrapper discovers the bridge and proxies UI tools to it.</div>
             <div>Do not point clients at the random localhost bridge URL directly.</div>
           </div>
         </CardContent>
@@ -825,7 +825,7 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
                     Production discovery file
                   </TableCell>
                   <TableCell className="py-2 whitespace-normal">
-                    <span className="font-mono text-xs break-all">~/Library/Application Support/io.redrob.work/openwork-ui-control.json</span>
+                    <span className="font-mono text-xs break-all">~/Library/Application Support/io.redrob.work/redrob-ui-control.json</span>
                   </TableCell>
                 </TableRow>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
@@ -833,7 +833,7 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
                     Dev discovery file
                   </TableCell>
                   <TableCell className="py-2 whitespace-normal">
-                    <span className="font-mono text-xs break-all">~/Library/Application Support/io.redrob.work.dev/openwork-ui-control.json</span>
+                    <span className="font-mono text-xs break-all">~/Library/Application Support/io.redrob.work.dev/redrob-ui-control.json</span>
                   </TableCell>
                 </TableRow>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
@@ -841,7 +841,7 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
                     Override
                   </TableCell>
                   <TableCell className="py-2 whitespace-normal">
-                    <span className="font-mono text-xs break-all">REDROB_UI_CONTROL_DISCOVERY=/path/to/openwork-ui-control.json</span>
+                    <span className="font-mono text-xs break-all">REDROB_UI_CONTROL_DISCOVERY=/path/to/redrob-ui-control.json</span>
                   </TableCell>
                 </TableRow>
                 {props.environment?.REDROB_UI_CONTROL_DISCOVERY ? (

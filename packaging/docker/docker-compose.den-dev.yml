@@ -84,7 +84,7 @@ services:
       - --max-heap-table-size=16M
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: openwork_den
+      MYSQL_DATABASE: redrob_den
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -ppassword --silent"]
       interval: 5s
@@ -118,12 +118,12 @@ services:
       CI: "true"
       REDROB_DEV_MODE: ${REDROB_DEV_MODE:-1}
       OTEL_SERVICE_NAME: ${DEN_API_OTEL_SERVICE_NAME:-den-api}
-      DATABASE_URL: mysql://root:password@mysql:3306/openwork_den
+      DATABASE_URL: mysql://root:password@mysql:3306/redrob_den
       BETTER_AUTH_SECRET: ${DEN_BETTER_AUTH_SECRET:-dev-den-local-auth-secret-please-override-1234567890}
       DEN_DB_ENCRYPTION_KEY: ${DEN_DB_ENCRYPTION_KEY:-dev-den-db-encryption-key-please-change-1234567890}
       BETTER_AUTH_URL: ${DEN_BETTER_AUTH_URL:-http://localhost:3005}
       DEN_ORG_MODE: ${DEN_ORG_MODE:-single_org}
-      DEN_SINGLE_ORG_NAME: ${DEN_SINGLE_ORG_NAME:-OpenWork}
+      DEN_SINGLE_ORG_NAME: ${DEN_SINGLE_ORG_NAME:-Redrob Work}
       DEN_SINGLE_ORG_SLUG: ${DEN_SINGLE_ORG_SLUG:-default}
       DEN_SINGLE_ORG_OWNER_EMAILS: ${DEN_SINGLE_ORG_OWNER_EMAILS:-}
       DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP: ${DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP:-false}
@@ -184,7 +184,7 @@ services:
       DEN_WEB_PUBLIC_ORIGIN: ${DEN_BETTER_AUTH_URL:-http://localhost:3005}
       DEN_WEB_REDROB_AUTH_CALLBACK_URL: ${DEN_BETTER_AUTH_URL:-http://localhost:3005}
       DEN_ORG_MODE: ${DEN_ORG_MODE:-single_org}
-      DEN_SINGLE_ORG_NAME: ${DEN_SINGLE_ORG_NAME:-OpenWork}
+      DEN_SINGLE_ORG_NAME: ${DEN_SINGLE_ORG_NAME:-Redrob Work}
       DEN_SINGLE_ORG_SLUG: ${DEN_SINGLE_ORG_SLUG:-default}
       DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP: ${DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP:-false}
       DEN_SINGLE_ORG_ALLOW_EMAIL_PASSWORD_AFTER_SSO: ${DEN_SINGLE_ORG_ALLOW_EMAIL_PASSWORD_AFTER_SSO:-false}

@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import { EnvService } from "./env-file.js";
 import { CloudProviderSync } from "./cloud-provider-sync.js";
-import { readOpenworkWorkspaceConfig, writeOpenworkWorkspaceConfig } from "./openwork-workspace-config-store.js";
+import { readRedrobWorkspaceConfig, writeRedrobWorkspaceConfig } from "./redrob-workspace-config-store.js";
 import {
   readGlobalRuntimeOpencodeConfig,
   readRuntimeOpencodeConfig,
@@ -55,7 +55,7 @@ function clientHeaders() {
 }
 
 function hostHeaders() {
-  return { "x-openwork-host-token": hostToken, "content-type": "application/json" };
+  return { "x-redrob-host-token": hostToken, "content-type": "application/json" };
 }
 
 async function responseRecord(response: Response, label: string): Promise<Record<string, unknown>> {
@@ -63,7 +63,7 @@ async function responseRecord(response: Response, label: string): Promise<Record
 }
 
 async function createRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openwork-cloud-provider-sync-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-cloud-provider-sync-"));
   roots.push(root);
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   process.env.REDROB_ENV_STORE = join(root, "env.json");
@@ -196,7 +196,7 @@ describe("cloud provider sync gateway", () => {
         if (url.pathname !== "/v1/llm-providers") {
           return Response.json({ error: "not_found" }, { status: 404 });
         }
-        listOrgIds.push(request.headers.get("x-openwork-legacy-org-id") ?? "");
+        listOrgIds.push(request.headers.get("x-redrob-legacy-org-id") ?? "");
         listRequestsInFlight += 1;
         maxListRequestsInFlight = Math.max(maxListRequestsInFlight, listRequestsInFlight);
         try {
@@ -351,7 +351,7 @@ describe("cloud provider sync gateway", () => {
         denRequests.push({
           path: url.pathname,
           authorization: request.headers.get("authorization"),
-          orgId: request.headers.get("x-openwork-legacy-org-id"),
+          orgId: request.headers.get("x-redrob-legacy-org-id"),
         });
         if (denFailure) return Response.json({ error: "unavailable" }, { status: 503 });
         if (url.pathname === "/v1/llm-providers") return Response.json({ llmProviders: denProviders });
@@ -371,7 +371,7 @@ describe("cloud provider sync gateway", () => {
         local_provider: { id: "local", name: "Local" },
       },
     }));
-    await writeOpenworkWorkspaceConfig(config, "ws_1", () => ({
+    await writeRedrobWorkspaceConfig(config, "ws_1", () => ({
       cloudImports: {
         providers: { lpr_stale: { cloudProviderId: "lpr_stale" } },
         marketplaces: { mkp_keep: { name: "Keep" } },
@@ -447,8 +447,8 @@ describe("cloud provider sync gateway", () => {
     const workspaceProviders = runtimeProviderMap(await readRuntimeOpencodeConfig(config, "ws_1"));
     expect(workspaceProviders.lpr_stale).toBeUndefined();
     expect(workspaceProviders.local_provider).toBeDefined();
-    const openwork = await readOpenworkWorkspaceConfig(config, "ws_1");
-    const cloudImports = expectRecord(openwork.cloudImports, "workspace cloud imports");
+    const redrob = await readRedrobWorkspaceConfig(config, "ws_1");
+    const cloudImports = expectRecord(redrob.cloudImports, "workspace cloud imports");
     expect(cloudImports.providers).toEqual({});
     expect(cloudImports.marketplaces).toEqual({ mkp_keep: { name: "Keep" } });
 

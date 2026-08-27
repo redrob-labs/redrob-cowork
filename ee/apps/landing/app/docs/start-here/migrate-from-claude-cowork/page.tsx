@@ -5,17 +5,17 @@ import { getGithubData } from "../../../../lib/github";
 import { baseOpenGraph } from "../../../../lib/seo";
 
 export const metadata: Metadata = {
-  title: "Migrate from Claude Cowork to OpenWork",
+  title: "Migrate from Claude Cowork to Redrob Work",
   description:
-    "Move your files, skills, plugins, MCP servers, scheduled tasks, and team setup from Claude Cowork to OpenWork.",
+    "Move your files, skills, plugins, MCP servers, scheduled tasks, and team setup from Claude Cowork to Redrob Work.",
   alternates: {
     canonical: "/docs/start-here/migrate-from-claude-cowork"
   },
   openGraph: {
     ...baseOpenGraph,
-    title: "Migrate from Claude Cowork to OpenWork",
+    title: "Migrate from Claude Cowork to Redrob Work",
     description:
-      "A step-by-step guide to moving your Cowork setup to open-source OpenWork.",
+      "A step-by-step guide to moving your Cowork setup to open-source Redrob Work.",
     url: "https://redrob.io/docs/start-here/migrate-from-claude-cowork"
   }
 };

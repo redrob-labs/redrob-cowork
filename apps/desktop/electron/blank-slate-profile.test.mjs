@@ -18,7 +18,7 @@ const execFileAsync = promisify(execFile);
 test("normal launches remain unchanged", () => {
   const env = {
     HOME: "/Users/installed",
-    REDROB_DESKTOP_BOOTSTRAP_PATH: "/Users/installed/.config/openwork/desktop-bootstrap.json",
+    REDROB_DESKTOP_BOOTSTRAP_PATH: "/Users/installed/.config/redrob/desktop-bootstrap.json",
   };
   const originalEnv = { ...env };
   const profile = prepareBlankSlateProfile({
@@ -30,17 +30,17 @@ test("normal launches remain unchanged", () => {
 
   assert.equal(profile, null);
   assert.deepEqual(env, originalEnv);
-  assert.deepEqual(resolveBlankSlateLaunch({ appName: "OpenWork", profile }), {
+  assert.deepEqual(resolveBlankSlateLaunch({ appName: "Redrob Work", profile }), {
     enabled: false,
-    appName: "OpenWork",
+    appName: "Redrob Work",
     userDataPath: null,
   });
 });
 
 test("cleanup worker removes the entire temporary root after its parent exits", async () => {
-  const rootPath = await mkdtemp(path.join(tmpdir(), "openwork-cleanup-test-"));
+  const rootPath = await mkdtemp(path.join(tmpdir(), "redrob-cleanup-test-"));
   const userDataPath = path.join(rootPath, "electron", "user-data");
-  const configPath = path.join(rootPath, "openwork", "config");
+  const configPath = path.join(rootPath, "redrob", "config");
   await mkdir(userDataPath, { recursive: true });
   await mkdir(configPath, { recursive: true });
   await writeFile(path.join(userDataPath, "Preferences"), "test");
@@ -58,11 +58,11 @@ test("cleanup worker removes the entire temporary root after its parent exits", 
 test("blank-slate launches receive unique temporary roots and a visible name", async () => {
   const firstProfile = prepareBlankSlateProfile({ argv: ["--blank-slate"], env: {} });
   const secondProfile = prepareBlankSlateProfile({ argv: ["--blank-slate"], env: {} });
-  const first = resolveBlankSlateLaunch({ appName: "OpenWork", profile: firstProfile });
-  const second = resolveBlankSlateLaunch({ appName: "OpenWork", profile: secondProfile });
+  const first = resolveBlankSlateLaunch({ appName: "Redrob Work", profile: firstProfile });
+  const second = resolveBlankSlateLaunch({ appName: "Redrob Work", profile: secondProfile });
 
   try {
-    assert.equal(first.appName, "OpenWork - Test profile");
+    assert.equal(first.appName, "Redrob Work - Test profile");
     assert.equal(first.enabled, true);
     assert.ok(first.rootPath.startsWith(tmpdir()));
     assert.notEqual(first.rootPath, second.rootPath);
@@ -77,7 +77,7 @@ test("blank-slate launches receive unique temporary roots and a visible name", a
 });
 
 test("process profile hides an installed bootstrap before workspace-store loads", async () => {
-  const installedRoot = await mkdtemp(path.join(tmpdir(), "openwork-installed-profile-test-"));
+  const installedRoot = await mkdtemp(path.join(tmpdir(), "redrob-installed-profile-test-"));
   const installedBootstrapPath = path.join(installedRoot, "desktop-bootstrap.json");
   await writeFile(installedBootstrapPath, JSON.stringify({
     baseUrl: "http://localhost:3005",
@@ -148,7 +148,7 @@ function registerPlatformIsolationTest(platform, temporaryDirectory, rootPath) {
       platform,
       temporaryDirectory,
       createTempRoot: (prefix) => {
-        assert.equal(prefix, paths.join(temporaryDirectory, "openwork-test-profile-"));
+        assert.equal(prefix, paths.join(temporaryDirectory, "redrob-test-profile-"));
         return rootPath;
       },
       createDirectory: (directory) => createdDirectories.push(directory),
@@ -171,6 +171,6 @@ function registerPlatformIsolationTest(platform, temporaryDirectory, rootPath) {
   });
 }
 
-registerPlatformIsolationTest("darwin", "/private/tmp", "/private/tmp/openwork-test-profile-macos");
-registerPlatformIsolationTest("linux", "/tmp", "/tmp/openwork-test-profile-linux");
-registerPlatformIsolationTest("win32", "C:\\Temp", "C:\\Temp\\openwork-test-profile-windows");
+registerPlatformIsolationTest("darwin", "/private/tmp", "/private/tmp/redrob-test-profile-macos");
+registerPlatformIsolationTest("linux", "/tmp", "/tmp/redrob-test-profile-linux");
+registerPlatformIsolationTest("win32", "C:\\Temp", "C:\\Temp\\redrob-test-profile-windows");

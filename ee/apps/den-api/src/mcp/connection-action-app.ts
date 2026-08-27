@@ -84,7 +84,7 @@ export function connectionActionTextFallback(payload: ConnectionActionPayload): 
 
 /**
  * The same-server MCP App launch reference for one connection status result.
- * Attached as `_meta["openwork/mcpApp"]` (no connectionId, so OpenWork hosts
+ * Attached as `_meta["redrob/mcpApp"]` (no connectionId, so Redrob Work hosts
  * resolve the app tool and ui:// resource from this same gateway).
  */
 export function connectionActionLaunch(payload: ConnectionActionPayload) {
@@ -107,7 +107,7 @@ export function connectionActionErrorCard(status: ExternalConnectionStatus): {
   const payload = connectionActionPayloadFromStatus(status)
   return {
     structuredContent: { ...payload },
-    meta: { "openwork/mcpApp": connectionActionLaunch(payload) },
+    meta: { "redrob/mcpApp": connectionActionLaunch(payload) },
   }
 }
 
@@ -164,7 +164,7 @@ export function registerAgentConnectionActionApp(input: {
 export function registerAgentConnectionActionResource(server: McpServer) {
   registerAppResource(
     server,
-    "OpenWork Connection Action",
+    "Redrob Work Connection Action",
     CONNECTION_ACTION_APP_RESOURCE_URI,
     {
       description: "An actionable status card for one Connect connection: who acts, where, and the exact next step.",

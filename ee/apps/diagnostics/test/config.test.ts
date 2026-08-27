@@ -42,16 +42,16 @@ describe("Diagnostics deployment configuration", () => {
   test("uses the deployment-specific Vercel URL for previews", () => {
     configureHostedEnvironment()
     process.env.VERCEL_ENV = "preview"
-    process.env.VERCEL_URL = "openwork-diagnostics-git-feature.vercel.app"
+    process.env.VERCEL_URL = "redrob-diagnostics-git-feature.vercel.app"
 
     expect(validateProductionConfig()).toEqual([])
-    expect(diagnosticsConfig().publicOrigin).toBe("https://openwork-diagnostics-git-feature.vercel.app")
+    expect(diagnosticsConfig().publicOrigin).toBe("https://redrob-diagnostics-git-feature.vercel.app")
   })
 
   test("fails closed when a preview deployment URL is malformed", () => {
     configureHostedEnvironment()
     process.env.VERCEL_ENV = "preview"
-    process.env.VERCEL_URL = "openwork-diagnostics.vercel.app/not-a-root"
+    process.env.VERCEL_URL = "redrob-diagnostics.vercel.app/not-a-root"
 
     expect(validateProductionConfig()).toContain("VERCEL_URL")
   })

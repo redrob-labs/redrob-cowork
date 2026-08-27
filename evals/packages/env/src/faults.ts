@@ -219,9 +219,9 @@ export async function faultProxy(ref: DenRef, options: FaultProxyOptions = {}): 
   const remote = await startFaultProxyOnSandbox({ sandbox: options.sandbox });
   const requests: FaultRequest[] = [];
   const control = async (path: string, init: RequestInit = {}): Promise<Response> => {
-    const response = await fetch(`${remote.url}/__openwork_faults/${path}`, {
+    const response = await fetch(`${remote.url}/__redrob_faults/${path}`, {
       ...init,
-      headers: { ...init.headers, "x-openwork-fault-token": remote.token },
+      headers: { ...init.headers, "x-redrob-fault-token": remote.token },
     });
     if (!response.ok) {
       const body = await response.text().catch(() => "");
@@ -264,7 +264,7 @@ export async function faultProxy(ref: DenRef, options: FaultProxyOptions = {}): 
       if (disposed) return;
       disposed = true;
       await remote.stop().catch((error: unknown) => {
-        console.error(`[openwork/testkit] Fault proxy cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
+        console.error(`[redrob/testkit] Fault proxy cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
       });
     },
   };

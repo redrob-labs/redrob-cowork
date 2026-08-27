@@ -1,7 +1,7 @@
 # Deploy Redrob Work EE on Azure with AKS and Helm
 
 Status: self-host operator guide
-Related: `packaging/helm/openwork-ee`, `packaging/helm/openwork-ee/examples/values.azure-ingress.yaml`
+Related: `packaging/helm/redrob-ee`, `packaging/helm/redrob-ee/examples/values.azure-ingress.yaml`
 
 This is the recommended Azure path for a first production-like Redrob Work EE
 self-host install. Use Helm on Azure Kubernetes Service with Azure Database for
@@ -56,8 +56,8 @@ not a different Redrob Work packaging format.
   4-vCPU regional limit must either request more quota or intentionally start
   smaller.
 - A real admin email address for the first owner account.
-- A domain you control, such as `openwork.example.com` and
-  `api.openwork.example.com`.
+- A domain you control, such as `redrob.example.com` and
+  `api.redrob.example.com`.
 
 Azure docs used for this guide:
 
@@ -88,9 +88,9 @@ across regions.
 
 ```bash
 export AZURE_LOCATION=westus2
-export RESOURCE_GROUP=openwork-ee-rg
-export AKS_CLUSTER=openwork-ee
-export VNET_NAME=openwork-ee-vnet
+export RESOURCE_GROUP=redrob-ee-rg
+export AKS_CLUSTER=redrob-ee
+export VNET_NAME=redrob-ee-vnet
 export AKS_SUBNET_NAME=aks
 export MYSQL_SUBNET_NAME=mysql
 export AKS_NODE_VM_SIZE=Standard_D2s_v7
@@ -275,7 +275,7 @@ virtual network reachability boundary as AKS. The most important requirements
 are:
 
 - MySQL 8-compatible Flexible Server.
-- Database name: `openwork_den`.
+- Database name: `redrob_den`.
 - Private access through VNet integration or Private Link.
 - AKS pods can resolve and reach the MySQL FQDN on TCP `3306`.
 - TLS enforcement remains enabled.
@@ -286,7 +286,7 @@ Azure's CLI can create a private-access server and delegate the MySQL subnet:
 
 ```bash
 export MYSQL_SERVER_NAME=REPLACE_GLOBALLY_UNIQUE_MYSQL_SERVER_NAME
-export MYSQL_ADMIN_USER=openwork
+export MYSQL_ADMIN_USER=redrob
 export MYSQL_ADMIN_PASSWORD=REPLACE_DB_PASSWORD
 
 az mysql flexible-server create \
@@ -295,7 +295,7 @@ az mysql flexible-server create \
   --name "$MYSQL_SERVER_NAME" \
   --admin-user "$MYSQL_ADMIN_USER" \
   --admin-password "$MYSQL_ADMIN_PASSWORD" \
-  --database-name openwork_den \
+  --database-name redrob_den \
   --version 8.0.21 \
   --vnet "$VNET_NAME" \
   --subnet "$MYSQL_SUBNET_NAME" \
@@ -344,7 +344,7 @@ documented Azure Database path.
 Example database URL:
 
 ```text
-mysql://openwork:<password>@<server>.mysql.database.azure.com:3306/openwork_den?sslaccept=accept
+mysql://redrob:<password>@<server>.mysql.database.azure.com:3306/redrob_den?sslaccept=accept
 ```
 
 Use `?sslaccept=accept` for the simple private-MySQL smoke path. This keeps TLS
@@ -374,7 +374,7 @@ kubectl run mysql-client \
 Copy the starter file:
 
 ```bash
-cp packaging/helm/openwork-ee/examples/values.azure-ingress.yaml values.azure.yaml
+cp packaging/helm/redrob-ee/examples/values.azure-ingress.yaml values.azure.yaml
 ```
 
 Replace every `REPLACE_*` placeholder.
@@ -398,7 +398,7 @@ secret:
     emailFrom: "Redrob Work <no-reply@example.com>"
     smtpHost: "smtp.example.com"
     smtpPort: "587"
-    smtpUser: "openwork@example.com"
+    smtpUser: "redrob@example.com"
     smtpPass: "REPLACE_SMTP_PASSWORD"
     smtpSecure: "false"
 ```
@@ -423,12 +423,12 @@ Before installing, render the chart and verify the migration Job will use your
 Azure MySQL URL:
 
 ```bash
-helm template openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm template redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
-  -f values.azure.yaml > /tmp/openwork-rendered.yaml
+  --namespace redrob-ee \
+  -f values.azure.yaml > /tmp/redrob-rendered.yaml
 
-grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SMTP_PORT|SMTP_SECURE' /tmp/openwork-rendered.yaml
+grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SMTP_PORT|SMTP_SECURE' /tmp/redrob-rendered.yaml
 ```
 
 Redact secrets before sharing rendered manifests or terminal output.
@@ -440,16 +440,16 @@ The starter values reference this TLS secret:
 ```yaml
 ingress:
   tls:
-    - secretName: openwork-ee-tls
+    - secretName: redrob-ee-tls
 ```
 
 Create that secret from a certificate that covers both Redrob Work hosts:
 
 ```bash
-kubectl create namespace openwork-ee
+kubectl create namespace redrob-ee
 
-kubectl create secret tls openwork-ee-tls \
-  --namespace openwork-ee \
+kubectl create secret tls redrob-ee-tls \
+  --namespace redrob-ee \
   --cert=REPLACE_FULL_CHAIN_CERT.pem \
   --key=REPLACE_PRIVATE_KEY.pem
 ```
@@ -464,9 +464,9 @@ aligned with whichever controller creates the certificate.
 Published chart releases live in GHCR:
 
 ```bash
-helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm upgrade --install redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.azure.yaml
 ```
@@ -474,8 +474,8 @@ helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee
 For a checkout-local test:
 
 ```bash
-helm upgrade --install openwork-ee ./packaging/helm/openwork-ee \
-  --namespace openwork-ee \
+helm upgrade --install redrob-ee ./packaging/helm/redrob-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.azure.yaml
 ```
@@ -486,7 +486,7 @@ private packages or private forks do:
 
 ```bash
 kubectl create secret docker-registry ghcr-pull-secret \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --docker-server=ghcr.io \
   --docker-username="$GITHUB_USER" \
   --docker-password="$GITHUB_TOKEN"
@@ -502,7 +502,7 @@ imagePullSecrets:
 The migration Job runs before the Deployments are useful. If it fails, fix that
 before debugging web/API readiness.
 
-Avoid `kubectl describe job openwork-ee-migrate` in shared reports because the
+Avoid `kubectl describe job redrob-ee-migrate` in shared reports because the
 hook Job currently includes `DATABASE_URL` and `DEN_DB_ENCRYPTION_KEY` in the
 rendered environment. Use logs and redacted rendered manifests instead.
 
@@ -518,15 +518,15 @@ migrations:
 Then run Helm and inspect the normal Job logs:
 
 ```bash
-helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm upgrade --install redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.azure.yaml \
   --wait=false
 
-kubectl get jobs,pods -n openwork-ee
-kubectl logs -n openwork-ee -l job-name=openwork-ee-migrate --all-containers=true
+kubectl get jobs,pods -n redrob-ee
+kubectl logs -n redrob-ee -l job-name=redrob-ee-migrate --all-containers=true
 ```
 
 Return to the default hook mode after debugging:
@@ -543,14 +543,14 @@ migrations:
 Wait for AKS to allocate an ingress address:
 
 ```bash
-kubectl get ingress -n openwork-ee
+kubectl get ingress -n redrob-ee
 kubectl get service -n app-routing-system nginx
 ```
 
 Create DNS records:
 
-- `openwork.example.com` -> the application routing public IP.
-- `api.openwork.example.com` -> the same application routing public IP.
+- `redrob.example.com` -> the application routing public IP.
+- `api.redrob.example.com` -> the same application routing public IP.
 
 For production domains, prefer HTTPS before testing SSO. Browser auth cookies
 and identity-provider callback policies are much easier to validate on stable
@@ -566,9 +566,9 @@ when ConfigMap or Secret content changes. On older chart versions, manually
 restart the deployments after changing public origin values:
 
 ```bash
-kubectl rollout restart deployment/openwork-ee-den-api deployment/openwork-ee-den-web -n openwork-ee
-kubectl rollout status deployment/openwork-ee-den-api -n openwork-ee --timeout=180s
-kubectl rollout status deployment/openwork-ee-den-web -n openwork-ee --timeout=180s
+kubectl rollout restart deployment/redrob-ee-den-api deployment/redrob-ee-den-web -n redrob-ee
+kubectl rollout status deployment/redrob-ee-den-api -n redrob-ee --timeout=180s
+kubectl rollout status deployment/redrob-ee-den-web -n redrob-ee --timeout=180s
 ```
 
 ## 8. Verify readiness
@@ -576,20 +576,20 @@ kubectl rollout status deployment/openwork-ee-den-web -n openwork-ee --timeout=1
 Check Kubernetes state:
 
 ```bash
-helm status openwork-ee -n openwork-ee
-kubectl get pods -n openwork-ee
-kubectl get jobs -n openwork-ee
-kubectl get ingress -n openwork-ee
-kubectl describe ingress openwork-ee -n openwork-ee
-kubectl logs -n openwork-ee deploy/openwork-ee-den-api
-kubectl logs -n openwork-ee deploy/openwork-ee-den-web
+helm status redrob-ee -n redrob-ee
+kubectl get pods -n redrob-ee
+kubectl get jobs -n redrob-ee
+kubectl get ingress -n redrob-ee
+kubectl describe ingress redrob-ee -n redrob-ee
+kubectl logs -n redrob-ee deploy/redrob-ee-den-api
+kubectl logs -n redrob-ee deploy/redrob-ee-den-web
 ```
 
 Check readiness from your machine:
 
 ```bash
-curl -fsS https://api.openwork.example.com/ready
-curl -fsS https://openwork.example.com/api/ready
+curl -fsS https://api.redrob.example.com/ready
+curl -fsS https://redrob.example.com/api/ready
 ```
 
 ## 9. Bootstrap the first owner
@@ -614,7 +614,7 @@ secret:
 For releases that include initial-administrator bootstrap, inject the
 release-documented one-time setup secret through the Kubernetes Secret referenced
 by `secret.existingSecret`. Do not store the code in the values file or a
-ConfigMap. Then open `https://openwork.example.com/setup`, enter the configured
+ConfigMap. Then open `https://redrob.example.com/setup`, enter the configured
 owner email and one-time operator code, and create the first account. Redrob Work
 creates the singleton organization, grants owner and configured platform-admin
 access, and signs the administrator in. Public signup remains disabled. After
@@ -641,14 +641,14 @@ For the full Microsoft Entra SAML and SCIM setup flow, use
 Configure the IdP application with this callback URL:
 
 ```text
-https://openwork.example.com/api/auth/sso/callback/openwork-sso-<org-id>
+https://redrob.example.com/api/auth/sso/callback/redrob-sso-<org-id>
 ```
 
 In Redrob Work, sign in as the owner, open the organization SSO settings, and enter
 the IdP issuer/client details. After saving, the organization sign-in path is:
 
 ```text
-https://openwork.example.com/sso/<singleOrgSlug>
+https://redrob.example.com/sso/<singleOrgSlug>
 ```
 
 For SAML, Redrob Work shows the generated ACS URL and metadata URL after the SAML
@@ -667,7 +667,7 @@ single organization. Password sign-in for that organization is rejected.
 |---|---|---|
 | `kubectl get ingressclass` does not show `webapprouting.kubernetes.azure.com` | Application routing is not enabled | Run `az aks approuting enable` or install a different supported ingress controller and update `ingress.className` |
 | Ingress has no address | Application routing controller is still reconciling or lacks public IP permission | Check `kubectl get pods -n app-routing-system` and the Ingress events |
-| Browser shows certificate warnings | TLS secret is missing, wrong, or does not cover both hosts | Recreate `openwork-ee-tls` or configure the platform certificate automation |
+| Browser shows certificate warnings | TLS secret is missing, wrong, or does not cover both hosts | Recreate `redrob-ee-tls` or configure the platform certificate automation |
 | Migration Job fails to connect to MySQL | VNet, private DNS, credentials, or TLS settings are wrong | Test from `mysql-client`, confirm DNS resolves inside AKS, and use `?sslaccept=accept` for the private-MySQL smoke path |
 | `ERROR 3159` from MySQL | Azure requires encrypted transport and the client is not using TLS | Keep TLS enabled with `?sslaccept=accept`, or configure strict CA verification explicitly |
 | Migration Job logs show `self-signed certificate in certificate chain` | Strict certificate verification is being used without the cloud MySQL CA bundle | Use `?sslaccept=accept` for the smoke path or mount/configure the CA bundle before strict verification |
@@ -691,7 +691,7 @@ single organization. Password sign-in for that organization is rejected.
 For a disposable test:
 
 ```bash
-helm uninstall openwork-ee -n openwork-ee
+helm uninstall redrob-ee -n redrob-ee
 az group delete --name "$RESOURCE_GROUP"
 ```
 

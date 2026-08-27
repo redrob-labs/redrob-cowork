@@ -1249,17 +1249,6 @@ importers:
         specifier: ^2.3.0
         version: 2.3.3(rollup@4.62.2)(vite@6.4.3(@types/node@25.6.0)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
 
-  packages/openwork-bootstrap: {}
-
-  packages/openwork-ui-mcp:
-    dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.29.0
-        version: 1.29.0(patch_hash=b9b29e6a319e94ea968476aa440eb8586b5da9db6b8011ce749c384d186f8a10)(zod@3.25.76)
-      zod:
-        specifier: ^3.25.76
-        version: 3.25.76
-
   packages/paths:
     devDependencies:
       '@types/node':
@@ -1268,6 +1257,17 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+
+  packages/redrob-bootstrap: {}
+
+  packages/redrob-ui-mcp:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.29.0
+        version: 1.29.0(patch_hash=b9b29e6a319e94ea968476aa440eb8586b5da9db6b8011ce749c384d186f8a10)(zod@3.25.76)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
 
   packages/types:
     dependencies:
@@ -8741,7 +8741,7 @@ packages:
     engines: {node: '>=20'}
 
   xlsx@https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz:
-    resolution: {integrity: sha512-+nKZ39+nvK7Qq6i0PvWWRA4j/EkfWOtkP/YhMtupm+lJIiHxUrgTr1CcKv1nBk1rHtkRRQ3O2+Ih/q/sA+FXZA==, tarball: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz}
+    resolution: {tarball: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz}
     version: 0.20.2
     engines: {node: '>=0.8'}
     hasBin: true

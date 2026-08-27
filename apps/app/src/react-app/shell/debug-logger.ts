@@ -1,6 +1,6 @@
 /**
  * Dev observability client. Forwards browser console logs, uncaught errors,
- * promise rejections, and fetch activity to the openwork-server `/dev/log`
+ * promise rejections, and fetch activity to the redrob-server `/dev/log`
  * sink so an operator can tail a single file and see everything the React
  * shell is doing — especially right before a hang.
  *
@@ -91,7 +91,7 @@ async function sinkIsAvailable(base: string): Promise<boolean> {
 function readFallbackServerUrl(): string {
   if (typeof window === "undefined") return "";
   try {
-    return window.localStorage.getItem("openwork.server.urlOverride") ?? "";
+    return window.localStorage.getItem("redrob.server.urlOverride") ?? "";
   } catch {
     return "";
   }
@@ -145,7 +145,7 @@ async function flushQueue() {
   const available = await sinkIsAvailable(base);
   if (!available) {
     // Drop the queued entries; they're still retained in
-    // window.__openwork.events() for any operator who needs them.
+    // window.__redrob.events() for any operator who needs them.
     queue = [];
     return;
   }
@@ -162,7 +162,7 @@ async function flushQueue() {
   } catch {
     // Keep this silent; we don't want the logger to itself create a log
     // storm when the server is unreachable. Events are still retained in
-    // window.__openwork.events().
+    // window.__redrob.events().
   }
 }
 
@@ -183,15 +183,15 @@ export function recordDebugLog(entry: DevLogEntry) {
 
 function isEnabled(): boolean {
   if (typeof window === "undefined") return false;
-  // Always on in dev; explicit opt-out via `localStorage.openwork.debug.disableLogger = "1"`.
+  // Always on in dev; explicit opt-out via `localStorage.redrob.debug.disableLogger = "1"`.
   try {
-    if (window.localStorage.getItem("openwork.debug.disableLogger") === "1") return false;
+    if (window.localStorage.getItem("redrob.debug.disableLogger") === "1") return false;
   } catch {
     // ignore
   }
   const env = (import.meta as unknown as { env?: Record<string, unknown> }).env ?? {};
   if (env.PROD === true) {
-    return window.localStorage.getItem("openwork.debug.enableLoggerInProd") === "1";
+    return window.localStorage.getItem("redrob.debug.enableLoggerInProd") === "1";
   }
   return true;
 }

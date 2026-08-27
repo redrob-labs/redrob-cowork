@@ -75,9 +75,9 @@ import {
 import { resetMacDockIcon } from "./brand-icon-darwin.mjs";
 import { createDesktopVaultKeyProvider } from "./secure-vault-key.mjs";
 import {
-  clearOpenworkSentrySession,
-  initOpenworkSentry,
-  setOpenworkSentrySession,
+  clearRedrobSentrySession,
+  initRedrobSentry,
+  setRedrobSentrySession,
 } from "./sentry.mjs";
 import { installStdioErrorHandlers } from "./stdio-errors.mjs";
 
@@ -103,12 +103,12 @@ const {
   systemPreferences,
 } = require("electron");
 const pty = require(["node", "pty"].join("-"));
-const NATIVE_DEEP_LINK_EVENT = "openwork:deep-link-native";
-const AUTOMATION_RUNNER_CREDENTIAL_REJECTED_EVENT = "openwork:automation-runner:credential-rejected";
+const NATIVE_DEEP_LINK_EVENT = "redrob:deep-link-native";
+const AUTOMATION_RUNNER_CREDENTIAL_REJECTED_EVENT = "redrob:automation-runner:credential-rejected";
 const isDevMode = process.env.REDROB_DEV_MODE === "1";
 const DESKTOP_DISTRIBUTION = resolveDesktopDistribution({
   isPackaged: app.isPackaged,
-  packageFlavor: Reflect.get(desktopPackageMetadata, "openworkDistribution"),
+  packageFlavor: Reflect.get(desktopPackageMetadata, "redrobDistribution"),
   environmentFlavor: process.env.REDROB_DESKTOP_DISTRIBUTION,
 });
 const TAURI_APP_IDENTIFIER = DESKTOP_DISTRIBUTION.appIdentifier;
@@ -124,7 +124,7 @@ const BLANK_SLATE_LAUNCH = resolveBlankSlateLaunch({
 const APP_NAME = BLANK_SLATE_LAUNCH.appName;
 let currentDisplayAppName = APP_NAME;
 installStdioErrorHandlers();
-await initOpenworkSentry({
+await initRedrobSentry({
   app,
   distribution: DESKTOP_DISTRIBUTION,
   packageMetadata: desktopPackageMetadata,
@@ -147,8 +147,8 @@ if (BLANK_SLATE_LAUNCH.enabled || process.env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN 
   // system keychain normally.
   app.commandLine.appendSwitch("use-mock-keychain");
 }
-const RELEASE_DOWNLOAD_BASE_URL = "https://github.com/different-ai/openwork/releases/latest/download";
-const RELEASE_PAGE_URL = "https://github.com/different-ai/openwork/releases/latest";
+const RELEASE_DOWNLOAD_BASE_URL = "https://github.com/redrob-labs/redrob-work/releases/latest/download";
+const RELEASE_PAGE_URL = "https://github.com/redrob-labs/redrob-work/releases/latest";
 const DOCS_PAGE_URL = "https://redrob.io/docs";
 const applicationMenu = createApplicationMenu({
   appName: APP_NAME,
@@ -371,7 +371,7 @@ async function resolveArchitectureInfo() {
   const systemArch = resolveSystemArch();
   const version = app.getVersion();
   const targetArch = systemArch === "arm64" || systemArch === "x64" ? systemArch : appArch;
-  const assetName = `openwork-${platformDownloadSlug()}-${downloadAssetArch(targetArch)}-${version}.${downloadAssetExtension()}`;
+  const assetName = `redrob-${platformDownloadSlug()}-${downloadAssetArch(targetArch)}-${version}.${downloadAssetExtension()}`;
   const latestDownloadUrl = await resolveCorrectArchitectureDownloadUrl(targetArch);
   const hasCorrectArchitectureDownload = Boolean(latestDownloadUrl);
   return {
@@ -432,7 +432,7 @@ function brandIconWindowsPath() {
 }
 
 function defaultAppWindowsIconPath() {
-  return path.join(app.getPath("userData"), "openwork-stock.ico");
+  return path.join(app.getPath("userData"), "redrob-stock.ico");
 }
 
 let cachedWindowsProgramsPath = null;
@@ -965,11 +965,11 @@ if (remoteDebugPort > 0) {
   app.commandLine.appendSwitch("remote-debugging-address", "127.0.0.1");
 }
 // Make the resolved port available to the embedded server so it flows into
-// agent instructions via ensureOpenworkAgent → resolveAgentTemplate.
+// agent instructions via ensureRedrobAgent → resolveAgentTemplate.
 process.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT = String(remoteDebugPort);
 if (isDevMode && !app.isPackaged) {
   const cdpAddress = remoteDebugPort > 0 ? `http://127.0.0.1:${remoteDebugPort}` : "disabled";
-  console.log(`[openwork] dev profile=${app.getPath("userData")} cdp=${cdpAddress}`);
+  console.log(`[redrob] dev profile=${app.getPath("userData")} cdp=${cdpAddress}`);
 }
 
 // Apply extra Chromium flags from ELECTRON_EXTRA_LAUNCH_ARGS.
@@ -1254,7 +1254,7 @@ const desktopAutomationRunner = createDesktopAutomationRunner({
   // rollout only for endpoints trusted before the renderer starts issuing IPC.
   legacyBaseUrls: legacyRunnerBaseUrls,
   getLocalRuntime: async () => {
-    const server = await runtimeManager.openworkServerInfo();
+    const server = await runtimeManager.redrobServerInfo();
     return { baseUrl: server.baseUrl, token: server.clientToken ?? server.ownerToken };
   },
   log: (state) => console.info(`[automation-runner] ${state}`),
@@ -1302,7 +1302,7 @@ function showShutdownScreen() {
   <body>
     <main>
       <div class="spinner" aria-hidden="true"></div>
-      <div class="title">Stopping OpenWork services</div>
+      <div class="title">Stopping Redrob Work services</div>
       <div class="body">Closing local workers and background services...</div>
     </main>
   </body>
@@ -1323,15 +1323,15 @@ async function disposeRuntimeBeforeQuit() {
   }
 }
 
-function assertOpenworkServerReady(info) {
+function assertRedrobServerReady(info) {
   if (!info?.running) {
-    throw new Error("OpenWork server did not stay running after startup.");
+    throw new Error("Redrob Work server did not stay running after startup.");
   }
   if (!info.baseUrl) {
-    throw new Error("OpenWork server did not report a base URL after startup.");
+    throw new Error("Redrob Work server did not report a base URL after startup.");
   }
   if (!info.ownerToken && !info.clientToken) {
-    throw new Error("OpenWork server did not report an access token after startup.");
+    throw new Error("Redrob Work server did not report an access token after startup.");
   }
   return info;
 }
@@ -1394,8 +1394,8 @@ async function bootRuntimeForSelectedWorkspace() {
       watchedId: String(fallback.id ?? ""),
     }).catch(() => undefined);
   }
-  const openworkServer = assertOpenworkServerReady(await runtimeManager.openworkServerInfo());
-  return { ok: true, skipped: false, engine, openworkServer, workspaceId: bootWorkspace.id ?? null };
+  const redrobServer = assertRedrobServerReady(await runtimeManager.redrobServerInfo());
+  return { ok: true, skipped: false, engine, redrobServer, workspaceId: bootWorkspace.id ?? null };
 }
 
 function ensureRuntimeBootstrap() {
@@ -1724,13 +1724,13 @@ const desktopCommandHandlers = {
   "workspaceAddAuthorizedRoot": async (event, ...args) => {
       return workspaceStore.addAuthorizedRoot(args[0] ?? {});
   },
-  "workspaceOpenworkRead": async (event, ...args) => {
-      return workspaceStore.readWorkspaceOpenworkConfig(String(args[0]?.workspacePath ?? "").trim());
+  "workspaceRedrobRead": async (event, ...args) => {
+      return workspaceStore.readWorkspaceRedrobConfig(String(args[0]?.workspacePath ?? "").trim());
   },
-  "workspaceOpenworkWrite": async (event, ...args) => {
-      return workspaceStore.writeWorkspaceOpenworkConfig(
+  "workspaceRedrobWrite": async (event, ...args) => {
+      return workspaceStore.writeWorkspaceRedrobConfig(
         String(args[0]?.workspacePath ?? "").trim(),
-        args[0]?.config ?? workspaceStore.defaultWorkspaceOpenworkConfig(""),
+        args[0]?.config ?? workspaceStore.defaultWorkspaceRedrobConfig(""),
       );
   },
   "workspaceExportConfig": async (event, ...args) => {
@@ -1790,7 +1790,7 @@ const desktopCommandHandlers = {
         version: app.getVersion(),
         gitSha: process.env.REDROB_GIT_SHA ?? null,
         buildEpoch: process.env.REDROB_BUILD_EPOCH ?? null,
-        openworkDevMode: process.env.REDROB_DEV_MODE === "1",
+        redrobDevMode: process.env.REDROB_DEV_MODE === "1",
       };
   },
   "desktopNotificationShow": async (event, ...args) => {
@@ -1799,14 +1799,14 @@ const desktopCommandHandlers = {
   "desktopSentrySetSession": async (event, ...args) => {
       const input = args[0] ?? {};
       return {
-        enabled: setOpenworkSentrySession({
+        enabled: setRedrobSentrySession({
           userId: input.userId,
           orgId: input.orgId,
         }),
       };
   },
   "desktopSentryClearSession": async (event, ...args) => {
-      return { enabled: clearOpenworkSentrySession() };
+      return { enabled: clearRedrobSentrySession() };
   },
   "desktopIntegrationStatus": async (event, ...args) => {
       return linuxDesktopIntegration.getStatus();
@@ -1821,17 +1821,17 @@ const desktopCommandHandlers = {
   },
   "getUiControlBridgeInfo": async (event, ...args) => {
       try {
-        const raw = await readFile(path.join(app.getPath("userData"), "openwork-ui-control.json"), "utf8");
+        const raw = await readFile(path.join(app.getPath("userData"), "redrob-ui-control.json"), "utf8");
         return JSON.parse(raw);
       } catch {
         return null;
       }
   },
-  "getOpenworkUiMcpCommand": async (event, ...args) => {
+  "getRedrobUiMcpCommand": async (event, ...args) => {
       if (process.env.REDROB_DEV_MODE === "1") {
-        return ["node", path.resolve(__dirname, "../../..", "packages/openwork-ui-mcp/index.mjs")];
+        return ["node", path.resolve(__dirname, "../../..", "packages/redrob-ui-mcp/index.mjs")];
       }
-      return ["npx", "-y", "openwork-ui-mcp"];
+      return ["npx", "-y", "redrob-ui-mcp"];
   },
   "getComputerUseMcpCommand": async (event, ...args) => {
       return getComputerUseMcpCommand();
@@ -1855,9 +1855,9 @@ const desktopCommandHandlers = {
       await openComputerUseSetupApp();
       return checkComputerUsePermissions();
   },
-  "getOpenworkUiMcpEnvironment": async (event, ...args) => {
+  "getRedrobUiMcpEnvironment": async (event, ...args) => {
       return {
-        REDROB_UI_CONTROL_DISCOVERY: path.join(app.getPath("userData"), "openwork-ui-control.json"),
+        REDROB_UI_CONTROL_DISCOVERY: path.join(app.getPath("userData"), "redrob-ui-control.json"),
       };
   },
   "getDesktopBootstrapConfig": async (event, ...args) => {
@@ -1923,7 +1923,7 @@ const desktopCommandHandlers = {
       const config = await persistConnectLinkClaims(verified.claims);
       return { ok: true, config };
   },
-  "nukeOpenworkAndOpencodeConfigPreview": async (event, ...args) => {
+  "nukeRedrobAndOpencodeConfigPreview": async (event, ...args) => {
       return buildNukeManifest({
         env: process.env,
         homedir: os.homedir(),
@@ -1933,7 +1933,7 @@ const desktopCommandHandlers = {
         workspacePaths: await workspaceStore.listLocalWorkspacePaths(),
       });
   },
-  "nukeOpenworkAndOpencodeConfigAndExit": async (event, ...args) => {
+  "nukeRedrobAndOpencodeConfigAndExit": async (event, ...args) => {
       return executeNukeFreshStart({
         app,
         session,
@@ -1951,17 +1951,17 @@ const desktopCommandHandlers = {
         },
       });
   },
-  "sandboxCleanupOpenworkContainers": async (event, ...args) => {
-      return runtimeManager.sandboxCleanupOpenworkContainers();
+  "sandboxCleanupRedrobContainers": async (event, ...args) => {
+      return runtimeManager.sandboxCleanupRedrobContainers();
   },
-  "openworkServerInfo": async (event, ...args) => {
-      return runtimeManager.openworkServerInfo();
+  "redrobServerInfo": async (event, ...args) => {
+      return runtimeManager.redrobServerInfo();
   },
   "automationRunnerConfigure": async (event, ...args) => {
       return desktopAutomationRunner.configure(args[0] ?? null);
   },
-  "openworkServerRestart": async (event, ...args) => {
-      return runtimeManager.openworkServerRestart(args[0] ?? {});
+  "redrobServerRestart": async (event, ...args) => {
+      return runtimeManager.redrobServerRestart(args[0] ?? {});
   },
   "pickDirectory": async (event, ...args) => {
       const options = args[0] ?? {};
@@ -2088,8 +2088,8 @@ const desktopCommandHandlers = {
         String(args[2] ?? ""),
       );
   },
-  "resetOpenworkState": async (event, ...args) => {
-      return workspaceStore.resetOpenworkState();
+  "resetRedrobState": async (event, ...args) => {
+      return workspaceStore.resetRedrobState();
   },
   "resetOpencodeCache": async (event, ...args) => {
       return { removed: [], missing: [], errors: [] };
@@ -2375,7 +2375,7 @@ function assertDesktopActivation() {
     DESKTOP_DISTRIBUTION,
     workspaceStore.readDesktopBootstrapConfigSync(),
   )) {
-    throw new Error("OpenWork must be activated from your Den portal before this command is available.");
+    throw new Error("Redrob Work must be activated from your Den portal before this command is available.");
   }
 }
 
@@ -2527,29 +2527,29 @@ async function createMainWindow() {
   return mainWindow;
 }
 
-ipcMain.on("openwork:desktop-bootstrap-sync", (event) => {
+ipcMain.on("redrob:desktop-bootstrap-sync", (event) => {
   event.returnValue = workspaceStore.readDesktopBootstrapConfigSync();
 });
-ipcMain.on("openwork:desktop-distribution-sync", (event) => {
+ipcMain.on("redrob:desktop-distribution-sync", (event) => {
   event.returnValue = DESKTOP_DISTRIBUTION;
 });
-ipcMain.handle("openwork:desktop", handleDesktopInvoke);
-ipcMain.handle("openwork:shell:openExternal", async (_event, url) => {
+ipcMain.handle("redrob:desktop", handleDesktopInvoke);
+ipcMain.handle("redrob:shell:openExternal", async (_event, url) => {
   if (typeof url !== "string" || url.trim().length === 0) {
     return { ok: false, error: "empty url" };
   }
   return openExternalUrl(url.trim());
 });
-ipcMain.handle("openwork:shell:relaunch", async () => {
+ipcMain.handle("redrob:shell:relaunch", async () => {
   app.relaunch();
   app.quit();
 });
-ipcMain.handle("openwork:system:architecture", async () => resolveArchitectureInfo());
-ipcMain.handle("openwork:system:microphoneStatus", async () => {
+ipcMain.handle("redrob:system:architecture", async () => resolveArchitectureInfo());
+ipcMain.handle("redrob:system:microphoneStatus", async () => {
   if (process.platform !== "darwin") return { platform: process.platform, status: "not-mac" };
   return { platform: process.platform, status: systemPreferences.getMediaAccessStatus("microphone") };
 });
-ipcMain.handle("openwork:system:askMicrophoneAccess", async () => {
+ipcMain.handle("redrob:system:askMicrophoneAccess", async () => {
   if (process.platform !== "darwin") return { platform: process.platform, granted: true, status: "not-mac" };
   const before = systemPreferences.getMediaAccessStatus("microphone");
   const granted = await systemPreferences.askForMediaAccess("microphone");
@@ -2558,7 +2558,7 @@ ipcMain.handle("openwork:system:askMicrophoneAccess", async () => {
 });
 
 // ── Terminal IPC ────────────────────────────────────────────────────────
-ipcMain.handle("openwork:terminal:create", async (event, options = {}) => {
+ipcMain.handle("redrob:terminal:create", async (event, options = {}) => {
   assertDesktopActivation();
   const cwd = await resolveTerminalCwd(options?.cwd);
   const cols = Number.isFinite(options?.cols) ? Math.max(20, Math.floor(options.cols)) : 80;
@@ -2582,27 +2582,27 @@ ipcMain.handle("openwork:terminal:create", async (event, options = {}) => {
   event.sender.once("destroyed", () => killTerminalsForWebContents(event.sender.id));
   child.onData((data) => {
     if (event.sender.isDestroyed()) return;
-    event.sender.send("openwork:terminal:data", { terminalId, data });
+    event.sender.send("redrob:terminal:data", { terminalId, data });
   });
   child.onExit(({ exitCode, signal }) => {
     terminalProcesses.delete(terminalId);
     if (event.sender.isDestroyed()) return;
-    event.sender.send("openwork:terminal:exit", { terminalId, exitCode, signal });
+    event.sender.send("redrob:terminal:exit", { terminalId, exitCode, signal });
   });
 
   return { terminalId };
 });
-ipcMain.handle("openwork:terminal:write", (event, terminalId, data) => {
+ipcMain.handle("redrob:terminal:write", (event, terminalId, data) => {
   const terminal = terminalForSender(event, terminalId);
   if (!terminal || typeof data !== "string") return;
   terminal.process.write(data);
 });
-ipcMain.handle("openwork:terminal:resize", (event, terminalId, cols, rows) => {
+ipcMain.handle("redrob:terminal:resize", (event, terminalId, cols, rows) => {
   const terminal = terminalForSender(event, terminalId);
   if (!terminal || !Number.isFinite(cols) || !Number.isFinite(rows)) return;
   terminal.process.resize(Math.max(20, Math.floor(cols)), Math.max(5, Math.floor(rows)));
 });
-ipcMain.handle("openwork:terminal:kill", (event, terminalId) => {
+ipcMain.handle("redrob:terminal:kill", (event, terminalId) => {
   const terminal = terminalForSender(event, terminalId);
   if (!terminal) return;
   killTerminal(String(terminalId));
@@ -2630,7 +2630,7 @@ const { ensureAutoUpdater } = registerUpdaterIpc({
 
 if (!app.requestSingleInstanceLock()) {
   if (isDevMode && !app.isPackaged) {
-    console.error(`[openwork] Another OpenWork dev instance already holds this profile directory:
+    console.error(`[redrob] Another Redrob Work dev instance already holds this profile directory:
   ${app.getPath("userData")}
 The second process is exiting so its CDP port is released.
 Run this worktree with an isolated profile: REDROB_DEV_PROFILE=auto pnpm dev

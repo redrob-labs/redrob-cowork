@@ -13,16 +13,16 @@ import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 
 import { desktopFetch } from "../../app/lib/desktop";
 import {
-  getOpenworkGatewayOrigin,
-  readOpenworkGatewayDenToken,
+  getRedrobGatewayOrigin,
+  readRedrobGatewayDenToken,
 } from "../../app/lib/gateway-runtime";
-import { isWebDeployment } from "../../app/lib/openwork-deployment";
-import { normalizeOpenworkServerUrl } from "../../app/lib/openwork-server";
+import { isWebDeployment } from "../../app/lib/redrob-deployment";
+import { normalizeRedrobServerUrl } from "../../app/lib/redrob-server";
 import { isDesktopRuntime } from "../../app/utils";
 import { initialServerState, serverReducer } from "./server-provider-state";
 
 export function normalizeServerUrl(input: string): string | undefined {
-  return normalizeOpenworkServerUrl(input) ?? undefined;
+  return normalizeRedrobServerUrl(input) ?? undefined;
 }
 
 export function serverDisplayName(url: string): string {
@@ -45,7 +45,7 @@ const ServerContext = createContext<ServerContextValue | undefined>(undefined);
 function readStoredList(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem("openwork.server.list");
+    const raw = window.localStorage.getItem("redrob.server.list");
     const parsed = raw ? (JSON.parse(raw) as unknown) : [];
     return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
   } catch {
@@ -56,32 +56,32 @@ function readStoredList(): string[] {
 function readStoredActive(): string {
   if (typeof window === "undefined") return "";
   try {
-    const stored = window.localStorage.getItem("openwork.server.active");
+    const stored = window.localStorage.getItem("redrob.server.active");
     return typeof stored === "string" ? stored : "";
   } catch {
     return "";
   }
 }
 
-function readOpenworkToken(): string {
-  if (getOpenworkGatewayOrigin()) return readOpenworkGatewayDenToken();
+function readRedrobToken(): string {
+  if (getRedrobGatewayOrigin()) return readRedrobGatewayDenToken();
 
   if (typeof window === "undefined") return "";
   try {
-    return (window.localStorage.getItem("openwork.server.token") ?? "").trim();
+    return (window.localStorage.getItem("redrob.server.token") ?? "").trim();
   } catch {
     return "";
   }
 }
 
-export function buildOpenworkHealthHeaders(url: string): Record<string, string> | undefined {
-  const token = readOpenworkToken();
+export function buildRedrobHealthHeaders(url: string): Record<string, string> | undefined {
+  const token = readRedrobToken();
   return token && url.includes("/opencode") ? { Authorization: `Bearer ${token}` } : undefined;
 }
 
 async function checkHealth(url: string): Promise<boolean> {
   if (!url) return false;
-  const headers = buildOpenworkHealthHeaders(url);
+  const headers = buildRedrobHealthHeaders(url);
   const client = createOpencodeClient({
     baseUrl: url,
     headers,
@@ -107,10 +107,10 @@ export function ServerProvider({ children, defaultUrl }: ServerProviderProps) {
     if (readyRef.current) return;
     if (typeof window === "undefined") return;
 
-    const gatewayOrigin = getOpenworkGatewayOrigin();
+    const gatewayOrigin = getRedrobGatewayOrigin();
     const fallback = normalizeServerUrl(gatewayOrigin ? `${gatewayOrigin}/opencode` : defaultUrl) ?? "";
 
-    // Hosted web deployments served by OpenWork must reuse the OpenCode proxy
+    // Hosted web deployments served by Redrob Work must reuse the OpenCode proxy
     // rather than any persisted localhost target.
     const forceProxy =
       Boolean(gatewayOrigin) ||
@@ -140,8 +140,8 @@ export function ServerProvider({ children, defaultUrl }: ServerProviderProps) {
     if (!readyRef.current) return;
     if (typeof window === "undefined") return;
     try {
-      window.localStorage.setItem("openwork.server.list", JSON.stringify(list));
-      window.localStorage.setItem("openwork.server.active", active);
+      window.localStorage.setItem("redrob.server.list", JSON.stringify(list));
+      window.localStorage.setItem("redrob.server.active", active);
     } catch {
       // ignore
     }
@@ -150,7 +150,7 @@ export function ServerProvider({ children, defaultUrl }: ServerProviderProps) {
   useEffect(() => {
     if (!active) return;
     if (isDesktopRuntime() && !active.includes("/opencode")) {
-      // Desktop React routes now talk to OpenWork server workspace-mounted
+      // Desktop React routes now talk to Redrob Work server workspace-mounted
       // `/opencode` URLs directly. Ignore old persisted raw OpenCode daemon
       // URLs here; their ephemeral ports go stale across restarts and otherwise
       // produce noisy `/global/health` connection-refused polling forever.

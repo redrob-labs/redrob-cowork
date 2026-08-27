@@ -15,8 +15,8 @@ REF=""
 FORCE_INSTALL=0
 RUN_SEED=0
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SANDBOX="openwork-server-$(date +%Y%m%d-%H%M%S)"
-DAYTONA_SERVER_SNAPSHOT="${DAYTONA_SERVER_SNAPSHOT:-openwork-server}"
+SANDBOX="redrob-server-$(date +%Y%m%d-%H%M%S)"
+DAYTONA_SERVER_SNAPSHOT="${DAYTONA_SERVER_SNAPSHOT:-redrob-server}"
 DAYTONA_TARGET="${DAYTONA_TARGET:-us}"
 DEN_API_PORT="${DEN_API_PORT:-8788}"
 DEN_WEB_PORT="${DEN_WEB_PORT:-3005}"
@@ -133,7 +133,7 @@ if [ -n "${REDROB_DEN_URLS_FILE:-}" ]; then
 fi
 
 echo "==> Checking out $REF..."
-daytona exec "$SANDBOX" -- "bash -lc 'set -euo pipefail; cd /workspace; REF=\"$REF\"; FORCE_INSTALL=\"$FORCE_INSTALL\"; if git fetch origin \"\$REF\"; then git checkout --detach FETCH_HEAD; else git fetch origin dev --depth 50 || true; git checkout \"\$REF\"; fi; git rev-parse --short HEAD; if [ \"\$FORCE_INSTALL\" = 1 ]; then rm -f .openwork-daytona/pnpm-lock.sha256; fi'"
+daytona exec "$SANDBOX" -- "bash -lc 'set -euo pipefail; cd /workspace; REF=\"$REF\"; FORCE_INSTALL=\"$FORCE_INSTALL\"; if git fetch origin \"\$REF\"; then git checkout --detach FETCH_HEAD; else git fetch origin dev --depth 50 || true; git checkout \"\$REF\"; fi; git rev-parse --short HEAD; if [ \"\$FORCE_INSTALL\" = 1 ]; then rm -f .redrob-daytona/pnpm-lock.sha256; fi'"
 
 echo "==> Uploading server start script..."
 START_SCRIPT_B64="$(base64 < "$ROOT_DIR/.devcontainer/start-daytona-server.sh" | tr -d '\n')"

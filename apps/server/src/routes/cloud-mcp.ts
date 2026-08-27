@@ -1,9 +1,9 @@
 import type { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 import {
   REDROB_CLOUD_MCP_NAME,
-  readOpenworkCloudMcpHealth,
-  reconcileOpenworkCloudMcp,
-  refreshOpenworkCloudMcpEngine,
+  readRedrobCloudMcpHealth,
+  reconcileRedrobCloudMcp,
+  refreshRedrobCloudMcpEngine,
   type CloudMcpServerMetadata,
   type CloudMcpProviderModelContext,
   type CloudMcpRuntimeRegistrar,
@@ -73,7 +73,7 @@ function assertStrictBody(body: Record<string, unknown>, workspace: WorkspaceInf
     throw new ApiError(400, "workspace_id_mismatch", "workspaceId must match the route workspace");
   }
   if (typeof body.name === "string" && body.name.trim() !== REDROB_CLOUD_MCP_NAME) {
-    throw new ApiError(400, "invalid_mcp_name", "Only openwork-cloud can be reconciled by this endpoint");
+    throw new ApiError(400, "invalid_mcp_name", "Only redrob-cloud can be reconciled by this endpoint");
   }
 }
 
@@ -93,10 +93,10 @@ export function registerCloudMcpRoutes(options: RegisterCloudMcpRoutesOptions): 
     serverMetadata,
   } = options;
 
-  addRoute(routes, "GET", "/workspace/:id/mcp/openwork-cloud/health", "client", async (ctx) => {
+  addRoute(routes, "GET", "/workspace/:id/mcp/redrob-cloud/health", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
     assertExactWorkspace(ctx.params.id, workspace);
-    const health = await readOpenworkCloudMcpHealth({
+    const health = await readRedrobCloudMcpHealth({
       config,
       workspace,
       directory: resolveOpencodeDirectory(workspace),
@@ -109,7 +109,7 @@ export function registerCloudMcpRoutes(options: RegisterCloudMcpRoutesOptions): 
     return jsonResponse(health);
   });
 
-  addRoute(routes, "POST", "/workspace/:id/mcp/openwork-cloud/engine-refresh", "client", async (ctx) => {
+  addRoute(routes, "POST", "/workspace/:id/mcp/redrob-cloud/engine-refresh", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
@@ -132,7 +132,7 @@ export function registerCloudMcpRoutes(options: RegisterCloudMcpRoutesOptions): 
       body = parsed;
     }
     assertStrictBody(body, workspace);
-    const result = await refreshOpenworkCloudMcpEngine({
+    const result = await refreshRedrobCloudMcpEngine({
       config,
       workspace,
       directory: resolveOpencodeDirectory(workspace),
@@ -146,7 +146,7 @@ export function registerCloudMcpRoutes(options: RegisterCloudMcpRoutesOptions): 
     return jsonResponse(result);
   });
 
-  addRoute(routes, "POST", "/workspace/:id/mcp/openwork-cloud/reconcile", "client", async (ctx) => {
+  addRoute(routes, "POST", "/workspace/:id/mcp/redrob-cloud/reconcile", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
@@ -156,7 +156,7 @@ export function registerCloudMcpRoutes(options: RegisterCloudMcpRoutesOptions): 
       throw new ApiError(400, "invalid_payload", "JSON object body is required");
     }
     assertStrictBody(body, workspace);
-    const health = await reconcileOpenworkCloudMcp({
+    const health = await reconcileRedrobCloudMcp({
       config,
       workspace,
       directory: resolveOpencodeDirectory(workspace),

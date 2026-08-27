@@ -64,8 +64,8 @@ rm -f "$code_file"
 Create or update the chart Secret with the setup code:
 
 ```bash
-kubectl create secret generic openwork-ee \
-  --namespace openwork-ee \
+kubectl create secret generic redrob-ee \
+  --namespace redrob-ee \
   --from-file=DEN_INITIAL_ADMIN_BOOTSTRAP_CODE="$code_file" \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -103,7 +103,7 @@ The same pattern works with container-platform secret stores, systemd environmen
 Open:
 
 ```text
-https://openwork.example.com/setup
+https://redrob.example.com/setup
 ```
 
 The setup page asks for the eligible administrator email and the raw one-time setup code. It does not display configured privileged emails and it does not require email delivery.
@@ -113,7 +113,7 @@ The setup page asks for the eligible administrator email and the raw one-time se
 The status endpoint reports only general state:
 
 ```bash
-curl -fsS https://api.openwork.example.com/v1/auth/bootstrap/status
+curl -fsS https://api.redrob.example.com/v1/auth/bootstrap/status
 ```
 
 Possible statuses are `available`, `complete`, and `unavailable`. The response never includes configured emails or setup-code material.

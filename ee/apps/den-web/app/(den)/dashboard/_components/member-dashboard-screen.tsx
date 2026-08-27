@@ -35,7 +35,7 @@ export function MemberDashboardScreen() {
           icon={Download}
           onClick={() => router.push("/install")}
         >
-          Get OpenWork
+          Get Redrob Work
         </DenButton>
 
         <p className="mt-3 text-[12px] text-gray-400">macOS · Windows · Linux</p>
@@ -43,7 +43,7 @@ export function MemberDashboardScreen() {
         <p className="mt-10 w-full border-t border-gray-100 pt-5 text-[13px] text-gray-500">
           Already installed?{" "}
           <a href={OPEN_APP_URL} className="font-medium text-gray-900 underline-offset-2 hover:underline">
-            Open OpenWork →
+            Open Redrob Work →
           </a>
         </p>
       </div>

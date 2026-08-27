@@ -67,7 +67,7 @@ test.skipIf(!e2eTestsEnabled || !mysqlOpen)(title, async ({ evidence, place }) =
   const orgId = await activeOrganizationId(admin);
   const orgHeaders = {
     authorization: `Bearer ${admin.token}`,
-    "x-openwork-org-id": orgId,
+    "x-redrob-org-id": orgId,
   };
 
   // Large multibyte bodies over the Daytona preview proxy need a wider, still

@@ -30,9 +30,9 @@ test(title, async ({ evidence, place }) => {
   const runId = `${Date.now().toString(36)}${process.pid.toString(36)}`;
   const orgName = `Acme Robotics ${runId}`;
   const invitee = {
-    email: `maya+${runId}@openwork.test`,
+    email: `maya+${runId}@redrob.test`,
     name: "Maya Chen",
-    password: "OpenWorkEval123!",
+    password: "RedrobWorkEval123!",
   };
 
   await using den = await server({
@@ -80,8 +80,8 @@ test(title, async ({ evidence, place }) => {
   });
 
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(member.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(member.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(member.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(member.token)};
   })()`);
   expect(tokenStored).toBe(true);
 
@@ -148,7 +148,7 @@ test(title, async ({ evidence, place }) => {
 
   const shot = await screenshot(browser);
   const seen = await validate(shot, [
-    "The page is an OpenWork download or install guide",
+    "The page is an Redrob Work download or install guide",
     "The page offers downloads for desktop computers",
   ]);
   expect(seen.ok, seen.why).toBe(true);

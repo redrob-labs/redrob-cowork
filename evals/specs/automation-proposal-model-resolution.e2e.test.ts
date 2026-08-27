@@ -66,7 +66,7 @@ async function createProvider(admin: DenSession, orgId: string): Promise<string>
     method: "POST",
     headers: {
       ...auth(admin),
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({
       name: PROVIDER_NAME,
@@ -105,7 +105,7 @@ async function waitForProposalCard(
   created: boolean,
 ): Promise<ProposalCardState> {
   await waitFor(desktop, `(() => {
-    const card = [...document.querySelectorAll('[data-openwork-automation-proposal]')]
+    const card = [...document.querySelectorAll('[data-redrob-automation-proposal]')]
       .find((candidate) => (candidate.textContent ?? '').includes(${JSON.stringify(name)}));
     if (!card || card.getAttribute('data-automation-model-resolution') !== ${JSON.stringify(resolution)}) return false;
     const createdId = card.getAttribute('data-automation-created') ?? '';
@@ -115,7 +115,7 @@ async function waitForProposalCard(
     label: `${resolution} Automation proposal card ${created ? "created" : "ready"}`,
   });
   const value = await evalIn(desktop, `(() => {
-    const card = [...document.querySelectorAll('[data-openwork-automation-proposal]')]
+    const card = [...document.querySelectorAll('[data-redrob-automation-proposal]')]
       .find((candidate) => (candidate.textContent ?? '').includes(${JSON.stringify(name)}));
     if (!card) return null;
     card.scrollIntoView({ block: 'center' });
@@ -135,13 +135,13 @@ async function waitForProposalCard(
 
 async function clickCreateAutomation(desktop: Surface, name: string): Promise<void> {
   await waitFor(desktop, `(() => {
-    const card = [...document.querySelectorAll('[data-openwork-automation-proposal]')]
+    const card = [...document.querySelectorAll('[data-redrob-automation-proposal]')]
       .find((candidate) => (candidate.textContent ?? '').includes(${JSON.stringify(name)}));
     const button = card?.querySelector('[data-create-automation]');
     return button instanceof HTMLButtonElement && !button.disabled;
   })()`, { timeoutMs: 60_000, label: `enabled create button for ${name}` });
   const clicked = await evalIn(desktop, `(() => {
-    const card = [...document.querySelectorAll('[data-openwork-automation-proposal]')]
+    const card = [...document.querySelectorAll('[data-redrob-automation-proposal]')]
       .find((candidate) => (candidate.textContent ?? '').includes(${JSON.stringify(name)}));
     const button = card?.querySelector('[data-create-automation]');
     if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
@@ -164,7 +164,7 @@ async function storedAutomationModel(
   const result = await denFetch(admin, "/v1/automations", {
     headers: {
       ...auth(admin),
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
@@ -234,7 +234,7 @@ test("chat Automation proposals map Den providers and disclose a safe fallback",
     return true;
   })()`);
 
-  const mappedPrompt = `Use the openwork_execute tool exactly once with arguments: {"id":"automation.propose","args":{"name":${JSON.stringify(mappedName)},"instructions":"Summarize new OpenWork feedback and post one short digest.","schedule":{"kind":"weekly","timezone":"UTC","daysOfWeek":[1],"hour":9,"minute":0},"model":{"providerId":"deepseek","modelId":"deepseek-v4-flash"}}}. This is a tool-call test; do not ask questions, do not call any other tool, and reply only after the tool call.`;
+  const mappedPrompt = `Use the redrob_execute tool exactly once with arguments: {"id":"automation.propose","args":{"name":${JSON.stringify(mappedName)},"instructions":"Summarize new Redrob Work feedback and post one short digest.","schedule":{"kind":"weekly","timezone":"UTC","daysOfWeek":[1],"hour":9,"minute":0},"model":{"providerId":"deepseek","modelId":"deepseek-v4-flash"}}}. This is a tool-call test; do not ask questions, do not call any other tool, and reply only after the tool call.`;
   expect(mappedPrompt).not.toContain(providerRecordId);
   await sendComposerMessage(desktop, mappedPrompt);
   const mappedCard = await waitForProposalCard(desktop, mappedName, "mapped", false);
@@ -270,7 +270,7 @@ test("chat Automation proposals map Den providers and disclose a safe fallback",
     "No provider-unavailable error or failed creation message is visible",
   ]);
 
-  const fallbackPrompt = `Use the openwork_execute tool exactly once with arguments: {"id":"automation.propose","args":{"name":${JSON.stringify(fallbackName)},"instructions":"Summarize new OpenWork feedback and post one short digest.","schedule":{"kind":"weekly","timezone":"UTC","daysOfWeek":[1],"hour":9,"minute":0},"model":{"providerId":"local-only-provider","modelId":"mystery-model"}}}. This is a tool-call test; do not ask questions, do not call any other tool, and reply only after the tool call.`;
+  const fallbackPrompt = `Use the redrob_execute tool exactly once with arguments: {"id":"automation.propose","args":{"name":${JSON.stringify(fallbackName)},"instructions":"Summarize new Redrob Work feedback and post one short digest.","schedule":{"kind":"weekly","timezone":"UTC","daysOfWeek":[1],"hour":9,"minute":0},"model":{"providerId":"local-only-provider","modelId":"mystery-model"}}}. This is a tool-call test; do not ask questions, do not call any other tool, and reply only after the tool call.`;
   expect(fallbackPrompt).not.toContain(providerRecordId);
   await sendComposerMessage(desktop, fallbackPrompt);
   const fallbackCard = await waitForProposalCard(desktop, fallbackName, "fallback", false);

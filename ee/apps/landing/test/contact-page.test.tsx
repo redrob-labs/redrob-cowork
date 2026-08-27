@@ -6,11 +6,11 @@ import { AppFeedbackForm } from "../components/app-feedback-form";
 import { SiteFooter } from "../components/site-footer";
 
 const contactPrefill = {
-  source: "openwork-contact-page",
+  source: "redrob-contact-page",
   entrypoint: "/contact",
   deployment: "landing",
   appVersion: "",
-  openworkServerVersion: "",
+  redrobServerVersion: "",
   opencodeVersion: "",
   osName: "",
   osVersion: "",
@@ -24,7 +24,7 @@ describe("Contact page affordances", () => {
       mode: "contact",
     }));
 
-    expect(html).toContain("Have questions about OpenWork?");
+    expect(html).toContain("Have questions about Redrob Work?");
     expect(html).toContain("Prefer to email us instead?");
     expect(html).toContain("team@redrob.io");
     expect(html).toContain("Send question");

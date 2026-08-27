@@ -56,7 +56,7 @@ function connectionActionMcpResultFromError(error: string): JSONValue | null {
     content: [{ type: "text", text: error }],
     structuredContent: payload.data,
     _meta: {
-      "openwork/mcpApp": {
+      "redrob/mcpApp": {
         toolName: connectionActionToolName,
         resourceUri: connectionActionAppResourceUri,
         arguments: { connectionId: payload.data.connectionId },
@@ -67,16 +67,16 @@ function connectionActionMcpResultFromError(error: string): JSONValue | null {
 
 function toolCallProviderMetadata(part: ToolPart): ProviderMetadata {
   const stateMetadata = "metadata" in part.state && isRecord(part.state.metadata) ? part.state.metadata : {};
-  const persistedMcpResult = isJsonValue(stateMetadata.openworkMcpResult)
-    ? stateMetadata.openworkMcpResult
-    : isJsonValue(stateMetadata.openworkMcpApp)
-      ? stateMetadata.openworkMcpApp
+  const persistedMcpResult = isJsonValue(stateMetadata.redrobMcpResult)
+    ? stateMetadata.redrobMcpResult
+    : isJsonValue(stateMetadata.redrobMcpApp)
+      ? stateMetadata.redrobMcpApp
       : null;
   const mcpResult = persistedMcpResult
     ?? (part.state.status === "error" ? connectionActionMcpResultFromError(part.state.error) : null);
   return {
     opencode: { partId: part.id },
-    ...(mcpResult ? { openwork: { mcpResult } } : {}),
+    ...(mcpResult ? { redrob: { mcpResult } } : {}),
   };
 }
 

@@ -63,7 +63,7 @@ export async function chrome(opts: BrowserOptions = {}): Promise<AttachedSurface
   surface.stop = stop;
   surface[Symbol.asyncDispose] = async (): Promise<void> => {
     await stop().catch((error: unknown) => {
-      console.warn(`[openwork/evals] Browser ${name} cleanup failed: ${messageText(error)}`);
+      console.warn(`[redrob/evals] Browser ${name} cleanup failed: ${messageText(error)}`);
     });
   };
   return surface;

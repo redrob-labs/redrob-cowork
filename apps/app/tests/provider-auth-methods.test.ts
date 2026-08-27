@@ -97,11 +97,11 @@ function createTestStore(workerType: "local" | "remote") {
     providerBaseUrl: () => "https://engine.example",
     selectedWorkspaceRoot: () => workspace.path,
     runtimeWorkspaceId: () => workspace.id,
-    openworkServer: {
+    redrobServer: {
       getSnapshot: () => ({
-        openworkServerStatus: "disconnected",
-        openworkServerClient: null,
-        openworkServerCapabilities: null,
+        redrobServerStatus: "disconnected",
+        redrobServerClient: null,
+        redrobServerCapabilities: null,
       }),
     },
     setProviders: () => undefined,

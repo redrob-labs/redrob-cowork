@@ -9,7 +9,7 @@ const repoRoot = resolve(import.meta.dirname, "../..");
 const retryClassificationTest = "GitHub sync treats 502 and TimeoutError as transient";
 
 test("GitHub installation-token request budgets and recovery hold in focused runtime tests", ({ evidence }) => {
-  const reportDir = mkdtempSync(join(tmpdir(), "openwork-github-budget-"));
+  const reportDir = mkdtempSync(join(tmpdir(), "redrob-github-budget-"));
   const reportPath = join(reportDir, "bun-junit.xml");
   const retryReportPath = join(reportDir, "bun-retry-junit.xml");
   try {

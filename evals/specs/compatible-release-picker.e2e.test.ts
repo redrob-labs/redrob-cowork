@@ -7,8 +7,8 @@ const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const title = e2eTestsEnabled
   ? "recovery offers only recent stable releases with exact compatible artifacts"
   : "compatible release picker skipped — needs: set REDROB_EVAL_E2E_TESTS=1";
-const currentArtifact = "https://releases.openwork.test/v2.4.0/OpenWork-darwin-arm64.dmg";
-const previousArtifact = "https://releases.openwork.test/v2.3.1/OpenWork-darwin-arm64.dmg";
+const currentArtifact = "https://releases.redrob.test/v2.4.0/Redrob Work-darwin-arm64.dmg";
+const previousArtifact = "https://releases.redrob.test/v2.3.1/Redrob Work-darwin-arm64.dmg";
 
 test.skipIf(!e2eTestsEnabled)(title, async ({ evidence, place }) => {
   needs({ optIn: ["REDROB_EVAL_E2E_TESTS"] });
@@ -22,17 +22,17 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence, place }) => {
       REDROB_EVAL_RECOVERY_RELEASES: JSON.stringify([
         { version: "2.4.0", channel: "stable", artifact: { platform: "darwin", arch: "arm64", distribution: "public", url: currentArtifact } },
         { version: "2.3.1", channel: "stable", artifact: { platform: "darwin", arch: "arm64", distribution: "public", url: previousArtifact } },
-        { version: "2.3.0", channel: "stable", artifact: { platform: "linux", arch: "x64", distribution: "public", url: "https://incompatible.invalid/OpenWork.AppImage" } },
-        { version: "2.2.9", channel: "stable", artifact: { platform: "darwin", arch: "arm64", distribution: "enterprise", url: "https://wrong-flavor.invalid/OpenWork.dmg" } },
-        { version: "2.2.8-beta.1", channel: "prerelease", artifact: { platform: "darwin", arch: "arm64", distribution: "public", url: "https://prerelease.invalid/OpenWork.dmg" } },
+        { version: "2.3.0", channel: "stable", artifact: { platform: "linux", arch: "x64", distribution: "public", url: "https://incompatible.invalid/Redrob Work.AppImage" } },
+        { version: "2.2.9", channel: "stable", artifact: { platform: "darwin", arch: "arm64", distribution: "enterprise", url: "https://wrong-flavor.invalid/Redrob Work.dmg" } },
+        { version: "2.2.8-beta.1", channel: "prerelease", artifact: { platform: "darwin", arch: "arm64", distribution: "public", url: "https://prerelease.invalid/Redrob Work.dmg" } },
       ]),
     },
   });
 
   const releaseObserverAvailable = await evalIn(
     recoveryApp,
-    `typeof window.__openworkRecoveryControl?.snapshot === "function"
-      && typeof window.__openworkRecoveryControl?.select === "function"`,
+    `typeof window.__redrobRecoveryControl?.snapshot === "function"
+      && typeof window.__redrobRecoveryControl?.select === "function"`,
   );
   expect(
     releaseObserverAvailable,
@@ -55,7 +55,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence, place }) => {
 
   const offeredReleases = await evalIn(
     recoveryApp,
-    `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.releases.map((release) => ({
+    `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.releases.map((release) => ({
       version: release.version,
       marking: release.marking,
       platform: release.artifact.platform,
@@ -70,13 +70,13 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence, place }) => {
     { version: "2.3.1", marking: "previous", platform: "darwin", arch: "arm64", distribution: "public", url: previousArtifact },
   ]);
 
-  await evalIn(recoveryApp, `window.__openworkRecoveryControl.select("2.3.0")`, { awaitPromise: true });
-  await evalIn(recoveryApp, `window.__openworkRecoveryControl.select("9.9.9")`, { awaitPromise: true });
-  expect(await evalIn(recoveryApp, `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.openedArtifactUrls)`, { awaitPromise: true })).toEqual([]);
+  await evalIn(recoveryApp, `window.__redrobRecoveryControl.select("2.3.0")`, { awaitPromise: true });
+  await evalIn(recoveryApp, `window.__redrobRecoveryControl.select("9.9.9")`, { awaitPromise: true });
+  expect(await evalIn(recoveryApp, `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.openedArtifactUrls)`, { awaitPromise: true })).toEqual([]);
 
   await clickButton(recoveryApp, "Use 2.3.1", { timeoutMs: 5_000 });
   const openedArtifactUrls = await eventually(
-    () => evalIn(recoveryApp, `window.__openworkRecoveryControl.snapshot().then((snapshot) => snapshot.openedArtifactUrls)`, { awaitPromise: true }),
+    () => evalIn(recoveryApp, `window.__redrobRecoveryControl.snapshot().then((snapshot) => snapshot.openedArtifactUrls)`, { awaitPromise: true }),
     {
       within: 5_000,
       label: "exact compatible release artifact",
@@ -85,9 +85,9 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence, place }) => {
   );
   expect(openedArtifactUrls).toEqual([previousArtifact]);
   expect(openedArtifactUrls).not.toContain(currentArtifact);
-  expect(openedArtifactUrls).not.toContain("https://incompatible.invalid/OpenWork.AppImage");
-  expect(openedArtifactUrls).not.toContain("https://wrong-flavor.invalid/OpenWork.dmg");
-  expect(openedArtifactUrls).not.toContain("https://prerelease.invalid/OpenWork.dmg");
+  expect(openedArtifactUrls).not.toContain("https://incompatible.invalid/Redrob Work.AppImage");
+  expect(openedArtifactUrls).not.toContain("https://wrong-flavor.invalid/Redrob Work.dmg");
+  expect(openedArtifactUrls).not.toContain("https://prerelease.invalid/Redrob Work.dmg");
   evidence.recordAssertionEvidence(
     "The picker opened only the exact compatible previous stable artifact",
     "Current and previous were marked, incompatible and prerelease targets were absent, and arbitrary selection opened nothing.",

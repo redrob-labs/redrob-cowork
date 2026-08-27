@@ -41,7 +41,7 @@ test("the enterprise install guide is three steps ending in one copy-paste link"
   expect(parseGuideStep("nonsense")).toBe(1);
 
   // Step 1 downloads with every OS available; step 2 installs and opens in one
-  // sentence; step 3 connects with the workspace address, keeping the OpenWork
+  // sentence; step 3 connects with the workspace address, keeping the Redrob Work
   // link as the quiet backup.
   expect(downloadStep).toContain("DownloadPlatformGrid");
   expect(downloadStep).toContain("Already installed? Skip to step 3");
@@ -51,7 +51,7 @@ test("the enterprise install guide is three steps ending in one copy-paste link"
   expect(openStep).toContain('<InstallVisual');
   expect(openStep).not.toContain("Come back to this page");
   expect(source).not.toContain('data-testid="install-connect-copy"');
-  expect(source).not.toContain("Copy OpenWork link");
+  expect(source).not.toContain("Copy Redrob Work link");
   expect(linkStep).toContain("In the app, enter your workspace address:");
   expect(linkStep).toContain('data-testid="install-workspace-address"');
   expect(linkStep).toContain("sign-in finishes in this browser and sends you back to the app.");
@@ -63,7 +63,7 @@ test("the enterprise install guide is three steps ending in one copy-paste link"
   expect(source).not.toContain("install-running-checklist");
   expect(source).not.toContain("install-handoff-note");
   expect(source).not.toMatch(/activation link/i);
-  expect(source).toContain("Set up OpenWork Enterprise");
+  expect(source).toContain("Set up Redrob Work Enterprise");
   expect(source).toContain('variant="flat"');
   expect(source).toContain('width="enterprise"');
 

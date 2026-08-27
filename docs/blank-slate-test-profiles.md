@@ -29,7 +29,7 @@ pnpm dev:electron -- --blank-slate
 
 ## What it does
 
-Each launch creates one unique temporary root (`$TMPDIR/openwork-test-profile-*`)
+Each launch creates one unique temporary root (`$TMPDIR/redrob-test-profile-*`)
 and redirects every persisted path into it before any other module loads:
 
 - Electron `userData` and `home`

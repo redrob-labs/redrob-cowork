@@ -5,7 +5,7 @@ import { Hono } from "hono"
 import type { OpenRouterUnknownModelUsageReport } from "../src/webhooks.js"
 
 process.env.REDROB_DEV_MODE = "1"
-process.env.DATABASE_URL = "mysql://root:password@127.0.0.1:3306/openwork_den"
+process.env.DATABASE_URL = "mysql://root:password@127.0.0.1:3306/redrob_den"
 process.env.DEN_DB_ENCRYPTION_KEY = "local-dev-db-encryption-key-please-change-1234567890"
 process.env.INFERENCE_WEBHOOK_SECRET = "local-dev-webhook-secret"
 
@@ -23,7 +23,7 @@ function attribute(key: string, value: string | number | boolean) {
 }
 
 function webhookRequest(body: unknown) {
-  return new Request("http://openwork.test/webhooks/openrouter", {
+  return new Request("http://redrob.test/webhooks/openrouter", {
     method: "POST",
     headers: {
       authorization: "Bearer local-dev-webhook-secret",
@@ -48,7 +48,7 @@ function createWebhookTestServer() {
   const bucketId = createDenTypeId("inferenceOrgUsageBucket")
   const reports: OpenRouterUnknownModelUsageReport[] = []
   const insertedEntries: {
-    openworkRequestId: string
+    redrobRequestId: string
     externalEventId: string | null
     costAmount: number
     modelId: string
@@ -92,14 +92,14 @@ function createWebhookTestServer() {
       calls.findLedgerEntryByExternalEventId += 1
       return null
     },
-    async findOpenRouterUsageLedgerEntry(_openworkRequestId) {
+    async findOpenRouterUsageLedgerEntry(_redrobRequestId) {
       calls.findOpenRouterUsageLedgerEntry += 1
       return null
     },
     async insertOpenRouterUsageLedgerEntry(input) {
       calls.insertOpenRouterUsageLedgerEntry += 1
       insertedEntries.push({
-        openworkRequestId: input.span.openworkRequestId,
+        redrobRequestId: input.span.redrobRequestId,
         externalEventId: input.span.externalEventId,
         costAmount: input.costAmount,
         modelId: input.span.reportedModel,
@@ -120,7 +120,7 @@ function createWebhookTestServer() {
     const attributes = [
       attribute("trace.org_membership_id", orgMembershipId),
       attribute("trace.inference_key_id", inferenceKeyId),
-      attribute("trace.openwork_request_id", input.requestId),
+      attribute("trace.redrob_request_id", input.requestId),
       attribute("event_id", input.eventId),
       attribute("gen_ai.response.id", input.generationId),
       attribute("gen_ai.request.model", input.requestModel),
@@ -189,7 +189,7 @@ test("reports fatal Sentry diagnostics and skips deduction when OpenRouter usage
   assert.ok(report)
   assert.equal(report.reportedModel, "vendor/new-model")
   assert.equal(report.organizationId, organizationId)
-  assert.equal(report.openworkRequestId, "request-unknown")
+  assert.equal(report.redrobRequestId, "request-unknown")
   assert.equal(report.externalEventId, "event-unknown")
   assert.equal(report.generationId, "generation-unknown")
   assert.equal(report.usage.requestModel, "z-ai/glm-5.2")
@@ -226,7 +226,7 @@ test("deducts usage without Sentry diagnostics when OpenRouter usage reports a k
   assert.equal(calls.insertOpenRouterUsageLedgerEntry, 1)
   assert.equal(calls.chargeBuckets, 1)
   assert.deepEqual(insertedEntries, [{
-    openworkRequestId: "request-known",
+    redrobRequestId: "request-known",
     externalEventId: "event-known",
     costAmount: 1,
     modelId: "z-ai/glm-5.2",

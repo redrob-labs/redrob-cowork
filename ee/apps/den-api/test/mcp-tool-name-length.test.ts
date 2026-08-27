@@ -9,9 +9,9 @@ import {
 
 // AWS Bedrock's Converse API rejects toolConfig.tools.*.member.toolSpec.name
 // longer than 64 chars. MCP clients namespace tools as `<serverName>_<name>`;
-// the OpenWork Cloud client uses the `openwork-cloud_` prefix (15 chars), so
+// the Redrob Work Cloud client uses the `redrob-cloud_` prefix (15 chars), so
 // the registered name must stay <= 49 so the prefixed name validates.
-const CLIENT_PREFIX = "openwork-cloud_"
+const CLIENT_PREFIX = "redrob-cloud_"
 
 test("budget constants leave room for the client prefix", () => {
   expect(CLIENT_PREFIX.length).toBe(MAX_CLIENT_PREFIX)

@@ -32,11 +32,11 @@ const DEN_API_URL = `http://127.0.0.1:${DEN_API_PORT}`;
 const DEN_API_INTERNAL_URL = `http://127.0.0.1:${DEN_API_INTERNAL_PORT}`;
 const DEN_BASE_URL = `http://localhost:${DEN_API_PORT}`;
 const DEMO_EMAIL = process.env.DEN_DEMO_OWNER_EMAIL ?? "alex@acme.test";
-const DEMO_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD ?? "OpenWorkDemo123!";
-const MYSQL_CONTAINER = "openwork-web-local-mysql";
+const DEMO_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD ?? "RedrobWorkDemo123!";
+const MYSQL_CONTAINER = "redrob-web-local-mysql";
 const MYSQL_STATE_DIR = join(STATE_DIR, "mysql");
 const MYSQL_SOCKET = join(MYSQL_STATE_DIR, "mysql.sock");
-const COMPOSE_ARGS = ["compose", "-p", "openwork-den-local", "-f", "packaging/docker/docker-compose.web-local.yml"];
+const COMPOSE_ARGS = ["compose", "-p", "redrob-den-local", "-f", "packaging/docker/docker-compose.web-local.yml"];
 const DEFAULT_MOCK_IDP_ISSUER = "http://127.0.0.1:19190";
 const MOCK_IDP_ISSUER = (process.env.REDROB_EVAL_MOCK_IDP_ISSUER?.trim() || DEFAULT_MOCK_IDP_ISSUER).replace(/\/+$/, "");
 const DEN_WEB_ORIGIN = (process.env.REDROB_EVAL_DEN_WEB_URL ?? "http://localhost:3005").replace(/\/+$/, "");
@@ -62,8 +62,8 @@ const DEN_TRUSTED_ORIGINS = [
 
 // Override with REDROB_EVAL_DATABASE_URL to isolate a run from the shared
 // dev database (e.g. a dedicated schema on the same MySQL container).
-const DEN_DATABASE_URL = process.env.REDROB_EVAL_DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_den";
-const DEN_DATABASE_NAME = new URL(DEN_DATABASE_URL).pathname.replace(/^\//, "") || "openwork_den";
+const DEN_DATABASE_URL = process.env.REDROB_EVAL_DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_den";
+const DEN_DATABASE_NAME = new URL(DEN_DATABASE_URL).pathname.replace(/^\//, "") || "redrob_den";
 if (!/^[A-Za-z0-9_]+$/.test(DEN_DATABASE_NAME)) {
   throw new Error(`Unsupported Den database name: ${DEN_DATABASE_NAME}`);
 }
@@ -87,9 +87,9 @@ export function denEvalEnvironment(options: DenEvalEnvironmentOptions = {}): Nod
     DEN_BETTER_AUTH_TRUSTED_ORIGINS: DEN_TRUSTED_ORIGINS,
     CORS_ORIGINS: DEN_TRUSTED_ORIGINS,
     PROVISIONER_MODE: "stub",
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "sk_test_openwork_eval",
-    STRIPE_INFERENCE_PRICE_ID: process.env.STRIPE_INFERENCE_PRICE_ID ?? "price_openwork_models_eval",
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_openwork_eval",
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "sk_test_redrob_eval",
+    STRIPE_INFERENCE_PRICE_ID: process.env.STRIPE_INFERENCE_PRICE_ID ?? "price_redrob_models_eval",
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_redrob_eval",
     INFERENCE_PROXY_BASE_URL: process.env.INFERENCE_PROXY_BASE_URL ?? "http://127.0.0.1:8791",
   };
   if (options.orgMode) env.DEN_ORG_MODE = options.orgMode;
@@ -117,7 +117,7 @@ function devUserDataHome(): string {
 }
 
 function devBootstrapPath(): string {
-  return join(devUserDataHome(), "openwork-dev-data", "home", ".config", "openwork", "desktop-bootstrap.json");
+  return join(devUserDataHome(), "redrob-dev-data", "home", ".config", "redrob", "desktop-bootstrap.json");
 }
 
 async function httpOk(url: string, timeoutMs = 2_500): Promise<boolean> {

@@ -8,7 +8,7 @@ import { test } from "@redrob/testkit";
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 test("MCP endpoints tolerate newer or duplicated protocol-version headers", ({ evidence }) => {
-  const reportDir = mkdtempSync(join(tmpdir(), "openwork-mcp-protocol-version-"));
+  const reportDir = mkdtempSync(join(tmpdir(), "redrob-mcp-protocol-version-"));
   const reportPath = join(reportDir, "bun-junit.xml");
   try {
     const result = spawnSync("pnpm", [

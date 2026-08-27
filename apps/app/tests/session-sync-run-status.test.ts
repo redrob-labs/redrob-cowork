@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, jest, setSystemTime, test } from "bun:test";
 import type { SessionStatus } from "@opencode-ai/sdk/v2/client";
 
-import type { OpenworkSessionSnapshot } from "../src/app/lib/openwork-server";
+import type { RedrobSessionSnapshot } from "../src/app/lib/redrob-server";
 import { useSessionActivityStore } from "../src/react-app/domains/session/status/session-activity-store";
 import {
   __applySessionSyncEventForTest,
@@ -21,7 +21,7 @@ import { getReactQueryClient } from "../src/react-app/infra/query-client";
 type SyncInput = {
   workspaceId: string;
   baseUrl: string;
-  openworkToken: string;
+  redrobToken: string;
 };
 
 type Subscription = {
@@ -34,7 +34,7 @@ const sessionId = "session-run-status";
 const syncInputs: SyncInput[] = [];
 const subscriptions: Subscription[] = [];
 
-function createSnapshot(status: SessionStatus): OpenworkSessionSnapshot {
+function createSnapshot(status: SessionStatus): RedrobSessionSnapshot {
   return {
     session: {
       id: sessionId,
@@ -55,7 +55,7 @@ function createSyncInput(): SyncInput {
   const input = {
     workspaceId,
     baseUrl: "https://run-status.example/opencode",
-    openworkToken: "token",
+    redrobToken: "token",
   };
   syncInputs.push(input);
   return input;

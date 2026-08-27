@@ -134,12 +134,12 @@ const assistantHasText = (text: string): string => `(() => {
 })()`;
 
 const stopEnabledExpression = `(() => {
-  const stop = window.__openworkControl?.listActions().find((action) => action.id === "composer.stop");
+  const stop = window.__redrobControl?.listActions().find((action) => action.id === "composer.stop");
   return Boolean(stop && !stop.disabled);
 })()`;
 
 const stopDisabledExpression = `(() => {
-  const stop = window.__openworkControl?.listActions().find((action) => action.id === "composer.stop");
+  const stop = window.__redrobControl?.listActions().find((action) => action.id === "composer.stop");
   return Boolean(stop?.disabled);
 })()`;
 
@@ -162,8 +162,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
   // it cannot contaminate the mid-run dispose/abort claims below.
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim() ?? "";
   const providerConfigured = await evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -207,8 +207,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
 
   // ── Start the engine event tail (dispose / retry / session.error witness) ──
   const tailStarted = await evalIn(desktopApp, `(() => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     window.__owStorm = { active: true, reconnects: -1, disposes: [], retries: [], errors: [], eventCounts: {} };
     const record = (event) => {
@@ -267,8 +267,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
 
   // The sync layer must actually be armed, otherwise this spec stresses nothing.
   const readSyncStatusExpression = `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     const response = await fetch("http://127.0.0.1:" + port + "/cloud-provider-sync/status", {
       headers: { Authorization: "Bearer " + token },
     });
@@ -291,12 +291,12 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
     // sends, with the product's own persisted credentials — the failure, if
     // any, names itself instead of no-oping.
     armingProbe = String(await evalIn(desktopApp, `(async () => {
-      const port = localStorage.getItem("openwork.server.port");
-      const clientToken = localStorage.getItem("openwork.server.token");
-      const hostToken = localStorage.getItem("openwork.server.hostToken");
-      const denToken = (localStorage.getItem("openwork.den.authToken") ?? "").trim();
-      const orgId = (localStorage.getItem("openwork.den.activeOrgId") ?? "").trim();
-      const apiBaseUrl = (localStorage.getItem("openwork.den.apiBaseUrl") ?? "").trim()
+      const port = localStorage.getItem("redrob.server.port");
+      const clientToken = localStorage.getItem("redrob.server.token");
+      const hostToken = localStorage.getItem("redrob.server.hostToken");
+      const denToken = (localStorage.getItem("redrob.den.authToken") ?? "").trim();
+      const orgId = (localStorage.getItem("redrob.den.activeOrgId") ?? "").trim();
+      const apiBaseUrl = (localStorage.getItem("redrob.den.apiBaseUrl") ?? "").trim()
         || ${JSON.stringify(den.ref.apiUrl)};
       const facts = [
         "hostToken=" + (hostToken ? "present" : "MISSING"),
@@ -307,7 +307,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
       if (!port || !hostToken || !denToken || !orgId || !apiBaseUrl) return facts.join(" ");
       const response = await fetch("http://127.0.0.1:" + port + "/den-session", {
         method: "PUT",
-        headers: { "x-openwork-host-token": hostToken, "Content-Type": "application/json" },
+        headers: { "x-redrob-host-token": hostToken, "Content-Type": "application/json" },
         body: JSON.stringify({ baseUrl: apiBaseUrl, token: denToken, orgId }),
       });
       facts.push("PUT /den-session -> " + response.status + " " + (await response.text()).slice(0, 200));
@@ -336,11 +336,11 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
   const convergence: string[] = [];
   for (let pass = 1; pass <= 3; pass += 1) {
     const result = await evalIn(desktopApp, `(async () => {
-      const port = localStorage.getItem("openwork.server.port");
-      const hostToken = localStorage.getItem("openwork.server.hostToken");
+      const port = localStorage.getItem("redrob.server.port");
+      const hostToken = localStorage.getItem("redrob.server.hostToken");
       const response = await fetch("http://127.0.0.1:" + port + "/cloud-provider-sync/run", {
         method: "POST",
-        headers: { "x-openwork-host-token": hostToken, "Content-Type": "application/json" },
+        headers: { "x-redrob-host-token": hostToken, "Content-Type": "application/json" },
         body: JSON.stringify({ reason: "spec_convergence_probe" }),
       });
       const body = await response.text();
@@ -404,8 +404,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
     if (stillBusy === true) busyTicks += 1;
 
     const status = parseSyncStatus(await evalIn(desktopApp, `(async () => {
-      const port = localStorage.getItem("openwork.server.port");
-      const token = localStorage.getItem("openwork.server.token");
+      const port = localStorage.getItem("redrob.server.port");
+      const token = localStorage.getItem("redrob.server.token");
       const response = await fetch("http://127.0.0.1:" + port + "/cloud-provider-sync/status", {
         headers: { Authorization: "Bearer " + token },
       });
@@ -468,8 +468,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 2_700_000 }, async
   const headerTimeoutRetries = probe.retries.filter((retry) => /headers? timed out/i.test(retry.message));
 
   const finalStatusRaw = await evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     const response = await fetch("http://127.0.0.1:" + port + "/cloud-provider-sync/status", {
       headers: { Authorization: "Bearer " + token },
     });

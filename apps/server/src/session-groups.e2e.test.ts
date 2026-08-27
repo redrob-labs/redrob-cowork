@@ -19,13 +19,13 @@ afterEach(async () => {
 });
 
 async function createWorkspaceRoot() {
-  const root = await mkdtemp(join(tmpdir(), "openwork-session-groups-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-session-groups-"));
   roots.push(root);
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   return root;
 }
 
-async function startOpenworkServer(
+async function startRedrobServer(
   workspaceRoot: string,
   options: { authorizedRoots?: string[]; workspace?: ServerConfig["workspaces"][number] } = {},
 ) {
@@ -64,7 +64,7 @@ async function json(response: Response) {
 describe("session group API", () => {
   test("persists groups, assignments, and update events in the runtime db", async () => {
     const root = await createWorkspaceRoot();
-    const { base, token } = await startOpenworkServer(root);
+    const { base, token } = await startRedrobServer(root);
 
     const empty = await json(await fetch(`${base}/workspace/ws_1/session-groups`, { headers: auth(token) }));
     expect(empty).toMatchObject({ state: { groups: [], assignments: {} } });
@@ -116,7 +116,7 @@ describe("session group API", () => {
 
   test("serializes concurrent read-modify-write group updates", async () => {
     const root = await createWorkspaceRoot();
-    const { base, token } = await startOpenworkServer(root);
+    const { base, token } = await startRedrobServer(root);
 
     const responses = await Promise.all([
       fetch(`${base}/workspace/ws_1/session-groups`, {
@@ -143,7 +143,7 @@ describe("session group API", () => {
 
   test("read-only session group endpoints do not repair legacy command files", async () => {
     const root = await createWorkspaceRoot();
-    const { base, token } = await startOpenworkServer(root);
+    const { base, token } = await startRedrobServer(root);
     const commandsDir = join(root, ".opencode", "commands");
     const commandPath = join(commandsDir, "legacy.md");
     const legacyCommand = "---\nname: legacy\ndescription: Legacy\nmodel: null\n---\nRun legacy command\n";
@@ -160,9 +160,9 @@ describe("session group API", () => {
 
   test("read-only session group endpoints preserve remote workspace authorization", async () => {
     const root = await createWorkspaceRoot();
-    const remoteRoot = await mkdtemp(join(tmpdir(), "openwork-session-groups-remote-"));
+    const remoteRoot = await mkdtemp(join(tmpdir(), "redrob-session-groups-remote-"));
     roots.push(remoteRoot);
-    const { base, token } = await startOpenworkServer(root, {
+    const { base, token } = await startRedrobServer(root, {
       authorizedRoots: [root],
       workspace: { id: "ws_remote", name: "Remote", path: remoteRoot, preset: "remote", workspaceType: "remote" },
     });
@@ -173,7 +173,7 @@ describe("session group API", () => {
 
   test("moves assigned sessions when deleting a group with a destination", async () => {
     const root = await createWorkspaceRoot();
-    const { base, token } = await startOpenworkServer(root);
+    const { base, token } = await startRedrobServer(root);
 
     await json(await fetch(`${base}/workspace/ws_1/session-groups`, {
       method: "PUT",

@@ -17,8 +17,8 @@ const dirs: string[] = [];
 const priorEnvStore = process.env.REDROB_ENV_STORE;
 const priorTokenStore = process.env.REDROB_TOKEN_STORE;
 const priorOpenAiApiKey = process.env.OPENAI_API_KEY;
-const priorOpenWorkApiKey = process.env.REDROB_CLOUD_API_KEY;
-const priorOpenWorkInferenceBaseUrl = process.env.REDROB_INFERENCE_BASE_URL;
+const priorRedrobWorkApiKey = process.env.REDROB_CLOUD_API_KEY;
+const priorRedrobWorkInferenceBaseUrl = process.env.REDROB_INFERENCE_BASE_URL;
 const nativeFetch = globalThis.fetch;
 
 function baseConfig(): ServerConfig {
@@ -50,14 +50,14 @@ async function boot() {
 }
 
 function hostAuth() {
-  return { "x-openwork-host-token": HOST_TOKEN, "content-type": "application/json" };
+  return { "x-redrob-host-token": HOST_TOKEN, "content-type": "application/json" };
 }
 
 beforeEach(() => {
-  const dir = mkdtempSync(join(tmpdir(), "openwork-env-routes-"));
+  const dir = mkdtempSync(join(tmpdir(), "redrob-env-routes-"));
   dirs.push(dir);
   // Redirect the shared env.json path into a throwaway dir so the test never
-  // touches the developer's real ~/.config/openwork/env.json.
+  // touches the developer's real ~/.config/redrob/env.json.
   process.env.REDROB_ENV_STORE = join(dir, "env.json");
   process.env.REDROB_TOKEN_STORE = join(dir, "tokens.json");
 });
@@ -84,15 +84,15 @@ afterEach(async () => {
   } else {
     process.env.OPENAI_API_KEY = priorOpenAiApiKey;
   }
-  if (priorOpenWorkApiKey === undefined) {
+  if (priorRedrobWorkApiKey === undefined) {
     delete process.env.REDROB_CLOUD_API_KEY;
   } else {
-    process.env.REDROB_CLOUD_API_KEY = priorOpenWorkApiKey;
+    process.env.REDROB_CLOUD_API_KEY = priorRedrobWorkApiKey;
   }
-  if (priorOpenWorkInferenceBaseUrl === undefined) {
+  if (priorRedrobWorkInferenceBaseUrl === undefined) {
     delete process.env.REDROB_INFERENCE_BASE_URL;
   } else {
-    process.env.REDROB_INFERENCE_BASE_URL = priorOpenWorkInferenceBaseUrl;
+    process.env.REDROB_INFERENCE_BASE_URL = priorRedrobWorkInferenceBaseUrl;
   }
   globalThis.fetch = nativeFetch;
 });
@@ -294,7 +294,7 @@ describe("env routes", () => {
     expect(put.status).toBe(400);
     const body = (await put.json()) as { code: string; message: string };
     expect(body.code).toBe("reserved_env_key");
-    expect(body.message).toBe("Environment variable name is reserved for OpenWork internals");
+    expect(body.message).toBe("Environment variable name is reserved for Redrob Work internals");
     expect(body.message).not.toContain("REDROB_TOKEN");
   });
 
@@ -393,8 +393,8 @@ describe("env routes", () => {
           expiresAt: 456,
           model: "gpt-realtime-2",
           transcriptionModel: "gpt-4o-transcribe",
-          tools: ["openwork_snapshot"],
-          source: "openwork-models",
+          tools: ["redrob_snapshot"],
+          source: "redrob-models",
         }), {
           status: 200,
           headers: { "content-type": "application/json" },
@@ -424,7 +424,7 @@ describe("env routes", () => {
       ok: true,
       clientSecret: "managed-rt-secret",
       expiresAt: 456,
-      source: "openwork-models",
+      source: "redrob-models",
     });
   });
 
@@ -521,7 +521,7 @@ describe("env routes", () => {
 
     expect(response.status).toBe(503);
     const body = (await response.json()) as { code: string; message: string };
-    expect(body.code).toBe("openwork_models_voice_unavailable");
+    expect(body.code).toBe("redrob_models_voice_unavailable");
     expect(body.message).toContain("not fully configured");
   });
 
@@ -568,7 +568,7 @@ describe("env routes", () => {
 
     expect(response.status).toBe(429);
     const body = (await response.json()) as { code: string };
-    expect(body.code).toBe("openwork_models_voice_failed");
+    expect(body.code).toBe("redrob_models_voice_failed");
   });
 
   test("values persist across server restart", async () => {

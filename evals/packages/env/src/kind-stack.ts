@@ -20,11 +20,11 @@ const DEFAULT_STATE_DIR = resolve(MODULE_DIR, "..", "..", "..", "results", ".kub
 const DEFAULT_ELECTRON_USERDATA = process.env.REDROB_EVAL_KUBE_ELECTRON_USERDATA?.trim()
   || join(DEFAULT_STATE_DIR, "electron-user-data");
 
-export const KUBE_CLUSTER_NAME = "openwork-kube-lab";
+export const KUBE_CLUSTER_NAME = "redrob-kube-lab";
 export const KUBE_CONTEXT = `kind-${KUBE_CLUSTER_NAME}`;
-export const KUBE_RELEASE_NAME = "openwork-ee";
+export const KUBE_RELEASE_NAME = "redrob-ee";
 export const KUBE_NAMESPACE = "default";
-export const KUBE_CHART_PATH = "packaging/helm/openwork-ee";
+export const KUBE_CHART_PATH = "packaging/helm/redrob-ee";
 const KUBE_FIXTURE_DIR = "evals/fixtures/kube";
 const KUBE_MYSQL_MANIFEST = `${KUBE_FIXTURE_DIR}/mysql.yaml`;
 const KUBE_EGRESS_KIND_CONFIG = `${KUBE_FIXTURE_DIR}/kind-config-egress.yaml`;
@@ -35,20 +35,20 @@ const KUBE_ALLOW_EXTERNAL_EGRESS_TEMPLATE = `${KUBE_NETPOL_DIR}/allow-external.t
 const CALICO_MANIFEST_URL = "https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/calico.yaml";
 const DEN_API_SERVICE = `${KUBE_RELEASE_NAME}-den-api`;
 const DEN_WEB_SERVICE = `${KUBE_RELEASE_NAME}-den-web`;
-const MYSQL_DEPLOYMENT = "openwork-mysql";
+const MYSQL_DEPLOYMENT = "redrob-mysql";
 const DEN_API_PORT = Number(process.env.REDROB_EVAL_DEN_PORT ?? 8790);
 const DEN_WEB_PORT = Number(process.env.REDROB_EVAL_DEN_WEB_PORT ?? 3005);
 const DEN_API_URL = `http://127.0.0.1:${DEN_API_PORT}`;
 const DEN_WEB_URL = `http://127.0.0.1:${DEN_WEB_PORT}`;
 const DEN_BASE_URL = `http://localhost:${DEN_API_PORT}`;
 const DEMO_EMAIL = process.env.DEN_DEMO_OWNER_EMAIL ?? "alex@acme.test";
-export const DEMO_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD ?? "OpenWorkDemo123!";
+export const DEMO_PASSWORD = process.env.DEN_DEMO_OWNER_PASSWORD ?? "RedrobWorkDemo123!";
 const LOCAL_IMAGE_TAG = process.env.REDROB_EVAL_KUBE_LOCAL_IMAGE_TAG?.trim() || "kube-lab";
 const PUBLISHED_IMAGE_TAG = process.env.REDROB_EVAL_KUBE_IMAGE_TAG?.trim() || "latest";
-const PUBLISHED_DEN_API_REPOSITORY = "ghcr.io/different-ai/openwork-den-api";
-const PUBLISHED_DEN_WEB_REPOSITORY = "ghcr.io/different-ai/openwork-den-web";
-const LOCAL_DEN_API_REPOSITORY = "openwork-den-api";
-const LOCAL_DEN_WEB_REPOSITORY = "openwork-den-web";
+const PUBLISHED_DEN_API_REPOSITORY = "ghcr.io/redrob-labs/redrob-work-den-api";
+const PUBLISHED_DEN_WEB_REPOSITORY = "ghcr.io/redrob-labs/redrob-work-den-web";
+const LOCAL_DEN_API_REPOSITORY = "redrob-den-api";
+const LOCAL_DEN_WEB_REPOSITORY = "redrob-den-web";
 
 type DenOrgMode = "single_org" | "multi_org";
 export type KubeProfile = "single-org" | "multi-org";
@@ -475,7 +475,7 @@ export function helmUpgradeArgs(profile: KubeProfileConfig, plan: KubeImagePlan,
   ];
   if (egress === "allowlist") {
     args.push(
-      "--set", "config.openworkDevMode=0",
+      "--set", "config.redrobDevMode=0",
       "--set", "config.public.allowPrivateMcpUrls=1",
     );
   }
@@ -770,9 +770,9 @@ async function mysqlQuery(runtime: KubeRuntime, sql: string): Promise<string> {
     `deployment/${MYSQL_DEPLOYMENT}`,
     "--",
     "mysql",
-    "-uopenwork",
-    "-popenwork",
-    "openwork_den",
+    "-uredrob",
+    "-predrob",
+    "redrob_den",
     "-N",
     "-e",
     sql,
@@ -925,7 +925,7 @@ function appUserDataHome(): string {
 }
 
 function appBootstrapPath(): string {
-  return join(appUserDataHome(), "openwork-dev-data", "home", ".config", "openwork", "desktop-bootstrap.json");
+  return join(appUserDataHome(), "redrob-dev-data", "home", ".config", "redrob", "desktop-bootstrap.json");
 }
 
 async function hasCdpPageTarget(baseUrl: string): Promise<boolean> {

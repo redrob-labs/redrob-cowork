@@ -65,7 +65,7 @@ const title = !e2eTestsEnabled || !apiUrl || !optedIn
   ? "google workspace multi-account skipped: set REDROB_EVAL_E2E_TESTS=1, REDROB_EVAL_DEN_API_URL, and REDROB_EVAL_GOOGLE_MULTI_ACCOUNT_E2E_TEST=1"
   : "two Google Workspace connectors keep one member's accounts and drafts isolated";
 
-const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!";
 const adminEmail = process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
 const memberEmail = process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "jordan@acme.test";
 const roboticsEmail = "jordan@acme.test";
@@ -77,7 +77,7 @@ async function memberDesktop(den: DenRef, member: DenSession): Promise<{ app: De
     name: "google-workspace-multi-account",
     bootstrap: { baseUrl: den.webUrl, requireSignin: false },
   });
-  const path = `/tmp/openwork-google-workspace-multi-account-${Date.now()}`;
+  const path = `/tmp/redrob-google-workspace-multi-account-${Date.now()}`;
   await createAndSelectWorkspace(app, { path });
   await signInDesktopAs(app, den, member);
   const { workspaceId } = await createAndSelectWorkspace(app, { path });
@@ -95,7 +95,7 @@ async function createFreshSession(app: Surface, workspaceId: string): Promise<st
   await control(app, "session.create_task");
   await waitUntilInteractive(app, { timeoutMs: 120_000 });
   const listed = await waitFor(app, `(async () => {
-    const result = await window.__openworkControl.execute("session.list_sessions", null);
+    const result = await window.__redrobControl.execute("session.list_sessions", null);
     const sessions = Array.isArray(result?.result) ? result.result : [];
     const withId = sessions.map((entry) => entry?.sessionId).filter((id) => typeof id === "string" && id.startsWith("ses_"));
     return withId.length > 0 ? withId[0] : false;
@@ -240,7 +240,7 @@ test.skipIf(!e2eTestsEnabled || !apiUrl || !optedIn)(title, async () => {
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "OpenWork visibly shows that Acme Labs browser authorization is in progress",
+      "Redrob Work visibly shows that Acme Labs browser authorization is in progress",
       "The app has not silently reported success and no OAuth launch error is visible",
     ]);
     expect(seen.ok, seen.why).toBe(true);

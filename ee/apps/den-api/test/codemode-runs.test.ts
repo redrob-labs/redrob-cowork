@@ -11,7 +11,7 @@ import {
   type RecordWorkflowRunInput,
 } from "../src/workflow-runs.js"
 
-const databaseUrl = "mysql://root:password@127.0.0.1:3306/openwork_test_workflow_runs"
+const databaseUrl = "mysql://root:password@127.0.0.1:3306/redrob_test_workflow_runs"
 const database = createDenDb({ databaseUrl, mode: "mysql" }).db
 const organizationId = createDenTypeId("organization")
 const otherOrganizationId = createDenTypeId("organization")

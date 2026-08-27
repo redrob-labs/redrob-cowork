@@ -57,7 +57,7 @@ export function LoadingOverlay() {
         if (!cancelled && result.ok) setReleases(result.releases);
       })
       .catch(() => undefined);
-    if (window.__openworkRecoveryControl) {
+    if (window.__redrobRecoveryControl) {
       return () => {
         cancelled = true;
       };
@@ -110,7 +110,7 @@ export function LoadingOverlay() {
       <div className="flex w-full max-w-[320px] flex-col items-center gap-4 px-6 text-center">
         {error ? (
           <div className="flex w-full flex-col gap-3 text-[12px] leading-5">
-            <div className="text-base font-medium text-dls-primary">OpenWork couldn't start</div>
+            <div className="text-base font-medium text-dls-primary">Redrob Work couldn't start</div>
             <div className="text-dls-secondary">Return to a version that works on this computer.</div>
             <button
               type="button"

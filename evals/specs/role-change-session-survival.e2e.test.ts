@@ -40,7 +40,7 @@ async function memberIdByEmail(admin: DenSession, orgId: string, email: string):
   const result = await denFetch(admin, "/v1/org", {
     headers: {
       ...auth(admin),
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   const members = isRecord(result.body) && Array.isArray(result.body.members)
@@ -60,7 +60,7 @@ async function updateMemberRole(admin: DenSession, orgId: string, memberId: stri
     method: "POST",
     headers: {
       ...auth(privilegedAdmin),
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ role }),
   });

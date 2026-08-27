@@ -36,18 +36,18 @@ export type {
   OpencodeConfigFile,
   OpencodeExecutionEnvEntry,
   OpencodeExecutionSnapshot,
-  OpenworkDockerCleanupResult,
-  OpenworkServerInfo,
+  RedrobDockerCleanupResult,
+  RedrobServerInfo,
   UpdaterEnvironment,
   WorkspaceCreateInput,
   WorkspaceCreateRemoteInput,
   WorkspaceExportSummary,
   WorkspaceList,
-  WorkspaceOpenworkConfig,
+  WorkspaceRedrobConfig,
   WorkspaceUpdateRemoteInput,
 } from "@redrob/types/desktop-ipc";
 
-// Canonical wire shape shared with openwork-server and the desktop bridge.
+// Canonical wire shape shared with redrob-server and the desktop bridge.
 // Single source of truth: packages/types/src/workspace.ts.
 export type WorkspaceInfo = WorkspaceWire;
 

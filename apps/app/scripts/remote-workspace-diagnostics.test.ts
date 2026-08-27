@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import type { OpenworkServerClient } from "../src/app/lib/openwork-server";
+import type { RedrobServerClient } from "../src/app/lib/redrob-server";
 import type { WorkspaceInfo } from "../src/app/lib/desktop";
 import { getWorkspaceTaskLoadErrorDisplay } from "../src/app/utils";
 import {
@@ -18,14 +18,14 @@ function workspace(overrides: Partial<WorkspaceInfo> = {}): WorkspaceInfo {
     path: "",
     preset: "remote",
     workspaceType: "remote",
-    remoteType: "openwork",
-    openworkHostUrl: "https://worker.example.com/w/ws_remote",
-    openworkToken: "ow-token",
+    remoteType: "redrob",
+    redrobHostUrl: "https://worker.example.com/w/ws_remote",
+    redrobToken: "ow-token",
     ...overrides,
   };
 }
 
-function client(overrides: Partial<OpenworkServerClient> = {}): OpenworkServerClient {
+function client(overrides: Partial<RedrobServerClient> = {}): RedrobServerClient {
   return {
     baseUrl: "https://worker.example.com/w/ws_remote",
     token: "ow-token",
@@ -52,7 +52,7 @@ function client(overrides: Partial<OpenworkServerClient> = {}): OpenworkServerCl
       tokenSource: { client: "file", host: "file" },
     }),
     capabilities: async () => ({
-      skills: { read: true, write: true, source: "openwork" },
+      skills: { read: true, write: true, source: "redrob" },
       plugins: { read: true, write: true },
       mcp: { read: true, write: true },
       commands: { read: true, write: true },
@@ -71,7 +71,7 @@ function client(overrides: Partial<OpenworkServerClient> = {}): OpenworkServerCl
       activeId: "ws_remote",
     }),
     ...overrides,
-  } as OpenworkServerClient;
+  } as RedrobServerClient;
 }
 
 function serverError(status: number, code: string, message: string) {
@@ -79,11 +79,11 @@ function serverError(status: number, code: string, message: string) {
 }
 
 describe("resolveRemoteWorkspaceConnectionTarget", () => {
-  test("builds a host-scoped OpenWork target from saved worker credentials", () => {
+  test("builds a host-scoped Redrob Work target from saved worker credentials", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
-        openworkHostUrl: "https://worker.example.com",
-        openworkWorkspaceId: "ws_remote",
+        redrobHostUrl: "https://worker.example.com",
+        redrobWorkspaceId: "ws_remote",
       }),
     );
 
@@ -106,7 +106,7 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
   test("fails fast when a remote worker has no endpoint", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
-        openworkHostUrl: "",
+        redrobHostUrl: "",
         baseUrl: "",
       }),
     );
@@ -120,7 +120,7 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
   test("fails fast when a remote worker endpoint is invalid", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
-        openworkHostUrl: "not a url",
+        redrobHostUrl: "not a url",
       }),
     );
 
@@ -130,12 +130,12 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
     expect(target.state.message).toContain("URL is invalid");
   });
 
-  test("does not run OpenWork probes against non-OpenWork remote workspaces", () => {
+  test("does not run Redrob Work probes against non-Redrob Work remote workspaces", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
         remoteType: "opencode",
-        openworkHostUrl: "",
-        openworkToken: "",
+        redrobHostUrl: "",
+        redrobToken: "",
         baseUrl: "https://opencode.example.com",
       }),
     );
@@ -143,22 +143,22 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
     expect(target.ok).toBe(false);
     if (target.ok) return;
     expect(target.state.status).toBe("error");
-    expect(target.state.message).toContain("OpenWork remote workers");
+    expect(target.state.message).toContain("Redrob Work remote workers");
   });
 
-  test("does not run OpenWork probes against stale OpenWork fields on non-OpenWork remotes", () => {
+  test("does not run Redrob Work probes against stale Redrob Work fields on non-Redrob Work remotes", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
         remoteType: "opencode",
-        openworkHostUrl: "https://worker.example.com/w/ws_remote",
-        openworkToken: "owt_secret",
+        redrobHostUrl: "https://worker.example.com/w/ws_remote",
+        redrobToken: "owt_secret",
         baseUrl: "https://opencode.example.com",
       }),
     );
 
     expect(target.ok).toBe(false);
     if (target.ok) return;
-    expect(target.state.message).toContain("OpenWork remote workers");
+    expect(target.state.message).toContain("Redrob Work remote workers");
   });
 });
 
@@ -178,14 +178,14 @@ describe("testRemoteWorkspaceConnection", () => {
   });
 
   test("reports a missing token after proving the worker endpoint is reachable", async () => {
-    const result = await testRemoteWorkspaceConnection(workspace({ openworkToken: "" }), {
+    const result = await testRemoteWorkspaceConnection(workspace({ redrobToken: "" }), {
       createClient: () => client(),
     });
 
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Token is missing");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -200,15 +200,15 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("unhealthy response");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
-  test("uses fallback OpenWork tokens saved on older workspace records", async () => {
+  test("uses fallback Redrob Work tokens saved on older workspace records", async () => {
     const result = await testRemoteWorkspaceConnection(
       workspace({
-        openworkToken: "",
-        openworkClientToken: "legacy-client-token",
+        redrobToken: "",
+        redrobClientToken: "legacy-client-token",
       }),
       {
         createClient: (target) => {
@@ -234,7 +234,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Token was rejected by worker.example.com");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -251,15 +251,15 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Workspace ws_remote was not found");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
   test("uses workspace list when the saved remote target is not workspace-scoped", async () => {
     const result = await testRemoteWorkspaceConnection(
       workspace({
-        openworkHostUrl: "https://worker.example.com",
-        openworkWorkspaceId: "",
+        redrobHostUrl: "https://worker.example.com",
+        redrobWorkspaceId: "",
         baseUrl: "",
       }),
       {
@@ -282,8 +282,8 @@ describe("testRemoteWorkspaceConnection", () => {
   test("reports rejected credentials from the workspace list fallback", async () => {
     const result = await testRemoteWorkspaceConnection(
       workspace({
-        openworkHostUrl: "https://worker.example.com",
-        openworkWorkspaceId: "",
+        redrobHostUrl: "https://worker.example.com",
+        redrobWorkspaceId: "",
         baseUrl: "",
       }),
       {
@@ -299,7 +299,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Token was rejected by worker.example.com");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -316,7 +316,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("is not authorized");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -333,7 +333,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Cannot reach worker.example.com");
-    expect(result.state.message).toContain("Upgrade the OpenWork host");
+    expect(result.state.message).toContain("Upgrade the Redrob Work host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -370,8 +370,8 @@ describe("remote diagnostic identity", () => {
   });
 
   test("changes when connection credentials change", () => {
-    const before = getRemoteWorkspaceConnectionKey(workspace({ openworkToken: "old-token" }));
-    const after = getRemoteWorkspaceConnectionKey(workspace({ openworkToken: "new-token" }));
+    const before = getRemoteWorkspaceConnectionKey(workspace({ redrobToken: "old-token" }));
+    const after = getRemoteWorkspaceConnectionKey(workspace({ redrobToken: "new-token" }));
 
     expect(before).not.toBe(after);
   });

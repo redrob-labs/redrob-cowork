@@ -8,7 +8,7 @@ import { test } from "@redrob/testkit";
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 test("MCP OAuth grants outlive login sessions and revoke with consent", ({ evidence }) => {
-  const reportDir = mkdtempSync(join(tmpdir(), "openwork-mcp-grant-liveness-"));
+  const reportDir = mkdtempSync(join(tmpdir(), "redrob-mcp-grant-liveness-"));
   try {
     // The witnesses exercise real den-api modules whose import chains reach
     // @redrob-ee/utils and @redrob-ee/den-db. Bun resolves those package

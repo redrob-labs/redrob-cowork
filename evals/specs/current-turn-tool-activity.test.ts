@@ -15,7 +15,7 @@ const staleHistory: MessageHistory = [
     role: "assistant",
     parts: [{
       type: "dynamic-tool",
-      toolName: "openwork_execute",
+      toolName: "redrob_execute",
       toolCallId: "old-call",
       state: "input-streaming",
       input: {},
@@ -60,7 +60,7 @@ test("live activity ignores unfinished tools from earlier turns", ({ evidence })
 
   evidence.recordAssertionEvidence(
     "A live turn never reports stale tool activity",
-    "A pending openwork_execute was excluded after both a replacement assistant response and a newer user message, while the newest assistant response retained its current tool.",
+    "A pending redrob_execute was excluded after both a replacement assistant response and a newer user message, while the newest assistant response retained its current tool.",
     true,
   );
 });

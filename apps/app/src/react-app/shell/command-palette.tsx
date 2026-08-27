@@ -276,7 +276,7 @@ export function CommandPalette(props: CommandPaletteProps) {
       meta: t("session.cmd_settings_meta"),
       action: () => {
         props.onClose();
-        openUrl("https://openwork.dev/docs");
+        openUrl("https://redrob.dev/docs");
       },
     },
     {
@@ -285,7 +285,7 @@ export function CommandPalette(props: CommandPaletteProps) {
       meta: t("session.cmd_settings_meta"),
       action: () => {
         props.onClose();
-        openUrl("https://openwork.dev/feedback");
+        openUrl("https://redrob.dev/feedback");
       },
     },
     {

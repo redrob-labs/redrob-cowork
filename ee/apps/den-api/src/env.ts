@@ -710,7 +710,7 @@ export const env = {
   },
   orgMode,
   singleOrg: {
-    name: optionalString(parsed.DEN_SINGLE_ORG_NAME) ?? "OpenWork",
+    name: optionalString(parsed.DEN_SINGLE_ORG_NAME) ?? "Redrob Work",
     slug: normalizeSingleOrgSlug(parsed.DEN_SINGLE_ORG_SLUG),
     allowPublicSignup: parseSingleOrgAllowPublicSignup(parsed.DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP, orgMode),
     ownerEmails: splitCsv(parsed.DEN_SINGLE_ORG_OWNER_EMAILS)
@@ -731,8 +731,8 @@ export const env = {
   // defaulting to the pinned app release this den-api build shipped with.
   installerReleaseTag: optionalString(parsed.REDROB_INSTALLER_RELEASE_TAG) ?? `v${denApiAppVersion.latestAppVersion}`,
   installerReleaseTagExplicit: optionalString(parsed.REDROB_INSTALLER_RELEASE_TAG) !== undefined,
-  installerReleaseRepo: optionalString(parsed.REDROB_INSTALLER_RELEASE_REPO) ?? "different-ai/openwork",
-  installerCacheDir: optionalString(parsed.REDROB_INSTALLER_CACHE_DIR) ?? path.join(os.tmpdir(), "openwork-desktop-artifacts"),
+  installerReleaseRepo: optionalString(parsed.REDROB_INSTALLER_RELEASE_REPO) ?? "redrob-labs/redrob-work",
+  installerCacheDir: optionalString(parsed.REDROB_INSTALLER_CACHE_DIR) ?? path.join(os.tmpdir(), "redrob-desktop-artifacts"),
   // Desktop-release endpoint overrides for evals/self-host testing. Static mode
   // keeps air-gapped deployments on the committed release snapshot.
   desktopReleasesBaseUrl: optionalString(parsed.DEN_DESKTOP_RELEASES_BASE_URL),
@@ -795,14 +795,14 @@ export const env = {
     apiKey: parsed.RENDER_API_KEY,
     ownerId: parsed.RENDER_OWNER_ID,
     workerRepo:
-      // TODO(ent): require RENDER_WORKER_REPO for hosted/customer Render deployments instead of using OpenWork's public repo default.
-      parsed.RENDER_WORKER_REPO ?? "https://github.com/different-ai/openwork",
+      // TODO(ent): require RENDER_WORKER_REPO for hosted/customer Render deployments instead of using Redrob Work's public repo default.
+      parsed.RENDER_WORKER_REPO ?? "https://github.com/redrob-labs/redrob-work",
     workerBranch: parsed.RENDER_WORKER_BRANCH ?? "dev",
     workerRootDir:
       parsed.RENDER_WORKER_ROOT_DIR ?? "ee/apps/den-worker-runtime",
     workerPlan: parsed.RENDER_WORKER_PLAN ?? "standard",
     workerRegion: parsed.RENDER_WORKER_REGION ?? "oregon",
-    workerOpenworkVersion: parsed.RENDER_WORKER_REDROB_VERSION,
+    workerRedrobVersion: parsed.RENDER_WORKER_REDROB_VERSION,
     workerNamePrefix: parsed.RENDER_WORKER_NAME_PREFIX ?? "den-worker",
     workerPublicDomainSuffix: parsed.RENDER_WORKER_PUBLIC_DOMAIN_SUFFIX,
     customDomainReadyTimeoutMs: Number(
@@ -864,15 +864,15 @@ export const env = {
     workspaceMountPath:
       optionalString(parsed.DAYTONA_WORKSPACE_MOUNT_PATH) ?? "/workspace",
     dataMountPath:
-      optionalString(parsed.DAYTONA_DATA_MOUNT_PATH) ?? "/persist/openwork",
+      optionalString(parsed.DAYTONA_DATA_MOUNT_PATH) ?? "/persist/redrob",
     runtimeWorkspacePath:
       optionalString(parsed.DAYTONA_RUNTIME_WORKSPACE_PATH) ??
-      "/tmp/openwork-workspace",
+      "/tmp/redrob-workspace",
     runtimeDataPath:
-      optionalString(parsed.DAYTONA_RUNTIME_DATA_PATH) ?? "/tmp/openwork-data",
+      optionalString(parsed.DAYTONA_RUNTIME_DATA_PATH) ?? "/tmp/redrob-data",
     sidecarDir:
-      optionalString(parsed.DAYTONA_SIDECAR_DIR) ?? "/tmp/openwork-sidecars",
-    openworkPort: Number(parsed.DAYTONA_REDROB_PORT ?? "8787"),
+      optionalString(parsed.DAYTONA_SIDECAR_DIR) ?? "/tmp/redrob-sidecars",
+    redrobPort: Number(parsed.DAYTONA_REDROB_PORT ?? "8787"),
     opencodePort: Number(parsed.DAYTONA_OPENCODE_PORT ?? "4096"),
     createTimeoutSeconds: Number(parsed.DAYTONA_CREATE_TIMEOUT_SECONDS ?? "300"),
     deleteTimeoutSeconds: Number(parsed.DAYTONA_DELETE_TIMEOUT_SECONDS ?? "120"),

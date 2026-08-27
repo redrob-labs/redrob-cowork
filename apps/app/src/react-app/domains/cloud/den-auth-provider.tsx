@@ -35,7 +35,7 @@ import {
   deepLinkBridgeEvent,
   drainPendingDeepLinks,
 } from "../../../app/lib/deep-link-bridge";
-import { parseDenAuthDeepLink } from "../../../app/lib/openwork-links";
+import { parseDenAuthDeepLink } from "../../../app/lib/redrob-links";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -277,7 +277,7 @@ export function DenAuthProvider({ children }: DenAuthProviderProps) {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Failed to restore OpenWork Cloud session.",
+          : "Failed to restore Redrob Work Cloud session.",
       );
       updateStatus(failureStatus);
     }

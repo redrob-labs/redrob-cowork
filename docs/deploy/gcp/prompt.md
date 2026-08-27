@@ -13,8 +13,8 @@ Read and obey `AGENTS.md`. Use the current repository documentation as the sourc
 - `packages/docs/self-host/deploy-to-your-cloud/google-cloud.mdx`
 - `packages/docs/self-host/deploy-to-your-cloud/first-administrator.mdx`
 - `docs/gcp-gke-helm.md`
-- `packaging/helm/openwork-ee/README.md`
-- `packaging/helm/openwork-ee/examples/values.gcp-ingress.yaml`
+- `packaging/helm/redrob-ee/README.md`
+- `packaging/helm/redrob-ee/examples/values.gcp-ingress.yaml`
 
 Goal: provision and deploy a production-like Redrob Work EE install on GCP using the latest published Helm chart that contains the documented first-administrator setup flow. Leave the deployment running unless I ask for cleanup.
 
@@ -33,13 +33,13 @@ Customer inputs:
 
 Agent-created resource names and defaults (change if required):
 
-- GKE cluster name: Kubernetes cluster to create, default `openwork-ee`.
-- Kubernetes namespace: Kubernetes namespace for Redrob Work workloads, default `openwork-ee`.
-- Helm release name: Helm's install/upgrade release name, default `openwork-ee`.
-- Cloud SQL instance name: GCP Cloud SQL resource to create, default `openwork-ee-mysql`.
-- Cloud SQL database name: MySQL database to create inside Cloud SQL, default `openwork_den`.
-- Cloud SQL user: MySQL user to create for Redrob Work, default `openwork`.
-- Reserved global address name: GCP resource name for the static global IPv4 address used by the HTTPS load balancer, default `openwork-ee-ip`. This is not the IP address; the agent creates the address and reports the allocated IP.
+- GKE cluster name: Kubernetes cluster to create, default `redrob-ee`.
+- Kubernetes namespace: Kubernetes namespace for Redrob Work workloads, default `redrob-ee`.
+- Helm release name: Helm's install/upgrade release name, default `redrob-ee`.
+- Cloud SQL instance name: GCP Cloud SQL resource to create, default `redrob-ee-mysql`.
+- Cloud SQL database name: MySQL database to create inside Cloud SQL, default `redrob_den`.
+- Cloud SQL user: MySQL user to create for Redrob Work, default `redrob`.
+- Reserved global address name: GCP resource name for the static global IPv4 address used by the HTTPS load balancer, default `redrob-ee-ip`. This is not the IP address; the agent creates the address and reports the allocated IP.
 
 Operating rules:
 

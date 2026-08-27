@@ -69,11 +69,11 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      openworkAppConnectUrl: readPublicRuntimeEnv("DEN_WEB_REDROB_APP_CONNECT_URL"),
-      openworkWebUrl: readPublicRuntimeEnv("DEN_WEB_REDROB_WEB_URL") || DEFAULT_REDROB_WEB_URL,
-      openworkAuthCallbackUrl: readPublicRuntimeEnv("DEN_WEB_REDROB_AUTH_CALLBACK_URL"),
+      redrobAppConnectUrl: readPublicRuntimeEnv("DEN_WEB_REDROB_APP_CONNECT_URL"),
+      redrobWebUrl: readPublicRuntimeEnv("DEN_WEB_REDROB_WEB_URL") || DEFAULT_REDROB_WEB_URL,
+      redrobAuthCallbackUrl: readPublicRuntimeEnv("DEN_WEB_REDROB_AUTH_CALLBACK_URL"),
       orgMode,
-      singleOrgName: readPublicRuntimeEnv("DEN_SINGLE_ORG_NAME") || "OpenWork",
+      singleOrgName: readPublicRuntimeEnv("DEN_SINGLE_ORG_NAME") || "Redrob Work",
       singleOrgSlug: readPublicRuntimeEnv("DEN_SINGLE_ORG_SLUG") || "default",
       singleOrgAllowPublicSignup: readBooleanEnv("DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP", orgMode === "multi_org"),
       singleOrgSsoConfigured

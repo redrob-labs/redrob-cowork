@@ -25,7 +25,7 @@ bash .devcontainer/test-on-daytona.sh [branch-or-commit]
 
 The helper uses the VNC snapshot, starts noVNC/Vite/Electron, and prints the
 URLs. If the snapshot is missing, create it with
-`bash .devcontainer/create-daytona-openwork-snapshot.sh`.
+`bash .devcontainer/create-daytona-redrob-snapshot.sh`.
 
 Use the Daytona setup as four reusable pieces. Prefer the focused skills when a
 request names one piece directly:
@@ -35,8 +35,8 @@ request names one piece directly:
 - `test-server-on-daytona.sh` for the cloud Den server sandbox.
 - `daytona-electron-den` for Electron connected to a Daytona Den server.
 - `daytona-chrome-cdp` for standalone Chrome in the sandbox, separate from Electron.
-- `openwork-eval-secrets:/daytona-secrets` for provider keys and eval-only secrets.
-- `openwork-eval-artifacts:/daytona-artifacts` for screenshots, validation notes, and recordings.
+- `redrob-eval-secrets:/daytona-secrets` for provider keys and eval-only secrets.
+- `redrob-eval-artifacts:/daytona-artifacts` for screenshots, validation notes, and recordings.
 
 Focused skills:
 
@@ -58,7 +58,7 @@ cd /workspace
 ### 2. Get the noVNC URL
 
 ```bash
-daytona preview-url openwork-dev -p 6080
+daytona preview-url redrob-dev -p 6080
 ```
 
 Open that URL in your browser. You'll see the real Electron Redrob Work app.
@@ -67,10 +67,10 @@ Open that URL in your browser. You'll see the real Electron Redrob Work app.
 
 ```bash
 # Den Web dashboard (if Den stack is running)
-daytona preview-url openwork-dev -p 3005
+daytona preview-url redrob-dev -p 3005
 
 # CDP debugging endpoint
-daytona preview-url openwork-dev -p 9825
+daytona preview-url redrob-dev -p 9825
 ```
 
 ## What's Running
@@ -107,31 +107,31 @@ If you need a local Den (for testing customization, restrictions, etc.):
 daytona list
 
 # SSH into sandbox
-daytona ssh openwork-dev
+daytona ssh redrob-dev
 
 # Check logs
-daytona exec openwork-dev 'tail -50 /tmp/electron.log'
-daytona exec openwork-dev 'tail -50 /tmp/vite.log'
-daytona exec openwork-dev 'tail -50 /tmp/start-vnc.log'
+daytona exec redrob-dev 'tail -50 /tmp/electron.log'
+daytona exec redrob-dev 'tail -50 /tmp/vite.log'
+daytona exec redrob-dev 'tail -50 /tmp/start-vnc.log'
 
 # Inspect Electron CDP targets
-daytona exec openwork-dev 'curl -s http://127.0.0.1:9825/json/list'
+daytona exec redrob-dev 'curl -s http://127.0.0.1:9825/json/list'
 
 # Capture a persistent screenshot artifact
-daytona exec openwork-dev 'bash .devcontainer/capture-daytona-screenshot.sh'
+daytona exec redrob-dev 'bash .devcontainer/capture-daytona-screenshot.sh'
 
 # Restart just the Electron app
-daytona exec openwork-dev 'bash -lc "pkill -f electron || true; pkill -f electron-dev || true"'
-daytona exec openwork-dev 'bash -lc "cd /workspace && bash /opt/openwork-daytona/start-daytona-electron.sh --detach"'
+daytona exec redrob-dev 'bash -lc "pkill -f electron || true; pkill -f electron-dev || true"'
+daytona exec redrob-dev 'bash -lc "cd /workspace && bash /opt/redrob-daytona/start-daytona-electron.sh --detach"'
 
 # Stop the sandbox (preserves state)
-daytona stop openwork-dev
+daytona stop redrob-dev
 
 # Start it again
-daytona start openwork-dev
+daytona start redrob-dev
 
 # Delete (destroys everything)
-daytona delete openwork-dev
+daytona delete redrob-dev
 ```
 
 ## Updating the Code
@@ -139,7 +139,7 @@ daytona delete openwork-dev
 Inside the sandbox, the repo is at `/workspace`. To pull latest:
 
 ```bash
-daytona ssh openwork-dev
+daytona ssh redrob-dev
 cd /workspace
 git pull origin dev
 pnpm install
@@ -157,7 +157,7 @@ cd /workspace/apps/app && REDROB_DEV_MODE=1 nohup npx vite --host 0.0.0.0 --port
 **noVNC shows black screen:**
 Xvfb/XFCE may have crashed. Restart the desktop stack:
 ```bash
-bash /opt/openwork-daytona/start-daytona-vnc.sh
+bash /opt/redrob-daytona/start-daytona-vnc.sh
 ```
 
 **"no space left on device" when creating sandbox:**

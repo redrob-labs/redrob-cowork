@@ -10,7 +10,7 @@ import { z } from "zod"
 import type { ExternalMcpConnectionRow } from "../src/capability-sources/external-mcp-connections.js"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_searchdiv"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_searchdiv"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "local-dev-secret-not-for-production-use!!"
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -594,7 +594,7 @@ test("the rollout flag controls MCP App launch metadata without removing regular
     },
   })
   expect(launchResult._meta).toMatchObject({
-    "openwork/mcpApp": {
+    "redrob/mcpApp": {
       connectionId: connection.id,
       toolName: "open_project_atlas",
       resourceUri: "ui://atlas/1.0.0/index.html",
@@ -850,7 +850,7 @@ test("shared-oauth-never-connected: Connections list sees Slack and search retur
     actor: "organization_admin",
     action: {
       type: "connect",
-      surface: "openwork_organization_connections",
+      surface: "redrob_organization_connections",
       retry: "search_capabilities",
     },
   })
@@ -1212,7 +1212,7 @@ test("downstream provider authorization links are relayed as needs_connection", 
         actor: "member",
         action: {
           type: "connect",
-          surface: "openwork_your_connections",
+          surface: "redrob_your_connections",
           retry: "search_capabilities",
           url: providerAuthServer.connectUrl,
         },
@@ -1266,7 +1266,7 @@ test("foreign-origin downstream authorization links are dropped but still surfac
       connectionStatus: {
         layer: "downstream_provider",
         state: "needs_connection",
-        action: { type: "connect", surface: "openwork_your_connections" },
+        action: { type: "connect", surface: "redrob_your_connections" },
       },
     })
     expect(typeof result.referenceId).toBe("string")

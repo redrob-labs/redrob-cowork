@@ -132,7 +132,7 @@ function normalizeUrl(value: string): string {
   return value.trim().replace(/\/+$/, "")
 }
 
-function parseWorkspaceSelection(payload: unknown): { workspaceId: string; openworkUrl: string } | null {
+function parseWorkspaceSelection(payload: unknown): { workspaceId: string; redrobUrl: string } | null {
   if (!isRecord(payload) || !Array.isArray(payload.items)) {
     return null
   }
@@ -156,7 +156,7 @@ function parseWorkspaceSelection(payload: unknown): { workspaceId: string; openw
 
   return {
     workspaceId,
-    openworkUrl: `${baseUrl}/w/${encodeURIComponent(workspaceId)}`,
+    redrobUrl: `${baseUrl}/w/${encodeURIComponent(workspaceId)}`,
   }
 }
 
@@ -296,7 +296,7 @@ export async function fetchWorkerRuntimeJson(input: {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "X-OpenWork-Host-Token": access.hostToken,
+          "X-Redrob Work-Host-Token": access.hostToken,
         },
         body: input.body === undefined ? undefined : JSON.stringify(input.body),
       })
@@ -500,7 +500,7 @@ export async function getWorkerTokensAndConnect(worker: WorkerRow) {
       host: hostToken,
       client: clientToken,
     },
-    connect: connect ?? (instance?.url ? { openworkUrl: instance.url, workspaceId: null } : null),
+    connect: connect ?? (instance?.url ? { redrobUrl: instance.url, workspaceId: null } : null),
   }
 }
 

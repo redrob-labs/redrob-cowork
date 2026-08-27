@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import { createOpenworkServerClient } from "../src/app/lib/openwork-server";
+import { createRedrobServerClient } from "../src/app/lib/redrob-server";
 import { createClient } from "../src/app/lib/opencode";
 import type { ProviderListItem, WorkspaceDisplay } from "../src/app/types";
 import { createProviderAuthStore } from "../src/react-app/domains/connections/provider-auth/store";
@@ -82,8 +82,8 @@ function jsonResponse(payload: unknown, status = 200) {
 function cloudProviderPayload(options: { conflict?: boolean } = {}) {
   return {
     id: "lpr_test",
-    source: options.conflict ? "openwork" : "custom",
-    providerId: options.conflict ? "openwork" : "openai",
+    source: options.conflict ? "redrob" : "custom",
+    providerId: options.conflict ? "redrob" : "openai",
     name: options.conflict ? "Redrob Models" : "Team OpenAI",
     providerConfig: { env: [options.conflict ? "REDROB_CLOUD_API_KEY" : "OPENAI_API_KEY"] },
     hasApiKey: true,
@@ -102,9 +102,9 @@ function cloudProviderPayload(options: { conflict?: boolean } = {}) {
 }
 
 function installCloudSession(storage: Storage) {
-  storage.setItem("openwork.den.baseUrl", "https://den.example");
-  storage.setItem("openwork.den.authToken", "den-token");
-  storage.setItem("openwork.den.activeOrgId", "org_test");
+  storage.setItem("redrob.den.baseUrl", "https://den.example");
+  storage.setItem("redrob.den.authToken", "den-token");
+  storage.setItem("redrob.den.activeOrgId", "org_test");
 }
 
 function createProviderAuthTestStore(
@@ -112,9 +112,9 @@ function createProviderAuthTestStore(
 ) {
   const opencodeClient = createClient("https://engine.example", "/tmp/workspace_test", {
     token: "engine-token",
-    mode: "openwork",
+    mode: "redrob",
   });
-  const openworkClient = createOpenworkServerClient({
+  const redrobClient = createRedrobServerClient({
     baseUrl: "https://server.example",
     token: "server-token",
     hostToken: "host-token",
@@ -143,12 +143,12 @@ function createProviderAuthTestStore(
     providerBaseUrl: () => "https://engine.example",
     selectedWorkspaceRoot: () => "/tmp/workspace_test",
     runtimeWorkspaceId: () => "ws_1",
-    openworkServer: {
+    redrobServer: {
       getSnapshot: () => ({
-        openworkServerStatus: "connected",
-        openworkServerClient: openworkClient,
-        openworkServerAuth: { token: "server-token", hostToken: "host-token" },
-        openworkServerCapabilities: {
+        redrobServerStatus: "connected",
+        redrobServerClient: redrobClient,
+        redrobServerAuth: { token: "server-token", hostToken: "host-token" },
+        redrobServerCapabilities: {
           config: configCapabilities,
           providerSync: configCapabilities.providerSync,
         },
@@ -207,7 +207,7 @@ function installProviderSyncFetch(
         return jsonResponse({ llmProvider: cloudProviderPayload(options) });
       }
       if (url.origin === "https://server.example" && url.pathname === "/workspace/ws_1/config" && method === "GET") {
-        return jsonResponse({ opencode: {}, openwork: {} });
+        return jsonResponse({ opencode: {}, redrob: {} });
       }
       if (url.origin === "https://server.example" && url.pathname === "/den-session" && method === "PUT") {
         return new Response(null, { status: 204 });
@@ -236,7 +236,7 @@ function installProviderSyncFetch(
       }
       if (url.origin === "https://server.example" && url.pathname === "/workspace/ws_1/opencode-config") {
         return jsonResponse(options.conflict
-          ? { content: '{"provider":{"openwork":{"name":"Local OpenWork"}}}' }
+          ? { content: '{"provider":{"redrob":{"name":"Local Redrob Work"}}}' }
           : null);
       }
       if (url.origin === "https://server.example" && url.pathname === "/workspace/ws_1/engine/reload") {
@@ -340,7 +340,7 @@ describe("cloud provider sync in gateway mode", () => {
     expect(store.getSnapshot().lastSyncError).toEqual({});
   });
 
-  test("records a hand-authored OpenWork collision once and skips later automatic retries", async () => {
+  test("records a hand-authored Redrob Work collision once and skips later automatic retries", async () => {
     const storage = installWindow({ origin: "https://self-hosted.example" });
     installCloudSession(storage);
     const requests: RecordedRequest[] = [];
@@ -351,7 +351,7 @@ describe("cloud provider sync in gateway mode", () => {
 
     expect(store.getSnapshot().lastSyncError.lpr_test).toMatchObject({
       kind: "conflict",
-      message: expect.stringContaining("openwork already has a provider block"),
+      message: expect.stringContaining("redrob already has a provider block"),
     });
     expect(store.getSnapshot().importedCloudProviders.lpr_test).toBeUndefined();
     const firstConnectCount = requests.filter(
@@ -425,7 +425,7 @@ describe("cloud provider sync in server-capability mode", () => {
     await Bun.sleep(10);
     expect(requests.filter((request) => new URL(request.url).pathname === "/cloud-provider-sync/run")).toHaveLength(1);
 
-    storage.setItem("openwork.den.activeOrgId", "org_changed");
+    storage.setItem("redrob.den.activeOrgId", "org_changed");
     const changedContext = [
       store.runCloudProviderSync("sign_in"),
       strictModeRemountStore.runCloudProviderSync("app_resume"),

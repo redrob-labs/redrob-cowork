@@ -400,9 +400,9 @@ export function electronProfilePaths(root: string): ElectronProfilePaths {
     bootstrapPath: join(root, "bootstrap.json"),
     cacheHome: join(root, "xdg-cache"),
     configHome: join(root, "xdg-config"),
-    dataDir: join(root, "openwork-data"),
+    dataDir: join(root, "redrob-data"),
     dataHome: join(root, "xdg-data"),
-    envStorePath: join(root, "openwork-env.json"),
+    envStorePath: join(root, "redrob-env.json"),
     homeDir: join(root, "home"),
     localAppDataDir: join(root, "local-appdata"),
     opencodeConfigDir: join(root, "opencode-config"),
@@ -650,7 +650,7 @@ async function clearStaleSurfaces(rootDir: string, log: (message: string) => voi
       await writeBootstrap(paths.bootstrapPath, opts.bootstrap);
       const [port, cdpPort] = await allocateFreePorts(2);
       if (port === undefined || cdpPort === undefined) throw new Error("Could not allocate Electron Vite/CDP ports.");
-      const appName = `OpenWork Eval ${name}`;
+      const appName = `Redrob Work Eval ${name}`;
       const appIdentifier = `io.redrob.work.eval.${sanitizeSlug(name)}`;
       const isolationEnv = electronSurfaceEnv(paths, { appName, appIdentifier, port, cdpPort });
       const env: NodeJS.ProcessEnv = { ...process.env, ...isolationEnv, ...opts.env };
@@ -713,7 +713,7 @@ async function clearStaleSurfaces(rootDir: string, log: (message: string) => voi
       const cdpUrl = `http://127.0.0.1:${cdpPort}`;
       const launch = async (headless: boolean): Promise<SpawnedDetached> => {
         const spawned = spawnDetached(binary, chromeArgs(cdpPort, profileDir, startUrl, headless), { cwd: profileRoot, env, logPath });
-        await writeFile(join(profileDir, "openwork-eval-chrome.pid"), `${spawned.pid}\n`, "utf8");
+        await writeFile(join(profileDir, "redrob-eval-chrome.pid"), `${spawned.pid}\n`, "utf8");
         try {
           await waitForCdpOrExit("Chrome", cdpUrl, spawned, logPath);
         } catch (error) {

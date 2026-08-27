@@ -93,7 +93,7 @@ test("profile config resolution normalizes defaults", () => {
 
 test("openssl argv construction includes CA, AIA, and fullchain prerequisites", () => {
   const commands = opensslCertificateCommands({
-    dir: "/tmp/openwork-egress-test",
+    dir: "/tmp/redrob-egress-test",
     hostname: "localhost",
     aiaUrl: "http://127.0.0.1:9000/__egress-lab/intermediate.der",
     corporateIssuer: true,
@@ -112,7 +112,7 @@ test("openssl argv construction includes CA, AIA, and fullchain prerequisites", 
     "leaf-csr",
     "leaf-cert",
   ]);
-  assert.ok(commands.some((command) => command.args.includes("/CN=OpenWork Egress Lab Corporate Interception CA")));
+  assert.ok(commands.some((command) => command.args.includes("/CN=Redrob Work Egress Lab Corporate Interception CA")));
   assert.ok(commands.some((command) => command.args.includes("-extfile")));
   const rootCert = commands.find((command) => command.label === "root-cert");
   assert.ok(rootCert, "root-cert command must exist");

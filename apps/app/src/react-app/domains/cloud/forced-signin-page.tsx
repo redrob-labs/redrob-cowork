@@ -52,7 +52,7 @@ export function ForcedSigninPage({ developerMode }: ForcedSigninPageProps) {
 
   const initial = readDenSettings();
   const bootstrap = readDenBootstrapConfig();
-  const appName = bootstrap.brandAppName?.trim() || "OpenWork";
+  const appName = bootstrap.brandAppName?.trim() || "Redrob Work";
   const initialBaseUrl =
     bootstrap.enterpriseActivation?.denBaseUrl ||
     initial.baseUrl ||

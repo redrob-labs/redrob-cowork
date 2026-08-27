@@ -43,10 +43,10 @@ export function prepareBlankSlateProfile({
   }
 
   const paths = pathApi(platform);
-  const rootPath = createTempRoot(paths.join(temporaryDirectory, "openwork-test-profile-"));
+  const rootPath = createTempRoot(paths.join(temporaryDirectory, "redrob-test-profile-"));
   const userDataPath = paths.join(rootPath, "electron", "user-data");
   const homePath = paths.join(rootPath, "home");
-  const openworkConfigPath = paths.join(rootPath, "openwork", "config");
+  const redrobConfigPath = paths.join(rootPath, "redrob", "config");
   const opencodeDataPath = paths.join(rootPath, "opencode", "data");
   const environment = {
     HOME: homePath,
@@ -58,12 +58,12 @@ export function prepareBlankSlateProfile({
     APPDATA: paths.join(rootPath, "windows", "app-data", "roaming"),
     LOCALAPPDATA: paths.join(rootPath, "windows", "app-data", "local"),
     REDROB_ELECTRON_USERDATA: userDataPath,
-    REDROB_DESKTOP_BOOTSTRAP_PATH: paths.join(openworkConfigPath, "desktop-bootstrap.json"),
-    REDROB_SERVER_CONFIG: paths.join(openworkConfigPath, "server.json"),
-    REDROB_ENV_STORE: paths.join(openworkConfigPath, "env.json"),
-    REDROB_TOKEN_STORE: paths.join(openworkConfigPath, "tokens.json"),
-    REDROB_RUNTIME_DB: paths.join(openworkConfigPath, "runtime.sqlite"),
-    REDROB_DATA_DIR: paths.join(rootPath, "openwork", "data"),
+    REDROB_DESKTOP_BOOTSTRAP_PATH: paths.join(redrobConfigPath, "desktop-bootstrap.json"),
+    REDROB_SERVER_CONFIG: paths.join(redrobConfigPath, "server.json"),
+    REDROB_ENV_STORE: paths.join(redrobConfigPath, "env.json"),
+    REDROB_TOKEN_STORE: paths.join(redrobConfigPath, "tokens.json"),
+    REDROB_RUNTIME_DB: paths.join(redrobConfigPath, "runtime.sqlite"),
+    REDROB_DATA_DIR: paths.join(rootPath, "redrob", "data"),
     OPENCODE_CONFIG_DIR: paths.join(rootPath, "opencode", "config"),
     OPENCODE_DB: paths.join(opencodeDataPath, "opencode.db"),
   };
@@ -77,7 +77,7 @@ export function prepareBlankSlateProfile({
     environment.XDG_STATE_HOME,
     environment.APPDATA,
     environment.LOCALAPPDATA,
-    openworkConfigPath,
+    redrobConfigPath,
     environment.REDROB_DATA_DIR,
     environment.OPENCODE_CONFIG_DIR,
     opencodeDataPath,

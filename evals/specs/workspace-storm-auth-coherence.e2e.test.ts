@@ -64,7 +64,7 @@ interface WorkspaceListing {
 /** The local server's own workspace registry, read the way the app reads it. */
 async function listWorkspaces(desktopApp: App): Promise<WorkspaceListing> {
   const value = await evalIn(desktopApp, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     if (!info?.running || !info.baseUrl) return { error: "local_server_unavailable" };
     const response = await fetch(String(info.baseUrl).replace(/\\/+$/, "") + "/workspaces", {
       headers: { authorization: "Bearer " + String(info.ownerToken ?? info.clientToken ?? "") },
@@ -89,7 +89,7 @@ async function listWorkspaces(desktopApp: App): Promise<WorkspaceListing> {
 /** Create one workspace through the product's own control action and return its id. */
 async function createWorkspace(desktopApp: App, label: string, index: number): Promise<string> {
   const before = await listWorkspaces(desktopApp);
-  const path = `/tmp/openwork-${label}-${Date.now()}-${index}`;
+  const path = `/tmp/redrob-${label}-${Date.now()}-${index}`;
   await control(desktopApp, "workspace.create", { path }, { timeoutMs: 90_000 });
   const after = await eventually(() => listWorkspaces(desktopApp), {
     within: 90_000,
@@ -112,7 +112,7 @@ async function switchToWorkspace(desktopApp: App, workspaceId: string, dwellMs: 
 async function refreshDenSession(desktopApp: App, times: number): Promise<void> {
   await evalIn(desktopApp, `(async () => {
     for (let index = 0; index < ${times}; index += 1) {
-      window.dispatchEvent(new Event("openwork-den-session-updated"));
+      window.dispatchEvent(new Event("redrob-den-session-updated"));
       await new Promise((resolve) => window.setTimeout(resolve, 100));
     }
   })()`, { awaitPromise: true, timeoutMs: 10_000 });
@@ -120,7 +120,7 @@ async function refreshDenSession(desktopApp: App, times: number): Promise<void> 
 
 /** Wait until the app itself has adopted the workspace as active. */
 async function waitForAdoptedWorkspace(desktopApp: App, workspaceId: string): Promise<void> {
-  await waitFor(desktopApp, `(localStorage.getItem("openwork.react.activeWorkspace") ?? "") === ${JSON.stringify(workspaceId)}
+  await waitFor(desktopApp, `(localStorage.getItem("redrob.react.activeWorkspace") ?? "") === ${JSON.stringify(workspaceId)}
     && window.location.hash.includes(${JSON.stringify(`/workspace/${workspaceId}`)})`, {
     timeoutMs: 60_000,
     label: `workspace ${workspaceId} adopted as active`,
@@ -332,14 +332,14 @@ test.skipIf(!runnable)(
     });
 
     // The reported symptom is Cloud tools claiming to need a reconnect while
-    // connected: the settled workspace's openwork-cloud MCP must still be
+    // connected: the settled workspace's redrob-cloud MCP must still be
     // usable with its capability tools present.
     const health = await eventually(
       () => readCloudMcpHealth(desktopApp, finalWorkspaceId, { probe: true, timeoutMs: 30_000 }),
       {
         within: 180_000,
         intervalMs: 5_000,
-        label: "openwork-cloud MCP usable after the scale storm",
+        label: "redrob-cloud MCP usable after the scale storm",
         until: (state) => state.ok && state.usable === true,
       },
     );
@@ -501,10 +501,10 @@ test.skipIf(!runnable)(
       attempt: "Attempt 3",
     });
 
-    const adopted = await evalIn(desktopApp, `localStorage.getItem("openwork.react.activeWorkspace") ?? ""`);
+    const adopted = await evalIn(desktopApp, `localStorage.getItem("redrob.react.activeWorkspace") ?? ""`);
     evidence.recordAssertionEvidence(
       "Attempt 3: no lost update — the adopted workspace is the last one requested",
-      `openwork.react.activeWorkspace=${JSON.stringify(adopted)} after ${toggles} toggles (expected ${finalWorkspaceId}).`,
+      `redrob.react.activeWorkspace=${JSON.stringify(adopted)} after ${toggles} toggles (expected ${finalWorkspaceId}).`,
       adopted === finalWorkspaceId,
     );
     expect(adopted).toBe(finalWorkspaceId);

@@ -2,7 +2,7 @@
 import type { UIMessage } from "ai";
 import type { FilePart, Part, ToolPart } from "@opencode-ai/sdk/v2/client";
 
-import type { OpenworkSessionSnapshot } from "../../../../app/lib/openwork-server";
+import type { RedrobSessionSnapshot } from "../../../../app/lib/redrob-server";
 import { SYNTHETIC_SESSION_ERROR_MESSAGE_PREFIX } from "../../../../app/types";
 import {
   parseDynamicToolUIPart,
@@ -120,7 +120,7 @@ function mapSnapshotToolParts(part: ToolPart): UIMessage["parts"] {
   return [mapped];
 }
 
-export function snapshotToUIMessages(snapshot: OpenworkSessionSnapshot): UIMessage[] {
+export function snapshotToUIMessages(snapshot: RedrobSessionSnapshot): UIMessage[] {
   return snapshot.messages.flatMap((message) => {
     const created = message.info.time?.created;
     const time = message.info.time;

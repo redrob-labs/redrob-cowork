@@ -35,7 +35,7 @@ const ENV_KEYS = [
 ].sort();
 
 test("electronProfilePaths returns all expected paths under the profile root", () => {
-  const root = join(tmpdir(), "openwork-local-host-profile");
+  const root = join(tmpdir(), "redrob-local-host-profile");
   const paths = electronProfilePaths(root);
 
   assert.deepEqual(Object.keys(paths).sort(), [
@@ -61,10 +61,10 @@ test("electronProfilePaths returns all expected paths under the profile root", (
 });
 
 test("electronSurfaceEnv matches the isolated Electron demo contract", () => {
-  const root = join(tmpdir(), "openwork-local-host-env");
+  const root = join(tmpdir(), "redrob-local-host-env");
   const paths = electronProfilePaths(root);
   const env = electronSurfaceEnv(paths, {
-    appName: "OpenWork Eval probe",
+    appName: "Redrob Work Eval probe",
     appIdentifier: "io.redrob.work.eval.probe",
     port: 5123,
     cdpPort: 9123,
@@ -87,7 +87,7 @@ test("electronSurfaceEnv matches the isolated Electron demo contract", () => {
   assert.equal(env.REDROB_ELECTRON_USERDATA, paths.userDataDir);
   assert.equal(env.PORT, "5123");
   assert.equal(env.REDROB_ELECTRON_REMOTE_DEBUG_PORT, "9123");
-  assert.equal(env.REDROB_ELECTRON_APP_NAME, "OpenWork Eval probe");
+  assert.equal(env.REDROB_ELECTRON_APP_NAME, "Redrob Work Eval probe");
   assert.equal(env.REDROB_ELECTRON_APP_IDENTIFIER, "io.redrob.work.eval.probe");
   assert.equal(env.REDROB_ELECTRON_SKIP_SHARED_PREPARE, "1");
   assert.equal(env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN, "1");
@@ -107,7 +107,7 @@ test("resolveChromeBinary returns the macOS default path", () => {
 });
 
 test("resolveChromeBinary finds Linux Chrome on PATH and reports a helpful error otherwise", async () => {
-  const binDir = await mkdtemp(join(tmpdir(), "openwork-chrome-bin-"));
+  const binDir = await mkdtemp(join(tmpdir(), "redrob-chrome-bin-"));
   const chromePath = join(binDir, "google-chrome");
   try {
     await writeFile(chromePath, "#!/bin/sh\nexit 0\n", "utf8");

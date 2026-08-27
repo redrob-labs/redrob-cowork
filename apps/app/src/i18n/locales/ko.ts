@@ -313,7 +313,7 @@ export default {
   "status.loading_session": "세션 로딩 중",
   "status.mcp_connected": "MCP {count}개 연결됨",
   "status.open_docs": "문서 열기",
-  "status.openwork_ready": "레드롭 워크 준비 완료",
+  "status.redrob_ready": "레드롭 워크 준비 완료",
   "status.providers_connected": "제공자 {count}개 연결됨",
   "status.ready_for_tasks": "새 작업 준비 완료",
   "status.running": "실행 중",

@@ -13,7 +13,7 @@ import { startMockMcp } from "@redrob/labs";
 import type { MockMcpHandle, MockAuthorizeRequest } from "@redrob/labs";
 import { eventually, sleep, test } from "@redrob/testkit";
 
-const KUBE_CONTEXT = "kind-openwork-kube-lab";
+const KUBE_CONTEXT = "kind-redrob-kube-lab";
 const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
 const webUrl = process.env.REDROB_EVAL_DEN_WEB_URL?.trim().replace(/\/+$/, "") ?? "";
 const allowedHostIp = process.env.REDROB_EVAL_KUBE_ALLOWED_HOST_IP?.trim() ?? "";
@@ -102,7 +102,7 @@ async function podFetch(hostIp: string, port: number): Promise<CommandResult> {
     "--context",
     KUBE_CONTEXT,
     "exec",
-    "deploy/openwork-ee-den-api",
+    "deploy/redrob-ee-den-api",
     "--",
     "node",
     "-e",
@@ -159,7 +159,7 @@ test.skipIf(skipReason !== null)(title, async ({ evidence }) => {
     const den = { apiUrl, webUrl };
     const activeAdmin = await signIn(den, {
       email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-      password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+      password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!",
     });
     admin = activeAdmin;
     await deleteConnectionsNamed(activeAdmin, "Kube allowed MCP ");

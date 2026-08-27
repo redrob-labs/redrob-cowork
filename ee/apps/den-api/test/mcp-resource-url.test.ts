@@ -109,7 +109,7 @@ console.log("ok")
       PATH: process.env.PATH ?? "",
       HOME: process.env.HOME ?? "",
       TMPDIR: process.env.TMPDIR ?? "",
-      DATABASE_URL: "mysql://root:password@127.0.0.1:3306/openwork_test",
+      DATABASE_URL: "mysql://root:password@127.0.0.1:3306/redrob_test",
       DB_MODE: "mysql",
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),
@@ -194,13 +194,13 @@ describe("getMcpResourceUrl", () => {
   test("auto-trusts a path-prefixed public API resource", () => {
     runMcpResourceProbe({
       betterAuthUrl: "https://app.example.com",
-      apiPublicUrl: "https://openwork.example/api/den",
+      apiPublicUrl: "https://redrob.example/api/den",
       route: "agent",
-      requestUrl: "https://openwork.example/api/den/mcp/agent",
-      expectedResource: "https://openwork.example/api/den/mcp/agent",
-      expectedMetadataUrl: "https://openwork.example/.well-known/oauth-protected-resource/api/den/mcp/agent",
-      metadataUrl: "https://openwork.example/api/den/mcp/agent",
-      expectedMetadataResource: "https://openwork.example/api/den/mcp/agent",
+      requestUrl: "https://redrob.example/api/den/mcp/agent",
+      expectedResource: "https://redrob.example/api/den/mcp/agent",
+      expectedMetadataUrl: "https://redrob.example/.well-known/oauth-protected-resource/api/den/mcp/agent",
+      metadataUrl: "https://redrob.example/api/den/mcp/agent",
+      expectedMetadataResource: "https://redrob.example/api/den/mcp/agent",
       expectedAuthorizationServer: "https://app.example.com/api/auth",
     })
   })

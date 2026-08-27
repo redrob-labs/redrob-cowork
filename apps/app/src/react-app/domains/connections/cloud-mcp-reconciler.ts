@@ -4,13 +4,13 @@ import {
   resolveCloudMcpResourceUrl,
 } from "../../../app/lib/den";
 import type {
-  OpenworkCloudMcpEngineRefresh,
-  OpenworkCloudMcpEngineRefreshResult,
-  OpenworkCloudMcpFailure,
-  OpenworkCloudMcpHealth,
-  OpenworkCloudMcpProviderModelContext,
-  OpenworkCloudMcpReconcilePayload,
-} from "../../../app/lib/openwork-server";
+  RedrobCloudMcpEngineRefresh,
+  RedrobCloudMcpEngineRefreshResult,
+  RedrobCloudMcpFailure,
+  RedrobCloudMcpHealth,
+  RedrobCloudMcpProviderModelContext,
+  RedrobCloudMcpReconcilePayload,
+} from "../../../app/lib/redrob-server";
 import {
   CLOUD_MCP_SERVER_NAME,
   clearCloudMcpScopedMetadata,
@@ -27,25 +27,25 @@ import {
 } from "./cloud-mcp-user-state";
 
 export const REDROB_CLOUD_EXPECTED_TOOLS = [
-  "openwork-cloud_search_capabilities",
-  "openwork-cloud_execute_capability",
+  "redrob-cloud_search_capabilities",
+  "redrob-cloud_execute_capability",
 ];
 
 export type CloudMcpClient = {
   baseUrl: string;
-  getOpenworkCloudMcpHealth: (
+  getRedrobCloudMcpHealth: (
     workspaceId: string,
-    providerModel?: OpenworkCloudMcpProviderModelContext,
+    providerModel?: RedrobCloudMcpProviderModelContext,
     options?: { probe?: boolean },
-  ) => Promise<OpenworkCloudMcpHealth>;
-  reconcileOpenworkCloudMcp: (
+  ) => Promise<RedrobCloudMcpHealth>;
+  reconcileRedrobCloudMcp: (
     workspaceId: string,
-    payload: OpenworkCloudMcpReconcilePayload,
-  ) => Promise<OpenworkCloudMcpHealth>;
-  refreshOpenworkCloudMcpEngine?: (
+    payload: RedrobCloudMcpReconcilePayload,
+  ) => Promise<RedrobCloudMcpHealth>;
+  refreshRedrobCloudMcpEngine?: (
     workspaceId: string,
     payload?: { provider?: string; model?: string; trigger?: string },
-  ) => Promise<OpenworkCloudMcpEngineRefreshResult>;
+  ) => Promise<RedrobCloudMcpEngineRefreshResult>;
 };
 
 export type CloudMcpOperationContext = CloudMcpScope & {
@@ -53,7 +53,7 @@ export type CloudMcpOperationContext = CloudMcpScope & {
   orgSlug?: string | null;
   orgName?: string | null;
   fallbackUrl?: string | null;
-  providerModel?: OpenworkCloudMcpProviderModelContext;
+  providerModel?: RedrobCloudMcpProviderModelContext;
   connectCatalogEnabled?: boolean;
   trigger?: string;
 };
@@ -62,7 +62,7 @@ export type CloudMcpOperationMode = "health" | "repair";
 
 export type CloudMcpOperationResult = {
   status: "checked" | "ready" | "repaired" | "unchanged" | "skipped" | "failed";
-  health: OpenworkCloudMcpHealth | null;
+  health: RedrobCloudMcpHealth | null;
   skippedReason?: "signed_out" | "missing_org" | "missing_workspace" | "disabled" | "deduped" | "mint_failed";
   attempts: number;
   markerWritten: boolean;
@@ -91,7 +91,7 @@ type CloudMcpReconcilerInput = {
   now?: number;
   configuredEnabled?: boolean | null;
   /**
-   * Ask the OpenWork server to also verify the Cloud endpoint directly
+   * Ask the Redrob Work server to also verify the Cloud endpoint directly
    * (initialize + tools/list outside the engine). Only meaningful for
    * mode "health"; repair reconciles always probe on the server.
    */
@@ -118,7 +118,7 @@ function normalizeCode(code: string | null | undefined): string {
   return code?.trim().toLowerCase().replace(/[-.]/g, "_") ?? "";
 }
 
-function isProviderProjectionFailure(failure?: OpenworkCloudMcpFailure | null): boolean {
+function isProviderProjectionFailure(failure?: RedrobCloudMcpFailure | null): boolean {
   if (!failure) return false;
   if (failure.stage === "provider_projection") return true;
   const code = normalizeCode(failure.code);
@@ -172,10 +172,10 @@ function resolveMcpUrl(token: DenMcpToken, fallbackUrl?: string | null): string 
   return fallback || null;
 }
 
-export function buildOpenworkCloudMcpReconcilePayload(input: {
+export function buildRedrobCloudMcpReconcilePayload(input: {
   context: CloudMcpOperationContext;
   token: DenMcpToken;
-}): OpenworkCloudMcpReconcilePayload | null {
+}): RedrobCloudMcpReconcilePayload | null {
   const workspaceId = input.context.workspaceId.trim();
   const url = resolveMcpUrl(input.token, input.context.fallbackUrl);
   if (!workspaceId || !url) return null;
@@ -219,9 +219,9 @@ export function isCloudMcpAuthTokenFailureCode(code: string | null | undefined):
   ) {
     return false;
   }
-  return normalized === "openwork_cloud_auth_required" ||
-    normalized === "openwork_cloud_auth_invalid" ||
-    normalized === "openwork_cloud_token_expired" ||
+  return normalized === "redrob_cloud_auth_required" ||
+    normalized === "redrob_cloud_auth_invalid" ||
+    normalized === "redrob_cloud_token_expired" ||
     // The Den rejects an expired/missing first-party bearer with exactly these
     // codes; the `_mcp_` infix means the `invalid_token` substring below never
     // matches them (field incident: token sat expired for 7 days because the
@@ -237,9 +237,9 @@ export function isCloudMcpAuthTokenFailureCode(code: string | null | undefined):
 /**
  * Health failures carry the primary `code` plus optional `aliases` (e.g. the
  * direct-probe 401 reports code `invalid_mcp_token` with alias
- * `openwork_cloud_token_expired`). Remint decisions must consider both.
+ * `redrob_cloud_token_expired`). Remint decisions must consider both.
  */
-export function isCloudMcpAuthTokenFailure(failure: Pick<OpenworkCloudMcpFailure, "code" | "aliases"> | null | undefined): boolean {
+export function isCloudMcpAuthTokenFailure(failure: Pick<RedrobCloudMcpFailure, "code" | "aliases"> | null | undefined): boolean {
   if (!failure) return false;
   if (isCloudMcpAuthTokenFailureCode(failure.code)) return true;
   return (failure.aliases ?? []).some((alias) => isCloudMcpAuthTokenFailureCode(alias));
@@ -263,7 +263,7 @@ function shouldSkipForPrerequisite(input: CloudMcpReconcilerInput, scope: CloudM
 }
 
 function writeUsableMarker(input: {
-  health: OpenworkCloudMcpHealth | null;
+  health: RedrobCloudMcpHealth | null;
   scope: CloudMcpScope;
   expiresAt: string | null;
 }): boolean {
@@ -273,7 +273,7 @@ function writeUsableMarker(input: {
 }
 
 async function probeHealth(input: CloudMcpReconcilerInput, scope: CloudMcpScope, options?: { writeFreshnessMarker?: boolean }): Promise<CloudMcpOperationResult> {
-  const health = await input.client.getOpenworkCloudMcpHealth(
+  const health = await input.client.getRedrobCloudMcpHealth(
     scope.workspaceId,
     input.context.providerModel,
     input.probe ? { probe: true } : undefined,
@@ -291,17 +291,17 @@ async function probeHealth(input: CloudMcpReconcilerInput, scope: CloudMcpScope,
   };
 }
 
-async function mintAndPost(input: CloudMcpReconcilerInput, scope: CloudMcpScope): Promise<{ health: OpenworkCloudMcpHealth | null; token: DenMcpToken | null }> {
+async function mintAndPost(input: CloudMcpReconcilerInput, scope: CloudMcpScope): Promise<{ health: RedrobCloudMcpHealth | null; token: DenMcpToken | null }> {
   const token = await input.mintToken({
     baseUrl: scope.denBaseUrl,
     authToken: input.context.denAuthToken,
     orgId: scope.orgId,
   });
   if (!token) return { health: null, token: null };
-  const payload = buildOpenworkCloudMcpReconcilePayload({ context: { ...input.context, ...scope }, token });
+  const payload = buildRedrobCloudMcpReconcilePayload({ context: { ...input.context, ...scope }, token });
   if (!payload) return { health: null, token };
   return {
-    health: await input.client.reconcileOpenworkCloudMcp(scope.workspaceId, payload),
+    health: await input.client.reconcileRedrobCloudMcp(scope.workspaceId, payload),
     token,
   };
 }
@@ -318,7 +318,7 @@ async function repairCloudMcp(input: CloudMcpReconcilerInput, scope: CloudMcpSco
     now: input.now ?? Date.now(),
     refreshMarginMs: input.refreshMarginMs,
   })) {
-    const health = await input.client.getOpenworkCloudMcpHealth(scope.workspaceId, input.context.providerModel);
+    const health = await input.client.getRedrobCloudMcpHealth(scope.workspaceId, input.context.providerModel);
     if (health.usable) return { status: "unchanged", health, attempts: 0, markerWritten: false, reminted: false };
   }
 
@@ -349,7 +349,7 @@ async function repairCloudMcp(input: CloudMcpReconcilerInput, scope: CloudMcpSco
   };
 }
 
-export async function runOpenworkCloudMcpReconciler(input: CloudMcpReconcilerInput): Promise<CloudMcpOperationResult> {
+export async function runRedrobCloudMcpReconciler(input: CloudMcpReconcilerInput): Promise<CloudMcpOperationResult> {
   const scope = normalizedContextScope(input.context);
   if (!scope) return { status: "skipped", health: null, skippedReason: "missing_workspace", attempts: 0, markerWritten: false, reminted: false };
   const prerequisite = shouldSkipForPrerequisite(input, scope);
@@ -371,19 +371,19 @@ export async function runOpenworkCloudMcpReconciler(input: CloudMcpReconcilerInp
 export type CloudMcpEngineRefreshRunResult = {
   status: "refreshed" | "failed" | "skipped";
   skippedReason?: "missing_workspace" | "unsupported";
-  health: OpenworkCloudMcpHealth | null;
-  refresh: OpenworkCloudMcpEngineRefresh | null;
+  health: RedrobCloudMcpHealth | null;
+  refresh: RedrobCloudMcpEngineRefresh | null;
 };
 
 const engineRefreshInFlight = new Map<string, Promise<CloudMcpEngineRefreshRunResult>>();
 
 /**
- * Force the engine to drop its openwork-cloud MCP client and reconnect.
+ * Force the engine to drop its redrob-cloud MCP client and reconnect.
  * OpenCode keeps a failed MCP failed forever (no automatic retry), so this is
  * the explicit "try again from scratch" lever: engine disconnect, then
  * re-registration from the persisted desired config, then a direct probe.
  */
-export async function runOpenworkCloudMcpEngineRefresh(input: {
+export async function runRedrobCloudMcpEngineRefresh(input: {
   client: CloudMcpClient;
   context: CloudMcpOperationContext;
 }): Promise<CloudMcpEngineRefreshRunResult> {
@@ -391,7 +391,7 @@ export async function runOpenworkCloudMcpEngineRefresh(input: {
   if (!scope?.workspaceId) {
     return { status: "skipped", skippedReason: "missing_workspace", health: null, refresh: null };
   }
-  const refreshEngine = input.client.refreshOpenworkCloudMcpEngine;
+  const refreshEngine = input.client.refreshRedrobCloudMcpEngine;
   if (!refreshEngine) {
     return { status: "skipped", skippedReason: "unsupported", health: null, refresh: null };
   }
@@ -423,7 +423,7 @@ export function cloudMcpFailureStageLabel(input: {
   signedIn: boolean;
   orgSelected: boolean;
   userState?: CloudMcpUserState | null;
-  health?: OpenworkCloudMcpHealth | null;
+  health?: RedrobCloudMcpHealth | null;
 }): string {
   if (!input.signedIn) return "Sign in required";
   if (!input.orgSelected) return "Select an organization";
@@ -436,7 +436,7 @@ export function cloudMcpFailureStageLabel(input: {
   if (code === "cloud_tools_missing") return "Cloud endpoint tools are missing";
   if (code === "cloud_status_missing" || code === "cloud_registration_failed") return "Cloud tools weren’t registered";
   if (isProviderProjectionFailure(input.health?.firstFailure)) return "Current model can’t use Cloud tools";
-  if (code.includes("tool_ids") || code.includes("client_registration")) return "OpenWork components need updating";
+  if (code.includes("tool_ids") || code.includes("client_registration")) return "Redrob Work components need updating";
   if (code === "extensions_plugin_missing") return "Agent instructions are out of date";
   if (code.includes("unreachable") || code.includes("connection") || code.includes("status_missing")) return "Cloud connection unavailable";
   return "Couldn’t apply Cloud access to this workspace";
@@ -446,9 +446,9 @@ export function cloudMcpRecommendedAction(input: {
   signedIn: boolean;
   orgSelected: boolean;
   userState?: CloudMcpUserState | null;
-  health?: OpenworkCloudMcpHealth | null;
+  health?: RedrobCloudMcpHealth | null;
 }): string {
-  if (!input.signedIn) return "Sign in to OpenWork Cloud.";
+  if (!input.signedIn) return "Sign in to Redrob Work Cloud.";
   if (!input.orgSelected) return "Choose the organization agents should use.";
   if (input.userState) return "Enable Agent access or use Repair and test when you want agents to use connected services.";
   const code = normalizeCode(input.health?.firstFailure?.code);
@@ -460,12 +460,12 @@ export function cloudMcpRecommendedAction(input: {
   if (code === "cloud_desired_missing" || code === "cloud_mcp_missing") return "Use Repair and test to apply agent access for this workspace.";
   if (code.includes("auth") || code.includes("token") || code.includes("unauthorized")) return "Use Repair and test to refresh Cloud authentication.";
   if (code.includes("membership")) return "Ask an organization admin to grant access.";
-  if (code.includes("scope")) return "Reconnect OpenWork Cloud with the required permissions.";
+  if (code.includes("scope")) return "Reconnect Redrob Work Cloud with the required permissions.";
   if (code.includes("policy") || code.includes("forbidden") || code.includes("resource")) return "Check organization policy and resource access.";
-  if (isProviderProjectionFailure(input.health?.firstFailure)) return "Choose a model that can use OpenWork Cloud tools.";
-  if (code.includes("tool_ids") || code.includes("client_registration")) return "Update OpenWork, then retry.";
-  if (code === "extensions_plugin_missing") return "Reload the agent so OpenWork instructions are current.";
-  if (code === "cloud_tools_missing") return "Reconnect OpenWork Cloud so the endpoint exposes search_capabilities and execute_capability.";
+  if (isProviderProjectionFailure(input.health?.firstFailure)) return "Choose a model that can use Redrob Work Cloud tools.";
+  if (code.includes("tool_ids") || code.includes("client_registration")) return "Update Redrob Work, then retry.";
+  if (code === "extensions_plugin_missing") return "Reload the agent so Redrob Work instructions are current.";
+  if (code === "cloud_tools_missing") return "Reconnect Redrob Work Cloud so the endpoint exposes search_capabilities and execute_capability.";
   if (code === "cloud_status_missing" || code === "cloud_registration_failed") return "Use Repair and test to register the Cloud tools.";
   return input.health?.firstFailure?.recommendedAction || "Use Repair and test, then check Advanced Settings if it still fails.";
 }
@@ -475,7 +475,7 @@ export function cloudMcpDisplaySummary(input: {
   orgSelected: boolean;
   connecting: boolean;
   userState?: CloudMcpUserState | null;
-  health?: OpenworkCloudMcpHealth | null;
+  health?: RedrobCloudMcpHealth | null;
 }): CloudMcpDisplaySummary {
   if (input.connecting) {
     return {
@@ -525,9 +525,9 @@ export function cloudMcpDisplaySummary(input: {
   };
 }
 
-export async function cleanupOpenworkCloudMcpAfterSignOut(input: {
+export async function cleanupRedrobCloudMcpAfterSignOut(input: {
   context: CloudMcpScope;
-  openworkClient: CleanupClient | null;
+  redrobClient: CleanupClient | null;
   opencodeClient: OpenCodeDisconnectClient | null;
   directory: string;
 }): Promise<void> {
@@ -535,8 +535,8 @@ export async function cleanupOpenworkCloudMcpAfterSignOut(input: {
   if (scope) clearCloudMcpScopedMetadata(scope);
 
   await Promise.all([
-    input.openworkClient && scope
-      ? input.openworkClient.removeMcp(scope.workspaceId, CLOUD_MCP_SERVER_NAME).catch(() => null)
+    input.redrobClient && scope
+      ? input.redrobClient.removeMcp(scope.workspaceId, CLOUD_MCP_SERVER_NAME).catch(() => null)
       : Promise.resolve(null),
     input.opencodeClient && input.directory.trim()
       ? input.opencodeClient.mcp.disconnect({ directory: input.directory.trim(), name: CLOUD_MCP_SERVER_NAME }).catch(() => null)

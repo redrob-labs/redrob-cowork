@@ -6,7 +6,7 @@ type FeedbackContext = {
   entrypoint?: string;
   deployment?: string;
   appVersion?: string;
-  openworkServerVersion?: string;
+  redrobServerVersion?: string;
   opencodeVersion?: string;
   osName?: string;
   osVersion?: string;
@@ -35,7 +35,7 @@ function sanitizeContext(input: FeedbackContext | undefined) {
     entrypoint: sanitizeValue(input?.entrypoint),
     deployment: sanitizeValue(input?.deployment),
     appVersion: sanitizeValue(input?.appVersion),
-    openworkServerVersion: sanitizeValue(input?.openworkServerVersion),
+    redrobServerVersion: sanitizeValue(input?.redrobServerVersion),
     opencodeVersion: sanitizeValue(input?.opencodeVersion),
     osName: sanitizeValue(input?.osName),
     osVersion: sanitizeValue(input?.osVersion),
@@ -50,7 +50,7 @@ function formatDiagnosticsSummary(context: ReturnType<typeof sanitizeContext>) {
     ["Entrypoint", context.entrypoint],
     ["Deployment", context.deployment],
     ["App version", context.appVersion],
-    ["OpenWork server", context.openworkServerVersion],
+    ["Redrob Work server", context.redrobServerVersion],
     ["OpenCode", context.opencodeVersion],
     ["OS", osLabel],
     ["Platform", context.platform],
@@ -140,11 +140,11 @@ export async function POST(request: Request) {
     email,
     message,
     mode,
-    source: context.source || "openwork-app",
+    source: context.source || "redrob-app",
     entrypoint: context.entrypoint || "unknown",
     deployment: context.deployment || "desktop",
     appVersion: context.appVersion || "unknown",
-    openworkServerVersion: context.openworkServerVersion || "unknown",
+    redrobServerVersion: context.redrobServerVersion || "unknown",
     opencodeVersion: context.opencodeVersion || "unknown",
     osName: context.osName || "unknown",
     osVersion: context.osVersion || "",

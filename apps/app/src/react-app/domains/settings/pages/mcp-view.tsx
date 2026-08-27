@@ -26,7 +26,7 @@ import {
   Zap,
 } from "lucide-react";
 
-import { isBuiltInOpenWorkExtension, getMcpServerName, type McpDirectoryInfo } from "../../../../app/constants";
+import { isBuiltInRedrobWorkExtension, getMcpServerName, type McpDirectoryInfo } from "../../../../app/constants";
 import { evaluateEnablement } from "../../../../app/enablement";
 import type { EnablementResult } from "../../../../app/extensions";
 import type { CloudImportedPlugin, CloudImportedPluginFile } from "../../../../app/cloud/import-state";
@@ -77,14 +77,14 @@ import {
   canDisconnectNativeProviderAccount,
   canMemberAuthorizeConnection,
 } from "../../connections/native-provider-connections";
-import type { OpenworkClaudePluginPreview } from "../../../../app/lib/openwork-server";
+import type { RedrobClaudePluginPreview } from "../../../../app/lib/redrob-server";
 import {
-  isOpenWorkExtensionEnabled,
-  isOpenWorkExtensionHidden,
+  isRedrobWorkExtensionEnabled,
+  isRedrobWorkExtensionHidden,
   REDROB_EXTENSION_STATE_CHANGED,
   readExtensionLayout,
-  setOpenWorkExtensionEnabled,
-  setOpenWorkExtensionHidden,
+  setRedrobWorkExtensionEnabled,
+  setRedrobWorkExtensionHidden,
   writeExtensionLayout,
 } from "../extension-state";
 import {
@@ -139,7 +139,7 @@ export type SkillItem = {
   trigger?: string;
   path: string;
   content?: string;
-  origin?: "local" | "openwork-connect";
+  origin?: "local" | "redrob-connect";
   marketplaceName?: string;
   pluginName?: string;
 };
@@ -156,7 +156,7 @@ export type McpViewProps = {
   installedCommands?: LibraryCommandItem[];
   /** Composer agents to render in Library. */
   installedAgents?: LibraryAgentItem[];
-  /** MCP capabilities assigned through OpenWork Connect. */
+  /** MCP capabilities assigned through Redrob Work Connect. */
   availableConnectMcpServers?: McpServerEntry[];
   availableConnectMcpStatuses?: McpStatusMap;
   /** Organization inventory is still being fetched and nothing is cached yet. */
@@ -175,7 +175,7 @@ export type McpViewProps = {
   mcpLastUpdatedAt: number | null;
   mcpStatuses: McpStatusMap;
   mcpConnectingName: string | null;
-  /** False when secure storage for OpenWork-managed sign-ins is unavailable on this device. */
+  /** False when secure storage for Redrob Work-managed sign-ins is unavailable on this device. */
   managedOAuthAvailable?: boolean;
   selectedMcp: string | null;
   setSelectedMcp: (name: string | null) => void;
@@ -191,10 +191,10 @@ export type McpViewProps = {
   isExtensionConnected?: (entry: McpDirectoryInfo) => boolean;
   /** Enablement context for evaluating extension active state. */
   enablementContext?: import("../../../../app/enablement").EnablementContext;
-  /** Organization policy restriction for OpenWork-provided built-in extensions. */
+  /** Organization policy restriction for Redrob Work-provided built-in extensions. */
   builtInExtensionsDisabled?: boolean;
   /** Preview a Claude Code plugin bundle from a GitHub URL ("Will install" disclosure). */
-  previewClaudePlugin?: (url: string) => Promise<OpenworkClaudePluginPreview>;
+  previewClaudePlugin?: (url: string) => Promise<RedrobClaudePluginPreview>;
   /** Install a Claude Code plugin bundle from a GitHub URL. */
   installClaudePlugin?: (url: string) => Promise<{ ok: boolean; message: string }>;
   /** Connected org-level External MCP Connections rendered in My Extensions. */
@@ -287,8 +287,8 @@ const serviceIcon = (name: string) => {
   if (lower.includes("devtools")) {
     return MonitorSmartphone;
   }
-  if (lower.includes("openwork") && lower.includes("cloud")) return Cloud;
-  if (lower.includes("openwork") && lower.includes("ui")) return MonitorSmartphone;
+  if (lower.includes("redrob") && lower.includes("cloud")) return Cloud;
+  if (lower.includes("redrob") && lower.includes("ui")) return MonitorSmartphone;
   return Plug2;
 };
 
@@ -302,7 +302,7 @@ const serviceColor = (name: string) => {
   if (lower.includes("devtools")) {
     return "text-amber-11";
   }
-  if (lower.includes("openwork")) return "text-gray-12";
+  if (lower.includes("redrob")) return "text-gray-12";
   return "text-dls-secondary";
 };
 
@@ -316,7 +316,7 @@ const serviceIconBg = (name: string) => {
   if (lower.includes("devtools")) {
     return "bg-amber-3 border-amber-6";
   }
-  if (lower.includes("openwork")) return "bg-gray-3 border-gray-6";
+  if (lower.includes("redrob")) return "bg-gray-3 border-gray-6";
   return "bg-dls-hover border-dls-border";
 };
 
@@ -439,8 +439,8 @@ export function McpView(props: McpViewProps) {
   const [mcpConnectFailure, setMcpConnectFailure] = useState<{ id: string; message: string } | null>(null);
   const [pendingPlugin, setPendingPlugin] = useState<CloudImportedPlugin | null>(null);
   const [detailSkillContent, setDetailSkillContent] = useState<string | null>(null);
-  const [openworkUiMcpCommand, setOpenworkUiMcpCommand] = useState<string[] | null>(null);
-  const [openworkUiMcpEnvironment, setOpenworkUiMcpEnvironment] = useState<Record<string, string> | null>(null);
+  const [redrobUiMcpCommand, setRedrobUiMcpCommand] = useState<string[] | null>(null);
+  const [redrobUiMcpEnvironment, setRedrobUiMcpEnvironment] = useState<Record<string, string> | null>(null);
   const [computerUseMcpCommand, setComputerUseMcpCommand] = useState<string[] | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<ExtensionInventoryFilter>(props.initialFilter ?? "all");
@@ -620,7 +620,7 @@ export function McpView(props: McpViewProps) {
     setMcpConnectFailure(null);
     if (target.kind === "skill") {
       setDetailSkillContent(target.skill.content ?? null);
-      if (!target.skill.content && target.skill.origin !== "openwork-connect" && props.readSkill) {
+      if (!target.skill.content && target.skill.origin !== "redrob-connect" && props.readSkill) {
         void props.readSkill(target.skill.name).then((result) => {
           if (result?.content) {
             setDetailSkillContent(result.content);
@@ -665,7 +665,7 @@ export function McpView(props: McpViewProps) {
     setDetailTarget(resolved);
     if (resolved?.kind === "skill") {
       setDetailSkillContent(resolved.skill.content ?? null);
-      if (!resolved.skill.content && resolved.skill.origin !== "openwork-connect" && props.readSkill) {
+      if (!resolved.skill.content && resolved.skill.origin !== "redrob-connect" && props.readSkill) {
         void props.readSkill(resolved.skill.name).then((result) => {
           if (result?.content) {
             setDetailSkillContent(result.content);
@@ -723,13 +723,13 @@ export function McpView(props: McpViewProps) {
     if (!isDesktopRuntime()) return;
     void (async () => {
       try {
-        const command = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpCommand");
+        const command = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getRedrobUiMcpCommand");
         if (Array.isArray(command) && command.every((part) => typeof part === "string")) {
-          setOpenworkUiMcpCommand(command);
+          setRedrobUiMcpCommand(command);
         }
-        const environment = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpEnvironment");
+        const environment = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getRedrobUiMcpEnvironment");
         if (environment && typeof environment === "object" && !Array.isArray(environment)) {
-          setOpenworkUiMcpEnvironment(Object.fromEntries(
+          setRedrobUiMcpEnvironment(Object.fromEntries(
             Object.entries(environment).filter((entry): entry is [string, string] =>
               typeof entry[0] === "string" && typeof entry[1] === "string"
             ),
@@ -740,8 +740,8 @@ export function McpView(props: McpViewProps) {
           setComputerUseMcpCommand(computerUseCommand);
         }
       } catch {
-        setOpenworkUiMcpCommand(null);
-        setOpenworkUiMcpEnvironment(null);
+        setRedrobUiMcpCommand(null);
+        setRedrobUiMcpEnvironment(null);
         setComputerUseMcpCommand(null);
       }
     })();
@@ -815,14 +815,14 @@ export function McpView(props: McpViewProps) {
       );
     });
 
-  // Auto-configured built-ins like openwork-cloud remain active but hidden from
+  // Auto-configured built-ins like redrob-cloud remain active but hidden from
   // Your apps until Show hidden reveals the row for disable/remove.
   const visibleMcpServers = inventoryState === "all" && (filter === "all" || filter === "mcp")
     ? showHidden
       ? props.mcpServers
       : props.mcpServers.filter((entry) => {
           const match = resolveQuickConnectMatch(entry.name);
-          return !match || !isOpenWorkExtensionHidden(match);
+          return !match || !isRedrobWorkExtensionHidden(match);
         })
     : [];
 
@@ -846,17 +846,17 @@ export function McpView(props: McpViewProps) {
   };
 
   const isEntryConfigured = (entry: McpDirectoryInfo) => {
-    if (props.builtInExtensionsDisabled && isBuiltInOpenWorkExtension(entry)) return false;
+    if (props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(entry)) return false;
     const result = enablementForEntry(entry);
     if (result) return result.active;
     // Fallback for entries without enablement context.
-    if (isToggleOnlyExtension(entry)) return isOpenWorkExtensionEnabled(entry);
+    if (isToggleOnlyExtension(entry)) return isRedrobWorkExtensionEnabled(entry);
     if (entry.kind === "extension" && !isMcpBackedExtension(entry)) return props.isExtensionConnected?.(entry) ?? false;
     return isQuickConnectConfigured(entry);
   };
 
   const launchCommandForEntry = (entry: McpDirectoryInfo) => {
-    if (entry.serverName === "openwork-ui") return openworkUiMcpCommand ?? undefined;
+    if (entry.serverName === "redrob-ui") return redrobUiMcpCommand ?? undefined;
     if (entry.serverName === "computer-use") return computerUseMcpCommand ?? entry.command;
     return entry.command;
   };
@@ -870,11 +870,11 @@ export function McpView(props: McpViewProps) {
     return resolved?.status ?? "disconnected";
   };
 
-  const hiddenCount = quickConnectList.filter((entry) => isOpenWorkExtensionHidden(entry)).length +
-    (props.installedSkills ?? []).filter((skill) => isOpenWorkExtensionHidden(getSkillHiddenId(skill))).length +
-    (props.installedPlugins ?? []).filter((plugin) => isOpenWorkExtensionHidden(`plugin:${plugin.pluginId}`)).length;
+  const hiddenCount = quickConnectList.filter((entry) => isRedrobWorkExtensionHidden(entry)).length +
+    (props.installedSkills ?? []).filter((skill) => isRedrobWorkExtensionHidden(getSkillHiddenId(skill))).length +
+    (props.installedPlugins ?? []).filter((plugin) => isRedrobWorkExtensionHidden(`plugin:${plugin.pluginId}`)).length;
   const policyHiddenBuiltInCount = props.builtInExtensionsDisabled
-    ? quickConnectList.filter((entry) => isBuiltInOpenWorkExtension(entry) && !isOpenWorkExtensionHidden(entry)).length
+    ? quickConnectList.filter((entry) => isBuiltInRedrobWorkExtension(entry) && !isRedrobWorkExtensionHidden(entry)).length
     : 0;
   const hiddenOrPolicyCount = hiddenCount + policyHiddenBuiltInCount;
 
@@ -937,14 +937,14 @@ export function McpView(props: McpViewProps) {
       {detailEntry ? (() => {
         const extensionConfigSlot = props.configSlotForEntry?.(detailEntry) ?? null;
         const hasConfigSlot = extensionConfigSlot !== null;
-        const hidden = isOpenWorkExtensionHidden(detailEntry);
-        const disabledReason = props.builtInExtensionsDisabled && isBuiltInOpenWorkExtension(detailEntry)
+        const hidden = isRedrobWorkExtensionHidden(detailEntry);
+        const disabledReason = props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(detailEntry)
           ? builtInExtensionDisabledReason()
           : null;
         const isConnected = disabledReason
           ? false
           : isToggleOnlyExtension(detailEntry)
-          ? isOpenWorkExtensionEnabled(detailEntry)
+          ? isRedrobWorkExtensionEnabled(detailEntry)
           : detailEntry.kind === "extension" && !isMcpBackedExtension(detailEntry)
           ? props.isExtensionConnected?.(detailEntry) ?? false
           : isQuickConnectConfigured(detailEntry);
@@ -970,13 +970,13 @@ export function McpView(props: McpViewProps) {
             resourceLabels={extensionResourceLabels(detailEntry)}
             contributionLabels={extensionContributionLabels(detailEntry)}
             launchCommand={launchCommandForEntry(detailEntry)}
-            environment={detailEntry.serverName === "openwork-ui" ? openworkUiMcpEnvironment ?? undefined : undefined}
+            environment={detailEntry.serverName === "redrob-ui" ? redrobUiMcpEnvironment ?? undefined : undefined}
             url={typeof detailEntry.url === "string" ? detailEntry.url : undefined}
             oauth={detailEntry.oauth}
             configSlot={disabledReason ? null : extensionConfigSlot}
             showEnablementCard
             onConnect={disabledReason ? undefined : isToggleOnlyExtension(detailEntry) ? () => {
-              setOpenWorkExtensionEnabled(detailEntry, true);
+              setRedrobWorkExtensionEnabled(detailEntry, true);
               closeDetail();
             } : hasConfigSlot ? undefined : async () => {
               setMcpConnectFailure(null);
@@ -991,20 +991,20 @@ export function McpView(props: McpViewProps) {
               });
             }}
             onUninstall={disabledReason ? undefined : isToggleOnlyExtension(detailEntry) && isConnected ? () => {
-              setOpenWorkExtensionEnabled(detailEntry, false);
+              setRedrobWorkExtensionEnabled(detailEntry, false);
             } : isQuickConnectConfigured(detailEntry) ? () => {
               const slug = getMcpIdentityKey(detailEntry);
               props.removeMcp(slug);
               closeDetail();
             } : undefined}
-            onHide={() => setOpenWorkExtensionHidden(detailEntry, true)}
-            onShow={() => setOpenWorkExtensionHidden(detailEntry, false)}
+            onHide={() => setRedrobWorkExtensionHidden(detailEntry, true)}
+            onShow={() => setRedrobWorkExtensionHidden(detailEntry, false)}
           />
         );
       })() : null}
 
       {detailSkill ? (() => {
-        const hidden = isOpenWorkExtensionHidden(getSkillHiddenId(detailSkill));
+        const hidden = isRedrobWorkExtensionHidden(getSkillHiddenId(detailSkill));
         return (
           <ExtensionDetailModal
             open={!!detailSkill}
@@ -1015,11 +1015,11 @@ export function McpView(props: McpViewProps) {
             description={detailSkill.description ?? "Installed skill"}
             taxonomy="skill"
             connected={true}
-            connectedLabel={detailSkill.origin === "openwork-connect" ? "Available through OpenWork Connect" : undefined}
+            connectedLabel={detailSkill.origin === "redrob-connect" ? "Available through Redrob Work Connect" : undefined}
             hidden={hidden}
-            path={detailSkill.origin === "openwork-connect" ? undefined : detailSkill.path}
+            path={detailSkill.origin === "redrob-connect" ? undefined : detailSkill.path}
             sourceLabel={
-              detailSkill.origin === "openwork-connect"
+              detailSkill.origin === "redrob-connect"
                 ? [detailSkill.pluginName, detailSkill.marketplaceName].filter(Boolean).join(" · ") || t("extensions.surface_cloud")
                 : detailSkill.path
             }
@@ -1029,15 +1029,15 @@ export function McpView(props: McpViewProps) {
             openFileLabel={t("extensions.detail_open_skill")}
             contentPreview={detailSkillContent ?? undefined}
             configSlot={openInDenAction({ id: detailSkill.path })}
-            onReveal={detailSkill.path && detailSkill.origin !== "openwork-connect" ? () => {
+            onReveal={detailSkill.path && detailSkill.origin !== "redrob-connect" ? () => {
               void revealDesktopItemInDir(detailSkill.path);
             } : undefined}
-            onUninstall={props.uninstallSkill && detailSkill.origin !== "openwork-connect" ? () => {
+            onUninstall={props.uninstallSkill && detailSkill.origin !== "redrob-connect" ? () => {
               props.uninstallSkill?.(detailSkill.name);
               closeDetail();
             } : undefined}
-            onHide={() => setOpenWorkExtensionHidden(getSkillHiddenId(detailSkill), true)}
-            onShow={() => setOpenWorkExtensionHidden(getSkillHiddenId(detailSkill), false)}
+            onHide={() => setRedrobWorkExtensionHidden(getSkillHiddenId(detailSkill), true)}
+            onShow={() => setRedrobWorkExtensionHidden(getSkillHiddenId(detailSkill), false)}
           />
         );
       })() : null}
@@ -1102,11 +1102,11 @@ export function McpView(props: McpViewProps) {
               ? `Provided by ${detailConnectMcp.pluginName}${detailConnectMcp.marketplaceName ? ` · ${detailConnectMcp.marketplaceName}` : ""}.`
               : detailConnectMcp.marketplaceName
                 ? `Provided by ${detailConnectMcp.marketplaceName}.`
-                : "Available through OpenWork Connect."
+                : "Available through Redrob Work Connect."
           }
           taxonomy="connection"
           connected={(props.availableConnectMcpStatuses?.[detailConnectMcp.id ?? detailConnectMcp.name]?.status) === "connected"}
-          connectedLabel="Available through OpenWork Connect"
+          connectedLabel="Available through Redrob Work Connect"
           disconnectedLabel="Setup required"
           url={detailConnectMcp.config.type === "remote" ? detailConnectMcp.config.url : undefined}
           oauth={detailConnectMcp.config.type === "remote"}
@@ -1124,7 +1124,7 @@ export function McpView(props: McpViewProps) {
       ) : null}
 
       {detailPlugin ? (() => {
-        const hidden = isOpenWorkExtensionHidden(`plugin:${detailPlugin.pluginId}`);
+        const hidden = isRedrobWorkExtensionHidden(`plugin:${detailPlugin.pluginId}`);
         const marketplaceName = detailPlugin.files.find((file) => file.marketplaceName)?.marketplaceName;
         return (
           <ExtensionDetailModal
@@ -1160,8 +1160,8 @@ export function McpView(props: McpViewProps) {
               void props.removeCloudPlugin?.(detailPlugin.pluginId);
               closeDetail();
             } : undefined}
-            onHide={() => setOpenWorkExtensionHidden(`plugin:${detailPlugin.pluginId}`, true)}
-            onShow={() => setOpenWorkExtensionHidden(`plugin:${detailPlugin.pluginId}`, false)}
+            onHide={() => setRedrobWorkExtensionHidden(`plugin:${detailPlugin.pluginId}`, true)}
+            onShow={() => setRedrobWorkExtensionHidden(`plugin:${detailPlugin.pluginId}`, false)}
           />
         );
       })() : null}
@@ -1285,7 +1285,7 @@ export function McpView(props: McpViewProps) {
 
       {props.builtInExtensionsDisabled ? (
         <div className="mb-5 rounded-xl border border-amber-6 bg-amber-2 px-4 py-3 text-xs text-amber-11">
-          Built-in OpenWork extensions are disabled by your organization. Use Show hidden to review blocked built-ins.
+          Built-in Redrob Work extensions are disabled by your organization. Use Show hidden to review blocked built-ins.
         </div>
       ) : null}
 
@@ -1367,7 +1367,7 @@ export function McpView(props: McpViewProps) {
         skillCount={skillCount}
         entries={
           quickConnectList.filter((entry) => {
-            if (!showHidden && (isOpenWorkExtensionHidden(entry) || (props.builtInExtensionsDisabled && isBuiltInOpenWorkExtension(entry)))) return false;
+            if (!showHidden && (isRedrobWorkExtensionHidden(entry) || (props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(entry)))) return false;
             if (!matchesExtensionFilter(
               filter,
               taxonomyForDirectoryEntry(entry),
@@ -1380,7 +1380,7 @@ export function McpView(props: McpViewProps) {
         }
         installedSkills={
           installedSkills.filter((skill) => {
-            if (!showHidden && isOpenWorkExtensionHidden(getSkillHiddenId(skill))) return false;
+            if (!showHidden && isRedrobWorkExtensionHidden(getSkillHiddenId(skill))) return false;
             if (!matchesExtensionFilter(filter, "skill")) return false;
             if (!search.trim()) return true;
             const q = search.toLowerCase();
@@ -1423,7 +1423,7 @@ export function McpView(props: McpViewProps) {
         onStateCountsChange={setInventoryStateCounts}
         installedPlugins={
           installedPlugins.filter((plugin) => {
-            if (!showHidden && isOpenWorkExtensionHidden(`plugin:${plugin.pluginId}`)) return false;
+            if (!showHidden && isRedrobWorkExtensionHidden(`plugin:${plugin.pluginId}`)) return false;
             if (!matchesExtensionFilter(filter, "plugin")) return false;
             if (!search.trim()) return true;
             const q = search.toLowerCase();
@@ -1449,11 +1449,11 @@ export function McpView(props: McpViewProps) {
         organizationName={props.organizationName}
         busy={props.busy}
         connectingName={props.mcpConnectingName}
-        isEntryHidden={(entry) => isOpenWorkExtensionHidden(entry)}
-        isSkillHidden={(skill) => isOpenWorkExtensionHidden(getSkillHiddenId(skill))}
-        isPluginHidden={(plugin) => isOpenWorkExtensionHidden(`plugin:${plugin.pluginId}`)}
+        isEntryHidden={(entry) => isRedrobWorkExtensionHidden(entry)}
+        isSkillHidden={(skill) => isRedrobWorkExtensionHidden(getSkillHiddenId(skill))}
+        isPluginHidden={(plugin) => isRedrobWorkExtensionHidden(`plugin:${plugin.pluginId}`)}
         disabledReasonForEntry={(entry) =>
-          props.builtInExtensionsDisabled && isBuiltInOpenWorkExtension(entry)
+          props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(entry)
             ? builtInExtensionDisabledReason()
             : null
         }
@@ -1832,7 +1832,7 @@ function McpQuickConnectSection(props: {
 
   for (const skill of props.installedSkills ?? []) {
     const hidden = props.isSkillHidden(skill);
-    const fromOrg = skill.origin === "openwork-connect";
+    const fromOrg = skill.origin === "redrob-connect";
     cards.push({
       key: `skill:${skill.path}`,
       group: "ready",

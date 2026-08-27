@@ -22,9 +22,9 @@ RUN apt-get update \
 
 WORKDIR /workspace
 
-RUN git clone --depth 1 --branch dev https://github.com/different-ai/openwork.git . \
-  && mkdir -p /workspace/.openwork-daytona \
-  && sha256sum /workspace/pnpm-lock.yaml | cut -d ' ' -f 1 > /workspace/.openwork-daytona/pnpm-lock.sha256 \
+RUN git clone --depth 1 --branch dev https://github.com/redrob-labs/redrob-work.git . \
+  && mkdir -p /workspace/.redrob-daytona \
+  && sha256sum /workspace/pnpm-lock.yaml | cut -d ' ' -f 1 > /workspace/.redrob-daytona/pnpm-lock.sha256 \
   && git gc --prune=now \
   && rm -rf /home/daytona/.cache /home/daytona/.npm /home/daytona/.local/share/pnpm/store \
     /workspace/node_modules

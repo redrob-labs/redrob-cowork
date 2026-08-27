@@ -100,7 +100,7 @@ async function prepareElectronNativeBinding(): Promise<void> {
   const electronVersion = isRecord(electronPackage) && typeof electronPackage.version === "string" ? electronPackage.version : "";
   if (!electronVersion) throw new Error("Could not resolve the Electron version for the native witness build.");
 
-  const root = await mkdtemp(join(tmpdir(), "openwork-electron-native-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-electron-native-"));
   const moduleCopy = join(root, "better-sqlite3");
   const home = join(root, "home");
   await cp(source, moduleCopy, { recursive: true, dereference: true });
@@ -234,7 +234,7 @@ async function startProviderWitness(): Promise<ProviderWitness> {
 }
 
 function auth(session: DenSession, orgId: string): Record<string, string> {
-  return { authorization: `Bearer ${session.token}`, "x-openwork-org-id": orgId };
+  return { authorization: `Bearer ${session.token}`, "x-redrob-org-id": orgId };
 }
 
 async function organizationIdByName(session: DenSession, name: string): Promise<string> {
@@ -313,8 +313,8 @@ async function waitForAnalytics(
 
 async function configureProvider(appSurface: Surface, workspaceId: string, baseUrl: string, apiKey: string): Promise<void> {
   const configured = await evalIn(appSurface, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -346,22 +346,22 @@ async function configureProvider(appSurface: Surface, workspaceId: string, baseU
     const reloaded = await request("/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/engine/reload", { method: "POST" });
     if (reloaded !== "ok") return reloaded;
     let preferences = {};
-    try { preferences = JSON.parse(localStorage.getItem("openwork.preferences") || "{}"); } catch { preferences = {}; }
+    try { preferences = JSON.parse(localStorage.getItem("redrob.preferences") || "{}"); } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(defaultModelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(defaultModelValue)});
-    localStorage.removeItem("openwork.sessionModels.v1");
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(defaultModelValue)});
+    localStorage.removeItem("redrob.sessionModels.v1");
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 30_000 });
   expect(configured).toBe("ok");
   await evalIn(appSurface, "location.reload(); true").catch(() => undefined);
   await delay(1_000);
-  await waitFor(appSurface, "Boolean(window.__openworkControl)", { timeoutMs: 60_000, label: "desktop control after provider configuration reload" });
+  await waitFor(appSurface, "Boolean(window.__redrobControl)", { timeoutMs: 60_000, label: "desktop control after provider configuration reload" });
 }
 
 async function createFreshSession(appSurface: Surface, workspaceId: string): Promise<string> {
@@ -370,8 +370,8 @@ async function createFreshSession(appSurface: Surface, workspaceId: string): Pro
   let last = "not attempted";
   while (Date.now() < deadline && !sessionId) {
     const result = await evalIn(appSurface, `(async () => {
-      const port = localStorage.getItem("openwork.server.port");
-      const token = localStorage.getItem("openwork.server.token");
+      const port = localStorage.getItem("redrob.server.port");
+      const token = localStorage.getItem("redrob.server.token");
       if (!port || !token) return { error: "missing local server credentials" };
       let response;
       try {
@@ -408,7 +408,7 @@ async function createFreshSession(appSurface: Surface, workspaceId: string): Pro
 async function sessionModelValue(appSurface: Surface, sessionId: string): Promise<string> {
   const value = await evalIn(appSurface, `(() => {
     try {
-      const selections = JSON.parse(localStorage.getItem("openwork.sessionModels.v1") || "{}");
+      const selections = JSON.parse(localStorage.getItem("redrob.sessionModels.v1") || "{}");
       const model = selections?.[${JSON.stringify(sessionId)}]?.model;
       return model?.providerID && model?.modelID ? model.providerID + "/" + model.modelID : "";
     } catch {
@@ -477,8 +477,8 @@ async function openAnalyticsDashboard(session: DenSession, name: string): Promis
       label: "Den Web origin before analytics auth handoff",
     });
     const tokenStored = await evalIn(browser, `(() => {
-      localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(session.token)});
-      return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(session.token)};
+      localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(session.token)});
+      return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(session.token)};
     })()`);
     expect(tokenStored).toBe(true);
     await navigate(browser.client, `${session.webUrl}/dashboard/analytics`);

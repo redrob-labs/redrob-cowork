@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url"
 const denApiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DB_MODE = process.env.DB_MODE ?? "mysql"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
@@ -24,7 +24,7 @@ function probeAccessTokenLifetime(overrides: Record<string, string>) {
       PATH: process.env.PATH ?? "",
       HOME: process.env.HOME ?? "",
       TMPDIR: process.env.TMPDIR ?? "",
-      DATABASE_URL: "mysql://root:password@127.0.0.1:3306/openwork_test",
+      DATABASE_URL: "mysql://root:password@127.0.0.1:3306/redrob_test",
       DB_MODE: "mysql",
       DEN_DB_ENCRYPTION_KEY: "x".repeat(32),
       BETTER_AUTH_SECRET: "y".repeat(32),

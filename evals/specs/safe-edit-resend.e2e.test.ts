@@ -280,11 +280,11 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     },
   });
   const workspace = await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-safe-edit-resend-${Date.now()}`,
+    path: `/tmp/redrob-safe-edit-resend-${Date.now()}`,
   });
   const configured = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -315,37 +315,37 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     // A slow dispose reports 504 opencode_reload_timeout while the reload
     // keeps going; the engine-ready poll below owns convergence.
     if (reloaded !== "ok" && !reloaded.includes("opencode_reload_timeout")) return reloaded;
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
-    localStorage.removeItem("openwork.sessionModels." + workspaceId);
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.removeItem("redrob.sessionModels." + workspaceId);
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 60_000 });
   expect(configured).toBe("ok");
   // Preferences hydrate at boot, so reload unconditionally: without this the
   // engine's built-in free model stays the default and out-competes the mock.
   await evalIn(app, "location.reload(); true");
-  await waitFor(app, "Boolean(window.__openworkControl)", {
+  await waitFor(app, "Boolean(window.__redrobControl)", {
     timeoutMs: 30_000,
     label: "app reloaded with safe edit mock model preferences",
   });
 
   const credentials = parseRuntimeCredentials(await evalIn(app, `JSON.stringify({
-    port: localStorage.getItem("openwork.server.port") ?? "",
-    token: localStorage.getItem("openwork.server.token") ?? "",
+    port: localStorage.getItem("redrob.server.port") ?? "",
+    token: localStorage.getItem("redrob.server.token") ?? "",
   })`));
   // The engine restarts after /engine/reload; sending into that window races
   // the swap and strands the run behind an "OpenCode unavailable" banner.
   await waitForEngineReady(credentials, workspace.workspaceId);
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "new task action enabled",
   });
@@ -417,8 +417,8 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   );
 
   const faultInstalled = await evalIn(app, `(() => {
-    const originalKey = "__openworkSafeEditOriginalFetch";
-    const countKey = "__openworkSafeEditFaultCount";
+    const originalKey = "__redrobSafeEditOriginalFetch";
+    const countKey = "__redrobSafeEditFaultCount";
     if (!globalThis[originalKey]) globalThis[originalKey] = globalThis.fetch.bind(globalThis);
     const original = globalThis[originalKey];
     globalThis[countKey] = 0;
@@ -449,7 +449,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
       && transcript.includes(${JSON.stringify(replies[0])})
       && transcript.includes(${JSON.stringify(secondPrompt)})
       && transcript.includes(${JSON.stringify(replies[1])})
-      && globalThis["__openworkSafeEditFaultCount"] === 1;
+      && globalThis["__redrobSafeEditFaultCount"] === 1;
   })()`, { timeoutMs: 30_000, label: "failed edit send kept transcript and surfaced error" });
   const rolledBack = await waitForEngineSnapshot(
     credentials,
@@ -468,11 +468,11 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   );
 
   const faultCleared = await evalIn(app, `(() => {
-    const original = globalThis["__openworkSafeEditOriginalFetch"];
+    const original = globalThis["__redrobSafeEditOriginalFetch"];
     if (typeof original !== "function") return false;
     globalThis.fetch = original;
-    delete globalThis["__openworkSafeEditOriginalFetch"];
-    delete globalThis["__openworkSafeEditFaultCount"];
+    delete globalThis["__redrobSafeEditOriginalFetch"];
+    delete globalThis["__redrobSafeEditFaultCount"];
     return true;
   })()`);
   expect(faultCleared).toBe(true);

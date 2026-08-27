@@ -1,9 +1,9 @@
 export type DenOrgMode = "single_org" | "multi_org";
 
 export type DenWebRuntimeConfig = {
-  openworkAppConnectUrl: string;
-  openworkWebUrl: string;
-  openworkAuthCallbackUrl: string;
+  redrobAppConnectUrl: string;
+  redrobWebUrl: string;
+  redrobAuthCallbackUrl: string;
   orgMode: DenOrgMode;
   singleOrgName: string;
   singleOrgSlug: string;
@@ -14,11 +14,11 @@ export type DenWebRuntimeConfig = {
 export const DEFAULT_REDROB_WEB_URL = "https://web.redrob.io";
 
 export const EMPTY_RUNTIME_CONFIG: DenWebRuntimeConfig = {
-  openworkAppConnectUrl: "",
-  openworkWebUrl: DEFAULT_REDROB_WEB_URL,
-  openworkAuthCallbackUrl: "",
+  redrobAppConnectUrl: "",
+  redrobWebUrl: DEFAULT_REDROB_WEB_URL,
+  redrobAuthCallbackUrl: "",
   orgMode: "single_org",
-  singleOrgName: "OpenWork",
+  singleOrgName: "Redrob Work",
   singleOrgSlug: "default",
   singleOrgAllowPublicSignup: false,
   singleOrgSsoConfigured: false
@@ -47,11 +47,11 @@ function normalizeRuntimeConfig(value: unknown): DenWebRuntimeConfig {
   const singleOrgName = readStringProperty(value, "singleOrgName");
   const singleOrgSlug = readStringProperty(value, "singleOrgSlug");
   return {
-    openworkAppConnectUrl: readStringProperty(value, "openworkAppConnectUrl"),
-    openworkWebUrl: readStringProperty(value, "openworkWebUrl") || DEFAULT_REDROB_WEB_URL,
-    openworkAuthCallbackUrl: readStringProperty(value, "openworkAuthCallbackUrl"),
+    redrobAppConnectUrl: readStringProperty(value, "redrobAppConnectUrl"),
+    redrobWebUrl: readStringProperty(value, "redrobWebUrl") || DEFAULT_REDROB_WEB_URL,
+    redrobAuthCallbackUrl: readStringProperty(value, "redrobAuthCallbackUrl"),
     orgMode: normalizeOrgMode(readStringProperty(value, "orgMode")),
-    singleOrgName: singleOrgName || "OpenWork",
+    singleOrgName: singleOrgName || "Redrob Work",
     singleOrgSlug: singleOrgSlug || "default",
     singleOrgAllowPublicSignup: readBooleanProperty(value, "singleOrgAllowPublicSignup"),
     singleOrgSsoConfigured: readBooleanProperty(value, "singleOrgSsoConfigured")

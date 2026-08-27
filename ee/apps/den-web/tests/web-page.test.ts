@@ -53,13 +53,13 @@ describe("Web dashboard page", () => {
 
   test("renders the external Web button with the configured href", () => {
     const html = renderToStaticMarkup(createElement(WebOpenButton, {
-      openworkWebUrl: DEFAULT_REDROB_WEB_URL,
+      redrobWebUrl: DEFAULT_REDROB_WEB_URL,
     }));
 
     expect(html).toContain(`href="${DEFAULT_REDROB_WEB_URL}"`);
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
-    expect(html).toContain("Open OpenWork Web");
+    expect(html).toContain("Open Redrob Work Web");
   });
 
   test("runtime config exposes the default Web URL and deployment override", async () => {
@@ -67,10 +67,10 @@ describe("Web dashboard page", () => {
     delete process.env.DEN_WEB_REDROB_WEB_URL;
 
     const defaultPayload: unknown = await (await GET()).json();
-    expect(readStringProperty(defaultPayload, "openworkWebUrl")).toBe(DEFAULT_REDROB_WEB_URL);
+    expect(readStringProperty(defaultPayload, "redrobWebUrl")).toBe(DEFAULT_REDROB_WEB_URL);
 
     process.env.DEN_WEB_REDROB_WEB_URL = "https://self-hosted.example.test";
     const overridePayload: unknown = await (await GET()).json();
-    expect(readStringProperty(overridePayload, "openworkWebUrl")).toBe("https://self-hosted.example.test");
+    expect(readStringProperty(overridePayload, "redrobWebUrl")).toBe("https://self-hosted.example.test");
   });
 });

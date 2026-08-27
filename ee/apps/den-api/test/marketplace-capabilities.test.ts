@@ -24,7 +24,7 @@ import { memberFacingMcpConnectionsEnabled } from "../src/capability-sources/ext
 import type { McpMemberIdentity } from "../src/mcp/external-capabilities.js"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_pr3"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_pr3"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -672,7 +672,7 @@ describe("marketplace capabilities source", () => {
     if (!missingConnection.ok) throw new Error(missingConnection.message)
     expect(missingConnection.result.serverSpec).toEqual(serverSpec)
     expect(missingConnection.result.status).toBe("needs_connection")
-    expect(missingConnection.result.hint).toContain("OpenWork Cloud -> Connectors")
+    expect(missingConnection.result.hint).toContain("Redrob Work Cloud -> Connectors")
 
     const connectionId = createDenTypeId("externalMcpConnection")
     await db.insert(ExternalMcpConnectionTable).values({
@@ -861,13 +861,13 @@ describe("marketplace capabilities source", () => {
     expect(match?.mcpRequirements?.map((requirement) => requirement.serverName)).toEqual(["alpha", "slack"])
     expect(match?.mcpRequirements?.every((requirement) => requirement.pluginName === "Revenue Ops Plugin")).toBe(true)
     expect(match?.mcpRequirements?.every((requirement) => requirement.state === "needs_admin_setup")).toBe(true)
-    expect(match?.action?.surface).toBe("openwork_organization_connections")
+    expect(match?.action?.surface).toBe("redrob_organization_connections")
     expectOrganizationConnectionsUrl(match?.action?.url)
 
     const result = await execute(teamMember, seeded)
     if (!result.ok) throw new Error(result.message)
     expect(result.result.status).toBe("needs_admin_setup")
-    expect(result.result.action?.surface).toBe("openwork_organization_connections")
+    expect(result.result.action?.surface).toBe("redrob_organization_connections")
     expect(result.result.mcpRequirements?.map((requirement) => requirement.serverName)).toEqual(["alpha", "slack"])
   })
 

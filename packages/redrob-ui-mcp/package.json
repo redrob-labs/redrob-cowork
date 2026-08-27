@@ -1,0 +1,30 @@
+{
+  "name": "redrob-ui-mcp",
+  "version": "0.2.0",
+  "description": "MCP server for Redrob Work app context and semantic UI control",
+  "author": "Redrob Work <support@redrob.io>",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "redrob-ui-mcp": "index.mjs"
+  },
+  "files": [
+    "index.mjs"
+  ],
+  "scripts": {
+    "check": "node --check index.mjs",
+    "test": "node --check index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redrob-labs/redrob-work.git",
+    "directory": "packages/redrob-ui-mcp"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  }
+}

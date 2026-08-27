@@ -16,7 +16,7 @@ import {
   drainPendingDeepLinks,
   type DeepLinkBridgeDetail,
 } from "../../../app/lib/deep-link-bridge";
-import { parseConnectDeepLink } from "../../../app/lib/openwork-links";
+import { parseConnectDeepLink } from "../../../app/lib/redrob-links";
 import { isDesktopRuntime } from "../../../app/utils";
 import { ConnectConfirmDialog, type ConnectConfirmPhase } from "./connect-confirm-dialog";
 

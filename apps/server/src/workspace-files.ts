@@ -5,8 +5,8 @@ export function opencodeConfigPath(workspaceRoot: string): string {
   return resolveWorkspaceOpencodeConfigPath(workspaceRoot);
 }
 
-export function openworkConfigPath(workspaceRoot: string): string {
-  return join(workspaceRoot, ".opencode", "openwork.json");
+export function redrobConfigPath(workspaceRoot: string): string {
+  return join(workspaceRoot, ".opencode", "redrob.json");
 }
 
 export function projectSkillsDir(workspaceRoot: string): string {

@@ -185,7 +185,7 @@ const MODEL_LINEUP: LineupModel[] = Object.entries(INFERENCE_MODEL_ALIASES)
     const detail = MODEL_DETAILS[id];
     return {
       id,
-      name: model.displayName.replace(/^OpenWork:\s*/, ""),
+      name: model.displayName.replace(/^Redrob Work:\s*/, ""),
       bestFor: detail?.bestFor ?? "General knowledge work",
       monogram: detail?.monogram ?? id.split("/")[0].slice(0, 2).toUpperCase(),
     };

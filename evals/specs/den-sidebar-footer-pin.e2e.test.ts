@@ -120,8 +120,8 @@ test(title, async ({ evidence, place }) => {
   });
 
   const adminTokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(den.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(den.admin.token)};
   })()`);
   expect(adminTokenStored).toBe(true);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/org-settings`);

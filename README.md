@@ -116,13 +116,13 @@ That sets `REDROB_DEV_PROFILE=auto`, derives a stable profile name from the work
 
 `dev:worktree` also defaults `REDROB_ELECTRON_USE_MOCK_KEYCHAIN=1`. A brand-new profile has no stored credentials, so on macOS the real keychain prompts as soon as Chromium persists an authenticated cookie, and that modal blocks Electron's main loop until it is dismissed. Set `REDROB_ELECTRON_USE_MOCK_KEYCHAIN=0` if you specifically want the system keychain in an isolated profile.
 
-Dev startup prints a banner like `[openwork] dev profile=... cdp=http://127.0.0.1:9223`; use it to find the profile directory and pass the CDP URL to local tooling.
+Dev startup prints a banner like `[redrob] dev profile=... cdp=http://127.0.0.1:9223`; use it to find the profile directory and pass the CDP URL to local tooling.
 
 If a second instance cannot get the profile lock it now says so and exits, instead of lingering with an open CDP port and no window.
 
 ### Headless web (no Electron)
 
-To run the Redrob Work UI in a browser against a local `openwork-server` (no desktop shell):
+To run the Redrob Work UI in a browser against a local `redrob-server` (no desktop shell):
 
 ```bash
 pnpm dev:headless-web
@@ -130,9 +130,9 @@ pnpm dev:headless-web
 
 This is an isolated launcher:
 
-- Writes `tmp/headless-server.json` and never reads `~/.config/openwork/server.json`
+- Writes `tmp/headless-server.json` and never reads `~/.config/redrob/server.json`
 - Authorizes the chosen workspace root automatically, and merges (never rewrites) that config on relaunch, so workspaces you add through the UI survive `--replace`
-- Starts Vite + `openwork-server` with a stable owner bearer forced into the UI. Crash-restarts reuse that bearer so open tabs keep working; `--replace` mints fresh tokens (pass `--keep-tokens` to preserve them). The privileged host token stays on the server process and is never inlined into the Vite bundle.
+- Starts Vite + `redrob-server` with a stable owner bearer forced into the UI. Crash-restarts reuse that bearer so open tabs keep working; `--replace` mints fresh tokens (pass `--keep-tokens` to preserve them). The privileged host token stays on the server process and is never inlined into the Vite bundle.
 - Proxies Den Cloud calls same-origin: Vite serves `/api/den` (forwarded to the Den control plane) and the app pins its Den API there via `VITE_DEN_API_BASE_URL`, so Cloud calls are never CORS-blocked and stale `localStorage` base URLs are cleared on load
 - Publishes agent-facing URLs/tokens at `tmp/dev-headless-web.json` (owner-only, `0600`), and allows browser calls to the local server only from the web app's own origins, not every site you visit
 - Uses stable ports by default (web `5178`, server `8778`; falls back to free ports when taken, override with `REDROB_WEB_PORT` / `REDROB_PORT`)

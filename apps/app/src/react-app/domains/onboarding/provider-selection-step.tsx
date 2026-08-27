@@ -11,15 +11,15 @@ import { Button } from "@/components/ui/button";
 import { KeyRoundIcon, SkipForwardIcon, SparklesIcon } from "lucide-react";
 
 type ProviderSelectionStepProps = {
-  showOpenWorkModels?: boolean;
-  onOpenWorkModels: () => void;
+  showRedrobWorkModels?: boolean;
+  onRedrobWorkModels: () => void;
   onBringYourOwn: () => void;
   onSkip: () => void;
 };
 
 export function ProviderSelectionStep({
-  showOpenWorkModels = true,
-  onOpenWorkModels,
+  showRedrobWorkModels = true,
+  onRedrobWorkModels,
   onBringYourOwn,
   onSkip,
 }: ProviderSelectionStepProps) {
@@ -32,16 +32,16 @@ export function ProviderSelectionStep({
         <PageHeader className="mb-8 text-center">
           <PageTitle>Power your first task</PageTitle>
           <PageDescription>
-            Connect a model, then try a real task in chat so you can see OpenWork work.
+            Connect a model, then try a real task in chat so you can see Redrob Work work.
           </PageDescription>
         </PageHeader>
 
         <div className="space-y-3">
-          {showOpenWorkModels ? (
+          {showRedrobWorkModels ? (
             <button
               type="button"
               className="flex w-full items-start gap-4 rounded-xl border border-blue-7/50 bg-blue-2/30 p-4 text-left transition-colors hover:bg-blue-3/40"
-              onClick={onOpenWorkModels}
+              onClick={onRedrobWorkModels}
             >
               <SparklesIcon className="mt-0.5 size-5 shrink-0 text-blue-10" />
               <div>

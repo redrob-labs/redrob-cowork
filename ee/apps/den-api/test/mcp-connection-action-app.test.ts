@@ -21,7 +21,7 @@ import { workflowArtifactAppServerCapabilities } from "../src/mcp/workflow-artif
 const needsSignInStatus: ExternalConnectionStatus = {
   version: 1,
   kind: "connection_action",
-  source: "openwork-cloud",
+  source: "redrob-cloud",
   layer: "downstream_provider",
   connectionId: "emc_gmail",
   connectionName: "Gmail",
@@ -34,7 +34,7 @@ const needsSignInStatus: ExternalConnectionStatus = {
   action: {
     type: "connect",
     label: "Connect Gmail",
-    surface: "openwork_your_connections",
+    surface: "redrob_your_connections",
     retry: "search_capabilities",
     url: "https://app.redrob.io/dashboard/connections/emc_gmail",
   },
@@ -111,7 +111,7 @@ test("connection status payloads carry the exact human action and same-server la
     action: {
       type: "connect",
       label: "Connect Gmail",
-      surface: "openwork_your_connections",
+      surface: "redrob_your_connections",
       url: "https://app.redrob.io/dashboard/connections/emc_gmail",
     },
   })
@@ -137,7 +137,7 @@ test("needs_connection tool failures carry the same card as the probe", () => {
   expect(parsed.state).toBe("needs_connection")
   expect(parsed.action?.label).toBe("Connect Gmail")
   expect(card.meta).toEqual({
-    "openwork/mcpApp": {
+    "redrob/mcpApp": {
       toolName: CONNECTION_ACTION_TOOL_NAME,
       resourceUri: CONNECTION_ACTION_APP_RESOURCE_URI,
       arguments: { connectionId: "emc_gmail" },

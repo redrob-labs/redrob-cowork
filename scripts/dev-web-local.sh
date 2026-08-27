@@ -3,11 +3,11 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE_FILE="$ROOT_DIR/packaging/docker/docker-compose.web-local.yml"
-PROJECT_NAME="openwork-web-local"
+PROJECT_NAME="redrob-web-local"
 
 # Local-dev defaults — match the MySQL container in docker-compose.web-local.yml.
 # These are only used when not already set in the environment or .env.
-: "${DATABASE_URL:=mysql://root:password@127.0.0.1:3306/openwork_den}"
+: "${DATABASE_URL:=mysql://root:password@127.0.0.1:3306/redrob_den}"
 : "${BETTER_AUTH_SECRET:=local-dev-secret-not-for-production-use!!}"
 
 pick_port() {

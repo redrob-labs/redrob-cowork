@@ -12,7 +12,7 @@ afterEach(async () => {
 });
 
 async function createRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openwork-managed-opencode-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-managed-opencode-"));
   roots.push(root);
   return root;
 }

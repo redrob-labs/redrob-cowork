@@ -19,24 +19,24 @@ const REDROB_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe"
 const REDROB_VOICE_REALTIME_TOOLS = [
   {
     type: "function",
-    name: "openwork_snapshot",
-    description: "Read the current OpenWork UI control snapshot: route, status, narration, and visible action metadata.",
+    name: "redrob_snapshot",
+    description: "Read the current Redrob Work UI control snapshot: route, status, narration, and visible action metadata.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     type: "function",
-    name: "openwork_list_actions",
-    description: "List semantic OpenWork UI actions. Call this before openwork_execute_action when you do not know the exact action id.",
+    name: "redrob_list_actions",
+    description: "List semantic Redrob Work UI actions. Call this before redrob_execute_action when you do not know the exact action id.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     type: "function",
-    name: "openwork_execute_action",
-    description: "Execute a semantic OpenWork UI action by id. Prefer this over screen coordinates or DOM guessing.",
+    name: "redrob_execute_action",
+    description: "Execute a semantic Redrob Work UI action by id. Prefer this over screen coordinates or DOM guessing.",
     parameters: {
       type: "object",
       properties: {
-        actionId: { type: "string", description: "The action id from openwork_list_actions, such as composer.set_text or composer.send." },
+        actionId: { type: "string", description: "The action id from redrob_list_actions, such as composer.set_text or composer.send." },
         args: { type: "object", description: "Optional JSON arguments for the action.", additionalProperties: true },
       },
       required: ["actionId"],
@@ -92,15 +92,15 @@ function formatResetMessage(windowEndAt: Date): string {
   return `It resets in ${Math.ceil(seconds / 3600)} hours.`
 }
 
-function openworkVoiceRealtimeInstructions() {
+function redrobVoiceRealtimeInstructions() {
   return `# Role and Objective
 
-You are OpenWork Voice Mode, a voice-first control layer inside OpenWork.
-Help the user control OpenWork by using the semantic OpenWork UI tools.
+You are Redrob Work Voice Mode, a voice-first control layer inside Redrob Work.
+Help the user control Redrob Work by using the semantic Redrob Work UI tools.
 
 # Tool Policy
 
-- Prefer openwork_snapshot, openwork_list_actions, and openwork_execute_action over visual guessing.
+- Prefer redrob_snapshot, redrob_list_actions, and redrob_execute_action over visual guessing.
 - If the user asks to write or draft something, use composer.set_text.
 - If the user asks to send or run the current prompt, use composer.send.
 - For navigation, settings, session, transcript, and composer work, inspect the action list first if the action id is unknown.
@@ -111,11 +111,11 @@ Help the user control OpenWork by using the semantic OpenWork UI tools.
 
 - Be concise, calm, and direct.
 - If audio is unclear, ask the user to repeat it instead of guessing.
-- Ignore background speech that is not addressed to OpenWork.
+- Ignore background speech that is not addressed to Redrob Work.
 - Summarize tool results briefly and offer the next useful step.`
 }
 
-async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestId: string) {
+async function createOpenAiRealtimeClientSecret(input: unknown, redrobRequestId: string) {
   if (!env.openAiRealtimeApiKey) {
     return Response.json({ error: { message: "Managed voice is not configured.", type: "invalid_request_error", code: "openai_realtime_key_missing" } }, { status: 503 })
   }
@@ -145,7 +145,7 @@ async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestI
             },
           },
         },
-        instructions: openworkVoiceRealtimeInstructions(),
+        instructions: redrobVoiceRealtimeInstructions(),
         tool_choice: "auto",
         tools: REDROB_VOICE_REALTIME_TOOLS,
       },
@@ -178,14 +178,14 @@ async function createOpenAiRealtimeClientSecret(input: unknown, openworkRequestI
     model,
     transcriptionModel: REDROB_VOICE_TRANSCRIPTION_MODEL,
     tools: REDROB_VOICE_REALTIME_TOOLS.map((tool) => tool.name),
-    source: "openwork-models",
-    openworkRequestId,
+    source: "redrob-models",
+    redrobRequestId,
   })
 }
 
 async function chargeVoiceSession(input: {
   inferenceKey: { id: DenTypeId<"inferenceKey">; organization_id: DenTypeId<"organization">; org_membership_id: DenTypeId<"member"> }
-  openworkRequestId: string
+  redrobRequestId: string
   limits: Awaited<ReturnType<typeof ensureUsableBuckets>>
 }) {
   const costAmount = env.voiceSessionCostUnits
@@ -197,7 +197,7 @@ async function chargeVoiceSession(input: {
       organization_id: input.inferenceKey.organization_id,
       org_membership_id: input.inferenceKey.org_membership_id,
       inference_key_id: input.inferenceKey.id,
-      external_job_id: input.openworkRequestId,
+      external_job_id: input.redrobRequestId,
       external_event_id: null,
       cost_amount: costAmount,
       event_type: "voice_realtime_session",
@@ -228,12 +228,12 @@ export function registerVoiceRoutes(app: Hono) {
   app.post("/voice/realtime/session", async (c) => {
     const rawKey = readApiKey(c.req.raw)
     if (!rawKey) {
-      return c.json({ error: { message: "Missing OpenWork inference API key.", type: "authentication_error", code: "missing_api_key" } }, 401)
+      return c.json({ error: { message: "Missing Redrob Work inference API key.", type: "authentication_error", code: "missing_api_key" } }, 401)
     }
 
     const inferenceKey = await findActiveInferenceKey(rawKey)
     if (!inferenceKey) {
-      return c.json({ error: { message: "Invalid OpenWork inference API key.", type: "authentication_error", code: "invalid_api_key" } }, 401)
+      return c.json({ error: { message: "Invalid Redrob Work inference API key.", type: "authentication_error", code: "invalid_api_key" } }, 401)
     }
 
     const limits = await ensureUsableBuckets(inferenceKey.organization_id)
@@ -241,7 +241,7 @@ export function registerVoiceRoutes(app: Hono) {
       const limitedBucket = "limitedBucket" in limits ? limits.limitedBucket : null
       const resetMessage = limitedBucket ? ` ${formatResetMessage(limitedBucket.windowEndAt)}` : ""
       const retryAfter = limitedBucket ? secondsUntil(limitedBucket.windowEndAt) : undefined
-      c.header("x-openwork-limit-window-type", limits.windowType)
+      c.header("x-redrob-limit-window-type", limits.windowType)
       if (retryAfter !== undefined) {
         c.header("retry-after", String(retryAfter))
         c.header("x-ratelimit-remaining-tokens", "0")
@@ -259,7 +259,7 @@ export function registerVoiceRoutes(app: Hono) {
       }, 429)
     }
 
-    const openworkRequestId = buildRequestId()
+    const redrobRequestId = buildRequestId()
     let body: unknown = {}
     try {
       body = await c.req.json()
@@ -267,13 +267,13 @@ export function registerVoiceRoutes(app: Hono) {
       body = {}
     }
 
-    const response = await createOpenAiRealtimeClientSecret(body, openworkRequestId)
+    const response = await createOpenAiRealtimeClientSecret(body, redrobRequestId)
 
     if (response.status === 200) {
       try {
-        await chargeVoiceSession({ inferenceKey, openworkRequestId, limits })
+        await chargeVoiceSession({ inferenceKey, redrobRequestId, limits })
       } catch (error) {
-        console.error("[voice] failed to charge voice session", { openworkRequestId, error: error instanceof Error ? error.message : String(error) })
+        console.error("[voice] failed to charge voice session", { redrobRequestId, error: error instanceof Error ? error.message : String(error) })
       }
     }
 

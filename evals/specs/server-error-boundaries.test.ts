@@ -9,7 +9,7 @@ import { createManagedOpencodeServer } from "../../apps/server/src/managed-openc
 import { captureServerException } from "../../apps/server/src/telemetry";
 
 test("server error boundaries contain expected noise without hiding actionable failures", async ({ evidence }) => {
-  const originalTelemetry = globalThis.__openworkDesktopTelemetry;
+  const originalTelemetry = globalThis.__redrobDesktopTelemetry;
   const captured: unknown[] = [];
   const request = new AbortController();
   const cancellation = new DOMException("The operation was aborted", "AbortError");
@@ -17,7 +17,7 @@ test("server error boundaries contain expected noise without hiding actionable f
   request.abort(cancellation);
 
   try {
-    globalThis.__openworkDesktopTelemetry = {
+    globalThis.__redrobDesktopTelemetry = {
       captureException(error) {
         captured.push(error);
         return true;
@@ -40,7 +40,7 @@ test("server error boundaries contain expected noise without hiding actionable f
       true,
     );
   } finally {
-    globalThis.__openworkDesktopTelemetry = originalTelemetry;
+    globalThis.__redrobDesktopTelemetry = originalTelemetry;
   }
 
   expect(isEngineConnectionFailure(new TypeError("fetch failed"))).toBe(true);
@@ -51,7 +51,7 @@ test("server error boundaries contain expected noise without hiding actionable f
     true,
   );
 
-  const root = await mkdtemp(join(tmpdir(), "openwork-server-boundaries-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-server-boundaries-"));
   const attemptsPath = join(root, "attempts.log");
   const bin = join(root, "unknown-code-one.mjs");
   await writeFile(bin, [

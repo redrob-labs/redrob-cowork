@@ -92,7 +92,7 @@ async function mintMcpToken(session: DenSession, orgId: string): Promise<string>
     method: "POST",
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({}),
   });
@@ -230,8 +230,8 @@ test(title, async ({ place, evidence, skip }) => {
     label: "Den Web origin before admin auth token handoff",
   });
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(den.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(den.admin.token)};
   })()`);
   expect(tokenStored).toBe(true);
   await oauthConnect(browser, den.ref.webUrl, healthy, den.mocks.healthy);

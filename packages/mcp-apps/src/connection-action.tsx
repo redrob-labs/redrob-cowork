@@ -19,19 +19,19 @@ const ACTOR_LABEL: Record<NonNullable<ConnectionActionPayload["actor"]>, string>
   organization_admin: "An organization admin",
   provider_admin: "The provider admin",
   network_admin: "A network admin",
-  openwork: "OpenWork support",
+  redrob: "Redrob Work support",
 }
 
 const SURFACE_LABEL: Record<NonNullable<ConnectionActionPayload["action"]>["surface"], string> = {
-  openwork_your_connections: "Your Connections",
-  openwork_organization_connections: "Organization Connections",
+  redrob_your_connections: "Your Connections",
+  redrob_organization_connections: "Organization Connections",
   provider_admin_console: "Provider admin console",
   network_infrastructure: "Network infrastructure",
-  openwork_support: "OpenWork support",
+  redrob_support: "Redrob Work support",
 }
 
 mountMcpApp({
-  name: "OpenWork Connection Action",
+  name: "Redrob Work Connection Action",
   waitingLabel: "Checking the connection...",
   schema: connectionActionPayloadSchema,
   render: (payload, app) => {

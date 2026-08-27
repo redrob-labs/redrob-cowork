@@ -22,7 +22,7 @@ import {
 } from "@redrob/behaviors";
 
 /**
- * CORE JOURNEY: a person opens the app for the first time, signs in to OpenWork
+ * CORE JOURNEY: a person opens the app for the first time, signs in to Redrob Work
  * Cloud — which hands off to a real browser and comes back — then shares a skill
  * with a colleague by authoring it inside a plugin and putting that plugin on a
  * marketplace the colleague can use.
@@ -40,7 +40,7 @@ import {
 const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const denApiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
 const denWebUrl = (process.env.REDROB_EVAL_DEN_WEB_URL?.trim() || denApiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, "");
-const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!";
 const adminEmail = process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
 const colleagueEmail = process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "jordan.demo@acme.test";
 
@@ -65,7 +65,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "A fresh OpenWork app is visible offering to sign in to OpenWork Cloud",
+      "A fresh Redrob Work app is visible offering to sign in to Redrob Work Cloud",
       "No error or 'Something went wrong' message is visible",
     ]);
     expect(seen.ok, seen.why).toBe(true);
@@ -74,7 +74,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
 
   // 1. Sign in from inside the app: this must hand off to the browser.
   const buttons = await enabledButtons(app);
-  const signInLabel = ["Sign in to OpenWork Cloud", "Sign in"].find((label) => buttons.includes(label));
+  const signInLabel = ["Sign in to Redrob Work Cloud", "Sign in"].find((label) => buttons.includes(label));
   expect(signInLabel, `no sign-in control. Buttons: ${buttons.join(" | ")}`).toBeDefined();
   if (!signInLabel) throw new Error("unreachable");
   await clickButton(app, signInLabel, { timeoutMs: 60_000 });
@@ -94,7 +94,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
   {
     const shot = await screenshot(browser);
     const seen = await validate(shot, [
-      "A browser page shows an OpenWork Cloud sign-in result or dashboard, not a sign-in form error",
+      "A browser page shows an Redrob Work Cloud sign-in result or dashboard, not a sign-in form error",
       "No 'invalid credentials' or error banner is visible",
     ]);
     expect(seen.ok, seen.why).toBe(true);
@@ -114,7 +114,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "The app is back in focus and no longer offers a bare 'Sign in to OpenWork Cloud' as the only action",
+      "The app is back in focus and no longer offers a bare 'Sign in to Redrob Work Cloud' as the only action",
       "No sign-in failure message is visible",
     ]);
     expect(seen.ok, seen.why).toBe(true);
@@ -164,7 +164,7 @@ test.skipIf(!e2eTestsEnabled || !denApiUrl)(title, async () => {
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "An OpenWork surface listing extensions, skills or connections is visible",
+      "An Redrob Work surface listing extensions, skills or connections is visible",
       "No 'Something went wrong' crash message is visible",
     ]);
     expect(seen.ok, seen.why).toBe(true);

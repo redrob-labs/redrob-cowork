@@ -4,8 +4,8 @@ import { getApiKeyScopedOrganizationId } from "../api-keys.js"
 import { resolveUserOrganizations, setSessionActiveOrganization, type UserOrgSummary } from "../orgs.js"
 import type { AuthContextVariables } from "../session.js"
 
-export const LEGACY_ORG_PROXY_HEADER = "x-openwork-legacy-org-id"
-export const ORG_SCOPE_HEADER = "x-openwork-org-id"
+export const LEGACY_ORG_PROXY_HEADER = "x-redrob-legacy-org-id"
+export const ORG_SCOPE_HEADER = "x-redrob-org-id"
 
 export type UserOrganizationsContext = {
   userOrganizations: UserOrgSummary[]

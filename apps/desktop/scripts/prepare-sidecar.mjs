@@ -95,8 +95,8 @@ const opencodeTargetPath = opencodeTargetName ? join(sidecarDir, opencodeTargetN
 const opencodeCandidatePath = opencodeTargetPath ?? opencodePath;
 let existingOpencodeVersion = null;
 
-// openwork-server paths
-const openworkServerDir = resolve(__dirname, "..", "..", "server");
+// redrob-server paths
+const redrobServerDir = resolve(__dirname, "..", "..", "server");
 
 const readHeader = (filePath, length = 256) => {
   const fd = openSync(filePath, "r");
@@ -200,7 +200,7 @@ const adHocSignDarwinSidecars = (paths) => {
   }
 };
 
-// openwork-server is no longer compiled as a sidecar binary — it runs
+// redrob-server is no longer compiled as a sidecar binary — it runs
 // in-process inside Electron via a direct import of the server library.
 // Server binary copy/sign skipped — runs in-process.
 
@@ -337,12 +337,12 @@ if (shouldDownloadOpencode) {
 adHocSignDarwinSidecars([
   opencodePath,
   opencodeTargetPath,
-  // openwork-server runs in-process — no binary to sign.
+  // redrob-server runs in-process — no binary to sign.
 ]);
 
-const openworkServerVersion = (() => {
+const redrobServerVersion = (() => {
   try {
-    const raw = readFileSync(resolve(openworkServerDir, "package.json"), "utf8");
+    const raw = readFileSync(resolve(redrobServerDir, "package.json"), "utf8");
     return String(JSON.parse(raw).version ?? "").trim();
   } catch {
     return null;
@@ -354,8 +354,8 @@ const versions = {
     version: normalizedOpencodeVersion,
     sha256: opencodeCandidatePath && existsSync(opencodeCandidatePath) ? sha256File(opencodeCandidatePath) : null,
   },
-  "openwork-server": {
-    version: openworkServerVersion,
+  "redrob-server": {
+    version: redrobServerVersion,
     sha256: "in-process",
   },
 };

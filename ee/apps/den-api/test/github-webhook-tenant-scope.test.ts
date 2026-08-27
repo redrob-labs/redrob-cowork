@@ -2,7 +2,7 @@ import { beforeAll, expect, mock, test } from "bun:test"
 import { Hono } from "hono"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -43,8 +43,8 @@ const vulnerableCrossInstallationMatch = {
     organizationId: "organization_foreign",
     connectorInstanceId: "connectorInstance_foreign",
     connectorType: "github",
-    remoteId: "different-ai/openwork",
-    targetConfigJson: { repositoryFullName: "different-ai/openwork", repositoryId: 42 },
+    remoteId: "redrob-labs/redrob-work",
+    targetConfigJson: { repositoryFullName: "redrob-labs/redrob-work", repositoryId: 42 },
   },
 }
 
@@ -150,7 +150,7 @@ test("GitHub push webhooks only match targets for the payload installation", asy
     installationId: 12345,
     payload: {},
     ref: "refs/heads/main",
-    repositoryFullName: "different-ai/openwork",
+    repositoryFullName: "redrob-labs/redrob-work",
     repositoryId: 42,
   })
 
@@ -179,7 +179,7 @@ test("GitHub push ingress persists queued work without calling GitHub", async ()
       installationId: 12345,
       payload: {},
       ref: "refs/heads/main",
-      repositoryFullName: "different-ai/openwork",
+      repositoryFullName: "redrob-labs/redrob-work",
       repositoryId: 42,
     })
 
@@ -211,18 +211,18 @@ test("repository rename updates connector identity, records continuity, queues r
   try {
     const response = await deliverWebhook("repository", {
       action: "renamed",
-      changes: { repository: { name: { from: "openwork" } } },
+      changes: { repository: { name: { from: "redrob" } } },
       installation: { id: 12345 },
-      repository: { full_name: "different-ai/openwork-renamed", id: 42 },
+      repository: { full_name: "redrob-labs/redrob-work-renamed", id: 42 },
     })
 
     expect(response.status).toBe(202)
     expect(updatedValues).toEqual([
       expect.objectContaining({
-        remoteId: "different-ai/openwork-renamed",
-        targetConfigJson: expect.objectContaining({ repositoryFullName: "different-ai/openwork-renamed", repositoryId: 42 }),
+        remoteId: "redrob-labs/redrob-work-renamed",
+        targetConfigJson: expect.objectContaining({ repositoryFullName: "redrob-labs/redrob-work-renamed", repositoryId: 42 }),
       }),
-      expect.objectContaining({ remoteId: "different-ai/openwork-renamed" }),
+      expect.objectContaining({ remoteId: "redrob-labs/redrob-work-renamed" }),
     ])
     expect(insertedValues).toEqual([
       expect.objectContaining({
@@ -231,8 +231,8 @@ test("repository rename updates connector identity, records continuity, queues r
         summaryJson: {
           action: "renamed",
           deliveryId: "delivery-repository",
-          from: "different-ai/openwork",
-          to: "different-ai/openwork-renamed",
+          from: "redrob-labs/redrob-work",
+          to: "redrob-labs/redrob-work-renamed",
           trigger: "webhook",
         },
       }),
@@ -260,7 +260,7 @@ test("removed installation repository disables its target and instance and acks 
     const response = await deliverWebhook("installation_repositories", {
       action: "removed",
       installation: { id: 12345 },
-      repositories_removed: [{ full_name: "different-ai/openwork", id: 42 }],
+      repositories_removed: [{ full_name: "redrob-labs/redrob-work", id: 42 }],
     })
 
     expect(response.status).toBe(202)

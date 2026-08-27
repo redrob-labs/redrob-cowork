@@ -37,9 +37,9 @@ import { GrepTool } from "@/components/tools/grep"
 import { LspTool } from "@/components/tools/lsp"
 import {
   isAutomationProposalToolPart,
-  OpenWorkAutomationProposalTool,
-} from "@/components/tools/openwork-automation-proposal"
-import { OpenWorkSessionCreateTool } from "@/components/tools/openwork-session-create"
+  RedrobWorkAutomationProposalTool,
+} from "@/components/tools/redrob-automation-proposal"
+import { RedrobWorkSessionCreateTool } from "@/components/tools/redrob-session-create"
 import { QuestionTool } from "@/components/tools/question"
 import { SkillTool } from "@/components/tools/skill"
 import { TodoWriteTool } from "@/components/tools/todowrite"
@@ -231,12 +231,12 @@ const ToolMessageInner = ({ part }: ToolMessageProps) => {
     return <EnvVarRequestTool part={part} />
   }
 
-  if (part.type === "dynamic-tool" && part.toolName === "openwork_session_create") {
-    return <OpenWorkSessionCreateTool part={part} />
+  if (part.type === "dynamic-tool" && part.toolName === "redrob_session_create") {
+    return <RedrobWorkSessionCreateTool part={part} />
   }
 
   if (part.type === "dynamic-tool" && isAutomationProposalToolPart(part)) {
-    return <OpenWorkAutomationProposalTool part={part} />
+    return <RedrobWorkAutomationProposalTool part={part} />
   }
 
   if (isTaskToolPart(part)) {

@@ -62,7 +62,7 @@ async function fetchLabInChild(url: string, env: NodeJS.ProcessEnv): Promise<Chi
 // Exactly the record the enterprise sign-in gate stamps after a successful
 // grant exchange (enterprise-activation-gate.tsx, exchangeConfirmedGrant).
 async function writeSignInStampedBootstrap(denBaseUrl: string): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-enterprise-activation-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-enterprise-activation-"));
   const bootstrapPath = join(dir, "desktop-bootstrap.json");
   const stamped = {
     baseUrl: denBaseUrl,
@@ -87,7 +87,7 @@ async function resolveCaEnvFromActivationRecord(options: {
   parentEnv: NodeJS.ProcessEnv;
   tlsConnectImpl?: (connectOptions: { host: string; port: number }) => never;
 }): Promise<RepairAttempt> {
-  const userDataDir = await mkdtemp(join(tmpdir(), "openwork-chain-repair-spec-"));
+  const userDataDir = await mkdtemp(join(tmpdir(), "redrob-chain-repair-spec-"));
   const logs: string[] = [];
   const caEnv: NodeJS.ProcessEnv = await resolveSystemCaEnv({
     tlsModule: { getCACertificates: () => [] },

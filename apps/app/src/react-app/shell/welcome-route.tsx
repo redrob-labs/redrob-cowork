@@ -25,21 +25,21 @@ import { REDROB_API_KEY_ENV, REDROB_CONSOLE_URL } from "../domains/settings/redr
 import { CreateWorkspaceModal } from "../domains/workspace/create-workspace-modal";
 import type { CreateWorkspaceOptions } from "../domains/workspace/types";
 import {
-  getOpenWorkModelsActionUrl,
-  hideOpenWorkModelsPromo,
-  useOpenWorkModelsPromoEligibility,
-  markOpenWorkModelsStartupPromoShown,
-} from "../domains/cloud/openwork-models-promo";
+  getRedrobWorkModelsActionUrl,
+  hideRedrobWorkModelsPromo,
+  useRedrobWorkModelsPromoEligibility,
+  markRedrobWorkModelsStartupPromoShown,
+} from "../domains/cloud/redrob-models-promo";
 import { useDenAuth } from "../domains/cloud/den-auth-provider";
 import { JoinOrganizationDialog } from "../domains/cloud/join-organization-dialog";
-import { resolveOpenworkConnection } from "./openwork-connection";
+import { resolveRedrobConnection } from "./redrob-connection";
 import { captureAnalyticsEvent } from "../../app/lib/analytics";
-import { buildOpenworkWorkspaceBaseUrl, createOpenworkServerClient } from "../../app/lib/openwork-server";
+import { buildRedrobWorkspaceBaseUrl, createRedrobServerClient } from "../../app/lib/redrob-server";
 import { readDenSettings } from "../../app/lib/den";
 import { denSettingsChangedEvent } from "../../app/lib/den-session-events";
 import { writeActiveWorkspaceId, writeLastSessionFor, writeWorkspaceProjectDimension } from "./session-memory";
 import { workspaceSessionRoute } from "./workspace-routes";
-import { ensureDesktopLocalOpenworkConnection } from "./desktop-local-openwork";
+import { ensureDesktopLocalRedrobConnection } from "./desktop-local-redrob";
 import { shouldHoldWelcomeForDenSession } from "./welcome-den-session";
 
 function subscribeToDenSettings(onStoreChange: () => void) {
@@ -60,7 +60,7 @@ function folderNameFromPath(path: string) {
 
 function focusPromptSoon() {
   if (typeof window === "undefined") return;
-  const focus = () => window.dispatchEvent(new Event("openwork:focusPrompt"));
+  const focus = () => window.dispatchEvent(new Event("redrob:focusPrompt"));
   [0, 80, 240, 600].forEach((delay) => window.setTimeout(focus, delay));
 }
 
@@ -167,7 +167,7 @@ export function WelcomeRoute() {
   const [state, dispatch] = useReducer(welcomeReducer, initialWelcomeState);
   const [manualFolder, setManualFolder] = useState("");
   const [joinOrganizationOpen, setJoinOrganizationOpen] = useState(false);
-  const showOpenWorkModelsPromo = useOpenWorkModelsPromoEligibility();
+  const showRedrobWorkModelsPromo = useRedrobWorkModelsPromoEligibility();
   const denAuthTokenSnapshot = useSyncExternalStore(
     subscribeToDenSettings,
     readDenAuthTokenSnapshot,
@@ -208,14 +208,14 @@ export function WelcomeRoute() {
         let sessionToken = "";
         try {
           const { normalizedBaseUrl, resolvedToken, resolvedHostToken } =
-            await resolveOpenworkConnection();
+            await resolveRedrobConnection();
           if (normalizedBaseUrl && (resolvedToken || resolvedHostToken)) {
-            const openworkClient = createOpenworkServerClient({
+            const redrobClient = createRedrobServerClient({
               baseUrl: normalizedBaseUrl,
               token: resolvedToken || undefined,
               hostToken: resolvedHostToken || undefined,
             });
-            list = await openworkClient.createLocalWorkspace({
+            list = await redrobClient.createLocalWorkspace({
               folderPath: folder,
               name: workspaceName,
               preset: "starter",
@@ -227,7 +227,7 @@ export function WelcomeRoute() {
           list = null;
         }
         if (!list) {
-          throw new Error("OpenWork server is unavailable. Start or reconnect the server before creating a workspace.");
+          throw new Error("Redrob Work server is unavailable. Start or reconnect the server before creating a workspace.");
         }
         const createdId =
           resolveWorkspaceListSelectedId(list) ||
@@ -242,12 +242,12 @@ export function WelcomeRoute() {
           writeActiveWorkspaceId(createdId);
         }
         if (targetWorkspace) {
-          await ensureDesktopLocalOpenworkConnection({
+          await ensureDesktopLocalRedrobConnection({
             route: "session",
             workspace: targetWorkspace,
             allWorkspaces: list.workspaces,
           }).catch(() => undefined);
-          const fresh = await resolveOpenworkConnection().catch(() => null);
+          const fresh = await resolveRedrobConnection().catch(() => null);
           if (fresh?.normalizedBaseUrl && fresh.resolvedToken) {
             sessionBaseUrl = fresh.normalizedBaseUrl;
             sessionToken = fresh.resolvedToken;
@@ -257,9 +257,9 @@ export function WelcomeRoute() {
           try {
             const workspacePath = targetWorkspace?.path?.trim() || folder;
             const session = unwrap(await createClient(
-              `${(buildOpenworkWorkspaceBaseUrl(sessionBaseUrl, targetWorkspaceId) ?? sessionBaseUrl).replace(/\/+$/, "")}/opencode`,
+              `${(buildRedrobWorkspaceBaseUrl(sessionBaseUrl, targetWorkspaceId) ?? sessionBaseUrl).replace(/\/+$/, "")}/opencode`,
               workspacePath || undefined,
-              { token: sessionToken, mode: "openwork" },
+              { token: sessionToken, mode: "redrob" },
             ).session.create({ directory: workspacePath || undefined }));
             targetSessionId = session.id;
             captureAnalyticsEvent("task_created", { source: "onboarding", workspace_type: "local" });
@@ -295,20 +295,20 @@ export function WelcomeRoute() {
 
   const handleCreateRemote = useCallback(
     async (input: {
-      openworkHostUrl?: string | null;
-      openworkToken?: string | null;
+      redrobHostUrl?: string | null;
+      redrobToken?: string | null;
       directory?: string | null;
       displayName?: string | null;
     }) => {
-      const baseUrlValue = input.openworkHostUrl?.trim() ?? "";
+      const baseUrlValue = input.redrobHostUrl?.trim() ?? "";
       if (!baseUrlValue) return false;
       dispatch({ type: "remote:start" });
       try {
-        const remoteType: "openwork" = "openwork";
+        const remoteType: "redrob" = "redrob";
         const payload = {
           baseUrl: baseUrlValue,
-          openworkHostUrl: baseUrlValue,
-          openworkToken: input.openworkToken?.trim() || null,
+          redrobHostUrl: baseUrlValue,
+          redrobToken: input.redrobToken?.trim() || null,
           displayName: input.displayName?.trim() || null,
           directory: input.directory?.trim() || null,
           remoteType,
@@ -319,9 +319,9 @@ export function WelcomeRoute() {
         } else {
           try {
             const { normalizedBaseUrl, resolvedToken, resolvedHostToken } =
-              await resolveOpenworkConnection();
+              await resolveRedrobConnection();
             if (normalizedBaseUrl && (resolvedToken || resolvedHostToken)) {
-              list = await createOpenworkServerClient({
+              list = await createRedrobServerClient({
                 baseUrl: normalizedBaseUrl,
                 token: resolvedToken || undefined,
                 hostToken: resolvedHostToken || undefined,
@@ -332,7 +332,7 @@ export function WelcomeRoute() {
           }
         }
         if (!list) {
-          throw new Error("OpenWork server is unavailable. Start or reconnect the server before connecting a remote workspace.");
+          throw new Error("Redrob Work server is unavailable. Start or reconnect the server before connecting a remote workspace.");
         }
         const createdId =
           resolveWorkspaceListSelectedId(list) ||
@@ -394,11 +394,11 @@ export function WelcomeRoute() {
       dispatch({ type: "redrob-key:start" });
       try {
         const { normalizedBaseUrl, resolvedToken, resolvedHostToken } =
-          await resolveOpenworkConnection();
+          await resolveRedrobConnection();
         if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
           throw new Error(t("welcome.redrob_key_error_server"));
         }
-        await createOpenworkServerClient({
+        await createRedrobServerClient({
           baseUrl: normalizedBaseUrl,
           token: resolvedToken || undefined,
           hostToken: resolvedHostToken || undefined,
@@ -496,20 +496,20 @@ export function WelcomeRoute() {
       ) : null}
       {state.providerStep ? (
         <ProviderSelectionStep
-          showOpenWorkModels={showOpenWorkModelsPromo}
-          onOpenWorkModels={() => {
+          showRedrobWorkModels={showRedrobWorkModelsPromo}
+          onRedrobWorkModels={() => {
             // Land on the Redrob Models value-prop page when already
             // signed in to Den; otherwise start sign-up. Previously this
             // always opened a bare sign-up page — payment before value.
-            platform.openLink(getOpenWorkModelsActionUrl(denAuth.isSignedIn, "sign-up"));
+            platform.openLink(getRedrobWorkModelsActionUrl(denAuth.isSignedIn, "sign-up"));
             const route = state.pendingWorkspaceId
               ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
               : "/session";
             dispatch({ type: "attribution-step", route });
           }}
           onBringYourOwn={() => {
-            markOpenWorkModelsStartupPromoShown();
-            hideOpenWorkModelsPromo();
+            markRedrobWorkModelsStartupPromoShown();
+            hideRedrobWorkModelsPromo();
             const route = state.pendingWorkspaceId
               ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
               : "/session";

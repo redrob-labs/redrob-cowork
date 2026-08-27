@@ -103,7 +103,7 @@ though CDP is driving the browser or Electron window.
 The reusable Daytona volume is:
 
 ```text
-openwork-eval-artifacts:/daytona-artifacts
+redrob-eval-artifacts:/daytona-artifacts
 ```
 
 The helper serves it on port `8090` when `--artifacts-volume` or

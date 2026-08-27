@@ -308,7 +308,7 @@ export function externalCapabilitySuccessToolResult(
     : {}
   const meta = {
     ...providerMeta,
-    ...(result.mcpApp ? { "openwork/mcpApp": result.mcpApp } : {}),
+    ...(result.mcpApp ? { "redrob/mcpApp": result.mcpApp } : {}),
   }
   if (!result.schemaGuidance) {
     return {
@@ -574,7 +574,7 @@ const externalMcpSource: CapabilitySource = {
       return {
         content: textContent(connectionActionTextFallback(payload)),
         structuredContent: { ...payload },
-        _meta: { "openwork/mcpApp": connectionActionLaunch(payload) },
+        _meta: { "redrob/mcpApp": connectionActionLaunch(payload) },
       }
     }
     const result = await executeExternalCapability({

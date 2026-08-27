@@ -59,7 +59,7 @@ describe("github connector app helpers", () => {
         }
 
         if (String(url).endsWith("/contents/.claude-plugin/marketplace.json")) {
-          if (String(url).includes("different-ai/openwork")) {
+          if (String(url).includes("redrob-labs/redrob-work")) {
             const content = Buffer.from(JSON.stringify({ plugins: [{ name: "a" }, { name: "b" }, { name: "c" }] })).toString("base64")
             return new Response(JSON.stringify({ content, encoding: "base64" }), { status: 200 })
           }
@@ -75,7 +75,7 @@ describe("github connector app helpers", () => {
 
         return new Response(JSON.stringify({
           repositories: [
-            { default_branch: "main", full_name: "different-ai/openwork", id: 42, private: true },
+            { default_branch: "main", full_name: "redrob-labs/redrob-work", id: 42, private: true },
             { default_branch: "dev", full_name: "different-ai/opencode", id: 99, private: false },
           ],
         }), { status: 200 })
@@ -89,7 +89,7 @@ describe("github connector app helpers", () => {
       "https://api.github.com/installation/repositories?per_page=100&page=1",
     ])
     expect(requestUrls.slice(2).sort()).toEqual([
-      "https://api.github.com/repos/different-ai/openwork/contents/.claude-plugin/marketplace.json",
+      "https://api.github.com/repos/redrob-labs/redrob-work/contents/.claude-plugin/marketplace.json",
       "https://api.github.com/repos/different-ai/opencode/contents/.claude-plugin/marketplace.json",
       "https://api.github.com/repos/different-ai/opencode/contents/.claude-plugin/plugin.json",
     ].sort())
@@ -99,7 +99,7 @@ describe("github connector app helpers", () => {
     ])
     expect(requestUrls).not.toContain("https://api.github.com/installation/repositories?per_page=100&page=2")
     expect(repositories).toEqual([
-      { defaultBranch: "main", fullName: "different-ai/openwork", hasPluginManifest: true, id: 42, manifestKind: "marketplace", marketplacePluginCount: 3, private: true },
+      { defaultBranch: "main", fullName: "redrob-labs/redrob-work", hasPluginManifest: true, id: 42, manifestKind: "marketplace", marketplacePluginCount: 3, private: true },
       { defaultBranch: "dev", fullName: "different-ai/opencode", hasPluginManifest: true, id: 99, manifestKind: "plugin", marketplacePluginCount: null, private: false },
     ])
   })
@@ -192,9 +192,9 @@ describe("github connector app helpers", () => {
     const app = await getGithubAppSummary({
       config: { appId: "123456", privateKey: privateKeyPem },
       fetchFn: async () => new Response(JSON.stringify({
-        html_url: "https://github.com/apps/openwork-test",
-        name: "OpenWork Test",
-        slug: "openwork-test",
+        html_url: "https://github.com/apps/redrob-test",
+        name: "Redrob Work Test",
+        slug: "redrob-test",
       }), { status: 200 }),
     })
 
@@ -206,7 +206,7 @@ describe("github connector app helpers", () => {
       userId: "user_123",
     })
 
-    expect(buildGithubAppInstallUrl({ app, state: token })).toBe(`https://github.com/apps/openwork-test/installations/new?state=${encodeURIComponent(token)}`)
+    expect(buildGithubAppInstallUrl({ app, state: token })).toBe(`https://github.com/apps/redrob-test/installations/new?state=${encodeURIComponent(token)}`)
     expect(verifyGithubInstallStateToken({ now: new Date("2026-04-21T19:05:00.000Z"), secret: "secret-123", token })).toMatchObject({
       orgId: "org_123",
       returnPath: "/dashboard/integrations/github",
@@ -255,7 +255,7 @@ describe("github connector app helpers", () => {
       installationId: 777,
       path,
       ref: "main",
-      repositoryFullName: "different-ai/openwork",
+      repositoryFullName: "redrob-labs/redrob-work",
       token: "installation-token",
     })
 
@@ -280,8 +280,8 @@ describe("github connector app helpers", () => {
       { rawSourceText: "# imported from skills/d/SKILL.md", status: "fetched" },
     ])
     expect(contentRequests).toEqual([
-      "https://api.github.com/repos/different-ai/openwork/contents/skills/c/SKILL.md?ref=main",
-      "https://api.github.com/repos/different-ai/openwork/contents/skills/d/SKILL.md?ref=main",
+      "https://api.github.com/repos/redrob-labs/redrob-work/contents/skills/c/SKILL.md?ref=main",
+      "https://api.github.com/repos/redrob-labs/redrob-work/contents/skills/d/SKILL.md?ref=main",
     ])
   })
 
@@ -338,15 +338,15 @@ describe("github connector app helpers", () => {
           return new Response(JSON.stringify({ token: "installation-token" }), { status: 201 })
         }
 
-        if (String(url).endsWith("/repos/different-ai/openwork")) {
+        if (String(url).endsWith("/repos/redrob-labs/redrob-work")) {
           return new Response(JSON.stringify({
             default_branch: "main",
-            full_name: "different-ai/openwork",
+            full_name: "redrob-labs/redrob-work",
             id: 42,
           }), { status: 200 })
         }
 
-        if (String(url).endsWith("/repos/different-ai/openwork/branches/main")) {
+        if (String(url).endsWith("/repos/redrob-labs/redrob-work/branches/main")) {
           return new Response(JSON.stringify({ name: "main" }), { status: 200 })
         }
 
@@ -354,7 +354,7 @@ describe("github connector app helpers", () => {
       },
       installationId: 777,
       ref: "refs/heads/main",
-      repositoryFullName: "different-ai/openwork",
+      repositoryFullName: "redrob-labs/redrob-work",
       repositoryId: 42,
     })
 

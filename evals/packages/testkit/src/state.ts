@@ -51,10 +51,10 @@ function errorCode(error: unknown): string | null {
 
 export async function readDenClientState(app: Surface): Promise<DenClientState> {
   const value = await evalIn(app, `(() => ({
-    authTokenPresent: Boolean((localStorage.getItem("openwork.den.authToken") ?? "").trim()),
-    activeOrgId: (localStorage.getItem("openwork.den.activeOrgId") ?? "").trim() || null,
-    activeOrgSlug: (localStorage.getItem("openwork.den.activeOrgSlug") ?? "").trim() || null,
-    activeOrgName: (localStorage.getItem("openwork.den.activeOrgName") ?? "").trim() || null,
+    authTokenPresent: Boolean((localStorage.getItem("redrob.den.authToken") ?? "").trim()),
+    activeOrgId: (localStorage.getItem("redrob.den.activeOrgId") ?? "").trim() || null,
+    activeOrgSlug: (localStorage.getItem("redrob.den.activeOrgSlug") ?? "").trim() || null,
+    activeOrgName: (localStorage.getItem("redrob.den.activeOrgName") ?? "").trim() || null,
   }))()`);
   if (!isRecord(value)) throw new Error("The desktop returned an invalid Den client state.");
   return {
@@ -75,7 +75,7 @@ export async function readConnectState(app: Surface): Promise<ConnectState> {
     try {
       const invokeDesktop = window.__REDROB_ELECTRON__ && window.__REDROB_ELECTRON__.invokeDesktop;
       if (invokeDesktop) {
-        const info = await invokeDesktop("openworkServerInfo");
+        const info = await invokeDesktop("redrobServerInfo");
         if (info && info.running === true) {
           baseUrl = String(info.baseUrl ?? info.connectUrl ?? "").trim().replace(/\\/+$/, "");
           token = String(info.ownerToken ?? info.clientToken ?? "").trim();
@@ -83,9 +83,9 @@ export async function readConnectState(app: Surface): Promise<ConnectState> {
       }
     } catch {}
     if (!baseUrl || !token) {
-      const port = (localStorage.getItem("openwork.server.port") ?? "").trim();
+      const port = (localStorage.getItem("redrob.server.port") ?? "").trim();
       baseUrl = port ? "http://127.0.0.1:" + port : baseUrl;
-      token = token || (localStorage.getItem("openwork.server.token") ?? "").trim();
+      token = token || (localStorage.getItem("redrob.server.token") ?? "").trim();
     }
     if (!baseUrl || !token) {
       return { ok: false, status: null, connectEnabled: null, raw: { error: "Local server credentials are unavailable." } };
@@ -143,7 +143,7 @@ export async function readCloudMcpHealth(
     try {
       const invokeDesktop = window.__REDROB_ELECTRON__ && window.__REDROB_ELECTRON__.invokeDesktop;
       if (invokeDesktop) {
-        const info = await invokeDesktop("openworkServerInfo");
+        const info = await invokeDesktop("redrobServerInfo");
         if (info && info.running === true) {
           baseUrl = String(info.baseUrl ?? info.connectUrl ?? "").trim().replace(/\\/+$/, "");
           token = String(info.ownerToken ?? info.clientToken ?? "").trim();
@@ -151,16 +151,16 @@ export async function readCloudMcpHealth(
       }
     } catch {}
     if (!baseUrl || !token) {
-      const port = (localStorage.getItem("openwork.server.port") ?? "").trim();
+      const port = (localStorage.getItem("redrob.server.port") ?? "").trim();
       baseUrl = port ? "http://127.0.0.1:" + port : baseUrl;
-      token = token || (localStorage.getItem("openwork.server.token") ?? "").trim();
+      token = token || (localStorage.getItem("redrob.server.token") ?? "").trim();
     }
     if (!baseUrl || !token) {
       return { ok: false, raw: { error: "Local server credentials are unavailable." } };
     }
     try {
       const response = await fetch(
-        baseUrl + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/mcp/openwork-cloud/health" + ${JSON.stringify(opts?.probe === true ? "?probe=1" : "")},
+        baseUrl + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/mcp/redrob-cloud/health" + ${JSON.stringify(opts?.probe === true ? "?probe=1" : "")},
         { headers: { Authorization: "Bearer " + token } },
       );
       const text = await response.text();
@@ -209,15 +209,15 @@ export async function readConnectStateFile(
   }
   if (!app.handle.profileDir) throw new Error(`The ${app.handle.hostKind} app did not expose its profile directory.`);
   // The local server persists runtime state next to its config file
-  // (`openworkConfigDir()`). The dev-mode desktop redirects that XDG config
-  // root under its Electron userData dir (`<userData>/openwork-dev-data/xdg/config`),
+  // (`redrobConfigDir()`). The dev-mode desktop redirects that XDG config
+  // root under its Electron userData dir (`<userData>/redrob-dev-data/xdg/config`),
   // so probe the known layouts in order.
   const paths = electronProfilePaths(app.handle.profileDir);
   const pathJoin = app.handle.hostKind === "daytona" ? posix.join : join;
   const candidates = [
-    pathJoin(paths.userDataDir, "openwork-dev-data", "xdg", "config", "openwork", "connect-state.json"),
-    pathJoin(paths.configHome, "openwork", "connect-state.json"),
-    pathJoin(paths.homeDir, ".config", "openwork", "connect-state.json"),
+    pathJoin(paths.userDataDir, "redrob-dev-data", "xdg", "config", "redrob", "connect-state.json"),
+    pathJoin(paths.configHome, "redrob", "connect-state.json"),
+    pathJoin(paths.homeDir, ".config", "redrob", "connect-state.json"),
   ];
   let text: string | null = null;
   if (app.handle.hostKind === "daytona") {

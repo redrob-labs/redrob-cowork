@@ -123,7 +123,7 @@ If the sandbox does not have the Google OAuth client metadata in the environment
 ```bash
 REDROB_GOOGLE_WORKSPACE_OAUTH_CLIENT_ID="929071212606-pmkqimjhm2tnp68kbklnout0irllj99h.apps.googleusercontent.com" \
 REDROB_GOOGLE_WORKSPACE_OAUTH_CLIENT_SECRET="<desktop-client-secret-from-google-cloud>" \
-bash /opt/openwork-daytona/start-daytona-electron.sh --detach
+bash /opt/redrob-daytona/start-daytona-electron.sh --detach
 ```
 
 ## Current Verification Blockers

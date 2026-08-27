@@ -34,7 +34,7 @@ const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const denApiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim().replace(/\/+$/, "") ?? "";
 const denWebUrl = (process.env.REDROB_EVAL_DEN_WEB_URL?.trim() || denApiUrl.replace("127.0.0.1", "localhost")).replace(/\/+$/, "");
 const email = process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
-const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!";
 
 const title = !e2eTestsEnabled
   ? "marketplace catalogue legibility skipped: set REDROB_EVAL_E2E_TESTS=1 to opt in"

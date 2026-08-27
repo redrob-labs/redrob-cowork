@@ -272,8 +272,8 @@ function validateUntrustedSnapshot(snapshot: WorldSnapshot): void {
     } catch {
       rejectSnapshotField("resolved.den.database", database, "expected a valid ephemeral database name matching ^[a-z][a-z0-9_]{0,62}$");
     }
-    if (!database.startsWith("openwork_eval_")) {
-      rejectSnapshotField("resolved.den.database", database, "only generated openwork_eval_* databases may be torn down");
+    if (!database.startsWith("redrob_eval_")) {
+      rejectSnapshotField("resolved.den.database", database, "only generated redrob_eval_* databases may be torn down");
     }
   }
   if (snapshot.resolved.den.ports) {
@@ -365,7 +365,7 @@ async function createPolicyTeam(
   const route = "/v1/teams";
   const created = await denFetch(den.admin, route, {
     method: "POST",
-    headers: { ...auth(den.admin.token), "x-openwork-org-id": organizationId },
+    headers: { ...auth(den.admin.token), "x-redrob-org-id": organizationId },
     body: JSON.stringify({
       name: team.name,
       memberIds: await policyMemberIds(den, organizationId, team.members),
@@ -398,7 +398,7 @@ async function createDesktopPolicy(
   const promptCards = policy.promptCards ?? [];
   const created = await denFetch(den.admin, route, {
     method: "POST",
-    headers: { ...auth(den.admin.token), "x-openwork-org-id": organizationId },
+    headers: { ...auth(den.admin.token), "x-redrob-org-id": organizationId },
     body: JSON.stringify({
       policyName: policy.name,
       priority: policy.priority ?? 1,
@@ -550,7 +550,7 @@ function extraOrganizationMembers(
   for (const [memberName, person] of Object.entries(org.members ?? {})) {
     members.add(
       person.email?.trim()
-      || `${emailSegment(memberName)}+${emailSegment(worldName)}-${emailSegment(orgName)}@openwork.test`,
+      || `${emailSegment(memberName)}+${emailSegment(worldName)}-${emailSegment(orgName)}@redrob.test`,
     );
   }
   return [...members];
@@ -707,7 +707,7 @@ export async function resumeWorld(
           timeoutMs: 10_000,
         });
       } catch (error) {
-        console.warn(`[openwork/testkit] World app ${JSON.stringify(name)} could not be attached during resume: ${messageText(error)}`);
+        console.warn(`[redrob/testkit] World app ${JSON.stringify(name)} could not be attached during resume: ${messageText(error)}`);
       }
     }
   }
@@ -718,7 +718,7 @@ export async function resumeWorld(
     detached = true;
     for (const [name, app] of Object.entries(apps)) {
       await app.stop().catch((error: unknown) => {
-        console.error(`[openwork/testkit] World app ${JSON.stringify(name)} CDP detach failed: ${messageText(error)}`);
+        console.error(`[redrob/testkit] World app ${JSON.stringify(name)} CDP detach failed: ${messageText(error)}`);
       });
     }
   };
@@ -734,7 +734,7 @@ export async function resumeWorld(
       await freePort(port)
         .then(() => stoppedApps.push(name))
         .catch((error: unknown) => {
-          console.error(`[openwork/testkit] World app ${JSON.stringify(name)} teardown failed on CDP port ${port}: ${messageText(error)}`);
+          console.error(`[redrob/testkit] World app ${JSON.stringify(name)} teardown failed on CDP port ${port}: ${messageText(error)}`);
         });
     }
 
@@ -752,7 +752,7 @@ export async function resumeWorld(
       await freePort(port)
         .then(() => stoppedDenPorts.push(port))
         .catch((error: unknown) => {
-          console.error(`[openwork/testkit] World Den teardown failed on port ${port}: ${messageText(error)}`);
+          console.error(`[redrob/testkit] World Den teardown failed on port ${port}: ${messageText(error)}`);
         });
     }
 
@@ -761,7 +761,7 @@ export async function resumeWorld(
       await dropSnapshotDatabase(snapshot.resolved.den.database)
         .then(() => { droppedDatabase = snapshot.resolved.den.database; })
         .catch((error: unknown) => {
-          console.error(`[openwork/testkit] World database ${snapshot.resolved.den.database} teardown failed: ${messageText(error)}`);
+          console.error(`[redrob/testkit] World database ${snapshot.resolved.den.database} teardown failed: ${messageText(error)}`);
         });
     }
     teardownResult = {
@@ -826,7 +826,7 @@ export async function startWorld(
             members: extraOrganizationMembers(name, orgName, org),
           })),
           (created) => Effect.promise(() => deleteProvisionedOrganization(created).catch((error: unknown) => {
-            console.error(`[openwork/testkit] world org ${orgName} cleanup failed: ${messageText(error)}`);
+            console.error(`[redrob/testkit] world org ${orgName} cleanup failed: ${messageText(error)}`);
           })),
         );
         yield* Effect.promise(() => renameProvisionedOrganization(provisioned, orgName));
@@ -906,7 +906,7 @@ export async function startWorld(
     };
   } catch (error) {
     await Effect.runPromise(Scope.close(scope, Exit.die(error))).catch((cleanupError: unknown) => {
-      console.error(`[openwork/testkit] world cleanup after acquisition failure failed: ${messageText(cleanupError)}`);
+      console.error(`[redrob/testkit] world cleanup after acquisition failure failed: ${messageText(cleanupError)}`);
     });
     throw error;
   }

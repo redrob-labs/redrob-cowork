@@ -18,7 +18,7 @@ and bug reproduction.
 ## Fastest path: the script
 
 Run the helper script from the repo root. It creates a Daytona VNC-capable
-sandbox from the reusable `openwork-eval-vnc` snapshot when present, checks out
+sandbox from the reusable `redrob-eval-vnc` snapshot when present, checks out
 the ref, conditionally installs deps, starts XFCE/noVNC, Vite, Electron, and
 waits for CDP:
 
@@ -42,12 +42,12 @@ verdict coverage belongs in `evals/specs/<slug>.e2e.test.ts`, imports `test`
 from `@redrob/testkit`, and records ambient evidence; see `write-a-spec`.
 
 Use `browser_list` to connect when manual inspection is needed.
-Refresh the snapshot with `bash .devcontainer/create-daytona-openwork-snapshot.sh`
+Refresh the snapshot with `bash .devcontainer/create-daytona-redrob-snapshot.sh`
 when dependencies or base setup change. The snapshot excludes `node_modules`;
-dependency installs reuse the `openwork-eval-pnpm-store` volume.
+dependency installs reuse the `redrob-eval-pnpm-store` volume.
 For provider flows, create/populate the reusable secrets volume once with
 `bash .devcontainer/setup-daytona-secrets-volume.sh .newtoken`; future Daytona
-sandboxes mount `openwork-eval-secrets:/daytona-secrets` automatically and
+sandboxes mount `redrob-eval-secrets:/daytona-secrets` automatically and
 source every `/daytona-secrets/*.env` file before Electron starts.
 
 ## Related Daytona Skills
@@ -59,7 +59,7 @@ source every `/daytona-secrets/*.env` file before Electron starts.
 - `daytona-electron-den`: two-sandbox server + Electron validation.
 - `daytona-chrome-cdp`: standalone Chrome in Daytona for web sign-in and OAuth.
 - `daytona-secrets-volume`: provider keys and eval-only secrets in
-  `openwork-eval-secrets:/daytona-secrets`.
+  `redrob-eval-secrets:/daytona-secrets`.
 - `daytona-recording-artifacts`: supplementary screenshots, before/after
   recordings, and PR presentation artifacts.
 
@@ -67,12 +67,12 @@ source every `/daytona-secrets/*.env` file before Electron starts.
 
 - **Cloud server:** use `.devcontainer/test-server-on-daytona.sh` for Den Web,
   Den API, worker proxy, org policies, marketplace, and cloud auth flows.
-- **Secrets volume:** use `openwork-eval-secrets:/daytona-secrets` for provider
+- **Secrets volume:** use `redrob-eval-secrets:/daytona-secrets` for provider
   keys and eval-only credentials. Add more files with
   `bash .devcontainer/setup-daytona-secrets-volume.sh <local-env> <name>.env`.
 - **Electron sandbox:** use `.devcontainer/test-on-daytona.sh` for the real
   desktop app, noVNC visual access, and CDP automation on port 9825.
-- **Artifacts volume:** use `openwork-eval-artifacts:/daytona-artifacts` for
+- **Artifacts volume:** use `redrob-eval-artifacts:/daytona-artifacts` for
   screenshots, validation notes, and recordings that survive sandbox deletion.
 
 Validation standard: use `daytona-flow-validator`. The `@redrob/testkit`
@@ -357,8 +357,8 @@ bash .devcontainer/setup-daytona-secrets-volume.sh .newtoken
 bash .devcontainer/setup-daytona-secrets-volume.sh .anthropic anthropic.env
 ```
 
-Every Daytona eval sandbox mounts `openwork-eval-secrets:/daytona-secrets` and
-`/opt/openwork-daytona/start-daytona-electron.sh` sources every
+Every Daytona eval sandbox mounts `redrob-eval-secrets:/daytona-secrets` and
+`/opt/redrob-daytona/start-daytona-electron.sh` sources every
 `/daytona-secrets/*.env` file before Electron starts. Keep provider keys, test
 OAuth credentials, and other eval-only secrets there instead of workspace files.
 If you update the volume while a sandbox is already running, restart Electron so
@@ -370,7 +370,7 @@ daytona exec "$SANDBOX" -- "bash -lc 'pkill -f electron || true; pkill -f electr
 
 # Step 2: wait, then restart Electron (separate exec call)
 sleep 3
-daytona exec "$SANDBOX" -- "bash -lc 'cd /workspace && bash /opt/openwork-daytona/start-daytona-electron.sh --detach'"
+daytona exec "$SANDBOX" -- "bash -lc 'cd /workspace && bash /opt/redrob-daytona/start-daytona-electron.sh --detach'"
 ```
 
 **GOTCHA:** Do NOT chain `pkill` and the restart in the same
@@ -403,7 +403,7 @@ bash .devcontainer/test-server-on-daytona.sh <branch-or-commit>
 must use the same encryption key as `.devcontainer/start-daytona-server.sh`, and
 `@redrob/email` must be built before the seed imports Den email helpers:
 ```bash
-daytona exec <server-sandbox> -- 'cd /workspace && pnpm --filter @redrob/email build && cd /workspace/ee/apps/den-api && REDROB_DEV_MODE=1 DATABASE_URL=mysql://root:password@127.0.0.1:3306/openwork_den DEN_DB_ENCRYPTION_KEY=daytona-den-db-encryption-key-please-change-1234567890 BETTER_AUTH_SECRET=local-dev-secret-not-for-production-use!! BETTER_AUTH_URL=http://localhost:3005 pnpm exec tsx scripts/seed-demo-org.ts --reset'
+daytona exec <server-sandbox> -- 'cd /workspace && pnpm --filter @redrob/email build && cd /workspace/ee/apps/den-api && REDROB_DEV_MODE=1 DATABASE_URL=mysql://root:password@127.0.0.1:3306/redrob_den DEN_DB_ENCRYPTION_KEY=daytona-den-db-encryption-key-please-change-1234567890 BETTER_AUTH_SECRET=local-dev-secret-not-for-production-use!! BETTER_AUTH_URL=http://localhost:3005 pnpm exec tsx scripts/seed-demo-org.ts --reset'
 ```
 
 3. Start Electron against the printed Den Web/API URLs:
@@ -415,8 +415,8 @@ bash .devcontainer/test-on-daytona.sh <branch-or-commit> --den-base-url <DEN_WEB
 grant from the Den API, paste the `redrob://den-auth?...` URL into Cloud
 Account -> `Paste sign-in code`, and choose `Acme Robotics`:
 ```bash
-TOKEN=$(curl -s -X POST '<DEN_API_URL>/api/auth/sign-in/email' -H 'content-type: application/json' --data '{"email":"alex@acme.test","password":"OpenWorkDemo123!"}' | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).token))')
-curl -s -X POST '<DEN_API_URL>/v1/auth/desktop-handoff' -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' --data '{"desktopScheme":"openwork"}'
+TOKEN=$(curl -s -X POST '<DEN_API_URL>/api/auth/sign-in/email' -H 'content-type: application/json' --data '{"email":"alex@acme.test","password":"RedrobWorkDemo123!"}' | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).token))')
+curl -s -X POST '<DEN_API_URL>/v1/auth/desktop-handoff' -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' --data '{"desktopScheme":"redrob"}'
 ```
 
 5. Open Settings -> Extensions -> Marketplace and run the marketplace install,
@@ -455,7 +455,7 @@ daytona exec "$SANDBOX" -- "bash -lc 'tail -80 /tmp/electron.log'"
 daytona exec "$SANDBOX" -- "bash -lc 'tail -80 /tmp/vite.log'"
 ```
 
-The app log line `[openwork] Electron CDP exposed at http://127.0.0.1:9825`
+The app log line `[redrob] Electron CDP exposed at http://127.0.0.1:9825`
 means Redrob Work requested CDP. The real success marker is Chromium's own line:
 `DevTools listening on ws://127.0.0.1:9825/devtools/browser/...`.
 
@@ -487,7 +487,7 @@ daytona exec "$SANDBOX" -- "bash -lc 'pkill -f electron || true; pkill -f electr
 
 Use this workflow to capture a BEFORE recording on the current branch, switch
 to a feature branch on the same sandbox, and capture an AFTER recording. Both
-recordings are saved to the persistent `openwork-eval-artifacts` volume and
+recordings are saved to the persistent `redrob-eval-artifacts` volume and
 survive sandbox deletion.
 
 ### Step 1: Start the sandbox with BEFORE recording
@@ -496,7 +496,7 @@ survive sandbox deletion.
 bash .devcontainer/test-on-daytona.sh dev --record-video --recording-name my-feature-before
 ```
 
-Save the sandbox name from the output (e.g. `SANDBOX=openwork-test-20260601-165424`).
+Save the sandbox name from the output (e.g. `SANDBOX=redrob-test-20260601-165424`).
 
 ### Step 2: Drive the BEFORE flow
 
@@ -520,10 +520,10 @@ any app state needed (e.g. onboarding flag):
 
 ```js
 // In browser_eval:
-const raw = localStorage.getItem("openwork.preferences");
+const raw = localStorage.getItem("redrob.preferences");
 const prefs = raw ? JSON.parse(raw) : {};
 prefs.hasCompletedOnboarding = false;
-localStorage.setItem("openwork.preferences", JSON.stringify(prefs));
+localStorage.setItem("redrob.preferences", JSON.stringify(prefs));
 location.reload();
 ```
 
@@ -590,7 +590,7 @@ screenshot, then continue the recording.
 
 ### Notes
 
-- Recordings are stored on the `openwork-eval-artifacts` Daytona volume (5 GB,
+- Recordings are stored on the `redrob-eval-artifacts` Daytona volume (5 GB,
   reusable across sandboxes). They persist after `daytona delete`.
 - The `start-daytona-recording.sh` script records to a temp file first, then
   copies to the artifacts volume on stop — this avoids NFS write issues.

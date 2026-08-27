@@ -30,14 +30,14 @@ function normalizeLocalServer(localServer: LocalServerHandle): NormalizedLocalSe
 }
 
 function remoteBaseUrl(workspace: NonNullable<WorkspaceServerClientWorkspace>): string {
-  return trim(workspace.baseUrl) || trim(workspace.openworkHostUrl);
+  return trim(workspace.baseUrl) || trim(workspace.redrobHostUrl);
 }
 
 function remoteToken(workspace: NonNullable<WorkspaceServerClientWorkspace>): string {
   return (
-    trim(workspace.openworkToken) ||
-    trim(workspace.openworkClientToken) ||
-    trim(workspace.openworkHostToken)
+    trim(workspace.redrobToken) ||
+    trim(workspace.redrobClientToken) ||
+    trim(workspace.redrobHostToken)
   );
 }
 
@@ -70,10 +70,10 @@ export function createWorkspaceServerClientCacheKey(
 }
 
 /**
- * Workspace-scoped OpenWork server client resolver.
+ * Workspace-scoped Redrob Work server client resolver.
  *
  * The returned endpoint includes the correctly mounted workspace URLs and a
- * memoized OpenWork server client. The cache is intentionally per resolver so
+ * memoized Redrob Work server client. The cache is intentionally per resolver so
  * React routes/stores do not share mutable clients across workspace contexts.
  */
 export function createWorkspaceServerClientResolver(

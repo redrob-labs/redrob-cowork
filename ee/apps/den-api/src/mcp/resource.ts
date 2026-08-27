@@ -1,7 +1,7 @@
 /**
  * Derivation of the Den MCP resource URL from the auth origin.
  *
- * Hosted web-app origins (app.redrob.io, app.openwork.software,
+ * Hosted web-app origins (app.redrob.io, app.redrob.software,
  * app.*, *.run.app, configured DEN_WEB_APP_HOSTS) serve the den-web
  * frontend at their root and expose den-api only behind the `/api/den`
  * proxy path. Nothing serves MCP at `<origin>/mcp` on those hosts, so

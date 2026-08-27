@@ -1,4 +1,4 @@
-# OpenWork tests and test evidence
+# Redrob Work tests and test evidence
 
 All executable coverage lives in [`specs/**/*.test.ts`](./specs) and imports
 `test` from `@redrob/testkit`. Tests that drive Electron, Den, or another app
@@ -191,7 +191,7 @@ recordings are supplementary and never determine the pass/fail verdict.
 For an isolated Den API without Electron or Den Web, use the development helper:
 
 ```bash
-pnpm --dir evals dev:den -- up --port 8891 --database openwork_den_my_eval --seed
+pnpm --dir evals dev:den -- up --port 8891 --database redrob_den_my_eval --seed
 pnpm --dir evals dev:den -- down --port 8891 --drop-database
 ```
 

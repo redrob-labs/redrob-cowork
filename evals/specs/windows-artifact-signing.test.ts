@@ -11,12 +11,12 @@ const workflowPath = join(repoRoot, ".github", "workflows", "release-macos-aarch
 const refreshScriptPath = join(repoRoot, "scripts", "release", "refresh-signed-windows-artifacts.mjs");
 
 const installers = [
-  ["openwork-win-x64-1.2.3.exe", "latest.yml"],
-  ["openwork-win-arm64-1.2.3.exe", "latest.yml"],
-  ["openwork-cloud-win-x64-1.2.3.exe", "cloud.yml"],
-  ["openwork-cloud-win-arm64-1.2.3.exe", "cloud.yml"],
-  ["openwork-enterprise-win-x64-1.2.3.exe", "enterprise.yml"],
-  ["openwork-enterprise-win-arm64-1.2.3.exe", "enterprise.yml"],
+  ["redrob-win-x64-1.2.3.exe", "latest.yml"],
+  ["redrob-win-arm64-1.2.3.exe", "latest.yml"],
+  ["redrob-cloud-win-x64-1.2.3.exe", "cloud.yml"],
+  ["redrob-cloud-win-arm64-1.2.3.exe", "cloud.yml"],
+  ["redrob-enterprise-win-x64-1.2.3.exe", "enterprise.yml"],
+  ["redrob-enterprise-win-arm64-1.2.3.exe", "enterprise.yml"],
 ] as const;
 
 const windowsMatrixArtifacts = [
@@ -76,7 +76,7 @@ test("public, cloud, and enterprise Windows targets avoid an unsigned artifact t
 });
 
 test("signed Windows metadata is regenerated for every distribution and architecture", async ({ evidence }) => {
-  const fixtureRoot = await mkdtemp(join(tmpdir(), "openwork-windows-signing-"));
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "redrob-windows-signing-"));
   onTestFinished(() => rm(fixtureRoot, { recursive: true, force: true }));
 
   for (const [index, [installerName, manifestName]] of installers.entries()) {

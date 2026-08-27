@@ -137,7 +137,7 @@ async function createProvider(
 ): Promise<string> {
   const result = await denFetch(admin, "/v1/llm-providers", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: PROVIDER_NAME,
       source: "custom",
@@ -172,7 +172,7 @@ async function createAutomation(
 ): Promise<{ automationId: string; revisionId: string }> {
   const result = await denFetch(admin, "/v1/automations", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: input.name,
       instructions: input.instructions,
@@ -269,7 +269,7 @@ async function assertSucceededReceipt(
     executionLocation: "desktop",
     automationId: expected.automationId,
     automationRunId: runId,
-    engineKind: "openwork-desktop-runner-v1",
+    engineKind: "redrob-desktop-runner-v1",
   });
   expect(sessionId).not.toBe("");
   expect(typeof thread.workspaceId).toBe("string");
@@ -346,7 +346,7 @@ test("a Desktop Automation completes through UI, API, schedule, thread, and rece
 
   const invalid = await denFetch(den.admin, "/v1/automations", {
     method: "POST",
-    headers: { ...auth(den.admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(den.admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: `Invalid lifecycle ${stamp}`,
       instructions,
@@ -528,7 +528,7 @@ test("a Desktop Automation recovers across restart before execution and while wo
     instructions: `Return one concise synthetic recovery result for marker ${stamp}.`,
     providerId,
   });
-  const profileDir = await mkdtemp(join(tmpdir(), "openwork-automation-recovery-"));
+  const profileDir = await mkdtemp(join(tmpdir(), "redrob-automation-recovery-"));
   onTestFinished(() => rm(profileDir, { recursive: true, force: true }));
   let desktop: Awaited<ReturnType<typeof app>> | null = null;
 

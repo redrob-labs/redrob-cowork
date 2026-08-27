@@ -3,12 +3,12 @@ import { readFile } from "node:fs/promises";
 
 import type { EnvService } from "./env-file.js";
 import { syncManagedProviderAuth } from "./managed-provider-auth.js";
-import { writeOpenworkRuntimeConfigFile } from "./openwork-runtime-config.js";
+import { writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import {
-  hasOpenworkWorkspaceConfig,
-  readOpenworkWorkspaceConfig,
-  writeOpenworkWorkspaceConfig,
-} from "./openwork-workspace-config-store.js";
+  hasRedrobWorkspaceConfig,
+  readRedrobWorkspaceConfig,
+  writeRedrobWorkspaceConfig,
+} from "./redrob-workspace-config-store.js";
 import {
   mergeRuntimeProviderUpdate,
   readGlobalRuntimeOpencodeConfig,
@@ -18,7 +18,7 @@ import {
   writeRuntimeOpencodeConfig,
 } from "./runtime-opencode-config-store.js";
 import type { ServerConfig } from "./types.js";
-import { openworkConfigPath } from "./workspace-files.js";
+import { redrobConfigPath } from "./workspace-files.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
 
 type JsonRecord = Record<string, unknown>;
@@ -317,7 +317,7 @@ async function requestJson(
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${session.token}`,
-        "x-openwork-legacy-org-id": session.orgId,
+        "x-redrob-legacy-org-id": session.orgId,
       },
       signal: AbortSignal.timeout(requestTimeoutMs),
     });
@@ -366,11 +366,11 @@ function hashString(value: string): string {
 }
 
 function runtimeProviderId(provider: DenProvider): string {
-  return provider.source === "openwork" ? "openwork" : provider.id;
+  return provider.source === "redrob" ? "redrob" : provider.id;
 }
 
 function isCloudManagedProviderKey(providerId: string): boolean {
-  return /^lpr_/i.test(providerId) || providerId.trim() === "openwork";
+  return /^lpr_/i.test(providerId) || providerId.trim() === "redrob";
 }
 
 function readProviderEnvNames(providerConfig: JsonRecord): string[] {
@@ -386,7 +386,7 @@ function upsertEnvEntry(entries: EnvEntry[], key: string, value: string): void {
   else entries.push({ key: trimmedKey, value: trimmedValue });
 }
 
-function readOpenWorkInferenceBaseUrl(providerConfig: JsonRecord): string | null {
+function readRedrobWorkInferenceBaseUrl(providerConfig: JsonRecord): string | null {
   const options = providerConfig.options;
   if (isRecord(options)) {
     const baseUrl = readRequiredString(options.baseURL);
@@ -412,9 +412,9 @@ function providerEnvEntries(provider: DenProviderConnection): EnvEntry[] {
   if (provider.apiKey && envNames[0]) upsertEnvEntry(entries, envNames[0], provider.apiKey);
 
   const primaryCredential = provider.apiKey?.trim() || entries[0]?.value || "";
-  if (provider.source === "openwork" && primaryCredential) {
+  if (provider.source === "redrob" && primaryCredential) {
     upsertEnvEntry(entries, "REDROB_CLOUD_API_KEY", primaryCredential);
-    const baseUrl = readOpenWorkInferenceBaseUrl(provider.providerConfig);
+    const baseUrl = readRedrobWorkInferenceBaseUrl(provider.providerConfig);
     if (baseUrl) upsertEnvEntry(entries, "REDROB_INFERENCE_BASE_URL", baseUrl);
   }
   return entries;
@@ -439,7 +439,7 @@ function buildProviderConfig(provider: DenProviderConnection): JsonRecord {
     name: provider.name,
     env: readProviderEnvNames(provider.providerConfig),
   };
-  if (Object.keys(models).length > 0 || provider.source !== "openwork") config.models = models;
+  if (Object.keys(models).length > 0 || provider.source !== "redrob") config.models = models;
 
   const npm = readRequiredString(provider.providerConfig.npm);
   if (npm) config.npm = npm;
@@ -513,19 +513,19 @@ function managedProviderMap(providers: Record<string, Record<string, unknown>>):
   return Object.fromEntries(Object.entries(providers).filter(([providerId]) => isCloudManagedProviderKey(providerId)));
 }
 
-function removeCloudProviderImportBaselines(openwork: JsonRecord): JsonRecord | null {
-  if (!isRecord(openwork.cloudImports) || !isRecord(openwork.cloudImports.providers)) return null;
-  if (Object.keys(openwork.cloudImports.providers).length === 0) return null;
+function removeCloudProviderImportBaselines(redrob: JsonRecord): JsonRecord | null {
+  if (!isRecord(redrob.cloudImports) || !isRecord(redrob.cloudImports.providers)) return null;
+  if (Object.keys(redrob.cloudImports.providers).length === 0) return null;
   return {
-    ...openwork,
+    ...redrob,
     cloudImports: {
-      ...openwork.cloudImports,
+      ...redrob.cloudImports,
       providers: {},
     },
   };
 }
 
-async function readLegacyOpenworkConfig(path: string): Promise<JsonRecord | null> {
+async function readLegacyRedrobConfig(path: string): Promise<JsonRecord | null> {
   try {
     const parsed: unknown = JSON.parse(await readFile(path, "utf8"));
     return isRecord(parsed) ? parsed : null;
@@ -861,7 +861,7 @@ export class CloudProviderSync {
     const workspaceCleanup = await this.cleanupWorkspaceTakeovers();
     const engineWorkspace = findManagedEngineWorkspace(this.config.workspaces) ?? this.config.workspaces[0];
     const runtimeFileChanged = engineWorkspace
-      ? (await writeOpenworkRuntimeConfigFile(this.config, engineWorkspace.id)).changed
+      ? (await writeRedrobRuntimeConfigFile(this.config, engineWorkspace.id)).changed
       : false;
     // Credentials reach a live engine through PUT /auth/{providerID} below, so
     // a key rotation never needs a reload. Provider *config* (models, npm,
@@ -940,16 +940,16 @@ export class CloudProviderSync {
         runtimeChanged = runtimeChanged || result.changed;
       }
 
-      const hasStoredConfig = await hasOpenworkWorkspaceConfig(this.config, workspace.id);
-      const openwork = hasStoredConfig
-        ? await readOpenworkWorkspaceConfig(this.config, workspace.id)
+      const hasStoredConfig = await hasRedrobWorkspaceConfig(this.config, workspace.id);
+      const redrob = hasStoredConfig
+        ? await readRedrobWorkspaceConfig(this.config, workspace.id)
         : workspace.workspaceType !== "remote" && workspace.path.trim().length > 0
-          ? await readLegacyOpenworkConfig(openworkConfigPath(workspace.path))
+          ? await readLegacyRedrobConfig(redrobConfigPath(workspace.path))
           : null;
-      if (!openwork) continue;
-      const next = removeCloudProviderImportBaselines(openwork);
+      if (!redrob) continue;
+      const next = removeCloudProviderImportBaselines(redrob);
       if (!next) continue;
-      await writeOpenworkWorkspaceConfig(this.config, workspace.id, () => next);
+      await writeRedrobWorkspaceConfig(this.config, workspace.id, () => next);
       changed = true;
     }
     return { changed, runtimeChanged };
@@ -991,7 +991,7 @@ export class CloudProviderSync {
 
     const engineWorkspace = findManagedEngineWorkspace(this.config.workspaces) ?? this.config.workspaces[0];
     if (engineWorkspace) {
-      const fileResult = await writeOpenworkRuntimeConfigFile(this.config, engineWorkspace.id);
+      const fileResult = await writeRedrobRuntimeConfigFile(this.config, engineWorkspace.id);
       this.reloadPending = this.reloadPending || providerChanged || fileResult.changed;
     }
     let reloadError: unknown;

@@ -110,7 +110,7 @@ function assistantFailure(snapshot) {
   return null
 }
 
-/** Runs the assignment as a normal visible local OpenWork thread. */
+/** Runs the assignment as a normal visible local Redrob Work thread. */
 export async function executeDesktopAutomation(assignment, options) {
   const local = await options.getLocalRuntime()
   if (!local?.baseUrl || !local?.token) throw new Error("The desktop runtime is unavailable")

@@ -3,20 +3,20 @@ import { nativeDeepLinkEvent } from "./deep-link-bridge";
 export type * from "./desktop-types";
 export type {
   EngineInfo,
-  OpenworkServerInfo,
+  RedrobServerInfo,
   EngineDoctorResult,
   WorkspaceInfo,
   WorkspaceList,
   WorkspaceExportSummary,
   OpencodeCommandDraft,
-  WorkspaceOpenworkConfig,
+  WorkspaceRedrobConfig,
   AppBuildInfo,
   DesktopDistributionInfo,
   BrandIconApplyResult,
   BrandIconState,
   DesktopBootstrapConfig,
   EvalRelaunchResult,
-  OpenworkDockerCleanupResult,
+  RedrobDockerCleanupResult,
   ExecResult,
   LocalSkillCard,
   LocalSkillContent,
@@ -74,7 +74,7 @@ export type RecoveryActionResult = {
 
 declare global {
   interface Window {
-    __openworkRecoveryControl?: {
+    __redrobRecoveryControl?: {
       snapshot: () => Promise<unknown>;
       select: (id: string) => Promise<unknown>;
     };
@@ -289,7 +289,7 @@ export const desktopBridge = new Proxy(electronBridge, {
 
 // ---------------------------------------------------------------------------
 // desktopFetch — proxies non-loopback requests through the Electron main
-// process. Loopback hosts (the local opencode/openwork server) use the
+// process. Loopback hosts (the local opencode/redrob server) use the
 // renderer's own fetch, which works against same-machine services. Cross-origin
 // requests that need CORS headers the target does not send (e.g. the Den API on
 // a different control plane) should instead use `desktopFetchViaMain` directly.
@@ -552,8 +552,8 @@ const {
   workspaceAddAuthorizedRoot,
   workspaceExportConfig,
   workspaceImportConfig,
-  workspaceOpenworkRead,
-  workspaceOpenworkWrite,
+  workspaceRedrobRead,
+  workspaceRedrobWrite,
   opencodeCommandList,
   opencodeCommandWrite,
   opencodeCommandDelete,
@@ -566,11 +566,11 @@ const {
   setDesktopBootstrapConfig,
   connectLinkVerify,
   connectLinkAccept,
-  nukeOpenworkAndOpencodeConfigPreview,
-  nukeOpenworkAndOpencodeConfigAndExit,
-  sandboxCleanupOpenworkContainers,
-  openworkServerInfo,
-  openworkServerRestart,
+  nukeRedrobAndOpencodeConfigPreview,
+  nukeRedrobAndOpencodeConfigAndExit,
+  sandboxCleanupRedrobContainers,
+  redrobServerInfo,
+  redrobServerRestart,
   runtimeBootstrap,
   engineInfo,
   engineDoctor,
@@ -588,7 +588,7 @@ const {
   updaterEnvironment,
   readOpencodeConfig,
   writeOpencodeConfig,
-  resetOpenworkState,
+  resetRedrobState,
   resetOpencodeCache,
   opencodeMcpAuth,
   setWindowDecorations,
@@ -607,8 +607,8 @@ export {
   workspaceAddAuthorizedRoot,
   workspaceExportConfig,
   workspaceImportConfig,
-  workspaceOpenworkRead,
-  workspaceOpenworkWrite,
+  workspaceRedrobRead,
+  workspaceRedrobWrite,
   opencodeCommandList,
   opencodeCommandWrite,
   opencodeCommandDelete,
@@ -621,11 +621,11 @@ export {
   setDesktopBootstrapConfig,
   connectLinkVerify,
   connectLinkAccept,
-  nukeOpenworkAndOpencodeConfigPreview,
-  nukeOpenworkAndOpencodeConfigAndExit,
-  sandboxCleanupOpenworkContainers,
-  openworkServerInfo,
-  openworkServerRestart,
+  nukeRedrobAndOpencodeConfigPreview,
+  nukeRedrobAndOpencodeConfigAndExit,
+  sandboxCleanupRedrobContainers,
+  redrobServerInfo,
+  redrobServerRestart,
   runtimeBootstrap,
   engineInfo,
   engineDoctor,
@@ -643,7 +643,7 @@ export {
   updaterEnvironment,
   readOpencodeConfig,
   writeOpencodeConfig,
-  resetOpenworkState,
+  resetRedrobState,
   resetOpencodeCache,
   opencodeMcpAuth,
   setWindowDecorations,

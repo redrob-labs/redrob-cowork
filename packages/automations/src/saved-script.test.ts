@@ -62,7 +62,7 @@ describe("saved Script Automations", () => {
       name: "Legacy",
       instructions: "Prepare a briefing",
       schedule,
-      model: { providerId: "openwork", modelId: "model" },
+      model: { providerId: "redrob", modelId: "model" },
     }).success).toBe(true)
 
     const common = {

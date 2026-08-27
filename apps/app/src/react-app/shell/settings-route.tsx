@@ -5,22 +5,22 @@ import { toast } from "@/components/ui/sonner";
 
 import {
   SUGGESTED_PLUGINS,
-  filterOpenWorkExtensionCatalogForPlatform,
-  resolveOpenWorkExtensionCatalogPlatform,
+  filterRedrobWorkExtensionCatalogForPlatform,
+  resolveRedrobWorkExtensionCatalogPlatform,
 } from "@/app/constants";
 import type { EnablementContext } from "@/app/enablement";
 import { createClient, unwrap } from "@/app/lib/opencode";
 import {
-  createOpenworkServerClient,
-  isLoopbackOpenworkServerUrl,
-  readOpenworkServerSettings,
-  type OpenworkCloudMcpHealth,
-  type OpenworkCloudMcpProviderModelContext,
-  type OpenworkServerCapabilities,
-  type OpenworkServerClient,
-  type OpenworkWorkspaceInfo,
-} from "@/app/lib/openwork-server";
-import { buildOpenworkEnvRuntimeKey } from "@/app/lib/openwork-env-runtime";
+  createRedrobServerClient,
+  isLoopbackRedrobServerUrl,
+  readRedrobServerSettings,
+  type RedrobCloudMcpHealth,
+  type RedrobCloudMcpProviderModelContext,
+  type RedrobServerCapabilities,
+  type RedrobServerClient,
+  type RedrobWorkspaceInfo,
+} from "@/app/lib/redrob-server";
+import { buildRedrobEnvRuntimeKey } from "@/app/lib/redrob-env-runtime";
 import {
   collectAgentContextDiagnosticObservations,
   isAgentContextDiagnosticsWorkspaceAllowed,
@@ -57,9 +57,9 @@ import {
   workspaceLabel,
 } from "@/react-app/shell/route-workspaces";
 import { createConnectionsStore, useConnectionsStoreSnapshot } from "@/react-app/domains/connections/store";
-import { cleanupOpenworkCloudMcpAfterSignOut } from "@/react-app/domains/connections/cloud-mcp-reconciler";
+import { cleanupRedrobCloudMcpAfterSignOut } from "@/react-app/domains/connections/cloud-mcp-reconciler";
 import { useOrgMcpConnections } from "@/react-app/domains/connections/use-org-mcp-connections";
-import { createOpenworkServerStore, useOpenworkServerStoreSnapshot } from "@/react-app/domains/connections/openwork-server-store";
+import { createRedrobServerStore, useRedrobServerStoreSnapshot } from "@/react-app/domains/connections/redrob-server-store";
 import { createProviderAuthStore, useProviderAuthStoreSnapshot } from "@/react-app/domains/connections/provider-auth/store";
 import ProviderAuthModal from "@/react-app/domains/connections/provider-auth/provider-auth-modal";
 import ConnectionsModals from "@/react-app/domains/connections/modals";
@@ -68,10 +68,10 @@ import { AiSettingsView } from "@/react-app/domains/settings/pages/ai-view";
 import "@/react-app/domains/settings/ollama-config";
 import "@/react-app/domains/settings/computer-use-config";
 import "@/react-app/domains/settings/browser-extension-config";
-import "@/react-app/domains/settings/openwork-voice-config";
+import "@/react-app/domains/settings/redrob-voice-config";
 import { useSettingsExtensionController } from "@/react-app/domains/settings/settings-extension-controller";
 import { buildExtensionItems } from "@/react-app/domains/settings/extension-items";
-import { isOpenWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "@/react-app/domains/settings/extension-state";
+import { isRedrobWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "@/react-app/domains/settings/extension-state";
 import { PreferencesView } from "@/react-app/domains/settings/pages/preferences-view";
 import { GeneralSettingsView } from "@/react-app/domains/settings/pages/general-view";
 import { AuthorizedFoldersPanel } from "@/react-app/domains/settings/panels/authorized-folders-panel";
@@ -102,7 +102,7 @@ import { useDebugViewModel } from "@/react-app/domains/settings/state/debug-view
 import { useElectronUpdaterState } from "@/react-app/domains/settings/state/electron-updater-state";
 import { CloudSessionProvider, useCloudSession } from "@/react-app/domains/settings/cloud/cloud-session-provider";
 import { useDenSession } from "@/react-app/domains/settings/cloud/use-den-session";
-import { useControlAction, type OpenworkControlAction } from "./control/control-provider";
+import { useControlAction, type RedrobControlAction } from "./control/control-provider";
 import { useBootState } from "./boot-state";
 import { SettingsShell } from "@/react-app/domains/settings/shell/settings-shell";
 import { SettingsContent } from "@/react-app/domains/settings/shell/panel";
@@ -110,8 +110,8 @@ import { createExtensionsStore, useExtensionsStoreSnapshot } from "@/react-app/d
 import { usePlatform } from "@/react-app/kernel/platform";
 import { useLocal } from "@/react-app/kernel/local-provider";
 import {
-  openworkServerInfo,
-  openworkServerRestart,
+  redrobServerInfo,
+  redrobServerRestart,
   engineStart,
   engineRestart,
   resolveWorkspaceListSelectedId,
@@ -130,13 +130,13 @@ import { useCheckDesktopRestriction, useDesktopConfig } from "@/react-app/domain
 import { useRestrictionNotice } from "@/react-app/domains/cloud/restriction-notice-provider";
 import { useCloudProviderAutoSync } from "@/react-app/domains/cloud/use-cloud-provider-auto-sync";
 import {
-  hasOpenWorkModelsAvailable,
-  hideOpenWorkModelsPromo,
-  useOpenWorkModelsPromoEligibility,
-  isOpenWorkModelsPromoHidden,
-  openWorkModelsPromoChangedEvent,
-  shouldShowOpenWorkModelsSyncing,
-} from "@/react-app/domains/cloud/openwork-models-promo";
+  hasRedrobWorkModelsAvailable,
+  hideRedrobWorkModelsPromo,
+  useRedrobWorkModelsPromoEligibility,
+  isRedrobWorkModelsPromoHidden,
+  redrobModelsPromoChangedEvent,
+  shouldShowRedrobWorkModelsSyncing,
+} from "@/react-app/domains/cloud/redrob-models-promo";
 import {
   isDesktopRuntime,
   isElectronRuntime,
@@ -161,11 +161,11 @@ import type { ModelRef } from "@/app/types";
 import { workspaceSwatchColor } from "@/react-app/domains/session/sidebar/utils";
 import { recordInspectorEvent } from "../../app/lib/app-inspector";
 import {
-  ensureDesktopLocalOpenworkConnection,
+  ensureDesktopLocalRedrobConnection,
   shouldAttemptDesktopLocalReconnect,
-} from "./desktop-local-openwork";
+} from "./desktop-local-redrob";
 import { reloadEngineWithDesktopFallback } from "./engine-reload-escalation";
-import { resolveOpenworkConnection } from "./openwork-connection";
+import { resolveRedrobConnection } from "./redrob-connection";
 import { abortSessionSafe, listCommands } from "@/app/lib/opencode-session";
 import { notifyAlert } from "./notifications";
 import { useReloadCoordinator } from "./reload-coordinator";
@@ -200,8 +200,8 @@ import {
   type LibraryCommandItem,
 } from "@/react-app/domains/settings/library";
 
-const ROUTE_REDROB_CAPABILITIES: OpenworkServerCapabilities = {
-  skills: { read: true, write: true, source: "openwork" },
+const ROUTE_REDROB_CAPABILITIES: RedrobServerCapabilities = {
+  skills: { read: true, write: true, source: "redrob" },
   plugins: { read: true, write: true },
   mcp: { read: true, write: true },
   commands: { read: true, write: true },
@@ -209,7 +209,7 @@ const ROUTE_REDROB_CAPABILITIES: OpenworkServerCapabilities = {
 };
 
 async function reloadEngineOrRestartDesktop(
-  client: Pick<OpenworkServerClient, "reloadEngine">,
+  client: Pick<RedrobServerClient, "reloadEngine">,
   workspaceId: string,
   afterRestart?: () => Promise<void>,
 ): Promise<void> {
@@ -219,13 +219,13 @@ async function reloadEngineOrRestartDesktop(
   }
 }
 
-function isOpenWorkCloudProvider(provider: {
+function isRedrobWorkCloudProvider(provider: {
   providerId?: string | null;
   source?: string | null;
   sourceProviderId?: string | null;
 }) {
   return [provider.providerId, provider.source, provider.sourceProviderId].some(
-    (value) => value?.trim().toLowerCase() === "openwork",
+    (value) => value?.trim().toLowerCase() === "redrob",
   );
 }
 
@@ -266,9 +266,9 @@ function reconcileSelectedWorkspaceId(
   return serverList.activeId?.trim() || desktopSelectedId || workspaces[0]?.id || "";
 }
 
-const SETTINGS_HIDE_TITLEBAR_KEY = "openwork.react.settings.hide-titlebar";
-const SETTINGS_UPDATE_AUTO_CHECK_KEY = "openwork.react.settings.update-auto-check";
-const SETTINGS_UPDATE_AUTO_DOWNLOAD_KEY = "openwork.react.settings.update-auto-download";
+const SETTINGS_HIDE_TITLEBAR_KEY = "redrob.react.settings.hide-titlebar";
+const SETTINGS_UPDATE_AUTO_CHECK_KEY = "redrob.react.settings.update-auto-check";
+const SETTINGS_UPDATE_AUTO_DOWNLOAD_KEY = "redrob.react.settings.update-auto-download";
 
 export function parseSettingsPath(pathname: string): {
   tab: SettingsTab;
@@ -476,7 +476,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   }, [navigate, props.embedded, props.standaloneExtensions, selectedWorkspaceId]);
   const [baseUrl, setBaseUrl] = useState("");
   const [token, setToken] = useState("");
-  const [openworkClient, setOpenworkClient] = useState<OpenworkServerClient | null>(null);
+  const [redrobClient, setRedrobClient] = useState<RedrobServerClient | null>(null);
   const [activeClient, setActiveClient] = useState<Client | null>(null);
   const [busy, setBusy] = useState(false);
   const [busyLabel, setBusyLabel] = useState<string | null>(null);
@@ -495,7 +495,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const [disabledProviders, setDisabledProviders] = useState<string[]>([]);
   const [developerMode, setDeveloperMode] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("openwork.developerMode") === "1";
+    return window.localStorage.getItem("redrob.developerMode") === "1";
   });
   const [themeMode, setThemeModeState] = useState<ThemeMode>(getInitialThemeMode);
   const [hideTitlebar, setHideTitlebar] = useState(() => readStoredBoolean(SETTINGS_HIDE_TITLEBAR_KEY, false));
@@ -530,7 +530,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const [voiceStatus, setVoiceStatus] = useState<string | null>(null);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [userEnvKeys, setUserEnvKeys] = useState<string[]>([]);
-  const [cloudMcpHealth, setCloudMcpHealth] = useState<OpenworkCloudMcpHealth | null>(null);
+  const [cloudMcpHealth, setCloudMcpHealth] = useState<RedrobCloudMcpHealth | null>(null);
   const emptyWorkspaceDisplay = useMemo<WorkspaceDisplay>(
     () => ({
       id: "",
@@ -549,10 +549,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     selectedWorkspaceRoot: "",
     selectedWorkspaceType: "local" as "local" | "remote",
     runtimeWorkspaceId: null as string | null,
-    openworkServerClient: null as OpenworkServerClient | null,
-    selectedWorkspaceOpenworkClient: null as OpenworkServerClient | null,
-    openworkServerStatus: "disconnected" as "connected" | "disconnected",
-    openworkServerCapabilities: null as OpenworkServerCapabilities | null,
+    redrobServerClient: null as RedrobServerClient | null,
+    selectedWorkspaceRedrobClient: null as RedrobServerClient | null,
+    redrobServerStatus: "disconnected" as "connected" | "disconnected",
+    redrobServerCapabilities: null as RedrobServerCapabilities | null,
     selectedWorkspaceDisplay: emptyWorkspaceDisplay as WorkspaceDisplay,
     providerItems: [] as ProviderListItem[],
     providerDefaults: {} as Record<string, string>,
@@ -590,7 +590,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             preset: "starter",
             workspaceType: selectedWorkspace.workspaceType ?? "local",
             displayName: selectedWorkspace.displayNameResolved,
-            openworkWorkspaceName: selectedWorkspace.openworkWorkspaceName,
+            redrobWorkspaceName: selectedWorkspace.redrobWorkspaceName,
           }
         : emptyWorkspaceDisplay,
     [emptyWorkspaceDisplay, selectedWorkspace],
@@ -609,10 +609,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     selectedWorkspaceRoot,
     selectedWorkspaceType: selectedWorkspace?.workspaceType ?? "local",
     runtimeWorkspaceId: selectedWorkspace?.id ?? null,
-    openworkServerClient: openworkClient,
-    selectedWorkspaceOpenworkClient: openworkClient,
-    openworkServerStatus: openworkClient ? "connected" : "disconnected",
-    openworkServerCapabilities: openworkClient ? ROUTE_REDROB_CAPABILITIES : null,
+    redrobServerClient: redrobClient,
+    selectedWorkspaceRedrobClient: redrobClient,
+    redrobServerStatus: redrobClient ? "connected" : "disconnected",
+    redrobServerCapabilities: redrobClient ? ROUTE_REDROB_CAPABILITIES : null,
     selectedWorkspaceDisplay,
     providerItems: providers,
     providerDefaults,
@@ -639,17 +639,17 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     [sessionsByWorkspaceId],
   );
 
-  const openworkServerStore = useMemo(
+  const redrobServerStore = useMemo(
     () =>
-      createOpenworkServerStore({
+      createRedrobServerStore({
         startupPreference: () => {
           // In desktop mode, loopback URLs are ephemeral local runtime details.
           // Only non-loopback stored URLs indicate an explicit remote/manual
           // server connection preference.
           if (!isDesktopRuntime()) return "server";
-          const stored = readOpenworkServerSettings();
+          const stored = readRedrobServerSettings();
           const storedUrl = stored.urlOverride?.trim() ?? "";
-          return storedUrl && !isLoopbackOpenworkServerUrl(storedUrl) ? "server" : "local";
+          return storedUrl && !isLoopbackRedrobServerUrl(storedUrl) ? "server" : "local";
         },
         documentVisible: () => typeof document === "undefined" || document.visibilityState === "visible",
         developerMode: () => routeStateRef.current.developerMode,
@@ -659,9 +659,9 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         restartLocalServer: async () => {
           if (!isDesktopRuntime()) return false;
           try {
-            await openworkServerRestart({
+            await redrobServerRestart({
               remoteAccessEnabled:
-                readOpenworkServerSettings().remoteAccessEnabled === true,
+                readRedrobServerSettings().remoteAccessEnabled === true,
             });
             return true;
           } catch {
@@ -681,7 +681,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         selectedWorkspaceId: () => routeStateRef.current.selectedWorkspaceId,
         selectedWorkspaceRoot: () => routeStateRef.current.selectedWorkspaceRoot,
         workspaceType: () => routeStateRef.current.selectedWorkspaceType,
-        openworkServer: openworkServerStore,
+        redrobServer: redrobServerStore,
         runtimeWorkspaceId: () => routeStateRef.current.runtimeWorkspaceId,
         ensureRuntimeWorkspaceId: async () =>
           routeStateRef.current.runtimeWorkspaceId?.trim() ||
@@ -690,7 +690,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         developerMode: () => routeStateRef.current.developerMode,
         markReloadRequired: reloadCoordinator.markReloadRequired,
       }),
-    [openworkServerStore, reloadCoordinator.markReloadRequired],
+    [redrobServerStore, reloadCoordinator.markReloadRequired],
   );
   refreshMcpServersRef.current = connectionsStore.refreshMcpServers;
   notifyMcpReloadingRef.current = connectionsStore.notifyMcpReloading;
@@ -712,7 +712,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           routeStateRef.current.runtimeWorkspaceId?.trim() ||
           routeStateRef.current.selectedWorkspaceId.trim() ||
           null,
-        openworkServer: openworkServerStore,
+        redrobServer: redrobServerStore,
         setProviders,
         setProviderDefaults,
         setProviderConnectedIds,
@@ -726,7 +726,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           });
         },
       }),
-    [checkDesktopRestriction, openworkServerStore, reloadCoordinator.markReloadRequired],
+    [checkDesktopRestriction, redrobServerStore, reloadCoordinator.markReloadRequired],
   );
   const extensionsStore = useMemo(
     () =>
@@ -736,11 +736,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         selectedWorkspaceId: () => routeStateRef.current.selectedWorkspaceId,
         selectedWorkspaceRoot: () => routeStateRef.current.selectedWorkspaceRoot,
         workspaceType: () => routeStateRef.current.selectedWorkspaceType,
-        openworkServer: openworkServerStore,
-        openworkServerConnection: () => ({
-          openworkServerClient: routeStateRef.current.openworkServerClient,
-          openworkServerStatus: routeStateRef.current.openworkServerStatus,
-          openworkServerCapabilities: routeStateRef.current.openworkServerCapabilities,
+        redrobServer: redrobServerStore,
+        redrobServerConnection: () => ({
+          redrobServerClient: routeStateRef.current.redrobServerClient,
+          redrobServerStatus: routeStateRef.current.redrobServerStatus,
+          redrobServerCapabilities: routeStateRef.current.redrobServerCapabilities,
         }),
         runtimeWorkspaceId: () => routeStateRef.current.runtimeWorkspaceId,
         ensureRuntimeWorkspaceId: async () =>
@@ -757,52 +757,52 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         },
         markReloadRequired: reloadCoordinator.markReloadRequired,
       }),
-    [openworkServerStore, reloadCoordinator.markReloadRequired],
+    [redrobServerStore, reloadCoordinator.markReloadRequired],
   );
-  const openworkServerSnapshot = useOpenworkServerStoreSnapshot(openworkServerStore);
+  const redrobServerSnapshot = useRedrobServerStoreSnapshot(redrobServerStore);
   const connectionsSnapshot = useConnectionsStoreSnapshot(connectionsStore);
   const providerAuthSnapshot = useProviderAuthStoreSnapshot(providerAuthStore);
   const extensionsSnapshot = useExtensionsStoreSnapshot(extensionsStore);
   const orgMcpConnections = useOrgMcpConnections();
 
-  const openworkServerStatusForMcp = openworkServerSnapshot.openworkServerStatus;
+  const redrobServerStatusForMcp = redrobServerSnapshot.redrobServerStatus;
   useEffect(() => {
-    if (openworkServerStatusForMcp !== "connected") return;
-    // The first MCP read races the openwork-server store's initial health
+    if (redrobServerStatusForMcp !== "connected") return;
+    // The first MCP read races the redrob-server store's initial health
     // check (a fresh store always starts "disconnected"), so it falls back
     // to config files where server-runtime (config.remote) entries — notably
     // the cloud control MCP — don't exist. Without this re-read the built-in
     // cards show "Tap to connect" until the next full remount even though
     // the entries are configured and healthy.
     void connectionsStore.refreshMcpServers();
-  }, [connectionsStore, openworkServerStatusForMcp]);
+  }, [connectionsStore, redrobServerStatusForMcp]);
 
   useEffect(() => {
-    if (openworkServerStatusForMcp !== "connected") return;
+    if (redrobServerStatusForMcp !== "connected") return;
     // Same race for the Cloud Providers rows: the provider-auth store's
     // start() read fires while this store still reports "disconnected", so
     // it takes the legacy (empty) config read and the rows sit on "Syncing"
     // even though the server's /cloud-provider-sync/status already lists the
     // providers as synced. Re-derive from the server once it is reachable.
     void providerAuthStore.refreshImportedCloudProviders();
-  }, [openworkServerStatusForMcp, providerAuthStore]);
+  }, [redrobServerStatusForMcp, providerAuthStore]);
 
   const cleanupCloudMcpForSignOut = useCallback(async (settings: DenSettings) => {
-    const client = routeStateRef.current.selectedWorkspaceOpenworkClient;
+    const client = routeStateRef.current.selectedWorkspaceRedrobClient;
     const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() ?? "";
     const orgId = settings.activeOrgId?.trim() ?? "";
     if (!client || !workspaceId || !orgId) return;
     // Settings only has a safe, exact OpenCode client/directory for the active
     // workspace here, so sign-out cleanup is intentionally scoped to that
     // workspace instead of guessing across every configured worker.
-    await cleanupOpenworkCloudMcpAfterSignOut({
+    await cleanupRedrobCloudMcpAfterSignOut({
       context: {
         denBaseUrl: settings.baseUrl,
         serverBaseUrl: client.baseUrl,
         workspaceId,
         orgId,
       },
-      openworkClient: client,
+      redrobClient: client,
       opencodeClient: routeStateRef.current.activeClient,
       directory: routeStateRef.current.selectedWorkspaceRoot,
     });
@@ -863,50 +863,50 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     void refreshConnectCapabilities({ force: true });
   }, [refreshConnectCapabilities]);
 
-  const hasOpenWorkCloudProvider = useMemo(
+  const hasRedrobWorkCloudProvider = useMemo(
     () =>
-      providerAuthSnapshot.cloudOrgProviders.some(isOpenWorkCloudProvider) ||
-      Object.values(providerAuthSnapshot.importedCloudProviders ?? {}).some(isOpenWorkCloudProvider),
+      providerAuthSnapshot.cloudOrgProviders.some(isRedrobWorkCloudProvider) ||
+      Object.values(providerAuthSnapshot.importedCloudProviders ?? {}).some(isRedrobWorkCloudProvider),
     [providerAuthSnapshot.cloudOrgProviders, providerAuthSnapshot.importedCloudProviders],
   );
-  const [openWorkModelsPromoHidden, setOpenWorkModelsPromoHidden] = useState(isOpenWorkModelsPromoHidden);
-  const openWorkModelsPromoEligible = useOpenWorkModelsPromoEligibility();
+  const [redrobModelsPromoHidden, setRedrobWorkModelsPromoHidden] = useState(isRedrobWorkModelsPromoHidden);
+  const redrobModelsPromoEligible = useRedrobWorkModelsPromoEligibility();
   // Entitled = Den/import says Redrob Models is included. Available = local
-  // engine actually exposes selectable openwork models.
-  const openWorkModelsEntitled = cloudSession.isSignedIn && hasOpenWorkCloudProvider;
-  const openWorkModelsAvailable = hasOpenWorkModelsAvailable({
+  // engine actually exposes selectable redrob models.
+  const redrobModelsEntitled = cloudSession.isSignedIn && hasRedrobWorkCloudProvider;
+  const redrobModelsAvailable = hasRedrobWorkModelsAvailable({
     providerConnectedIds,
     providers,
   });
-  const showOpenWorkModelsSyncing = shouldShowOpenWorkModelsSyncing({
-    entitled: openWorkModelsEntitled,
-    available: openWorkModelsAvailable,
+  const showRedrobWorkModelsSyncing = shouldShowRedrobWorkModelsSyncing({
+    entitled: redrobModelsEntitled,
+    available: redrobModelsAvailable,
     workspaceReady: Boolean(selectedWorkspaceId && activeClient),
     reloadPending: providerAuthSnapshot.cloudProviderServerSync?.reloadPending === true,
   });
-  const showOpenWorkModelsSubscribe =
-    openWorkModelsPromoEligible &&
-    !openWorkModelsEntitled &&
-    !openWorkModelsAvailable &&
-    !openWorkModelsPromoHidden;
-  const showOpenWorkModelsConnect =
-    openWorkModelsPromoEligible &&
-    !openWorkModelsEntitled &&
-    !openWorkModelsAvailable &&
-    openWorkModelsPromoHidden;
+  const showRedrobWorkModelsSubscribe =
+    redrobModelsPromoEligible &&
+    !redrobModelsEntitled &&
+    !redrobModelsAvailable &&
+    !redrobModelsPromoHidden;
+  const showRedrobWorkModelsConnect =
+    redrobModelsPromoEligible &&
+    !redrobModelsEntitled &&
+    !redrobModelsAvailable &&
+    redrobModelsPromoHidden;
 
   useEffect(() => {
-    const handlePromoChanged = () => setOpenWorkModelsPromoHidden(isOpenWorkModelsPromoHidden());
-    window.addEventListener(openWorkModelsPromoChangedEvent, handlePromoChanged);
-    return () => window.removeEventListener(openWorkModelsPromoChangedEvent, handlePromoChanged);
+    const handlePromoChanged = () => setRedrobWorkModelsPromoHidden(isRedrobWorkModelsPromoHidden());
+    window.addEventListener(redrobModelsPromoChangedEvent, handlePromoChanged);
+    return () => window.removeEventListener(redrobModelsPromoChangedEvent, handlePromoChanged);
   }, []);
 
-  const dismissOpenWorkModelsPromo = useCallback(() => {
-    hideOpenWorkModelsPromo();
-    setOpenWorkModelsPromoHidden(true);
+  const dismissRedrobWorkModelsPromo = useCallback(() => {
+    hideRedrobWorkModelsPromo();
+    setRedrobWorkModelsPromoHidden(true);
   }, []);
 
-  const subscribeToOpenWorkModels = useCallback(() => {
+  const subscribeToRedrobWorkModels = useCallback(() => {
     providerAuthStore.closeProviderAuthModal();
     const accountPath = selectedWorkspaceId
       ? workspaceSettingsRoute(selectedWorkspaceId, "cloud-account")
@@ -943,8 +943,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
   const shareWorkspaceState = useShareWorkspaceState({
     workspaces,
-    openworkServerHostInfo: openworkServerSnapshot.openworkServerHostInfo,
-    openworkServerSettings: openworkServerSnapshot.openworkServerSettings,
+    redrobServerHostInfo: redrobServerSnapshot.redrobServerHostInfo,
+    redrobServerSettings: redrobServerSnapshot.redrobServerSettings,
     engineInfo: null,
     exportWorkspaceBusy,
     openLink: (url) => platform.openLink(url),
@@ -953,8 +953,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
   const debugViewProps = useDebugViewModel({
     developerMode,
-    openworkServerStore,
-    openworkServerSnapshot,
+    redrobServerStore,
+    redrobServerSnapshot,
     runtimeWorkspaceId: selectedWorkspace?.id ?? null,
     selectedWorkspaceRoot,
     setRouteError: (message) => {
@@ -999,7 +999,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
   const runtimeWorkspaceId = selectedWorkspaceEndpoint?.workspaceId ?? selectedWorkspace?.id ?? null;
   routeStateRef.current.runtimeWorkspaceId = runtimeWorkspaceId;
-  routeStateRef.current.selectedWorkspaceOpenworkClient = selectedWorkspaceEndpoint?.client ?? openworkClient;
+  routeStateRef.current.selectedWorkspaceRedrobClient = selectedWorkspaceEndpoint?.client ?? redrobClient;
 
   const opencodeClient = useMemo(() => {
     if (!selectedWorkspaceEndpoint || !selectedWorkspaceEndpoint.token) return null;
@@ -1008,7 +1008,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       selectedWorkspaceRoot || undefined,
       {
         token: selectedWorkspaceEndpoint.token,
-        mode: "openwork",
+        mode: "redrob",
       },
     );
   }, [selectedWorkspaceEndpoint, selectedWorkspaceRoot]);
@@ -1058,13 +1058,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     onLoadError: handleModelPickerLoadError,
     cloudProvidersEnabled: cloudSession.isSignedIn,
   });
-  const currentCloudMcpModel = useMemo<OpenworkCloudMcpProviderModelContext | null>(() => {
+  const currentCloudMcpModel = useMemo<RedrobCloudMcpProviderModelContext | null>(() => {
     const provider = local.prefs.defaultModel?.providerID.trim() ?? "";
     const model = local.prefs.defaultModel?.modelID.trim() ?? "";
     return provider && model ? { provider, model } : null;
   }, [local.prefs.defaultModel]);
   const refreshCloudMcpHealth = useCallback(async () => {
-    const client = selectedWorkspaceEndpoint?.client ?? openworkClient;
+    const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
     const workspaceId = runtimeWorkspaceId?.trim() ?? "";
     if (!client || !workspaceId) {
       setCloudMcpHealth(null);
@@ -1072,10 +1072,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     }
     // probe: the Advanced page refresh should verify the Cloud endpoint
     // directly (outside the engine), not just report the engine's cached state.
-    const health = await client.getOpenworkCloudMcpHealth(workspaceId, currentCloudMcpModel ?? undefined, { probe: true });
+    const health = await client.getRedrobCloudMcpHealth(workspaceId, currentCloudMcpModel ?? undefined, { probe: true });
     setCloudMcpHealth(health);
     return health;
-  }, [currentCloudMcpModel, openworkClient, runtimeWorkspaceId, selectedWorkspaceEndpoint]);
+  }, [currentCloudMcpModel, redrobClient, runtimeWorkspaceId, selectedWorkspaceEndpoint]);
   const { commandPaletteOpen, setCommandPaletteOpen } = useCommandPaletteShortcut(!props.embedded);
   const paletteSessionOptions = useMemo(
     () => buildCommandPaletteSessions(workspaces, sessionsByWorkspaceId, selectedWorkspaceId),
@@ -1128,21 +1128,21 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   }, []);
 
   useEffect(() => {
-    if (!openworkClient) {
+    if (!redrobClient) {
       setUserEnvKeys([]);
       return;
     }
     let cancelled = false;
-    void openworkClient.listUserEnvKeys()
+    void redrobClient.listUserEnvKeys()
       .then((response) => { if (!cancelled) setUserEnvKeys(response.keys); })
       .catch(() => { if (!cancelled) setUserEnvKeys([]); });
     return () => { cancelled = true; };
-  }, [openworkClient]);
+  }, [redrobClient]);
 
   const installOpenAiImageExtension = useCallback(async (apiKey: string) => {
     const resolvedApiKey = apiKey.trim();
-    if (!openworkClient) {
-      setImageExtensionError("OpenWork server is not connected.");
+    if (!redrobClient) {
+      setImageExtensionError("Redrob Work server is not connected.");
       return;
     }
     if (!resolvedApiKey) {
@@ -1154,23 +1154,23 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     setImageExtensionStatus(null);
     setImageExtensionError(null);
     try {
-      await openworkClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: resolvedApiKey }]);
+      await redrobClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: resolvedApiKey }]);
       setUserEnvKeys((current) => Array.from(new Set([...current, "OPENAI_API_KEY"])));
-      setImageExtensionStatus("Saved OPENAI_API_KEY. Agents can use OpenWork extension actions for image generation.");
+      setImageExtensionStatus("Saved OPENAI_API_KEY. Agents can use Redrob Work extension actions for image generation.");
     } catch (error) {
       setImageExtensionError(describeRouteError(error));
     } finally {
       setImageExtensionBusy(false);
     }
-  }, [openworkClient]);
+  }, [redrobClient]);
 
   const generateOpenAiTestImage = useCallback(async (input: { apiKey: string; prompt: string }) => {
-    const client = selectedWorkspaceEndpoint?.client ?? openworkClient;
+    const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
     const workspaceId = runtimeWorkspaceId?.trim() ?? "";
     const apiKey = input.apiKey.trim();
     const prompt = input.prompt.trim();
     if (!client || !workspaceId) {
-      setImageGenerationError("OpenWork server is not connected for this workspace.");
+      setImageGenerationError("Redrob Work server is not connected for this workspace.");
       return;
     }
     if (!apiKey) {
@@ -1186,8 +1186,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     setImageGenerationStatus(null);
     setImageGenerationError(null);
     try {
-      if (openworkClient) {
-        await openworkClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: apiKey }]);
+      if (redrobClient) {
+        await redrobClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: apiKey }]);
         setUserEnvKeys((current) => Array.from(new Set([...current, "OPENAI_API_KEY"])));
       }
       const response = await client.callExtensionAction({
@@ -1210,11 +1210,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     } finally {
       setImageGenerationBusy(false);
     }
-  }, [openworkClient, runtimeWorkspaceId, selectedWorkspaceEndpoint, selectedWorkspaceRoot]);
+  }, [redrobClient, runtimeWorkspaceId, selectedWorkspaceEndpoint, selectedWorkspaceRoot]);
 
   const saveVoiceApiKey = useCallback(async (apiKey: string) => {
     const resolvedApiKey = apiKey.trim();
-    if (!openworkClient || !resolvedApiKey) {
+    if (!redrobClient || !resolvedApiKey) {
       setVoiceError("OpenAI API key is required.");
       return;
     }
@@ -1222,7 +1222,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     setVoiceStatus(null);
     setVoiceError(null);
     try {
-      await openworkClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: resolvedApiKey }]);
+      await redrobClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: resolvedApiKey }]);
       setUserEnvKeys((current) => Array.from(new Set([...current, "OPENAI_API_KEY"])));
       setVoiceStatus("Saved OPENAI_API_KEY for Voice Mode.");
     } catch (error) {
@@ -1230,32 +1230,32 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     } finally {
       setVoiceBusy(false);
     }
-  }, [openworkClient]);
+  }, [redrobClient]);
 
   const testVoiceSession = useCallback(async () => {
-    if (!openworkClient) {
-      setVoiceError("OpenWork server is not connected.");
+    if (!redrobClient) {
+      setVoiceError("Redrob Work server is not connected.");
       return;
     }
     setVoiceBusy(true);
     setVoiceStatus(null);
     setVoiceError(null);
     try {
-      const session = await openworkClient.createVoiceRealtimeSession();
-      setVoiceStatus(`Realtime ready with ${session.model} (${session.tools.length} OpenWork tools).`);
+      const session = await redrobClient.createVoiceRealtimeSession();
+      setVoiceStatus(`Realtime ready with ${session.model} (${session.tools.length} Redrob Work tools).`);
     } catch (error) {
       setVoiceError(describeRouteError(error));
     } finally {
       setVoiceBusy(false);
     }
-  }, [openworkClient]);
+  }, [redrobClient]);
 
   const installLocalProvider = useCallback(async (input: LocalProviderInstallInput) => {
-    const client = selectedWorkspaceEndpoint?.client ?? openworkClient;
+    const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
     const workspaceId = runtimeWorkspaceId?.trim() ?? "";
     const modelId = input.modelId.trim();
     if (!client || !workspaceId) {
-      setLocalProviderError("OpenWork server is not connected for this workspace.");
+      setLocalProviderError("Redrob Work server is not connected for this workspace.");
       return;
     }
     if (!modelId) {
@@ -1289,7 +1289,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       }
       await refreshProviderListQueries(getReactQueryClient());
       try {
-        window.dispatchEvent(new CustomEvent("openwork-server-settings-changed"));
+        window.dispatchEvent(new CustomEvent("redrob-server-settings-changed"));
       } catch {
         // ignore browser event dispatch failures
       }
@@ -1299,7 +1299,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     } finally {
       setLocalProviderBusy(false);
     }
-  }, [local, openworkClient, reloadCoordinator, runtimeWorkspaceId, selectedWorkspaceEndpoint]);
+  }, [local, redrobClient, reloadCoordinator, runtimeWorkspaceId, selectedWorkspaceEndpoint]);
 
   useEffect(() => {
     local.setUi((previous) => ({ ...previous, view: "settings", tab: route.tab }));
@@ -1349,10 +1349,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           desktopWorkspaces = workspacesRef.current;
         }
       }
-      const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await resolveOpenworkConnection();
+      const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await resolveRedrobConnection();
 
       if (!normalizedBaseUrl || !resolvedToken) {
-        setOpenworkClient(null);
+        setRedrobClient(null);
         setBaseUrl("");
         setToken("");
         setWorkspaces(desktopWorkspaces);
@@ -1366,7 +1366,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         return;
       }
 
-      const client = createOpenworkServerClient({
+      const client = createRedrobServerClient({
         baseUrl: normalizedBaseUrl,
         token: resolvedToken,
         hostToken: resolvedHostToken || undefined,
@@ -1422,7 +1422,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         }),
       );
 
-      setOpenworkClient(client);
+      setRedrobClient(client);
       setBaseUrl(normalizedBaseUrl);
       setToken(resolvedToken);
       setWorkspaces(nextWorkspaces);
@@ -1490,7 +1490,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     setContinuousEngine(next);
     try {
       await engineRestart({ engineRollover: next });
-      await openworkServerStore.reconnectOpenworkServer();
+      await redrobServerStore.reconnectRedrobServer();
       await refreshRouteState();
     } catch (error) {
       setContinuousEngine(!next);
@@ -1503,23 +1503,23 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   }, [
     activeReloadBlockingSessions.length,
     continuousEngineEnabled,
-    openworkServerStore,
+    redrobServerStore,
     refreshRouteState,
     setContinuousEngine,
   ]);
 
   const reloadWorkspaceEngineFromUi = useCallback(async () => {
     const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() || selectedWorkspaceId.trim();
-    if (!openworkClient || !workspaceId) {
+    if (!redrobClient || !workspaceId) {
       toast.error(t("app.error_connect_first"));
       return false;
     }
 
-    await reloadEngineOrRestartDesktop(openworkClient, workspaceId, refreshRouteState);
+    await reloadEngineOrRestartDesktop(redrobClient, workspaceId, refreshRouteState);
     await refreshProviderListQueries(getReactQueryClient());
 
     try {
-      window.dispatchEvent(new CustomEvent("openwork-server-settings-changed"));
+      window.dispatchEvent(new CustomEvent("redrob-server-settings-changed"));
     } catch {
       // ignore browser event dispatch failures
     }
@@ -1529,11 +1529,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     void pollMcpServersAfterReloadRef.current?.();
 
     return true;
-  }, [openworkClient, refreshRouteState, selectedWorkspaceId]);
+  }, [redrobClient, refreshRouteState, selectedWorkspaceId]);
 
   useEffect(() => {
     return reloadCoordinator.registerWorkspaceReloadControls({
-      canReloadWorkspaceEngine: () => Boolean(openworkClient && (selectedWorkspace?.id || selectedWorkspaceId)),
+      canReloadWorkspaceEngine: () => Boolean(redrobClient && (selectedWorkspace?.id || selectedWorkspaceId)),
       reloadWorkspaceEngine: reloadWorkspaceEngineFromUi,
       activeSessions: () => activeReloadBlockingSessions,
       stopSession: async (sessionId) => {
@@ -1548,7 +1548,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   }, [
     activeClient,
     activeReloadBlockingSessions,
-    openworkClient,
+    redrobClient,
     reloadCoordinator,
     reloadWorkspaceEngineFromUi,
     selectedWorkspace?.id,
@@ -1591,7 +1591,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
   const remoteWorkspaceConnectionEditor = useRemoteWorkspaceConnectionEditor({
     workspaces,
-    client: openworkClient,
+    client: redrobClient,
     onSaved: handleRemoteWorkspaceConnectionSaved,
   });
 
@@ -1654,7 +1654,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   );
 
   useEffect(() => {
-    if (openworkClient) {
+    if (redrobClient) {
       reconnectAttemptedWorkspaceIdRef.current = "";
     }
     // Same gate as the session route: reconnect must not probe the local
@@ -1665,7 +1665,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         bootPhase,
         bootRouteReady,
         routeLoading: loading,
-        hasClient: Boolean(openworkClient),
+        hasClient: Boolean(redrobClient),
         connectionPending: false,
         workspaceType: selectedWorkspace?.workspaceType ?? null,
       })
@@ -1677,7 +1677,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     if (!workspaceId || reconnectAttemptedWorkspaceIdRef.current === workspaceId) return;
     reconnectAttemptedWorkspaceIdRef.current = workspaceId;
 
-    void ensureDesktopLocalOpenworkConnection({
+    void ensureDesktopLocalRedrobConnection({
       route: "settings",
       workspace: selectedWorkspace,
       allWorkspaces: workspaces,
@@ -1691,27 +1691,27 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         dedupeKey: "server-reconnect",
       });
     });
-  }, [bootPhase, bootRouteReady, loading, openworkClient, selectedWorkspace, workspaces]);
+  }, [bootPhase, bootRouteReady, loading, redrobClient, selectedWorkspace, workspaces]);
 
   useEffect(() => {
     void refreshRouteState();
     const handleSettingsChange = () => {
       void refreshRouteState();
     };
-    window.addEventListener("openwork-server-settings-changed", handleSettingsChange);
+    window.addEventListener("redrob-server-settings-changed", handleSettingsChange);
     return () => {
-      window.removeEventListener("openwork-server-settings-changed", handleSettingsChange);
+      window.removeEventListener("redrob-server-settings-changed", handleSettingsChange);
     };
   }, [refreshRouteState]);
 
   // Load auto-compaction state from OpenCode config on workspace change.
   useEffect(() => {
-    if (!openworkClient || !selectedWorkspaceId) return;
+    if (!redrobClient || !selectedWorkspaceId) return;
     const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() || selectedWorkspaceId;
     let cancelled = false;
     (async () => {
       try {
-        const config = await openworkClient.getConfig(workspaceId);
+        const config = await redrobClient.getConfig(workspaceId);
         if (cancelled) return;
         const compaction = config.opencode?.compaction;
         const auto = compaction && typeof compaction === "object" && "auto" in compaction
@@ -1724,17 +1724,17 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       }
     })();
     return () => { cancelled = true; };
-  }, [openworkClient, selectedWorkspaceId]);
+  }, [redrobClient, selectedWorkspaceId]);
 
   const toggleAutoCompactContext = useCallback(async () => {
     if (autoCompactContextBusy) return;
     const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() || selectedWorkspaceId;
-    if (!openworkClient || !workspaceId) return;
+    if (!redrobClient || !workspaceId) return;
     const next = !autoCompactContext;
     setAutoCompactContext(next);
     setAutoCompactContextBusy(true);
     try {
-      await openworkClient.patchConfig(workspaceId, {
+      await redrobClient.patchConfig(workspaceId, {
         opencode: { compaction: { auto: next } },
       });
       reloadCoordinator.markReloadRequired("config", {
@@ -1747,10 +1747,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     } finally {
       setAutoCompactContextBusy(false);
     }
-  }, [autoCompactContext, autoCompactContextBusy, openworkClient, reloadCoordinator, selectedWorkspaceId]);
+  }, [autoCompactContext, autoCompactContextBusy, redrobClient, reloadCoordinator, selectedWorkspaceId]);
 
   useEffect(() => {
-    openworkServerStore.start();
+    redrobServerStore.start();
     connectionsStore.start();
     providerAuthStore.start();
     extensionsStore.start();
@@ -1759,11 +1759,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       extensionsStore.dispose();
       providerAuthStore.dispose();
       connectionsStore.dispose();
-      openworkServerStore.dispose();
+      redrobServerStore.dispose();
     };
-  }, [connectionsStore, extensionsStore, openworkServerStore, providerAuthStore]);
+  }, [connectionsStore, extensionsStore, redrobServerStore, providerAuthStore]);
 
-  const refreshMarketplaceAction = useMemo<OpenworkControlAction>(() => ({
+  const refreshMarketplaceAction = useMemo<RedrobControlAction>(() => ({
     id: "extensions.refresh-marketplace",
     label: "Refresh marketplace extensions",
     description: "Force a fresh sync of organization marketplace plugins from the cloud.",
@@ -1790,7 +1790,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   }, [providerAuthStore, route.tab]);
 
   useEffect(() => {
-    openworkServerStore.syncFromOptions();
+    redrobServerStore.syncFromOptions();
     connectionsStore.syncFromOptions();
     providerAuthStore.syncFromOptions();
     extensionsStore.syncFromOptions();
@@ -1798,7 +1798,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     activeClient,
     connectionsStore,
     extensionsStore,
-    openworkServerStore,
+    redrobServerStore,
     providerAuthStore,
     selectedWorkspace?.id,
     selectedWorkspace?.workspaceType,
@@ -1827,7 +1827,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const workspaceType = selectedWorkspace?.workspaceType ?? "local";
   const isRemoteWorkspace = workspaceType === "remote";
   const canWriteWorkspacePlugins =
-    !isRemoteWorkspace || openworkServerSnapshot.openworkServerCanWritePlugins;
+    !isRemoteWorkspace || redrobServerSnapshot.redrobServerCanWritePlugins;
   const pluginsAccessHint =
     isRemoteWorkspace && !canWriteWorkspacePlugins ? t("app.plugins_hint_readonly") : null;
   const defaultModelLabel = local.prefs.defaultModel
@@ -1864,8 +1864,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         }]
       : [],
   );
-  const openworkCloudMcpUrl = connectionsSnapshot.mcpServers.find(
-    (server) => server.name === "openwork-cloud",
+  const redrobCloudMcpUrl = connectionsSnapshot.mcpServers.find(
+    (server) => server.name === "redrob-cloud",
   )?.config.url ?? null;
 
   // Build enablement context from all available runtime state.
@@ -1893,7 +1893,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       isToggleEnabled: (ref: string) => {
         const catalog = connectionsStore.quickConnect;
         const match = catalog.find((e: { id?: string; serverName?: string }) => (e.id ?? e.serverName) === ref);
-        return match ? isOpenWorkExtensionEnabled(match) : false;
+        return match ? isRedrobWorkExtensionEnabled(match) : false;
       },
     };
   }, [computerUsePermissions, connectionsSnapshot, extensionStateVersion, providerConnectedIds, userEnvKeys]);
@@ -1901,20 +1901,20 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const restartExtensionLocalServer = useCallback(async () => {
     if (!isDesktopRuntime()) return false;
     try {
-      await openworkServerRestart({
+      await redrobServerRestart({
         remoteAccessEnabled:
-          readOpenworkServerSettings().remoteAccessEnabled === true,
+          readRedrobServerSettings().remoteAccessEnabled === true,
       });
-      await openworkServerStore.reconnectOpenworkServer();
+      await redrobServerStore.reconnectRedrobServer();
       await refreshRouteState();
       return true;
     } catch {
       return false;
     }
-  }, [openworkServerStore, refreshRouteState]);
+  }, [redrobServerStore, refreshRouteState]);
   const extensionController = useSettingsExtensionController({
-    openworkServerClient: selectedWorkspaceEndpoint?.client ?? openworkClient,
-    hostOpenworkServerClient: openworkClient,
+    redrobServerClient: selectedWorkspaceEndpoint?.client ?? redrobClient,
+    hostRedrobServerClient: redrobClient,
     enablementContext,
     mcpServers: connectionsSnapshot.mcpServers,
     mcpConnectingName: connectionsSnapshot.mcpConnectingName,
@@ -1948,9 +1948,9 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       onInstall: installLocalProvider,
     },
   });
-  const extensionCatalogPlatform = resolveOpenWorkExtensionCatalogPlatform(platform.platform, platform.os);
+  const extensionCatalogPlatform = resolveRedrobWorkExtensionCatalogPlatform(platform.platform, platform.os);
   const quickConnectCatalog = useMemo(
-    () => filterOpenWorkExtensionCatalogForPlatform(connectionsStore.quickConnect, extensionCatalogPlatform),
+    () => filterRedrobWorkExtensionCatalogForPlatform(connectionsStore.quickConnect, extensionCatalogPlatform),
     [connectionsStore.quickConnect, extensionCatalogPlatform],
   );
   const extensionItems = useMemo(
@@ -1978,7 +1978,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     loaded: orgMcpConnections.loaded,
     error: orgMcpConnections.error,
   });
-  const diagnosticsClient = selectedWorkspaceEndpoint?.client ?? openworkClient;
+  const diagnosticsClient = selectedWorkspaceEndpoint?.client ?? redrobClient;
   const diagnosticsWorkspaceAllowed = isAgentContextDiagnosticsWorkspaceAllowed(selectedWorkspace);
   const diagnosticsAvailable = Boolean(
     diagnosticsClient
@@ -1986,7 +1986,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     && diagnosticsWorkspaceAllowed,
   );
   const diagnosticsUnavailableReason = selectedWorkspace?.workspaceType === "remote"
-    && selectedWorkspace.remoteType !== "openwork"
+    && selectedWorkspace.remoteType !== "redrob"
     ? "direct-remote-opencode" as const
     : null;
   const diagnosticsWorkspaceType = selectedWorkspace?.workspaceType === "remote"
@@ -2015,7 +2015,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     token,
   ]);
   const runAgentContextDiagnostics = useCallback(async () => {
-    const client = selectedWorkspaceEndpoint?.client ?? openworkClient;
+    const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
     const workspaceId = runtimeWorkspaceId?.trim() ?? "";
     if (
       !client
@@ -2032,14 +2032,14 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     });
     return client.runAgentContextDiagnostics(workspaceId, observations);
   }, [
-    openworkClient,
+    redrobClient,
     organizationConnectionsProbe,
     orgMcpConnections.connections,
     runtimeWorkspaceId,
     selectedWorkspace,
     selectedWorkspaceEndpoint,
   ]);
-  const routeOpenworkStatus = openworkClient ? "connected" : "disconnected";
+  const routeRedrobStatus = redrobClient ? "connected" : "disconnected";
   const notFoundRouteError = !loading && routeWorkspaceId && !selectedWorkspace
     ? "Workspace was not found. Select a new workspace from the sidebar."
     : null;
@@ -2052,13 +2052,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       });
     }
   }, [notFoundRouteError]);
-  const routeOpenworkCapabilities: OpenworkServerCapabilities | null = openworkClient
+  const routeRedrobCapabilities: RedrobServerCapabilities | null = redrobClient
     ? ROUTE_REDROB_CAPABILITIES
     : null;
-  const environmentRuntimeKey = buildOpenworkEnvRuntimeKey({
-    baseUrl: openworkServerSnapshot.openworkServerBaseUrl || openworkServerSnapshot.openworkServerUrl,
-    pid: openworkServerSnapshot.openworkServerHostInfo?.pid ?? null,
-    port: openworkServerSnapshot.openworkServerHostInfo?.port ?? null,
+  const environmentRuntimeKey = buildRedrobEnvRuntimeKey({
+    baseUrl: redrobServerSnapshot.redrobServerBaseUrl || redrobServerSnapshot.redrobServerUrl,
+    pid: redrobServerSnapshot.redrobServerHostInfo?.pid ?? null,
+    port: redrobServerSnapshot.redrobServerHostInfo?.port ?? null,
   });
 
   const handleApplyEnvironmentChanges = async () => {
@@ -2087,9 +2087,9 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       preferSidecar: true,
       runtime: "direct",
       workspacePaths,
-      openworkRemoteAccess: openworkServerSnapshot.openworkServerSettings.remoteAccessEnabled === true,
+      redrobRemoteAccess: redrobServerSnapshot.redrobServerSettings.remoteAccessEnabled === true,
     });
-    const reconnected = await openworkServerStore.reconnectOpenworkServer();
+    const reconnected = await redrobServerStore.reconnectRedrobServer();
     if (!reconnected) {
       await refreshRouteState().catch(() => {});
       return { statusMessage: t("settings.environment.apply_refresh_failed") };
@@ -2131,11 +2131,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     if (!trimmed) return;
     setRenameWorkspaceBusy(true);
     try {
-      if (!openworkClient) {
-        toast.error("OpenWork server is unavailable. Reconnect the server before renaming workspaces.");
+      if (!redrobClient) {
+        toast.error("Redrob Work server is unavailable. Reconnect the server before renaming workspaces.");
         return;
       }
-      await openworkClient.updateWorkspaceDisplayName(renameWorkspaceId, trimmed);
+      await redrobClient.updateWorkspaceDisplayName(renameWorkspaceId, trimmed);
       setRenameWorkspaceId(null);
       setRenameWorkspaceTitle("");
       await refreshRouteState();
@@ -2146,7 +2146,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     } finally {
       setRenameWorkspaceBusy(false);
     }
-  }, [openworkClient, refreshRouteState, renameWorkspaceId, renameWorkspaceTitle]);
+  }, [redrobClient, refreshRouteState, renameWorkspaceId, renameWorkspaceTitle]);
 
   const handleRevealWorkspace = useCallback(async (workspaceId: string) => {
     const workspace = workspaces.find((item) => item.id === workspaceId);
@@ -2169,7 +2169,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       }
       return;
     }
-    throw new Error("OpenWork server is unavailable. Reconnect the server before exporting workspace config.");
+    throw new Error("Redrob Work server is unavailable. Reconnect the server before exporting workspace config.");
   }, [workspaceServerClientResolver, workspaces]);
 
   const handleForgetWorkspace = useCallback(async (workspaceId: string) => {
@@ -2177,8 +2177,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       const message = t("workspace_list.remove_confirm") || "Remove this workspace from the sidebar?";
       if (!window.confirm(message)) return;
     }
-    if (openworkClient) {
-      await openworkClient.deleteWorkspace(workspaceId).catch(() => undefined);
+    if (redrobClient) {
+      await redrobClient.deleteWorkspace(workspaceId).catch(() => undefined);
     }
     if (isDesktopRuntime()) {
       await workspaceForget(workspaceId).catch(() => undefined);
@@ -2192,7 +2192,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       }
     }
     await refreshRouteState();
-  }, [openworkClient, refreshRouteState, selectedWorkspaceId, workspaces]);
+  }, [redrobClient, refreshRouteState, selectedWorkspaceId, workspaces]);
 
   if (route.redirectPath && !props.embedded) {
     const target = props.standaloneExtensions
@@ -2225,16 +2225,16 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             developerMode={developerMode}
             onSendFeedback={() => platform.openLink(buildFeedbackUrl({ entrypoint: "settings" }))}
             onJoinDiscord={() => platform.openLink("https://discord.gg/VEhNQXxYMB")}
-            onReportIssue={() => platform.openLink("https://github.com/different-ai/openwork/issues/new?template=bug.yml")}
+            onReportIssue={() => platform.openLink("https://github.com/redrob-labs/redrob-work/issues/new?template=bug.yml")}
           />
         );
       case "permissions":
         return (
           <SettingsStack>
             <AuthorizedFoldersPanel
-              openworkServerClient={openworkClient}
-              openworkServerStatus={routeOpenworkStatus}
-              openworkServerCapabilities={routeOpenworkCapabilities}
+              redrobServerClient={redrobClient}
+              redrobServerStatus={routeRedrobStatus}
+              redrobServerCapabilities={routeRedrobCapabilities}
               runtimeWorkspaceId={runtimeWorkspaceId}
               selectedWorkspaceRoot={selectedWorkspaceRoot}
               activeWorkspaceType={workspaceType}
@@ -2273,13 +2273,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             organizationName={cloudSession.activeOrgName}
             cloudProviderIds={new Set([
               ...Object.values(providerAuthSnapshot.importedCloudProviders ?? {}).map((p) => p.providerId),
-              ...(openWorkModelsEntitled || openWorkModelsAvailable ? ["openwork"] : []),
+              ...(redrobModelsEntitled || redrobModelsAvailable ? ["redrob"] : []),
             ])}
-            showOpenWorkModelsSubscribe={showOpenWorkModelsSubscribe}
-            showOpenWorkModelsConnect={showOpenWorkModelsConnect}
-            showOpenWorkModelsSyncing={showOpenWorkModelsSyncing}
-            onSubscribeOpenWorkModels={subscribeToOpenWorkModels}
-            onDismissOpenWorkModels={dismissOpenWorkModelsPromo}
+            showRedrobWorkModelsSubscribe={showRedrobWorkModelsSubscribe}
+            showRedrobWorkModelsConnect={showRedrobWorkModelsConnect}
+            showRedrobWorkModelsSyncing={showRedrobWorkModelsSyncing}
+            onSubscribeRedrobWorkModels={subscribeToRedrobWorkModels}
+            onDismissRedrobWorkModels={dismissRedrobWorkModelsPromo}
             cloudProvidersView={
               <CloudProvidersView
                 embedded
@@ -2288,11 +2288,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
                 connectCloudProvider={providerAuthStore.connectCloudProvider}
                 importedCloudProviders={providerAuthSnapshot.importedCloudProviders}
                 importsUnavailable={
-                  openworkServerSnapshot.openworkServerCapabilities?.config?.read === false ||
-                  openworkServerSnapshot.openworkServerCapabilities?.config?.write === false
+                  redrobServerSnapshot.redrobServerCapabilities?.config?.read === false ||
+                  redrobServerSnapshot.redrobServerCapabilities?.config?.write === false
                 }
                 lastSyncError={providerAuthSnapshot.lastSyncError}
-                openworkServerAvailable={Boolean(openworkServerSnapshot.openworkServerClient)}
+                redrobServerAvailable={Boolean(redrobServerSnapshot.redrobServerClient)}
                 onOpenAccount={openCloudAccountSettings}
                 refreshCloudOrgProviders={providerAuthStore.refreshCloudOrgProviders}
                 runCloudProviderSync={providerAuthStore.runCloudProviderSync}
@@ -2390,7 +2390,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
                   void connectionsStore.removeMcp(name);
                 }}
                 setMcpEnabled={
-                  routeOpenworkStatus === "connected" && routeOpenworkCapabilities?.mcp?.write
+                  routeRedrobStatus === "connected" && routeRedrobCapabilities?.mcp?.write
                     ? (name, enabled) => connectionsStore.setMcpEnabled(name, enabled)
                     : undefined
                 }
@@ -2457,11 +2457,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             connectCloudProvider={providerAuthStore.connectCloudProvider}
             importedCloudProviders={providerAuthSnapshot.importedCloudProviders}
             importsUnavailable={
-              openworkServerSnapshot.openworkServerCapabilities?.config?.read === false ||
-              openworkServerSnapshot.openworkServerCapabilities?.config?.write === false
+              redrobServerSnapshot.redrobServerCapabilities?.config?.read === false ||
+              redrobServerSnapshot.redrobServerCapabilities?.config?.write === false
             }
             lastSyncError={providerAuthSnapshot.lastSyncError}
-            openworkServerAvailable={Boolean(openworkServerSnapshot.openworkServerClient)}
+            redrobServerAvailable={Boolean(redrobServerSnapshot.redrobServerClient)}
             onOpenAccount={openCloudAccountSettings}
             refreshCloudOrgProviders={providerAuthStore.refreshCloudOrgProviders}
             runCloudProviderSync={providerAuthStore.runCloudProviderSync}
@@ -2474,22 +2474,22 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             busy={busy}
             clientConnected={Boolean(opencodeClient)}
             opencodeConnectStatus={null}
-            openworkServerStatus={openworkServerSnapshot.openworkServerStatus}
+            redrobServerStatus={redrobServerSnapshot.redrobServerStatus}
             developerMode={developerMode}
             toggleDeveloperMode={() => setDeveloperMode((current) => {
               const next = !current;
-              try { window.localStorage.setItem("openwork.developerMode", next ? "1" : "0"); } catch {}
+              try { window.localStorage.setItem("redrob.developerMode", next ? "1" : "0"); } catch {}
               return next;
             })}
             opencodeDevModeEnabled={false}
             openDebugDeepLink={async () => ({ ok: false, message: "Debug deep links are not wired into the React settings route yet." })}
-            cloudMcpUrl={openworkCloudMcpUrl}
-            canMigrateRuntimeConfig={Boolean(openworkClient && selectedWorkspaceId)}
+            cloudMcpUrl={redrobCloudMcpUrl}
+            canMigrateRuntimeConfig={Boolean(redrobClient && selectedWorkspaceId)}
             migrateRuntimeConfig={async () => {
-              if (!openworkClient || !selectedWorkspaceId) {
+              if (!redrobClient || !selectedWorkspaceId) {
                 throw new Error("Select a workspace before migrating legacy runtime config.");
               }
-              const result = await openworkClient.migrateRuntimeConfig(selectedWorkspaceId);
+              const result = await redrobClient.migrateRuntimeConfig(selectedWorkspaceId);
               if (result.migrated) {
                 void connectionsStore.refreshMcpServers();
                 void extensionsStore.refreshPlugins();
@@ -2497,10 +2497,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
               return { migrated: result.migrated, keys: result.keys };
             }}
             getRuntimeConfigStatus={async () => {
-              if (!openworkClient || !selectedWorkspaceId) {
+              if (!redrobClient || !selectedWorkspaceId) {
                 throw new Error("Select a workspace to inspect runtime config.");
               }
-              return openworkClient.getRuntimeConfigStatus(selectedWorkspaceId);
+              return redrobClient.getRuntimeConfigStatus(selectedWorkspaceId);
             }}
             cloudMcpHealth={cloudMcpHealth}
             refreshCloudMcpHealth={refreshCloudMcpHealth}
@@ -2549,7 +2549,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         return (
           <RecoveryView
             anyActiveRuns={false}
-            workspaceConfigPath={selectedWorkspaceRoot ? `${selectedWorkspaceRoot}/.opencode/openwork.json` : ""}
+            workspaceConfigPath={selectedWorkspaceRoot ? `${selectedWorkspaceRoot}/.opencode/redrob.json` : ""}
             resetConfigBusy={resetConfigBusy}
             onResetAppConfigDefaults={() => {}}
             configActionStatus={configActionStatus}
@@ -2558,13 +2558,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             onRepairOpencodeCache={() => {}}
             dockerCleanupBusy={false}
             dockerCleanupResult={null}
-            onCleanupOpenworkDockerContainers={() => {}}
+            onCleanupRedrobDockerContainers={() => {}}
           />
         );
       case "environment":
         return (
           <EnvironmentView
-            client={openworkServerSnapshot.openworkServerClient}
+            client={redrobServerSnapshot.redrobServerClient}
             isRemoteWorkspace={isRemoteWorkspace}
             onApplyChanges={isDesktopRuntime() && !isRemoteWorkspace ? handleApplyEnvironmentChanges : undefined}
             applyBlocked={activeReloadBlockingSessions.length > 0}
@@ -2581,7 +2581,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           <DebugView
             {...debugViewProps}
             agentAccess={{
-              client: selectedWorkspaceEndpoint?.client ?? openworkClient,
+              client: selectedWorkspaceEndpoint?.client ?? redrobClient,
               workspaceId: runtimeWorkspaceId,
               currentModel: currentCloudMcpModel,
               onHealthChange: setCloudMcpHealth,
@@ -2615,7 +2615,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           selectedWorkspaceColor={selectedWorkspaceColor}
           workspaces={workspaceOptions}
           onSelectWorkspace={handleSelectSettingsWorkspace}
-          headerStatus={routeOpenworkStatus}
+          headerStatus={routeRedrobStatus}
           busyHint={loading ? t("session.loading_detail") : busyLabel}
           onClose={props.onClose ?? (() => navigate(selectedWorkspaceId ? workspaceSessionRoute(selectedWorkspaceId) : "/session"))}
           compact={props.embedded}
@@ -2692,8 +2692,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         onSubmitApiKey={providerAuthStore.submitProviderApiKey}
         onSubmitOAuth={providerAuthStore.completeProviderAuthOAuth}
         onRefreshProviders={providerAuthStore.refreshProviders}
-        showOpenWorkModelsSubscribe={showOpenWorkModelsSubscribe}
-        onSubscribeOpenWorkModels={subscribeToOpenWorkModels}
+        showRedrobWorkModelsSubscribe={showRedrobWorkModelsSubscribe}
+        onSubscribeRedrobWorkModels={subscribeToRedrobWorkModels}
         onClose={() => providerAuthStore.closeProviderAuthModal()}
       />
       <RenameWorkspaceModal

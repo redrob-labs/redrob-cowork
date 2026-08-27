@@ -1,7 +1,7 @@
 import { beforeAll, expect, test } from "bun:test"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -36,7 +36,7 @@ test("default marketplace logos pass logo url validation", () => {
 
 test("marketplace logo url accepts https and root-relative paths only", () => {
   expect(schemas.marketplaceLogoUrlSchema.safeParse("https://cdn.simpleicons.org/anthropic").success).toBe(true)
-  expect(schemas.marketplaceLogoUrlSchema.safeParse("/openwork-mark.svg").success).toBe(true)
+  expect(schemas.marketplaceLogoUrlSchema.safeParse("/redrob-mark.svg").success).toBe(true)
 
   expect(schemas.marketplaceLogoUrlSchema.safeParse("javascript:alert(1)").success).toBe(false)
   expect(schemas.marketplaceLogoUrlSchema.safeParse("http://insecure.example/logo.png").success).toBe(false)

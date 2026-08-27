@@ -270,11 +270,11 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     },
   });
   const workspace = await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-clamp-html-errors-${Date.now()}`,
+    path: `/tmp/redrob-clamp-html-errors-${Date.now()}`,
   });
   const configured = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -310,18 +310,18 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     // A slow dispose reports 504 opencode_reload_timeout while the reload
     // keeps going; readiness is owned by the polling below.
     if (reloaded !== "ok" && !reloaded.includes("opencode_reload_timeout")) return reloaded;
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
-    localStorage.removeItem("openwork.sessionModels." + workspaceId);
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.removeItem("redrob.sessionModels." + workspaceId);
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 60_000 });
   expect(configured).toBe("ok");
@@ -330,15 +330,15 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   // Preferences hydrate at boot, so reload unconditionally: without this the
   // engine's built-in free model stays the default and out-competes the mock.
   await evalIn(app, "location.reload(); true");
-  await waitFor(app, "Boolean(window.__openworkControl)", {
+  await waitFor(app, "Boolean(window.__redrobControl)", {
     timeoutMs: 30_000,
     label: "app reloaded with the HTML error mock preferences",
   });
   // The engine restarts after /engine/reload; sending into that window races
   // the swap and strands the run behind an "OpenCode unavailable" banner.
   const engineReady = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const deadline = Date.now() + 60_000;
     let last = "";
@@ -357,7 +357,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     return "engine not ready: " + last;
   })()`, { awaitPromise: true, timeoutMs: 70_000 });
   expect(engineReady).toBe("ready");
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "new task action enabled",
   });

@@ -8,7 +8,7 @@ import { test } from "@redrob/testkit";
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 test("OAuth token rate-limit diagnostics remain safe", ({ evidence }) => {
-  const reportDir = mkdtempSync(join(tmpdir(), "openwork-oauth-rate-limit-"));
+  const reportDir = mkdtempSync(join(tmpdir(), "redrob-oauth-rate-limit-"));
   const reportPath = join(reportDir, "bun-junit.xml");
   try {
     const result = spawnSync("pnpm", [

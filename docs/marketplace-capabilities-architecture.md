@@ -11,7 +11,7 @@ Status: design note for a Den-only, additive Phase 1.
 
 ## 1. North star
 
-Every plugin published to an org marketplace is automatically discoverable via `search_capabilities` and reachable via `execute_capability` on the existing `openwork-cloud` connection — the same rail as External MCP Connections.
+Every plugin published to an org marketplace is automatically discoverable via `search_capabilities` and reachable via `execute_capability` on the existing `redrob-cloud` connection — the same rail as External MCP Connections.
 
 Installation, meaning copying files into `.opencode/`, becomes an optimization for offline use and pinning, not a requirement for using org-published content.
 
@@ -21,7 +21,7 @@ Before:
 
 ```text
 harness
-  └─ openwork-cloud /mcp/agent
+  └─ redrob-cloud /mcp/agent
        ├─ REST catalog (incl. native provider capability routes)
        └─ External MCP Connections
 ```
@@ -30,7 +30,7 @@ After:
 
 ```text
 harness
-  └─ openwork-cloud /mcp/agent
+  └─ redrob-cloud /mcp/agent
        ├─ REST catalog (incl. native provider capability routes)
        ├─ External MCP Connections
        └─ Marketplace plugin capabilities   ← new, DB-only

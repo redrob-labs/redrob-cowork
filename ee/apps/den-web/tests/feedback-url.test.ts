@@ -11,7 +11,7 @@ describe("Den feedback links", () => {
     });
 
     expect(url.startsWith(`${REDROB_FEEDBACK_URL}?`)).toBe(true);
-    expect(url).toContain("source=openwork-web-app");
+    expect(url).toContain("source=redrob-web-app");
     expect(url).toContain("deployment=web");
     expect(url).toContain("entrypoint=%2Fdashboard%2Forg-settings");
     expect(url).toContain("org=org_123");

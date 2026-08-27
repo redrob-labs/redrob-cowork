@@ -1,17 +1,17 @@
 import { Check, CheckCircle2 } from "lucide-react";
 
 import { LpAlphaBadge } from "./lp-primitives";
-import { OpenWorkMark } from "./openwork-mark";
+import { RedrobWorkMark } from "./redrob-mark";
 
 type CoworkSupport = "check" | "none" | "limited";
 
-type OpenWorkSupport = "check" | "soon";
+type RedrobWorkSupport = "check" | "soon";
 
 type ParityRow = {
   capability: string;
   cowork: CoworkSupport;
-  openwork?: OpenWorkSupport;
-  badge?: "alpha" | "openwork";
+  redrob?: RedrobWorkSupport;
+  badge?: "alpha" | "redrob";
   highlighted?: boolean;
 };
 
@@ -23,12 +23,12 @@ const rows: ParityRow[] = [
   {
     capability: "Dispatch — assign tasks from your phone",
     cowork: "check",
-    openwork: "soon"
+    redrob: "soon"
   },
   {
     capability: "Live artifacts — auto-refreshing dashboards",
     cowork: "check",
-    openwork: "soon"
+    redrob: "soon"
   },
   { capability: "Browser automation", cowork: "limited" },
   { capability: "Anthropic-compatible plugins and skills", cowork: "check" },
@@ -36,14 +36,14 @@ const rows: ParityRow[] = [
   {
     capability: "MCP gateway usable from any client",
     cowork: "none",
-    badge: "openwork",
+    badge: "redrob",
     highlighted: true
   },
   { capability: "Self-host or managed private instance", cowork: "none" },
   { capability: "Open source — audit it, fork it, own it", cowork: "none" }
 ];
 
-function OpenWorkCheck() {
+function RedrobWorkCheck() {
   return (
     <span
       className="inline-flex items-center justify-center text-[var(--lp-ink)]"
@@ -72,7 +72,7 @@ function CoworkCell({ support }: { support: CoworkSupport }) {
   );
 }
 
-function OpenWorkCell({ support }: { support?: OpenWorkSupport }) {
+function RedrobWorkCell({ support }: { support?: RedrobWorkSupport }) {
   if (support === "soon") {
     return (
       <span className="text-[12px] font-medium text-[var(--lp-blue)]">
@@ -81,7 +81,7 @@ function OpenWorkCell({ support }: { support?: OpenWorkSupport }) {
     );
   }
 
-  return <OpenWorkCheck />;
+  return <RedrobWorkCheck />;
 }
 
 function Capability({ row }: { row: ParityRow }) {
@@ -93,9 +93,9 @@ function Capability({ row }: { row: ParityRow }) {
     >
       <span>{row.capability}</span>
       {row.badge === "alpha" ? <LpAlphaBadge /> : null}
-      {row.badge === "openwork" ? (
+      {row.badge === "redrob" ? (
         <span className="rounded-full bg-[#dbeafe] px-2 py-0.5 text-[9.5px] font-bold tracking-[0.08em] text-[var(--lp-blue)]">
-          OPENWORK ONLY
+          REDROB ONLY
         </span>
       ) : null}
     </div>
@@ -117,10 +117,10 @@ export function LpParityTable() {
             <div className="mt-4 grid grid-cols-2 gap-3 rounded-[12px] bg-[var(--lp-tonal)] p-3">
               <div>
                 <div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--lp-muted)]">
-                  <OpenWorkMark className="h-3.5 w-3.5 object-contain" />
-                  OpenWork
+                  <RedrobWorkMark className="h-3.5 w-3.5 object-contain" />
+                  Redrob Work
                 </div>
-                <OpenWorkCell support={row.openwork} />
+                <RedrobWorkCell support={row.redrob} />
               </div>
               <div>
                 <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--lp-muted)]">
@@ -139,8 +139,8 @@ export function LpParityTable() {
             CAPABILITY
           </div>
           <div className="flex w-40 items-center justify-center gap-2 text-[13px] font-semibold text-[var(--lp-ink)]">
-            <OpenWorkMark className="h-5 w-5 object-contain" />
-            OpenWork
+            <RedrobWorkMark className="h-5 w-5 object-contain" />
+            Redrob Work
           </div>
           <div className="w-40 text-center text-[13px] font-medium text-[var(--lp-muted)]">
             Claude Cowork
@@ -158,7 +158,7 @@ export function LpParityTable() {
               <Capability row={row} />
             </div>
             <div className="flex w-40 justify-center">
-              <OpenWorkCell support={row.openwork} />
+              <RedrobWorkCell support={row.redrob} />
             </div>
             <div className="flex w-40 justify-center">
               <CoworkCell support={row.cowork} />

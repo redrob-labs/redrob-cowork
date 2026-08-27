@@ -1,6 +1,6 @@
-# OpenWork Diagnostics
+# Redrob Work Diagnostics
 
-OpenWork Diagnostics is a deliberately small, Vercel-native MCP compatibility
+Redrob Work Diagnostics is a deliberately small, Vercel-native MCP compatibility
 endpoint. An enterprise can allowlist one stable host, point a client at
 `/mcp`, and use the authenticated dashboard to prove that requests arrived and
 inspect the safely redacted request/response sequence.
@@ -10,7 +10,7 @@ For customer-facing setup and interpretation guidance, see the published
 page.
 
 The authenticated **Connections** dashboard also keeps a seven-day rolling
-record of metadata-only OpenWork Connect incidents. It correlates what a
+record of metadata-only Redrob Work Connect incidents. It correlates what a
 desktop maintenance probe observed with the initialize, initialized, and
 tools/list lifecycle requests that reached Den. Operators can filter by raw
 organization ID or desktop client UUID; the portal hashes those lookup values
@@ -20,7 +20,7 @@ It also supports a controlled Den egress diagnostic for private-cloud and
 Kubernetes deployments. A workspace owner or admin starts the run in **Org
 settings**. The requests originate in the Den process, so they exercise the
 customer's real container DNS, proxy, TLS trust, firewall, service mesh, and
-NetworkPolicy path. OpenWork support can filter the dashboard by the resulting
+NetworkPolicy path. Redrob Work support can filter the dashboard by the resulting
 run ID and see the last request that reached the public service.
 
 It supports one active synthetic profile at a time (`generic`, `microsoft`, or
@@ -36,10 +36,10 @@ pnpm --filter @redrob-ee/diagnostics dev
 Open `http://localhost:3010` and sign in with:
 
 - username: `diagnostics-admin`
-- password: `OpenWorkDiagnosticsLocal!`
+- password: `RedrobWorkDiagnosticsLocal!`
 
 The local MCP endpoint is `http://localhost:3010/mcp` with synthetic bearer
-token `OpenWorkDiagnosticsToken!`. Local history is process-memory only.
+token `RedrobDiagnosticsToken!`. Local history is process-memory only.
 
 The Connect debug proxy is available at:
 
@@ -52,7 +52,7 @@ scenario URLs such as
 `http://localhost:3010/via/auth-expired/local-connect-debug-proxy`. In the
 desktop, enable **Settings → Advanced → Developer mode**, then paste a complete
 generated URL into **Settings → Cloud → Account → Cloud control plane URL**.
-The same editor is visible on the OpenWork Connect sign-in surface while signed
+The same editor is visible on the Redrob Work Connect sign-in surface while signed
 out. Run the standalone local MCP smoke journey with:
 
 ```bash
@@ -76,7 +76,7 @@ To expose the controlled run in a local Den, set:
 
 ```dotenv
 DEN_DIAGNOSTICS_ORIGIN=http://localhost:3010
-DEN_DIAGNOSTICS_BEARER_TOKEN=OpenWorkDiagnosticsToken!
+DEN_DIAGNOSTICS_BEARER_TOKEN=RedrobDiagnosticsToken!
 ```
 
 The standard `pnpm dev:den` command supplies these local defaults. The browser
@@ -155,7 +155,7 @@ https://<deployment>/via/<scenario>/<DEBUG_PROXY_ACCESS_KEY>[/~<encoded-upstream
 This is a Den **control plane base URL**, not a manually configured MCP server
 URL. Saving it signs the desktop out of the previous control plane. Sign in
 again through the browser; the desktop will derive the `/api/den` API routes,
-mint its short-lived MCP token, and manage the hidden `openwork-cloud` MCP
+mint its short-lived MCP token, and manage the hidden `redrob-cloud` MCP
 entry automatically.
 
 Browser sign-in uses root-relative Den web assets and API calls. The first HTML
@@ -218,7 +218,7 @@ After the production deployment is promoted, verify all of the following
 before sharing the allowlist hostname:
 
 1. `GET https://diagnostic.redrob.io/health` returns HTTP 200 and
-   `{"service":"openwork-diagnostics","status":"ok"}`.
+   `{"service":"redrob-diagnostics","status":"ok"}`.
 2. The dashboard redirects to `/login` without a signed session, accepts the
    configured administrator credentials, and signs out by clearing the session.
 3. The Firewall rule returns HTTP 429 when its threshold is exceeded.
@@ -249,7 +249,7 @@ observations for seven days. Desktop reports contain only:
   attempt/event identifiers;
 - allowlisted DNS/TCP/TLS error class, HTTP status, retryability, duration, and
   consecutive-failure count;
-- app, OpenWork server, engine, and platform versions;
+- app, Redrob Work server, engine, and platform versions;
 - an optional server request identifier for correlation.
 
 Den replaces the authenticated organization ID and the desktop's random
@@ -283,7 +283,7 @@ One run uses a UUID correlation header and stops at the first failed layer:
 Every reached endpoint returns a diagnostic reference and retains a redacted
 exchange under the run ID. If Den reports DNS, TLS, connection, or timeout
 failure and the public dashboard has no matching row, the request failed before
-HTTP reached OpenWork. If a row exists, its response status and next missing
+HTTP reached Redrob Work. If a row exists, its response status and next missing
 step narrow the issue to proxy authentication, header stripping, redirects,
 OAuth, or MCP.
 

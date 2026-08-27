@@ -107,7 +107,7 @@ export function cloudWorkspaceTakeoverCopy(input: {
   if (input.variant === "updating") {
     return {
       title: "Updating your workspace…",
-      body: "We’re applying the latest OpenWork image. Your files and sessions come along.",
+      body: "We’re applying the latest Redrob Work image. Your files and sessions come along.",
     };
   }
   return {
@@ -119,9 +119,9 @@ export function cloudWorkspaceTakeoverCopy(input: {
 export function formatCloudWorkspaceVersion(version: string | null): string | null {
   const trimmed = version?.trim() ?? "";
   if (!trimmed) return null;
-  const openworkPrefix = "openwork-";
-  if (!trimmed.toLowerCase().startsWith(openworkPrefix)) return trimmed;
-  const withoutPrefix = trimmed.slice(openworkPrefix.length);
+  const redrobPrefix = "redrob-";
+  if (!trimmed.toLowerCase().startsWith(redrobPrefix)) return trimmed;
+  const withoutPrefix = trimmed.slice(redrobPrefix.length);
   return withoutPrefix.toLowerCase().startsWith("v") ? withoutPrefix : `v${withoutPrefix}`;
 }
 

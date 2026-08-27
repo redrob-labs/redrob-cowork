@@ -14,7 +14,7 @@ const APP_DATA_PATH = path.join("tmp", "appData");
 
 function resolveProfile({
   appIdentifierOverride = "",
-  appRootPath = path.join("tmp", "openwork"),
+  appRootPath = path.join("tmp", "redrob"),
   devProfile = "",
   isDevMode = true,
   isPackaged = false,
@@ -48,13 +48,13 @@ test("unset REDROB_DEV_PROFILE keeps the legacy dev identifier", () => {
 });
 
 test("auto dev profile is stable for one worktree and different for another", () => {
-  const firstPath = path.join("tmp", "worktrees", "openwork");
-  const secondPath = path.join("tmp", "other", "openwork");
+  const firstPath = path.join("tmp", "worktrees", "redrob");
+  const secondPath = path.join("tmp", "other", "redrob");
   const firstProfile = deriveAutoDevProfileName(firstPath);
 
   assert.equal(deriveAutoDevProfileName(firstPath), firstProfile);
   assert.notEqual(deriveAutoDevProfileName(secondPath), firstProfile);
-  assert.match(firstProfile, /^openwork-[a-f0-9]{10}$/);
+  assert.match(firstProfile, /^redrob-[a-f0-9]{10}$/);
 });
 
 test("named dev profile is sanitized into the dev app identifier", () => {

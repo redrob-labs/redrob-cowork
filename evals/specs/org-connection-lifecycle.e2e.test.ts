@@ -45,7 +45,7 @@ async function waitForConnectionCard(app: Surface, name: string, workspaceId: st
     }
     await evalIn(
       app,
-      "window.__openworkControl.execute('extensions.refresh-marketplace', null)",
+      "window.__redrobControl.execute('extensions.refresh-marketplace', null)",
       { awaitPromise: true },
     ).catch(() => undefined);
     await evalIn(app, `(() => {
@@ -105,11 +105,11 @@ test.skipIf(!apiUrl || !e2eTestsEnabled)(title, async () => {
   };
   const admin = await signIn(den, {
     email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!",
   });
   const member = await ensureMemberSession(den, admin, {
     email: process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "jordan.demo@acme.test",
-    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "RedrobWorkDemo123!",
     name: "Jordan Demo",
     markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
@@ -135,7 +135,7 @@ test.skipIf(!apiUrl || !e2eTestsEnabled)(title, async () => {
   await using visualEvidence = createVisualEvidence("org-connection-lifecycle");
   // Workspace first, then the org sign-in: the signed-in org shell offers no
   // Add workspace entry, so a member's workspace exists before they connect.
-  const workspacePath = `/tmp/openwork-org-connection-lifecycle-${Date.now()}`;
+  const workspacePath = `/tmp/redrob-org-connection-lifecycle-${Date.now()}`;
   await createAndSelectWorkspace(app, { path: workspacePath });
   await signInDesktopAs(app, den, member);
   const { workspaceId } = await createAndSelectWorkspace(app, { path: workspacePath });

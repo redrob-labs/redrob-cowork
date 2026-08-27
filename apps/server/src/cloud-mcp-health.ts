@@ -3,25 +3,25 @@ import { readFile } from "node:fs/promises";
 import type { createOpencodeClient, McpStatus, ToolIds, ToolList } from "@opencode-ai/sdk/v2/client";
 import { ApiError } from "./errors.js";
 import { diagnoseMcpToolDenies, type McpToolDeny } from "./mcp.js";
-import { openworkPluginPath } from "./openwork-extensions-plugin-path.js";
+import { redrobPluginPath } from "./redrob-extensions-plugin-path.js";
 import { sanitizeDiagnosticString, sanitizeDiagnosticValue } from "./diagnostic-sanitizer.js";
 import { readRuntimeOpencodeConfig, runtimeMcpMap, writeRuntimeOpencodeConfig } from "./runtime-opencode-config-store.js";
 import { externalFetch } from "./server-fetch.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
 import { validateMcpConfig } from "./validators.js";
 
-export const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
+export const REDROB_CLOUD_MCP_NAME = "redrob-cloud";
 export const REDROB_CLOUD_EXPECTED_TOOLS = [
-  "openwork-cloud_search_capabilities",
-  "openwork-cloud_execute_capability",
+  "redrob-cloud_search_capabilities",
+  "redrob-cloud_execute_capability",
 ] satisfies string[];
 const REDROB_CLOUD_DIRECT_TOOL_NAMES = [
   "search_capabilities",
   "execute_capability",
 ] satisfies string[];
 export const REDROB_CLOUD_PLUGIN_CANARIES = [
-  "openwork_docs_search",
-  "openwork_query",
+  "redrob_docs_search",
+  "redrob_query",
 ] satisfies string[];
 
 const POLL_DELAYS_MS = [0, 250, 750, 1500, 3000];
@@ -68,14 +68,14 @@ export type CloudMcpFailureCode =
   | "opencode_unreachable"
   | "cloud_status_missing"
   | "cloud_disabled"
-  | "openwork_cloud_auth_required"
-  | "openwork_cloud_auth_invalid"
-  | "openwork_cloud_token_expired"
-  | "openwork_cloud_membership_required"
-  | "openwork_cloud_scope_missing"
-  | "openwork_cloud_resource_forbidden"
-  | "openwork_cloud_resource_not_found"
-  | "openwork_cloud_client_registration_required"
+  | "redrob_cloud_auth_required"
+  | "redrob_cloud_auth_invalid"
+  | "redrob_cloud_token_expired"
+  | "redrob_cloud_membership_required"
+  | "redrob_cloud_scope_missing"
+  | "redrob_cloud_resource_forbidden"
+  | "redrob_cloud_resource_not_found"
+  | "redrob_cloud_client_registration_required"
   | "cloud_connection_failed"
   | "cloud_registration_failed"
   | "cloud_tools_denied"
@@ -152,7 +152,7 @@ export type CloudMcpServerMetadata = {
 };
 
 export type CloudMcpCompatibilitySnapshot = {
-  openwork: {
+  redrob: {
     serverVersion: string | null;
     app: Record<string, string | number | boolean | null> | null;
   };
@@ -354,7 +354,7 @@ export type CloudMcpEngineServerStatus = {
 /**
  * The engine's own view of every MCP server it tracks, read over the OpenCode
  * SDK. Support triage needs the siblings: "everything failed" points at the
- * engine host's network path, "only openwork-cloud failed" points at the Cloud
+ * engine host's network path, "only redrob-cloud failed" points at the Cloud
  * endpoint or token, and an absent entry means the dynamic registration was
  * lost (e.g. after an engine state rebuild) and must be re-applied.
  */
@@ -397,7 +397,7 @@ type DirectCloudToolsSnapshot = {
 
 const directCloudToolsProbeFlights = new Map<string, Promise<DirectCloudToolsSnapshot>>();
 
-export function clearOpenworkCloudMcpProbeFlights(): void {
+export function clearRedrobCloudMcpProbeFlights(): void {
   directCloudToolsProbeFlights.clear();
 }
 
@@ -706,8 +706,8 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       code: "cloud_endpoint_invalid",
       stage: "desired_config",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "openwork-cloud must be configured as a remote MCP endpoint.",
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "redrob-cloud must be configured as a remote MCP endpoint.",
       details: { type: typeof config.type === "string" ? config.type : null },
     };
   }
@@ -718,7 +718,7 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       stage: "desired_config",
       retryable: false,
       recommendedAction: "Enable Agent access in Settings → Connect",
-      message: "openwork-cloud desired config is disabled.",
+      message: "redrob-cloud desired config is disabled.",
       aliases: ["cloud_disabled"],
       details: { enabled: config.enabled ?? null },
     };
@@ -731,8 +731,8 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       code: "cloud_endpoint_invalid",
       stage: "desired_config",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "openwork-cloud URL must be a valid http(s) endpoint at /mcp/agent.",
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "redrob-cloud URL must be a valid http(s) endpoint at /mcp/agent.",
       details: { url: typeof config.url === "string" ? sanitizeDiagnosticString(config.url) : null },
     };
   }
@@ -743,9 +743,9 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       code: "invalid_mcp_token",
       stage: "desired_config",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "openwork-cloud desired config is missing an Authorization header.",
-      aliases: ["openwork_cloud_auth_required"],
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "redrob-cloud desired config is missing an Authorization header.",
+      aliases: ["redrob_cloud_auth_required"],
     };
   }
 
@@ -754,9 +754,9 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       code: "invalid_mcp_token",
       stage: "desired_config",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "openwork-cloud desired config must use the minted bearer token, not OAuth.",
-      aliases: ["openwork_cloud_auth_invalid"],
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "redrob-cloud desired config must use the minted bearer token, not OAuth.",
+      aliases: ["redrob_cloud_auth_invalid"],
       details: { oauth: config.oauth === undefined ? "missing" : "configured" },
     };
   }
@@ -769,7 +769,7 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       stage: "desired_config",
       retryable: false,
       recommendedAction: "Choose the matching organization, then Repair and test",
-      message: "openwork-cloud token organization does not match the active organization.",
+      message: "redrob-cloud token organization does not match the active organization.",
       details: { tokenOrganizationId, activeOrganizationId },
     };
   }
@@ -781,8 +781,8 @@ function strictCloudMcpDesiredConfigProblem(config: Record<string, unknown>, met
       code: "cloud_endpoint_invalid",
       stage: "desired_config",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "openwork-cloud desired config is not a valid remote MCP config.",
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "redrob-cloud desired config is not a valid remote MCP config.",
       details: { error: error instanceof Error ? error.message : String(error) },
     };
   }
@@ -974,7 +974,7 @@ function opencodeRequestFailure(stage: CloudMcpFailureStage, path: string, respo
       code: "opencode_tool_ids_unsupported",
       stage,
       retryable: false,
-      recommendedAction: "Update OpenWork",
+      recommendedAction: "Update Redrob Work",
       message: "OpenCode does not support listing tool IDs.",
       details: { path, status: response.status, error },
     });
@@ -983,8 +983,8 @@ function opencodeRequestFailure(stage: CloudMcpFailureStage, path: string, respo
     code: stage === "provider_projection" ? "provider_tool_projection_missing" : "opencode_tool_ids_unavailable",
     stage,
     retryable: response.status >= 500,
-    recommendedAction: response.status >= 500 ? "Retry after OpenCode is healthy" : "Update OpenWork",
-    message: "OpenCode request failed while checking openwork-cloud MCP readiness.",
+    recommendedAction: response.status >= 500 ? "Retry after OpenCode is healthy" : "Update Redrob Work",
+    message: "OpenCode request failed while checking redrob-cloud MCP readiness.",
     aliases: stage === "provider_projection" ? ["provider_projection_unavailable"] : undefined,
     details: { path, status: response.status, error },
   });
@@ -1092,7 +1092,7 @@ function directCloudToolsFailure(input: {
     code: "cloud_tools_missing",
     stage: "tool_registration",
     retryable: input.retryable,
-    recommendedAction: "Reconnect OpenWork Cloud or contact OpenWork support",
+    recommendedAction: "Reconnect Redrob Work Cloud or contact Redrob Work support",
     message: input.message,
     details: input.details,
   });
@@ -1104,9 +1104,9 @@ function directCloudAuthFailure(response: Response, payload: unknown, endpoint: 
       code: "invalid_mcp_token",
       stage: "transport_auth",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "The OpenWork Cloud MCP endpoint rejected the persisted Authorization header.",
-      aliases: ["openwork_cloud_auth_invalid"],
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "The Redrob Work Cloud MCP endpoint rejected the persisted Authorization header.",
+      aliases: ["redrob_cloud_auth_invalid"],
       details: { endpoint, status: response.status, response: payload },
     });
   }
@@ -1116,8 +1116,8 @@ function directCloudAuthFailure(response: Response, payload: unknown, endpoint: 
       stage: "transport_auth",
       retryable: false,
       recommendedAction: "Check organization policy and resource access",
-      message: "The OpenWork Cloud MCP endpoint denied access to this resource.",
-      aliases: ["openwork_cloud_resource_forbidden"],
+      message: "The Redrob Work Cloud MCP endpoint denied access to this resource.",
+      aliases: ["redrob_cloud_resource_forbidden"],
       details: { endpoint, status: response.status, response: payload },
     });
   }
@@ -1143,7 +1143,7 @@ function directToolsFromNames(names: string[]): DirectCloudToolsSnapshot {
   const failureResult = split.missing.length
     ? directCloudToolsFailure({
         retryable: false,
-        message: "The OpenWork Cloud MCP endpoint tools/list is missing required unprefixed tools.",
+        message: "The Redrob Work Cloud MCP endpoint tools/list is missing required unprefixed tools.",
         details: { expected: split.expected, present: split.present, missing: split.missing },
       })
     : undefined;
@@ -1245,7 +1245,7 @@ async function readDirectCloudTools(config: Record<string, unknown>): Promise<Di
   if (!url || !authorization) {
     const failureResult = directCloudToolsFailure({
       retryable: false,
-      message: "The persisted OpenWork Cloud MCP config cannot be used for direct tools/list verification.",
+      message: "The persisted Redrob Work Cloud MCP config cannot be used for direct tools/list verification.",
       details: { endpoint, authorizationPresent: Boolean(authorization) },
     });
     return { ...directToolsNotChecked(), checked: true, missing: expectedDirectToolNames(), trace: trace(), error: failureResult.details, failure: failureResult };
@@ -1268,7 +1268,7 @@ async function readDirectCloudTools(config: Record<string, unknown>): Promise<Di
           method: "initialize",
           params: {
             capabilities: {},
-            clientInfo: { name: "openwork-server-cloud-mcp-health", version: "1.0.0" },
+            clientInfo: { name: "redrob-server-cloud-mcp-health", version: "1.0.0" },
             protocolVersion: "2025-06-18",
           },
         },
@@ -1280,7 +1280,7 @@ async function readDirectCloudTools(config: Record<string, unknown>): Promise<Di
       const authFailure = directCloudAuthFailure(initialized.response, initialized.payload, endpoint ?? "unknown");
       const failureResult = authFailure ?? directCloudToolsFailure({
         retryable: initialized.response.status >= 500,
-        message: "The OpenWork Cloud MCP endpoint initialize request failed during direct verification.",
+        message: "The Redrob Work Cloud MCP endpoint initialize request failed during direct verification.",
         details: { endpoint, status: initialized.response.status, response: initialized.payload },
       });
       return { ...directToolsNotChecked(), checked: true, missing: expectedDirectToolNames(), trace: trace(), error: failureResult.details, failure: failureResult };
@@ -1330,7 +1330,7 @@ async function readDirectCloudTools(config: Record<string, unknown>): Promise<Di
       const authFailure = directCloudAuthFailure(listed.response, listed.payload, endpoint ?? "unknown");
       const failureResult = authFailure ?? directCloudToolsFailure({
         retryable: listed.response.status >= 500,
-        message: "The OpenWork Cloud MCP endpoint tools/list request failed during direct verification.",
+        message: "The Redrob Work Cloud MCP endpoint tools/list request failed during direct verification.",
         details: { endpoint, status: listed.response.status, response: listed.payload },
       });
       return { ...directToolsNotChecked(), checked: true, missing: expectedDirectToolNames(), trace: trace(), error: failureResult.details, failure: failureResult };
@@ -1339,7 +1339,7 @@ async function readDirectCloudTools(config: Record<string, unknown>): Promise<Di
     if (!toolNames.names) {
       const failureResult = directCloudToolsFailure({
         retryable: false,
-        message: "The OpenWork Cloud MCP endpoint tools/list response could not be parsed.",
+        message: "The Redrob Work Cloud MCP endpoint tools/list response could not be parsed.",
         details: { endpoint, error: toolNames.error },
       });
       return { ...directToolsNotChecked(), checked: true, missing: expectedDirectToolNames(), trace: trace(), error: failureResult.details, failure: failureResult };
@@ -1354,7 +1354,7 @@ async function readDirectCloudTools(config: Record<string, unknown>): Promise<Di
       stage: "tool_registration",
       retryable: true,
       recommendedAction: "Check this machine's network path (proxy/TLS trust) to the Cloud MCP endpoint. The engine's own MCP connection is authoritative.",
-      message: "The OpenWork server could not reach the Cloud MCP endpoint for direct verification (transport error before any HTTP response). This does not indicate missing tools.",
+      message: "The Redrob Work server could not reach the Cloud MCP endpoint for direct verification (transport error before any HTTP response). This does not indicate missing tools.",
       details: { endpoint, error: error instanceof Error ? error.message : String(error), transport: describeTransportError(error) },
     });
     return { ...directToolsNotChecked(), checked: false, missing: [], trace: trace(), error: failureResult.details, failure: failureResult };
@@ -1506,7 +1506,7 @@ async function readProviderCapability(input: {
           code: "provider_tool_projection_missing",
           stage: "provider_projection",
           retryable: false,
-          recommendedAction: "Choose a model that can use OpenWork Cloud tools",
+          recommendedAction: "Choose a model that can use Redrob Work Cloud tools",
           message: modelExists ? "The selected provider/model does not support tool calling." : "The selected provider/model was not found in OpenCode provider catalog.",
           aliases: ["provider_projection_missing"],
           details: {
@@ -1556,8 +1556,8 @@ function statusFailure(status: McpStatus | undefined): CloudMcpFailure {
       code: "cloud_mcp_missing",
       stage: "engine_delivery",
       retryable: true,
-      recommendedAction: "Run reconcile to register openwork-cloud with OpenCode",
-      message: "OpenCode does not report an openwork-cloud MCP status.",
+      recommendedAction: "Run reconcile to register redrob-cloud with OpenCode",
+      message: "OpenCode does not report an redrob-cloud MCP status.",
       aliases: ["cloud_status_missing"],
     });
   }
@@ -1566,8 +1566,8 @@ function statusFailure(status: McpStatus | undefined): CloudMcpFailure {
       code: "cloud_mcp_disabled",
       stage: "engine_delivery",
       retryable: false,
-      recommendedAction: "Enable the openwork-cloud MCP entry",
-      message: "openwork-cloud MCP is disabled.",
+      recommendedAction: "Enable the redrob-cloud MCP entry",
+      message: "redrob-cloud MCP is disabled.",
       aliases: ["cloud_disabled"],
     });
   }
@@ -1576,9 +1576,9 @@ function statusFailure(status: McpStatus | undefined): CloudMcpFailure {
       code: "cloud_mcp_needs_auth",
       stage: "transport_auth",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud",
-      message: "openwork-cloud MCP needs authentication.",
-      aliases: ["openwork_cloud_auth_required"],
+      recommendedAction: "Reconnect Redrob Work Cloud",
+      message: "redrob-cloud MCP needs authentication.",
+      aliases: ["redrob_cloud_auth_required"],
     });
   }
   if (status.status === "needs_client_registration") {
@@ -1586,9 +1586,9 @@ function statusFailure(status: McpStatus | undefined): CloudMcpFailure {
       code: "opencode_mcp_sync_failed",
       stage: "engine_delivery",
       retryable: false,
-      recommendedAction: "Reconnect OpenWork Cloud or update OpenWork",
-      message: "openwork-cloud MCP needs OAuth client registration.",
-      aliases: ["openwork_cloud_client_registration_required"],
+      recommendedAction: "Reconnect Redrob Work Cloud or update Redrob Work",
+      message: "redrob-cloud MCP needs OAuth client registration.",
+      aliases: ["redrob_cloud_client_registration_required"],
       details: { error: status.error },
     });
   }
@@ -1600,7 +1600,7 @@ function statusFailure(status: McpStatus | undefined): CloudMcpFailure {
     stage: "engine_delivery",
     retryable: true,
     recommendedAction: "Retry reconcile",
-    message: "openwork-cloud MCP is not connected.",
+    message: "redrob-cloud MCP is not connected.",
     aliases: ["cloud_connection_failed"],
   });
 }
@@ -1621,35 +1621,35 @@ function inferFailedStatus(error: string): CloudMcpFailure {
     lower.includes("self signed") ||
     lower.includes("self-signed");
   if (!certTransport && lower.includes("expired")) {
-    return failure({ code: "invalid_mcp_token", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect OpenWork Cloud", message: "openwork-cloud token is expired.", aliases: ["openwork_cloud_token_expired"], details: { error } });
+    return failure({ code: "invalid_mcp_token", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect Redrob Work Cloud", message: "redrob-cloud token is expired.", aliases: ["redrob_cloud_token_expired"], details: { error } });
   }
   if (!certTransport && (lower.includes("invalid_token") || lower.includes("unauthorized") || lower.includes("401") || lower.includes("auth"))) {
-    return failure({ code: "invalid_mcp_token", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect OpenWork Cloud", message: "openwork-cloud authentication failed.", aliases: ["openwork_cloud_auth_invalid"], details: { error } });
+    return failure({ code: "invalid_mcp_token", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect Redrob Work Cloud", message: "redrob-cloud authentication failed.", aliases: ["redrob_cloud_auth_invalid"], details: { error } });
   }
   if (!certTransport && (lower.includes("invalid_grant") || lower.includes("session") || lower.includes("revoked"))) {
-    return failure({ code: "mcp_session_revoked", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect OpenWork Cloud", message: "openwork-cloud session was revoked.", details: { error } });
+    return failure({ code: "mcp_session_revoked", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect Redrob Work Cloud", message: "redrob-cloud session was revoked.", details: { error } });
   }
   if (lower.includes("membership") || lower.includes("member")) {
-    return failure({ code: "mcp_membership_revoked", stage: "transport_auth", retryable: false, recommendedAction: "Ask an organization admin to grant access", message: "OpenWork Cloud membership is required.", aliases: ["openwork_cloud_membership_required"], details: { error } });
+    return failure({ code: "mcp_membership_revoked", stage: "transport_auth", retryable: false, recommendedAction: "Ask an organization admin to grant access", message: "Redrob Work Cloud membership is required.", aliases: ["redrob_cloud_membership_required"], details: { error } });
   }
   if (lower.includes("insufficient_scope") || lower.includes("scope")) {
-    return failure({ code: "insufficient_mcp_scope", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect OpenWork Cloud with the required scopes", message: "openwork-cloud token is missing required scopes.", aliases: ["openwork_cloud_scope_missing"], details: { error } });
+    return failure({ code: "insufficient_mcp_scope", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect Redrob Work Cloud with the required scopes", message: "redrob-cloud token is missing required scopes.", aliases: ["redrob_cloud_scope_missing"], details: { error } });
   }
   if (lower.includes("forbidden") || lower.includes("403") || lower.includes("policy")) {
-    return failure({ code: "wrong_mcp_resource", stage: "transport_auth", retryable: false, recommendedAction: "Check organization policy and resource access", message: "OpenWork Cloud denied access to this resource.", aliases: ["openwork_cloud_resource_forbidden"], details: { error } });
+    return failure({ code: "wrong_mcp_resource", stage: "transport_auth", retryable: false, recommendedAction: "Check organization policy and resource access", message: "Redrob Work Cloud denied access to this resource.", aliases: ["redrob_cloud_resource_forbidden"], details: { error } });
   }
   if (lower.includes("not found") || lower.includes("404") || lower.includes("resource")) {
-    return failure({ code: "wrong_mcp_resource", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect OpenWork Cloud or choose an accessible organization", message: "OpenWork Cloud resource was not found.", aliases: ["openwork_cloud_resource_not_found"], details: { error } });
+    return failure({ code: "wrong_mcp_resource", stage: "transport_auth", retryable: false, recommendedAction: "Reconnect Redrob Work Cloud or choose an accessible organization", message: "Redrob Work Cloud resource was not found.", aliases: ["redrob_cloud_resource_not_found"], details: { error } });
   }
   if (lower.includes("client registration")) {
-    return failure({ code: "opencode_mcp_sync_failed", stage: "engine_delivery", retryable: false, recommendedAction: "Reconnect OpenWork Cloud or update OpenWork", message: "openwork-cloud needs client registration.", aliases: ["openwork_cloud_client_registration_required"], details: { error } });
+    return failure({ code: "opencode_mcp_sync_failed", stage: "engine_delivery", retryable: false, recommendedAction: "Reconnect Redrob Work Cloud or update Redrob Work", message: "redrob-cloud needs client registration.", aliases: ["redrob_cloud_client_registration_required"], details: { error } });
   }
   return failure({
     code: "opencode_mcp_sync_failed",
     stage: "engine_delivery",
     retryable: true,
-    recommendedAction: "Retry reconcile or reconnect OpenWork Cloud",
-    message: "openwork-cloud MCP connection failed.",
+    recommendedAction: "Retry reconcile or reconnect Redrob Work Cloud",
+    message: "redrob-cloud MCP connection failed.",
     aliases: ["cloud_connection_failed"],
     details: { error },
   });
@@ -1711,7 +1711,7 @@ async function readOpencodeVersion(opencode: WorkspaceOpencodeClient): Promise<C
   }
 }
 
-async function inspectOpenworkCloud(input: {
+async function inspectRedrobCloud(input: {
   opencode: WorkspaceOpencodeClient;
   config: ServerConfig;
   workspace: WorkspaceInfo;
@@ -1834,8 +1834,8 @@ async function inspectOpenworkCloud(input: {
       code: "extensions_plugin_missing",
       stage: "plugin_load",
       retryable: true,
-      recommendedAction: "Reload the OpenCode engine so OpenWork extensions are loaded",
-      message: "OpenWork extension plugin canary tools are missing.",
+      recommendedAction: "Reload the OpenCode engine so Redrob Work extensions are loaded",
+      message: "Redrob Work extension plugin canary tools are missing.",
       details: { missing: pluginCanaries.missing },
     }));
   }
@@ -1928,11 +1928,11 @@ function phaseFromFailure(firstFailure: CloudMcpFailure | null): CloudMcpHealthP
     firstFailure.code === "mcp_membership_revoked" ||
     firstFailure.code === "insufficient_mcp_scope" ||
     firstFailure.code === "wrong_mcp_resource" ||
-    firstFailure.code === "openwork_cloud_auth_required" ||
-    firstFailure.code === "openwork_cloud_auth_invalid" ||
-    firstFailure.code === "openwork_cloud_token_expired"
+    firstFailure.code === "redrob_cloud_auth_required" ||
+    firstFailure.code === "redrob_cloud_auth_invalid" ||
+    firstFailure.code === "redrob_cloud_token_expired"
   ) return "engine_needs_auth";
-  if (firstFailure.code === "openwork_cloud_client_registration_required") return "engine_needs_client_registration";
+  if (firstFailure.code === "redrob_cloud_client_registration_required") return "engine_needs_client_registration";
   if (firstFailure.code === "opencode_mcp_sync_failed" || firstFailure.code === "cloud_registration_failed") return "registration_failed";
   if (firstFailure.code === "cloud_tools_denied") return "denied_by_tools";
   if (firstFailure.code === "opencode_tool_ids_unsupported") return "tool_ids_unsupported";
@@ -1948,8 +1948,8 @@ function firstFailureFromDenies(denies: McpToolDeny[]): CloudMcpFailure | null {
     code: "cloud_tools_denied",
     stage: "prerequisites",
     retryable: false,
-    recommendedAction: "Remove project/global OpenCode tool denies for openwork-cloud tools",
-    message: "OpenCode configuration denies one or more openwork-cloud tools.",
+    recommendedAction: "Remove project/global OpenCode tool denies for redrob-cloud tools",
+    message: "OpenCode configuration denies one or more redrob-cloud tools.",
     details: { denies },
   });
 }
@@ -1970,10 +1970,10 @@ function baseUrlConfigured(config: ServerConfig, workspace: WorkspaceInfo): bool
 }
 
 async function pluginFileHashes(): Promise<CloudMcpCompatibilitySnapshot["pluginFileHashes"]> {
-  const names = ["openwork-extensions-preview", "openwork-capabilities-knowledge"];
+  const names = ["redrob-extensions-preview", "redrob-capabilities-knowledge"];
   return Promise.all(names.map(async (name) => {
     try {
-      return { name, sha256: hashString(await readFile(openworkPluginPath(name), "utf8")) };
+      return { name, sha256: hashString(await readFile(redrobPluginPath(name), "utf8")) };
     } catch (error) {
       const lastError = error instanceof Error ? error.message : String(error);
       return { name, sha256: null, error: sanitizeDiagnosticString(lastError) };
@@ -1992,7 +1992,7 @@ async function compatibilitySnapshot(input: {
     expectedVersion: input.serverMetadata?.expectedOpencodeVersion ?? null,
   };
   return {
-    openwork: {
+    redrob: {
       serverVersion: input.serverMetadata?.serverVersion ?? null,
       app: input.appMetadata ?? null,
     },
@@ -2010,7 +2010,7 @@ async function compatibilitySnapshot(input: {
   };
 }
 
-type ReadOpenworkCloudMcpHealthInput = {
+type ReadRedrobCloudMcpHealthInput = {
   config: ServerConfig;
   workspace: WorkspaceInfo;
   directory: string | null;
@@ -2026,8 +2026,8 @@ type DirectProbeReuse = {
   value: CloudMcpHealth["tools"]["direct"];
 };
 
-async function readOpenworkCloudMcpHealthInternal(
-  input: ReadOpenworkCloudMcpHealthInput & { directProbeReuse?: DirectProbeReuse },
+async function readRedrobCloudMcpHealthInternal(
+  input: ReadRedrobCloudMcpHealthInput & { directProbeReuse?: DirectProbeReuse },
 ): Promise<CloudMcpHealth> {
   const checkedAt = new Date().toISOString();
   const startedAtMs = Date.now();
@@ -2043,8 +2043,8 @@ async function readOpenworkCloudMcpHealthInternal(
       code: "cloud_mcp_missing",
       stage: "desired_config",
       retryable: false,
-      recommendedAction: "Connect OpenWork Cloud",
-      message: "No openwork-cloud MCP desired config is persisted for this workspace.",
+      recommendedAction: "Connect Redrob Work Cloud",
+      message: "No redrob-cloud MCP desired config is persisted for this workspace.",
       aliases: ["cloud_desired_missing"],
     }));
   }
@@ -2085,7 +2085,7 @@ async function readOpenworkCloudMcpHealthInternal(
     failures: [],
   };
   if (desired.present && desired.config && desired.revision && !desired.validationProblem && input.directory && baseUrlConfigured(input.config, input.workspace)) {
-    inspection = await inspectOpenworkCloud({
+    inspection = await inspectRedrobCloud({
       opencode: input.createWorkspaceOpencodeClient(input.config, input.workspace),
       config: input.config,
       workspace: input.workspace,
@@ -2179,8 +2179,8 @@ async function readOpenworkCloudMcpHealthInternal(
   };
 }
 
-export async function readOpenworkCloudMcpHealth(input: ReadOpenworkCloudMcpHealthInput): Promise<CloudMcpHealth> {
-  return readOpenworkCloudMcpHealthInternal(input);
+export async function readRedrobCloudMcpHealth(input: ReadRedrobCloudMcpHealthInput): Promise<CloudMcpHealth> {
+  return readRedrobCloudMcpHealthInternal(input);
 }
 
 async function persistDesiredConfig(config: ServerConfig, workspaceId: string, desiredConfig: Record<string, unknown>): Promise<void> {
@@ -2203,7 +2203,7 @@ function registrationFailure(failures: CloudMcpRuntimeRegistrationFailure[]): Cl
     stage: "engine_delivery",
     retryable: failures.some((item) => item.status === undefined || item.status >= 500),
     recommendedAction: "Retry reconcile after OpenCode is reachable",
-    message: "Failed to dynamically register openwork-cloud with OpenCode.",
+    message: "Failed to dynamically register redrob-cloud with OpenCode.",
     aliases: ["cloud_registration_failed"],
     details: { failures },
   });
@@ -2265,7 +2265,7 @@ function reusableDirectProbeFromHealth(health: CloudMcpHealth): DirectProbeReuse
     : undefined;
 }
 
-export async function reconcileOpenworkCloudMcp(input: {
+export async function reconcileRedrobCloudMcp(input: {
   config: ServerConfig;
   workspace: WorkspaceInfo;
   directory: string | null;
@@ -2276,7 +2276,7 @@ export async function reconcileOpenworkCloudMcp(input: {
   registerRuntimeMcp: CloudMcpRuntimeRegistrar;
   refreshRegistrationFromLiveStatus?: CloudMcpLiveStatusObserver;
 }): Promise<CloudMcpHealth> {
-  const readHealth = (directProbeReuse?: DirectProbeReuse) => readOpenworkCloudMcpHealthInternal({
+  const readHealth = (directProbeReuse?: DirectProbeReuse) => readRedrobCloudMcpHealthInternal({
     config: input.config,
     workspace: input.workspace,
     directory: input.directory,
@@ -2327,8 +2327,8 @@ export async function reconcileOpenworkCloudMcp(input: {
   // the normal engine prerequisites pass, then purge stale model-runtime
   // entries before registration. Independent projection filters keep stale
   // rows from ever reaching an engine while prerequisites are unavailable.
-  const { reconcileOpenWorkConnectMcpServers } = await import("./connect-mcp-server-catalog.js");
-  const connectServers = await reconcileOpenWorkConnectMcpServers({
+  const { reconcileRedrobWorkConnectMcpServers } = await import("./connect-mcp-server-catalog.js");
+  const connectServers = await reconcileRedrobWorkConnectMcpServers({
     config: input.config,
     workspace: input.workspace,
     cloudMcp: desiredConfig,
@@ -2373,7 +2373,7 @@ export async function reconcileOpenworkCloudMcp(input: {
   return readHealth(directProbeReuse);
 }
 
-export async function reconcilePersistedOpenworkCloudMcp(input: {
+export async function reconcilePersistedRedrobCloudMcp(input: {
   config: ServerConfig;
   workspace: WorkspaceInfo;
   directory: string | null;
@@ -2387,9 +2387,9 @@ export async function reconcilePersistedOpenworkCloudMcp(input: {
   const runtimeConfig = await readRuntimeOpencodeConfig(input.config, input.workspace.id);
   const desiredConfig = runtimeMcpMap(runtimeConfig)[REDROB_CLOUD_MCP_NAME];
   if (!desiredConfig) {
-    return readOpenworkCloudMcpHealth(input);
+    return readRedrobCloudMcpHealth(input);
   }
-  return reconcileOpenworkCloudMcp({
+  return reconcileRedrobCloudMcp({
     ...input,
     body: {
       config: desiredConfig,
@@ -2398,7 +2398,7 @@ export async function reconcilePersistedOpenworkCloudMcp(input: {
   });
 }
 
-export function markOpenworkCloudMcpStale(workspace: WorkspaceInfo, directory: string | null): void {
+export function markRedrobCloudMcpStale(workspace: WorkspaceInfo, directory: string | null): void {
   cloudMcpDeliveryState.markWorkspaceStale(workspace, directory);
 }
 
@@ -2428,7 +2428,7 @@ export type CloudMcpEngineRefreshResult = {
 // something external re-drives it. This refresh closes any wedged client
 // first (disconnect), then re-runs the persisted reconcile, which re-POSTs
 // /mcp — an unconditional fresh connect attempt on the engine side.
-export async function refreshOpenworkCloudMcpEngine(input: {
+export async function refreshRedrobCloudMcpEngine(input: {
   config: ServerConfig;
   workspace: WorkspaceInfo;
   directory: string | null;
@@ -2457,7 +2457,7 @@ export async function refreshOpenworkCloudMcpEngine(input: {
   const runtimeConfig = await readRuntimeOpencodeConfig(input.config, input.workspace.id);
   const desiredConfig = runtimeMcpMap(runtimeConfig)[REDROB_CLOUD_MCP_NAME];
   if (!desiredConfig) {
-    return finish(false, await readOpenworkCloudMcpHealth({ ...input, probe: true }), "desired_missing");
+    return finish(false, await readRedrobCloudMcpHealth({ ...input, probe: true }), "desired_missing");
   }
 
   const disconnectStarted = Date.now();
@@ -2488,7 +2488,7 @@ export async function refreshOpenworkCloudMcpEngine(input: {
   }
 
   const reapplyStarted = Date.now();
-  const health = await reconcilePersistedOpenworkCloudMcp({
+  const health = await reconcilePersistedRedrobCloudMcp({
     config: input.config,
     workspace: input.workspace,
     directory: input.directory,

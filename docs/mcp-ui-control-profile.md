@@ -49,21 +49,21 @@ This may navigate Redrob Work away from the user's current session while the loo
 
 ### Redrob Work agents
 
-Inside Redrob Work, agents control the app through the semantic tools (`openwork_context`, `openwork_query`, `openwork_execute`) using affordance ids from context. External MCP clients can also use the hidden **Redrob Work UI Control** MCP via **Settings -> Extensions -> Show hidden**.
+Inside Redrob Work, agents control the app through the semantic tools (`redrob_context`, `redrob_query`, `redrob_execute`) using affordance ids from context. External MCP clients can also use the hidden **Redrob Work UI Control** MCP via **Settings -> Extensions -> Show hidden**.
 
 ## Install
 
 ```bash
-npm install -g openwork-ui-mcp
+npm install -g redrob-ui-mcp
 ```
 
 Or run without installing:
 
 ```bash
-npx openwork-ui-mcp
+npx redrob-ui-mcp
 ```
 
-> The package is [`openwork-ui-mcp` on npm](https://www.npmjs.com/package/openwork-ui-mcp).
+> The package is [`redrob-ui-mcp` on npm](https://www.npmjs.com/package/redrob-ui-mcp).
 
 ## Add to OpenCode
 
@@ -72,9 +72,9 @@ Add the MCP server to your workspace or global `opencode.json`:
 ```json
 {
   "mcp": {
-    "openwork-ui": {
+    "redrob-ui": {
       "type": "local",
-      "command": ["npx", "-y", "openwork-ui-mcp"],
+      "command": ["npx", "-y", "redrob-ui-mcp"],
       "enabled": true
     }
   }
@@ -94,9 +94,9 @@ Both use the same MCP config shape. Add to your `claude_desktop_config.json` or 
 ```json
 {
   "mcpServers": {
-    "openwork-ui": {
+    "redrob-ui": {
       "command": "npx",
-      "args": ["-y", "openwork-ui-mcp"]
+      "args": ["-y", "redrob-ui-mcp"]
     }
   }
 }
@@ -114,7 +114,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 
 const transport = new StdioClientTransport({
   command: "npx",
-  args: ["-y", "openwork-ui-mcp"],
+  args: ["-y", "redrob-ui-mcp"],
 });
 const client = new Client({ name: "my-app", version: "1.0.0" });
 await client.connect(transport);
@@ -240,7 +240,7 @@ The exact list depends on the current Redrob Work route and state. Common action
 
 ```
 ┌─────────────┐     MCP stdio      ┌──────────────────┐     HTTP localhost     ┌──────────────┐
-│  MCP client  │ ←────────────────→ │  openwork-ui-mcp │ ←───────────────────→ │  Redrob Work app │
+│  MCP client  │ ←────────────────→ │  redrob-ui-mcp │ ←───────────────────→ │  Redrob Work app │
 │  (HandsFree, │                    │  (Node.js)       │                       │  (Electron)   │
 │   OpenCode,  │                    │                  │                       │               │
 │   Codex)     │                    └──────────────────┘                       └──────────────┘
@@ -248,8 +248,8 @@ The exact list depends on the current Redrob Work route and state. Common action
 ```
 
 1. Redrob Work desktop starts a private localhost HTTP bridge on a random port, protected by a bearer token.
-2. It writes a discovery file with the port and token so `openwork-ui-mcp` can find it.
-3. `openwork-ui-mcp` reads the discovery file, proxies MCP tool calls to the bridge, and returns structured results.
-4. The bridge calls `window.__openworkControl` inside the Electron renderer to snapshot state and execute actions.
+2. It writes a discovery file with the port and token so `redrob-ui-mcp` can find it.
+3. `redrob-ui-mcp` reads the discovery file, proxies MCP tool calls to the bridge, and returns structured results.
+4. The bridge calls `window.__redrobControl` inside the Electron renderer to snapshot state and execute actions.
 
-The bridge and discovery file are implementation details — you never need to touch them directly. Just point your MCP client at `openwork-ui-mcp`.
+The bridge and discovery file are implementation details — you never need to touch them directly. Just point your MCP client at `redrob-ui-mcp`.

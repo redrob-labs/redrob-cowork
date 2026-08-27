@@ -8,7 +8,7 @@ const repoRoot = resolve(import.meta.dirname, "../..");
 test("direct Cloud MCP health checks stay within a scoped handshake budget", ({ evidence }) => {
   const budgetResult = spawnSync("pnpm", [
     "--filter",
-    "openwork-server",
+    "redrob-server",
     "test",
     "src/cloud-mcp-health.test.ts",
     "--test-name-pattern",
@@ -22,7 +22,7 @@ test("direct Cloud MCP health checks stay within a scoped handshake budget", ({ 
   const budgetOutput = `${budgetResult.stdout}${budgetResult.stderr}`;
   const reconcileResult = spawnSync("pnpm", [
     "--filter",
-    "openwork-server",
+    "redrob-server",
     "test",
     "src/cloud-mcp-reconcile.e2e.test.ts",
     "--test-name-pattern",

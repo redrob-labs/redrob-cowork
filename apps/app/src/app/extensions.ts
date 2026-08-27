@@ -2,22 +2,22 @@
 // types.ts re-exports it for the rest of the app.
 export type ReloadReason = "plugins" | "skills" | "mcp" | "config" | "agents" | "commands";
 
-export type OpenWorkExtensionSourceFormat =
-  | "openwork-builtin"
-  | "openwork-extension-manifest"
+export type RedrobWorkExtensionSourceFormat =
+  | "redrob-builtin"
+  | "redrob-extension-manifest"
   | "claude-plugin"
   | "opencode-plugin"
   | "mcp-directory"
   | "manual";
 
-export type OpenWorkExtensionSource = {
-  format: OpenWorkExtensionSourceFormat;
+export type RedrobWorkExtensionSource = {
+  format: RedrobWorkExtensionSourceFormat;
   trusted: boolean;
   origin?: "builtin" | "den" | "workspace" | "local";
   reference?: string;
 };
 
-export type OpenWorkExtensionResourceType =
+export type RedrobWorkExtensionResourceType =
   | "skill"
   | "agent"
   | "command"
@@ -32,8 +32,8 @@ export type OpenWorkExtensionResourceType =
   | "local-service"
   | "native-binary";
 
-export type OpenWorkExtensionResource = {
-  type: OpenWorkExtensionResourceType;
+export type RedrobWorkExtensionResource = {
+  type: RedrobWorkExtensionResourceType;
   id: string;
   label?: string;
   description?: string;
@@ -43,11 +43,11 @@ export type OpenWorkExtensionResource = {
   packageName?: string;
   providerId?: string;
   mcpServerName?: string;
-  localCommandRef?: "openwork.computerUseMcp" | "openwork.uiMcp";
+  localCommandRef?: "redrob.computerUseMcp" | "redrob.uiMcp";
   required?: boolean;
 };
 
-export type OpenWorkExtensionContributionType =
+export type RedrobWorkExtensionContributionType =
   | "settings-panel"
   | "setup-instructions"
   | "composer-prompt"
@@ -58,8 +58,8 @@ export type OpenWorkExtensionContributionType =
   | "native-capability"
   | "test-action";
 
-export type OpenWorkExtensionContribution = {
-  type: OpenWorkExtensionContributionType;
+export type RedrobWorkExtensionContribution = {
+  type: RedrobWorkExtensionContributionType;
   ref?: string;
   label?: string;
   description?: string;
@@ -67,7 +67,7 @@ export type OpenWorkExtensionContribution = {
   location?: "settings-detail" | "composer" | "session-right-pane" | "session-rail" | "server" | "native";
 };
 
-export type OpenWorkExtensionSetup = {
+export type RedrobWorkExtensionSetup = {
   instructions?: string;
   primaryCta?: string;
   secondaryCta?: string;
@@ -75,7 +75,7 @@ export type OpenWorkExtensionSetup = {
   testActionRef?: string;
 };
 
-export type OpenWorkExtensionLifecycle = {
+export type RedrobWorkExtensionLifecycle = {
   reload?: ReloadReason[];
   detection?: string[];
 };
@@ -106,13 +106,13 @@ export type EnablementResult = {
   met: boolean;
 };
 
-export type OpenWorkExtensionManifest = {
+export type RedrobWorkExtensionManifest = {
   schemaVersion: 1;
   id: string;
   name: string;
   description: string;
   preview?: boolean;
-  source: OpenWorkExtensionSource;
+  source: RedrobWorkExtensionSource;
   icon?: {
     src?: string;
     simpleIconSlug?: string;
@@ -120,10 +120,10 @@ export type OpenWorkExtensionManifest = {
   composer?: {
     prompt: string;
   };
-  setup?: OpenWorkExtensionSetup;
-  resources: OpenWorkExtensionResource[];
-  contributions?: OpenWorkExtensionContribution[];
-  lifecycle?: OpenWorkExtensionLifecycle;
+  setup?: RedrobWorkExtensionSetup;
+  resources: RedrobWorkExtensionResource[];
+  contributions?: RedrobWorkExtensionContribution[];
+  lifecycle?: RedrobWorkExtensionLifecycle;
   /** Declarative conditions that must ALL be true for the extension to be "active". */
   enablement?: EnablementCondition[];
   defaultEnabled?: boolean;
@@ -131,37 +131,37 @@ export type OpenWorkExtensionManifest = {
   platform?: Array<"darwin" | "linux" | "windows" | "web">;
 };
 
-export type OpenWorkExtensionPlatform = NonNullable<OpenWorkExtensionManifest["platform"]>[number];
+export type RedrobWorkExtensionPlatform = NonNullable<RedrobWorkExtensionManifest["platform"]>[number];
 
 export function extensionContribution(
-  manifest: OpenWorkExtensionManifest | undefined,
-  type: OpenWorkExtensionContributionType,
-): OpenWorkExtensionContribution | undefined {
+  manifest: RedrobWorkExtensionManifest | undefined,
+  type: RedrobWorkExtensionContributionType,
+): RedrobWorkExtensionContribution | undefined {
   return manifest?.contributions?.find((contribution) => contribution.type === type);
 }
 
 export function extensionResource(
-  manifest: OpenWorkExtensionManifest | undefined,
-  type: OpenWorkExtensionResourceType,
-): OpenWorkExtensionResource | undefined {
+  manifest: RedrobWorkExtensionManifest | undefined,
+  type: RedrobWorkExtensionResourceType,
+): RedrobWorkExtensionResource | undefined {
   return manifest?.resources.find((resource) => resource.type === type);
 }
 
-export function isTrustedBuiltInExtension(manifest: OpenWorkExtensionManifest | undefined): boolean {
+export function isTrustedBuiltInExtension(manifest: RedrobWorkExtensionManifest | undefined): boolean {
   return manifest?.source.origin === "builtin" && manifest.source.trusted;
 }
 
-export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = [
+export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] = [
   {
     schemaVersion: 1,
-    id: "openwork-browser",
-    name: "OpenWork Browser",
-    description: "Automate the built-in browser panel that stays visible inside OpenWork.",
-    source: { format: "openwork-builtin", origin: "builtin", trusted: true },
-    icon: { src: "/openwork-mark.svg" },
-    composer: { prompt: "Use the OpenWork Browser extension to " },
+    id: "redrob-browser",
+    name: "Redrob Work Browser",
+    description: "Automate the built-in browser panel that stays visible inside Redrob Work.",
+    source: { format: "redrob-builtin", origin: "builtin", trusted: true },
+    icon: { src: "/redrob-mark.svg" },
+    composer: { prompt: "Use the Redrob Work Browser extension to " },
     setup: {
-      instructions: "OpenWork Browser is ready by default in desktop workspaces.",
+      instructions: "Redrob Work Browser is ready by default in desktop workspaces.",
     },
     resources: [
       {
@@ -172,12 +172,12 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
       },
     ],
     contributions: [
-      { type: "settings-panel", ref: "openwork.browser.settings", location: "settings-detail" },
-      { type: "session-side-panel", ref: "openwork.browser.panel", location: "session-right-pane" },
-      { type: "composer-prompt", prompt: "Use the OpenWork Browser extension to ", location: "composer" },
+      { type: "settings-panel", ref: "redrob.browser.settings", location: "settings-detail" },
+      { type: "session-side-panel", ref: "redrob.browser.panel", location: "session-right-pane" },
+      { type: "composer-prompt", prompt: "Use the Redrob Work Browser extension to ", location: "composer" },
     ],
     enablement: [
-      { type: "toggle-enabled", ref: "openwork-browser", label: "Enabled" },
+      { type: "toggle-enabled", ref: "redrob-browser", label: "Enabled" },
     ],
     lifecycle: { reload: ["plugins", "agents"], detection: ["plugin:opencode-chrome-devtools"] },
     defaultEnabled: true,
@@ -189,14 +189,14 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
     name: "Computer Use",
     description: "Mac only: control Mac apps through semantic accessibility refs, screenshots, background-safe clicks, keyboard input, and strict mode.",
     preview: true,
-    source: { format: "openwork-builtin", origin: "builtin", trusted: true },
-    icon: { src: "/openwork-mark.svg" },
+    source: { format: "redrob-builtin", origin: "builtin", trusted: true },
+    icon: { src: "/redrob-mark.svg" },
     composer: { prompt: "Use Computer Use to " },
     setup: {
       instructions: "Computer Use is Mac only. It runs as a local MCP server backed by the macOS accessibility runtime. Grant Accessibility and Screen Recording permissions when macOS asks, then connect the MCP server in this workspace.",
       primaryCta: "Connect Computer Use MCP",
       secondaryCta: "Check macOS permissions",
-      testActionRef: "openwork.computerUse.healthCheck",
+      testActionRef: "redrob.computerUse.healthCheck",
     },
     resources: [
       {
@@ -205,7 +205,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
         label: "Computer Use MCP",
         mcpServerName: "computer-use",
         command: ["npx", "-y", "@redrob/handsfree", "mcp"],
-        localCommandRef: "openwork.computerUseMcp",
+        localCommandRef: "redrob.computerUseMcp",
         required: true,
       },
       {
@@ -217,9 +217,9 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
       },
     ],
     contributions: [
-      { type: "setup-instructions", ref: "openwork.computerUse.setup", location: "settings-detail" },
-      { type: "native-capability", ref: "openwork.computerUse.axPermissions", label: "Accessibility and Screen Recording" },
-      { type: "test-action", ref: "openwork.computerUse.healthCheck", label: "Verify Computer Use MCP" },
+      { type: "setup-instructions", ref: "redrob.computerUse.setup", location: "settings-detail" },
+      { type: "native-capability", ref: "redrob.computerUse.axPermissions", label: "Accessibility and Screen Recording" },
+      { type: "test-action", ref: "redrob.computerUse.healthCheck", label: "Verify Computer Use MCP" },
       { type: "composer-prompt", prompt: "Use Computer Use to ", location: "composer" },
     ],
     enablement: [
@@ -232,36 +232,36 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
   },
   {
     schemaVersion: 1,
-    id: "openwork-voice",
+    id: "redrob-voice",
     name: "Voice Mode",
-    description: "Talk to OpenWork through a Realtime voice panel that drives the same semantic UI controls as OpenWork UI MCP.",
+    description: "Talk to Redrob Work through a Realtime voice panel that drives the same semantic UI controls as Redrob Work UI MCP.",
     preview: true,
-    source: { format: "openwork-builtin", origin: "builtin", trusted: true },
-    icon: { src: "/openwork-mark.svg" },
+    source: { format: "redrob-builtin", origin: "builtin", trusted: true },
+    icon: { src: "/redrob-mark.svg" },
     composer: { prompt: "Use Voice Mode to " },
     setup: {
-      instructions: "Voice Mode uses OpenAI Realtime. Save an OpenAI API key in OpenWork env vars, then open the session rail panel and speak or send a typed voice command.",
+      instructions: "Voice Mode uses OpenAI Realtime. Save an OpenAI API key in Redrob Work env vars, then open the session rail panel and speak or send a typed voice command.",
       primaryCta: "Save OpenAI key",
       secondaryCta: "Test Realtime",
       requiredEnv: ["OPENAI_REALTIME_API_KEY", "OPENAI_API_KEY"],
-      testActionRef: "openwork.voice.testRealtime",
+      testActionRef: "redrob.voice.testRealtime",
     },
     resources: [
       { type: "secret", id: "openai-realtime-api-key", envKey: "OPENAI_REALTIME_API_KEY", required: false },
       { type: "secret", id: "openai-api-key", envKey: "OPENAI_API_KEY", required: true },
-      { type: "local-service", id: "openwork-voice-realtime-session", label: "Realtime client-secret minting", required: true },
+      { type: "local-service", id: "redrob-voice-realtime-session", label: "Realtime client-secret minting", required: true },
     ],
     contributions: [
-      { type: "settings-panel", ref: "openwork.voice.settings", location: "settings-detail" },
-      { type: "session-side-panel", ref: "openwork.voice.panel", location: "session-right-pane" },
-      { type: "session-rail-item", ref: "openwork.voice.rail", label: "Voice Mode", location: "session-rail" },
+      { type: "settings-panel", ref: "redrob.voice.settings", location: "settings-detail" },
+      { type: "session-side-panel", ref: "redrob.voice.panel", location: "session-right-pane" },
+      { type: "session-rail-item", ref: "redrob.voice.rail", label: "Voice Mode", location: "session-rail" },
       { type: "server-route", ref: "POST /voice/realtime/session", location: "server" },
-      { type: "control-actions", ref: "openwork.voice.controlActions" },
-      { type: "test-action", ref: "openwork.voice.testRealtime", label: "Test Realtime" },
+      { type: "control-actions", ref: "redrob.voice.controlActions" },
+      { type: "test-action", ref: "redrob.voice.testRealtime", label: "Test Realtime" },
       { type: "composer-prompt", prompt: "Use Voice Mode to ", location: "composer" },
     ],
     enablement: [
-      { type: "toggle-enabled", ref: "openwork-voice", label: "Enabled" },
+      { type: "toggle-enabled", ref: "redrob-voice", label: "Enabled" },
       { type: "env-set", ref: "OPENAI_API_KEY", label: "OpenAI API key" },
     ],
     lifecycle: { reload: ["config"], detection: ["env:OPENAI_REALTIME_API_KEY", "env:OPENAI_API_KEY"] },
@@ -271,7 +271,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
     id: "ollama",
     name: "Ollama",
     description: "Local model provider at http://localhost:11434.",
-    source: { format: "openwork-builtin", origin: "builtin", trusted: true },
+    source: { format: "redrob-builtin", origin: "builtin", trusted: true },
     icon: { src: "/ext-ollama.svg" },
     composer: { prompt: "Use the Ollama extension to " },
     setup: {
@@ -284,8 +284,8 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
       { type: "provider", id: "ollama", providerId: "ollama", packageName: "@ai-sdk/openai-compatible", required: true },
     ],
     contributions: [
-      { type: "settings-panel", ref: "openwork.ollama.settings", location: "settings-detail" },
-      { type: "test-action", ref: "openwork.ollama.listModels", label: "Check local models" },
+      { type: "settings-panel", ref: "redrob.ollama.settings", location: "settings-detail" },
+      { type: "test-action", ref: "redrob.ollama.listModels", label: "Check local models" },
       { type: "composer-prompt", prompt: "Use the Ollama extension to ", location: "composer" },
     ],
     enablement: [
@@ -298,7 +298,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: OpenWorkExtensionManifest[] = 
     id: "redrob",
     name: "Redrob",
     description: "Multilingual OpenAI-compatible inference at https://console.redrob.ai.",
-    source: { format: "openwork-builtin", origin: "builtin", trusted: true },
+    source: { format: "redrob-builtin", origin: "builtin", trusted: true },
     icon: { src: "/ext-redrob.svg" },
     composer: { prompt: "Use the Redrob provider to " },
     setup: {

@@ -38,7 +38,7 @@ function healthyReport(): AgentContextDiagnosticsReport {
         : "observed",
     code: passiveEngineCheckIds.has(id) ? `${id}-not-queried` : `${id}-ok`,
     message: passiveEngineCheckIds.has(id) ? `${id} intentionally not queried.` : `${id} verified.`,
-    owner: "openwork-server",
+    owner: "redrob-server",
     action: "No action required.",
     details: id === "cloud-tool-catalog"
       ? {
@@ -67,8 +67,8 @@ function healthyReport(): AgentContextDiagnosticsReport {
     checks,
     agent: {
       evidenceSource: "configured-intent",
-      defaultAgent: "openwork",
-      configuredOpenworkAgent: {
+      defaultAgent: "redrob",
+      configuredRedrobAgent: {
         state: "present",
         mode: "primary",
         prompt: {
@@ -86,11 +86,11 @@ function healthyReport(): AgentContextDiagnosticsReport {
           deniedRelevantToolCount: null,
         },
       },
-      pluginLabels: ["openwork-extensions-preview", "openwork-capabilities-knowledge"],
+      pluginLabels: ["redrob-extensions-preview", "redrob-capabilities-knowledge"],
     },
     mcps: [
       {
-        name: "openwork-cloud",
+        name: "redrob-cloud",
         source: "config.global",
         type: "remote",
         enabled: true,
@@ -103,7 +103,7 @@ function healthyReport(): AgentContextDiagnosticsReport {
         liveEngineStatus: "unavailable",
       },
       {
-        name: "openwork-cloud",
+        name: "redrob-cloud",
         source: "config.remote",
         type: "remote",
         enabled: true,
@@ -175,11 +175,11 @@ describe("AgentContextDiagnosticsReportView", () => {
     expect(html).toContain("Expected");
     expect(html).toContain("Client observed");
     expect(html).toContain("Observed");
-    expect(html).toContain("openwork-extensions-preview");
+    expect(html).toContain("redrob-extensions-preview");
     expect(html).toContain("config.remote");
     expect(html).toContain("Registration record: Connected");
     expect(html).toContain("Configured default-agent intent");
-    expect(html).toContain("Configured OpenWork agent");
+    expect(html).toContain("Configured Redrob Work agent");
     expect(html).toContain("Configured enabled");
     expect(html).toContain("Configured headers present · values redacted");
     expect(html).toContain("Live connection status not queried");
@@ -210,7 +210,7 @@ describe("AgentContextDiagnosticsReportView", () => {
 
   test("announces false context markers and diagnostic errors without relying on color", () => {
     const report = healthyReport();
-    report.agent.configuredOpenworkAgent.prompt.markers.memoryBank = false;
+    report.agent.configuredRedrobAgent.prompt.markers.memoryBank = false;
     const reportHtml = renderToStaticMarkup(
       <AgentContextDiagnosticsReportView report={report} copied={false} copying={false} onCopy={() => {}} />,
     );
@@ -243,7 +243,7 @@ describe("AgentContextDiagnosticsReportView", () => {
     );
 
     expect(html).toContain("Effective default agent");
-    expect(html).toContain("Effective OpenWork agent");
+    expect(html).toContain("Effective Redrob Work agent");
     expect(html).toContain("Effective plugin labels");
     expect(html).toContain("Effective configuration observed");
     expect(html).toContain("Disabled by tool policy");
@@ -252,7 +252,7 @@ describe("AgentContextDiagnosticsReportView", () => {
 
   test("renders and serializes an effective ask rule as approval required", () => {
     const report = healthyReport();
-    report.agent.configuredOpenworkAgent.connectToolPermissions.searchCapabilities = "approval-required";
+    report.agent.configuredRedrobAgent.connectToolPermissions.searchCapabilities = "approval-required";
 
     const html = renderToStaticMarkup(
       <AgentContextDiagnosticsReportView report={report} copied={false} copying={false} onCopy={() => {}} />,
@@ -371,7 +371,7 @@ describe("AgentContextDiagnosticsReportView", () => {
     const cloudProbeWithoutRetainedEntry = {
       ...healthyReport(),
       safety: { ...healthyReport().safety, cloudCatalogToolsListPerformed: true },
-      mcps: healthyReport().mcps.filter((mcp) => mcp.name !== "openwork-cloud"),
+      mcps: healthyReport().mcps.filter((mcp) => mcp.name !== "redrob-cloud"),
     };
     expect(agentContextDiagnosticsReportSchema.safeParse(cloudProbeWithoutRetainedEntry).success).toBe(false);
 

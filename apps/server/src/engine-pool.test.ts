@@ -136,7 +136,7 @@ type Fixture = {
 };
 
 async function createFixture(options?: { bin?: "ready" | "unready" }): Promise<Fixture> {
-  const root = await mkdtemp(join(tmpdir(), "openwork-engine-pool-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-engine-pool-"));
   cleanups.push(() => rm(root, { recursive: true, force: true }));
 
   const logPath = join(root, "engine.log");
@@ -624,10 +624,10 @@ describe("engine pool", () => {
     const fixture = await createFixture();
     await createPool(fixture);
     const originalFetch = globalThis.fetch;
-    const originalTelemetry = globalThis.__openworkDesktopTelemetry;
+    const originalTelemetry = globalThis.__redrobDesktopTelemetry;
     const captured: unknown[] = [];
     const server = await startServer(fixture.config);
-    globalThis.__openworkDesktopTelemetry = {
+    globalThis.__redrobDesktopTelemetry = {
       captureException(error) {
         captured.push(error);
         return true;
@@ -649,7 +649,7 @@ describe("engine pool", () => {
       expect(captured).toEqual([]);
     } finally {
       globalThis.fetch = originalFetch;
-      globalThis.__openworkDesktopTelemetry = originalTelemetry;
+      globalThis.__redrobDesktopTelemetry = originalTelemetry;
       await server.stop();
     }
   });

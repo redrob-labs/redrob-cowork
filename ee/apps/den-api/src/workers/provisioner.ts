@@ -255,29 +255,29 @@ async function provisionWorkerOnRender(
   const serviceName = slug(
     `${env.render.workerNamePrefix}-${input.name}-${input.workerId.slice(0, 8)}`,
   ).slice(0, 62)
-  const openworkServerPackage = env.render.workerOpenworkVersion?.trim()
-    ? `openwork-server@${env.render.workerOpenworkVersion.trim()}`
-    : "openwork-server"
+  const redrobServerPackage = env.render.workerRedrobVersion?.trim()
+    ? `redrob-server@${env.render.workerRedrobVersion.trim()}`
+    : "redrob-server"
   const buildCommand = [
-    `npm install -g ${shellQuote(openworkServerPackage)}`,
+    `npm install -g ${shellQuote(redrobServerPackage)}`,
     "node ./scripts/install-opencode.mjs",
   ].join(" && ")
   const startScript = `
 set -u
 mkdir -p /tmp/workspace
-plugin_dir="$(npm root -g)/openwork-server/dist/opencode-plugins"
+plugin_dir="$(npm root -g)/redrob-server/dist/opencode-plugins"
 if [ ! -d "$plugin_dir" ]; then
-  echo "openwork-server extension plugins missing at $plugin_dir" >&2
+  echo "redrob-server extension plugins missing at $plugin_dir" >&2
   exit 1
 fi
 attempt=0
 while [ "$attempt" -lt 3 ]; do
   attempt=$((attempt + 1))
-  if REDROB_MANAGE_OPENCODE=1 REDROB_OPENCODE_BIN=./bin/opencode REDROB_EXTENSIONS_PLUGIN_DIR="$plugin_dir" openwork-server --workspace /tmp/workspace --host 0.0.0.0 --port "\${PORT:-10000}" --cors '*' --approval manual --verbose; then
+  if REDROB_MANAGE_OPENCODE=1 REDROB_OPENCODE_BIN=./bin/opencode REDROB_EXTENSIONS_PLUGIN_DIR="$plugin_dir" redrob-server --workspace /tmp/workspace --host 0.0.0.0 --port "\${PORT:-10000}" --cors '*' --approval manual --verbose; then
     exit 0
   fi
   status=$?
-  echo "openwork-server failed (attempt $attempt, exit $status); retrying in 3s"
+  echo "redrob-server failed (attempt $attempt, exit $status); retrying in 3s"
   sleep 3
 done
 exit 1

@@ -29,9 +29,9 @@ import {
   validateMcpServerName,
 } from "../../../app/mcp";
 import {
-  buildOpenworkWorkspaceBaseUrl,
-  type OpenworkServerClient,
-} from "../../../app/lib/openwork-server";
+  buildRedrobWorkspaceBaseUrl,
+  type RedrobServerClient,
+} from "../../../app/lib/redrob-server";
 import type {
   Client,
   McpServerEntry,
@@ -40,9 +40,9 @@ import type {
   ReloadTrigger,
 } from "../../../app/types";
 import { isDesktopRuntime, normalizeDirectoryPath, safeStringify } from "../../../app/utils";
-import { conflictsWithOpenworkConnect } from "./mcp-connection-boundary";
+import { conflictsWithRedrobConnect } from "./mcp-connection-boundary";
 
-import type { OpenworkServerStore } from "./openwork-server-store";
+import type { RedrobServerStore } from "./redrob-server-store";
 import { attemptSilentMcpReauth } from "./mcp-silent-reauth";
 import {
   CLOUD_MCP_SERVER_NAME,
@@ -52,7 +52,7 @@ import {
   clearCloudMcpDisabledIntent,
   cloudMcpDisplaySummary,
   recordCloudMcpDisabledIntent,
-  runOpenworkCloudMcpReconciler,
+  runRedrobCloudMcpReconciler,
   type CloudMcpOperationContext,
 } from "./cloud-mcp-reconciler";
 
@@ -65,7 +65,7 @@ type SetStateAction<T> = T | ((current: T) => T);
 const CLOUD_MCP_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
 const LOCAL_REDROB_SERVER_RECOVERY_TIMEOUT_MS = 30_000;
 
-async function withLocalOpenworkServerRecoveryTimeout<T>(
+async function withLocalRedrobServerRecoveryTimeout<T>(
   task: Promise<T>,
   timeoutMs: number,
 ): Promise<T> {
@@ -109,10 +109,10 @@ export function createConnectionsStore(options: {
   selectedWorkspaceId: () => string;
   selectedWorkspaceRoot: () => string;
   workspaceType: () => "local" | "remote";
-  openworkServer: OpenworkServerStore;
+  redrobServer: RedrobServerStore;
   runtimeWorkspaceId: () => string | null;
   ensureRuntimeWorkspaceId?: () => Promise<string | null | undefined>;
-  localOpenworkServerRecoveryTimeoutMs?: number;
+  localRedrobServerRecoveryTimeoutMs?: number;
   setProjectDir?: (value: string) => void;
   developerMode: () => boolean;
   markReloadRequired?: (reason: ReloadReason, trigger?: ReloadTrigger) => void;
@@ -179,13 +179,13 @@ export function createConnectionsStore(options: {
     return `${workspaceType}:${workspaceId}:${root}:${runtimeWorkspaceId}`;
   };
 
-  const getOpenworkSnapshot = () => options.openworkServer.getSnapshot();
+  const getRedrobSnapshot = () => options.redrobServer.getSnapshot();
 
-  const resolveOpenworkWorkspaceId = async () => {
+  const resolveRedrobWorkspaceId = async () => {
     const current = options.runtimeWorkspaceId()?.trim();
     if (current) return current;
-    const openworkSnapshot = getOpenworkSnapshot();
-    if (openworkSnapshot.openworkServerStatus !== "connected" || !openworkSnapshot.openworkServerClient) {
+    const redrobSnapshot = getRedrobSnapshot();
+    if (redrobSnapshot.redrobServerStatus !== "connected" || !redrobSnapshot.redrobServerClient) {
       return null;
     }
     const ensured = (await options.ensureRuntimeWorkspaceId?.())?.trim();
@@ -193,51 +193,51 @@ export function createConnectionsStore(options: {
     return options.workspaceType() === "local" ? options.selectedWorkspaceId().trim() || null : null;
   };
 
-  const resolveConfigOpenworkTarget = async (mode: "read" | "write") => {
-    const openworkSnapshot = getOpenworkSnapshot();
-    const openworkClient = openworkSnapshot.openworkServerClient;
-    const openworkWorkspaceId = await resolveOpenworkWorkspaceId();
-    const hasOpenworkTarget =
-      openworkSnapshot.openworkServerStatus === "connected" &&
-      Boolean(openworkClient && openworkWorkspaceId);
-    const canUseOpenworkServer =
-      hasOpenworkTarget &&
-      openworkSnapshot.openworkServerCapabilities?.config?.[mode] !== false;
+  const resolveConfigRedrobTarget = async (mode: "read" | "write") => {
+    const redrobSnapshot = getRedrobSnapshot();
+    const redrobClient = redrobSnapshot.redrobServerClient;
+    const redrobWorkspaceId = await resolveRedrobWorkspaceId();
+    const hasRedrobTarget =
+      redrobSnapshot.redrobServerStatus === "connected" &&
+      Boolean(redrobClient && redrobWorkspaceId);
+    const canUseRedrobServer =
+      hasRedrobTarget &&
+      redrobSnapshot.redrobServerCapabilities?.config?.[mode] !== false;
     return {
-      openworkClient,
-      openworkWorkspaceId,
-      hasOpenworkTarget,
-      canUseOpenworkServer,
+      redrobClient,
+      redrobWorkspaceId,
+      hasRedrobTarget,
+      canUseRedrobServer,
     };
   };
 
-  const resolveMcpOpenworkTarget = async (mode: "read" | "write") => {
-    let openworkSnapshot = getOpenworkSnapshot();
-    let openworkClient = openworkSnapshot.openworkServerClient;
-    let openworkWorkspaceId = await resolveOpenworkWorkspaceId();
-    if ((!openworkClient || !openworkWorkspaceId || openworkSnapshot.openworkServerStatus !== "connected")
+  const resolveMcpRedrobTarget = async (mode: "read" | "write") => {
+    let redrobSnapshot = getRedrobSnapshot();
+    let redrobClient = redrobSnapshot.redrobServerClient;
+    let redrobWorkspaceId = await resolveRedrobWorkspaceId();
+    if ((!redrobClient || !redrobWorkspaceId || redrobSnapshot.redrobServerStatus !== "connected")
       && isDesktopRuntime()
       && options.workspaceType() === "local") {
-      openworkClient = await withLocalOpenworkServerRecoveryTimeout(
-        options.openworkServer.ensureLocalOpenworkServerClient(),
-        options.localOpenworkServerRecoveryTimeoutMs ?? LOCAL_REDROB_SERVER_RECOVERY_TIMEOUT_MS,
+      redrobClient = await withLocalRedrobServerRecoveryTimeout(
+        options.redrobServer.ensureLocalRedrobServerClient(),
+        options.localRedrobServerRecoveryTimeoutMs ?? LOCAL_REDROB_SERVER_RECOVERY_TIMEOUT_MS,
       );
-      openworkSnapshot = getOpenworkSnapshot();
-      openworkWorkspaceId = options.runtimeWorkspaceId()?.trim()
+      redrobSnapshot = getRedrobSnapshot();
+      redrobWorkspaceId = options.runtimeWorkspaceId()?.trim()
         || (await options.ensureRuntimeWorkspaceId?.())?.trim()
         || options.selectedWorkspaceId().trim()
         || null;
     }
-    const hasOpenworkTarget =
-      Boolean(openworkClient && openworkWorkspaceId);
-    const canUseOpenworkServer =
-      hasOpenworkTarget &&
-      openworkSnapshot.openworkServerCapabilities?.mcp?.[mode] !== false;
+    const hasRedrobTarget =
+      Boolean(redrobClient && redrobWorkspaceId);
+    const canUseRedrobServer =
+      hasRedrobTarget &&
+      redrobSnapshot.redrobServerCapabilities?.mcp?.[mode] !== false;
     return {
-      openworkClient,
-      openworkWorkspaceId,
-      hasOpenworkTarget,
-      canUseOpenworkServer,
+      redrobClient,
+      redrobWorkspaceId,
+      hasRedrobTarget,
+      canUseRedrobServer,
     };
   };
 
@@ -250,14 +250,14 @@ export function createConnectionsStore(options: {
 
   const readMcpConfigFile = async (scope: "project" | "global"): Promise<OpencodeConfigFile | null> => {
     const projectDir = options.projectDir().trim();
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveConfigOpenworkTarget("read");
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveConfigRedrobTarget("read");
 
-    if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-      return openworkClient.readOpencodeConfigFile(openworkWorkspaceId, scope);
+    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+      return redrobClient.readOpencodeConfigFile(redrobWorkspaceId, scope);
     }
 
-    if (hasOpenworkTarget) {
+    if (hasRedrobTarget) {
       return null;
     }
 
@@ -274,31 +274,31 @@ export function createConnectionsStore(options: {
       return activeClient;
     }
 
-    const openworkSnapshot = getOpenworkSnapshot();
-    const openworkBaseUrl = openworkSnapshot.openworkServerBaseUrl.trim();
-    const token = openworkSnapshot.openworkServerAuth.token?.trim();
-    if (!openworkBaseUrl || !token) {
+    const redrobSnapshot = getRedrobSnapshot();
+    const redrobBaseUrl = redrobSnapshot.redrobServerBaseUrl.trim();
+    const token = redrobSnapshot.redrobServerAuth.token?.trim();
+    if (!redrobBaseUrl || !token) {
       return null;
     }
 
     const mountedBaseUrl =
-      buildOpenworkWorkspaceBaseUrl(openworkBaseUrl, await resolveOpenworkWorkspaceId()) ?? openworkBaseUrl;
+      buildRedrobWorkspaceBaseUrl(redrobBaseUrl, await resolveRedrobWorkspaceId()) ?? redrobBaseUrl;
     activeClient = createClient(`${mountedBaseUrl.replace(/\/+$/, "")}/opencode`, undefined, {
       token,
-      mode: "openwork",
+      mode: "redrob",
     });
     options.setClient(activeClient);
     return activeClient;
   };
 
-  const resolveWritableOpenworkTarget = async () => {
-    return resolveMcpOpenworkTarget("write");
+  const resolveWritableRedrobTarget = async () => {
+    return resolveMcpRedrobTarget("write");
   };
 
   const resolveCloudMcpOperationContext = async (fallbackUrl?: string | null): Promise<CloudMcpOperationContext | null> => {
     const settings = readDenSettings();
-    const workspaceId = await resolveOpenworkWorkspaceId();
-    const serverBaseUrl = getOpenworkSnapshot().openworkServerClient?.baseUrl.trim() ?? "";
+    const workspaceId = await resolveRedrobWorkspaceId();
+    const serverBaseUrl = getRedrobSnapshot().redrobServerClient?.baseUrl.trim() ?? "";
     const orgId = settings.activeOrgId?.trim() ?? "";
     if (!workspaceId || !serverBaseUrl || !orgId) return null;
     return {
@@ -332,29 +332,29 @@ export function createConnectionsStore(options: {
     return resolvedProjectDir;
   };
 
-  const listMcpFromOpenworkServer = async (projectDir: string) => {
-    const openworkSnapshot = getOpenworkSnapshot();
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveMcpOpenworkTarget("read");
-    const canTryOpenworkServer = canUseOpenworkServer;
+  const listMcpFromRedrobServer = async (projectDir: string) => {
+    const redrobSnapshot = getRedrobSnapshot();
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveMcpRedrobTarget("read");
+    const canTryRedrobServer = canUseRedrobServer;
 
     recordPerfLog(options.developerMode(), "mcp.refresh", "server-path-check", {
       workspaceType: options.workspaceType(),
       projectDir: projectDir || null,
-      openworkStatus: openworkSnapshot.openworkServerStatus,
-      hasOpenworkClient: Boolean(openworkClient),
-      openworkWorkspaceId: openworkWorkspaceId ?? null,
-      canReadMcp: openworkSnapshot.openworkServerCapabilities?.mcp?.read ?? null,
-      canTryOpenworkServer,
+      redrobStatus: redrobSnapshot.redrobServerStatus,
+      hasRedrobClient: Boolean(redrobClient),
+      redrobWorkspaceId: redrobWorkspaceId ?? null,
+      canReadMcp: redrobSnapshot.redrobServerCapabilities?.mcp?.read ?? null,
+      canTryRedrobServer,
     });
 
-    if (hasOpenworkTarget && !canTryOpenworkServer) {
-      throw new Error("OpenWork server cannot read MCP config for this workspace.");
+    if (hasRedrobTarget && !canTryRedrobServer) {
+      throw new Error("Redrob Work server cannot read MCP config for this workspace.");
     }
 
-    if (!canTryOpenworkServer || !openworkClient || !openworkWorkspaceId) return null;
+    if (!canTryRedrobServer || !redrobClient || !redrobWorkspaceId) return null;
 
-    const response = await openworkClient.listMcp(openworkWorkspaceId);
+    const response = await redrobClient.listMcp(redrobWorkspaceId);
     const next = response.items.map((entry) => ({
       name: entry.name,
       config: entry.config as McpServerEntry["config"],
@@ -403,7 +403,7 @@ export function createConnectionsStore(options: {
     };
   };
 
-  const resolveDesktopCommand = async (commandName: "getComputerUseMcpCommand" | "getOpenworkUiMcpCommand", fallbackOnError = true) => {
+  const resolveDesktopCommand = async (commandName: "getComputerUseMcpCommand" | "getRedrobUiMcpCommand", fallbackOnError = true) => {
     try {
       const command = await window.__REDROB_ELECTRON__?.invokeDesktop?.(commandName);
       if (Array.isArray(command) && command.every((part) => typeof part === "string") && command.length > 0) {
@@ -413,7 +413,7 @@ export function createConnectionsStore(options: {
       if (!fallbackOnError) {
         throw error instanceof Error
           ? error
-          : new Error("Computer Use helper app is unavailable. Restart OpenWork or reinstall the app.");
+          : new Error("Computer Use helper app is unavailable. Restart Redrob Work or reinstall the app.");
       }
       // Fall through to the published package command in the manifest/catalog.
     }
@@ -422,21 +422,21 @@ export function createConnectionsStore(options: {
 
   const resolveLocalMcpCommand = async (entry: McpDirectoryInfo) => {
     const mcpResource = extensionResource(entry.extensionManifest, "mcp");
-    if (mcpResource?.localCommandRef === "openwork.computerUseMcp") {
+    if (mcpResource?.localCommandRef === "redrob.computerUseMcp") {
       const command = await resolveDesktopCommand("getComputerUseMcpCommand", false);
       return command ?? entry.command;
     }
-    if (mcpResource?.localCommandRef === "openwork.uiMcp" || entry.serverName === "openwork-ui") {
-      const command = await resolveDesktopCommand("getOpenworkUiMcpCommand");
+    if (mcpResource?.localCommandRef === "redrob.uiMcp" || entry.serverName === "redrob-ui") {
+      const command = await resolveDesktopCommand("getRedrobUiMcpCommand");
       return command ?? entry.command;
     }
     return entry.command;
   };
 
   const resolveLocalMcpEnvironment = async (entry: McpDirectoryInfo) => {
-    if (entry.serverName !== "openwork-ui") return undefined;
+    if (entry.serverName !== "redrob-ui") return undefined;
     try {
-      const environment = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getOpenworkUiMcpEnvironment");
+      const environment = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getRedrobUiMcpEnvironment");
       if (environment && typeof environment === "object" && !Array.isArray(environment)) {
         return Object.fromEntries(
           Object.entries(environment).filter((entry): entry is [string, string] =>
@@ -445,7 +445,7 @@ export function createConnectionsStore(options: {
         );
       }
     } catch {
-      // Discovery fallback in openwork-ui-mcp still handles normal launches.
+      // Discovery fallback in redrob-ui-mcp still handles normal launches.
     }
     return undefined;
   };
@@ -489,7 +489,7 @@ export function createConnectionsStore(options: {
 
     try {
       setStateField("mcpStatus", null);
-      const serverResult = await listMcpFromOpenworkServer(projectDir);
+      const serverResult = await listMcpFromRedrobServer(projectDir);
       if (serverResult) {
         // Surface engine registration failures instead of leaving users
         // staring at an MCP that silently shows as disconnected.
@@ -513,8 +513,8 @@ export function createConnectionsStore(options: {
       recordPerfLog(options.developerMode(), "mcp.refresh", "server-path-error", {
         message: error instanceof Error ? error.message : String(error),
       });
-      const serverTarget = await resolveMcpOpenworkTarget("read").catch(() => null);
-      if (isRemoteWorkspace || serverTarget?.hasOpenworkTarget) {
+      const serverTarget = await resolveMcpRedrobTarget("read").catch(() => null);
+      if (isRemoteWorkspace || serverTarget?.hasRedrobTarget) {
         mutateState((current) => ({
           ...current,
           mcpServers: [],
@@ -528,7 +528,7 @@ export function createConnectionsStore(options: {
     if (isRemoteWorkspace) {
       mutateState((current) => ({
         ...current,
-        mcpStatus: "OpenWork server unavailable. MCP config is read-only.",
+        mcpStatus: "Redrob Work server unavailable. MCP config is read-only.",
         mcpServers: [],
         mcpStatuses: {},
       }));
@@ -578,10 +578,10 @@ export function createConnectionsStore(options: {
         ...globalServers.filter((entry) => !projectNames.has(entry.name)),
         ...projectServers,
       ];
-      // Runtime-DB MCPs (source "config.remote") only exist on the OpenWork
+      // Runtime-DB MCPs (source "config.remote") only exist on the Redrob Work
       // server. Keep the last-known entries instead of silently dropping them
       // while the server is briefly unreachable (startup race) — otherwise
-      // enabled MCPs like openwork-ui render as "off".
+      // enabled MCPs like redrob-ui render as "off".
       const fileNames = new Set(fileServers.map((entry) => entry.name));
       const runtimeServers = state.mcpServers.filter(
         (entry) => entry.source === "config.remote" && !fileNames.has(entry.name),
@@ -637,10 +637,10 @@ export function createConnectionsStore(options: {
 
   async function connectMcp(entry: McpDirectoryInfo): Promise<McpConnectResult> {
     const startedAt = perfNow();
-    const openworkSnapshot = getOpenworkSnapshot();
+    const redrobSnapshot = getRedrobSnapshot();
     const isRemoteWorkspace =
       options.workspaceType() === "remote" ||
-      (!isDesktopRuntime() && openworkSnapshot.openworkServerStatus === "connected");
+      (!isDesktopRuntime() && redrobSnapshot.redrobServerStatus === "connected");
     const projectDir = options.projectDir().trim();
     const entryType = entry.type ?? "remote";
 
@@ -651,28 +651,28 @@ export function createConnectionsStore(options: {
       projectDir: projectDir || null,
     });
 
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveWritableOpenworkTarget();
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveWritableRedrobTarget();
 
-    if (isRemoteWorkspace && !canUseOpenworkServer) {
-      const error = "OpenWork server unavailable. MCP config is read-only.";
+    if (isRemoteWorkspace && !canUseRedrobServer) {
+      const error = "Redrob Work server unavailable. MCP config is read-only.";
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
-        reason: "openwork-server-unavailable",
+        reason: "redrob-server-unavailable",
       });
       return { ok: false, error };
     }
 
-    if (hasOpenworkTarget && !canUseOpenworkServer) {
-      const error = "OpenWork server MCP config is read-only.";
+    if (hasRedrobTarget && !canUseRedrobServer) {
+      const error = "Redrob Work server MCP config is read-only.";
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
-        reason: "openwork-server-read-only",
+        reason: "redrob-server-read-only",
       });
       return { ok: false, error };
     }
 
-    if (!canUseOpenworkServer && !isDesktopRuntime()) {
+    if (!canUseRedrobServer && !isDesktopRuntime()) {
       const error = t("mcp.desktop_required");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
@@ -681,7 +681,7 @@ export function createConnectionsStore(options: {
       return { ok: false, error };
     }
 
-    if (!isRemoteWorkspace && !projectDir && !canUseOpenworkServer) {
+    if (!isRemoteWorkspace && !projectDir && !canUseRedrobServer) {
       const error = t("mcp.pick_workspace_first");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
@@ -690,8 +690,8 @@ export function createConnectionsStore(options: {
       return { ok: false, error };
     }
 
-    const activeClient = canUseOpenworkServer ? options.client() ?? await ensureActiveClient().catch(() => null) : await ensureActiveClient();
-    if (!activeClient && !canUseOpenworkServer) {
+    const activeClient = canUseRedrobServer ? options.client() ?? await ensureActiveClient().catch(() => null) : await ensureActiveClient();
+    if (!activeClient && !canUseRedrobServer) {
       const error = t("mcp.connect_server_first");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
@@ -701,7 +701,7 @@ export function createConnectionsStore(options: {
     }
 
     const resolvedProjectDir = activeClient ? await resolveProjectDir(activeClient, projectDir) : projectDir;
-    if (!resolvedProjectDir && !canUseOpenworkServer) {
+    if (!resolvedProjectDir && !canUseRedrobServer) {
       const error = t("mcp.pick_workspace_first");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
@@ -713,11 +713,11 @@ export function createConnectionsStore(options: {
     const slug = entry.id ?? getMcpServerName(entry);
     const action = snapshot.mcpServers.some((server) => server.name === slug) ? "updated" : "added";
 
-    if (conflictsWithOpenworkConnect(entry)) {
-      const error = t("mcp.name_reserved_openwork_connect");
+    if (conflictsWithRedrobConnect(entry)) {
+      const error = t("mcp.name_reserved_redrob_connect");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
-        reason: "openwork-connect-name-reserved",
+        reason: "redrob-connect-name-reserved",
       });
       return { ok: false, error };
     }
@@ -725,21 +725,21 @@ export function createConnectionsStore(options: {
     try {
       mutateState((current) => ({ ...current, mcpStatus: null, mcpConnectingName: entry.name }));
 
-      if (entry.managedBy === "openwork-connect") {
+      if (entry.managedBy === "redrob-connect") {
         if (slug !== CLOUD_MCP_SERVER_NAME) {
-          throw new Error("OpenWork Connect MCP metadata is invalid.");
+          throw new Error("Redrob Work Connect MCP metadata is invalid.");
         }
-        if (!canUseOpenworkServer || !openworkClient || !openworkWorkspaceId) {
-          throw new Error("OpenWork server is required to repair agent access to connected services.");
+        if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
+          throw new Error("Redrob Work server is required to repair agent access to connected services.");
         }
         const context = await resolveCloudMcpOperationContext(entry.url);
         if (!context) {
-          throw new Error("Sign in to OpenWork Cloud and choose an organization first.");
+          throw new Error("Sign in to Redrob Work Cloud and choose an organization first.");
         }
         clearCloudMcpDisabledIntent(context);
-        const result = await runOpenworkCloudMcpReconciler({
+        const result = await runRedrobCloudMcpReconciler({
           mode: "repair",
-          client: openworkClient,
+          client: redrobClient,
           context: { ...context, trigger: "desktop-explicit-connect" },
           mintToken: mintCloudControlMcpToken,
           force: true,
@@ -772,15 +772,15 @@ export function createConnectionsStore(options: {
 
       if (entry.managedOAuth) {
         if (isRemoteWorkspace || !isDesktopRuntime()) {
-          throw new Error("OpenWork-managed MCP OAuth is currently available for local desktop workspaces only.");
+          throw new Error("Redrob Work-managed MCP OAuth is currently available for local desktop workspaces only.");
         }
         if (entryType !== "remote" || !entry.url) {
-          throw new Error("OpenWork-managed OAuth requires a remote MCP URL.");
+          throw new Error("Redrob Work-managed OAuth requires a remote MCP URL.");
         }
-        if (!canUseOpenworkServer || !openworkClient || !openworkWorkspaceId) {
-          throw new Error("The local OpenWork server is required for managed MCP sign-in.");
+        if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
+          throw new Error("The local Redrob Work server is required for managed MCP sign-in.");
         }
-        const result = await openworkClient.addManagedMcp(openworkWorkspaceId, {
+        const result = await redrobClient.addManagedMcp(redrobWorkspaceId, {
           name: slug,
           url: entry.url,
           oauth: {
@@ -791,8 +791,8 @@ export function createConnectionsStore(options: {
           },
         });
         const connected = await waitForManagedMcpAuthorization(
-          openworkClient,
-          openworkWorkspaceId,
+          redrobClient,
+          redrobWorkspaceId,
           slug,
           result,
         );
@@ -815,7 +815,7 @@ export function createConnectionsStore(options: {
       // Resolve dynamic URLs for built-in MCPs
       let resolvedUrl = entry.url;
       let resolvedHeaders: Record<string, string> | undefined;
-      if (!resolvedUrl && entry.serverName === "openwork-ui") {
+      if (!resolvedUrl && entry.serverName === "redrob-ui") {
         try {
           const bridgeInfo = await window.__REDROB_ELECTRON__?.invokeDesktop?.("getUiControlBridgeInfo");
           if (bridgeInfo?.baseUrl) {
@@ -836,7 +836,7 @@ export function createConnectionsStore(options: {
 
       if (entryType === "remote") {
         if (!resolvedUrl) {
-          throw new Error("Missing MCP URL. Is the OpenWork desktop app running?");
+          throw new Error("Missing MCP URL. Is the Redrob Work desktop app running?");
         }
         mcpEntryConfig["url"] = resolvedUrl;
         if (resolvedHeaders) {
@@ -865,8 +865,8 @@ export function createConnectionsStore(options: {
         }
       }
 
-      if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-        await openworkClient.addMcp(openworkWorkspaceId, {
+      if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+        await redrobClient.addMcp(redrobWorkspaceId, {
           name: slug,
           config: mcpEntryConfig,
         });
@@ -910,12 +910,12 @@ export function createConnectionsStore(options: {
         }
       }
 
-      if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-        // The OpenWork server is the source of truth for workspace-scoped MCP
+      if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+        // The Redrob Work server is the source of truth for workspace-scoped MCP
         // config in the React port. Avoid also calling the OpenCode SDK's MCP
         // hot-add endpoint here: when the SDK client is rooted at the aggregate
         // `/opencode` route it can resolve to an internal `local_*` workspace
-        // id that the OpenWork server does not expose, producing a confusing
+        // id that the Redrob Work server does not expose, producing a confusing
         // `workspace_not_found` after the config write already succeeded.
         setStateField("mcpStatuses", filterConfiguredStatuses(snapshot.mcpStatuses, snapshot.mcpServers));
       } else {
@@ -1004,8 +1004,8 @@ export function createConnectionsStore(options: {
 
   /**
    * Background reconciliation for the Den cloud MCP: when the desktop is
-   * signed in to OpenWork Cloud with an active org, keep the
-   * `openwork-cloud` MCP entry configured with a fresh first-party token.
+   * signed in to Redrob Work Cloud with an active org, keep the
+   * `redrob-cloud` MCP entry configured with a fresh first-party token.
    * Quiet by design — a failed mint never opens the OAuth modal.
    *
    * `force` bypasses the freshness marker: used by the user-facing Refresh
@@ -1017,11 +1017,11 @@ export function createConnectionsStore(options: {
     const settings = readDenSettings();
     const orgId = settings.activeOrgId?.trim() ?? "";
     if (!orgId || !settings.authToken?.trim()) return "skipped";
-    const workspaceId = await resolveOpenworkWorkspaceId();
+    const workspaceId = await resolveRedrobWorkspaceId();
     if (!workspaceId) return "skipped";
-    const openworkClient = getOpenworkSnapshot().openworkServerClient;
-    const serverBaseUrl = openworkClient?.baseUrl.trim() ?? "";
-    if (!openworkClient || !serverBaseUrl) return "skipped";
+    const redrobClient = getRedrobSnapshot().redrobServerClient;
+    const serverBaseUrl = redrobClient?.baseUrl.trim() ?? "";
+    if (!redrobClient || !serverBaseUrl) return "skipped";
 
     const entry = MCP_QUICK_CONNECT.find((candidate) => candidate.serverName === CLOUD_MCP_SERVER_NAME);
     if (!entry) return "skipped";
@@ -1032,9 +1032,9 @@ export function createConnectionsStore(options: {
     const configuredEntry = snapshot.mcpServers.find((server) => server.name === CLOUD_MCP_SERVER_NAME);
     if (configuredEntry?.config.enabled === false) return "skipped";
 
-    const result = await runOpenworkCloudMcpReconciler({
+    const result = await runRedrobCloudMcpReconciler({
       mode: "repair",
-      client: openworkClient,
+      client: redrobClient,
       context: {
         ...scope,
         denAuthToken: settings.authToken,
@@ -1056,7 +1056,7 @@ export function createConnectionsStore(options: {
   }
 
   async function waitForManagedMcpAuthorization(
-    openworkClient: OpenworkServerClient,
+    redrobClient: RedrobServerClient,
     workspaceId: string,
     name: string,
     result: { status: "connected" } | { status: "needs_auth"; authorizeUrl: string },
@@ -1065,7 +1065,7 @@ export function createConnectionsStore(options: {
     await openDesktopUrl(assertDesktopWebUrl(result.authorizeUrl));
     for (let attempt = 0; attempt < 120; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 1_000));
-      const connection = await openworkClient.getManagedMcp(workspaceId, name);
+      const connection = await redrobClient.getManagedMcp(workspaceId, name);
       if (connection.status === "connected") return true;
       if (connection.status === "reconnect_required") {
         throw new Error(connection.lastError || "MCP sign-in needs to be restarted.");
@@ -1078,13 +1078,13 @@ export function createConnectionsStore(options: {
   async function authorizeMcp(entry: McpServerEntry) {
     if (entry.managedOAuth) {
       try {
-        const { openworkClient, openworkWorkspaceId, canUseOpenworkServer } = await resolveWritableOpenworkTarget();
-        if (!canUseOpenworkServer || !openworkClient || !openworkWorkspaceId) {
-          throw new Error("The local OpenWork server is required for managed MCP sign-in.");
+        const { redrobClient, redrobWorkspaceId, canUseRedrobServer } = await resolveWritableRedrobTarget();
+        if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
+          throw new Error("The local Redrob Work server is required for managed MCP sign-in.");
         }
         mutateState((current) => ({ ...current, mcpStatus: null, mcpConnectingName: entry.name }));
-        const result = await openworkClient.connectManagedMcp(openworkWorkspaceId, entry.name);
-        const connected = await waitForManagedMcpAuthorization(openworkClient, openworkWorkspaceId, entry.name, result);
+        const result = await redrobClient.connectManagedMcp(redrobWorkspaceId, entry.name);
+        const connected = await waitForManagedMcpAuthorization(redrobClient, redrobWorkspaceId, entry.name, result);
         await refreshMcpServers();
         if (connected) setStateField("mcpStatus", t("mcp.connected"));
       } catch (error) {
@@ -1120,38 +1120,38 @@ export function createConnectionsStore(options: {
   }
 
   async function logoutMcpAuth(name: string) {
-    const openworkSnapshot = getOpenworkSnapshot();
+    const redrobSnapshot = getRedrobSnapshot();
     const isRemoteWorkspace =
       options.workspaceType() === "remote" ||
-      (!isDesktopRuntime() && openworkSnapshot.openworkServerStatus === "connected");
+      (!isDesktopRuntime() && redrobSnapshot.redrobServerStatus === "connected");
     const projectDir = options.projectDir().trim();
 
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveWritableOpenworkTarget();
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveWritableRedrobTarget();
 
-    if (isRemoteWorkspace && !canUseOpenworkServer) {
-      setStateField("mcpStatus", "OpenWork server unavailable. MCP auth is read-only.");
+    if (isRemoteWorkspace && !canUseRedrobServer) {
+      setStateField("mcpStatus", "Redrob Work server unavailable. MCP auth is read-only.");
       return;
     }
 
-    if (hasOpenworkTarget && !canUseOpenworkServer) {
-      setStateField("mcpStatus", "OpenWork server MCP auth is read-only.");
+    if (hasRedrobTarget && !canUseRedrobServer) {
+      setStateField("mcpStatus", "Redrob Work server MCP auth is read-only.");
       return;
     }
 
-    if (!canUseOpenworkServer && !isDesktopRuntime()) {
+    if (!canUseRedrobServer && !isDesktopRuntime()) {
       setStateField("mcpStatus", t("mcp.desktop_required"));
       return;
     }
 
-    const activeClient = canUseOpenworkServer ? options.client() : await ensureActiveClient();
-    if (!activeClient && !canUseOpenworkServer) {
+    const activeClient = canUseRedrobServer ? options.client() : await ensureActiveClient();
+    if (!activeClient && !canUseRedrobServer) {
       setStateField("mcpStatus", t("mcp.connect_server_first"));
       return;
     }
 
     const resolvedProjectDir = activeClient ? await resolveProjectDir(activeClient, projectDir) : projectDir;
-    if (!resolvedProjectDir && !canUseOpenworkServer) {
+    if (!resolvedProjectDir && !canUseRedrobServer) {
       setStateField("mcpStatus", t("mcp.pick_workspace_first"));
       return;
     }
@@ -1160,8 +1160,8 @@ export function createConnectionsStore(options: {
     setStateField("mcpStatus", null);
 
     try {
-      if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-        await openworkClient.logoutMcpAuth(openworkWorkspaceId, safeName);
+      if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+        await redrobClient.logoutMcpAuth(redrobWorkspaceId, safeName);
       } else {
         if (!activeClient || !resolvedProjectDir) {
           throw new Error(t("mcp.connect_server_first"));
@@ -1197,14 +1197,14 @@ export function createConnectionsStore(options: {
     try {
       setStateField("mcpStatus", null);
 
-      const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-        await resolveWritableOpenworkTarget();
+      const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+        await resolveWritableRedrobTarget();
 
-      if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-        await openworkClient.removeMcp(openworkWorkspaceId, name);
+      if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+        await redrobClient.removeMcp(redrobWorkspaceId, name);
       } else {
-        if (hasOpenworkTarget) {
-          setStateField("mcpStatus", "OpenWork server MCP config is read-only.");
+        if (hasRedrobTarget) {
+          setStateField("mcpStatus", "Redrob Work server MCP config is read-only.");
           return;
         }
         const projectDir = options.projectDir().trim();
@@ -1277,15 +1277,15 @@ export function createConnectionsStore(options: {
   // from the existing reload-required popup; no extra banner here.
   async function setMcpEnabled(name: string, enabled: boolean) {
     try {
-      const { openworkClient, openworkWorkspaceId, canUseOpenworkServer } =
-        await resolveWritableOpenworkTarget();
+      const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
+        await resolveWritableRedrobTarget();
 
-      if (!canUseOpenworkServer || !openworkClient || !openworkWorkspaceId) {
+      if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
         setStateField("mcpStatus", t("mcp.toggle_requires_server"));
         return;
       }
 
-      await openworkClient.setMcpEnabled(openworkWorkspaceId, name, enabled);
+      await redrobClient.setMcpEnabled(redrobWorkspaceId, name, enabled);
       if (name === CLOUD_MCP_SERVER_NAME) {
         const context = await resolveCloudMcpOperationContext(null);
         if (enabled) {
@@ -1331,7 +1331,7 @@ export function createConnectionsStore(options: {
       return;
     }
 
-    if (!isDesktopRuntime() && getOpenworkSnapshot().openworkServerStatus !== "connected") {
+    if (!isDesktopRuntime() && getRedrobSnapshot().redrobServerStatus !== "connected") {
       return;
     }
 

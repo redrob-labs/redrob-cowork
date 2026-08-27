@@ -19,7 +19,7 @@ const title = e2eTestsEnabled
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 /**
- * Boot the standalone openwork-server (the web/gateway posture) in
+ * Boot the standalone redrob-server (the web/gateway posture) in
  * manual-approval mode with nobody answering approvals. This is the exact
  * configuration that used to park chat-attachment uploads for the whole
  * approval timeout and then fail them with 403 write_denied.
@@ -30,7 +30,7 @@ async function startManualApprovalServer(approvalTimeoutMs: number) {
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");
     const { startServer } = await import("./src/server.ts");
-    const root = mkdtempSync(join(tmpdir(), "openwork-attachment-spec-"));
+    const root = mkdtempSync(join(tmpdir(), "redrob-attachment-spec-"));
     const server = await startServer({
       host: "127.0.0.1",
       port: 0,
@@ -58,7 +58,7 @@ async function startManualApprovalServer(approvalTimeoutMs: number) {
     child.kill("SIGKILL");
   });
   const port = await new Promise<number>((resolvePort, reject) => {
-    const timer = setTimeout(() => reject(new Error("Standalone openwork-server did not report a port within 30s.")), 30_000);
+    const timer = setTimeout(() => reject(new Error("Standalone redrob-server did not report a port within 30s.")), 30_000);
     let buffered = "";
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
@@ -71,7 +71,7 @@ async function startManualApprovalServer(approvalTimeoutMs: number) {
     });
     child.on("exit", (code) => {
       clearTimeout(timer);
-      reject(new Error(`Standalone openwork-server exited early (code ${code}): ${buffered.slice(0, 500)}`));
+      reject(new Error(`Standalone redrob-server exited early (code ${code}): ${buffered.slice(0, 500)}`));
     });
     child.on("error", (error) => {
       clearTimeout(timer);
@@ -168,12 +168,12 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({ name: "attachment-upload-loading" });
   const workspace = await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-attachment-upload-${Date.now()}`,
+    path: `/tmp/redrob-attachment-upload-${Date.now()}`,
   });
 
   const configured = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -204,18 +204,18 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     if (patched !== "ok") return patched;
     const reloaded = await request("/workspace/" + encodeURIComponent(workspaceId) + "/engine/reload", { method: "POST" });
     if (reloaded !== "ok") return reloaded;
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
-    localStorage.removeItem("openwork.sessionModels." + workspaceId);
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.removeItem("redrob.sessionModels." + workspaceId);
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 30_000 });
   expect(configured).toBe("ok");
@@ -224,7 +224,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   // new session is created. Without this, the already-mounted model store can
   // keep the previous default model despite the localStorage update above.
   await evalIn(app, "location.reload(); true");
-  await waitFor(app, "Boolean(window.__openworkControl)", {
+  await waitFor(app, "Boolean(window.__redrobControl)", {
     timeoutMs: 30_000,
     label: "app reloaded with attachment mock provider preference",
   });
@@ -355,6 +355,6 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await screenshot(app);
 
-  const stopEnabled = await evalIn(app, `window.__openworkControl.listActions().some((action) => action.id === "composer.stop" && !action.disabled)`);
+  const stopEnabled = await evalIn(app, `window.__redrobControl.listActions().some((action) => action.id === "composer.stop" && !action.disabled)`);
   if (stopEnabled) await control(app, "composer.stop");
 });

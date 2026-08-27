@@ -9,7 +9,7 @@ import { test } from "@redrob/testkit";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("the packaged Desktop runtime can load MCP validation and SSE transport", async () => {
-  const root = mkdtempSync(join(tmpdir(), "openwork-mcp-validation-"));
+  const root = mkdtempSync(join(tmpdir(), "redrob-mcp-validation-"));
   try {
     const nodeModules = join(root, "node_modules");
     const prepare = spawnSync(process.execPath, [

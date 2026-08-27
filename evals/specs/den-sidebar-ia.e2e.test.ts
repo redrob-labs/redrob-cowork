@@ -120,8 +120,8 @@ test(title, async ({ evidence, place }) => {
   });
 
   const adminTokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(den.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(den.admin.token)};
   })()`);
   expect(adminTokenStored).toBe(true);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/org-settings`);
@@ -145,7 +145,7 @@ test(title, async ({ evidence, place }) => {
   const adminHasExtensions = adminItems.some((item) => item === "Extensions" || item.startsWith("Extensions "));
   const adminHasYourConnections = adminItems.some((item) => item.includes("Your Connections"));
   const adminHasMyLibrary = adminItems.some((item) => item.includes("My Library"));
-  const adminHasOpenWorkWeb = adminItems.some((item) => item.includes("OpenWork Web"));
+  const adminHasRedrobWorkWeb = adminItems.some((item) => item.includes("Redrob Work Web"));
 
   expect(adminSectionNames).toEqual(["work", "manage", "observability", "team"]);
   expect(adminHasMyLibrary).toBe(true);
@@ -155,7 +155,7 @@ test(title, async ({ evidence, place }) => {
   expect(adminHasWorkflowRuns).toBe(true);
   expect(adminHasToolTester).toBe(true);
   expect(adminHasTopLevelToolTester).toBe(false);
-  expect(adminHasOpenWorkWeb).toBe(true);
+  expect(adminHasRedrobWorkWeb).toBe(true);
   expect(adminHasExtensions).toBe(false);
   expect(adminHasYourConnections).toBe(false);
   evidence.recordAssertionEvidence(
@@ -184,8 +184,8 @@ test(title, async ({ evidence, place }) => {
   }
 
   const memberTokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(member.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(member.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(member.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(member.token)};
   })()`);
   expect(memberTokenStored).toBe(true);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/library`);

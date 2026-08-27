@@ -1,4 +1,4 @@
-import { DownloadOpenWorkCard } from "@redrob/ui/react";
+import { DownloadRedrobWorkCard } from "@redrob/ui/react";
 import { SiteFooter } from "../../components/site-footer";
 import { SiteNav } from "../../components/site-nav";
 import { StructuredData } from "../../components/structured-data";
@@ -8,9 +8,9 @@ import { baseOpenGraph } from "../../lib/seo";
 const downloadSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "OpenWork",
+  name: "Redrob Work",
   description:
-    "Open source Claude Cowork alternative. Download the OpenWork desktop app for macOS, Windows, or Linux. No account required.",
+    "Open source Claude Cowork alternative. Download the Redrob Work desktop app for macOS, Windows, or Linux. No account required.",
   url: "https://redrob.io/download",
   applicationCategory: "BusinessApplication",
   operatingSystem: "macOS, Windows, Linux",
@@ -21,15 +21,15 @@ const downloadSchema = {
   },
   publisher: {
     "@type": "Organization",
-    name: "OpenWork",
+    name: "Redrob Work",
     url: "https://redrob.io"
   }
 };
 
 export const metadata = {
-  title: "Download OpenWork — macOS, Windows, Linux",
+  title: "Download Redrob Work — macOS, Windows, Linux",
   description:
-    "Download the OpenWork desktop app for macOS, Windows, or Linux. Free, open source, no account required.",
+    "Download the Redrob Work desktop app for macOS, Windows, or Linux. Free, open source, no account required.",
   alternates: {
     canonical: "/download"
   },
@@ -66,7 +66,7 @@ export default async function Download() {
           </div>
 
           <section className="my-8">
-            <DownloadOpenWorkCard installers={github.installers} releaseTag={releaseTag} />
+            <DownloadRedrobWorkCard installers={github.installers} releaseTag={releaseTag} />
           </section>
 
           <p className="max-w-md text-[13px] text-gray-500">

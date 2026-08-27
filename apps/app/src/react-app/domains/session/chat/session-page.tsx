@@ -9,7 +9,7 @@ import { t } from "../../../../i18n";
 import { REDROB_EXTENSION_CATALOG } from "../../../../app/constants";
 import { buildDenAuthUrl, readDenBootstrapConfig } from "../../../../app/lib/den";
 import { markDesktopSignInInitiated } from "../../../../app/lib/den-sign-in-intent";
-import { type OpenworkServerClient, type OpenworkServerStatus } from "../../../../app/lib/openwork-server";
+import { type RedrobServerClient, type RedrobServerStatus } from "../../../../app/lib/redrob-server";
 import { getDisplaySessionTitle } from "../../../../app/lib/session-title";
 import type { BootPhase } from "../../../../app/lib/startup-boot";
 import { openDesktopPath, revealDesktopItemInDir, type WorkspaceInfo } from "../../../../app/lib/desktop";
@@ -87,8 +87,8 @@ import { getSidePanelSessionKey } from "../panel/side-panel-session";
 import { TerminalDock } from "../terminal/terminal-dock";
 import { useActivePanelTab, usePanelTabStore, useSessionPanelState } from "../panel/panel-tab-store";
 import { useWorkspaceShellLayout } from "../../../shell/workspace-shell-layout";
-import { useControlAction, type OpenworkControlAction } from "../../../shell/control/control-provider";
-import { getExtensionId, isOpenWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "../../settings/extension-state";
+import { useControlAction, type RedrobControlAction } from "../../../shell/control/control-provider";
+import { getExtensionId, isRedrobWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "../../settings/extension-state";
 import { cn } from "@/lib/utils";
 import {
   canNavigateSelectedConversationHistory,
@@ -105,7 +105,7 @@ const STARTUP_SKELETON_ROWS = [
   { id: "middle", titleWidth: "56%", bodyWidth: "88%" },
   { id: "final", titleWidth: "36%", bodyWidth: "74%" },
 ];
-const GLOBAL_VOICE_SIDE_PANEL_KEY = "__openwork_voice__";
+const GLOBAL_VOICE_SIDE_PANEL_KEY = "__redrob_voice__";
 const EMPTY_TRANSCRIPT_TARGETS: OpenTarget[] = [];
 const EMPTY_SESSION_TABS: WorkbenchSessionTab[] = [];
 
@@ -125,7 +125,7 @@ type StatusBarOverrides = {
   showSettingsButton: boolean;
   reloadBusy: boolean;
   reloadError: string | null;
-  openWorkConnectState: SessionCloudMcpMaintenanceState;
+  redrobConnectState: SessionCloudMcpMaintenanceState;
 };
 
 export type SessionPageHistoryControls = {
@@ -170,7 +170,7 @@ export type SessionPageSidebarProps = {
 
 export type SessionPageSurfaceProps = Omit<
   SessionSurfaceProps,
-  "client" | "workspaceId" | "sessionId" | "opencodeBaseUrl" | "openworkToken" | "isControlTarget"
+  "client" | "workspaceId" | "sessionId" | "opencodeBaseUrl" | "redrobToken" | "isControlTarget"
 >;
 
 export type SessionPageProps = {
@@ -194,10 +194,10 @@ export type SessionPageProps = {
   opencodeBaseUrl?: string | null;
   workspaces: WorkspaceInfo[];
   clientConnected: boolean;
-  openworkServerStatus: OpenworkServerStatus;
-  openworkServerClient: OpenworkServerClient | null;
-  environmentClient?: OpenworkServerClient | null;
-  openworkServerToken?: string | null;
+  redrobServerStatus: RedrobServerStatus;
+  redrobServerClient: RedrobServerClient | null;
+  environmentClient?: RedrobServerClient | null;
+  redrobServerToken?: string | null;
   developerMode: boolean;
   headerStatus: string;
   busyHint: string | null;
@@ -278,7 +278,7 @@ function absoluteWorkspacePath(root: string | null | undefined, value: string) {
 
 function hiddenAccessibleTargetsStorageKey(workspaceId: string | null | undefined, sessionId: string | null | undefined) {
   if (!workspaceId || !sessionId) return null;
-  return `openwork.session.hiddenAccessibleTargets.v1:${workspaceId}:${sessionId}`;
+  return `redrob.session.hiddenAccessibleTargets.v1:${workspaceId}:${sessionId}`;
 }
 
 function readHiddenAccessibleTargetIds(workspaceId: string | null | undefined, sessionId: string | null | undefined): Set<string> {
@@ -357,10 +357,10 @@ export function SessionPage(props: SessionPageProps) {
   const panelRailActive = activeSidePanel === "panel";
   const voiceRailActive = activeSidePanel === "voice";
   const voiceExtension = useMemo(
-    () => REDROB_EXTENSION_CATALOG.find((entry) => getExtensionId(entry) === "openwork-voice") ?? null,
+    () => REDROB_EXTENSION_CATALOG.find((entry) => getExtensionId(entry) === "redrob-voice") ?? null,
     [],
   );
-  const voiceExtensionEnabled = voiceExtension ? isOpenWorkExtensionEnabled(voiceExtension) : false;
+  const voiceExtensionEnabled = voiceExtension ? isRedrobWorkExtensionEnabled(voiceExtension) : false;
   const showCloudSignIn = shellConfig.cloudSignin && !denAuth.isSignedIn && denAuth.status !== "checking";
   const openCloudSignIn = useCallback(() => {
     const baseUrl = readDenBootstrapConfig().baseUrl;
@@ -468,11 +468,11 @@ export function SessionPage(props: SessionPageProps) {
     return target.value;
   }, []);
   const downloadOpenTarget = useCallback(async (target: OpenTarget) => {
-    if (target.kind !== "file" || !props.openworkServerClient || !props.runtimeWorkspaceId) {
+    if (target.kind !== "file" || !props.redrobServerClient || !props.runtimeWorkspaceId) {
       return;
     }
 
-    const result = await props.openworkServerClient.downloadWorkspaceFile(props.runtimeWorkspaceId, target.value);
+    const result = await props.redrobServerClient.downloadWorkspaceFile(props.runtimeWorkspaceId, target.value);
     const url = URL.createObjectURL(new Blob([result.data], { type: result.contentType ?? "application/octet-stream" }));
     const anchor = document.createElement("a");
 
@@ -481,7 +481,7 @@ export function SessionPage(props: SessionPageProps) {
     anchor.click();
 
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [props.openworkServerClient, props.runtimeWorkspaceId]);
+  }, [props.redrobServerClient, props.runtimeWorkspaceId]);
   const openTarget = useCallback((target: OpenTarget, options?: OpenTargetOptions, sourceSessionId?: string) => {
     if (target.kind === "url" || target.preview === "browser") {
       const url = browserUrlForTarget(target);
@@ -546,10 +546,10 @@ export function SessionPage(props: SessionPageProps) {
     // panel that forces the user to click "+".
     toggleCurrentSidePanel("panel");
   }, [hasBrowserTabs, toggleCurrentSidePanel]);
-  const openBrowserUrlControlAction = useMemo<OpenworkControlAction>(() => ({
+  const openBrowserUrlControlAction = useMemo<RedrobControlAction>(() => ({
     id: "browser.open_url",
     label: "Open URL in built-in browser",
-    description: "Create or select an OpenWork built-in browser tab, navigate it to a URL, and return the CDP handle for browser automation.",
+    description: "Create or select an Redrob Work built-in browser tab, navigate it to a URL, and return the CDP handle for browser automation.",
     sideEffect: "navigation",
     requiresArgs: true,
     args: [
@@ -570,7 +570,7 @@ export function SessionPage(props: SessionPageProps) {
     },
   }), [setCurrentSidePanel]);
   useControlAction(openBrowserUrlControlAction);
-  const setBrowserProxyControlAction = useMemo<OpenworkControlAction>(() => ({
+  const setBrowserProxyControlAction = useMemo<RedrobControlAction>(() => ({
     id: "browser.set_proxy",
     label: "Set built-in browser proxy",
     description: "Route all built-in browser traffic through an HTTP/SOCKS proxy (e.g. to browse from another location). Applies to every built-in browser tab until cleared. Pass an empty proxy to restore system network settings.",
@@ -653,17 +653,17 @@ export function SessionPage(props: SessionPageProps) {
       const target = accessibleTargets.find((item) => item.id === requested?.id || item.value === requested?.value);
       if (target) removeAccessibleTarget(target);
     };
-    window.addEventListener("openwork-open-accessible-target", open);
-    window.addEventListener("openwork-hide-accessible-target", hide);
+    window.addEventListener("redrob-open-accessible-target", open);
+    window.addEventListener("redrob-hide-accessible-target", hide);
     return () => {
-      window.removeEventListener("openwork-open-accessible-target", open);
-      window.removeEventListener("openwork-hide-accessible-target", hide);
+      window.removeEventListener("redrob-open-accessible-target", open);
+      window.removeEventListener("redrob-hide-accessible-target", hide);
     };
   }, [accessibleTargets, openTarget, removeAccessibleTarget]);
   useEffect(() => {
     const handler = () => setCurrentSidePanel(null);
-    window.addEventListener("openwork-close-right-pane", handler);
-    return () => window.removeEventListener("openwork-close-right-pane", handler);
+    window.addEventListener("redrob-close-right-pane", handler);
+    return () => window.removeEventListener("redrob-close-right-pane", handler);
   }, [setCurrentSidePanel]);
   useEffect(() => {
     const refresh = () => setExtensionStateVersion((value) => value + 1);
@@ -680,7 +680,7 @@ export function SessionPage(props: SessionPageProps) {
     }
   }, [activeSidePanel, setCurrentSidePanel, voiceExtensionEnabled]);
 
-  const openVoicePanelControlAction = useMemo<OpenworkControlAction | null>(() => (
+  const openVoicePanelControlAction = useMemo<RedrobControlAction | null>(() => (
     voiceExtensionEnabled ? {
       id: "voice.panel.open",
       label: "Open Voice Mode",
@@ -695,7 +695,7 @@ export function SessionPage(props: SessionPageProps) {
   ), [setCurrentSidePanel, voiceExtensionEnabled]);
   useControlAction(openVoicePanelControlAction);
 
-  const closeVoicePanelControlAction = useMemo<OpenworkControlAction | null>(() => (
+  const closeVoicePanelControlAction = useMemo<RedrobControlAction | null>(() => (
     voiceExtensionEnabled && activeSidePanel === "voice" ? {
       id: "voice.panel.close",
       label: "Close Voice Mode",
@@ -841,13 +841,13 @@ export function SessionPage(props: SessionPageProps) {
 
   const reactSessionBaseUrl = props.opencodeBaseUrl?.trim() ?? "";
   const reactSessionToken =
-    props.openworkServerToken?.trim() ||
-    props.openworkServerClient?.token?.trim() ||
+    props.redrobServerToken?.trim() ||
+    props.redrobServerClient?.token?.trim() ||
     "";
   const canRenderReactSurface = Boolean(
     props.selectedSessionId &&
       props.runtimeWorkspaceId &&
-      props.openworkServerClient &&
+      props.redrobServerClient &&
       reactSessionBaseUrl &&
       reactSessionToken &&
       props.surface,
@@ -892,7 +892,7 @@ export function SessionPage(props: SessionPageProps) {
     props.sidebar.onOpenSession(workspaceId, sessionId);
   }, [focusWorkbenchPane, openWorkbenchTab, props.sidebar]);
 
-  const focusWorkbenchSessionControlAction = useMemo<OpenworkControlAction>(() => ({
+  const focusWorkbenchSessionControlAction = useMemo<RedrobControlAction>(() => ({
     id: "workbench.session.focus",
     label: "Focus an open session",
     description: "Focus a session already visible in either split-screen pane, or reuse its existing tab without opening a duplicate.",
@@ -903,7 +903,7 @@ export function SessionPage(props: SessionPageProps) {
       name: "sessionId",
       type: "string",
       required: true,
-      description: "Session id from the OpenWork context resources or conversation tabs.",
+      description: "Session id from the Redrob Work context resources or conversation tabs.",
     }],
     execute: (args) => {
       if (!args || typeof args !== "object" || !("sessionId" in args) || typeof args.sessionId !== "string") {
@@ -1077,7 +1077,7 @@ export function SessionPage(props: SessionPageProps) {
           extensionsActive={props.extensionsActive}
           status={{
             clientConnected: props.clientConnected,
-            openworkServerStatus: props.openworkServerStatus,
+            redrobServerStatus: props.redrobServerStatus,
             developerMode: props.developerMode,
             showConnectionStatus: Boolean(props.selectedWorkspaceId),
             providerConnectedIds: props.providerConnectedIds,
@@ -1086,7 +1086,7 @@ export function SessionPage(props: SessionPageProps) {
             showSettingsButton: props.statusBar?.showSettingsButton,
             reloadBusy: props.statusBar?.reloadBusy,
             reloadError: props.statusBar?.reloadError,
-            openWorkConnectState: props.statusBar?.openWorkConnectState,
+            redrobConnectState: props.statusBar?.redrobConnectState,
             onSendFeedback: props.onSendFeedback,
           }}
         />
@@ -1228,8 +1228,8 @@ export function SessionPage(props: SessionPageProps) {
                   className="hidden lg:inline-flex"
                   onClick={() => {
                     try {
-                      window.localStorage.removeItem("openwork.acknowledgedProviders");
-                      window.localStorage.removeItem("openwork.orgOnboardingSeen");
+                      window.localStorage.removeItem("redrob.acknowledgedProviders");
+                      window.localStorage.removeItem("redrob.orgOnboardingSeen");
                     } catch {}
                   }}
                   title="Clears acknowledged providers + org onboarding so they trigger again"
@@ -1322,17 +1322,17 @@ export function SessionPage(props: SessionPageProps) {
                         // Spread `surface` first so the explicit per-workspace
                         // routing props below CAN'T be silently overridden by
                         // anything that leaks into `surface`. SessionSurface's
-                        // server target (client/workspaceId/sessionId/opencodeBaseUrl/openworkToken)
+                        // server target (client/workspaceId/sessionId/opencodeBaseUrl/redrobToken)
                         // must come from the resolved workspace endpoint passed by
                         // SessionRoute, not from anything in `surface`.
                         {...props.surface!}
-                        client={props.openworkServerClient!}
+                        client={props.redrobServerClient!}
                         environmentClient={props.environmentClient}
                         workspaceId={props.runtimeWorkspaceId!}
                         sessionId={props.selectedSessionId!}
                         isControlTarget={activeWorkbenchPane === "primary"}
                         opencodeBaseUrl={reactSessionBaseUrl}
-                        openworkToken={reactSessionToken}
+                        redrobToken={reactSessionToken}
                         todos={props.todos}
                         activePermission={props.activePermission}
                         permissionReplyBusy={props.permissionReplyBusy}
@@ -1357,13 +1357,13 @@ export function SessionPage(props: SessionPageProps) {
                         >
                           <SessionSurface
                             {...props.surface!}
-                            client={props.openworkServerClient!}
+                            client={props.redrobServerClient!}
                             environmentClient={props.environmentClient}
                             workspaceId={props.runtimeWorkspaceId!}
                             sessionId={splitSessionId!}
                             isControlTarget={activeWorkbenchPane === "secondary"}
                             opencodeBaseUrl={reactSessionBaseUrl}
-                            openworkToken={reactSessionToken}
+                            redrobToken={reactSessionToken}
                             todos={[]}
                             onOpenTarget={openTarget}
                           />
@@ -1487,7 +1487,7 @@ export function SessionPage(props: SessionPageProps) {
                     </div>
                   ) : activeSidePanel === "voice" ? (
                     <VoicePanel
-                      client={props.openworkServerClient}
+                      client={props.redrobServerClient}
                       workspaceId={props.runtimeWorkspaceId}
                       sessionId={props.selectedSessionId}
                       onClose={closeRightPane}
@@ -1495,7 +1495,7 @@ export function SessionPage(props: SessionPageProps) {
                   ) : activeSidePanel === "panel" ? (
                     <SidePanel
                       sessionId={sidePanelSessionKey}
-                      client={props.openworkServerClient}
+                      client={props.redrobServerClient}
                       workspaceId={props.runtimeWorkspaceId}
                       workspaceRoot={props.selectedWorkspaceRoot}
                       isRemoteWorkspace={props.surface?.isRemoteWorkspace ?? false}
@@ -1530,7 +1530,7 @@ export function SessionPage(props: SessionPageProps) {
                       </div>
                     ) : activeSidePanel === "voice" ? (
                       <VoicePanel
-                        client={props.openworkServerClient}
+                        client={props.redrobServerClient}
                         workspaceId={props.runtimeWorkspaceId}
                         sessionId={props.selectedSessionId}
                         onClose={closeRightPane}
@@ -1538,7 +1538,7 @@ export function SessionPage(props: SessionPageProps) {
                     ) : activeSidePanel === "panel" ? (
                       <SidePanel
                         sessionId={sidePanelSessionKey}
-                        client={props.openworkServerClient}
+                        client={props.redrobServerClient}
                         workspaceId={props.runtimeWorkspaceId}
                         workspaceRoot={props.selectedWorkspaceRoot}
                         isRemoteWorkspace={props.surface?.isRemoteWorkspace ?? false}

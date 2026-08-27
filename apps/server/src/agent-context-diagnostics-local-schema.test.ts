@@ -38,14 +38,14 @@ const validRequest: AgentContextDiagnosticsRequest = {
 };
 
 const workspace: WorkspaceInfo = {
-  id: "remote_openwork_schema_parity",
-  name: "Remote OpenWork schema parity",
+  id: "remote_redrob_schema_parity",
+  name: "Remote Redrob Work schema parity",
   path: "",
   preset: "starter",
   workspaceType: "remote",
-  remoteType: "openwork",
-  baseUrl: "https://remote-openwork.invalid",
-  openworkHostUrl: "https://remote-openwork.invalid",
+  remoteType: "redrob",
+  baseUrl: "https://remote-redrob.invalid",
+  redrobHostUrl: "https://remote-redrob.invalid",
 };
 
 const config: ServerConfig = {
@@ -91,7 +91,7 @@ describe("agent context diagnostics server-local schema parity", () => {
     const reportWithCanonicalMcp = {
       ...report,
       mcps: [{
-        name: "openwork-cloud",
+        name: "redrob-cloud",
         source: "config.remote",
         type: "remote",
         enabled: true,
@@ -194,7 +194,7 @@ describe("agent context diagnostics server-local schema parity", () => {
       {
         ...report,
         mcps: [{
-          name: "openwork-cloud",
+          name: "redrob-cloud",
           source: "config.remote",
           type: "remote",
           enabled: true,

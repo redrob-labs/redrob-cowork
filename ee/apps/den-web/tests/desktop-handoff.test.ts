@@ -2,18 +2,18 @@ import { expect, test } from "bun:test";
 import {
   getDesktopGrant,
   getDesktopHandoffGrant,
-  getDesktopHandoffOpenworkUrl,
+  getDesktopHandoffRedrobUrl,
 } from "../app/(den)/_lib/desktop-handoff";
 
-test("preserves the complete OpenWork desktop handoff URL", () => {
-  const openworkUrl = "redrob://den-auth?grant=one-time-code&denBaseUrl=https%3A%2F%2Fapi.example.test";
-  const payload = { grant: "one-time-code", openworkUrl };
+test("preserves the complete Redrob Work desktop handoff URL", () => {
+  const redrobUrl = "redrob://den-auth?grant=one-time-code&denBaseUrl=https%3A%2F%2Fapi.example.test";
+  const payload = { grant: "one-time-code", redrobUrl };
 
-  expect(getDesktopHandoffOpenworkUrl(payload)).toBe(openworkUrl);
-  expect(getDesktopHandoffGrant(payload, openworkUrl)).toBe("one-time-code");
+  expect(getDesktopHandoffRedrobUrl(payload)).toBe(redrobUrl);
+  expect(getDesktopHandoffGrant(payload, redrobUrl)).toBe("one-time-code");
 });
 
-test("extracts a one-time grant from an OpenWork desktop handoff", () => {
+test("extracts a one-time grant from an Redrob Work desktop handoff", () => {
   expect(
     getDesktopGrant(
       "redrob://den-auth?grant=one-time-code&baseUrl=https%3A%2F%2Fapi.example.test"

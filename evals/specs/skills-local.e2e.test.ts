@@ -66,12 +66,12 @@ test.skipIf(!e2eTestsEnabled)(title, async () => {
   }
 
   const extensions = await readLoadedExtensions(app);
-  expect(extensions.some((label) => label.includes("OpenWork Browser"))).toBe(true);
+  expect(extensions.some((label) => label.includes("Redrob Work Browser"))).toBe(true);
   expect(await evalIn(app, `document.body.innerText.includes("Loading commands")`)).toBe(false);
   {
     const shot = await screenshot(app);
     const seen = await validate(shot, [
-      "The Library list visibly includes OpenWork Browser",
+      "The Library list visibly includes Redrob Work Browser",
       "No Loading commands state or 'Something went wrong' crash message is visible",
     ]);
     expect(seen.ok, seen.why).toBe(true);
@@ -90,7 +90,7 @@ test.skipIf(!e2eTestsEnabled)(title, async () => {
   // rather than scraping the route. Observed payload shape:
   // { ok, actionId, result: [{ sessionId: "ses_…", title, workspace, updatedAt }] }
   const listed = await waitFor(app, `(async () => {
-    const result = await window.__openworkControl.execute("session.list_sessions", null);
+    const result = await window.__redrobControl.execute("session.list_sessions", null);
     const sessions = Array.isArray(result?.result) ? result.result : [];
     const withId = sessions.map((entry) => entry?.sessionId).filter((id) => typeof id === "string" && id.startsWith("ses_"));
     return withId.length > 0 ? withId[0] : false;

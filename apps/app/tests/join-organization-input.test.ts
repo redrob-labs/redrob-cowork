@@ -36,9 +36,9 @@ describe("join organization input classification", () => {
   });
 
   test("recognizes plain server URLs but never raw grants or deep links", () => {
-    expect(parseServerUrlInput(" https://openwork.acme.test/ ")).toEqual({
-      url: "https://openwork.acme.test",
-      host: "openwork.acme.test",
+    expect(parseServerUrlInput(" https://redrob.acme.test/ ")).toEqual({
+      url: "https://redrob.acme.test",
+      host: "redrob.acme.test",
     });
     expect(parseServerUrlInput("http://localhost:3005")).toEqual({
       url: "http://localhost:3005",

@@ -258,9 +258,9 @@ test.skipIf(!runnable)(title, { timeout: 1_500_000 }, async ({ evidence, place }
     org: {
       name: `Intermittent Outage ${stamp}`,
       admin: {
-        email: `intermittent-outage-admin-${stamp}@openwork.test`,
+        email: `intermittent-outage-admin-${stamp}@redrob.test`,
         name: "Intermittent Outage Admin",
-        password: "OpenWorkEval123!",
+        password: "RedrobWorkEval123!",
       },
     },
   });
@@ -314,7 +314,7 @@ test.skipIf(!runnable)(title, { timeout: 1_500_000 }, async ({ evidence, place }
   ]);
   expect(baselineHealthySeen.ok, baselineHealthySeen.why).toBe(true);
 
-  await evalIn(desktopApp, `localStorage.setItem("openwork.developerMode", "1"); true`);
+  await evalIn(desktopApp, `localStorage.setItem("redrob.developerMode", "1"); true`);
   await openDiagnostics(desktopApp);
   const baselineDiagnostics = await runDiagnostics(desktopApp, "healthy baseline diagnostics");
   expect(baselineDiagnostics.overallFailed, JSON.stringify(baselineDiagnostics)).toBe(false);

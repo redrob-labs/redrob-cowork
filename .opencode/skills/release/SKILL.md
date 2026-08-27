@@ -28,7 +28,7 @@ pnpm release:cut:watch      # same as release:cut, then tails the run
 Equivalent by hand:
 
 ```bash
-gh workflow run "Release App" --repo different-ai/openwork -f bump=patch
+gh workflow run "Release App" --repo redrob-labs/redrob-work -f bump=patch
 ```
 
 The run resolves the next version from existing `v*` tags, creates the tag on
@@ -62,8 +62,8 @@ rules.
 ## Watch
 
 ```bash
-gh run list --repo different-ai/openwork --workflow "Release App" --limit 1
-gh run watch <run-id> --repo different-ai/openwork --exit-status --interval 90
+gh run list --repo redrob-labs/redrob-work --workflow "Release App" --limit 1
+gh run watch <run-id> --repo redrob-labs/redrob-work --exit-status --interval 90
 ```
 
 Publishing is gated on the electron matrix, electron assets, and npm publish.
@@ -75,7 +75,7 @@ workflow with the same tag once the channel recovers.
 non-blocking channels:
 
 ```bash
-gh workflow run "Release App" --repo different-ai/openwork -f tag=vX.Y.Z
+gh workflow run "Release App" --repo redrob-labs/redrob-work -f tag=vX.Y.Z
 ```
 
 Recovery runs skip tag creation and monotonicity, build source pinned to the
@@ -97,25 +97,25 @@ git push --delete origin vX.Y.Z
 ## Verify
 
 ```bash
-gh release view vX.Y.Z --repo different-ai/openwork --json assets --jq '.assets[].name'
+gh release view vX.Y.Z --repo redrob-labs/redrob-work --json assets --jq '.assets[].name'
 ```
 
-Expect the app assets (`openwork-<platform>-X.Y.Z.*`, `latest*.yml` updater
+Expect the app assets (`redrob-<platform>-X.Y.Z.*`, `latest*.yml` updater
 manifests), including:
 
-- `openwork-mac-arm64-X.Y.Z.dmg`
-- `openwork-mac-x64-X.Y.Z.dmg`
-- `openwork-win-x64-X.Y.Z.exe`
+- `redrob-mac-arm64-X.Y.Z.dmg`
+- `redrob-mac-x64-X.Y.Z.dmg`
+- `redrob-win-x64-X.Y.Z.exe`
 
 The desktop updater 404s on `latest*.yml` until the release is published —
 that error in a running app during the build window is expected and
 self-heals. Spot-check a download URL resolves (302 to release-assets CDN):
 
 ```bash
-curl -sI "https://github.com/different-ai/openwork/releases/download/vX.Y.Z/openwork-mac-arm64-X.Y.Z.dmg" | head -2
+curl -sI "https://github.com/redrob-labs/redrob-work/releases/download/vX.Y.Z/redrob-mac-arm64-X.Y.Z.dmg" | head -2
 ```
 
-Confirm `npm view openwork-server version` matches.
+Confirm `npm view redrob-server version` matches.
 
 ---
 

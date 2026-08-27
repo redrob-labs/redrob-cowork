@@ -50,9 +50,9 @@ even before a dedicated UI exists.
 ## Local headless web (agents)
 
 - `pnpm dev:headless-web --detach` launches an isolated browser UI + local
- `openwork-server` without Electron, detached from the invoking shell. Read
+ `redrob-server` without Electron, detached from the invoking shell. Read
  `tmp/dev-headless-web.json` for `webUrl`, tokens, logs, and Den proxy URLs.
- It does not use `~/.config/openwork/server.json`. Re-running reuses a healthy
+ It does not use `~/.config/redrob/server.json`. Re-running reuses a healthy
  instance; `--replace` restarts it with fresh tokens (`--keep-tokens` to
  keep the previous ones). Inference is connected by pasting a `REDROB_API_KEY`
  issued at console.redrob.ai; there is no separate account sign-in flow.

@@ -14,7 +14,7 @@ import { inPage } from "./inpage.ts";
 import type { SeededOrg } from "./seed.ts";
 
 export const REPO_ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
-export const WEB_DEMO_WORKSPACE = "/tmp/openwork-web-demo/acme-robotics";
+export const WEB_DEMO_WORKSPACE = "/tmp/redrob-web-demo/acme-robotics";
 
 export interface WorkspaceModel {
   providerId: string;
@@ -47,8 +47,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 async function configureWorkspaceModel(app: App, model: WorkspaceModel): Promise<void> {
   const configured = await inPage(app, `async (args) => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -65,9 +65,9 @@ async function configureWorkspaceModel(app: App, model: WorkspaceModel): Promise
           provider: {
             [args.providerId]: {
               npm: "@ai-sdk/openai-compatible",
-              name: "OpenWork",
+              name: "Redrob Work",
               options: { baseURL: args.baseUrl, apiKey: "sk-docs-shots" },
-              models: { [args.modelId]: { name: "OpenWork", tool_call: true } },
+              models: { [args.modelId]: { name: "Redrob Work", tool_call: true } },
             },
           },
         },
@@ -76,18 +76,18 @@ async function configureWorkspaceModel(app: App, model: WorkspaceModel): Promise
     if (patched !== "ok") return patched;
     const reloaded = await request("/workspace/" + encodeURIComponent(args.workspaceId) + "/engine/reload", { method: "POST" });
     if (reloaded !== "ok" && !reloaded.includes("opencode_reload_timeout")) return reloaded;
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: args.providerId, modelID: args.modelId },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", args.providerId + "/" + args.modelId);
-    localStorage.removeItem("openwork.sessionModels." + args.workspaceId);
+    localStorage.setItem("redrob.defaultModel", args.providerId + "/" + args.modelId);
+    localStorage.removeItem("redrob.sessionModels." + args.workspaceId);
     return "ok";
   }`, {
     workspaceId: app.workspaceId,
@@ -97,8 +97,8 @@ async function configureWorkspaceModel(app: App, model: WorkspaceModel): Promise
   }, { awaitPromise: true, timeoutMs: 90_000 });
   if (configured !== "ok") throw new Error(`Configuring the workspace model failed: ${String(configured)}`);
   await inPage(app, `() => { location.reload(); return true; }`, {});
-  await waitFor(app, "Boolean(window.__openworkControl)", { timeoutMs: 60_000, label: "desktop control after reload" });
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, "Boolean(window.__redrobControl)", { timeoutMs: 60_000, label: "desktop control after reload" });
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 60_000,
     label: "desktop ready after model configuration",
   });
@@ -140,8 +140,8 @@ export function denWeb(options: { org: Provider<SeededOrg>; as: string }): Provi
       label: "Den Web origin before auth token handoff",
     });
     const stored = await inPage(browser, `(args) => {
-      localStorage.setItem("openwork:web:auth-token", args.token);
-      return localStorage.getItem("openwork:web:auth-token") === args.token;
+      localStorage.setItem("redrob:web:auth-token", args.token);
+      return localStorage.getItem("redrob:web:auth-token") === args.token;
     }`, { token: member.token });
     if (stored !== true) throw new Error("Storing the Den Web auth token failed.");
     return {
@@ -236,7 +236,7 @@ export function webTab(options: { org: Provider<SeededOrg> }): Provider<ShotSurf
         await navigate(browser.client, new URL(path, info.webUrl).toString());
         await waitFor(browser, `document.readyState === "complete"`, {
           timeoutMs: 60_000,
-          label: `OpenWork Web ${path}`,
+          label: `Redrob Work Web ${path}`,
         });
       },
     };

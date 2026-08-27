@@ -87,7 +87,7 @@ function optionHomeDir(opts) {
   return fromEnv || homedir();
 }
 
-function defaultOpenworkConfigDir(opts) {
+function defaultRedrobConfigDir(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
@@ -95,38 +95,38 @@ function defaultOpenworkConfigDir(opts) {
   if (platform === "win32") {
     const appData = envValue(env, "APPDATA");
     const root = appData || paths.join(homeDir, "AppData", "Roaming");
-    return paths.join(root, "openwork");
+    return paths.join(root, "redrob");
   }
   const xdgConfigHome = envValue(env, "XDG_CONFIG_HOME");
   const root = xdgConfigHome || paths.join(homeDir, ".config");
-  return paths.join(root, "openwork");
+  return paths.join(root, "redrob");
 }
 
-export function openworkConfigDir(opts) {
+export function redrobConfigDir(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
   const override = envValue(env, "REDROB_SERVER_CONFIG");
   if (override) return paths.dirname(paths.resolve(override));
-  return defaultOpenworkConfigDir(opts);
+  return defaultRedrobConfigDir(opts);
 }
 
-export function openworkServerConfigPath(opts) {
+export function redrobServerConfigPath(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
   const override = envValue(env, "REDROB_SERVER_CONFIG");
   if (override) return paths.resolve(override);
-  return paths.join(defaultOpenworkConfigDir(opts), "server.json");
+  return paths.join(defaultRedrobConfigDir(opts), "server.json");
 }
 
-export function openworkEnvStorePath(opts) {
+export function redrobEnvStorePath(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
   const override = envValue(env, "REDROB_ENV_STORE");
   if (override) return paths.resolve(override);
-  return paths.join(defaultOpenworkConfigDir(opts), "env.json");
+  return paths.join(defaultRedrobConfigDir(opts), "env.json");
 }
 
 function safeConfigRoot(value, paths) {
@@ -198,9 +198,9 @@ export function desktopBootstrapPath(opts) {
   const override = envValue(env, "REDROB_DESKTOP_BOOTSTRAP_PATH");
   if (override) return override;
   if (envValue(env, "REDROB_DEV_MODE") === "1" && opts?.userDataDir) {
-    return paths.join(opts.userDataDir, "openwork-dev-data", "home", ".config", "openwork", "desktop-bootstrap.json");
+    return paths.join(opts.userDataDir, "redrob-dev-data", "home", ".config", "redrob", "desktop-bootstrap.json");
   }
-  return paths.join(desktopConfigDir(opts), "openwork", "desktop-bootstrap.json");
+  return paths.join(desktopConfigDir(opts), "redrob", "desktop-bootstrap.json");
 }
 
 export function legacyDesktopBootstrapPath(opts) {
@@ -210,7 +210,7 @@ export function legacyDesktopBootstrapPath(opts) {
   // Electron used os.homedir(). optionHomeDir accepts an explicit homeDir but
   // otherwise checks the same env variables before os.homedir(), so both legacy
   // locations continue to resolve for normal installs.
-  return paths.join(optionHomeDir(opts), ".config", "openwork", "desktop-bootstrap.json");
+  return paths.join(optionHomeDir(opts), ".config", "redrob", "desktop-bootstrap.json");
 }
 
 export function expandHomePath(value, opts) {
@@ -221,13 +221,13 @@ export function expandHomePath(value, opts) {
   return value;
 }
 
-export function openworkServerDataDir(opts) {
+export function redrobServerDataDir(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
   const override = envValue(env, "REDROB_DATA_DIR");
   if (override) return expandHomePath(override, opts);
-  return paths.join(optionHomeDir(opts), ".openwork", "openwork-server");
+  return paths.join(optionHomeDir(opts), ".redrob", "redrob-server");
 }
 
 export function opencodeDataDirs(opts) {

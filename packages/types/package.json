@@ -14,20 +14,20 @@
       "development": "./src/agent-context-diagnostics.ts",
       "default": "./src/agent-context-diagnostics.ts"
     },
-    "./openwork-affordance": {
-      "types": "./src/openwork-affordance.ts",
-      "development": "./src/openwork-affordance.ts",
-      "default": "./src/openwork-affordance.ts"
+    "./redrob-affordance": {
+      "types": "./src/redrob-affordance.ts",
+      "development": "./src/redrob-affordance.ts",
+      "default": "./src/redrob-affordance.ts"
     },
-    "./openwork-context": {
-      "types": "./src/openwork-context.ts",
-      "development": "./src/openwork-context.ts",
-      "default": "./src/openwork-context.ts"
+    "./redrob-context": {
+      "types": "./src/redrob-context.ts",
+      "development": "./src/redrob-context.ts",
+      "default": "./src/redrob-context.ts"
     },
-    "./openwork-provider": {
-      "types": "./src/openwork-provider.ts",
-      "development": "./src/openwork-provider.ts",
-      "default": "./src/openwork-provider.ts"
+    "./redrob-provider": {
+      "types": "./src/redrob-provider.ts",
+      "development": "./src/redrob-provider.ts",
+      "default": "./src/redrob-provider.ts"
     },
     "./automations": {
       "types": "./src/automations.ts",

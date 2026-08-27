@@ -60,7 +60,7 @@ describe("resolveOpencodeModelsUrl", () => {
 
 describe("startEmbeddedServer managed OpenCode models URL", () => {
   test("injects an explicit OPENCODE_MODELS_URL override", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openwork-embedded-models-url-"));
+    const root = await mkdtemp(join(tmpdir(), "redrob-embedded-models-url-"));
     const workspace = join(root, "workspace");
     const capturePath = join(root, "models-url.txt");
     await mkdir(workspace, { recursive: true });

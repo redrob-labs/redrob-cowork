@@ -35,7 +35,7 @@ export type OpenRouterUnknownModelUsageReport = {
   organizationId: string
   orgMembershipId: string
   inferenceKeyId: string
-  openworkRequestId: string
+  redrobRequestId: string
   externalEventId: string | null
   generationId: string | null
   usage: OpenRouterUsageMetadata
@@ -48,7 +48,7 @@ type OpenRouterUsageWebhookReporter = {
 type ParsedSpan = {
   orgMembershipId: string
   inferenceKeyId: string
-  openworkRequestId: string
+  redrobRequestId: string
   externalEventId: string | null
   generationId: string | null
   occurredAt: Date
@@ -95,7 +95,7 @@ type WebhookDependencies = {
   findInferenceKey(inferenceKeyId: string): Promise<WebhookInferenceKey | null>
   ensureUsableBuckets(organizationId: string, occurredAt: Date): Promise<UsageBucketSettlement>
   findLedgerEntryByExternalEventId(externalEventId: string): Promise<UsageLedgerEntryRef | null>
-  findOpenRouterUsageLedgerEntry(openworkRequestId: string): Promise<UsageLedgerEntryRef | null>
+  findOpenRouterUsageLedgerEntry(redrobRequestId: string): Promise<UsageLedgerEntryRef | null>
   insertOpenRouterUsageLedgerEntry(input: InsertUsageLedgerEntryInput): Promise<UsageLedgerEntryRef>
   chargeBuckets(input: ChargeBucketsInput): Promise<void>
 }
@@ -199,14 +199,14 @@ function parseSpan(span: JsonRecord, resourceAttrs: JsonRecord, scopeAttrs: Json
   const attrs = { ...resourceAttrs, ...scopeAttrs, ...attributesToRecord(span.attributes) }
   const orgMembershipId = stringAttr(attrs, ["trace.metadata.org_membership_id", "trace.org_membership_id", "metadata.org_membership_id", "org_membership_id"])
   const inferenceKeyId = stringAttr(attrs, ["trace.metadata.inference_key_id", "trace.inference_key_id", "metadata.inference_key_id", "inference_key_id"])
-  const openworkRequestId = stringAttr(attrs, ["trace.metadata.openwork_request_id", "trace.openwork_request_id", "metadata.openwork_request_id", "openwork_request_id", "trace_id"])
+  const redrobRequestId = stringAttr(attrs, ["trace.metadata.redrob_request_id", "trace.redrob_request_id", "metadata.redrob_request_id", "redrob_request_id", "trace_id"])
     ?? (typeof span.traceId === "string" ? span.traceId : null)
   const requestModel = stringAttr(attrs, ["gen_ai.request.model"])
   const responseModel = stringAttr(attrs, ["gen_ai.response.model"])
   const reportedModel = responseModel ?? requestModel
   const inputCost = numberAttr(attrs, ["gen_ai.usage.input_cost"])
   const outputCost = numberAttr(attrs, ["gen_ai.usage.output_cost"])
-  if (!orgMembershipId || !inferenceKeyId || !openworkRequestId || !reportedModel || inputCost === null || outputCost === null) {
+  if (!orgMembershipId || !inferenceKeyId || !redrobRequestId || !reportedModel || inputCost === null || outputCost === null) {
     return null
   }
   const generationId = stringAttr(attrs, ["gen_ai.response.id", "gen_ai.generation.id", "generation_id", "response_id"])
@@ -215,7 +215,7 @@ function parseSpan(span: JsonRecord, resourceAttrs: JsonRecord, scopeAttrs: Json
   return {
     orgMembershipId,
     inferenceKeyId,
-    openworkRequestId,
+    redrobRequestId,
     externalEventId,
     generationId,
     occurredAt: timeFromSpan(span),
@@ -262,7 +262,7 @@ const sentryWebhookReporter: OpenRouterUsageWebhookReporter = {
       level: "fatal",
       tags: {
         organization_id: report.organizationId,
-        openwork_request_id: report.openworkRequestId,
+        redrob_request_id: report.redrobRequestId,
         external_event_id: report.externalEventId ?? "none",
         reported_model: report.reportedModel,
       },
@@ -290,9 +290,9 @@ const defaultWebhookDependencies: WebhookDependencies = {
       .limit(1)
     return event ?? null
   },
-  async findOpenRouterUsageLedgerEntry(openworkRequestId) {
+  async findOpenRouterUsageLedgerEntry(redrobRequestId) {
     const [existing] = await db.select({ id: InferenceUsageLedgerEntryTable.id }).from(InferenceUsageLedgerEntryTable)
-      .where(and(eq(InferenceUsageLedgerEntryTable.external_job_id, openworkRequestId), eq(InferenceUsageLedgerEntryTable.event_type, "openrouter_usage"))).limit(1)
+      .where(and(eq(InferenceUsageLedgerEntryTable.external_job_id, redrobRequestId), eq(InferenceUsageLedgerEntryTable.event_type, "openrouter_usage"))).limit(1)
     return existing ?? null
   },
   async insertOpenRouterUsageLedgerEntry(input) {
@@ -302,7 +302,7 @@ const defaultWebhookDependencies: WebhookDependencies = {
       organization_id: input.inferenceKey.organization_id,
       org_membership_id: input.inferenceKey.org_membership_id,
       inference_key_id: input.inferenceKey.id,
-      external_job_id: input.span.openworkRequestId,
+      external_job_id: input.span.redrobRequestId,
       external_event_id: input.span.externalEventId,
       cost_amount: input.costAmount,
       model_id: input.span.reportedModel,
@@ -351,7 +351,7 @@ function reportUnknownPricedModel(input: { span: ParsedSpan; inferenceKey: Webho
   logWebhookError("skipped span for unknown priced model", {
     reportedModel: input.span.reportedModel,
     organizationId: input.inferenceKey.organization_id,
-    openworkRequestId: input.span.openworkRequestId,
+    redrobRequestId: input.span.redrobRequestId,
     externalEventId: input.span.externalEventId,
   })
   input.reporter.unknownModel({
@@ -359,7 +359,7 @@ function reportUnknownPricedModel(input: { span: ParsedSpan; inferenceKey: Webho
     organizationId: input.inferenceKey.organization_id,
     orgMembershipId: input.inferenceKey.org_membership_id,
     inferenceKeyId: input.inferenceKey.id,
-    openworkRequestId: input.span.openworkRequestId,
+    redrobRequestId: input.span.redrobRequestId,
     externalEventId: input.span.externalEventId,
     generationId: input.span.generationId,
     usage: input.span.usageMetadata,
@@ -400,7 +400,7 @@ async function ingestSpan(span: ParsedSpan, dependencies: WebhookDependencies) {
     if (event) return false
   }
 
-  const existing = await dependencies.findOpenRouterUsageLedgerEntry(span.openworkRequestId)
+  const existing = await dependencies.findOpenRouterUsageLedgerEntry(span.redrobRequestId)
   const entry = existing ?? await dependencies.insertOpenRouterUsageLedgerEntry({ inferenceKey, span, costAmount })
   await dependencies.chargeBuckets({ limits, ledgerEntryId: entry.id, costAmount })
   return true

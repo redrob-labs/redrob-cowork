@@ -37,21 +37,21 @@ test("finds stale launchers and profile processes while excluding the current re
 test("uses a non-production temporary demo root by default", () => {
   const root = resolveDemoRoot({});
 
-  assert.equal(root, path.join(os.tmpdir(), "openwork-two-electron-demo"));
-  assert.notEqual(root, path.join(os.homedir(), ".openwork"));
+  assert.equal(root, path.join(os.tmpdir(), "redrob-two-electron-demo"));
+  assert.notEqual(root, path.join(os.homedir(), ".redrob"));
 });
 
 test("honors an explicit demo root", () => {
   assert.equal(
     resolveDemoRoot({
-      REDROB_ELECTRON_DEMO_ROOT: " /tmp/openwork-custom-demo "
+      REDROB_ELECTRON_DEMO_ROOT: " /tmp/redrob-custom-demo "
     }),
-    "/tmp/openwork-custom-demo"
+    "/tmp/redrob-custom-demo"
   );
 });
 
 test("creates fresh, independent folders for every demo launch", async context => {
-  const testRoot = await mkdtemp(path.join(os.tmpdir(), "openwork-demo-test-"));
+  const testRoot = await mkdtemp(path.join(os.tmpdir(), "redrob-demo-test-"));
   context.after(() => rm(testRoot, { recursive: true, force: true }));
 
   const first = await createDemoRun(testRoot);
@@ -76,7 +76,7 @@ test("creates fresh, independent folders for every demo launch", async context =
 });
 
 test("reopens the same prepared profile pair without falling back to another profile", async context => {
-  const testRoot = await mkdtemp(path.join(os.tmpdir(), "openwork-demo-reopen-test-"));
+  const testRoot = await mkdtemp(path.join(os.tmpdir(), "redrob-demo-reopen-test-"));
   context.after(() => rm(testRoot, { recursive: true, force: true }));
   const prepared = await createDemoRun(testRoot);
   const reopened = existingDemoRun(prepared.runRoot);
@@ -86,7 +86,7 @@ test("reopens the same prepared profile pair without falling back to another pro
 
 test("reset removes all prior demo runs from the configured root", async context => {
   const testRoot = await mkdtemp(
-    path.join(os.tmpdir(), "openwork-demo-reset-test-")
+    path.join(os.tmpdir(), "redrob-demo-reset-test-")
   );
   context.after(() => rm(testRoot, { recursive: true, force: true }));
   const run = await createDemoRun(testRoot);
@@ -98,7 +98,7 @@ test("reset removes all prior demo runs from the configured root", async context
 
 test("points each Electron instance at its own profile folders", async context => {
   const testRoot = await mkdtemp(
-    path.join(os.tmpdir(), "openwork-demo-env-test-")
+    path.join(os.tmpdir(), "redrob-demo-env-test-")
   );
   context.after(() => rm(testRoot, { recursive: true, force: true }));
   const run = await createDemoRun(testRoot);

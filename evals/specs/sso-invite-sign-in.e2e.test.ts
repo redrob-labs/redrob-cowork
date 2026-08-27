@@ -72,7 +72,7 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
     headers: {
       authorization: `Bearer ${org.admin.token}`,
       cookie: sessionCookie,
-      "x-openwork-org-id": org.orgId,
+      "x-redrob-org-id": org.orgId,
     },
     body: JSON.stringify({
       issuer: registration.issuer,
@@ -251,7 +251,7 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
 
   const installShot = await screenshot(browser);
   const installSeen = await validate(installShot, [
-    "The page is an OpenWork download or install guide",
+    "The page is an Redrob Work download or install guide",
     "Download options for desktop computers are visible",
   ]);
   expect(installSeen.ok, installSeen.why).toBe(true);

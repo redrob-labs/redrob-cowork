@@ -3,17 +3,17 @@ import { getGithubData } from "../../lib/github";
 import { baseOpenGraph } from "../../lib/seo";
 
 export const metadata = {
-  title: "OpenWork Roadmap | Your workspace, on every surface",
+  title: "Redrob Work Roadmap | Your workspace, on every surface",
   description:
-    "See what OpenWork supports today and what is coming next for the desktop app, OpenWork Connect, hosted workspaces, Slack, mobile, and reliable agent workflows.",
+    "See what Redrob Work supports today and what is coming next for the desktop app, Redrob Work Connect, hosted workspaces, Slack, mobile, and reliable agent workflows.",
   alternates: {
     canonical: "/roadmap"
   },
   openGraph: {
     ...baseOpenGraph,
-    title: "OpenWork Roadmap | Your workspace, on every surface",
+    title: "Redrob Work Roadmap | Your workspace, on every surface",
     description:
-      "The roadmap for the OpenWork desktop app, portable agent capabilities, hosted workspaces, and every surface where work happens.",
+      "The roadmap for the Redrob Work desktop app, portable agent capabilities, hosted workspaces, and every surface where work happens.",
     url: "https://redrob.io/roadmap"
   }
 };

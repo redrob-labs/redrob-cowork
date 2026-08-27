@@ -13,8 +13,8 @@ on:
       - "ee/packages/den-db/**"
       - "packages/automations/**"
       - "packaging/docker/Dockerfile.den"
-      - "packaging/helm/openwork-ee/values.yaml"
-      - "packaging/helm/openwork-ee/templates/migration-job.yaml"
+      - "packaging/helm/redrob-ee/values.yaml"
+      - "packaging/helm/redrob-ee/templates/migration-job.yaml"
 
 permissions:
   contents: read

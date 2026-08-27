@@ -8,8 +8,8 @@ import {
   writeConnectState,
 } from "../connect-state.js";
 import type { CloudMcpLiveStatusObserver } from "../cloud-mcp-health.js";
-import { readOpenWorkConnectSkillCatalog, renderOpenWorkConnectSkillInstruction } from "../connect-skill-catalog.js";
-import { readOpenWorkAutomationCatalog, renderOpenWorkAutomationInstruction } from "../connect-automation-catalog.js";
+import { readRedrobWorkConnectSkillCatalog, renderRedrobWorkConnectSkillInstruction } from "../connect-skill-catalog.js";
+import { readRedrobWorkAutomationCatalog, renderRedrobWorkAutomationInstruction } from "../connect-automation-catalog.js";
 import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService } from "../env-file.js";
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
@@ -284,24 +284,24 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
   });
 
   addRoute(routes, "GET", "/experimental/connect/skills", "client", async (_ctx) => {
-    // Connect skills are server/account-scoped (openwork-cloud on the host), not per-workspace.
-    const skills = await readOpenWorkConnectSkillCatalog(config);
+    // Connect skills are server/account-scoped (redrob-cloud on the host), not per-workspace.
+    const skills = await readRedrobWorkConnectSkillCatalog(config);
     return jsonResponse({
       ok: true,
       schemaVersion: 1,
       skills,
-      instruction: renderOpenWorkConnectSkillInstruction(skills),
+      instruction: renderRedrobWorkConnectSkillInstruction(skills),
     });
   });
 
   addRoute(routes, "GET", "/experimental/connect/automations", "client", async (_ctx) => {
-    // Owner-scoped through the same openwork-cloud connection as skills.
-    const index = await readOpenWorkAutomationCatalog(config);
+    // Owner-scoped through the same redrob-cloud connection as skills.
+    const index = await readRedrobWorkAutomationCatalog(config);
     return jsonResponse({
       ok: true,
       schemaVersion: 1,
       index,
-      instruction: renderOpenWorkAutomationInstruction(index),
+      instruction: renderRedrobWorkAutomationInstruction(index),
     });
   });
 
@@ -514,7 +514,7 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
           400,
           error.code,
           error.code === "reserved_env_key"
-            ? "Environment variable name is reserved for OpenWork internals"
+            ? "Environment variable name is reserved for Redrob Work internals"
             : "Invalid environment variable name",
         );
       }

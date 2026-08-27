@@ -11,7 +11,7 @@ import {
   buildHeadlessCorsOrigins,
   buildHeadlessRuntimeManifest,
   buildHeadlessServerLaunch,
-  buildOpenworkServerArgs,
+  buildRedrobServerArgs,
   isHeadlessStackCommand,
   mergeHeadlessServerConfig,
   resolveHeadlessRuntimeManifestPath,
@@ -189,7 +189,7 @@ const existingHealthy = existingManifest
 if (existingManifest && existingHealthy && !replaceRequested) {
   logLine("[dev:headless-web] Already running; reusing the healthy instance");
   logLine(`[dev:headless-web] Web URL: ${existingManifest.webUrl}`);
-  logLine(`[dev:headless-web] OpenWork server: ${existingManifest.openworkUrl}`);
+  logLine(`[dev:headless-web] Redrob Work server: ${existingManifest.redrobUrl}`);
   logLine(
     `[dev:headless-web] Agent runtime: ${path.relative(cwd, runtimeManifestPath)}`,
   );
@@ -231,7 +231,7 @@ if (detachRequested && !isDetachedChild) {
       (await probeStack(manifest))
     ) {
       logLine(`[dev:headless-web] Web URL: ${manifest.webUrl}`);
-      logLine(`[dev:headless-web] OpenWork server: ${manifest.openworkUrl}`);
+      logLine(`[dev:headless-web] Redrob Work server: ${manifest.redrobUrl}`);
       if (manifest.denApiUrl) {
         logLine(
           `[dev:headless-web] Den (same-origin): ${manifest.denApiUrl} -> ${manifest.denTarget}`,
@@ -257,7 +257,7 @@ if (existingManifest) {
     logLine("[dev:headless-web] Cleaning up stale instance from the last run");
   }
   await killStackPid(existingManifest.pids?.web);
-  await killStackPid(existingManifest.pids?.openworkServer);
+  await killStackPid(existingManifest.pids?.redrobServer);
   await killStackPid(existingManifest.pids?.launcher ?? existingManifest.pid);
 }
 
@@ -267,7 +267,7 @@ const viteHost = process.env.VITE_HOST ?? process.env.HOST ?? host;
 const publicHost = process.env.REDROB_PUBLIC_HOST ?? null;
 const clientHost = publicHost ?? (host === "0.0.0.0" ? "127.0.0.1" : host);
 const workspace = path.resolve(process.env.REDROB_WORKSPACE ?? cwd);
-const openworkPort = await resolvePort(
+const redrobPort = await resolvePort(
   process.env.REDROB_PORT ?? DEFAULT_SERVER_PORT,
   "127.0.0.1",
 );
@@ -282,7 +282,7 @@ const keepTokensRequested = process.argv.includes("--keep-tokens");
 const rotateTokensRequested =
   process.argv.includes("--rotate-tokens") ||
   (replaceRequested && !keepTokensRequested);
-const { token: openworkToken, hostToken: openworkHostToken } =
+const { token: redrobToken, hostToken: redrobHostToken } =
   resolveHeadlessTokens({
     envToken: process.env.REDROB_TOKEN,
     envHostToken: process.env.REDROB_HOST_TOKEN,
@@ -307,7 +307,7 @@ await writeFile(
   "utf8",
 );
 
-const openworkUrl = `http://${clientHost}:${openworkPort}`;
+const redrobUrl = `http://${clientHost}:${redrobPort}`;
 const webUrl = `http://${clientHost}:${webPort}`;
 
 // Den wiring: Vite serves /api/den same-origin (proxied to the target) and
@@ -324,9 +324,9 @@ const viteEnv = {
   ...process.env,
   HOST: viteHost,
   PORT: String(webPort),
-  VITE_REDROB_URL: process.env.VITE_REDROB_URL ?? openworkUrl,
-  VITE_REDROB_PORT: process.env.VITE_REDROB_PORT ?? String(openworkPort),
-  VITE_REDROB_TOKEN: process.env.VITE_REDROB_TOKEN ?? openworkToken,
+  VITE_REDROB_URL: process.env.VITE_REDROB_URL ?? redrobUrl,
+  VITE_REDROB_PORT: process.env.VITE_REDROB_PORT ?? String(redrobPort),
+  VITE_REDROB_TOKEN: process.env.VITE_REDROB_TOKEN ?? redrobToken,
   // Never put the host token in VITE_*: Vite inlines those into the browser
   // bundle. The owner bearer is enough for the web UI; host-token routes
   // (env secrets, den-session) stay on the server process.
@@ -351,9 +351,9 @@ const headlessEnv = {
   REDROB_WORKSPACE: workspace,
   REDROB_HOST: host,
   REDROB_REMOTE_ACCESS: remoteAccessEnabled ? "1" : "0",
-  REDROB_PORT: String(openworkPort),
-  REDROB_TOKEN: openworkToken,
-  REDROB_HOST_TOKEN: openworkHostToken,
+  REDROB_PORT: String(redrobPort),
+  REDROB_TOKEN: redrobToken,
+  REDROB_HOST_TOKEN: redrobHostToken,
   REDROB_SERVER_CONFIG: serverConfigPath,
   REDROB_MANAGE_OPENCODE: "1",
   REDROB_OPENCODE_BIN: process.env.REDROB_OPENCODE_BIN ?? "opencode",
@@ -381,9 +381,9 @@ children.push(webProcess);
 
 const headlessServerLaunch = buildHeadlessServerLaunch(
   cwd,
-  buildOpenworkServerArgs({
+  buildRedrobServerArgs({
     host,
-    port: openworkPort,
+    port: redrobPort,
     configPath: serverConfigPath,
     corsOrigins: buildHeadlessCorsOrigins({ webUrl, webPort }),
   }),
@@ -398,17 +398,17 @@ children.push(headlessProcess);
 
 const runtimeManifest = buildHeadlessRuntimeManifest({
   webUrl,
-  openworkUrl,
+  redrobUrl,
   workspace,
-  token: openworkToken,
-  hostToken: openworkHostToken,
+  token: redrobToken,
+  hostToken: redrobHostToken,
   serverConfigPath,
   runtimeManifestPath,
   webLogPath,
   headlessLogPath,
   denTarget,
   webPid: webProcess.pid ?? null,
-  openworkServerPid: headlessProcess.pid ?? null,
+  redrobServerPid: headlessProcess.pid ?? null,
 });
 // The manifest carries the server bearer and host tokens, so keep it
 // owner-only. `mode` applies on creation only; chmod covers the rewrite of a
@@ -422,10 +422,10 @@ await chmod(runtimeManifestPath, 0o600);
 
 logLine("[dev:headless-web] Starting isolated local-server session");
 logLine(`[dev:headless-web] Workspace: ${workspace}`);
-logLine(`[dev:headless-web] OpenWork server: ${openworkUrl}`);
+logLine(`[dev:headless-web] Redrob Work server: ${redrobUrl}`);
 logLine(`[dev:headless-web] Web URL: ${webUrl}`);
 logLine(
-  `[dev:headless-web] Server config: ${path.relative(cwd, serverConfigPath)} (not ~/.config/openwork/server.json)`,
+  `[dev:headless-web] Server config: ${path.relative(cwd, serverConfigPath)} (not ~/.config/redrob/server.json)`,
 );
 logLine(
   `[dev:headless-web] Agent runtime: ${path.relative(cwd, runtimeManifestPath)}`,
@@ -495,5 +495,5 @@ webProcess.on("exit", (code, signal) => {
   void shutdown("web", code, signal);
 });
 headlessProcess.on("exit", (code, signal) => {
-  void shutdown("openwork-server", code, signal);
+  void shutdown("redrob-server", code, signal);
 });

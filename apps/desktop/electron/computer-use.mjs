@@ -11,7 +11,7 @@ import { app, shell } from "electron";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const COMPUTER_USE_HELPER_APP_NAME = "OpenWork Computer Use.app";
+const COMPUTER_USE_HELPER_APP_NAME = "Redrob Work Computer Use.app";
 const COMPUTER_USE_HELPER_EXECUTABLE = "ComputerUse";
 
 function computerUseHelperExecutablePath() {
@@ -41,11 +41,11 @@ function getComputerUseMcpCommand() {
   if (helperExecutable) return [helperExecutable, "mcp"];
 
   if (app.isPackaged) {
-    throw new Error("OpenWork Computer Use is missing from this OpenWork build.");
+    throw new Error("Redrob Work Computer Use is missing from this Redrob Work build.");
   }
 
   if (process.env.REDROB_DEV_MODE === "1") {
-    return ["node", path.resolve(__dirname, "../../..", "packages/handsfree/bin/openwork-handsfree-computer-use.mjs"), "mcp"];
+    return ["node", path.resolve(__dirname, "../../..", "packages/handsfree/bin/redrob-handsfree-computer-use.mjs"), "mcp"];
   }
   return ["npx", "-y", "@redrob/handsfree", "mcp"];
 }

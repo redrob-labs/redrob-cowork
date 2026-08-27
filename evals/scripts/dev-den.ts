@@ -8,7 +8,7 @@ import { parseArgs } from "node:util";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const STATE_ROOT = join(REPO_ROOT, "evals", "results", ".dev-den");
-const MYSQL_CONTAINER = "openwork-web-local-mysql";
+const MYSQL_CONTAINER = "redrob-web-local-mysql";
 const DB_ENCRYPTION_KEY = "local-dev-db-encryption-key-please-change-1234567890";
 const BETTER_AUTH_SECRET = "local-dev-secret-not-for-production-use!!";
 const USAGE = `Usage:
@@ -140,9 +140,9 @@ function denEnvironment(state: DevDenState): NodeJS.ProcessEnv {
     DEN_ORG_MODE: "multi_org",
     DEN_SINGLE_ORG_ALLOW_PUBLIC_SIGNUP: "true",
     PROVISIONER_MODE: "stub",
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "sk_test_openwork_eval",
-    STRIPE_INFERENCE_PRICE_ID: process.env.STRIPE_INFERENCE_PRICE_ID ?? "price_openwork_models_eval",
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_openwork_eval",
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "sk_test_redrob_eval",
+    STRIPE_INFERENCE_PRICE_ID: process.env.STRIPE_INFERENCE_PRICE_ID ?? "price_redrob_models_eval",
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_redrob_eval",
     INFERENCE_PROXY_BASE_URL: process.env.INFERENCE_PROXY_BASE_URL ?? "http://127.0.0.1:8791",
   };
 }
@@ -216,7 +216,7 @@ async function seedDemoOrg(state: DevDenState): Promise<void> {
 
 async function up(portValue: string | undefined, databaseValue: string | undefined, seed: boolean): Promise<void> {
   const port = parsePort(portValue) ?? await pickPort();
-  const database = validateDatabase(databaseValue ?? `openwork_den_eval_${process.pid}_${Date.now().toString(36)}`);
+  const database = validateDatabase(databaseValue ?? `redrob_den_eval_${process.pid}_${Date.now().toString(36)}`);
   await ensurePortFree(port);
   await mkdir(STATE_ROOT, { recursive: true });
 

@@ -25,7 +25,7 @@ import {
 } from "./agent-context-engine-inspection.js";
 import {
   differentialCloudVerdict,
-  probeOpenworkCloudCatalog,
+  probeRedrobCloudCatalog,
   type CloudCatalogProbe,
 } from "./agent-context-cloud-probe.js";
 import { readActivatedEnterpriseDenOrigin } from "./enterprise-den-origin.js";
@@ -50,7 +50,7 @@ import {
   type McpInventoryInspection,
 } from "./mcp.js";
 import { resolveWorkspaceOpencodeConnection } from "./opencode-connection.js";
-import { buildOpenworkRuntimeConfigObjectFromSnapshot } from "./openwork-runtime-config.js";
+import { buildRedrobRuntimeConfigObjectFromSnapshot } from "./redrob-runtime-config.js";
 import {
   inspectRuntimeOpencodeConfigState,
   runtimeMcpMap,
@@ -61,7 +61,7 @@ import type { McpItem, ServerConfig, WorkspaceInfo } from "./types.js";
 import { exists } from "./utils.js";
 import { opencodeConfigPath } from "./workspace-files.js";
 
-const REDROB_CLOUD_MCP_NAME = "openwork-cloud";
+const REDROB_CLOUD_MCP_NAME = "redrob-cloud";
 const CLOUD_MCP_TERMINAL_PATH = "/mcp/agent";
 const REQUIRED_CLOUD_TOOL_IDS = ["search_capabilities", "execute_capability"] as const;
 const REQUIRED_CLOUD_AGENT_TOOL_IDS = REQUIRED_CLOUD_TOOL_IDS.map(
@@ -152,30 +152,30 @@ function assessEffectiveToolPolicy(
       unavailableReasons: ["effective_engine_snapshot_unavailable"],
     };
   }
-  const openworkAgent = snapshot.agents.find((agent) => agent.name === "openwork");
-  if (!openworkAgent) {
+  const redrobAgent = snapshot.agents.find((agent) => agent.name === "redrob");
+  if (!redrobAgent) {
     return {
       status: "unavailable",
       decisions: {},
       deniedToolIds: [],
-      unavailableReasons: ["effective_openwork_agent_missing"],
+      unavailableReasons: ["effective_redrob_agent_missing"],
     };
   }
   if (
-    snapshot.defaultAgent !== "openwork"
-    || openworkAgent.hidden
-    || (openworkAgent.mode !== "primary" && openworkAgent.mode !== "all")
+    snapshot.defaultAgent !== "redrob"
+    || redrobAgent.hidden
+    || (redrobAgent.mode !== "primary" && redrobAgent.mode !== "all")
   ) {
     return {
       status: "unavailable",
       decisions: {},
       deniedToolIds: [],
-      unavailableReasons: ["effective_openwork_agent_unusable_as_default"],
+      unavailableReasons: ["effective_redrob_agent_unusable_as_default"],
     };
   }
   const decisions: Record<string, EffectiveToolPolicyDecision> = {};
   for (const toolId of REQUIRED_CLOUD_AGENT_TOOL_IDS) {
-    decisions[toolId] = effectiveToolDecision(openworkAgent.permission, toolId);
+    decisions[toolId] = effectiveToolDecision(redrobAgent.permission, toolId);
   }
 
   const deniedToolIds = REQUIRED_CLOUD_AGENT_TOOL_IDS.filter(
@@ -373,10 +373,10 @@ async function inspectProjectAgent(workspace: WorkspaceInfo, signal?: AbortSigna
     return {
       available: true,
       defaultAgentOverride: typeof data.default_agent === "string",
-      agentConfigOverride: Object.hasOwn(agents, "openwork"),
+      agentConfigOverride: Object.hasOwn(agents, "redrob"),
       agentFileOverride: await Promise.all([
-        exists(join(workspace.path, ".opencode", "agent", "openwork.md")),
-        exists(join(workspace.path, ".opencode", "agents", "openwork.md")),
+        exists(join(workspace.path, ".opencode", "agent", "redrob.md")),
+        exists(join(workspace.path, ".opencode", "agents", "redrob.md")),
       ]).then((values) => values.some(Boolean)),
     };
   } catch {
@@ -421,7 +421,7 @@ async function inspectMcpInventory(
       inventory: await inspectMcpLayersFromRuntimeSnapshot(workspace.path, runtime, {
         signal,
         toolPolicy: {
-          agentName: "openwork",
+          agentName: "redrob",
           mcpName: REDROB_CLOUD_MCP_NAME,
           toolIds: [...REQUIRED_CLOUD_AGENT_TOOL_IDS],
         },
@@ -569,24 +569,24 @@ export function cloudCatalogCheck(probe: CloudCatalogProbe): AgentContextDiagnos
         ? "cloud_catalog_recovered_after_transient_401"
         : exact ? "cloud_catalog_exact_match" : "cloud_catalog_mismatch",
       message: transientUnauthorizedRecovered
-        ? "The OpenWork runtime saw a transient HTTP 401 during the independent Cloud MCP initialize request and recovered on retry; this points to a proxy or auth-gateway blip, not a revoked OpenWork Cloud credential."
+        ? "The Redrob Work runtime saw a transient HTTP 401 during the independent Cloud MCP initialize request and recovered on retry; this points to a proxy or auth-gateway blip, not a revoked Redrob Work Cloud credential."
         : exact
-        ? "The canonical OpenWork Cloud catalog exposes exactly the two required capability tools."
-        : "The OpenWork Cloud catalog does not match the required two-tool contract.",
-      owner: transientUnauthorizedRecovered ? "network-admin" : exact ? "openwork-server" : "openwork-support",
+        ? "The canonical Redrob Work Cloud catalog exposes exactly the two required capability tools."
+        : "The Redrob Work Cloud catalog does not match the required two-tool contract.",
+      owner: transientUnauthorizedRecovered ? "network-admin" : exact ? "redrob-server" : "redrob-support",
       action: transientUnauthorizedRecovered
         ? "Treat the first 401 as transient unless it repeats or carries a Den revoked-session envelope; inspect proxy and auth-gateway logs for one-off challenges."
         : exact
         ? "No action is required."
-        : "Review the OpenWork Cloud deployment and restore the canonical capability catalog.",
+        : "Review the Redrob Work Cloud deployment and restore the canonical capability catalog.",
     });
   }
 
   let status: AgentContextDiagnosticCheck["status"] = "failed";
   let evidenceKind: AgentContextDiagnosticCheck["evidenceKind"] = probe.performed ? "observed" : "derived";
-  let message = "The selected workspace does not have a usable managed OpenWork Cloud MCP configuration.";
-  let owner: AgentContextDiagnosticCheck["owner"] = "openwork-server";
-  let action = "Reconnect OpenWork Cloud from Settings > Connect and rerun diagnostics.";
+  let message = "The selected workspace does not have a usable managed Redrob Work Cloud MCP configuration.";
+  let owner: AgentContextDiagnosticCheck["owner"] = "redrob-server";
+  let action = "Reconnect Redrob Work Cloud from Settings > Connect and rerun diagnostics.";
 
   switch (probe.code) {
     case "runtime_config_unavailable":
@@ -599,51 +599,51 @@ export function cloudCatalogCheck(probe: CloudCatalogProbe): AgentContextDiagnos
       status = "warning";
       evidenceKind = "unavailable";
       message = "A local runtime credential was not inspected or used for this remote workspace shell.";
-      action = "Run diagnostics on the OpenWork server that owns the workspace.";
+      action = "Run diagnostics on the Redrob Work server that owns the workspace.";
       break;
     case "cloud_mcp_missing":
-      owner = "openwork-client";
-      message = "The selected client workspace has no synced OpenWork Cloud MCP entry.";
+      owner = "redrob-client";
+      message = "The selected client workspace has no synced Redrob Work Cloud MCP entry.";
       break;
     case "cloud_mcp_disabled":
-      owner = "openwork-client";
-      message = "The selected workspace OpenWork Cloud MCP entry is disabled.";
-      action = "Enable or reconnect OpenWork Cloud from Settings > Connect, then rerun diagnostics.";
+      owner = "redrob-client";
+      message = "The selected workspace Redrob Work Cloud MCP entry is disabled.";
+      action = "Enable or reconnect Redrob Work Cloud from Settings > Connect, then rerun diagnostics.";
       break;
     case "cloud_mcp_not_remote":
-      message = "The managed OpenWork Cloud entry is not configured as a remote MCP.";
-      action = "Reconnect OpenWork Cloud to restore its managed remote configuration.";
+      message = "The managed Redrob Work Cloud entry is not configured as a remote MCP.";
+      action = "Reconnect Redrob Work Cloud to restore its managed remote configuration.";
       break;
     case "invalid_endpoint":
-      message = "The managed OpenWork Cloud endpoint is not credential-safe or does not end at the required /mcp/agent route.";
-      action = "Reconnect OpenWork Cloud to restore its managed endpoint, then rerun diagnostics.";
+      message = "The managed Redrob Work Cloud endpoint is not credential-safe or does not end at the required /mcp/agent route.";
+      action = "Reconnect Redrob Work Cloud to restore its managed endpoint, then rerun diagnostics.";
       break;
     case "untrusted_endpoint":
       status = "warning";
       evidenceKind = "unavailable";
       message = probe.enterpriseActivationPresent
-        ? "The runtime endpoint probe was not performed: this installation is enterprise activated, but against a different control-plane origin than the configured OpenWork Cloud MCP. No request was sent, so this is a configuration mismatch, not a network, TLS, or MCP failure."
+        ? "The runtime endpoint probe was not performed: this installation is enterprise activated, but against a different control-plane origin than the configured Redrob Work Cloud MCP. No request was sent, so this is a configuration mismatch, not a network, TLS, or MCP failure."
         : "The runtime endpoint probe was not performed because the configured origin is not in the diagnostics trust list; no request was sent, so this is a trust-configuration state, not a network, TLS, or MCP failure.";
       action = probe.enterpriseActivationPresent
-        ? "Reconcile the enterprise activation origin with the configured OpenWork Cloud MCP origin, or have an administrator add the exact endpoint origin to REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS, then rerun diagnostics."
-        : "Activate this installation against your on-prem Den, or have an administrator set REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS on the OpenWork desktop/server process to the exact endpoint origin, then rerun diagnostics.";
+        ? "Reconcile the enterprise activation origin with the configured Redrob Work Cloud MCP origin, or have an administrator add the exact endpoint origin to REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS, then rerun diagnostics."
+        : "Activate this installation against your on-prem Den, or have an administrator set REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS on the Redrob Work desktop/server process to the exact endpoint origin, then rerun diagnostics.";
       break;
     case "credential_missing":
     case "duplicate_authorization":
-      owner = "openwork-client";
-      message = "The managed OpenWork Cloud entry does not contain one unambiguous authentication value.";
-      action = "Reconnect OpenWork Cloud so the client can replace the managed credential, then rerun diagnostics.";
+      owner = "redrob-client";
+      message = "The managed Redrob Work Cloud entry does not contain one unambiguous authentication value.";
+      action = "Reconnect Redrob Work Cloud so the client can replace the managed credential, then rerun diagnostics.";
       break;
     case "timeout":
     case "network_error":
     case "http_error":
       owner = "network-admin";
       if (probe.httpStatus === 451) {
-        message = "The independent runtime endpoint probe received HTTP 451, which indicates an egress proxy, firewall, or allowlist deny rather than an OpenWork Cloud catalog shape problem.";
-        action = "Add the configured OpenWork Cloud MCP host and its documented redirect targets to the corporate allowlist, then rerun diagnostics.";
+        message = "The independent runtime endpoint probe received HTTP 451, which indicates an egress proxy, firewall, or allowlist deny rather than an Redrob Work Cloud catalog shape problem.";
+        action = "Add the configured Redrob Work Cloud MCP host and its documented redirect targets to the corporate allowlist, then rerun diagnostics.";
       } else {
         message = "The independent runtime endpoint probe could not be completed through the configured network path.";
-        action = "Verify server egress, DNS, TLS, proxy policy, and the configured OpenWork Cloud service, then rerun diagnostics.";
+        action = "Verify server egress, DNS, TLS, proxy policy, and the configured Redrob Work Cloud service, then rerun diagnostics.";
       }
       break;
     case "redirect_rejected":
@@ -654,11 +654,11 @@ export function cloudCatalogCheck(probe: CloudCatalogProbe): AgentContextDiagnos
     case "dns_error":
       owner = "network-admin";
       message = "The independent runtime endpoint probe could not resolve the configured service hostname.";
-      action = "Verify DNS resolution from the OpenWork server, then rerun diagnostics.";
+      action = "Verify DNS resolution from the Redrob Work server, then rerun diagnostics.";
       break;
     case "connection_refused":
       owner = "network-admin";
-      message = "The configured OpenWork Cloud service refused the independent runtime probe connection.";
+      message = "The configured Redrob Work Cloud service refused the independent runtime probe connection.";
       action = "Verify the service listener, firewall, and egress route, then rerun diagnostics.";
       break;
     case "connection_reset":
@@ -668,49 +668,49 @@ export function cloudCatalogCheck(probe: CloudCatalogProbe): AgentContextDiagnos
       break;
     case "tls_error":
       owner = "network-admin";
-      message = "The independent runtime endpoint probe failed TLS certificate validation or negotiation on the OpenWork runtime trust store.";
+      message = "The independent runtime endpoint probe failed TLS certificate validation or negotiation on the Redrob Work runtime trust store.";
       action = "Verify the server trust store, enterprise certificates, TLS inspection, and service certificate, then rerun diagnostics.";
       break;
     case "proxy_error":
       owner = "network-admin";
       if (probe.httpStatus === 451) {
-        message = "The independent runtime endpoint probe received HTTP 451, which indicates an egress proxy, firewall, or allowlist deny rather than an OpenWork Cloud catalog shape problem.";
-        action = "Add the configured OpenWork Cloud MCP host and its documented redirect targets to the corporate allowlist, then rerun diagnostics.";
+        message = "The independent runtime endpoint probe received HTTP 451, which indicates an egress proxy, firewall, or allowlist deny rather than an Redrob Work Cloud catalog shape problem.";
+        action = "Add the configured Redrob Work Cloud MCP host and its documented redirect targets to the corporate allowlist, then rerun diagnostics.";
       } else {
         message = "The configured proxy could not complete the independent runtime endpoint probe.";
         action = "Verify proxy reachability, authentication, and bypass policy, then rerun diagnostics.";
       }
       break;
     case "unauthorized":
-      owner = "openwork-client";
-      message = "OpenWork Cloud rejected the configured credential during the independent runtime probe.";
-      action = "Reconnect OpenWork Cloud so the client can replace the managed credential, then rerun diagnostics.";
+      owner = "redrob-client";
+      message = "Redrob Work Cloud rejected the configured credential during the independent runtime probe.";
+      action = "Reconnect Redrob Work Cloud so the client can replace the managed credential, then rerun diagnostics.";
       break;
     case "forbidden":
       owner = "organization-admin";
-      message = "OpenWork Cloud rejected the probe for membership, scope, or policy reasons rather than credential validity.";
+      message = "Redrob Work Cloud rejected the probe for membership, scope, or policy reasons rather than credential validity.";
       action = "Verify organization membership, workspace scope, and Cloud policy for this credential, then rerun diagnostics.";
       break;
     case "mcp_route_not_found":
-      owner = "openwork-support";
+      owner = "redrob-support";
       message = "The configured service answered, but the MCP agent route was not found; the deployment version or route configuration is implicated.";
-      action = "Verify the OpenWork Cloud or on-prem Den deployment version exposes the /mcp/agent route, then rerun diagnostics.";
+      action = "Verify the Redrob Work Cloud or on-prem Den deployment version exposes the /mcp/agent route, then rerun diagnostics.";
       break;
     case "rate_limited":
       status = "warning";
-      owner = "openwork-support";
-      message = "OpenWork Cloud rate-limited the independent runtime probe.";
-      action = "Wait before rerunning diagnostics; contact OpenWork support if rate limiting persists.";
+      owner = "redrob-support";
+      message = "Redrob Work Cloud rate-limited the independent runtime probe.";
+      action = "Wait before rerunning diagnostics; contact Redrob Work support if rate limiting persists.";
       break;
     case "gateway_unavailable":
       owner = "network-admin";
-      message = "A gateway or upstream in front of the OpenWork Cloud service reported it unavailable during the independent runtime probe.";
+      message = "A gateway or upstream in front of the Redrob Work Cloud service reported it unavailable during the independent runtime probe.";
       action = "Check service status and gateway health, wait briefly, then rerun diagnostics.";
       break;
     case "probe_busy":
       status = "warning";
       evidenceKind = "unavailable";
-      owner = "openwork-server";
+      owner = "redrob-server";
       message = "The server's bounded diagnostics probe capacity was busy, so no new egress was started.";
       action = "Wait briefly and rerun diagnostics.";
       break;
@@ -725,14 +725,14 @@ export function cloudCatalogCheck(probe: CloudCatalogProbe): AgentContextDiagnos
     case "invalid_session_header":
     case "pagination_unsupported":
     case "invalid_catalog":
-      owner = "openwork-support";
-      message = "OpenWork Cloud returned a response that does not satisfy the bounded MCP handshake protocol contract.";
-      action = "Review the OpenWork Cloud deployment and restore a conformant MCP handshake response.";
+      owner = "redrob-support";
+      message = "Redrob Work Cloud returned a response that does not satisfy the bounded MCP handshake protocol contract.";
+      action = "Review the Redrob Work Cloud deployment and restore a conformant MCP handshake response.";
       break;
     case "required_tools_missing":
-      owner = "openwork-support";
-      message = "The OpenWork Cloud catalog handshake succeeded, but the catalog does not contain both required capability tools.";
-      action = "Review the OpenWork Cloud deployment and restore the canonical capability catalog.";
+      owner = "redrob-support";
+      message = "The Redrob Work Cloud catalog handshake succeeded, but the catalog does not contain both required capability tools.";
+      action = "Review the Redrob Work Cloud deployment and restore the canonical capability catalog.";
       break;
   }
   return diagnosticCheck({
@@ -769,8 +769,8 @@ export function cloudDifferentialCheck(probe: CloudCatalogProbe, engineReachable
       ...common,
       status: "passed",
       evidenceKind: "derived",
-      message: "The independent OpenWork runtime probe and the engine registration evidence both report the OpenWork Cloud endpoint as reachable.",
-      owner: "openwork-server",
+      message: "The independent Redrob Work runtime probe and the engine registration evidence both report the Redrob Work Cloud endpoint as reachable.",
+      owner: "redrob-server",
       action: "No action is required.",
     });
   }
@@ -779,9 +779,9 @@ export function cloudDifferentialCheck(probe: CloudCatalogProbe, engineReachable
       ...common,
       status: "failed",
       evidenceKind: "derived",
-      message: "The OpenWork runtime reached the Cloud endpoint directly, but the engine registration evidence reports a failure; the engine-side connection path or registration lifecycle is implicated, not the endpoint.",
+      message: "The Redrob Work runtime reached the Cloud endpoint directly, but the engine registration evidence reports a failure; the engine-side connection path or registration lifecycle is implicated, not the endpoint.",
       owner: "opencode-engine",
-      action: "Reconnect OpenWork Cloud or restart the selected workspace engine, then rerun diagnostics; the endpoint itself is reachable from this machine.",
+      action: "Reconnect Redrob Work Cloud or restart the selected workspace engine, then rerun diagnostics; the endpoint itself is reachable from this machine.",
     });
   }
   if (verdict === "runtime_failed_engine_connected") {
@@ -789,9 +789,9 @@ export function cloudDifferentialCheck(probe: CloudCatalogProbe, engineReachable
       ...common,
       status: "warning",
       evidenceKind: "derived",
-      message: "The engine registration evidence reports a live connection, but the independent runtime probe failed; the OpenWork runtime network path is implicated rather than the endpoint or the engine.",
+      message: "The engine registration evidence reports a live connection, but the independent runtime probe failed; the Redrob Work runtime network path is implicated rather than the endpoint or the engine.",
       owner: "network-admin",
-      action: "Compare proxy, DNS, and trust-store configuration between the OpenWork runtime and the engine process, then rerun diagnostics.",
+      action: "Compare proxy, DNS, and trust-store configuration between the Redrob Work runtime and the engine process, then rerun diagnostics.",
     });
   }
   if (verdict === "runtime_and_engine_failed") {
@@ -809,7 +809,7 @@ export function cloudDifferentialCheck(probe: CloudCatalogProbe, engineReachable
       ...common,
       status: "warning",
       evidenceKind: "derived",
-      message: "The engine registration evidence for OpenWork Cloud is stale or was never recorded, so only the independent runtime observation is current.",
+      message: "The engine registration evidence for Redrob Work Cloud is stale or was never recorded, so only the independent runtime observation is current.",
       owner: "opencode-engine",
       action: "Start or reconnect the selected workspace engine to refresh its registration evidence, then rerun diagnostics.",
     });
@@ -819,7 +819,7 @@ export function cloudDifferentialCheck(probe: CloudCatalogProbe, engineReachable
     status: "skipped",
     evidenceKind: "unavailable",
     message: "The independent runtime probe was not performed, so endpoint availability cannot be compared with the engine registration evidence.",
-    owner: "openwork-server",
+    owner: "redrob-server",
     action: "Address the probe eligibility code reported by the cloud catalog check, then rerun diagnostics.",
   });
 }
@@ -856,8 +856,8 @@ export function cloudEndpointTransportCheck(
       status: "skipped",
       evidenceKind: "derived",
       code: "transport_probe_not_required",
-      message: "The managed OpenWork Cloud MCP registration is connected; the differential check compares runtime and engine reachability, so a separate TLS-layer probe was not needed.",
-      owner: "openwork-server",
+      message: "The managed Redrob Work Cloud MCP registration is connected; the differential check compares runtime and engine reachability, so a separate TLS-layer probe was not needed.",
+      owner: "redrob-server",
       action: "No action is required.",
       details,
     });
@@ -868,8 +868,8 @@ export function cloudEndpointTransportCheck(
       status: "passed",
       evidenceKind: "observed",
       code: "endpoint_tls_handshake_verified",
-      message: "The OpenWork Cloud endpoint completed a credential-free TLS handshake; use the differential check for authentication, MCP protocol, and engine-registration attribution.",
-      owner: "openwork-server",
+      message: "The Redrob Work Cloud endpoint completed a credential-free TLS handshake; use the differential check for authentication, MCP protocol, and engine-registration attribution.",
+      owner: "redrob-server",
       action: "Review the cloud-endpoint-differential verdict and catalog evidence for the next failure layer.",
       details,
     });
@@ -887,7 +887,7 @@ export function cloudEndpointTransportCheck(
       code: "endpoint_tls_version_handshake_fault",
       message: "The credential-free transport probe reproduced a TLS version fault: TLS 1.3 timed out while TLS 1.2 completed, which points to an egress proxy or firewall stalling TLS 1.3 handshakes rather than a ServiceNow, credential, or allowlist issue.",
       owner: "network-admin",
-      action: "Fix or bypass the egress device that stalls TLS 1.3 ClientHello traffic for OpenWork Cloud hosts, or temporarily force TLS 1.2 where your policy permits it, then rerun diagnostics.",
+      action: "Fix or bypass the egress device that stalls TLS 1.3 ClientHello traffic for Redrob Work Cloud hosts, or temporarily force TLS 1.2 where your policy permits it, then rerun diagnostics.",
       details,
     });
   }
@@ -905,7 +905,7 @@ export function cloudEndpointTransportCheck(
         code: "endpoint_tls_handshake_timeout_tls12_comparison_failed",
         message: "The credential-free TLS handshake timed out before any HTTP response, and the explicit TLS 1.3 probe also timed out; the runtime TLS 1.2 comparison timed out too, so this still points to an egress TLS ClientHello stall but this runtime could not prove the TLS 1.2 workaround.",
         owner: "network-admin",
-        action: "Verify the egress proxy and firewall pass TLS ClientHello traffic to OpenWork Cloud hosts, then compare with a known Node or openssl TLS 1.2-only probe and confirm every OpenWork runtime honors any temporary TLS-version pinning policy.",
+        action: "Verify the egress proxy and firewall pass TLS ClientHello traffic to Redrob Work Cloud hosts, then compare with a known Node or openssl TLS 1.2-only probe and confirm every Redrob Work runtime honors any temporary TLS-version pinning policy.",
         details,
       });
     }
@@ -916,7 +916,7 @@ export function cloudEndpointTransportCheck(
       code: "endpoint_tls_handshake_timeout",
       message: "The credential-free TLS handshake timed out before any HTTP response; this points to a TLS handshake or egress proxy fault consistent with a TLS 1.3 ClientHello stall, not an application credential or ServiceNow problem.",
       owner: "network-admin",
-      action: "Verify that the egress proxy and firewall pass TLS 1.3 ClientHello traffic to OpenWork Cloud hosts; compare with a TLS 1.2-only probe or temporarily force TLS 1.2 where policy permits, then rerun diagnostics.",
+      action: "Verify that the egress proxy and firewall pass TLS 1.3 ClientHello traffic to Redrob Work Cloud hosts; compare with a TLS 1.2-only probe or temporarily force TLS 1.2 where policy permits, then rerun diagnostics.",
       details,
     });
   }
@@ -928,9 +928,9 @@ export function cloudEndpointTransportCheck(
         status: "failed",
         evidenceKind: "observed",
         code: "endpoint_tls_interception_detected",
-        message: "The OpenWork Cloud endpoint appears to be TLS-inspected or re-signed by a corporate proxy; the runtime does not trust that inspecting issuer.",
+        message: "The Redrob Work Cloud endpoint appears to be TLS-inspected or re-signed by a corporate proxy; the runtime does not trust that inspecting issuer.",
         owner: "network-admin",
-        action: "Install the corporate inspection root for the OpenWork runtime with NODE_EXTRA_CA_CERTS, or bypass TLS inspection for OpenWork Cloud hosts, then rerun diagnostics.",
+        action: "Install the corporate inspection root for the Redrob Work runtime with NODE_EXTRA_CA_CERTS, or bypass TLS inspection for Redrob Work Cloud hosts, then rerun diagnostics.",
         details,
       });
     }
@@ -940,9 +940,9 @@ export function cloudEndpointTransportCheck(
         status: "failed",
         evidenceKind: "observed",
         code: "endpoint_tls_incomplete_chain",
-        message: "The OpenWork Cloud endpoint served a leaf-only TLS chain and verification failed with UNABLE_TO_VERIFY_LEAF_SIGNATURE; the missing intermediate/fullchain must be repaired before blaming credentials or application logic.",
+        message: "The Redrob Work Cloud endpoint served a leaf-only TLS chain and verification failed with UNABLE_TO_VERIFY_LEAF_SIGNATURE; the missing intermediate/fullchain must be repaired before blaming credentials or application logic.",
         owner: "network-admin",
-        action: "Serve the complete certificate chain from the endpoint or let the OpenWork runtime add the AIA intermediate to NODE_EXTRA_CA_CERTS, then rerun diagnostics.",
+        action: "Serve the complete certificate chain from the endpoint or let the Redrob Work runtime add the AIA intermediate to NODE_EXTRA_CA_CERTS, then rerun diagnostics.",
         details,
       });
     }
@@ -951,9 +951,9 @@ export function cloudEndpointTransportCheck(
       status: "failed",
       evidenceKind: "observed",
       code: "endpoint_tls_untrusted",
-      message: `The OpenWork Cloud endpoint TLS handshake failed with ${probe.verifyErrorCode ?? "a certificate verification error"}; the OS or corporate CA chain is not visible to this runtime.`,
+      message: `The Redrob Work Cloud endpoint TLS handshake failed with ${probe.verifyErrorCode ?? "a certificate verification error"}; the OS or corporate CA chain is not visible to this runtime.`,
       owner: "network-admin",
-      action: "Provide the corporate CA chain to OpenWork with NODE_EXTRA_CA_CERTS or fix the server to present its full certificate chain; the served-chain evidence below shows what the endpoint sent.",
+      action: "Provide the corporate CA chain to Redrob Work with NODE_EXTRA_CA_CERTS or fix the server to present its full certificate chain; the served-chain evidence below shows what the endpoint sent.",
       details,
     });
   }
@@ -963,7 +963,7 @@ export function cloudEndpointTransportCheck(
       status: "failed",
       evidenceKind: "observed",
       code: "endpoint_unreachable",
-      message: "The OpenWork Cloud endpoint could not be reached with a credential-free TCP/TLS handshake.",
+      message: "The Redrob Work Cloud endpoint could not be reached with a credential-free TCP/TLS handshake.",
       owner: "network-admin",
       action: "Verify DNS, firewall, VPN, proxy, and endpoint availability from this machine, then rerun diagnostics.",
       details,
@@ -975,8 +975,8 @@ export function cloudEndpointTransportCheck(
     evidenceKind: probe.skipReason === "invalid_endpoint" || probe.skipReason === "missing_endpoint" ? "unavailable" : "derived",
     code: "transport_probe_not_applicable",
     message: "A credential-free TLS-layer probe was not applicable to this workspace or endpoint configuration; the differential check reports runtime probe eligibility.",
-    owner: "openwork-server",
-    action: "Review the managed OpenWork Cloud MCP configuration if transport evidence is needed.",
+    owner: "redrob-server",
+    action: "Review the managed Redrob Work Cloud MCP configuration if transport evidence is needed.",
     details,
   });
 }
@@ -989,7 +989,7 @@ function organizationCheck(request: AgentContextDiagnosticsRequest): AgentContex
       evidenceKind: "client-observed",
       code: "organization_connections_unavailable",
       message: "The client could not observe organization connection readiness.",
-      owner: "openwork-client",
+      owner: "redrob-client",
       action: "Verify the Den session and organization access, then rerun diagnostics.",
       details: { connectionCount: 0, reportedConnectionCount: 0, truncated: false, notReadyCount: 0 },
     });
@@ -1002,9 +1002,9 @@ function organizationCheck(request: AgentContextDiagnosticsRequest): AgentContex
       evidenceKind: "client-observed",
       code: request.organizationConnectionsProbe.code ?? "organization_connections_skipped",
       message: remotePrivacy
-        ? "Local Den organization topology was intentionally omitted from the remote OpenWork diagnostics request."
+        ? "Local Den organization topology was intentionally omitted from the remote Redrob Work diagnostics request."
         : "Organization connection readiness was not observed for this run.",
-      owner: remotePrivacy ? "openwork-client" : "member",
+      owner: remotePrivacy ? "redrob-client" : "member",
       action: remotePrivacy
         ? "No action is required; run diagnostics against a local workspace to include local Den organization readiness."
         : "Sign in to Den and select an organization to include organization readiness.",
@@ -1045,14 +1045,14 @@ function organizationCheck(request: AgentContextDiagnosticsRequest): AgentContex
           ? "One or more shared organization connections need organization administrator setup or repair."
           : "The client-observed organization connections are ready.",
     owner: truncated
-      ? "openwork-client"
+      ? "redrob-client"
       : memberAndAdminAction
       ? "member-and-organization-admin"
       : memberActionCount > 0
         ? "member"
         : organizationAdminActionCount > 0
           ? "organization-admin"
-          : "openwork-client",
+          : "redrob-client",
     action: truncated
       ? "Review organization connection readiness in Den for the complete inventory."
       : memberAndAdminAction
@@ -1152,24 +1152,24 @@ function engineAgentCheck(
       durationMs,
     );
   }
-  const agent = snapshot.agents.find((candidate) => candidate.name === "openwork");
+  const agent = snapshot.agents.find((candidate) => candidate.name === "redrob");
   return diagnosticCheck({
     id: "engine-agent",
     status: agent ? "passed" : "failed",
     evidenceKind: "observed",
-    code: agent ? "effective_openwork_agent_observed" : "effective_openwork_agent_missing",
+    code: agent ? "effective_redrob_agent_observed" : "effective_redrob_agent_missing",
     message: agent
-      ? "The selected engine resolved the OpenWork agent."
-      : "The selected engine did not resolve an OpenWork agent.",
-    owner: agent ? "opencode-engine" : "openwork-server",
+      ? "The selected engine resolved the Redrob Work agent."
+      : "The selected engine did not resolve an Redrob Work agent.",
+    owner: agent ? "opencode-engine" : "redrob-server",
     action: agent
       ? "No action is required."
-      : "Restore the OpenWork runtime agent injection and restart the selected workspace engine.",
+      : "Restore the Redrob Work runtime agent injection and restart the selected workspace engine.",
     details: {
       engineApiReadPerformed: true,
       effectiveAgentCount: snapshot.agents.length,
-      openworkAgentPresent: Boolean(agent),
-      openworkAgentHidden: agent?.hidden ?? null,
+      redrobAgentPresent: Boolean(agent),
+      redrobAgentHidden: agent?.hidden ?? null,
       permissionRuleCount: agent?.permission.length ?? null,
       rawPromptIncluded: false,
     },
@@ -1215,13 +1215,13 @@ function runtimeHealthCheck(
     evidenceKind: corrupt ? "unavailable" : "derived",
     code,
     message,
-    owner: corrupt ? "openwork-server" : engineConfigured ? "openwork-server" : "member",
+    owner: corrupt ? "redrob-server" : engineConfigured ? "redrob-server" : "member",
     action: status === "passed"
       ? "No action is required."
       : corrupt
-        ? "Repair the OpenWork runtime state before relying on injected configuration."
+        ? "Repair the Redrob Work runtime state before relying on injected configuration."
         : remote
-          ? "Run diagnostics on the OpenWork server that owns the workspace."
+          ? "Run diagnostics on the Redrob Work server that owns the workspace."
           : "Start or configure the selected workspace runtime, then rerun diagnostics.",
     details: {
       workspaceType: workspace.workspaceType,
@@ -1292,22 +1292,22 @@ export async function runAgentContextDiagnostics(input: {
   input.dependencies?.signal?.throwIfAborted();
   const runtimeDuration = elapsed(runtimeStarted, now);
   const runtime = runtimeInspection.config;
-  const expectedRuntimeConfig = buildOpenworkRuntimeConfigObjectFromSnapshot(runtime);
+  const expectedRuntimeConfig = buildRedrobRuntimeConfigObjectFromSnapshot(runtime);
   const expectedAgents = isRecord(expectedRuntimeConfig.agent) ? expectedRuntimeConfig.agent : {};
-  const expectedAgent = isRecord(expectedAgents.openwork) ? expectedAgents.openwork : null;
-  const effectiveOpenworkAgent = effectiveEngine?.agents.find((agent) => agent.name === "openwork") ?? null;
-  const effectiveAgentModeUsable = effectiveOpenworkAgent?.mode === "primary"
-    || effectiveOpenworkAgent?.mode === "all";
+  const expectedAgent = isRecord(expectedAgents.redrob) ? expectedAgents.redrob : null;
+  const effectiveRedrobAgent = effectiveEngine?.agents.find((agent) => agent.name === "redrob") ?? null;
+  const effectiveAgentModeUsable = effectiveRedrobAgent?.mode === "primary"
+    || effectiveRedrobAgent?.mode === "all";
   const effectiveAgentUsable = Boolean(
-    effectiveOpenworkAgent
-    && effectiveEngine?.defaultAgent === "openwork"
-    && !effectiveOpenworkAgent.hidden
+    effectiveRedrobAgent
+    && effectiveEngine?.defaultAgent === "redrob"
+    && !effectiveRedrobAgent.hidden
     && effectiveAgentModeUsable,
   );
   const agentEvidenceSource = effectiveEngine ? "effective-engine" as const : "configured-intent" as const;
   const reportedAgent = effectiveEngine
-    ? effectiveOpenworkAgent
-      ? { prompt: effectiveOpenworkAgent.prompt }
+    ? effectiveRedrobAgent
+      ? { prompt: effectiveRedrobAgent.prompt }
       : null
     : expectedAgent;
   const prompt = promptEvidence(reportedAgent);
@@ -1328,7 +1328,7 @@ export async function runAgentContextDiagnostics(input: {
     return label ? [label] : [];
   }))].slice(0, 100);
   const canonicalConnectPluginSpec = expectedPlugins.find(
-    (spec) => pluginLabel(spec) === "openwork-extensions-preview",
+    (spec) => pluginLabel(spec) === "redrob-extensions-preview",
   ) ?? null;
   const canonicalPluginSpecMatched = canonicalConnectPluginSpec !== null
     && reportedPlugins.some(
@@ -1463,7 +1463,7 @@ export async function runAgentContextDiagnostics(input: {
   // Cached engine registration and agent tool policy are comparison inputs
   // for the differential verdict, never eligibility gates: the independent
   // runtime probe exists precisely to diagnose engine-side failures.
-  const cloudProbe = await probeOpenworkCloudCatalog({
+  const cloudProbe = await probeRedrobCloudCatalog({
     workspaceId: input.workspace.id,
     workspaceType: input.workspace.workspaceType,
     runtimeConfigAvailable: runtimeInspection.status === "available",
@@ -1552,7 +1552,7 @@ export async function runAgentContextDiagnostics(input: {
       evidenceKind: "observed",
       code: "strict_request_validated",
       message: "The request matched the strict diagnostics schema and contained only safe organization summaries.",
-      owner: "openwork-server",
+      owner: "redrob-server",
       action: "No action is required.",
       details: {
         organizationProbeStatus: request.organizationConnectionsProbe.status,
@@ -1574,13 +1574,13 @@ export async function runAgentContextDiagnostics(input: {
       message: !connectSnapshotAvailable
         ? "The passive Connect steering state could not be inspected."
         : crossWorkspaceSteeringDrift
-          ? "Global Connect steering sees OpenWork Cloud, but the selected workspace does not contain that managed MCP."
+          ? "Global Connect steering sees Redrob Work Cloud, but the selected workspace does not contain that managed MCP."
           : "The expected Connect steering branch is internally consistent for the selected workspace.",
-      owner: !connectSnapshotAvailable || crossWorkspaceSteeringDrift ? "openwork-server" : "openwork-client",
+      owner: !connectSnapshotAvailable || crossWorkspaceSteeringDrift ? "redrob-server" : "redrob-client",
       action: !connectSnapshotAvailable
-        ? "Verify the OpenWork server runtime state and rerun diagnostics."
+        ? "Verify the Redrob Work server runtime state and rerun diagnostics."
         : crossWorkspaceSteeringDrift
-          ? "Reconnect or sync OpenWork Cloud for the selected workspace."
+          ? "Reconnect or sync Redrob Work Cloud for the selected workspace."
           : "No action is required.",
       details: {
         expectedBranch: branch,
@@ -1600,43 +1600,43 @@ export async function runAgentContextDiagnostics(input: {
         ? "observed"
         : runtimeInspection.status === "available" ? "expected" : "unavailable",
       code: effectiveEngine
-        ? !effectiveOpenworkAgent
-          ? "effective_openwork_agent_missing"
-          : effectiveEngine.defaultAgent !== "openwork"
+        ? !effectiveRedrobAgent
+          ? "effective_redrob_agent_missing"
+          : effectiveEngine.defaultAgent !== "redrob"
             ? "effective_default_agent_mismatch"
-            : effectiveOpenworkAgent.hidden
-              ? "effective_openwork_agent_hidden"
+            : effectiveRedrobAgent.hidden
+              ? "effective_redrob_agent_hidden"
               : !effectiveAgentModeUsable
-                ? "effective_openwork_agent_not_primary"
-            : "effective_openwork_agent_selected"
+                ? "effective_redrob_agent_not_primary"
+            : "effective_redrob_agent_selected"
         : projectOverrideDetected
           ? "configured_agent_has_override_layers"
           : "runtime_agent_intent_only",
       message: effectiveEngine
-        ? !effectiveOpenworkAgent
-          ? "The effective engine configuration does not contain the OpenWork agent."
-          : effectiveEngine.defaultAgent !== "openwork"
-            ? "The effective engine default does not select the OpenWork agent."
-            : effectiveOpenworkAgent.hidden
-              ? "The effective OpenWork agent is hidden and cannot be used as the default agent."
+        ? !effectiveRedrobAgent
+          ? "The effective engine configuration does not contain the Redrob Work agent."
+          : effectiveEngine.defaultAgent !== "redrob"
+            ? "The effective engine default does not select the Redrob Work agent."
+            : effectiveRedrobAgent.hidden
+              ? "The effective Redrob Work agent is hidden and cannot be used as the default agent."
               : !effectiveAgentModeUsable
-                ? "The effective OpenWork agent is subagent-only and cannot be used as the default agent."
-            : "The effective engine default selects the resolved OpenWork agent."
+                ? "The effective Redrob Work agent is subagent-only and cannot be used as the default agent."
+            : "The effective engine default selects the resolved Redrob Work agent."
         : projectOverrideDetected
-          ? "The configured OpenWork agent intent has project override layers and could not be confirmed live."
-          : "Only the configured OpenWork agent intent was available; effective resolution was not observed.",
+          ? "The configured Redrob Work agent intent has project override layers and could not be confirmed live."
+          : "Only the configured Redrob Work agent intent was available; effective resolution was not observed.",
       owner: effectiveEngine ? "opencode-engine" : projectOverrideDetected ? "member" : "opencode-engine",
       action: effectiveEngine && effectiveAgentUsable
         ? "No action is required."
         : effectiveEngine
-          ? "Restore the OpenWork agent and default-agent injection, then restart the selected workspace engine."
+          ? "Restore the Redrob Work agent and default-agent injection, then restart the selected workspace engine."
           : "Check the selected workspace engine health and rerun diagnostics.",
       details: {
         configuredAgentPresent: Boolean(expectedAgent),
-        effectiveAgentPresent: effectiveEngine ? Boolean(effectiveOpenworkAgent) : null,
-        effectiveDefaultAgentIsOpenwork: effectiveEngine ? effectiveEngine.defaultAgent === "openwork" : null,
-        effectiveAgentHidden: effectiveOpenworkAgent?.hidden ?? null,
-        effectiveAgentMode: effectiveOpenworkAgent?.mode ?? null,
+        effectiveAgentPresent: effectiveEngine ? Boolean(effectiveRedrobAgent) : null,
+        effectiveDefaultAgentIsRedrob: effectiveEngine ? effectiveEngine.defaultAgent === "redrob" : null,
+        effectiveAgentHidden: effectiveRedrobAgent?.hidden ?? null,
+        effectiveAgentMode: effectiveRedrobAgent?.mode ?? null,
         effectiveAgentUsableAsDefault: effectiveEngine ? effectiveAgentUsable : null,
         projectLayersAvailable: projectAgent.available,
         projectDefaultAgentOverride: projectAgent.defaultAgentOverride,
@@ -1656,19 +1656,19 @@ export async function runAgentContextDiagnostics(input: {
           : effectiveEngine ? "effective_prompt_digest_mismatch" : "configured_prompt_digest_mismatch",
       message: promptMatchesCanonicalIntent
         ? effectiveEngine
-          ? "The effective OpenWork base prompt exactly matches the canonical configured injection and contains every required marker."
-          : "The configured OpenWork base prompt intent matches its canonical generated injection and contains every required marker."
+          ? "The effective Redrob Work base prompt exactly matches the canonical configured injection and contains every required marker."
+          : "The configured Redrob Work base prompt intent matches its canonical generated injection and contains every required marker."
         : !promptMarkersPresent
           ? effectiveEngine
-            ? "The effective OpenWork base prompt is missing one or more required markers."
-            : "The configured OpenWork base prompt intent is missing one or more required markers."
+            ? "The effective Redrob Work base prompt is missing one or more required markers."
+            : "The configured Redrob Work base prompt intent is missing one or more required markers."
           : effectiveEngine
-            ? "The effective OpenWork base prompt contains the markers but does not match the canonical configured injection."
-            : "The configured OpenWork base prompt markers are present, but its digest does not match the canonical generated injection.",
-      owner: effectiveEngine ? "opencode-engine" : "openwork-server",
+            ? "The effective Redrob Work base prompt contains the markers but does not match the canonical configured injection."
+            : "The configured Redrob Work base prompt markers are present, but its digest does not match the canonical generated injection.",
+      owner: effectiveEngine ? "opencode-engine" : "redrob-server",
       action: promptMatchesCanonicalIntent
         ? "No action is required."
-        : "Restore the canonical OpenWork runtime agent definition.",
+        : "Restore the canonical Redrob Work runtime agent definition.",
       details: {
         ...prompt.markers,
         promptLength: prompt.length,
@@ -1695,18 +1695,18 @@ export async function runAgentContextDiagnostics(input: {
           : "required_connect_tool_ids_not_denied_by_effective_policy",
       message: cloudToolPolicyStatus === "denied"
         ? !effectiveEngine && staticallyDeniedCloudAgentToolIds.size > 0
-          ? "A passively inspected static OpenCode policy denies one or more required OpenWork Cloud capability tools."
-          : "The effective OpenCode agent policy hides one or more required OpenWork Cloud capability tools."
+          ? "A passively inspected static OpenCode policy denies one or more required Redrob Work Cloud capability tools."
+          : "The effective OpenCode agent policy hides one or more required Redrob Work Cloud capability tools."
         : cloudToolPolicyStatus === "unavailable"
-          ? "Required OpenWork Cloud tool visibility could not be verified from the effective selected-engine agent."
-          : "The effective OpenCode agent policy does not deny either required OpenWork Cloud candidate tool ID; the live engine tool registry was not read.",
+          ? "Required Redrob Work Cloud tool visibility could not be verified from the effective selected-engine agent."
+          : "The effective OpenCode agent policy does not deny either required Redrob Work Cloud candidate tool ID; the live engine tool registry was not read.",
       owner: cloudToolPolicyStatus === "available"
-        ? "openwork-server"
+        ? "redrob-server"
         : cloudToolPolicyStatus === "unavailable"
           ? "opencode-engine"
           : "member",
       action: cloudToolPolicyStatus === "denied"
-        ? "Allow the denied openwork-cloud capability tool IDs in top-level or OpenWork agent permission policy, then rerun diagnostics."
+        ? "Allow the denied redrob-cloud capability tool IDs in top-level or Redrob Work agent permission policy, then rerun diagnostics."
         : cloudToolPolicyStatus === "unavailable"
           ? "Check the selected workspace engine health and rerun diagnostics."
           : "No policy change is required; confirm catalog and registration evidence because this policy check alone does not prove live tool presence.",
@@ -1736,10 +1736,10 @@ export async function runAgentContextDiagnostics(input: {
         : effectiveEngine
           ? "The Connect steering plugin is missing from the effective engine configuration."
           : "The Connect steering plugin is missing from the configured runtime injection intent.",
-      owner: effectiveEngine ? "opencode-engine" : "openwork-server",
+      owner: effectiveEngine ? "opencode-engine" : "redrob-server",
       action: canonicalPluginSpecMatched
         ? "No action is required."
-        : "Restore the canonical OpenWork runtime plugin bundle.",
+        : "Restore the canonical Redrob Work runtime plugin bundle.",
       details: {
         configuredPluginLabels: pluginLabels,
         canonicalPluginSpecMatched,
@@ -1774,7 +1774,7 @@ export async function runAgentContextDiagnostics(input: {
       message: effectiveEngine
         ? inventoryTotal > 200
           ? "The combined engine-configuration and runtime-managed MCP evidence exceeded the report limit and was truncated."
-          : "The selected engine's merged MCP configuration and OpenWork-managed dynamic injection intent were inventoried as separate evidence sources."
+          : "The selected engine's merged MCP configuration and Redrob Work-managed dynamic injection intent were inventoried as separate evidence sources."
         : layerHealthProblem
         ? "One or more static MCP configuration layers are invalid or unreadable."
         : inventoryTotal > 200
@@ -1786,10 +1786,10 @@ export async function runAgentContextDiagnostics(input: {
               : "The server-managed runtime and selected project/global MCP sources were inventoried without claiming complete OpenCode resolution.",
       owner: effectiveEngine
         ? "opencode-engine"
-        : layerHealthProblem ? "member" : inventory.collisions.length > 0 ? "member" : "openwork-server",
+        : layerHealthProblem ? "member" : inventory.collisions.length > 0 ? "member" : "redrob-server",
       action: effectiveEngine
         ? inventoryTotal > 200
-          ? "Reduce the configured MCP count or inspect the engine and OpenWork runtime sources directly."
+          ? "Reduce the configured MCP count or inspect the engine and Redrob Work runtime sources directly."
           : "No action is required; review registration evidence for runtime-managed dynamic MCP connection state."
         : layerHealthProblem
         ? "Repair the invalid or unreadable OpenCode configuration layer, then rerun diagnostics."
@@ -1807,7 +1807,7 @@ export async function runAgentContextDiagnostics(input: {
         globalLayerStatus: inventory.layerStatus.global,
         inventoryScope: effectiveEngine
           ? "engine-merged-config-plus-runtime-managed-injection"
-          : "bounded-openwork-sources",
+          : "bounded-redrob-sources",
         completeDynamicMcpStateClaimed: false,
         engineConfigMcpCount: engineConfigItems?.length ?? 0,
         runtimeManagedMcpCount: inventory.items.filter((item) => item.source === "config.remote").length,
@@ -1855,9 +1855,9 @@ export async function runAgentContextDiagnostics(input: {
         : missingRegistrationCount > 0
           ? "One or more enabled managed MCPs do not have a current engine registration record."
           : remoteMcps.length > 0
-            ? "Every enabled OpenWork-managed MCP has a current connected registration result; configured-disabled entries are not treated as injected tools."
+            ? "Every enabled Redrob Work-managed MCP has a current connected registration result; configured-disabled entries are not treated as injected tools."
             : "No server-managed MCP registration was available to inspect.",
-      owner: failedRegistrationCount > 0 || missingRegistrationCount > 0 ? "opencode-engine" : "openwork-server",
+      owner: failedRegistrationCount > 0 || missingRegistrationCount > 0 ? "opencode-engine" : "redrob-server",
       action: failedRegistrationCount > 0 || missingRegistrationCount > 0
         ? staleRegistrationFailure
           ? "The engine is reachable and this evidence is stale; rerun diagnostics. No repair is needed unless it persists."
@@ -1888,7 +1888,7 @@ export async function runAgentContextDiagnostics(input: {
       code: "live_mcp_status_intentionally_not_queried",
       message: "Live MCP status was not queried because that endpoint can connect every enabled MCP.",
       owner: "opencode-engine",
-      action: "Review the bounded OpenWork Cloud catalog probe and exact managed registration response evidence instead.",
+      action: "Review the bounded Redrob Work Cloud catalog probe and exact managed registration response evidence instead.",
       details: {
         effectiveMcpConfigurationObserved: Boolean(effectiveEngine),
         mcpStatusApiReadPerformed: false,
@@ -1907,7 +1907,7 @@ export async function runAgentContextDiagnostics(input: {
       evidenceKind: "derived",
       code: "sanitized_allowlist_report",
       message: "The report contains only allowlisted evidence, bounded sanitized engine error summaries, and credential-free transport metadata; diagnostics did not directly request mutations, provider operations, or capability calls.",
-      owner: "openwork-server",
+      owner: "redrob-server",
       action: engineApiReadPerformed
         ? "Be aware that reading a cold engine may initialize configured bootstrap or plugin hooks whose side effects this report does not inspect."
         : "No action is required.",
@@ -1953,16 +1953,16 @@ export async function runAgentContextDiagnostics(input: {
         effectiveEngine ? effectiveEngine.defaultAgent : expectedRuntimeConfig.default_agent,
         160,
       ) || null,
-      configuredOpenworkAgent: {
+      configuredRedrobAgent: {
         state: effectiveEngine
-          ? effectiveOpenworkAgent ? "present" : "missing"
+          ? effectiveRedrobAgent ? "present" : "missing"
           : expectedAgent?.disable === true
             ? "configured-disabled"
             : expectedAgent
               ? "present"
               : "missing",
-        mode: effectiveOpenworkAgent
-          ? effectiveOpenworkAgent.mode
+        mode: effectiveRedrobAgent
+          ? effectiveRedrobAgent.mode
           : expectedAgent?.mode === "subagent" || expectedAgent?.mode === "primary" || expectedAgent?.mode === "all"
             ? expectedAgent.mode
             : null,

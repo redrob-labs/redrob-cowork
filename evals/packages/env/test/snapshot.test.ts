@@ -10,13 +10,13 @@ function safeSnapshot() {
     place: "local",
     topology: defineWorld({
       den: { orgs: { acme: {} } },
-      apps: { main: { workspacePath: "/tmp/openwork-safe-snapshot", model: "openai/gpt-5.1" } },
+      apps: { main: { workspacePath: "/tmp/redrob-safe-snapshot", model: "openai/gpt-5.1" } },
     }).topology,
     resolved: {
       den: {
         apiUrl: "http://127.0.0.1:8790",
         webUrl: "http://127.0.0.1:3005",
-        database: "openwork_eval_safe_snapshot",
+        database: "redrob_eval_safe_snapshot",
         ports: { api: 8790, web: 3005 },
       },
       apps: {
@@ -39,7 +39,7 @@ test("buildSnapshot output round-trips through untrusted boot-shape validation",
     },
     apps: {
       main: {
-        workspacePath: "/tmp/openwork-round-trip",
+        workspacePath: "/tmp/redrob-round-trip",
         model: "openai/gpt-5.1",
         sessions: ["Q3 report", "Invoice cleanup"],
       },
@@ -54,7 +54,7 @@ test("buildSnapshot output round-trips through untrusted boot-shape validation",
       den: {
         apiUrl: "http://127.0.0.1:8790",
         webUrl: "http://127.0.0.1:3005",
-        database: "openwork_eval_round_trip",
+        database: "redrob_eval_round_trip",
         ports: { api: 8790, web: 3005 },
       },
       apps: {
@@ -75,7 +75,7 @@ test("buildSnapshot output round-trips through untrusted boot-shape validation",
   assert.deepEqual(snapshot.resolved.den, {
     apiUrl: "http://127.0.0.1:8790",
     webUrl: "http://127.0.0.1:3005",
-    database: "openwork_eval_round_trip",
+    database: "redrob_eval_round_trip",
     ports: { api: 8790, web: 3005 },
   });
 });
@@ -144,7 +144,7 @@ test("fromSnapshot rejects non-loopback resolved app CDP URLs", () => {
 });
 
 test("fromSnapshot rejects injected and non-eval database names", () => {
-  for (const database of ["openwork_eval_safe`; DROP DATABASE production; --", "production"]) {
+  for (const database of ["redrob_eval_safe`; DROP DATABASE production; --", "production"]) {
     const snapshot = safeSnapshot();
     const hostile = {
       ...snapshot,
@@ -155,7 +155,7 @@ test("fromSnapshot rejects injected and non-eval database names", () => {
     };
     assert.throws(
       () => fromSnapshot(JSON.stringify(hostile)),
-      /resolved\.den\.database=.*(?:valid ephemeral database name|only generated openwork_eval_\* databases)/,
+      /resolved\.den\.database=.*(?:valid ephemeral database name|only generated redrob_eval_\* databases)/,
     );
   }
 });

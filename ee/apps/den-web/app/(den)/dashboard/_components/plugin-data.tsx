@@ -376,18 +376,18 @@ const MOCK_PLUGINS: DenPlugin[] = [
     requiresProvider: "any",
   },
   {
-    id: "plg_openwork_release",
-    name: "OpenWork Release Kit",
-    slug: "openwork-release-kit",
+    id: "plg_redrob_release",
+    name: "Redrob Work Release Kit",
+    slug: "redrob-release-kit",
     description:
-      "Internal plugin that automates OpenWork release prep, server package checks, and changelog generation. Shipped by OpenWork infra.",
+      "Internal plugin that automates Redrob Work release prep, server package checks, and changelog generation. Shipped by Redrob Work infra.",
     version: "2.3.1",
-    author: "OpenWork",
+    author: "Redrob Work",
     category: "workflows",
     installed: true,
-    source: { type: "github", repo: "different-ai/openwork-plugins" },
+    source: { type: "github", repo: "redrob-labs/redrob-work-plugins" },
     skills: [
-      { id: "sk_ow_release_prep", name: "Release Prep", description: "Bump versions across app, desktop, and openwork-server in lockstep." },
+      { id: "sk_ow_release_prep", name: "Release Prep", description: "Bump versions across app, desktop, and redrob-server in lockstep." },
       { id: "sk_ow_changelog", name: "Changelog Drafter", description: "Generate markdown release notes from merged PRs." },
     ],
     hooks: [

@@ -20,7 +20,7 @@ let materializeCloudWorkerProviders: MaterializerModule["materializeCloudWorkerP
 let computeCloudProviderMaterializationFingerprint: MaterializerModule["computeCloudProviderMaterializationFingerprint"]
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -193,7 +193,7 @@ function makeInstance(input: {
       return jsonResponse({
         services: [
           {
-            name: "openwork-server",
+            name: "redrob-server",
             actualVersion: input.runtimeVersion ?? null,
           },
         ],
@@ -243,7 +243,7 @@ function makeInstance(input: {
       if (input.providerRouteServesSpa) {
         // Instances older than this route fall through to the SPA catch-all and
         // answer 200 with index.html (seen on a real worker on 0.18.3).
-        return new Response("<!doctype html>\n<html lang=\"en\"><head><title>OpenWork</title></head></html>", {
+        return new Response("<!doctype html>\n<html lang=\"en\"><head><title>Redrob Work</title></head></html>", {
           status: 200,
           headers: { "content-type": "text/html" },
         })
@@ -385,11 +385,11 @@ describe("Cloud provider materialization", () => {
       "PATCH /runtime-config/providers",
       "GET /opencode/config",
     ])
-    expect(instance.calls[2]?.headers["x-openwork-host-token"]).toBe("host-token")
+    expect(instance.calls[2]?.headers["x-redrob-host-token"]).toBe("host-token")
     expect(instance.calls[2]?.body).toEqual({
       entries: [{ key: "ANTHROPIC_API_KEY", value: "sk-anthropic" }],
     })
-    expect(instance.calls[3]?.headers["x-openwork-host-token"]).toBe("host-token")
+    expect(instance.calls[3]?.headers["x-redrob-host-token"]).toBe("host-token")
     expect(instance.calls[3]?.headers.authorization).toBeUndefined()
     expect(instance.calls[3]?.body).toEqual({
       provider: {
@@ -699,7 +699,7 @@ describe("Cloud provider materialization", () => {
   })
 
   test("treats an instance that serves the SPA on the provider route as unsupported", async () => {
-    // A real worker still running openwork-server 0.18.3 answered PATCH
+    // A real worker still running redrob-server 0.18.3 answered PATCH
     // /runtime-config/providers with 200 + index.html, so the patch looked like
     // a success while the engine ended up with zero providers. The org then saw
     // an opaque failure instead of "this workspace needs an update", and every
@@ -721,7 +721,7 @@ describe("Cloud provider materialization", () => {
   test("preserves credential env when the global provider route is unsupported", async () => {
     const workerId = createDenTypeId("worker")
     let provider = makeAnthropicProvider({ apiKey: "sk-anthropic" })
-    const instance = makeInstance({ providerRouteStatus: 404, runtimeVersion: "openwork-0.18.8" })
+    const instance = makeInstance({ providerRouteStatus: 404, runtimeVersion: "redrob-0.18.8" })
     const logs: Array<{ message: string; metadata?: Record<string, unknown> }> = []
     const logger: Logger = {
       warn(message, metadata) {
@@ -754,7 +754,7 @@ describe("Cloud provider materialization", () => {
     expect(logs[0]).toMatchObject({
       message: "cloud provider materialization unsupported by worker version",
       metadata: {
-        instance_version: "openwork-0.18.8",
+        instance_version: "redrob-0.18.8",
         reason: "runtime_provider_patch_failed_404",
       },
     })

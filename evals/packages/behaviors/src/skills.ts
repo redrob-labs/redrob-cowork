@@ -135,12 +135,12 @@ export async function readLoadedExtensions(app: Surface): Promise<string[]> {
     button.click();
     return true;
   })()`, { label: "Extensions section" });
-  await waitFor(app, 'document.body.innerText.includes("OpenWork Browser")', {
+  await waitFor(app, 'document.body.innerText.includes("Redrob Work Browser")', {
     timeoutMs: 10_000,
-    label: "OpenWork Browser extension",
+    label: "Redrob Work Browser extension",
   });
   const value = await waitFor(app, `([...document.querySelectorAll("button")]
     .map((button) => (button.textContent ?? "").replace(/\\s+/g, " ").trim())
-    .filter((label) => label.includes("OpenWork Browser")))`, { timeoutMs: 60_000, label: "OpenWork Browser extension rows" });
+    .filter((label) => label.includes("Redrob Work Browser")))`, { timeoutMs: 60_000, label: "Redrob Work Browser extension rows" });
   return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 }

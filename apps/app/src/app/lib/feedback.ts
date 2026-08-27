@@ -8,7 +8,7 @@ type FeedbackUrlOptions = {
   entrypoint: string;
   deployment?: string | null;
   appVersion?: string | null;
-  openworkServerVersion?: string | null;
+  redrobServerVersion?: string | null;
   opencodeVersion?: string | null;
 };
 
@@ -84,13 +84,13 @@ export function buildFeedbackUrl(options: FeedbackUrlOptions): string {
   const url = new URL(DEFAULT_FEEDBACK_URL);
   const osContext = parseClientOsContext();
 
-  url.searchParams.set("source", "openwork-app");
+  url.searchParams.set("source", "redrob-app");
   url.searchParams.set("entrypoint", options.entrypoint);
 
   const entries = {
     deployment: options.deployment?.trim() ?? "",
     appVersion: options.appVersion?.trim() || ENV_APP_VERSION,
-    openworkServerVersion: options.openworkServerVersion?.trim() ?? "",
+    redrobServerVersion: options.redrobServerVersion?.trim() ?? "",
     opencodeVersion: options.opencodeVersion?.trim() ?? "",
     osName: osContext.osName?.trim() ?? "",
     osVersion: osContext.osVersion?.trim() ?? "",

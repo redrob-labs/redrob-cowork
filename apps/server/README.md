@@ -1,20 +1,20 @@
-# OpenWork Server
+# Redrob Work Server
 
-Filesystem-backed API for OpenWork remote clients. This package provides the OpenWork server layer described in `apps/app/pr/openwork-server.md` and is intentionally independent from the desktop app.
+Filesystem-backed API for Redrob Work remote clients. This package provides the Redrob Work server layer described in `apps/app/pr/redrob-server.md` and is intentionally independent from the desktop app.
 
 ## Quick start
 
 ```bash
-npm install -g openwork-server
-openwork-server --workspace /path/to/workspace --approval auto
+npm install -g redrob-server
+redrob-server --workspace /path/to/workspace --approval auto
 ```
 
-`openwork-server` ships as a compiled binary, so Bun is not required at runtime.
+`redrob-server` ships as a compiled binary, so Bun is not required at runtime.
 
 Or from source:
 
 ```bash
-pnpm --filter openwork-server dev -- \
+pnpm --filter redrob-server dev -- \
   --workspace /path/to/workspace \
   --approval auto
 ```
@@ -25,7 +25,7 @@ Add `--verbose` to print resolved config details on startup. Use `--version` to 
 
 ## Config file
 
-Defaults to `~/.config/openwork/server.json` (override with `REDROB_SERVER_CONFIG` or `--config`).
+Defaults to `~/.config/redrob/server.json` (override with `REDROB_SERVER_CONFIG` or `--config`).
 
 ```json
 {
@@ -110,7 +110,7 @@ Token management (host/owner auth):
 
 Inbox/outbox:
 
-- `POST /workspace/:id/inbox` (multipart upload into `.opencode/openwork/inbox/`)
+- `POST /workspace/:id/inbox` (multipart upload into `.opencode/redrob/inbox/`)
 - `GET /workspace/:id/artifacts`
 - `GET /workspace/:id/artifacts/:artifactId`
 - `POST /workspace/:id/files/sessions`
@@ -133,7 +133,7 @@ All writes are gated by host approval.
 
 Host APIs accept either:
 
-- `X-OpenWork-Host-Token: <token>` (legacy host token), or
+- `X-Redrob Work-Host-Token: <token>` (legacy host token), or
 - `Authorization: Bearer <token>` where the token scope is `owner`.
 
 Approvals endpoints:

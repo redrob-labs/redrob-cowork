@@ -8,7 +8,7 @@ import { Database } from "bun:sqlite";
 import { resolveOpencodeDbPath, seedOpencodeSessionMessages } from "./opencode-db.js";
 
 async function createDb(): Promise<{ path: string; dispose: () => void }> {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-opencode-db-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-opencode-db-"));
   await mkdir(dir, { recursive: true });
   const dbPath = join(dir, "opencode-test.db");
   const db = new Database(dbPath);
@@ -111,7 +111,7 @@ describe("seedOpencodeSessionMessages", () => {
 
 describe("resolveOpencodeDbPath", () => {
   test("prefers an existing XDG opencode.db when present", async () => {
-    const xdg = await mkdtemp(join(tmpdir(), "openwork-opencode-xdg-"));
+    const xdg = await mkdtemp(join(tmpdir(), "redrob-opencode-xdg-"));
     const dir = join(xdg, "opencode");
     const file = join(dir, "opencode.db");
     await mkdir(dir, { recursive: true });
@@ -137,8 +137,8 @@ describe("resolveOpencodeDbPath", () => {
   });
 
   test("finds server-managed OpenCode dbs under REDROB_DATA_DIR", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openwork-server-data-"));
-    const dir = join(root, "openwork-dev-data", "xdg", "data", "opencode");
+    const root = await mkdtemp(join(tmpdir(), "redrob-server-data-"));
+    const dir = join(root, "redrob-dev-data", "xdg", "data", "opencode");
     const file = join(dir, "opencode.db");
     await mkdir(dir, { recursive: true });
     await writeFile(file, "", "utf8");
@@ -167,7 +167,7 @@ describe("resolveOpencodeDbPath", () => {
   });
 
   test("finds legacy OpenCode db layouts under REDROB_DATA_DIR", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openwork-legacy-data-"));
+    const root = await mkdtemp(join(tmpdir(), "redrob-legacy-data-"));
     const dir = join(root, "opencode-dev", "ws-test", "xdg", "data", "opencode");
     const file = join(dir, "opencode.db");
     await mkdir(dir, { recursive: true });

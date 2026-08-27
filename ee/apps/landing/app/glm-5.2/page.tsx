@@ -14,7 +14,7 @@ const DOWNLOAD_URL = "/download";
 const glmSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "OpenWork — GLM 5.2",
+  name: "Redrob Work — GLM 5.2",
   description:
     "GLM 5.2 is available through Redrob Models with 2x usage. Run real agent work on an open model at a fraction of the cost.",
   url: "https://redrob.io/glm-5.2",
@@ -28,13 +28,13 @@ const glmSchema = {
   },
   publisher: {
     "@type": "Organization",
-    name: "OpenWork",
+    name: "Redrob Work",
     url: "https://redrob.io"
   }
 };
 
 export const metadata = {
-  title: "GLM 5.2 is now in OpenWork — with 2x usage",
+  title: "GLM 5.2 is now in Redrob Work — with 2x usage",
   description:
     "GLM 5.2 is available through Redrob Models, and we're doubling your usage so you can run real agent work on an open model at a fraction of the cost.",
   alternates: {
@@ -54,7 +54,7 @@ const features = [
   },
   {
     title: "Run your day from chat",
-    body: "Orchestrate OpenWork fully through chat. Tasks now organize into groups — In progress, Done, Requires attention — and you can move them by asking, not clicking. Try: \"Put this session in In progress now.\"",
+    body: "Orchestrate Redrob Work fully through chat. Tasks now organize into groups — In progress, Done, Requires attention — and you can move them by asking, not clicking. Try: \"Put this session in In progress now.\"",
     color: "border-violet-100 bg-violet-50/50"
   },
   {
@@ -64,12 +64,12 @@ const features = [
   },
   {
     title: "Voice mode",
-    body: "Control the OpenWork UI by voice. Talk through a task, navigate panels, and drive the agent without touching the keyboard.",
+    body: "Control the Redrob Work UI by voice. Talk through a task, navigate panels, and drive the agent without touching the keyboard.",
     color: "border-amber-100 bg-amber-50/50"
   },
   {
-    title: "Advanced analytics on OpenWork Cloud",
-    body: "The cloud platform now has advanced analytics — usage, activity, and team behavior in one view. If you're running OpenWork across a team, this is your new dashboard.",
+    title: "Advanced analytics on Redrob Work Cloud",
+    body: "The cloud platform now has advanced analytics — usage, activity, and team behavior in one view. If you're running Redrob Work across a team, this is your new dashboard.",
     color: "border-rose-100 bg-rose-50/50"
   }
 ];
@@ -90,7 +90,7 @@ export default async function GlmLanding() {
           {/* Hero */}
           <div className="animate-fade-up max-w-3xl">
             <div className="mb-3 text-[12px] font-bold uppercase tracking-wider text-gray-500">
-              New in OpenWork
+              New in Redrob Work
             </div>
             <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
               GLM 5.2, now in the API — with 2x usage
@@ -109,7 +109,7 @@ export default async function GlmLanding() {
                 rel="noreferrer"
                 className="doc-button inline-flex"
               >
-                Try GLM 5.2 in OpenWork →
+                Try GLM 5.2 in Redrob Work →
               </a>
               <a href={CHANGELOG_URL} className="secondary-button inline-flex" target="_blank" rel="noreferrer">
                 See the full changelog
@@ -138,7 +138,7 @@ export default async function GlmLanding() {
               Switch to GLM 5.2 and ask the chat to organize your tasks
             </h2>
             <p className="mb-6 text-[15px] leading-relaxed text-gray-700">
-              Open OpenWork, switch to GLM 5.2 from the model picker, and ask the
+              Open Redrob Work, switch to GLM 5.2 from the model picker, and ask the
               chat to organize your tasks. No setup, no keys — Redrob Models
               handles the rest.
             </p>
@@ -149,7 +149,7 @@ export default async function GlmLanding() {
                 rel="noreferrer"
                 className="doc-button inline-flex"
               >
-                Try GLM 5.2 in OpenWork →
+                Try GLM 5.2 in Redrob Work →
               </a>
               <a href={DOWNLOAD_URL} className="secondary-button inline-flex">
                 Download the app
@@ -172,7 +172,7 @@ export default async function GlmLanding() {
                   Sign up
                 </span>
                 <p className="text-[14px] text-gray-700">
-                  Create a free OpenWork Cloud account. After signup, you land
+                  Create a free Redrob Work Cloud account. After signup, you land
                   directly on the Redrob Models page.
                 </p>
               </div>
@@ -217,7 +217,7 @@ export default async function GlmLanding() {
                 rel="noreferrer"
                 className="doc-button inline-flex"
               >
-                Try GLM 5.2 in OpenWork →
+                Try GLM 5.2 in Redrob Work →
               </a>
               <a href={CALENDAR_URL} target="_blank" rel="noreferrer" className="secondary-button inline-flex">
                 Book a call

@@ -14,14 +14,14 @@ const desktopRequire = createRequire(path.join(desktopRoot, "package.json"));
 const electronCli = desktopRequire.resolve("electron/cli.js");
 const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 export function resolveDemoRoot(env = process.env) {
-  return env.REDROB_ELECTRON_DEMO_ROOT?.trim() || path.join(os.tmpdir(), "openwork-two-electron-demo");
+  return env.REDROB_ELECTRON_DEMO_ROOT?.trim() || path.join(os.tmpdir(), "redrob-two-electron-demo");
 }
 
 const demoRoot = resolveDemoRoot();
 const appProfiles = {
   admin: {
     appIdentifier: "io.redrob.work.demo.admin",
-    appName: "OpenWork Demo A",
+    appName: "Redrob Work Demo A",
     bootstrapName: "admin-bootstrap.json",
     cdpFlag: "--admin-cdp",
     cdpPort: "9923",
@@ -32,7 +32,7 @@ const appProfiles = {
   },
   consumer: {
     appIdentifier: "io.redrob.work.demo.consumer",
-    appName: "OpenWork Demo B",
+    appName: "Redrob Work Demo B",
     bootstrapName: "consumer-bootstrap.json",
     cdpFlag: "--consumer-cdp",
     cdpPort: "9924",
@@ -50,9 +50,9 @@ function profilePaths(runRoot, profile) {
     bootstrapPath: path.join(root, profile.bootstrapName),
     cacheHome: path.join(root, "xdg-cache"),
     configHome: path.join(root, "xdg-config"),
-    dataDir: path.join(root, "openwork-data"),
+    dataDir: path.join(root, "redrob-data"),
     dataHome: path.join(root, "xdg-data"),
-    envStorePath: path.join(root, "openwork-env.json"),
+    envStorePath: path.join(root, "redrob-env.json"),
     homeDir: path.join(root, "home"),
     localAppDataDir: path.join(root, "local-appdata"),
     opencodeConfigDir: path.join(root, "opencode-config"),
@@ -532,10 +532,10 @@ async function main() {
   console.log(`Demo B CDP:    http://127.0.0.1:${consumerCdp}`);
   console.log(`Demo A folder: ${demoRun.admin.root}`);
   console.log(`  Electron:    ${demoRun.admin.userDataDir}`);
-  console.log(`  OpenWork:    ${demoRun.admin.dataDir}`);
+  console.log(`  Redrob Work:    ${demoRun.admin.dataDir}`);
   console.log(`Demo B folder: ${demoRun.consumer.root}`);
   console.log(`  Electron:    ${demoRun.consumer.userDataDir}`);
-  console.log(`  OpenWork:    ${demoRun.consumer.dataDir}`);
+  console.log(`  Redrob Work:    ${demoRun.consumer.dataDir}`);
   const denStartup =
     adminPort === appProfiles.admin.port && consumerPort === appProfiles.consumer.port
       ? "pnpm demo:den"

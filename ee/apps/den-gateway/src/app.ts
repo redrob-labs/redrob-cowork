@@ -55,7 +55,7 @@ type GatewayConfig = {
 
 const ASSET_CACHE = "public, max-age=31536000, immutable"
 const INDEX_CACHE = "no-cache"
-const gatewayKeyHeader = "X-OpenWork-Gateway-Key"
+const gatewayKeyHeader = "X-Redrob Work-Gateway-Key"
 const resolvePath = "/v1/cloud/gateway/resolve"
 const denApiRoutePrefix = "/api/den"
 const hopByHopHeaders = new Set([
@@ -228,7 +228,7 @@ export function shouldProxyToInstance(request: Request) {
     return true
   }
 
-  // /workspace/ is ambiguous: openwork-server owns API routes here, while the
+  // /workspace/ is ambiguous: redrob-server owns API routes here, while the
   // BrowserRouter SPA owns reloadable session/settings deep links under it.
   return pathname.startsWith(workspacePathPrefix) && !isDocumentNavigation(request)
 }
@@ -508,7 +508,7 @@ async function requestBody(request: Request) {
 function upstreamRequestHeaders(headers: Headers, clientToken: string, hostToken: string) {
   const upstream = new Headers(headers)
   upstream.delete("authorization")
-  upstream.delete("x-openwork-host-token")
+  upstream.delete("x-redrob-host-token")
   upstream.delete("cookie")
   upstream.delete("host")
   upstream.delete("connection")
@@ -516,7 +516,7 @@ function upstreamRequestHeaders(headers: Headers, clientToken: string, hostToken
   upstream.delete("transfer-encoding")
   upstream.delete(gatewayKeyHeader)
   upstream.set("Authorization", `Bearer ${clientToken}`)
-  upstream.set("x-openwork-host-token", hostToken)
+  upstream.set("x-redrob-host-token", hostToken)
   return upstream
 }
 
@@ -528,7 +528,7 @@ function denApiRequestHeaders(request: Request) {
     if (normalized === "host" || normalized === "content-length" || normalized === "cookie") return
     if (spoofableForwardingHeaders.has(normalized)) return
     if (normalized === gatewayKeyHeader.toLowerCase()) return
-    if (normalized === "x-openwork-host-token") return
+    if (normalized === "x-redrob-host-token") return
     upstream.append(name, value)
   })
 

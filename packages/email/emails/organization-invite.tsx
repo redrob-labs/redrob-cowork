@@ -11,6 +11,6 @@ OrganizationInvitePreview.PreviewProps = {
   inviteLink: "https://app.redrob.io/join-org?invite=invitation_preview",
   invitedByName: "Ada Lovelace",
   invitedByEmail: "ada@example.com",
-  organizationName: "OpenWork Preview",
+  organizationName: "Redrob Work Preview",
   role: "admin",
 } satisfies OrganizationInviteEmailProps

@@ -10,7 +10,7 @@ import { useAutomationDeploymentEnabled } from "./automation-availability"
 import { createAutomationRunnerConnectCoordinator } from "./automation-runner-connect-coordinator"
 
 const RUNNER_TOKEN_REFRESH_MS = 30 * 60_000
-const RUNNER_ID_KEY = "openwork.automations.desktop-runner-id"
+const RUNNER_ID_KEY = "redrob.automations.desktop-runner-id"
 
 function desktopRunnerId() {
   const existing = localStorage.getItem(RUNNER_ID_KEY)?.trim()

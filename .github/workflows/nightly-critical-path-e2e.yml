@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   critical-path-e2e:
-    if: github.repository == 'different-ai/openwork'
+    if: github.repository == 'redrob-labs/redrob-work'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 100
 

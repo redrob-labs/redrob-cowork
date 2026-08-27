@@ -23,7 +23,7 @@ if [ -n "$FACTORY_ROOT" ]; then
 fi
 
 # ── Internal infra: all build/config/CI files that may reference source ────
-# These are files WITHIN openwork that knip can't trace but that use source files
+# These are files WITHIN redrob that knip can't trace but that use source files
 # by convention, config, or build step.
 INFRA_GLOBS=(
   # CI/CD
@@ -130,9 +130,9 @@ search_infra() {
   echo "$INFRA_FILES" | xargs grep -l "$pattern" 2>/dev/null || true
 }
 
-# Search sibling repo CI/CD and build scripts for an openwork-relative path.
+# Search sibling repo CI/CD and build scripts for an redrob-relative path.
 # Only checks infra files (workflows, Dockerfiles, build scripts), NOT source code,
-# since no sibling repo has an npm dependency on openwork packages.
+# since no sibling repo has an npm dependency on redrob packages.
 search_sibling_ci() {
   local pattern="$1"
   local hits=""
@@ -287,8 +287,8 @@ for filepath in "${UNUSED_FILES[@]}"; do
   fi
 
   # ── Check 4: Sibling repo CI/CD references ──
-  # Only search by the openwork-relative path (precise) or unique filename.
-  # Since no sibling repo has npm deps on openwork packages, we only check
+  # Only search by the redrob-relative path (precise) or unique filename.
+  # Since no sibling repo has npm deps on redrob packages, we only check
   # CI/CD and build scripts for direct path references.
   if [ "$status" = "safe" ]; then
     sibling_hits=$(search_sibling_ci "$filepath")
@@ -346,7 +346,7 @@ flagged_count=${#flagged_sorted[@]}
 echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
 echo -e "${RED}${BOLD} UNUSED — safe to remove (${safe_count})${RESET}"
 echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
-echo -e "${DIM}  No imports in openwork source, no references in CI/CD, build${RESET}"
+echo -e "${DIM}  No imports in redrob source, no references in CI/CD, build${RESET}"
 echo -e "${DIM}  scripts, configs, conventions, routing, or sibling repo pipelines.${RESET}"
 echo ""
 

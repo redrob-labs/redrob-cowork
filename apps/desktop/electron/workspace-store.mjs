@@ -1,5 +1,5 @@
 // Desktop workspace persistence and bootstrap configuration. This module owns
-// on-disk workspace state, per-workspace openwork.json files, remote workspace
+// on-disk workspace state, per-workspace redrob.json files, remote workspace
 // normalization/discovery, and the workspace-facing command operations.
 import { createHash, randomBytes } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -10,10 +10,10 @@ import {
   desktopBootstrapPath as resolveDesktopBootstrapPath,
   legacyDesktopBootstrapPath as resolveLegacyDesktopBootstrapPath,
   normalizeWorkspaceRootPath,
-  openworkServerConfigPath as resolveOpenworkServerConfigPath,
+  redrobServerConfigPath as resolveRedrobServerConfigPath,
 } from "@redrob/paths";
 
-import { openworkWorkspaceDisplayName, selectOpenworkWorkspaceForConnection } from "./remote-workspace.mjs";
+import { redrobWorkspaceDisplayName, selectRedrobWorkspaceForConnection } from "./remote-workspace.mjs";
 import { exportWorkspaceConfig, importWorkspaceConfig } from "./workspace-archive.mjs";
 
 const EMPTY_WORKSPACE_LIST = Object.freeze({
@@ -166,20 +166,20 @@ export function createWorkspaceStore({
   }
 
   function workspaceStatePath() {
-    return path.join(app.getPath("userData"), "openwork-workspaces.json");
+    return path.join(app.getPath("userData"), "redrob-workspaces.json");
   }
 
-  function openworkServerTokenStorePath() {
-    return path.join(app.getPath("userData"), "openwork-server-tokens.json");
+  function redrobServerTokenStorePath() {
+    return path.join(app.getPath("userData"), "redrob-server-tokens.json");
   }
 
-  function openworkServerConfigPath() {
-    return resolveOpenworkServerConfigPath({ env: process.env, homeDir: os.homedir() });
+  function redrobServerConfigPath() {
+    return resolveRedrobServerConfigPath({ env: process.env, homeDir: os.homedir() });
   }
 
-  // Earlier Electron alpha builds copied Tauri's openwork-workspaces.json into
+  // Earlier Electron alpha builds copied Tauri's redrob-workspaces.json into
   // an Electron-only workspace-state.json. Keep importing that file when the
-  // shared canonical file is missing, but write openwork-workspaces.json going
+  // shared canonical file is missing, but write redrob-workspaces.json going
   // forward so Tauri rollback and Electron both read the same desktop state.
   function legacyElectronWorkspaceStatePath() {
     return path.join(app.getPath("userData"), "workspace-state.json");
@@ -194,7 +194,7 @@ export function createWorkspaceStore({
       await mkdir(path.dirname(current), { recursive: true });
       const raw = await readFile(legacy, "utf8");
       await writeFile(current, raw, "utf8");
-      console.info("[migration] copied workspace-state.json to openwork-workspaces.json");
+      console.info("[migration] copied workspace-state.json to redrob-workspaces.json");
       return true;
     } catch (error) {
       console.warn("[migration] legacy Electron workspace-state copy failed", error);
@@ -503,7 +503,7 @@ export function createWorkspaceStore({
     return undefined;
   }
 
-  function defaultWorkspaceOpenworkConfig(workspacePath, preset = null) {
+  function defaultWorkspaceRedrobConfig(workspacePath, preset = null) {
     return {
       version: 1,
       workspace: workspacePath
@@ -553,7 +553,7 @@ export function createWorkspaceStore({
   }
 
   async function recoverWorkspacesFromTokenStore() {
-    const store = await readJsonFile(openworkServerTokenStorePath(), null);
+    const store = await readJsonFile(redrobServerTokenStorePath(), null);
     if (!isRecord(store) || !isRecord(store.workspaces)) return [];
 
     const candidates = [];
@@ -589,7 +589,7 @@ export function createWorkspaceStore({
     const workspaceKey = normalizeWorkspacePathKey(workspacePath);
     if (!workspaceKey) return;
 
-    const store = await readJsonFile(openworkServerTokenStorePath(), null);
+    const store = await readJsonFile(redrobServerTokenStorePath(), null);
     if (!isRecord(store) || !isRecord(store.workspaces)) return;
 
     const workspaces = { ...store.workspaces };
@@ -600,12 +600,12 @@ export function createWorkspaceStore({
       changed = true;
     }
     if (changed) {
-      await writeJsonFileAtomic(openworkServerTokenStorePath(), { ...store, workspaces });
+      await writeJsonFileAtomic(redrobServerTokenStorePath(), { ...store, workspaces });
     }
   }
 
   async function recoverWorkspacesFromServerConfig() {
-    const config = await readJsonFile(openworkServerConfigPath(), null);
+    const config = await readJsonFile(redrobServerConfigPath(), null);
     if (!isRecord(config) || !Array.isArray(config.workspaces)) return [];
 
     const seen = new Set();
@@ -621,13 +621,13 @@ export function createWorkspaceStore({
 
       const baseUrl = typeof entry.baseUrl === "string" ? entry.baseUrl.trim() : "";
       const directory = typeof entry.directory === "string" && entry.directory.trim() ? entry.directory.trim() : null;
-      const remoteType = entry.remoteType === "opencode" ? "opencode" : "openwork";
-      const openworkWorkspaceId = typeof entry.openworkWorkspaceId === "string" ? entry.openworkWorkspaceId.trim() : "";
+      const remoteType = entry.remoteType === "opencode" ? "opencode" : "redrob";
+      const redrobWorkspaceId = typeof entry.redrobWorkspaceId === "string" ? entry.redrobWorkspaceId.trim() : "";
       const id = typeof entry.id === "string" && entry.id.trim()
         ? entry.id.trim()
         : workspaceType === "remote"
-          ? remoteType === "openwork"
-            ? openworkRemoteWorkspaceId(baseUrl, openworkWorkspaceId)
+          ? remoteType === "redrob"
+            ? redrobRemoteWorkspaceId(baseUrl, redrobWorkspaceId)
             : remoteWorkspaceId(baseUrl, directory)
           : localWorkspaceId(normalizedPath);
       const key = workspaceType === "remote" ? id : normalizeWorkspacePathKey(normalizedPath);
@@ -670,7 +670,7 @@ export function createWorkspaceStore({
     return stableWorkspaceId(key);
   }
 
-  function parseOpenworkWorkspaceIdFromUrl(input) {
+  function parseRedrobWorkspaceIdFromUrl(input) {
     const raw = String(input ?? "").trim();
     if (!raw) return null;
     try {
@@ -693,7 +693,7 @@ export function createWorkspaceStore({
     }
   }
 
-  function stripOpenworkWorkspaceMount(input) {
+  function stripRedrobWorkspaceMount(input) {
     const raw = String(input ?? "").trim();
     if (!raw) return null;
     try {
@@ -712,13 +712,13 @@ export function createWorkspaceStore({
     }
   }
 
-  function openworkRemoteWorkspaceId(hostUrl, workspaceId) {
-    const remoteWorkspaceId = String(workspaceId ?? "").trim() || parseOpenworkWorkspaceIdFromUrl(hostUrl);
+  function redrobRemoteWorkspaceId(hostUrl, workspaceId) {
+    const remoteWorkspaceId = String(workspaceId ?? "").trim() || parseRedrobWorkspaceIdFromUrl(hostUrl);
     if (remoteWorkspaceId) return `rem_${remoteWorkspaceId}`;
-    return `rem_${createHash("sha256").update(`openwork::${hostUrl}`).digest("hex").slice(0, 12)}`;
+    return `rem_${createHash("sha256").update(`redrob::${hostUrl}`).digest("hex").slice(0, 12)}`;
   }
 
-  async function fetchOpenworkWorkspaceList(hostUrl, token, hostToken) {
+  async function fetchRedrobWorkspaceList(hostUrl, token, hostToken) {
     const url = `${String(hostUrl ?? "").replace(/\/+$/, "")}/workspaces`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8_000);
@@ -726,7 +726,7 @@ export function createWorkspaceStore({
     const bearerToken = String(token ?? "").trim();
     const hostAuthToken = String(hostToken ?? "").trim();
     if (bearerToken) headers.set("Authorization", `Bearer ${bearerToken}`);
-    if (hostAuthToken) headers.set("X-OpenWork-Host-Token", hostAuthToken);
+    if (hostAuthToken) headers.set("X-Redrob Work-Host-Token", hostAuthToken);
 
     try {
       const electron = await import("electron").catch(() => null);
@@ -738,7 +738,7 @@ export function createWorkspaceStore({
         cache: "no-store",
       });
       if (!response.ok) {
-        throw new Error(`OpenWork workspace discovery failed (${response.status} ${response.statusText || "HTTP error"})`);
+        throw new Error(`Redrob Work workspace discovery failed (${response.status} ${response.statusText || "HTTP error"})`);
       }
       return await response.json();
     } finally {
@@ -746,9 +746,9 @@ export function createWorkspaceStore({
     }
   }
 
-  async function discoverOpenworkWorkspace({ hostUrl, token, hostToken, directory }) {
-    const list = await fetchOpenworkWorkspaceList(hostUrl, token, hostToken);
-    return selectOpenworkWorkspaceForConnection(list, directory);
+  async function discoverRedrobWorkspace({ hostUrl, token, hostToken, directory }) {
+    const list = await fetchRedrobWorkspaceList(hostUrl, token, hostToken);
+    return selectRedrobWorkspaceForConnection(list, directory);
   }
 
   function normalizeWorkspaceEntry(input) {
@@ -762,32 +762,32 @@ export function createWorkspaceStore({
       baseUrl: input.baseUrl ?? null,
       directory: input.directory ?? null,
       displayName: input.displayName ?? null,
-      openworkHostUrl: input.openworkHostUrl ?? null,
-      openworkToken: input.openworkToken ?? null,
-      openworkClientToken: input.openworkClientToken ?? null,
-      openworkHostToken: input.openworkHostToken ?? null,
-      openworkWorkspaceId: input.openworkWorkspaceId ?? null,
-      openworkWorkspaceName: input.openworkWorkspaceName ?? null,
+      redrobHostUrl: input.redrobHostUrl ?? null,
+      redrobToken: input.redrobToken ?? null,
+      redrobClientToken: input.redrobClientToken ?? null,
+      redrobHostToken: input.redrobHostToken ?? null,
+      redrobWorkspaceId: input.redrobWorkspaceId ?? null,
+      redrobWorkspaceName: input.redrobWorkspaceName ?? null,
       sandboxBackend: input.sandboxBackend ?? null,
       sandboxRunId: input.sandboxRunId ?? null,
       sandboxContainerName: input.sandboxContainerName ?? null,
     };
   }
 
-  async function readWorkspaceOpenworkConfig(workspacePath) {
-    const openworkPath = path.join(workspacePath, ".opencode", "openwork.json");
-    if (!(await pathExists(openworkPath))) {
-      return defaultWorkspaceOpenworkConfig(workspacePath);
+  async function readWorkspaceRedrobConfig(workspacePath) {
+    const redrobPath = path.join(workspacePath, ".opencode", "redrob.json");
+    if (!(await pathExists(redrobPath))) {
+      return defaultWorkspaceRedrobConfig(workspacePath);
     }
-    const raw = await readFile(openworkPath, "utf8");
+    const raw = await readFile(redrobPath, "utf8");
     return JSON.parse(raw);
   }
 
-  async function writeWorkspaceOpenworkConfig(workspacePath, config) {
-    const openworkPath = path.join(workspacePath, ".opencode", "openwork.json");
-    await mkdir(path.dirname(openworkPath), { recursive: true });
-    await writeFile(openworkPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-    return execResult(true, `Wrote ${openworkPath}`);
+  async function writeWorkspaceRedrobConfig(workspacePath, config) {
+    const redrobPath = path.join(workspacePath, ".opencode", "redrob.json");
+    await mkdir(path.dirname(redrobPath), { recursive: true });
+    await writeFile(redrobPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+    return execResult(true, `Wrote ${redrobPath}`);
   }
 
   async function writeWorkspaceState(nextState) {
@@ -833,7 +833,7 @@ export function createWorkspaceStore({
       const recoveredWorkspaces = await recoverWorkspacesFromKnownState();
       if (recoveredWorkspaces.length > 0) {
         const selectedWorkspace = recoveredWorkspaces[0];
-        console.info("[migration] recovered desktop workspaces from persisted OpenWork state", {
+        console.info("[migration] recovered desktop workspaces from persisted Redrob Work state", {
           count: recoveredWorkspaces.length,
           selectedWorkspaceId: selectedWorkspace.id,
         });
@@ -847,29 +847,29 @@ export function createWorkspaceStore({
     const idMap = new Map();
     const migratedWorkspaces = workspaces.map((entry) => {
       const workspace = entry && typeof entry === "object" ? entry : normalizeWorkspaceEntry(entry ?? {});
-      if (workspace.workspaceType !== "remote" || workspace.remoteType !== "openwork") return workspace;
+      if (workspace.workspaceType !== "remote" || workspace.remoteType !== "redrob") return workspace;
 
-      const remoteWorkspaceId = String(workspace.openworkWorkspaceId ?? "").trim()
-        || parseOpenworkWorkspaceIdFromUrl(workspace.openworkHostUrl)
-        || parseOpenworkWorkspaceIdFromUrl(workspace.baseUrl);
+      const remoteWorkspaceId = String(workspace.redrobWorkspaceId ?? "").trim()
+        || parseRedrobWorkspaceIdFromUrl(workspace.redrobHostUrl)
+        || parseRedrobWorkspaceIdFromUrl(workspace.baseUrl);
       if (!remoteWorkspaceId) return workspace;
 
-      const hostUrl = stripOpenworkWorkspaceMount(workspace.openworkHostUrl) || stripOpenworkWorkspaceMount(workspace.baseUrl);
-      const nextId = openworkRemoteWorkspaceId(hostUrl ?? workspace.baseUrl, remoteWorkspaceId);
+      const hostUrl = stripRedrobWorkspaceMount(workspace.redrobHostUrl) || stripRedrobWorkspaceMount(workspace.baseUrl);
+      const nextId = redrobRemoteWorkspaceId(hostUrl ?? workspace.baseUrl, remoteWorkspaceId);
       idMap.set(workspace.id, nextId);
       const nextWorkspace = {
         ...workspace,
         id: nextId,
         baseUrl: hostUrl,
-        openworkWorkspaceId: remoteWorkspaceId,
-        openworkHostUrl: hostUrl,
+        redrobWorkspaceId: remoteWorkspaceId,
+        redrobHostUrl: hostUrl,
       };
-      if (workspace.id !== nextWorkspace.id || workspace.baseUrl !== nextWorkspace.baseUrl || workspace.openworkWorkspaceId !== nextWorkspace.openworkWorkspaceId || workspace.openworkHostUrl !== nextWorkspace.openworkHostUrl) {
+      if (workspace.id !== nextWorkspace.id || workspace.baseUrl !== nextWorkspace.baseUrl || workspace.redrobWorkspaceId !== nextWorkspace.redrobWorkspaceId || workspace.redrobHostUrl !== nextWorkspace.redrobHostUrl) {
         changed = true;
       }
       return nextWorkspace;
     });
-    // Older desktop state can contain multiple OpenWork remote entries that
+    // Older desktop state can contain multiple Redrob Work remote entries that
     // normalize to the same rem_<workspaceId> after stripping worker mounts.
     // Collapse them here so React never receives duplicate workspace keys.
     const workspaceIndexById = new Map();
@@ -958,7 +958,7 @@ export function createWorkspaceStore({
       workspaceType: "local",
     });
     await mkdir(path.join(folderPath, ".opencode"), { recursive: true });
-    await writeWorkspaceOpenworkConfig(folderPath, defaultWorkspaceOpenworkConfig(folderPath, preset));
+    await writeWorkspaceRedrobConfig(folderPath, defaultWorkspaceRedrobConfig(folderPath, preset));
 
     return mutateWorkspaceState((state) => {
       const key = workspacePathKey(workspace);
@@ -979,57 +979,57 @@ export function createWorkspaceStore({
     if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
       throw new Error("baseUrl must start with http:// or https://");
     }
-    const remoteType = input.remoteType === "opencode" ? "opencode" : "openwork";
+    const remoteType = input.remoteType === "opencode" ? "opencode" : "redrob";
     const directory = typeof input.directory === "string" && input.directory.trim() ? input.directory.trim() : null;
-    const rawOpenworkHostUrl = typeof input.openworkHostUrl === "string" && input.openworkHostUrl.trim()
-      ? input.openworkHostUrl.trim()
+    const rawRedrobHostUrl = typeof input.redrobHostUrl === "string" && input.redrobHostUrl.trim()
+      ? input.redrobHostUrl.trim()
       : null;
-    const openworkHostUrl = remoteType === "openwork"
-      ? stripOpenworkWorkspaceMount(rawOpenworkHostUrl ?? baseUrl)
-      : rawOpenworkHostUrl;
-    const openworkWorkspaceId = typeof input.openworkWorkspaceId === "string" && input.openworkWorkspaceId.trim()
-      ? input.openworkWorkspaceId.trim()
-      : remoteType === "openwork"
-        ? parseOpenworkWorkspaceIdFromUrl(rawOpenworkHostUrl) || parseOpenworkWorkspaceIdFromUrl(baseUrl)
+    const redrobHostUrl = remoteType === "redrob"
+      ? stripRedrobWorkspaceMount(rawRedrobHostUrl ?? baseUrl)
+      : rawRedrobHostUrl;
+    const redrobWorkspaceId = typeof input.redrobWorkspaceId === "string" && input.redrobWorkspaceId.trim()
+      ? input.redrobWorkspaceId.trim()
+      : remoteType === "redrob"
+        ? parseRedrobWorkspaceIdFromUrl(rawRedrobHostUrl) || parseRedrobWorkspaceIdFromUrl(baseUrl)
         : null;
-    let resolvedOpenworkWorkspaceId = openworkWorkspaceId;
-    let resolvedOpenworkWorkspaceName = input.openworkWorkspaceName ?? null;
-    if (remoteType === "openwork" && !resolvedOpenworkWorkspaceId) {
-      const discovered = await discoverOpenworkWorkspace({
-        hostUrl: openworkHostUrl ?? baseUrl,
-        token: input.openworkToken,
-        hostToken: input.openworkHostToken,
+    let resolvedRedrobWorkspaceId = redrobWorkspaceId;
+    let resolvedRedrobWorkspaceName = input.redrobWorkspaceName ?? null;
+    if (remoteType === "redrob" && !resolvedRedrobWorkspaceId) {
+      const discovered = await discoverRedrobWorkspace({
+        hostUrl: redrobHostUrl ?? baseUrl,
+        token: input.redrobToken,
+        hostToken: input.redrobHostToken,
         directory,
       });
       if (!discovered?.id) {
         throw new Error(
           directory
-            ? `OpenWork server has no workspace matching ${directory}.`
-            : "OpenWork server returned no workspaces.",
+            ? `Redrob Work server has no workspace matching ${directory}.`
+            : "Redrob Work server returned no workspaces.",
         );
       }
-      resolvedOpenworkWorkspaceId = String(discovered.id).trim();
-      resolvedOpenworkWorkspaceName = openworkWorkspaceDisplayName(discovered);
+      resolvedRedrobWorkspaceId = String(discovered.id).trim();
+      resolvedRedrobWorkspaceName = redrobWorkspaceDisplayName(discovered);
     }
-    const id = remoteType === "openwork"
-      ? openworkRemoteWorkspaceId(openworkHostUrl ?? baseUrl, resolvedOpenworkWorkspaceId)
+    const id = remoteType === "redrob"
+      ? redrobRemoteWorkspaceId(redrobHostUrl ?? baseUrl, resolvedRedrobWorkspaceId)
       : remoteWorkspaceId(baseUrl, directory);
     const workspace = normalizeWorkspaceEntry({
       id,
-      name: String(input.displayName ?? resolvedOpenworkWorkspaceName ?? "Remote workspace"),
+      name: String(input.displayName ?? resolvedRedrobWorkspaceName ?? "Remote workspace"),
       displayName: input.displayName ?? null,
       path: directory ?? "",
       preset: "remote",
       workspaceType: "remote",
       remoteType,
-      baseUrl: remoteType === "openwork" ? (openworkHostUrl ?? baseUrl) : baseUrl,
+      baseUrl: remoteType === "redrob" ? (redrobHostUrl ?? baseUrl) : baseUrl,
       directory,
-      openworkHostUrl,
-      openworkToken: input.openworkToken ?? null,
-      openworkClientToken: input.openworkClientToken ?? null,
-      openworkHostToken: input.openworkHostToken ?? null,
-      openworkWorkspaceId: resolvedOpenworkWorkspaceId,
-      openworkWorkspaceName: resolvedOpenworkWorkspaceName,
+      redrobHostUrl,
+      redrobToken: input.redrobToken ?? null,
+      redrobClientToken: input.redrobClientToken ?? null,
+      redrobHostToken: input.redrobHostToken ?? null,
+      redrobWorkspaceId: resolvedRedrobWorkspaceId,
+      redrobWorkspaceName: resolvedRedrobWorkspaceName,
       sandboxBackend: input.sandboxBackend ?? null,
       sandboxRunId: input.sandboxRunId ?? null,
       sandboxContainerName: input.sandboxContainerName ?? null,
@@ -1052,50 +1052,50 @@ export function createWorkspaceStore({
       if (!existing) return state;
 
       let nextWorkspace = { ...existing, ...patch };
-      const nextRemoteType = nextWorkspace.remoteType === "opencode" ? "opencode" : "openwork";
-      if (nextRemoteType === "openwork") {
-        const rawHostUrl = typeof nextWorkspace.openworkHostUrl === "string" && nextWorkspace.openworkHostUrl.trim()
-          ? nextWorkspace.openworkHostUrl.trim()
+      const nextRemoteType = nextWorkspace.remoteType === "opencode" ? "opencode" : "redrob";
+      if (nextRemoteType === "redrob") {
+        const rawHostUrl = typeof nextWorkspace.redrobHostUrl === "string" && nextWorkspace.redrobHostUrl.trim()
+          ? nextWorkspace.redrobHostUrl.trim()
           : null;
         const nextBaseUrl = String(nextWorkspace.baseUrl ?? "").trim();
-        const hostUrl = stripOpenworkWorkspaceMount(rawHostUrl ?? nextBaseUrl);
+        const hostUrl = stripRedrobWorkspaceMount(rawHostUrl ?? nextBaseUrl);
         const directory = typeof nextWorkspace.directory === "string" && nextWorkspace.directory.trim()
           ? nextWorkspace.directory.trim()
           : null;
-        const parsedWorkspaceId = parseOpenworkWorkspaceIdFromUrl(rawHostUrl) || parseOpenworkWorkspaceIdFromUrl(nextBaseUrl);
+        const parsedWorkspaceId = parseRedrobWorkspaceIdFromUrl(rawHostUrl) || parseRedrobWorkspaceIdFromUrl(nextBaseUrl);
         let remoteWorkspaceId = parsedWorkspaceId || (
-          typeof nextWorkspace.openworkWorkspaceId === "string" && nextWorkspace.openworkWorkspaceId.trim()
-            ? nextWorkspace.openworkWorkspaceId.trim()
+          typeof nextWorkspace.redrobWorkspaceId === "string" && nextWorkspace.redrobWorkspaceId.trim()
+            ? nextWorkspace.redrobWorkspaceId.trim()
             : null
         );
-        let remoteWorkspaceName = nextWorkspace.openworkWorkspaceName ?? null;
+        let remoteWorkspaceName = nextWorkspace.redrobWorkspaceName ?? null;
         if (!remoteWorkspaceId) {
-          const discovered = await discoverOpenworkWorkspace({
+          const discovered = await discoverRedrobWorkspace({
             hostUrl: hostUrl ?? nextBaseUrl,
-            token: nextWorkspace.openworkToken,
-            hostToken: nextWorkspace.openworkHostToken,
+            token: nextWorkspace.redrobToken,
+            hostToken: nextWorkspace.redrobHostToken,
             directory,
           });
           if (!discovered?.id) {
             throw new Error(
               directory
-                ? `OpenWork server has no workspace matching ${directory}.`
-                : "OpenWork server returned no workspaces.",
+                ? `Redrob Work server has no workspace matching ${directory}.`
+                : "Redrob Work server returned no workspaces.",
             );
           }
           remoteWorkspaceId = String(discovered.id).trim();
-          remoteWorkspaceName = openworkWorkspaceDisplayName(discovered);
+          remoteWorkspaceName = redrobWorkspaceDisplayName(discovered);
         }
-        const nextId = openworkRemoteWorkspaceId(hostUrl ?? nextBaseUrl, remoteWorkspaceId);
+        const nextId = redrobRemoteWorkspaceId(hostUrl ?? nextBaseUrl, remoteWorkspaceId);
         nextWorkspace = normalizeWorkspaceEntry({
           ...nextWorkspace,
           id: nextId,
           baseUrl: hostUrl ?? nextBaseUrl,
-          openworkHostUrl: hostUrl,
+          redrobHostUrl: hostUrl,
           directory,
-          remoteType: "openwork",
-          openworkWorkspaceId: remoteWorkspaceId,
-          openworkWorkspaceName: remoteWorkspaceName,
+          remoteType: "redrob",
+          redrobWorkspaceId: remoteWorkspaceId,
+          redrobWorkspaceName: remoteWorkspaceName,
         });
         if (nextId !== workspaceId) {
           if (state.selectedId === workspaceId) state.selectedId = nextId;
@@ -1144,14 +1144,14 @@ export function createWorkspaceStore({
     if (!workspacePath || !authorizedRoot) {
       throw new Error("workspacePath and folderPath are required");
     }
-    const config = await readWorkspaceOpenworkConfig(workspacePath);
+    const config = await readWorkspaceRedrobConfig(workspacePath);
     if (!Array.isArray(config.authorizedRoots)) {
       config.authorizedRoots = [];
     }
     if (!config.authorizedRoots.includes(authorizedRoot)) {
       config.authorizedRoots.push(authorizedRoot);
     }
-    return writeWorkspaceOpenworkConfig(workspacePath, config);
+    return writeWorkspaceRedrobConfig(workspacePath, config);
   }
 
   async function exportConfig(input = {}) {
@@ -1197,7 +1197,7 @@ export function createWorkspaceStore({
     });
   }
 
-  async function resetOpenworkState() {
+  async function resetRedrobState() {
     await rm(workspaceStatePath(), { force: true });
     await clearDesktopBootstrapFiles();
     return undefined;
@@ -1209,7 +1209,7 @@ export function createWorkspaceStore({
     createWorkspace,
     clearDesktopBootstrapConfig,
     debugDesktopBootstrapConfig,
-    defaultWorkspaceOpenworkConfig,
+    defaultWorkspaceRedrobConfig,
     exportConfig,
     forgetWorkspace,
     getDesktopBootstrapConfig,
@@ -1217,15 +1217,15 @@ export function createWorkspaceStore({
     listLocalWorkspacePaths,
     migrateLegacyElectronWorkspaceStateIfNeeded,
     readDesktopBootstrapConfigSync,
-    readWorkspaceOpenworkConfig,
+    readWorkspaceRedrobConfig,
     readWorkspaceState,
-    resetOpenworkState,
+    resetRedrobState,
     setDesktopBootstrapConfig,
     setRuntimeActiveWorkspace,
     setSelectedWorkspace,
     updateRemoteWorkspace,
     updateWorkspaceDisplayName,
-    writeWorkspaceOpenworkConfig,
+    writeWorkspaceRedrobConfig,
     writeWorkspaceState,
   };
 }

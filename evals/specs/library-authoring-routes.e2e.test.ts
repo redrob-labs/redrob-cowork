@@ -68,7 +68,7 @@ async function readAuthoredSkill(
   const listed = await denFetch(session, `/v1/plugins?q=${encodeURIComponent(pluginName)}&limit=20`, {
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   if (!listed.response.ok || !isRecord(listed.body)) return null;
@@ -79,7 +79,7 @@ async function readAuthoredSkill(
   const resolved = await denFetch(session, `/v1/plugins/${encodeURIComponent(pluginId)}/resolved`, {
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   if (!resolved.response.ok || !isRecord(resolved.body)) return null;
@@ -215,7 +215,7 @@ test(title, async ({ evidence, place }) => {
     };
     const observer = new MutationObserver(record);
     observer.observe(document.body, { subtree: true, childList: true, characterData: true });
-    window.__openworkLibraryFlashProbe = { flashes, observer, modalClosed: () => modalClosed };
+    window.__redrobLibraryFlashProbe = { flashes, observer, modalClosed: () => modalClosed };
     return true;
   })()`);
   expect(observerInstalled).toBe(true);
@@ -242,8 +242,8 @@ test(title, async ({ evidence, place }) => {
   });
   const optimisticDetail = await evalIn(desktop, `({
     route: decodeURIComponent(location.hash),
-    modalClosed: window.__openworkLibraryFlashProbe?.modalClosed() ?? false,
-    flashes: [...(window.__openworkLibraryFlashProbe?.flashes ?? [])],
+    modalClosed: window.__redrobLibraryFlashProbe?.modalClosed() ?? false,
+    flashes: [...(window.__redrobLibraryFlashProbe?.flashes ?? [])],
     hasName: document.body.innerText.includes(${JSON.stringify(skillName)}),
     hasDescription: document.body.innerText.includes(${JSON.stringify(description)}),
   })`);
@@ -336,7 +336,7 @@ test(title, async ({ evidence, place }) => {
     label: "hydrated authored skill in desktop Library",
   });
   const flashProbe = await evalIn(desktop, `(() => {
-    const probe = window.__openworkLibraryFlashProbe;
+    const probe = window.__redrobLibraryFlashProbe;
     if (!probe) return null;
     probe.observer.disconnect();
     return { modalClosed: probe.modalClosed(), flashes: [...probe.flashes] };
@@ -399,7 +399,7 @@ test(title, async ({ evidence, place }) => {
     timeoutMs: 60_000,
     label: "Den Web origin before token handoff",
   });
-  await evalIn(browser, `localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)})`);
+  await evalIn(browser, `localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)})`);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/library`);
   await waitFor(browser, `document.body.innerText.includes("My Library")
     && [...document.querySelectorAll("button")].some((button) => /^Show \\d+ more$/.test((button.textContent ?? "").trim()))`, {

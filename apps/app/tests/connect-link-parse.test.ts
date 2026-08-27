@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseConnectDeepLink } from "../src/app/lib/openwork-links";
+import { parseConnectDeepLink } from "../src/app/lib/redrob-links";
 
 const TOKEN = "eyJhbGciOiJFZERTQSJ9.eyJmYWtlIjoxfQ.c2ln";
 
@@ -23,7 +23,7 @@ describe("parseConnectDeepLink", () => {
   });
 
   test("does not activate from web URLs or unrelated desktop routes", () => {
-    expect(parseConnectDeepLink(`https://openwork.example.com/connect?token=${TOKEN}`)).toBeNull();
+    expect(parseConnectDeepLink(`https://redrob.example.com/connect?token=${TOKEN}`)).toBeNull();
     expect(parseConnectDeepLink(`redrob://den-auth?grant=${TOKEN}`)).toBeNull();
     expect(parseConnectDeepLink("redrob://connect")).toBeNull();
     expect(parseConnectDeepLink("not a url")).toBeNull();

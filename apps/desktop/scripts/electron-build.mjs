@@ -11,7 +11,7 @@ const electronHelperDir = resolve(desktopRoot, "resources", "helpers");
 const electronRoot = resolve(desktopRoot, "electron");
 const packagedServerRoot = resolve(desktopRoot, "server");
 const packagedRuntimeRoot = resolve(desktopRoot, ".electron-runtime", "node_modules");
-const sentryBuildConfigPath = resolve(desktopRoot, ".electron-runtime", "openwork-sentry.json");
+const sentryBuildConfigPath = resolve(desktopRoot, ".electron-runtime", "redrob-sentry.json");
 
 const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const nodeCmd = process.execPath;
@@ -50,7 +50,7 @@ run(nodeCmd, [resolve(__dirname, "prepare-computer-use-helper.mjs"), "--force", 
 run(nodeCmd, [resolve(__dirname, "prepare-runtime-node-modules.mjs"), "--outdir", packagedRuntimeRoot], desktopRoot);
 writeSentryBuildConfig();
 // Build the server TS → JS so Electron can import it in-process
-run(pnpmCmd, ["--filter", "openwork-server", "build"], repoRoot);
+run(pnpmCmd, ["--filter", "redrob-server", "build"], repoRoot);
 // REDROB_ELECTRON_BUILD tells Vite to emit relative asset paths so
 // index.html resolves /assets/* correctly when loaded via file:// from
 // inside the packaged .app bundle.

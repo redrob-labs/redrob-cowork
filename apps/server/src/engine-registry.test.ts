@@ -24,7 +24,7 @@ type Fixture = {
 };
 
 async function createFixture(): Promise<Fixture> {
-  const root = await mkdtemp(join(tmpdir(), "openwork-engine-registry-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-engine-registry-"));
   const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   const config = { configPath: join(root, "server.json") } as unknown as ServerConfig;

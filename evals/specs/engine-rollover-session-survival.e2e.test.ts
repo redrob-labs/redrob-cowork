@@ -34,7 +34,7 @@ const title = missingRequirements.length > 0
 const COMPLETE_MARKER = "ROLLOVER-LIVE-TASK-COMPLETE";
 const FRESH_MARKER = "ROLLOVER-FRESH-ENGINE-OK";
 const stopEnabledExpression = `(() => {
-  const stop = window.__openworkControl?.listActions().find((action) => action.id === "composer.stop");
+  const stop = window.__redrobControl?.listActions().find((action) => action.id === "composer.stop");
   return Boolean(stop && !stop.disabled);
 })()`;
 
@@ -65,8 +65,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim() ?? "";
 
   const configured = await evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
         ...init,
@@ -98,8 +98,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   );
   expect(isRecord(restarted) && restarted.running === true).toBe(true);
   await eventually(async () => evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     const response = await fetch("http://127.0.0.1:" + port + "/capabilities", {
       headers: { Authorization: "Bearer " + token },
     });
@@ -124,8 +124,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   await waitFor(desktopApp, stopEnabledExpression, { timeoutMs: 60_000, label: "long task became active" });
 
   const reloadResult = await evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     const workspaceId = ${JSON.stringify(workspaceId)};
     const headers = { Authorization: "Bearer " + token, "Content-Type": "application/json" };
     const patch = await fetch("http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(workspaceId) + "/config", {
@@ -163,8 +163,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   );
 
   const newSession = await evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     const response = await fetch("http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/opencode/session", {
       method: "POST",
       headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },

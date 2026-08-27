@@ -1,18 +1,18 @@
 {
-  "name": "openwork-server",
+  "name": "redrob-server",
   "version": "0.0.0-dev",
-  "description": "Filesystem-backed API for OpenWork remote clients",
+  "description": "Filesystem-backed API for Redrob Work remote clients",
   "type": "module",
   "bin": {
-    "openwork-server": "bin/openwork-server.mjs"
+    "redrob-server": "bin/redrob-server.mjs"
   },
   "scripts": {
     "dev": "REDROB_DEV_MODE=1 bun --conditions=development src/cli.ts",
     "test": "bun --conditions=development test",
     "test:artifacts": "bun --conditions=development test src/artifact-files.e2e.test.ts src/workspace-init.test.ts src/server.normalizeWorkspaceRelativePath.test.ts",
     "build:enterprise-mcp-client": "pnpm --filter @redrob/enterprise-mcp-client build",
-    "build": "pnpm build:enterprise-mcp-client && tsc -p tsconfig.json && bun build src/opencode-plugins/openwork-extensions-preview.ts src/opencode-plugins/openwork-capabilities-knowledge.ts src/opencode-plugins/openwork-office-attachments.ts src/opencode-plugins/openwork-anthropic-adaptive-thinking.ts src/opencode-plugins/openwork-anthropic-tool-schema.ts --outdir dist/opencode-plugins --target node --format esm",
-    "build:bin": "pnpm build:enterprise-mcp-client && bun build --compile src/cli.ts --outfile dist/bin/openwork-server",
+    "build": "pnpm build:enterprise-mcp-client && tsc -p tsconfig.json && bun build src/opencode-plugins/redrob-extensions-preview.ts src/opencode-plugins/redrob-capabilities-knowledge.ts src/opencode-plugins/redrob-office-attachments.ts src/opencode-plugins/redrob-anthropic-adaptive-thinking.ts src/opencode-plugins/redrob-anthropic-tool-schema.ts --outdir dist/opencode-plugins --target node --format esm",
+    "build:bin": "pnpm build:enterprise-mcp-client && bun build --compile src/cli.ts --outfile dist/bin/redrob-server",
     "build:bin:all": "pnpm build:enterprise-mcp-client && bun ./script/build.ts --outdir dist/bin --target bun-darwin-arm64 --target bun-darwin-x64 --target bun-linux-x64 --target bun-linux-arm64 --target bun-windows-x64 --target bun-windows-arm64",
     "prepare:npm": "pnpm build:bin && node scripts/publish-npm.mjs --prepare-only",
     "publish:npm": "pnpm build:bin && node scripts/publish-npm.mjs",
@@ -27,15 +27,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/different-ai/openwork.git",
+    "url": "git+https://github.com/redrob-labs/redrob-work.git",
     "directory": "apps/server"
   },
-  "homepage": "https://github.com/different-ai/openwork/tree/dev/apps/server",
+  "homepage": "https://github.com/redrob-labs/redrob-work/tree/dev/apps/server",
   "bugs": {
-    "url": "https://github.com/different-ai/openwork/issues"
+    "url": "https://github.com/redrob-labs/redrob-work/issues"
   },
   "keywords": [
-    "openwork",
+    "redrob",
     "server",
     "opencode",
     "headless",

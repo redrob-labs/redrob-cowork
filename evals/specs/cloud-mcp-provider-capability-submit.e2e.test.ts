@@ -87,7 +87,7 @@ test(title, async ({ evidence, place }) => {
     window.fetch = async (input, init) => {
       const response = await originalFetch(input, init);
       const url = typeof input === "string" ? input : input?.url ?? String(input);
-      if (url.includes("/mcp/openwork-cloud/health")) {
+      if (url.includes("/mcp/redrob-cloud/health")) {
         probe.probeRequested ||= url.includes("probe=1");
         const body = await response.clone().json().catch(() => null);
         if (body?.tools?.providerProjection) {
@@ -152,7 +152,7 @@ test(title, async ({ evidence, place }) => {
 
   const shot = await screenshot(desktopApp);
   const seen = await validate(shot, [
-    "An OpenWork session shows a submitted task that used a connected organization tool",
+    "An Redrob Work session shows a submitted task that used a connected organization tool",
     "No connected service preparation failure or crash message is visible",
   ]);
   expect(seen.ok, seen.why).toBe(true);

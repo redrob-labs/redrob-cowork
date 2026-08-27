@@ -4,7 +4,7 @@ import { mkdtemp, rm, stat } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { installCloudPlugin, readInstalledCloudPlugins } from "./cloud-plugins.js";
-import { readOpenworkWorkspaceConfig, writeOpenworkWorkspaceConfig } from "./openwork-workspace-config-store.js";
+import { readRedrobWorkspaceConfig, writeRedrobWorkspaceConfig } from "./redrob-workspace-config-store.js";
 import { openRuntimeSqliteDatabase, runtimeDbPath, runtimeStorageDir } from "./runtime-db.js";
 import { readRuntimeOpencodeConfig, writeRuntimeOpencodeConfig } from "./runtime-opencode-config-store.js";
 import { readSessionGroupState, writeSessionGroupState } from "./session-groups.js";
@@ -46,7 +46,7 @@ function serverConfig(root: string, configPath: string | null = join(root, "serv
 }
 
 async function tempRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openwork-runtime-db-primitive-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-runtime-db-primitive-"));
   roots.push(root);
   return root;
 }
@@ -74,7 +74,7 @@ describe("runtime DB primitive", () => {
     expect(runtimeStorageDir(config)).toBe(root);
 
     const configWithoutPath = serverConfig(root, null);
-    expect(runtimeDbPath(configWithoutPath)).toBe(join(homedir(), ".config", "openwork", "runtime.sqlite"));
+    expect(runtimeDbPath(configWithoutPath)).toBe(join(homedir(), ".config", "redrob", "runtime.sqlite"));
 
     const overridePath = join(root, "state", "override.sqlite");
     process.env.REDROB_RUNTIME_DB = ` ${overridePath} `;
@@ -113,7 +113,7 @@ describe("runtime DB primitive", () => {
       groups: [{ id: "grp_runtime", label: "Runtime" }],
       assignments: { ses_runtime: "grp_runtime" },
     });
-    await writeOpenworkWorkspaceConfig(config, WORKSPACE_ID, (current) => ({
+    await writeRedrobWorkspaceConfig(config, WORKSPACE_ID, (current) => ({
       ...current,
       workspace: { label: "Workspace config" },
     }));
@@ -137,7 +137,7 @@ describe("runtime DB primitive", () => {
       groups: [{ id: "grp_runtime", label: "Runtime" }],
       assignments: { ses_runtime: "grp_runtime" },
     });
-    expect((await readOpenworkWorkspaceConfig(config, WORKSPACE_ID)).workspace).toEqual({ label: "Workspace config" });
+    expect((await readRedrobWorkspaceConfig(config, WORKSPACE_ID)).workspace).toEqual({ label: "Workspace config" });
     expect((await readRuntimeOpencodeConfig(config, WORKSPACE_ID)).plugin).toEqual(["runtime-plugin"]);
     expect((await readInstalledCloudPlugins(config, WORKSPACE_ID)).plugins.plugin_runtime?.name).toBe("Runtime Primitive Plugin");
 
@@ -146,7 +146,7 @@ describe("runtime DB primitive", () => {
       const tables = rowNames(sqlite.query("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all());
       expect(tables).toEqual([
         "cloud_plugin_install_configs",
-        "openwork_workspace_configs",
+        "redrob_workspace_configs",
         "runtime_opencode_configs",
         "session_group_states",
       ]);

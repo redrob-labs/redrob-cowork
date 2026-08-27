@@ -1,5 +1,5 @@
-export const deepLinkBridgeEvent = "openwork:deep-link";
-export const nativeDeepLinkEvent = "openwork:deep-link-native";
+export const deepLinkBridgeEvent = "redrob:deep-link";
+export const nativeDeepLinkEvent = "redrob:deep-link-native";
 
 export type DeepLinkBridgeDetail = {
   urls: string[];

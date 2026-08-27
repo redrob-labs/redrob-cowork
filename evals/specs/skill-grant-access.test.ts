@@ -66,7 +66,7 @@ async function mintMcpToken(session: DenSession, orgId: string): Promise<string>
     method: "POST",
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({}),
   });
@@ -81,7 +81,7 @@ async function organizationMemberIdByEmail(session: DenSession, orgId: string, e
   const result = await denFetch(session, "/v1/org", {
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   const members = isRecord(result.body) && Array.isArray(result.body.members)
@@ -135,13 +135,13 @@ test.skipIf(!apiUrl)(title, async () => {
   };
   const admin = await signIn(den, {
     email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
-    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!",
   });
   const orgId = await organizationId(admin);
   await selectOrganization(admin, orgId);
   const creator = await ensureMemberSession(den, admin, {
     email: process.env.REDROB_EVAL_CREATOR_EMAIL?.trim() || "casey.spec@acme.test",
-    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "RedrobWorkDemo123!",
     name: "Casey Spec",
     markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
@@ -149,7 +149,7 @@ test.skipIf(!apiUrl)(title, async () => {
   const deniedEmail = process.env.REDROB_EVAL_MEMBER_EMAIL?.trim() || "nova.spec@acme.test";
   const denied = await ensureMemberSession(den, admin, {
     email: deniedEmail,
-    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "RedrobWorkDemo123!",
     name: "Nova Spec",
     markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
@@ -157,7 +157,7 @@ test.skipIf(!apiUrl)(title, async () => {
   const thirdEmail = process.env.REDROB_EVAL_THIRD_MEMBER_EMAIL?.trim() || "riley.spec@acme.test";
   const third = await ensureMemberSession(den, admin, {
     email: thirdEmail,
-    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_MEMBER_PASSWORD?.trim() || "RedrobWorkDemo123!",
     name: "Riley Spec",
     markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
   });
@@ -169,7 +169,7 @@ test.skipIf(!apiUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${creator.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({
       name: skillName,
@@ -186,7 +186,7 @@ test.skipIf(!apiUrl)(title, async () => {
       method: "POST",
       headers: {
         authorization: `Bearer ${creator.token}`,
-        "x-openwork-org-id": orgId,
+        "x-redrob-org-id": orgId,
       },
     }).catch(() => undefined);
   });
@@ -230,7 +230,7 @@ test.skipIf(!apiUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${creator.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ orgMembershipId: deniedMemberId, role: "viewer" }),
   });
@@ -252,7 +252,7 @@ test.skipIf(!apiUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${denied.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ orgMembershipId: thirdMemberId, role: "viewer" }),
   });

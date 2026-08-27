@@ -110,7 +110,7 @@ async function placeSurfaces(den: Den, place: Place): Promise<SurfacePlacement> 
     ref: process.env.REDROB_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
     name: "chat-survives-flaky-den-link",
     reuse: process.env.REDROB_EVAL_DAYTONA_SANDBOX?.trim(),
-    log: (line) => console.error(`[openwork/testkit] ${line}`),
+    log: (line) => console.error(`[redrob/testkit] ${line}`),
   });
   let host: DisposableHost | undefined;
   try {
@@ -149,7 +149,7 @@ const assistantHasText = (text: string): string => `(() => [...document.querySel
   .some((message) => (message.innerText ?? "").includes(${JSON.stringify(text)})))()`;
 
 const stopEnabledExpression = `(() => {
-  const stop = window.__openworkControl?.listActions().find((action) => action.id === "composer.stop");
+  const stop = window.__redrobControl?.listActions().find((action) => action.id === "composer.stop");
   return Boolean(stop && !stop.disabled);
 })()`;
 
@@ -159,7 +159,7 @@ const sessionRunningExpression = (sessionId: string): string => `(() => {
 })()`;
 
 const denProbeExpression = (apiUrl: string): string => `(async () => {
-  const token = (localStorage.getItem("openwork.den.authToken") ?? "").trim();
+  const token = (localStorage.getItem("redrob.den.authToken") ?? "").trim();
   try {
     const response = await fetch(${JSON.stringify(`${apiUrl}/v1/me/orgs`)}, {
       headers: { Authorization: "Bearer " + token },
@@ -171,8 +171,8 @@ const denProbeExpression = (apiUrl: string): string => `(async () => {
 })()`;
 
 const toolRunningExpression = (workspaceId: string, sessionId: string): string => `(async () => {
-  const port = localStorage.getItem("openwork.server.port");
-  const token = localStorage.getItem("openwork.server.token");
+  const port = localStorage.getItem("redrob.server.port");
+  const token = localStorage.getItem("redrob.server.token");
   if (!port || !token) return false;
   const response = await fetch(
     "http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)})
@@ -226,8 +226,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim() ?? "";
   const providerConfigured = await evalIn(desktopApp, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const headers = { Authorization: "Bearer " + token, "Content-Type": "application/json" };
     const patch = await fetch("http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/config", {
@@ -277,8 +277,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   expect(baselineCompleted).toBe(true);
 
   const tailStarted = await evalIn(desktopApp, `(() => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     window.__owDenLink = { active: true, disposes: [], retries: [], errors: [], eventCounts: {} };
     const record = (event) => {
@@ -383,7 +383,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   }
   const offlineSessionId = offlineSessionResult;
   await waitFor(desktopApp, `(() => {
-    const parts = window.__openworkControl.snapshot().route.split("/");
+    const parts = window.__redrobControl.snapshot().route.split("/");
     const sessionIndex = parts.indexOf("session");
     return sessionIndex >= 0
       && decodeURIComponent(parts[sessionIndex + 1] ?? "") === ${JSON.stringify(offlineSessionId)};
@@ -411,7 +411,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
         /(?:failed|failure|error|unavailable|offline|timed out|refused|closed)[^\\n]{0,180}(?:connect|mcp|search_capabilities|mock_echo|network|den|tool)/i,
       ].flatMap((pattern) => failureSurfaces.map((surface) => surface.textContent?.match(pattern)?.[0] ?? ""))
         .find(Boolean) ?? "";
-      const stop = window.__openworkControl?.listActions().find((action) => action.id === "composer.stop");
+      const stop = window.__redrobControl?.listActions().find((action) => action.id === "composer.stop");
       return { failureText: namedFailure.slice(0, 240), active: Boolean(stop && !stop.disabled) };
     })()`),
     {
@@ -430,7 +430,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
   if (offlineRunStillActive) {
     await control(desktopApp, "composer.stop");
     offlineCancelled = await waitFor(desktopApp, `(() => {
-      const stop = window.__openworkControl?.listActions().find((action) => action.id === "composer.stop");
+      const stop = window.__redrobControl?.listActions().find((action) => action.id === "composer.stop");
       return Boolean(stop?.disabled);
     })()`, {
       timeoutMs: 30_000,
@@ -512,7 +512,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 900_000 }, async (
 
   await control(desktopApp, "session.open", { sessionId: longSessionId });
   await waitFor(desktopApp, `(() => {
-    const parts = window.__openworkControl.snapshot().route.split("/");
+    const parts = window.__redrobControl.snapshot().route.split("/");
     const sessionIndex = parts.indexOf("session");
     return sessionIndex >= 0
       && decodeURIComponent(parts[sessionIndex + 1] ?? "") === ${JSON.stringify(longSessionId)};

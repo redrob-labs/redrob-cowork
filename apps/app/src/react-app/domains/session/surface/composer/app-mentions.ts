@@ -1,7 +1,7 @@
 import { REDROB_EXTENSION_CATALOG } from "@/app/constants";
 import { desktopBridge } from "@/app/lib/desktop";
 import { isMacPlatform } from "@/app/utils";
-import { isOpenWorkExtensionEnabled, isOpenWorkExtensionHidden } from "@/react-app/domains/settings/extension-state";
+import { isRedrobWorkExtensionEnabled, isRedrobWorkExtensionHidden } from "@/react-app/domains/settings/extension-state";
 
 /**
  * "@App" mentions let the user target a running macOS app for Computer Use
@@ -14,7 +14,7 @@ export function isAppMentionAvailable(): boolean {
   if (!isMacPlatform()) return false;
   const entry = REDROB_EXTENSION_CATALOG.find((candidate) => candidate.id === "computer-use");
   if (!entry) return false;
-  return isOpenWorkExtensionEnabled(entry) && !isOpenWorkExtensionHidden(entry);
+  return isRedrobWorkExtensionEnabled(entry) && !isRedrobWorkExtensionHidden(entry);
 }
 
 /**

@@ -63,7 +63,7 @@ export const env = {
     apiUrl: optionalString(parsed.DAYTONA_API_URL) ?? "https://app.daytona.io/api",
     apiKey: optionalString(parsed.DAYTONA_API_KEY),
     target: optionalString(parsed.DAYTONA_TARGET),
-    openworkPort: Number(parsed.DAYTONA_REDROB_PORT ?? "8787"),
+    redrobPort: Number(parsed.DAYTONA_REDROB_PORT ?? "8787"),
     signedPreviewExpiresSeconds: Number(parsed.DAYTONA_SIGNED_PREVIEW_EXPIRES_SECONDS ?? "86400"),
   },
 }

@@ -59,7 +59,7 @@ test("domain-based SSO resolution does not query through users or members", asyn
     organizationId: "organization_sso_domain",
     organizationSlug: "verified-sso",
     signInPath: "/sso/verified-sso",
-    ssoProviderId: "openwork-sso-organization_sso_domain",
+    ssoProviderId: "redrob-sso-organization_sso_domain",
   }]
 
   const realMember = await findEnterpriseAuthRequirementForEmailDomain("real-user@verified.example.test")
@@ -70,7 +70,7 @@ test("domain-based SSO resolution does not query through users or members", asyn
     organizationId: "organization_sso_domain",
     organizationSlug: "verified-sso",
     signInPath: "/sso/verified-sso",
-    ssoProviderId: "openwork-sso-organization_sso_domain",
+    ssoProviderId: "redrob-sso-organization_sso_domain",
     hasSso: true,
   })
   expect(fromTable).toBe(schema.OrganizationTable)

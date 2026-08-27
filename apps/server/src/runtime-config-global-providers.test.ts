@@ -3,7 +3,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { openworkRuntimeConfigFilePath, writeOpenworkRuntimeConfigFile } from "./openwork-runtime-config.js";
+import { redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import {
   mergeRuntimeProviderUpdate,
   readGlobalRuntimeOpencodeConfig,
@@ -33,7 +33,7 @@ function clientHeaders() {
 }
 
 function hostHeaders() {
-  return { "x-openwork-host-token": HOST_TOKEN, "content-type": "application/json" };
+  return { "x-redrob-host-token": HOST_TOKEN, "content-type": "application/json" };
 }
 
 async function readJsonObject(response: Response): Promise<Record<string, unknown>> {
@@ -43,7 +43,7 @@ async function readJsonObject(response: Response): Promise<Record<string, unknow
 }
 
 async function createTempRoot() {
-  const root = await mkdtemp(join(tmpdir(), "openwork-global-providers-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-global-providers-"));
   roots.push(root);
   previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
@@ -99,8 +99,8 @@ describe("global runtime providers", () => {
     const globalRuntime = await readGlobalRuntimeOpencodeConfig(config);
     expect(runtimeProviderMap(globalRuntime)).toEqual({ lpr_openrouter: openrouter });
 
-    const { path } = await writeOpenworkRuntimeConfigFile(config, "ws_1");
-    expect(path).toBe(openworkRuntimeConfigFilePath(config));
+    const { path } = await writeRedrobRuntimeConfigFile(config, "ws_1");
+    expect(path).toBe(redrobRuntimeConfigFilePath(config));
     const raw = await readFile(path, "utf8");
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed)) throw new Error("Expected runtime config object");
@@ -123,7 +123,7 @@ describe("global runtime providers", () => {
           return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
         }
         if (request.method === "GET" && url.pathname === "/config") {
-          const content = await readFile(openworkRuntimeConfigFilePath(config), "utf8");
+          const content = await readFile(redrobRuntimeConfigFilePath(config), "utf8");
           return new Response(content, { headers: { "content-type": "application/json" } });
         }
         return new Response(JSON.stringify({ error: "not_found" }), { status: 404, headers: { "content-type": "application/json" } });
@@ -162,7 +162,7 @@ describe("global runtime providers", () => {
     expect(await readJsonObject(identicalAttempt)).toMatchObject({ ok: true, changed: false, reload: "skipped" });
     expect(engineRequests.filter((request) => request === "POST /instance/dispose")).toHaveLength(1);
 
-    await rm(openworkRuntimeConfigFilePath(config));
+    await rm(redrobRuntimeConfigFilePath(config));
     const missingFileAttempt = await fetch(`${base}/runtime-config/providers`, {
       method: "PATCH",
       headers: hostHeaders(),
@@ -171,13 +171,13 @@ describe("global runtime providers", () => {
     expect(missingFileAttempt.status).toBe(200);
     expect(await readJsonObject(missingFileAttempt)).toMatchObject({ ok: true, changed: false, reload: "reloaded" });
     expect(engineRequests.filter((request) => request === "POST /instance/dispose")).toHaveLength(2);
-    const restoredFile: unknown = JSON.parse(await readFile(openworkRuntimeConfigFilePath(config), "utf8"));
+    const restoredFile: unknown = JSON.parse(await readFile(redrobRuntimeConfigFilePath(config), "utf8"));
     if (!isRecord(restoredFile)) throw new Error("Expected restored runtime config object");
     expect(providerFromPayload(restoredFile)).toEqual({
       lpr_anthropic: provider,
     });
 
-    await writeFile(openworkRuntimeConfigFilePath(config), "{}", "utf8");
+    await writeFile(redrobRuntimeConfigFilePath(config), "{}", "utf8");
     const staleFileAttempt = await fetch(`${base}/runtime-config/providers`, {
       method: "PATCH",
       headers: hostHeaders(),

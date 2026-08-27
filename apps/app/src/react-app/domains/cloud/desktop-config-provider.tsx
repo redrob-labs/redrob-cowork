@@ -30,13 +30,13 @@ import {
   type DenDesktopConfig,
 } from "../../../app/lib/den";
 import { applyBrandAppName, applyBrandIcon, getBrandIconState } from "../../../app/lib/desktop";
-import { createOpenworkServerClient } from "../../../app/lib/openwork-server";
+import { createRedrobServerClient } from "../../../app/lib/redrob-server";
 import {
   denSessionUpdatedEvent,
   denSettingsChangedEvent,
 } from "../../../app/lib/den-session-events";
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
-import { resolveOpenworkConnection } from "../../shell/openwork-connection";
+import { resolveRedrobConnection } from "../../shell/redrob-connection";
 import { useDenAuth } from "./den-auth-provider";
 import {
   bootstrapBrandingFromDesktopConfig,
@@ -246,7 +246,7 @@ export function DesktopConfigProvider({ children }: DesktopConfigProviderProps) 
     const brandAppNameAction = actions.find((action) => action.item === "brandAppName");
     if (brandAppNameAction) {
       const appName = typeof brandAppNameAction.nextValue === "string" ? brandAppNameAction.nextValue : null;
-      document.title = appName ?? "OpenWork";
+      document.title = appName ?? "Redrob Work";
       void applyBrandAppName(appName).catch(() => null);
     }
 
@@ -400,9 +400,9 @@ export function DesktopConfigProvider({ children }: DesktopConfigProviderProps) 
 
     void deliverConnectState(
       async () => {
-        const connection = await resolveOpenworkConnection();
+        const connection = await resolveRedrobConnection();
         if (!connection.normalizedBaseUrl || !connection.resolvedHostToken) return false;
-        await createOpenworkServerClient({
+        await createRedrobServerClient({
           baseUrl: connection.normalizedBaseUrl,
           token: connection.resolvedToken,
           hostToken: connection.resolvedHostToken,
@@ -431,17 +431,17 @@ export function DesktopConfigProvider({ children }: DesktopConfigProviderProps) 
         normalizeDenDesktopConfig(configPayload),
       );
     };
-    Object.defineProperty(window, "__openworkApplyDesktopConfig", { value: bridge, configurable: true });
+    Object.defineProperty(window, "__redrobApplyDesktopConfig", { value: bridge, configurable: true });
     const refreshBridge = (configPayload: unknown) => {
       devRefreshDesktopConfigRef.current = normalizeDenDesktopConfig(configPayload);
     };
-    Object.defineProperty(window, "__openworkSetDesktopConfigRefreshResult", {
+    Object.defineProperty(window, "__redrobSetDesktopConfigRefreshResult", {
       value: refreshBridge,
       configurable: true,
     });
     return () => {
-      Object.defineProperty(window, "__openworkApplyDesktopConfig", { value: undefined, configurable: true });
-      Object.defineProperty(window, "__openworkSetDesktopConfigRefreshResult", { value: undefined, configurable: true });
+      Object.defineProperty(window, "__redrobApplyDesktopConfig", { value: undefined, configurable: true });
+      Object.defineProperty(window, "__redrobSetDesktopConfigRefreshResult", { value: undefined, configurable: true });
     };
   }, [applyDesktopConfigActions]);
 

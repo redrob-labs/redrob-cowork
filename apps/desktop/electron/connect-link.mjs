@@ -11,7 +11,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const CONNECT_LINK_ALGORITHM = "EdDSA";
-const CONNECT_LINK_AUDIENCE = "openwork-desktop-connect";
+const CONNECT_LINK_AUDIENCE = "redrob-desktop-connect";
 const CONNECT_LINK_VERSION = 1;
 const CONNECT_LINK_ROUTE = "connect";
 const DEFAULT_CLOCK_SKEW_SECONDS = 60;

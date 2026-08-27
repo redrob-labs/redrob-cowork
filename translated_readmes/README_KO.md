@@ -116,13 +116,13 @@ pnpm dev:worktree
 
 `dev:worktree`는 또한 `REDROB_ELECTRON_USE_MOCK_KEYCHAIN=1`을 기본값으로 설정합니다. 완전히 새로운 프로필에는 저장된 자격 증명이 없으므로, macOS에서는 Chromium이 인증된 쿠키를 저장하는 즉시 실제 키체인이 프롬프트를 표시하며, 이 모달은 닫힐 때까지 Electron의 메인 루프를 차단합니다. 격리된 프로필에서 시스템 키체인을 특별히 사용하려면 `REDROB_ELECTRON_USE_MOCK_KEYCHAIN=0`을 설정하세요.
 
-개발 시작 시 `[openwork] dev profile=... cdp=http://127.0.0.1:9223`와 같은 배너가 출력됩니다. 이를 사용하여 프로필 디렉터리를 찾고 CDP URL을 로컬 도구에 전달하세요.
+개발 시작 시 `[redrob] dev profile=... cdp=http://127.0.0.1:9223`와 같은 배너가 출력됩니다. 이를 사용하여 프로필 디렉터리를 찾고 CDP URL을 로컬 도구에 전달하세요.
 
 두 번째 인스턴스가 프로필 잠금을 얻지 못하면, 이제 열린 CDP 포트와 창 없이 남아 있는 대신 그렇다고 알리고 종료합니다.
 
 ### 헤드리스 웹 (Electron 없음)
 
-로컬 `openwork-server`에 대해 브라우저에서 레드롭 워크 UI를 실행하려면(데스크톱 셸 없이):
+로컬 `redrob-server`에 대해 브라우저에서 레드롭 워크 UI를 실행하려면(데스크톱 셸 없이):
 
 ```bash
 pnpm dev:headless-web
@@ -130,9 +130,9 @@ pnpm dev:headless-web
 
 이것은 격리된 런처입니다:
 
-- `tmp/headless-server.json`을 작성하며 `~/.config/openwork/server.json`은 절대 읽지 않습니다
+- `tmp/headless-server.json`을 작성하며 `~/.config/redrob/server.json`은 절대 읽지 않습니다
 - 선택한 워크스페이스 루트를 자동으로 승인하고, 다시 실행 시 해당 구성을 병합(재작성하지 않음)하므로 UI를 통해 추가한 워크스페이스가 `--replace` 후에도 유지됩니다
-- 안정적인 소유자 베어러가 UI에 강제 적용된 상태로 Vite + `openwork-server`를 시작합니다. 크래시 재시작은 해당 베어러를 재사용하여 열린 탭이 계속 작동하게 하며, `--replace`는 새 토큰을 발급합니다(`--keep-tokens`를 전달하여 유지). 권한이 있는 호스트 토큰은 서버 프로세스에 남아 있으며 Vite 번들에 인라인되지 않습니다.
+- 안정적인 소유자 베어러가 UI에 강제 적용된 상태로 Vite + `redrob-server`를 시작합니다. 크래시 재시작은 해당 베어러를 재사용하여 열린 탭이 계속 작동하게 하며, `--replace`는 새 토큰을 발급합니다(`--keep-tokens`를 전달하여 유지). 권한이 있는 호스트 토큰은 서버 프로세스에 남아 있으며 Vite 번들에 인라인되지 않습니다.
 - Den Cloud 호출을 동일 출처로 프록시합니다. Vite는 `/api/den`(Den 컨트롤 플레인으로 전달)을 제공하고 앱은 `VITE_DEN_API_BASE_URL`을 통해 거기에 Den API를 고정하므로, Cloud 호출은 CORS로 차단되지 않고 오래된 `localStorage` 기본 URL은 로드 시 지워집니다
 - 에이전트 대상 URL/토큰을 `tmp/dev-headless-web.json`(소유자 전용, `0600`)에 게시하고, 방문하는 모든 사이트가 아니라 웹 앱 자체 출처에서만 로컬 서버에 대한 브라우저 호출을 허용합니다
 - 기본적으로 안정적인 포트를 사용합니다(웹 `5178`, 서버 `8778`. 사용 중일 때는 사용 가능한 포트로 대체되며, `REDROB_WEB_PORT` / `REDROB_PORT`로 재정의)

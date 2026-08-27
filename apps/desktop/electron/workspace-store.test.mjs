@@ -17,7 +17,7 @@ async function writeBootstrapConfig(targetPath, config) {
 }
 
 async function withIsolatedBootstrapStore(callback) {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-bootstrap-store-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-bootstrap-store-"));
   const home = path.join(root, "home");
   const xdg = path.join(root, "xdg");
   const previousHome = process.env.HOME;
@@ -43,8 +43,8 @@ async function withIsolatedBootstrapStore(callback) {
     return await callback({
       store,
       createStore,
-      canonicalPath: path.join(xdg, "openwork", "desktop-bootstrap.json"),
-      legacyPath: path.join(home, ".config", "openwork", "desktop-bootstrap.json"),
+      canonicalPath: path.join(xdg, "redrob", "desktop-bootstrap.json"),
+      legacyPath: path.join(home, ".config", "redrob", "desktop-bootstrap.json"),
       root,
       userDataPath: path.join(root, "userData"),
     });
@@ -57,7 +57,7 @@ async function withIsolatedBootstrapStore(callback) {
 }
 
 test("recovers missing desktop workspace state from token store paths", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const oldWorkspace = path.join(root, "old-workspace");
   await mkdir(oldWorkspace, { recursive: true });
@@ -65,7 +65,7 @@ test("recovers missing desktop workspace state from token store paths", async ()
   await mkdir(userData, { recursive: true });
 
   await writeFile(
-    path.join(userData, "openwork-server-tokens.json"),
+    path.join(userData, "redrob-server-tokens.json"),
     JSON.stringify({
       version: 1,
       workspaces: {
@@ -93,7 +93,7 @@ test("recovers missing desktop workspace state from token store paths", async ()
     assert.equal(state.selectedId, state.workspaces[0].id);
     assert.equal(state.watchedId, state.workspaces[0].id);
 
-    const persisted = JSON.parse(await readFile(path.join(userData, "openwork-workspaces.json"), "utf8"));
+    const persisted = JSON.parse(await readFile(path.join(userData, "redrob-workspaces.json"), "utf8"));
     assert.equal(persisted.workspaces.length, 1);
     assert.equal(persisted.selectedWorkspaceId, state.workspaces[0].id);
   } finally {
@@ -103,19 +103,19 @@ test("recovers missing desktop workspace state from token store paths", async ()
 });
 
 test("keeps persisted empty desktop workspace state authoritative", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const oldWorkspace = path.join(root, "old-workspace");
   await mkdir(oldWorkspace, { recursive: true });
   await mkdir(userData, { recursive: true });
 
   await writeFile(
-    path.join(userData, "openwork-workspaces.json"),
+    path.join(userData, "redrob-workspaces.json"),
     JSON.stringify({ selectedId: "", activeId: null, watchedId: null, workspaces: [] }),
     "utf8",
   );
   await writeFile(
-    path.join(userData, "openwork-server-tokens.json"),
+    path.join(userData, "redrob-server-tokens.json"),
     JSON.stringify({ version: 1, workspaces: { [oldWorkspace]: { updatedAt: 2 } } }),
     "utf8",
   );
@@ -139,7 +139,7 @@ test("keeps persisted empty desktop workspace state authoritative", async () => 
 });
 
 test("prefers server config workspaces when desktop state is missing", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const oldWorkspace = path.join(root, "server-workspace");
   const serverConfig = path.join(root, "server.json");
@@ -153,7 +153,7 @@ test("prefers server config workspaces when desktop state is missing", async () 
     "utf8",
   );
   await writeFile(
-    path.join(userData, "openwork-server-tokens.json"),
+    path.join(userData, "redrob-server-tokens.json"),
     JSON.stringify({ version: 1, workspaces: { [path.join(root, "other")]: { updatedAt: 9 } } }),
     "utf8",
   );
@@ -179,7 +179,7 @@ test("prefers server config workspaces when desktop state is missing", async () 
 });
 
 test("does not create a default workspace when desktop state is absent", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const previousDevMode = process.env.REDROB_DEV_MODE;
   const previousServerConfig = process.env.REDROB_SERVER_CONFIG;
@@ -195,15 +195,15 @@ test("does not create a default workspace when desktop state is absent", async (
 
     const state = await store.readWorkspaceState();
     assert.equal(state.workspaces.length, 0);
-    await assert.rejects(readFile(path.join(userData, "openwork-dev-data", "home", "OpenWork", ".opencode", "openwork.json"), "utf8"));
+    await assert.rejects(readFile(path.join(userData, "redrob-dev-data", "home", "Redrob Work", ".opencode", "redrob.json"), "utf8"));
   } finally {
     restoreEnv("REDROB_DEV_MODE", previousDevMode);
     restoreEnv("REDROB_SERVER_CONFIG", previousServerConfig);
   }
 });
 
-test("normalizes recovered remote OpenWork entries before persisting", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
+test("normalizes recovered remote Redrob Work entries before persisting", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const serverConfig = path.join(root, "server.json");
   await mkdir(userData, { recursive: true });
@@ -216,14 +216,14 @@ test("normalizes recovered remote OpenWork entries before persisting", async () 
           id: "legacy_one",
           path: "/workspace",
           workspaceType: "remote",
-          remoteType: "openwork",
+          remoteType: "redrob",
           baseUrl: "https://worker.example.com/workspace/ws_remote",
         },
         {
           id: "legacy_two",
           path: "/workspace",
           workspaceType: "remote",
-          remoteType: "openwork",
+          remoteType: "redrob",
           baseUrl: "https://worker.example.com/w/ws_remote",
         },
       ],
@@ -245,7 +245,7 @@ test("normalizes recovered remote OpenWork entries before persisting", async () 
     assert.equal(state.workspaces.length, 1);
     assert.equal(state.workspaces[0].id, "rem_ws_remote");
     assert.equal(state.workspaces[0].baseUrl, "https://worker.example.com");
-    assert.equal(state.workspaces[0].openworkWorkspaceId, "ws_remote");
+    assert.equal(state.workspaces[0].redrobWorkspaceId, "ws_remote");
     assert.equal(state.selectedId, "rem_ws_remote");
   } finally {
     if (previous === undefined) delete process.env.REDROB_SERVER_CONFIG;
@@ -254,7 +254,7 @@ test("normalizes recovered remote OpenWork entries before persisting", async () 
 });
 
 test("forgetting a local workspace removes its recovery token", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "openwork-workspace-store-"));
+  const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const forgottenWorkspace = path.join(root, "forgotten-workspace");
   const retainedWorkspace = path.join(root, "retained-workspace");
@@ -263,7 +263,7 @@ test("forgetting a local workspace removes its recovery token", async () => {
   await mkdir(userData, { recursive: true });
 
   await writeFile(
-    path.join(userData, "openwork-workspaces.json"),
+    path.join(userData, "redrob-workspaces.json"),
     JSON.stringify({
       selectedId: "ws_forgotten",
       activeId: "ws_forgotten",
@@ -276,7 +276,7 @@ test("forgetting a local workspace removes its recovery token", async () => {
     "utf8",
   );
   await writeFile(
-    path.join(userData, "openwork-server-tokens.json"),
+    path.join(userData, "redrob-server-tokens.json"),
     JSON.stringify({
       version: 1,
       workspaces: {
@@ -300,7 +300,7 @@ test("forgetting a local workspace removes its recovery token", async () => {
   assert.equal(state.activeId, null);
   assert.equal(state.watchedId, null);
 
-  const tokens = JSON.parse(await readFile(path.join(userData, "openwork-server-tokens.json"), "utf8"));
+  const tokens = JSON.parse(await readFile(path.join(userData, "redrob-server-tokens.json"), "utf8"));
   assert.deepEqual(Object.keys(tokens.workspaces), [retainedWorkspace]);
   assert.equal(tokens.workspaces[retainedWorkspace].token, "retained");
 });
@@ -395,24 +395,24 @@ test("desktop bootstrap prefers an older legacy organization config over a newer
       writtenAt: "2026-07-10T13:00:00.000Z",
     });
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://openwork.organization.internal.example",
+      baseUrl: "https://redrob.organization.internal.example",
       apiBaseUrl: "https://api.organization.internal.example",
       requireSignin: true,
       writtenAt: "2026-07-09T12:00:00.000Z",
     });
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://openwork.organization.internal.example");
+    assert.equal(config.baseUrl, "https://redrob.organization.internal.example");
     assert.equal(config.fromFile, true);
     const migrated = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(migrated.baseUrl, "https://openwork.organization.internal.example");
+    assert.equal(migrated.baseUrl, "https://redrob.organization.internal.example");
   });
 });
 
 test("desktop bootstrap keeps an older canonical organization config over a newer legacy hosted default", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://openwork.organization.internal.example",
+      baseUrl: "https://redrob.organization.internal.example",
       apiBaseUrl: "https://api.organization.internal.example",
       requireSignin: true,
       writtenAt: "2026-07-09T12:00:00.000Z",
@@ -425,10 +425,10 @@ test("desktop bootstrap keeps an older canonical organization config over a newe
     });
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://openwork.organization.internal.example");
+    assert.equal(config.baseUrl, "https://redrob.organization.internal.example");
     assert.equal(config.fromFile, true);
     const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(persisted.baseUrl, "https://openwork.organization.internal.example");
+    assert.equal(persisted.baseUrl, "https://redrob.organization.internal.example");
   });
 });
 
@@ -578,7 +578,7 @@ test("an omitted requireActivation is never materialized into the shared bootstr
 
 test("clearDesktopBootstrapConfig removes bootstrap files without deleting workspace state", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath, userDataPath }) => {
-    const workspaceStatePath = path.join(userDataPath, "openwork-workspaces.json");
+    const workspaceStatePath = path.join(userDataPath, "redrob-workspaces.json");
     await writeBootstrapConfig(canonicalPath, {
       baseUrl: "https://canonical.example.com",
       requireSignin: false,

@@ -245,7 +245,7 @@ function collectMigratedSkillIds(rows: { normalizedPayloadJson: Record<string, u
   return migrated
 }
 
-async function ensureDefaultOpenWorkMarketplace(input: {
+async function ensureDefaultRedrobWorkMarketplace(input: {
   createdByOrgMembershipId: MemberId
   database: DbTransaction
   organizationId: OrganizationId
@@ -309,7 +309,7 @@ async function attachPluginToDefaultMarketplace(input: {
   organizationId: OrganizationId
   pluginId: PluginId
 }) {
-  const marketplaceId = await ensureDefaultOpenWorkMarketplace(input)
+  const marketplaceId = await ensureDefaultRedrobWorkMarketplace(input)
   const existing = (await input.database
     .select()
     .from(MarketplacePluginTable)
@@ -566,7 +566,7 @@ async function main() {
       organizationId: ConfigObjectVersionTable.organizationId,
     })
     .from(ConfigObjectVersionTable)
-    .where(eq(ConfigObjectVersionTable.schemaVersion, "openwork.den_skill.v1"))
+    .where(eq(ConfigObjectVersionTable.schemaVersion, "redrob.den_skill.v1"))
     .orderBy(asc(ConfigObjectVersionTable.createdAt), asc(ConfigObjectVersionTable.id))
 
   for (const version of pointerVersions) {

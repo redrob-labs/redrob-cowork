@@ -148,7 +148,7 @@ export function LpCloudConsole() {
     <div className="overflow-hidden rounded-[20px] border border-[#EDF1F6] bg-white">
       <div className="flex h-12 items-center gap-3 border-b border-[#e1e4e8] px-5">
         <TrafficLights />
-        <span className="text-[12px] font-medium text-[var(--lp-muted)]">OpenWork Cloud — Acme Inc</span>
+        <span className="text-[12px] font-medium text-[var(--lp-muted)]">Redrob Work Cloud — Acme Inc</span>
       </div>
       <div className="flex min-h-[570px]">
         <aside className="hidden w-[200px] shrink-0 flex-col border-r border-[#e1e4e8] bg-[#f7f8fa] p-3 md:flex">

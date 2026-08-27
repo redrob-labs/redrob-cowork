@@ -34,7 +34,7 @@ async function createTempRoot(prefix: string) {
   return root;
 }
 
-async function startOpenworkServer(workspaceRoot: string) {
+async function startRedrobServer(workspaceRoot: string) {
   const config: ServerConfig = {
     host: "127.0.0.1",
     port: 0,
@@ -58,7 +58,7 @@ async function startOpenworkServer(workspaceRoot: string) {
 }
 
 beforeEach(async () => {
-  const envRoot = await createTempRoot("openwork-runtime-migrate-env-");
+  const envRoot = await createTempRoot("redrob-runtime-migrate-env-");
   process.env.REDROB_DATA_DIR = join(envRoot, "data");
   process.env.REDROB_TOKEN_STORE = join(envRoot, "tokens.json");
 });
@@ -84,7 +84,7 @@ afterEach(async () => {
 
 describe("runtime-config migrate route", () => {
   test("lifts MCP entries from project opencode.jsonc into the runtime store", async () => {
-    const workspaceRoot = await createTempRoot("openwork-runtime-migrate-");
+    const workspaceRoot = await createTempRoot("redrob-runtime-migrate-");
     await writeFile(
       join(workspaceRoot, "opencode.jsonc"),
       JSON.stringify({
@@ -96,7 +96,7 @@ describe("runtime-config migrate route", () => {
       "utf8",
     );
 
-    const { base, config } = await startOpenworkServer(workspaceRoot);
+    const { base, config } = await startRedrobServer(workspaceRoot);
 
     const response = await fetch(`${base}/workspace/ws_1/runtime-config/migrate`, {
       method: "POST",

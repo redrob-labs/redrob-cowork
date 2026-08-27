@@ -53,7 +53,7 @@ const BEATS = [
 ];
 
 async function createWorkspaceRoot() {
-  const root = await mkdtemp(join(tmpdir(), "openwork-headless-threads-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-headless-threads-"));
   await mkdir(join(root, ".opencode"), { recursive: true });
   roots.push(root);
   return root;
@@ -114,7 +114,7 @@ function startMockOpencode() {
   };
 }
 
-async function startOpenworkServer(input: { workspaceRoot: string; opencodeBaseUrl: string }) {
+async function startRedrobServer(input: { workspaceRoot: string; opencodeBaseUrl: string }) {
   const config: ServerConfig = {
     host: "127.0.0.1",
     port: 0,
@@ -145,19 +145,19 @@ async function startOpenworkServer(input: { workspaceRoot: string; opencodeBaseU
   return { server, token: config.token };
 }
 
-test("drives two headless turns on a native OpenWork thread", async () => {
+test("drives two headless turns on a native Redrob Work thread", async () => {
   const workspaceRoot = await createWorkspaceRoot();
   const engine = startMockOpencode();
-  const openwork = await startOpenworkServer({
+  const redrob = await startRedrobServer({
     workspaceRoot,
     opencodeBaseUrl: `http://127.0.0.1:${engine.server.port}`,
   });
 
   let clock = 0;
   const threads = createHeadlessThreadClient({
-    baseUrl: `http://127.0.0.1:${openwork.server.port}`,
+    baseUrl: `http://127.0.0.1:${redrob.server.port}`,
     workspaceId: "ws_1",
-    token: openwork.token,
+    token: redrob.token,
     defaultModel: { providerId: "anthropic", modelId: "claude-sonnet-5" },
     now: () => clock,
     // Each poll gap moves the engine exactly one beat, so the journey below is
@@ -229,29 +229,29 @@ test("drives two headless turns on a native OpenWork thread", async () => {
 test("leaves the thread readable through the session surface the app uses", async () => {
   const workspaceRoot = await createWorkspaceRoot();
   const engine = startMockOpencode();
-  const openwork = await startOpenworkServer({
+  const redrob = await startRedrobServer({
     workspaceRoot,
     opencodeBaseUrl: `http://127.0.0.1:${engine.server.port}`,
   });
-  const base = `http://127.0.0.1:${openwork.server.port}`;
+  const base = `http://127.0.0.1:${redrob.server.port}`;
 
   const thread = await createHeadlessThreadClient({
     baseUrl: base,
     workspaceId: "ws_1",
-    token: openwork.token,
+    token: redrob.token,
   }).createThread({ title: "Refund policy" });
 
   // The app lists and opens sessions through these routes. A headless thread
   // is an ordinary session, so it has to be visible here with the same id.
   const listed = await fetch(`${base}/workspace/ws_1/sessions`, {
-    headers: { Authorization: `Bearer ${openwork.token}` },
+    headers: { Authorization: `Bearer ${redrob.token}` },
   });
   expect(listed.status).toBe(200);
   const listedBody = await listed.json();
   expect(listedBody.items.map((item: { id: string }) => item.id)).toContain(thread.id);
 
   const opened = await fetch(`${base}/workspace/ws_1/sessions/${thread.id}`, {
-    headers: { Authorization: `Bearer ${openwork.token}` },
+    headers: { Authorization: `Bearer ${redrob.token}` },
   });
   expect(opened.status).toBe(200);
   await expect(opened.json()).resolves.toMatchObject({ item: { id: thread.id, title: "Refund policy" } });

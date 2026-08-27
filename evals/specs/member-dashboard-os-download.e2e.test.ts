@@ -30,9 +30,9 @@ test(title, async ({ evidence, place }) => {
   const runId = `${Date.now().toString(36)}${process.pid.toString(36)}`;
   const orgName = `Acme Robotics ${runId}`;
   const invitee = {
-    email: `maya+${runId}@openwork.test`,
+    email: `maya+${runId}@redrob.test`,
     name: "Maya Chen",
-    password: "OpenWorkEval123!",
+    password: "RedrobWorkEval123!",
   };
 
   await using den = await server({
@@ -89,8 +89,8 @@ test(title, async ({ evidence, place }) => {
   });
 
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(member.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(member.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(member.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(member.token)};
   })()`);
   expect(tokenStored).toBe(true);
 
@@ -114,18 +114,18 @@ test(title, async ({ evidence, place }) => {
   }
 
   expect(dashboard.pathname).toBe("/dashboard");
-  expect(dashboard.cta).toBe("Get OpenWork");
+  expect(dashboard.cta).toBe("Get Redrob Work");
   evidence.recordAssertionEvidence(
     "The member dashboard offers the authenticated install guide",
     `pathname=${dashboard.pathname}; cta=${dashboard.cta}`,
-    dashboard.pathname === "/dashboard" && dashboard.cta === "Get OpenWork",
+    dashboard.pathname === "/dashboard" && dashboard.cta === "Get Redrob Work",
   );
 
   {
     const shot = await screenshot(browser);
     const seen = await validate(shot, [
       "The heading says the workspace is set up for you",
-      "The primary button says Get OpenWork",
+      "The primary button says Get Redrob Work",
     ]);
     expect(seen.ok, seen.why).toBe(true);
   }

@@ -1,11 +1,11 @@
 import { getMcpServerName, type McpDirectoryInfo } from "../../../app/constants";
 import type { ExtensionLayout } from "../../design-system/extension-card";
 
-const EXTENSION_LAYOUT_KEY = "openwork.extensions.layout";
-const EXTENSION_DISABLED_KEY_PREFIX = "openwork.extension.disabled.";
-const EXTENSION_ENABLED_KEY_PREFIX = "openwork.extension.enabled.";
-const EXTENSION_HIDDEN_KEY_PREFIX = "openwork.extension.hidden.";
-export const REDROB_EXTENSION_STATE_CHANGED = "openwork:extension-state-changed";
+const EXTENSION_LAYOUT_KEY = "redrob.extensions.layout";
+const EXTENSION_DISABLED_KEY_PREFIX = "redrob.extension.disabled.";
+const EXTENSION_ENABLED_KEY_PREFIX = "redrob.extension.enabled.";
+const EXTENSION_HIDDEN_KEY_PREFIX = "redrob.extension.hidden.";
+export const REDROB_EXTENSION_STATE_CHANGED = "redrob:extension-state-changed";
 
 /** Whether the inventory shows tiles or dense rows. Remembered across sessions; defaults to the dense list. */
 export function readExtensionLayout(): ExtensionLayout {
@@ -22,14 +22,14 @@ export function getExtensionId(entry: McpDirectoryInfo): string {
   return entry.id ?? entry.serverName ?? getMcpServerName(entry);
 }
 
-export function isOpenWorkExtensionEnabled(entry: McpDirectoryInfo): boolean {
+export function isRedrobWorkExtensionEnabled(entry: McpDirectoryInfo): boolean {
   if (typeof window === "undefined") return Boolean(entry.defaultEnabled);
   const id = getExtensionId(entry);
   if (!entry.defaultEnabled) return window.localStorage.getItem(`${EXTENSION_ENABLED_KEY_PREFIX}${id}`) === "1";
   return window.localStorage.getItem(`${EXTENSION_DISABLED_KEY_PREFIX}${id}`) !== "1";
 }
 
-export function setOpenWorkExtensionEnabled(entry: McpDirectoryInfo, enabled: boolean) {
+export function setRedrobWorkExtensionEnabled(entry: McpDirectoryInfo, enabled: boolean) {
   if (typeof window === "undefined") return;
   const id = getExtensionId(entry);
   if (entry.defaultEnabled) {
@@ -52,7 +52,7 @@ export function setOpenWorkExtensionEnabled(entry: McpDirectoryInfo, enabled: bo
   }));
 }
 
-export function isOpenWorkExtensionHidden(entryOrId: McpDirectoryInfo | string): boolean {
+export function isRedrobWorkExtensionHidden(entryOrId: McpDirectoryInfo | string): boolean {
   const id = typeof entryOrId === "string" ? entryOrId : getExtensionId(entryOrId);
   if (typeof window === "undefined") return false;
   const stored = window.localStorage.getItem(`${EXTENSION_HIDDEN_KEY_PREFIX}${id}`);
@@ -61,7 +61,7 @@ export function isOpenWorkExtensionHidden(entryOrId: McpDirectoryInfo | string):
   return typeof entryOrId !== "string" && entryOrId.defaultHidden === true;
 }
 
-export function setOpenWorkExtensionHidden(entryOrId: McpDirectoryInfo | string, hidden: boolean) {
+export function setRedrobWorkExtensionHidden(entryOrId: McpDirectoryInfo | string, hidden: boolean) {
   const id = typeof entryOrId === "string" ? entryOrId : getExtensionId(entryOrId);
   if (typeof window === "undefined") return;
   const key = `${EXTENSION_HIDDEN_KEY_PREFIX}${id}`;

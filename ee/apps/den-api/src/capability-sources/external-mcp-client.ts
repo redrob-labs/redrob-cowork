@@ -57,7 +57,7 @@ import {
  * optional secret + free-form extras) is identical either way.
  */
 
-const CLIENT_NAME = "OpenWork"
+const CLIENT_NAME = "Redrob Work"
 const EXTERNAL_MCP_CALL_TIMEOUT_MS = 30_000
 const EXTERNAL_MCP_LIFECYCLE_TIMEOUT_MS = 45_000
 export const EXTERNAL_MCP_TOOL_CALL_TIMEOUT_MS = 120_000
@@ -480,7 +480,7 @@ function buildTransport(
 }
 
 function buildClient() {
-  return new Client({ name: "openwork-den", version: "1.0.0" }, { capabilities: {} })
+  return new Client({ name: "redrob-den", version: "1.0.0" }, { capabilities: {} })
 }
 
 type ExternalMcpToolPage = Awaited<ReturnType<Client["listTools"]>>

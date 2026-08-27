@@ -32,16 +32,16 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, async ({ e
     org: {
       name: "First Run Bootstrap",
       admin: {
-        email: `first-run-bootstrap-admin-${Date.now()}@openwork.test`,
+        email: `first-run-bootstrap-admin-${Date.now()}@redrob.test`,
         name: "First Run Bootstrap Admin",
-        password: "OpenWorkEval123!",
+        password: "RedrobWorkEval123!",
       },
     },
   });
   await inviteMember(den, "member", {
-    email: `first-run-bootstrap-member-${Date.now()}@openwork.test`,
+    email: `first-run-bootstrap-member-${Date.now()}@redrob.test`,
     name: "First Run Bootstrap Member",
-    password: "OpenWorkEval123!",
+    password: "RedrobWorkEval123!",
   });
   await using proxy = await faultProxy(den.ref);
   proxy.faults.status(desktopConfigPath, 429, { times: 5 });

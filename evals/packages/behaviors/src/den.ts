@@ -284,9 +284,9 @@ export async function provisionOrg(den: DenRef, input: ProvisionOrgInput): Promi
   }
 
   const unique = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 12)}`;
-  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
-  const email = `openwork-eval-admin-${unique}@example.test`;
-  const name = `OpenWork Eval ${unique}`;
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!";
+  const email = `redrob-eval-admin-${unique}@example.test`;
+  const name = `Redrob Work Eval ${unique}`;
   const signUp = await denFetch(den, "/api/auth/sign-up/email", {
     method: "POST",
     body: JSON.stringify({ email, name, password }),
@@ -313,7 +313,7 @@ export async function provisionOrg(den: DenRef, input: ProvisionOrgInput): Promi
     const member = await ensureMemberSession(den, admin, {
       email: memberEmail,
       password,
-      name: "OpenWork Eval Member",
+      name: "Redrob Work Eval Member",
       markVerifiedCmd: process.env.REDROB_EVAL_MARK_VERIFIED_CMD?.trim(),
     });
     const orgs = await denFetch(den, "/v1/me/orgs", { headers: auth(member) });
@@ -347,8 +347,8 @@ export async function provisionOrg(den: DenRef, input: ProvisionOrgInput): Promi
       method: "POST",
       headers: auth(admin),
       body: JSON.stringify({
-        clientId: `openwork-eval-google-client-${unique}`,
-        clientSecret: `openwork-eval-google-secret-${unique}`,
+        clientId: `redrob-eval-google-client-${unique}`,
+        clientSecret: `redrob-eval-google-secret-${unique}`,
       }),
     });
     if (!configured.response.ok) {
@@ -359,7 +359,7 @@ export async function provisionOrg(den: DenRef, input: ProvisionOrgInput): Promi
   return { admin, orgId };
 }
 
-export async function createDesktopHandoffGrant(member: DenSession, desktopScheme = "openwork"): Promise<string> {
+export async function createDesktopHandoffGrant(member: DenSession, desktopScheme = "redrob"): Promise<string> {
   const result = await denFetch(member, "/v1/auth/desktop-handoff", {
     method: "POST",
     headers: auth(member),

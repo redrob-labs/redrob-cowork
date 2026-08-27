@@ -278,7 +278,7 @@ function validateReferences(topology: WorldTopology): void {
     if (seededOrg.admin?.name !== undefined && seededOrg.admin.name !== "Alex Chen") {
       throw new Error('den.substrate "kind" admin.name must be "Alex Chen" to match the kind seed.');
     }
-    if (seededOrg.admin?.password !== undefined && seededOrg.admin.password !== "OpenWorkDemo123!") {
+    if (seededOrg.admin?.password !== undefined && seededOrg.admin.password !== "RedrobWorkDemo123!") {
       throw new Error('den.substrate "kind" admin.password must match the seeded demo admin password.');
     }
   }

@@ -25,9 +25,9 @@ export const denSkillEditor = shot("den-skill-editor", {
   out: "packages/docs/images/cloud-skill-editor.png",
 });
 
-export const denOpenworkWeb = shot("den-openwork-web", {
+export const denRedrobWeb = shot("den-redrob-web", {
   use: browser,
   at: "/dashboard/web",
-  expect: ["OpenWork Web", "Open OpenWork Web"],
-  out: "packages/docs/images/cloud-openwork-web.png",
+  expect: ["Redrob Work Web", "Open Redrob Work Web"],
+  out: "packages/docs/images/cloud-redrob-web.png",
 });

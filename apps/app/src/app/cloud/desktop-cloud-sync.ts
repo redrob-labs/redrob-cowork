@@ -3,11 +3,11 @@ import {
   readDenSettings,
 } from "../lib/den";
 import type {
-  OpenworkDesktopCloudSyncChange,
-  OpenworkDesktopCloudSyncResult,
-  OpenworkDesktopCloudSyncState,
-  OpenworkServerClient,
-} from "../lib/openwork-server";
+  RedrobDesktopCloudSyncChange,
+  RedrobDesktopCloudSyncResult,
+  RedrobDesktopCloudSyncState,
+  RedrobServerClient,
+} from "../lib/redrob-server";
 
 export type PendingCloudPluginChange = "modified" | "removed";
 
@@ -20,7 +20,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function readSyncChange(value: unknown): OpenworkDesktopCloudSyncChange | null {
+function readSyncChange(value: unknown): RedrobDesktopCloudSyncChange | null {
   if (!isRecord(value)) return null;
   const id = typeof value.id === "string" ? value.id.trim() : "";
   const kind = value.kind === "new" || value.kind === "modified" || value.kind === "removed" ? value.kind : null;
@@ -44,7 +44,7 @@ function readSyncChange(value: unknown): OpenworkDesktopCloudSyncChange | null {
 }
 
 /** Read all pending changes from a persisted desktop-cloud-sync state (GET response). */
-export function readPendingCloudSyncChanges(state: OpenworkDesktopCloudSyncState): OpenworkDesktopCloudSyncChange[] {
+export function readPendingCloudSyncChanges(state: RedrobDesktopCloudSyncState): RedrobDesktopCloudSyncChange[] {
   return Object.values(state.entries).flatMap((entry) => {
     if (!isRecord(entry) || !Array.isArray(entry.pendingChanges)) return [];
     return entry.pendingChanges.flatMap((change) => {
@@ -61,7 +61,7 @@ export function readPendingCloudSyncChanges(state: OpenworkDesktopCloudSyncState
  * no longer installed) are filtered out.
  */
 export function derivePendingCloudPluginChanges(input: {
-  changes: OpenworkDesktopCloudSyncChange[];
+  changes: RedrobDesktopCloudSyncChange[];
   installedPlugins: Record<string, InstalledCloudPluginLike>;
 }): Record<string, PendingCloudPluginChange> {
   const pending: Record<string, PendingCloudPluginChange> = {};
@@ -101,9 +101,9 @@ export function derivePendingCloudPluginChanges(input: {
 let desktopCloudSyncQueue: Promise<void> = Promise.resolve();
 
 async function runDesktopCloudSync(input: {
-  openworkClient: OpenworkServerClient;
+  redrobClient: RedrobServerClient;
   workspaceId: string;
-}): Promise<OpenworkDesktopCloudSyncResult | null> {
+}): Promise<RedrobDesktopCloudSyncResult | null> {
   const settings = readDenSettings();
   const token = settings.authToken?.trim() ?? "";
   const activeOrgId = settings.activeOrgId?.trim() ?? "";
@@ -114,18 +114,18 @@ async function runDesktopCloudSync(input: {
     token,
   }).getResourceSnapshot(activeOrgId);
 
-  return input.openworkClient.syncDesktopCloud(input.workspaceId, snapshot);
+  return input.redrobClient.syncDesktopCloud(input.workspaceId, snapshot);
 }
 
 export function refreshDesktopCloudSync(input: {
-  openworkClient: OpenworkServerClient | null | undefined;
+  redrobClient: RedrobServerClient | null | undefined;
   workspaceId: string | null | undefined;
-}): Promise<OpenworkDesktopCloudSyncResult | null> {
-  const openworkClient = input.openworkClient ?? null;
+}): Promise<RedrobDesktopCloudSyncResult | null> {
+  const redrobClient = input.redrobClient ?? null;
   const workspaceId = input.workspaceId?.trim() ?? "";
-  if (!openworkClient || !workspaceId) return Promise.resolve(null);
+  if (!redrobClient || !workspaceId) return Promise.resolve(null);
 
-  const run = desktopCloudSyncQueue.then(() => runDesktopCloudSync({ openworkClient, workspaceId }));
+  const run = desktopCloudSyncQueue.then(() => runDesktopCloudSync({ redrobClient, workspaceId }));
   desktopCloudSyncQueue = run.then(
     () => undefined,
     () => undefined,

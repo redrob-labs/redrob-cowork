@@ -84,9 +84,9 @@ import {
   workspaceBrandingFingerprint,
 } from "./workspace-branding-restart";
 
-const RELOAD_AFTER_ONBOARDING_KEY = "openwork.reloadAfterOrgOnboarding";
-const APPLIED_BRANDING_FINGERPRINT_KEY = "openwork.den.appliedBrandingFingerprint";
-const BRANDING_RESTART_RESUME_KEY = "openwork.den.brandingRestartResume";
+const RELOAD_AFTER_ONBOARDING_KEY = "redrob.reloadAfterOrgOnboarding";
+const APPLIED_BRANDING_FINGERPRINT_KEY = "redrob.den.appliedBrandingFingerprint";
+const BRANDING_RESTART_RESUME_KEY = "redrob.den.brandingRestartResume";
 
 type BrandingRestartState = {
   fingerprint: string;
@@ -98,13 +98,13 @@ type OnboardingUpdaterBridge = NonNullable<Window["__REDROB_ELECTRON__"]>["updat
 
 declare global {
   interface Window {
-    __openworkOnboardingUpdaterEvalBridge?: OnboardingUpdaterBridge;
+    __redrobOnboardingUpdaterEvalBridge?: OnboardingUpdaterBridge;
   }
 }
 
 function onboardingUpdaterBridge(): OnboardingUpdaterBridge | undefined {
-  if (import.meta.env.DEV && window.__openworkOnboardingUpdaterEvalBridge) {
-    return window.__openworkOnboardingUpdaterEvalBridge;
+  if (import.meta.env.DEV && window.__redrobOnboardingUpdaterEvalBridge) {
+    return window.__redrobOnboardingUpdaterEvalBridge;
   }
   return window.__REDROB_ELECTRON__?.updater;
 }
@@ -256,12 +256,12 @@ function PreparedWorkspacePage({ prepared }: { prepared: PreparedBootstrapSummar
       <PageContainer>
         <PageHeader>
           <div
-            data-openwork-prepared="true"
-            data-openwork-provisional="true"
+            data-redrob-prepared="true"
+            data-redrob-provisional="true"
             className="mx-auto flex w-fit items-center gap-2 rounded-full border border-green-6/30 bg-green-2/30 px-3 py-1 text-xs font-semibold text-green-11"
           >
             <CheckCircle2 className="size-3.5" />
-            Setup complete — OpenWork is ready
+            Setup complete — Redrob Work is ready
           </div>
           <PageTitle>{prepared.orgName}</PageTitle>
         </PageHeader>
@@ -326,11 +326,11 @@ function markProvidersSeen(providers: DenOrgLlmProvider[]) {
   if (providers.length === 0) return;
 
   try {
-    const raw = window.localStorage.getItem("openwork.seenProviderIds");
+    const raw = window.localStorage.getItem("redrob.seenProviderIds");
     const existing: string[] = raw ? JSON.parse(raw) : [];
     const ids = new Set(existing);
     for (const provider of providers) ids.add(provider.id);
-    window.localStorage.setItem("openwork.seenProviderIds", JSON.stringify([...ids]));
+    window.localStorage.setItem("redrob.seenProviderIds", JSON.stringify([...ids]));
   } catch {}
 }
 
@@ -762,7 +762,7 @@ export function ResourceSelectionPage({ autoContinue = false }: { autoContinue?:
           <PageHeader>
             <PageTitle>Workspace identity is ready</PageTitle>
             <PageDescription>
-              Restart OpenWork once to finish applying {orgName || "your workspace"}&apos;s name and app icon everywhere.
+              Restart Redrob Work once to finish applying {orgName || "your workspace"}&apos;s name and app icon everywhere.
             </PageDescription>
             {brandingRestart.updateReady ? (
               <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-green-6/30 bg-green-2/30 px-3 py-1 text-xs font-semibold text-green-11">
@@ -792,7 +792,7 @@ export function ResourceSelectionPage({ autoContinue = false }: { autoContinue?:
               Continue without restarting
             </Button>
             <Button type="button" size="lg" onClick={() => void restartWithBranding()}>
-              Restart OpenWork
+              Restart Redrob Work
               <ArrowRight data-icon="inline-end" />
             </Button>
           </PageFooter>
@@ -831,11 +831,11 @@ export function ResourceSelectionPage({ autoContinue = false }: { autoContinue?:
         <PageHeader>
           {prepared ? (
             <div
-              data-openwork-prepared="true"
+              data-redrob-prepared="true"
               className="mx-auto flex w-fit items-center gap-2 rounded-full border border-green-6/30 bg-green-2/30 px-3 py-1 text-xs font-semibold text-green-11"
             >
               <CheckCircle2 className="size-3.5" />
-              Setup complete — OpenWork prepared this workspace
+              Setup complete — Redrob Work prepared this workspace
             </div>
           ) : null}
           <PageTitle>
@@ -868,7 +868,7 @@ export function ResourceSelectionPage({ autoContinue = false }: { autoContinue?:
               <EmptyHeader>
                 <EmptyTitle>No resources have been configured for this organization yet.</EmptyTitle>
                 <EmptyDescription>
-                  Add AI providers or marketplaces from the OpenWork Cloud dashboard.
+                  Add AI providers or marketplaces from the Redrob Work Cloud dashboard.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
@@ -876,7 +876,7 @@ export function ResourceSelectionPage({ autoContinue = false }: { autoContinue?:
                   variant="outline"
                   onClick={() => platform.openLink(resolveDenBaseUrls(settings.baseUrl).baseUrl)}
                 >
-                  Open OpenWork Cloud
+                  Open Redrob Work Cloud
                   <ArrowUpRightIcon data-icon="inline-end" />
                 </Button>
               </EmptyContent>

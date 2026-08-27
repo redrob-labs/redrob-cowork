@@ -22,8 +22,8 @@ export const REDROB_DESKTOP_NAME = "io.redrob.work";
 export const REDROB_PROTOCOL_MIME = "x-scheme-handler/redrob";
 
 const INTEGRATION_STATE_VERSION = 1;
-const OWNERSHIP_MARKER = "X-OpenWork-Managed";
-const MANAGED_VERSION_MARKER = "X-OpenWork-Version";
+const OWNERSHIP_MARKER = "X-Redrob Work-Managed";
+const MANAGED_VERSION_MARKER = "X-Redrob Work-Version";
 const ICON_SIZES = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 
 function defaultCommandRunner(command, args) {
@@ -88,7 +88,7 @@ function entryTargetsAppImage(fields, appImagePath) {
     || exec.includes(`'${appImagePath.replaceAll("'", "'\\''")}'`);
 }
 
-function entryHandlesOpenwork(fields) {
+function entryHandlesRedrob(fields) {
   return (fields.get("MimeType") ?? "")
     .split(";")
     .map((value) => value.trim())
@@ -176,7 +176,7 @@ function unsupportedStatus() {
   };
 }
 
-export function buildOpenworkDesktopEntry({
+export function buildRedrobDesktopEntry({
   appImagePath,
   appName,
   appVersion,
@@ -186,7 +186,7 @@ export function buildOpenworkDesktopEntry({
 Type=Application
 Version=1.0
 Name=${cleanDesktopValue(appName)}
-Comment=Run agents, skills, and MCP with OpenWork
+Comment=Run agents, skills, and MCP with Redrob Work
 Exec=${quoteDesktopExec(appImagePath)} %U
 TryExec=${cleanDesktopValue(appImagePath)}
 Icon=${REDROB_DESKTOP_NAME}
@@ -198,8 +198,8 @@ X-AppImage-Name=${cleanDesktopValue(appName)}
 X-AppImage-Version=${cleanDesktopValue(appVersion)}
 ${OWNERSHIP_MARKER}=true
 ${MANAGED_VERSION_MARKER}=${cleanDesktopValue(appVersion)}
-X-OpenWork-Distribution=${cleanDesktopValue(distribution)}
-X-OpenWork-AppImage=${cleanDesktopValue(appImagePath)}
+X-Redrob Work-Distribution=${cleanDesktopValue(distribution)}
+X-Redrob Work-AppImage=${cleanDesktopValue(appImagePath)}
 `;
 }
 
@@ -230,7 +230,7 @@ export function createLinuxDesktopIntegration({
     size,
     path.join(resourcesPath ?? "", "icons", "linux", `${size}x${size}.png`),
   ]));
-  const statePath = path.join(configHome, "openwork", "desktop-integration.json");
+  const statePath = path.join(configHome, "redrob", "desktop-integration.json");
 
   async function readState() {
     const raw = await readFile(statePath, "utf8").catch(() => null);
@@ -277,7 +277,7 @@ export function createLinuxDesktopIntegration({
       path: candidate,
       managed: fields.get(OWNERSHIP_MARKER) === "true",
       acceptsUrl: entryAcceptsUrl(fields),
-      handlesProtocol: entryHandlesOpenwork(fields),
+      handlesProtocol: entryHandlesRedrob(fields),
     };
   }
 
@@ -310,7 +310,7 @@ export function createLinuxDesktopIntegration({
       /** @type {DesktopIntegrationIssue[]} */
       const issues = [];
       if (!entryTargetsAppImage(ownFields, appImagePath)) issues.push("appimage-path");
-      if (!entryHandlesOpenwork(ownFields)) issues.push("desktop-entry");
+      if (!entryHandlesRedrob(ownFields)) issues.push("desktop-entry");
       if (ownFields.get(MANAGED_VERSION_MARKER) !== app.getVersion()) issues.push("version");
       const iconsPresent = await Promise.all(
         ICON_SIZES.map((size) => fileExists(iconPaths[size])),
@@ -320,7 +320,7 @@ export function createLinuxDesktopIntegration({
       return {
         supported: true,
         state: issues.length ? "needs_repair" : "integrated",
-        ownership: "openwork",
+        ownership: "redrob",
         appImagePath,
         desktopEntryPath,
         handlerDesktopId,
@@ -414,12 +414,12 @@ export function createLinuxDesktopIntegration({
     }
     if (
       await fileExists(desktopEntryPath)
-      && before.ownership !== "openwork"
+      && before.ownership !== "redrob"
     ) {
       return {
         ok: false,
         status: before,
-        error: "The canonical OpenWork launcher is externally managed and will not be overwritten.",
+        error: "The canonical Redrob Work launcher is externally managed and will not be overwritten.",
       };
     }
 
@@ -428,7 +428,7 @@ export function createLinuxDesktopIntegration({
         await mkdir(path.dirname(iconPaths[size]), { recursive: true });
         await copyFile(iconSources[size], iconPaths[size]);
       }
-      await atomicWrite(desktopEntryPath, buildOpenworkDesktopEntry({
+      await atomicWrite(desktopEntryPath, buildRedrobDesktopEntry({
         appImagePath,
         appName,
         appVersion: app.getVersion(),
@@ -467,13 +467,13 @@ export function createLinuxDesktopIntegration({
       return { ok: false, status: unsupportedStatus(), error: "Desktop integration is unavailable." };
     }
     const before = await getStatus();
-    if (before.ownership !== "openwork") {
+    if (before.ownership !== "redrob") {
       return {
         ok: false,
         status: before,
         error: before.ownership === "external"
           ? "Remove this AppImage with the tool that manages it."
-          : "OpenWork does not own a desktop integration to remove.",
+          : "Redrob Work does not own a desktop integration to remove.",
       };
     }
 
@@ -530,11 +530,11 @@ export function createLinuxDesktopIntegration({
       return status;
     }
 
-    // The user already accepted this integration, so drift in the files OpenWork
+    // The user already accepted this integration, so drift in the files Redrob Work
     // owns is maintenance rather than a new decision. A self-update lands under a
     // new versioned filename and a moved AppImage changes its path; both stale the
     // launcher. Repair silently instead of prompting after every release.
-    if (status.ownership === "openwork") {
+    if (status.ownership === "redrob") {
       const repaired = await install();
       if (!repaired.ok) {
         console.warn("[desktop-integration] silent repair failed", repaired.error);
@@ -546,9 +546,9 @@ export function createLinuxDesktopIntegration({
 
     const { response, checkboxChecked } = await dialog.showMessageBox(window, {
       type: "question",
-      title: "Add OpenWork to your applications?",
-      message: "Add OpenWork to your application launcher and register browser sign-in callbacks?",
-      detail: `The launcher will use this AppImage in its current location:\n${appImagePath}\n\nIf you move or update it later, OpenWork repairs the launcher automatically. You can change or remove this in Settings → Preferences → AppImage desktop integration.`,
+      title: "Add Redrob Work to your applications?",
+      message: "Add Redrob Work to your application launcher and register browser sign-in callbacks?",
+      detail: `The launcher will use this AppImage in its current location:\n${appImagePath}\n\nIf you move or update it later, Redrob Work repairs the launcher automatically. You can change or remove this in Settings → Preferences → AppImage desktop integration.`,
       buttons: ["Not now", "Integrate"],
       defaultId: 1,
       cancelId: 0,
@@ -566,7 +566,7 @@ export function createLinuxDesktopIntegration({
       await dialog.showMessageBox(window, {
         type: "warning",
         title: "Desktop integration failed",
-        message: "OpenWork could not complete desktop integration.",
+        message: "Redrob Work could not complete desktop integration.",
         detail: result.error ?? "Unknown error",
         buttons: ["OK"],
       });

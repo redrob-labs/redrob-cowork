@@ -38,7 +38,7 @@ const connectStateResponseSchema = z.object({
 
 const gatedCallSchema = z.object({
   ok: z.literal(false),
-  error: z.literal("use_openwork_cloud"),
+  error: z.literal("use_redrob_cloud"),
   message: z.string(),
 }).passthrough();
 
@@ -106,7 +106,7 @@ function serverConfig(root: string): ServerConfig {
 }
 
 async function boot() {
-  const root = await mkdtemp(join(tmpdir(), "openwork-connect-gating-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-connect-gating-"));
   dirs.push(root);
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   const config = serverConfig(root);
@@ -124,7 +124,7 @@ function clientJsonHeaders() {
 }
 
 function hostJsonHeaders() {
-  return { "x-openwork-host-token": HOST_TOKEN, "content-type": "application/json" };
+  return { "x-redrob-host-token": HOST_TOKEN, "content-type": "application/json" };
 }
 
 async function readSchema<T>(response: Response, schema: z.ZodType<T>): Promise<T> {
@@ -190,7 +190,7 @@ function expectAllActions(actions: ActionItem[]) {
   expect(actions).toHaveLength(18);
   expect(actions.filter((action) => action.extensionId === "google-workspace")).toHaveLength(14);
   expect(actions.filter((action) => action.extensionId === "openai-image-generation")).toHaveLength(2);
-  expect(actions.filter((action) => action.extensionId === "openwork-cloud-uploads")).toHaveLength(2);
+  expect(actions.filter((action) => action.extensionId === "redrob-cloud-uploads")).toHaveLength(2);
 }
 
 beforeEach(() => {
@@ -264,8 +264,8 @@ describe("Connect-aware legacy extension gating", () => {
       "google-workspace/status",
       "openai-image-generation/image_generate",
       "openai-image-generation/status",
-      "openwork-cloud-uploads/drive_upload_file",
-      "openwork-cloud-uploads/gmail_create_draft_with_attachments",
+      "redrob-cloud-uploads/drive_upload_file",
+      "redrob-cloud-uploads/gmail_create_draft_with_attachments",
     ]);
 
     const gated = await callCalendarListEvents(base);
@@ -291,7 +291,7 @@ describe("Connect-aware legacy extension gating", () => {
       ...current,
       mcp: {
         ...current.mcp,
-        "openwork-cloud": { type: "remote", url: "https://cloud.example/mcp" },
+        "redrob-cloud": { type: "remote", url: "https://cloud.example/mcp" },
       },
     }));
 

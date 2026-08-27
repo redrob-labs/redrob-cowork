@@ -13,8 +13,8 @@ runtimes use the operating system trust path.
 Use this as the Windows companion to `daytona-electron-test`. For executable
 end-to-end or PR verdict evidence, use an app-driving `.e2e.test.ts` test with
 `@redrob/testkit`; custom VNC screenshots are supplementary. Reuse the repo
-support assets instead of copying their logic: `scripts/support/setup-openwork-tls-repro.ps1`,
-`scripts/support/openwork-doctor.ps1`, and `docs/support/enterprise-network-doctor.md`.
+support assets instead of copying their logic: `scripts/support/setup-redrob-tls-repro.ps1`,
+`scripts/support/redrob-doctor.ps1`, and `docs/support/enterprise-network-doctor.md`.
 
 ## When to use
 
@@ -36,7 +36,7 @@ brew link --overwrite daytona
 daytona version
 ```
 
-- `gh` must be authenticated to `different-ai/openwork` and able to create/delete
+- `gh` must be authenticated to `redrob-labs/redrob-work` and able to create/delete
   temporary public prereleases.
 - Have a Windows Redrob Work build or installer ready. Keep secrets and customer
   materials out of the temporary release asset.
@@ -106,27 +106,27 @@ the app build plus the support scripts from this repo so the VM reuses the
 checked-in harness:
 
 ```bash
-TAG="openwork-win-cert-repro-$(date +%Y%m%d%H%M%S)"
+TAG="redrob-win-cert-repro-$(date +%Y%m%d%H%M%S)"
 ZIP="/tmp/${TAG}.zip"
-# Put your Windows app build under /tmp/openwork-win-cert-upload/openwork/app
-# and include scripts/support/setup-openwork-tls-repro.ps1 plus
-# scripts/support/openwork-doctor.ps1 under openwork/scripts/support/.
+# Put your Windows app build under /tmp/redrob-win-cert-upload/redrob/app
+# and include scripts/support/setup-redrob-tls-repro.ps1 plus
+# scripts/support/redrob-doctor.ps1 under redrob/scripts/support/.
 # Include .opencode/skills/daytona-windows-cert/scripts/ca-probe.js as
-# openwork/ca-probe.js.
-ditto -c -k --keepParent /tmp/openwork-win-cert-upload/openwork "$ZIP"
-gh release create "$TAG" "$ZIP" --repo different-ai/openwork --prerelease
+# redrob/ca-probe.js.
+ditto -c -k --keepParent /tmp/redrob-win-cert-upload/redrob "$ZIP"
+gh release create "$TAG" "$ZIP" --repo redrob-labs/redrob-work --prerelease
 ```
 
 The release command shape from the verified session was:
 
 ```bash
-gh release create <tag> <zip> --repo different-ai/openwork --prerelease
+gh release create <tag> <zip> --repo redrob-labs/redrob-work --prerelease
 ```
 
 Download and extract inside Windows:
 
 ```bash
-DOWNLOAD_URL="https://github.com/different-ai/openwork/releases/download/${TAG}/$(basename "$ZIP")"
+DOWNLOAD_URL="https://github.com/redrob-labs/redrob-work/releases/download/${TAG}/$(basename "$ZIP")"
 daytona exec "$SANDBOX_ID" -- cmd /c 'mkdir C:\ow 2>NUL'
 daytona exec "$SANDBOX_ID" -- cmd /c "curl.exe -L -o C:\ow\app.zip $DOWNLOAD_URL"
 daytona exec "$SANDBOX_ID" -- cmd /c 'tar -xf C:\ow\app.zip -C C:\ow'
@@ -143,19 +143,19 @@ If the zip only contains the app, fetch the support scripts from the same branch
 instead of rewriting them:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- cmd /c 'mkdir C:\ow\openwork\scripts\support 2>NUL'
-daytona exec "$SANDBOX_ID" -- cmd /c 'curl.exe -L -o C:\ow\openwork\scripts\support\setup-openwork-tls-repro.ps1 https://raw.githubusercontent.com/different-ai/openwork/dev/scripts/support/setup-openwork-tls-repro.ps1'
-daytona exec "$SANDBOX_ID" -- cmd /c 'curl.exe -L -o C:\ow\openwork\scripts\support\openwork-doctor.ps1 https://raw.githubusercontent.com/different-ai/openwork/dev/scripts/support/openwork-doctor.ps1'
+daytona exec "$SANDBOX_ID" -- cmd /c 'mkdir C:\ow\redrob\scripts\support 2>NUL'
+daytona exec "$SANDBOX_ID" -- cmd /c 'curl.exe -L -o C:\ow\redrob\scripts\support\setup-redrob-tls-repro.ps1 https://raw.githubusercontent.com/redrob-labs/redrob-work/dev/scripts/support/setup-redrob-tls-repro.ps1'
+daytona exec "$SANDBOX_ID" -- cmd /c 'curl.exe -L -o C:\ow\redrob\scripts\support\redrob-doctor.ps1 https://raw.githubusercontent.com/redrob-labs/redrob-work/dev/scripts/support/redrob-doctor.ps1'
 ```
 
 ## 4. Stand up the enterprise-TLS repro
 
-`scripts/support/setup-openwork-tls-repro.ps1` creates a fake corporate root and
+`scripts/support/setup-redrob-tls-repro.ps1` creates a fake corporate root and
 intermediate, trusts the root in `Cert:\LocalMachine\Root`, maps
-`poc.openwork.test` to localhost, and serves:
+`poc.redrob.test` to localhost, and serves:
 
-- `https://poc.openwork.test:8443` — healthy chain.
-- `https://poc.openwork.test:9443` — broken chain with the intermediate removed.
+- `https://poc.redrob.test:8443` — healthy chain.
+- `https://poc.redrob.test:9443` — broken chain with the intermediate removed.
 
 Do not run the listeners only inside a one-off `daytona exec`; the PowerShell
 listeners die when that exec session closes. Persist them with a scheduled task
@@ -166,17 +166,17 @@ ENCODED=$(python3 - <<'PY'
 import base64
 script = r'''
 $ErrorActionPreference = "Stop"
-$repo = "C:\ow\openwork"
-$cmdPath = "C:\ow\start-openwork-tls-repro.cmd"
+$repo = "C:\ow\redrob"
+$cmdPath = "C:\ow\start-redrob-tls-repro.cmd"
 $cmd = @"
 @echo off
 cd /d "$repo"
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\support\setup-openwork-tls-repro.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\support\setup-redrob-tls-repro.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -Command "while (`$true) { Start-Sleep -Seconds 3600 }"
 "@
 Set-Content -LiteralPath $cmdPath -Value $cmd -Encoding ASCII
-schtasks /create /f /sc onstart /ru SYSTEM /tn OpenWorkTlsRepro /tr $cmdPath
-schtasks /run /tn OpenWorkTlsRepro
+schtasks /create /f /sc onstart /ru SYSTEM /tn RedrobWorkTlsRepro /tr $cmdPath
+schtasks /run /tn RedrobWorkTlsRepro
 '''
 print(base64.b64encode(script.encode("utf-16le")).decode())
 PY
@@ -193,7 +193,7 @@ daytona exec "$SANDBOX_ID" -- cmd /c 'netstat -ano | findstr :8443'
 Optional diagnostic output from the checked-in doctor script:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- powershell -NoProfile -ExecutionPolicy Bypass -File 'C:\ow\openwork\scripts\support\openwork-doctor.ps1' -WebUrl https://poc.openwork.test:8443 -ApiUrl https://poc.openwork.test:9443 -ExpectedIssuerMatch "OpenWork TLS Repro"
+daytona exec "$SANDBOX_ID" -- powershell -NoProfile -ExecutionPolicy Bypass -File 'C:\ow\redrob\scripts\support\redrob-doctor.ps1' -WebUrl https://poc.redrob.test:8443 -ApiUrl https://poc.redrob.test:9443 -ExpectedIssuerMatch "Redrob Work TLS Repro"
 ```
 
 ## 5. Verify the fix
@@ -204,14 +204,14 @@ Copy `.opencode/skills/daytona-windows-cert/scripts/ca-probe.js` into the VM as
 `C:\ow\ca-probe.js`. Its contents are intentionally small and reusable:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- cmd /c 'copy C:\ow\openwork\ca-probe.js C:\ow\ca-probe.js'
+daytona exec "$SANDBOX_ID" -- cmd /c 'copy C:\ow\redrob\ca-probe.js C:\ow\ca-probe.js'
 ```
 
 ```js
 const { X509Certificate } = require("node:crypto");
 const tls = require("node:tls");
 
-const needle = (process.env.REDROB_TLS_REPRO_CA_MATCH || "OpenWork TLS Repro").toLowerCase();
+const needle = (process.env.REDROB_TLS_REPRO_CA_MATCH || "Redrob Work TLS Repro").toLowerCase();
 
 function countMatchingSubjects(certificates) {
   let count = 0;
@@ -247,7 +247,7 @@ Run Electron in node mode. Adjust the executable path for your unpacked build or
 installed app:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- cmd /c 'set ELECTRON_RUN_AS_NODE=1 && "C:\ow\openwork\app\OpenWork.exe" C:\ow\ca-probe.js'
+daytona exec "$SANDBOX_ID" -- cmd /c 'set ELECTRON_RUN_AS_NODE=1 && "C:\ow\redrob\app\Redrob Work.exe" C:\ow\ca-probe.js'
 ```
 
 The verified result was:
@@ -266,9 +266,9 @@ Drive the installed Redrob Work Windows app through VNC, not `daytona exec`.
 
 1. Open Daytona Dashboard -> sandbox -> ⋮ menu -> **VNC** -> Connect.
 2. Launch or install Redrob Work as the interactive user.
-3. Point the self-hosted/control-plane URL at `https://poc.openwork.test:8443`.
+3. Point the self-hosted/control-plane URL at `https://poc.redrob.test:8443`.
    The request should succeed.
-4. Repeat against `https://poc.openwork.test:9443`. The request should fail with
+4. Repeat against `https://poc.redrob.test:9443`. The request should fail with
    a named certificate/chain error, not a vague `fetch failed` banner.
 
 Use `daytona-electron-test` for normal Electron driving patterns. If this is PR
@@ -285,12 +285,12 @@ The real Windows userData folder is:
 C:\Users\<User>\AppData\Roaming\io.redrob.work
 ```
 
-It is **not** `C:\Users\<User>\AppData\Roaming\OpenWork`. Because `exec` runs as
+It is **not** `C:\Users\<User>\AppData\Roaming\Redrob Work`. Because `exec` runs as
 SYSTEM, inspect the interactive user path explicitly:
 
 ```bash
 daytona exec "$SANDBOX_ID" -- cmd /c 'dir "C:\Users\Administrator\AppData\Roaming\io.redrob.work\system-ca-bundle.pem"'
-daytona exec "$SANDBOX_ID" -- cmd /c 'findstr /c:"OpenWork TLS Repro" "C:\Users\Administrator\AppData\Roaming\io.redrob.work\system-ca-bundle.pem"'
+daytona exec "$SANDBOX_ID" -- cmd /c 'findstr /c:"Redrob Work TLS Repro" "C:\Users\Administrator\AppData\Roaming\io.redrob.work\system-ca-bundle.pem"'
 ```
 
 Known gotcha: `system-ca-bundle.pem` is written once at first launch and then
@@ -314,7 +314,7 @@ daytona exec "$SANDBOX_ID" -- cmd /c 'dir "C:\Users\Administrator\AppData\Roamin
 ```bash
 ENCODED=$(python3 - <<'PY'
 import base64
-command = r'Get-ChildItem Cert:\LocalMachine\Root | Where-Object Subject -like "*OpenWork TLS Repro*"'
+command = r'Get-ChildItem Cert:\LocalMachine\Root | Where-Object Subject -like "*Redrob Work TLS Repro*"'
 print(base64.b64encode(command.encode("utf-16le")).decode())
 PY
 )
@@ -341,9 +341,9 @@ Stop the scheduled repro, remove the certificates/hosts/bindings through the
 checked-in setup script, delete the sandbox, and delete the temporary prerelease:
 
 ```bash
-daytona exec "$SANDBOX_ID" -- cmd /c 'schtasks /end /tn OpenWorkTlsRepro'
-# Core repro cleanup shape: setup-openwork-tls-repro.ps1 -Cleanup
-daytona exec "$SANDBOX_ID" -- powershell -NoProfile -ExecutionPolicy Bypass -File 'C:\ow\openwork\scripts\support\setup-openwork-tls-repro.ps1' -Cleanup
+daytona exec "$SANDBOX_ID" -- cmd /c 'schtasks /end /tn RedrobWorkTlsRepro'
+# Core repro cleanup shape: setup-redrob-tls-repro.ps1 -Cleanup
+daytona exec "$SANDBOX_ID" -- powershell -NoProfile -ExecutionPolicy Bypass -File 'C:\ow\redrob\scripts\support\setup-redrob-tls-repro.ps1' -Cleanup
 daytona sandbox delete <ID>
 gh release delete <tag> --yes
 ```

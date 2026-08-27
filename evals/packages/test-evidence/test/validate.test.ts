@@ -17,7 +17,7 @@ function testScreenshot(hash: string): ScreenshotArtifact {
     png: Buffer.from("canned png"),
     hash,
     route: "#/workspace/ws_test/session",
-    visibleText: "OpenWork composer",
+    visibleText: "Redrob Work composer",
     at: "2026-07-29T12:00:00.000Z",
   };
 }
@@ -94,7 +94,7 @@ test("defer mode judges a caller-provided deterministic witness inline", async (
 });
 
 test("deferred validation records pending expectations that the judge resolves", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-deferred-vision-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-deferred-vision-"));
   const previousMode = process.env.REDROB_EVAL_VISION;
   try {
     const expectation = `Synthetic screenshot is visible ${randomUUID()}`;

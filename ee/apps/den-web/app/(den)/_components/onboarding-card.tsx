@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { OrganizationBrandIdentity, type OrganizationBrand } from "./organization-brand-identity";
 
-const REDROB_MARK_SRC = "/openwork-mark.svg";
+const REDROB_MARK_SRC = "/redrob-mark.svg";
 
 export type OnboardingCardOrganization = {
   name: string;
@@ -37,7 +37,7 @@ function BrandIcon({ iconUrl }: { iconUrl: string | null }) {
 
 function BrandLabel({ organization }: { organization: OnboardingCardOrganization | null }) {
   if (!organization) {
-    return <span>OpenWork Cloud</span>;
+    return <span>Redrob Work Cloud</span>;
   }
 
   if (organization.brand.logoUrl) {

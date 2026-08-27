@@ -22,7 +22,7 @@ export async function startWorld(
     const snapshot: unknown = JSON.parse(await readFile(world.snapshotPath, "utf8"));
     currentTestEvidence()?.recordJsonArtifact(`world-snapshot ${world.name}`, snapshot);
   } catch (error) {
-    console.error(`[openwork/testkit] world snapshot evidence attach failed: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(`[redrob/testkit] world snapshot evidence attach failed: ${error instanceof Error ? error.message : String(error)}`);
   }
   return world;
 }

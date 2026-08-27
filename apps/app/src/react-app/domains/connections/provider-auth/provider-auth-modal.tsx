@@ -51,15 +51,14 @@ type ProviderOAuthSession = ProviderOAuthStartResult & {
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
-  openwork: "Redrob",
+  redrob: "Redrob",
   openai: "OpenAI",
   anthropic: "Anthropic",
   google: "Google",
   openrouter: "OpenRouter",
-  redrob: "Redrob",
 };
 
-const REDROB_MODELS_PROVIDER_ID = "openwork";
+const REDROB_MODELS_PROVIDER_ID = "redrob";
 
 export type ProviderAuthModalProps = {
   open: boolean;
@@ -79,8 +78,8 @@ export type ProviderAuthModalProps = {
     code?: string,
   ) => Promise<{ connected: boolean; pending?: boolean; message?: string }>;
   onRefreshProviders?: () => Promise<unknown>;
-  showOpenWorkModelsSubscribe?: boolean;
-  onSubscribeOpenWorkModels?: () => void | Promise<void>;
+  showRedrobWorkModelsSubscribe?: boolean;
+  onSubscribeRedrobWorkModels?: () => void | Promise<void>;
   onClose: () => void;
 };
 
@@ -89,7 +88,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
   const isRemoteWorker = workerType === "remote";
 
   const [view, setView] = useState<
-    "list" | "method" | "api" | "oauth-code" | "oauth-auto" | "openwork-subscribe"
+    "list" | "method" | "api" | "oauth-code" | "oauth-auto" | "redrob-subscribe"
   >("list");
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState("");
@@ -187,14 +186,14 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
       })
       .sort(compareProviders);
 
-    if (props.showOpenWorkModelsSubscribe && isRedrobOnlyProviderId(REDROB_MODELS_PROVIDER_ID)) {
-      const connectedToOpenWork = connected.has(REDROB_MODELS_PROVIDER_ID);
+    if (props.showRedrobWorkModelsSubscribe && isRedrobOnlyProviderId(REDROB_MODELS_PROVIDER_ID)) {
+      const connectedToRedrobWork = connected.has(REDROB_MODELS_PROVIDER_ID);
       return [
         {
           id: REDROB_MODELS_PROVIDER_ID,
           name: "Redrob",
           methods: [{ type: "cloud", label: "Subscribe" }],
-          connected: connectedToOpenWork,
+          connected: connectedToRedrobWork,
           env: [],
         },
         ...nextEntries.filter((entry) => entry.id.trim().toLowerCase() !== REDROB_MODELS_PROVIDER_ID),
@@ -202,7 +201,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     }
 
     return nextEntries;
-  }, [isRemoteWorker, props.authMethods, props.connectedProviderIds, props.providers, props.showOpenWorkModelsSubscribe]);
+  }, [isRemoteWorker, props.authMethods, props.connectedProviderIds, props.providers, props.showRedrobWorkModelsSubscribe]);
 
   const selectedEntry = useMemo(
     () => entries.find((entry) => entry.id === selectedProviderId) ?? null,
@@ -516,7 +515,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     }
 
     if (method.type === "cloud") {
-      setView("openwork-subscribe");
+      setView("redrob-subscribe");
       return;
     }
 
@@ -528,8 +527,8 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     setLocalError(null);
     setSelectedProviderId(entry.id);
 
-    if (props.showOpenWorkModelsSubscribe && entry.id.trim().toLowerCase() === REDROB_MODELS_PROVIDER_ID) {
-      setView("openwork-subscribe");
+    if (props.showRedrobWorkModelsSubscribe && entry.id.trim().toLowerCase() === REDROB_MODELS_PROVIDER_ID) {
+      setView("redrob-subscribe");
       return;
     }
 
@@ -582,7 +581,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
   };
 
   const handleBack = () => {
-    if (resolvedView === "openwork-subscribe") {
+    if (resolvedView === "redrob-subscribe") {
       resetState();
       return;
     }
@@ -881,7 +880,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                 </div>
               ) : null}
 
-              {resolvedView === "openwork-subscribe" && selectedEntry ? (
+              {resolvedView === "redrob-subscribe" && selectedEntry ? (
                 <div className="rounded-xl border border-blue-6/50 bg-blue-2/25 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -895,7 +894,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     </Button>
                   </div>
                   <div className="flex items-center justify-end">
-                    <Button onClick={() => void props.onSubscribeOpenWorkModels?.()} disabled={actionDisabled}>
+                    <Button onClick={() => void props.onSubscribeRedrobWorkModels?.()} disabled={actionDisabled}>
                       Subscribe
                     </Button>
                   </div>

@@ -34,7 +34,7 @@ function indicatorExpression(sessionId: string, present: boolean): string {
 }
 
 const stopDisabledExpression = `(() => {
-  const stop = window.__openworkControl.listActions().find((action) => action.id === "composer.stop");
+  const stop = window.__redrobControl.listActions().find((action) => action.id === "composer.stop");
   return Boolean(stop?.disabled);
 })()`;
 
@@ -92,12 +92,12 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({ name: "session-loading-idle" });
   const workspace = await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-session-loading-idle-${Date.now()}`,
+    path: `/tmp/redrob-session-loading-idle-${Date.now()}`,
   });
 
   const configured = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -128,18 +128,18 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     if (patched !== "ok") return patched;
     const reloaded = await request("/workspace/" + encodeURIComponent(workspaceId) + "/engine/reload", { method: "POST" });
     if (reloaded !== "ok") return reloaded;
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
-    localStorage.removeItem("openwork.sessionModels." + workspaceId);
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.removeItem("redrob.sessionModels." + workspaceId);
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 30_000 });
   expect(configured).toBe("ok");
@@ -150,12 +150,12 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
   const mainSessionId = newestSessionId(await control(app, "session.list_sessions"));
   expect(mainSessionId).not.toBe(parkingSessionId);
 
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "composer.set_text" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "composer.set_text" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "main session composer text action enabled",
   });
   await control(app, "composer.set_text", { text: `Reply with exactly: ${reply}` });
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "composer.send" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "composer.send" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "main session composer send action enabled",
   });

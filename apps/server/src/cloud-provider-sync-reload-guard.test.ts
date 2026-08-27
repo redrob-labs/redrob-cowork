@@ -32,7 +32,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function hostHeaders() {
-  return { "x-openwork-host-token": HOST_TOKEN, "content-type": "application/json" };
+  return { "x-redrob-host-token": HOST_TOKEN, "content-type": "application/json" };
 }
 
 function clientHeaders() {
@@ -46,7 +46,7 @@ async function readJsonObject(response: Response): Promise<Record<string, unknow
 }
 
 async function createTempRoot() {
-  const root = await mkdtemp(join(tmpdir(), "openwork-reload-guard-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-reload-guard-"));
   roots.push(root);
   previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");

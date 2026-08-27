@@ -43,9 +43,9 @@ async function regenerateBlockmap(installerPath) {
 }
 
 function manifestName(installerName) {
-  if (installerName.startsWith("openwork-cloud-win-")) return "cloud.yml";
-  if (installerName.startsWith("openwork-enterprise-win-")) return "enterprise.yml";
-  if (installerName.startsWith("openwork-win-")) return "latest.yml";
+  if (installerName.startsWith("redrob-cloud-win-")) return "cloud.yml";
+  if (installerName.startsWith("redrob-enterprise-win-")) return "enterprise.yml";
+  if (installerName.startsWith("redrob-win-")) return "latest.yml";
   throw new Error(`Unsupported Windows installer name: ${installerName}`);
 }
 
@@ -86,7 +86,7 @@ if (!existsSync(distRoot)) {
 }
 
 const installers = walk(distRoot).filter((file) =>
-  /^openwork(?:-(?:cloud|enterprise))?-win-(?:x64|arm64)-.+\.exe$/i.test(basename(file)),
+  /^redrob(?:-(?:cloud|enterprise))?-win-(?:x64|arm64)-.+\.exe$/i.test(basename(file)),
 );
 
 if (installers.length !== expectedCount) {

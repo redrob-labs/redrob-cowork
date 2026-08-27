@@ -22,7 +22,7 @@ import {
 } from "./server.js";
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
-import { keepOpenworkRuntimeConfigFileFresh, writeOpenworkRuntimeConfigFile } from "./openwork-runtime-config.js";
+import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
 import { resolveOpencodeModelsUrl } from "./opencode-models-url.js";
 import { startWorkerActivityHeartbeat } from "./worker-activity-heartbeat.js";
@@ -67,10 +67,10 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
     // effort: a failed reap must never block startup.
     await reapOrphanEngineInstances(config, { logger }).catch(() => undefined);
     // Server-managed config file: the engine re-reads it from disk on every
-    // instance rebuild, and keepOpenworkRuntimeConfigFileFresh synchronizes it
+    // instance rebuild, and keepRedrobRuntimeConfigFileFresh synchronizes it
     // on every runtime-DB write — so disposes always pick up current state.
-    const { path: runtimeConfigPath } = await writeOpenworkRuntimeConfigFile(config, workspace.id);
-    keepOpenworkRuntimeConfigFileFresh(config, workspace.id);
+    const { path: runtimeConfigPath } = await writeRedrobRuntimeConfigFile(config, workspace.id);
+    keepRedrobRuntimeConfigFileFresh(config, workspace.id);
     const managedOpencodeCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
     await mkdir(managedOpencodeCwd, { recursive: true });
     await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
@@ -160,7 +160,7 @@ if (managedOpencode) {
 }
 
 const url = `http://${config.host}:${server.port}`;
-logger.log("info", `OpenWork server listening on ${url}`);
+logger.log("info", `Redrob Work server listening on ${url}`);
 
 if (config.tokenSource === "generated") {
   logger.log("info", `Client token: ${config.token}`);

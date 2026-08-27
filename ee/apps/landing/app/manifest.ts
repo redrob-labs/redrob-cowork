@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OpenWork",
-    short_name: "OpenWork",
+    name: "Redrob Work",
+    short_name: "Redrob Work",
     description:
       "Open source Claude Cowork alternative. Bring your own model, wire in your tools, and ship reusable agent setups across your org.",
     start_url: "/",
@@ -24,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any"
       },
       {
-        src: "/openwork-mark.svg",
+        src: "/redrob-mark.svg",
         type: "image/svg+xml",
         sizes: "any"
       }

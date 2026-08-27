@@ -15,7 +15,7 @@ function messageText(error: unknown): string {
 }
 
 function logCleanupError(name: string, error: unknown): void {
-  console.warn(`[openwork/evals] Desktop ${name} cleanup failed: ${messageText(error)}`);
+  console.warn(`[redrob/evals] Desktop ${name} cleanup failed: ${messageText(error)}`);
 }
 
 async function appendDesktopLog(error: unknown, handle: SurfaceHandle): Promise<unknown> {
@@ -89,7 +89,7 @@ async function waitForReadiness(app: Surface, timeoutMs: number): Promise<AppRea
     await sleep(Math.min(POLL_INTERVAL_MS, Math.max(0, deadline - Date.now())));
   }
   throw new Error(
-    `OpenWork desktop did not become ready after ${timeoutMs}ms: ${describeAppState(last)} On screen: ${await dumpScreenState(app)}.`,
+    `Redrob Work desktop did not become ready after ${timeoutMs}ms: ${describeAppState(last)} On screen: ${await dumpScreenState(app)}.`,
   );
 }
 

@@ -1,0 +1,22 @@
+{
+  "name": "redrob-bootstrap",
+  "version": "0.1.0",
+  "description": "Script-installable Redrob Work bootstrap CLI for agents",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "redrob-bootstrap": "bin/redrob.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "start.md"
+  ],
+  "scripts": {
+    "check": "node --check bin/redrob.mjs && node --check evals/agent-test-evidence-redrob-bootstrap.mjs && node --check evals/agent-test-evidence-redrob-app-install.mjs && node --check evals/agent-test-evidence-linux-container.mjs",
+    "test": "node test/redrob-bootstrap.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

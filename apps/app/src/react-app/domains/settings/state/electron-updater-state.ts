@@ -34,7 +34,7 @@ type ElectronUpdaterBridge = NonNullable<Window["__REDROB_ELECTRON__"]>["updater
 
 declare global {
   interface Window {
-    __openworkUpdaterEvalBridge?: ElectronUpdaterBridge;
+    __redrobUpdaterEvalBridge?: ElectronUpdaterBridge;
   }
 }
 
@@ -94,8 +94,8 @@ function electronUpdaterEnvReducer(
 
 function electronUpdaterBridge(): ElectronUpdaterBridge | null {
   if (typeof window === "undefined") return null;
-  if (import.meta.env.DEV && window.__openworkUpdaterEvalBridge) {
-    return window.__openworkUpdaterEvalBridge;
+  if (import.meta.env.DEV && window.__redrobUpdaterEvalBridge) {
+    return window.__redrobUpdaterEvalBridge;
   }
   return window.__REDROB_ELECTRON__?.updater ?? null;
 }
@@ -382,7 +382,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         if (!isCurrentRequest()) return;
         const currentVersion = channelState?.currentVersion ?? appVersion;
         if (!currentVersion) {
-          throw new Error("Could not determine the installed OpenWork version.");
+          throw new Error("Could not determine the installed Redrob Work version.");
         }
 
         const selection = await resolveFreshStableDesktopUpdate({

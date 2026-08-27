@@ -89,16 +89,16 @@ if [ -z "$REF" ]; then
   REF="${REF:-$(git rev-parse HEAD)}"
 fi
 
-SANDBOX="openwork-test-$(date +%Y%m%d-%H%M%S)"
+SANDBOX="redrob-test-$(date +%Y%m%d-%H%M%S)"
 CDP_PORT=9825
 NOVNC_PORT=6080
 ARTIFACTS_PORT=8090
 MAX_WAIT=90
-DAYTONA_EVAL_SNAPSHOT="${DAYTONA_EVAL_SNAPSHOT:-openwork-eval-vnc}"
-DAYTONA_SECRETS_VOLUME="${DAYTONA_SECRETS_VOLUME:-openwork-eval-secrets}"
+DAYTONA_EVAL_SNAPSHOT="${DAYTONA_EVAL_SNAPSHOT:-redrob-eval-vnc}"
+DAYTONA_SECRETS_VOLUME="${DAYTONA_SECRETS_VOLUME:-redrob-eval-secrets}"
 DAYTONA_SECRETS_MOUNT="${DAYTONA_SECRETS_MOUNT:-/daytona-secrets}"
 DAYTONA_SECRETS_ENV="${DAYTONA_SECRETS_ENV:-${DAYTONA_SECRETS_MOUNT}}"
-DAYTONA_ARTIFACTS_VOLUME="${DAYTONA_ARTIFACTS_VOLUME:-openwork-eval-artifacts}"
+DAYTONA_ARTIFACTS_VOLUME="${DAYTONA_ARTIFACTS_VOLUME:-redrob-eval-artifacts}"
 DAYTONA_ARTIFACTS_MOUNT="${DAYTONA_ARTIFACTS_MOUNT:-/daytona-artifacts}"
 DAYTONA_ELECTRON_EXTRA_LAUNCH_ARGS="${DAYTONA_ELECTRON_EXTRA_LAUNCH_ARGS:---disable-gpu --disable-dev-shm-usage --enable-unsafe-swiftshader}"
 REDROB_ELECTRON_FAKE_MEDIA="${REDROB_ELECTRON_FAKE_MEDIA:-0}"
@@ -176,7 +176,7 @@ fi
 SNAPSHOT_ID="$(snapshot_id "$DAYTONA_EVAL_SNAPSHOT")"
 if [ -z "$SNAPSHOT_ID" ]; then
   echo "ERROR: Daytona snapshot '$DAYTONA_EVAL_SNAPSHOT' not found." >&2
-  echo "Create it with: bash .devcontainer/create-daytona-openwork-snapshot.sh" >&2
+  echo "Create it with: bash .devcontainer/create-daytona-redrob-snapshot.sh" >&2
   exit 1
 fi
 
@@ -217,11 +217,11 @@ fi
 
 echo ""
 echo "==> Checking out $REF..."
-daytona exec "$SANDBOX" -- "bash -lc 'set -euo pipefail; cd /workspace; REF=\"$REF\"; FORCE_INSTALL=\"$FORCE_INSTALL\"; PNPM_STORE=/workspace/.openwork-daytona/pnpm-store; if git fetch origin \"\$REF\"; then git checkout --detach FETCH_HEAD; else git fetch origin dev --depth 50 || true; git checkout \"\$REF\"; fi; git rev-parse --short HEAD; mkdir -p \"\$PNPM_STORE\" .openwork-daytona; baseline=.openwork-daytona/pnpm-lock.sha256; current=\$(sha256sum pnpm-lock.yaml | cut -d \" \" -f 1); if [ \"\$FORCE_INSTALL\" = 1 ] || [ ! -d node_modules ] || [ ! -f \"\$baseline\" ] || [ \"\$(cat \"\$baseline\")\" != \"\$current\" ]; then echo \"==> Installing deps (missing node_modules, lockfile changed, or forced)...\"; CI=1 pnpm install --store-dir \"\$PNPM_STORE\" --frozen-lockfile || CI=1 pnpm install --store-dir \"\$PNPM_STORE\"; printf \"%s\" \"\$current\" > \"\$baseline\"; else echo \"==> Skipping pnpm install (node_modules present and lockfile unchanged).\"; fi'"
+daytona exec "$SANDBOX" -- "bash -lc 'set -euo pipefail; cd /workspace; REF=\"$REF\"; FORCE_INSTALL=\"$FORCE_INSTALL\"; PNPM_STORE=/workspace/.redrob-daytona/pnpm-store; if git fetch origin \"\$REF\"; then git checkout --detach FETCH_HEAD; else git fetch origin dev --depth 50 || true; git checkout \"\$REF\"; fi; git rev-parse --short HEAD; mkdir -p \"\$PNPM_STORE\" .redrob-daytona; baseline=.redrob-daytona/pnpm-lock.sha256; current=\$(sha256sum pnpm-lock.yaml | cut -d \" \" -f 1); if [ \"\$FORCE_INSTALL\" = 1 ] || [ ! -d node_modules ] || [ ! -f \"\$baseline\" ] || [ \"\$(cat \"\$baseline\")\" != \"\$current\" ]; then echo \"==> Installing deps (missing node_modules, lockfile changed, or forced)...\"; CI=1 pnpm install --store-dir \"\$PNPM_STORE\" --frozen-lockfile || CI=1 pnpm install --store-dir \"\$PNPM_STORE\"; printf \"%s\" \"\$current\" > \"\$baseline\"; else echo \"==> Skipping pnpm install (node_modules present and lockfile unchanged).\"; fi'"
 
 echo ""
 echo "==> Starting Redrob Work sandbox dev stack..."
-daytona exec "$SANDBOX" -- "bash -lc 'set -euo pipefail; cd /workspace; DEN_BASE_URL=\"$DEN_BASE_URL\"; DEN_API_BASE_URL=\"$DEN_API_BASE_URL\"; DEN_REQUIRE_SIGNIN=\"$DEN_REQUIRE_SIGNIN\"; if [ -n \"\$DEN_BASE_URL\" ] || [ -n \"\$DEN_API_BASE_URL\" ] || [ \"\$DEN_REQUIRE_SIGNIN\" = 1 ]; then mkdir -p /workspace/.openwork-daytona; DEN_BASE_URL=\"\$DEN_BASE_URL\" DEN_API_BASE_URL=\"\$DEN_API_BASE_URL\" DEN_REQUIRE_SIGNIN=\"\$DEN_REQUIRE_SIGNIN\" node -e '\''const fs = require(\"node:fs\"); const baseUrl = process.env.DEN_BASE_URL || \"https://app.redrob.io\"; const apiBaseUrl = process.env.DEN_API_BASE_URL || null; const requireSignin = process.env.DEN_REQUIRE_SIGNIN === \"1\"; fs.writeFileSync(\"/workspace/.openwork-daytona/desktop-bootstrap.json\", JSON.stringify({ baseUrl, apiBaseUrl, requireSignin }, null, 2) + \"\\n\");'\''; fi; export DAYTONA_SECRETS_ENV=\"$DAYTONA_SECRETS_ENV\" DAYTONA_ELECTRON_EXTRA_LAUNCH_ARGS=\"$DAYTONA_ELECTRON_EXTRA_LAUNCH_ARGS\" REDROB_ELECTRON_REMOTE_DEBUG_PORT=$CDP_PORT REDROB_ELECTRON_FAKE_MEDIA=\"$REDROB_ELECTRON_FAKE_MEDIA\" REDROB_WORKSPACE_DIR=/workspace REDROB_GOOGLE_WORKSPACE_ALLOW_PLAINTEXT_VAULT=1; if [ -f /workspace/.openwork-daytona/desktop-bootstrap.json ]; then export REDROB_DESKTOP_BOOTSTRAP_PATH=/workspace/.openwork-daytona/desktop-bootstrap.json; fi; pnpm dev:sandbox'"
+daytona exec "$SANDBOX" -- "bash -lc 'set -euo pipefail; cd /workspace; DEN_BASE_URL=\"$DEN_BASE_URL\"; DEN_API_BASE_URL=\"$DEN_API_BASE_URL\"; DEN_REQUIRE_SIGNIN=\"$DEN_REQUIRE_SIGNIN\"; if [ -n \"\$DEN_BASE_URL\" ] || [ -n \"\$DEN_API_BASE_URL\" ] || [ \"\$DEN_REQUIRE_SIGNIN\" = 1 ]; then mkdir -p /workspace/.redrob-daytona; DEN_BASE_URL=\"\$DEN_BASE_URL\" DEN_API_BASE_URL=\"\$DEN_API_BASE_URL\" DEN_REQUIRE_SIGNIN=\"\$DEN_REQUIRE_SIGNIN\" node -e '\''const fs = require(\"node:fs\"); const baseUrl = process.env.DEN_BASE_URL || \"https://app.redrob.io\"; const apiBaseUrl = process.env.DEN_API_BASE_URL || null; const requireSignin = process.env.DEN_REQUIRE_SIGNIN === \"1\"; fs.writeFileSync(\"/workspace/.redrob-daytona/desktop-bootstrap.json\", JSON.stringify({ baseUrl, apiBaseUrl, requireSignin }, null, 2) + \"\\n\");'\''; fi; export DAYTONA_SECRETS_ENV=\"$DAYTONA_SECRETS_ENV\" DAYTONA_ELECTRON_EXTRA_LAUNCH_ARGS=\"$DAYTONA_ELECTRON_EXTRA_LAUNCH_ARGS\" REDROB_ELECTRON_REMOTE_DEBUG_PORT=$CDP_PORT REDROB_ELECTRON_FAKE_MEDIA=\"$REDROB_ELECTRON_FAKE_MEDIA\" REDROB_WORKSPACE_DIR=/workspace REDROB_GOOGLE_WORKSPACE_ALLOW_PLAINTEXT_VAULT=1; if [ -f /workspace/.redrob-daytona/desktop-bootstrap.json ]; then export REDROB_DESKTOP_BOOTSTRAP_PATH=/workspace/.redrob-daytona/desktop-bootstrap.json; fi; pnpm dev:sandbox'"
 
 echo ""
 echo "==> Waiting for Electron CDP on port $CDP_PORT (up to ${MAX_WAIT}s)..."

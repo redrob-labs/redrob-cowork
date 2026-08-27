@@ -36,7 +36,7 @@ afterEach(async () => {
 });
 
 async function createWorkspaceRoot() {
-  const root = await mkdtemp(join(tmpdir(), "openwork-mcp-engine-sync-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-mcp-engine-sync-"));
   roots.push(root);
   return root;
 }
@@ -84,7 +84,7 @@ function startMockOpencode(options?: {
   return { server, requests };
 }
 
-async function startOpenworkServer(
+async function startRedrobServer(
   workspaceRoot: string,
   opencodeBaseUrl: string,
   options?: { trustedProcessIdentity?: string | null; isAlive?: () => boolean },
@@ -169,11 +169,11 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
@@ -194,22 +194,22 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(
+      const redrob = await startRedrobServer(
         workspaceRoot,
         `http://127.0.0.1:${mock.server.port}`,
         { trustedProcessIdentity: null },
       );
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
       expect(mock.requests.some((entry) => entry.method === "POST" && entry.pathname === "/mcp")).toBe(true);
       expect(inspectEngineMcpRegistration(
-        openwork.config,
-        openwork.config.workspaces[0]!,
+        redrob.config,
+        redrob.config.workspaces[0]!,
         "posthog",
         POSTHOG_CONFIG,
       )).toBe("not-recorded");
@@ -253,9 +253,9 @@ describe("runtime MCP engine sync", () => {
           return null;
         },
       });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
       const inspectRegistration = (name: string, config: Record<string, unknown>) =>
-        inspectEngineMcpRegistration(openwork.config, openwork.config.workspaces[0]!, name, config);
+        inspectEngineMcpRegistration(redrob.config, redrob.config.workspaces[0]!, name, config);
       const configs = new Map<string, Record<string, unknown>>([
         ["connected", POSTHOG_CONFIG],
         ["disabled", { ...POSTHOG_CONFIG, enabled: false }],
@@ -267,9 +267,9 @@ describe("runtime MCP engine sync", () => {
       ]);
 
       for (const [name, config] of configs) {
-        const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+        const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
           method: "POST",
-          headers: auth(openwork.token),
+          headers: auth(redrob.token),
           body: JSON.stringify({ name, config }),
         });
         expect(response.status).toBe(200);
@@ -279,8 +279,8 @@ describe("runtime MCP engine sync", () => {
       expect(inspectRegistration("disabled", configs.get("disabled")!)).toBe("disabled");
       expect(inspectRegistration("failed", configs.get("failed")!)).toBe("failed");
       expect(inspectEngineMcpRegistrationDetails(
-        openwork.config,
-        openwork.config.workspaces[0]!,
+        redrob.config,
+        redrob.config.workspaces[0]!,
         "failed",
         configs.get("failed")!,
       )).toMatchObject({
@@ -295,28 +295,28 @@ describe("runtime MCP engine sync", () => {
       expect(inspectRegistration("invalid", configs.get("invalid")!)).toBe("not-recorded");
       expect(inspectRegistration("oversized", configs.get("oversized")!)).toBe("not-recorded");
       expect(refreshEngineMcpRegistrationFromLiveStatus(
-        openwork.config,
-        openwork.config.workspaces[0]!,
+        redrob.config,
+        redrob.config.workspaces[0]!,
         "failed",
         configs.get("failed")!,
         "connected",
       )).toBe(true);
       expect(inspectRegistration("failed", configs.get("failed")!)).toBe("connected");
       expect(inspectEngineMcpRegistrationDetails(
-        openwork.config,
-        openwork.config.workspaces[0]!,
+        redrob.config,
+        redrob.config.workspaces[0]!,
         "failed",
         configs.get("failed")!,
       ).errorSummary).toBeNull();
       expect(inspectEngineMcpRegistrationDetails(
-        openwork.config,
-        openwork.config.workspaces[0]!,
+        redrob.config,
+        redrob.config.workspaces[0]!,
         "failed",
         { ...POSTHOG_CONFIG, url: "https://changed.example/mcp" },
       )).toMatchObject({ status: "not-recorded", errorSummary: null });
 
-      const listResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
-        headers: auth(openwork.token),
+      const listResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
+        headers: auth(redrob.token),
       });
       const listText = await listResponse.text();
       expect(listResponse.status).toBe(200);
@@ -355,25 +355,25 @@ describe("runtime MCP engine sync", () => {
             : null;
         },
       });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
-      const workspace = openwork.config.workspaces[0]!;
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const workspace = redrob.config.workspaces[0]!;
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("failed");
-      expect(inspectEngineMcpRegistrationDetails(openwork.config, workspace, "posthog", POSTHOG_CONFIG).source)
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("failed");
+      expect(inspectEngineMcpRegistrationDetails(redrob.config, workspace, "posthog", POSTHOG_CONFIG).source)
         .toBe("transport_failure");
 
       await waitForRegistration(
-        () => inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG),
+        () => inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG),
         "connected",
       );
       expect(posthogPosts).toBe(3);
-      expect(inspectEngineMcpRegistrationDetails(openwork.config, workspace, "posthog", POSTHOG_CONFIG).source)
+      expect(inspectEngineMcpRegistrationDetails(redrob.config, workspace, "posthog", POSTHOG_CONFIG).source)
         .toBe("engine_status");
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -415,20 +415,20 @@ describe("runtime MCP engine sync", () => {
           return Response.json({ posthog: { status: "connected" } });
         },
       });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
-      const writePosthogUrl = (url: string) => writeRuntimeOpencodeConfig(openwork.config, "ws_1", (current) => ({
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const writePosthogUrl = (url: string) => writeRuntimeOpencodeConfig(redrob.config, "ws_1", (current) => ({
         ...current,
         mcp: { posthog: { ...POSTHOG_CONFIG, url } },
       }));
 
       await writePosthogUrl("https://first.example/mcp");
-      const firstSync = syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
+      const firstSync = syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
       await firstRegistrationReached;
 
       await writePosthogUrl("https://intermediate.example/mcp");
-      const secondSync = syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
+      const secondSync = syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
       await writePosthogUrl("https://latest.example/mcp");
-      const thirdSync = syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
+      const thirdSync = syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
 
       await Bun.sleep(25);
       expect(registrations).toBe(1);
@@ -471,7 +471,7 @@ describe("runtime MCP engine sync", () => {
     let maxRegistrationsInFlight = 0;
     try {
       const mock = startMockOpencode({
-        liveMcpStatusByName: () => ({ "openwork-cloud": { status: "connected" } }),
+        liveMcpStatusByName: () => ({ "redrob-cloud": { status: "connected" } }),
         mcpResponseForName: (name) => {
           registrationNames.push(name);
           registrationsInFlight += 1;
@@ -486,17 +486,17 @@ describe("runtime MCP engine sync", () => {
           return Response.json({ [name]: { status: "connected" } });
         },
       });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
-      await writeRuntimeOpencodeConfig(openwork.config, "ws_1", (current) => ({
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      await writeRuntimeOpencodeConfig(redrob.config, "ws_1", (current) => ({
         ...current,
         mcp: { posthog: POSTHOG_CONFIG },
       }));
 
-      const startupSync = syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
+      const startupSync = syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
       await startupRegistrationReached;
-      const explicitReconcile = fetch(`${openwork.base}/workspace/ws_1/mcp/openwork-cloud/reconcile`, {
+      const explicitReconcile = fetch(`${redrob.base}/workspace/ws_1/mcp/redrob-cloud/reconcile`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({
           config: {
             type: "remote",
@@ -518,7 +518,7 @@ describe("runtime MCP engine sync", () => {
       expect(reconcileResponse.status).toBe(200);
       await reconcileResponse.text();
       expect(registrationNames.filter((name) => name === "posthog")).toHaveLength(1);
-      expect(registrationNames.filter((name) => name === "openwork-cloud").length).toBeGreaterThanOrEqual(1);
+      expect(registrationNames.filter((name) => name === "redrob-cloud").length).toBeGreaterThanOrEqual(1);
       expect(maxRegistrationsInFlight).toBe(1);
     } finally {
       releaseStartupRegistration(Response.json({ posthog: { status: "connected" } }));
@@ -527,15 +527,15 @@ describe("runtime MCP engine sync", () => {
     }
   });
 
-  test("scopes registration evidence to the concrete OpenWork server instance", async () => {
+  test("scopes registration evidence to the concrete Redrob Work server instance", async () => {
     const workspaceRoot = await createWorkspaceRoot();
     const previousDb = process.env.REDROB_RUNTIME_DB;
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const engineA = startMockOpencode();
       const engineB = startMockOpencode();
-      const serverA = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engineA.server.port}`);
-      const serverB = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engineB.server.port}`);
+      const serverA = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${engineA.server.port}`);
+      const serverB = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${engineB.server.port}`);
 
       const response = await fetch(`${serverA.base}/workspace/ws_1/mcp`, {
         method: "POST",
@@ -570,25 +570,25 @@ describe("runtime MCP engine sync", () => {
     try {
       const engineA = startMockOpencode();
       const engineB = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engineA.server.port}`);
-      const workspace = openwork.config.workspaces[0]!;
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${engineA.server.port}`);
+      const workspace = redrob.config.workspaces[0]!;
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
 
       workspace.baseUrl = `http://127.0.0.1:${engineB.server.port}`;
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
 
       // Switching back must not revive the record that belonged to the old
       // endpoint. A new successful registration is required.
       workspace.baseUrl = `http://127.0.0.1:${engineA.server.port}`;
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -603,38 +603,38 @@ describe("runtime MCP engine sync", () => {
     try {
       const engine = startMockOpencode();
       const baseUrl = `http://127.0.0.1:${engine.server.port}`;
-      const openwork = await startOpenworkServer(workspaceRoot, baseUrl, {
+      const redrob = await startRedrobServer(workspaceRoot, baseUrl, {
         trustedProcessIdentity: "managed-process-a",
       });
-      const workspace = openwork.config.workspaces[0]!;
+      const workspace = redrob.config.workspaces[0]!;
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
 
-      registerTrustedOpencodeProcess(openwork.config, {
+      registerTrustedOpencodeProcess(redrob.config, {
         baseUrl,
         identity: "managed-process-b",
         isAlive: () => true,
       });
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
 
-      await syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      await syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
 
       // Reusing an older opaque value starts another monotonic generation and
       // cannot revive evidence recorded for either prior process.
-      registerTrustedOpencodeProcess(openwork.config, {
+      registerTrustedOpencodeProcess(redrob.config, {
         baseUrl,
         identity: "managed-process-a",
         isAlive: () => true,
       });
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -649,23 +649,23 @@ describe("runtime MCP engine sync", () => {
     let isAlive = true;
     try {
       const engine = startMockOpencode();
-      const openwork = await startOpenworkServer(
+      const redrob = await startRedrobServer(
         workspaceRoot,
         `http://127.0.0.1:${engine.server.port}`,
         { trustedProcessIdentity: "managed-live-process", isAlive: () => isAlive },
       );
-      const workspace = openwork.config.workspaces[0]!;
+      const workspace = redrob.config.workspaces[0]!;
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
 
       isAlive = false;
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -679,28 +679,28 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const engine = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
-      const workspace = openwork.config.workspaces[0]!;
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
+      const workspace = redrob.config.workspaces[0]!;
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
 
-      await openwork.server.stop(true);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      await redrob.server.stop(true);
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
 
-      const restarted = await startServer(openwork.config) as Served;
+      const restarted = await startServer(redrob.config) as Served;
       stops.push(() => restarted.stop(true));
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
 
-      await syncAllWorkspacesRuntimeMcpToEngine(openwork.config);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      await syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
       else process.env.REDROB_RUNTIME_DB = previousDb;
@@ -719,23 +719,23 @@ describe("runtime MCP engine sync", () => {
           ? Response.json({ posthog: { status: "failed", error: "unable to verify the first certificate" } })
           : null,
       });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
-      const workspace = openwork.config.workspaces[0]!;
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
+      const workspace = redrob.config.workspaces[0]!;
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
       expect(inspectEngineMcpRegistrationDetails(
-        openwork.config,
+        redrob.config,
         workspace,
         "posthog",
         POSTHOG_CONFIG,
       )).toMatchObject({ status: "failed", errorSummary: "unable to verify the first certificate" });
 
       await Bun.sleep(150);
-      expect(inspectEngineMcpRegistrationDetails(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistrationDetails(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toMatchObject({ status: "not-recorded", errorSummary: null });
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -756,23 +756,23 @@ describe("runtime MCP engine sync", () => {
           ? Response.json({ code: "reload_failed" }, { status: 500 })
           : null,
       });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
-      const workspace = openwork.config.workspaces[0]!;
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${engine.server.port}`);
+      const workspace = redrob.config.workspaces[0]!;
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG)).toBe("connected");
 
       rejectDispose = true;
-      const reload = await fetch(`${openwork.base}/workspace/ws_1/engine/reload`, {
+      const reload = await fetch(`${redrob.base}/workspace/ws_1/engine/reload`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
       });
       expect(reload.status).toBe(502);
-      expect(inspectEngineMcpRegistration(openwork.config, workspace, "posthog", POSTHOG_CONFIG))
+      expect(inspectEngineMcpRegistration(redrob.config, workspace, "posthog", POSTHOG_CONFIG))
         .toBe("not-recorded");
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -786,11 +786,11 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/cloud-plugins`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/cloud-plugins`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({
           marketplaceId: null,
           resolved: {
@@ -829,7 +829,7 @@ describe("runtime MCP engine sync", () => {
       expect(item.pluginId).toBe("plugin_cloud_mcp");
       expect(body.warnings).toEqual([]);
 
-      expect((await readRuntimeOpencodeConfig(openwork.config, "ws_1")).mcp?.brief).toMatchObject({
+      expect((await readRuntimeOpencodeConfig(redrob.config, "ws_1")).mcp?.brief).toMatchObject({
         type: "remote",
         url: "https://example.com/mcp",
       });
@@ -851,11 +851,11 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/cloud-plugins`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/cloud-plugins`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({
           marketplaceId: null,
           resolved: {
@@ -919,7 +919,7 @@ describe("runtime MCP engine sync", () => {
 
       const skillPath = join(workspaceRoot, ".opencode", "skills", "broken-plugin", "helpful-skill", "SKILL.md");
       expect(await readFile(skillPath, "utf8")).toContain("Installed skill body.");
-      expect((await readRuntimeOpencodeConfig(openwork.config, "ws_1")).mcp?.broken).toBeUndefined();
+      expect((await readRuntimeOpencodeConfig(redrob.config, "ws_1")).mcp?.broken).toBeUndefined();
       expect(mock.requests.some((entry) => entry.method === "POST" && entry.pathname === "/mcp")).toBe(false);
     } finally {
       if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
@@ -933,19 +933,19 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
-      const addResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const addResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(addResponse.status).toBe(200);
       mock.requests.length = 0;
 
-      const reloadResponse = await fetch(`${openwork.base}/workspace/ws_1/engine/reload`, {
+      const reloadResponse = await fetch(`${redrob.base}/workspace/ws_1/engine/reload`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
       });
       expect(reloadResponse.status).toBe(200);
 
@@ -966,19 +966,19 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
-      const addResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const addResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(addResponse.status).toBe(200);
       mock.requests.length = 0;
 
-      const toggleResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp/posthog/enabled`, {
+      const toggleResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp/posthog/enabled`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ enabled: false }),
       });
       expect(toggleResponse.status).toBe(200);
@@ -998,19 +998,19 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode();
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
-      const addResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const addResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(addResponse.status).toBe(200);
       mock.requests.length = 0;
 
-      const removeResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp/posthog`, {
+      const removeResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp/posthog`, {
         method: "DELETE",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
       });
       expect(removeResponse.status).toBe(200);
 
@@ -1031,21 +1031,21 @@ describe("runtime MCP engine sync", () => {
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
       const mock = startMockOpencode({ failMcpNames: ["bad"] });
-      const openwork = await startOpenworkServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
+      const redrob = await startRedrobServer(workspaceRoot, `http://127.0.0.1:${mock.server.port}`);
 
       for (const [name, config] of [["bad", POSTHOG_CONFIG], ["posthog", POSTHOG_CONFIG]] as const) {
-        const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+        const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
           method: "POST",
-          headers: auth(openwork.token),
+          headers: auth(redrob.token),
           body: JSON.stringify({ name, config }),
         });
         expect(response.status).toBe(200);
       }
       mock.requests.length = 0;
 
-      const reloadResponse = await fetch(`${openwork.base}/workspace/ws_1/engine/reload`, {
+      const reloadResponse = await fetch(`${redrob.base}/workspace/ws_1/engine/reload`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
       });
       expect(reloadResponse.status).toBe(200);
 
@@ -1060,8 +1060,8 @@ describe("runtime MCP engine sync", () => {
 
       // The failure is surfaced on the MCP list endpoint instead of being
       // swallowed silently.
-      const listResponse = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
-        headers: auth(openwork.token),
+      const listResponse = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
+        headers: auth(redrob.token),
       });
       expect(listResponse.status).toBe(200);
       const listText = await listResponse.text();
@@ -1126,11 +1126,11 @@ describe("runtime MCP engine sync", () => {
     const previousDb = process.env.REDROB_RUNTIME_DB;
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
-      const openwork = await startOpenworkServer(workspaceRoot, "http://127.0.0.1:9");
+      const redrob = await startRedrobServer(workspaceRoot, "http://127.0.0.1:9");
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/mcp`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
         body: JSON.stringify({ name: "posthog", config: POSTHOG_CONFIG }),
       });
       expect(response.status).toBe(200);
@@ -1153,11 +1153,11 @@ describe("runtime MCP engine sync", () => {
     const previousDb = process.env.REDROB_RUNTIME_DB;
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
     try {
-      const openwork = await startOpenworkServer(workspaceRoot, "http://127.0.0.1:9");
+      const redrob = await startRedrobServer(workspaceRoot, "http://127.0.0.1:9");
 
-      const response = await fetch(`${openwork.base}/workspace/ws_1/engine/reload`, {
+      const response = await fetch(`${redrob.base}/workspace/ws_1/engine/reload`, {
         method: "POST",
-        headers: auth(openwork.token),
+        headers: auth(redrob.token),
       });
       expect(response.status).toBe(503);
       const body = await response.json() as { code?: string };

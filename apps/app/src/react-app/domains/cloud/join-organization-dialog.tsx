@@ -212,7 +212,7 @@ export function JoinOrganizationDialog({
 
     const settings = readDenSettings();
     const baseUrl = parsed.baseUrl ?? settings.baseUrl;
-    setStatus({ phase: "connecting", clientName: t("join_org.openwork_cloud"), host: hostFromUrl(baseUrl) });
+    setStatus({ phase: "connecting", clientName: t("join_org.redrob_cloud"), host: hostFromUrl(baseUrl) });
     const result = await exchangeHandoffAndSignIn(parsed.grant, {
       baseUrl,
       client: createDenClient({ baseUrl }),
@@ -226,7 +226,7 @@ export function JoinOrganizationDialog({
       return true;
     }
 
-    setStatus({ phase: "success", clientName: t("join_org.openwork_cloud"), host: hostFromUrl(baseUrl) });
+    setStatus({ phase: "success", clientName: t("join_org.redrob_cloud"), host: hostFromUrl(baseUrl) });
     finishConnected();
     return true;
   }, [finishConnected]);

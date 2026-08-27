@@ -150,11 +150,11 @@ describe("Connect debug proxy rewriting and streaming", () => {
     const response = await buildConnectDebugProxyResponse({
       proxyBase,
       tamperMode: null,
-      upstream: Response.json({ openworkUrl: deepLink }),
+      upstream: Response.json({ redrobUrl: deepLink }),
       upstreamRequestUrl: upstreamUrl,
     })
-    const payload = await response.json() as { openworkUrl: string }
-    expect(new URL(payload.openworkUrl).searchParams.get("denBaseUrl")).toBe(`${proxyBase}/api/den`)
+    const payload = await response.json() as { redrobUrl: string }
+    expect(new URL(payload.redrobUrl).searchParams.get("denBaseUrl")).toBe(`${proxyBase}/api/den`)
   })
 
   test("keeps the proxy key private while translating same-origin browser headers", () => {

@@ -3,7 +3,7 @@
 Status: self-host operator guide
 
 Owner: platform/self-host
-Related: `ee/apps/den-api/src/install-links.ts`, `ee/apps/den-api/src/routes/org/install-links.ts`, `ee/apps/den-api/src/desktop-connect-grants.ts`, `packaging/helm/openwork-ee/README.md`
+Related: `ee/apps/den-api/src/install-links.ts`, `ee/apps/den-api/src/routes/org/install-links.ts`, `ee/apps/den-api/src/desktop-connect-grants.ts`, `packaging/helm/redrob-ee/README.md`
 
 ## What users get
 
@@ -56,11 +56,11 @@ flag.
 ## Public origins
 
 Set `DEN_BASE_URL` to the externally reachable Den web origin, for example
-`https://openwork.example.com`. Den derives Better Auth, CORS/trusted origins,
+`https://redrob.example.com`. Den derives Better Auth, CORS/trusted origins,
 web-app hosts, API defaults, and MCP resource defaults from that one value. Set
 `DEN_API_PUBLIC_URL` only as a compatibility override when you publish a separate
 Den API origin or an externally reachable proxy path, such as
-`https://openwork.example.com/api/den`. If you publish a separate Den API origin,
+`https://redrob.example.com/api/den`. If you publish a separate Den API origin,
 the install-link exchange and external MCP clients must be able to reach it.
 
 Invitation acceptance links use the first non-wildcard trusted origin. In the
@@ -86,11 +86,11 @@ one of these paths:
 
 The standard filenames use the release tag without a leading `v`:
 
-- `openwork-mac-arm64-<version>.dmg`
-- `openwork-mac-x64-<version>.dmg`
-- `openwork-win-x64-<version>.exe`
-- `openwork-linux-x86_64-<version>.AppImage`
-- `openwork-linux-arm64-<version>.AppImage`
+- `redrob-mac-arm64-<version>.dmg`
+- `redrob-mac-x64-<version>.dmg`
+- `redrob-win-x64-<version>.exe`
+- `redrob-linux-x86_64-<version>.AppImage`
+- `redrob-linux-arm64-<version>.AppImage`
 
 There is no first-request GitHub download inside Den, artifact lookup API call,
 ZIP creation, per-pod cold cache, or different repeated-download path. Every
@@ -158,25 +158,25 @@ Customer-facing guidance for this path is published at
 
 Managed deployments can skip the deep-link handoff by deploying a standard
 binary — typically the enterprise distribution
-(`openwork-enterprise-<os>-<arch>-<version>.<ext>`, published on the
+(`redrob-enterprise-<os>-<arch>-<version>.<ext>`, published on the
 `enterprise` release channel), or the public installer — and writing
 `desktop-bootstrap.json` directly:
 
 | OS | Canonical path |
 |---|---|
-| Windows | `%LOCALAPPDATA%\openwork\desktop-bootstrap.json` (`%XDG_CONFIG_HOME%\openwork\desktop-bootstrap.json` wins if set) |
-| macOS/Linux | `$XDG_CONFIG_HOME/openwork/desktop-bootstrap.json`, falling back to `~/.config/openwork/desktop-bootstrap.json` |
+| Windows | `%LOCALAPPDATA%\redrob\desktop-bootstrap.json` (`%XDG_CONFIG_HOME%\redrob\desktop-bootstrap.json` wins if set) |
+| macOS/Linux | `$XDG_CONFIG_HOME/redrob/desktop-bootstrap.json`, falling back to `~/.config/redrob/desktop-bootstrap.json` |
 
 ```json
 {
-  "baseUrl": "https://openwork.example.com",
-  "apiBaseUrl": "https://api.openwork.example.com",
+  "baseUrl": "https://redrob.example.com",
+  "apiBaseUrl": "https://api.redrob.example.com",
   "requireSignin": true,
   "writtenAt": "2026-07-14T12:00:00.000Z"
 }
 ```
 
-Current builds still read the older `~/.config/openwork` path for
+Current builds still read the older `~/.config/redrob` path for
 compatibility. When both files exist, the valid configuration with the newest
 `writtenAt` wins.
 

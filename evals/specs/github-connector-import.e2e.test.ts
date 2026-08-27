@@ -106,7 +106,7 @@ async function apiRequest(
   const headers: Record<string, string> = {
     authorization: `Bearer ${session.token}`,
   };
-  if (input.orgId) headers["x-openwork-org-id"] = input.orgId;
+  if (input.orgId) headers["x-redrob-org-id"] = input.orgId;
   if (input.body) headers["content-type"] = "application/json";
   const result = await denFetch(session, path, {
     method: input.method ?? "GET",

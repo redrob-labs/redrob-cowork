@@ -121,9 +121,9 @@ export default defineConfig({
   },
   plugins: [
     {
-      name: "openwork-dev-server-id",
+      name: "redrob-dev-server-id",
       configureServer(server) {
-        server.middlewares.use("/__openwork_dev_server_id", (_req, res) => {
+        server.middlewares.use("/__redrob_dev_server_id", (_req, res) => {
           res.setHeader("Content-Type", "application/json");
           res.end(JSON.stringify({ appRoot }));
         });

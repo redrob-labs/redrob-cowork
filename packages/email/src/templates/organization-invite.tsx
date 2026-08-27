@@ -1,7 +1,7 @@
 import React, { type CSSProperties } from "react"
 import { Body, Button, Container, Head, Heading, Hr, Html, Img, Preview, Section, Text } from "@react-email/components"
 
-const LOGO_URL = "https://redrob.io/email/openwork-mark.png"
+const LOGO_URL = "https://redrob.io/email/redrob-mark.png"
 
 export type OrganizationInviteEmailProps = {
   inviteLink: string
@@ -23,16 +23,16 @@ export function OrganizationInviteEmail({
   return (
     <Html>
       <Head />
-      <Preview>{invitedByName} invited you to join {organizationName} on OpenWork</Preview>
+      <Preview>{invitedByName} invited you to join {organizationName} on Redrob Work</Preview>
       <Body style={styles.body}>
         <Container style={styles.frame}>
           <Section style={styles.brand}>
-            <Img src={LOGO_URL} width="31" height="24" alt="OpenWork" style={styles.brandLogo} />
-            <span style={styles.brandName}>OpenWork</span>
+            <Img src={LOGO_URL} width="31" height="24" alt="Redrob Work" style={styles.brandLogo} />
+            <span style={styles.brandName}>Redrob Work</span>
           </Section>
           <Section style={styles.card}>
             <Text style={styles.eyebrow}>Invitation</Text>
-            <Heading style={styles.heading}>Join {organizationName} on OpenWork</Heading>
+            <Heading style={styles.heading}>Join {organizationName} on Redrob Work</Heading>
             <Text style={styles.text}>
               {inviter} invited you to join the <span style={styles.strong}>{organizationName}</span> workspace as {articleFor(role)} {role}.
             </Text>
@@ -42,9 +42,9 @@ export function OrganizationInviteEmail({
             <Text style={styles.link}>{inviteLink}</Text>
           </Section>
           <Text style={styles.footer}>
-            You received this email because someone invited you to an OpenWork workspace.
+            You received this email because someone invited you to an Redrob Work workspace.
             <br />
-            OpenWork · redrob.io
+            Redrob Work · redrob.io
           </Text>
         </Container>
       </Body>

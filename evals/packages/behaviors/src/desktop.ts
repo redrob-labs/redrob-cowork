@@ -299,7 +299,7 @@ export async function waitForConnectionCard(app: Surface, name: string, workspac
       await new Promise((resolve) => setTimeout(resolve, 1_500));
       continue;
     }
-    await evalIn(app, "window.__openworkControl.execute('extensions.refresh-marketplace', null)", { awaitPromise: true, timeoutMs: 15_000 })
+    await evalIn(app, "window.__redrobControl.execute('extensions.refresh-marketplace', null)", { awaitPromise: true, timeoutMs: 15_000 })
       .catch(() => undefined);
     await evalIn(app, `(() => {
       const button = [...document.querySelectorAll('button')]
@@ -392,7 +392,7 @@ export async function enabledButtons(app: Surface): Promise<string[]> {
   return labels;
 }
 
-/** Invoke a registered `window.__openworkControl` action, the product's own automation seam. */
+/** Invoke a registered `window.__redrobControl` action, the product's own automation seam. */
 export async function control(
   app: Surface,
   action: string,
@@ -402,7 +402,7 @@ export async function control(
   // Control actions are non-idempotent; a timeout must surface, not re-fire.
   const result = await evalIn(
     app,
-    `window.__openworkControl.execute(${JSON.stringify(action)}, ${JSON.stringify(args ?? null)})`,
+    `window.__redrobControl.execute(${JSON.stringify(action)}, ${JSON.stringify(args ?? null)})`,
     { timeoutMs: 60_000, reattachAttempts: 0, ...opts, awaitPromise: true },
   );
   if (!isRecord(result) || result.ok !== true) {

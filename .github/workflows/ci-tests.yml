@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  openwork-tests:
+  redrob-tests:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -143,7 +143,7 @@ jobs:
         run: pnpm --filter @redrob/app test
 
       - name: Run server unit tests
-        run: pnpm --filter openwork-server test
+        run: pnpm --filter redrob-server test
 
       - name: Run desktop unit tests
         run: pnpm --filter @redrob/desktop test
@@ -165,7 +165,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf packages/types/dist
-          pnpm --filter openwork-server build
+          pnpm --filter redrob-server build
 
       - name: Typecheck Electron main against the IPC contract
         run: pnpm --filter @redrob/desktop typecheck:electron
@@ -174,18 +174,18 @@ jobs:
         run: pnpm --filter @redrob/app test:e2e
 
   # Single stable context for branch rulesets to require. Green only when
-  # every openwork-tests matrix leg succeeded; runs even when legs fail or
+  # every redrob-tests matrix leg succeeded; runs even when legs fail or
   # are cancelled so the required check always reports instead of hanging.
-  openwork-tests-required:
-    needs: openwork-tests
+  redrob-tests-required:
+    needs: redrob-tests
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Require every openwork-tests matrix leg to pass
+      - name: Require every redrob-tests matrix leg to pass
         env:
-          RESULT: ${{ needs.openwork-tests.result }}
+          RESULT: ${{ needs.redrob-tests.result }}
         run: |
-          echo "openwork-tests result: $RESULT"
+          echo "redrob-tests result: $RESULT"
           if [ "$RESULT" != "success" ]; then
             echo "One or more Redrob Work Tests matrix legs did not succeed; blocking merge." >&2
             exit 1

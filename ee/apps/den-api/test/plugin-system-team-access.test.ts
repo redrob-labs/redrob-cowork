@@ -22,7 +22,7 @@ import type { OrgRouteVariables } from "../src/routes/org/shared.js"
 
 const API_ORIGIN = "http://127.0.0.1:8790"
 
-process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_teamaccess"
+process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_teamaccess"
 process.env.DB_MODE ??= "mysql"
 process.env.DEN_DB_ENCRYPTION_KEY ??= "team-access-test-encryption-key-1234567890"
 process.env.BETTER_AUTH_SECRET ??= "team-access-test-secret-123456789"

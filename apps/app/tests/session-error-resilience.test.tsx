@@ -71,7 +71,7 @@ describe("session error resilience", () => {
     const syncInput = {
       workspaceId: "workspace-1",
       baseUrl: "http://127.0.0.1:1234",
-      openworkToken: "token",
+      redrobToken: "token",
     }
     const cleanup = __createWorkspaceSessionSyncForTest(syncInput)
     const release = trackWorkspaceSessionSync(syncInput, "session-1")

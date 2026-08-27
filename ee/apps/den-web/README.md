@@ -1,4 +1,4 @@
-# OpenWork Cloud App (`ee/apps/den-web`)
+# Redrob Work Cloud App (`ee/apps/den-web`)
 
 Frontend for `app.redrob.io`.
 
@@ -8,7 +8,7 @@ Frontend for `app.redrob.io`.
 - Handles invited-org signup flows where the invited email stays locked and the user verifies access before joining.
 - Lists and connects existing cloud workers.
 - Sends users to the organization billing page for subscription management.
-- Offers desktop handoff actions so users can open the generated worker directly in OpenWork or copy the connect credentials manually.
+- Offers desktop handoff actions so users can open the generated worker directly in Redrob Work or copy the connect credentials manually.
 - Calls the Den API directly at the matching `api.*` origin (for example, `app.redrob.io` -> `api.app.redrob.io`).
 - Uses a same-origin auth proxy (`/api/auth/*`) so GitHub OAuth callbacks can land on `app.redrob.io`.
 

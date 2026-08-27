@@ -60,7 +60,7 @@ async function organizationMemberIdByEmail(session: DenSession, orgId: string, e
   const result = await denFetch(session, "/v1/org", {
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   const members = isRecord(result.body) && Array.isArray(result.body.members)
@@ -97,7 +97,7 @@ async function useMobileViewport(browser: Surface): Promise<void> {
 
 test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const den = { apiUrl, webUrl };
-  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "OpenWorkDemo123!";
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD?.trim() || "RedrobWorkDemo123!";
   const admin = await signIn(den, {
     email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
     password,
@@ -132,7 +132,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
         method: "POST",
         headers: {
           authorization: `Bearer ${casey.token}`,
-          "x-openwork-org-id": orgId,
+          "x-redrob-org-id": orgId,
         },
       }).catch(() => undefined);
     }
@@ -141,7 +141,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
         method: "DELETE",
         headers: {
           authorization: `Bearer ${admin.token}`,
-          "x-openwork-org-id": orgId,
+          "x-redrob-org-id": orgId,
         },
       }).catch(() => undefined);
     }
@@ -174,7 +174,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${casey.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({
       name: pluginName,
@@ -194,7 +194,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${admin.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ name: teamName }),
   });
@@ -207,7 +207,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     method: "PATCH",
     headers: {
       authorization: `Bearer ${admin.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ memberIds: [novaMemberId] }),
   });
@@ -219,7 +219,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${casey.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ orgMembershipId: novaMemberId, role: "viewer" }),
   });
@@ -230,7 +230,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     method: "POST",
     headers: {
       authorization: `Bearer ${casey.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ teamId, role: "viewer" }),
   });
@@ -241,7 +241,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const caseyAccess = await denFetch(casey, "/v1/me/library", {
     headers: {
       authorization: `Bearer ${casey.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   expect(caseyAccess.response.status).toBe(200);
@@ -254,7 +254,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const novaAccess = await denFetch(nova, "/v1/me/library", {
     headers: {
       authorization: `Bearer ${nova.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   expect(novaAccess.response.status).toBe(200);
@@ -289,7 +289,7 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
   const capabilities = await denFetch(casey, "/v1/resources/marketplace-capabilities", {
     headers: {
       authorization: `Bearer ${casey.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
   });
   expect(capabilities.response.status).toBe(200);
@@ -301,8 +301,8 @@ test.skipIf(!apiUrl || !webUrl)(title, async () => {
     label: "Den Web origin before Nova auth token handoff",
   });
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(nova.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(nova.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(nova.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(nova.token)};
   })()`);
   expect(tokenStored).toBe(true);
 

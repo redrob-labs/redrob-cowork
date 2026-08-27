@@ -54,15 +54,15 @@ test("the enterprise gate is a sign-in door with a server field, not a waiting w
   const { normalizeOrganizationServerInput } = await import(
     "../../apps/app/src/app/lib/organization-server-input"
   );
-  expect(normalizeOrganizationServerInput("https://openwork.acme.com/werpiweur")).toBe("https://openwork.acme.com");
-  expect(normalizeOrganizationServerInput("  openwork.acme.com  ")).toBe("https://openwork.acme.com");
+  expect(normalizeOrganizationServerInput("https://redrob.acme.com/werpiweur")).toBe("https://redrob.acme.com");
+  expect(normalizeOrganizationServerInput("  redrob.acme.com  ")).toBe("https://redrob.acme.com");
   expect(normalizeOrganizationServerInput("http://localhost:3005/dashboard?x=1#y")).toBe("http://localhost:3005");
   expect(normalizeOrganizationServerInput("http://127.0.0.1:3005")).toBe("http://127.0.0.1:3005");
   expect(normalizeOrganizationServerInput("http://[::1]:3005")).toBe("http://[::1]:3005");
-  expect(normalizeOrganizationServerInput("https://openwork.acme.com:8443/path")).toBe("https://openwork.acme.com:8443");
-  expect(normalizeOrganizationServerInput("http://openwork.acme.com")).toBe(null);
+  expect(normalizeOrganizationServerInput("https://redrob.acme.com:8443/path")).toBe("https://redrob.acme.com:8443");
+  expect(normalizeOrganizationServerInput("http://redrob.acme.com")).toBe(null);
   expect(normalizeOrganizationServerInput("http://den.internal:8080")).toBe(null);
-  expect(normalizeOrganizationServerInput("ftp://openwork.acme.com")).toBe(null);
+  expect(normalizeOrganizationServerInput("ftp://redrob.acme.com")).toBe(null);
   expect(normalizeOrganizationServerInput("")).toBe(null);
   expect(normalizeOrganizationServerInput("not a url at all")).toBe(null);
   evidence.recordAssertionEvidence(
@@ -112,8 +112,8 @@ test("enterprise onboarding is workspace-address-first with a silent paste recov
   expect(gateSource).toContain("Link this app to your organization");
   expect(gateSource).toContain("Enter your workspace address — the page where you downloaded this app. Sign-in finishes in your browser and returns here.");
   expect(gateSource).toContain("{pendingConfirmation ? null : (");
-  expect(gateSource).not.toContain("OpenWork link");
-  expect(gateSource).not.toContain("enterprise-openwork-link-connect");
+  expect(gateSource).not.toContain("Redrob Work link");
+  expect(gateSource).not.toContain("enterprise-redrob-link-connect");
   expect(gateSource).not.toContain("enterprise-connection-method-toggle");
   expect(gateSource).not.toContain("manualAuthOpen");
   expect(gateSource).not.toMatch(/(?:paste|hide) sign-in code/i);
@@ -126,13 +126,13 @@ test("enterprise onboarding is workspace-address-first with a silent paste recov
   );
 
   // The install guide's connect step hands the user the exact address to type,
-  // and the workspace-claim page still copies the complete OpenWork URL for the
+  // and the workspace-claim page still copies the complete Redrob Work URL for the
   // desktop's silent paste recovery.
   expect(installGuideSource).toContain('data-testid="install-workspace-address"');
   expect(installGuideSource).toContain("In the app, enter your workspace address:");
-  expect(installGuideSource).not.toContain("Copy OpenWork link");
-  expect(workspaceClaimSource).toContain("const openworkUrl = await createDesktopHandoff();");
-  expect(workspaceClaimSource).toContain("await navigator.clipboard.writeText(openworkUrl);");
+  expect(installGuideSource).not.toContain("Copy Redrob Work link");
+  expect(workspaceClaimSource).toContain("const redrobUrl = await createDesktopHandoff();");
+  expect(workspaceClaimSource).toContain("await navigator.clipboard.writeText(redrobUrl);");
   expect(workspaceClaimSource).not.toMatch(/sign-in code/i);
   expect(workspaceClaimSource).not.toContain("getDesktopGrant");
 
@@ -144,7 +144,7 @@ test("enterprise onboarding is workspace-address-first with a silent paste recov
 
   evidence.recordAssertionEvidence(
     "The guide hands over the workspace address, not a credential",
-    "The install guide's connect step shows the exact workspace address to type, keeps macOS, Windows, and Linux install guidance, avoids activation-link language, and the workspace-claim page still copies a complete OpenWork URL.",
+    "The install guide's connect step shows the exact workspace address to type, keeps macOS, Windows, and Linux install guidance, avoids activation-link language, and the workspace-claim page still copies a complete Redrob Work URL.",
     true,
   );
 

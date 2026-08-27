@@ -52,7 +52,7 @@ on:
         type: boolean
         default: true
       publish_npm:
-        description: "Publish openwork-server to npm if its version changed"
+        description: "Publish redrob-server to npm if its version changed"
         required: false
         type: boolean
         default: true
@@ -279,9 +279,9 @@ jobs:
             printf -v RELEASE_BODY '%s\n\nRedrob Work %s desktop release.\n\n%s\n%s\n%s\n%s' \
               "## What's new" \
               "$TAG" \
-              "- Public artifacts use the openwork-* naming convention." \
-              "- Cloud artifacts use openwork-cloud-* and require sign-in without enterprise activation." \
-              "- Enterprise artifacts use openwork-enterprise-* while retaining the standard Redrob Work app identity." \
+              "- Public artifacts use the redrob-* naming convention." \
+              "- Cloud artifacts use redrob-cloud-* and require sign-in without enterprise activation." \
+              "- Enterprise artifacts use redrob-enterprise-* while retaining the standard Redrob Work app identity." \
               "- Public, Cloud, and enterprise Electron builds use separate updater manifests on this release."
           fi
 
@@ -489,7 +489,7 @@ jobs:
             os_type: macos
             artifact: electron-macos-arm64
             builder_config: electron-builder.yml
-            asset_prefix: openwork
+            asset_prefix: redrob
             manifest_pattern: latest*.yml
             electron_args: "--mac --arm64"
             target_triple: aarch64-apple-darwin
@@ -497,7 +497,7 @@ jobs:
             os_type: macos
             artifact: electron-macos-x64
             builder_config: electron-builder.yml
-            asset_prefix: openwork
+            asset_prefix: redrob
             manifest_pattern: latest*.yml
             electron_args: "--mac --x64"
             target_triple: x86_64-apple-darwin
@@ -505,7 +505,7 @@ jobs:
             os_type: linux
             artifact: electron-linux-x64
             builder_config: electron-builder.yml
-            asset_prefix: openwork
+            asset_prefix: redrob
             manifest_pattern: latest*.yml
             electron_args: "--linux --x64"
             target_triple: x86_64-unknown-linux-gnu
@@ -516,7 +516,7 @@ jobs:
             os_type: linux
             artifact: electron-linux-arm64
             builder_config: electron-builder.yml
-            asset_prefix: openwork
+            asset_prefix: redrob
             manifest_pattern: latest*.yml
             electron_args: "--linux --arm64"
             target_triple: aarch64-unknown-linux-gnu
@@ -524,7 +524,7 @@ jobs:
             os_type: macos
             artifact: electron-cloud-macos-arm64
             builder_config: electron-builder.cloud.yml
-            asset_prefix: openwork-cloud
+            asset_prefix: redrob-cloud
             manifest_pattern: cloud*.yml
             electron_args: "--mac --arm64"
             target_triple: aarch64-apple-darwin
@@ -532,7 +532,7 @@ jobs:
             os_type: macos
             artifact: electron-cloud-macos-x64
             builder_config: electron-builder.cloud.yml
-            asset_prefix: openwork-cloud
+            asset_prefix: redrob-cloud
             manifest_pattern: cloud*.yml
             electron_args: "--mac --x64"
             target_triple: x86_64-apple-darwin
@@ -540,7 +540,7 @@ jobs:
             os_type: linux
             artifact: electron-cloud-linux-x64
             builder_config: electron-builder.cloud.yml
-            asset_prefix: openwork-cloud
+            asset_prefix: redrob-cloud
             manifest_pattern: cloud*.yml
             electron_args: "--linux --x64"
             target_triple: x86_64-unknown-linux-gnu
@@ -548,7 +548,7 @@ jobs:
             os_type: linux
             artifact: electron-cloud-linux-arm64
             builder_config: electron-builder.cloud.yml
-            asset_prefix: openwork-cloud
+            asset_prefix: redrob-cloud
             manifest_pattern: cloud*.yml
             electron_args: "--linux --arm64"
             target_triple: aarch64-unknown-linux-gnu
@@ -556,7 +556,7 @@ jobs:
             os_type: macos
             artifact: electron-enterprise-macos-arm64
             builder_config: electron-builder.enterprise.yml
-            asset_prefix: openwork-enterprise
+            asset_prefix: redrob-enterprise
             manifest_pattern: enterprise*.yml
             electron_args: "--mac --arm64"
             target_triple: aarch64-apple-darwin
@@ -564,7 +564,7 @@ jobs:
             os_type: macos
             artifact: electron-enterprise-macos-x64
             builder_config: electron-builder.enterprise.yml
-            asset_prefix: openwork-enterprise
+            asset_prefix: redrob-enterprise
             manifest_pattern: enterprise*.yml
             electron_args: "--mac --x64"
             target_triple: x86_64-apple-darwin
@@ -572,7 +572,7 @@ jobs:
             os_type: linux
             artifact: electron-enterprise-linux-x64
             builder_config: electron-builder.enterprise.yml
-            asset_prefix: openwork-enterprise
+            asset_prefix: redrob-enterprise
             manifest_pattern: enterprise*.yml
             electron_args: "--linux --x64"
             target_triple: x86_64-unknown-linux-gnu
@@ -580,7 +580,7 @@ jobs:
             os_type: linux
             artifact: electron-enterprise-linux-arm64
             builder_config: electron-builder.enterprise.yml
-            asset_prefix: openwork-enterprise
+            asset_prefix: redrob-enterprise
             manifest_pattern: enterprise*.yml
             electron_args: "--linux --arm64"
             target_triple: aarch64-unknown-linux-gnu
@@ -632,7 +632,7 @@ jobs:
             ${{ runner.os }}-electron-pnpm-
 
       - name: Install dependencies
-        run: pnpm --filter @redrob/desktop... --filter @redrob/app... --filter openwork-server... install --frozen-lockfile --prefer-offline
+        run: pnpm --filter @redrob/desktop... --filter @redrob/app... --filter redrob-server... install --frozen-lockfile --prefer-offline
 
       # The repo commits a permanent 0.0.0-dev placeholder; the release
       # version exists only as the git tag. Stamp it into the workspace so
@@ -758,14 +758,14 @@ jobs:
       # electron-builder may still emit latest*.yml for a custom distribution.
       # Normalize each non-public feed so it cannot update into another flavor.
       - name: Normalize custom distribution updater manifests
-        if: matrix.asset_prefix != 'openwork'
+        if: matrix.asset_prefix != 'redrob'
         shell: bash
         run: |
           set -euo pipefail
           cd apps/desktop/dist-electron
           shopt -s nullglob
           channel="${{ matrix.asset_prefix }}"
-          channel="${channel#openwork-}"
+          channel="${channel#redrob-}"
           for manifest in latest*.yml; do
             target="${channel}${manifest#latest}"
             if [ -e "$target" ]; then
@@ -920,7 +920,7 @@ jobs:
             os_type: windows
             artifact: electron-windows-x64
             builder_config: electron-builder.yml
-            asset_prefix: openwork
+            asset_prefix: redrob
             manifest_pattern: latest*.yml
             electron_args: "--win --x64"
             target_triple: x86_64-pc-windows-msvc
@@ -931,7 +931,7 @@ jobs:
             os_type: windows
             artifact: electron-windows-arm64
             builder_config: electron-builder.yml
-            asset_prefix: openwork
+            asset_prefix: redrob
             manifest_pattern: latest*.yml
             electron_args: "--win --arm64"
             target_triple: aarch64-pc-windows-msvc
@@ -939,7 +939,7 @@ jobs:
             os_type: windows
             artifact: electron-cloud-windows-x64
             builder_config: electron-builder.cloud.yml
-            asset_prefix: openwork-cloud
+            asset_prefix: redrob-cloud
             manifest_pattern: cloud*.yml
             electron_args: "--win --x64"
             target_triple: x86_64-pc-windows-msvc
@@ -947,7 +947,7 @@ jobs:
             os_type: windows
             artifact: electron-cloud-windows-arm64
             builder_config: electron-builder.cloud.yml
-            asset_prefix: openwork-cloud
+            asset_prefix: redrob-cloud
             manifest_pattern: cloud*.yml
             electron_args: "--win --arm64"
             target_triple: aarch64-pc-windows-msvc
@@ -955,7 +955,7 @@ jobs:
             os_type: windows
             artifact: electron-enterprise-windows-x64
             builder_config: electron-builder.enterprise.yml
-            asset_prefix: openwork-enterprise
+            asset_prefix: redrob-enterprise
             manifest_pattern: enterprise*.yml
             electron_args: "--win --x64"
             target_triple: x86_64-pc-windows-msvc
@@ -963,7 +963,7 @@ jobs:
             os_type: windows
             artifact: electron-enterprise-windows-arm64
             builder_config: electron-builder.enterprise.yml
-            asset_prefix: openwork-enterprise
+            asset_prefix: redrob-enterprise
             manifest_pattern: enterprise*.yml
             electron_args: "--win --arm64"
             target_triple: aarch64-pc-windows-msvc
@@ -1044,7 +1044,7 @@ jobs:
           fi
 
   prepare-npm:
-    name: Prepare openwork-server npm package
+    name: Prepare redrob-server npm package
     needs: [resolve-release, verify-release]
     if: |
       always() &&
@@ -1078,7 +1078,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-          # Bun builds the openwork-server executable before npm publish.
+          # Bun builds the redrob-server executable before npm publish.
           bun-version: "1.3.10"
 
       - name: Get pnpm store path
@@ -1098,7 +1098,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
-      # openwork-server publishes with the tag-derived version; the committed
+      # redrob-server publishes with the tag-derived version; the committed
       # package.json holds the permanent 0.0.0-dev placeholder. Pre-redesign
       # tags carry real committed versions and no stamp script.
       - name: Stamp release version
@@ -1120,7 +1120,7 @@ jobs:
           set -euo pipefail
           # npm view exits non-zero for packages that don't exist yet (404).
           # Treat missing packages as "not published" so release can publish them.
-          server_current="$(npm view openwork-server version 2>/dev/null || true)"
+          server_current="$(npm view redrob-server version 2>/dev/null || true)"
 
           if [ "$server_current" = "$SERVER_VERSION" ]; then
             echo "publish_server=false" >> "$GITHUB_OUTPUT"
@@ -1130,20 +1130,20 @@ jobs:
             echo "publish_any=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Prepare openwork-server
+      - name: Prepare redrob-server
         if: steps.npm-versions.outputs.publish_server == 'true'
-        run: pnpm --filter openwork-server publish:npm --dry-run
+        run: pnpm --filter redrob-server publish:npm --dry-run
 
       - name: Upload npm package
         if: steps.npm-versions.outputs.publish_server == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: openwork-server-npm-${{ env.RELEASE_VERSION }}
+          name: redrob-server-npm-${{ env.RELEASE_VERSION }}
           path: apps/server/dist/npm
           if-no-files-found: error
 
   publish-npm:
-    name: Publish openwork-server
+    name: Publish redrob-server
     needs: [resolve-release, verify-release, prepare-npm]
     if: |
       always() &&
@@ -1167,11 +1167,11 @@ jobs:
       - name: Download npm package
         uses: actions/download-artifact@v4
         with:
-          name: openwork-server-npm-${{ env.RELEASE_VERSION }}
-          path: ${{ runner.temp }}/openwork-server-npm
+          name: redrob-server-npm-${{ env.RELEASE_VERSION }}
+          path: ${{ runner.temp }}/redrob-server-npm
 
-      - name: Publish openwork-server
-        run: npm publish "$RUNNER_TEMP/openwork-server-npm" --access public --provenance
+      - name: Publish redrob-server
+        run: npm publish "$RUNNER_TEMP/redrob-server-npm" --access public --provenance
 
   publish-daytona-snapshot:
     name: Build + Push Daytona Snapshot
@@ -1221,7 +1221,7 @@ jobs:
       - name: Publish to AUR
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          AUR_REPO: ${{ vars.AUR_REPO || 'openwork' }}
+          AUR_REPO: ${{ vars.AUR_REPO || 'redrob' }}
         run: |
           set -euo pipefail
           if [ -z "${AUR_SSH_PRIVATE_KEY:-}" ]; then

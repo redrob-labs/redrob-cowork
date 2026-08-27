@@ -56,7 +56,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({ name: "workspace-new-task-hit-target" });
   await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-kitchen-vercel-env-hit-target-${Date.now()}`,
+    path: `/tmp/redrob-kitchen-vercel-env-hit-target-${Date.now()}`,
   });
 
   await waitFor(app, `Boolean(document.querySelector(${JSON.stringify(plusSelector)}))`, {

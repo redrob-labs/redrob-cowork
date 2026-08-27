@@ -34,8 +34,8 @@ test("readConnectStateFile reads Daytona candidates in order", async () => {
 
   assert.deepEqual(result, { status: "available", connectEnabled: true });
   assert.deepEqual(calls.map(({ sandbox }) => sandbox), ["sandbox-1", "sandbox-1"]);
-  assert(calls[0]?.script.includes("/workspace/profiles/desktop/electron-userdata/openwork-dev-data/xdg/config/openwork/connect-state.json"));
-  assert(calls[1]?.script.includes("/workspace/profiles/desktop/xdg-config/openwork/connect-state.json"));
+  assert(calls[0]?.script.includes("/workspace/profiles/desktop/electron-userdata/redrob-dev-data/xdg/config/redrob/connect-state.json"));
+  assert(calls[1]?.script.includes("/workspace/profiles/desktop/xdg-config/redrob/connect-state.json"));
   assert(calls.every(({ script }) => !script.includes("'")));
 });
 
@@ -84,10 +84,10 @@ test("readConnectStateFile rejects unsafe Daytona profile paths without executin
 });
 
 test("readConnectStateFile preserves local profile reads", async () => {
-  const root = await mkdtemp(join(tmpdir(), "openwork-state-test-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-state-test-"));
   try {
     const paths = electronProfilePaths(root);
-    const statePath = join(paths.configHome, "openwork", "connect-state.json");
+    const statePath = join(paths.configHome, "redrob", "connect-state.json");
     await mkdir(dirname(statePath), { recursive: true });
     await writeFile(statePath, '{"connectEnabled":false}', "utf8");
     assert.deepEqual(await readConnectStateFile(surface("local", root)), { status: "available", connectEnabled: false });

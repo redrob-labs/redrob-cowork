@@ -5,7 +5,7 @@ import { ORG_SCOPE_HEADER, getRequestOrgScope, shouldPinOrgScopePath } from "./o
 export type AuthMode = "sign-in" | "sign-up";
 export type SocialAuthProvider = "github" | "google";
 export type WorkerStatusBucket = "ready" | "starting" | "attention" | "other";
-export type RuntimeServiceName = "openwork-server" | "opencode";
+export type RuntimeServiceName = "redrob-server" | "opencode";
 export type EventLevel = "info" | "success" | "warning" | "error";
 export type AuthMethod = "email" | SocialAuthProvider;
 
@@ -99,7 +99,7 @@ export class DenRequestTimeoutError extends Error {
 
   constructor(timeoutMs: number, cause?: unknown) {
     super(
-      `OpenWork stopped waiting after ${formatDeadlineDuration(timeoutMs)}. The operation’s outcome is unknown.`,
+      `Redrob Work stopped waiting after ${formatDeadlineDuration(timeoutMs)}. The operation’s outcome is unknown.`,
       cause === undefined ? undefined : { cause },
     );
     this.name = "DenRequestTimeoutError";
@@ -112,7 +112,7 @@ export class DenRequestCanceledError extends Error {
 
   constructor(cause?: unknown) {
     super(
-      "The OpenWork request was canceled before the dashboard received a result. The operation’s outcome is unknown.",
+      "The Redrob Work request was canceled before the dashboard received a result. The operation’s outcome is unknown.",
       cause === undefined ? undefined : { cause },
     );
     this.name = "DenRequestCanceledError";
@@ -125,7 +125,7 @@ export type WorkerLaunch = {
   status: string;
   provider: string | null;
   instanceUrl: string | null;
-  openworkUrl: string | null;
+  redrobUrl: string | null;
   workspaceId: string | null;
   clientToken: string | null;
   ownerToken: string | null;
@@ -145,7 +145,7 @@ export type WorkerTokens = {
   clientToken: string | null;
   ownerToken: string | null;
   hostToken: string | null;
-  openworkUrl: string | null;
+  redrobUrl: string | null;
   workspaceId: string | null;
 };
 
@@ -221,13 +221,13 @@ declare global {
   }
 }
 
-export const LAST_WORKER_STORAGE_KEY = "openwork:web:last-worker";
-export const PENDING_SOCIAL_SIGNUP_STORAGE_KEY = "openwork:web:pending-social-signup";
-export const AUTH_TOKEN_STORAGE_KEY = "openwork:web:auth-token";
-export const ONBOARDING_INTENT_STORAGE_KEY = "openwork:web:onboarding-intent";
-export const PENDING_AUTH_INTENT_STORAGE_KEY = "openwork:web:pending-auth-intent";
+export const LAST_WORKER_STORAGE_KEY = "redrob:web:last-worker";
+export const PENDING_SOCIAL_SIGNUP_STORAGE_KEY = "redrob:web:pending-social-signup";
+export const AUTH_TOKEN_STORAGE_KEY = "redrob:web:auth-token";
+export const ONBOARDING_INTENT_STORAGE_KEY = "redrob:web:onboarding-intent";
+export const PENDING_AUTH_INTENT_STORAGE_KEY = "redrob:web:pending-auth-intent";
 export const WORKER_STATUS_POLL_MS = DEN_WORKER_POLL_INTERVAL_MS;
-export const DEFAULT_AUTH_NAME = "OpenWork User";
+export const DEFAULT_AUTH_NAME = "Redrob Work User";
 export const DEFAULT_WORKER_NAME = "My Worker";
 export const WORKSPACE_REAUTH_SECURITY_MESSAGE = "For security, confirm it's you before changing workspace settings.";
 
@@ -570,7 +570,7 @@ export function getWorker(payload: unknown): WorkerLaunch | null {
     status: getEffectiveWorkerStatus(worker.status, instance),
     provider: instance && typeof instance.provider === "string" ? instance.provider : null,
     instanceUrl: instance && typeof instance.url === "string" ? instance.url : null,
-    openworkUrl: instance && typeof instance.url === "string" ? instance.url : null,
+    redrobUrl: instance && typeof instance.url === "string" ? instance.url : null,
     workspaceId: null,
     clientToken: tokens && typeof tokens.client === "string" ? tokens.client : null,
     ownerToken: tokens && typeof tokens.owner === "string"
@@ -618,14 +618,14 @@ export function getWorkerTokens(payload: unknown): WorkerTokens | null {
       ? tokens.host
       : null;
   const hostToken = typeof tokens.host === "string" ? tokens.host : null;
-  const openworkUrl = connect && typeof connect.openworkUrl === "string" ? connect.openworkUrl : null;
+  const redrobUrl = connect && typeof connect.redrobUrl === "string" ? connect.redrobUrl : null;
   const workspaceId = connect && typeof connect.workspaceId === "string" ? connect.workspaceId : null;
 
   if (!clientToken && !ownerToken && !hostToken) {
     return null;
   }
 
-  return { clientToken, ownerToken, hostToken, openworkUrl, workspaceId };
+  return { clientToken, ownerToken, hostToken, redrobUrl, workspaceId };
 }
 
 export function getWorkerRuntimeSnapshot(payload: unknown): WorkerRuntimeSnapshot | null {
@@ -668,8 +668,8 @@ export function getWorkerRuntimeSnapshot(payload: unknown): WorkerRuntimeSnapsho
 
 export function getRuntimeServiceLabel(name: RuntimeServiceName): string {
   switch (name) {
-    case "openwork-server":
-      return "OpenWork server";
+    case "redrob-server":
+      return "Redrob Work server";
     case "opencode":
       return "OpenCode";
   }
@@ -911,7 +911,7 @@ export function isWorkerLaunch(value: unknown): value is WorkerLaunch {
     typeof value.status === "string" &&
     (typeof value.provider === "string" || value.provider === null) &&
     (typeof value.instanceUrl === "string" || value.instanceUrl === null) &&
-    (typeof value.openworkUrl === "string" || value.openworkUrl === null || typeof value.openworkUrl === "undefined") &&
+    (typeof value.redrobUrl === "string" || value.redrobUrl === null || typeof value.redrobUrl === "undefined") &&
     (typeof value.workspaceId === "string" || value.workspaceId === null || typeof value.workspaceId === "undefined") &&
     (typeof value.clientToken === "string" || value.clientToken === null) &&
     (typeof value.ownerToken === "string" || value.ownerToken === null || typeof value.ownerToken === "undefined") &&
@@ -926,7 +926,7 @@ export function listItemToWorker(item: WorkerListItem, current: WorkerLaunch | n
     status: item.status,
     provider: item.provider,
     instanceUrl: item.instanceUrl,
-    openworkUrl: current?.workerId === item.workerId ? current.openworkUrl ?? item.instanceUrl : item.instanceUrl,
+    redrobUrl: current?.workerId === item.workerId ? current.redrobUrl ?? item.instanceUrl : item.instanceUrl,
     workspaceId: current?.workerId === item.workerId ? current.workspaceId : null,
     clientToken: current?.workerId === item.workerId ? current.clientToken : null,
     ownerToken: current?.workerId === item.workerId ? current.ownerToken : null,
@@ -970,20 +970,20 @@ function buildWorkspaceUrl(instanceUrl: string, workspaceId: string): string {
   return `${normalizeUrl(instanceUrl)}/w/${encodeURIComponent(workspaceId)}`;
 }
 
-export function buildOpenworkDeepLink(
-  openworkUrl: string | null,
+export function buildRedrobDeepLink(
+  redrobUrl: string | null,
   accessToken: string | null,
   workerId: string | null,
   workerName: string | null
 ): string | null {
-  if (!openworkUrl || !accessToken) {
+  if (!redrobUrl || !accessToken) {
     return null;
   }
 
   const params = new URLSearchParams({
-    openworkHostUrl: openworkUrl,
-    openworkToken: accessToken,
-    source: "openwork-web"
+    redrobHostUrl: redrobUrl,
+    redrobToken: accessToken,
+    source: "redrob-web"
   });
 
   if (workerId) {
@@ -997,15 +997,15 @@ export function buildOpenworkDeepLink(
   return `redrob://connect-remote?${params.toString()}`;
 }
 
-export function buildOpenworkAppConnectUrl(
+export function buildRedrobAppConnectUrl(
   appConnectBaseUrl: string,
-  openworkUrl: string | null,
+  redrobUrl: string | null,
   accessToken: string | null,
   workerId: string | null,
   workerName: string | null,
   options?: { autoConnect?: boolean }
 ): string | null {
-  if (!appConnectBaseUrl || !openworkUrl || !accessToken) {
+  if (!appConnectBaseUrl || !redrobUrl || !accessToken) {
     return null;
   }
 
@@ -1025,12 +1025,12 @@ export function buildOpenworkAppConnectUrl(
     connectUrl.pathname = lastSegment === "connect-remote" ? normalizedPath : `${normalizedPath}/connect-remote`;
   }
 
-  connectUrl.searchParams.set("openworkHostUrl", openworkUrl);
-  connectUrl.searchParams.set("openworkToken", accessToken);
+  connectUrl.searchParams.set("redrobHostUrl", redrobUrl);
+  connectUrl.searchParams.set("redrobToken", accessToken);
   if (options?.autoConnect) {
     connectUrl.searchParams.set("autoConnect", "1");
   }
-  connectUrl.searchParams.set("source", "openwork-web");
+  connectUrl.searchParams.set("source", "redrob-web");
 
   if (workerId) {
     connectUrl.searchParams.set("workerId", workerId);
@@ -1101,7 +1101,7 @@ async function requestAbsoluteJson(url: string, init: RequestInit = {}, timeoutM
   return { response, payload };
 }
 
-export async function resolveOpenworkWorkspaceUrl(instanceUrl: string, accessToken: string): Promise<{ workspaceId: string; openworkUrl: string } | null> {
+export async function resolveRedrobWorkspaceUrl(instanceUrl: string, accessToken: string): Promise<{ workspaceId: string; redrobUrl: string } | null> {
   const baseUrl = normalizeUrl(instanceUrl);
   const token = accessToken.trim();
   if (!baseUrl || !token) {
@@ -1112,7 +1112,7 @@ export async function resolveOpenworkWorkspaceUrl(instanceUrl: string, accessTok
   if (mountedWorkspaceId) {
     return {
       workspaceId: mountedWorkspaceId,
-      openworkUrl: baseUrl
+      redrobUrl: baseUrl
     };
   }
 
@@ -1134,7 +1134,7 @@ export async function resolveOpenworkWorkspaceUrl(instanceUrl: string, accessTok
 
   return {
     workspaceId,
-    openworkUrl: buildWorkspaceUrl(baseUrl, workspaceId)
+    redrobUrl: buildWorkspaceUrl(baseUrl, workspaceId)
   };
 }
 

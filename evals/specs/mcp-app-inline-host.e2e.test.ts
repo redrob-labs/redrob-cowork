@@ -12,7 +12,7 @@ const modelId = "mcp-app-inline-host-model";
 const mcpServerName = "artifact-view";
 const saveToolName = "save_artifact_view";
 const mcpToolName = "render_card";
-const resourceUri = "ui://openwork/artifacts/arv_eval_card/views/avr_eval_card/index.html";
+const resourceUri = "ui://redrob/artifacts/arv_eval_card/views/avr_eval_card/index.html";
 const closingReply = "The interactive artifact card is ready.";
 const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1";
 const localPlacement = process.env.REDROB_EVAL_DAYTONA !== "1"
@@ -31,8 +31,8 @@ async function createWorkspaceForRenderer(
   if (packaged !== true) return createAndSelectWorkspace(app, { path });
 
   const created = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const hostToken = localStorage.getItem("openwork.server.hostToken");
+    const port = localStorage.getItem("redrob.server.port");
+    const hostToken = localStorage.getItem("redrob.server.hostToken");
     const invokeDesktop = window.__REDROB_ELECTRON__?.invokeDesktop;
     if (!port || !hostToken || !invokeDesktop) return {
       error: "packaged host prerequisites unavailable",
@@ -40,7 +40,7 @@ async function createWorkspaceForRenderer(
     };
     const response = await fetch("http://127.0.0.1:" + port + "/workspaces/local", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-OpenWork-Host-Token": hostToken },
+      headers: { "Content-Type": "application/json", "X-Redrob Work-Host-Token": hostToken },
       body: JSON.stringify({ folderPath: ${JSON.stringify(path)}, preset: "starter" }),
     });
     const payload = await response.json();
@@ -50,12 +50,12 @@ async function createWorkspaceForRenderer(
     const workspaceId = payload.activeId;
     await invokeDesktop("workspaceSetSelected", workspaceId);
     await invokeDesktop("workspaceSetRuntimeActive", workspaceId);
-    localStorage.setItem("openwork.react.activeWorkspace", workspaceId);
-    const raw = localStorage.getItem("openwork.preferences");
+    localStorage.setItem("redrob.react.activeWorkspace", workspaceId);
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({ ...preferences, hasCompletedOnboarding: true }));
+    localStorage.setItem("redrob.preferences", JSON.stringify({ ...preferences, hasCompletedOnboarding: true }));
     return { workspaceId };
   })()`, { awaitPromise: true, timeoutMs: 60_000 });
   if (!isRecord(created) || typeof created.workspaceId !== "string") {
@@ -68,7 +68,7 @@ async function createWorkspaceForRenderer(
   })()`);
   await waitFor(app, `location.protocol === "file:"
     && location.hash.includes(${JSON.stringify(`/workspace/${created.workspaceId}/session`)})
-    && Boolean(window.__openworkControl)`, {
+    && Boolean(window.__redrobControl)`, {
     timeoutMs: 120_000,
     label: "packaged workspace task route",
   });
@@ -78,22 +78,22 @@ async function createWorkspaceForRenderer(
     await invokeDesktop("engineStart", ${JSON.stringify(path)}, {
       runtime: "direct",
       workspacePaths: [${JSON.stringify(path)}],
-      openworkRemoteAccess: false,
+      redrobRemoteAccess: false,
     });
-    const serverInfo = await invokeDesktop("openworkServerInfo");
+    const serverInfo = await invokeDesktop("redrobServerInfo");
     if (serverInfo?.baseUrl) {
       const serverUrl = new URL(serverInfo.baseUrl);
-      localStorage.setItem("openwork.server.url", serverInfo.baseUrl);
-      localStorage.setItem("openwork.server.port", serverUrl.port);
-      if (serverInfo.clientToken) localStorage.setItem("openwork.server.token", serverInfo.clientToken);
-      if (serverInfo.hostToken) localStorage.setItem("openwork.server.hostToken", serverInfo.hostToken);
+      localStorage.setItem("redrob.server.url", serverInfo.baseUrl);
+      localStorage.setItem("redrob.server.port", serverUrl.port);
+      if (serverInfo.clientToken) localStorage.setItem("redrob.server.token", serverInfo.clientToken);
+      if (serverInfo.hostToken) localStorage.setItem("redrob.server.hostToken", serverInfo.hostToken);
     }
     return "started";
   })()`, { awaitPromise: true, timeoutMs: 60_000 });
   if (engineStarted !== "started") throw new Error(String(engineStarted));
   const engineReady = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const deadline = Date.now() + 120_000;
     let last = "";
@@ -468,10 +468,10 @@ test.skipIf(!e2eTestsEnabled || !localPlacement)(title, { timeout: 240_000 }, as
       REDROB_INFERENCE_BASE_URL: "",
     },
   });
-  const workspace = await createWorkspaceForRenderer(app, `/tmp/openwork-mcp-app-inline-host-${Date.now()}`);
+  const workspace = await createWorkspaceForRenderer(app, `/tmp/redrob-mcp-app-inline-host-${Date.now()}`);
   const configured = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -508,27 +508,27 @@ test.skipIf(!e2eTestsEnabled || !localPlacement)(title, { timeout: 240_000 }, as
     if (patched !== "ok") return patched;
     const reloaded = await request("/workspace/" + encodeURIComponent(workspaceId) + "/engine/reload", { method: "POST" });
     if (reloaded !== "ok" && !reloaded.includes("opencode_reload_timeout")) return reloaded;
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
-    localStorage.removeItem("openwork.sessionModels." + workspaceId);
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.removeItem("redrob.sessionModels." + workspaceId);
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 60_000 });
   expect(configured).toBe("ok");
 
   await evalIn(app, "location.reload(); true");
-  await waitFor(app, "Boolean(window.__openworkControl)", { timeoutMs: 30_000, label: "app control API after reload" });
+  await waitFor(app, "Boolean(window.__redrobControl)", { timeoutMs: 30_000, label: "app control API after reload" });
   const engineReady = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const deadline = Date.now() + 60_000;
     let last = "";
@@ -545,7 +545,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement)(title, { timeout: 240_000 }, as
     return "engine not ready: " + last;
   })()`, { awaitPromise: true, timeoutMs: 70_000 });
   expect(engineReady).toBe("ready");
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "new task action enabled",
   });
@@ -614,7 +614,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement)(title, { timeout: 240_000 }, as
     // Keep the checked-in tape runnable without a separate vision-model key.
     ask: async (request) => request.prompt.startsWith("Objectively describe")
       ? JSON.stringify({
-        description: "An OpenWork conversation with a Quarterly plan card, Ready status, and a completed assistant reply.",
+        description: "An Redrob Work conversation with a Quarterly plan card, Ready status, and a completed assistant reply.",
       })
       : JSON.stringify({
         results: expectations.map((expectation) => ({

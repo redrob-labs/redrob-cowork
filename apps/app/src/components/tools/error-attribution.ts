@@ -1,4 +1,4 @@
-import { openworkCloudMcpInlineReconnectSchema } from "@redrob/types/den/mcp-connection-action"
+import { redrobCloudMcpInlineReconnectSchema } from "@redrob/types/den/mcp-connection-action"
 
 export type ToolErrorAttribution = {
   label: string
@@ -18,8 +18,8 @@ export type ChatToolReconnectProgress =
 export type ChatToolReconnectResult = "connected"
 
 const REDROB_CLOUD_CAPABILITY_TOOLS = new Set([
-  "openwork-cloud_search_capabilities",
-  "openwork-cloud_execute_capability",
+  "redrob-cloud_search_capabilities",
+  "redrob-cloud_execute_capability",
 ])
 
 const MAX_PARSED_RESULT_LENGTH = 64 * 1_024
@@ -77,7 +77,7 @@ export function reconnectActionFromChatToolResult(
   toolName: string,
   result: unknown,
 ): ChatToolReconnectAction | null {
-  // Tool output is otherwise untrusted. Only the two canonical OpenWork Cloud
+  // Tool output is otherwise untrusted. Only the two canonical Redrob Work Cloud
   // capability tools may turn a structured Den response into a UI action.
   // Discovery is included because it performs a live connection probe before
   // the agent can safely proceed to execution.
@@ -97,7 +97,7 @@ export function reconnectActionFromChatToolResult(
   ]
   const reconnectTargets = new Map<string, { connectionId: string; connectionName: string }>()
   for (const connectionStatus of candidates) {
-    const parsedStatus = openworkCloudMcpInlineReconnectSchema.safeParse(connectionStatus)
+    const parsedStatus = redrobCloudMcpInlineReconnectSchema.safeParse(connectionStatus)
     if (!parsedStatus.success) continue
     const { connectionId, connectionName } = parsedStatus.data
     reconnectTargets.set(connectionId, { connectionId, connectionName })
@@ -125,15 +125,15 @@ export function attributeChatToolError(errorText: string): ToolErrorAttribution 
   const providerCode = stringValue(diagnostic, "providerCode")
 
   if (
-    errorText.includes("OpenWork stopped waiting after")
+    errorText.includes("Redrob Work stopped waiting after")
     || /The capability call exceeded \d+(?:\.\d+)?s\b/.test(errorText)
     || code === "MCP_LIFECYCLE_DEADLINE"
     || code === "MCP_REQUEST_TIMEOUT"
     || category === "lifecycle_deadline"
   ) {
     return confirmed(
-      "OpenWork timeout",
-      "OpenWork created this deadline. The external operation may still have completed, so verify its state before retrying.",
+      "Redrob Work timeout",
+      "Redrob Work created this deadline. The external operation may still have completed, so verify its state before retrying.",
     )
   }
 
@@ -142,7 +142,7 @@ export function attributeChatToolError(errorText: string): ToolErrorAttribution 
     || code === "MCP_URL_BLOCKED"
     || code === "MCP_FETCH_FORBIDDEN_PORT"
   ) {
-    return confirmed("Blocked by OpenWork", "OpenWork blocked the request before it was sent.")
+    return confirmed("Blocked by Redrob Work", "Redrob Work blocked the request before it was sent.")
   }
 
   if (httpStatus !== undefined && (httpStatus < 200 || httpStatus >= 300)) {

@@ -29,7 +29,7 @@ function serverConfig(root: string): ServerConfig {
 }
 
 async function withWorkspace(fn: (input: { root: string; config: ServerConfig }) => Promise<void>) {
-  const root = await mkdtemp(join(tmpdir(), "openwork-cloud-plugin-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-cloud-plugin-"));
   const previousDb = process.env.REDROB_RUNTIME_DB;
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   try {

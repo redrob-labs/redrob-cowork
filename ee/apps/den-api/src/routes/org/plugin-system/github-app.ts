@@ -234,7 +234,7 @@ async function requestGithubJson<TResponse>(input: {
   const response = await fetchFn(`${githubApiBase()}${input.path}`, {
     headers: {
       Accept: "application/vnd.github+json",
-      "User-Agent": "openwork-den-api",
+      "User-Agent": "redrob-den-api",
       "X-GitHub-Api-Version": GITHUB_API_VERSION,
       ...input.headers,
     },

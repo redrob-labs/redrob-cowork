@@ -8,7 +8,7 @@ import type {
 } from "../src/automations/authority.js"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL ??= "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL ??= "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY ??= "x".repeat(32)
   process.env.BETTER_AUTH_SECRET ??= "y".repeat(32)
   process.env.BETTER_AUTH_URL ??= "http://127.0.0.1:8790"
@@ -23,9 +23,9 @@ beforeAll(async () => {
 })
 
 const member: AutomationAuthorityMember = { id: createDenTypeId("member") }
-const openWorkProvider: AutomationAuthorityProvider = {
+const redrobProvider: AutomationAuthorityProvider = {
   id: createDenTypeId("llmProvider"),
-  source: "openwork",
+  source: "redrob",
   name: "Redrob Models",
 }
 const customProvider: AutomationAuthorityProvider = {
@@ -41,7 +41,7 @@ const customModel: AutomationAuthorityModel = {
 function authorityStore(overrides: Partial<AutomationModelAuthorityStore> = {}): AutomationModelAuthorityStore {
   return {
     async findActiveMember() { return member },
-    async findOpenWorkProvider() { return openWorkProvider },
+    async findRedrobWorkProvider() { return redrobProvider },
     async findProvider() { return customProvider },
     async findModel() { return customModel },
     async canAccessProvider() { return true },
@@ -100,26 +100,26 @@ describe("Automation normalized model authority", () => {
     })
   })
 
-  test("resolves enabled OpenWork aliases through the owner's managed provider", async () => {
+  test("resolves enabled Redrob Work aliases through the owner's managed provider", async () => {
     const result = await resolveAutomationModelAccessWithStore({
       ...base,
-      providerId: "openwork",
+      providerId: "redrob",
       modelId: "z-ai/glm-5.2",
     }, authorityStore())
 
     expect(result).toMatchObject({
       ok: true,
       value: {
-        accessKind: "openwork_managed",
-        providerRecordId: openWorkProvider.id,
-        providerId: "openwork",
+        accessKind: "redrob_managed",
+        providerRecordId: redrobProvider.id,
+        providerId: "redrob",
         modelId: "z-ai/glm-5.2",
       },
     })
 
     expect(await resolveAutomationModelAccessWithStore({
       ...base,
-      providerId: "openwork",
+      providerId: "redrob",
       modelId: "unknown/model",
     }, authorityStore())).toMatchObject({ ok: false, code: "model_access_lost" })
   })

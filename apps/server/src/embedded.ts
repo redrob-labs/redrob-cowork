@@ -1,5 +1,5 @@
 /**
- * Single entry point for embedding the OpenWork server in-process.
+ * Single entry point for embedding the Redrob Work server in-process.
  *
  * Handles config resolution, managed OpenCode spawn, and server start
  * in one call -- mirrors what cli.ts does but returns a handle instead
@@ -32,7 +32,7 @@ import {
 } from "./server.js";
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
-import { keepOpenworkRuntimeConfigFileFresh, writeOpenworkRuntimeConfigFile } from "./openwork-runtime-config.js";
+import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
 import { resolveOpencodeModelsUrl } from "./opencode-models-url.js";
 import type { ServeResult } from "./serve-node.js";
@@ -145,7 +145,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
 
     if (errors.length === 1) throw errors[0];
     if (errors.length > 1) {
-      throw new AggregateError(errors, "Failed to stop embedded OpenWork server");
+      throw new AggregateError(errors, "Failed to stop embedded Redrob Work server");
     }
   };
 
@@ -163,7 +163,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       } catch (cleanupError) {
         throw new AggregateError(
           [startupError, cleanupError],
-          "Embedded OpenWork server startup failed and cleanup was incomplete",
+          "Embedded Redrob Work server startup failed and cleanup was incomplete",
         );
       }
       throw startupError;
@@ -191,10 +191,10 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       // effort: a failed reap must never block startup.
       await reapOrphanEngineInstances(config).catch(() => undefined);
       // Server-managed config file: the engine re-reads it from disk on every
-      // instance rebuild, and keepOpenworkRuntimeConfigFileFresh synchronizes it
+      // instance rebuild, and keepRedrobRuntimeConfigFileFresh synchronizes it
       // on every runtime-DB write — so disposes always pick up current state.
-      const { path: runtimeConfigPath } = await writeOpenworkRuntimeConfigFile(config, workspace.id);
-      stopRuntimeConfigFileRefresh = keepOpenworkRuntimeConfigFileFresh(config, workspace.id);
+      const { path: runtimeConfigPath } = await writeRedrobRuntimeConfigFile(config, workspace.id);
+      stopRuntimeConfigFileRefresh = keepRedrobRuntimeConfigFileFresh(config, workspace.id);
       const cwd = options.opencodeCwd
         || process.env.REDROB_MANAGED_OPENCODE_CWD?.trim()
         || workspace.path;

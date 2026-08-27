@@ -23,8 +23,8 @@ import {
   type WorkerRuntimeSnapshot,
   type WorkerSummary,
   type WorkerStatusBucket,
-  buildOpenworkAppConnectUrl,
-  buildOpenworkDeepLink,
+  buildRedrobAppConnectUrl,
+  buildRedrobDeepLink,
   deriveOnboardingWorkerName,
   getAuthInfoForMode,
   getBillingSummary,
@@ -52,13 +52,13 @@ import {
   parseWorkspaceIdFromUrl,
   requestJson,
   resetPosthogUser,
-  resolveOpenworkWorkspaceUrl,
+  resolveRedrobWorkspaceUrl,
   trackPosthogEvent
 } from "../_lib/den-flow";
 import { EMPTY_RUNTIME_CONFIG, getRuntimeConfig, type DenWebRuntimeConfig } from "../_lib/runtime-config";
 import {
   getDesktopHandoffGrant,
-  getDesktopHandoffOpenworkUrl,
+  getDesktopHandoffRedrobUrl,
   rememberDesktopHandoffGrant,
 } from "../_lib/desktop-handoff";
 import {
@@ -174,8 +174,8 @@ type DenFlowContextValue = {
   events: LaunchEvent[];
   runtimeConfig: DenWebRuntimeConfig;
   runtimeConfigLoaded: boolean;
-  openworkDeepLink: string | null;
-  openworkAppConnectUrl: string | null;
+  redrobDeepLink: string | null;
+  redrobAppConnectUrl: string | null;
   hasWorkspaceScopedUrl: boolean;
   additionalWorkerNeedsPlan: boolean;
   selectedStatusMeta: { label: string; bucket: WorkerStatusBucket };
@@ -307,19 +307,19 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
       : selectedWorker
         ? listItemToWorker(selectedWorker, worker)
         : worker;
-  const openworkConnectUrl = activeWorker?.openworkUrl ?? activeWorker?.instanceUrl ?? null;
-  const preferredOpenworkToken = activeWorker?.clientToken ?? activeWorker?.ownerToken ?? null;
-  const hasWorkspaceScopedUrl = Boolean(openworkConnectUrl && /\/w\/[^/?#]+/.test(openworkConnectUrl));
-  const openworkDeepLink = buildOpenworkDeepLink(
-    openworkConnectUrl,
-    preferredOpenworkToken,
+  const redrobConnectUrl = activeWorker?.redrobUrl ?? activeWorker?.instanceUrl ?? null;
+  const preferredRedrobToken = activeWorker?.clientToken ?? activeWorker?.ownerToken ?? null;
+  const hasWorkspaceScopedUrl = Boolean(redrobConnectUrl && /\/w\/[^/?#]+/.test(redrobConnectUrl));
+  const redrobDeepLink = buildRedrobDeepLink(
+    redrobConnectUrl,
+    preferredRedrobToken,
     activeWorker?.workerId ?? null,
     activeWorker?.workerName ?? null
   );
-  const openworkAppConnectUrl = buildOpenworkAppConnectUrl(
-    runtimeConfig.openworkAppConnectUrl,
-    openworkConnectUrl,
-    preferredOpenworkToken,
+  const redrobAppConnectUrl = buildRedrobAppConnectUrl(
+    runtimeConfig.redrobAppConnectUrl,
+    redrobConnectUrl,
+    preferredRedrobToken,
     activeWorker?.workerId ?? null,
     activeWorker?.workerName ?? null,
     { autoConnect: true }
@@ -526,12 +526,12 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
     }
 
     if (desktopAuthRequested) {
-      setAuthInfo("Signed in. Returning to OpenWork...");
+      setAuthInfo("Signed in. Returning to Redrob Work...");
       return null;
     }
 
     if (webAuthRequested) {
-      setAuthInfo("Signed in. Returning to OpenWork...");
+      setAuthInfo("Signed in. Returning to Redrob Work...");
       return null;
     }
 
@@ -642,13 +642,13 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function withResolvedOpenworkCredentials(candidate: WorkerLaunch, options: { quiet?: boolean } = {}) {
-    const existingConnectUrl = candidate.openworkUrl?.trim() ?? "";
+  async function withResolvedRedrobCredentials(candidate: WorkerLaunch, options: { quiet?: boolean } = {}) {
+    const existingConnectUrl = candidate.redrobUrl?.trim() ?? "";
     const existingWorkspaceId = candidate.workspaceId?.trim() ?? "";
     if (existingConnectUrl && existingWorkspaceId) {
       return {
         ...candidate,
-        openworkUrl: existingConnectUrl,
+        redrobUrl: existingConnectUrl,
         workspaceId: existingWorkspaceId
       };
     }
@@ -657,7 +657,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
     if (!instanceUrl) {
       return {
         ...candidate,
-        openworkUrl: null,
+        redrobUrl: null,
         workspaceId: null
       };
     }
@@ -667,17 +667,17 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
       const mountedWorkspaceId = parseWorkspaceIdFromUrl(instanceUrl);
       return {
         ...candidate,
-        openworkUrl: instanceUrl.trim().replace(/\/+$/, ""),
+        redrobUrl: instanceUrl.trim().replace(/\/+$/, ""),
         workspaceId: mountedWorkspaceId
       };
     }
 
     try {
-      const resolved = await resolveOpenworkWorkspaceUrl(instanceUrl, accessToken);
+      const resolved = await resolveRedrobWorkspaceUrl(instanceUrl, accessToken);
       if (resolved) {
         return {
           ...candidate,
-          openworkUrl: resolved.openworkUrl,
+          redrobUrl: resolved.redrobUrl,
           workspaceId: resolved.workspaceId
         };
       }
@@ -689,7 +689,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
 
     return {
       ...candidate,
-      openworkUrl: instanceUrl.trim().replace(/\/+$/, ""),
+      redrobUrl: instanceUrl.trim().replace(/\/+$/, ""),
       workspaceId: parseWorkspaceIdFromUrl(instanceUrl)
     };
   }
@@ -860,7 +860,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
         {
           method: "POST",
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
-          body: JSON.stringify({ services: ["openwork-server", "opencode"] })
+          body: JSON.stringify({ services: ["redrob-server", "opencode"] })
         },
         12000
       );
@@ -1058,17 +1058,17 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const openworkUrl = getDesktopHandoffOpenworkUrl(payload) ?? "";
-      if (!openworkUrl) {
-        setAuthError("Desktop handoff succeeded, but no OpenWork redirect URL was returned.");
+      const redrobUrl = getDesktopHandoffRedrobUrl(payload) ?? "";
+      if (!redrobUrl) {
+        setAuthError("Desktop handoff succeeded, but no Redrob Work redirect URL was returned.");
         return;
       }
 
-      rememberDesktopHandoffGrant(getDesktopHandoffGrant(payload, openworkUrl));
-      setDesktopRedirectUrl(openworkUrl);
-      window.location.assign(openworkUrl);
+      rememberDesktopHandoffGrant(getDesktopHandoffGrant(payload, redrobUrl));
+      setDesktopRedirectUrl(redrobUrl);
+      window.location.assign(redrobUrl);
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Failed to open OpenWork.");
+      setAuthError(error instanceof Error ? error.message : "Failed to open Redrob Work.");
     } finally {
       setDesktopRedirectBusy(false);
     }
@@ -1125,7 +1125,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
       redirectUrl.searchParams.set("grant", grant);
       window.location.replace(redirectUrl.toString());
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Failed to return to OpenWork Cloud.");
+      setAuthError(error instanceof Error ? error.message : "Failed to return to Redrob Work Cloud.");
     } finally {
       setWebRedirectBusy(false);
     }
@@ -1295,7 +1295,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
       }
       const latestRuntimeConfig = await getRuntimeConfig();
       setRuntimeConfig(latestRuntimeConfig);
-      const callbackURL = getSocialCallbackUrl(latestRuntimeConfig.openworkAuthCallbackUrl);
+      const callbackURL = getSocialCallbackUrl(latestRuntimeConfig.redrobAuthCallbackUrl);
       const { response, payload } = await requestJson("/api/auth/sign-in/social", {
         method: "POST",
         body: JSON.stringify({
@@ -1501,7 +1501,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
         return "error" as const;
       }
 
-      const resolvedWorker = await withResolvedOpenworkCredentials(parsedWorker);
+      const resolvedWorker = await withResolvedRedrobCredentials(parsedWorker);
       setWorker(resolvedWorker);
       setWorkerLookupId(parsedWorker.workerId);
       setPendingRestoredWorkerId(null);
@@ -1607,7 +1607,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
               status: summary.status,
               provider: summary.provider,
               instanceUrl: summary.instanceUrl,
-              openworkUrl: summary.instanceUrl,
+              redrobUrl: summary.instanceUrl,
               workspaceId: null,
               clientToken: null,
               ownerToken: null,
@@ -1616,7 +1616,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
 
       const shouldUpdateActiveWorker = worker?.workerId === summary.workerId || (!background && workerLookupId === summary.workerId);
       if (shouldUpdateActiveWorker) {
-        const resolvedWorker = await withResolvedOpenworkCredentials(nextWorker, { quiet: true });
+        const resolvedWorker = await withResolvedRedrobCredentials(nextWorker, { quiet: true });
         setWorker(resolvedWorker);
         setPendingRestoredWorkerId(null);
         if (!background) {
@@ -1692,7 +1692,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
         worker && worker.workerId === id
           ? {
               ...worker,
-              openworkUrl: tokens.openworkUrl ?? worker.openworkUrl,
+              redrobUrl: tokens.redrobUrl ?? worker.redrobUrl,
               workspaceId: tokens.workspaceId ?? worker.workspaceId,
               clientToken: tokens.clientToken,
               ownerToken: tokens.ownerToken,
@@ -1704,14 +1704,14 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
               status: "unknown",
               provider: null,
               instanceUrl: null,
-              openworkUrl: tokens.openworkUrl,
+              redrobUrl: tokens.redrobUrl,
               workspaceId: tokens.workspaceId,
               clientToken: tokens.clientToken,
               ownerToken: tokens.ownerToken,
               hostToken: tokens.hostToken
             };
 
-      const resolvedWorker = await withResolvedOpenworkCredentials(nextWorker, { quiet: true });
+      const resolvedWorker = await withResolvedRedrobCredentials(nextWorker, { quiet: true });
       setWorker(resolvedWorker);
       setPendingRestoredWorkerId(null);
       setLaunchStatus("Worker is ready to connect.");
@@ -2029,7 +2029,7 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
 
       const restored: WorkerLaunch = {
         ...parsed,
-        openworkUrl: parsed.openworkUrl ?? parsed.instanceUrl,
+        redrobUrl: parsed.redrobUrl ?? parsed.instanceUrl,
         workspaceId: parsed.workspaceId ?? parseWorkspaceIdFromUrl(parsed.instanceUrl ?? ""),
         clientToken: null,
         ownerToken: null,
@@ -2274,8 +2274,8 @@ export function DenFlowProvider({ children }: { children: ReactNode }) {
     events,
     runtimeConfig,
     runtimeConfigLoaded,
-    openworkDeepLink,
-    openworkAppConnectUrl,
+    redrobDeepLink,
+    redrobAppConnectUrl,
     hasWorkspaceScopedUrl,
     additionalWorkerNeedsPlan,
     selectedStatusMeta,

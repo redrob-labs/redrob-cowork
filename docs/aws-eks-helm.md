@@ -1,7 +1,7 @@
 # Deploy Redrob Work EE on AWS with EKS and Helm
 
 Status: self-host operator guide
-Related: `packaging/helm/openwork-ee`, `packaging/helm/openwork-ee/examples/values.aws-load-balancer.yaml`, `packaging/helm/openwork-ee/examples/values.aws-load-balancer-http-smoke.yaml`
+Related: `packaging/helm/redrob-ee`, `packaging/helm/redrob-ee/examples/values.aws-load-balancer.yaml`, `packaging/helm/redrob-ee/examples/values.aws-load-balancer-http-smoke.yaml`
 
 This is the recommended AWS path for a first production-like Redrob Work EE
 self-host install. Use Helm on Amazon EKS with Amazon RDS for MySQL. For the
@@ -42,8 +42,8 @@ missing chart knobs for AWS service annotations.
 - Permission to create EKS, EC2/VPC, IAM, Elastic Load Balancing, RDS, Secrets
   Manager, Route 53, and ACM resources.
 - A real admin email address for the first owner account.
-- A domain you control, such as `openwork.example.com` and
-  `api.openwork.example.com`.
+- A domain you control, such as `redrob.example.com` and
+  `api.redrob.example.com`.
 
 Do not run production installs as the AWS root account. Use AWS SSO or an IAM
 role with only the permissions needed for the cluster, VPC/load balancer, RDS,
@@ -110,7 +110,7 @@ For a first deployment, create an EKS Auto Mode cluster:
 
 ```bash
 export AWS_REGION=us-east-1
-export CLUSTER_NAME=openwork-ee
+export CLUSTER_NAME=redrob-ee
 
 eksctl create cluster \
   --name "$CLUSTER_NAME" \
@@ -138,7 +138,7 @@ Create a MySQL database reachable from the EKS worker security group. The exact
 VPC and subnet commands vary by account, so the important requirements are:
 
 - RDS MySQL 8-compatible engine.
-- Database name: `openwork_den`.
+- Database name: `redrob_den`.
 - Private subnets in the same VPC as the EKS cluster.
 - RDS security group inbound TCP `3306` from the EKS node/pod security group.
 - Storage encryption enabled.
@@ -149,7 +149,7 @@ VPC and subnet commands vary by account, so the important requirements are:
 Example database URL:
 
 ```text
-mysql://openwork:<password>@<rds-endpoint>:3306/openwork_den?sslaccept=accept
+mysql://redrob:<password>@<rds-endpoint>:3306/redrob_den?sslaccept=accept
 ```
 
 Use `?sslaccept=accept` for the simple private-RDS smoke path. This keeps TLS on
@@ -200,7 +200,7 @@ kubectl run mysql-client \
   --image=mysql:8 \
   -- mysql \
     --host="$RDS_ENDPOINT" \
-    --user=openwork \
+    --user=redrob \
     --password \
     --ssl-mode=REQUIRED \
     --execute "select 1"
@@ -211,14 +211,14 @@ kubectl run mysql-client \
 Copy the starter file:
 
 ```bash
-cp packaging/helm/openwork-ee/examples/values.aws-load-balancer.yaml values.aws.yaml
+cp packaging/helm/redrob-ee/examples/values.aws-load-balancer.yaml values.aws.yaml
 ```
 
 If you do not have DNS and ACM ready yet, use the HTTP smoke-test starter
 instead:
 
 ```bash
-cp packaging/helm/openwork-ee/examples/values.aws-load-balancer-http-smoke.yaml values.aws.yaml
+cp packaging/helm/redrob-ee/examples/values.aws-load-balancer-http-smoke.yaml values.aws.yaml
 ```
 
 Replace every `REPLACE_*` placeholder.
@@ -242,7 +242,7 @@ secret:
     emailFrom: "Redrob Work <no-reply@example.com>"
     smtpHost: "smtp.example.com"
     smtpPort: "587"
-    smtpUser: "openwork@example.com"
+    smtpUser: "redrob@example.com"
     smtpPass: "REPLACE_SMTP_PASSWORD"
     smtpSecure: "false"
 ```
@@ -267,12 +267,12 @@ Before installing, render the chart and verify the migration Job will use your
 RDS URL:
 
 ```bash
-helm template openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm template redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
-  -f values.aws.yaml > /tmp/openwork-rendered.yaml
+  --namespace redrob-ee \
+  -f values.aws.yaml > /tmp/redrob-rendered.yaml
 
-grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SMTP_PORT|SMTP_SECURE' /tmp/openwork-rendered.yaml
+grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SMTP_PORT|SMTP_SECURE' /tmp/redrob-rendered.yaml
 ```
 
 Redact secrets before sharing rendered manifests or terminal output.
@@ -282,9 +282,9 @@ Redact secrets before sharing rendered manifests or terminal output.
 Published chart releases live in GHCR:
 
 ```bash
-helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm upgrade --install redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.aws.yaml
 ```
@@ -292,8 +292,8 @@ helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee
 For a checkout-local test:
 
 ```bash
-helm upgrade --install openwork-ee ./packaging/helm/openwork-ee \
-  --namespace openwork-ee \
+helm upgrade --install redrob-ee ./packaging/helm/redrob-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.aws.yaml
 ```
@@ -304,7 +304,7 @@ private packages or private forks do:
 
 ```bash
 kubectl create secret docker-registry ghcr-pull-secret \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --docker-server=ghcr.io \
   --docker-username="$GITHUB_USER" \
   --docker-password="$GITHUB_TOKEN"
@@ -320,7 +320,7 @@ imagePullSecrets:
 The migration Job runs before the Deployments and Services are installed. If it
 fails, fix that before debugging web/API readiness.
 
-Avoid `kubectl describe job openwork-ee-migrate` in shared reports because the
+Avoid `kubectl describe job redrob-ee-migrate` in shared reports because the
 hook Job currently includes `DATABASE_URL` and `DEN_DB_ENCRYPTION_KEY` in the
 rendered environment. Use logs and redacted rendered manifests instead.
 
@@ -336,15 +336,15 @@ migrations:
 Then run Helm and inspect the normal Job logs:
 
 ```bash
-helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm upgrade --install redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.aws.yaml \
   --wait=false
 
-kubectl get jobs,pods -n openwork-ee
-kubectl logs -n openwork-ee -l job-name=openwork-ee-migrate --all-containers=true
+kubectl get jobs,pods -n redrob-ee
+kubectl logs -n redrob-ee -l job-name=redrob-ee-migrate --all-containers=true
 ```
 
 If you see `self-signed certificate in certificate chain` against RDS, use the
@@ -365,18 +365,18 @@ migrations:
 Wait for AWS to allocate load balancer hostnames:
 
 ```bash
-kubectl get svc -n openwork-ee
+kubectl get svc -n redrob-ee
 ```
 
 You should see external hostnames for:
 
-- `openwork-ee-den-web`
-- `openwork-ee-den-api`
+- `redrob-ee-den-web`
+- `redrob-ee-den-api`
 
 Create DNS records:
 
-- `openwork.example.com` -> Den Web load balancer hostname.
-- `api.openwork.example.com` -> Den API load balancer hostname.
+- `redrob.example.com` -> Den Web load balancer hostname.
+- `api.redrob.example.com` -> Den API load balancer hostname.
 
 The starter values terminate TLS on port `443` at each Network Load Balancer
 and forward clear HTTP to the Kubernetes service target port. Use an ACM
@@ -415,9 +415,9 @@ when ConfigMap or Secret content changes. On older chart versions, manually
 restart the deployments after changing public origin values:
 
 ```bash
-kubectl rollout restart deployment/openwork-ee-den-api deployment/openwork-ee-den-web -n openwork-ee
-kubectl rollout status deployment/openwork-ee-den-api -n openwork-ee --timeout=180s
-kubectl rollout status deployment/openwork-ee-den-web -n openwork-ee --timeout=180s
+kubectl rollout restart deployment/redrob-ee-den-api deployment/redrob-ee-den-web -n redrob-ee
+kubectl rollout status deployment/redrob-ee-den-api -n redrob-ee --timeout=180s
+kubectl rollout status deployment/redrob-ee-den-web -n redrob-ee --timeout=180s
 ```
 
 ## 7. Verify readiness
@@ -425,19 +425,19 @@ kubectl rollout status deployment/openwork-ee-den-web -n openwork-ee --timeout=1
 Check Kubernetes state:
 
 ```bash
-helm status openwork-ee -n openwork-ee
-kubectl get pods -n openwork-ee
-kubectl get jobs -n openwork-ee
-kubectl describe pods -n openwork-ee
-kubectl logs -n openwork-ee deploy/openwork-ee-den-api
-kubectl logs -n openwork-ee deploy/openwork-ee-den-web
+helm status redrob-ee -n redrob-ee
+kubectl get pods -n redrob-ee
+kubectl get jobs -n redrob-ee
+kubectl describe pods -n redrob-ee
+kubectl logs -n redrob-ee deploy/redrob-ee-den-api
+kubectl logs -n redrob-ee deploy/redrob-ee-den-web
 ```
 
 Check service readiness from your machine:
 
 ```bash
-curl -fsS https://api.openwork.example.com/ready
-curl -fsS https://openwork.example.com/api/ready
+curl -fsS https://api.redrob.example.com/ready
+curl -fsS https://redrob.example.com/api/ready
 ```
 
 For HTTP smoke tests, use the raw NLB hostnames and ports:
@@ -469,7 +469,7 @@ secret:
 For releases that include initial-administrator bootstrap, inject the
 release-documented one-time setup secret through the Kubernetes Secret referenced
 by `secret.existingSecret`. Do not store the code in the values file or a
-ConfigMap. Then open `https://openwork.example.com/setup`, enter the configured
+ConfigMap. Then open `https://redrob.example.com/setup`, enter the configured
 owner email and one-time operator code, and create the first account. Redrob Work
 creates the singleton organization, grants owner and configured platform-admin
 access, and signs the administrator in. Public signup remains disabled. After
@@ -493,14 +493,14 @@ IdPs.
 Configure the IdP application with these callback URLs:
 
 ```text
-https://openwork.example.com/api/auth/sso/callback/openwork-sso-<org-id>
+https://redrob.example.com/api/auth/sso/callback/redrob-sso-<org-id>
 ```
 
 In Redrob Work, sign in as the owner, open the organization SSO settings, and enter
 the IdP issuer/client details. After saving, the organization sign-in path is:
 
 ```text
-https://openwork.example.com/sso/<singleOrgSlug>
+https://redrob.example.com/sso/<singleOrgSlug>
 ```
 
 For SAML, Redrob Work shows the generated ACS URL and metadata URL after the SAML
@@ -533,7 +533,7 @@ single organization. Password sign-in for that organization is rejected.
 For a disposable test:
 
 ```bash
-helm uninstall openwork-ee -n openwork-ee
+helm uninstall redrob-ee -n redrob-ee
 eksctl delete cluster --name "$CLUSTER_NAME" --region "$AWS_REGION"
 ```
 

@@ -93,7 +93,7 @@ function parseVisibleToolFact(value: unknown): VisibleToolFact {
 
 async function configureWorkspaces(appSurface: App, workspaceIds: string[], baseUrl: string): Promise<void> {
   const result = await evalIn(appSurface, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     if (!info?.running || !info.baseUrl) return "local_server_unavailable";
     const root = String(info.baseUrl).replace(/\\/+$/, "");
     const headers = {
@@ -129,23 +129,23 @@ async function configureWorkspaces(appSurface: App, workspaceIds: string[], base
       });
       if (!reloaded.ok) return "reload:" + reloaded.status + ":" + (await reloaded.text()).slice(0, 300);
     }
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 120_000 });
   expect(result).toBe("ok");
 
   await evalIn(appSurface, "location.reload(); true");
-  await waitFor(appSurface, "Boolean(window.__openworkControl)", {
+  await waitFor(appSurface, "Boolean(window.__redrobControl)", {
     timeoutMs: 60_000,
     label: "desktop restored after mock provider configuration",
   });
@@ -180,13 +180,13 @@ async function clickSessionRow(appSurface: App, workspaceId: string, sessionId: 
   await waitFor(appSurface, `(() => {
     const surface = document.querySelector("[data-session-surface-id]");
     return surface?.getAttribute("data-session-surface-id") === ${JSON.stringify(sessionId)}
-      && (localStorage.getItem("openwork.react.activeWorkspace") ?? "") === ${JSON.stringify(workspaceId)};
+      && (localStorage.getItem("redrob.react.activeWorkspace") ?? "") === ${JSON.stringify(workspaceId)};
   })()`, { timeoutMs: 60_000, label: `workspace ${workspaceId} session ${sessionId} visible after sidebar click` });
 }
 
 async function readSessionFacts(appSurface: App, workspaceId: string, sessionId: string): Promise<SessionFacts> {
   const value = await evalIn(appSurface, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     if (!info?.running || !info.baseUrl) return { sessionId: "", text: "", tools: [] };
     const response = await fetch(
       String(info.baseUrl).replace(/\\/+$/, "") + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)})
@@ -222,7 +222,7 @@ async function readSessionFacts(appSurface: App, workspaceId: string, sessionId:
 
 async function approvePendingPermission(appSurface: App, workspaceId: string, sessionId: string): Promise<number> {
   const value = await evalIn(appSurface, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     if (!info?.running || !info.baseUrl) return [];
     const root = String(info.baseUrl).replace(/\\/+$/, "")
       + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/opencode";
@@ -339,13 +339,13 @@ test.skipIf(!runnable)(
     await using desktopApp = await app({ den, as: "member", place });
 
     const workspaceB = await createAndSelectWorkspace(desktopApp, {
-      path: `/tmp/openwork-live-tool-switch-${runId}-b`,
+      path: `/tmp/redrob-live-tool-switch-${runId}-b`,
     });
     const chatB = await createSession(desktopApp);
     await control(desktopApp, "session.rename", { sessionId: chatB, title: "Chat B" });
 
     const workspaceA = await createAndSelectWorkspace(desktopApp, {
-      path: `/tmp/openwork-live-tool-switch-${runId}-a`,
+      path: `/tmp/redrob-live-tool-switch-${runId}-a`,
     });
     await configureWorkspaces(desktopApp, [workspaceA.workspaceId, workspaceB.workspaceId], den.mocks.agent.url);
     const chatA = await createSession(desktopApp);

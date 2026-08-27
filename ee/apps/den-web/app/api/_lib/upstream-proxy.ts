@@ -41,7 +41,7 @@ const SAFE_X_RESPONSE_HEADERS = new Set(["x-content-type-options"]);
 const AUTH_COOKIE_PREFIXES = ["better-auth.", "__Secure-better-auth.", "better-auth-"];
 
 /**
- * OpenWork Cloud instances are served from Daytona preview origins that are
+ * Redrob Work Cloud instances are served from Daytona preview origins that are
  * re-signed (and therefore renamed) on every wake, so they can never appear in
  * a static CORS allowlist. The signed-in SPA running there has to reach Den for
  * /v1/me, /v1/me/orgs, MCP tokens and org connections.
@@ -57,7 +57,7 @@ const AUTH_COOKIE_PREFIXES = ["better-auth.", "__Secure-better-auth.", "better-a
  */
 const DEN_API_ROUTE_PREFIX = "/api/den";
 const DEFAULT_CLOUD_INSTANCE_ORIGIN_SUFFIXES = [".daytonaproxy01.net"];
-const CORS_ALLOW_HEADERS = "authorization,content-type,x-openwork-org-id,x-openwork-legacy-org-id,x-request-id,accept";
+const CORS_ALLOW_HEADERS = "authorization,content-type,x-redrob-org-id,x-redrob-legacy-org-id,x-request-id,accept";
 const CORS_ALLOW_METHODS = "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS";
 
 function cloudInstanceOriginSuffixes(): string[] {

@@ -17,7 +17,7 @@ const requirements: TestNeeds = {
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Managed vault recovery skipped — needs: ${missingRequirements.join(", ")}`
-  : "OpenWork recovers managed MCP connections after the OS secure-storage key changes";
+  : "Redrob Work recovers managed MCP connections after the OS secure-storage key changes";
 
 const VAULT_FILE = "local-managed-mcp-vault.json";
 const RECONNECT_REASON = "Secure storage on this device changed";
@@ -38,22 +38,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** The embedded openwork-server's base URL and client token, read from the app itself. */
+/** The embedded redrob-server's base URL and client token, read from the app itself. */
 async function serverTarget(app: DesktopHandle): Promise<ServerTarget> {
   return eventually(async () => {
     const info = await evalIn(app, `(async () => {
-      const value = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+      const value = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
       return {
         baseUrl: String(value?.baseUrl ?? value?.connectUrl ?? ""),
         token: String(value?.ownerToken ?? value?.clientToken ?? ""),
       };
     })()`, { awaitPromise: true, timeoutMs: 15_000 });
-    if (!isRecord(info)) throw new Error("openworkServerInfo returned no record");
+    if (!isRecord(info)) throw new Error("redrobServerInfo returned no record");
     const baseUrl = String(info.baseUrl ?? "").replace(/\/+$/, "");
     const token = String(info.token ?? "");
-    if (!baseUrl || !token) throw new Error("embedded openwork-server credentials not ready");
+    if (!baseUrl || !token) throw new Error("embedded redrob-server credentials not ready");
     return { baseUrl, token };
-  }, { within: 120_000, intervalMs: 1_000, label: "embedded openwork-server credentials" });
+  }, { within: 120_000, intervalMs: 1_000, label: "embedded redrob-server credentials" });
 }
 
 async function api(target: ServerTarget, method: string, path: string, payload?: unknown): Promise<ApiResult> {
@@ -116,7 +116,7 @@ async function vaultFilesUnder(root: string): Promise<string[]> {
 
 async function backupNamesIn(storageDir: string): Promise<string[]> {
   const entries = await readdir(storageDir);
-  return entries.filter((entry) => entry.startsWith(`${VAULT_FILE}.openwork-backup-`));
+  return entries.filter((entry) => entry.startsWith(`${VAULT_FILE}.redrob-backup-`));
 }
 
 function rowExpression(name: string, statusLabel: string): string {
@@ -133,11 +133,11 @@ test(title, { timeout: 900_000 }, async ({ evidence }) => {
   const nameA = `vault-a-${stamp}`;
   const nameB = `vault-b-${stamp}`;
   const namePlain = `plain-${stamp}`;
-  const keyOne = `openwork-eval-secure-storage-key-one-${stamp}`;
-  const keyTwo = `openwork-eval-secure-storage-key-two-${stamp}`;
+  const keyOne = `redrob-eval-secure-storage-key-one-${stamp}`;
+  const keyTwo = `redrob-eval-secure-storage-key-two-${stamp}`;
   // The spec owns the profile so it survives the relaunch; the host never deletes caller-owned profiles.
-  const profileDir = await mkdtemp(join(tmpdir(), "openwork-vault-recovery-"));
-  const workspacePath = join(tmpdir(), `openwork-vault-recovery-ws-${stamp}`);
+  const profileDir = await mkdtemp(join(tmpdir(), "redrob-vault-recovery-"));
+  const workspacePath = join(tmpdir(), `redrob-vault-recovery-ws-${stamp}`);
   await using mock = await startMockMcp({ port: await allocateFreePort() });
 
   let app: DesktopHandle | null = null;
@@ -296,7 +296,7 @@ test(title, { timeout: 900_000 }, async ({ evidence }) => {
     }
     evidence.recordAssertionEvidence(
       "The unreadable vault was quarantined once and rebuilt without credentials",
-      `Exactly one ${VAULT_FILE}.openwork-backup-* exists (${backupsAfterRecovery[0]}); the rebuilt vault is schemaVersion 2, contains no mock access/refresh token material, and both managed index entries carry hasCredential=false before reconnect.`,
+      `Exactly one ${VAULT_FILE}.redrob-backup-* exists (${backupsAfterRecovery[0]}); the rebuilt vault is schemaVersion 2, contains no mock access/refresh token material, and both managed index entries carry hasCredential=false before reconnect.`,
       backupsAfterRecovery.length === 1 && recoveredManagedEntries.length === 2,
     );
 

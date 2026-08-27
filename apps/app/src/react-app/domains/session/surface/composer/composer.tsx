@@ -65,8 +65,8 @@ type ComposerProps = {
   modelOptions?: readonly ModelOption[];
   /** When set, the full model picker opened from here targets this session. */
   sessionId?: string;
-  openWorkModelsEntitled?: boolean;
-  openWorkModelsSyncing?: boolean;
+  redrobModelsEntitled?: boolean;
+  redrobModelsSyncing?: boolean;
   onRefreshOrganizationModels?: () => void | Promise<void>;
   onModelPickerOpenChange: (open: boolean) => void;
   onModelChange: (model: ModelRef, variant?: string | null) => void;
@@ -115,9 +115,9 @@ type ComposerProps = {
   topAccessory?: ReactNode;
 };
 
-const FLUSH_PROMPT_EVENT = "openwork:flushPromptDraft";
-const FOCUS_PROMPT_EVENT = "openwork:focusPrompt";
-const DEFAULT_AGENT_NAME = "openwork";
+const FLUSH_PROMPT_EVENT = "redrob:flushPromptDraft";
+const FOCUS_PROMPT_EVENT = "redrob:focusPrompt";
+const DEFAULT_AGENT_NAME = "redrob";
 
 function isNonDefaultAgent(agent: Agent) {
   return agent.name !== DEFAULT_AGENT_NAME;
@@ -153,7 +153,7 @@ function isImageAttachment(attachment: ComposerAttachment) {
 }
 
 function isLocalCapability(origin: SkillCard["origin"] | McpServerEntry["origin"]) {
-  return origin !== "openwork-connect";
+  return origin !== "redrob-connect";
 }
 
 function formatPluginObjectType(type: string) {
@@ -739,7 +739,7 @@ export function ReactSessionComposer(props: ComposerProps) {
       origin: "local" as const,
     })),
     ...skills.filter((skill) =>
-      skill.origin === "openwork-connect" || !localCommandSkillNames.has(skill.name)
+      skill.origin === "redrob-connect" || !localCommandSkillNames.has(skill.name)
     ),
   ];
   const connectionInventory = useMemo(
@@ -852,7 +852,7 @@ export function ReactSessionComposer(props: ComposerProps) {
     const skill = typeof input === "string"
       ? { name: input, path: "", origin: "local" as const }
       : input;
-    if (skill.origin === "openwork-connect") {
+    if (skill.origin === "redrob-connect") {
       const slug = skillSlashCommandName(skill);
       const token = encodeConnectSkillToken({
         slug,
@@ -892,11 +892,11 @@ export function ReactSessionComposer(props: ComposerProps) {
   };
 
   const applyPluginFileSelection = (file: CloudImportedPluginFile) => {
-    if (file.skillOrigin === "openwork-connect") {
+    if (file.skillOrigin === "redrob-connect") {
       applySkillSelection({
         name: file.skillName ?? file.title,
         path: file.path,
-        origin: "openwork-connect",
+        origin: "redrob-connect",
         marketplaceName: file.marketplaceName,
         pluginName: file.pluginName,
         connectCapabilityName: file.connectCapabilityName,
@@ -1544,7 +1544,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                                         ) : null}
                                       </div>
                                       {skill.description ? <div className="truncate text-xs text-gray-10">{skill.description}</div> : null}
-                                      {skill.origin === "openwork-connect" ? (
+                                      {skill.origin === "redrob-connect" ? (
                                         <div className="truncate text-[10px] text-gray-9">
                                           {[skill.marketplaceName, skill.pluginName].filter(Boolean).join(" · ")}
                                         </div>
@@ -1714,8 +1714,8 @@ export function ReactSessionComposer(props: ComposerProps) {
                   }}
                   disabled={props.steering}
                   sessionId={props.sessionId}
-                  openWorkModelsEntitled={props.openWorkModelsEntitled}
-                  openWorkModelsSyncing={props.openWorkModelsSyncing}
+                  redrobModelsEntitled={props.redrobModelsEntitled}
+                  redrobModelsSyncing={props.redrobModelsSyncing}
                   fallbackOptions={props.modelOptions}
                   behaviorValue={props.modelVariant}
                   behaviorLabel={props.modelVariantLabel}

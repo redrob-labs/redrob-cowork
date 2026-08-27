@@ -29,11 +29,11 @@ x-shared: &shared
     - pnpm-store:/root/.local/share/pnpm/store
     - bun-install:/root/.bun
     - ${REDROB_WORKSPACE:-./workspace}:/workspace
-    - ${REDROB_HOST_OPENCODE_CONFIG_DIR:-./workspace/.openwork-host-opencode-config}:/persist/.config/opencode:ro
-    - ${REDROB_HOST_OPENCODE_DATA_DIR:-./workspace/.openwork-host-opencode-data}:/persist/.openwork-host-opencode-data:ro
+    - ${REDROB_HOST_OPENCODE_CONFIG_DIR:-./workspace/.redrob-host-opencode-config}:/persist/.config/opencode:ro
+    - ${REDROB_HOST_OPENCODE_DATA_DIR:-./workspace/.redrob-host-opencode-data}:/persist/.redrob-host-opencode-data:ro
 
 services:
-  openwork-server:
+  redrob-server:
     <<: *shared
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -51,7 +51,7 @@ services:
         export BUN_INSTALL="/root/.bun"
         export PATH="$$BUN_INSTALL/bin:$$PATH"
         if ! command -v bun >/dev/null 2>&1; then
-          echo "[openwork-server] Installing bun..."
+          echo "[redrob-server] Installing bun..."
           curl -fsSL https://bun.sh/install | bash
         fi
 
@@ -59,11 +59,11 @@ services:
         corepack enable && corepack prepare pnpm@10.27.0 --activate
 
         # --- Install deps ---
-        echo "[openwork-server] Installing dependencies..."
+        echo "[redrob-server] Installing dependencies..."
         pnpm install --no-frozen-lockfile --network-concurrency 1 --child-concurrency 1
 
         # --- Build the server plugins and install the pinned OpenCode binary ---
-        pnpm --filter openwork-server build
+        pnpm --filter redrob-server build
         OPENCODE_VERSION=$$(node -e 'const fs=require("fs"); const parsed=JSON.parse(fs.readFileSync("/app/constants.json", "utf8")); process.stdout.write(String(parsed.opencodeVersion || "").trim().replace(/^v/, ""));')
         export OPENCODE_INSTALL_DIR="/root/.opencode/bin"
         mkdir -p "$$OPENCODE_INSTALL_DIR"
@@ -100,7 +100,7 @@ services:
         echo "============================================"
         echo ""
 
-        exec pnpm --filter openwork-server exec bun dist/cli.js \
+        exec pnpm --filter redrob-server exec bun dist/cli.js \
           --workspace /workspace \
           --host 0.0.0.0 \
           --port 8787 \
@@ -124,12 +124,12 @@ services:
       REDROB_DEV_ID: ${REDROB_DEV_ID:-default}
       REDROB_DEV_MODE: ${REDROB_DEV_MODE:-1}
       REDROB_DEV_OPENCODE_IMPORT_CONFIG_DIR: /persist/.config/opencode
-      REDROB_DEV_OPENCODE_IMPORT_DATA_DIR: /persist/.openwork-host-opencode-data
+      REDROB_DEV_OPENCODE_IMPORT_DATA_DIR: /persist/.redrob-host-opencode-data
 
   web:
     <<: *shared
     depends_on:
-      openwork-server:
+      redrob-server:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -148,7 +148,7 @@ services:
         fi
         corepack enable && corepack prepare pnpm@10.27.0 --activate
 
-        # --- Read token written by openwork-server ---
+        # --- Read token written by redrob-server ---
         if [ -f "/app/tmp/.dev-env-${REDROB_DEV_ID:-default}" ]; then
           . "/app/tmp/.dev-env-${REDROB_DEV_ID:-default}"
           export VITE_REDROB_TOKEN="$$REDROB_TOKEN"
@@ -158,7 +158,7 @@ services:
         echo "============================================"
         echo "  Redrob Work web UI"
         echo "  URL:   http://localhost:${WEB_PORT:-5173}"
-          echo "  Token: $${VITE_REDROB_TOKEN:-<see openwork-server logs>}"
+          echo "  Token: $${VITE_REDROB_TOKEN:-<see redrob-server logs>}"
         echo "============================================"
         echo ""
 
@@ -179,6 +179,6 @@ services:
 
 volumes:
   pnpm-store:
-    name: openwork-dev-pnpm-store
+    name: redrob-dev-pnpm-store
   bun-install:
-    name: openwork-dev-bun-install
+    name: redrob-dev-bun-install

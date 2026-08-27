@@ -18,8 +18,8 @@ import {
 import { DenInput } from "../../_components/ui/input";
 import { DashboardPageTemplate } from "../../_components/ui/dashboard-page-template";
 import {
-  buildOpenworkAppConnectUrl,
-  buildOpenworkDeepLink,
+  buildRedrobAppConnectUrl,
+  buildRedrobDeepLink,
   getErrorMessage,
   getWorkerStatusMeta,
   getWorkerTokens,
@@ -29,11 +29,11 @@ import {
 import { useDenFlow } from "../../_providers/den-flow-provider";
 
 type ConnectionDetails = {
-  openworkUrl: string | null;
+  redrobUrl: string | null;
   ownerToken: string | null;
   clientToken: string | null;
-  openworkAppConnectUrl: string | null;
-  openworkDeepLink: string | null;
+  redrobAppConnectUrl: string | null;
+  redrobDeepLink: string | null;
 };
 
 function getStatusBadgeClass(bucket: ReturnType<typeof getWorkerStatusMeta>["bucket"]) {
@@ -108,11 +108,11 @@ function SandboxCard({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const meta = getWorkerStatusMeta(sandbox.status);
   const canConnect = meta.bucket === "ready";
-  const connectionUrl = details?.openworkUrl ?? sandbox.instanceUrl ?? null;
+  const connectionUrl = details?.redrobUrl ?? sandbox.instanceUrl ?? null;
   const ownerToken = details?.ownerToken ?? null;
   const clientToken = details?.clientToken ?? null;
-  const openWebUrl = details?.openworkAppConnectUrl ?? null;
-  const openDesktopUrl = details?.openworkDeepLink ?? null;
+  const openWebUrl = details?.redrobAppConnectUrl ?? null;
+  const openDesktopUrl = details?.redrobDeepLink ?? null;
 
   async function handleCopy(field: string, text: string) {
     await navigator.clipboard.writeText(text);
@@ -329,19 +329,19 @@ export function BackgroundAgentsScreen() {
       }
 
       const nextDetails: ConnectionDetails = {
-        openworkUrl: tokens.openworkUrl,
+        redrobUrl: tokens.redrobUrl,
         ownerToken: tokens.ownerToken,
         clientToken: tokens.clientToken,
-        openworkAppConnectUrl: buildOpenworkAppConnectUrl(
-          runtimeConfig.openworkAppConnectUrl,
-          tokens.openworkUrl,
+        redrobAppConnectUrl: buildRedrobAppConnectUrl(
+          runtimeConfig.redrobAppConnectUrl,
+          tokens.redrobUrl,
           tokens.clientToken,
           workerId,
           workerName,
           { autoConnect: true },
         ),
-        openworkDeepLink: buildOpenworkDeepLink(
-          tokens.openworkUrl,
+        redrobDeepLink: buildRedrobDeepLink(
+          tokens.redrobUrl,
           tokens.clientToken,
           workerId,
           workerName,

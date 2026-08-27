@@ -2,7 +2,7 @@ import { afterAll, beforeAll, expect, mock, test } from "bun:test"
 import { createDenTypeId, type DenTypeId } from "@redrob-ee/utils/typeid"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_pr8"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_pr8"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "local-dev-db-encryption-key-please-change-1234567890"
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "local-dev-secret-not-for-production-use!!"
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -306,9 +306,9 @@ beforeAll(async () => {
       id: createDenTypeId("configObjectVersion"),
       organizationId,
       configObjectId: visibleLegacyConfigObjectId,
-      normalizedPayloadJson: { mcpServers: { legacy: { openworkManaged: "den_external_mcp", externalMcpConnectionId: legacyConnectionId, url: "https://legacy.example.test/mcp" } } },
+      normalizedPayloadJson: { mcpServers: { legacy: { redrobManaged: "den_external_mcp", externalMcpConnectionId: legacyConnectionId, url: "https://legacy.example.test/mcp" } } },
       rawSourceText: null,
-      schemaVersion: "openwork.den_external_mcp.v1",
+      schemaVersion: "redrob.den_external_mcp.v1",
       createdVia: "import",
       createdByOrgMembershipId: adminMemberId,
       connectorSyncEventId: null,
@@ -320,9 +320,9 @@ beforeAll(async () => {
       id: createDenTypeId("configObjectVersion"),
       organizationId,
       configObjectId: hiddenLegacyConfigObjectId,
-      normalizedPayloadJson: { mcpServers: { legacy: { openworkManaged: "den_external_mcp", externalMcpConnectionId: legacyConnectionId, url: "https://legacy.example.test/mcp" } } },
+      normalizedPayloadJson: { mcpServers: { legacy: { redrobManaged: "den_external_mcp", externalMcpConnectionId: legacyConnectionId, url: "https://legacy.example.test/mcp" } } },
       rawSourceText: null,
-      schemaVersion: "openwork.den_external_mcp.v1",
+      schemaVersion: "redrob.den_external_mcp.v1",
       createdVia: "import",
       createdByOrgMembershipId: adminMemberId,
       connectorSyncEventId: null,

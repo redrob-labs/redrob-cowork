@@ -5,19 +5,19 @@ import { test } from "@redrob/testkit";
 import { buildHeadlessServerLaunch } from "../../scripts/dev-headless-web-lib";
 
 test("headless web development launches the server from current source", ({ evidence }) => {
-  const launch = buildHeadlessServerLaunch("/repo/openwork", ["--port", "8787"]);
+  const launch = buildHeadlessServerLaunch("/repo/redrob", ["--port", "8787"]);
 
   expect(launch).toEqual({
     command: "bun",
     args: [
       "--conditions=development",
-      path.join("/repo/openwork", "apps/server/src/cli.ts"),
+      path.join("/repo/redrob", "apps/server/src/cli.ts"),
       "--port",
       "8787",
     ],
   });
   expect(launch.args.join(" ")).not.toContain("apps/server/dist");
-  expect(launch.args.join(" ")).not.toContain("openwork-server");
+  expect(launch.args.join(" ")).not.toContain("redrob-server");
 
   evidence.recordAssertionEvidence(
     "Local headless development is source-first",

@@ -22,7 +22,7 @@ import { useDenAuth } from "@/react-app/domains/cloud/den-auth-provider";
 import {
   REDROB_MODELS_PROVIDER_ID,
   REDROB_MODELS_PROVIDER_NAME,
-} from "@/react-app/domains/cloud/openwork-models-promo";
+} from "@/react-app/domains/cloud/redrob-models-promo";
 import { getConnectedProviderItems, useProviderListQuery } from "@/react-app/infra/provider-list-query";
 import { filterEntitledModelOptions } from "@/react-app/domains/connections/provider-auth/provider-policy";
 import {
@@ -205,9 +205,9 @@ interface ModelSelectProps {
   /** When set, "All models" opens the full picker scoped to this session. */
   sessionId?: string;
   /** Den/import includes Redrob Models. Kept for callers; picker no longer upsells here. */
-  openWorkModelsEntitled?: boolean;
+  redrobModelsEntitled?: boolean;
   /** The server is waiting to reload this workspace with Redrob Models. */
-  openWorkModelsSyncing?: boolean;
+  redrobModelsSyncing?: boolean;
   /** Member-scoped models available before a workspace OpenCode client exists. */
   fallbackOptions?: readonly ModelOption[];
   behaviorValue?: string | null;
@@ -224,7 +224,7 @@ export function ModelSelect({
   onChange,
   disabled = false,
   sessionId,
-  openWorkModelsSyncing = false,
+  redrobModelsSyncing = false,
   fallbackOptions = [],
   behaviorValue = null,
   behaviorLabel,
@@ -361,7 +361,7 @@ export function ModelSelect({
             />
           </CommandHeader>
           <CommandEmpty>No models found.</CommandEmpty>
-          {openWorkModelsSyncing ? (
+          {redrobModelsSyncing ? (
             <div className="mx-1 mb-1 flex items-center gap-2 rounded-md border border-amber-6/60 bg-amber-2/40 px-2 py-1.5">
               <ProviderIcon
                 providerId={REDROB_MODELS_PROVIDER_ID}

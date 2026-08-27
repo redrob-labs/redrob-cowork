@@ -5,12 +5,12 @@ import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import { mintCloudControlMcpToken, readDenSettings } from "@/app/lib/den";
 import { openDesktopUrl } from "@/app/lib/desktop";
 import type {
-  OpenworkCloudMcpEngineRefresh,
-  OpenworkCloudMcpHealth,
-  OpenworkCloudMcpProviderModelContext,
-  OpenworkConnectState,
-  OpenworkServerClient,
-} from "@/app/lib/openwork-server";
+  RedrobCloudMcpEngineRefresh,
+  RedrobCloudMcpHealth,
+  RedrobCloudMcpProviderModelContext,
+  RedrobConnectState,
+  RedrobServerClient,
+} from "@/app/lib/redrob-server";
 import { Button } from "@/components/ui/button";
 import {
   SettingsInset,
@@ -22,8 +22,8 @@ import {
   REDROB_CLOUD_EXPECTED_TOOLS,
   clearCloudMcpDisabledIntent,
   cloudMcpDisplaySummary,
-  runOpenworkCloudMcpEngineRefresh,
-  runOpenworkCloudMcpReconciler,
+  runRedrobCloudMcpEngineRefresh,
+  runRedrobCloudMcpReconciler,
   type CloudMcpOperationContext,
 } from "@/react-app/domains/connections/cloud-mcp-reconciler";
 import {
@@ -33,7 +33,7 @@ import {
   cloudMcpProbeTraceLines,
 } from "@/react-app/domains/connections/cloud-mcp-diagnostics";
 import { readCloudMcpUserState } from "@/react-app/domains/connections/cloud-mcp-user-state";
-import { resolveOpenWorkConnectStateSummary } from "@/react-app/domains/connections/openwork-connect-status";
+import { resolveRedrobWorkConnectStateSummary } from "@/react-app/domains/connections/redrob-connect-status";
 import { t } from "@/i18n";
 
 const CLOUD_MCP_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
@@ -57,9 +57,9 @@ function ManageInDenButton() {
 }
 
 function buildCloudMcpContext(input: {
-  client: OpenworkServerClient | null;
+  client: RedrobServerClient | null;
   workspaceId: string | null;
-  currentModel: OpenworkCloudMcpProviderModelContext | null;
+  currentModel: RedrobCloudMcpProviderModelContext | null;
 }): CloudMcpOperationContext | null {
   const workspaceId = input.workspaceId?.trim() ?? "";
   const serverBaseUrl = input.client?.baseUrl.trim() ?? "";
@@ -79,7 +79,7 @@ function buildCloudMcpContext(input: {
 }
 
 function missingCloudMcpContextMessage(input: {
-  client: OpenworkServerClient | null;
+  client: RedrobServerClient | null;
   workspaceId: string | null;
 }): string {
   if (!input.workspaceId?.trim()) return "Select a workspace before running agent access diagnostics.";
@@ -88,25 +88,25 @@ function missingCloudMcpContextMessage(input: {
   return "Agent access diagnostics are unavailable for the current workspace.";
 }
 
-export function readyCloudMcpToolIds(health: OpenworkCloudMcpHealth | null): string[] {
+export function readyCloudMcpToolIds(health: RedrobCloudMcpHealth | null): string[] {
   if (!health?.usable) return [];
   return health.tools.present.filter((tool) => REDROB_CLOUD_EXPECTED_TOOLS.some((expected) => expected === tool));
 }
 
 export function AgentAccessCard(props: {
-  client: OpenworkServerClient | null;
+  client: RedrobServerClient | null;
   workspaceId: string | null;
-  currentModel: OpenworkCloudMcpProviderModelContext | null;
-  onHealthChange?: (health: OpenworkCloudMcpHealth | null) => void;
+  currentModel: RedrobCloudMcpProviderModelContext | null;
+  onHealthChange?: (health: RedrobCloudMcpHealth | null) => void;
 }) {
   const cloudSession = useCloudSession();
-  const [health, setHealth] = useState<OpenworkCloudMcpHealth | null>(null);
-  const [connectState, setConnectState] = useState<OpenworkConnectState | null>(null);
+  const [health, setHealth] = useState<RedrobCloudMcpHealth | null>(null);
+  const [connectState, setConnectState] = useState<RedrobConnectState | null>(null);
   const [busy, setBusy] = useState<"test" | "repair" | "refresh" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
-  const [lastEngineRefresh, setLastEngineRefresh] = useState<OpenworkCloudMcpEngineRefresh | null>(null);
+  const [lastEngineRefresh, setLastEngineRefresh] = useState<RedrobCloudMcpEngineRefresh | null>(null);
   const context = buildCloudMcpContext(props);
   const userState = context ? readCloudMcpUserState(context) : null;
   const signedIn = cloudSession.isSignedIn && Boolean(cloudSession.authToken.trim());
@@ -139,7 +139,7 @@ export function AgentAccessCard(props: {
           : null
     : null;
   const connectStateSummary = connectState && (connectState.status !== "available" || !connectState.connectEnabled)
-    ? resolveOpenWorkConnectStateSummary(connectState.status, connectState.connectEnabled)
+    ? resolveRedrobWorkConnectStateSummary(connectState.status, connectState.connectEnabled)
     : null;
   const summary = missingContextSummary ?? connectStateSummary ?? cloudMcpDisplaySummary({
       signedIn,
@@ -149,7 +149,7 @@ export function AgentAccessCard(props: {
       health,
     });
 
-  const updateHealth = (next: OpenworkCloudMcpHealth | null) => {
+  const updateHealth = (next: RedrobCloudMcpHealth | null) => {
     setHealth(next);
     props.onHealthChange?.(next);
   };
@@ -162,10 +162,10 @@ export function AgentAccessCard(props: {
     setBusy("test");
     setError(null);
     try {
-      // probe: verify the Cloud endpoint directly from the OpenWork server as
+      // probe: verify the Cloud endpoint directly from the Redrob Work server as
       // well, so a failure can be attributed to the endpoint, the network
       // path, or the engine — not just reported as the engine's cached state.
-      const result = await runOpenworkCloudMcpReconciler({
+      const result = await runRedrobCloudMcpReconciler({
         mode: "health",
         client: props.client,
         context: { ...context, trigger: "desktop-connect-test" },
@@ -189,7 +189,7 @@ export function AgentAccessCard(props: {
     setBusy("refresh");
     setError(null);
     try {
-      const result = await runOpenworkCloudMcpEngineRefresh({
+      const result = await runRedrobCloudMcpEngineRefresh({
         client: props.client,
         context: { ...context, trigger: "desktop-connect-engine-refresh" },
       });
@@ -198,7 +198,7 @@ export function AgentAccessCard(props: {
       if (result.status === "skipped") {
         setError(
           result.skippedReason === "unsupported"
-            ? "This OpenWork server does not support engine refresh yet. Update OpenWork, then retry."
+            ? "This Redrob Work server does not support engine refresh yet. Update Redrob Work, then retry."
             : "Select a workspace before refreshing the engine connection.",
         );
       }
@@ -238,7 +238,7 @@ export function AgentAccessCard(props: {
     setError(null);
     try {
       clearCloudMcpDisabledIntent(context);
-      const result = await runOpenworkCloudMcpReconciler({
+      const result = await runRedrobCloudMcpReconciler({
         mode: "repair",
         client: props.client,
         context: { ...context, trigger: "desktop-connect-repair" },
@@ -283,7 +283,7 @@ export function AgentAccessCard(props: {
     let cancelled = false;
     setBusy("test");
     setError(null);
-    void runOpenworkCloudMcpReconciler({
+    void runRedrobCloudMcpReconciler({
       mode: "health",
       client: props.client,
       context: { ...context, trigger: "desktop-connect-autocheck" },
@@ -310,7 +310,7 @@ export function AgentAccessCard(props: {
     let cancelled = false;
     const retryAfterReconnect = () => {
       if (window.navigator.onLine === false) return;
-      void runOpenworkCloudMcpReconciler({
+      void runRedrobCloudMcpReconciler({
         mode: "repair",
         client,
         context: { ...context, trigger: "desktop-connect-online-retry" },
@@ -374,7 +374,7 @@ export function AgentAccessCard(props: {
         <div className="space-y-1">
           <div className="text-base font-semibold text-dls-text">Agent access to connected services</div>
           <div className="max-w-[62ch] text-sm text-dls-secondary">
-            Lets agents use the exact OpenWork Cloud tools for this active workspace and organization.
+            Lets agents use the exact Redrob Work Cloud tools for this active workspace and organization.
           </div>
         </div>
         <SettingsStatusBadge label={summary.statusLabel} tone={summary.tone} />
@@ -434,8 +434,8 @@ export function AgentAccessCard(props: {
 }
 
 function AgentAccessAdvanced(props: {
-  health: OpenworkCloudMcpHealth | null;
-  engineRefresh: OpenworkCloudMcpEngineRefresh | null;
+  health: RedrobCloudMcpHealth | null;
+  engineRefresh: RedrobCloudMcpEngineRefresh | null;
   open: boolean;
   onToggle: () => void;
   busyLabel: "test" | "repair" | "refresh" | null;

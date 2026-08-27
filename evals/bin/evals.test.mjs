@@ -145,7 +145,7 @@ test("summarize reads counts and skipped test details", () => {
 });
 
 test("worldSnapshotsSince returns only snapshots written during the run, newest first", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "openwork-world-snapshots-"));
+  const directory = await mkdtemp(join(tmpdir(), "redrob-world-snapshots-"));
   try {
     await writeFile(join(directory, "old.json"), "{}\n");
     await utimes(join(directory, "old.json"), new Date(0), new Date(0));

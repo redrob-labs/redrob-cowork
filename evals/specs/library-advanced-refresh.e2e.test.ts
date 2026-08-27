@@ -99,7 +99,7 @@ test(title, async ({ evidence, place }) => {
       if (!visible()) probe.everMissing = true;
     });
     observer.observe(document.body, { subtree: true, childList: true, attributes: true });
-    window.__openworkAdvancedRefreshProbe = { observer, probe, visible };
+    window.__redrobAdvancedRefreshProbe = { observer, probe, visible };
     return visible();
   })()`);
   expect(probeInstalled).toBe(true);
@@ -157,7 +157,7 @@ test(title, async ({ evidence, place }) => {
     label: "new organization connection rendered from refreshed inventory",
   });
   const stayedExpanded = await evalIn(desktop, `(() => {
-    const current = window.__openworkAdvancedRefreshProbe;
+    const current = window.__redrobAdvancedRefreshProbe;
     if (!current) return false;
     current.observer.disconnect();
     return current.probe.samples > 1 && !current.probe.everMissing && current.visible();

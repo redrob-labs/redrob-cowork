@@ -20,7 +20,7 @@ import {
   type PluginArchActorContext,
 } from "./routes/org/plugin-system/access.js"
 
-export const REMOTE_MCP_APP_CONFIG_SCHEMA_VERSION = "openwork.remote-mcp-app-installation/1" as const
+export const REMOTE_MCP_APP_CONFIG_SCHEMA_VERSION = "redrob.remote-mcp-app-installation/1" as const
 // Keep imported portable bundles aligned with the desktop MCP Apps host's
 // authoritative resources/read ceiling.
 export const REMOTE_MCP_APP_MAX_BYTES = 768 * 1024
@@ -186,7 +186,7 @@ export function inspectRemoteMcpAppHtml(html: string) {
     digest,
     diagnostics: [
       "Self-contained HTML validated.",
-      "The cached HTML is exposed through standard MCP tools and resources; no embedded OpenWork runtime manifest is required.",
+      "The cached HTML is exposed through standard MCP tools and resources; no embedded Redrob Work runtime manifest is required.",
       "Runtime network, subframes, external resources, and base URI changes are blocked by the host CSP.",
     ],
   }
@@ -409,7 +409,7 @@ async function serializeApp(app: RemoteMcpAppRow, role: "viewer" | "editor" | "m
 }
 
 export function remoteMcpAppResourceUri(configObjectId: string, versionId: string) {
-  return `ui://openwork/library-apps/${configObjectId}/revisions/${versionId}/index.html`
+  return `ui://redrob/library-apps/${configObjectId}/revisions/${versionId}/index.html`
 }
 
 export async function previewRemoteMcpApp(sourceUrl: string) {

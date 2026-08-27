@@ -20,7 +20,7 @@ const publicKeys = { [KID]: publicKeyPem }
 
 function claims(overrides: Partial<ConnectLinkClaims> = {}): ConnectLinkClaims {
   return {
-    iss: "https://api.openwork.acme.example.com",
+    iss: "https://api.redrob.acme.example.com",
     aud: CONNECT_LINK_AUDIENCE,
     iat: NOW,
     exp: NOW + 72 * 3600,
@@ -29,8 +29,8 @@ function claims(overrides: Partial<ConnectLinkClaims> = {}): ConnectLinkClaims {
     org: { name: "Acme Robotics" },
     brand: { appName: "Acme Work", logoUrl: null, iconUrl: null },
     den: {
-      baseUrl: "https://openwork.acme.example.com",
-      apiBaseUrl: "https://api.openwork.acme.example.com",
+      baseUrl: "https://redrob.acme.example.com",
+      apiBaseUrl: "https://api.redrob.acme.example.com",
     },
     requireSignin: true,
     ...overrides,

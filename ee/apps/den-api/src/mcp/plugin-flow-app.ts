@@ -14,7 +14,7 @@ import {
 
 export { pluginFlowPayloadSchema } from "@redrob/types/plugin-flow-app"
 
-export const PLUGIN_FLOW_APP_RESOURCE_URI = "ui://openwork/plugin-flow/v1/view.html"
+export const PLUGIN_FLOW_APP_RESOURCE_URI = "ui://redrob/plugin-flow/v1/view.html"
 export const PLUGIN_FLOW_TOOL_NAME = "plugin_flow"
 export const PLUGIN_FLOW_APP_HTML = pluginFlowAppHtml
 
@@ -91,7 +91,7 @@ function pluginFlowRecipient(body: Record<string, unknown>): PluginFlowPayload["
 /**
  * Attach the plugin-flow card to one successful library-sharing execute
  * result: the schema-valid payload becomes the structuredContent the app
- * renders, and the same-server `openwork/mcpApp` launch tells compatible
+ * renders, and the same-server `redrob/mcpApp` launch tells compatible
  * hosts to mount the card. The original response JSON stays in content.
  */
 export function attachPluginFlowCard<Result extends {
@@ -116,7 +116,7 @@ export function attachPluginFlowCard<Result extends {
     structuredContent: { ...payload },
     _meta: {
       ...(input.result._meta ?? {}),
-      "openwork/mcpApp": {
+      "redrob/mcpApp": {
         toolName: PLUGIN_FLOW_TOOL_NAME,
         resourceUri: PLUGIN_FLOW_APP_RESOURCE_URI,
         arguments: { mode: payload.mode },
@@ -164,7 +164,7 @@ export function registerAgentPluginFlowApp(server: McpServer) {
 export function registerAgentPluginFlowResource(server: McpServer) {
   registerAppResource(
     server,
-    "OpenWork Plugin Flow",
+    "Redrob Work Plugin Flow",
     PLUGIN_FLOW_APP_RESOURCE_URI,
     {
       description: "A confirmation card for marketplace attach and plugin or marketplace access grants.",

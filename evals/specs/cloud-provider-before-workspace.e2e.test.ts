@@ -34,7 +34,7 @@ async function organizationId(session: DenSession): Promise<string> {
 async function createProvider(admin: DenSession, orgId: string): Promise<string> {
   const result = await denFetch(admin, "/v1/llm-providers", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify({
       name: PROVIDER_NAME,
       source: "custom",
@@ -45,7 +45,7 @@ async function createProvider(admin: DenSession, orgId: string): Promise<string>
         env: ["FIRST_WORKSPACE_PROVIDER_API_KEY"],
         models: [{ id: MODEL_ID, name: "First Workspace Proof Model" }],
       },
-      apiKey: "sk-openwork-first-workspace-eval-only",
+      apiKey: "sk-redrob-first-workspace-eval-only",
       allMembers: true,
       memberIds: [],
       teamIds: [],
@@ -65,10 +65,10 @@ async function localServerRequest(
   input: { method?: string; body?: Record<string, unknown>; host?: boolean } = {},
 ): Promise<Record<string, unknown>> {
   const result = await evalIn(app, `(async () => {
-    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("openworkServerInfo");
+    const info = await window.__REDROB_ELECTRON__?.invokeDesktop?.("redrobServerInfo");
     if (!info?.running || !info.baseUrl) return { status: 0, body: { error: "local_server_unavailable" } };
     const headers = { "content-type": "application/json" };
-    if (${input.host === true}) headers["x-openwork-host-token"] = String(info.hostToken ?? "");
+    if (${input.host === true}) headers["x-redrob-host-token"] = String(info.hostToken ?? "");
     else headers.authorization = "Bearer " + String(info.ownerToken ?? info.clientToken ?? "");
     const response = await fetch(String(info.baseUrl).replace(/\\/+$/, "") + ${JSON.stringify(path)}, {
       method: ${JSON.stringify(input.method ?? "GET")},
@@ -101,7 +101,7 @@ test("managed models survive sign-in before the first workspace exists", async (
   onTestFinished(async () => {
     await denFetch(den.admin, `/v1/llm-providers/${encodeURIComponent(providerId)}`, {
       method: "DELETE",
-      headers: { ...auth(den.admin), "x-openwork-org-id": orgId },
+      headers: { ...auth(den.admin), "x-redrob-org-id": orgId },
     }).catch(() => undefined);
   });
 
@@ -189,7 +189,7 @@ test("managed models survive sign-in before the first workspace exists", async (
   // The first workspace is created through the product itself: organization
   // onboarding plus the app's workspace.create action, the same journey a
   // person takes right after this sign-in.
-  const workspacePath = `/tmp/openwork-provider-before-workspace-${Date.now()}`;
+  const workspacePath = `/tmp/redrob-provider-before-workspace-${Date.now()}`;
   const { workspaceId } = await createAndSelectWorkspace(desktopApp, { path: workspacePath });
   expect(workspaceId).not.toBe("");
   const models = await eventually(

@@ -22,8 +22,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function readFileExpression(workspaceId: string, path: string): string {
   return `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "";
     const response = await fetch(
       "http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(${JSON.stringify(workspaceId)}) + "/files/content?path=" + encodeURIComponent(${JSON.stringify(path)}),
@@ -78,28 +78,28 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
     mode: process.env.REDROB_EVAL_CDP_URL?.trim() ? "attach" : "spawn",
   });
   const workspace = await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-markdown-editor-autosave-${Date.now()}`,
+    path: `/tmp/redrob-markdown-editor-autosave-${Date.now()}`,
   });
 
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "new task action enabled",
   });
   await control(app, "session.create_task");
-  await waitFor(app, `String(window.__openworkControl.snapshot().route || "").includes("/session/")`, {
+  await waitFor(app, `String(window.__redrobControl.snapshot().route || "").includes("/session/")`, {
     timeoutMs: 30_000,
     label: "session route open",
   });
 
   // Mount the side panel so the dev seed action registers, then open markdown artifacts.
-  const seedReady = await evalIn(app, `window.__openworkControl.listActions().some((action) => action.id === "eval.artifact_tabs.seed_overflow" && !action.disabled)`);
+  const seedReady = await evalIn(app, `window.__redrobControl.listActions().some((action) => action.id === "eval.artifact_tabs.seed_overflow" && !action.disabled)`);
   if (seedReady !== true) {
     // browser.open_url sets the side panel open before navigating; the
     // navigation itself can race the internal tab bootstrap, which is fine —
     // we only need the panel mounted so its dev seed action registers.
     await control(app, "browser.open_url", { url: "about:blank" }).catch(() => undefined);
   }
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "eval.artifact_tabs.seed_overflow" && !action.disabled)`, {
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "eval.artifact_tabs.seed_overflow" && !action.disabled)`, {
     timeoutMs: 30_000,
     label: "artifact seed action enabled",
   });

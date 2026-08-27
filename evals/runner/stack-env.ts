@@ -1,7 +1,7 @@
 import { inject } from "vitest";
 import { workerSlot } from "./stack-suite.ts";
 
-const preparation = inject("openworkStackPreparation");
+const preparation = inject("redrobStackPreparation");
 
 if (preparation.kind === "local") {
   process.env.REDROB_EVAL_DEN_RUNTIME_PREPARED = "1";

@@ -123,7 +123,7 @@ async function organizationId(session: DenSession): Promise<string> {
 async function createProvider(admin: DenSession, orgId: string, body: Record<string, unknown>): Promise<string> {
   const result = await denFetch(admin, "/v1/llm-providers", {
     method: "POST",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
@@ -138,14 +138,14 @@ async function createProvider(admin: DenSession, orgId: string, body: Record<str
 async function deleteProvider(admin: DenSession, orgId: string, providerId: string): Promise<void> {
   await denFetch(admin, `/v1/llm-providers/${encodeURIComponent(providerId)}`, {
     method: "DELETE",
-    headers: { ...auth(admin), "x-openwork-org-id": orgId },
+    headers: { ...auth(admin), "x-redrob-org-id": orgId },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 }
 
 async function memberVisibleProviderIds(member: DenSession, orgId: string): Promise<string[]> {
   const result = await denFetch(member, "/v1/llm-providers", {
-    headers: { ...auth(member), "x-openwork-org-id": orgId },
+    headers: { ...auth(member), "x-redrob-org-id": orgId },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!result.response.ok) {
@@ -186,13 +186,13 @@ function parseSyncStatus(payload: Record<string, unknown>): SyncStatusFacts {
 
 // The desktop local server's GET /cloud-provider-sync/status is registered
 // with "client" auth (apps/server/src/server.ts:2108), so the renderer's own
-// persisted credentials (localStorage openwork.server.port/openwork.server.token)
+// persisted credentials (localStorage redrob.server.port/redrob.server.token)
 // reach it with a plain Bearer fetch to 127.0.0.1 — the same access pattern
 // subagent-run-survives-provider-sync-storm.e2e.test.ts uses.
 async function readSyncStatusPayload(surface: Parameters<typeof evalIn>[0]): Promise<Record<string, unknown>> {
   const value = await evalIn(surface, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return { specProbeError: "missing local server credentials" };
     const response = await fetch("http://127.0.0.1:" + port + "/cloud-provider-sync/status", {
       headers: { Authorization: "Bearer " + token },
@@ -255,7 +255,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, asy
       env: ["SYNC_CONTRACT_PROVIDER_API_KEY"],
       models: [{ id: CUSTOM_MODEL_ID, name: "Sync Contract Custom Model" }],
     },
-    apiKey: "sk-openwork-sync-contract-eval-only",
+    apiKey: "sk-redrob-sync-contract-eval-only",
     allMembers: true,
     memberIds: [],
     teamIds: [],
@@ -268,7 +268,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, asy
     source: "models_dev",
     providerId: "openai",
     modelIds: [CATALOG_MODEL_ID],
-    apiKey: "sk-openwork-sync-contract-eval-only",
+    apiKey: "sk-redrob-sync-contract-eval-only",
     allMembers: true,
     memberIds: [],
     teamIds: [],

@@ -35,7 +35,7 @@ function serverConfig(root: string): ServerConfig {
 }
 
 async function withWorkspace(fn: (input: { root: string; config: ServerConfig }) => Promise<void>) {
-  const root = await mkdtemp(join(tmpdir(), "openwork-extensions-export-"));
+  const root = await mkdtemp(join(tmpdir(), "redrob-extensions-export-"));
   const previousDb = process.env.REDROB_RUNTIME_DB;
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   try {
@@ -209,9 +209,9 @@ describe("POST /workspace/:id/extensions/export", () => {
 
 describe("bundled agent tool surface", () => {
   test("keeps portable export out of every chat", async () => {
-    const { OpenWorkExtensionsPreview } = await import("./opencode-plugins/openwork-extensions-preview.js");
-    const plugin = await OpenWorkExtensionsPreview();
+    const { RedrobWorkExtensionsPreview } = await import("./opencode-plugins/redrob-extensions-preview.js");
+    const plugin = await RedrobWorkExtensionsPreview();
 
-    expect(Object.keys(plugin.tool)).not.toContain("openwork_extensions_export");
+    expect(Object.keys(plugin.tool)).not.toContain("redrob_extensions_export");
   });
 });

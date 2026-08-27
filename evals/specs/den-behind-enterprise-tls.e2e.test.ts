@@ -38,11 +38,11 @@ const requirements: TestNeeds = {
 const missingRequirements = unmetNeeds(requirements, process.env);
 const title = missingRequirements.length > 0
   ? `Den behind enterprise TLS skipped — needs: ${missingRequirements.join(", ")}`
-  : "Linux OS trust lets OpenWork use one corporate TLS Den without trusting an unrelated private CA";
+  : "Linux OS trust lets Redrob Work use one corporate TLS Den without trusting an unrelated private CA";
 
 const PROFILE_MARKER = "enterprise-tls-profile-continuity";
 const ASSISTANT_MARKER = "ENTERPRISE-TLS-CHAT-OK";
-const CORPORATE_ROOT = "OpenWork Egress Lab Corporate Root CA";
+const CORPORATE_ROOT = "Redrob Work Egress Lab Corporate Root CA";
 
 type EdgeRequest = {
   endpoint: string;
@@ -82,7 +82,7 @@ async function cleanup(label: string, action: () => PromiseLike<unknown>): Promi
   try {
     await action();
   } catch (error) {
-    console.error(`[openwork/testkit] ${label} cleanup failed: ${messageText(error)}`);
+    console.error(`[redrob/testkit] ${label} cleanup failed: ${messageText(error)}`);
   }
 }
 
@@ -97,9 +97,9 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
     ref: process.env.REDROB_EVAL_REF?.trim() || process.env.GITHUB_SHA?.trim() || "dev",
     name: "den-behind-enterprise-tls",
     reuse: process.env.REDROB_EVAL_DAYTONA_SANDBOX?.trim(),
-    log: (line) => console.error(`[openwork/testkit] ${line}`),
+    log: (line) => console.error(`[redrob/testkit] ${line}`),
   });
-  const profileDir = `/workspace/.openwork-daytona/profiles/enterprise-tls-${process.pid}-${Date.now()}`;
+  const profileDir = `/workspace/.redrob-daytona/profiles/enterprise-tls-${process.pid}-${Date.now()}`;
   const edge = enterpriseTlsEdgeDaytonaCommands({
     sandboxId: provisioned.sandbox,
     upstream: den.ref.webUrl,
@@ -141,7 +141,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
       expect(seededWorkspaceNames).toContain(PROFILE_MARKER);
       await waitFor(
         rawApp,
-        "Boolean(window.__openworkControl?.listActions?.().some((action) => action.id === 'auth.exchange-grant'))",
+        "Boolean(window.__redrobControl?.listActions?.().some((action) => action.id === 'auth.exchange-grant'))",
         { timeoutMs: 60_000, label: "pre-trust sign-in reachability action" },
       );
 
@@ -159,7 +159,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
       expect(beforeTrustState.authTokenPresent).toBe(false);
       expect(beforeTrustState.activeOrgId).toBeNull();
       expect(rawApp.readiness.workspaceId).toBeNull();
-      for (const falseSuccess of ["Signed in as", "Synced", "Connected to OpenWork Cloud"]) {
+      for (const falseSuccess of ["Signed in as", "Synced", "Connected to Redrob Work Cloud"]) {
         expect(beforeTrustText.includes(falseSuccess), `pre-trust UI falsely showed ${JSON.stringify(falseSuccess)}`).toBe(false);
       }
 
@@ -204,8 +204,8 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 1_200_000 }, async
 
       const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim() || "";
       const configured = await evalIn(trustedApp, `(async () => {
-        const port = localStorage.getItem("openwork.server.port");
-        const token = localStorage.getItem("openwork.server.token");
+        const port = localStorage.getItem("redrob.server.port");
+        const token = localStorage.getItem("redrob.server.token");
         if (!port || !token) return "missing local server credentials";
         const headers = { Authorization: "Bearer " + token, "Content-Type": "application/json" };
         const base = "http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(${JSON.stringify(trustedApp.workspaceId)});

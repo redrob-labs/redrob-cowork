@@ -9,13 +9,13 @@ describe("getArtifactsFromMessages", () => {
     const messages: UIMessage[] = [{
       id: "msg_deck",
       role: "assistant",
-      parts: [{ type: "text", text: "Updated file: decks/openwork-vertebrae-deck.pptx", state: "done" }],
+      parts: [{ type: "text", text: "Updated file: decks/redrob-vertebrae-deck.pptx", state: "done" }],
     }];
     const targets: OpenTarget[] = [{
-      id: "file:decks/openwork-vertebrae-deck.pptx",
+      id: "file:decks/redrob-vertebrae-deck.pptx",
       kind: "file",
-      value: "decks/openwork-vertebrae-deck.pptx",
-      name: "openwork-vertebrae-deck.pptx",
+      value: "decks/redrob-vertebrae-deck.pptx",
+      name: "redrob-vertebrae-deck.pptx",
       preview: "slides",
       confidence: 65,
       reason: "message",
@@ -23,8 +23,8 @@ describe("getArtifactsFromMessages", () => {
     }];
 
     expect(getArtifactsFromMessages(messages, targets)[0]).toMatchObject({
-      name: "openwork-vertebrae-deck.pptx",
-      path: "decks/openwork-vertebrae-deck.pptx",
+      name: "redrob-vertebrae-deck.pptx",
+      path: "decks/redrob-vertebrae-deck.pptx",
       type: "slides",
       legacy_target: { preview: "slides", exists: true },
     });

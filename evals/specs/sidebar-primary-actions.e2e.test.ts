@@ -59,7 +59,7 @@ test.skipIf(!e2eTestsEnabled)(title, async ({ evidence }) => {
 
   await using app = await desktop({ name: "sidebar-primary-actions" });
   await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-sidebar-primary-actions-${Date.now()}`,
+    path: `/tmp/redrob-sidebar-primary-actions-${Date.now()}`,
   });
 
   await waitFor(app, `Boolean(document.querySelector('[data-slot="sidebar-header"] [data-sidebar-new-chat]'))`, {

@@ -54,9 +54,9 @@ test(title, { timeout: 600_000 }, async ({ evidence, place }) => {
     org: {
       name: `Library session restore ${stamp}`,
       admin: {
-        email: `library-session-restore-${stamp}@openwork.test`,
+        email: `library-session-restore-${stamp}@redrob.test`,
         name: "Library Session Restore Admin",
-        password: "OpenWorkEval123!",
+        password: "RedrobWorkEval123!",
       },
     },
   });
@@ -74,7 +74,7 @@ test(title, { timeout: 600_000 }, async ({ evidence, place }) => {
   });
 
   const selected = await createAndSelectWorkspace(surface, {
-    path: `/tmp/openwork-library-session-restore-${stamp}`,
+    path: `/tmp/redrob-library-session-restore-${stamp}`,
   });
   const skillsRoute = `/workspace/${selected.workspaceId}/extensions/skills`;
   const sessionRoute = `/workspace/${selected.workspaceId}/session`;
@@ -99,7 +99,7 @@ test(title, { timeout: 600_000 }, async ({ evidence, place }) => {
     label: "pre-sign-in session route",
   });
   const navigationInstalled = await evalIn(surface, `(() => {
-    window.addEventListener("openwork-den-session-updated", (event) => {
+    window.addEventListener("redrob-den-session-updated", (event) => {
       if (event.detail?.status === "success") {
         window.location.hash = ${JSON.stringify(`#${skillsRoute}`)};
       }
@@ -165,7 +165,7 @@ test(title, { timeout: 600_000 }, async ({ evidence, place }) => {
 
   const stalledBoundMs = 13_500;
   await waitFor(surface, `${enabledAddSkill}
-    && document.body.innerText.includes("OpenWork Cloud is temporarily unavailable.")`, {
+    && document.body.innerText.includes("Redrob Work Cloud is temporarily unavailable.")`, {
     timeoutMs: Math.max(1, stalledBoundMs - (Date.now() - stalledCommittedAt)),
     label: "enabled Add skill after stalled session timeout",
   });

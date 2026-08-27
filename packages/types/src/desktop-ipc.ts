@@ -7,7 +7,7 @@
  * Consumer: apps/app/src/app/lib/desktop.ts — the `desktopBridge` Proxy and
  * its named exports derive per-command signatures from `DesktopCommandMap`.
  *
- * Every command sent over the `openwork:desktop` channel has exactly one
+ * Every command sent over the `redrob:desktop` channel has exactly one
  * entry here: `args` is the tuple the renderer passes, `result` what the
  * main process resolves. Results marked `unknown` are not yet modeled —
  * tighten them instead of widening call sites.
@@ -72,7 +72,7 @@ export type DesktopIntegrationIssue =
 export type DesktopIntegrationStatus = {
   supported: boolean;
   state: "unsupported" | "not_integrated" | "integrated" | "needs_repair" | "managed_externally";
-  ownership: "none" | "openwork" | "external";
+  ownership: "none" | "redrob" | "external";
   appImagePath: string | null;
   desktopEntryPath: string | null;
   handlerDesktopId: string | null;
@@ -85,7 +85,7 @@ export type DesktopIntegrationResult = {
   error?: string;
 };
 
-export type OpenworkServerInfo = {
+export type RedrobServerInfo = {
   running: boolean;
   engineRollover: boolean;
   remoteAccessEnabled: boolean;
@@ -145,7 +145,7 @@ export type OpencodeCommandDraft = {
   subtask?: boolean;
 };
 
-export type WorkspaceOpenworkConfig = {
+export type WorkspaceRedrobConfig = {
   version: number;
   workspace?: {
     name?: string | null;
@@ -163,7 +163,7 @@ export type AppBuildInfo = {
   version: string;
   gitSha?: string | null;
   buildEpoch?: string | null;
-  openworkDevMode?: boolean;
+  redrobDevMode?: boolean;
   os?: string | null;
   arch?: string | null;
 };
@@ -219,7 +219,7 @@ export type DesktopBootstrapConfig = {
   } | null;
 };
 
-export type OpenworkDockerCleanupResult = {
+export type RedrobDockerCleanupResult = {
   candidates: string[];
   removed: string[];
   errors: string[];
@@ -314,15 +314,15 @@ export type WorkspaceCreateInput = {
 
 export type WorkspaceCreateRemoteInput = {
   baseUrl: string;
-  remoteType?: "openwork" | "opencode" | null;
+  remoteType?: "redrob" | "opencode" | null;
   directory?: string | null;
   displayName?: string | null;
-  openworkHostUrl?: string | null;
-  openworkToken?: string | null;
-  openworkClientToken?: string | null;
-  openworkHostToken?: string | null;
-  openworkWorkspaceId?: string | null;
-  openworkWorkspaceName?: string | null;
+  redrobHostUrl?: string | null;
+  redrobToken?: string | null;
+  redrobClientToken?: string | null;
+  redrobHostToken?: string | null;
+  redrobWorkspaceId?: string | null;
+  redrobWorkspaceName?: string | null;
   sandboxBackend?: string | null;
   sandboxRunId?: string | null;
   sandboxContainerName?: string | null;
@@ -370,12 +370,12 @@ export type DesktopCommandMap = {
     args: [input: { workspacePath: string; folderPath?: string; authorizedRoot?: string }];
     result: unknown;
   };
-  workspaceOpenworkRead: {
+  workspaceRedrobRead: {
     args: [input: { workspacePath: string }];
-    result: WorkspaceOpenworkConfig;
+    result: WorkspaceRedrobConfig;
   };
-  workspaceOpenworkWrite: {
-    args: [input: { workspacePath: string; config: WorkspaceOpenworkConfig }];
+  workspaceRedrobWrite: {
+    args: [input: { workspacePath: string; config: WorkspaceRedrobConfig }];
     result: unknown;
   };
   workspaceExportConfig: {
@@ -430,9 +430,9 @@ export type DesktopCommandMap = {
   };
   desktopIntegrationRemove: { args: []; result: DesktopIntegrationResult };
   getUiControlBridgeInfo: { args: []; result: UiControlBridgeInfo | null };
-  getOpenworkUiMcpCommand: { args: []; result: string[] };
+  getRedrobUiMcpCommand: { args: []; result: string[] };
   getComputerUseMcpCommand: { args: []; result: string[] };
-  getOpenworkUiMcpEnvironment: { args: []; result: Record<string, string> };
+  getRedrobUiMcpEnvironment: { args: []; result: Record<string, string> };
 
   // Computer use
   checkComputerUsePermissions: { args: []; result: ComputerUsePermissions };
@@ -458,21 +458,21 @@ export type DesktopCommandMap = {
     args: [rawUrl: string];
     result: { ok: true; config: DesktopBootstrapConfig } | ConnectLinkVerifyFailure;
   };
-  nukeOpenworkAndOpencodeConfigPreview: { args: [options?: NukeOptions]; result: NukeManifestPreview };
-  nukeOpenworkAndOpencodeConfigAndExit: { args: [options?: NukeOptions]; result: NukeReceipt };
+  nukeRedrobAndOpencodeConfigPreview: { args: [options?: NukeOptions]; result: NukeManifestPreview };
+  nukeRedrobAndOpencodeConfigAndExit: { args: [options?: NukeOptions]; result: NukeReceipt };
 
   // Sandbox
-  sandboxCleanupOpenworkContainers: { args: []; result: OpenworkDockerCleanupResult };
+  sandboxCleanupRedrobContainers: { args: []; result: RedrobDockerCleanupResult };
 
-  // Openwork server sidecar
-  openworkServerInfo: { args: []; result: OpenworkServerInfo };
+  // Redrob server sidecar
+  redrobServerInfo: { args: []; result: RedrobServerInfo };
   automationRunnerConfigure: {
     args: [configuration: { baseUrl: string; token: string; runnerId: string } | null];
     result: { connected: boolean };
   };
-  openworkServerRestart: {
+  redrobServerRestart: {
     args: [options?: Record<string, unknown>];
-    result: OpenworkServerInfo;
+    result: RedrobServerInfo;
   };
 
   // Dialogs
@@ -526,7 +526,7 @@ export type DesktopCommandMap = {
    * the renderer's localStorage cleanup is mode-scoped. Follow-up: decide
    * whether "onboarding" should preserve desktop workspace state.
    */
-  resetOpenworkState: { args: [mode?: "onboarding" | "all"]; result: unknown };
+  resetRedrobState: { args: [mode?: "onboarding" | "all"]; result: unknown };
   resetOpencodeCache: { args: []; result: CacheResetResult };
   opencodeMcpAuth: { args: [action: string, name: string]; result: ExecResult };
   setWindowDecorations: { args: [decorated: boolean]; result: unknown };

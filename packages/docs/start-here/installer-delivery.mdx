@@ -1,9 +1,9 @@
 ---
 title: "Installer delivery"
-description: "Choose how organization install links deliver standard OpenWork desktop installers."
+description: "Choose how organization install links deliver standard Redrob Work desktop installers."
 ---
 
-Organization install links help members install the standard OpenWork desktop and connect it to the correct Den organization. Den does not build a customer-specific installer or wrap the installer in a ZIP. The implementation and security details remain in the repository's [Organization Install Links guide](https://github.com/different-ai/openwork/blob/dev/docs/org-install-links.md#installer-delivery).
+Organization install links help members install the standard Redrob Work desktop and connect it to the correct Den organization. Den does not build a customer-specific installer or wrap the installer in a ZIP. The implementation and security details remain in the repository's [Organization Install Links guide](https://github.com/redrob-labs/redrob-work/blob/dev/docs/org-install-links.md#installer-delivery).
 
 ## Delivery matrix
 
@@ -19,11 +19,11 @@ When `REDROB_INSTALLER_ARTIFACTS_DIR` points at a mounted directory and the expe
 
 `REDROB_INSTALLER_RELEASE_TAG` selects the expected release version. The standard filenames use the release tag without a leading `v`:
 
-- `openwork-mac-arm64-<version>.dmg`
-- `openwork-mac-x64-<version>.dmg`
-- `openwork-win-x64-<version>.exe`
-- `openwork-linux-x86_64-<version>.AppImage`
-- `openwork-linux-arm64-<version>.AppImage`
+- `redrob-mac-arm64-<version>.dmg`
+- `redrob-mac-x64-<version>.dmg`
+- `redrob-win-x64-<version>.exe`
+- `redrob-linux-x86_64-<version>.AppImage`
+- `redrob-linux-arm64-<version>.AppImage`
 
 `REDROB_INSTALLER_RELEASE_REPO` controls the GitHub redirect path when Den does not find a mounted artifact. It is not an internal artifact registry setting.
 
@@ -33,8 +33,8 @@ For multi-replica Den API deployments, mount the same read-only PVC at the same 
 
 For normal signed-in desktop traffic, prefer one desktop-facing Den web origin. The desktop derives API and MCP paths through that origin's `/api/den` proxy.
 
-If `DEN_API_PUBLIC_URL` is configured as a separate API origin, the one-time **Open OpenWork** install-link exchange must also reach that API origin. External MCP clients that use the published MCP URL must reach it too. This does not mean every steady-state desktop request needs both origins in the single-origin topology.
+If `DEN_API_PUBLIC_URL` is configured as a separate API origin, the one-time **Open Redrob Work** install-link exchange must also reach that API origin. External MCP clients that use the published MCP URL must reach it too. This does not mean every steady-state desktop request needs both origins in the single-origin topology.
 
 ## Managed fleets: enterprise binary + MDM
 
-This page covers install-link delivery of the standard installer. Managed fleets typically skip the install-link handoff entirely: deploy the **OpenWork Enterprise binary** through MDM and write `desktop-bootstrap.json` during provisioning so the first launch already targets your Den server. See [Enterprise desktop deployment](/start-here/enterprise-desktop-deployment) for the artifact names, bootstrap file reference, and what MDM does not need to push.
+This page covers install-link delivery of the standard installer. Managed fleets typically skip the install-link handoff entirely: deploy the **Redrob Work Enterprise binary** through MDM and write `desktop-bootstrap.json` during provisioning so the first launch already targets your Den server. See [Enterprise desktop deployment](/start-here/enterprise-desktop-deployment) for the artifact names, bootstrap file reference, and what MDM does not need to push.

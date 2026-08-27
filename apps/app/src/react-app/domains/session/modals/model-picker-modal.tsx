@@ -29,7 +29,7 @@ import { usePlatform } from "../../../kernel/platform";
 import {
   REDROB_MODELS_PROVIDER_ID,
   REDROB_MODELS_PROVIDER_NAME,
-} from "../../cloud/openwork-models-promo";
+} from "../../cloud/redrob-models-promo";
 
 export const MODEL_PICKER_DEFAULT_SUBTITLE = "Select a model for this session.";
 export const MODEL_PICKER_UNAVAILABLE_SUBTITLE = "The model you were using is no longer available, please select a different model for this session.";
@@ -55,9 +55,9 @@ export type ModelPickerModalProps = {
   onOpenSettings: () => void;
   onClose: (options?: { restorePromptFocus?: boolean }) => void;
   /** Den entitlement present. Picker no longer upsells here; callers still pass it. */
-  openWorkModelsEntitled?: boolean;
+  redrobModelsEntitled?: boolean;
   /** The server is waiting to reload this workspace with Redrob Models. */
-  openWorkModelsSyncing?: boolean;
+  redrobModelsSyncing?: boolean;
   onRefreshOrganizationModels?: () => void | Promise<void>;
   restrictToCloud?: boolean;
 };
@@ -203,7 +203,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     }
   }, [props.query, providerGroups]);
 
-  // Expand current, organization-provided, and OpenWork groups once they appear
+  // Expand current, organization-provided, and Redrob Work groups once they appear
   // (options often load async).
   const autoExpandedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
@@ -220,8 +220,8 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     for (const group of providerGroups) {
       if (group.isCloud) queueExpand(group.id);
     }
-    const openwork = providerGroups.find((group) => group.id === REDROB_MODELS_PROVIDER_ID);
-    if (openwork) queueExpand(openwork.id);
+    const redrob = providerGroups.find((group) => group.id === REDROB_MODELS_PROVIDER_ID);
+    if (redrob) queueExpand(redrob.id);
     if (toExpand.length === 0) return;
     for (const id of toExpand) autoExpandedRef.current.add(id);
     setExpandedProviders((prev) => {
@@ -301,7 +301,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
             />
           </div>
 
-          {props.openWorkModelsSyncing ? (
+          {props.redrobModelsSyncing ? (
             <div className="mb-3 flex shrink-0 items-center overflow-hidden rounded-2xl border border-amber-6/60 bg-amber-2/40">
               <div className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5">
                 <ProviderIcon providerId={REDROB_MODELS_PROVIDER_ID} providerName={REDROB_MODELS_PROVIDER_NAME} size={18} className="shrink-0 text-amber-11" />

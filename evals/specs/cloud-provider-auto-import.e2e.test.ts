@@ -39,7 +39,7 @@ async function createProvider(admin: DenSession, orgId: string): Promise<string>
     method: "POST",
     headers: {
       ...auth(admin),
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({
       name: PROVIDER_NAME,
@@ -51,7 +51,7 @@ async function createProvider(admin: DenSession, orgId: string): Promise<string>
         env: ["AUTO_IMPORT_PROVIDER_API_KEY"],
         models: [{ id: MODEL_ID, name: "Automatic Proof Model" }],
       },
-      apiKey: "sk-openwork-auto-import-eval-only",
+      apiKey: "sk-redrob-auto-import-eval-only",
       allMembers: true,
       memberIds: [],
       teamIds: [],
@@ -73,7 +73,7 @@ async function deleteProvider(admin: DenSession, orgId: string, providerId: stri
     method: "DELETE",
     headers: {
       ...auth(admin),
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });

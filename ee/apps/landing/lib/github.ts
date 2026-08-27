@@ -15,7 +15,7 @@ type Repo = {
   stargazers_count?: number;
 };
 
-const FALLBACK_RELEASE = "https://github.com/different-ai/openwork/releases";
+const FALLBACK_RELEASE = "https://github.com/redrob-labs/redrob-work/releases";
 
 const formatCompact = (value: number) => {
   try {
@@ -75,12 +75,12 @@ export const getGithubData = async () => {
   // the paginated list being flooded by alpha tags pushing stable releases out
   // of the per_page window.
   const [repo, latestRelease, releases] = await Promise.all([
-    fetchJson<Repo>("https://api.github.com/repos/different-ai/openwork"),
+    fetchJson<Repo>("https://api.github.com/repos/redrob-labs/redrob-work"),
     fetchJson<Release>(
-      "https://api.github.com/repos/different-ai/openwork/releases/latest"
+      "https://api.github.com/repos/redrob-labs/redrob-work/releases/latest"
     ),
     fetchJson<Release[]>(
-      "https://api.github.com/repos/different-ai/openwork/releases?per_page=50"
+      "https://api.github.com/repos/redrob-labs/redrob-work/releases?per_page=50"
     )
   ]);
 
@@ -91,9 +91,9 @@ export const getGithubData = async () => {
 
   const releaseList = Array.isArray(releases) ? releases : [];
   const isElectronDesktopAsset = (name: string) =>
-    name.startsWith("openwork-mac-") ||
-    name.startsWith("openwork-win-") ||
-    name.startsWith("openwork-linux-");
+    name.startsWith("redrob-mac-") ||
+    name.startsWith("redrob-win-") ||
+    name.startsWith("redrob-linux-");
 
   const hasElectronDesktopAsset = (release: Release) => {
     const assets = Array.isArray(release?.assets) ? release.assets : [];
@@ -107,7 +107,7 @@ export const getGithubData = async () => {
     const assets = Array.isArray(release?.assets) ? release.assets : [];
     return assets.some((asset) => {
       const name = String(asset?.name || "").toLowerCase();
-      return name.startsWith("openwork-win-x64-") && name.endsWith(".exe");
+      return name.startsWith("redrob-win-x64-") && name.endsWith(".exe");
     });
   };
 
@@ -135,9 +135,9 @@ export const getGithubData = async () => {
   // swaps the public download for a managed distribution.
   const isNonPublicDesktopAsset = (asset: ReleaseAsset) => {
     const name = String(asset?.name || "").toLowerCase();
-    return name.startsWith("openwork-installer-")
-      || name.startsWith("openwork-cloud-")
-      || name.startsWith("openwork-enterprise-");
+    return name.startsWith("redrob-installer-")
+      || name.startsWith("redrob-cloud-")
+      || name.startsWith("redrob-enterprise-");
   };
   const publicAssets = (list: ReleaseAsset[] | undefined) =>
     (Array.isArray(list) ? list : []).filter((asset) => !isNonPublicDesktopAsset(asset));
@@ -146,8 +146,8 @@ export const getGithubData = async () => {
   const releaseUrl = pick?.html_url || FALLBACK_RELEASE;
   const windowsAssets = windowsPick ? publicAssets(windowsPick.assets) : assets;
   const windowsReleaseUrl = windowsPick?.html_url || releaseUrl;
-  const dmg = selectAsset(assets, [".dmg"], ["openwork-mac-"]);
-  const exe = selectAsset(windowsAssets, [".exe"], ["openwork-win-"]);
+  const dmg = selectAsset(assets, [".dmg"], ["redrob-mac-"]);
+  const exe = selectAsset(windowsAssets, [".exe"], ["redrob-win-"]);
   const macosApple = selectAsset(assets, [".dmg"], ["mac-arm64"]);
   const macosIntel = selectAsset(assets, [".dmg"], ["mac-x64"]);
   const windowsX64 =

@@ -11,8 +11,8 @@ import { pathToFileURL } from "node:url";
 import {
   desktopBootstrapPath,
   normalizeWorkspaceRootPath,
-  openworkEnvStorePath,
-  openworkServerConfigPath,
+  redrobEnvStorePath,
+  redrobServerConfigPath,
   resolveWorkspaceOpencodeConfigPath,
 } from "@redrob/paths";
 import {
@@ -182,7 +182,7 @@ function normalizeServerCredentials(value) {
   };
 }
 
-export function migrateOpenworkServerTokenStore(value) {
+export function migrateRedrobServerTokenStore(value) {
   const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const sourceWorkspaces = source.workspaces && typeof source.workspaces === "object" && !Array.isArray(source.workspaces)
     ? source.workspaces
@@ -255,15 +255,15 @@ export async function prepareRuntimeWorkspaceRoot(projectDir, options = {}) {
   }
 }
 
-export function resolveOpenworkServerConfigPath(env = process.env) {
-  return openworkServerConfigPath({ env });
+export function resolveRedrobServerConfigPath(env = process.env) {
+  return redrobServerConfigPath({ env });
 }
 
 export function seedWorkspacePathsForEmbeddedServer(workspacePaths, serverConfigExists) {
   return serverConfigExists ? [] : workspacePaths;
 }
 
-export function selectStickyOpenworkPortWorkspace(requestedWorkspacePaths = [], serverWorkspacePaths = []) {
+export function selectStickyRedrobPortWorkspace(requestedWorkspacePaths = [], serverWorkspacePaths = []) {
   for (const value of [...requestedWorkspacePaths, ...serverWorkspacePaths]) {
     const workspacePath = String(value ?? "").trim();
     if (workspacePath) return workspacePath;
@@ -379,7 +379,7 @@ export function snapshotEngineState(state) {
   };
 }
 
-function createOpenworkServerState() {
+function createRedrobServerState() {
   return {
     child: null,
     childExited: true,
@@ -403,7 +403,7 @@ function createOpenworkServerState() {
   };
 }
 
-export function snapshotOpenworkServerState(state) {
+export function snapshotRedrobServerState(state) {
   const child = state.childExited ? null : state.child;
   const running = state.inProcess || Boolean(child && child.exitCode === null && !child.killed);
   return {
@@ -434,19 +434,19 @@ export function resolveEngineRolloverPreference(optionValue, persistedValue) {
 
 /**
  * A failed server start must not leave the state objects describing the
- * runtime it already stopped: snapshotOpenworkServerState would report
- * running:true with a dead baseUrl and assertOpenworkServerReady would pass
+ * runtime it already stopped: snapshotRedrobServerState would report
+ * running:true with a dead baseUrl and assertRedrobServerReady would pass
  * against it. Keeps accumulated output for diagnostics and the project dir so
  * a retry via engineRestart still knows its workspace. The engine state only
  * resets when this start owned the engine (manageOpencode) — an external
  * engine keeps running regardless of the server's fate.
  */
-export function resetRuntimeStatesAfterFailedServerStart(openworkServerStateRef, engineStateRef, options = {}) {
-  const serverStdout = openworkServerStateRef.lastStdout;
-  const serverStderr = openworkServerStateRef.lastStderr;
-  Object.assign(openworkServerStateRef, createOpenworkServerState());
-  openworkServerStateRef.lastStdout = serverStdout;
-  openworkServerStateRef.lastStderr = serverStderr;
+export function resetRuntimeStatesAfterFailedServerStart(redrobServerStateRef, engineStateRef, options = {}) {
+  const serverStdout = redrobServerStateRef.lastStdout;
+  const serverStderr = redrobServerStateRef.lastStderr;
+  Object.assign(redrobServerStateRef, createRedrobServerState());
+  redrobServerStateRef.lastStdout = serverStdout;
+  redrobServerStateRef.lastStderr = serverStderr;
   if (options.manageOpencode === true) {
     const engineStdout = engineStateRef.lastStdout;
     const engineStderr = engineStateRef.lastStderr;
@@ -458,15 +458,15 @@ export function resetRuntimeStatesAfterFailedServerStart(openworkServerStateRef,
   }
 }
 
-function assertOpenworkServerReady(snapshot) {
+function assertRedrobServerReady(snapshot) {
   if (!snapshot?.running) {
-    throw new Error("OpenWork server did not stay running after startup.");
+    throw new Error("Redrob Work server did not stay running after startup.");
   }
   if (!snapshot.baseUrl) {
-    throw new Error("OpenWork server did not report a base URL after startup.");
+    throw new Error("Redrob Work server did not report a base URL after startup.");
   }
   if (!snapshot.ownerToken && !snapshot.clientToken) {
-    throw new Error("OpenWork server did not report an access token after startup.");
+    throw new Error("Redrob Work server did not report an access token after startup.");
   }
   return snapshot;
 }
@@ -682,7 +682,7 @@ async function fetchJson(url, options = {}, timeoutMs = 3000) {
 }
 
 export function resolveUserEnvFilePath(env = process.env) {
-  return openworkEnvStorePath({ env });
+  return redrobEnvStorePath({ env });
 }
 
 const USER_ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -1125,14 +1125,14 @@ async function repairIncompleteChains(options) {
   const chainRepair = options.chainRepair ?? {};
   const logInfo = options.logInfo;
   if (chainRepair.disabled === true || String(env.REDROB_DISABLE_CHAIN_REPAIR ?? "").trim() === "1") {
-    if (typeof logInfo === "function") logInfo("OpenWork runtime: chain repair disabled by REDROB_DISABLE_CHAIN_REPAIR.");
+    if (typeof logInfo === "function") logInfo("Redrob Work runtime: chain repair disabled by REDROB_DISABLE_CHAIN_REPAIR.");
     return { pems: [], timedOut: false };
   }
 
   const origins = await resolveChainRepairOrigins(options);
   if (origins.length === 0) {
     if (!chainRepair.origins && !String(env.REDROB_CHAIN_REPAIR_ORIGINS ?? "").trim() && typeof logInfo === "function") {
-      logInfo("OpenWork runtime: chain repair skipped: no activation record.");
+      logInfo("Redrob Work runtime: chain repair skipped: no activation record.");
     }
     return { pems: [], timedOut: false };
   }
@@ -1153,7 +1153,7 @@ async function repairIncompleteChains(options) {
 
   if (typeof fetchImpl !== "function") {
     if (typeof logInfo === "function") {
-      for (const origin of origins) logInfo(`OpenWork runtime: chain repair skipped for ${origin}: fetch unavailable`);
+      for (const origin of origins) logInfo(`Redrob Work runtime: chain repair skipped for ${origin}: fetch unavailable`);
     }
     return { pems: [], timedOut: false };
   }
@@ -1163,27 +1163,27 @@ async function repairIncompleteChains(options) {
     for (const origin of origins) {
       const strictError = await strictProbeChainRepair(origin, tlsConnectImpl);
       if (strictError === null) {
-        if (typeof logInfo === "function") logInfo(`OpenWork runtime: chain ok for ${origin}`);
+        if (typeof logInfo === "function") logInfo(`Redrob Work runtime: chain ok for ${origin}`);
         continue;
       }
       if (strictError !== "UNABLE_TO_VERIFY_LEAF_SIGNATURE") {
-        if (typeof logInfo === "function") logInfo(`OpenWork runtime: chain repair skipped for ${origin}: ${strictError}`);
+        if (typeof logInfo === "function") logInfo(`Redrob Work runtime: chain repair skipped for ${origin}: ${strictError}`);
         continue;
       }
 
       const leafState = await introspectLeafCertificate(origin, tlsConnectImpl);
       if (!leafState) {
-        if (typeof logInfo === "function") logInfo(`OpenWork runtime: chain repair skipped for ${origin}: certificate introspection failed`);
+        if (typeof logInfo === "function") logInfo(`Redrob Work runtime: chain repair skipped for ${origin}: certificate introspection failed`);
         continue;
       }
       if (!leafState.leafOnly) {
-        if (typeof logInfo === "function") logInfo(`OpenWork runtime: chain repair skipped for ${origin}: served chain includes an intermediate`);
+        if (typeof logInfo === "function") logInfo(`Redrob Work runtime: chain repair skipped for ${origin}: served chain includes an intermediate`);
         continue;
       }
 
       const issuerUrls = caIssuerUrls(leafState.leaf);
       if (issuerUrls.length === 0) {
-        if (typeof logInfo === "function") logInfo(`OpenWork runtime: chain repair skipped for ${origin}: no CA Issuers AIA URL`);
+        if (typeof logInfo === "function") logInfo(`Redrob Work runtime: chain repair skipped for ${origin}: no CA Issuers AIA URL`);
         continue;
       }
 
@@ -1198,18 +1198,18 @@ async function repairIncompleteChains(options) {
         if (!intermediate) continue;
         const reason = refusalReason(leafState.leaf, intermediate, rootsProvider);
         if (reason) {
-          if (typeof logInfo === "function") logInfo(`OpenWork runtime: chain repair refused for ${origin}: ${reason}`);
+          if (typeof logInfo === "function") logInfo(`Redrob Work runtime: chain repair refused for ${origin}: ${reason}`);
           continue;
         }
         pems.push(intermediate.toString());
         repaired = true;
         if (typeof logInfo === "function") {
-          logInfo(`OpenWork runtime: chain repaired for ${origin}: added "${certificateCommonName(intermediate)}"`);
+          logInfo(`Redrob Work runtime: chain repaired for ${origin}: added "${certificateCommonName(intermediate)}"`);
         }
         break;
       }
       if (!repaired && typeof logInfo === "function") {
-        logInfo(`OpenWork runtime: chain repair skipped for ${origin}: no usable AIA issuer certificate`);
+        logInfo(`Redrob Work runtime: chain repair skipped for ${origin}: no usable AIA issuer certificate`);
       }
     }
     return { pems, timedOut: false };
@@ -1244,7 +1244,7 @@ async function resolveSystemCa({
   const env = parentEnv ?? {};
   if (Object.prototype.hasOwnProperty.call(env, "NODE_EXTRA_CA_CERTS")) {
     if (typeof logInfo === "function") {
-      logInfo("OpenWork runtime: NODE_EXTRA_CA_CERTS is already set; skipping system CA bundle export.");
+      logInfo("Redrob Work runtime: NODE_EXTRA_CA_CERTS is already set; skipping system CA bundle export.");
     }
     try {
       const configuredPem = await readFile(String(env.NODE_EXTRA_CA_CERTS), "utf8");
@@ -1267,7 +1267,7 @@ async function resolveSystemCa({
       platform: platformLoader,
     });
     if (typeof logInfo === "function") {
-      logInfo(`OpenWork runtime: system CA bundle sources ${summarizeSystemCaSources(bundle.sources)}`);
+      logInfo(`Redrob Work runtime: system CA bundle sources ${summarizeSystemCaSources(bundle.sources)}`);
     }
     let repairedPems = [];
     try {
@@ -1283,7 +1283,7 @@ async function resolveSystemCa({
       });
       repairedPems = repaired.pems;
       if (repaired.timedOut && typeof logInfo === "function") {
-        logInfo("OpenWork runtime: chain repair skipped: timed out");
+        logInfo("Redrob Work runtime: chain repair skipped: timed out");
       }
     } catch {
       repairedPems = [];
@@ -1341,7 +1341,7 @@ export function createRuntimeManager({
   const inheritedProcessEnv = { ...process.env };
   let injectedUserEnvKeys = new Set();
   const engineState = createEngineState();
-  const openworkServerState = createOpenworkServerState();
+  const redrobServerState = createRedrobServerState();
 
   // Serialize engine lifecycle operations. Without this, concurrent renderer
   // invocations of engineStart/engineStop/engineRestart race: each call's
@@ -1381,12 +1381,12 @@ export function createRuntimeManager({
     return systemCaPromise;
   }
 
-  function openworkServerTokenStorePath() {
-    return path.join(userDataDir, "openwork-server-tokens.json");
+  function redrobServerTokenStorePath() {
+    return path.join(userDataDir, "redrob-server-tokens.json");
   }
 
-  function openworkServerStatePath() {
-    return path.join(userDataDir, "openwork-server-state.json");
+  function redrobServerStatePath() {
+    return path.join(userDataDir, "redrob-server-state.json");
   }
 
   function managedOpencodeWorkdir() {
@@ -1394,8 +1394,8 @@ export function createRuntimeManager({
   }
 
   async function loadTokenStore() {
-    const stored = await readJsonFile(openworkServerTokenStorePath(), { version: 1, workspaces: {} });
-    const migrated = migrateOpenworkServerTokenStore(stored);
+    const stored = await readJsonFile(redrobServerTokenStorePath(), { version: 1, workspaces: {} });
+    const migrated = migrateRedrobServerTokenStore(stored);
     if (JSON.stringify(stored) !== JSON.stringify(migrated)) {
       await saveTokenStore(migrated);
     }
@@ -1403,13 +1403,13 @@ export function createRuntimeManager({
   }
 
   async function saveTokenStore(store) {
-    const filePath = openworkServerTokenStorePath();
+    const filePath = redrobServerTokenStorePath();
     await mkdir(path.dirname(filePath), { recursive: true });
     await writeFile(filePath, `${JSON.stringify(store, null, 2)}\n`, "utf8");
   }
 
   async function loadPortState() {
-    return readJsonFile(openworkServerStatePath(), {
+    return readJsonFile(redrobServerStatePath(), {
       version: 4,
       workspacePorts: {},
       preferredPort: null,
@@ -1418,7 +1418,7 @@ export function createRuntimeManager({
   }
 
   async function savePortState(state) {
-    const filePath = openworkServerStatePath();
+    const filePath = redrobServerStatePath();
     await mkdir(path.dirname(filePath), { recursive: true });
     await writeFile(filePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
   }
@@ -1435,7 +1435,7 @@ export function createRuntimeManager({
     await saveTokenStore(store);
   }
 
-  async function readPreferredOpenworkPort(workspaceKey) {
+  async function readPreferredRedrobPort(workspaceKey) {
     const state = await loadPortState();
     const normalized = normalizeWorkspaceKey(workspaceKey, workspacePlatform);
     if (normalized && state.workspacePorts?.[normalized]) {
@@ -1444,7 +1444,7 @@ export function createRuntimeManager({
     return state.preferredPort ?? null;
   }
 
-  async function persistPreferredOpenworkPort(workspaceKey, port) {
+  async function persistPreferredRedrobPort(workspaceKey, port) {
     const state = await loadPortState();
     const normalized = normalizeWorkspaceKey(workspaceKey, workspacePlatform);
     state.version = 4;
@@ -1479,8 +1479,8 @@ export function createRuntimeManager({
     return portAvailable(host, port);
   }
 
-  async function resolveOpenworkPort(host, workspaceKey, currentPort = null) {
-    const preferredPort = await readPreferredOpenworkPort(workspaceKey);
+  async function resolveRedrobPort(host, workspaceKey, currentPort = null) {
+    const preferredPort = await readPreferredRedrobPort(workspaceKey);
     if (currentPort && (await waitForPortAvailable(host, currentPort))) {
       return { port: currentPort, preferredPort };
     }
@@ -1491,7 +1491,7 @@ export function createRuntimeManager({
   }
 
   async function ensureDevModePaths() {
-    const root = path.join(userDataDir, "openwork-dev-data");
+    const root = path.join(userDataDir, "redrob-dev-data");
     const paths = {
       homeDir: path.join(root, "home"),
       xdgConfigHome: path.join(root, "xdg", "config"),
@@ -1671,9 +1671,9 @@ export function createRuntimeManager({
     );
   }
 
-  const legacyOpenworkContainerPrefix = `${["openwork", "orchestrator"].join("-")}-`;
+  const legacyRedrobContainerPrefix = `${["redrob", "orchestrator"].join("-")}-`;
 
-  async function listOpenworkManagedContainers() {
+  async function listRedrobManagedContainers() {
     const result = runDockerCommandDetailed(["ps", "-a", "--format", "{{.Names}}"], 8000);
     if (result.status !== 0) {
       const combined = `${result.stdout.trim()}\n${result.stderr.trim()}`.trim();
@@ -1682,7 +1682,7 @@ export function createRuntimeManager({
     return result.stdout
       .split(/\r?\n/)
       .map((line) => line.trim())
-      .filter((name) => name && (name.startsWith(legacyOpenworkContainerPrefix) || name.startsWith("openwork-dev-") || name.startsWith("openwrk-")))
+      .filter((name) => name && (name.startsWith(legacyRedrobContainerPrefix) || name.startsWith("redrob-dev-") || name.startsWith("openwrk-")))
       .sort();
   }
 
@@ -1833,9 +1833,9 @@ export function createRuntimeManager({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-OpenWork-Host-Token": hostToken,
+          "X-Redrob Work-Host-Token": hostToken,
         },
-        body: JSON.stringify({ scope: "owner", label: "OpenWork desktop owner token" }),
+        body: JSON.stringify({ scope: "owner", label: "Redrob Work desktop owner token" }),
       },
       5000,
     );
@@ -1846,7 +1846,7 @@ export function createRuntimeManager({
   // In-process server handle. Kept alive across restarts so we can stop it.
   let inProcessServer = null;
 
-  async function startOpenworkServer(options) {
+  async function startRedrobServer(options) {
     // The inner start stops any previous runtime before mutating state, so a
     // throw below always happens with nothing left running.
     try {
@@ -1857,31 +1857,31 @@ export function createRuntimeManager({
       if (typeof options.engineRollover === "boolean") {
         await persistEngineRolloverPreference(engineRollover);
       }
-      return await startOpenworkServerInner({ ...options, engineRollover });
+      return await startRedrobServerInner({ ...options, engineRollover });
     } catch (error) {
-      resetRuntimeStatesAfterFailedServerStart(openworkServerState, engineState, options);
+      resetRuntimeStatesAfterFailedServerStart(redrobServerState, engineState, options);
       throw error;
     }
   }
 
-  async function startOpenworkServerInner(options) {
+  async function startRedrobServerInner(options) {
     const evalDelayMs = resolveEvalLocalServerDelayMs();
     if (evalDelayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, evalDelayMs));
     }
-    const currentPort = openworkServerState.port;
+    const currentPort = redrobServerState.port;
     // Stop any previously running in-process server
     if (inProcessServer) {
       try { await inProcessServer.stop(); } catch { /* ignore */ }
       inProcessServer = null;
     }
-    await stopChild(openworkServerState);
+    await stopChild(redrobServerState);
 
     const host = options.remoteAccessEnabled ? "0.0.0.0" : "127.0.0.1";
 
     const managedOpencode = options.manageOpencode ? resolveOpencodeBinary(options.opencodeBinPath) : null;
-    openworkServerState.managedOpencodeBinPath = managedOpencode?.path ?? null;
-    openworkServerState.managedOpencodeBinSource = managedOpencode?.source ?? null;
+    redrobServerState.managedOpencodeBinPath = managedOpencode?.path ?? null;
+    redrobServerState.managedOpencodeBinSource = managedOpencode?.source ?? null;
     if (options.manageOpencode) {
       engineState.opencodeBinPath = managedOpencode?.path ?? null;
       engineState.opencodeBinSource = managedOpencode?.source ?? null;
@@ -1895,7 +1895,7 @@ export function createRuntimeManager({
     // truth. Do not pass Electron's legacy workspace list as CLI workspaces or
     // the server config loader will ignore server.json and lose server-created
     // workspaces after restart.
-    const serverConfigPath = resolveOpenworkServerConfigPath(process.env);
+    const serverConfigPath = resolveRedrobServerConfigPath(process.env);
     const requestedWorkspacePaths = prioritizeWorkspacePaths("", options.workspacePaths, {
       platform: workspacePlatform,
     });
@@ -1903,8 +1903,8 @@ export function createRuntimeManager({
       requestedWorkspacePaths,
       existsSync(serverConfigPath),
     );
-    const activeWorkspace = selectStickyOpenworkPortWorkspace(requestedWorkspacePaths, workspacePaths);
-    const portSelection = await resolveOpenworkPort(host, activeWorkspace, currentPort);
+    const activeWorkspace = selectStickyRedrobPortWorkspace(requestedWorkspacePaths, workspacePaths);
+    const portSelection = await resolveRedrobPort(host, activeWorkspace, currentPort);
     const tokens = await loadServerCredentials();
 
     // One call: resolve config, spawn managed OpenCode, start HTTP server.
@@ -1920,7 +1920,7 @@ export function createRuntimeManager({
       : [...packagedPaths, devPath];
     const embeddedPath = candidates.find((candidate) => existsSync(candidate));
     if (!embeddedPath) {
-      throw new Error(`Cannot find OpenWork embedded server bundle. Checked: ${candidates.join(", ")}`);
+      throw new Error(`Cannot find Redrob Work embedded server bundle. Checked: ${candidates.join(", ")}`);
     }
     const { startEmbeddedServer } = await import(embeddedServerImportUrl(embeddedPath));
     // startEmbeddedServer falls back to an OS-assigned port if `port` races
@@ -1944,7 +1944,7 @@ export function createRuntimeManager({
       engineRollover: options.engineRollover === true,
     });
     inProcessServer = handle;
-    openworkServerState.managedOpencodeExecution = handle.managedOpencodeExecution ?? null;
+    redrobServerState.managedOpencodeExecution = handle.managedOpencodeExecution ?? null;
     engineState.managedByServer = Boolean(handle.managedOpencode);
     engineState.managedPid = handle.managedOpencode?.pid ?? null;
     engineState.managedIsAlive = handle.managedOpencode?.isAlive ?? null;
@@ -1952,19 +1952,19 @@ export function createRuntimeManager({
     const boundPort = handle.port;
     const baseUrl = handle.url;
 
-    openworkServerState.inProcess = true;
-    openworkServerState.engineRollover = options.engineRollover === true;
-    openworkServerState.remoteAccessEnabled = options.remoteAccessEnabled;
-    openworkServerState.host = host;
-    openworkServerState.port = boundPort;
-    openworkServerState.baseUrl = baseUrl;
-    openworkServerState.clientToken = tokens.clientToken;
-    openworkServerState.hostToken = tokens.hostToken;
+    redrobServerState.inProcess = true;
+    redrobServerState.engineRollover = options.engineRollover === true;
+    redrobServerState.remoteAccessEnabled = options.remoteAccessEnabled;
+    redrobServerState.host = host;
+    redrobServerState.port = boundPort;
+    redrobServerState.baseUrl = baseUrl;
+    redrobServerState.clientToken = tokens.clientToken;
+    redrobServerState.hostToken = tokens.hostToken;
 
     const connectUrls = options.remoteAccessEnabled ? buildConnectUrls(boundPort) : { connectUrl: null, mdnsUrl: null, lanUrl: null };
-    openworkServerState.connectUrl = connectUrls.connectUrl;
-    openworkServerState.mdnsUrl = connectUrls.mdnsUrl;
-    openworkServerState.lanUrl = connectUrls.lanUrl;
+    redrobServerState.connectUrl = connectUrls.connectUrl;
+    redrobServerState.mdnsUrl = connectUrls.mdnsUrl;
+    redrobServerState.lanUrl = connectUrls.lanUrl;
 
     // No health check needed -- startServer() resolves only after the listener is bound.
     let workspaceList = null;
@@ -1979,7 +1979,7 @@ export function createRuntimeManager({
       }
     }
     ownerToken ||= await issueOwnerToken(baseUrl, tokens.hostToken);
-    openworkServerState.ownerToken = ownerToken;
+    redrobServerState.ownerToken = ownerToken;
     if (ownerToken) {
       await persistServerOwnerToken(ownerToken);
     }
@@ -2003,13 +2003,13 @@ export function createRuntimeManager({
           engineState.childExited = false;
         }
       } catch (error) {
-        appendOutput(openworkServerState, "lastStderr", `OpenWork server workspace probe: ${error instanceof Error ? error.message : String(error)}\n`);
+        appendOutput(redrobServerState, "lastStderr", `Redrob Work server workspace probe: ${error instanceof Error ? error.message : String(error)}\n`);
       }
     }
     if (!portSelection.preferredPort || boundPort === portSelection.preferredPort) {
-      await persistPreferredOpenworkPort(activeWorkspace, boundPort);
+      await persistPreferredRedrobPort(activeWorkspace, boundPort);
     }
-    return snapshotOpenworkServerState(openworkServerState);
+    return snapshotRedrobServerState(redrobServerState);
   }
 
   async function stopAllRuntimeChildren() {
@@ -2018,11 +2018,11 @@ export function createRuntimeManager({
       try { await inProcessServer.stop(); } catch { /* ignore */ }
       inProcessServer = null;
     }
-    await stopChild(openworkServerState);
+    await stopChild(redrobServerState);
     await stopChild(engineState);
 
     Object.assign(engineState, createEngineState());
-    Object.assign(openworkServerState, createOpenworkServerState());
+    Object.assign(redrobServerState, createRedrobServerState());
   }
 
   async function prepareFreshRuntime() {
@@ -2033,19 +2033,19 @@ export function createRuntimeManager({
   }
 
   function settleAfterWorkspacePreparationFailure() {
-    if (snapshotOpenworkServerState(openworkServerState).running) {
+    if (snapshotRedrobServerState(redrobServerState).running) {
       lifecycleState = "healthy";
       return;
     }
     Object.assign(engineState, createEngineState());
-    Object.assign(openworkServerState, createOpenworkServerState());
+    Object.assign(redrobServerState, createRedrobServerState());
     lifecycleState = "idle";
   }
 
-  async function ensureOpenwork(options) {
-    let openworkServer;
+  async function ensureRedrob(options) {
+    let redrobServer;
     try {
-      openworkServer = await startOpenworkServer({
+      redrobServer = await startRedrobServer({
         workspacePaths: options.workspacePaths,
         opencodeBaseUrl: engineState.baseUrl,
         opencodeUsername: engineState.opencodeUsername,
@@ -2056,11 +2056,11 @@ export function createRuntimeManager({
         engineRollover: options.engineRollover,
       });
     } catch (error) {
-      appendOutput(engineState, "lastStderr", `OpenWork server: ${error instanceof Error ? error.message : String(error)}\n`);
+      appendOutput(engineState, "lastStderr", `Redrob Work server: ${error instanceof Error ? error.message : String(error)}\n`);
       throw error;
     }
 
-    assertOpenworkServerReady(openworkServer);
+    assertRedrobServerReady(redrobServer);
   }
 
   async function engineStart(projectDir, options = {}) {
@@ -2078,25 +2078,25 @@ export function createRuntimeManager({
 
     // Reuse a healthy server instead of tearing it down. During boot the
     // main process kicks off bootRuntimeForSelectedWorkspace while renderer
-    // routes independently call ensureDesktopLocalOpenworkConnection. Both go
+    // routes independently call ensureDesktopLocalRedrobConnection. Both go
     // through this serialized path; without this guard the second call runs
     // prepareFreshRuntime (killing the freshly bound server) and then rebinds
     // the sticky preferred port, racing the not-yet-released socket into
     // EADDRINUSE and leaving the runtime in error -> boot screen.
-    const requestedRemoteAccess = options.openworkRemoteAccess === true;
+    const requestedRemoteAccess = options.redrobRemoteAccess === true;
     const requestedEngineRollover = resolveEngineRolloverPreference(
       options.engineRollover,
       await readEngineRolloverPreference(),
     );
     if (
       options.forceRestart !== true &&
-      openworkServerState.inProcess &&
+      redrobServerState.inProcess &&
       lifecycleState === "healthy" &&
       normalizeWorkspaceKey(engineState.projectDir, workspacePlatform) === normalizeWorkspaceKey(safeProjectDir, workspacePlatform) &&
-      openworkServerState.remoteAccessEnabled === requestedRemoteAccess &&
-      openworkServerState.engineRollover === requestedEngineRollover
+      redrobServerState.remoteAccessEnabled === requestedRemoteAccess &&
+      redrobServerState.engineRollover === requestedEngineRollover
     ) {
-      const existing = snapshotOpenworkServerState(openworkServerState);
+      const existing = snapshotRedrobServerState(redrobServerState);
       if (existing.running && existing.baseUrl && (existing.ownerToken || existing.clientToken)) {
         return snapshotEngineState(engineState);
       }
@@ -2127,10 +2127,10 @@ export function createRuntimeManager({
       engineState.child = null;
       engineState.childExited = true;
 
-      await ensureOpenwork({
+      await ensureRedrob({
         projectDir: safeProjectDir,
         workspacePaths,
-        remoteAccessEnabled: options.openworkRemoteAccess === true,
+        remoteAccessEnabled: options.redrobRemoteAccess === true,
         manageOpencode: true,
         opencodeBinPath: options.opencodeBinPath,
         engineRollover: requestedEngineRollover,
@@ -2156,14 +2156,14 @@ export function createRuntimeManager({
     if (!projectDir) {
       throw new Error("OpenCode is not configured for a local workspace");
     }
-    const openworkRemoteAccess = typeof options.openworkRemoteAccess === "boolean"
-      ? options.openworkRemoteAccess
-      : openworkServerState.remoteAccessEnabled;
+    const redrobRemoteAccess = typeof options.redrobRemoteAccess === "boolean"
+      ? options.redrobRemoteAccess
+      : redrobServerState.remoteAccessEnabled;
     return engineStart(projectDir, {
       runtime: engineState.runtime,
       workspacePaths: [projectDir],
       opencodeEnableExa: options.opencodeEnableExa,
-      openworkRemoteAccess,
+      redrobRemoteAccess,
       ...(typeof options.engineRollover === "boolean"
         ? { engineRollover: options.engineRollover }
         : {}),
@@ -2183,29 +2183,29 @@ export function createRuntimeManager({
       lifecycleState,
       engine: await engineInfo(),
       enginePool: inProcessServer?.managedOpencodePool?.() ?? null,
-      openworkServer: snapshotOpenworkServerState(openworkServerState),
+      redrobServer: snapshotRedrobServerState(redrobServerState),
     };
   }
 
-  async function openworkServerInfo() {
-    return snapshotOpenworkServerState(openworkServerState);
+  async function redrobServerInfo() {
+    return snapshotRedrobServerState(redrobServerState);
   }
 
-  async function openworkServerRestart(options = {}) {
+  async function redrobServerRestart(options = {}) {
     const workspacePaths = prioritizeWorkspacePaths(engineState.projectDir, await listLocalWorkspacePaths(), {
       platform: workspacePlatform,
     });
     const shouldManageOpencode = Boolean(
-      openworkServerState.managedOpencodeBinPath || engineState.opencodeBinPath || !engineState.baseUrl,
+      redrobServerState.managedOpencodeBinPath || engineState.opencodeBinPath || !engineState.baseUrl,
     );
-    return startOpenworkServer({
+    return startRedrobServer({
       workspacePaths,
       opencodeBaseUrl: shouldManageOpencode ? null : engineState.baseUrl,
       opencodeUsername: shouldManageOpencode ? null : engineState.opencodeUsername,
       opencodePassword: shouldManageOpencode ? null : engineState.opencodePassword,
       remoteAccessEnabled: options.remoteAccessEnabled === true,
       manageOpencode: shouldManageOpencode,
-      opencodeBinPath: engineState.opencodeBinPath ?? openworkServerState.managedOpencodeBinPath,
+      opencodeBinPath: engineState.opencodeBinPath ?? redrobServerState.managedOpencodeBinPath,
     });
   }
 
@@ -2216,7 +2216,7 @@ export function createRuntimeManager({
         status: -1,
         stdout: "",
         stderr:
-          "Guided install is not supported on Windows yet. Install the OpenWork-pinned OpenCode version manually, then restart OpenWork.",
+          "Guided install is not supported on Windows yet. Install the Redrob Work-pinned OpenCode version manually, then restart Redrob Work.",
       };
     }
 
@@ -2262,8 +2262,8 @@ export function createRuntimeManager({
     };
   }
 
-  async function sandboxCleanupOpenworkContainers() {
-    const candidates = await listOpenworkManagedContainers().catch((error) => {
+  async function sandboxCleanupRedrobContainers() {
+    const candidates = await listRedrobManagedContainers().catch((error) => {
       throw error;
     });
     const removed = [];
@@ -2296,9 +2296,9 @@ export function createRuntimeManager({
     engineInfo,
     engineDoctor,
     engineInstall,
-    openworkServerInfo,
-    openworkServerRestart: (options) => withRuntimeLifecycle(() => openworkServerRestart(options)),
+    redrobServerInfo,
+    redrobServerRestart: (options) => withRuntimeLifecycle(() => redrobServerRestart(options)),
     opencodeMcpAuth,
-    sandboxCleanupOpenworkContainers,
+    sandboxCleanupRedrobContainers,
   };
 }

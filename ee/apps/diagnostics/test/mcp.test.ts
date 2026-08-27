@@ -41,7 +41,7 @@ function mcpRequest(body: unknown, headers: Readonly<Record<string, string>> = {
     body: JSON.stringify(body),
     headers: {
       accept: "application/json, text/event-stream",
-      authorization: "Bearer OpenWorkDiagnosticsToken!",
+      authorization: "Bearer RedrobDiagnosticsToken!",
       "content-type": "application/json",
       ...headers,
     },
@@ -56,7 +56,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function mockAuthorizationSubject(): string {
   const subject = mcpAuthorizationSubject(
     mcpRequest({}),
-    "OpenWorkDiagnosticsToken!",
+    "RedrobDiagnosticsToken!",
     "local-diagnostics-signing-secret-change-me",
   )
   if (!subject) throw new Error("Expected a mock authorization subject")
@@ -79,7 +79,7 @@ async function callMcpTool(id: number, session: string, name: string) {
   }), JSON.stringify(body))
 }
 
-describe("OpenWork Diagnostics MCP endpoint", () => {
+describe("Redrob Work Diagnostics MCP endpoint", () => {
   test("keeps short-lived OAuth access tokens distinct from MCP session tokens", () => {
     const secret = "a-test-signing-secret-with-more-than-32-characters"
     const now = Date.now()
@@ -144,7 +144,7 @@ describe("OpenWork Diagnostics MCP endpoint", () => {
       throw new Error("Expected an authorization-required JSON-RPC error")
     }
     expect(envelope.error.code).toBe(-32001)
-    expect(envelope.error.data.provider).toBe("openwork-diagnostics")
+    expect(envelope.error.data.provider).toBe("redrob-diagnostics")
     const connectUrl = envelope.error.data.connect_url
     expect(typeof connectUrl).toBe("string")
     if (typeof connectUrl !== "string") throw new Error("Expected a mock authorization link")
@@ -152,7 +152,7 @@ describe("OpenWork Diagnostics MCP endpoint", () => {
 
     const verified = await completeMockAuthorization(new Request(connectUrl))
     expect(verified.status).toBe(200)
-    expect(await verified.text()).toContain("Return to OpenWork")
+    expect(await verified.text()).toContain("Return to Redrob Work")
 
     // A fresh MCP session models the reconnect/retry performed after the
     // browser action. Authorization is bound to the synthetic bearer identity,
@@ -268,7 +268,7 @@ describe("redacted wire history", () => {
     const request = new Request("http://localhost:3010/mcp", {
       headers: {
         [EGRESS_DIAGNOSTIC_RUN_HEADER]: runId,
-        [EGRESS_DIAGNOSTIC_SIGNATURE_HEADER]: createDiagnosticRunSignature("OpenWorkDiagnosticsToken!", runId, step),
+        [EGRESS_DIAGNOSTIC_SIGNATURE_HEADER]: createDiagnosticRunSignature("RedrobDiagnosticsToken!", runId, step),
         [EGRESS_DIAGNOSTIC_STEP_HEADER]: step,
       },
     })

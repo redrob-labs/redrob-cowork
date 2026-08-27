@@ -14,16 +14,16 @@ import {
   type DenOrgLlmProvider,
   type DenOrgLlmProviderConnection,
 } from "../../../../app/lib/den";
-import { getOpenworkGatewayOrigin } from "../../../../app/lib/gateway-runtime";
+import { getRedrobGatewayOrigin } from "../../../../app/lib/gateway-runtime";
 import { unwrap, waitForHealthy } from "../../../../app/lib/opencode";
 import {
   readOpencodeConfig,
   writeOpencodeConfig,
   engineRestart,
-  workspaceOpenworkRead,
-  workspaceOpenworkWrite,
+  workspaceRedrobRead,
+  workspaceRedrobWrite,
 } from "../../../../app/lib/desktop";
-import { OpenworkServerError } from "../../../../app/lib/openwork-server";
+import { RedrobServerError } from "../../../../app/lib/redrob-server";
 import type {
   Client,
   ProviderListItem,
@@ -41,23 +41,23 @@ import {
   getConnectedProviderItems,
 } from "../../../infra/provider-list-query";
 import type {
-  OpenworkCloudProviderSyncRun,
-  OpenworkCloudProviderSyncSkippedProvider,
-} from "../../../../app/lib/openwork-server";
-import type { OpenworkServerStoreSnapshot } from "../openwork-server-store";
+  RedrobCloudProviderSyncRun,
+  RedrobCloudProviderSyncSkippedProvider,
+} from "../../../../app/lib/redrob-server";
+import type { RedrobServerStoreSnapshot } from "../redrob-server-store";
 
 /**
- * The slice of the openwork-server store this store actually consumes.
+ * The slice of the redrob-server store this store actually consumes.
  * The settings route passes the full store; the session route passes a
  * lightweight endpoint-backed adapter (previously forced through `as never`).
  */
-export type ProviderAuthOpenworkServer = {
+export type ProviderAuthRedrobServer = {
   getSnapshot: () => Pick<
-    OpenworkServerStoreSnapshot,
-    "openworkServerStatus" | "openworkServerClient"
+    RedrobServerStoreSnapshot,
+    "redrobServerStatus" | "redrobServerClient"
   > & {
-    openworkServerAuth?: { token?: string; hostToken?: string };
-    openworkServerCapabilities: { config?: { read?: boolean; write?: boolean }; providerSync?: boolean } | null;
+    redrobServerAuth?: { token?: string; hostToken?: string };
+    redrobServerCapabilities: { config?: { read?: boolean; write?: boolean }; providerSync?: boolean } | null;
   };
 };
 import {
@@ -114,7 +114,7 @@ type CloudProviderSyncReason =
   | "settings_cloud_opened"
   | "manual";
 
-type CloudProviderSyncWorkResult = void | OpenworkCloudProviderSyncRun;
+type CloudProviderSyncWorkResult = void | RedrobCloudProviderSyncRun;
 
 type GlobalCloudProviderSyncBatch = {
   contextKey: string;
@@ -255,7 +255,7 @@ export type ProviderOAuthStartResult = {
  */
 export type CloudProviderServerSyncState = {
   reloadPending: boolean;
-  skippedProviders: Record<string, OpenworkCloudProviderSyncSkippedProvider>;
+  skippedProviders: Record<string, RedrobCloudProviderSyncSkippedProvider>;
 };
 
 export type ProviderAuthStoreSnapshot = {
@@ -284,7 +284,7 @@ type CreateProviderAuthStoreOptions = {
   selectedWorkspaceRoot: () => string;
   runtimeWorkspaceId: () => string | null;
   ensureRuntimeWorkspaceId?: () => Promise<string | null | undefined>;
-  openworkServer: ProviderAuthOpenworkServer;
+  redrobServer: ProviderAuthRedrobServer;
   setProviders: (value: ProviderListItem[]) => void;
   setProviderDefaults: (value: Record<string, string>) => void;
   setProviderConnectedIds: (value: string[]) => void;
@@ -406,50 +406,50 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     return Array.from(merged.values()).toSorted(compareProviders);
   };
 
-  const resolveOpenworkConfigTarget = async (mode: "read" | "write") => {
-    const openworkSnapshot = options.openworkServer.getSnapshot();
-    const openworkClient = openworkSnapshot.openworkServerClient;
-    let openworkWorkspaceId = options.runtimeWorkspaceId()?.trim() || null;
-    if (!openworkWorkspaceId && openworkSnapshot.openworkServerStatus === "connected" && openworkClient) {
-      openworkWorkspaceId = (await options.ensureRuntimeWorkspaceId?.())?.trim() || null;
+  const resolveRedrobConfigTarget = async (mode: "read" | "write") => {
+    const redrobSnapshot = options.redrobServer.getSnapshot();
+    const redrobClient = redrobSnapshot.redrobServerClient;
+    let redrobWorkspaceId = options.runtimeWorkspaceId()?.trim() || null;
+    if (!redrobWorkspaceId && redrobSnapshot.redrobServerStatus === "connected" && redrobClient) {
+      redrobWorkspaceId = (await options.ensureRuntimeWorkspaceId?.())?.trim() || null;
     }
-    const hasOpenworkTarget =
-      openworkSnapshot.openworkServerStatus === "connected" &&
-      Boolean(openworkClient && openworkWorkspaceId);
-    const canUseOpenworkServer =
-      hasOpenworkTarget &&
-      openworkSnapshot.openworkServerCapabilities?.config?.[mode] !== false;
+    const hasRedrobTarget =
+      redrobSnapshot.redrobServerStatus === "connected" &&
+      Boolean(redrobClient && redrobWorkspaceId);
+    const canUseRedrobServer =
+      hasRedrobTarget &&
+      redrobSnapshot.redrobServerCapabilities?.config?.[mode] !== false;
     return {
-      openworkClient,
-      openworkWorkspaceId,
-      hasOpenworkTarget,
-      canUseOpenworkServer,
+      redrobClient,
+      redrobWorkspaceId,
+      hasRedrobTarget,
+      canUseRedrobServer,
     };
   };
 
   const serverHandlesProviderSync = () => {
-    const openworkSnapshot = options.openworkServer.getSnapshot();
+    const redrobSnapshot = options.redrobServer.getSnapshot();
     return Boolean(
-      openworkSnapshot.openworkServerStatus === "connected" &&
-      openworkSnapshot.openworkServerCapabilities?.providerSync === true &&
-      openworkSnapshot.openworkServerAuth?.hostToken?.trim() &&
-      openworkSnapshot.openworkServerClient,
+      redrobSnapshot.redrobServerStatus === "connected" &&
+      redrobSnapshot.redrobServerCapabilities?.providerSync === true &&
+      redrobSnapshot.redrobServerAuth?.hostToken?.trim() &&
+      redrobSnapshot.redrobServerClient,
     );
   };
 
   const pushDenSession = (force = false): Promise<void> => {
-    const openworkSnapshot = options.openworkServer.getSnapshot();
-    const openworkClient = openworkSnapshot.openworkServerClient;
+    const redrobSnapshot = options.redrobServer.getSnapshot();
+    const redrobClient = redrobSnapshot.redrobServerClient;
     const settings = readDenSettings();
     const apiBaseUrl = settings.apiBaseUrl ?? resolveDenBaseUrls(settings).apiBaseUrl;
     const token = settings.authToken?.trim() ?? "";
     const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!serverHandlesProviderSync() || !openworkClient || !token || !orgId) return Promise.resolve();
+    if (!serverHandlesProviderSync() || !redrobClient || !token || !orgId) return Promise.resolve();
     const key = `${apiBaseUrl}::${orgId}::${token}`;
     if (!force && key === lastDenSessionPushKey) return Promise.resolve();
     if (key === denSessionPushKey && denSessionPushInFlight) return denSessionPushInFlight;
     denSessionPushKey = key;
-    const request = openworkClient.putDenSession({ baseUrl: apiBaseUrl, token, orgId });
+    const request = redrobClient.putDenSession({ baseUrl: apiBaseUrl, token, orgId });
     denSessionPushInFlight = request;
     request.then(
       () => { lastDenSessionPushKey = key; },
@@ -504,15 +504,15 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     return "";
   };
 
-  const mirrorOpenWorkModelsVoiceEnv = async (provider: DenOrgLlmProviderConnection, apiKey: string) => {
+  const mirrorRedrobWorkModelsVoiceEnv = async (provider: DenOrgLlmProviderConnection, apiKey: string) => {
     const trimmedKey = apiKey.trim();
     if (!trimmedKey) return;
-    const openworkClient = options.openworkServer.getSnapshot().openworkServerClient;
-    if (!openworkClient) return;
+    const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
+    if (!redrobClient) return;
     const entries = getCloudProviderEnv(provider.providerConfig)
       .slice(0, 1)
       .map((key) => ({ key, value: trimmedKey }));
-    if (provider.source === "openwork") {
+    if (provider.source === "redrob") {
       if (!entries.some((entry) => entry.key === "REDROB_CLOUD_API_KEY")) {
         entries.unshift({ key: "REDROB_CLOUD_API_KEY", value: trimmedKey });
       }
@@ -520,29 +520,29 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       if (baseUrl) entries.push({ key: "REDROB_INFERENCE_BASE_URL", value: baseUrl });
     }
     if (entries.length === 0) return;
-    await openworkClient.upsertUserEnv(entries);
+    await redrobClient.upsertUserEnv(entries);
   };
 
-  const readWorkspaceOpenworkConfigRecord = async (): Promise<
+  const readWorkspaceRedrobConfigRecord = async (): Promise<
     Record<string, unknown>
   > => {
     const root = options.selectedWorkspaceRoot().trim();
     const isLocalWorkspace =
       options.selectedWorkspaceDisplay().workspaceType === "local";
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveOpenworkConfigTarget("read");
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveRedrobConfigTarget("read");
 
-    if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-      const config = await openworkClient.getConfig(openworkWorkspaceId);
-      return config.openwork ?? {};
+    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+      const config = await redrobClient.getConfig(redrobWorkspaceId);
+      return config.redrob ?? {};
     }
 
-    if (hasOpenworkTarget) {
+    if (hasRedrobTarget) {
       return {};
     }
 
     if (isLocalWorkspace && isDesktopRuntime() && root) {
-      return (await workspaceOpenworkRead({
+      return (await workspaceRedrobRead({
         workspacePath: root,
       })) as unknown as Record<string, unknown>;
     }
@@ -550,33 +550,33 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     return {};
   };
 
-  const writeWorkspaceOpenworkConfigRecord = async (
+  const writeWorkspaceRedrobConfigRecord = async (
     config: Record<string, unknown>,
   ) => {
     const root = options.selectedWorkspaceRoot().trim();
     const isLocalWorkspace =
       options.selectedWorkspaceDisplay().workspaceType === "local";
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveOpenworkConfigTarget("write");
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveRedrobConfigTarget("write");
 
-    if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-      await openworkClient.patchConfig(openworkWorkspaceId, { openwork: config });
+    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+      await redrobClient.patchConfig(redrobWorkspaceId, { redrob: config });
       return true;
     }
 
-    if (hasOpenworkTarget) {
+    if (hasRedrobTarget) {
       return false;
     }
 
     if (isLocalWorkspace && isDesktopRuntime() && root) {
-      const result = await workspaceOpenworkWrite({
+      const result = await workspaceRedrobWrite({
         workspacePath: root,
         config: config as never,
       });
       const typed = result as { ok: boolean; stderr?: string; stdout?: string };
       if (!typed.ok) {
         throw new Error(
-          typed.stderr || typed.stdout || "Failed to write .opencode/openwork.json",
+          typed.stderr || typed.stdout || "Failed to write .opencode/redrob.json",
         );
       }
       return true;
@@ -588,9 +588,9 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   const refreshImportedCloudProviders = async (refreshOptions?: { strict?: boolean }) => {
     try {
       if (serverHandlesProviderSync()) {
-        const openworkClient = options.openworkServer.getSnapshot().openworkServerClient;
-        if (!openworkClient) throw new Error("OpenWork server unavailable.");
-        const status = await openworkClient.getCloudProviderSyncStatus();
+        const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
+        if (!redrobClient) throw new Error("Redrob Work server unavailable.");
+        const status = await redrobClient.getCloudProviderSyncStatus();
         const next = Object.fromEntries(status.providers.map((provider) => [provider.cloudProviderId, provider]));
         setStateField("importedCloudProviders", next);
         // Carry the server's truth alongside the records: rows must not show
@@ -609,7 +609,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       if (state.cloudProviderServerSync !== null) {
         setStateField("cloudProviderServerSync", null);
       }
-      const config = await readWorkspaceOpenworkConfigRecord();
+      const config = await readWorkspaceRedrobConfigRecord();
       const cloudImports = readWorkspaceCloudImports(config);
       const next = cloudImports.providers;
       // Guard: don't overwrite non-empty import state with an empty read.
@@ -633,7 +633,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   const persistImportedCloudProviders = async (
     nextProviders: Record<string, CloudImportedProvider>,
   ) => {
-    const config = await readWorkspaceOpenworkConfigRecord();
+    const config = await readWorkspaceRedrobConfigRecord();
     const cloudImports = readWorkspaceCloudImports(config);
     const nextCloudImports = {
       ...cloudImports,
@@ -642,10 +642,10 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     const nextConfig = withWorkspaceCloudImports(config, {
       ...nextCloudImports,
     });
-    const persisted = await writeWorkspaceOpenworkConfigRecord(nextConfig);
+    const persisted = await writeWorkspaceRedrobConfigRecord(nextConfig);
     if (!persisted) {
       throw new Error(
-        "OpenWork server unavailable. Connect to manage imported cloud providers.",
+        "Redrob Work server unavailable. Connect to manage imported cloud providers.",
       );
     }
     setStateField("importedCloudProviders", nextProviders);
@@ -655,15 +655,15 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     const root = options.selectedWorkspaceRoot().trim();
     const isLocalWorkspace =
       options.selectedWorkspaceDisplay().workspaceType === "local";
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveOpenworkConfigTarget("read");
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveRedrobConfigTarget("read");
 
-    if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-      return await openworkClient.readOpencodeConfigFile(openworkWorkspaceId, "project");
+    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+      return await redrobClient.readOpencodeConfigFile(redrobWorkspaceId, "project");
     }
 
-    if (hasOpenworkTarget) {
-      throw new Error("OpenWork server config API is unavailable for this workspace.");
+    if (hasRedrobTarget) {
+      throw new Error("Redrob Work server config API is unavailable for this workspace.");
     }
 
     if (isLocalWorkspace && isDesktopRuntime() && root) {
@@ -677,12 +677,12 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     const root = options.selectedWorkspaceRoot().trim();
     const isLocalWorkspace =
       options.selectedWorkspaceDisplay().workspaceType === "local";
-    const { openworkClient, openworkWorkspaceId, hasOpenworkTarget, canUseOpenworkServer } =
-      await resolveOpenworkConfigTarget("write");
+    const { redrobClient, redrobWorkspaceId, hasRedrobTarget, canUseRedrobServer } =
+      await resolveRedrobConfigTarget("write");
 
-    if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-      const result = await openworkClient.writeOpencodeConfigFile(
-        openworkWorkspaceId,
+    if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+      const result = await redrobClient.writeOpencodeConfigFile(
+        redrobWorkspaceId,
         "project",
         content,
       ) as { ok: boolean; stderr?: string; stdout?: string };
@@ -692,8 +692,8 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       return true;
     }
 
-    if (hasOpenworkTarget) {
-      throw new Error("OpenWork server config API is unavailable for this workspace.");
+    if (hasRedrobTarget) {
+      throw new Error("Redrob Work server config API is unavailable for this workspace.");
     }
 
     if (isLocalWorkspace && isDesktopRuntime() && root) {
@@ -714,12 +714,12 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
    * is no read-modify-write race and no edit of the user's opencode.jsonc.
    */
   const patchRuntimeProviders = async (update: Record<string, unknown>) => {
-    const { openworkClient, openworkWorkspaceId, canUseOpenworkServer } =
-      await resolveOpenworkConfigTarget("write");
-    if (!canUseOpenworkServer || !openworkClient || !openworkWorkspaceId) {
-      throw new Error("OpenWork server unavailable. Connect to manage cloud providers.");
+    const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
+      await resolveRedrobConfigTarget("write");
+    if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
+      throw new Error("Redrob Work server unavailable. Connect to manage cloud providers.");
     }
-    await openworkClient.patchConfig(openworkWorkspaceId, {
+    await redrobClient.patchConfig(redrobWorkspaceId, {
       opencode: { provider: update },
     });
   };
@@ -738,8 +738,8 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     if (options.providers().some((provider) => provider.id?.trim() === REDROB_PROVIDER_ID)) {
       return false;
     }
-    const { canUseOpenworkServer } = await resolveOpenworkConfigTarget("write");
-    if (!canUseOpenworkServer) return false;
+    const { canUseRedrobServer } = await resolveRedrobConfigTarget("write");
+    if (!canUseRedrobServer) return false;
     try {
       await patchRuntimeProviders({ [REDROB_PROVIDER_ID]: buildRedrobProviderConfig() });
       return true;
@@ -752,20 +752,20 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     providerUpdate: Record<string, unknown>,
     nextProviders: Record<string, CloudImportedProvider>,
   ) => {
-    const { openworkClient, openworkWorkspaceId, canUseOpenworkServer } =
-      await resolveOpenworkConfigTarget("write");
-    if (!canUseOpenworkServer || !openworkClient || !openworkWorkspaceId) {
-      throw new Error("OpenWork server unavailable. Connect to manage cloud providers.");
+    const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
+      await resolveRedrobConfigTarget("write");
+    if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
+      throw new Error("Redrob Work server unavailable. Connect to manage cloud providers.");
     }
-    const config = await readWorkspaceOpenworkConfigRecord();
+    const config = await readWorkspaceRedrobConfigRecord();
     const cloudImports = readWorkspaceCloudImports(config);
     const nextConfig = withWorkspaceCloudImports(config, {
       ...cloudImports,
       providers: nextProviders,
     });
-    await openworkClient.patchConfig(openworkWorkspaceId, {
+    await redrobClient.patchConfig(redrobWorkspaceId, {
       opencode: { provider: providerUpdate },
-      openwork: nextConfig,
+      redrob: nextConfig,
     });
     setStateField("importedCloudProviders", nextProviders);
   };
@@ -813,10 +813,10 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
 
     const c = options.client();
-    const openworkSnapshot = options.openworkServer.getSnapshot();
+    const redrobSnapshot = options.redrobServer.getSnapshot();
     const workspaceId = options.runtimeWorkspaceId();
     const workspaceType = options.selectedWorkspaceDisplay().workspaceType;
-    const canUseManagedRuntime = Boolean(openworkSnapshot.openworkServerClient && workspaceId?.trim() && workspaceType === "local");
+    const canUseManagedRuntime = Boolean(redrobSnapshot.redrobServerClient && workspaceId?.trim() && workspaceType === "local");
     if (!c && !canUseManagedRuntime) {
       throw new Error(t("providers.not_connected"));
     }
@@ -824,7 +824,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     const next = fallbackUpdate(config);
     await updateManagedDisabledProviders({
       opencodeClient: c,
-      openworkClient: openworkSnapshot.openworkServerClient,
+      redrobClient: redrobSnapshot.redrobServerClient,
       workspaceId,
       workspaceType,
       disabledProviders: next.disabled_providers,
@@ -897,17 +897,17 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     // the user's opencode.jsonc. Fall back to project config only when the
     // managed runtime endpoint is unavailable.
     const c = options.client();
-    const openworkSnapshot = options.openworkServer.getSnapshot();
+    const redrobSnapshot = options.redrobServer.getSnapshot();
     const workspaceId = options.runtimeWorkspaceId();
     const workspaceType = options.selectedWorkspaceDisplay().workspaceType;
     const canUseManagedRuntime = Boolean(
-      openworkSnapshot.openworkServerClient && workspaceId?.trim() && workspaceType === "local",
+      redrobSnapshot.redrobServerClient && workspaceId?.trim() && workspaceType === "local",
     );
 
     if (canUseManagedRuntime || c) {
       const result = await updateManagedDisabledProviders({
         opencodeClient: c,
-        openworkClient: openworkSnapshot.openworkServerClient,
+        redrobClient: redrobSnapshot.redrobServerClient,
         workspaceId,
         workspaceType,
         disabledProviders: nextDisabled,
@@ -975,10 +975,10 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
     // Runtime-managed orphans (`lpr_*` keys in the workspace runtime config).
     try {
-      const { openworkClient, openworkWorkspaceId, canUseOpenworkServer } =
-        await resolveOpenworkConfigTarget("write");
-      if (canUseOpenworkServer && openworkClient && openworkWorkspaceId) {
-        const merged = await openworkClient.getConfig(openworkWorkspaceId);
+      const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
+        await resolveRedrobConfigTarget("write");
+      if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
+        const merged = await redrobClient.getConfig(redrobWorkspaceId);
         const runtimeProvider = isRecord(merged.opencode) ? merged.opencode.provider : null;
         const runtimeOrphans = isRecord(runtimeProvider)
           ? Object.keys(runtimeProvider).filter((key) => /^lpr_/i.test(key))
@@ -1026,7 +1026,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   ) => {
     const localProviderId = getCloudManagedProviderId(provider);
     const existingImported = state.importedCloudProviders[provider.id] ?? null;
-    // `lpr_*` / `openwork` keys are owned by the cloud-import system. When the
+    // `lpr_*` / `redrob` keys are owned by the cloud-import system. When the
     // import baseline was lost or diverged (e.g. it lives in a different file
     // than the provider block, or a prior reconcile failed mid-flight), an
     // existing cloud-managed block must be treated as a re-import to reconcile,
@@ -1058,7 +1058,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     if (
       !configFile?.content?.trim() ||
       existingImported ||
-      (cloudManagedKey && localProviderId !== "openwork")
+      (cloudManagedKey && localProviderId !== "redrob")
     ) {
       return;
     }
@@ -1482,7 +1482,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       const shouldUseServerReload = !(
         isDesktopRuntime() && options.selectedWorkspaceDisplay().workspaceType === "local"
       );
-      // Prefer the OpenWork server engine reload: it disposes the engine AND
+      // Prefer the Redrob Work server engine reload: it disposes the engine AND
       // re-registers runtime-DB MCPs, so non-primary workspaces and pending
       // changes are picked up instead of silently dropping (toggles "turn
       // off").
@@ -1491,19 +1491,19 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
         lastGlobalProviderDisposeRefreshAt = now;
         if (shouldUseServerReload) {
           try {
-            const openworkSnapshot = options.openworkServer.getSnapshot();
-            const openworkClient = openworkSnapshot.openworkServerClient;
-            if (openworkSnapshot.openworkServerStatus === "connected" && openworkClient) {
+            const redrobSnapshot = options.redrobServer.getSnapshot();
+            const redrobClient = redrobSnapshot.redrobServerClient;
+            if (redrobSnapshot.redrobServerStatus === "connected" && redrobClient) {
               const workspaceId =
                 options.runtimeWorkspaceId()?.trim() ||
                 (await options.ensureRuntimeWorkspaceId?.())?.trim() ||
                 "";
               if (workspaceId) {
                 try {
-                  await openworkClient.reloadEngine(workspaceId);
+                  await redrobClient.reloadEngine(workspaceId);
                 } catch (error) {
                   const unreachable =
-                    error instanceof OpenworkServerError && error.code === "opencode_engine_unreachable";
+                    error instanceof RedrobServerError && error.code === "opencode_engine_unreachable";
                   if (!unreachable || !isDesktopRuntime()) {
                     throw error;
                   }
@@ -1692,7 +1692,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     const token = settings.authToken?.trim() ?? "";
     const orgId = settings.activeOrgId?.trim() ?? "";
     if (!token || !orgId) {
-      throw new Error("Sign in to OpenWork Cloud and choose an organization first.");
+      throw new Error("Sign in to Redrob Work Cloud and choose an organization first.");
     }
 
     try {
@@ -1715,22 +1715,22 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       await assertCloudProviderImportSafe(provider);
 
       if (envEntries.length > 0) {
-        const openworkClient = options.openworkServer.getSnapshot().openworkServerClient;
-        if (!openworkClient) {
+        const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
+        if (!redrobClient) {
           throw new CloudProviderNeedsServerError(
             `${provider.name} needs environment variables (${envEntries
               .map((entry) => entry.key)
-              .join(", ")}) but the OpenWork server is not available.`,
+              .join(", ")}) but the Redrob Work server is not available.`,
           );
         }
-        await openworkClient.upsertUserEnv(envEntries);
+        await redrobClient.upsertUserEnv(envEntries);
       }
       if (primaryApiKey) {
         await c.auth.set({
           providerID: localProviderId,
           auth: { type: "api", key: primaryApiKey },
         });
-        await mirrorOpenWorkModelsVoiceEnv(provider, primaryApiKey);
+        await mirrorRedrobWorkModelsVoiceEnv(provider, primaryApiKey);
       }
       if (existingImported?.providerId && existingImported.providerId !== localProviderId) {
         try {
@@ -1959,19 +1959,19 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       return;
     }
 
-    // Imports, baseline reads, and persistence all go through the OpenWork
+    // Imports, baseline reads, and persistence all go through the Redrob Work
     // server target (patchRuntimeProviders throws without it). Running before
     // the target resolves made the baseline read fall back to an empty source
     // and re-import every org provider — engine dispose churn on settings open.
     const [readTarget, target] = await Promise.all([
-      resolveOpenworkConfigTarget("read"),
-      resolveOpenworkConfigTarget("write"),
+      resolveRedrobConfigTarget("read"),
+      resolveRedrobConfigTarget("write"),
     ]);
     if (
-      !readTarget.canUseOpenworkServer ||
-      !target.canUseOpenworkServer ||
-      !target.openworkClient ||
-      !target.openworkWorkspaceId
+      !readTarget.canUseRedrobServer ||
+      !target.canUseRedrobServer ||
+      !target.redrobClient ||
+      !target.redrobWorkspaceId
     ) {
       return;
     }
@@ -2109,7 +2109,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       }
       return;
     }
-    if (getOpenworkGatewayOrigin()) {
+    if (getRedrobGatewayOrigin()) {
       if (!loggedGatewayCloudProviderSyncSkip) {
         loggedGatewayCloudProviderSyncSkip = true;
         console.info(
@@ -2124,12 +2124,12 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
         const result = await enqueueGlobalCloudProviderSync(
           `server:${getCloudProviderSyncContextKey()}`,
           async () => {
-            const openworkClient = options.openworkServer.getSnapshot().openworkServerClient;
-            if (!openworkClient) throw new Error("OpenWork server unavailable.");
-            let result = await openworkClient.runCloudProviderSyncNow(reason);
+            const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
+            if (!redrobClient) throw new Error("Redrob Work server unavailable.");
+            let result = await redrobClient.runCloudProviderSyncNow(reason);
             if (result.status === "no_session") {
               await pushDenSession(true);
-              result = await openworkClient.runCloudProviderSyncNow(reason);
+              result = await redrobClient.runCloudProviderSyncNow(reason);
             }
             return result;
           },
@@ -2392,7 +2392,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
           if (serverHandlesProviderSync()) {
             lastDenSessionPushKey = "";
             void (async () => {
-              await options.openworkServer.getSnapshot().openworkServerClient?.deleteDenSession().catch(() => undefined);
+              await options.redrobServer.getSnapshot().redrobServerClient?.deleteDenSession().catch(() => undefined);
               // The server removes cloud-owned environment entries from disk,
               // but a running OpenCode child retains its spawn environment.
               // Explicit desktop sign-out must replace that process so an

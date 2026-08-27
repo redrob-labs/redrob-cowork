@@ -28,7 +28,7 @@ function requireItem(body: unknown, label: string): Record<string, unknown> {
 function auth(session: DenSession, orgId?: string): Record<string, string> {
   return {
     authorization: `Bearer ${session.token}`,
-    ...(orgId ? { "x-openwork-org-id": orgId } : {}),
+    ...(orgId ? { "x-redrob-org-id": orgId } : {}),
   };
 }
 

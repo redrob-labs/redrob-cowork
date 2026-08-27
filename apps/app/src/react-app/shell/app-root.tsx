@@ -37,12 +37,12 @@ import { ReactRenderWatchdogOverlay } from "./react-render-watchdog-overlay";
 import { CloudWorkspaceOverlay, CloudWorkspaceStatusProvider } from "./cloud-workspace-overlay";
 import { AppMenuProvider } from "./app-menu";
 import {
-  OpenworkControlProvider,
-  OpenworkRouteControlActions,
+  RedrobControlProvider,
+  RedrobRouteControlActions,
   useControlAction,
-  type OpenworkControlAction,
+  type RedrobControlAction,
 } from "./control/control-provider";
-import { OpenworkContextPublisher } from "./openwork-context-publisher";
+import { RedrobContextPublisher } from "./redrob-context-publisher";
 import { BottomLeftControls } from "./bottom-left-controls";
 import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
@@ -220,13 +220,13 @@ function DenSigninGate({ children }: DenSigninGateProps) {
 }
 
 /**
- * Control actions for cloud auth. Placed inside OpenworkControlProvider so
+ * Control actions for cloud auth. Placed inside RedrobControlProvider so
  * the actions are available on every route (including /welcome and /signin).
  */
 function DenAuthControlActions() {
   const denAuth = useDenAuth();
 
-  const exchangeGrantAction = useMemo<OpenworkControlAction>(() => ({
+  const exchangeGrantAction = useMemo<RedrobControlAction>(() => ({
     id: "auth.exchange-grant",
     label: "Sign in with a handoff grant",
     description: "Exchange a desktop handoff grant string to sign in without the browser flow.",
@@ -256,7 +256,7 @@ function DenAuthControlActions() {
   }), []);
   useControlAction(exchangeGrantAction);
 
-  const authStatusAction = useMemo<OpenworkControlAction>(() => ({
+  const authStatusAction = useMemo<RedrobControlAction>(() => ({
     id: "auth.status",
     label: "Get auth status",
     description: "Return the current cloud sign-in status and user.",
@@ -270,7 +270,7 @@ function DenAuthControlActions() {
   }), [denAuth.status, denAuth.user]);
   useControlAction(authStatusAction);
 
-  const setEvalBaseUrlAction = useMemo<OpenworkControlAction | null>(() => {
+  const setEvalBaseUrlAction = useMemo<RedrobControlAction | null>(() => {
     if (!import.meta.env.DEV) return null;
     return {
       id: "eval.auth.set-base-url",
@@ -309,10 +309,10 @@ function DenAuthControlActions() {
 
 /**
  * Control action for eval automation: inject brand theme (logo, icon, accent color)
- * via the dev-only desktop config bridge. Placed inside OpenworkControlProvider.
+ * via the dev-only desktop config bridge. Placed inside RedrobControlProvider.
  */
 function BrandThemeControlActions() {
-  const applyAction = useMemo<OpenworkControlAction | null>(() => {
+  const applyAction = useMemo<RedrobControlAction | null>(() => {
     if (!import.meta.env.DEV) return null;
     return {
       id: "eval.brand_theme.apply",
@@ -325,7 +325,7 @@ function BrandThemeControlActions() {
         { name: "brandAccentColor", type: "string", description: "Radix color family" },
       ],
       execute: (args) => {
-        const bridge = (window as unknown as Record<string, unknown>).__openworkApplyDesktopConfig;
+        const bridge = (window as unknown as Record<string, unknown>).__redrobApplyDesktopConfig;
         if (typeof bridge !== "function") {
           return { ok: false, error: "Desktop config bridge not available (dev mode only)." };
         }
@@ -336,7 +336,7 @@ function BrandThemeControlActions() {
   }, []);
   useControlAction(applyAction);
 
-  const relaunchAction = useMemo<OpenworkControlAction | null>(() => {
+  const relaunchAction = useMemo<RedrobControlAction | null>(() => {
     if (!import.meta.env.DEV) return null;
     return {
       id: "eval.app.relaunch",
@@ -388,9 +388,9 @@ export function AppRoot() {
       <DevProfiler id="AppRoot">
         <ShellConfigProvider>
         <AppMenuProvider>
-        <OpenworkControlProvider>
-          <OpenworkRouteControlActions />
-          <OpenworkContextPublisher />
+        <RedrobControlProvider>
+          <RedrobRouteControlActions />
+          <RedrobContextPublisher />
           <DenAuthControlActions />
           <BrandThemeControlActions />
           <CloudWorkspaceStatusProvider>
@@ -505,7 +505,7 @@ export function AppRoot() {
           </EnterpriseActivationGate>
           <CloudWorkspaceOverlay />
           </CloudWorkspaceStatusProvider>
-        </OpenworkControlProvider>
+        </RedrobControlProvider>
         </AppMenuProvider>
         </ShellConfigProvider>
       </DevProfiler>

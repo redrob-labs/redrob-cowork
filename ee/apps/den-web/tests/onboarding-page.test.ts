@@ -14,25 +14,25 @@ const publicInstallers = read("_lib", "public-installers.ts");
 
 describe("Marketplace onboarding page", () => {
   test("reuses the landing download card and den choice cards", () => {
-    expect(screen).toContain("DownloadOpenWorkCard");
+    expect(screen).toContain("DownloadRedrobWorkCard");
     expect(screen).toContain("DenChoiceCard");
     expect(screen).toContain("DenSectionHeader");
     expect(screen).toContain("DenBadge");
     expect(page).toContain("getPublicInstallers");
-    expect(publicInstallers).toContain('name.startsWith("openwork-cloud-")');
-    expect(publicInstallers).toContain('name.startsWith("openwork-enterprise-")');
+    expect(publicInstallers).toContain('name.startsWith("redrob-cloud-")');
+    expect(publicInstallers).toContain('name.startsWith("redrob-enterprise-")');
   });
 
   test("offers Redrob Models and Bring your Own Keys as the model path", () => {
-    expect(screen).toContain("onboarding-choice-openwork-models");
+    expect(screen).toContain("onboarding-choice-redrob-models");
     expect(screen).toContain("onboarding-choice-byok");
     expect(screen).toContain("Turn on models");
     expect(screen).toContain("Bring your Own Keys");
-    expect(screen).toContain("/openwork-mark.svg");
+    expect(screen).toContain("/redrob-mark.svg");
   });
 
   test("keeps the installed flag and inference check", () => {
-    expect(screen).toContain("openwork:onboarding:app-installed");
+    expect(screen).toContain("redrob:onboarding:app-installed");
     expect(screen).toContain("/v1/inference");
     expect(screen).toContain("onboarding-app-installed");
   });

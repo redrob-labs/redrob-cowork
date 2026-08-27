@@ -44,7 +44,7 @@ async function payload(dir: string): Promise<Record<string, unknown>> {
 }
 
 test("test evidence writes visual validations, assertions, failures, and unvalidated screenshots", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-test-evidence-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-test-evidence-"));
   try {
     const testEvidence = createTestEvidence({ name: "body cam", outDir: dir });
     const passing = screenshotArtifact("passing");
@@ -94,7 +94,7 @@ test("test evidence writes visual validations, assertions, failures, and unvalid
 });
 
 test("test evidence writes a JSON artifact and lists it in the test run", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-test-evidence-json-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-test-evidence-json-"));
   try {
     const testEvidence = createTestEvidence({ name: "world evidence", outDir: dir });
     testEvidence.recordJsonArtifact("world-snapshot primary", { version: 1, name: "primary" });
@@ -116,7 +116,7 @@ test("test evidence writes a JSON artifact and lists it in the test run", async 
 });
 
 test("test evidence accepts unchanged screenshots and only lets one validation use their pixel hash", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-test-evidence-retake-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-test-evidence-retake-"));
   try {
     const testEvidence = createTestEvidence({ name: "retakes", outDir: dir });
     const duplicate = screenshotArtifact("same pixels");
@@ -158,7 +158,7 @@ test("test evidence accepts unchanged screenshots and only lets one validation u
 });
 
 test("screenshot automatically records an artifact in ambient test evidence", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "openwork-test-evidence-screenshot-"));
+  const dir = await mkdtemp(join(tmpdir(), "redrob-test-evidence-screenshot-"));
   try {
     const png = Buffer.from("ambient screenshot pixels");
     const client: CdpClient = {

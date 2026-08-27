@@ -103,10 +103,10 @@ function normalizeAuthProvider(providerId: string) {
   if (normalized === "credential" || normalized === "email-password") {
     return "email"
   }
-  if (normalized.startsWith("openwork-sso-")) {
+  if (normalized.startsWith("redrob-sso-")) {
     return "sso"
   }
-  if (normalized.startsWith("openwork-scim-")) {
+  if (normalized.startsWith("redrob-scim-")) {
     return "scim"
   }
   return normalized || "unknown"
@@ -211,8 +211,8 @@ export function registerMeRoutes<T extends { Variables: AuthContextVariables & P
     "/v1/me/send-download-link",
     describeRoute({
       tags: ["Users"],
-      summary: "Send current user the OpenWork desktop download link",
-      description: "Emails the authenticated user a link to download the OpenWork desktop app.",
+      summary: "Send current user the Redrob Work desktop download link",
+      description: "Emails the authenticated user a link to download the Redrob Work desktop app.",
       responses: {
         200: jsonResponse("Download link email sent successfully.", sendDownloadLinkResponseSchema),
         400: jsonResponse("The signed-in account is missing an email address.", invalidRequestSchema),

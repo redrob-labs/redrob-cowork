@@ -183,11 +183,11 @@ export function desktopSandboxName(name: string): string {
   // flags as polynomial ReDoS. This form cannot backtrack and also collapses
   // internal runs, so "a_-_b" yields "a-b" instead of "a---b".
   const safeName = name.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).join("-") || "surface";
-  return `openwork-connector-${safeName}-${sandboxTimestamp()}-${process.pid}-${randomBytes(4).toString("hex")}`;
+  return `redrob-connector-${safeName}-${sandboxTimestamp()}-${process.pid}-${randomBytes(4).toString("hex")}`;
 }
 
 export function serverSandboxName(): string {
-  return `openwork-server-${sandboxTimestamp()}-${process.pid}-${randomBytes(4).toString("hex")}`;
+  return `redrob-server-${sandboxTimestamp()}-${process.pid}-${randomBytes(4).toString("hex")}`;
 }
 
 async function waitForExecReady(exec: DaytonaExec, sandbox: string): Promise<void> {
@@ -220,7 +220,7 @@ export async function provisionDesktopSandbox(options: DesktopSandboxOptions & P
     if (reused) {
       await exec(["sandbox", "start", reused], { timeoutMs: 60_000 });
     } else {
-      const snapshot = options.snapshot ?? "openwork-eval-vnc";
+      const snapshot = options.snapshot ?? "redrob-eval-vnc";
       const listed = await checkedExec(exec, ["snapshot", "list", "-f", "json"], "snapshot gate", { timeoutMs: 60_000 });
       const id = snapshotId(listed.stdout, snapshot);
       if (!id) {
@@ -233,7 +233,7 @@ export async function provisionDesktopSandbox(options: DesktopSandboxOptions & P
           "create",
           "--name", sandbox,
           "--snapshot", id,
-          ...(options.secrets === true ? ["--volume", "openwork-eval-secrets:/daytona-secrets"] : []),
+          ...(options.secrets === true ? ["--volume", "redrob-eval-secrets:/daytona-secrets"] : []),
           "--auto-stop", "60",
           "--public",
           "--target", "us",
@@ -270,7 +270,7 @@ export async function provisionDesktopSandbox(options: DesktopSandboxOptions & P
     await execInSandbox(
       exec,
       sandbox,
-      "cd /workspace; pnpm install --store-dir /workspace/.openwork-daytona/pnpm-store",
+      "cd /workspace; pnpm install --store-dir /workspace/.redrob-daytona/pnpm-store",
       { timeoutMs: INSTALL_TIMEOUT_MS, context: `install gate for ${sandbox}` },
     );
   });
@@ -279,7 +279,7 @@ export async function provisionDesktopSandbox(options: DesktopSandboxOptions & P
     const result = await execInSandbox(
       exec,
       sandbox,
-      "rm -rf /workspace/.openwork-daytona/profiles /tmp/openwork-* 2>/dev/null; df -P /workspace | tail -1",
+      "rm -rf /workspace/.redrob-daytona/profiles /tmp/redrob-* 2>/dev/null; df -P /workspace | tail -1",
       { timeoutMs: 60_000, context: `cleanup and disk gate for ${sandbox}` },
     );
     const dfLine = lastNonemptyLine(result.stdout);
@@ -292,7 +292,7 @@ export async function provisionDesktopSandbox(options: DesktopSandboxOptions & P
       const sizes = await execInSandbox(
         exec,
         sandbox,
-        "du -sh /workspace/node_modules /workspace/.openwork-daytona/pnpm-store 2>&1 || true",
+        "du -sh /workspace/node_modules /workspace/.redrob-daytona/pnpm-store 2>&1 || true",
         { timeoutMs: 60_000, context: `disk usage detail for ${sandbox}` },
       );
       throw new Error(`Cleanup and disk gate failed for ${sandbox}: workspace is ${useField} used. df: ${dfLine}\n${outputTail(sizes)}`);
@@ -354,7 +354,7 @@ echo detached`;
 
   await timedStep(log, "first boot gate", async () => {
     // A sandbox's first Electron boot pays sidecar prepare, the
-    // openwork-server tsc build, and the engine cold start. Paid INSIDE a
+    // redrob-server tsc build, and the engine cold start. Paid INSIDE a
     // spec, that bill starved the tool-call phase past its window while every
     // UI assertion still passed. Boot once into a throwaway profile, wait for
     // CDP, tear it down — after this the room behaves like a warm machine.
@@ -570,7 +570,7 @@ async function previewUrl(exec: DaytonaExec, sandbox: string, port: number): Pro
 
 async function proveDenSeed(apiUrl: string, webUrl: string, sandbox: string, reused: boolean): Promise<void> {
   const email = process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test";
-  const password = process.env.REDROB_EVAL_DEMO_PASSWORD ?? "OpenWorkDemo123!";
+  const password = process.env.REDROB_EVAL_DEMO_PASSWORD ?? "RedrobWorkDemo123!";
   const url = `${apiUrl.replace(/\/+$/, "")}/api/auth/sign-in/email`;
   // A freshly-booted stack was observed answering public sign-in with bare
   // 403s for its first ~minute, then recovering on its own — so the window is
@@ -629,7 +629,7 @@ export async function provisionDenSandbox(options: DenSandboxOptions & Provision
     // different hostname, while the sandbox's baked DEN_*_PUBLIC_URL is the
     // Den's OAuth issuer and MCP resource identity. RFC 9728 validating MCP
     // clients (opencode) refuse a Den reached through a mismatched host.
-    const urlsDir = await mkdtemp(path.join(os.tmpdir(), "openwork-den-urls-"));
+    const urlsDir = await mkdtemp(path.join(os.tmpdir(), "redrob-den-urls-"));
     const urlsFile = path.join(urlsDir, "den-urls.env");
     try {
       const result = await timedStep(log, "Den provisioning script", () => runDenProvisionScript(
@@ -736,7 +736,7 @@ export async function startFaultProxyOnSandbox(options: FaultProxyOnSandboxOptio
     await execInSandbox(
       exec,
       options.sandbox,
-      "pkill -f openwork-fault-proxy || true",
+      "pkill -f redrob-fault-proxy || true",
       { timeoutMs: 30_000, context: `fault proxy process cleanup for ${options.sandbox}` },
     ).catch(() => undefined);
   });
@@ -746,7 +746,7 @@ export async function startFaultProxyOnSandbox(options: FaultProxyOnSandboxOptio
     await execInSandbox(
       exec,
       options.sandbox,
-      `printf %s ${encoded} | base64 -d > /tmp/openwork-fault-proxy.mjs`,
+      `printf %s ${encoded} | base64 -d > /tmp/redrob-fault-proxy.mjs`,
       { timeoutMs: 30_000, context: `fault proxy script upload for ${options.sandbox}` },
     );
   });
@@ -754,8 +754,8 @@ export async function startFaultProxyOnSandbox(options: FaultProxyOnSandboxOptio
   await timedStep(log, "fault proxy process detach", async () => {
     const detachScript = `python3 - <<PYEOF
 import subprocess
-log = open("/tmp/openwork-fault-proxy.log", "ab", buffering=0)
-subprocess.Popen(["bash", "-lc", "env PORT=${port} UPSTREAM=http://127.0.0.1:${upstreamPort} ISSUER=${url} CONTROL_TOKEN=${token} node /tmp/openwork-fault-proxy.mjs"], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
+log = open("/tmp/redrob-fault-proxy.log", "ab", buffering=0)
+subprocess.Popen(["bash", "-lc", "env PORT=${port} UPSTREAM=http://127.0.0.1:${upstreamPort} ISSUER=${url} CONTROL_TOKEN=${token} node /tmp/redrob-fault-proxy.mjs"], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
 PYEOF
 echo detached`;
     await execInSandbox(exec, options.sandbox, detachScript, { timeoutMs: 30_000, context: `fault proxy process detach for ${options.sandbox}` });
@@ -768,7 +768,7 @@ echo detached`;
       let body: unknown = null;
       let responseOk = false;
       try {
-        const response = await fetchImpl(`${url}/__openwork_faults/health`, { signal: AbortSignal.timeout(5_000) });
+        const response = await fetchImpl(`${url}/__redrob_faults/health`, { signal: AbortSignal.timeout(5_000) });
         body = await response.json();
         responseOk = response.ok;
         if (!response.ok) last = `HTTP ${response.status}`;
@@ -785,7 +785,7 @@ echo detached`;
     const proxyLog = await execInSandbox(
       exec,
       options.sandbox,
-      "tail -80 /tmp/openwork-fault-proxy.log 2>&1 || true",
+      "tail -80 /tmp/redrob-fault-proxy.log 2>&1 || true",
       { timeoutMs: 30_000, context: `fault proxy health log for ${options.sandbox}` },
     );
     throw new Error(`Fault proxy health gate failed at ${url}. Last: ${last}. Log tail:\n${outputTail(proxyLog)}`);
@@ -798,7 +798,7 @@ echo detached`;
       await execInSandbox(
         exec,
         options.sandbox,
-        "pkill -f openwork-fault-proxy.mjs || true",
+        "pkill -f redrob-fault-proxy.mjs || true",
         { timeoutMs: 30_000, context: `fault proxy stop for ${options.sandbox}` },
       ).catch(() => undefined);
     },

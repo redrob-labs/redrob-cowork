@@ -6,7 +6,7 @@ import { afterEach, describe, it } from "node:test";
 
 import {
   REDROB_DESKTOP_ID,
-  buildOpenworkDesktopEntry,
+  buildRedrobDesktopEntry,
   createLinuxDesktopIntegration,
   quoteDesktopExec,
 } from "./linux-desktop-integration.mjs";
@@ -15,13 +15,13 @@ const temporaryRoots = [];
 const iconSizes = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 
 async function createHarness(options = {}) {
-  const root = await mkdtemp(path.join(os.tmpdir(), "openwork-appimage-integration-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "redrob-appimage-integration-"));
   temporaryRoots.push(root);
   const homeDir = path.join(root, "home");
   const dataHome = path.join(root, "data");
   const configHome = path.join(root, "config");
   const resourcesPath = path.join(root, "resources");
-  const appImagePath = options.appImagePath ?? path.join(root, "OpenWork AppImage");
+  const appImagePath = options.appImagePath ?? path.join(root, "Redrob Work AppImage");
   await mkdir(path.join(resourcesPath, "icons", "linux"), { recursive: true });
   await Promise.all(iconSizes.map((size) => (
     writeFile(path.join(resourcesPath, "icons", "linux", `${size}x${size}.png`), String(size))
@@ -55,7 +55,7 @@ async function createHarness(options = {}) {
   const integration = createLinuxDesktopIntegration({
     app,
     dialog,
-    appName: "OpenWork",
+    appName: "Redrob Work",
     distribution: "public",
     env: {
       APPIMAGE: appImagePath,
@@ -93,7 +93,7 @@ function relaunchAt(harness, appImagePath, options = {}) {
         return { response: 0, checkboxChecked: false };
       },
     },
-    appName: "OpenWork",
+    appName: "Redrob Work",
     distribution: "public",
     env: {
       APPIMAGE: appImagePath,
@@ -125,9 +125,9 @@ describe("Linux AppImage desktop integration", () => {
       quoteDesktopExec(appImagePath),
       String.raw`"/home/alice/Applications/Open Work \\"daily\\"\\$%%draft\\\\archive"`,
     );
-    const entry = buildOpenworkDesktopEntry({
+    const entry = buildRedrobDesktopEntry({
       appImagePath,
-      appName: "OpenWork",
+      appName: "Redrob Work",
       appVersion: "0.18.7",
       distribution: "public",
     });
@@ -143,7 +143,7 @@ describe("Linux AppImage desktop integration", () => {
     assert.equal(status.state, "unsupported");
   });
 
-  it("installs its launcher, icons, and openwork handler", async () => {
+  it("installs its launcher, icons, and redrob handler", async () => {
     const harness = await createHarness();
     const result = await harness.integration.install();
     assert.equal(result.ok, true);
@@ -152,7 +152,7 @@ describe("Linux AppImage desktop integration", () => {
 
     const desktopEntry = await readFile(harness.integration.paths.desktopEntryPath, "utf8");
     assert.match(desktopEntry, new RegExp(`^Exec=${quoteDesktopExec(harness.appImagePath)} %U$`, "m"));
-    assert.match(desktopEntry, /^X-OpenWork-Managed=true$/m);
+    assert.match(desktopEntry, /^X-Redrob Work-Managed=true$/m);
     for (const size of iconSizes) {
       assert.equal(await readFile(harness.integration.paths.iconPaths[size], "utf8"), String(size));
     }
@@ -161,14 +161,14 @@ describe("Linux AppImage desktop integration", () => {
   it("detects a moved AppImage and repairs the launcher for the new path", async () => {
     const first = await createHarness();
     assert.equal((await first.integration.install()).ok, true);
-    const movedPath = path.join(first.root, "Applications", "OpenWork.AppImage");
+    const movedPath = path.join(first.root, "Applications", "Redrob Work.AppImage");
     await mkdir(path.dirname(movedPath), { recursive: true });
     await rename(first.appImagePath, movedPath);
 
     const moved = createLinuxDesktopIntegration({
       app: { isPackaged: true, getVersion: () => "0.18.7" },
       dialog: { showMessageBox: async () => ({ response: 0, checkboxChecked: false }) },
-      appName: "OpenWork",
+      appName: "Redrob Work",
       distribution: "public",
       env: {
         APPIMAGE: movedPath,
@@ -201,7 +201,7 @@ describe("Linux AppImage desktop integration", () => {
 
     // Linux artifacts carry the version in their filename, so electron-updater
     // installs each release at a new path and stales the launcher.
-    const updatedPath = path.join(harness.root, "openwork-linux-x86_64-0.18.8.AppImage");
+    const updatedPath = path.join(harness.root, "redrob-linux-x86_64-0.18.8.AppImage");
     await rename(harness.appImagePath, updatedPath);
     const relaunched = relaunchAt(harness, updatedPath, { version: "0.18.8" });
     assert.equal((await relaunched.integration.getStatus()).state, "needs_repair");
@@ -211,7 +211,7 @@ describe("Linux AppImage desktop integration", () => {
     assert.equal(relaunched.dialogs.length, 0);
     const entry = await readFile(relaunched.integration.paths.desktopEntryPath, "utf8");
     assert.match(entry, new RegExp(`^TryExec=${updatedPath}$`, "m"));
-    assert.match(entry, /^X-OpenWork-Version=0\.18\.8$/m);
+    assert.match(entry, /^X-Redrob Work-Version=0\.18\.8$/m);
   });
 
   it("silently refreshes an owned launcher when only the version changed", async () => {
@@ -230,7 +230,7 @@ describe("Linux AppImage desktop integration", () => {
     const harness = await createHarness();
     assert.equal((await harness.integration.install()).ok, true);
 
-    const movedPath = path.join(harness.root, "openwork-linux-x86_64-0.18.8.AppImage");
+    const movedPath = path.join(harness.root, "redrob-linux-x86_64-0.18.8.AppImage");
     await rename(harness.appImagePath, movedPath);
     const relaunched = relaunchAt(harness, movedPath, { version: "0.18.8" });
     await rm(path.join(harness.root, "resources"), { recursive: true, force: true });
@@ -261,13 +261,13 @@ describe("Linux AppImage desktop integration", () => {
   });
 
   it("recognizes an external manager and does not duplicate its integration", async () => {
-    const managerDesktopId = "it.mijorus.gearlever.openwork.desktop";
+    const managerDesktopId = "it.mijorus.gearlever.redrob.desktop";
     const harness = await createHarness({ defaultHandler: managerDesktopId });
     const applications = path.join(harness.dataHome, "applications");
     await mkdir(applications, { recursive: true });
     await writeFile(path.join(applications, managerDesktopId), `[Desktop Entry]
 Type=Application
-Name=OpenWork
+Name=Redrob Work
 Exec=${quoteDesktopExec(harness.appImagePath)} %U
 TryExec=${harness.appImagePath}
 MimeType=x-scheme-handler/redrob;
@@ -286,7 +286,7 @@ MimeType=x-scheme-handler/redrob;
     await mkdir(path.dirname(harness.integration.paths.desktopEntryPath), { recursive: true });
     const original = `[Desktop Entry]
 Type=Application
-Name=Manager-owned OpenWork
+Name=Manager-owned Redrob Work
 Exec=${quoteDesktopExec(harness.appImagePath)} %U
 TryExec=${harness.appImagePath}
 MimeType=x-scheme-handler/redrob;
@@ -309,13 +309,13 @@ MimeType=x-scheme-handler/redrob;
   });
 
   it("registers an existing manager launcher without creating a duplicate", async () => {
-    const managerDesktopId = "appimagelauncher-openwork.desktop";
+    const managerDesktopId = "appimagelauncher-redrob.desktop";
     const harness = await createHarness({ defaultHandler: "firefox.desktop" });
     const managerPath = path.join(harness.dataHome, "applications", managerDesktopId);
     await mkdir(path.dirname(managerPath), { recursive: true });
     const managerEntry = `[Desktop Entry]
 Type=Application
-Name=OpenWork
+Name=Redrob Work
 Exec=${quoteDesktopExec(harness.appImagePath)} %U
 TryExec=${harness.appImagePath}
 MimeType=x-scheme-handler/redrob;

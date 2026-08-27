@@ -8,7 +8,7 @@ import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit"
 
 const providerId = "connection-action-mcp-app-provider"
 const modelId = "connection-action-mcp-app-model"
-const resourceUri = "ui://openwork/connection-action/v1/view.html"
+const resourceUri = "ui://redrob/connection-action/v1/view.html"
 const connectionName = "Acme Tracker (E2E)"
 const closingReply = "Connect your Acme Tracker account, then ask again."
 const e2eTestsEnabled = process.env.REDROB_EVAL_E2E_TESTS === "1"
@@ -228,7 +228,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
     method: "POST",
     headers: {
       authorization: `Bearer ${den.admin.token}`,
-      "x-openwork-org-id": organizationId,
+      "x-redrob-org-id": organizationId,
     },
     body: JSON.stringify({ scopes: ["mcp:read", "mcp:write"] }),
   })
@@ -251,11 +251,11 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
     },
   })
   const workspace = await createAndSelectWorkspace(app, {
-    path: `/tmp/openwork-connection-action-mcp-app-${Date.now()}`,
+    path: `/tmp/redrob-connection-action-mcp-app-${Date.now()}`,
   })
   const configured = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return "missing local server credentials";
     const request = async (path, init) => {
       const response = await fetch("http://127.0.0.1:" + port + path, {
@@ -284,7 +284,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
     if (patched !== "ok") return patched;
     const reloaded = await request("/workspace/" + encodeURIComponent(workspaceId) + "/engine/reload", { method: "POST" });
     if (reloaded !== "ok" && !reloaded.includes("opencode_reload_timeout")) return reloaded;
-    const reconcileResponse = await fetch("http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(workspaceId) + "/mcp/openwork-cloud/reconcile", {
+    const reconcileResponse = await fetch("http://127.0.0.1:" + port + "/workspace/" + encodeURIComponent(workspaceId) + "/mcp/redrob-cloud/reconcile", {
       method: "POST",
       headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -304,25 +304,25 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
     if (!reconcileResponse.ok) return "Cloud MCP reconcile failed: " + reconcileResponse.status + " " + reconcileText.slice(0, 1_000);
     const health = JSON.parse(reconcileText);
     if (health?.phase !== "ready") return "Cloud MCP reconcile was not ready: " + JSON.stringify(health).slice(0, 2_000);
-    const raw = localStorage.getItem("openwork.preferences");
+    const raw = localStorage.getItem("redrob.preferences");
     let preferences = {};
     try { preferences = raw ? JSON.parse(raw) : {}; } catch { preferences = {}; }
     if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) preferences = {};
-    localStorage.setItem("openwork.preferences", JSON.stringify({
+    localStorage.setItem("redrob.preferences", JSON.stringify({
       ...preferences,
       defaultModel: { providerID: ${JSON.stringify(providerId)}, modelID: ${JSON.stringify(modelId)} },
       modelVariant: null,
       providerStepCompleted: true,
     }));
-    localStorage.setItem("openwork.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
-    localStorage.removeItem("openwork.sessionModels." + workspaceId);
+    localStorage.setItem("redrob.defaultModel", ${JSON.stringify(`${providerId}/${modelId}`)});
+    localStorage.removeItem("redrob.sessionModels." + workspaceId);
     return "ok";
   })()`, { awaitPromise: true, timeoutMs: 90_000 })
   expect(configured).toBe("ok")
 
   await evalIn(app, "location.reload(); true")
-  await waitFor(app, "Boolean(window.__openworkControl)", { timeoutMs: 30_000, label: "desktop control after reload" })
-  await waitFor(app, `window.__openworkControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
+  await waitFor(app, "Boolean(window.__redrobControl)", { timeoutMs: 30_000, label: "desktop control after reload" })
+  await waitFor(app, `window.__redrobControl.listActions().some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 60_000,
     label: "new task action ready",
   })
@@ -330,7 +330,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
     const deadline = Date.now() + 60_000;
     let last = null;
     while (Date.now() < deadline) {
-      last = await window.__openworkControl.execute("session.create_task", null);
+      last = await window.__redrobControl.execute("session.create_task", null);
       if (last?.ok === true) return last;
       await new Promise((resolve) => setTimeout(resolve, 1_000));
     }
@@ -361,8 +361,8 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
   expect(modelExecuteCalls).toBe(1)
 
   const persistedTools = await evalIn(app, `(async () => {
-    const port = localStorage.getItem("openwork.server.port");
-    const token = localStorage.getItem("openwork.server.token");
+    const port = localStorage.getItem("redrob.server.port");
+    const token = localStorage.getItem("redrob.server.token");
     if (!port || !token) return { error: "missing local server credentials" };
     const routeParts = location.hash.split("/");
     const sessionIndex = routeParts.indexOf("session");
@@ -388,7 +388,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
     : []
   expect(parts.length, JSON.stringify(persistedTools)).toBe(1)
   expect(parts[parts.length - 1], JSON.stringify(persistedTools)).toMatchObject({
-    tool: "openwork-cloud_execute_capability",
+    tool: "redrob-cloud_execute_capability",
     state: "error",
   })
 
@@ -445,7 +445,7 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, { timeout:
   )
   evidence.recordAssertionEvidence(
     "Connection steering renders its standard MCP App",
-    "Desktop mounted ui://openwork/connection-action/v1/view.html showing Connection needed, the connection name, Not connected, and a Connect action rather than only JSON steering text.",
+    "Desktop mounted ui://redrob/connection-action/v1/view.html showing Connection needed, the connection name, Not connected, and a Connect action rather than only JSON steering text.",
     mounted.mounted,
   )
   evidence.recordAssertionEvidence(

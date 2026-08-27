@@ -11,12 +11,12 @@
 export const MIGRATION_SNAPSHOT_VERSION = 1;
 
 export const MIGRATION_KEY_PATTERNS: Array<RegExp> = [
-  /^openwork\.react\.activeWorkspace$/,
-  /^openwork\.react\.sessionByWorkspace$/,
-  /^openwork\.server\.list$/,
-  /^openwork\.server\.active$/,
-  /^openwork\.server\.urlOverride$/,
-  /^openwork\.server\.token$/,
+  /^redrob\.react\.activeWorkspace$/,
+  /^redrob\.react\.sessionByWorkspace$/,
+  /^redrob\.server\.list$/,
+  /^redrob\.server\.active$/,
+  /^redrob\.server\.urlOverride$/,
+  /^redrob\.server\.token$/,
 ];
 
 export type MigrationSnapshot = {
@@ -87,7 +87,7 @@ export async function ingestMigrationSnapshotOnElectronBoot(): Promise<number> {
 }
 
 // Localstorage key that stores a "don't ask again until" epoch-ms.
-export const MIGRATION_DEFER_KEY = "openwork.migration.deferredUntil";
+export const MIGRATION_DEFER_KEY = "redrob.migration.deferredUntil";
 export const MIGRATION_DEFAULT_DEFER_MS = 24 * 60 * 60 * 1000;
 
 export function isMigrationDeferred(now: number = Date.now()): boolean {

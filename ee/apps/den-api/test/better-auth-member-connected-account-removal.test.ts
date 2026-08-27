@@ -11,7 +11,7 @@ let oauthCredentials: typeof import("../src/capability-sources/oauth-credentials
 let schema: typeof import("@redrob-ee/den-db/schema")
 
 beforeAll(async () => {
-  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/openwork_test_gwsreconnect"
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? "mysql://root:password@127.0.0.1:3306/redrob_test_gwsreconnect"
   process.env.DEN_DB_ENCRYPTION_KEY = process.env.DEN_DB_ENCRYPTION_KEY ?? "x".repeat(32)
   process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET ?? "y".repeat(32)
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? "http://127.0.0.1:8790"
@@ -51,7 +51,7 @@ test("Better Auth's native remove and leave routes delete the member's connected
   const { db } = dbModule
   const suffix = crypto.randomUUID()
   const ownerEmail = `native-removal-owner+${suffix}@test.local`
-  const password = "OpenWork-test-password-123!"
+  const password = "Redrob Work-test-password-123!"
 
   const signup = await auth.api.signUpEmail({
     body: { email: ownerEmail, name: "Native Removal Owner", password },

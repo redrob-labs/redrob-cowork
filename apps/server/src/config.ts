@@ -1,5 +1,5 @@
 import { dirname, resolve } from "node:path";
-import { openworkServerConfigPath } from "@redrob/paths";
+import { redrobServerConfigPath } from "@redrob/paths";
 import type { ApprovalMode, ApprovalConfig, ServerConfig, WorkspaceConfig, LogFormat } from "./types.js";
 import { buildWorkspaceInfos } from "./workspaces.js";
 import { parseList, readJsonFile, shortId } from "./utils.js";
@@ -177,7 +177,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
 
 export function printHelp(): void {
   const message = [
-    "openwork-server",
+    "redrob-server",
     "",
     "Options:",
     "  --config <path>          Path to server.json",
@@ -209,7 +209,7 @@ async function loadFileConfig(configPath: string): Promise<FileConfig> {
 }
 
 export async function resolveServerConfig(cli: CliArgs): Promise<ServerConfig> {
-  const configPath = cli.configPath ?? openworkServerConfigPath();
+  const configPath = cli.configPath ?? redrobServerConfigPath();
   const fileConfig = await loadFileConfig(configPath);
   const configDir = dirname(configPath);
 

@@ -49,8 +49,8 @@ async function makeWebRoot() {
   const root = await mkdtemp(join(tmpdir(), "den-gateway-web-"))
   tempDirs.push(root)
   await mkdir(join(root, "assets"), { recursive: true })
-  await writeFile(join(root, "index.html"), "<!doctype html><div id=\"root\">OpenWork App</div>")
-  await writeFile(join(root, "assets", "app.js"), "globalThis.__openworkTest = true;")
+  await writeFile(join(root, "index.html"), "<!doctype html><div id=\"root\">Redrob Work App</div>")
+  await writeFile(join(root, "assets", "app.js"), "globalThis.__redrobTest = true;")
   return root
 }
 
@@ -63,7 +63,7 @@ function startDenApi(resolvePayload) {
     }
     observed.calls += 1
     observed.authorization = request.headers.get("authorization")
-    observed.gatewayKey = request.headers.get("x-openwork-gateway-key")
+    observed.gatewayKey = request.headers.get("x-redrob-gateway-key")
     return Response.json(resolvePayload())
   })
   return { server, observed }
@@ -99,9 +99,9 @@ function startPassthroughDenApi() {
       method: request.method,
       path: `${url.pathname}${url.search}`,
       authorization: request.headers.get("authorization"),
-      hostToken: request.headers.get("x-openwork-host-token"),
+      hostToken: request.headers.get("x-redrob-host-token"),
       cookie: request.headers.get("cookie"),
-      gatewayKey: request.headers.get("x-openwork-gateway-key"),
+      gatewayKey: request.headers.get("x-redrob-gateway-key"),
       forwardedPrefix: request.headers.get("x-forwarded-prefix"),
       body: await request.text(),
     })
@@ -145,7 +145,7 @@ function startUpstream() {
       method: request.method,
       path: `${url.pathname}${url.search}`,
       authorization: request.headers.get("authorization"),
-      hostToken: request.headers.get("x-openwork-host-token"),
+      hostToken: request.headers.get("x-redrob-host-token"),
       cookie: request.headers.get("cookie"),
     })
 
@@ -181,7 +181,7 @@ function startUpstream() {
 
 describe("gateway build version", () => {
   test("prefers the explicit version and falls back to Render's commit", () => {
-    expect(resolveGatewayBuildVersion({ denGatewayVersion: " openwork-0.19.0 ", renderGitCommit: " render-sha " })).toBe("openwork-0.19.0")
+    expect(resolveGatewayBuildVersion({ denGatewayVersion: " redrob-0.19.0 ", renderGitCommit: " render-sha " })).toBe("redrob-0.19.0")
     expect(resolveGatewayBuildVersion({ renderGitCommit: " render-sha " })).toBe("render-sha")
     expect(resolveGatewayBuildVersion({ denGatewayVersion: "  ", renderGitCommit: " render-sha " })).toBe("render-sha")
     expect(resolveGatewayBuildVersion({ denGatewayVersion: "  ", renderGitCommit: "\t" })).toBeUndefined()
@@ -198,11 +198,11 @@ describe("den-gateway static UI", () => {
     const index = await fetch(`${base}/`)
     expect(index.status).toBe(200)
     expect(index.headers.get("cache-control")).toBe("no-cache")
-    expect(await index.text()).toContain("OpenWork App")
+    expect(await index.text()).toContain("Redrob Work App")
 
     const deep = await fetch(`${base}/sessions/deep/link`)
     expect(deep.status).toBe(200)
-    expect(await deep.text()).toContain("OpenWork App")
+    expect(await deep.text()).toContain("Redrob Work App")
 
     const asset = await fetch(`${base}/assets/app.js`)
     expect(asset.status).toBe(200)
@@ -211,7 +211,7 @@ describe("den-gateway static UI", () => {
     const missingAsset = await fetch(`${base}/assets/missing.js`)
     expect(missingAsset.status).toBe(404)
     expect(missingAsset.headers.get("content-type")).not.toContain("text/html")
-    expect(await missingAsset.text()).not.toContain("OpenWork App")
+    expect(await missingAsset.text()).not.toContain("Redrob Work App")
 
     const traversal = await fetch(`${base}/%2e%2e%2fsecret.txt`)
     expect(traversal.status).toBe(400)
@@ -232,16 +232,16 @@ describe("den-gateway static UI", () => {
 
   test("identifies the configured gateway build in the runtime marker and status", async () => {
     const root = await makeWebRoot()
-    const gateway = startGateway({ webRoot: root, buildVersion: "openwork-0.19.0" })
+    const gateway = startGateway({ webRoot: root, buildVersion: "redrob-0.19.0" })
     const base = serverBase(gateway)
 
     const index = await fetch(`${base}/`)
     const health = await fetch(`${base}/__gw/health`)
     const ready = await fetch(`${base}/__gw/ready`)
 
-    expect(await index.text()).toContain("window.__REDROB_GATEWAY__ = {\"version\":1,\"build\":\"openwork-0.19.0\"}")
-    await expect(health.json()).resolves.toEqual({ ok: true, service: "den-gateway", build: "openwork-0.19.0" })
-    await expect(ready.json()).resolves.toEqual({ ok: true, service: "den-gateway", build: "openwork-0.19.0" })
+    expect(await index.text()).toContain("window.__REDROB_GATEWAY__ = {\"version\":1,\"build\":\"redrob-0.19.0\"}")
+    await expect(health.json()).resolves.toEqual({ ok: true, service: "den-gateway", build: "redrob-0.19.0" })
+    await expect(ready.json()).resolves.toEqual({ ok: true, service: "den-gateway", build: "redrob-0.19.0" })
   })
 })
 
@@ -342,7 +342,7 @@ describe("den-gateway proxy", () => {
       method: "POST",
       headers: {
         Authorization: "Bearer den-session",
-        "X-OpenWork-Host-Token": "browser-host-token",
+        "X-Redrob Work-Host-Token": "browser-host-token",
         Cookie: "ow_session=must_not_leak",
         "Content-Type": "application/json",
       },
@@ -418,7 +418,7 @@ describe("den-gateway proxy", () => {
     const response = await fetch(`${serverBase(gateway)}/status`, {
       headers: {
         Authorization: "Bearer den-bearer",
-        "X-OpenWork-Host-Token": "browser-host-token",
+        "X-Redrob Work-Host-Token": "browser-host-token",
         Cookie: "ow_session=must_not_leak",
       },
     })
@@ -508,7 +508,7 @@ describe("den-gateway proxy", () => {
       headers: { "Sec-Fetch-Mode": "navigate" },
     })
     expect(navigation.status).toBe(200)
-    expect(await navigation.text()).toContain("OpenWork App")
+    expect(await navigation.text()).toContain("Redrob Work App")
     expect(upstream.observed.requests).toHaveLength(0)
 
     const api = await fetch(`${base}/workspace/ws_1/sessions`, {
@@ -556,7 +556,7 @@ describe("den-gateway proxy", () => {
       headers: { "Sec-Fetch-Mode": "navigate" },
     })
     expect(settings.status).toBe(200)
-    expect(await settings.text()).toContain("OpenWork App")
+    expect(await settings.text()).toContain("Redrob Work App")
     expect(upstream.observed.requests).toHaveLength(1)
   })
 

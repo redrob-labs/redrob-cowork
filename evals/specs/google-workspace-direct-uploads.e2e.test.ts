@@ -195,8 +195,8 @@ function runCloudUpload(input: Record<string, unknown>): Promise<Record<string, 
 
 test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) => {
   needs({});
-  const account = "uploader@openwork.test";
-  const root = await mkdtemp(join(tmpdir(), "openwork-direct-upload-spec-"));
+  const account = "uploader@redrob.test";
+  const root = await mkdtemp(join(tmpdir(), "redrob-direct-upload-spec-"));
   const fixture = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff, 0x80, 0x13]);
   await writeFile(join(root, "witness.png"), fixture);
   await using google = await startMockGoogle({ accounts: [account], port: 0, autoApprove: false });
@@ -210,7 +210,7 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
     const inspection = await runCloudUpload({ mode: "inspect" });
     const actions = Array.isArray(inspection.result) ? inspection.result : [];
     const cloudActions = actions.filter((action): action is Record<string, unknown> => (
-      isRecord(action) && action.extensionId === "openwork-cloud-uploads"
+      isRecord(action) && action.extensionId === "redrob-cloud-uploads"
     ));
     expect(cloudActions.map((action) => action.action).sort()).toEqual([
       "drive_upload_file",
@@ -275,7 +275,7 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
       root,
       action: "gmail_create_draft_with_attachments",
       args: {
-        to: "reviewer@openwork.test",
+        to: "reviewer@redrob.test",
         subject: "Binary attachment witness",
         body: "Please review the attached file.",
         paths: ["witness.png"],
@@ -314,7 +314,7 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
       root,
       action: "gmail_create_draft_with_attachments",
       args: {
-        to: "reviewer@openwork.test",
+        to: "reviewer@redrob.test",
         subject: "Too large",
         body: "This must fail locally.",
         paths: ["part-a.bin", "part-b.bin"],

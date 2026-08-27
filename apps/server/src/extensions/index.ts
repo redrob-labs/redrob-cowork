@@ -18,7 +18,7 @@ import {
   OPENAI_IMAGE_GENERATION_EXTENSION_ID,
 } from "./openai-image-generation.js";
 import {
-  callOpenWorkCloudUploadAction,
+  callRedrobWorkCloudUploadAction,
   REDROB_CLOUD_UPLOAD_ACTIONS,
   REDROB_CLOUD_UPLOADS_EXTENSION_ID,
 } from "./cloud-uploads.js";
@@ -61,7 +61,7 @@ export async function callExperimentalExtensionAction(config: ServerConfig, env:
   }
   const registered = REDROB_EXPERIMENTAL_EXTENSION_ACTIONS.find((item) => item.extensionId === extensionId && item.action === action);
   if (!registered) {
-    throw new ApiError(404, "extension_action_not_found", "OpenWork extension action not found");
+    throw new ApiError(404, "extension_action_not_found", "Redrob Work extension action not found");
   }
 
   if (
@@ -72,7 +72,7 @@ export async function callExperimentalExtensionAction(config: ServerConfig, env:
   ) {
     return {
       ok: false,
-      error: "use_openwork_cloud",
+      error: "use_redrob_cloud",
       message: googleWorkspaceConnectGuidance(connectSnapshot.cloudHealth),
     };
   }
@@ -88,9 +88,9 @@ export async function callExperimentalExtensionAction(config: ServerConfig, env:
   }
 
   if (extensionId === REDROB_CLOUD_UPLOADS_EXTENSION_ID) {
-    const result = await callOpenWorkCloudUploadAction(config, action, args, context);
+    const result = await callRedrobWorkCloudUploadAction(config, action, args, context);
     if (result) return result;
   }
 
-  throw new ApiError(501, "extension_action_not_implemented", `${registered.title} is registered but not implemented on openwork-server yet.`, { extensionId, action, args });
+  throw new ApiError(501, "extension_action_not_implemented", `${registered.title} is registered but not implemented on redrob-server yet.`, { extensionId, action, args });
 }

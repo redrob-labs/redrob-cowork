@@ -5,12 +5,12 @@
 **Feature commit:** `80f494408` — `feat(app): unify Library with composer Connections (MCPs)`  
 **This file:** latest commit on the same branch.  
 **Base:** `dev` (`9f4425725`)  
-**PR:** none yet. Open from https://github.com/different-ai/openwork/pull/new/feat/library-composer-connections
+**PR:** none yet. Open from https://github.com/redrob-labs/redrob-work/pull/new/feat/library-composer-connections
 
 ```bash
 git fetch origin feat/library-composer-connections
 git checkout feat/library-composer-connections
-# or: git worktree add ../openwork-library-composer origin/feat/library-composer-connections
+# or: git worktree add ../redrob-library-composer origin/feat/library-composer-connections
 ```
 
 Do not push `dev`. Do not force-push this branch.

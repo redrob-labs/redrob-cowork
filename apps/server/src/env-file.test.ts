@@ -16,7 +16,7 @@ describe("env-file", () => {
   let path: string;
 
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "openwork-env-"));
+    dir = mkdtempSync(join(tmpdir(), "redrob-env-"));
     path = join(dir, "env.json");
   });
 

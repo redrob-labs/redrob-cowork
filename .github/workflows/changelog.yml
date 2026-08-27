@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   changelog:
-    if: github.repository == 'different-ai/openwork'
+    if: github.repository == 'redrob-labs/redrob-work'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 30
     env:
@@ -51,7 +51,7 @@ jobs:
         if: steps.guard.outputs.stable == 'true'
         id: dedupe
         run: |
-          if grep -Fq "[$TAG](https://github.com/different-ai/openwork/compare/" packages/docs/changelog.mdx; then
+          if grep -Fq "[$TAG](https://github.com/redrob-labs/redrob-work/compare/" packages/docs/changelog.mdx; then
             echo "documented=true" >> "$GITHUB_OUTPUT"
             echo "$TAG is already documented; skipping changelog automation."
           else
@@ -118,7 +118,7 @@ jobs:
           - docs date label: $DATE_LABEL
           - tracker file: $TRACKER_FILE
           - loc line (copy verbatim into the tracker): $LOC_LINE
-          - compare url: https://github.com/different-ai/openwork/compare/$PREV...$TAG
+          - compare url: https://github.com/redrob-labs/redrob-work/compare/$PREV...$TAG
 
           Commits between $PREV and $TAG (hash subject):
           PROMPT_EOF

@@ -6,7 +6,7 @@ import { opencodeDataDirs as defaultOpencodeDataDirs } from "@redrob/paths";
 
 // better-sqlite3's N-API binding hard-crashes Bun (panic: "NAPI FATAL ERROR:
 // Error::New napi_get_last_error_info"), and the Daytona worker runtime ships
-// openwork-server as a bun-compiled binary. Use Bun's built-in bun:sqlite
+// redrob-server as a bun-compiled binary. Use Bun's built-in bun:sqlite
 // driver under Bun and better-sqlite3 under Node/Electron; both expose the
 // better-sqlite3-style API surface used here (prepare/get/run, exec,
 // transaction, close). Loading is lazy so merely importing this module never
@@ -49,10 +49,10 @@ type SeedMessage = {
   text: string;
 };
 
-const DEFAULT_AGENT = "openwork";
+const DEFAULT_AGENT = "redrob";
 const DEFAULT_PROVIDER = "openai";
 const DEFAULT_MODEL = "gpt-5.4";
-const REDROB_DEV_DATA_DIRS = ["openwork-dev-data", "opencode-dev"];
+const REDROB_DEV_DATA_DIRS = ["redrob-dev-data", "opencode-dev"];
 
 function truthy(value: string | undefined): boolean {
   if (!value) return false;
@@ -60,7 +60,7 @@ function truthy(value: string | undefined): boolean {
   return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
 }
 
-function opencodeOpenworkDataDirs(): string[] {
+function opencodeRedrobDataDirs(): string[] {
   const root = process.env.REDROB_DATA_DIR?.trim();
   if (!root) return [];
 
@@ -84,7 +84,7 @@ function opencodeOpenworkDataDirs(): string[] {
 }
 
 function opencodeDataDirs(): string[] {
-  const dirs = [...opencodeOpenworkDataDirs(), ...defaultOpencodeDataDirs()];
+  const dirs = [...opencodeRedrobDataDirs(), ...defaultOpencodeDataDirs()];
   return Array.from(new Set(dirs));
 }
 

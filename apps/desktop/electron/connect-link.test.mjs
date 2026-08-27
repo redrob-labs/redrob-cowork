@@ -33,8 +33,8 @@ const publicKeys = { [KID]: publicKeyPem };
  */
 function claims(overrides = {}) {
   return {
-    iss: "https://api.openwork.acme.example.com",
-    aud: "openwork-desktop-connect",
+    iss: "https://api.redrob.acme.example.com",
+    aud: "redrob-desktop-connect",
     iat: NOW,
     exp: NOW + 72 * 3600,
     jti: "test-jti-0001",
@@ -42,8 +42,8 @@ function claims(overrides = {}) {
     org: { name: "Acme Robotics" },
     brand: { appName: "Acme Work", logoUrl: null, iconUrl: null },
     den: {
-      baseUrl: "https://openwork.acme.example.com",
-      apiBaseUrl: "https://api.openwork.acme.example.com",
+      baseUrl: "https://redrob.acme.example.com",
+      apiBaseUrl: "https://api.redrob.acme.example.com",
     },
     requireSignin: true,
     ...overrides,
@@ -95,7 +95,7 @@ test("verifies an exact signed organization target end to end", () => {
 
 test("resolves a keyless exchange through the exact HTTPS Den endpoint", async () => {
   const code = "abcdefghijklmnopqrstuvwxyz123456";
-  const apiBaseUrl = "https://api.openwork.acme.example.com/api/den";
+  const apiBaseUrl = "https://api.redrob.acme.example.com/api/den";
   const expected = claims({
     iss: apiBaseUrl,
     brand: {
@@ -104,7 +104,7 @@ test("resolves a keyless exchange through the exact HTTPS Den endpoint", async (
       iconUrl: "https://assets.acme.example.com/icon.png",
     },
     den: {
-      baseUrl: "https://openwork.acme.example.com",
+      baseUrl: "https://redrob.acme.example.com",
       apiBaseUrl,
     },
   });
@@ -130,7 +130,7 @@ test("resolves a keyless exchange through the exact HTTPS Den endpoint", async (
   assert.deepEqual(JSON.parse(calls[0].init.body), { code });
   assert.equal(calls[0].init.redirect, "error");
   assert.deepEqual(desktopBootstrapFromConnectClaims(result.claims), {
-    baseUrl: "https://openwork.acme.example.com",
+    baseUrl: "https://redrob.acme.example.com",
     apiBaseUrl,
     requireSignin: true,
     brandAppName: "Acme Work",
@@ -192,7 +192,7 @@ test("startup branding applies a saved icon and skips an absent one", async () =
 
 test("fails closed for ambiguous, insecure, mismatched, expired, and replayed exchanges", async () => {
   const code = "abcdefghijklmnopqrstuvwxyz123456";
-  const apiBaseUrl = "https://api.openwork.acme.example.com";
+  const apiBaseUrl = "https://api.redrob.acme.example.com";
   const rawUrl = `redrob://connect?code=${code}&apiBaseUrl=${encodeURIComponent(apiBaseUrl)}`;
   assert.equal(extractConnectExchange(`${rawUrl}&token=a.b.c`), null);
 
@@ -208,7 +208,7 @@ test("fails closed for ambiguous, insecure, mismatched, expired, and replayed ex
     fetcher: () => Promise.resolve(Response.json({ claims: claims({
       iss: "https://other.example.com",
       den: {
-        baseUrl: "https://openwork.acme.example.com",
+        baseUrl: "https://redrob.acme.example.com",
         apiBaseUrl: "https://other.example.com",
       },
     }) })),

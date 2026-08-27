@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 import type { McpDirectoryInfo } from "../../../app/constants";
 import { evaluateEnablement, type EnablementContext } from "../../../app/enablement";
-import type { OpenworkServerClient } from "../../../app/lib/openwork-server";
+import type { RedrobServerClient } from "../../../app/lib/redrob-server";
 import type { McpServerEntry } from "../../../app/types";
 import { getExtensionConfigSlot, type ExtensionConfigContext } from "./extension-registry";
 import type { LocalProviderInstallInput } from "./openai-image-extension";
@@ -14,8 +14,8 @@ type ProviderLike = {
 };
 
 type SettingsExtensionControllerInput = {
-  openworkServerClient: OpenworkServerClient | null;
-  hostOpenworkServerClient: OpenworkServerClient | null;
+  redrobServerClient: RedrobServerClient | null;
+  hostRedrobServerClient: RedrobServerClient | null;
   enablementContext: EnablementContext;
   mcpServers: McpServerEntry[];
   mcpConnectingName: string | null;
@@ -58,8 +58,8 @@ function hasOpenAiEnv(input: Pick<SettingsExtensionControllerInput, "providers" 
 
 export function useSettingsExtensionController(input: SettingsExtensionControllerInput) {
   const configContextForEntry = useCallback((entry: McpDirectoryInfo): ExtensionConfigContext => ({
-    openworkServerClient: input.openworkServerClient,
-    hostOpenworkServerClient: input.hostOpenworkServerClient,
+    redrobServerClient: input.redrobServerClient,
+    hostRedrobServerClient: input.hostRedrobServerClient,
     restartLocalServer: input.restartLocalServer,
     computerUse: {
       connected: input.mcpServers.some((server) => server.name === "computer-use"),

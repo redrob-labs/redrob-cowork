@@ -6,11 +6,11 @@
 // Usage:
 //   node scripts/migration/01-cut-migration-release.mjs \
 //     --version 0.12.0 \
-//     --mac-url   'https://.../OpenWork-darwin-arm64-0.12.0-mac.zip' \
-//     --mac-arm64-url 'https://.../openwork-mac-arm64-0.12.0.zip' \
-//     --mac-x64-url   'https://.../openwork-mac-x64-0.12.0.zip' \
-//     --win-url   'https://.../OpenWork-Setup-0.12.0.exe'  (optional) \
-//     --linux-url 'https://.../OpenWork-0.12.0.AppImage'   (optional) \
+//     --mac-url   'https://.../Redrob Work-darwin-arm64-0.12.0-mac.zip' \
+//     --mac-arm64-url 'https://.../redrob-mac-arm64-0.12.0.zip' \
+//     --mac-x64-url   'https://.../redrob-mac-x64-0.12.0.zip' \
+//     --win-url   'https://.../Redrob Work-Setup-0.12.0.exe'  (optional) \
+//     --linux-url 'https://.../Redrob Work-0.12.0.AppImage'   (optional) \
 //     --dry-run
 
 import { spawnSync } from "node:child_process";
@@ -183,8 +183,8 @@ async function main() {
   console.log("");
   console.log(`[cut-release] pushed ${tag}.`);
   console.log(`[cut-release] watch the workflow:`);
-  console.log(`    gh run list --repo different-ai/openwork --workflow "Release App" --limit 3`);
-  console.log(`    gh run watch --repo different-ai/openwork`);
+  console.log(`    gh run list --repo redrob-labs/redrob-work --workflow "Release App" --limit 3`);
+  console.log(`    gh run watch --repo redrob-labs/redrob-work`);
   console.log("");
   console.log(`[cut-release] once the workflow finishes, run:`);
   console.log(`    node scripts/migration/02-validate-migration.mjs --tag ${tag}`);

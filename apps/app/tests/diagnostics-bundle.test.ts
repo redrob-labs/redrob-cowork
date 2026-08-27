@@ -11,7 +11,7 @@ function baseInputs(): DiagnosticsBundleInputs {
     desktopRuntime: false,
     appInfo: null,
     engineInfo: null,
-    openworkServerSettings: {},
+    redrobServerSettings: {},
     hostInfo: null,
     developerLogs: [],
     perfLogs: [],
@@ -22,8 +22,8 @@ function baseInputs(): DiagnosticsBundleInputs {
       developerMode: false,
       hostConnectUrl: "",
       hostConnectUrlUsesMdns: false,
-      openworkServerStatus: "disconnected",
-      openworkServerUrl: "",
+      redrobServerStatus: "disconnected",
+      redrobServerUrl: "",
       runtimeWorkspaceId: null,
     },
   };
@@ -39,7 +39,7 @@ describe("diagnostics bundle", () => {
     const opencodeSecret = "opencode-password-1234";
     const input = baseInputs();
     input.desktopRuntime = true;
-    input.openworkServerSettings = {
+    input.redrobServerSettings = {
       urlOverride: "http://127.0.0.1:4096",
       token: settingsSecret,
       hostToken: settingsHostSecret,
@@ -68,7 +68,7 @@ describe("diagnostics bundle", () => {
       runtime: "direct",
       managedByServer: true,
       baseUrl: "http://127.0.0.1:4097",
-      projectDir: "/tmp/openwork",
+      projectDir: "/tmp/redrob",
       hostname: "127.0.0.1",
       port: 4097,
       opencodeUsername: "do-not-include-user",
@@ -85,8 +85,8 @@ describe("diagnostics bundle", () => {
     const parsed = JSON.parse(json);
 
     expect(json).toContain('"tokenPresent": true');
-    expect(parsed.openworkServer.settings.tokenPresent).toBe(true);
-    expect(parsed.openworkServer.host.lastStderr).toContain("[redacted]");
+    expect(parsed.redrobServer.settings.tokenPresent).toBe(true);
+    expect(parsed.redrobServer.host.lastStderr).toContain("[redacted]");
     expect(parsed.opencodeEngine.lastStderr).toContain("[redacted]");
     expect(json).not.toContain(settingsSecret);
     expect(json).not.toContain(settingsHostSecret);
@@ -108,8 +108,8 @@ describe("diagnostics bundle", () => {
 
     expect(parsed.app).toBeNull();
     expect(parsed.opencodeEngine).toBeNull();
-    expect(parsed.openworkServer.host).toBeNull();
-    expect(parsed.openworkServer.settings.tokenPresent).toBe(false);
+    expect(parsed.redrobServer.host).toBeNull();
+    expect(parsed.redrobServer.settings.tokenPresent).toBe(false);
   });
 
   test("includes sanitized Cloud health without Den or MCP tokens", () => {

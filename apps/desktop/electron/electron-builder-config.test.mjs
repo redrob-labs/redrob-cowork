@@ -46,11 +46,11 @@ describe("Electron distribution configs", () => {
     assert.equal(config.extends, "./electron-builder.base.yml");
     assert.equal(config.appId, "io.redrob.work");
     assert.equal(config.productName, "Redrob Work Enterprise");
-    assert.equal(config.extraMetadata.openworkDistribution, "enterprise");
+    assert.equal(config.extraMetadata.redrobDistribution, "enterprise");
     assert.equal(config.protocols[0].schemes[0], "redrob");
     assert.equal(config.publish[0].provider, "github");
     assert.equal(config.publish[0].owner, "different-ai");
-    assert.equal(config.publish[0].repo, "openwork");
+    assert.equal(config.publish[0].repo, "redrob");
     assert.equal(config.publish[0].channel, "enterprise");
     assert.equal(
       config.artifactName,
@@ -63,7 +63,7 @@ describe("Electron distribution configs", () => {
     assert.equal(config.extends, "./electron-builder.base.yml");
     assert.equal(config.appId, "io.redrob.work");
     assert.equal(config.productName, "Redrob Work Cloud");
-    assert.equal(config.extraMetadata.openworkDistribution, "cloud");
+    assert.equal(config.extraMetadata.redrobDistribution, "cloud");
     assert.equal(config.protocols[0].schemes[0], "redrob");
     assert.equal(config.publish[0].channel, "cloud");
     assert.equal(

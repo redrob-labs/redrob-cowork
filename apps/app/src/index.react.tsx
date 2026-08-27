@@ -6,7 +6,7 @@ import { BrowserRouter, HashRouter } from "react-router";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { initializeDenBootstrapConfig } from "./app/lib/den";
-import { getOpenWorkDeployment } from "./app/lib/openwork-deployment";
+import { getRedrobWorkDeployment } from "./app/lib/redrob-deployment";
 import { bootstrapTheme } from "./app/theme";
 import { isDesktopRuntime } from "./app/utils";
 import { initLocale } from "./i18n";
@@ -32,7 +32,7 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
-root.dataset.openworkDeployment = getOpenWorkDeployment();
+root.dataset.redrobDeployment = getRedrobWorkDeployment();
 
 const platform = createDefaultPlatform();
 setWebNotificationHandler(platform.notify);

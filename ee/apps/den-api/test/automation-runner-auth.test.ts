@@ -3,7 +3,7 @@ import { AUTOMATION_MODEL_ATTENTION_CAPABILITY } from "@redrob/types/automations
 import { createHmac } from "node:crypto"
 
 function seedRequiredEnv() {
-  process.env.DATABASE_URL ??= "mysql://root:password@127.0.0.1:3306/openwork_test"
+  process.env.DATABASE_URL ??= "mysql://root:password@127.0.0.1:3306/redrob_test"
   process.env.DEN_DB_ENCRYPTION_KEY ??= "x".repeat(32)
   process.env.BETTER_AUTH_SECRET ??= "y".repeat(32)
   process.env.BETTER_AUTH_URL ??= "http://127.0.0.1:8790"
@@ -134,7 +134,7 @@ describe("Automation runner credentials", () => {
       e: expiresAt,
     })).toString("base64url")
     const signature = createHmac("sha256", secret)
-      .update(`openwork-automation-runner-v1.${payload}`)
+      .update(`redrob-automation-runner-v1.${payload}`)
       .digest("base64url")
 
     expect(new AutomationRunnerAuth(secret).authenticate(`Bearer ${payload}.${signature}`)).toEqual({

@@ -53,7 +53,7 @@ const oidcDiscoverySchema = z.object({
 })
 
 export function buildOrganizationSsoProviderId(organizationId: OrganizationId) {
-  return `openwork-sso-${organizationId}`
+  return `redrob-sso-${organizationId}`
 }
 
 export function getOrganizationSsoSignInPath(organizationSlug: string) {

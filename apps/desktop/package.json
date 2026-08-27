@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.0.0-dev",
   "desktopName": "io.redrob.work",
-  "description": "OpenWork desktop shell",
+  "description": "Redrob Work desktop shell",
   "author": {
-    "name": "OpenWork",
+    "name": "Redrob Work",
     "email": "support@redrob.io"
   },
   "main": "electron/main.mjs",

@@ -4,7 +4,7 @@ import { detectPlatform, type DetectedPlatform } from "@redrob/ui/react";
 import { useEffect, useState } from "react";
 import {
   getDesktopHandoffGrant,
-  getDesktopHandoffOpenworkUrl,
+  getDesktopHandoffRedrobUrl,
   rememberDesktopHandoffGrant,
 } from "../_lib/desktop-handoff";
 import { getErrorMessage, requestJson } from "../_lib/den-flow";
@@ -25,20 +25,20 @@ import { OrganizationBrandIdentity, type OrganizationBrand } from "./organizatio
 
 const REDROB_DOWNLOAD_URL = "https://redrob.io/download";
 
-function ReturnToOpenWorkStatus({
-  openworkUrl,
+function ReturnToRedrobWorkStatus({
+  redrobUrl,
   grant,
   organizationName,
 }: {
-  openworkUrl: string;
+  redrobUrl: string;
   grant: string | null;
   organizationName: string;
 }) {
   const { status, timedOut } = useDesktopHandoffStatus(grant);
   const [copied, setCopied] = useState(false);
 
-  async function copyOpenworkUrl() {
-    await navigator.clipboard.writeText(openworkUrl);
+  async function copyRedrobUrl() {
+    await navigator.clipboard.writeText(redrobUrl);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
@@ -46,7 +46,7 @@ function ReturnToOpenWorkStatus({
   if (status === "consumed") {
     return (
       <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700" data-testid="desktop-connected" aria-live="polite">
-        Connected — {organizationName} is ready in OpenWork.
+        Connected — {organizationName} is ready in Redrob Work.
       </div>
     );
   }
@@ -56,15 +56,15 @@ function ReturnToOpenWorkStatus({
       <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600" data-testid="desktop-handoff-troubleshoot" aria-live="polite">
         <p className="m-0">
           Nothing opened?{" "}
-          <button type="button" className="font-medium text-slate-950 underline-offset-4 hover:underline" onClick={() => window.location.assign(openworkUrl)}>
-            Return to OpenWork again
+          <button type="button" className="font-medium text-slate-950 underline-offset-4 hover:underline" onClick={() => window.location.assign(redrobUrl)}>
+            Return to Redrob Work again
           </button>
         </p>
         <div className="grid gap-2">
-          <p className="m-0">Still stuck? Copy this sign-in link into OpenWork:</p>
+          <p className="m-0">Still stuck? Copy this sign-in link into Redrob Work:</p>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <input className="den-input min-w-0 flex-1 text-xs" value={openworkUrl} readOnly onFocus={(event) => event.currentTarget.select()} />
-            <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyOpenworkUrl()}>
+            <input className="den-input min-w-0 flex-1 text-xs" value={redrobUrl} readOnly onFocus={(event) => event.currentTarget.select()} />
+            <button type="button" className="den-button-secondary sm:w-auto" onClick={() => void copyRedrobUrl()}>
               {copied ? "Copied" : "Copy link"}
             </button>
           </div>
@@ -75,7 +75,7 @@ function ReturnToOpenWorkStatus({
 
   return (
     <p className="m-0 text-sm text-slate-500" aria-live="polite">
-      Returning to OpenWork…
+      Returning to Redrob Work…
     </p>
   );
 }
@@ -105,7 +105,7 @@ export function JoinOrgSuccess({
   const [emailSent, setEmailSent] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [handoffBusy, setHandoffBusy] = useState(false);
-  const [desktopOpenworkUrl, setDesktopOpenworkUrl] = useState<string | null>(null);
+  const [desktopRedrobUrl, setDesktopRedrobUrl] = useState<string | null>(null);
   const [desktopGrant, setDesktopGrant] = useState<string | null>(null);
   const [downloadHref, setDownloadHref] = useState<string | null>(null);
 
@@ -179,7 +179,7 @@ export function JoinOrgSuccess({
     }
   }
 
-  async function handleReturnToOpenWork() {
+  async function handleReturnToRedrobWork() {
     setHandoffBusy(true);
     setActionError(null);
 
@@ -190,23 +190,23 @@ export function JoinOrgSuccess({
         12000,
       );
       if (!response.ok) {
-        setActionError(getErrorMessage(payload, `Could not return to OpenWork (${response.status}).`));
+        setActionError(getErrorMessage(payload, `Could not return to Redrob Work (${response.status}).`));
         return;
       }
 
-      const openworkUrl = getDesktopHandoffOpenworkUrl(payload);
-      if (!openworkUrl) {
-        setActionError("OpenWork sign-in was prepared, but no app link was returned.");
+      const redrobUrl = getDesktopHandoffRedrobUrl(payload);
+      if (!redrobUrl) {
+        setActionError("Redrob Work sign-in was prepared, but no app link was returned.");
         return;
       }
 
-      const grant = getDesktopHandoffGrant(payload, openworkUrl);
+      const grant = getDesktopHandoffGrant(payload, redrobUrl);
       rememberDesktopHandoffGrant(grant);
-      setDesktopOpenworkUrl(openworkUrl);
+      setDesktopRedrobUrl(redrobUrl);
       setDesktopGrant(grant);
-      window.location.assign(openworkUrl);
+      window.location.assign(redrobUrl);
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Could not return to OpenWork.");
+      setActionError(error instanceof Error ? error.message : "Could not return to Redrob Work.");
     } finally {
       setHandoffBusy(false);
     }
@@ -238,7 +238,7 @@ export function JoinOrgSuccess({
             <h1 className="m-0 grid max-w-full gap-1 text-[30px] font-semibold leading-[38px] tracking-[-0.03em] text-slate-950 sm:text-[38px] sm:leading-[46px]">
               <span>You&apos;re in, welcome to</span>
               {/* No horizontal gap: the possessive must hug the org identity
-                  ("Acme Robotics's OpenWork", not "Acme Robotics 's"). */}
+                  ("Acme Robotics's Redrob Work", not "Acme Robotics 's"). */}
               <span className="flex min-w-0 flex-wrap items-center gap-y-1">
                 <OrganizationBrandIdentity organizationName={organizationName} brand={brand} />
                 <span className="whitespace-nowrap">&apos;s {brand.appName}</span>
@@ -246,8 +246,8 @@ export function JoinOrgSuccess({
             </h1>
             <p className="m-0 max-w-2xl text-[15px] leading-[23px] text-slate-600">
               {desktopAuthRequested
-                ? "Your team setup is ready. Return to OpenWork to continue where you left off."
-                : "The desktop app is where OpenWork runs on your computer and puts your team's setup to work."}
+                ? "Your team setup is ready. Return to Redrob Work to continue where you left off."
+                : "The desktop app is where Redrob Work runs on your computer and puts your team's setup to work."}
             </p>
           </div>
 
@@ -256,7 +256,7 @@ export function JoinOrgSuccess({
           ) : isMobile ? (
             <div className="grid gap-3">
               <div className="grid gap-2 rounded-2xl bg-slate-50 p-4" data-testid="join-org-mobile-note">
-                <p className="m-0 text-sm font-medium text-slate-950">OpenWork runs on your computer.</p>
+                <p className="m-0 text-sm font-medium text-slate-950">Redrob Work runs on your computer.</p>
                 <p className="m-0 text-sm leading-6 text-slate-600">
                   Email the install link to yourself and continue when you&apos;re back at your desk.
                 </p>
@@ -273,17 +273,17 @@ export function JoinOrgSuccess({
               {emailSent ? <div className="den-notice is-info">Sent — check your inbox when you&apos;re back at your desk.</div> : null}
             </div>
           ) : desktopAuthRequested ? (
-            desktopOpenworkUrl ? (
-              <ReturnToOpenWorkStatus openworkUrl={desktopOpenworkUrl} grant={desktopGrant} organizationName={organizationName} />
+            desktopRedrobUrl ? (
+              <ReturnToRedrobWorkStatus redrobUrl={desktopRedrobUrl} grant={desktopGrant} organizationName={organizationName} />
             ) : (
               <button
                 type="button"
                 className="den-button-primary min-h-12 w-full"
-                onClick={() => void handleReturnToOpenWork()}
+                onClick={() => void handleReturnToRedrobWork()}
                 disabled={handoffBusy}
-                data-testid="join-org-return-openwork"
+                data-testid="join-org-return-redrob"
               >
-                {handoffBusy ? "Returning to OpenWork..." : "Return to OpenWork"}
+                {handoffBusy ? "Returning to Redrob Work..." : "Return to Redrob Work"}
               </button>
             )
           ) : !platformReady ? (
@@ -303,18 +303,18 @@ export function JoinOrgSuccess({
               <button
                 type="button"
                 className="min-h-12 w-full rounded-full px-3 text-sm font-medium text-slate-500 underline-offset-4 hover:text-slate-950 hover:underline"
-                onClick={() => void handleReturnToOpenWork()}
+                onClick={() => void handleReturnToRedrobWork()}
                 disabled={handoffBusy}
                 data-testid="join-org-open-app"
               >
-                {handoffBusy ? "Opening OpenWork..." : "Already have OpenWork? Open it."}
+                {handoffBusy ? "Opening Redrob Work..." : "Already have Redrob Work? Open it."}
               </button>
             </div>
           )}
 
-          {desktopAuthRequested && desktopOpenworkUrl ? null : (
+          {desktopAuthRequested && desktopRedrobUrl ? null : (
             <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700" data-testid="join-org-connected">
-              Connected — OpenWork is set up for {organizationName}
+              Connected — Redrob Work is set up for {organizationName}
             </div>
           )}
 

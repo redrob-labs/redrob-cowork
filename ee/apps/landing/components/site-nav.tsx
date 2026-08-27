@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { OpenWorkMark } from "./openwork-mark";
+import { RedrobWorkMark } from "./redrob-mark";
 
 type ActivePage =
   | "home"
@@ -75,9 +75,9 @@ export function SiteNav(props: Props) {
             className="group inline-flex items-center gap-1.5"
             onClick={() => setMobileOpen(false)}
           >
-            <OpenWorkMark className="h-[30px] w-[38px] transition-opacity group-hover:opacity-80" />
+            <RedrobWorkMark className="h-[30px] w-[38px] transition-opacity group-hover:opacity-80" />
             <span className="text-[1.2rem] font-semibold tracking-tight text-[#011627] md:text-[1.3rem]">
-              OpenWork
+              Redrob Work
             </span>
           </Link>
 
@@ -96,11 +96,11 @@ export function SiteNav(props: Props) {
 
           <div className="col-start-3 flex items-center gap-4">
             <a
-              href="https://github.com/different-ai/openwork"
+              href="https://github.com/redrob-labs/redrob-work"
               className="hidden h-9 items-center gap-2 rounded-full border border-[var(--lp-border)] bg-white px-3.5 text-sm font-normal text-[var(--lp-muted)] transition-colors hover:text-[var(--lp-ink)] sm:flex"
               rel="noreferrer"
               target="_blank"
-              aria-label="OpenWork GitHub stars"
+              aria-label="Redrob Work GitHub stars"
             >
               <svg
                 className="h-4 w-4"
@@ -171,7 +171,7 @@ export function SiteNav(props: Props) {
                 Book a call
               </a>
               <a
-                href="https://github.com/different-ai/openwork"
+                href="https://github.com/redrob-labs/redrob-work"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-100 bg-white px-4 py-2 text-sm font-medium text-gray-500 shadow-[0_1px_2px_rgba(17,24,39,0.06)] transition-colors hover:text-[#011627]"
                 rel="noreferrer"
                 target="_blank"

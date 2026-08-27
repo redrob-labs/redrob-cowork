@@ -21,15 +21,15 @@ import {
 
 function statusDescription(status: DesktopIntegrationStatus) {
   if (status.state === "integrated") {
-    return "OpenWork is in your application launcher and handles redrob:// browser callbacks.";
+    return "Redrob Work is in your application launcher and handles redrob:// browser callbacks.";
   }
   if (status.state === "managed_externally") {
-    return "This AppImage is integrated by another app. OpenWork will leave its launcher untouched.";
+    return "This AppImage is integrated by another app. Redrob Work will leave its launcher untouched.";
   }
   if (status.state === "needs_repair" && status.ownership === "external") {
     return status.issues.includes("desktop-entry")
       ? "The manager-owned launcher cannot accept browser callbacks. Re-integrate this AppImage with its manager."
-      : "Another app manages this AppImage. Select its launcher for OpenWork browser callbacks.";
+      : "Another app manages this AppImage. Select its launcher for Redrob Work browser callbacks.";
   }
   if (status.state === "needs_repair") {
     return "The AppImage moved or its launcher, icon, or browser callback needs repair.";
@@ -79,7 +79,7 @@ export function DesktopIntegrationSection() {
   if (!status?.supported) return null;
 
   const externallyManaged = status.ownership === "external";
-  const openworkManaged = status.ownership === "openwork";
+  const redrobManaged = status.ownership === "redrob";
 
   return (
     <LayoutSection>
@@ -104,7 +104,7 @@ export function DesktopIntegrationSection() {
                 Integrate
               </Button>
             ) : null}
-            {openworkManaged ? (
+            {redrobManaged ? (
               <>
                 <Button
                   size="sm"

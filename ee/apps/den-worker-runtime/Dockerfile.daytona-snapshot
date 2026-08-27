@@ -1,5 +1,5 @@
 # The builder runs on the BUILD host's native platform and cross-compiles for
-# the target: bun compiles openwork-server via --target and the web build is
+# the target: bun compiles redrob-server via --target and the web build is
 # arch-independent. This avoids emulating the whole toolchain under QEMU
 # (node's libuv crashes under qemu-x86_64: uv__io_poll EEXIST assert).
 FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS openwork-builder
@@ -18,7 +18,7 @@ COPY . .
 # python3/make/g++ above: better-sqlite3 v13 has no install script, but pnpm's
 # implicit node-gyp build for packages with a binding.gyp still compiles it
 # from source here, which needs a toolchain (v12 downloaded prebuilds instead).
-RUN pnpm install --frozen-lockfile --filter openwork-server... --filter @redrob/app...
+RUN pnpm install --frozen-lockfile --filter redrob-server... --filter @redrob/app...
 
 ARG TARGETARCH
 
@@ -29,9 +29,9 @@ RUN set -eux; \
     arm64) target="bun-linux-arm64" ;; \
     *) echo "unsupported architecture: $arch" >&2; exit 1 ;; \
   esac; \
-  pnpm --filter openwork-server build; \
-  pnpm --filter openwork-server exec bun ./script/build.ts --outdir dist/bin --target "$target"; \
-  install -m 0755 "apps/server/dist/bin/openwork-server-${target}" /tmp/openwork-server; \
+  pnpm --filter redrob-server build; \
+  pnpm --filter redrob-server exec bun ./script/build.ts --outdir dist/bin --target "$target"; \
+  install -m 0755 "apps/server/dist/bin/redrob-server-${target}" /tmp/redrob-server; \
   pnpm --filter @redrob/app build:web
 
 FROM node:22-bookworm-slim
@@ -44,9 +44,9 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates curl tar unzip \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=openwork-builder /tmp/openwork-server /usr/local/bin/openwork-server
-COPY --from=openwork-builder /src/apps/app/dist /opt/openwork/web
-COPY --from=openwork-builder /src/apps/server/dist/opencode-plugins /opt/openwork/opencode-plugins
+COPY --from=openwork-builder /tmp/redrob-server /usr/local/bin/redrob-server
+COPY --from=openwork-builder /src/apps/app/dist /opt/redrob/web
+COPY --from=openwork-builder /src/apps/server/dist/opencode-plugins /opt/redrob/opencode-plugins
 
 RUN set -eux; \
   test -n "$OPENCODE_VERSION"; \
@@ -74,12 +74,12 @@ RUN set -eux; \
 # real hardware.
 ARG RUNTIME_ASSERTS=1
 RUN if [ "$RUNTIME_ASSERTS" = "1" ]; then \
-    test -f /opt/openwork/opencode-plugins/openwork-extensions-preview.js \
-    && test -f /opt/openwork/opencode-plugins/openwork-capabilities-knowledge.js \
-    && test -f /opt/openwork/opencode-plugins/openwork-office-attachments.js \
-    && test -f /opt/openwork/opencode-plugins/openwork-anthropic-adaptive-thinking.js \
-    && test -f /opt/openwork/opencode-plugins/openwork-anthropic-tool-schema.js \
-    && test "$(openwork-server --version)" = "$REDROB_SERVER_VERSION" \
+    test -f /opt/redrob/opencode-plugins/redrob-extensions-preview.js \
+    && test -f /opt/redrob/opencode-plugins/redrob-capabilities-knowledge.js \
+    && test -f /opt/redrob/opencode-plugins/redrob-office-attachments.js \
+    && test -f /opt/redrob/opencode-plugins/redrob-anthropic-adaptive-thinking.js \
+    && test -f /opt/redrob/opencode-plugins/redrob-anthropic-tool-schema.js \
+    && test "$(redrob-server --version)" = "$REDROB_SERVER_VERSION" \
     && opencode --version; \
   else \
     echo "RUNTIME_ASSERTS disabled (cross-build); binaries must be verified on target hardware"; \

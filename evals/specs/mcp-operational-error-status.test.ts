@@ -8,7 +8,7 @@ import { test } from "@redrob/testkit";
 const repoRoot = resolve(import.meta.dirname, "../..");
 
 test("operational routes preserve HTTPException responses without exposing unexpected errors", ({ evidence }) => {
-  const reportDir = mkdtempSync(join(tmpdir(), "openwork-mcp-operational-errors-"));
+  const reportDir = mkdtempSync(join(tmpdir(), "redrob-mcp-operational-errors-"));
   const reportPath = join(reportDir, "bun-junit.xml");
   try {
     const result = spawnSync("pnpm", [

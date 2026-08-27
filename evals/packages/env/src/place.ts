@@ -63,7 +63,7 @@ async function databaseExists(mysqlUrl: URL, name: string): Promise<boolean> {
   }
 }
 
-export function ephemeralDatabaseName(prefix = "openwork_eval"): string {
+export function ephemeralDatabaseName(prefix = "redrob_eval"): string {
   const timestamp = Date.now().toString(36);
   const nonce = randomBytes(6).toString("hex");
   return `${prefix}_${process.pid}_${timestamp}_${nonce}`.toLowerCase();
@@ -186,7 +186,7 @@ class DaytonaPlacementHost implements Host {
     const provisioned = await provisionDesktopSandbox({
       ref: this.#ref,
       name,
-      log: (line) => console.error(`[openwork/testkit] ${line}`),
+      log: (line) => console.error(`[redrob/testkit] ${line}`),
     });
     return {
       host: daytonaSandbox(provisioned.sandbox),
@@ -204,7 +204,7 @@ class DaytonaPlacementHost implements Host {
     } catch (error) {
       if (placed.created) {
         await deleteSandboxes([placed.sandbox]).catch((cleanupError: unknown) => {
-          console.error(`[openwork/testkit] Daytona cleanup failed: ${messageText(cleanupError)}`);
+          console.error(`[redrob/testkit] Daytona cleanup failed: ${messageText(cleanupError)}`);
         });
       }
       throw error;
@@ -220,7 +220,7 @@ class DaytonaPlacementHost implements Host {
     } catch (error) {
       if (placed.created) {
         await deleteSandboxes([placed.sandbox]).catch((cleanupError: unknown) => {
-          console.error(`[openwork/testkit] Daytona cleanup failed: ${messageText(cleanupError)}`);
+          console.error(`[redrob/testkit] Daytona cleanup failed: ${messageText(cleanupError)}`);
         });
       }
       throw error;

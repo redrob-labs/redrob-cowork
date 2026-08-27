@@ -11,8 +11,8 @@ wraps them with organization-scoped Redrob Work routes and policy:
 | Area | Redrob Work surface | Runtime behavior |
 |---|---|---|
 | SSO management | `/dashboard/sso`, `/v1/sso`, `/v1/sso/saml`, `/v1/sso/oidc` | One SSO connection per organization. Owners and security admins can create or replace it. |
-| SAML callback | `/api/auth/sso/saml2/sp/acs/openwork-sso-<org-id>` | Better Auth consumes the response after Redrob Work validates SAML response policy. |
-| SAML metadata | `/api/auth/sso/saml2/sp/metadata?providerId=openwork-sso-<org-id>` | Generated after the SAML connection is saved in Redrob Work. |
+| SAML callback | `/api/auth/sso/saml2/sp/acs/redrob-sso-<org-id>` | Better Auth consumes the response after Redrob Work validates SAML response policy. |
+| SAML metadata | `/api/auth/sso/saml2/sp/metadata?providerId=redrob-sso-<org-id>` | Generated after the SAML connection is saved in Redrob Work. |
 | SSO sign-in | `/sso/<org-slug>` | Starts SP-initiated SSO for one organization and redirects to Entra. |
 | SCIM management | `/dashboard/scim`, `/v1/scim`, `/v1/scim/token` | Owners and security admins create or rotate an org-scoped SCIM bearer token. |
 | SCIM provisioning | `/api/auth/scim/v2` | Supports SCIM user provisioning, updates, and deprovisioning. |
@@ -58,10 +58,10 @@ the Entra group object mapping disabled.
 For the Redrob Work Labs test tenant, use:
 
 - **Tenant ID**: `2b853de0-b14b-4433-90be-cced1b963647`
-- **Redrob Work SSO domain**: `omaropenworklabs.onmicrosoft.com`
+- **Redrob Work SSO domain**: `omarredroblabs.onmicrosoft.com`
 - **Test users**:
-  - `omar2@omaropenworklabs.onmicrosoft.com`
-  - `omar_redrob.io#EXT#@omaropenworklabs.onmicrosoft.com`
+  - `omar2@omarredroblabs.onmicrosoft.com`
+  - `omar_redrob.io#EXT#@omarredroblabs.onmicrosoft.com`
 - **Redrob Work organization**: `Omar Azure Test`
 
 As of July 7, 2026, both test users are assigned to the **Redrob Work Labs**
@@ -123,7 +123,7 @@ For the Redrob Work Labs test tenant, the Redrob Work SAML fields are:
 
 - **IdP Issuer URL**:
   `https://sts.windows.net/2b853de0-b14b-4433-90be-cced1b963647/`
-- **Domain**: `omaropenworklabs.onmicrosoft.com`
+- **Domain**: `omarredroblabs.onmicrosoft.com`
 - **SAML Entry Point**:
   `https://login.microsoftonline.com/2b853de0-b14b-4433-90be-cced1b963647/saml2`
 - **Audience URL**: leave blank unless you also set a custom Entra Identifier.

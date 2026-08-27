@@ -54,7 +54,7 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
     headers: {
       authorization: `Bearer ${org.admin.token}`,
       cookie: sessionCookie,
-      "x-openwork-org-id": org.orgId,
+      "x-redrob-org-id": org.orgId,
     },
     body: JSON.stringify({
       issuer: registration.issuer,
@@ -127,8 +127,8 @@ test.skipIf(!localPlacement || !mysqlOpen)(title, async ({ evidence, place }) =>
   });
   expect(browserSessionCookie.success).toBe(true);
   const tokenStored = await evalIn(browser, `(() => {
-    localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(org.admin.token)});
-    return localStorage.getItem("openwork:web:auth-token") === ${JSON.stringify(org.admin.token)};
+    localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(org.admin.token)});
+    return localStorage.getItem("redrob:web:auth-token") === ${JSON.stringify(org.admin.token)};
   })()`);
   expect(tokenStored).toBe(true);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/sso`);

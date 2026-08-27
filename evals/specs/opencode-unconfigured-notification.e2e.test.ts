@@ -63,7 +63,7 @@ async function startUnconfiguredServer(
 
   const port = await new Promise<number>((resolvePort, reject) => {
     const timer = setTimeout(
-      () => reject(new Error("Unconfigured OpenWork server did not report a port within 30s.")),
+      () => reject(new Error("Unconfigured Redrob Work server did not report a port within 30s.")),
       30_000,
     );
     let stdout = "";
@@ -82,7 +82,7 @@ async function startUnconfiguredServer(
     });
     child.on("exit", (code) => {
       clearTimeout(timer);
-      reject(new Error(`Unconfigured OpenWork server exited early (${code}): ${stderr.slice(0, 500)}`));
+      reject(new Error(`Unconfigured Redrob Work server exited early (${code}): ${stderr.slice(0, 500)}`));
     });
     child.on("error", (error) => {
       clearTimeout(timer);
@@ -97,7 +97,7 @@ async function startUnconfiguredServer(
 
 test(title, async ({ evidence }) => {
   needs(requirements);
-  const localWorkspacePath = await mkdtemp(join(tmpdir(), "openwork-notification-shell-"));
+  const localWorkspacePath = await mkdtemp(join(tmpdir(), "redrob-notification-shell-"));
   onTestFinished(async () => {
     await rm(localWorkspacePath, { recursive: true, force: true });
   });
@@ -145,22 +145,22 @@ test(title, async ({ evidence }) => {
   const switchedServer = await evalIn(app, `(async () => {
     const invoke = window.__REDROB_ELECTRON__?.invokeDesktop;
     if (!invoke) return false;
-    localStorage.setItem("openwork.server.urlOverride", ${JSON.stringify(server.appBaseUrl)});
-    localStorage.setItem("openwork.server.token", ${JSON.stringify(serverToken)});
-    localStorage.removeItem("openwork.server.hostToken");
+    localStorage.setItem("redrob.server.urlOverride", ${JSON.stringify(server.appBaseUrl)});
+    localStorage.setItem("redrob.server.token", ${JSON.stringify(serverToken)});
+    localStorage.removeItem("redrob.server.hostToken");
     await invoke("engineStop");
-    window.dispatchEvent(new CustomEvent("openwork-server-settings-changed"));
+    window.dispatchEvent(new CustomEvent("redrob-server-settings-changed"));
     return true;
   })()`, { awaitPromise: true, timeoutMs: 30_000 });
   expect(switchedServer).toBe(true);
-  await waitFor(app, `window.__openworkControl.listActions()
+  await waitFor(app, `window.__redrobControl.listActions()
     .some((action) => action.id === "session.create_task" && !action.disabled)`, {
     timeoutMs: 60_000,
     label: "New task action for unconfigured workspace",
   });
   const createResult = await evalIn(
     app,
-    `window.__openworkControl.execute("session.create_task", null)`,
+    `window.__redrobControl.execute("session.create_task", null)`,
     { awaitPromise: true, timeoutMs: 30_000 },
   );
   expect(isRecord(createResult) ? createResult.ok : null).toBe(false);

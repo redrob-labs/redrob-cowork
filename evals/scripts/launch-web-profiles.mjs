@@ -29,7 +29,7 @@ function alive(pid) {
 }
 
 async function killPidfile(userDataDir) {
-  const pidPath = join(userDataDir, "openwork-eval-chrome.pid");
+  const pidPath = join(userDataDir, "redrob-eval-chrome.pid");
   let pid = 0;
   try {
     pid = Number((await readFile(pidPath, "utf8")).trim());
@@ -52,7 +52,7 @@ async function waitForPort(port) {
 }
 
 async function ensureProfile(port) {
-  const userDataDir = `/tmp/openwork-evals-web-${port}`;
+  const userDataDir = `/tmp/redrob-evals-web-${port}`;
   await mkdir(userDataDir, { recursive: true });
   if (await isListening(port)) return;
   await killPidfile(userDataDir);
@@ -69,7 +69,7 @@ async function ensureProfile(port) {
     stdio: "ignore",
   });
   child.unref();
-  await writeFile(join(userDataDir, "openwork-eval-chrome.pid"), `${child.pid}\n`);
+  await writeFile(join(userDataDir, "redrob-eval-chrome.pid"), `${child.pid}\n`);
   await waitForPort(port);
 }
 

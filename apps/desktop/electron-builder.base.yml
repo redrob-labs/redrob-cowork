@@ -10,8 +10,8 @@ files:
   - from: .electron-runtime/node_modules
     to: node_modules
 extraResources:
-  - from: .electron-runtime/openwork-sentry.json
-    to: openwork-sentry.json
+  - from: .electron-runtime/redrob-sentry.json
+    to: redrob-sentry.json
   - from: ../app/dist
     to: app-dist
   - from: server/dist/opencode-plugins
@@ -19,7 +19,7 @@ extraResources:
     filter:
       - "*.js"
   - from: ../../packages/docs
-    to: openwork-docs
+    to: redrob-docs
     filter:
       - "**/*.md"
       - "**/*.mdx"
@@ -34,7 +34,7 @@ afterSign: scripts/electron-after-sign.cjs
 publish:
   - provider: github
     owner: different-ai
-    repo: openwork
+    repo: redrob
     releaseType: release
 mac:
   icon: resources/icons/icon.icns
@@ -59,7 +59,7 @@ mac:
     - from: resources/helpers
       to: helpers
       filter:
-        - "OpenWork Computer Use.app/**"
+        - "Redrob Work Computer Use.app/**"
   target:
     - dmg
     - zip

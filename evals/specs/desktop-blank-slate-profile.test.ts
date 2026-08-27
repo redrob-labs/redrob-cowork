@@ -11,24 +11,24 @@ import {
 test("any desktop build can launch with an isolated blank-slate profile", async ({ evidence }) => {
   const normalEnv: NodeJS.ProcessEnv = {
     HOME: "/Users/installed",
-    REDROB_DESKTOP_BOOTSTRAP_PATH: "/Users/installed/.config/openwork/desktop-bootstrap.json",
+    REDROB_DESKTOP_BOOTSTRAP_PATH: "/Users/installed/.config/redrob/desktop-bootstrap.json",
   };
   const originalNormalEnv = { ...normalEnv };
   const normalProfile = prepareBlankSlateProfile({ argv: [], env: normalEnv });
-  const normal = resolveBlankSlateLaunch({ appName: "OpenWork Enterprise", profile: normalProfile });
-  expect(normal).toEqual({ enabled: false, appName: "OpenWork Enterprise", userDataPath: null });
+  const normal = resolveBlankSlateLaunch({ appName: "Redrob Work Enterprise", profile: normalProfile });
+  expect(normal).toEqual({ enabled: false, appName: "Redrob Work Enterprise", userDataPath: null });
   expect(normalEnv).toEqual(originalNormalEnv);
 
   const firstEnv: NodeJS.ProcessEnv = { REDROB_DESKTOP_DISTRIBUTION: "enterprise" };
   const secondEnv: NodeJS.ProcessEnv = {};
   const firstProfile = prepareBlankSlateProfile({ argv: ["--blank-slate"], env: firstEnv });
   const secondProfile = prepareBlankSlateProfile({ argv: ["--blank-slate"], env: secondEnv });
-  const first = resolveBlankSlateLaunch({ appName: "OpenWork Enterprise", profile: firstProfile });
-  const second = resolveBlankSlateLaunch({ appName: "OpenWork Enterprise", profile: secondProfile });
+  const first = resolveBlankSlateLaunch({ appName: "Redrob Work Enterprise", profile: firstProfile });
+  const second = resolveBlankSlateLaunch({ appName: "Redrob Work Enterprise", profile: secondProfile });
 
   try {
     expect(first.enabled).toBe(true);
-    expect(first.appName).toBe("OpenWork Enterprise - Test profile");
+    expect(first.appName).toBe("Redrob Work Enterprise - Test profile");
     expect(first.rootPath).not.toBe(second.rootPath);
     expect(first.userDataPath).not.toContain("io.redrob.work");
 
@@ -43,17 +43,17 @@ test("any desktop build can launch with an isolated blank-slate profile", async 
 
     const packageFlavorPreserved = firstEnv.REDROB_DESKTOP_DISTRIBUTION === "enterprise"
       && !("REDROB_DEV_MODE" in firstEnv)
-      && first.appName.startsWith("OpenWork Enterprise");
+      && first.appName.startsWith("Redrob Work Enterprise");
     expect(packageFlavorPreserved).toBe(true);
 
     const normalLaunchUnchanged = normal.userDataPath === null
-      && normal.appName === "OpenWork Enterprise"
+      && normal.appName === "Redrob Work Enterprise"
       && normalEnv.REDROB_DESKTOP_BOOTSTRAP_PATH === originalNormalEnv.REDROB_DESKTOP_BOOTSTRAP_PATH;
     expect(normalLaunchUnchanged).toBe(true);
 
     evidence.recordAssertionEvidence(
       "Blank-slate launches cannot read or overwrite the installed profile",
-      "Every Electron, OpenWork, OpenCode, home, XDG, and Windows mutable path is below one unique per-launch temporary root.",
+      "Every Electron, Redrob Work, OpenCode, home, XDG, and Windows mutable path is below one unique per-launch temporary root.",
       allPathOverridesIsolated && first.rootPath !== second.rootPath,
     );
     evidence.recordAssertionEvidence(

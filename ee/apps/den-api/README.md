@@ -22,7 +22,7 @@ pnpm --filter @redrob-ee/den-api seed:demo-org
 
 This creates `Acme Robotics` with demo users, teams, pending invites, and an imported Anthropic Knowledge Work Plugins marketplace. It is guarded by `REDROB_DEV_MODE=1`, defaults to the local Den DB URL, and does not create workers or active external integrations.
 
-Default owner login: `alex@acme.test` / `OpenWorkDemo123!`.
+Default owner login: `alex@acme.test` / `RedrobWorkDemo123!`.
 
 ## Observability
 

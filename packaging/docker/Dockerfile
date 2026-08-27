@@ -13,7 +13,7 @@ RUN apt-get update \
     unzip \
   && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g "openwork-server@${REDROB_SERVER_VERSION}"
+RUN npm install -g "redrob-server@${REDROB_SERVER_VERSION}"
 
 RUN set -eux; \
   arch="$(dpkg --print-architecture)"; \
@@ -52,5 +52,5 @@ VOLUME ["/workspace", "/data"]
 
 # Defaults:
 # - Redrob Work server is published intentionally via --host 0.0.0.0
-# - OpenCode is managed by openwork-server and stays internal
-CMD ["/bin/sh", "-lc", "plugin_dir=\"$(npm root -g)/openwork-server/dist/opencode-plugins\"; test -d \"$plugin_dir\"; export REDROB_MANAGE_OPENCODE=1 REDROB_OPENCODE_BIN=/usr/local/bin/opencode REDROB_EXTENSIONS_PLUGIN_DIR=\"$plugin_dir\"; exec openwork-server --workspace \"${REDROB_WORKSPACE:-/workspace}\" --host 0.0.0.0 --port \"${REDROB_PORT:-8787}\" --cors \"${REDROB_CORS_ORIGINS:-*}\" --approval \"${REDROB_APPROVAL_MODE:-manual}\""]
+# - OpenCode is managed by redrob-server and stays internal
+CMD ["/bin/sh", "-lc", "plugin_dir=\"$(npm root -g)/redrob-server/dist/opencode-plugins\"; test -d \"$plugin_dir\"; export REDROB_MANAGE_OPENCODE=1 REDROB_OPENCODE_BIN=/usr/local/bin/opencode REDROB_EXTENSIONS_PLUGIN_DIR=\"$plugin_dir\"; exec redrob-server --workspace \"${REDROB_WORKSPACE:-/workspace}\" --host 0.0.0.0 --port \"${REDROB_PORT:-8787}\" --cors \"${REDROB_CORS_ORIGINS:-*}\" --approval \"${REDROB_APPROVAL_MODE:-manual}\""]

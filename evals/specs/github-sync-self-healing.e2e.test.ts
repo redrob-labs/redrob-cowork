@@ -8,7 +8,7 @@ import { localMysqlIsRunning, needs, server, test } from "@redrob/testkit";
 
 /**
  * CLAIMS — APPROVED NARRATION:
- *  1. Push → auto-update. GitHub receives the webhook immediately, OpenWork
+ *  1. Push → auto-update. GitHub receives the webhook immediately, Redrob Work
  *     acknowledges it before processing, and the exact pushed commit becomes
  *     the skill's latest stored version automatically.
  *  2. Rate-limited push retries itself. Two provider 429s recover without a
@@ -162,7 +162,7 @@ async function apiRequest(
   const headers: Record<string, string> = {
     authorization: `Bearer ${session.token}`,
   };
-  if (input.orgId) headers["x-openwork-org-id"] = input.orgId;
+  if (input.orgId) headers["x-redrob-org-id"] = input.orgId;
   if (input.body) headers["content-type"] = "application/json";
   const result = await denFetch(session, path, {
     method: input.method ?? "GET",

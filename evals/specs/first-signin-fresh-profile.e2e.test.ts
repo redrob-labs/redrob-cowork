@@ -33,16 +33,16 @@ test.skipIf(!e2eTestsEnabled || !localPlacement || !mysqlOpen)(title, async ({ e
     org: {
       name: "First Signin Heal",
       admin: {
-        email: `first-signin-admin-${Date.now()}@openwork.test`,
+        email: `first-signin-admin-${Date.now()}@redrob.test`,
         name: "First Signin Admin",
-        password: "OpenWorkEval123!",
+        password: "RedrobWorkEval123!",
       },
     },
   });
   await inviteMember(den, "fresh", {
-    email: `first-signin-member-${Date.now()}@openwork.test`,
+    email: `first-signin-member-${Date.now()}@redrob.test`,
     name: "Fresh Profile Member",
-    password: "OpenWorkEval123!",
+    password: "RedrobWorkEval123!",
   });
   await using proxy = await faultProxy(den.ref);
   proxy.faults.status(orgsPath, 429, { times: 3 });

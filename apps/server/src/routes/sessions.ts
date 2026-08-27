@@ -277,18 +277,18 @@ export function registerSessionRoutes(options: RegisterSessionRoutesOptions): vo
     const sessionId = ctx.params.sessionId?.trim();
     if (!sessionId) throw new ApiError(400, "invalid_payload", "sessionId is required");
     await readWorkspaceSession(workspace, sessionId);
-    console.info("[openwork-server] abort", {
+    console.info("[redrob-server] abort", {
       phase: "start",
       source: "workspace.sessions.abort_route",
       initiator: "user",
-      reason: "client requested session abort through OpenWork server route",
+      reason: "client requested session abort through Redrob Work server route",
       workspaceId: workspace.id,
       sessionID: sessionId,
       actorType: ctx.actor?.type ?? "unknown",
     });
     const result = await createWorkspaceOpencodeClient(config, workspace, { sessionId }).session.abort({ sessionID: sessionId });
     if (result.error !== undefined) {
-      console.info("[openwork-server] abort", {
+      console.info("[redrob-server] abort", {
         phase: "error",
         source: "workspace.sessions.abort_route",
         initiator: "user",
@@ -298,7 +298,7 @@ export function registerSessionRoutes(options: RegisterSessionRoutesOptions): vo
       });
       throw new ApiError(502, "opencode_request_failed", "OpenCode abort failed");
     }
-    console.info("[openwork-server] abort", {
+    console.info("[redrob-server] abort", {
       phase: "done",
       source: "workspace.sessions.abort_route",
       initiator: "user",

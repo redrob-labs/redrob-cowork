@@ -4,9 +4,9 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "agent-context-diagnostics": "src/agent-context-diagnostics.ts",
-    "openwork-affordance": "src/openwork-affordance.ts",
-    "openwork-context": "src/openwork-context.ts",
-    "openwork-provider": "src/openwork-provider.ts",
+    "redrob-affordance": "src/redrob-affordance.ts",
+    "redrob-context": "src/redrob-context.ts",
+    "redrob-provider": "src/redrob-provider.ts",
     "automations": "src/automations.ts",
     workflows: "src/workflows.ts",
     "skill-created-app": "src/skill-created-app.ts",

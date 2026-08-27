@@ -127,15 +127,15 @@ function auth(session: DenSession): Record<string, string> {
 
 export function personDefaults(key: string, person: PersonShape | undefined, runId: string): Required<PersonShape> {
   return {
-    email: person?.email?.trim() || `${key}+${runId}@openwork.test`,
+    email: person?.email?.trim() || `${key}+${runId}@redrob.test`,
     name: person?.name?.trim() || key.replace(/(^|[-_ ])\w/g, (part) => part.toUpperCase()),
-    password: person?.password || "OpenWorkEval123!",
+    password: person?.password || "RedrobWorkEval123!",
   };
 }
 
 function defaultLocalOrg(runId: string): OrgShape {
   return {
-    name: `OpenWork Eval ${runId}`,
+    name: `Redrob Work Eval ${runId}`,
     admin: personDefaults("admin", undefined, runId),
     members: { jordan: personDefaults("jordan", { name: "Jordan Eval" }, runId) },
   };
@@ -145,7 +145,7 @@ export function defaultReuseAdmin(): Required<PersonShape> {
   return {
     email: process.env.REDROB_EVAL_DEMO_EMAIL?.trim() || "alex@acme.test",
     name: "Alex Eval",
-    password: process.env.REDROB_EVAL_DEMO_PASSWORD || "OpenWorkDemo123!",
+    password: process.env.REDROB_EVAL_DEMO_PASSWORD || "RedrobWorkDemo123!",
   };
 }
 
@@ -249,7 +249,7 @@ async function waitForAuthProbe(ref: DenRef, service: SpawnedService): Promise<v
       const response = await fetch(url, {
         method: "POST",
         headers: { "content-type": "application/json", origin: ref.webUrl },
-        body: JSON.stringify({ email: `probe-${Date.now()}@openwork.test`, password: "not-a-real-password" }),
+        body: JSON.stringify({ email: `probe-${Date.now()}@redrob.test`, password: "not-a-real-password" }),
         signal: AbortSignal.timeout(5_000),
       });
       if (response.status !== 403 && response.status < 500) return;
@@ -434,7 +434,7 @@ async function provisionOrganization(
     ? await signIn(ref, { email: adminPerson.email, password: adminPerson.password })
     : await createOrSignInAccount(ref, adminPerson, options.databaseUrl);
   const createdOrgId = options.createOrg
-    ? await createOrganization(admin, shape.name?.trim() || `OpenWork Eval ${runId}`)
+    ? await createOrganization(admin, shape.name?.trim() || `Redrob Work Eval ${runId}`)
     : null;
   const members: Record<string, DenSession> = {};
   for (const [key, memberShape] of Object.entries(shape.members ?? {})) {
@@ -519,17 +519,17 @@ async function bootDaytonaMocks(
 async function stopMocks(handles: Record<string, MockHandle>): Promise<void> {
   for (const [name, handle] of Object.entries(handles)) {
     await handle.stop().catch((error: unknown) => {
-      console.error(`[openwork/testkit] mock ${name} cleanup failed: ${messageText(error)}`);
+      console.error(`[redrob/testkit] mock ${name} cleanup failed: ${messageText(error)}`);
     });
   }
 }
 
 async function stopServices(services: SpawnedService[]): Promise<void> {
   for (const service of services) {
-    await killLocalPid(service.pid, { log: (line) => console.error(`[openwork/testkit] ${line}`) })
-      .catch((error: unknown) => console.error(`[openwork/testkit] ${service.label} cleanup failed: ${messageText(error)}`));
+    await killLocalPid(service.pid, { log: (line) => console.error(`[redrob/testkit] ${line}`) })
+      .catch((error: unknown) => console.error(`[redrob/testkit] ${service.label} cleanup failed: ${messageText(error)}`));
     await freePort(service.port)
-      .catch((error: unknown) => console.error(`[openwork/testkit] ${service.label} port cleanup failed: ${messageText(error)}`));
+      .catch((error: unknown) => console.error(`[redrob/testkit] ${service.label} port cleanup failed: ${messageText(error)}`));
   }
 }
 
@@ -602,7 +602,7 @@ export async function server(options: ServerOptions): Promise<Den> {
           disposed = true;
           if (organization.createdOrgId) {
             await deleteCreatedOrganization(organization.admin, organization.createdOrgId).catch((error: unknown) => {
-              console.error(`[openwork/testkit] reused Den org cleanup failed: ${messageText(error)}`);
+              console.error(`[redrob/testkit] reused Den org cleanup failed: ${messageText(error)}`);
             });
           }
           await stopMocks(bootedMocks.handles);
@@ -631,7 +631,7 @@ export async function server(options: ServerOptions): Promise<Den> {
       ref: base.ref,
       reuse: preparedSandbox,
       bootstrapAdminEmail: bootstrapAdmin.email,
-      log: (line) => console.error(`[openwork/testkit] ${line}`),
+      log: (line) => console.error(`[redrob/testkit] ${line}`),
     });
     let bootedMocks: { handles: Record<string, MockHandle>; env: Record<string, string> } = { handles: {}, env: {} };
     try {
@@ -681,18 +681,18 @@ export async function server(options: ServerOptions): Promise<Den> {
           disposed = true;
           if (organization.createdOrgId) {
             await deleteCreatedOrganization(organization.admin, organization.createdOrgId).catch((error: unknown) => {
-              console.error(`[openwork/testkit] Daytona Den org cleanup failed: ${messageText(error)}`);
+              console.error(`[redrob/testkit] Daytona Den org cleanup failed: ${messageText(error)}`);
             });
           }
           if (platformAdminGrant) {
             await revokePreparedPlatformAdmin(platformAdminGrant).catch((error: unknown) => {
-              console.error(`[openwork/testkit] Daytona platform-admin cleanup failed: ${messageText(error)}`);
+              console.error(`[redrob/testkit] Daytona platform-admin cleanup failed: ${messageText(error)}`);
             });
           }
           await stopMocks(bootedMocks.handles);
           if (provisioned.created) {
             await deleteSandboxes([provisioned.sandbox]).catch((error: unknown) => {
-              console.error(`[openwork/testkit] Daytona Den cleanup failed: ${messageText(error)}`);
+              console.error(`[redrob/testkit] Daytona Den cleanup failed: ${messageText(error)}`);
             });
           }
         },
@@ -839,12 +839,12 @@ export async function server(options: ServerOptions): Promise<Den> {
         disposed = true;
         if (organization.createdOrgId) {
           await deleteCreatedOrganization(organization.admin, organization.createdOrgId).catch((error: unknown) => {
-            console.error(`[openwork/testkit] local Den org cleanup failed: ${messageText(error)}`);
+            console.error(`[redrob/testkit] local Den org cleanup failed: ${messageText(error)}`);
           });
         }
         await stopServices(services);
         await database?.drop().catch((error: unknown) => {
-          console.error(`[openwork/testkit] ephemeral database cleanup failed: ${messageText(error)}`);
+          console.error(`[redrob/testkit] ephemeral database cleanup failed: ${messageText(error)}`);
         });
         await stopMocks(bootedMocks.handles);
       },

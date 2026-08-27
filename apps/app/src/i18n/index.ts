@@ -1,6 +1,6 @@
 import en from "./locales/en";
 import ko from "./locales/ko";
-export const LANGUAGE_PREF_KEY = "openwork.language";
+export const LANGUAGE_PREF_KEY = "redrob.language";
 
 /**
  * Supported languages

@@ -10,7 +10,7 @@ function kindSeedWorld() {
           admin: {
             email: "alex@acme.test",
             name: "Alex Chen",
-            password: "OpenWorkDemo123!",
+            password: "RedrobWorkDemo123!",
           },
         },
       },

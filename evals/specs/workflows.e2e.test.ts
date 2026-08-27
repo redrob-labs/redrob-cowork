@@ -103,7 +103,7 @@ async function mintMcpToken(session: DenSession, orgId: string): Promise<string>
     method: "POST",
     headers: {
       authorization: `Bearer ${session.token}`,
-      "x-openwork-org-id": orgId,
+      "x-redrob-org-id": orgId,
     },
     body: JSON.stringify({ scopes: ["mcp:read", "mcp:write"] }),
   });
@@ -256,7 +256,7 @@ test(title, { timeout: 1_500_000 }, async ({ evidence, place }) => {
     const created = await denFetch(den.admin, "/v1/workers", {
       method: "POST",
       headers: { authorization: `Bearer ${den.admin.token}` },
-      body: JSON.stringify({ name, destination: "local", workspacePath: "/tmp/openwork-eval-worker" }),
+      body: JSON.stringify({ name, destination: "local", workspacePath: "/tmp/redrob-eval-worker" }),
     });
     if (!created.response.ok) {
       throw new Error(`Seeding worker ${name} failed: HTTP ${created.response.status} ${created.text.slice(0, 500)}`);
@@ -637,7 +637,7 @@ return { drive, gmail }`,
     timeoutMs: 60_000,
     label: "Den Web loaded",
   });
-  await evalIn(browser, `localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)})`);
+  await evalIn(browser, `localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)})`);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/script-runs`);
   await waitFor(browser, `document.body.innerText.includes("Workflow Runs") || document.body.innerText.includes("workflow runs")`, {
     timeoutMs: 60_000,

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Bring up a local Den testability stack with random host ports.
 #
-# Usage (from _repos/openwork repo root):
+# Usage (from _repos/redrob repo root):
 #   packaging/docker/den-dev-up.sh
 #
 # Outputs:
@@ -120,7 +120,7 @@ append_origin() {
 }
 
 DEV_ID="$(node -e "console.log(require('crypto').randomUUID().slice(0, 8))")"
-PROJECT="openwork-den-dev-$DEV_ID"
+PROJECT="redrob-den-dev-$DEV_ID"
 DEN_WATCH_OTP_CODES="${DEN_WATCH_OTP_CODES:-1}"
 
 DEN_API_PORT="${DEN_API_PORT:-$(pick_port)}"
@@ -204,7 +204,7 @@ DEN_API_URL=http://localhost:$DEN_API_PORT
 DEN_WEB_URL=http://localhost:$DEN_WEB_PORT
 DEN_API_PUBLIC_URL=http://$PUBLIC_HOST:$DEN_API_PORT
 DEN_WEB_PUBLIC_URL=http://$PUBLIC_HOST:$DEN_WEB_PORT
-DEN_MYSQL_URL=mysql://root:password@127.0.0.1:$DEN_MYSQL_PORT/openwork_den
+DEN_MYSQL_URL=mysql://root:password@127.0.0.1:$DEN_MYSQL_PORT/redrob_den
 DEN_BETTER_AUTH_URL=$DEN_BETTER_AUTH_URL
 DEN_DB_ENCRYPTION_KEY=$DEN_DB_ENCRYPTION_KEY
 DEN_ORG_MODE=$DEN_ORG_MODE
@@ -286,7 +286,7 @@ fi
 if [ -n "$TAILSCALE_DNS_NAME" ]; then
   echo "Den demo/API (Tailscale):          http://$TAILSCALE_DNS_NAME:$DEN_API_PORT" >&2
 fi
-echo "MySQL:                 mysql://root:password@127.0.0.1:$DEN_MYSQL_PORT/openwork_den" >&2
+echo "MySQL:                 mysql://root:password@127.0.0.1:$DEN_MYSQL_PORT/redrob_den" >&2
 echo "Health check:          http://localhost:$DEN_API_PORT/health" >&2
 echo "Runtime env file:      $RUNTIME_FILE" >&2
 if [ -n "$OTP_LOG_PID" ]; then

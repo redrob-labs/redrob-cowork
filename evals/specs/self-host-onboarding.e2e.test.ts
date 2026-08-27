@@ -44,7 +44,7 @@ const title = missingRequirements.length > 0
 
 const OWNER_EMAIL = "morgan.owner@selfhost.test";
 const MEMBER_EMAIL = "riley.member@selfhost.test";
-const PASSWORD = "OpenWorkEval123!";
+const PASSWORD = "RedrobWorkEval123!";
 const ORGANIZATION_NAME = "Bluefin Robotics";
 const ORGANIZATION_SLUG = "bluefin";
 const MODEL_ID = "selfhost-proof-model";
@@ -96,7 +96,7 @@ function matchNamed(result: unknown, capabilityName: string): Record<string, unk
 async function mintMcpToken(session: DenSession, organizationId: string): Promise<string> {
   const result = await denFetch(session, "/v1/mcp/token", {
     method: "POST",
-    headers: { ...auth(session), "x-openwork-org-id": organizationId },
+    headers: { ...auth(session), "x-redrob-org-id": organizationId },
     body: JSON.stringify({}),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
@@ -140,7 +140,7 @@ async function callTool(
 
 async function organizationMemberIdByEmail(owner: DenSession, organizationId: string, email: string): Promise<string> {
   const result = await denFetch(owner, "/v1/org", {
-    headers: { ...auth(owner), "x-openwork-org-id": organizationId },
+    headers: { ...auth(owner), "x-redrob-org-id": organizationId },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   const member = recordList(result.body, "members", "organization context")
@@ -224,11 +224,11 @@ test.skipIf(missingRequirements.length > 0 || daytonaPlacement || !mysqlOpen)(ti
   const landingText = await evalIn(browser, "document.body.innerText");
   const landingShot = await screenshot(browser);
   expect(landingText).toEqual(expect.any(String));
-  expect(landingText).toContain("Start using OpenWork");
+  expect(landingText).toContain("Start using Redrob Work");
   expect(landingText).toContain("Enter your email and we'll send you to the right sign-in step.");
   {
     const seen = await validate(landingShot, [
-      "The self-hosted account landing says Start using OpenWork",
+      "The self-hosted account landing says Start using Redrob Work",
       "An email entry action is visible",
       "No error or crash message is visible",
     ]);
@@ -318,7 +318,7 @@ test.skipIf(missingRequirements.length > 0 || daytonaPlacement || !mysqlOpen)(ti
 
   const providerResult = await denFetch(owner, "/v1/llm-providers", {
     method: "POST",
-    headers: { ...auth(owner), "x-openwork-org-id": organizationId },
+    headers: { ...auth(owner), "x-redrob-org-id": organizationId },
     body: JSON.stringify({
       name: "Self-host Proof Provider",
       source: "custom",
@@ -344,7 +344,7 @@ test.skipIf(missingRequirements.length > 0 || daytonaPlacement || !mysqlOpen)(ti
   expect(providerId).toMatch(/^lpr_/);
 
   const memberProviders = await denFetch(member, "/v1/llm-providers", {
-    headers: { ...auth(member), "x-openwork-org-id": organizationId },
+    headers: { ...auth(member), "x-redrob-org-id": organizationId },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   expect(memberProviders.response.status).toBe(200);

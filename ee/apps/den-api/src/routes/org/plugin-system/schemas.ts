@@ -72,8 +72,8 @@ export const connectorSyncStatusSchema = z.enum(connectorSyncStatusValues)
 export const connectorSyncEventTypeSchema = z.enum(connectorSyncEventTypeValues)
 export const githubWebhookEventSchema = z.enum(githubWebhookEventValues)
 export const extensionSourceFormatSchema = z.enum([
-  "openwork-builtin",
-  "openwork-extension-manifest",
+  "redrob-builtin",
+  "redrob-extension-manifest",
   "claude-plugin",
   "opencode-plugin",
   "mcp-directory",
@@ -650,7 +650,7 @@ export const extensionManifestSchema = z.object({
   contributions: z.array(jsonObjectSchema).optional(),
   setup: jsonObjectSchema.optional(),
   lifecycle: jsonObjectSchema.optional(),
-}).passthrough().meta({ ref: "OpenWorkExtensionManifest" })
+}).passthrough().meta({ ref: "RedrobWorkExtensionManifest" })
 
 export const pluginExtensionSchema = z.object({
   id: pluginIdSchema,

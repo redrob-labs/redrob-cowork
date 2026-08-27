@@ -10,8 +10,8 @@ const electronSidecarDir = resolve(desktopRoot, "resources", "sidecars");
 const electronHelperDir = resolve(desktopRoot, "resources", "helpers");
 const defaultDevDataDir = resolve(
   process.env.HOME ?? process.env.USERPROFILE ?? repoRoot,
-  ".openwork",
-  "openwork-server-dev",
+  ".redrob",
+  "redrob-server-dev",
 );
 
 const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
@@ -226,8 +226,8 @@ if (process.env.REDROB_ELECTRON_SKIP_SHARED_PREPARE !== "1") {
 }
 
 // Build the server TS → JS so Electron can import it in-process
-console.log("[electron-dev] Building openwork-server (tsc)...");
-runSync(pnpmCmd, ["--filter", "openwork-server", "build"], { cwd: repoRoot });
+console.log("[electron-dev] Building redrob-server (tsc)...");
+runSync(pnpmCmd, ["--filter", "redrob-server", "build"], { cwd: repoRoot });
 
 const initialProbeUrls = [startUrl, ...viteProbeUrls].filter(Boolean);
 let viteReady = false;
@@ -289,7 +289,7 @@ electronChild = run(pnpmCmd, ["exec", "electron", "./electron/main.mjs", ...blan
 });
 
 if (cdpPort) {
-  console.log(`[openwork] Electron CDP exposed at http://127.0.0.1:${cdpPort}`);
+  console.log(`[redrob] Electron CDP exposed at http://127.0.0.1:${cdpPort}`);
 }
 
 electronChild.on("exit", (code) => {

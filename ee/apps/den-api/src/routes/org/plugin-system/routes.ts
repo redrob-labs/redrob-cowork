@@ -248,7 +248,7 @@ async function configurePluginMcpConnectionResponse(c: OrgContext) {
     const params = validParam<z.infer<typeof pluginParamsSchema>>(c)
     const body = validJson<z.infer<typeof pluginMcpRequirementConfigureSchema>>(c)
     if (isAgentPluginMcpSecretSetup({ apiKey: body.apiKey, oauthClient: body.oauthClient, sessionId: c.get("session")?.id })) {
-      return c.json({ error: "invalid_request", message: "Plugin MCP credentials cannot be set from the agent. Add them in the OpenWork Cloud dashboard under Connections." }, 400)
+      return c.json({ error: "invalid_request", message: "Plugin MCP credentials cannot be set from the agent. Add them in the Redrob Work Cloud dashboard under Connections." }, 400)
     }
     const admin = ensureOrganizationAdmin(c, "Only workspace owners and admins can configure plugin MCP requirements.")
     if (!admin.ok) return c.json(admin.response, orgAccessFailureStatus(admin.response))
@@ -1042,7 +1042,7 @@ export function registerPluginArchRoutes<T extends { Variables: OrgRouteVariable
     describeRoute({
       tags: ["Plugins"],
       summary: "List my library",
-      description: "Lists the Workflows, Remote MCP Apps, plugins, and connections the caller can use, with every applicable access edge. Workflows and Remote MCP Apps remain config objects contained by their parent OpenWork Connect Plugin.",
+      description: "Lists the Workflows, Remote MCP Apps, plugins, and connections the caller can use, with every applicable access edge. Workflows and Remote MCP Apps remain config objects contained by their parent Redrob Work Connect Plugin.",
       responses: {
         200: jsonResponse("Effective member library returned successfully.", meLibraryListResponseSchema),
         401: jsonResponse("The caller must be signed in to view their library.", unauthorizedSchema),
@@ -1782,7 +1782,7 @@ export function registerPluginArchRoutes<T extends { Variables: OrgRouteVariable
     describeRoute({
       tags: ["GitHub"],
       summary: "Apply GitHub discovery selection",
-      description: "Creates OpenWork plugins and connector mappings from selected discovery candidates.",
+      description: "Creates Redrob Work plugins and connector mappings from selected discovery candidates.",
       responses: {
         200: jsonResponse("GitHub discovery selection applied successfully.", githubDiscoveryApplyResponseSchema),
         400: jsonResponse("The discovery apply request was invalid.", invalidRequestSchema),

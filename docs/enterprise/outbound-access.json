@@ -37,7 +37,7 @@
       "override": null
     },
     {
-      "host": "api.openwork.software",
+      "host": "api.redrob.software",
       "kind": "fetched",
       "components": ["server"],
       "purpose": "Legacy hosted Redrob Work Connect API origin retained for older Cloud configurations.",
@@ -64,7 +64,7 @@
       "override": "desktop apiBaseUrl / self-hosted Den API origin"
     },
     {
-      "host": "app.openwork.software",
+      "host": "app.redrob.software",
       "kind": "fetched",
       "components": ["server"],
       "purpose": "Legacy hosted Redrob Work Cloud web origin retained for older desktop configurations.",
@@ -271,7 +271,7 @@
       "override": null
     },
     {
-      "host": "openwork.dev",
+      "host": "redrob.dev",
       "kind": "link-only",
       "components": ["renderer"],
       "purpose": "Documentation and feedback links in the command palette.",
@@ -301,9 +301,9 @@
       "host": "registry.npmjs.org",
       "kind": "subprocess",
       "components": ["desktop", "renderer"],
-      "purpose": "npx package resolution for openwork-ui-mcp and development-only MCP helper commands.",
+      "purpose": "npx package resolution for redrob-ui-mcp and development-only MCP helper commands.",
       "requirement": "required-in-practice",
-      "blockedEffect": "The Redrob Work UI-control MCP is silently unavailable when npx cannot download openwork-ui-mcp.",
+      "blockedEffect": "The Redrob Work UI-control MCP is silently unavailable when npx cannot download redrob-ui-mcp.",
       "override": "npm registry configuration used by npx"
     },
     {

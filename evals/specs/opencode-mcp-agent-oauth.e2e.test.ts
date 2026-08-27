@@ -15,7 +15,7 @@ import type { TestNeeds } from "@redrob/testkit";
 // callback, token exchange, credential storage, transparent refresh with
 // rotation, and logout — and the minted token works on the /mcp/agent surface
 // without reopening the optional standalone SSE listener.
-const MCP_NAME = "openwork";
+const MCP_NAME = "redrob";
 const ORGANIZATION_NAME = "OAuth Lab";
 const EXPECTED_TOOLS = ["create_skill", "execute_capability", "search_capabilities"] as const;
 const OPENCODE_BIN = process.env.REDROB_EVAL_OPENCODE_BIN?.trim() || "opencode";
@@ -87,7 +87,7 @@ function childEnvironment(home: { root: string; binDir: string; browserShim: str
 }
 
 async function prepareOpencodeHome(mcpUrl: string): Promise<OpencodeHome> {
-  const root = await mkdtemp(path.join(os.tmpdir(), "openwork-opencode-oauth-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "redrob-opencode-oauth-"));
   const binDir = path.join(root, "bin");
   const configDir = path.join(root, "xdg-config", "opencode");
   const dataDir = path.join(root, "xdg-data", "opencode");
@@ -555,12 +555,12 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, asy
   const authList = await runOpencode(home, ["mcp", "auth", "list"], "opencode mcp auth list");
   const mcpList = await runOpencode(home, ["mcp", "list"], "opencode mcp list");
   const authListSound = authList.exitCode === 0
-    && /\bopenwork\b/i.test(authList.combined)
+    && /\bredrob\b/i.test(authList.combined)
     && /authenticated/i.test(authList.combined)
     && !/not authenticated|expired/i.test(authList.combined)
     && !containsTokenMaterial(authList.combined);
   const mcpListSound = mcpList.exitCode === 0
-    && /\bopenwork\b/i.test(mcpList.combined)
+    && /\bredrob\b/i.test(mcpList.combined)
     && /connected/i.test(mcpList.combined)
     && !/failed|needs authentication/i.test(mcpList.combined)
     && !containsTokenMaterial(mcpList.combined);
@@ -640,7 +640,7 @@ test.skipIf(missingRequirements.length > 0)(title, { timeout: 30 * 60_000 }, asy
   const storedAfterLogout = await readFile(home.authFilePath, "utf8").catch(() => "");
   const logoutSound = logout.exitCode === 0
     && authListAfterLogout.exitCode === 0
-    && !/\bopenwork\b.*\bauthenticated\b|✓ openwork/i.test(authListAfterLogout.combined.replace(/not authenticated/gi, ""))
+    && !/\bredrob\b.*\bauthenticated\b|✓ redrob/i.test(authListAfterLogout.combined.replace(/not authenticated/gi, ""))
     && !storedAfterLogout.includes("ow_mcp_rt_");
   evidence.recordAssertionEvidence(
     "Logout removes the stored OAuth credential and the server is no longer authenticated",

@@ -561,8 +561,8 @@ export class AutomationService {
         runId,
         leaseOwner,
         status: "failed",
-        resultSummary: "OpenWork Cloud Workflow execution is unavailable.",
-        error: { code: "execution_runtime_unavailable", message: "OpenWork Cloud Workflow execution is unavailable.", retryable: true },
+        resultSummary: "Redrob Work Cloud Workflow execution is unavailable.",
+        error: { code: "execution_runtime_unavailable", message: "Redrob Work Cloud Workflow execution is unavailable.", retryable: true },
         now: Date.now(),
       })
       return
@@ -619,9 +619,9 @@ export class AutomationService {
         runId: claimed.run.id,
         leaseOwner,
         status: "failed",
-        resultSummary: "OpenWork Cloud agent execution is unavailable.",
+        resultSummary: "Redrob Work Cloud agent execution is unavailable.",
         updateArtifactState: false,
-        error: { code: "execution_runtime_unavailable", message: "OpenWork Cloud agent execution is unavailable.", retryable: true },
+        error: { code: "execution_runtime_unavailable", message: "Redrob Work Cloud agent execution is unavailable.", retryable: true },
         now: Date.now(),
       })
       return
@@ -686,7 +686,7 @@ export class AutomationService {
         onAdmitted: async (receipt) => automationRepository.setCloudExecution({
           runId: claimed.run.id,
           leaseOwner,
-          engineKind: "openwork-cloud-agent-v1",
+          engineKind: "redrob-cloud-agent-v1",
           receipt,
           now: Date.now(),
         }),

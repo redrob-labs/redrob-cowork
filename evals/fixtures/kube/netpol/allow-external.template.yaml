@@ -1,12 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: openwork-den-allow-eval-mock-egress
+  name: redrob-den-allow-eval-mock-egress
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: openwork-ee
-      app.kubernetes.io/instance: openwork-ee
+      app.kubernetes.io/name: redrob-ee
+      app.kubernetes.io/instance: redrob-ee
     matchExpressions:
       - key: app.kubernetes.io/component
         operator: In

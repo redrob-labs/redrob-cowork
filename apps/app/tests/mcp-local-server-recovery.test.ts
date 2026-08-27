@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 
 import type { McpDirectoryInfo } from "../src/app/constants";
 import { submitMcpEntry } from "../src/react-app/domains/connections/modals/add-mcp-submission";
-import type { OpenworkServerStore } from "../src/react-app/domains/connections/openwork-server-store";
+import type { RedrobServerStore } from "../src/react-app/domains/connections/redrob-server-store";
 import { createConnectionsStore } from "../src/react-app/domains/connections/store";
 
 const originalWindow = globalThis.window;
@@ -26,28 +26,28 @@ describe("local MCP server recovery", () => {
     installDesktopWindow();
     let recoveryAttempts = 0;
     const stalledRecovery = new Promise<never>(() => undefined);
-    const openworkServer = {
+    const redrobServer = {
       getSnapshot: () => ({
-        openworkServerStatus: "disconnected",
-        openworkServerClient: null,
-        openworkServerCapabilities: null,
+        redrobServerStatus: "disconnected",
+        redrobServerClient: null,
+        redrobServerCapabilities: null,
       }),
-      ensureLocalOpenworkServerClient: () => {
+      ensureLocalRedrobServerClient: () => {
         recoveryAttempts += 1;
         return stalledRecovery;
       },
-    } as unknown as OpenworkServerStore;
+    } as unknown as RedrobServerStore;
     const store = createConnectionsStore({
       client: () => null,
       setClient: () => undefined,
-      projectDir: () => "/tmp/openwork-mcp-recovery",
+      projectDir: () => "/tmp/redrob-mcp-recovery",
       selectedWorkspaceId: () => "workspace_local",
-      selectedWorkspaceRoot: () => "/tmp/openwork-mcp-recovery",
+      selectedWorkspaceRoot: () => "/tmp/redrob-mcp-recovery",
       workspaceType: () => "local",
-      openworkServer,
+      redrobServer,
       runtimeWorkspaceId: () => null,
       ensureRuntimeWorkspaceId: async () => "workspace_local",
-      localOpenworkServerRecoveryTimeoutMs: 10,
+      localRedrobServerRecoveryTimeoutMs: 10,
       developerMode: () => false,
     });
     const entry: McpDirectoryInfo = {

@@ -1,7 +1,7 @@
 # Deploy Redrob Work EE on Google Cloud with GKE and Helm
 
 Status: self-host operator guide
-Related: `packaging/helm/openwork-ee`, `packaging/helm/openwork-ee/examples/values.gcp-ingress.yaml`
+Related: `packaging/helm/redrob-ee`, `packaging/helm/redrob-ee/examples/values.gcp-ingress.yaml`
 
 This is the recommended Google Cloud path for a first production-like Redrob Work
 EE self-host install. Use Helm on GKE Autopilot with Cloud SQL for MySQL. For
@@ -53,8 +53,8 @@ guidance, not a different Redrob Work packaging format.
 - Enabled APIs: Kubernetes Engine API, Compute Engine API, Cloud SQL Admin API,
   and Service Networking API.
 - A real admin email address for the first owner account.
-- A domain you control, such as `openwork.example.com` and
-  `api.openwork.example.com`.
+- A domain you control, such as `redrob.example.com` and
+  `api.redrob.example.com`.
 
 Google Cloud docs used for this guide:
 
@@ -74,7 +74,7 @@ For a first deployment, create a regional Autopilot cluster:
 ```bash
 export GCP_PROJECT=REPLACE_PROJECT_ID
 export GCP_REGION=us-central1
-export GKE_CLUSTER=openwork-ee
+export GKE_CLUSTER=redrob-ee
 
 gcloud config set project "$GCP_PROJECT"
 
@@ -112,7 +112,7 @@ Create Cloud SQL for MySQL with private IP in the same VPC as the GKE cluster.
 The most important requirements are:
 
 - MySQL 8-compatible Cloud SQL instance.
-- Database name: `openwork_den`.
+- Database name: `redrob_den`.
 - Private services access configured for the VPC.
 - Private IP enabled on the Cloud SQL instance.
 - GKE is VPC-native and can reach the private IP.
@@ -123,7 +123,7 @@ Private IP requires a one-time private services access connection for the VPC:
 
 ```bash
 export VPC_NETWORK=default
-export SQL_RANGE=openwork-sql-range
+export SQL_RANGE=redrob-sql-range
 
 gcloud compute addresses create "$SQL_RANGE" \
   --global \
@@ -140,7 +140,7 @@ gcloud services vpc-peerings connect \
 Create the instance and database:
 
 ```bash
-export SQL_INSTANCE=openwork-ee-mysql
+export SQL_INSTANCE=redrob-ee-mysql
 
 gcloud sql instances create "$SQL_INSTANCE" \
   --database-version=MYSQL_8_0 \
@@ -148,10 +148,10 @@ gcloud sql instances create "$SQL_INSTANCE" \
   --network="projects/$GCP_PROJECT/global/networks/$VPC_NETWORK" \
   --no-assign-ip
 
-gcloud sql databases create openwork_den \
+gcloud sql databases create redrob_den \
   --instance="$SQL_INSTANCE"
 
-gcloud sql users create openwork \
+gcloud sql users create redrob \
   --instance="$SQL_INSTANCE" \
   --password=REPLACE_DB_PASSWORD
 ```
@@ -166,7 +166,7 @@ gcloud sql instances describe "$SQL_INSTANCE" \
 Example database URL:
 
 ```text
-mysql://openwork:<password>@<cloud-sql-private-ip>:3306/openwork_den
+mysql://redrob:<password>@<cloud-sql-private-ip>:3306/redrob_den
 ```
 
 This guide uses direct private IP because the current Redrob Work chart does not
@@ -192,7 +192,7 @@ kubectl run mysql-client \
   --image=mysql:8 \
   -- mysql \
     --host="REPLACE_CLOUD_SQL_PRIVATE_IP" \
-    --user=openwork \
+    --user=redrob \
     --password \
     --execute "select 1"
 ```
@@ -202,10 +202,10 @@ kubectl run mysql-client \
 Reserve a global IP address for the HTTPS load balancer:
 
 ```bash
-gcloud compute addresses create openwork-ee-ip \
+gcloud compute addresses create redrob-ee-ip \
   --global
 
-gcloud compute addresses describe openwork-ee-ip \
+gcloud compute addresses describe redrob-ee-ip \
   --global \
   --format='value(address)'
 ```
@@ -213,17 +213,17 @@ gcloud compute addresses describe openwork-ee-ip \
 Create the namespace:
 
 ```bash
-kubectl create namespace openwork-ee
+kubectl create namespace redrob-ee
 ```
 
 Create a Google-managed certificate resource:
 
 ```bash
-kubectl apply -n openwork-ee -f - <<'YAML'
+kubectl apply -n redrob-ee -f - <<'YAML'
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
-  name: openwork-ee-cert
+  name: redrob-ee-cert
 spec:
   domains:
     - REPLACE_WEB_HOST
@@ -234,11 +234,11 @@ YAML
 Create explicit backend health checks for the two Redrob Work services:
 
 ```bash
-kubectl apply -n openwork-ee -f - <<'YAML'
+kubectl apply -n redrob-ee -f - <<'YAML'
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: openwork-ee-den-api-backend
+  name: redrob-ee-den-api-backend
 spec:
   healthCheck:
     type: HTTP
@@ -250,7 +250,7 @@ spec:
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: openwork-ee-den-web-backend
+  name: redrob-ee-den-web-backend
 spec:
   healthCheck:
     type: HTTP
@@ -269,7 +269,7 @@ The Helm values annotate the Redrob Work Services so GKE associates these
 Copy the starter file:
 
 ```bash
-cp packaging/helm/openwork-ee/examples/values.gcp-ingress.yaml values.gcp.yaml
+cp packaging/helm/redrob-ee/examples/values.gcp-ingress.yaml values.gcp.yaml
 ```
 
 Replace every `REPLACE_*` placeholder.
@@ -293,7 +293,7 @@ secret:
     emailFrom: "Redrob Work <no-reply@example.com>"
     smtpHost: "smtp.example.com"
     smtpPort: "587"
-    smtpUser: "openwork@example.com"
+    smtpUser: "redrob@example.com"
     smtpPass: "REPLACE_SMTP_PASSWORD"
     smtpSecure: "false"
 ```
@@ -318,12 +318,12 @@ Before installing, render the chart and verify the migration Job will use your
 Cloud SQL URL:
 
 ```bash
-helm template openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm template redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
-  -f values.gcp.yaml > /tmp/openwork-rendered.yaml
+  --namespace redrob-ee \
+  -f values.gcp.yaml > /tmp/redrob-rendered.yaml
 
-grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SMTP_PORT|SMTP_SECURE' /tmp/openwork-rendered.yaml
+grep -E 'DATABASE_URL|DEN_BASE_URL|DEN_WEB_PUBLIC_ORIGIN|EMAIL_FROM|SMTP_HOST|SMTP_PORT|SMTP_SECURE' /tmp/redrob-rendered.yaml
 ```
 
 Redact secrets before sharing rendered manifests or terminal output.
@@ -333,9 +333,9 @@ Redact secrets before sharing rendered manifests or terminal output.
 Published chart releases live in GHCR:
 
 ```bash
-helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm upgrade --install redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.gcp.yaml
 ```
@@ -343,8 +343,8 @@ helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee
 For a checkout-local test:
 
 ```bash
-helm upgrade --install openwork-ee ./packaging/helm/openwork-ee \
-  --namespace openwork-ee \
+helm upgrade --install redrob-ee ./packaging/helm/redrob-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.gcp.yaml
 ```
@@ -355,7 +355,7 @@ private packages or private forks do:
 
 ```bash
 kubectl create secret docker-registry ghcr-pull-secret \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --docker-server=ghcr.io \
   --docker-username="$GITHUB_USER" \
   --docker-password="$GITHUB_TOKEN"
@@ -371,7 +371,7 @@ imagePullSecrets:
 The migration Job runs before the Deployments are useful. If it fails, fix that
 before debugging web/API readiness.
 
-Avoid `kubectl describe job openwork-ee-migrate` in shared reports because the
+Avoid `kubectl describe job redrob-ee-migrate` in shared reports because the
 hook Job currently includes `DATABASE_URL` and `DEN_DB_ENCRYPTION_KEY` in the
 rendered environment. Use logs and redacted rendered manifests instead.
 
@@ -387,15 +387,15 @@ migrations:
 Then run Helm and inspect the normal Job logs:
 
 ```bash
-helm upgrade --install openwork-ee oci://ghcr.io/different-ai/charts/openwork-ee \
+helm upgrade --install redrob-ee oci://ghcr.io/different-ai/charts/redrob-ee \
   --version REPLACE_REDROB_VERSION \
-  --namespace openwork-ee \
+  --namespace redrob-ee \
   --create-namespace \
   -f values.gcp.yaml \
   --wait=false
 
-kubectl get jobs,pods -n openwork-ee
-kubectl logs -n openwork-ee -l job-name=openwork-ee-migrate --all-containers=true
+kubectl get jobs,pods -n redrob-ee
+kubectl logs -n redrob-ee -l job-name=redrob-ee-migrate --all-containers=true
 ```
 
 Return to the default hook mode after debugging:
@@ -412,15 +412,15 @@ migrations:
 Get the reserved IP address:
 
 ```bash
-gcloud compute addresses describe openwork-ee-ip \
+gcloud compute addresses describe redrob-ee-ip \
   --global \
   --format='value(address)'
 ```
 
 Create DNS records:
 
-- `openwork.example.com` -> the reserved global IP address.
-- `api.openwork.example.com` -> the reserved global IP address.
+- `redrob.example.com` -> the reserved global IP address.
+- `api.redrob.example.com` -> the reserved global IP address.
 
 GKE can take several minutes to provision the load balancer. Google-managed
 certificates can take up to an hour to become active after DNS points at the
@@ -429,9 +429,9 @@ load balancer.
 Check status:
 
 ```bash
-kubectl get ingress -n openwork-ee
-kubectl describe managedcertificate openwork-ee-cert -n openwork-ee
-kubectl describe ingress openwork-ee -n openwork-ee
+kubectl get ingress -n redrob-ee
+kubectl describe managedcertificate redrob-ee-cert -n redrob-ee
+kubectl describe ingress redrob-ee -n redrob-ee
 ```
 
 If you are still using temporary hosts before DNS/TLS is ready, temporarily
@@ -444,9 +444,9 @@ when ConfigMap or Secret content changes. On older chart versions, manually
 restart the deployments after changing public origin values:
 
 ```bash
-kubectl rollout restart deployment/openwork-ee-den-api deployment/openwork-ee-den-web -n openwork-ee
-kubectl rollout status deployment/openwork-ee-den-api -n openwork-ee --timeout=180s
-kubectl rollout status deployment/openwork-ee-den-web -n openwork-ee --timeout=180s
+kubectl rollout restart deployment/redrob-ee-den-api deployment/redrob-ee-den-web -n redrob-ee
+kubectl rollout status deployment/redrob-ee-den-api -n redrob-ee --timeout=180s
+kubectl rollout status deployment/redrob-ee-den-web -n redrob-ee --timeout=180s
 ```
 
 ## 8. Verify readiness
@@ -454,21 +454,21 @@ kubectl rollout status deployment/openwork-ee-den-web -n openwork-ee --timeout=1
 Check Kubernetes state:
 
 ```bash
-helm status openwork-ee -n openwork-ee
-kubectl get pods -n openwork-ee
-kubectl get jobs -n openwork-ee
-kubectl get ingress -n openwork-ee
-kubectl describe backendconfig openwork-ee-den-api-backend -n openwork-ee
-kubectl describe backendconfig openwork-ee-den-web-backend -n openwork-ee
-kubectl logs -n openwork-ee deploy/openwork-ee-den-api
-kubectl logs -n openwork-ee deploy/openwork-ee-den-web
+helm status redrob-ee -n redrob-ee
+kubectl get pods -n redrob-ee
+kubectl get jobs -n redrob-ee
+kubectl get ingress -n redrob-ee
+kubectl describe backendconfig redrob-ee-den-api-backend -n redrob-ee
+kubectl describe backendconfig redrob-ee-den-web-backend -n redrob-ee
+kubectl logs -n redrob-ee deploy/redrob-ee-den-api
+kubectl logs -n redrob-ee deploy/redrob-ee-den-web
 ```
 
 Check readiness from your machine:
 
 ```bash
-curl -fsS https://api.openwork.example.com/ready
-curl -fsS https://openwork.example.com/api/ready
+curl -fsS https://api.redrob.example.com/ready
+curl -fsS https://redrob.example.com/api/ready
 ```
 
 ## 9. Bootstrap the first owner
@@ -493,7 +493,7 @@ secret:
 For releases that include initial-administrator bootstrap, inject the
 release-documented one-time setup secret through the Kubernetes Secret referenced
 by `secret.existingSecret`. Do not store the code in the values file or a
-ConfigMap. Then open `https://openwork.example.com/setup`, enter the configured
+ConfigMap. Then open `https://redrob.example.com/setup`, enter the configured
 owner email and one-time operator code, and create the first account. Redrob Work
 creates the singleton organization, grants owner and configured platform-admin
 access, and signs the administrator in. Public signup remains disabled. After
@@ -517,14 +517,14 @@ demo IdPs.
 Configure the IdP application with this callback URL:
 
 ```text
-https://openwork.example.com/api/auth/sso/callback/openwork-sso-<org-id>
+https://redrob.example.com/api/auth/sso/callback/redrob-sso-<org-id>
 ```
 
 In Redrob Work, sign in as the owner, open the organization SSO settings, and enter
 the IdP issuer/client details. After saving, the organization sign-in path is:
 
 ```text
-https://openwork.example.com/sso/<singleOrgSlug>
+https://redrob.example.com/sso/<singleOrgSlug>
 ```
 
 For SAML, Redrob Work shows the generated ACS URL and metadata URL after the SAML
@@ -555,8 +555,8 @@ single organization. Password sign-in for that organization is rejected.
 For a disposable test:
 
 ```bash
-helm uninstall openwork-ee -n openwork-ee
-gcloud compute addresses delete openwork-ee-ip --global
+helm uninstall redrob-ee -n redrob-ee
+gcloud compute addresses delete redrob-ee-ip --global
 gcloud container clusters delete "$GKE_CLUSTER" --location "$GCP_REGION"
 gcloud sql instances delete "$SQL_INSTANCE"
 ```

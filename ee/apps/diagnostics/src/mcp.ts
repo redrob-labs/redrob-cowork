@@ -135,9 +135,9 @@ export async function handleMcpRequest(request: Request, rawBody: string): Promi
     const version = negotiatedVersion(value)
     return json(200, rpcResult(id, {
       capabilities: { tools: { listChanged: false } },
-      instructions: "Synthetic OpenWork Diagnostics endpoint. No customer content is returned or retained.",
+      instructions: "Synthetic Redrob Work Diagnostics endpoint. No customer content is returned or retained.",
       protocolVersion: version,
-      serverInfo: { name: "openwork-diagnostics", version: "1.0.0" },
+      serverInfo: { name: "redrob-diagnostics", version: "1.0.0" },
     }), {
       "mcp-protocol-version": version,
       "mcp-session-id": createSessionToken(config.signingSecret),
@@ -198,7 +198,7 @@ export async function handleMcpRequest(request: Request, rawBody: string): Promi
         })
         return json(200, rpcError(id, -32001, "Authorization required. Open the mock verification link, authorize this diagnostics tool for five minutes, then retry.", {
           connect_url: connectUrl,
-          provider: "openwork-diagnostics",
+          provider: "redrob-diagnostics",
         }))
       }
       return json(200, rpcResult(id, {

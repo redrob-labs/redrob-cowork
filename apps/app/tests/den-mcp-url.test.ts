@@ -59,7 +59,7 @@ describe("getDenMcpUrl", () => {
 describe("isLegacyWebAppMcpUrl", () => {
   test("flags the legacy bare web-app MCP URL", () => {
     expect(isLegacyWebAppMcpUrl("https://app.redrob.io/mcp")).toBe(true);
-    expect(isLegacyWebAppMcpUrl("https://app.openwork.software/mcp/")).toBe(true);
+    expect(isLegacyWebAppMcpUrl("https://app.redrob.software/mcp/")).toBe(true);
   });
 
   test("accepts valid MCP URLs", () => {
@@ -78,8 +78,8 @@ describe("resolveCloudMcpResourceUrl", () => {
     expect(resolveCloudMcpResourceUrl("https://app.redrob.io/mcp")).toBe(
       "https://app.redrob.io/api/den/mcp",
     );
-    expect(resolveCloudMcpResourceUrl("https://app.openwork.software/mcp/")).toBe(
-      "https://app.openwork.software/api/den/mcp",
+    expect(resolveCloudMcpResourceUrl("https://app.redrob.software/mcp/")).toBe(
+      "https://app.redrob.software/api/den/mcp",
     );
   });
 
@@ -108,13 +108,13 @@ describe("parseDenMcpToken", () => {
       expiresAt: "2026-08-18T00:00:00.000Z",
       organizationId: "org_1",
       scopes: ["mcp:read", "mcp:write"],
-      resource: "https://api.openwork.test/mcp",
+      resource: "https://api.redrob.test/mcp",
     })).toEqual({
       token: "central-token",
       expiresAt: "2026-08-18T00:00:00.000Z",
       organizationId: "org_1",
       scopes: ["mcp:read", "mcp:write"],
-      resource: "https://api.openwork.test/mcp",
+      resource: "https://api.redrob.test/mcp",
     });
   });
 
@@ -124,7 +124,7 @@ describe("parseDenMcpToken", () => {
       expiresAt: "2026-08-18T00:00:00.000Z",
       organizationId: "org_1",
       scopes: ["mcp:read", "mcp:write"],
-      resource: "https://api.openwork.test/mcp",
+      resource: "https://api.redrob.test/mcp",
     };
     expect(parseDenMcpToken({ ...base, appHostToken: "private-token" })?.appHostToken).toBeUndefined();
     expect(parseDenMcpToken({

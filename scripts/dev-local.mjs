@@ -16,7 +16,7 @@ try {
   // .env.dev is optional; the inline fallbacks below still apply.
 }
 const composeFile = path.join(rootDir, "packaging", "docker", "docker-compose.web-local.yml")
-const composeProject = "openwork-den-local"
+const composeProject = "redrob-den-local"
 
 const apiPort = process.env.DEN_API_PORT?.trim() || process.env.DEN_CONTROLLER_PORT?.trim() || "8788"
 const workerProxyPort = process.env.DEN_WORKER_PROXY_PORT?.trim() || "8789"
@@ -27,7 +27,7 @@ const extraAppPorts = (process.env.REDROB_EXTRA_APP_PORTS?.trim() || "5174")
   .split(",")
   .map((value) => value.trim())
   .filter(Boolean)
-const databaseUrl = process.env.DATABASE_URL?.trim() || "mysql://root:password@127.0.0.1:3306/openwork_den"
+const databaseUrl = process.env.DATABASE_URL?.trim() || "mysql://root:password@127.0.0.1:3306/redrob_den"
 const databaseRedisUrl = process.env.DATABASE_REDIS_URL?.trim() || "redis://127.0.0.1:6379"
 const dbEncryptionKey =
   process.env.DEN_DB_ENCRYPTION_KEY?.trim() ||

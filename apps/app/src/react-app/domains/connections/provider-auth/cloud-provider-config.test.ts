@@ -88,11 +88,11 @@ describe("isCloudProviderOutOfSync", () => {
 });
 
 describe("buildCloudProviderConfig", () => {
-  test("omits empty models for openwork so catalog models can remain", () => {
+  test("omits empty models for redrob so catalog models can remain", () => {
     const provider: DenOrgLlmProviderConnection = {
-      id: "lpr_openwork",
-      source: "openwork",
-      providerId: "openwork",
+      id: "lpr_redrob",
+      source: "redrob",
+      providerId: "redrob",
       name: "Redrob Models",
       providerConfig: {
         npm: "@openrouter/ai-sdk-provider",
@@ -112,7 +112,7 @@ describe("buildCloudProviderConfig", () => {
     expect(config.name).toBe("Redrob Models");
   });
 
-  test("keeps an empty models map for non-openwork cloud providers", () => {
+  test("keeps an empty models map for non-redrob cloud providers", () => {
     const provider: DenOrgLlmProviderConnection = {
       id: "lpr_custom",
       source: "custom",

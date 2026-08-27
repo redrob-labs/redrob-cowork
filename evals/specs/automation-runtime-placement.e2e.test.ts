@@ -29,18 +29,18 @@ test("Web creates Cloud-owned Automations while Desktop creation remains local",
     timeoutMs: 60_000,
     label: "Den Web loaded",
   });
-  await evalIn(browser, `localStorage.setItem("openwork:web:auth-token", ${JSON.stringify(den.admin.token)})`);
+  await evalIn(browser, `localStorage.setItem("redrob:web:auth-token", ${JSON.stringify(den.admin.token)})`);
   await navigate(browser.client, `${den.ref.webUrl}/dashboard/automations`);
   await waitForText(browser, "New Automation", { timeoutMs: 60_000 });
 
   const surfaceCopy = await evalIn(browser, "document.body.innerText");
-  expect(surfaceCopy).toContain("Automations created here run headlessly in OpenWork Cloud");
+  expect(surfaceCopy).toContain("Automations created here run headlessly in Redrob Work Cloud");
   expect(surfaceCopy).toContain("Desktop-created Automations stay on Desktop");
   await evalIn(browser, `([...document.querySelectorAll("button")].find((button) => button.textContent?.includes("New Automation")))?.click()`);
   await waitForText(browser, "A stopped Cloud container wakes automatically", { timeoutMs: 10_000 });
   evidence.recordAssertionEvidence(
     "Creation surface explains immutable runtime placement",
-    "Web identifies new Automations as OpenWork Cloud-owned and preserves Desktop-created Automations as Desktop-owned.",
+    "Web identifies new Automations as Redrob Work Cloud-owned and preserves Desktop-created Automations as Desktop-owned.",
     true,
   );
 

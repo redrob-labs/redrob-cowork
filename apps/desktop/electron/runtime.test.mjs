@@ -9,17 +9,17 @@ import {
   commandMatchesPackagedSidecar,
   createRuntimeManager,
   embeddedServerImportUrl,
-  migrateOpenworkServerTokenStore,
+  migrateRedrobServerTokenStore,
   prepareRuntimeWorkspaceRoot,
   prioritizeWorkspacePaths,
   resetRuntimeStatesAfterFailedServerStart,
   resolveEngineRolloverPreference,
   resolveEvalLocalServerDelayMs,
-  resolveOpenworkServerConfigPath,
+  resolveRedrobServerConfigPath,
   seedWorkspacePathsForEmbeddedServer,
-  selectStickyOpenworkPortWorkspace,
+  selectStickyRedrobPortWorkspace,
   snapshotEngineState,
-  snapshotOpenworkServerState,
+  snapshotRedrobServerState,
 } from "./runtime.mjs";
 
 describe("workspace root preparation", () => {
@@ -49,11 +49,11 @@ describe("workspace root preparation", () => {
   });
 
   it("returns the runtime lifecycle to idle after root preparation fails", async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), "openwork-runtime-root-"));
+    const root = await mkdtemp(path.join(os.tmpdir(), "redrob-runtime-root-"));
     try {
       const manager = createRuntimeManager({
         app: {
-          getPath: (name) => name === "exe" ? path.join(root, "OpenWork.exe") : root,
+          getPath: (name) => name === "exe" ? path.join(root, "Redrob Work.exe") : root,
           isPackaged: false,
         },
         desktopRoot: path.dirname(fileURLToPath(import.meta.url)),
@@ -73,7 +73,7 @@ describe("workspace root preparation", () => {
       assert.equal(status.lifecycleState, "idle");
       assert.equal(status.engine.running, false);
       assert.equal(status.engine.projectDir, null);
-      assert.equal(status.openworkServer.running, false);
+      assert.equal(status.redrobServer.running, false);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
@@ -100,7 +100,7 @@ describe("engine rollover preference", () => {
   });
 
   it("reports the active mode in the desktop server snapshot", () => {
-    const snapshot = snapshotOpenworkServerState({
+    const snapshot = snapshotRedrobServerState({
       child: null,
       childExited: true,
       inProcess: true,
@@ -143,17 +143,17 @@ describe("seedWorkspacePathsForEmbeddedServer", () => {
   });
 });
 
-describe("selectStickyOpenworkPortWorkspace", () => {
+describe("selectStickyRedrobPortWorkspace", () => {
   it("uses the requested workspace even when server config owns workspace loading", () => {
     assert.equal(
-      selectStickyOpenworkPortWorkspace(["/workspace/current"], []),
+      selectStickyRedrobPortWorkspace(["/workspace/current"], []),
       "/workspace/current",
     );
   });
 
   it("falls back to server workspace paths when no requested path is available", () => {
     assert.equal(
-      selectStickyOpenworkPortWorkspace([], ["/workspace/from-server"]),
+      selectStickyRedrobPortWorkspace([], ["/workspace/from-server"]),
       "/workspace/from-server",
     );
   });
@@ -173,8 +173,8 @@ describe("commandMatchesPackagedSidecar", () => {
   it("matches packaged opencode sidecars with platform suffixes", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
-        "/Applications/OpenWork.app/Contents/Resources/sidecars/opencode-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174 --cors *",
-        ["/Applications/OpenWork.app/Contents/Resources/sidecars"],
+        "/Applications/Redrob Work.app/Contents/Resources/sidecars/opencode-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174 --cors *",
+        ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
       ),
       true,
     );
@@ -184,7 +184,7 @@ describe("commandMatchesPackagedSidecar", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
         "/usr/local/bin/opencode serve --hostname 127.0.0.1 --port 49174",
-        ["/Applications/OpenWork.app/Contents/Resources/sidecars"],
+        ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
       ),
       false,
     );
@@ -193,7 +193,7 @@ describe("commandMatchesPackagedSidecar", () => {
 
 describe("embeddedServerImportUrl", () => {
   it("returns the same file URL for unchanged metadata", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "openwork-runtime-"));
+    const dir = await mkdtemp(path.join(os.tmpdir(), "redrob-runtime-"));
     try {
       const embeddedPath = path.join(dir, "embedded.js");
       await writeFile(embeddedPath, "export const value = 1;\n");
@@ -213,7 +213,7 @@ describe("embeddedServerImportUrl", () => {
   });
 
   it("changes when the file metadata changes", async () => {
-    const dir = await mkdtemp(path.join(os.tmpdir(), "openwork-runtime-"));
+    const dir = await mkdtemp(path.join(os.tmpdir(), "redrob-runtime-"));
     try {
       const embeddedPath = path.join(dir, "embedded.js");
       await writeFile(embeddedPath, "export const value = 1;\n");
@@ -228,32 +228,32 @@ describe("embeddedServerImportUrl", () => {
   });
 
   it("falls back to the plain file URL if stat fails", () => {
-    const missingPath = path.join(os.tmpdir(), "openwork-missing-embedded.js");
+    const missingPath = path.join(os.tmpdir(), "redrob-missing-embedded.js");
 
     assert.equal(embeddedServerImportUrl(missingPath), pathToFileURL(missingPath).href);
   });
 });
 
-describe("resolveOpenworkServerConfigPath", () => {
+describe("resolveRedrobServerConfigPath", () => {
   it("respects explicit server config path", () => {
     assert.equal(
-      resolveOpenworkServerConfigPath({ REDROB_SERVER_CONFIG: "/tmp/openwork/server.json" }),
-      "/tmp/openwork/server.json",
+      resolveRedrobServerConfigPath({ REDROB_SERVER_CONFIG: "/tmp/redrob/server.json" }),
+      "/tmp/redrob/server.json",
     );
   });
 
   it("uses XDG config home on Unix", () => {
     if (process.platform === "win32") return;
     assert.equal(
-      resolveOpenworkServerConfigPath({ XDG_CONFIG_HOME: "/tmp/xdg" }),
-      "/tmp/xdg/openwork/server.json",
+      resolveRedrobServerConfigPath({ XDG_CONFIG_HOME: "/tmp/xdg" }),
+      "/tmp/xdg/redrob/server.json",
     );
   });
 });
 
-describe("OpenWork server credential persistence", () => {
+describe("Redrob Work server credential persistence", () => {
   it("deterministically migrates legacy workspace credentials into one server bundle", () => {
-    const migrated = migrateOpenworkServerTokenStore({
+    const migrated = migrateRedrobServerTokenStore({
       version: 1,
       workspaces: {
         "/workspace/z": {
@@ -286,7 +286,7 @@ describe("OpenWork server credential persistence", () => {
         updatedAt: 20,
       },
     });
-    assert.deepEqual(migrateOpenworkServerTokenStore(migrated), migrated);
+    assert.deepEqual(migrateRedrobServerTokenStore(migrated), migrated);
   });
 });
 

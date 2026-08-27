@@ -10,8 +10,8 @@ const maximumSubmissionAgeMs = 1000 * 60 * 60;
 const defaultAllowedOrigins = [
   "https://redrob.io",
   "https://www.redrob.io",
-  "https://openwork.software",
-  "https://www.openwork.software",
+  "https://redrob.software",
+  "https://www.redrob.software",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:3005",
@@ -19,11 +19,11 @@ const defaultAllowedOrigins = [
 ];
 
 const store = globalThis as typeof globalThis & {
-  __openworkLandingRateLimitStore?: Map<string, FixedWindowEntry>;
+  __redrobLandingRateLimitStore?: Map<string, FixedWindowEntry>;
 };
 
-const rateLimitStore = store.__openworkLandingRateLimitStore ?? new Map<string, FixedWindowEntry>();
-store.__openworkLandingRateLimitStore = rateLimitStore;
+const rateLimitStore = store.__redrobLandingRateLimitStore ?? new Map<string, FixedWindowEntry>();
+store.__redrobLandingRateLimitStore = rateLimitStore;
 
 function currentTime() {
   return Date.now();

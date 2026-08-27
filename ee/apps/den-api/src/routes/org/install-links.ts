@@ -154,7 +154,7 @@ function organizationMetadataInput(value: unknown): Record<string, unknown> | st
 function buildInstallConfig(input: { organization: { name: string; logo: string | null; metadata: unknown }; request: Request }) {
   const metadata = normalizeOrganizationMetadata(organizationMetadataInput(input.organization.metadata)).metadata
   return installConfigSchema.parse({
-    appName: typeof metadata.brandAppName === "string" ? metadata.brandAppName : "OpenWork",
+    appName: typeof metadata.brandAppName === "string" ? metadata.brandAppName : "Redrob Work",
     clientName: input.organization.name,
     webUrl: env.webUrl,
     apiUrl: resolvePublicOrigin(input.request, env.apiPublicUrl),
@@ -352,7 +352,7 @@ export function registerOrgInstallLinkRoutes<T extends { Variables: OrgRouteVari
     describeRoute({
       tags: ["Organizations"],
       summary: "Create organization install link",
-      description: "Mints a shareable OpenWork desktop install link for a signed-in organization member. Older active links remain valid unless an owner or admin explicitly requests rotation.",
+      description: "Mints a shareable Redrob Work desktop install link for a signed-in organization member. Older active links remain valid unless an owner or admin explicitly requests rotation.",
       responses: {
         200: jsonResponse("Install link created successfully.", createInstallLinkResponseSchema),
         400: jsonResponse("The install-link request was invalid.", invalidRequestSchema),
@@ -439,7 +439,7 @@ export function registerOrgInstallLinkRoutes<T extends { Variables: OrgRouteVari
     "/v1/me/install/:platform",
     describeRoute({
       tags: ["Users"],
-      summary: "Download current user's managed OpenWork desktop",
+      summary: "Download current user's managed Redrob Work desktop",
       description: "Downloads the Cloud or Enterprise artifact approved for the signed-in member's active organization.",
       responses: {
         200: textResponse("Mounted desktop artifact returned successfully."),
@@ -613,7 +613,7 @@ export function registerOrgInstallLinkRoutes<T extends { Variables: OrgRouteVari
     "/v1/install/:platform",
     describeRoute({
       tags: ["Organizations"],
-      summary: "Download managed OpenWork desktop",
+      summary: "Download managed Redrob Work desktop",
       description: "Redirects hosted Cloud deployments to the sign-in-required Cloud app and private single-org deployments to the activation-required Enterprise app.",
       responses: {
         200: textResponse("Mounted desktop artifact returned successfully."),

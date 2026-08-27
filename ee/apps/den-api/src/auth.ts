@@ -139,7 +139,7 @@ export const DEN_MCP_OAUTH_RESOURCE = deriveDenMcpAgentResource({
   apiPublicUrl: env.apiPublicUrl,
   mcpResource: DEN_MCP_RESOURCE,
 });
-export const DEN_MCP_FIRST_PARTY_CLIENT_ID = "openwork-desktop";
+export const DEN_MCP_FIRST_PARTY_CLIENT_ID = "redrob-desktop";
 const DEN_API_PUBLIC_MCP_RESOURCES = apiPublicMcpResource(env.apiPublicUrl);
 const DEN_MCP_BASE_RESOURCES = [
   DEN_MCP_RESOURCE,

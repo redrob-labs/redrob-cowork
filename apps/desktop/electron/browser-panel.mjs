@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { app, WebContentsView, clipboard, session, shell } from "electron";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BROWSER_SESSION_PARTITION = "persist:openwork-browser";
+const BROWSER_SESSION_PARTITION = "persist:redrob-browser";
 const BROWSER_DEFAULT_URL = "about:blank";
 // URL a user-initiated new tab (the "+" button / opening the browser panel)
 // lands on. The agent's programmatic path keeps BROWSER_DEFAULT_URL.
@@ -115,8 +115,8 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
   }
 
   function browserTargetMarkerUrl(tabId) {
-    const marker = `openwork-browser-tab:${tabId}`;
-    const html = `<!doctype html><title>${marker}</title><meta name="openwork-browser-tab" content="${tabId}"><body>${marker}</body>`;
+    const marker = `redrob-browser-tab:${tabId}`;
+    const html = `<!doctype html><title>${marker}</title><meta name="redrob-browser-tab" content="${tabId}"><body>${marker}</body>`;
     return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
   }
 
@@ -130,7 +130,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
   }
 
   async function resolveBrowserCdpTargetId(tabId) {
-    const marker = encodeURIComponent(`openwork-browser-tab:${tabId}`);
+    const marker = encodeURIComponent(`redrob-browser-tab:${tabId}`);
     const deadline = Date.now() + BROWSER_TARGET_RESOLVE_TIMEOUT_MS;
     while (Date.now() < deadline) {
       const targets = await listCdpTargets().catch(() => []);
@@ -380,7 +380,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
     if (!ready) {
       console.warn("[menu-overlay] renderer did not signal readiness before show");
     }
-    view.webContents.send("openwork:menu-overlay:show", {
+    view.webContents.send("redrob:menu-overlay:show", {
       id: request.id,
       source: request.source,
       items: request.items,
@@ -526,7 +526,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
           // The tab may be mid-close; the panel-opened event below still fires.
         }
       }
-      sendToRenderer("openwork:browser:panel-opened");
+      sendToRenderer("redrob:browser:panel-opened");
     });
     view.webContents.on("did-navigate", () => sendBrowserState());
     view.webContents.on("did-navigate-in-page", () => sendBrowserState());
@@ -646,7 +646,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
         attachActiveBrowserView();
       } else {
         hideBrowserView();
-        sendToRenderer("openwork:browser:panel-closed");
+        sendToRenderer("redrob:browser:panel-closed");
       }
     }
     try { tab.view.webContents.close(); } catch { /* already destroyed */ }
@@ -668,7 +668,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
     for (const tab of tabsToClose) {
       try { tab.view.webContents.close(); } catch { /* already destroyed */ }
     }
-    sendToRenderer("openwork:browser:panel-closed");
+    sendToRenderer("redrob:browser:panel-closed");
     sendBrowserState();
     return closedTabIds;
   }
@@ -691,7 +691,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
   }
 
   function sendBrowserState() {
-    sendToRenderer("openwork:browser:state", browserStatePayload());
+    sendToRenderer("redrob:browser:state", browserStatePayload());
   }
 
   /**
@@ -744,58 +744,58 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
   }
 
   function registerIpc(ipcMain) {
-    ipcMain.handle("openwork:browser:show", (_event, bounds) => attachBrowserView(bounds));
-    ipcMain.handle("openwork:browser:hide", () => hideBrowserView());
-    ipcMain.handle("openwork:browser:openUrl", (_event, url, provider) => openBrowserUrlForAutomation(url, provider));
-    ipcMain.handle("openwork:browser:navigate", (_event, url) => {
+    ipcMain.handle("redrob:browser:show", (_event, bounds) => attachBrowserView(bounds));
+    ipcMain.handle("redrob:browser:hide", () => hideBrowserView());
+    ipcMain.handle("redrob:browser:openUrl", (_event, url, provider) => openBrowserUrlForAutomation(url, provider));
+    ipcMain.handle("redrob:browser:navigate", (_event, url) => {
       const view = getActiveBrowserView() ?? createBrowserTab("about:blank", { select: true }).view;
       view.webContents.loadURL(normalizeBrowserUrl(url));
     });
-    ipcMain.handle("openwork:browser:back", () => {
+    ipcMain.handle("redrob:browser:back", () => {
       const webContents = getActiveWebContents();
       if (webContents?.canGoBack()) webContents.goBack();
     });
-    ipcMain.handle("openwork:browser:forward", () => {
+    ipcMain.handle("redrob:browser:forward", () => {
       const webContents = getActiveWebContents();
       if (webContents?.canGoForward()) webContents.goForward();
     });
-    ipcMain.handle("openwork:browser:reload", () => getActiveWebContents()?.reload());
-    ipcMain.handle("openwork:browser:bounds", (_event, bounds) => {
+    ipcMain.handle("redrob:browser:reload", () => getActiveWebContents()?.reload());
+    ipcMain.handle("redrob:browser:bounds", (_event, bounds) => {
       lastBrowserBounds = bounds;
       const view = getActiveBrowserView();
       if (view && browserViewVisible && bounds.width > 0 && bounds.height > 0) {
         view.setBounds(scaleRendererBounds(bounds));
       }
     });
-    ipcMain.handle("openwork:browser:state", () => browserStatePayload());
-    ipcMain.handle("openwork:browser:createTab", (_event, url) => {
+    ipcMain.handle("redrob:browser:state", () => browserStatePayload());
+    ipcMain.handle("redrob:browser:createTab", (_event, url) => {
       const target = typeof url === "string" && url.trim() ? url : BROWSER_NEW_TAB_URL;
       const tab = createBrowserTab(target, { select: true });
       return { tabId: tab.tabId };
     });
-    ipcMain.handle("openwork:browser:closeTab", (_event, tabId) => closeBrowserTab(tabId == null ? undefined : String(tabId)));
-    ipcMain.handle("openwork:browser:closeAllTabs", () => closeAllBrowserTabs());
-    ipcMain.handle("openwork:browser:selectTab", (_event, tabId) => selectBrowserTab(String(tabId ?? "")).tabId);
-    ipcMain.handle("openwork:browser:reorderTabs", (_event, tabIds) => reorderBrowserTabs(tabIds));
-    ipcMain.handle("openwork:browser:listTabs", () => listBrowserTabs());
-    ipcMain.handle("openwork:browser:setProxy", (_event, proxy) => setBrowserProxy(proxy));
-    ipcMain.handle("openwork:browser:getProxy", () => browserProxyState());
-    ipcMain.handle("openwork:browser:tabContextMenu", (_event, tabId, point) => showBrowserTabContextMenu(tabId, point));
-    ipcMain.handle("openwork:browser:destroy", () => destroyBrowserView());
-    ipcMain.on("openwork:menu-overlay:ready", (event) => {
+    ipcMain.handle("redrob:browser:closeTab", (_event, tabId) => closeBrowserTab(tabId == null ? undefined : String(tabId)));
+    ipcMain.handle("redrob:browser:closeAllTabs", () => closeAllBrowserTabs());
+    ipcMain.handle("redrob:browser:selectTab", (_event, tabId) => selectBrowserTab(String(tabId ?? "")).tabId);
+    ipcMain.handle("redrob:browser:reorderTabs", (_event, tabIds) => reorderBrowserTabs(tabIds));
+    ipcMain.handle("redrob:browser:listTabs", () => listBrowserTabs());
+    ipcMain.handle("redrob:browser:setProxy", (_event, proxy) => setBrowserProxy(proxy));
+    ipcMain.handle("redrob:browser:getProxy", () => browserProxyState());
+    ipcMain.handle("redrob:browser:tabContextMenu", (_event, tabId, point) => showBrowserTabContextMenu(tabId, point));
+    ipcMain.handle("redrob:browser:destroy", () => destroyBrowserView());
+    ipcMain.on("redrob:menu-overlay:ready", (event) => {
       if (event.sender !== menuOverlayView?.webContents) return;
       markMenuOverlayReady(menuOverlayView);
     });
-    ipcMain.on("openwork:menu-overlay:choose", (event, payload) => {
+    ipcMain.on("redrob:menu-overlay:choose", (event, payload) => {
       if (event.sender !== menuOverlayView?.webContents) return;
       handleMenuOverlayChoice(payload);
     });
-    ipcMain.on("openwork:menu-overlay:close", (event, payload) => {
+    ipcMain.on("redrob:menu-overlay:close", (event, payload) => {
       if (event.sender !== menuOverlayView?.webContents) return;
       if (payload?.requestId && payload.requestId !== menuOverlayRequest?.id) return;
       hideMenuOverlay();
     });
-    ipcMain.on("openwork:menu-overlay:dismiss", (event) => {
+    ipcMain.on("redrob:menu-overlay:dismiss", (event) => {
       if (event.sender === menuOverlayView?.webContents) return;
       hideMenuOverlay();
     });
