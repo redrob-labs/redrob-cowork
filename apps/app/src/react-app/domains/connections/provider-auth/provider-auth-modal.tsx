@@ -58,7 +58,6 @@ const PROVIDER_LABELS: Record<string, string> = {
   openrouter: "OpenRouter",
 };
 
-const REDROB_MODELS_PROVIDER_ID = "redrob";
 
 export type ProviderAuthModalProps = {
   open: boolean;
@@ -78,8 +77,6 @@ export type ProviderAuthModalProps = {
     code?: string,
   ) => Promise<{ connected: boolean; pending?: boolean; message?: string }>;
   onRefreshProviders?: () => Promise<unknown>;
-  showRedrobWorkModelsSubscribe?: boolean;
-  onSubscribeRedrobWorkModels?: () => void | Promise<void>;
   onClose: () => void;
 };
 
@@ -88,7 +85,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
   const isRemoteWorker = workerType === "remote";
 
   const [view, setView] = useState<
-    "list" | "method" | "api" | "oauth-code" | "oauth-auto" | "redrob-subscribe"
+    "list" | "method" | "api" | "oauth-code" | "oauth-auto"
   >("list");
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState("");
@@ -186,22 +183,8 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
       })
       .sort(compareProviders);
 
-    if (props.showRedrobWorkModelsSubscribe && isRedrobOnlyProviderId(REDROB_MODELS_PROVIDER_ID)) {
-      const connectedToRedrobWork = connected.has(REDROB_MODELS_PROVIDER_ID);
-      return [
-        {
-          id: REDROB_MODELS_PROVIDER_ID,
-          name: "Redrob",
-          methods: [{ type: "cloud", label: "Subscribe" }],
-          connected: connectedToRedrobWork,
-          env: [],
-        },
-        ...nextEntries.filter((entry) => entry.id.trim().toLowerCase() !== REDROB_MODELS_PROVIDER_ID),
-      ];
-    }
-
     return nextEntries;
-  }, [isRemoteWorker, props.authMethods, props.connectedProviderIds, props.providers, props.showRedrobWorkModelsSubscribe]);
+  }, [isRemoteWorker, props.authMethods, props.connectedProviderIds, props.providers]);
 
   const selectedEntry = useMemo(
     () => entries.find((entry) => entry.id === selectedProviderId) ?? null,
@@ -514,11 +497,6 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
       return;
     }
 
-    if (method.type === "cloud") {
-      setView("redrob-subscribe");
-      return;
-    }
-
     setView("api");
   };
 
@@ -526,11 +504,6 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     if (actionDisabled) return;
     setLocalError(null);
     setSelectedProviderId(entry.id);
-
-    if (props.showRedrobWorkModelsSubscribe && entry.id.trim().toLowerCase() === REDROB_MODELS_PROVIDER_ID) {
-      setView("redrob-subscribe");
-      return;
-    }
 
     if (entry.methods.length === 1) {
       void handleMethodSelect(entry.methods[0]);
@@ -581,11 +554,6 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
   };
 
   const handleBack = () => {
-    if (resolvedView === "redrob-subscribe") {
-      resetState();
-      return;
-    }
-
     if (resolvedView === "oauth-code" || resolvedView === "oauth-auto") {
       if ((selectedEntry?.methods.length ?? 0) > 1) {
         setView("method");
@@ -667,9 +635,6 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     }
     if (method.type === "oauth") {
       return "Continue in the browser and let Redrob finish the connection automatically.";
-    }
-    if (method.type === "cloud") {
-      return "Subscribe to Redrob Models.";
     }
     return "Paste a secret key that Redrob stores locally on this device.";
   };
@@ -781,9 +746,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                                   className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
                                     method.type === "oauth"
                                       ? "bg-indigo-3/30 text-indigo-11 border-indigo-5/30"
-                                      : method.type === "cloud"
-                                        ? "bg-emerald-3/30 text-emerald-11 border-emerald-5/30"
-                                        : "bg-gray-3/40 text-gray-11 border-gray-6/40"
+                                      : "bg-gray-3/40 text-gray-11 border-gray-6/40"
                                   }`}
                                 >
                                   {methodLabel(method)}
@@ -877,27 +840,6 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                       ))}
                     </div>
                   ) : null}
-                </div>
-              ) : null}
-
-              {resolvedView === "redrob-subscribe" && selectedEntry ? (
-                <div className="rounded-xl border border-blue-6/50 bg-blue-2/25 shadow-sm p-5 space-y-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-12">Redrob Models</div>
-                      <div className="text-xs text-gray-10 mt-1">
-                        Frontier intelligence, hand picked for your team&apos;s most ambitious work.
-                      </div>
-                    </div>
-                    <Button variant="ghost" onClick={handleBack} disabled={actionDisabled}>
-                      Back
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-end">
-                    <Button onClick={() => void props.onSubscribeRedrobWorkModels?.()} disabled={actionDisabled}>
-                      Subscribe
-                    </Button>
-                  </div>
                 </div>
               ) : null}
 

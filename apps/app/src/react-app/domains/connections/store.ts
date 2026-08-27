@@ -9,10 +9,6 @@ import {
   type McpDirectoryInfo,
 } from "../../../app/constants";
 import { extensionResource } from "../../../app/extensions";
-import {
-  mintCloudControlMcpToken,
-  readDenSettings,
-} from "../../../app/lib/den";
 import { createClient, unwrap } from "../../../app/lib/opencode";
 import { finishPerf, perfNow, recordPerfLog } from "../../../app/lib/perf-log";
 import {
@@ -40,21 +36,9 @@ import type {
   ReloadTrigger,
 } from "../../../app/types";
 import { isDesktopRuntime, normalizeDirectoryPath, safeStringify } from "../../../app/utils";
-import { conflictsWithRedrobConnect } from "./mcp-connection-boundary";
 
 import type { RedrobServerStore } from "./redrob-server-store";
 import { attemptSilentMcpReauth } from "./mcp-silent-reauth";
-import {
-  CLOUD_MCP_SERVER_NAME,
-  readCloudMcpUserState,
-} from "./cloud-mcp-user-state";
-import {
-  clearCloudMcpDisabledIntent,
-  cloudMcpDisplaySummary,
-  recordCloudMcpDisabledIntent,
-  runRedrobCloudMcpReconciler,
-  type CloudMcpOperationContext,
-} from "./cloud-mcp-reconciler";
 
 type SetStateAction<T> = T | ((current: T) => T);
 
@@ -62,7 +46,6 @@ type SetStateAction<T> = T | ((current: T) => T);
 // below the minted token TTL (7 days, DEN_FIRST_PARTY_MCP_TOKEN_TTL_MS in
 // den-api): when the two were equal, the marker was stale the instant it
 // was written and every sync tick re-wrote the MCP config.
-const CLOUD_MCP_REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
 const LOCAL_REDROB_SERVER_RECOVERY_TIMEOUT_MS = 30_000;
 
 async function withLocalRedrobServerRecoveryTimeout<T>(
@@ -293,24 +276,6 @@ export function createConnectionsStore(options: {
 
   const resolveWritableRedrobTarget = async () => {
     return resolveMcpRedrobTarget("write");
-  };
-
-  const resolveCloudMcpOperationContext = async (fallbackUrl?: string | null): Promise<CloudMcpOperationContext | null> => {
-    const settings = readDenSettings();
-    const workspaceId = await resolveRedrobWorkspaceId();
-    const serverBaseUrl = getRedrobSnapshot().redrobServerClient?.baseUrl.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!workspaceId || !serverBaseUrl || !orgId) return null;
-    return {
-      denBaseUrl: settings.baseUrl,
-      serverBaseUrl,
-      workspaceId,
-      orgId,
-      denAuthToken: settings.authToken ?? null,
-      orgSlug: settings.activeOrgSlug,
-      orgName: settings.activeOrgName,
-      fallbackUrl,
-    };
   };
 
   const resolveProjectDir = async (activeClient: Client | null, currentProjectDir: string) => {
@@ -713,62 +678,8 @@ export function createConnectionsStore(options: {
     const slug = entry.id ?? getMcpServerName(entry);
     const action = snapshot.mcpServers.some((server) => server.name === slug) ? "updated" : "added";
 
-    if (conflictsWithRedrobConnect(entry)) {
-      const error = t("mcp.name_reserved_redrob_connect");
-      setStateField("mcpStatus", error);
-      finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
-        reason: "redrob-connect-name-reserved",
-      });
-      return { ok: false, error };
-    }
-
     try {
       mutateState((current) => ({ ...current, mcpStatus: null, mcpConnectingName: entry.name }));
-
-      if (entry.managedBy === "redrob-connect") {
-        if (slug !== CLOUD_MCP_SERVER_NAME) {
-          throw new Error("Redrob Work Connect MCP metadata is invalid.");
-        }
-        if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
-          throw new Error("Redrob Work server is required to repair agent access to connected services.");
-        }
-        const context = await resolveCloudMcpOperationContext(entry.url);
-        if (!context) {
-          throw new Error("Sign in to Redrob Work Cloud and choose an organization first.");
-        }
-        clearCloudMcpDisabledIntent(context);
-        const result = await runRedrobCloudMcpReconciler({
-          mode: "repair",
-          client: redrobClient,
-          context: { ...context, trigger: "desktop-explicit-connect" },
-          mintToken: mintCloudControlMcpToken,
-          force: true,
-          refreshMarginMs: CLOUD_MCP_REFRESH_MARGIN_MS,
-        });
-        await refreshMcpServers();
-        if (result.health?.usable) {
-          setStateField("mcpStatus", t("mcp.connected"));
-          finishPerf(options.developerMode(), "mcp.connect", "done", startedAt, {
-            name: entry.name,
-            type: entryType,
-            slug,
-          });
-          return { ok: true };
-        }
-        const summary = cloudMcpDisplaySummary({
-          signedIn: Boolean(context.denAuthToken?.trim()),
-          orgSelected: Boolean(context.orgId.trim()),
-          connecting: false,
-          health: result.health,
-        });
-        setStateField("mcpStatus", `${summary.stageLabel}. ${summary.recommendedAction}`);
-        finishPerf(options.developerMode(), "mcp.connect", "error", startedAt, {
-          name: entry.name,
-          type: entryType,
-          error: summary.stageLabel,
-        });
-        return { ok: false, error: `${summary.stageLabel}. ${summary.recommendedAction}` };
-      }
 
       if (entry.managedOAuth) {
         if (isRemoteWorkspace || !isDesktopRuntime()) {
@@ -1002,59 +913,6 @@ export function createConnectionsStore(options: {
     }
   }
 
-  /**
-   * Background reconciliation for the Den cloud MCP: when the desktop is
-   * signed in to Redrob Work Cloud with an active org, keep the
-   * `redrob-cloud` MCP entry configured with a fresh first-party token.
-   * Quiet by design — a failed mint never opens the OAuth modal.
-   *
-   * `force` bypasses the freshness marker: used by the user-facing Refresh
-   * button so "make my cloud connection current NOW" is one click (re-mint
-   * token + rewrite config + reconnect) instead of sign-out/sign-in or
-   * waiting for the marker to expire.
-   */
-  async function syncCloudControlMcp(options?: { force?: boolean }): Promise<"synced" | "unchanged" | "skipped"> {
-    const settings = readDenSettings();
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!orgId || !settings.authToken?.trim()) return "skipped";
-    const workspaceId = await resolveRedrobWorkspaceId();
-    if (!workspaceId) return "skipped";
-    const redrobClient = getRedrobSnapshot().redrobServerClient;
-    const serverBaseUrl = redrobClient?.baseUrl.trim() ?? "";
-    if (!redrobClient || !serverBaseUrl) return "skipped";
-
-    const entry = MCP_QUICK_CONNECT.find((candidate) => candidate.serverName === CLOUD_MCP_SERVER_NAME);
-    if (!entry) return "skipped";
-    const scope = { denBaseUrl: settings.baseUrl, serverBaseUrl, orgId, workspaceId };
-
-    // Respect explicit user intent for this exact workspace/org/server/deployment.
-    if (readCloudMcpUserState(scope) !== null) return "skipped";
-    const configuredEntry = snapshot.mcpServers.find((server) => server.name === CLOUD_MCP_SERVER_NAME);
-    if (configuredEntry?.config.enabled === false) return "skipped";
-
-    const result = await runRedrobCloudMcpReconciler({
-      mode: "repair",
-      client: redrobClient,
-      context: {
-        ...scope,
-        denAuthToken: settings.authToken,
-        orgSlug: settings.activeOrgSlug,
-        orgName: settings.activeOrgName,
-        fallbackUrl: configuredEntry?.config.url ?? entry.url,
-        trigger: options?.force ? "desktop-settings-force" : "desktop-settings-background",
-      },
-      mintToken: mintCloudControlMcpToken,
-      force: options?.force,
-      refreshMarginMs: CLOUD_MCP_REFRESH_MARGIN_MS,
-    });
-    if (result.status === "unchanged" || result.status === "ready") return "unchanged";
-    if (result.health?.usable) {
-      await refreshMcpServers();
-      return "synced";
-    }
-    return "skipped";
-  }
-
   async function waitForManagedMcpAuthorization(
     redrobClient: RedrobServerClient,
     workspaceId: string,
@@ -1215,10 +1073,6 @@ export function createConnectionsStore(options: {
         await removeMcpFromConfig(projectDir, name);
       }
 
-      if (name === CLOUD_MCP_SERVER_NAME) {
-        const context = await resolveCloudMcpOperationContext(null);
-        if (context) recordCloudMcpDisabledIntent(context, "removed");
-      }
       options.markReloadRequired?.("mcp", { type: "mcp", name, action: "removed" });
       await refreshMcpServers();
       if (snapshot.selectedMcp === name) {
@@ -1286,14 +1140,6 @@ export function createConnectionsStore(options: {
       }
 
       await redrobClient.setMcpEnabled(redrobWorkspaceId, name, enabled);
-      if (name === CLOUD_MCP_SERVER_NAME) {
-        const context = await resolveCloudMcpOperationContext(null);
-        if (enabled) {
-          if (context) clearCloudMcpDisabledIntent(context);
-        } else if (context) {
-          recordCloudMcpDisabledIntent(context, "disabled");
-        }
-      }
       options.markReloadRequired?.("mcp", { type: "mcp", name, action: "updated" });
       await refreshMcpServers();
     } catch (error) {
@@ -1394,7 +1240,6 @@ export function createConnectionsStore(options: {
     readMcpConfigFile,
     refreshMcpServers,
     connectMcp,
-    syncCloudControlMcp,
     authorizeMcp,
     logoutMcpAuth,
     removeMcp,
