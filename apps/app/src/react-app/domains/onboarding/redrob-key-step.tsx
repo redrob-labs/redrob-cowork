@@ -20,6 +20,14 @@ type RedrobKeyStepProps = {
   onSubmitKey: (apiKey: string) => void | Promise<void>;
   onOpenConsole: () => void;
   onSkip: () => void;
+  /**
+   * Overrides the skip control's copy. First-run onboarding passes the
+   * "just look around" label so skipping reads as an explicit browse-mode
+   * branch (finish onboarding without a key; add one later in Settings).
+   * Defaults to the existing "Skip for now" copy.
+   */
+  skipLabel?: string;
+  skipDescription?: string;
 };
 
 /**
@@ -35,6 +43,8 @@ export function RedrobKeyStep({
   onSubmitKey,
   onOpenConsole,
   onSkip,
+  skipLabel,
+  skipDescription,
 }: RedrobKeyStepProps) {
   const [apiKey, setApiKey] = useState("");
   const canSubmit = Boolean(apiKey.trim()) && !busy;
@@ -96,11 +106,14 @@ export function RedrobKeyStep({
             {busy ? t("welcome.redrob_key_saving") : t("welcome.redrob_key_submit")}
           </Button>
 
-          <div className="pt-1 text-center">
+          <div className="space-y-1 pt-1 text-center">
             <Button variant="ghost" size="sm" onClick={onSkip} disabled={busy}>
               <SkipForwardIcon className="mr-1.5 size-3.5" />
-              {t("welcome.redrob_key_skip")}
+              {skipLabel ?? t("welcome.redrob_key_skip")}
             </Button>
+            {skipDescription ? (
+              <p className="text-xs text-muted-foreground">{skipDescription}</p>
+            ) : null}
           </div>
         </div>
       </div>

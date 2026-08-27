@@ -19,6 +19,8 @@ import { usePlatform } from "../kernel/platform";
 import { WelcomePage } from "../domains/onboarding/welcome-page";
 import { ProviderSelectionStep } from "../domains/onboarding/provider-selection-step";
 import { RedrobKeyStep } from "../domains/onboarding/redrob-key-step";
+import { LanguageStep } from "../domains/onboarding/language-step";
+import { EngineDownloadStep } from "../domains/onboarding/engine-download-step";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
 import { REDROB_API_KEY_ENV, REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
 import { CreateWorkspaceModal } from "../domains/workspace/create-workspace-modal";
@@ -62,7 +64,16 @@ function focusPromptSoon() {
   [0, 80, 240, 600].forEach((delay) => window.setTimeout(focus, delay));
 }
 
+/**
+ * First-run wizard stage that precedes the existing workspace-creation flow.
+ * "language" and "engine" are the two new leading onboarding steps; once the
+ * user reaches "main" the existing WelcomePage -> create -> redrob-key ->
+ * provider -> attribution flow runs unchanged. Language is always shown first.
+ */
+type WelcomeStage = "language" | "engine" | "main";
+
 type WelcomeState = {
+  stage: WelcomeStage;
   modalOpen: boolean;
   createBusy: boolean;
   createError: string | null;
@@ -77,6 +88,7 @@ type WelcomeState = {
 };
 
 type WelcomeAction =
+  | { type: "stage"; stage: WelcomeStage }
   | { type: "open" }
   | { type: "close" }
   | { type: "create:start" }
@@ -90,6 +102,7 @@ type WelcomeAction =
   | { type: "attribution-step"; route: string };
 
 const initialWelcomeState: WelcomeState = {
+  stage: "language",
   modalOpen: false,
   createBusy: false,
   createError: null,
@@ -105,6 +118,8 @@ const initialWelcomeState: WelcomeState = {
 
 function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeState {
   switch (action.type) {
+    case "stage":
+      return { ...state, stage: action.stage };
     case "open":
       return { ...state, modalOpen: true };
     case "close":
@@ -338,6 +353,19 @@ export function WelcomeRoute() {
     if (state.pendingSessionId) focusPromptSoon();
   }, [markOnboardingComplete, navigate, state.pendingRoute, state.pendingSessionId]);
 
+  // "Just look around": the browse-mode branch of the API-key step. It finishes
+  // onboarding without a key and lands the user in the app; a key can be added
+  // later from Settings (the existing Redrob provider flow). Never throws.
+  const handleLookAround = useCallback(() => {
+    captureAnalyticsEvent("onboarding_browse_mode_selected");
+    markOnboardingComplete();
+    const route = state.pendingWorkspaceId
+      ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
+      : "/session";
+    navigate(route, { replace: true });
+    if (state.pendingSessionId) focusPromptSoon();
+  }, [markOnboardingComplete, navigate, state.pendingSessionId, state.pendingWorkspaceId]);
+
   const handleAttributionSubmit = useCallback(
     (source: AttributionSource, aiPrompt?: string) => {
       const prompt = aiPrompt?.trim().slice(0, 500) ?? "";
@@ -359,6 +387,22 @@ export function WelcomeRoute() {
 
   if (holdSignedOutSurface) {
     return null;
+  }
+
+  // Leading onboarding steps run before the existing workspace-creation flow.
+  // Language is always the first thing shown; engine download follows; then
+  // the "main" stage renders the established WelcomePage -> create -> key ->
+  // provider -> attribution flow unchanged.
+  if (state.stage === "language") {
+    return <LanguageStep onContinue={() => dispatch({ type: "stage", stage: "engine" })} />;
+  }
+  if (state.stage === "engine") {
+    return (
+      <EngineDownloadStep
+        onBack={() => dispatch({ type: "stage", stage: "language" })}
+        onContinue={() => dispatch({ type: "stage", stage: "main" })}
+      />
+    );
   }
 
   return (
@@ -396,7 +440,9 @@ export function WelcomeRoute() {
           error={state.redrobKeyError}
           onSubmitKey={handleSubmitRedrobKey}
           onOpenConsole={handleOpenRedrobConsole}
-          onSkip={advanceToProviderStep}
+          onSkip={handleLookAround}
+          skipLabel={t("onboarding.look_around_cta")}
+          skipDescription={t("onboarding.look_around_description")}
         />
       ) : null}
       {state.providerStep ? (

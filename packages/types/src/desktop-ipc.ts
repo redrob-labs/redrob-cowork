@@ -119,6 +119,18 @@ export type EngineDoctorResult = {
   serveHelpStderr: string | null;
 };
 
+/**
+ * Result of the desktop guided engine install (runtime.mjs `engineInstall`).
+ * `ok` is true only when the install shell command exited 0; `stderr` carries
+ * the actionable message on failure (e.g. the win32 "not supported" note).
+ */
+export type EngineInstallResult = {
+  ok: boolean;
+  status: number;
+  stdout: string;
+  stderr: string;
+};
+
 export type WorkspaceList = {
   selectedId?: string;
   watchedId?: string | null;
@@ -410,7 +422,7 @@ export type DesktopCommandMap = {
   engineRestart: { args: [options?: Record<string, unknown>]; result: EngineInfo };
   engineInfo: { args: []; result: EngineInfo };
   engineDoctor: { args: [projectDir?: string]; result: EngineDoctorResult };
-  engineInstall: { args: []; result: unknown };
+  engineInstall: { args: []; result: EngineInstallResult };
 
   // App / bridge info
   appBuildInfo: { args: []; result: AppBuildInfo };

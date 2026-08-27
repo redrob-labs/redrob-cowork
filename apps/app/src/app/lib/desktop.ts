@@ -5,6 +5,7 @@ export type {
   EngineInfo,
   RedrobServerInfo,
   EngineDoctorResult,
+  EngineInstallResult,
   WorkspaceInfo,
   WorkspaceList,
   WorkspaceExportSummary,

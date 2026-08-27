@@ -24,6 +24,13 @@ import {
 
 const __runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 
+// PLACEHOLDER: the real "Redrob Code" engine install source is not yet
+// published, so the guided install still points at the upstream OpenCode
+// installer. Override via REDROB_ENGINE_INSTALL_URL once the Redrob Code
+// endpoint is available; behavior is identical when the env var is unset.
+const REDROB_ENGINE_INSTALL_URL =
+  process.env.REDROB_ENGINE_INSTALL_URL?.trim() || "https://opencode.ai/install";
+
 const DIRECT_RUNTIME = "direct";
 const REDROB_SERVER_PORT_RANGE_START = 48_000;
 const REDROB_SERVER_PORT_RANGE_END = 51_000;
@@ -1750,7 +1757,7 @@ export function createRuntimeManager({
     if (!version) {
       throw new Error("constants.json is missing opencodeVersion");
     }
-    return `curl -fsSL https://opencode.ai/install | bash -s -- --version ${version} --no-modify-path`;
+    return `curl -fsSL ${REDROB_ENGINE_INSTALL_URL} | bash -s -- --version ${version} --no-modify-path`;
   }
 
   function processMatchesSidecar(command) {

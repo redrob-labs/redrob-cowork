@@ -1,0 +1,79 @@
+/** @jsxImportSource react */
+import { useSyncExternalStore } from "react";
+import { CheckIcon } from "lucide-react";
+
+import {
+  LANGUAGE_OPTIONS,
+  currentLocale,
+  setLocale,
+  subscribeToLocale,
+  t,
+  type Language,
+} from "@/i18n";
+import { Button } from "@/components/ui/button";
+import { OnboardingWizardShell } from "./onboarding-wizard-shell";
+
+type LanguageStepProps = {
+  onContinue: () => void;
+};
+
+/**
+ * First onboarding step: pick the UI language. The choice is applied
+ * immediately and persistently via `setLocale` from `@/i18n` (which writes the
+ * `redrob.language` localStorage key and notifies subscribers), so this and the
+ * rest of the app re-render into the chosen language right away. No new locale
+ * store is introduced — the active language is read through the same
+ * `useSyncExternalStore(subscribeToLocale, ...)` pattern as
+ * shell/bottom-left-controls.tsx.
+ */
+export function LanguageStep({ onContinue }: LanguageStepProps) {
+  const language = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+
+  return (
+    <OnboardingWizardShell
+      step="language"
+      title={t("onboarding.language_title")}
+      description={t("onboarding.language_subtitle")}
+    >
+      <div className="space-y-3">
+        {LANGUAGE_OPTIONS.map((option) => {
+          const selected = option.value === language;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={selected}
+              className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${
+                selected
+                  ? "border-blue-7/60 bg-blue-2/30"
+                  : "border-border bg-card hover:bg-accent"
+              }`}
+              onClick={() => setLocale(option.value as Language)}
+              data-testid={`onboarding-language-${option.value}`}
+            >
+              <div>
+                <div className="text-sm font-medium text-foreground">
+                  {option.nativeName}
+                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  {option.label}
+                </div>
+              </div>
+              {selected ? <CheckIcon className="size-5 shrink-0 text-blue-10" /> : null}
+            </button>
+          );
+        })}
+
+        <Button
+          type="button"
+          size="lg"
+          className="h-11 w-full text-[15px] font-semibold"
+          onClick={onContinue}
+          data-testid="onboarding-language-continue"
+        >
+          {t("onboarding.continue")}
+        </Button>
+      </div>
+    </OnboardingWizardShell>
+  );
+}
