@@ -22,7 +22,6 @@ type WelcomePageProps = {
   onManualFolderChange?: (value: string) => void;
   onUseManualFolder?: () => void;
   showManualFolder?: boolean;
-  onJoinOrganization: () => void;
 };
 
 export function WelcomePage({
@@ -34,7 +33,6 @@ export function WelcomePage({
   onManualFolderChange,
   onUseManualFolder,
   showManualFolder,
-  onJoinOrganization,
 }: WelcomePageProps) {
   const { config: shellConfig } = useShellConfig();
   const appName = shellConfig.appName;
@@ -108,22 +106,6 @@ export function WelcomePage({
                     ? t("welcome.creating_workspace")
                     : (getStartedLabel || t("welcome.get_started"))}
                 </Button>
-
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-                    onClick={onJoinOrganization}
-                    data-testid="welcome-join-org"
-                  >
-                    <span className="font-medium text-foreground/90">
-                      {t("welcome.join_org")}
-                    </span>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">
-                      {t("welcome.join_org_subtitle")}
-                    </span>
-                  </button>
-                </div>
 
                 {error ? (
                   <p className="text-center text-xs text-destructive">{error}</p>

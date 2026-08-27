@@ -293,11 +293,7 @@ export function ForcedSigninPage({ developerMode }: ForcedSigninPageProps) {
       sessionBusy={denAuth.status === "checking"}
       manualAuthOpen={manualAuthOpen}
       manualAuthInput={manualAuthInput}
-      organizationServerBusy={baseUrlBusy}
-      organizationServerError={baseUrlError}
-      organizationServerUrl={baseUrl}
       onBaseUrlDraftInput={setBaseUrlDraft}
-      onOrganizationServerSave={applyBaseUrl}
       onResetBaseUrl={() => setBaseUrlDraft(baseUrl)}
       onApplyBaseUrl={() => {
         void applyBaseUrl();

@@ -12,7 +12,6 @@ import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src"
 import { DEFAULT_DEN_BASE_URL } from "../../../app/lib/den";
 import { Button } from "@/components/ui/button";
 import { TextInput } from "../../design-system/text-input";
-import { OrganizationServerAffordance } from "../settings/cloud/organization-server-affordance";
 import { SignInFallbackNotice } from "./signin-fallback-notice";
 
 export type DenSignInSurfaceVariant = "panel" | "fullscreen";
@@ -33,11 +32,7 @@ export type DenSignInSurfaceProps = {
   sessionBusy: boolean;
   manualAuthOpen: boolean;
   manualAuthInput: string;
-  organizationServerBusy?: boolean;
-  organizationServerError?: string | null;
-  organizationServerUrl?: string;
   onBaseUrlDraftInput: (value: string) => void;
-  onOrganizationServerSave?: (url: string) => Promise<boolean>;
   onResetBaseUrl: () => void;
   onApplyBaseUrl: () => void;
   onOpenControlPlane: () => void;
@@ -279,15 +274,6 @@ export function DenSignInSurface(props: DenSignInSurfaceProps) {
 
               {props.signinFallbackUrl ? (
                 <SignInFallbackNotice url={props.signinFallbackUrl} />
-              ) : null}
-
-              {props.onOrganizationServerSave ? (
-                <OrganizationServerAffordance
-                  busy={props.organizationServerBusy === true}
-                  error={props.organizationServerError ?? null}
-                  onSave={props.onOrganizationServerSave}
-                  url={props.organizationServerUrl ?? props.baseUrl}
-                />
               ) : null}
 
               {props.statusMessage && !props.authError ? (

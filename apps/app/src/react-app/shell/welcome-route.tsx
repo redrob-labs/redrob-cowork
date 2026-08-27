@@ -6,7 +6,6 @@ import { t } from "../../i18n";
 import {
   pickDirectory,
   resolveWorkspaceListSelectedId,
-  workspaceCreateRemote,
   workspaceSetRuntimeActive,
   workspaceSetSelected,
   type WorkspaceInfo,
@@ -31,7 +30,6 @@ import {
   markRedrobWorkModelsStartupPromoShown,
 } from "../domains/cloud/redrob-models-promo";
 import { useDenAuth } from "../domains/cloud/den-auth-provider";
-import { JoinOrganizationDialog } from "../domains/cloud/join-organization-dialog";
 import { resolveRedrobConnection } from "./redrob-connection";
 import { captureAnalyticsEvent } from "../../app/lib/analytics";
 import { buildRedrobWorkspaceBaseUrl, createRedrobServerClient } from "../../app/lib/redrob-server";
@@ -68,8 +66,6 @@ type WelcomeState = {
   modalOpen: boolean;
   createBusy: boolean;
   createError: string | null;
-  remoteBusy: boolean;
-  remoteError: string | null;
   redrobKeyStep: boolean;
   redrobKeyBusy: boolean;
   redrobKeyError: string | null;
@@ -86,9 +82,6 @@ type WelcomeAction =
   | { type: "create:start" }
   | { type: "create:error"; error: string }
   | { type: "create:finish" }
-  | { type: "remote:start" }
-  | { type: "remote:error"; error: string }
-  | { type: "remote:finish" }
   | { type: "redrob-key-step"; workspaceId: string; sessionId: string | null }
   | { type: "redrob-key:start" }
   | { type: "redrob-key:error"; error: string }
@@ -100,8 +93,6 @@ const initialWelcomeState: WelcomeState = {
   modalOpen: false,
   createBusy: false,
   createError: null,
-  remoteBusy: false,
-  remoteError: null,
   redrobKeyStep: false,
   redrobKeyBusy: false,
   redrobKeyError: null,
@@ -117,19 +108,13 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
     case "open":
       return { ...state, modalOpen: true };
     case "close":
-      return { ...state, modalOpen: false, createError: null, remoteError: null };
+      return { ...state, modalOpen: false, createError: null };
     case "create:start":
       return { ...state, createBusy: true, createError: null };
     case "create:error":
       return { ...state, createError: action.error };
     case "create:finish":
       return { ...state, createBusy: false };
-    case "remote:start":
-      return { ...state, remoteBusy: true, remoteError: null };
-    case "remote:error":
-      return { ...state, remoteError: action.error };
-    case "remote:finish":
-      return { ...state, remoteBusy: false };
     case "redrob-key-step":
       return {
         ...state,
@@ -166,7 +151,6 @@ export function WelcomeRoute() {
   const denAuth = useDenAuth();
   const [state, dispatch] = useReducer(welcomeReducer, initialWelcomeState);
   const [manualFolder, setManualFolder] = useState("");
-  const [joinOrganizationOpen, setJoinOrganizationOpen] = useState(false);
   const showRedrobWorkModelsPromo = useRedrobWorkModelsPromoEligibility();
   const denAuthTokenSnapshot = useSyncExternalStore(
     subscribeToDenSettings,
@@ -293,73 +277,6 @@ export function WelcomeRoute() {
     [],
   );
 
-  const handleCreateRemote = useCallback(
-    async (input: {
-      redrobHostUrl?: string | null;
-      redrobToken?: string | null;
-      directory?: string | null;
-      displayName?: string | null;
-    }) => {
-      const baseUrlValue = input.redrobHostUrl?.trim() ?? "";
-      if (!baseUrlValue) return false;
-      dispatch({ type: "remote:start" });
-      try {
-        const remoteType: "redrob" = "redrob";
-        const payload = {
-          baseUrl: baseUrlValue,
-          redrobHostUrl: baseUrlValue,
-          redrobToken: input.redrobToken?.trim() || null,
-          displayName: input.displayName?.trim() || null,
-          directory: input.directory?.trim() || null,
-          remoteType,
-        };
-        let list: WorkspaceList | null = null;
-        if (isDesktopRuntime()) {
-          list = await workspaceCreateRemote(payload);
-        } else {
-          try {
-            const { normalizedBaseUrl, resolvedToken, resolvedHostToken } =
-              await resolveRedrobConnection();
-            if (normalizedBaseUrl && (resolvedToken || resolvedHostToken)) {
-              list = await createRedrobServerClient({
-                baseUrl: normalizedBaseUrl,
-                token: resolvedToken || undefined,
-                hostToken: resolvedHostToken || undefined,
-              }).createRemoteWorkspace(payload);
-            }
-          } catch {
-            list = null;
-          }
-        }
-        if (!list) {
-          throw new Error("Redrob Work server is unavailable. Start or reconnect the server before connecting a remote workspace.");
-        }
-        const createdId =
-          resolveWorkspaceListSelectedId(list) ||
-          list.workspaces[list.workspaces.length - 1]?.id ||
-          "";
-        if (createdId) {
-          await workspaceSetSelected(createdId).catch(() => undefined);
-          await workspaceSetRuntimeActive(createdId).catch(() => undefined);
-          writeActiveWorkspaceId(createdId);
-        }
-        markOnboardingComplete();
-        dispatch({ type: "close" });
-        navigate(createdId ? workspaceSessionRoute(createdId) : "/session", { replace: true });
-        return true;
-      } catch (error) {
-        dispatch({
-          type: "remote:error",
-          error: error instanceof Error ? error.message : "Connection failed.",
-        });
-        return false;
-      } finally {
-        dispatch({ type: "remote:finish" });
-      }
-    },
-    [markOnboardingComplete, navigate],
-  );
-
   const handleGetStarted = useCallback(async () => {
     if (!isDesktopRuntime()) {
       if (!canCreateWorkspaces()) return;
@@ -454,21 +371,11 @@ export function WelcomeRoute() {
         onManualFolderChange={setManualFolder}
         onUseManualFolder={handleUseManualFolder}
         showManualFolder={import.meta.env.DEV && isDesktopRuntime()}
-        onJoinOrganization={() => setJoinOrganizationOpen(true)}
-      />
-      <JoinOrganizationDialog
-        open={joinOrganizationOpen}
-        onOpenChange={setJoinOrganizationOpen}
-        onConnected={() => {
-          markOnboardingComplete();
-          setJoinOrganizationOpen(false);
-        }}
       />
       <CreateWorkspaceModal
         open={state.modalOpen}
         onClose={() => dispatch({ type: "close" })}
         onConfirm={handleCreateWorkspace}
-        onConfirmRemote={handleCreateRemote}
         onPickFolder={() =>
           pickDirectory({ title: t("onboarding.authorize_folder") }) as Promise<
             string | null
@@ -476,8 +383,6 @@ export function WelcomeRoute() {
         }
         submitting={state.createBusy}
         localError={state.createError}
-        remoteSubmitting={state.remoteBusy}
-        remoteError={state.remoteError}
         localDisabled={!isDesktopRuntime()}
         localDisabledReason={
           isDesktopRuntime()

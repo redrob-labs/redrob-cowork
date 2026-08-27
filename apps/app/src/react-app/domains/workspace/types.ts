@@ -1,16 +1,6 @@
 import type { ComposerAttachment, WorkspacePreset } from "../../../app/types";
 
-export type CreateWorkspaceScreen = "chooser" | "local" | "remote";
-
-export type RemoteWorkspaceInput = {
-  redrobHostUrl?: string | null;
-  redrobToken?: string | null;
-  redrobClientToken?: string | null;
-  redrobHostToken?: string | null;
-  directory?: string | null;
-  displayName?: string | null;
-  closeModal?: boolean;
-};
+export type CreateWorkspaceScreen = "chooser" | "local";
 
 export type CreateWorkspaceOptions = {
   projectLabel?: string | null;
@@ -38,7 +28,6 @@ export type CreateWorkspaceModalProps = {
   open: boolean;
   onClose: () => void;
   onConfirm: (preset: WorkspacePreset, folder: string | null, options?: CreateWorkspaceOptions) => void;
-  onConfirmRemote?: (input: RemoteWorkspaceInput) => Promise<boolean> | boolean | void;
   onConfirmWorker?: (preset: WorkspacePreset, folder: string | null, options?: CreateWorkspaceOptions) => void;
   onPickFolder: () => Promise<string | null>;
   onImportConfig?: () => void;
@@ -46,8 +35,6 @@ export type CreateWorkspaceModalProps = {
   submitting?: boolean;
   localError?: string | null;
   showProjectLabel?: boolean;
-  remoteSubmitting?: boolean;
-  remoteError?: string | null;
   showClose?: boolean;
   defaultPreset?: WorkspacePreset;
   title?: string;
@@ -66,29 +53,6 @@ export type CreateWorkspaceModalProps = {
   submittingProgress?: CreateWorkspaceProgress | null;
   localDisabled?: boolean;
   localDisabledReason?: string | null;
-};
-
-export type CreateRemoteWorkspaceModalProps = {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: (input: {
-    redrobHostUrl?: string | null;
-    redrobToken?: string | null;
-    directory?: string | null;
-    displayName?: string | null;
-  }) => void;
-  initialValues?: {
-    redrobHostUrl?: string | null;
-    redrobToken?: string | null;
-    directory?: string | null;
-    displayName?: string | null;
-  };
-  submitting?: boolean;
-  error?: string | null;
-  showClose?: boolean;
-  title?: string;
-  subtitle?: string;
-  confirmLabel?: string;
 };
 
 export type ShareField = {

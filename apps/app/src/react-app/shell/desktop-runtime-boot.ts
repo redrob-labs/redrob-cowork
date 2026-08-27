@@ -18,8 +18,6 @@ import {
 } from "../../app/lib/desktop";
 import { ingestMigrationSnapshotOnElectronBoot } from "../../app/lib/migration";
 import {
-  hydrateRedrobServerSettingsFromEnv,
-  readRedrobServerSettings,
   writeRedrobServerSettings,
 } from "../../app/lib/redrob-server";
 import { isDesktopRuntime, isElectronRuntime, safeStringify } from "../../app/utils";
@@ -94,9 +92,6 @@ export function useDesktopRuntimeBoot() {
             console.info(`[migration] hydrated ${hydrated} localStorage keys from Tauri snapshot`);
           }
         }
-        hydrateRedrobServerSettingsFromEnv();
-        const preferredRemoteAccess = readRedrobServerSettings().remoteAccessEnabled === true;
-
         const publishRedrobServerInfo = (serverInfo: BootRedrobServerInfo | null | undefined) => {
           if (!serverInfo?.baseUrl) return;
           writeRedrobServerSettings({
@@ -118,7 +113,7 @@ export function useDesktopRuntimeBoot() {
 
         const startServerWithoutDesktopWorkspace = async () => {
           setPhase("starting-engine", "Starting Redrob Work server");
-          const serverInfo = await redrobServerRestart({ remoteAccessEnabled: preferredRemoteAccess }).catch((error) => {
+          const serverInfo = await redrobServerRestart().catch((error) => {
             console.warn("[desktop-boot] redrobServerRestart failed:", error);
             return null;
           });
@@ -179,15 +174,7 @@ export function useDesktopRuntimeBoot() {
           if (boot.engine?.baseUrl) {
             setActive(boot.engine.baseUrl);
           }
-          let serverInfo = boot.redrobServer;
-          if (preferredRemoteAccess && serverInfo?.remoteAccessEnabled !== true) {
-            const restarted = await redrobServerRestart({ remoteAccessEnabled: true }).catch((error) => {
-              console.warn("[desktop-boot] redrobServerRestart failed:", error);
-              return null;
-            });
-            if (isRedrobServerInfoLike(restarted)) serverInfo = restarted;
-          }
-          publishRedrobServerInfo(serverInfo);
+          publishRedrobServerInfo(boot.redrobServer);
           await window.__REDROB_ELECTRON__?.recovery?.recordHealthy?.().catch(() => undefined);
           markReady();
           return;
@@ -251,7 +238,6 @@ export function useDesktopRuntimeBoot() {
         let engineStartResult = await engineStart(workspaceRoot, {
           runtime: "direct",
           workspacePaths: workspacePathsFor(workspaceRoot),
-          redrobRemoteAccess: readRedrobServerSettings().remoteAccessEnabled === true,
         }).catch((error) => {
           console.warn("[desktop-boot] engineStart failed:", error);
           return null;
@@ -272,7 +258,6 @@ export function useDesktopRuntimeBoot() {
             engineStartResult = await engineStart(fallbackRoot, {
               runtime: "direct",
               workspacePaths: workspacePathsFor(fallbackRoot).filter((path) => path !== workspaceRoot),
-              redrobRemoteAccess: readRedrobServerSettings().remoteAccessEnabled === true,
             }).catch((error) => {
               console.warn("[desktop-boot] fallback engineStart failed:", error);
               setError(error instanceof Error ? error.message : safeStringify(error));

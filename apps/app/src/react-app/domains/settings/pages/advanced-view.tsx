@@ -7,30 +7,14 @@ import type { OpencodeConnectStatus } from "@/app/types";
 import type { RedrobCloudMcpHealth, RedrobRuntimeConfigStatus, RedrobServerStatus } from "@/app/lib/redrob-server";
 import { t } from "@/i18n";
 import { LayoutStack } from "../settings-layout";
-import type { useDenSession } from "../cloud/use-den-session";
 
 import { advancedLocalReducer, initialAdvancedLocalState } from "./advanced-view-state";
 import {
   AdvancedDeveloperSection,
   AdvancedCloudMcpDiagnosticsSection,
-  AdvancedOrganizationServerSection,
   AdvancedRuntimeMigrationSection,
   AdvancedRuntimeSection,
 } from "./advanced-view-sections";
-
-type AdvancedOrganizationServerSession = Pick<
-  ReturnType<typeof useDenSession>,
-  | "authBusy"
-  | "baseUrl"
-  | "baseUrlBusy"
-  | "baseUrlDraft"
-  | "baseUrlError"
-  | "onApplyBaseUrl"
-  | "onBaseUrlDraftChange"
-  | "onClearServerConfiguration"
-  | "onResetBaseUrlToDefault"
-  | "sessionBusy"
->;
 
 export type AdvancedViewProps = {
   busy: boolean;
@@ -44,8 +28,6 @@ export type AdvancedViewProps = {
   canMigrateRuntimeConfig: boolean;
   migrateRuntimeConfig: () => Promise<{ migrated: boolean; keys: string[] }>;
   getRuntimeConfigStatus: () => Promise<RedrobRuntimeConfigStatus>;
-  organizationServer: AdvancedOrganizationServerSession;
-  cloudMcpUrl: string | null;
   cloudMcpHealth: RedrobCloudMcpHealth | null;
   refreshCloudMcpHealth: () => Promise<RedrobCloudMcpHealth | null>;
 };
@@ -181,20 +163,6 @@ export function AdvancedView(props: AdvancedViewProps) {
 
   return (
     <LayoutStack>
-      <AdvancedOrganizationServerSection
-        authBusy={props.organizationServer.authBusy}
-        baseUrl={props.organizationServer.baseUrl}
-        baseUrlBusy={props.organizationServer.baseUrlBusy}
-        baseUrlDraft={props.organizationServer.baseUrlDraft}
-        baseUrlError={props.organizationServer.baseUrlError}
-        onApplyBaseUrl={props.organizationServer.onApplyBaseUrl}
-        onBaseUrlDraftChange={props.organizationServer.onBaseUrlDraftChange}
-        onClearServerConfiguration={props.organizationServer.onClearServerConfiguration}
-        onResetBaseUrlToDefault={props.organizationServer.onResetBaseUrlToDefault}
-        sessionBusy={props.organizationServer.sessionBusy}
-        cloudMcpUrl={props.cloudMcpUrl}
-      />
-
       <AdvancedRuntimeSection
         clientStatusLabel={clientStatusLabel}
         clientTone={clientTone}

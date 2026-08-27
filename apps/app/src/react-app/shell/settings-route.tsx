@@ -146,11 +146,9 @@ import {
   resolveProviderDisplayName,
   safeStringify,
 } from "@/app/utils";
-import { CreateRemoteWorkspaceModal } from "@/react-app/domains/workspace/create-remote-workspace-modal";
 import { RenameWorkspaceModal } from "@/react-app/domains/workspace/rename-workspace-modal";
 import { ShareWorkspaceModal } from "@/react-app/domains/workspace/share-workspace-modal";
 import { useShareWorkspaceState } from "@/react-app/domains/workspace/share-workspace-state";
-import { useRemoteWorkspaceConnectionEditor } from "@/react-app/domains/workspace/use-remote-workspace-connection-editor";
 import {
   diagnoseRemoteWorkspaceTaskLoadFailure,
   getRemoteWorkspaceConnectionKey,
@@ -1575,26 +1573,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     });
   }, [workspaces]);
 
-  const handleRemoteWorkspaceConnectionSaved = useCallback(
-    async (workspaceId: string) => {
-      delete remoteWorkspaceCheckRunRef.current[workspaceId];
-      setWorkspaceConnectionOverrides((current) => {
-        const next = { ...current };
-        delete next[workspaceId];
-        return next;
-      });
-      setErrorsByWorkspaceId((current) => ({ ...current, [workspaceId]: null }));
-      await refreshRouteState();
-    },
-    [refreshRouteState],
-  );
-
-  const remoteWorkspaceConnectionEditor = useRemoteWorkspaceConnectionEditor({
-    workspaces,
-    client: redrobClient,
-    onSaved: handleRemoteWorkspaceConnectionSaved,
-  });
-
   const runRemoteWorkspaceConnectionCheck = useCallback(
     async (workspaceId: string, mode: "test" | "recover") => {
       const workspace = workspacesRef.current.find((item) => item.id === workspaceId);
@@ -1864,10 +1842,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         }]
       : [],
   );
-  const redrobCloudMcpUrl = connectionsSnapshot.mcpServers.find(
-    (server) => server.name === "redrob-cloud",
-  )?.config.url ?? null;
-
   // Build enablement context from all available runtime state.
   const enablementContext = useMemo<EnablementContext>(() => {
     const mcpConfigured = new Set(connectionsSnapshot.mcpServers.map((s) => s.name));
@@ -2483,7 +2457,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             })}
             opencodeDevModeEnabled={false}
             openDebugDeepLink={async () => ({ ok: false, message: "Debug deep links are not wired into the React settings route yet." })}
-            cloudMcpUrl={redrobCloudMcpUrl}
             canMigrateRuntimeConfig={Boolean(redrobClient && selectedWorkspaceId)}
             migrateRuntimeConfig={async () => {
               if (!redrobClient || !selectedWorkspaceId) {
@@ -2504,7 +2477,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             }}
             cloudMcpHealth={cloudMcpHealth}
             refreshCloudMcpHealth={refreshCloudMcpHealth}
-            organizationServer={denSession}
           />
         );
       case "appearance":
@@ -2729,17 +2701,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           exportDisabledReason={shareWorkspaceState.exportDisabledReason}
         />
       ) : null}
-      <CreateRemoteWorkspaceModal
-        open={remoteWorkspaceConnectionEditor.workspace !== null}
-        onClose={remoteWorkspaceConnectionEditor.close}
-        onConfirm={(input) => void remoteWorkspaceConnectionEditor.save(input)}
-        initialValues={remoteWorkspaceConnectionEditor.initialValues}
-        submitting={remoteWorkspaceConnectionEditor.busy}
-        error={remoteWorkspaceConnectionEditor.error}
-        title={t("dashboard.edit_remote_workspace_title")}
-        subtitle={t("dashboard.edit_remote_workspace_subtitle")}
-        confirmLabel={t("dashboard.edit_remote_workspace_confirm")}
-      />
       <ConnectionsModals
         client={activeClient}
         projectDir={selectedWorkspaceRoot}
