@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useReducer, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { t } from "../../i18n";
@@ -17,7 +17,6 @@ import { createClient, unwrap } from "../../app/lib/opencode";
 import { useLocal } from "../kernel/local-provider";
 import { usePlatform } from "../kernel/platform";
 import { WelcomePage } from "../domains/onboarding/welcome-page";
-import { ProviderSelectionStep } from "../domains/onboarding/provider-selection-step";
 import { RedrobKeyStep } from "../domains/onboarding/redrob-key-step";
 import { LanguageStep } from "../domains/onboarding/language-step";
 import { EngineDownloadStep } from "../domains/onboarding/engine-download-step";
@@ -25,32 +24,14 @@ import { AttributionStep, type AttributionSource } from "../domains/onboarding/a
 import { REDROB_API_KEY_ENV, REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
 import { CreateWorkspaceModal } from "../domains/workspace/create-workspace-modal";
 import type { CreateWorkspaceOptions } from "../domains/workspace/types";
-import {
-  getRedrobWorkModelsActionUrl,
-  hideRedrobWorkModelsPromo,
-  useRedrobWorkModelsPromoEligibility,
-  markRedrobWorkModelsStartupPromoShown,
-} from "../domains/cloud/redrob-models-promo";
-import { useDenAuth } from "../domains/cloud/den-auth-provider";
+
 import { resolveRedrobConnection } from "./redrob-connection";
 import { captureAnalyticsEvent } from "../../app/lib/analytics";
 import { buildRedrobWorkspaceBaseUrl, createRedrobServerClient } from "../../app/lib/redrob-server";
-import { readDenSettings } from "../../app/lib/den";
-import { denSettingsChangedEvent } from "../../app/lib/den-session-events";
 import { writeActiveWorkspaceId, writeLastSessionFor, writeWorkspaceProjectDimension } from "./session-memory";
 import { workspaceSessionRoute } from "./workspace-routes";
 import { ensureDesktopLocalRedrobConnection } from "./desktop-local-redrob";
-import { shouldHoldWelcomeForDenSession } from "./welcome-den-session";
 
-function subscribeToDenSettings(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  window.addEventListener(denSettingsChangedEvent, onStoreChange);
-  return () => window.removeEventListener(denSettingsChangedEvent, onStoreChange);
-}
-
-function readDenAuthTokenSnapshot() {
-  return readDenSettings().authToken?.trim() ?? "";
-}
 
 function folderNameFromPath(path: string) {
   const normalized = path.replace(/\\/g, "/").replace(/\/+$/, "");
@@ -68,7 +49,7 @@ function focusPromptSoon() {
  * First-run wizard stage that precedes the existing workspace-creation flow.
  * "language" and "engine" are the two new leading onboarding steps; once the
  * user reaches "main" the existing WelcomePage -> create -> redrob-key ->
- * provider -> attribution flow runs unchanged. Language is always shown first.
+ * attribution flow runs unchanged. Language is always shown first.
  */
 type WelcomeStage = "language" | "engine" | "main";
 
@@ -80,7 +61,6 @@ type WelcomeState = {
   redrobKeyStep: boolean;
   redrobKeyBusy: boolean;
   redrobKeyError: string | null;
-  providerStep: boolean;
   attributionStep: boolean;
   pendingRoute: string | null;
   pendingWorkspaceId: string | null;
@@ -98,7 +78,6 @@ type WelcomeAction =
   | { type: "redrob-key:start" }
   | { type: "redrob-key:error"; error: string }
   | { type: "redrob-key:finish" }
-  | { type: "provider-step" }
   | { type: "attribution-step"; route: string };
 
 const initialWelcomeState: WelcomeState = {
@@ -109,7 +88,6 @@ const initialWelcomeState: WelcomeState = {
   redrobKeyStep: false,
   redrobKeyBusy: false,
   redrobKeyError: null,
-  providerStep: false,
   attributionStep: false,
   pendingRoute: null,
   pendingWorkspaceId: null,
@@ -144,58 +122,28 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
       return { ...state, redrobKeyBusy: false, redrobKeyError: action.error };
     case "redrob-key:finish":
       return { ...state, redrobKeyBusy: false };
-    case "provider-step":
-      return { ...state, redrobKeyStep: false, providerStep: true };
     case "attribution-step":
       return {
         ...state,
         redrobKeyStep: false,
-        providerStep: false,
         attributionStep: true,
         pendingRoute: action.route,
       };
   }
 }
 
-/**
- * WelcomeRoute: full-screen welcome page shown on first launch when
- * the user has no workspaces and has not completed onboarding.
- *
- * Clicking "Get started" opens the CreateWorkspaceModal. Once a
- * workspace is created, provider and attribution onboarding runs before
- * hasCompletedOnboarding is set and the user is redirected to /session.
- */
 export function WelcomeRoute() {
   const navigate = useNavigate();
   const local = useLocal();
   const platform = usePlatform();
-  const denAuth = useDenAuth();
   const [state, dispatch] = useReducer(welcomeReducer, initialWelcomeState);
   const [manualFolder, setManualFolder] = useState("");
-  const showRedrobWorkModelsPromo = useRedrobWorkModelsPromoEligibility();
-  const denAuthTokenSnapshot = useSyncExternalStore(
-    subscribeToDenSettings,
-    readDenAuthTokenSnapshot,
-    readDenAuthTokenSnapshot,
-  );
-  const holdSignedOutSurface = shouldHoldWelcomeForDenSession({
-    authStatus: denAuth.status,
-    hasStoredAuthToken: Boolean(denAuthTokenSnapshot),
-    isSignedIn: denAuth.isSignedIn,
-  });
-
   // If user already completed onboarding, redirect away immediately.
   useEffect(() => {
     if (local.prefs.hasCompletedOnboarding) {
       navigate("/session", { replace: true });
     }
   }, [local.prefs.hasCompletedOnboarding, navigate]);
-
-  useEffect(() => {
-    if (denAuth.isSignedIn) {
-      navigate("/onboarding", { replace: true });
-    }
-  }, [denAuth.isSignedIn, navigate]);
 
   const markOnboardingComplete = useCallback(() => {
     local.setPrefs((prev) => ({ ...prev, hasCompletedOnboarding: true }));
@@ -317,10 +265,6 @@ export function WelcomeRoute() {
     await handleCreateWorkspace("starter", folder);
   }, [handleCreateWorkspace, manualFolder]);
 
-  const advanceToProviderStep = useCallback(() => {
-    dispatch({ type: "provider-step" });
-  }, []);
-
   const handleOpenRedrobConsole = useCallback(() => {
     platform.openLink(REDROB_CONSOLE_URL);
   }, [platform]);
@@ -342,7 +286,12 @@ export function WelcomeRoute() {
           hostToken: resolvedHostToken || undefined,
         }).upsertUserEnv([{ key: REDROB_API_KEY_ENV, value: trimmed }]);
         dispatch({ type: "redrob-key:finish" });
-        advanceToProviderStep();
+        dispatch({
+          type: "attribution-step",
+          route: state.pendingWorkspaceId
+            ? `${workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)}?onboarding=1`
+            : "/session?onboarding=1",
+        });
       } catch (error) {
         dispatch({
           type: "redrob-key:error",
@@ -350,7 +299,7 @@ export function WelcomeRoute() {
         });
       }
     },
-    [advanceToProviderStep],
+    [state.pendingSessionId, state.pendingWorkspaceId],
   );
 
   const finishOnboarding = useCallback(() => {
@@ -360,12 +309,9 @@ export function WelcomeRoute() {
   }, [markOnboardingComplete, navigate, state.pendingRoute, state.pendingSessionId]);
 
   // "Just look around": the browse-mode branch of the API-key step. Browsing
-  // finishes onboarding without a key, but we still run the attribution survey
+  // finishes onboarding without a key, but still runs the attribution survey
   // (as the keyed path does) so browse users are not silently dropped from
-  // attribution coverage. We intentionally skip the provider-selection promo
-  // for browse mode — a user who chose "just look around" opted out of setting
-  // up inference, so surfacing the Redrob Models upsell here would be noise;
-  // they can connect a key later from Settings. Never throws.
+  // attribution coverage. Never throws.
   const handleLookAround = useCallback(() => {
     captureAnalyticsEvent("onboarding_browse_mode_selected");
     const route = state.pendingWorkspaceId
@@ -392,10 +338,6 @@ export function WelcomeRoute() {
     captureAnalyticsEvent("attribution_survey_skipped");
     finishOnboarding();
   }, [finishOnboarding]);
-
-  if (holdSignedOutSurface) {
-    return null;
-  }
 
   // Leading onboarding steps run before the existing workspace-creation flow.
   // Language is always the first thing shown; engine download follows; then
@@ -451,35 +393,6 @@ export function WelcomeRoute() {
           onSkip={handleLookAround}
           skipLabel={t("onboarding.look_around_cta")}
           skipDescription={t("onboarding.look_around_description")}
-        />
-      ) : null}
-      {state.providerStep ? (
-        <ProviderSelectionStep
-          showRedrobWorkModels={showRedrobWorkModelsPromo}
-          onRedrobWorkModels={() => {
-            // Land on the Redrob Models value-prop page when already
-            // signed in to Den; otherwise start sign-up. Previously this
-            // always opened a bare sign-up page — payment before value.
-            platform.openLink(getRedrobWorkModelsActionUrl(denAuth.isSignedIn, "sign-up"));
-            const route = state.pendingWorkspaceId
-              ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
-              : "/session";
-            dispatch({ type: "attribution-step", route });
-          }}
-          onBringYourOwn={() => {
-            markRedrobWorkModelsStartupPromoShown();
-            hideRedrobWorkModelsPromo();
-            const route = state.pendingWorkspaceId
-              ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
-              : "/session";
-            dispatch({ type: "attribution-step", route: `${route}?onboarding=1` });
-          }}
-          onSkip={() => {
-            const route = state.pendingWorkspaceId
-              ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
-              : "/session";
-            dispatch({ type: "attribution-step", route });
-          }}
         />
       ) : null}
       {state.attributionStep ? (

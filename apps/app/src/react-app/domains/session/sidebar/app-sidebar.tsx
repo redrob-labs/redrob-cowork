@@ -104,7 +104,7 @@ import {
 } from "@/components/ui/select";
 
 import { SidebarContext, useSidebarContext } from "./app-sidebar-provider";
-import { AccountStatusMenu, type AccountStatusMenuProps } from "./account-status-menu";
+import { SidebarStatusMenu, type SidebarStatusMenuProps } from "./sidebar-status-menu";
 import { usePlatform } from "../../../kernel/platform";
 import {
   sessionNumberAriaKeyShortcut,
@@ -861,7 +861,7 @@ export type AppSidebarProps = {
   onOpenExtensions: () => void;
   extensionsActive?: boolean;
   /** Live app status, shown inside the footer account menu. */
-  status: Omit<AccountStatusMenuProps, "onOpenAccountSettings">;
+  status: Omit<SidebarStatusMenuProps, "onOpenAccountSettings">;
 };
 
 function useSessionTree(
@@ -1214,7 +1214,7 @@ export function AppSidebar(props: AppSidebarProps) {
         </LazyMotion>
 
         <SidebarFooter className="border-t border-sidebar-border/60 p-1.5 pe-0">
-          <AccountStatusMenu {...props.status} onOpenAccountSettings={props.onOpenAccountSettings} />
+          <SidebarStatusMenu {...props.status} onOpenAccountSettings={props.onOpenAccountSettings} />
         </SidebarFooter>
 
         <SidebarRail

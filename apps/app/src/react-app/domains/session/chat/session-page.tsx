@@ -2,13 +2,11 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePanelRef } from "react-resizable-panels";
-import { Cloud, FileText, Globe, Mic2, MoreHorizontal, PanelRight, TextSearch, Zap } from "lucide-react";
+import { FileText, Globe, Mic2, MoreHorizontal, PanelRight, TextSearch, Zap } from "lucide-react";
 
 import { resolveExtensionIconSrc } from "@/react-app/design-system/extension-icon-src";
 import { t } from "../../../../i18n";
 import { REDROB_EXTENSION_CATALOG } from "../../../../app/constants";
-import { buildDenAuthUrl, readDenBootstrapConfig } from "../../../../app/lib/den";
-import { markDesktopSignInInitiated } from "../../../../app/lib/den-sign-in-intent";
 import { type RedrobServerClient, type RedrobServerStatus } from "../../../../app/lib/redrob-server";
 import { getDisplaySessionTitle } from "../../../../app/lib/session-title";
 import type { BootPhase } from "../../../../app/lib/startup-boot";
@@ -50,7 +48,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { ConfirmModal } from "../../../design-system/modals/confirm-modal";
 import { usePlatform } from "../../../kernel/platform";
-import { useDenAuth } from "../../cloud/den-auth-provider";
 import ProviderAuthModal, { type ProviderAuthModalProps } from "../../connections/provider-auth/provider-auth-modal";
 import { RenameSessionModal } from "../modals/rename-session-modal";
 import { AppSidebar } from "../sidebar/app-sidebar";
@@ -70,7 +67,6 @@ import {
 import { ShareWorkspaceModal } from "../../workspace/share-workspace-modal";
 import { SessionEmptyHero } from "./session-empty-hero";
 import type { NewTaskComposerContext } from "./new-task-composer";
-import type { SessionCloudMcpMaintenanceState } from "../../connections/use-session-mcp-maintenance";
 import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
@@ -125,7 +121,6 @@ type StatusBarOverrides = {
   showSettingsButton: boolean;
   reloadBusy: boolean;
   reloadError: string | null;
-  redrobConnectState: SessionCloudMcpMaintenanceState;
 };
 
 export type SessionPageHistoryControls = {
@@ -317,7 +312,6 @@ function controlStringArg(args: unknown, key: string) {
 export function SessionPage(props: SessionPageProps) {
   const { config: shellConfig } = useShellConfig();
   const platform = usePlatform();
-  const denAuth = useDenAuth();
   const isMobile = useIsMobile();
   const bootOverlayVisible = useBootOverlayVisible();
   const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
@@ -360,14 +354,6 @@ export function SessionPage(props: SessionPageProps) {
     [],
   );
   const voiceExtensionEnabled = voiceExtension ? isRedrobWorkExtensionEnabled(voiceExtension) : false;
-  const showCloudSignIn = shellConfig.cloudSignin && !denAuth.isSignedIn && denAuth.status !== "checking";
-  const openCloudSignIn = useCallback(() => {
-    const baseUrl = readDenBootstrapConfig().baseUrl;
-    markDesktopSignInInitiated();
-    // Label stays "Sign in"; opens the sign-up tab so new users aren't defaulted into sign-in.
-    platform.openLink(buildDenAuthUrl(baseUrl, "sign-up"));
-  }, [platform]);
-
   useReactRenderWatchdog("SessionPage", {
     selectedSessionId: props.selectedSessionId,
     selectedWorkspaceId: props.selectedWorkspaceId,
@@ -1084,7 +1070,6 @@ export function SessionPage(props: SessionPageProps) {
             showSettingsButton: props.statusBar?.showSettingsButton,
             reloadBusy: props.statusBar?.reloadBusy,
             reloadError: props.statusBar?.reloadError,
-            redrobConnectState: props.statusBar?.redrobConnectState,
             onSendFeedback: props.onSendFeedback,
           }}
         />
@@ -1166,19 +1151,6 @@ export function SessionPage(props: SessionPageProps) {
                 />
                 <TooltipContent>{sidePanelOpen ? "Close side panel" : "Open side panel"}</TooltipContent>
               </Tooltip>
-              {showCloudSignIn ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="hidden lg:inline-flex"
-                  onClick={openCloudSignIn}
-                  title={t("den.signin_title")}
-                  aria-label={t("den.signin_title")}
-                >
-                  <Cloud className="size-3.5" />
-                  <span>{t("den.signin_button")}</span>
-                </Button>
-              ) : null}
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
@@ -1209,12 +1181,6 @@ export function SessionPage(props: SessionPageProps) {
                     <DropdownMenuItem onClick={openVoiceRailPane}>
                       <Mic2 className="size-4" />
                       Voice Mode
-                    </DropdownMenuItem>
-                  ) : null}
-                  {showCloudSignIn ? (
-                    <DropdownMenuItem onClick={openCloudSignIn}>
-                      <Cloud className="size-4" />
-                      {t("den.signin_button")}
                     </DropdownMenuItem>
                   ) : null}
                 </DropdownMenuContent>
@@ -1672,7 +1638,7 @@ export function SessionPage(props: SessionPageProps) {
 
       {props.shareWorkspaceModal ? <ShareWorkspaceModal {...props.shareWorkspaceModal} /> : null}
 
-      {/* Cloud provider notifications are now handled globally by CloudProvidersToast in app-root.tsx */}
+
     </div>
   );
 }
