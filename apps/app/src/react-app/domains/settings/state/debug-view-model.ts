@@ -23,7 +23,6 @@ import {
   type NukeManifestPreview,
   type RedrobServerInfo,
 } from "../../../../app/lib/desktop";
-import { createDenClient, readDenSettings } from "../../../../app/lib/den";
 import {
   ELECTRON_ALPHA_RELEASE_PAGE_URL,
   type ElectronAlphaArtifact,
@@ -53,7 +52,6 @@ const ENGINE_SOURCE_KEY = "redrob.engineSource";
 const ENGINE_CUSTOM_BIN_KEY = "redrob.engineCustomBinPath";
 const OPENCODE_ENABLE_EXA_KEY = "redrob.opencodeEnableExa";
 const NUKE_CONFIRMATION_WORD = "NUKE";
-const NUKE_SIGN_OUT_TIMEOUT_MS = 5000;
 
 type ResetModalMode = "onboarding" | "all";
 
@@ -119,20 +117,6 @@ function clearRedrobLocalStorageForReset(mode: ResetModalMode): void {
   } catch {
     // ignore persistence failures
   }
-}
-
-async function revokeDenSessionBeforeNuke(): Promise<void> {
-  const settings = readDenSettings();
-  const token = settings.authToken?.trim() ?? "";
-  if (!token) return;
-  const client = createDenClient({ baseUrl: settings.baseUrl, token });
-  const signOut = client.signOut().catch(() => undefined);
-  await Promise.race([
-    signOut,
-    new Promise<void>((resolve) => {
-      globalThis.setTimeout(resolve, NUKE_SIGN_OUT_TIMEOUT_MS);
-    }),
-  ]);
 }
 
 function readEngineSource(): "path" | "sidecar" | "custom" {
@@ -985,7 +969,6 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
     setNukeConfigBusy(true);
     setNukeConfigStatus(null);
     try {
-      await revokeDenSessionBeforeNuke();
       await nukeRedrobAndOpencodeConfigAndExit({ preserveBootstrap: !nukeDeleteBootstrap });
     } catch (error) {
       setNukeConfigStatus(error instanceof Error ? error.message : safeStringify(error));

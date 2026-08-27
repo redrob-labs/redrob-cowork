@@ -16,7 +16,6 @@ import { TextInput } from "../../../design-system/text-input";
 import type { McpDirectoryInfo } from "@/app/constants";
 import { t } from "@/i18n";
 import type { McpConnectResult } from "../store";
-import { conflictsWithRedrobConnect } from "../mcp-connection-boundary";
 import { submitMcpEntry } from "./add-mcp-submission";
 
 export type AddMcpModalProps = {
@@ -80,11 +79,6 @@ export function AddMcpModal(props: AddMcpModalProps) {
       dispatch({ error: t("mcp.name_required") });
       return;
     }
-    if (conflictsWithRedrobConnect({ name: trimmedName })) {
-      dispatch({ error: t("mcp.name_reserved_redrob_connect") });
-      return;
-    }
-
     dispatch({ submitting: true });
 
     if (state.serverType === "remote") {

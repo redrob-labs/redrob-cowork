@@ -3,7 +3,6 @@ import type { FilePart, Part, PermissionRequest, PermissionV2Request, QuestionRe
 
 import { getReactQueryClient } from "../../../infra/query-client";
 import { captureAnalyticsEvent, takeTaskRunStart } from "@/app/lib/analytics";
-import { trackTaskCompleted, trackTaskFailed } from "@/app/lib/den-telemetry";
 import { createClient, unwrap } from "@/app/lib/opencode";
 import { isGeneratedSessionTitle } from "@/app/lib/session-title";
 import { normalizeEvent } from "@/app/utils";
@@ -722,7 +721,6 @@ function applyEvent(entry: SyncEntry, workspaceId: string, event: OpencodeEvent)
         captureAnalyticsEvent("task_run_errored", {
           duration_ms: Date.now() - runStartedAt,
         });
-        trackTaskFailed(sessionId, Date.now() - runStartedAt);
       }
       notifyDesktopEvent({ type: "task.failed", sessionId, errorText });
       useSessionActivityStore.getState().setError(workspaceId, sessionId, errorText);
@@ -1015,7 +1013,6 @@ function applyEvent(entry: SyncEntry, workspaceId: string, event: OpencodeEvent)
       captureAnalyticsEvent("task_run_completed", {
         duration_ms: Date.now() - runStartedAt,
       });
-      trackTaskCompleted(props.sessionID, Date.now() - runStartedAt);
       notifyDesktopEvent({ type: "task.completed", sessionId: props.sessionID });
       entry.titleRecovery?.observe(props.sessionID);
     }

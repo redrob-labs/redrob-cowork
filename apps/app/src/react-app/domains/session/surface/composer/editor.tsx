@@ -35,7 +35,7 @@ import {
 } from "lexical";
 import type { InitialConfigType } from "@lexical/react/LexicalComposer.js";
 import { decodeComposerMentionValue, encodeComposerMentionValue, type ComposerMentionKind } from "./mention-encoding";
-import { parseConnectSkillToken } from "./connect-skill-token";
+
 import { shouldCollapsePastedText, splitPastedText } from "./pasted-text";
 import { insertPastedText } from "./pasted-text-insertion";
 
@@ -753,11 +753,6 @@ function setPrompt(
         paragraph.append($createComposerPastedTextNode(target.label, target.lines));
         continue;
       }
-    }
-    const connectSkill = parseConnectSkillToken(segment);
-    if (connectSkill) {
-      paragraph.append($createComposerSkillNode(connectSkill.slug, segment));
-      continue;
     }
     const skillMatch = segment.match(/^\[skill (.+)\]$/);
     if (skillMatch?.[1]) {

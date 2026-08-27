@@ -40,7 +40,6 @@ import {
   AgentContextDiagnosticsSection,
   type AgentContextDiagnosticsSectionProps,
 } from "./agent-context-diagnostics-section";
-import { AgentAccessCard } from "@/react-app/domains/settings/cloud/agent-access-card";
 import type {
   RedrobCloudMcpHealth,
   RedrobCloudMcpProviderModelContext,
@@ -623,23 +622,6 @@ export function DebugView(props: DebugViewProps) {
       </div>
 
       <AgentContextDiagnosticsSection {...props.agentContextDiagnostics} />
-
-      {props.agentAccess ? (
-        <div className={cardClass}>
-          <div className={sectionHeaderClass}>
-            <div className={sectionTitleClass}>Agent access</div>
-            <div className={sectionDescClass}>
-              Test and repair Redrob Work Cloud MCP access for this workspace.
-            </div>
-          </div>
-          <AgentAccessCard
-            client={props.agentAccess.client}
-            workspaceId={props.agentAccess.workspaceId}
-            currentModel={props.agentAccess.currentModel}
-            onHealthChange={props.agentAccess.onHealthChange}
-          />
-        </div>
-      ) : null}
 
       {/* Section: Diagnostics */}
       <div className={cardClass}>

@@ -248,7 +248,6 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
   }, [
     onReleaseChannelChange,
     releaseChannel,
-    resolvePolicyReleaseChannel,
     setError,
   ]);
 

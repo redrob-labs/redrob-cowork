@@ -15,7 +15,6 @@ import type {
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
-import { resolveRedrobWorkConnectStateSummary } from "@/react-app/domains/connections/redrob-connect-status";
 import { SettingsInset, SettingsNotice, SettingsSection } from "../settings-section";
 
 const EXPECTED_CLOUD_TOOL_IDS = ["search_capabilities", "execute_capability"];
@@ -593,10 +592,6 @@ export function AgentContextDiagnosticsReportView(props: {
   const firstFailure = props.report.firstFailedCheck;
   const agent = props.report.agent.configuredRedrobAgent;
   const effectiveEngineObserved = hasObservedEffectiveEngineConfiguration(props.report);
-  const connectStateSummary = resolveRedrobWorkConnectStateSummary(
-    props.report.connect.stateStatus,
-    props.report.connect.connectEnabled,
-  );
   return (
     <SettingsSection>
       <div data-testid="agent-diagnostics-report">
@@ -665,32 +660,13 @@ export function AgentContextDiagnosticsReportView(props: {
           <div className="text-sm font-semibold text-dls-text">{t("connect.diagnostics_connect_title")}</div>
           <div className="grid gap-3 rounded-xl border border-dls-border bg-dls-surface p-3 sm:grid-cols-2">
             <Fact
-              label={t("connect.diagnostics_expected_branch")}
-              value={t(BRANCH_LABEL_KEYS[props.report.connect.expectedBranch])}
-            />
-            <Fact label={t("connect.diagnostics_connect_policy")} value={connectStateSummary.statusLabel} />
-            <Fact
-              label={t("connect.diagnostics_legacy_google_workspace")}
-              value={booleanLabel(props.report.connect.legacyGoogleWorkspaceConfigured)}
-            />
-            <Fact label={t("connect.diagnostics_global_cloud_mcp")} value={booleanLabel(props.report.connect.globalCloudMcpPresent)} />
-            <Fact label={t("connect.diagnostics_workspace_cloud_mcp")} value={booleanLabel(props.report.connect.selectedWorkspaceCloudMcpPresent)} />
-            <Fact label={t("connect.diagnostics_cross_workspace_drift")} value={booleanLabel(props.report.connect.crossWorkspaceSteeringDrift)} />
-            <Fact
               label={t("connect.diagnostics_agent_state")}
               value={t(AGENT_STATE_LABEL_KEYS[agent.state])}
             />
           </div>
-          {connectStateSummary.status !== "ready" ? (
-            <SettingsNotice tone={connectStateSummary.tone === "error" ? "error" : "neutral"}>
-              <div className="font-medium text-dls-text">{connectStateSummary.stageLabel}</div>
-              <div>{connectStateSummary.recommendedAction}</div>
-            </SettingsNotice>
-          ) : null}
         </div>
 
         <McpInventory report={props.report} effectiveEngineObserved={effectiveEngineObserved} />
-        <CloudCatalog report={props.report} effectiveEngineObserved={effectiveEngineObserved} />
 
         <div className="space-y-3">
           <div>

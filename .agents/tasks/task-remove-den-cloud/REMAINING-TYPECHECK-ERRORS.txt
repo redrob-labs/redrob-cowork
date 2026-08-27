@@ -1,33 +1,28 @@
 src/app/lib/agent-context-diagnostics.ts(11,47): error TS2307: Cannot find module './den' or its corresponding type declarations.
 src/app/lib/redrob-server.ts(18,83): error TS2307: Cannot find module './den-types' or its corresponding type declarations.
 src/app/lib/redrob-server.ts(19,91): error TS2307: Cannot find module '../cloud/import-state' or its corresponding type declarations.
-src/components/chat/message-list.tsx(41,8): error TS2307: Cannot find module '@/components/tools/redrob-automation-proposal' or its corresponding type declarations.
-src/components/chat/task-suggestions.tsx(12,36): error TS2307: Cannot find module '@/react-app/domains/cloud/desktop-config-provider' or its corresponding type declarations.
-src/components/chat/task-suggestions.tsx(88,36): error TS7006: Parameter 'prompt' implicitly has an 'any' type.
-src/components/chat/task-suggestions.tsx(88,44): error TS7006: Parameter 'index' implicitly has an 'any' type.
 src/components/model-select.tsx(20,44): error TS2307: Cannot find module '@/react-app/domains/cloud/desktop-config-provider' or its corresponding type declarations.
 src/components/model-select.tsx(21,28): error TS2307: Cannot find module '@/react-app/domains/cloud/den-auth-provider' or its corresponding type declarations.
 src/components/model-select.tsx(25,8): error TS2307: Cannot find module '@/react-app/domains/cloud/redrob-models-promo' or its corresponding type declarations.
-src/react-app/domains/connections/modals/add-mcp-modal.tsx(19,44): error TS2307: Cannot find module '../mcp-connection-boundary' or its corresponding type declarations.
+src/components/model-select.tsx(32,43): error TS2307: Cannot find module '@/react-app/domains/connections/provider-auth/cloud-provider-config' or its corresponding type declarations.
 src/react-app/domains/connections/policy-provider-reconcile.ts(3,51): error TS2307: Cannot find module '@/app/cloud/desktop-app-restrictions' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/assigned-model-options.ts(1,40): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
+src/react-app/domains/connections/provider-auth/assigned-model-options.ts(3,70): error TS2307: Cannot find module './cloud-provider-config' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/assigned-model-options.ts(21,37): error TS7006: Parameter 'model' implicitly has an 'any' type.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.test.ts(11,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.test.ts(12,44): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.test.ts(13,50): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.ts(7,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.ts(8,44): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.ts(88,15): error TS7006: Parameter 'model' implicitly has an 'any' type.
-src/react-app/domains/connections/provider-auth/cloud-provider-config.ts(113,26): error TS7006: Parameter 'model' implicitly has an 'any' type.
 src/react-app/domains/connections/provider-auth/provider-policy.test.ts(8,51): error TS2307: Cannot find module '@/app/cloud/desktop-app-restrictions' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/provider-policy.test.ts(11,60): error TS7006: Parameter 'input' implicitly has an 'any' type.
 src/react-app/domains/connections/provider-auth/provider-policy.ts(5,8): error TS2307: Cannot find module '@/app/cloud/desktop-app-restrictions' or its corresponding type declarations.
+src/react-app/domains/connections/provider-auth/provider-policy.ts(7,43): error TS2307: Cannot find module './cloud-provider-config' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/store.ts(16,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/store.ts(67,8): error TS2307: Cannot find module '../../../../app/lib/den-session-events' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/store.ts(72,8): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
+src/react-app/domains/connections/provider-auth/store.ts(82,8): error TS2307: Cannot find module './cloud-provider-config' or its corresponding type declarations.
 src/react-app/domains/connections/provider-auth/store.ts(89,8): error TS2307: Cannot find module '../../../../app/cloud/desktop-app-restrictions' or its corresponding type declarations.
+src/react-app/domains/connections/provider-auth/store.ts(514,13): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/react-app/domains/connections/provider-auth/store.ts(516,26): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/domains/connections/provider-auth/store.ts(1120,14): error TS7006: Parameter 'providers' implicitly has an 'any' type.
 src/react-app/domains/connections/provider-auth/store.ts(1131,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/react-app/domains/connections/provider-auth/store.ts(1722,21): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/domains/connections/provider-auth/store.ts(1987,56): error TS7006: Parameter 'provider' implicitly has an 'any' type.
 src/react-app/domains/connections/provider-auth/store.ts(2016,49): error TS2339: Property 'id' does not exist on type '{}'.
 src/react-app/domains/connections/provider-auth/store.ts(2018,85): error TS2339: Property 'id' does not exist on type '{}'.
@@ -48,21 +43,10 @@ src/react-app/domains/connections/store.ts(15,8): error TS2307: Cannot find modu
 src/react-app/domains/connections/store.ts(43,44): error TS2307: Cannot find module './mcp-connection-boundary' or its corresponding type declarations.
 src/react-app/domains/connections/store.ts(50,8): error TS2307: Cannot find module './cloud-mcp-user-state' or its corresponding type declarations.
 src/react-app/domains/connections/store.ts(57,8): error TS2307: Cannot find module './cloud-mcp-reconciler' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.managed-degraded.test.ts(12,47): error TS2307: Cannot find module '../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.managed-degraded.test.ts(17,54): error TS2307: Cannot find module './cloud-mcp-user-state' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.managed-degraded.test.ts(122,15): error TS7006: Parameter 'key' implicitly has an 'any' type.
-src/react-app/domains/connections/use-session-mcp-maintenance.managed-degraded.test.ts(123,15): error TS7006: Parameter 'key' implicitly has an 'any' type.
-src/react-app/domains/connections/use-session-mcp-maintenance.managed-degraded.test.ts(123,20): error TS7006: Parameter 'value' implicitly has an 'any' type.
-src/react-app/domains/connections/use-session-mcp-maintenance.managed-degraded.test.ts(124,18): error TS7006: Parameter 'key' implicitly has an 'any' type.
-src/react-app/domains/connections/use-session-mcp-maintenance.ts(8,8): error TS2307: Cannot find module '../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.ts(20,50): error TS2307: Cannot find module './cloud-mcp-maintenance-outcome' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.ts(24,8): error TS2307: Cannot find module './cloud-mcp-user-state' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.ts(28,8): error TS2307: Cannot find module './cloud-mcp-reconciler' or its corresponding type declarations.
-src/react-app/domains/connections/use-session-mcp-maintenance.ts(213,41): error TS7006: Parameter 'entry' implicitly has an 'any' type.
-src/react-app/domains/connections/use-session-mcp-maintenance.ts(326,37): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/domains/session/chat/new-task-composer.tsx(5,42): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/session/chat/new-task-composer.tsx(6,50): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/chat/new-task-composer.tsx(22,8): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-inventory-cache' or its corresponding type declarations.
+src/react-app/domains/session/chat/new-task-composer.tsx(23,79): error TS2307: Cannot find module '@/react-app/domains/session/surface/connect-capability-inventory' or its corresponding type declarations.
 src/react-app/domains/session/chat/new-task-composer.tsx(116,35): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/chat/new-task-composer.tsx(139,35): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/chat/new-task-composer.tsx(162,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
@@ -74,51 +58,47 @@ src/react-app/domains/session/chat/session-empty-hero.tsx(94,43): error TS7006: 
 src/react-app/domains/session/chat/session-page.tsx(10,57): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/chat/session-page.tsx(11,44): error TS2307: Cannot find module '../../../../app/lib/den-sign-in-intent' or its corresponding type declarations.
 src/react-app/domains/session/chat/session-page.tsx(53,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
+src/react-app/domains/session/chat/session-page.tsx(73,54): error TS2307: Cannot find module '../../connections/use-session-mcp-maintenance' or its corresponding type declarations.
 src/react-app/domains/session/modals/model-picker-modal.tsx(22,33): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/modals/model-picker-modal.tsx(27,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
 src/react-app/domains/session/modals/model-picker-modal.tsx(32,8): error TS2307: Cannot find module '../../cloud/redrob-models-promo' or its corresponding type declarations.
 src/react-app/domains/session/modals/use-model-picker.ts(8,44): error TS2307: Cannot find module '@/react-app/domains/cloud/desktop-config-provider' or its corresponding type declarations.
+src/react-app/domains/session/modals/use-model-picker.ts(9,43): error TS2307: Cannot find module '@/react-app/domains/connections/provider-auth/cloud-provider-config' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(27,51): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(37,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(38,44): error TS2307: Cannot find module '../../../../app/lib/den-sign-in-intent' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(39,42): error TS2307: Cannot find module '../../../../app/lib/den-handoff' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(40,38): error TS2307: Cannot find module '../../../../app/lib/manual-auth-input' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(45,8): error TS2307: Cannot find module '../../connections/redrob-connect-status' or its corresponding type declarations.
+src/react-app/domains/session/sidebar/account-status-menu.tsx(46,54): error TS2307: Cannot find module '../../connections/use-session-mcp-maintenance' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/account-status-menu.tsx(54,8): error TS2307: Cannot find module '../../cloud/redrob-models-promo' or its corresponding type declarations.
+src/react-app/domains/session/sidebar/app-sidebar.tsx(34,39): error TS2307: Cannot find module '../../workspace/redrob-den-help-link' or its corresponding type declarations.
 src/react-app/domains/session/sidebar/app-sidebar.tsx(48,33): error TS2307: Cannot find module '../../cloud/brand-theme' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer-connections.ts(1,47): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer-connections.ts(3,72): error TS2307: Cannot find module '@/react-app/domains/connections/native-provider-connections' or its corresponding type declarations.
 src/react-app/domains/session/surface/composer/composer.tsx(8,67): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
+src/react-app/domains/session/surface/composer/composer.tsx(28,41): error TS2307: Cannot find module './connect-skill-token' or its corresponding type declarations.
 src/react-app/domains/session/surface/composer/composer.tsx(30,48): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-inventory-cache' or its corresponding type declarations.
 src/react-app/domains/session/surface/composer/composer.tsx(31,38): error TS2307: Cannot find module '@/react-app/domains/connections/use-org-mcp-connections' or its corresponding type declarations.
+src/react-app/domains/session/surface/composer/composer.tsx(35,8): error TS2307: Cannot find module './composer-connections' or its corresponding type declarations.
+src/react-app/domains/session/surface/composer/composer.tsx(771,23): error TS7006: Parameter 'server' implicitly has an 'any' type.
 src/react-app/domains/session/surface/composer/composer.tsx(774,55): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/domains/session/surface/composer/composer.tsx(1592,58): error TS7006: Parameter 'file' implicitly has an 'any' type.
-src/react-app/domains/session/surface/connect-capability-inventory.ts(1,42): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/session/surface/connect-capability-inventory.ts(11,8): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
-src/react-app/domains/session/surface/connect-capability-inventory.ts(139,28): error TS7006: Parameter 'connection' implicitly has an 'any' type.
-src/react-app/domains/session/surface/connect-capability-inventory.ts(141,38): error TS7006: Parameter 'connection' implicitly has an 'any' type.
-src/react-app/domains/session/surface/mcp-chat-reconnect.ts(1,47): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(14,42): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(15,50): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(16,41): error TS2307: Cannot find module '@/app/lib/den-session-events' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(42,8): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-mcp-submit-readiness' or its corresponding type declarations.
+src/react-app/domains/session/surface/session-surface.tsx(49,60): error TS2307: Cannot find module './composer/connect-skill-token' or its corresponding type declarations.
+src/react-app/domains/session/surface/session-surface.tsx(100,8): error TS2307: Cannot find module './mcp-chat-reconnect' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(113,8): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-inventory-cache' or its corresponding type declarations.
+src/react-app/domains/session/surface/session-surface.tsx(114,79): error TS2307: Cannot find module '@/react-app/domains/session/surface/connect-capability-inventory' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(1596,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(1629,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(1676,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(1808,44): error TS7006: Parameter 'entry' implicitly has an 'any' type.
-src/react-app/domains/session/sync/session-sync.ts(6,53): error TS2307: Cannot find module '@/app/lib/den-telemetry' or its corresponding type declarations.
-src/react-app/domains/settings/connect-cloud-readiness.ts(7,8): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
-src/react-app/domains/settings/connect-cloud-readiness.ts(9,42): error TS2307: Cannot find module '@/react-app/domains/connections/native-provider-connections' or its corresponding type declarations.
-src/react-app/domains/settings/connect-cloud-readiness.ts(26,70): error TS18046: 'count' is of type 'unknown'.
-src/react-app/domains/settings/connect-cloud-readiness.ts(27,54): error TS7006: Parameter 'resource' implicitly has an 'any' type.
-src/react-app/domains/settings/connect-cloud-readiness.ts(40,4): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
-src/react-app/domains/settings/connect-cloud-readiness.ts(92,39): error TS7006: Parameter 'connection' implicitly has an 'any' type.
-src/react-app/domains/settings/connect-cloud-readiness.ts(96,42): error TS7006: Parameter 'connection' implicitly has an 'any' type.
 src/react-app/domains/settings/extension-items.ts(2,67): error TS2307: Cannot find module '../../../app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/settings/extension-items.ts(3,47): error TS2307: Cannot find module '../../../app/cloud/desktop-cloud-sync' or its corresponding type declarations.
 src/react-app/domains/settings/extension-items.ts(11,8): error TS2307: Cannot find module '../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/extension-items.ts(13,42): error TS2307: Cannot find module '../connections/native-provider-connections' or its corresponding type declarations.
+src/react-app/domains/settings/extension-items.ts(18,8): error TS2307: Cannot find module './connect-cloud-readiness' or its corresponding type declarations.
 src/react-app/domains/settings/extension-items.ts(127,59): error TS7006: Parameter 'file' implicitly has an 'any' type.
 src/react-app/domains/settings/extension-items.ts(233,102): error TS7006: Parameter 'plugin' implicitly has an 'any' type.
 src/react-app/domains/settings/extension-items.ts(239,68): error TS7006: Parameter 'file' implicitly has an 'any' type.
@@ -126,30 +106,17 @@ src/react-app/domains/settings/extension-items.ts(258,133): error TS18046: 'coun
 src/react-app/domains/settings/pages/add-library-item-modal.tsx(18,50): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/pages/add-library-item-modal.tsx(156,41): error TS7006: Parameter 'items' implicitly has an 'any' type.
 src/react-app/domains/settings/pages/add-library-item-modal.tsx(158,36): error TS7006: Parameter 'item' implicitly has an 'any' type.
-src/react-app/domains/settings/pages/agent-context-diagnostics-report.tsx(18,54): error TS2307: Cannot find module '@/react-app/domains/connections/redrob-connect-status' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-account-view.tsx(16,38): error TS2307: Cannot find module '@/react-app/domains/cloud/signin-fallback-notice' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-account-view.tsx(17,37): error TS2307: Cannot find module '../cloud/cloud-account-section' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-account-view.tsx(18,33): error TS2307: Cannot find module '../cloud/cloud-session-provider' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-account-view.tsx(19,30): error TS2307: Cannot find module '../cloud/dev-mode' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-account-view.tsx(20,36): error TS2307: Cannot find module '../cloud/use-den-session' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-providers-view.tsx(4,44): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-providers-view.tsx(5,51): error TS2307: Cannot find module '@/app/cloud/desktop-app-restrictions' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-providers-view.tsx(6,40): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-providers-view.tsx(10,33): error TS2307: Cannot find module '@/react-app/domains/settings/cloud/cloud-session-provider' or its corresponding type declarations.
-src/react-app/domains/settings/pages/cloud-providers-view.tsx(15,8): error TS2307: Cannot find module '@/react-app/domains/settings/cloud/sections' or its corresponding type declarations.
-src/react-app/domains/settings/pages/debug-view.tsx(43,33): error TS2307: Cannot find module '@/react-app/domains/settings/cloud/agent-access-card' or its corresponding type declarations.
+src/react-app/domains/settings/pages/ai-view.tsx(7,43): error TS2307: Cannot find module '@/react-app/domains/connections/provider-auth/cloud-provider-config' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(32,67): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(61,33): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(79,8): error TS2307: Cannot find module '../../connections/native-provider-connections' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(96,33): error TS2307: Cannot find module '../cloud/cloud-session-provider' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(97,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
+src/react-app/domains/settings/pages/mcp-view.tsx(125,8): error TS2307: Cannot find module '../open-in-den' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(407,38): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/domains/settings/pages/mcp-view.tsx(1128,58): error TS7006: Parameter 'file' implicitly has an 'any' type.
 src/react-app/domains/settings/pages/mcp-view.tsx(1149,47): error TS7006: Parameter 'file' implicitly has an 'any' type.
 src/react-app/domains/settings/pages/mcp-view.tsx(1430,81): error TS7006: Parameter 'file' implicitly has an 'any' type.
-src/react-app/domains/settings/shell/settings-page.tsx(49,36): error TS2307: Cannot find module '../../cloud/desktop-config-provider' or its corresponding type declarations.
-src/react-app/domains/settings/state/debug-view-model.ts(26,50): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/settings/state/electron-updater-state.ts(251,5): error TS2304: Cannot find name 'resolvePolicyReleaseChannel'.
 src/react-app/domains/settings/state/extensions-store.ts(51,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/state/extensions-store.ts(58,8): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/settings/state/extensions-store.ts(64,8): error TS2307: Cannot find module '../../../../app/cloud/desktop-cloud-sync' or its corresponding type declarations.
@@ -184,6 +151,9 @@ src/react-app/shell/session-route.tsx(96,46): error TS2307: Cannot find module '
 src/react-app/shell/session-route.tsx(98,42): error TS2307: Cannot find module '@/app/cloud/desktop-app-restrictions' or its corresponding type declarations.
 src/react-app/shell/session-route.tsx(99,44): error TS2307: Cannot find module '@/react-app/domains/cloud/desktop-config-provider' or its corresponding type declarations.
 src/react-app/shell/session-route.tsx(100,38): error TS2307: Cannot find module '@/react-app/domains/cloud/restriction-notice-provider' or its corresponding type declarations.
+src/react-app/shell/session-route.tsx(118,60): error TS2307: Cannot find module '@/react-app/domains/session/surface/composer/connect-skill-token' or its corresponding type declarations.
+src/react-app/shell/session-route.tsx(123,43): error TS2307: Cannot find module '@/react-app/domains/connections/provider-auth/cloud-provider-config' or its corresponding type declarations.
+src/react-app/shell/session-route.tsx(141,42): error TS2307: Cannot find module '@/react-app/domains/connections/use-session-mcp-maintenance' or its corresponding type declarations.
 src/react-app/shell/session-route.tsx(142,44): error TS2307: Cannot find module '@/react-app/domains/connections/use-cloud-mcp-submit-readiness' or its corresponding type declarations.
 src/react-app/shell/session-route.tsx(143,47): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-mcp-submit-readiness' or its corresponding type declarations.
 src/react-app/shell/session-route.tsx(146,28): error TS2307: Cannot find module '@/react-app/domains/cloud/den-auth-provider' or its corresponding type declarations.
@@ -198,7 +168,10 @@ src/react-app/shell/session-route.tsx(887,14): error TS7006: Parameter 'response
 src/react-app/shell/session-route.tsx(889,44): error TS7006: Parameter 'org' implicitly has an 'any' type.
 src/react-app/shell/settings-route.tsx(60,51): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-mcp-reconciler' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(61,38): error TS2307: Cannot find module '@/react-app/domains/connections/use-org-mcp-connections' or its corresponding type declarations.
+src/react-app/shell/settings-route.tsx(81,34): error TS2307: Cannot find module '@/react-app/domains/settings/pages/cloud-account-view' or its corresponding type declarations.
+src/react-app/shell/settings-route.tsx(86,8): error TS2307: Cannot find module '@/react-app/domains/session/surface/connect-capability-inventory' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(90,8): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-inventory-cache' or its corresponding type declarations.
+src/react-app/shell/settings-route.tsx(92,36): error TS2307: Cannot find module '@/react-app/domains/settings/pages/cloud-providers-view' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(103,55): error TS2307: Cannot find module '@/react-app/domains/settings/cloud/cloud-session-provider' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(104,31): error TS2307: Cannot find module '@/react-app/domains/settings/cloud/use-den-session' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(128,42): error TS2307: Cannot find module '@/app/cloud/desktop-app-restrictions' or its corresponding type declarations.
@@ -209,6 +182,8 @@ src/react-app/shell/settings-route.tsx(139,8): error TS2307: Cannot find module 
 src/react-app/shell/settings-route.tsx(174,54): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/shell/settings-route.tsx(813,16): error TS7006: Parameter 'url' implicitly has an 'any' type.
 src/react-app/shell/settings-route.tsx(975,5): error TS2353: Object literal may only specify known properties, and 'desktopConfig' does not exist in type 'UseElectronUpdaterStateOptions'.
+src/react-app/shell/settings-route.tsx(2375,22): error TS7006: Parameter 'skill' implicitly has an 'any' type.
+src/react-app/shell/settings-route.tsx(2383,20): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/shell/use-workspace-route-state.ts(27,40): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/shell/use-workspace-route-state.ts(43,28): error TS2307: Cannot find module '@/react-app/domains/cloud/den-auth-provider' or its corresponding type declarations.
 src/react-app/shell/welcome-route.tsx(33,8): error TS2307: Cannot find module '../domains/cloud/redrob-models-promo' or its corresponding type declarations.

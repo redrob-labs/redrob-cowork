@@ -46,7 +46,6 @@ import type { PlatformCapabilities } from "../../../../app/lib/platform-capabili
 import type { SettingsTab } from "../../../../app/types";
 import { cn } from "@/lib/utils";
 import { usePlatform } from "../../../kernel/platform";
-import { useOrgRestrictions } from "../../cloud/desktop-config-provider";
 import {
   SettingsContent,
   SettingsPanel,
@@ -398,36 +397,6 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
   );
 }
 
-function DesktopPolicyBanner() {
-  const config = useOrgRestrictions();
-
-  // Show the banner when the org has any active desktop policy restriction
-  // (a boolean set to false) or any white-label branding override.
-  const hasRestriction = Object.entries(config).some(
-    ([key, value]) => typeof value === "boolean" && value === false && key !== "allowedDesktopVersions",
-  );
-  const hasBranding = Boolean(config.brandAppName ?? config.brandLogoUrl ?? config.brandAccentColor);
-
-  if (!hasRestriction && !hasBranding) return null;
-
-  return (
-    <div
-      data-testid="desktop-policy-banner"
-      className="flex items-start gap-2.5 rounded-xl border border-indigo-6/30 bg-indigo-2/50 px-3.5 py-2.5 text-sm dark:border-indigo-7/25 dark:bg-indigo-3/30"
-    >
-      <Info className="mt-0.5 size-4 shrink-0 text-indigo-11" />
-      <div className="min-w-0 flex-1">
-        <p className="font-medium text-indigo-12">
-          {t("settings.desktop_policy_active_title")}
-        </p>
-        <p className="mt-0.5 text-xs text-indigo-11">
-          {t("settings.desktop_policy_active_body")}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export function SettingsPageHeading({ activeTab }: Pick<SettingsPageProps, "activeTab">) {
   return (
     <SettingsPanelHeading>
@@ -442,7 +411,6 @@ export function SettingsPage(props: SettingsPageProps) {
     <SettingsContent>
       <SettingsPanel>
         <SettingsPageHeading activeTab={props.activeTab} />
-        <DesktopPolicyBanner />
 
         {props.showUpdateToolbar && props.activeTab === "general" ? (
           <SettingsPanelToolbar>
