@@ -379,7 +379,6 @@ export default {
   "workspace_list.connecting": "연결 중...",
   "workspace_list.delete_session": "세션 삭제",
   "workspace_list.edit_avatar": "워크스페이스 아이콘 편집",
-  "workspace_list.edit_connection": "연결 편집",
   "workspace_list.edit_name": "이름 편집",
   "workspace_list.hide_child_sessions": "하위 세션 숨기기",
   "workspace_list.loading_remote_tasks": "원격 워커에서 작업을 불러오는 중...",

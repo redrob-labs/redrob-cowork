@@ -157,7 +157,6 @@ export type SessionPageSidebarProps = {
   onRevealWorkspace: (workspaceId: string) => void;
   onRecoverWorkspace: (workspaceId: string) => Promise<boolean> | boolean | void;
   onTestWorkspaceConnection: (workspaceId: string) => Promise<boolean> | boolean | void;
-  onEditWorkspaceConnection: (workspaceId: string) => void;
   onForgetWorkspace: (workspaceId: string) => void;
   onOpenCreateWorkspace: () => void;
   automationsActive?: boolean;
@@ -1058,7 +1057,6 @@ export function SessionPage(props: SessionPageProps) {
           onRevealWorkspace={props.sidebar.onRevealWorkspace}
           onRecoverWorkspace={props.sidebar.onRecoverWorkspace}
           onTestWorkspaceConnection={props.sidebar.onTestWorkspaceConnection}
-          onEditWorkspaceConnection={props.sidebar.onEditWorkspaceConnection}
           onForgetWorkspace={props.sidebar.onForgetWorkspace}
           onOpenCreateWorkspace={props.sidebar.onOpenCreateWorkspace}
           onOpenSessionSearch={props.sidebar.onOpenSessionSearch}
@@ -1414,13 +1412,6 @@ export function SessionPage(props: SessionPageProps) {
                             onClick={() => void Promise.resolve(props.sidebar.onTestWorkspaceConnection(props.selectedWorkspaceId))}
                           >
                             {t("workspace_list.test_connection")}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => props.sidebar.onEditWorkspaceConnection(props.selectedWorkspaceId)}
-                          >
-                            {t("workspace_list.edit_connection")}
                           </Button>
                           {props.sidebar.workspaceConnectionStateById[props.selectedWorkspaceId]?.status === "error" ? (
                             <Button

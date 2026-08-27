@@ -22,7 +22,6 @@ import {
   Trash2,
   RefreshCw,
   RotateCcw,
-  Settings,
   FolderOpen,
   SquarePen,
   Tag,
@@ -629,13 +628,6 @@ function WorkspaceActionsMenu({ workspace, isConnectionActionBusy, canRecover, c
               <RefreshCw className="size-4" />
               {t("workspace_list.test_connection")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => ctx.onEditWorkspaceConnection(workspace.id)}
-              disabled={isConnectionActionBusy}
-            >
-              <Settings className="size-4" />
-              {t("workspace_list.edit_connection")}
-            </DropdownMenuItem>
           </>
         ) : null}
         <DropdownMenuSeparator />
@@ -663,7 +655,6 @@ function RemoteConnectionIssueCard(props: {
   busy: boolean;
   onRecover: () => void;
   onTest: () => void;
-  onEdit: () => void;
 }) {
   const isOffline = props.tone === "offline";
 
@@ -725,17 +716,6 @@ function RemoteConnectionIssueCard(props: {
               >
                 <RefreshCw size={12} />
                 {t("workspace_list.test_connection")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 gap-1.5 rounded-lg px-2 text-[11px]"
-                onClick={props.onEdit}
-                disabled={props.busy}
-              >
-                <Settings size={12} />
-                {t("common.edit")}
               </Button>
             </div>
           </div>
@@ -865,7 +845,6 @@ export type AppSidebarProps = {
   onRevealWorkspace: (workspaceId: string) => void;
   onRecoverWorkspace: (workspaceId: string) => Promise<boolean> | boolean | void;
   onTestWorkspaceConnection: (workspaceId: string) => Promise<boolean> | boolean | void;
-  onEditWorkspaceConnection: (workspaceId: string) => void;
   onForgetWorkspace: (workspaceId: string) => void;
   onOpenCreateWorkspace: () => void;
   automationsActive?: boolean;
@@ -1047,7 +1026,6 @@ export function AppSidebar(props: AppSidebarProps) {
     onRevealWorkspace: props.onRevealWorkspace,
     onRecoverWorkspace: props.onRecoverWorkspace,
     onTestWorkspaceConnection: props.onTestWorkspaceConnection,
-    onEditWorkspaceConnection: props.onEditWorkspaceConnection,
     onForgetWorkspace: props.onForgetWorkspace,
     expandWorkspace,
     toggleWorkspaceExpanded,
@@ -1676,9 +1654,6 @@ function WorkspaceSidebarGroup({
                     }}
                     onTest={() => {
                       void Promise.resolve(ctx.onTestWorkspaceConnection(workspace.id));
-                    }}
-                    onEdit={() => {
-                      ctx.onEditWorkspaceConnection(workspace.id);
                     }}
                   />
                 ) : group.status === "loading" && group.sessions.length === 0 ? null : activeSessions.length > 0 ? (
