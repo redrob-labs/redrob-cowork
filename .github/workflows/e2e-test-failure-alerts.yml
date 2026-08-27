@@ -1,4 +1,4 @@
-# Opens a developer-facing issue when either E2E workflow fails or times out.
+# Opens a developer-facing issue when the E2E workflow fails or times out.
 # Set E2E_TEST_ALERT_MENTION to route alerts to a GitHub team instead of the
 # developer who triggered the run.
 name: E2E Test Failure Alerts
@@ -7,7 +7,6 @@ on:
   workflow_run:
     workflows:
       - Nightly Critical-Path E2E Journey
-      - Daytona E2E Regression Suite
     types:
       - completed
 
@@ -43,11 +42,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          case "$RUN_NAME" in
-            "Nightly Critical-Path E2E Journey") issue_title="Nightly critical-path E2E journey failed" ;;
-            "Daytona E2E Regression Suite") issue_title="Daytona E2E regression suite failed" ;;
-            *) echo "Unexpected workflow: $RUN_NAME" >&2; exit 1 ;;
-          esac
+          issue_title="Nightly critical-path E2E journey failed"
 
           gh label create e2e-test-failure \
             --color B60205 \

@@ -10,7 +10,7 @@ export * from "@redrob/env";
 export * from "./brief.ts";
 export * from "./eventually.ts";
 export * from "./link.ts";
-export * from "./self-host.ts";
+
 export * from "./state.ts";
 
 export async function startWorld(

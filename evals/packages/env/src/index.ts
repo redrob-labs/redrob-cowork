@@ -1,7 +1,6 @@
 export * from "./place.ts";
 export * from "./needs.ts";
 export * from "./mock.ts";
-export * from "./den.ts";
 export * from "./desktop-app.ts";
 export * from "./topology.ts";
 export * from "./presets.ts";

@@ -4,7 +4,7 @@ import { access, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promise
 import { homedir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
 import { allocateFreePort, allocateFreePorts, listTargets, waitForCdp } from "@redrob/cdp";
-import { ensureDenStack } from "./den-stack.ts";
+
 import type { ChildProcess } from "node:child_process";
 import type { DisposableHost, SurfaceHandle, ElectronSurfaceOptions, ChromeSurfaceOptions, DenServiceOptions, DenServiceHandle, ShareLinks } from "./types.ts";
 
@@ -746,19 +746,7 @@ async function clearStaleSurfaces(rootDir: string, log: (message: string) => voi
     },
 
     async startDen(opts: DenServiceOptions = {}): Promise<DenServiceHandle> {
-      if (opts.seed === "none") {
-        log("seed:none requested; local Den stack currently keeps the Acme demo seed, so continuing with the default seed.");
-      }
-      await ensureDenStack({ log, cdpCandidates: [], skipApp: true, orgMode: opts.orgMode });
-      const apiUrl = process.env.REDROB_EVAL_DEN_API_URL?.trim();
-      const webUrl = process.env.REDROB_EVAL_DEN_WEB_URL?.trim();
-      if (!apiUrl || !webUrl) throw new Error("Den stack did not export REDROB_EVAL_DEN_API_URL / REDROB_EVAL_DEN_WEB_URL.");
-      const orgMode = await runtimeOrgMode(webUrl);
-      const apiPort = explicitPort(apiUrl);
-      const webPort = explicitPort(webUrl);
-      if (apiPort !== null) denPorts.add(apiPort);
-      if (webPort !== null) denPorts.add(webPort);
-      return { webUrl, apiUrl, orgMode, hostKind: "local" };
+      throw new Error("Den stack has been removed. The local host no longer supports startDen().");
     },
 
     async share(): Promise<ShareLinks> {
