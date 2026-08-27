@@ -146,4 +146,4 @@ Point Den at a local stack with `REDROB_DEV_DEN_PROXY_TARGET=http://127.0.0.1:30
 
 Redrob Work ships in English and Korean.
 
-README translations: [English](./README.md), [한국어](./translated_readmes/README_KO.md).
+README translations: [English](./README.md), [한국어](./README_KO.md).

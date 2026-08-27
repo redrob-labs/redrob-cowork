@@ -146,4 +146,4 @@ pnpm dev:headless-web
 
 레드롭 워크는 영어와 한국어를 지원합니다.
 
-README 번역: [English](../README.md), [한국어](./README_KO.md).
+README 번역: [English](./README.md), [한국어](./README_KO.md).
