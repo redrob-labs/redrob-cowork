@@ -7,13 +7,6 @@ import type {
 } from "@opencode-ai/sdk/v2/client";
 
 import { t } from "../../../../i18n";
-import {
-  createDenClient,
-  readDenSettings,
-  resolveDenBaseUrls,
-  type DenOrgLlmProvider,
-  type DenOrgLlmProviderConnection,
-} from "../../../../app/lib/den";
 import { getRedrobGatewayOrigin } from "../../../../app/lib/gateway-runtime";
 import { unwrap, waitForHealthy } from "../../../../app/lib/opencode";
 import {
@@ -40,10 +33,6 @@ import {
   ensureProviderListQuery,
   getConnectedProviderItems,
 } from "../../../infra/provider-list-query";
-import type {
-  RedrobCloudProviderSyncRun,
-  RedrobCloudProviderSyncSkippedProvider,
-} from "../../../../app/lib/redrob-server";
 import type { RedrobServerStoreSnapshot } from "../redrob-server-store";
 
 /**
@@ -60,39 +49,8 @@ export type ProviderAuthRedrobServer = {
     redrobServerCapabilities: { config?: { read?: boolean; write?: boolean }; providerSync?: boolean } | null;
   };
 };
-import {
-  denSettingsChangedEvent,
-  denSessionUpdatedEvent,
-  type DenSessionUpdatedDetail,
-} from "../../../../app/lib/den-session-events";
-import {
-  readWorkspaceCloudImports,
-  withWorkspaceCloudImports,
-  type CloudImportedProvider,
-} from "../../../../app/cloud/import-state";
-import {
-  buildRuntimeProviderPatch,
-  formatConfigWithoutCloudProvider,
-  getCloudManagedProviderId,
-  getCloudProviderEnv,
-  getProviderModelIds,
-  isCloudManagedProviderKey,
-  isCloudProviderOutOfSync,
-  resolveCloudProviderCredentials,
-} from "./cloud-provider-config";
 import { dispatchNewProviders } from "../../../../app/lib/provider-events";
 import { updateManagedDisabledProviders } from "../managed-engine-config";
-import {
-  DESKTOP_RESTRICTION_OPENCODE_PROVIDER_ID,
-  isDesktopProviderBlocked,
-  type DesktopAppRestrictionChecker,
-} from "../../../../app/cloud/desktop-app-restrictions";
-import {
-  isProviderAddRestrictedByDesktopPolicy,
-  isProviderAllowedByDesktopPolicy,
-  resolveEntitledOrgDefaultModel,
-  type ModelEntitlementOption,
-} from "./provider-policy";
 import {
   readStoredDefaultModel,
   writeStoredDefaultModel,
@@ -105,93 +63,19 @@ import {
 } from "../../settings/redrob-provider";
 
 type ProviderReturnFocusTarget = "none" | "composer";
-type CloudProviderSyncReason =
-  | "sign_in"
-  | "app_launch"
-  | "app_resume"
-  | "model_picker_open"
-  | "new_chat"
-  | "settings_cloud_opened"
-  | "manual";
 
-type CloudProviderSyncWorkResult = void | RedrobCloudProviderSyncRun;
+/**
+ * The built-in, env-backed opencode provider. Removing its credential is not
+ * enough to disconnect it, so it needs the `disabled_providers` treatment.
+ */
+const OPENCODE_BUILT_IN_PROVIDER_ID = "opencode";
 
-type GlobalCloudProviderSyncBatch = {
-  contextKey: string;
-  sync: () => Promise<CloudProviderSyncWorkResult>;
-  promise: Promise<CloudProviderSyncWorkResult>;
-  resolve: (outcome: CloudProviderSyncWorkResult) => void;
-  reject: (error: unknown) => void;
-};
-
+/**
+ * Throttles the dispose-and-refetch of the provider list across every store
+ * instance, so several routes mounting at once do not each tear down the
+ * cached list.
+ */
 let lastGlobalProviderDisposeRefreshAt = 0;
-let activeGlobalCloudProviderSync: GlobalCloudProviderSyncBatch | null = null;
-let trailingGlobalCloudProviderSync: GlobalCloudProviderSyncBatch | null = null;
-let loggedGatewayCloudProviderSyncSkip = false;
-
-function enqueueGlobalCloudProviderSync(
-  contextKey: string,
-  sync: () => Promise<CloudProviderSyncWorkResult>,
-): Promise<CloudProviderSyncWorkResult> {
-  if (activeGlobalCloudProviderSync?.contextKey === contextKey) {
-    const trailing = trailingGlobalCloudProviderSync;
-    if (trailing && trailing.contextKey !== contextKey) {
-      trailingGlobalCloudProviderSync = null;
-      void activeGlobalCloudProviderSync.promise.then(trailing.resolve, trailing.reject);
-    }
-    return activeGlobalCloudProviderSync.promise;
-  }
-  if (trailingGlobalCloudProviderSync) {
-    if (trailingGlobalCloudProviderSync.contextKey !== contextKey) {
-      trailingGlobalCloudProviderSync.contextKey = contextKey;
-      trailingGlobalCloudProviderSync.sync = sync;
-    }
-    return trailingGlobalCloudProviderSync.promise;
-  }
-
-  const batch = createGlobalCloudProviderSyncBatch(contextKey, sync);
-  if (activeGlobalCloudProviderSync) {
-    trailingGlobalCloudProviderSync = batch;
-  } else {
-    startGlobalCloudProviderSync(batch);
-  }
-  return batch.promise;
-}
-
-function createGlobalCloudProviderSyncBatch(
-  contextKey: string,
-  sync: () => Promise<CloudProviderSyncWorkResult>,
-): GlobalCloudProviderSyncBatch {
-  let resolve: (outcome: CloudProviderSyncWorkResult) => void = () => undefined;
-  let reject: (error: unknown) => void = () => undefined;
-  const promise = new Promise<CloudProviderSyncWorkResult>((resolvePromise, rejectPromise) => {
-    resolve = resolvePromise;
-    reject = rejectPromise;
-  });
-  return { contextKey, sync, promise, resolve, reject };
-}
-
-function startGlobalCloudProviderSync(batch: GlobalCloudProviderSyncBatch): void {
-  activeGlobalCloudProviderSync = batch;
-  void batch.sync().then(
-    (outcome) => {
-      batch.resolve(outcome);
-      finishGlobalCloudProviderSync(batch);
-    },
-    (error) => {
-      batch.reject(error);
-      finishGlobalCloudProviderSync(batch);
-    },
-  );
-}
-
-function finishGlobalCloudProviderSync(batch: GlobalCloudProviderSyncBatch): void {
-  if (activeGlobalCloudProviderSync !== batch) return;
-  activeGlobalCloudProviderSync = null;
-  const trailing = trailingGlobalCloudProviderSync;
-  trailingGlobalCloudProviderSync = null;
-  if (trailing) startGlobalCloudProviderSync(trailing);
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -225,14 +109,9 @@ function configsAreSemanticallyEqual(left: string, right: string): boolean {
 }
 
 export type ProviderAuthMethod = {
-  type: "oauth" | "api" | "cloud";
+  type: "oauth" | "api";
   label: string;
   methodIndex?: number;
-};
-
-export type CloudProviderSyncError = {
-  kind: "error" | "conflict" | "needs_credential" | "needs_server";
-  message: string;
 };
 
 export type ProviderAuthProvider = {
@@ -246,18 +125,6 @@ export type ProviderOAuthStartResult = {
   authorization: ProviderAuthAuthorization;
 };
 
-/**
- * Server-side sync facts the Cloud Providers settings rows derive from when
- * the local server owns provider sync: whether an engine reload is still owed
- * (materialized providers are not served yet) and which Den-granted providers
- * the server skipped, keyed by cloudProviderId. Null while the legacy
- * renderer-side import path owns the state (remote/hostless workspaces).
- */
-export type CloudProviderServerSyncState = {
-  reloadPending: boolean;
-  skippedProviders: Record<string, RedrobCloudProviderSyncSkippedProvider>;
-};
-
 export type ProviderAuthStoreSnapshot = {
   providerAuthModalOpen: boolean;
   providerAuthBusy: boolean;
@@ -266,10 +133,6 @@ export type ProviderAuthStoreSnapshot = {
   providerAuthPreferredProviderId: string | null;
   providerAuthWorkerType: "local" | "remote";
   providerAuthProviders: ProviderAuthProvider[];
-  cloudOrgProviders: DenOrgLlmProvider[];
-  importedCloudProviders: Record<string, CloudImportedProvider>;
-  cloudProviderServerSync: CloudProviderServerSyncState | null;
-  lastSyncError: Record<string, CloudProviderSyncError>;
 };
 
 type CreateProviderAuthStoreOptions = {
@@ -278,7 +141,6 @@ type CreateProviderAuthStoreOptions = {
   providerDefaults: () => Record<string, string>;
   providerConnectedIds: () => string[];
   disabledProviders: () => string[];
-  checkDesktopAppRestriction: DesktopAppRestrictionChecker;
   selectedWorkspaceDisplay: () => WorkspaceDisplay;
   providerBaseUrl: () => string;
   selectedWorkspaceRoot: () => string;
@@ -300,26 +162,7 @@ type MutableState = {
   providerAuthMethods: Record<string, ProviderAuthMethod[]>;
   providerAuthPreferredProviderId: string | null;
   providerAuthReturnFocusTarget: ProviderReturnFocusTarget;
-  cloudOrgProviders: DenOrgLlmProvider[];
-  importedCloudProviders: Record<string, CloudImportedProvider>;
-  cloudProviderServerSync: CloudProviderServerSyncState | null;
-  lastSyncError: Record<string, CloudProviderSyncError>;
 };
-
-class CloudProviderImportConflictError extends Error {}
-class CloudProviderNeedsCredentialError extends Error {}
-class CloudProviderNeedsServerError extends Error {}
-
-function providerListModelEntitlementOptions(
-  providerList: ProviderListResponse | null | undefined,
-): ModelEntitlementOption[] {
-  return getConnectedProviderItems(providerList).flatMap((provider) =>
-    Object.keys(provider.models ?? {}).map((modelID) => ({
-      providerID: provider.id,
-      modelID,
-    })),
-  );
-}
 
 export type ProviderAuthStore = ReturnType<typeof createProviderAuthStore>;
 
@@ -329,7 +172,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   let snapshot: ProviderAuthStoreSnapshot;
   let disposed = false;
   let started = false;
-  let denSessionCleanup: (() => void) | null = null;
   let lastWorkspaceKey = "";
 
   let state: MutableState = {
@@ -339,20 +181,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     providerAuthMethods: {},
     providerAuthPreferredProviderId: null,
     providerAuthReturnFocusTarget: "none",
-    cloudOrgProviders: [],
-    importedCloudProviders: {},
-    cloudProviderServerSync: null,
-    lastSyncError: {},
   };
-
-  let cloudOrgProvidersLoadKey = "";
-  let cloudOrgProvidersInFlightKey = "";
-  let cloudOrgProvidersInFlight: Promise<DenOrgLlmProvider[]> | null = null;
-  let cloudOrgProvidersGeneration = 0;
-  let cloudProviderSyncContextKey = "";
-  let lastDenSessionPushKey = "";
-  let denSessionPushKey = "";
-  let denSessionPushInFlight: Promise<void> | null = null;
 
   const emitChange = () => {
     for (const listener of listeners) listener();
@@ -363,43 +192,14 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
   const getProviderAuthProviders = (): ProviderAuthProvider[] => {
     const merged = new Map<string, ProviderAuthProvider>();
-    const restrictToCloud = options.checkDesktopAppRestriction({ restriction: "allowCustomProviders" });
 
     for (const provider of options.providers()) {
       const id = provider.id?.trim();
       if (!id) continue;
-      if (
-        !isProviderAllowedByDesktopPolicy({
-          providerId: id,
-          restrictToCloud,
-          checkRestriction: options.checkDesktopAppRestriction,
-        })
-      ) {
-        continue;
-      }
       merged.set(id, {
         id,
         name: provider.name?.trim() || id,
         env: Array.isArray(provider.env) ? provider.env : [],
-      });
-    }
-
-    for (const provider of state.cloudOrgProviders) {
-      const id = getCloudManagedProviderId(provider);
-      if (!id || merged.has(id)) continue;
-      if (
-        !isProviderAllowedByDesktopPolicy({
-          providerId: id,
-          restrictToCloud,
-          checkRestriction: options.checkDesktopAppRestriction,
-        })
-      ) {
-        continue;
-      }
-      merged.set(id, {
-        id,
-        name: provider.name.trim() || id,
-        env: getCloudProviderEnv(provider.providerConfig),
       });
     }
 
@@ -427,42 +227,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     };
   };
 
-  const serverHandlesProviderSync = () => {
-    const redrobSnapshot = options.redrobServer.getSnapshot();
-    return Boolean(
-      redrobSnapshot.redrobServerStatus === "connected" &&
-      redrobSnapshot.redrobServerCapabilities?.providerSync === true &&
-      redrobSnapshot.redrobServerAuth?.hostToken?.trim() &&
-      redrobSnapshot.redrobServerClient,
-    );
-  };
-
-  const pushDenSession = (force = false): Promise<void> => {
-    const redrobSnapshot = options.redrobServer.getSnapshot();
-    const redrobClient = redrobSnapshot.redrobServerClient;
-    const settings = readDenSettings();
-    const apiBaseUrl = settings.apiBaseUrl ?? resolveDenBaseUrls(settings).apiBaseUrl;
-    const token = settings.authToken?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!serverHandlesProviderSync() || !redrobClient || !token || !orgId) return Promise.resolve();
-    const key = `${apiBaseUrl}::${orgId}::${token}`;
-    if (!force && key === lastDenSessionPushKey) return Promise.resolve();
-    if (key === denSessionPushKey && denSessionPushInFlight) return denSessionPushInFlight;
-    denSessionPushKey = key;
-    const request = redrobClient.putDenSession({ baseUrl: apiBaseUrl, token, orgId });
-    denSessionPushInFlight = request;
-    request.then(
-      () => { lastDenSessionPushKey = key; },
-      () => undefined,
-    ).finally(() => {
-      if (denSessionPushInFlight === request) {
-        denSessionPushInFlight = null;
-        denSessionPushKey = "";
-      }
-    });
-    return request;
-  };
-
   const refreshSnapshot = () => {
     snapshot = {
       providerAuthModalOpen: state.providerAuthModalOpen,
@@ -472,10 +236,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       providerAuthPreferredProviderId: state.providerAuthPreferredProviderId,
       providerAuthWorkerType: getProviderAuthWorkerType(),
       providerAuthProviders: getProviderAuthProviders(),
-      cloudOrgProviders: state.cloudOrgProviders,
-      importedCloudProviders: state.importedCloudProviders,
-      cloudProviderServerSync: state.cloudProviderServerSync,
-      lastSyncError: state.lastSyncError,
     };
   };
 
@@ -491,36 +251,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   ) => {
     if (Object.is(state[key], value)) return;
     mutateState((current) => ({ ...current, [key]: value }));
-  };
-
-  const readCloudProviderBaseUrl = (provider: DenOrgLlmProviderConnection) => {
-    const options = provider.providerConfig.options;
-    if (options && typeof options === "object" && !Array.isArray(options)) {
-      const baseURL = "baseURL" in options ? options.baseURL : undefined;
-      if (typeof baseURL === "string" && baseURL.trim()) return baseURL.trim().replace(/\/api\/v1\/?$/, "");
-    }
-    const api = provider.providerConfig.api;
-    if (typeof api === "string" && api.trim()) return api.trim().replace(/\/api\/v1\/?$/, "");
-    return "";
-  };
-
-  const mirrorRedrobWorkModelsVoiceEnv = async (provider: DenOrgLlmProviderConnection, apiKey: string) => {
-    const trimmedKey = apiKey.trim();
-    if (!trimmedKey) return;
-    const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
-    if (!redrobClient) return;
-    const entries = getCloudProviderEnv(provider.providerConfig)
-      .slice(0, 1)
-      .map((key) => ({ key, value: trimmedKey }));
-    if (provider.source === "redrob") {
-      if (!entries.some((entry) => entry.key === "REDROB_CLOUD_API_KEY")) {
-        entries.unshift({ key: "REDROB_CLOUD_API_KEY", value: trimmedKey });
-      }
-      const baseUrl = readCloudProviderBaseUrl(provider);
-      if (baseUrl) entries.push({ key: "REDROB_INFERENCE_BASE_URL", value: baseUrl });
-    }
-    if (entries.length === 0) return;
-    await redrobClient.upsertUserEnv(entries);
   };
 
   const readWorkspaceRedrobConfigRecord = async (): Promise<
@@ -583,72 +313,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
 
     return false;
-  };
-
-  const refreshImportedCloudProviders = async (refreshOptions?: { strict?: boolean }) => {
-    try {
-      if (serverHandlesProviderSync()) {
-        const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
-        if (!redrobClient) throw new Error("Redrob Work server unavailable.");
-        const status = await redrobClient.getCloudProviderSyncStatus();
-        const next = Object.fromEntries(status.providers.map((provider) => [provider.cloudProviderId, provider]));
-        setStateField("importedCloudProviders", next);
-        // Carry the server's truth alongside the records: rows must not show
-        // "Connected" while an engine reload is still owed, and skipped
-        // providers must name themselves instead of staying "Syncing".
-        setStateField("cloudProviderServerSync", {
-          reloadPending: status.reloadPending,
-          skippedProviders: Object.fromEntries(
-            status.skippedProviders.map((provider) => [provider.cloudProviderId, provider]),
-          ),
-        });
-        return next;
-      }
-      // Legacy renderer-side import path (remote/hostless workspaces): the
-      // server sync facts do not apply here.
-      if (state.cloudProviderServerSync !== null) {
-        setStateField("cloudProviderServerSync", null);
-      }
-      const config = await readWorkspaceRedrobConfigRecord();
-      const cloudImports = readWorkspaceCloudImports(config);
-      const next = cloudImports.providers;
-      // Guard: don't overwrite non-empty import state with an empty read.
-      // This prevents a transient server unavailability (e.g. during engine
-      // restart) from clearing a just-completed import from the badge.
-      const hasNext = Object.keys(next).length > 0;
-      const hasCurrent = Object.keys(state.importedCloudProviders).length > 0;
-      if (hasNext || !hasCurrent) {
-        setStateField("importedCloudProviders", next);
-      }
-      return next;
-    } catch (error) {
-      if (refreshOptions?.strict) {
-        throw error;
-      }
-      // Preserve existing state on read failure to avoid losing import state.
-      return state.importedCloudProviders;
-    }
-  };
-
-  const persistImportedCloudProviders = async (
-    nextProviders: Record<string, CloudImportedProvider>,
-  ) => {
-    const config = await readWorkspaceRedrobConfigRecord();
-    const cloudImports = readWorkspaceCloudImports(config);
-    const nextCloudImports = {
-      ...cloudImports,
-      providers: nextProviders,
-    };
-    const nextConfig = withWorkspaceCloudImports(config, {
-      ...nextCloudImports,
-    });
-    const persisted = await writeWorkspaceRedrobConfigRecord(nextConfig);
-    if (!persisted) {
-      throw new Error(
-        "Redrob Work server unavailable. Connect to manage imported cloud providers.",
-      );
-    }
-    setStateField("importedCloudProviders", nextProviders);
   };
 
   const readProjectConfigFile = async () => {
@@ -745,49 +409,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       return true;
     } catch {
       return false;
-    }
-  };
-
-  const patchRuntimeProviderAndImportedCloudProviders = async (
-    providerUpdate: Record<string, unknown>,
-    nextProviders: Record<string, CloudImportedProvider>,
-  ) => {
-    const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
-      await resolveRedrobConfigTarget("write");
-    if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
-      throw new Error("Redrob Work server unavailable. Connect to manage cloud providers.");
-    }
-    const config = await readWorkspaceRedrobConfigRecord();
-    const cloudImports = readWorkspaceCloudImports(config);
-    const nextConfig = withWorkspaceCloudImports(config, {
-      ...cloudImports,
-      providers: nextProviders,
-    });
-    await redrobClient.patchConfig(redrobWorkspaceId, {
-      opencode: { provider: providerUpdate },
-      redrob: nextConfig,
-    });
-    setStateField("importedCloudProviders", nextProviders);
-  };
-
-  /**
-   * Best-effort migration: pre-runtime builds wrote cloud provider blocks
-   * into the project opencode.jsonc. Strip them so the runtime entry is the
-   * single owner (and stale blocks from older builds stop shadowing state).
-   */
-  const stripLegacyCloudProviderBlocks = async (providerIds: Array<string | null | undefined>) => {
-    const ids = [...new Set(providerIds.flatMap((id) => (id?.trim() ? [id.trim()] : [])))];
-    if (ids.length === 0) return;
-    try {
-      await updateProjectConfigFile((raw) => {
-        let next = raw;
-        for (const id of ids) {
-          next = formatConfigWithoutCloudProvider(next, id, options.disabledProviders());
-        }
-        return next;
-      });
-    } catch {
-      // Legacy cleanup only — the runtime entry already owns the provider.
     }
   };
 
@@ -945,25 +566,34 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     return true;
   };
 
-  const assertProviderAllowedByDesktopPolicy = (providerId: string) => {
-    const restrictToCloud = options.checkDesktopAppRestriction({ restriction: "allowCustomProviders" });
-    if (
-      isDesktopProviderBlocked({
-        providerId,
-        checkRestriction: options.checkDesktopAppRestriction,
-      })
-    ) {
-      throw new Error(`${providerId} is blocked by your organization desktop policy.`);
-    }
-    if (
-      !isProviderAllowedByDesktopPolicy({
-        providerId,
-        restrictToCloud,
-        checkRestriction: options.checkDesktopAppRestriction,
-      })
-    ) {
-      throw new Error(t("providers.custom_providers_disabled"));
-    }
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  /**
+   * Remove a provider block (and its `disabled_providers` entry) from a raw
+   * opencode.jsonc. Inlined from the deleted cloud-provider-config module: the
+   * orphan sweep below still needs it to clear `lpr_*` blocks left behind by
+   * installs that had organization-managed providers.
+   */
+  const formatConfigWithoutProvider = (
+    raw: string,
+    providerId: string,
+    disabledProviders: string[],
+  ) => {
+    let updated = raw.trim()
+      ? raw
+      : '{\n  "$schema": "https://opencode.ai/config.json"\n}\n';
+    updated = updated.replace(
+      new RegExp(`(^[ \t]*)// Redrob Work Cloud import:.*\\n\\1(?="${escapeRegExp(providerId)}":)`, "m"),
+      "$1",
+    );
+    updated = applyEdits(updated, modify(updated, ["provider", providerId], undefined, {
+      formattingOptions: { insertSpaces: true, tabSize: 2 },
+    }));
+    const nextDisabled = disabledProviders.filter((id) => id !== providerId);
+    updated = applyEdits(updated, modify(updated, ["disabled_providers"], nextDisabled, {
+      formattingOptions: { insertSpaces: true, tabSize: 2 },
+    }));
+    return updated.endsWith("\n") ? updated : `${updated}\n`;
   };
 
   // Sweep all cloud-managed provider entries (keys matching /^lpr_/) from
@@ -1010,7 +640,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
         await updateProjectConfigFile((raw) => {
           let next = raw;
           for (const id of fileOrphans) {
-            next = formatConfigWithoutCloudProvider(next, id, options.disabledProviders());
+            next = formatConfigWithoutProvider(next, id, options.disabledProviders());
           }
           return next;
         });
@@ -1019,138 +649,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
 
     return [...orphanIds];
-  };
-
-  const assertCloudProviderImportSafe = async (
-    provider: DenOrgLlmProviderConnection,
-  ) => {
-    const localProviderId = getCloudManagedProviderId(provider);
-    const existingImported = state.importedCloudProviders[provider.id] ?? null;
-    // `lpr_*` / `redrob` keys are owned by the cloud-import system. When the
-    // import baseline was lost or diverged (e.g. it lives in a different file
-    // than the provider block, or a prior reconcile failed mid-flight), an
-    // existing cloud-managed block must be treated as a re-import to reconcile,
-    // not blocked. Only guard against clobbering a user's manual provider.
-    const cloudManagedKey = isCloudManagedProviderKey(localProviderId);
-    if (
-      existingImported &&
-      existingImported.providerId !== localProviderId &&
-      Object.values(state.importedCloudProviders).some(
-        (entry) => entry.providerId === localProviderId && entry.cloudProviderId !== provider.id,
-      )
-    ) {
-      throw new CloudProviderImportConflictError(
-        `${localProviderId} is already imported from another cloud provider. Remove it before importing this one.`,
-      );
-    }
-
-    if (
-      !existingImported &&
-      !cloudManagedKey &&
-      options.providerConnectedIds().includes(localProviderId)
-    ) {
-      throw new CloudProviderImportConflictError(
-        `${localProviderId} is already connected in this workspace. Disconnect it before importing the cloud-managed version.`,
-      );
-    }
-
-    const configFile = await readProjectConfigFile() as { content?: string } | null;
-    if (
-      !configFile?.content?.trim() ||
-      existingImported ||
-      (cloudManagedKey && localProviderId !== "redrob")
-    ) {
-      return;
-    }
-
-    const parsed = parse(configFile.content);
-    const providerSection =
-      parsed && typeof parsed === "object" && !Array.isArray(parsed)
-        ? (parsed as Record<string, unknown>).provider
-        : null;
-    if (
-      providerSection &&
-      typeof providerSection === "object" &&
-      !Array.isArray(providerSection) &&
-      localProviderId in (providerSection as Record<string, unknown>)
-    ) {
-      throw new CloudProviderImportConflictError(
-        `${localProviderId} already has a provider block in opencode.jsonc. Remove it before importing the cloud-managed version.`,
-      );
-    }
-  };
-
-  const getCloudOrgProvidersKey = () => {
-    const settings = readDenSettings();
-    return [
-      settings.baseUrl,
-      settings.activeOrgId?.trim() ?? "",
-      settings.authToken?.trim() ?? "",
-    ].join("::");
-  };
-
-  const refreshCloudOrgProviders = async (optionsArg?: { force?: boolean }) => {
-    const settings = readDenSettings();
-    const loadKey = getCloudOrgProvidersKey();
-    const token = settings.authToken?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-
-    if (!optionsArg?.force && cloudOrgProvidersLoadKey === loadKey) {
-      return state.cloudOrgProviders;
-    }
-
-    if (cloudOrgProvidersInFlight && cloudOrgProvidersInFlightKey === loadKey) {
-      return cloudOrgProvidersInFlight;
-    }
-
-    if (!token || !orgId) {
-      cloudOrgProvidersGeneration += 1;
-      setStateField("cloudOrgProviders", []);
-      cloudOrgProvidersLoadKey = loadKey;
-      return [];
-    }
-
-    const client = createDenClient({
-      baseUrl: settings.baseUrl,
-      token,
-    });
-    const generation = ++cloudOrgProvidersGeneration;
-    const request = client
-      .listOrgLlmProviders(orgId)
-      .then((providers) => {
-        if (
-          generation !== cloudOrgProvidersGeneration ||
-          getCloudOrgProvidersKey() !== loadKey
-        ) {
-          return state.cloudOrgProviders;
-        }
-        setStateField("cloudOrgProviders", providers);
-        cloudOrgProvidersLoadKey = loadKey;
-        return providers;
-      })
-      .catch((error) => {
-        if (
-          generation === cloudOrgProvidersGeneration &&
-          getCloudOrgProvidersKey() === loadKey
-        ) {
-          setStateField("cloudOrgProviders", []);
-          cloudOrgProvidersLoadKey = "";
-        }
-        throw error;
-      })
-      .finally(() => {
-        if (
-          generation === cloudOrgProvidersGeneration &&
-          cloudOrgProvidersInFlightKey === loadKey
-        ) {
-          cloudOrgProvidersInFlight = null;
-          cloudOrgProvidersInFlightKey = "";
-        }
-      });
-
-    cloudOrgProvidersInFlight = request;
-    cloudOrgProvidersInFlightKey = loadKey;
-    return request;
   };
 
   // Track whether the provider list has been loaded at least once.
@@ -1337,7 +835,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     availableProviders: ProviderAuthProvider[],
     workerType: "local" | "remote",
   ) => {
-    const restrictToCloud = options.checkDesktopAppRestriction({ restriction: "allowCustomProviders" });
     const merged = Object.fromEntries(
       Object.entries(methods ?? {}).map(([id, providerMethods]) => [
         id,
@@ -1351,15 +848,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     for (const provider of availableProviders ?? []) {
       const id = provider.id?.trim();
       if (!id) continue;
-      if (
-        !isProviderAllowedByDesktopPolicy({
-          providerId: id,
-          restrictToCloud,
-          checkRestriction: options.checkDesktopAppRestriction,
-        })
-      ) {
-        continue;
-      }
       if (!Array.isArray(provider.env) || provider.env.length === 0) continue;
       const existing = merged[id] ?? [];
       if (existing.some((method) => method.type === "api")) continue;
@@ -1371,16 +859,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       // Redrob-only allowlist: drop every other provider so the connect modal
       // offers only Redrob and startProviderAuth can never resolve another id.
       if (!isRedrobOnlyProviderId(id)) {
-        delete merged[id];
-        continue;
-      }
-      if (
-        !isProviderAllowedByDesktopPolicy({
-          providerId: id,
-          restrictToCloud,
-          checkRestriction: options.checkDesktopAppRestriction,
-        })
-      ) {
         delete merged[id];
         continue;
       }
@@ -1439,8 +917,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       if (!resolved) {
         throw new Error(t("providers.provider_id_required"));
       }
-      assertProviderAllowedByDesktopPolicy(resolved);
-
       const methods = authMethods[resolved];
       if (!methods || !methods.length) {
         throw new Error(`${t("providers.unknown_provider")}: ${resolved}`);
@@ -1579,8 +1055,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     if (!resolved) {
       throw new Error(t("providers.provider_id_required"));
     }
-    assertProviderAllowedByDesktopPolicy(resolved);
-
     if (!Number.isInteger(methodIndex) || methodIndex < 0) {
       throw new Error(t("providers.oauth_method_required"));
     }
@@ -1608,7 +1082,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     };
 
     try {
-      if (resolved.toLowerCase() === DESKTOP_RESTRICTION_OPENCODE_PROVIDER_ID) {
+      if (resolved.toLowerCase() === OPENCODE_BUILT_IN_PROVIDER_ID) {
         await ensureProjectProviderDisabledState(resolved, false);
       }
       const trimmedCode = code?.trim();
@@ -1657,11 +1131,9 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     if (!trimmed) {
       throw new Error(t("providers.api_key_required"));
     }
-    assertProviderAllowedByDesktopPolicy(providerId);
-
     setStateField("providerAuthBusy", true);
     try {
-      if (providerId.trim().toLowerCase() === DESKTOP_RESTRICTION_OPENCODE_PROVIDER_ID) {
+      if (providerId.trim().toLowerCase() === OPENCODE_BUILT_IN_PROVIDER_ID) {
         await ensureProjectProviderDisabledState(providerId, false);
       }
       await c.auth.set({ providerID: providerId, auth: { type: "api", key: trimmed } });
@@ -1676,501 +1148,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
   }
 
-  async function connectCloudProviderInternal(
-    cloudProviderId: string,
-    optionsArg?: { silent?: boolean },
-  ) {
-    if (!optionsArg?.silent) {
-      setStateField("providerAuthError", null);
-    }
-    const c = options.client();
-    if (!c) {
-      throw new Error(t("providers.not_connected"));
-    }
-
-    const settings = readDenSettings();
-    const token = settings.authToken?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!token || !orgId) {
-      throw new Error("Sign in to Redrob Work Cloud and choose an organization first.");
-    }
-
-    try {
-      const den = createDenClient({
-        baseUrl: settings.baseUrl,
-        token,
-      });
-      const provider = await den.getOrgLlmProviderConnection(orgId, cloudProviderId);
-      const localProviderId = getCloudManagedProviderId(provider);
-      assertProviderAllowedByDesktopPolicy(localProviderId);
-      const existingImported = state.importedCloudProviders[cloudProviderId] ?? null;
-      const { envEntries, primaryApiKey } = resolveCloudProviderCredentials(provider);
-      const env = getCloudProviderEnv(provider.providerConfig);
-      if (!primaryApiKey && env.length > 0) {
-        throw new CloudProviderNeedsCredentialError(
-          `${provider.name} does not have a stored organization credential yet.`,
-        );
-      }
-
-      await assertCloudProviderImportSafe(provider);
-
-      if (envEntries.length > 0) {
-        const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
-        if (!redrobClient) {
-          throw new CloudProviderNeedsServerError(
-            `${provider.name} needs environment variables (${envEntries
-              .map((entry) => entry.key)
-              .join(", ")}) but the Redrob Work server is not available.`,
-          );
-        }
-        await redrobClient.upsertUserEnv(envEntries);
-      }
-      if (primaryApiKey) {
-        await c.auth.set({
-          providerID: localProviderId,
-          auth: { type: "api", key: primaryApiKey },
-        });
-        await mirrorRedrobWorkModelsVoiceEnv(provider, primaryApiKey);
-      }
-      if (existingImported?.providerId && existingImported.providerId !== localProviderId) {
-        try {
-          await removeProviderAuthCredentials(existingImported.providerId);
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error ?? "");
-          if (!/not found|unknown auth|404/i.test(message.toLowerCase())) {
-            throw error;
-          }
-        }
-      }
-      const nextImportedProviders = {
-        ...state.importedCloudProviders,
-        [provider.id]: {
-          cloudProviderId: provider.id,
-          providerId: localProviderId,
-          // Track the provider id as shipped by the server at import time
-          // so we can detect local/remote drift later (see dev #1510 "key
-          // cloud providers by cloud id"). On first import both match.
-          sourceProviderId: provider.providerId,
-          name: provider.name,
-          source: provider.source,
-          updatedAt: provider.updatedAt ?? null,
-          modelIds: getProviderModelIds(provider),
-          importedAt: Date.now(),
-        },
-      };
-      // Cloud providers are runtime-managed: upsert (and delete a renamed
-      // predecessor) via one server config write, together with the import
-      // baseline, instead of editing the user's opencode.jsonc.
-      await patchRuntimeProviderAndImportedCloudProviders(
-        buildRuntimeProviderPatch(provider, localProviderId, existingImported?.providerId ?? null),
-        nextImportedProviders,
-      );
-      await stripLegacyCloudProviderBlocks([localProviderId, existingImported?.providerId]);
-
-      const nextDisabledProviders = options
-        .disabledProviders()
-        .filter((id) => id !== localProviderId && id !== existingImported?.providerId);
-      options.setDisabledProviders(nextDisabledProviders);
-      if (!optionsArg?.silent) {
-        options.markOpencodeConfigReloadRequired();
-        await refreshProviders({ dispose: true });
-      }
-      refreshSnapshot();
-      emitChange();
-      return `${t("status.connected")} ${provider.name}`;
-    } catch (error) {
-      const message = describeProviderError(error, "Failed to connect organization provider.");
-      if (!optionsArg?.silent) {
-        setStateField("providerAuthError", message);
-      }
-      throw error instanceof Error ? error : new Error(message);
-    }
-  }
-
-  const describeCloudProviderSyncError = (error: unknown): CloudProviderSyncError => ({
-    kind: error instanceof CloudProviderImportConflictError
-      ? "conflict"
-      : error instanceof CloudProviderNeedsCredentialError
-        ? "needs_credential"
-        : error instanceof CloudProviderNeedsServerError
-          ? "needs_server"
-          : "error",
-    message: describeProviderError(error, "Cloud provider sync failed."),
-  });
-
-  const setCloudProviderSyncError = (
-    cloudProviderId: string,
-    error: CloudProviderSyncError | null,
-  ) => {
-    const current = state.lastSyncError[cloudProviderId];
-    if (!error && !current) return;
-    if (error && current?.kind === error.kind && current.message === error.message) return;
-    const next = { ...state.lastSyncError };
-    if (error) {
-      next[cloudProviderId] = error;
-    } else {
-      delete next[cloudProviderId];
-    }
-    setStateField("lastSyncError", next);
-  };
-
-  async function connectCloudProvider(cloudProviderId: string) {
-    try {
-      const result = await connectCloudProviderInternal(cloudProviderId);
-      setCloudProviderSyncError(cloudProviderId, null);
-      return result;
-    } catch (error) {
-      setCloudProviderSyncError(cloudProviderId, describeCloudProviderSyncError(error));
-      throw error;
-    }
-  }
-
-  async function removeCloudProviderInternal(
-    cloudProviderId: string,
-    optionsArg?: { silent?: boolean },
-  ) {
-    if (!optionsArg?.silent) {
-      setStateField("providerAuthError", null);
-    }
-    const imported = state.importedCloudProviders[cloudProviderId];
-    if (!imported) {
-      throw new Error("This cloud provider has not been imported into the workspace.");
-    }
-
-    try {
-      try {
-        await removeProviderAuthCredentials(imported.providerId);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error ?? "");
-        if (!/not found|unknown auth|404/i.test(message.toLowerCase())) {
-          throw error;
-        }
-      }
-      // Runtime-managed: delete the provider entry via the server's per-key
-      // merge (`null` deletes), then strip any legacy opencode.jsonc block
-      // left by pre-runtime builds. Both are idempotent.
-      await patchRuntimeProviders({ [imported.providerId]: null });
-      await stripLegacyCloudProviderBlocks([imported.providerId]);
-
-      const nextImportedProviders = { ...state.importedCloudProviders };
-      delete nextImportedProviders[cloudProviderId];
-      await persistImportedCloudProviders(nextImportedProviders);
-
-      options.setDisabledProviders(
-        options.disabledProviders().filter((id) => id !== imported.providerId),
-      );
-      options.markOpencodeConfigReloadRequired();
-      refreshSnapshot();
-      emitChange();
-      return `${t("providers.disconnected_prefix")} ${imported.name}`;
-    } catch (error) {
-      const message = describeProviderError(error, t("providers.disconnect_failed"));
-      if (!optionsArg?.silent) {
-        setStateField("providerAuthError", message);
-      }
-      throw error instanceof Error ? error : new Error(message);
-    }
-  }
-
-  async function removeCloudProvider(cloudProviderId: string) {
-    return await removeCloudProviderInternal(cloudProviderId);
-  }
-
-  const logCloudProviderSyncError = (reason: CloudProviderSyncReason, error: unknown) => {
-    const message = describeProviderError(error, "Cloud provider sync failed.");
-    console.warn(`[cloud-provider-sync:${reason}] ${message}`);
-    return message;
-  };
-
-  const recordCloudProviderSyncError = (
-    cloudProviderId: string,
-    reason: CloudProviderSyncReason,
-    error: unknown,
-  ) => {
-    const syncError = describeCloudProviderSyncError(error);
-    setCloudProviderSyncError(cloudProviderId, syncError);
-    console.warn(`[cloud-provider-sync:${reason}] ${syncError.message}`);
-    return syncError.message;
-  };
-
-  const getCloudProviderSyncContextKey = () => {
-    const settings = readDenSettings();
-    return [
-      settings.baseUrl,
-      settings.activeOrgId?.trim() ?? "",
-      settings.authToken?.trim() ?? "",
-      options.selectedWorkspaceDisplay().workspaceType,
-      options.selectedWorkspaceRoot().trim(),
-      options.runtimeWorkspaceId() ?? "",
-      options.client() ? "connected" : "disconnected",
-    ].join("::");
-  };
-
-  const hasCloudProviderSyncPrerequisites = () => {
-    const settings = readDenSettings();
-    const workspaceTarget =
-      options.selectedWorkspaceRoot().trim() || options.runtimeWorkspaceId() || "";
-    return Boolean(
-      options.client() &&
-        settings.authToken?.trim() &&
-        settings.activeOrgId?.trim() &&
-        workspaceTarget,
-    );
-  };
-
-  const publishSettingsCloudProviderSyncError = (
-    reason: CloudProviderSyncReason,
-    message: string,
-  ) => {
-    if (reason !== "settings_cloud_opened") return;
-    // A sync that loses its session while logout is clearing account state is
-    // cancellation, not a user-actionable provider failure.
-    setStateField(
-      "providerAuthError",
-      hasCloudProviderSyncPrerequisites() ? message : null,
-    );
-  };
-
-  const preselectEntitledOrgDefaultModel = (
-    providerList: ProviderListResponse | null | undefined,
-  ) => {
-    const replacement = resolveEntitledOrgDefaultModel(
-      providerListModelEntitlementOptions(providerList),
-      {
-        currentDefault: readStoredDefaultModel(),
-        restrictToCloud: options.checkDesktopAppRestriction({ restriction: "allowCustomProviders" }),
-        checkRestriction: options.checkDesktopAppRestriction,
-      },
-    );
-    if (replacement) writeStoredDefaultModel(replacement);
-  };
-
-  const refreshProvidersAfterCloudSync = async (optionsArg: {
-    dispose?: boolean;
-    force?: boolean;
-  }) => {
-    const providerList = await refreshProviders(optionsArg);
-    preselectEntitledOrgDefaultModel(providerList);
-    return providerList;
-  };
-
-  async function performCloudProviderSync(reason: CloudProviderSyncReason) {
-    if (!hasCloudProviderSyncPrerequisites()) {
-      return;
-    }
-
-    // Imports, baseline reads, and persistence all go through the Redrob Work
-    // server target (patchRuntimeProviders throws without it). Running before
-    // the target resolves made the baseline read fall back to an empty source
-    // and re-import every org provider — engine dispose churn on settings open.
-    const [readTarget, target] = await Promise.all([
-      resolveRedrobConfigTarget("read"),
-      resolveRedrobConfigTarget("write"),
-    ]);
-    if (
-      !readTarget.canUseRedrobServer ||
-      !target.canUseRedrobServer ||
-      !target.redrobClient ||
-      !target.redrobWorkspaceId
-    ) {
-      return;
-    }
-
-    let importedProviders: Record<string, CloudImportedProvider>;
-    try {
-      importedProviders = await refreshImportedCloudProviders({ strict: true });
-    } catch (error) {
-      logCloudProviderSyncError(reason, error);
-      return;
-    }
-    const liveProviders = await refreshCloudOrgProviders({ force: true });
-    const liveProviderMap = new Map(liveProviders.map((provider) => [provider.id, provider]));
-    const failures: string[] = [];
-    const processedLiveProviderIds = new Set<string>();
-    let configChanged = false;
-    const restrictToCloud = options.checkDesktopAppRestriction({ restriction: "allowCustomProviders" });
-
-    const canSyncProvider = (provider: DenOrgLlmProvider) =>
-      isProviderAllowedByDesktopPolicy({
-        providerId: getCloudManagedProviderId(provider),
-        restrictToCloud,
-        checkRestriction: options.checkDesktopAppRestriction,
-      });
-
-    const shouldSkipTerminalConflict = (cloudProviderId: string) =>
-      reason !== "manual" && state.lastSyncError[cloudProviderId]?.kind === "conflict";
-
-    for (const importedProvider of Object.values(importedProviders)) {
-      const liveProvider = liveProviderMap.get(importedProvider.cloudProviderId);
-      if (!liveProvider) {
-        try {
-          await removeCloudProviderInternal(importedProvider.cloudProviderId, { silent: true });
-          setCloudProviderSyncError(importedProvider.cloudProviderId, null);
-          configChanged = true;
-        } catch (error) {
-          failures.push(recordCloudProviderSyncError(importedProvider.cloudProviderId, reason, error));
-        }
-        continue;
-      }
-
-      processedLiveProviderIds.add(liveProvider.id);
-
-      if (!canSyncProvider(liveProvider) || shouldSkipTerminalConflict(liveProvider.id)) {
-        continue;
-      }
-
-      if (!isCloudProviderOutOfSync(liveProvider, importedProvider)) {
-        setCloudProviderSyncError(liveProvider.id, null);
-        continue;
-      }
-      if (!liveProvider.hasApiKey && getCloudProviderEnv(liveProvider.providerConfig).length > 0) {
-        setCloudProviderSyncError(liveProvider.id, {
-          kind: "needs_credential",
-          message: `${liveProvider.name} does not have a stored organization credential yet.`,
-        });
-        continue;
-      }
-
-      try {
-        // Reconcile in place with a single idempotent rewrite. Re-importing
-        // via connectCloudProviderInternal fetches the fresh Den model list
-        // and fully replaces the `lpr_*` provider block (added/changed/removed
-        // models) while keeping the import baseline. The previous
-        // remove-then-reconnect dance could leave the block deleted if the
-        // reconnect aborted on a stale in-memory connected-providers guard,
-        // so the workspace kept the first-import snapshot forever (#2346).
-        await connectCloudProviderInternal(liveProvider.id, { silent: true });
-        setCloudProviderSyncError(liveProvider.id, null);
-        configChanged = true;
-      } catch (error) {
-        failures.push(recordCloudProviderSyncError(liveProvider.id, reason, error));
-      }
-    }
-
-    const nextImportedProviders = state.importedCloudProviders;
-    const newlyImported: Array<{ id: string; name: string; providerId: string; firstModelId?: string; firstModelName?: string }> = [];
-    for (const liveProvider of liveProviders) {
-      if (processedLiveProviderIds.has(liveProvider.id)) {
-        continue;
-      }
-      if (nextImportedProviders[liveProvider.id]) {
-        continue;
-      }
-      if (!canSyncProvider(liveProvider) || shouldSkipTerminalConflict(liveProvider.id)) {
-        continue;
-      }
-      if (!liveProvider.hasApiKey && getCloudProviderEnv(liveProvider.providerConfig).length > 0) {
-        setCloudProviderSyncError(liveProvider.id, {
-          kind: "needs_credential",
-          message: `${liveProvider.name} does not have a stored organization credential yet.`,
-        });
-        continue;
-      }
-
-      try {
-        await connectCloudProviderInternal(liveProvider.id, { silent: true });
-        setCloudProviderSyncError(liveProvider.id, null);
-        configChanged = true;
-        const firstModel = liveProvider.models[0] ?? null;
-        newlyImported.push({
-          id: liveProvider.id,
-          name: liveProvider.name,
-          providerId: liveProvider.providerId,
-          firstModelId: firstModel?.id,
-          firstModelName: firstModel?.name ?? firstModel?.id,
-        });
-      } catch (error) {
-        failures.push(recordCloudProviderSyncError(liveProvider.id, reason, error));
-      }
-    }
-
-    await refreshProvidersAfterCloudSync(
-      configChanged ? { dispose: true } : { force: true },
-    ).catch(() => null);
-
-    // Notify the UI about newly imported providers so the global toast
-    // can be shown regardless of which route is active.
-    if (newlyImported.length > 0) {
-      dispatchNewProviders({
-        providers: newlyImported,
-        source: reason === "sign_in" ? "sign_in" : "cloud_sync",
-      });
-    }
-
-    if (failures.length > 0) {
-      throw new Error(failures.join("\n"));
-    }
-  }
-
-  async function runCloudProviderSync(reason: CloudProviderSyncReason) {
-    if (!hasCloudProviderSyncPrerequisites()) {
-      if (reason === "settings_cloud_opened") {
-        setStateField("providerAuthError", null);
-      }
-      return;
-    }
-    if (getRedrobGatewayOrigin()) {
-      if (!loggedGatewayCloudProviderSyncSkip) {
-        loggedGatewayCloudProviderSyncSkip = true;
-        console.info(
-          `[cloud-provider-sync:${reason}] Provider materialization is handled server-side in gateway mode.`,
-        );
-      }
-      return { outcome: "handled_server_side" };
-    }
-
-    if (serverHandlesProviderSync()) {
-      try {
-        const result = await enqueueGlobalCloudProviderSync(
-          `server:${getCloudProviderSyncContextKey()}`,
-          async () => {
-            const redrobClient = options.redrobServer.getSnapshot().redrobServerClient;
-            if (!redrobClient) throw new Error("Redrob Work server unavailable.");
-            let result = await redrobClient.runCloudProviderSyncNow(reason);
-            if (result.status === "no_session") {
-              await pushDenSession(true);
-              result = await redrobClient.runCloudProviderSyncNow(reason);
-            }
-            return result;
-          },
-        );
-        if (!result) throw new Error("Cloud provider sync returned no result.");
-        // Re-derive the imported records (and reloadPending/skips) from the
-        // server's status after EVERY server-handled pass. Without this the
-        // Cloud Providers rows kept whatever the one-shot start() read found
-        // (usually nothing) and sat on "Syncing" forever even though the
-        // server had long since applied the sync (#3671, UI layer).
-        await refreshImportedCloudProviders();
-        if (result.status === "failed" || result.status === "no_session") {
-          const message = logCloudProviderSyncError(
-            reason,
-            new Error(result.message ?? "Cloud provider sync failed."),
-          );
-          publishSettingsCloudProviderSyncError(reason, message);
-          return;
-        }
-        // The server may already be synchronized while this route still holds
-        // a removed managed-model default. Always reread the live catalog and
-        // reconcile that preference so Settings diagnostics recover in place,
-        // including after a noop server sync.
-        await refreshProvidersAfterCloudSync({ force: true });
-        return { outcome: "handled_server_side" };
-      } catch (error) {
-        const message = logCloudProviderSyncError(reason, error);
-        publishSettingsCloudProviderSyncError(reason, message);
-        return;
-      }
-    }
-
-    return enqueueGlobalCloudProviderSync(
-      `client:${getCloudProviderSyncContextKey()}`,
-      () => performCloudProviderSync(reason),
-    ).catch((error) => {
-      const message = logCloudProviderSyncError(reason, error);
-      publishSettingsCloudProviderSyncError(reason, message);
-    });
-  }
-
   async function disconnectProvider(providerId: string) {
     setStateField("providerAuthError", null);
     const c = options.client();
@@ -2183,17 +1160,10 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       throw new Error(t("providers.provider_id_required"));
     }
 
-    const trackedImport = Object.values(state.importedCloudProviders).find(
-      (entry) => entry.providerId === resolved,
-    );
-    if (trackedImport) {
-      return await removeCloudProvider(trackedImport.cloudProviderId);
-    }
-
     try {
       // The built-in opencode provider is env-backed. Credential removal alone
       // leaves it connected - disable it via runtime OPENCODE_CONFIG injection.
-      if (resolved.toLowerCase() === DESKTOP_RESTRICTION_OPENCODE_PROVIDER_ID) {
+      if (resolved.toLowerCase() === OPENCODE_BUILT_IN_PROVIDER_ID) {
         try {
           await removeProviderAuthCredentials(resolved);
         } catch {
@@ -2221,11 +1191,9 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
   }
 
-  function isProviderAddRestricted(providerId?: string | null) {
-    return isProviderAddRestrictedByDesktopPolicy({
-      providerId,
-      checkRestriction: options.checkDesktopAppRestriction,
-    });
+  /** Nothing restricts adding a provider: there is no organization policy. */
+  function isProviderAddRestricted(_providerId?: string | null) {
+    return false;
   }
 
   async function openProviderAuthModal(optionsArg?: {
@@ -2307,33 +1275,9 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
   const syncFromOptions = () => {
     const workspaceKey = currentWorkspaceKey();
-    const workspaceChanged = workspaceKey !== lastWorkspaceKey;
     lastWorkspaceKey = workspaceKey;
     refreshSnapshot();
     emitChange();
-    if (workspaceChanged) {
-      setStateField("lastSyncError", {});
-      void refreshImportedCloudProviders();
-    }
-    if (serverHandlesProviderSync()) {
-      const nextSyncContextKey = getCloudProviderSyncContextKey();
-      if (nextSyncContextKey === cloudProviderSyncContextKey) return;
-      cloudProviderSyncContextKey = nextSyncContextKey;
-      void pushDenSession().then(() => runCloudProviderSync("app_launch"));
-      return;
-    }
-    if (!hasCloudProviderSyncPrerequisites()) {
-      cloudProviderSyncContextKey = "";
-      return;
-    }
-
-    const nextSyncContextKey = getCloudProviderSyncContextKey();
-    if (nextSyncContextKey === cloudProviderSyncContextKey) {
-      return;
-    }
-
-    cloudProviderSyncContextKey = nextSyncContextKey;
-    void runCloudProviderSync("app_launch");
   };
 
   const start = () => {
@@ -2342,186 +1286,32 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     disposed = false;
     started = true;
     lastWorkspaceKey = currentWorkspaceKey();
-    if (typeof window !== "undefined") {
-      const handleDenSessionUpdate = (event: Event) => {
-        cloudOrgProvidersGeneration += 1;
-        cloudOrgProvidersLoadKey = "";
-        cloudOrgProvidersInFlightKey = "";
-        cloudOrgProvidersInFlight = null;
-        const detail = (event as CustomEvent<DenSessionUpdatedDetail>).detail;
 
-        if (detail?.status === "success") {
-          mutateState((current) => ({
-            ...current,
-            cloudOrgProviders: [],
-            providerAuthMethods: {},
-            providerAuthError: null,
-            cloudProviderServerSync: null,
-            lastSyncError: {},
-          }));
-          void refreshCloudOrgProviders({ force: true }).catch(() => undefined);
-          void pushDenSession().then(() => runCloudProviderSync("sign_in"));
-        } else {
-          const logoutProviderIds = detail?.status === "signed_out"
-            ? [...new Set(options.providerConnectedIds())].filter(
-              (providerId) => providerId.trim().toLowerCase() !== DESKTOP_RESTRICTION_OPENCODE_PROVIDER_ID,
-            )
-            : [];
-          // Account-scoped catalog state must disappear synchronously. Config
-          // and credential cleanup continues below without leaving stale
-          // models visible while those best-effort operations finish.
-          clearProviderListQueries(getReactQueryClient());
-          for (const providerId of logoutProviderIds) {
-            removeProviderFromState(providerId);
-          }
-          if (
-            logoutProviderIds.some(
-              (providerId) => providerId === readStoredDefaultModel().providerID,
-            )
-          ) {
-            writeStoredDefaultModel(DEFAULT_MODEL);
-          }
-          mutateState((current) => ({
-            ...current,
-            cloudOrgProviders: [],
-            providerAuthMethods: {},
-            providerAuthError: null,
-            cloudProviderServerSync: null,
-            lastSyncError: {},
-          }));
-          if (serverHandlesProviderSync()) {
-            lastDenSessionPushKey = "";
-            void (async () => {
-              await options.redrobServer.getSnapshot().redrobServerClient?.deleteDenSession().catch(() => undefined);
-              // The server removes cloud-owned environment entries from disk,
-              // but a running OpenCode child retains its spawn environment.
-              // Explicit desktop sign-out must replace that process so an
-              // account-scoped provider cannot remain connected in the UI.
-              if (detail?.status === "signed_out" && isDesktopRuntime()) {
-                await engineRestart({}).catch(() => undefined);
-              }
-            })();
-          }
-          // Sign-out or error: remove all cloud-imported providers from the workspace
-          // Capture the full import records BEFORE clearing state
-          const importedProviders = { ...state.importedCloudProviders };
-          const importedIds = Object.keys(importedProviders);
-
-          // Best-effort cleanup: remove each cloud provider from opencode.jsonc
-          // BEFORE clearing state so removeCloudProviderInternal can find the records
-          void (async () => {
-            for (const providerId of logoutProviderIds) {
-              try {
-                await removeProviderAuthCredentials(providerId);
-              } catch {
-                // Providers backed exclusively by the environment have no
-                // stored credential to remove. Their environment remains
-                // operator-owned and is not mutated by account logout.
-              }
-            }
-            for (const cloudId of importedIds) {
-              try {
-                await removeCloudProviderInternal(cloudId, { silent: true });
-              } catch {
-                // Ignore individual removal failures during sign-out cleanup
-              }
-            }
-            // Final sweep: remove any orphan `lpr_*` provider keys that remain
-            // in opencode.jsonc but weren't tracked in importedCloudProviders
-            // (e.g. from a previous failed cleanup or external edit).
-            try {
-              const orphans = await sweepOrphanCloudProvidersFromConfig();
-              for (const providerId of orphans) {
-                try {
-                  await removeProviderAuthCredentials(providerId);
-                } catch {
-                  // Ignore auth removal failures for orphans
-                }
-              }
-              if (orphans.length > 0) {
-                options.markOpencodeConfigReloadRequired();
-              }
-            } catch {
-              // Ignore sweep failures during sign-out cleanup
-            }
-            // Clear state AFTER cleanup so the records are available during removal
-            mutateState((current) => ({
-              ...current,
-              cloudOrgProviders: [],
-              providerAuthMethods: {},
-              providerAuthError: null,
-              importedCloudProviders: {},
-              cloudProviderServerSync: null,
-              lastSyncError: {},
-            }));
-            refreshSnapshot();
-            emitChange();
-          })();
-        }
-      };
-      window.addEventListener(
-        denSessionUpdatedEvent,
-        handleDenSessionUpdate as EventListener,
-      );
-      const handleDenSettingsChange = () => {
-        void refreshCloudOrgProviders({ force: true }).catch(() => undefined);
-      };
-      window.addEventListener(
-        denSettingsChangedEvent,
-        handleDenSettingsChange,
-      );
-      denSessionCleanup = () => {
-        window.removeEventListener(
-          denSessionUpdatedEvent,
-          handleDenSessionUpdate as EventListener,
-        );
-        window.removeEventListener(
-          denSettingsChangedEvent,
-          handleDenSettingsChange,
-        );
-      };
-    }
-    // The member's assigned model catalog is organization-scoped, not
-    // workspace-scoped. Hydrate it independently so the model picker works on
-    // first launch before a workspace exists (workspace sync still handles
-    // credential materialization once a workspace is selected).
-    void refreshCloudOrgProviders().catch(() => undefined);
-    void refreshImportedCloudProviders().then((imported) => {
-      // Startup cleanup: if no auth token, remove any cloud providers that
-      // were left behind. Handles orphans from a previous sign-out that
-      // didn't clean up (e.g. crash, force-quit, external edit).
-      if (!hasCloudProviderSyncPrerequisites()) {
-        void (async () => {
-          // First: remove anything tracked in import state
-          if (imported && Object.keys(imported).length > 0) {
-            for (const cloudId of Object.keys(imported)) {
-              try {
-                await removeCloudProviderInternal(cloudId, { silent: true });
-              } catch {}
-            }
-          }
-          // Then: sweep any `lpr_*` keys that remain in opencode.jsonc
+    // One-time local cleanup for installs that previously imported
+    // organization-managed providers: those `lpr_*` blocks are now orphans no
+    // feature owns, so sweep them out of the workspace config and drop their
+    // stored credentials. Best-effort — a failure just leaves them visible.
+    void (async () => {
+      try {
+        const orphans = await sweepOrphanCloudProvidersFromConfig();
+        for (const providerId of orphans) {
           try {
-            const orphans = await sweepOrphanCloudProvidersFromConfig();
-            for (const providerId of orphans) {
-              try {
-                await removeProviderAuthCredentials(providerId);
-              } catch {}
-            }
-            if (orphans.length > 0) {
-              options.markOpencodeConfigReloadRequired();
-            }
-          } catch {}
-          mutateState((current) => ({
-            ...current,
-            importedCloudProviders: {},
-            cloudProviderServerSync: null,
-          }));
+            await removeProviderAuthCredentials(providerId);
+          } catch {
+            // Providers backed only by the environment have no stored
+            // credential to remove.
+          }
+        }
+        if (orphans.length > 0) {
+          options.markOpencodeConfigReloadRequired();
           refreshSnapshot();
           emitChange();
-        })();
+        }
+      } catch {
+        // Sweep is opportunistic; never block startup on it.
       }
-    });
+    })();
+
     refreshSnapshot();
     emitChange();
   };
@@ -2530,8 +1320,6 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     if (disposed) return;
     disposed = true;
     started = false;
-    denSessionCleanup?.();
-    denSessionCleanup = null;
     listeners.clear();
   };
 
@@ -2543,15 +1331,10 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     start,
     dispose,
     syncFromOptions,
-    refreshCloudOrgProviders,
-    refreshImportedCloudProviders,
-    runCloudProviderSync,
     startProviderAuth,
     refreshProviders,
     completeProviderAuthOAuth,
     submitProviderApiKey,
-    connectCloudProvider,
-    removeCloudProvider,
     disconnectProvider,
     ensureProjectProviderDisabledState,
     isProviderAddRestricted,
