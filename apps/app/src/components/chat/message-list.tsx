@@ -169,8 +169,6 @@ class ToolMessage extends React.Component<ToolMessageProps, { failed: boolean }>
 }
 
 const ToolMessageInner = ({ part }: ToolMessageProps) => {
-  const { onMcpReconnect, onMcpReopenAuthorization, onMcpRetry } = useMessageList()
-
   if (isBashToolPart(part)) {
     return <BashTool part={part} />
   }
@@ -236,26 +234,12 @@ const ToolMessageInner = ({ part }: ToolMessageProps) => {
   }
 
   // Failed calls use the same sentence line with the "failures are
-  // instructions" treatment (inline Reconnect/Retry).
+  // instructions" treatment.
   if (part.type === "dynamic-tool") {
-    return (
-      <CapabilityCallLine
-        part={part}
-        onReconnect={onMcpReconnect}
-        onReopenAuthorization={onMcpReopenAuthorization}
-        onRetry={onMcpRetry}
-      />
-    )
+    return <CapabilityCallLine part={part} />
   }
 
-  return (
-    <Tool
-      toolPart={part}
-      onReconnect={onMcpReconnect}
-      onReopenAuthorization={onMcpReopenAuthorization}
-      onRetry={onMcpRetry}
-    />
-  )
+  return <Tool toolPart={part} />
 }
 
 const isEmptyMessage = (message: UIMessage): boolean => message.parts.length === 0

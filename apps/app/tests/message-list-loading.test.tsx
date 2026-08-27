@@ -30,9 +30,6 @@ function renderList(messages: UIMessage[], status: ThreadStatus) {
       onRevertToUserMessage={() => {}}
       onForkAtMessage={() => {}}
       onEditUserMessage={() => {}}
-      onMcpReconnect={() => Promise.reject(new Error("unused"))}
-      onMcpReopenAuthorization={() => Promise.resolve()}
-      onMcpRetry={() => {}}
     >
       <MessageList messages={messages} status={status} />
     </MessageListProvider>,

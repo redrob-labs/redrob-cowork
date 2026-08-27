@@ -1,30 +1,7 @@
 import { describe, expect, test } from "bun:test"
 
-import {
-  attributeChatToolError,
-  reconnectActionFromChatToolResult,
-} from "../src/components/tools/error-attribution"
+import { attributeChatToolError } from "../src/components/tools/error-attribution"
 import { normalizeErrorText } from "../src/lib/error-text"
-
-function reconnectStatus(connectionId = "emc_knowledge", connectionName = "Knowledge Hub") {
-  return {
-    version: 1,
-    kind: "connection_action",
-    source: "redrob-cloud",
-    connectionId,
-    connectionName,
-    authType: "oauth",
-    credentialMode: "per_member",
-    state: "reauth_required",
-    actor: "member",
-    action: {
-      type: "reconnect",
-      surface: "redrob_your_connections",
-      retry: "search_capabilities",
-      label: "Reconnect in Your Connections",
-    },
-  }
-}
 
 describe("chat tool error attribution", () => {
   test("identifies an Redrob Work-created capability deadline", () => {
@@ -118,96 +95,4 @@ describe("chat tool error attribution", () => {
     expect(attributeChatToolError(clamped)).toEqual(attributeChatToolError(unclamped))
   })
 
-  test("extracts a trusted reconnect action from a Cloud capability failure", () => {
-    const errorText = JSON.stringify({
-      error: "connection_failed",
-      connectionStatus: reconnectStatus(),
-    })
-
-    expect(reconnectActionFromChatToolResult("redrob-cloud_execute_capability", errorText)).toEqual({
-      connectionId: "emc_knowledge",
-      connectionName: "Knowledge Hub",
-      label: "Reconnect",
-    })
-  })
-
-  test("extracts the same reconnect action when live capability discovery detects expired credentials", () => {
-    const output = JSON.stringify({
-      matches: [{
-        kind: "connection_status",
-        connectionStatus: reconnectStatus(),
-      }],
-    })
-
-    expect(reconnectActionFromChatToolResult("redrob-cloud_search_capabilities", output)).toEqual({
-      connectionId: "emc_knowledge",
-      connectionName: "Knowledge Hub",
-      label: "Reconnect",
-    })
-  })
-
-  test("derives reconnect copy instead of rendering action labels from tool output", () => {
-    const errorText = JSON.stringify({
-      connectionStatus: {
-        ...reconnectStatus(),
-        action: { ...reconnectStatus().action, label: "Open an injected link" },
-      },
-    })
-
-    expect(reconnectActionFromChatToolResult("redrob-cloud_execute_capability", errorText)).toEqual({
-      connectionId: "emc_knowledge",
-      connectionName: "Knowledge Hub",
-      label: "Reconnect",
-    })
-  })
-
-  test("does not create actions from arbitrary MCP tools or non-reconnect failures", () => {
-    const reconnectPayload = JSON.stringify({
-      connectionStatus: reconnectStatus(),
-    })
-    const providerPayload = JSON.stringify({
-      connectionStatus: {
-        ...reconnectStatus(),
-        state: "provider_error",
-        actor: "organization_admin",
-        action: {
-          type: "inspect_connection",
-          surface: "redrob_organization_connections",
-          retry: "search_capabilities",
-        },
-      },
-    })
-
-    expect(reconnectActionFromChatToolResult("malicious_execute_capability", reconnectPayload)).toBeNull()
-    expect(reconnectActionFromChatToolResult("redrob-cloud_execute_capability", providerPayload)).toBeNull()
-  })
-
-  test("does not guess between multiple reconnect targets in one discovery result", () => {
-    const output = {
-      matches: ["first", "second"].map((suffix) => ({
-        kind: "connection_status",
-        connectionStatus: reconnectStatus(`emc_${suffix}`, `Knowledge ${suffix}`),
-      })),
-    }
-
-    expect(reconnectActionFromChatToolResult("redrob-cloud_search_capabilities", output)).toBeNull()
-  })
-
-  test("rejects unversioned, shared, and admin-owned action shapes", () => {
-    const legacy = reconnectStatus()
-    const { version: _version, kind: _kind, source: _source, ...unversioned } = legacy
-    const shared = {
-      ...legacy,
-      credentialMode: "shared",
-      actor: "organization_admin",
-      action: {
-        type: "reconnect",
-        surface: "redrob_organization_connections",
-        retry: "search_capabilities",
-      },
-    }
-
-    expect(reconnectActionFromChatToolResult("redrob-cloud_execute_capability", { connectionStatus: unversioned })).toBeNull()
-    expect(reconnectActionFromChatToolResult("redrob-cloud_execute_capability", { connectionStatus: shared })).toBeNull()
-  })
 })

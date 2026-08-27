@@ -1,26 +1,8 @@
-import { redrobCloudMcpInlineReconnectSchema } from "@redrob/types/den/mcp-connection-action"
-
 export type ToolErrorAttribution = {
   label: string
   confidence: "Confirmed" | "Inferred"
   description: string
 }
-
-export type ChatToolReconnectAction = {
-  connectionId: string
-  connectionName: string
-  label: string
-}
-
-export type ChatToolReconnectProgress =
-  | { phase: "opening" }
-  | { phase: "authorization_opened"; authorizeUrl: string }
-export type ChatToolReconnectResult = "connected"
-
-const REDROB_CLOUD_CAPABILITY_TOOLS = new Set([
-  "redrob-cloud_search_capabilities",
-  "redrob-cloud_execute_capability",
-])
 
 const MAX_PARSED_RESULT_LENGTH = 64 * 1_024
 
@@ -71,47 +53,6 @@ function numberValue(record: Record<string, unknown> | null, key: string): numbe
 
 function confirmed(label: string, description: string): ToolErrorAttribution {
   return { label, confidence: "Confirmed", description }
-}
-
-export function reconnectActionFromChatToolResult(
-  toolName: string,
-  result: unknown,
-): ChatToolReconnectAction | null {
-  // Tool output is otherwise untrusted. Only the two canonical Redrob Work Cloud
-  // capability tools may turn a structured Den response into a UI action.
-  // Discovery is included because it performs a live connection probe before
-  // the agent can safely proceed to execution.
-  if (!REDROB_CLOUD_CAPABILITY_TOOLS.has(toolName)) return null
-
-  const parsed = parseResultRecord(result)
-  if (!parsed) return null
-
-  const candidates = [
-    ...(isRecord(parsed.connectionStatus) ? [parsed.connectionStatus] : []),
-    ...(Array.isArray(parsed.matches)
-      ? parsed.matches
-        .filter(isRecord)
-        .map((match) => match.connectionStatus)
-        .filter(isRecord)
-      : []),
-  ]
-  const reconnectTargets = new Map<string, { connectionId: string; connectionName: string }>()
-  for (const connectionStatus of candidates) {
-    const parsedStatus = redrobCloudMcpInlineReconnectSchema.safeParse(connectionStatus)
-    if (!parsedStatus.success) continue
-    const { connectionId, connectionName } = parsedStatus.data
-    reconnectTargets.set(connectionId, { connectionId, connectionName })
-  }
-
-  // One tool row should never guess which of several connections the user
-  // intended to authorize. Multi-connection search results remain descriptive.
-  if (reconnectTargets.size !== 1) return null
-  const [{ connectionId, connectionName }] = reconnectTargets.values()
-
-  // Keep the chat action concise and derived from the trusted connection
-  // identity. Diagnostic operator guidance can be much longer than a button
-  // label, and tool output must never get to inject arbitrary action copy.
-  return { connectionId, connectionName, label: "Reconnect" }
 }
 
 export function attributeChatToolError(errorText: string): ToolErrorAttribution | null {

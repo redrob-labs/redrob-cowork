@@ -132,9 +132,6 @@ describe("session error resilience", () => {
         onRevertToUserMessage={() => undefined}
         onForkAtMessage={() => undefined}
         onEditUserMessage={() => undefined}
-        onMcpReconnect={async () => "connected"}
-        onMcpReopenAuthorization={async () => undefined}
-        onMcpRetry={() => undefined}
       >
         <MessageList messages={[message]} status="ready" />
       </MessageListProvider>,

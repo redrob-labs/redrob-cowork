@@ -52,9 +52,6 @@ describe("RedrobWorkSessionCreateTool", () => {
           onRevertToUserMessage={noop}
           onForkAtMessage={noop}
           onEditUserMessage={noop}
-          onMcpReconnect={async () => "connected"}
-          onMcpReopenAuthorization={async () => {}}
-          onMcpRetry={noop}
         >
           <RedrobWorkSessionCreateTool part={sessionCreatePart()} />
         </MessageListProvider>

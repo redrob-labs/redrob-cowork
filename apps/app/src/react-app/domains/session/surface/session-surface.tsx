@@ -11,9 +11,6 @@ import { createClient, unwrap } from "@/app/lib/opencode";
 import { abortSessionSafe } from "@/app/lib/opencode-session";
 import { t } from "@/i18n";
 import type { ComposerSettingsSection } from "@/react-app/domains/settings/library";
-import { type CloudImportedPlugin } from "@/app/cloud/import-state";
-import { createDenClient, readDenSettings } from "@/app/lib/den";
-import { denSettingsChangedEvent } from "@/app/lib/den-session-events";
 import type {
   RedrobServerClient,
   RedrobSessionSnapshot,
@@ -36,17 +33,12 @@ import {
 } from "@/app/lib/app-inspector";
 import { useControlAction, type RedrobControlAction } from "@/react-app/shell/control/control-provider";
 import { attemptSilentMcpReauth } from "@/react-app/domains/connections/mcp-silent-reauth";
-import type {
-  CloudMcpSubmissionGateState,
-  CloudMcpSubmissionResult,
-} from "@/react-app/domains/connections/cloud-mcp-submit-readiness";
 import { ReactSessionComposer } from "./composer/composer";
 import { useSessionModelSelection } from "./session-model-store";
 import type { ProviderCatalog } from "./use-model-behavior";
 import { decodeComposerMentionValue, encodeComposerMentionValue, type ComposerMentionKind } from "./composer/mention-encoding";
 import { desktopBridge, openDesktopUrl } from "@/app/lib/desktop";
 import { parseSlashCommandInvocation } from "./composer/slash-command";
-import { connectSkillPrompt, parseConnectSkillToken } from "./composer/connect-skill-token";
 import { createPastedTextChip, resolvePastedTextPlaceholders } from "./composer/pasted-text";
 import { DevProfiler } from "@/react-app/shell/dev-profiler";
 import { PaperGrainGradient } from "@redrob/ui/react";
@@ -87,31 +79,12 @@ import {
 } from "./composer-state-store";
 import { MessageList } from "@/components/chat/message-list";
 import { MessageListProvider, type DispatchAction } from "@/components/chat/message-list-provider";
-import type {
-  ChatToolReconnectAction,
-  ChatToolReconnectProgress,
-  ChatToolReconnectResult,
-} from "@/components/tools/error-attribution";
-import { useChatMcpReconnectStore } from "@/components/tools/mcp-reconnect-state";
-import {
-  isChatMcpReconnectScopeCurrent,
-  waitForFreshMcpAuthorization,
-  type ChatMcpReconnectScope,
-} from "./mcp-chat-reconnect";
 import { OpenTargetProvider, type OpenTargetOptions } from "@/lib/target-provider";
 import type { ThreadStatus } from "@/lib/messages";
 import {
   EnvironmentVariableProvider,
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
-import {
-  clearCloudInventoryCache,
-  CLOUD_INVENTORY_CHANGED_EVENT,
-  loadSessionConnectCapabilities,
-  readCachedConnectCapabilities,
-  readCloudInventoryScope,
-} from "@/react-app/domains/connections/cloud-inventory-cache";
-import { connectPluginsForComposer, EMPTY_CONNECT_CAPABILITY_INVENTORY } from "@/react-app/domains/session/surface/connect-capability-inventory";
 import { consumeComposerAutoSend } from "./composer-auto-send";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
@@ -294,6 +267,14 @@ function createChatTranscriptEvalMessages(sessionId: string) {
   return { messages };
 }
 
+/**
+ * Outcome of handing a draft to the route's sender. `cancelled` means the
+ * draft was never submitted — the queue drain puts it back so nothing is lost.
+ */
+export type SessionSendResult =
+  | { outcome: "sent" }
+  | { outcome: "cancelled"; reason: "context_changed" | "unmounted" };
+
 export type SessionSurfaceProps = {
   client: RedrobServerClient;
   environmentClient?: RedrobServerClient | null;
@@ -309,20 +290,14 @@ export type SessionSurfaceProps = {
   modelPickerOpen: boolean;
   modelUnavailable?: boolean;
   modelUnavailableMessage?: string | null;
-  organizationModelsEmpty?: boolean;
   selectedModel: ModelRef;
   /** providerID → modelID → provider model, for per-session variant options. */
   providerCatalog?: ProviderCatalog;
   /** Den/import includes Redrob Models for this org member (not just local sync). */
-  redrobModelsEntitled?: boolean;
   /** The server is waiting to reload this workspace with Redrob Models. */
-  redrobModelsSyncing?: boolean;
-  onRefreshOrganizationModels?: () => void | Promise<void>;
   onModelPickerOpenChange: (open: boolean) => void;
   onModelChange: (model: ModelRef, variant?: string | null) => void;
-  onSendDraft: (draft: ComposerDraft, sessionId: string) => Promise<CloudMcpSubmissionResult>;
-  cloudMcpSubmissionState: CloudMcpSubmissionGateState;
-  onOpenConnect: () => void;
+  onSendDraft: (draft: ComposerDraft, sessionId: string) => Promise<SessionSendResult>;
   onDraftChange: (draft: ComposerDraft) => void;
   attachmentsEnabled: boolean;
   attachmentsDisabledReason: string | null;
@@ -742,15 +717,12 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const [toolMcpServers, setToolMcpServers] = useState<McpServerEntry[]>([]);
   const [toolMcpStatus, setToolMcpStatus] = useState<string | null>(null);
   const [toolMcpStatuses, setToolMcpStatuses] = useState<McpStatusMap>({});
-  const [toolImportedPlugins, setToolImportedPlugins] = useState<CloudImportedPlugin[]>([]);
-  const skillsConnectPushRef = useRef(0);
-  const mcpConnectPushRef = useRef(0);
-  const pluginConnectPushRef = useRef(0);
+  // Generation counter for listMcp: a later call must win, so the async
+  // silent-reauth self-heal below discards its result if it lands stale.
+  const mcpListGenerationRef = useRef(0);
   const [steering, setSteering] = useState(false);
   const [verifiedOpenTargets, setVerifiedOpenTargets] = useState<OpenTarget[]>([]);
-  const [cloudQueueRetryVersion, setCloudQueueRetryVersion] = useState(0);
-  const sending = props.cloudMcpSubmissionState.status === "sending";
-  const cloudQueueBlockedRef = useRef(false);
+  const [sending, setSending] = useState(false);
   // Shared with promote-to-send so a manual send-now cannot race the idle drain.
   const drainingQueueRef = useRef(false);
   const awaitingQueueBusyRef = useRef(false);
@@ -835,13 +807,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
         lines: part.lines,
       })),
       sending,
-      cloudMcpSubmission: {
-        status: props.cloudMcpSubmissionState.status,
-        attempt: props.cloudMcpSubmissionState.attempt,
-        maxAttempts: props.cloudMcpSubmissionState.maxAttempts,
-        code: props.cloudMcpSubmissionState.issue?.code ?? null,
-        stage: props.cloudMcpSubmissionState.issue?.stage ?? null,
-      },
       error,
     }));
     return dispose;
@@ -853,7 +818,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
     pasteParts,
     props.sessionId,
     props.workspaceId,
-    props.cloudMcpSubmissionState,
     sending,
   ]);
 
@@ -885,8 +849,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const revertMessageId = snapshot?.session.revert?.messageID ?? null;
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
-  const preparingCloudTools = props.cloudMcpSubmissionState.status === "checking" ||
-    props.cloudMcpSubmissionState.status === "repairing";
   const chatStreaming = sending || liveStatus.type === "busy" || liveStatus.type === "retry";
 
   useEffect(() => {
@@ -1105,10 +1067,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
           return [{ type: "paste", id: target.id, label: target.label, text: target.text, lines: target.lines } satisfies ComposerDraft["parts"][number]];
         }
       }
-      const connectSkill = parseConnectSkillToken(segment);
-      if (connectSkill) {
-        return [{ type: "text", text: connectSkillPrompt(connectSkill) } satisfies ComposerDraft["parts"][number]];
-      }
       const skillMatch = segment.match(/^\[skill (.+)\]$/);
       if (skillMatch?.[1]) {
         return [{ type: "skill", name: skillMatch[1] } satisfies ComposerDraft["parts"][number]];
@@ -1126,10 +1084,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
     // the actual pasted content instead of "[pasted text <label>]".
     let resolved = resolvePastedTextPlaceholders(text, pasteParts);
     resolved = resolved.replace(/\[attachment [^\]]+\]/g, "");
-    resolved = resolved.replace(/\[connect-skill [^\]]+\]/g, (match) => {
-      const token = parseConnectSkillToken(match);
-      return token ? connectSkillPrompt(token) : match;
-    });
     resolved = resolved.replace(/\[skill ([^\]]+)\]/g, (_match, name: string) => `the \"${name}\" skill`);
     for (const value of Object.keys(mentions)) {
       resolved = resolved.replaceAll(`@${encodeComposerMentionValue(value)}`, `@${value}`);
@@ -1172,11 +1126,11 @@ export function SessionSurface(props: SessionSurfaceProps) {
   // up the new message — so this is safe to call while the agent is busy.
   const sendDraft = useCallback(async (nextDraft: ComposerDraft) => {
     setError(null);
+    setSending(true);
     try {
       const result = await props.onSendDraft(nextDraft, props.sessionId);
-      if (result.outcome === "blocked" || result.outcome === "cancelled") return result;
-      // Only report a run after the pre-send gate released the exact queued
-      // submission and the route accepted or sent it.
+      if (result.outcome === "cancelled") return result;
+      // Only report a run once the route actually submitted this draft.
       appendComposerHistory(props.sessionId, nextDraft.text);
       useSessionActivityStore.getState().setRunStatus(props.workspaceId, props.sessionId, { type: "busy" });
       setAwaitingAssistantBaseline(renderedMessages.length);
@@ -1188,6 +1142,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
       useSessionActivityStore.getState().setError(props.workspaceId, props.sessionId, parsed.message);
       setAwaitingAssistantBaseline(null);
       throw nextError;
+    } finally {
+      setSending(false);
     }
   }, [appendComposerHistory, props.onSendDraft, props.sessionId, props.workspaceId, renderedMessages.length]);
 
@@ -1207,7 +1163,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     if (sentAttachments.length) setAttachmentsUploading(true);
     try {
       const result = await sendDraft(nextDraft);
-      if (result.outcome === "blocked" || result.outcome === "cancelled") return;
+      if (result.outcome === "cancelled") return;
       const currentState = useComposerStateStore.getState();
       const currentDraft = getComposerDraft(currentState, props.sessionId);
       const currentAttachments = getComposerAttachments(currentState, props.sessionId);
@@ -1245,15 +1201,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
     await handleSend();
   }, [handleSend]);
 
-  const handleRetryCloudSubmission = useCallback(() => {
-    if (draft.trim() || attachments.length > 0) {
-      void handleSend();
-      return;
-    }
-    cloudQueueBlockedRef.current = false;
-    setCloudQueueRetryVersion((version) => version + 1);
-  }, [attachments.length, draft, handleSend]);
-
   // Queue: hold the draft locally and clear the composer. The drain effect
   // sends it once the session reports idle.
   const handleQueue = useCallback(() => {
@@ -1290,7 +1237,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     removeQueuedDraftFromStore(props.sessionId, id);
     try {
       const result = await sendDraft(target);
-      if (result.outcome === "blocked" || result.outcome === "cancelled") {
+      if (result.outcome === "cancelled") {
         prependQueuedDrafts(props.sessionId, [{ id: item.id, draft: target }]);
         return;
       }
@@ -1358,7 +1305,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   useEffect(() => {
     if (drainingQueueRef.current || sendingQueued) return;
-    if (cloudQueueBlockedRef.current) return;
     if (awaitingQueueBusyRef.current) return;
     if (queuedItems.length === 0) return;
     if (chatStreaming || liveStatus.type !== "idle") return;
@@ -1376,11 +1322,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     void (async () => {
       try {
         const result = await sendDraft(nextDraft);
-        if (result.outcome === "blocked") {
-          cloudQueueBlockedRef.current = true;
-          awaitingQueueBusyRef.current = false;
-          prependQueuedDrafts(props.sessionId, [{ id: nextItem.id, draft: nextDraft }]);
-        } else if (result.outcome === "cancelled") {
+        if (result.outcome === "cancelled") {
           awaitingQueueBusyRef.current = false;
           prependQueuedDrafts(props.sessionId, [{ id: nextItem.id, draft: nextDraft }]);
         } else {
@@ -1393,13 +1335,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
         drainingQueueRef.current = false;
       }
     })();
-  }, [chatStreaming, cloudQueueRetryVersion, liveStatus.type, prependQueuedDrafts, props.sessionId, queuedItems, removeQueuedDraftFromStore, sendDraft, sendingQueued]);
-
-  useEffect(() => {
-    if (props.cloudMcpSubmissionState.status !== "failed") {
-      cloudQueueBlockedRef.current = false;
-    }
-  }, [props.cloudMcpSubmissionState.status]);
+  }, [chatStreaming, liveStatus.type, prependQueuedDrafts, props.sessionId, queuedItems, removeQueuedDraftFromStore, sendDraft, sendingQueued]);
 
   useEffect(() => {
     props.onDraftChange(buildDraft(draft, attachments));
@@ -1579,13 +1515,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
   useControlAction(props.isControlTarget ? composerStopControlAction : null);
 
   const listSkills = async (): Promise<SkillCard[]> => {
-    const pushId = ++skillsConnectPushRef.current;
-    // Paint cached Connect inventory instantly; the fresh fan-out lands live.
-    const scope = readCloudInventoryScope();
-    const cachedConnect = (scope ? readCachedConnectCapabilities(scope) : null) ?? EMPTY_CONNECT_CAPABILITY_INVENTORY;
-    const connectPromise = loadSessionConnectCapabilities();
     const response = await props.client.listSkills(props.workspaceId, { includeGlobal: true });
-    const localSkills = (response.items ?? []).map((skill) => ({
+    const next = (response.items ?? []).map((skill) => ({
       name: skill.name,
       path: skill.path,
       description: skill.description,
@@ -1593,23 +1524,14 @@ export function SessionSurface(props: SessionSurfaceProps) {
       scope: skill.scope,
       origin: "local",
     } satisfies SkillCard));
-    void connectPromise.then((connect) => {
-      if (skillsConnectPushRef.current !== pushId) return;
-      setToolSkills([...localSkills, ...connect.skills]);
-    });
-    const next = [...localSkills, ...cachedConnect.skills];
     setToolSkills(next);
     return next;
   };
 
   const listMcp = async (): Promise<{ servers: McpServerEntry[]; statuses: McpStatusMap; status: string | null }> => {
-    const pushId = ++mcpConnectPushRef.current;
-    const scope = readCloudInventoryScope();
-    const cachedConnect = (scope ? readCachedConnectCapabilities(scope) : null) ?? EMPTY_CONNECT_CAPABILITY_INVENTORY;
-    const connectPromise = loadSessionConnectCapabilities();
-    const localMcpPromise = props.client.listMcp(props.workspaceId);
+    const generation = ++mcpListGenerationRef.current;
     const directory = props.workspaceRoot.trim();
-    const localStatusesPromise: Promise<McpStatusMap> = directory
+    const statusesPromise: Promise<McpStatusMap> = directory
       ? (async () => {
         try {
           return unwrap(await opencodeClient.mcp.status({ directory })) as McpStatusMap;
@@ -1618,68 +1540,44 @@ export function SessionSurface(props: SessionSurfaceProps) {
         }
       })()
       : Promise.resolve({});
-    const [response, localStatuses] = await Promise.all([localMcpPromise, localStatusesPromise]);
-    const localServers = (response.items ?? []).map((entry) => ({
+    const [response, statuses] = await Promise.all([
+      props.client.listMcp(props.workspaceId),
+      statusesPromise,
+    ]);
+    const servers = (response.items ?? []).map((entry) => ({
       name: entry.name,
       config: entry.config as McpServerEntry["config"],
       source: entry.source,
-      origin: entry.name === "redrob-cloud" ? "redrob-connect" : "local",
+      origin: "local",
     } satisfies McpServerEntry));
-
-    void connectPromise.then((connect) => {
-      if (mcpConnectPushRef.current !== pushId) return;
-      const freshServers = [...localServers, ...connect.mcpServers];
-      const freshStatuses = { ...connect.mcpStatuses, ...localStatuses };
-      const freshStatus = freshServers.length ? null : "No MCP servers loaded.";
-      setToolMcpServers(freshServers);
-      setToolMcpStatuses(freshStatuses);
-      setToolMcpStatus(freshStatus);
-
-      // Quiet self-heal: remote OAuth connectors whose access token expired
-      // show "Sign in needed" even though the stored refresh token still
-      // works. `mcp.connect` retries the refresh grant on a fresh transport
-      // without ever opening a browser; on success the badge flips live.
-      if (directory && localServers.length) {
-        void attemptSilentMcpReauth({
-          client: opencodeClient,
-          directory,
-          servers: localServers,
-          statuses: localStatuses,
-        })
-          .then(async (attempted) => {
-            if (!attempted) return;
-            const healed = unwrap(await opencodeClient.mcp.status({ directory })) as McpStatusMap;
-            if (mcpConnectPushRef.current !== pushId) return;
-            setToolMcpStatuses({ ...connect.mcpStatuses, ...healed });
-          })
-          .catch(() => {
-            // Best-effort; the manual Sign in path is unaffected.
-          });
-      }
-    });
-
-    const servers = [...localServers, ...cachedConnect.mcpServers];
-    const statuses = { ...cachedConnect.mcpStatuses, ...localStatuses };
     const status = servers.length ? null : "No MCP servers loaded.";
     setToolMcpServers(servers);
     setToolMcpStatuses(statuses);
     setToolMcpStatus(status);
 
-    return { servers, statuses, status };
-  };
+    // Quiet self-heal: remote OAuth connectors whose access token expired show
+    // "Sign in needed" even though the stored refresh token still works.
+    // `mcp.connect` retries the refresh grant on a fresh transport without ever
+    // opening a browser; on success the badge flips live.
+    if (directory && servers.length) {
+      void attemptSilentMcpReauth({
+        client: opencodeClient,
+        directory,
+        servers,
+        statuses,
+      })
+        .then(async (attempted) => {
+          if (!attempted) return;
+          const healed = unwrap(await opencodeClient.mcp.status({ directory })) as McpStatusMap;
+          if (mcpListGenerationRef.current !== generation) return;
+          setToolMcpStatuses(healed);
+        })
+        .catch(() => {
+          // Best-effort; the manual Sign in path is unaffected.
+        });
+    }
 
-  const listImportedPlugins = async (): Promise<CloudImportedPlugin[]> => {
-    const pushId = ++pluginConnectPushRef.current;
-    const scope = readCloudInventoryScope();
-    const cachedConnect = (scope ? readCachedConnectCapabilities(scope) : null) ?? EMPTY_CONNECT_CAPABILITY_INVENTORY;
-    const connectPromise = loadSessionConnectCapabilities();
-    void connectPromise.then((connect) => {
-      if (pluginConnectPushRef.current !== pushId) return;
-      setToolImportedPlugins(connectPluginsForComposer(connect.plugins));
-    });
-    const plugins = connectPluginsForComposer(cachedConnect.plugins);
-    setToolImportedPlugins(plugins);
-    return plugins;
+    return { servers, statuses, status };
   };
 
   const handleUploadInboxFiles = async (files: File[]) => {
@@ -1755,128 +1653,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const handleMessageListSetPrompt = useCallback((prompt: string) => {
     void typeComposerText(prompt);
   }, [typeComposerText]);
-
-  useEffect(() => {
-    const resetReconnectState = () => {
-      useChatMcpReconnectStore.getState().reset();
-      clearCloudInventoryCache();
-      setToolSkills((current) => current.filter((skill) => skill.origin !== "redrob-connect"));
-      setToolMcpServers((current) => current.filter((server) => server.origin !== "redrob-connect"));
-      setToolMcpStatuses((current) => Object.fromEntries(
-        Object.entries(current).filter(([key]) => !key.startsWith("redrob-connect:")),
-      ));
-    };
-    const refreshImportedPlugins = () => {
-      void listImportedPlugins();
-    };
-    window.addEventListener(denSettingsChangedEvent, resetReconnectState);
-    window.addEventListener(CLOUD_INVENTORY_CHANGED_EVENT, refreshImportedPlugins);
-    return () => {
-      window.removeEventListener(denSettingsChangedEvent, resetReconnectState);
-      window.removeEventListener(CLOUD_INVENTORY_CHANGED_EVENT, refreshImportedPlugins);
-    };
-  }, []);
-
-  const handleMcpReconnect = useCallback(async (
-    action: ChatToolReconnectAction,
-    onProgress: (progress: ChatToolReconnectProgress) => void,
-  ): Promise<ChatToolReconnectResult> => {
-    const settings = readDenSettings();
-    const token = settings.authToken?.trim() ?? "";
-    const organizationId = settings.activeOrgId?.trim() ?? "";
-    if (!token || !organizationId) {
-      props.onOpenConnect();
-      throw new Error("Sign in to Redrob Work Cloud, then try reconnecting again.");
-    }
-
-    const scope: ChatMcpReconnectScope = {
-      baseUrl: settings.baseUrl,
-      token,
-      organizationId,
-    };
-    const currentScope = (): ChatMcpReconnectScope => {
-      const current = readDenSettings();
-      return {
-        baseUrl: current.baseUrl,
-        token: current.authToken?.trim() ?? "",
-        organizationId: current.activeOrgId?.trim() ?? "",
-      };
-    };
-    try {
-      const denClient = createDenClient({ baseUrl: settings.baseUrl, token });
-      const connections = await denClient.listMcpConnections(organizationId, "usable");
-      const connection = connections.find((entry) => entry.id === action.connectionId);
-      if (!connection || connection.authType !== "oauth" || connection.credentialMode !== "per_member") {
-        throw new Error(`${action.connectionName} is no longer available as your reconnectable account.`);
-      }
-
-      recordInspectorEvent("mcp.chat_reconnect.started", {
-        workspaceId: props.workspaceId,
-        sessionId: props.sessionId,
-        connectionId: action.connectionId,
-      });
-      onProgress({ phase: "opening" });
-      const result = await denClient.startMcpConnectionConnect(organizationId, action.connectionId);
-      if (result.status === "connected") {
-        recordInspectorEvent("mcp.chat_reconnect.completed", {
-          workspaceId: props.workspaceId,
-          sessionId: props.sessionId,
-          connectionId: action.connectionId,
-          completion: "already_connected",
-        });
-        return "connected";
-      }
-      if (!result.authorizeUrl) throw new Error(`Could not start ${action.connectionName} authorization.`);
-
-      await openDesktopUrl(result.authorizeUrl);
-      onProgress({ phase: "authorization_opened", authorizeUrl: result.authorizeUrl });
-      await waitForFreshMcpAuthorization({
-        connectionId: action.connectionId,
-        connectionName: action.connectionName,
-        previousConnectedAt: connection.connectedAt,
-        listConnections: () => denClient.listMcpConnections(organizationId, "usable"),
-        isScopeCurrent: () => isChatMcpReconnectScopeCurrent(scope, currentScope()),
-      });
-      recordInspectorEvent("mcp.chat_reconnect.completed", {
-        workspaceId: props.workspaceId,
-        sessionId: props.sessionId,
-        connectionId: action.connectionId,
-        completion: "fresh_authorization",
-      });
-      return "connected";
-    } catch (error) {
-      recordInspectorEvent("mcp.chat_reconnect.failed", {
-        workspaceId: props.workspaceId,
-        sessionId: props.sessionId,
-        connectionId: action.connectionId,
-        errorType: error instanceof Error ? error.name : "unknown",
-      });
-      throw error;
-    }
-  }, [props.onOpenConnect, props.sessionId, props.workspaceId]);
-
-  const handleMcpReopenAuthorization = useCallback(async (
-    action: ChatToolReconnectAction,
-    authorizeUrl: string,
-  ) => {
-    await openDesktopUrl(authorizeUrl);
-    recordInspectorEvent("mcp.chat_reconnect.authorization_reopened", {
-      workspaceId: props.workspaceId,
-      sessionId: props.sessionId,
-      connectionId: action.connectionId,
-    });
-  }, [props.sessionId, props.workspaceId]);
-
-  const handleMcpRetry = useCallback(async (action: ChatToolReconnectAction) => {
-    const prompt = `The ${action.connectionName} connection is restored. Search for the capability again and retry the previous request. Before repeating any write action, confirm it did not already complete.`;
-    await typeComposerText(prompt);
-    props.onDraftChange(buildDraft(prompt, attachments));
-    recordInspectorEvent("mcp.chat_reconnect.retry_drafted", {
-      workspaceId: props.workspaceId,
-      sessionId: props.sessionId,
-      connectionId: action.connectionId,
-    });
-  }, [attachments, buildDraft, props.onDraftChange, props.sessionId, props.workspaceId, typeComposerText]);
 
   const handleRevertToUserMessage = useCallback((messageId: string) => {
     void props.onRevertToMessage?.(messageId, props.sessionId);
@@ -2091,9 +1867,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
                       onRevertToUserMessage={handleRevertToUserMessage}
                       onForkAtMessage={handleForkAtMessage}
                       onEditUserMessage={handleEditUserMessage}
-                      onMcpReconnect={handleMcpReconnect}
-                      onMcpReopenAuthorization={handleMcpReopenAuthorization}
-                      onMcpRetry={handleMcpRetry}
                     >
                       <MessageList
                         messages={renderedMessages}
@@ -2132,27 +1905,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
           </button>
         ) : null}
         <DevProfiler id="SessionComposer">
-        {props.cloudMcpSubmissionState.status === "failed" ? (
-          <div
-            className="mx-3 mb-2 flex items-center gap-3 rounded-xl border border-red-7/40 bg-red-2/40 px-3 py-2 text-xs text-red-11"
-            data-testid="cloud-mcp-submission-failure"
-          >
-            <span className="min-w-0 flex-1">
-              {[
-                props.cloudMcpSubmissionState.issue?.message ?? "Connected service tools could not be prepared.",
-                props.cloudMcpSubmissionState.issue?.recommendedAction,
-              ].filter(Boolean).join(" ")}
-            </span>
-            {props.cloudMcpSubmissionState.issue?.retryable !== false ? (
-              <button type="button" className="font-medium hover:underline" onClick={handleRetryCloudSubmission}>
-                Retry
-              </button>
-            ) : null}
-            <button type="button" className="font-medium hover:underline" onClick={props.onOpenConnect}>
-              Open Connect
-            </button>
-          </div>
-        ) : null}
         <ReactSessionComposer
           draft={draft}
           mentions={mentions}
@@ -2163,18 +1915,13 @@ export function SessionSurface(props: SessionSurfaceProps) {
         onStop={handleAbort}
         busy={chatStreaming}
         steering={steering}
-        submissionPreparing={preparingCloudTools}
         queuedCount={queuedItems.length}
         disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable)}
         modelUnavailable={Boolean(props.modelUnavailable)}
         modelUnavailableMessage={props.modelUnavailableMessage}
-        organizationModelsEmpty={props.organizationModelsEmpty}
         statusLabel={statusLabel(snapshot ?? undefined, chatStreaming)}
         modelPickerOpen={modelPickerOpen}
         selectedModel={sessionModel.selectedModel}
-        redrobModelsEntitled={props.redrobModelsEntitled}
-        redrobModelsSyncing={props.redrobModelsSyncing}
-        onRefreshOrganizationModels={props.onRefreshOrganizationModels}
         onModelPickerOpenChange={handleModelPickerOpenChange}
         onModelChange={handleModelChange}
         sessionId={props.sessionId}
@@ -2199,8 +1946,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
         mcpServers={toolMcpServers}
         mcpStatus={toolMcpStatus}
         mcpStatuses={toolMcpStatuses}
-        listImportedPlugins={listImportedPlugins}
-        importedPlugins={toolImportedPlugins}
         onOpenSettingsSection={props.onOpenSettingsSection}
         recentFiles={props.recentFiles}
         searchFiles={props.searchFiles}

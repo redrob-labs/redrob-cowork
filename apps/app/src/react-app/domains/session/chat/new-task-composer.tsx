@@ -208,7 +208,6 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
       onStop={noop}
       busy={false}
       steering={false}
-      submissionPreparing={props.busy}
       queuedCount={0}
       disabled={Boolean(context?.modelUnavailable)}
       modelUnavailable={context?.modelUnavailable}

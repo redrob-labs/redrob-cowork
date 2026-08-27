@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { Agent } from "@opencode-ai/sdk/v2/client";
-import { AppWindowMac, ArrowUp, Check, ChevronDown, ChevronRight, FileText, LoaderCircle, Paperclip, Plus, RefreshCw, Settings, Square, Terminal, X, Zap } from "lucide-react";
+import { AppWindowMac, ArrowUp, Check, ChevronDown, ChevronRight, FileText, Paperclip, Plus, RefreshCw, Settings, Square, Terminal, X, Zap } from "lucide-react";
 import fuzzysort from "fuzzysort";
 import { toast } from "@/components/ui/sonner";
 import type { ComposerAttachment, McpServerEntry, McpStatus, McpStatusMap, ModelOption, ModelRef, SkillCard, SlashCommandOption } from "@/app/types";
@@ -32,7 +32,7 @@ type MentionItem = {
   label: string;
 };
 
-type ToolMenuSection = "agents" | "commands" | "skills" | "connections" | "plugins" | `plugin:${string}`;
+type ToolMenuSection = "agents" | "commands" | "skills" | "connections";
 
 type ComposerProps = {
   draft: string;
@@ -44,7 +44,6 @@ type ComposerProps = {
   onStop: () => void | Promise<void>;
   busy: boolean;
   steering: boolean;
-  submissionPreparing: boolean;
   queuedCount: number;
   disabled: boolean;
   modelUnavailable?: boolean;
@@ -146,10 +145,6 @@ function formatPluginObjectType(type: string) {
   if (!normalized) return "File";
   if (normalized === "mcp") return "MCP";
   return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
-}
-
-function isToolMenuPluginsSection(section: ToolMenuSection) {
-  return section === "plugins" || section.startsWith("plugin:");
 }
 
 function mcpEntryStatus(entry: McpServerEntry, statuses: McpStatusMap | undefined) {
@@ -298,14 +293,13 @@ export function ReactSessionComposer(props: ComposerProps) {
   const handleEditorSubmit = useCallback((options: { queue: boolean }) => {
     const hasContent = props.draft.trim().length > 0 || props.attachments.length > 0;
     if (!hasContent) return;
-    if (props.submissionPreparing) return;
     if (props.busy) {
       if (options.queue) void props.onSteer();
       else void props.onQueue();
       return;
     }
     void props.onSend();
-  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue, props.submissionPreparing]);
+  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue]);
 
   const slashCommandQuery = getSlashCommandQuery(props.draft);
   const slashOpenNext = slashCommandQuery !== null;
@@ -1227,11 +1221,8 @@ export function ReactSessionComposer(props: ComposerProps) {
                             ["commands", t("dashboard.commands")],
                             ["skills", t("dashboard.skills")],
                             ["connections", t("composer.connections_mcps_label")],
-                            ["plugins", t("extensions.filter_plugins")],
                           ] as const).map(([section, label]) => {
-                            const active = section === "plugins"
-                              ? isToolMenuPluginsSection(toolMenuSection)
-                              : toolMenuSection === section;
+                            const active = toolMenuSection === section;
                             return (
                             <button
                               key={section}
@@ -1484,49 +1475,28 @@ export function ReactSessionComposer(props: ComposerProps) {
                   onClick={
                     props.busy
                       ? props.onStop
-                      : !canSend || props.submissionPreparing
+                      : !canSend
                         ? undefined
                         : props.onSend
                   }
-                  disabled={
-                    props.disabled
-                    || (!props.busy && (!canSend || props.submissionPreparing))
-                  }
-                  aria-label={
-                    props.busy
-                      ? t("composer.stop")
-                      : props.submissionPreparing
-                        ? "Preparing connected service tools…"
-                        : t("composer.run_task")
-                  }
+                  disabled={props.disabled || (!props.busy && !canSend)}
+                  aria-label={props.busy ? t("composer.stop") : t("composer.run_task")}
                   className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
                     props.busy
                       ? "bg-[var(--dls-accent)] text-[var(--dls-accent-fg)] hover:bg-[var(--dls-accent-hover)]"
-                      : !canSend || props.disabled || props.submissionPreparing
+                      : !canSend || props.disabled
                         ? "bg-gray-4 text-gray-10"
                         : "bg-[var(--dls-accent)] text-[var(--dls-accent-fg)] hover:bg-[var(--dls-accent-hover)]"
                   }`}
-                  title={
-                    props.busy
-                      ? t("composer.stop")
-                      : props.submissionPreparing
-                        ? "Preparing connected service tools…"
-                        : t("composer.run_task")
-                  }
+                  title={props.busy ? t("composer.stop") : t("composer.run_task")}
                 >
                   {props.busy ? (
                     <Square size={12} fill="currentColor" />
-                  ) : props.submissionPreparing ? (
-                    <LoaderCircle size={15} className="animate-spin" />
                   ) : (
                     <ArrowUp size={15} />
                   )}
                   <span className="sr-only">
-                    {props.busy
-                      ? t("composer.stop")
-                      : props.submissionPreparing
-                        ? "Preparing connected service tools…"
-                        : t("composer.run_task")}
+                    {props.busy ? t("composer.stop") : t("composer.run_task")}
                   </span>
                 </button>
               </div>

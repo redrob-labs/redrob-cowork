@@ -6,14 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
-import {
-  attributeChatToolError,
-  type ChatToolReconnectAction,
-  type ChatToolReconnectProgress,
-  type ChatToolReconnectResult,
-  type ToolErrorAttribution,
-} from "@/components/tools/error-attribution"
-import { useChatToolReconnect } from "@/components/tools/use-chat-tool-reconnect"
+import { attributeChatToolError } from "@/components/tools/error-attribution"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
 import { cn } from "@/lib/utils"
 import {
@@ -72,12 +65,6 @@ export type ToolProps = {
   toolPart: ToolPart
   defaultOpen?: boolean
   className?: string
-  onReconnect?: (
-    action: ChatToolReconnectAction,
-    onProgress: (progress: ChatToolReconnectProgress) => void,
-  ) => Promise<ChatToolReconnectResult>
-  onReopenAuthorization?: (action: ChatToolReconnectAction, authorizeUrl: string) => Promise<void>
-  onRetry?: (action: ChatToolReconnectAction) => void | Promise<void>
 }
 
 const formatValue = (value: unknown): string => {
@@ -136,35 +123,18 @@ function DiffLines({ diff }: { diff: string }) {
   )
 }
 
-function reconnectAttribution(action: ChatToolReconnectAction, label: string): ToolErrorAttribution {
-  return {
-    label,
-    confidence: "Confirmed",
-    description: label === "Reconnected"
-      ? `${action.connectionName} has a fresh authorization. Retry the request when ready.`
-      : `${action.connectionName} rejected its saved authorization and needs to be reconnected.`,
-  }
-}
-
 const Tool = ({
   title,
   toolPart,
   defaultOpen = false,
   className,
-  onReconnect,
-  onReopenAuthorization,
-  onRetry,
 }: ToolProps) => {
   const { state, input } = toolPart
   const inFlight = isToolPartInFlight(toolPart)
   const isError = state === "output-error"
-  const { reconnectAction, reconnectState, reconnectError, reconnectPresentation, handleReconnect } =
-    useChatToolReconnect(toolPart, { onReconnect, onReopenAuthorization, onRetry })
-  const errorAttribution = reconnectAction
-    ? reconnectAttribution(reconnectAction, reconnectPresentation?.badgeLabel ?? "Reconnect required")
-    : isError && toolPart.errorText
-      ? attributeChatToolError(toolPart.errorText)
-      : null
+  const errorAttribution = isError && toolPart.errorText
+    ? attributeChatToolError(toolPart.errorText)
+    : null
   const label = title ?? getToolActivityLabel(toolPart)
   const hasInput = input !== null && input !== undefined
   const hasOutput = "output" in toolPart && toolPart.output !== undefined
@@ -176,11 +146,6 @@ const Tool = ({
   const inputDiff = getInputDiff(input)
   const Icon = toolIcon(toolPart)
   const [copied, setCopied] = useState(false)
-  const ReconnectIcon = reconnectState === "opening"
-    ? LoaderCircle
-    : reconnectState === "authorization_opened"
-      ? ExternalLink
-      : RefreshCcw
 
   const handleCopyResult = useCallback(async () => {
     if (resultText === null) return
@@ -217,16 +182,7 @@ const Tool = ({
           ) : null}
           {errorAttribution ? (
             <span
-              className={cn(
-                "shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium leading-none transition-colors",
-                reconnectAction && reconnectState === "connected"
-                  ? "border-green-7/30 bg-green-3/50 text-green-11"
-                  : reconnectAction && reconnectState === "failed"
-                    ? "border-destructive/30 bg-destructive/5 text-destructive"
-                    : reconnectAction
-                      ? "border-amber-7/30 bg-amber-3/50 text-amber-11"
-                      : "border-border/70 text-muted-foreground",
-              )}
+              className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground transition-colors"
               title={`${errorAttribution.confidence}: ${errorAttribution.description}`}
               aria-label={`Error attribution: ${errorAttribution.label}. ${errorAttribution.confidence}.`}
             >
@@ -234,37 +190,7 @@ const Tool = ({
             </span>
           ) : null}
         </CollapsibleTrigger>
-        {reconnectAction && onReconnect ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            className={cn(
-              "h-7 shrink-0 gap-1.5 rounded-lg px-2.5 font-semibold shadow-none before:shadow-none",
-              reconnectState === "connected"
-                ? "border-green-7/40 bg-green-3/60 text-green-11 hover:border-green-7/60 hover:bg-green-4/70"
-                : reconnectState === "failed"
-                  ? "border-destructive/30 bg-destructive/5 text-destructive hover:border-destructive/50 hover:bg-destructive/10"
-                  : "border-amber-7/40 bg-amber-3/60 text-amber-11 hover:border-amber-7/60 hover:bg-amber-4/70",
-            )}
-            data-testid="chat-mcp-reconnect-action"
-            disabled={reconnectPresentation?.disabled}
-            title={`${reconnectPresentation?.buttonLabel} ${reconnectAction.connectionName}`}
-            aria-label={`${reconnectPresentation?.buttonLabel} ${reconnectAction.connectionName}`}
-            onClick={() => void handleReconnect()}
-          >
-            <ReconnectIcon
-              data-icon="inline-start"
-              className={cn("size-3.5", reconnectState === "opening" && "animate-spin")}
-              aria-hidden="true"
-            />
-            {reconnectPresentation?.buttonLabel}
-          </Button>
-        ) : null}
       </div>
-      {reconnectError ? (
-        <p className="mt-1 text-xs text-destructive" role="alert">{reconnectError}</p>
-      ) : null}
       <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden text-sm transition-[height] duration-150 ease-out data-starting-style:h-0 data-ending-style:h-0 [&[hidden]:not([hidden='until-found'])]:hidden">
         <div className="bg-muted relative mt-2 flex flex-col gap-2 rounded-lg p-2 pr-10 text-xs">
           {resultText !== null ? (

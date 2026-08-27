@@ -7,7 +7,7 @@ import { Tool } from "../src/components/ui/tool"
 test("renders compact MCP attribution in a failed chat tool row", () => {
   const toolPart: DynamicToolUIPart = {
     type: "dynamic-tool",
-    toolName: "redrob-cloud_execute_capability",
+    toolName: "notion_execute_capability",
     toolCallId: "call-1",
     state: "output-error",
     input: {},
@@ -24,51 +24,10 @@ test("renders compact MCP attribution in a failed chat tool row", () => {
   expect(html).not.toContain(">failed<")
 })
 
-test("renders an inline reconnect button when Cloud capability discovery finds expired credentials", () => {
-  const toolPart: DynamicToolUIPart = {
-    type: "dynamic-tool",
-    toolName: "redrob-cloud_search_capabilities",
-    toolCallId: "call-reconnect",
-    state: "output-available",
-    input: {},
-    output: JSON.stringify({
-      matches: [{
-        kind: "connection_status",
-        connectionStatus: {
-          version: 1,
-          kind: "connection_action",
-          source: "redrob-cloud",
-          connectionId: "emc_knowledge",
-          connectionName: "Knowledge Hub",
-          authType: "oauth",
-          credentialMode: "per_member",
-          state: "reauth_required",
-          actor: "member",
-          action: {
-            type: "reconnect",
-            surface: "redrob_your_connections",
-            retry: "search_capabilities",
-          },
-        },
-      }],
-    }),
-  }
-
-  const html = renderToStaticMarkup(
-    <Tool toolPart={toolPart} onReconnect={async () => "connected"} />,
-  )
-
-  expect(html).toContain("Reconnect required")
-  expect(html).toContain('aria-label="Reconnect Knowledge Hub"')
-  expect(html).toContain("Reconnect</button>")
-  expect(html).toContain("bg-amber-3/60")
-  expect(html).toContain('data-testid="chat-mcp-reconnect-action"')
-})
-
 test("renders a copy action inside the expanded tool result", () => {
   const toolPart: DynamicToolUIPart = {
     type: "dynamic-tool",
-    toolName: "redrob-cloud_search_capabilities",
+    toolName: "notion_search_capabilities",
     toolCallId: "call-copy",
     state: "output-available",
     input: { query: "Notion pages" },
@@ -87,7 +46,7 @@ test("renders a copy action inside the expanded tool result", () => {
 test("does not render a copy action before a tool has a result", () => {
   const toolPart: DynamicToolUIPart = {
     type: "dynamic-tool",
-    toolName: "redrob-cloud_search_capabilities",
+    toolName: "notion_search_capabilities",
     toolCallId: "call-running",
     state: "input-available",
     input: { query: "Notion pages" },

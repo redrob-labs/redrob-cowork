@@ -2,14 +2,9 @@
 
 import { useState } from "react"
 import type { DynamicToolUIPart } from "ai"
-import { ChevronRight, CircleAlert, ExternalLink, LoaderCircle, RefreshCcw } from "lucide-react"
+import { ChevronRight, CircleAlert } from "lucide-react"
 
 import { attributeChatToolError } from "@/components/tools/error-attribution"
-import {
-  useChatToolReconnect,
-  type ChatToolReconnectCallbacks,
-} from "@/components/tools/use-chat-tool-reconnect"
-import { Button } from "@/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,7 +17,7 @@ import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import { cn } from "@/lib/utils"
 
-type CapabilityCallLineProps = ChatToolReconnectCallbacks & {
+type CapabilityCallLineProps = {
   part: DynamicToolUIPart
   className?: string
 }
@@ -37,10 +32,7 @@ function formatTechnicalValue(value: unknown): string {
 }
 
 /** One human sentence explaining what to do about a failed call. */
-function failureInstruction(part: DynamicToolUIPart, reconnectName: string | null): string {
-  if (reconnectName) {
-    return `${reconnectName} needs a fresh sign-in — reconnect it, then retry.`
-  }
+function failureInstruction(part: DynamicToolUIPart): string {
   const errorText = part.state === "output-error" ? part.errorText : null
   const attribution = errorText ? attributeChatToolError(errorText) : null
   if (attribution) return attribution.description
@@ -101,28 +93,18 @@ function TechnicalDetailsPanel({ part }: { part: DynamicToolUIPart }) {
  * under a collapsed "Technical details" section.
  * Failures render the Paper "Failed Call Card": service avatar +
  * present-participle headline, the interpreted ask as a quote, one
- * instruction line saying what to do next with an inline
- * Reconnect/Retry action, and technical details collapsed below.
+ * instruction line saying what to do next, and technical details
+ * collapsed below.
  */
 export function CapabilityCallLine({
   part,
   className,
-  onReconnect,
-  onReopenAuthorization,
-  onRetry,
 }: CapabilityCallLineProps) {
   const [open, setOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const inFlight = isToolPartInFlight(part)
   const isFailed = part.state === "output-error"
   const duration = trackToolCallDuration(part)
-  const { reconnectAction, reconnectState, reconnectError, reconnectPresentation, handleReconnect } =
-    useChatToolReconnect(part, { onReconnect, onReopenAuthorization, onRetry })
-  const ReconnectIcon = reconnectState === "opening"
-    ? LoaderCircle
-    : reconnectState === "authorization_opened"
-      ? ExternalLink
-      : RefreshCcw
 
   // Failures stay minimal until the user asks for more: one collapsed
   // line, expanding into the Paper "Failed Call Card" (quote, instruction
@@ -176,32 +158,9 @@ export function CapabilityCallLine({
             <div className="flex min-w-0 items-center gap-2">
               <CircleAlert aria-hidden="true" className="size-3.5 shrink-0 text-destructive" />
               <p className="min-w-0 text-[13px] leading-5 text-destructive/90">
-                {failureInstruction(part, reconnectAction?.connectionName ?? null)}
+                {failureInstruction(part)}
               </p>
-              {reconnectAction && onReconnect ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  className="ms-auto h-6 shrink-0 gap-1.5 rounded-md px-2 font-semibold text-blue-11 shadow-none before:shadow-none hover:bg-blue-3/60"
-                  data-testid="chat-mcp-reconnect-action"
-                  disabled={reconnectPresentation?.disabled}
-                  title={`${reconnectPresentation?.buttonLabel} ${reconnectAction.connectionName}`}
-                  aria-label={`${reconnectPresentation?.buttonLabel} ${reconnectAction.connectionName}`}
-                  onClick={() => void handleReconnect()}
-                >
-                  <ReconnectIcon
-                    data-icon="inline-start"
-                    className={cn("size-3.5", reconnectState === "opening" && "animate-spin")}
-                    aria-hidden="true"
-                  />
-                  {reconnectPresentation?.buttonLabel}
-                </Button>
-              ) : null}
             </div>
-            {reconnectError ? (
-              <p className="text-xs text-destructive" role="alert">{reconnectError}</p>
-            ) : null}
             <div className="border-t border-border/60 pt-2.5">
               <button
                 type="button"
