@@ -25,7 +25,7 @@ type OnboardingWizardShellProps = {
 /**
  * Shared chrome for the first-run onboarding steps. Matches the full-screen
  * overlay convention used by redrob-key-step.tsx / provider-selection-step.tsx
- * (fixed inset-0 z-50 over PageBackground) and adds a "Step N of 3" indicator
+ * (fixed inset-0 z-50 over PageBackground) and adds a "Step N of 2" indicator
  * plus an optional Back control so the wizard reads as one coherent flow.
  */
 export function OnboardingWizardShell({

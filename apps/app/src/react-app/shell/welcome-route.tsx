@@ -147,7 +147,13 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
     case "provider-step":
       return { ...state, redrobKeyStep: false, providerStep: true };
     case "attribution-step":
-      return { ...state, providerStep: false, attributionStep: true, pendingRoute: action.route };
+      return {
+        ...state,
+        redrobKeyStep: false,
+        providerStep: false,
+        attributionStep: true,
+        pendingRoute: action.route,
+      };
   }
 }
 
@@ -353,18 +359,20 @@ export function WelcomeRoute() {
     if (state.pendingSessionId) focusPromptSoon();
   }, [markOnboardingComplete, navigate, state.pendingRoute, state.pendingSessionId]);
 
-  // "Just look around": the browse-mode branch of the API-key step. It finishes
-  // onboarding without a key and lands the user in the app; a key can be added
-  // later from Settings (the existing Redrob provider flow). Never throws.
+  // "Just look around": the browse-mode branch of the API-key step. Browsing
+  // finishes onboarding without a key, but we still run the attribution survey
+  // (as the keyed path does) so browse users are not silently dropped from
+  // attribution coverage. We intentionally skip the provider-selection promo
+  // for browse mode — a user who chose "just look around" opted out of setting
+  // up inference, so surfacing the Redrob Models upsell here would be noise;
+  // they can connect a key later from Settings. Never throws.
   const handleLookAround = useCallback(() => {
     captureAnalyticsEvent("onboarding_browse_mode_selected");
-    markOnboardingComplete();
     const route = state.pendingWorkspaceId
       ? workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)
       : "/session";
-    navigate(route, { replace: true });
-    if (state.pendingSessionId) focusPromptSoon();
-  }, [markOnboardingComplete, navigate, state.pendingSessionId, state.pendingWorkspaceId]);
+    dispatch({ type: "attribution-step", route });
+  }, [state.pendingSessionId, state.pendingWorkspaceId]);
 
   const handleAttributionSubmit = useCallback(
     (source: AttributionSource, aiPrompt?: string) => {

@@ -8,7 +8,6 @@ import {
   setLocale,
   subscribeToLocale,
   t,
-  type Language,
 } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { OnboardingWizardShell } from "./onboarding-wizard-shell";
@@ -48,7 +47,7 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
                   ? "border-blue-7/60 bg-blue-2/30"
                   : "border-border bg-card hover:bg-accent"
               }`}
-              onClick={() => setLocale(option.value as Language)}
+              onClick={() => setLocale(option.value)}
               data-testid={`onboarding-language-${option.value}`}
             >
               <div>

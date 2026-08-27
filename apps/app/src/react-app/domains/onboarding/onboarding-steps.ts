@@ -3,11 +3,15 @@
  * wizard chrome (step indicator + Back navigation). Kept framework-free so the
  * ordering logic can be unit-tested without React.
  *
- * The flow is: language -> engine (engine download) -> connect (API key OR
- * "just look around"). Completion is persisted through the existing
+ * These are the two leading steps that render through `OnboardingWizardShell`
+ * and therefore carry the "Step N of 2" indicator + Back control: language ->
+ * engine (engine download). The subsequent API-key / "just look around" branch
+ * is part of the existing welcome flow (RedrobKeyStep behind the
+ * workspace-creation gate) and does not use the wizard chrome, so it is not
+ * modeled here. Completion is persisted through the existing
  * `local.prefs.hasCompletedOnboarding` pref by welcome-route.tsx.
  */
-export const ONBOARDING_STEPS = ["language", "engine", "connect"] as const;
+export const ONBOARDING_STEPS = ["language", "engine"] as const;
 
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 
