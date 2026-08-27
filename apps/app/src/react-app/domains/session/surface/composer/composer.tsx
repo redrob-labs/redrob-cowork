@@ -5,7 +5,6 @@ import type { Agent } from "@opencode-ai/sdk/v2/client";
 import { AppWindowMac, ArrowUp, Check, ChevronDown, ChevronRight, FileText, LoaderCircle, Paperclip, Plus, RefreshCw, Settings, Square, Terminal, X, Zap } from "lucide-react";
 import fuzzysort from "fuzzysort";
 import { toast } from "@/components/ui/sonner";
-import type { CloudImportedPlugin, CloudImportedPluginFile } from "@/app/cloud/import-state";
 import type { ComposerAttachment, McpServerEntry, McpStatus, McpStatusMap, ModelOption, ModelRef, SkillCard, SlashCommandOption } from "@/app/types";
 import { t } from "@/i18n";
 import {
@@ -19,20 +18,12 @@ import { LexicalPromptEditor, syncAttachmentChipStatus, type LexicalPromptEditor
 import { listRunningAppsForMention } from "./app-mentions";
 import type { ComposerMentionKind } from "./mention-encoding";
 import {
-  connectSkillSlashCommandOptions,
   getSlashCommandQuery,
   skillMenuSlashCommandName,
   skillSlashCommandName,
   type ComposerSlashCommandOption,
 } from "./slash-command";
-import { encodeConnectSkillToken } from "./connect-skill-token";
 import { FILE_URL_RE, HTTP_URL_RE, type PastedTextChip } from "./pasted-text";
-import { loadSessionConnectCapabilities } from "@/react-app/domains/connections/cloud-inventory-cache";
-import { useOrgMcpConnections } from "@/react-app/domains/connections/use-org-mcp-connections";
-import {
-  composerConnectionSignIn,
-  mergeComposerConnectionInventory,
-} from "./composer-connections";
 
 type MentionItem = {
   id: string;
@@ -58,16 +49,12 @@ type ComposerProps = {
   disabled: boolean;
   modelUnavailable?: boolean;
   modelUnavailableMessage?: string | null;
-  organizationModelsEmpty?: boolean;
   statusLabel: string;
   modelPickerOpen: boolean;
   selectedModel: ModelRef;
   modelOptions?: readonly ModelOption[];
   /** When set, the full model picker opened from here targets this session. */
   sessionId?: string;
-  redrobModelsEntitled?: boolean;
-  redrobModelsSyncing?: boolean;
-  onRefreshOrganizationModels?: () => void | Promise<void>;
   onModelPickerOpenChange: (open: boolean) => void;
   onModelChange: (model: ModelRef, variant?: string | null) => void;
   attachments: ComposerAttachment[];
@@ -92,8 +79,6 @@ type ComposerProps = {
   mcpServers?: McpServerEntry[];
   mcpStatus?: string | null;
   mcpStatuses?: McpStatusMap;
-  listImportedPlugins?: () => Promise<CloudImportedPlugin[]>;
-  importedPlugins?: CloudImportedPlugin[];
   onOpenSettingsSection?: (section: ComposerSettingsSection) => void;
   recentFiles: string[];
   searchFiles: (query: string) => Promise<string[]>;
@@ -210,31 +195,14 @@ function measureToolMenuLayout(trigger: HTMLElement): ToolMenuLayout {
   return { left, bottom, width, maxHeight };
 }
 
-function pluginSlashCommandName(file: CloudImportedPluginFile) {
-  const path = file.path.trim();
-  if (file.objectType === "command") {
-    const command = path.match(/^\.opencode\/(?:command|commands)\/(.+)\.md$/i)?.[1];
-    return command?.trim() || null;
-  }
-  if (file.objectType === "skill") {
-    const skill = path.match(/^\.opencode\/(?:skill|skills)\/(?:[^/]+\/)?([^/]+)\/SKILL\.md$/i)?.[1];
-    return skill?.trim() || null;
-  }
-  return null;
-}
-
 export function ReactSessionComposer(props: ComposerProps) {
   let fileInput: HTMLInputElement | undefined;
-  const orgMcp = useOrgMcpConnections();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentMenuOpen, setAgentMenuOpen] = useState(false);
-  const [refreshingOrganizationModels, setRefreshingOrganizationModels] = useState(false);
   const [commands, setCommands] = useState<SlashCommandOption[]>([]);
   const [commandsLoading, setCommandsLoading] = useState(false);
   const [skillsLoading, setSkillsLoading] = useState(false);
   const [skills, setSkills] = useState<SkillCard[]>(props.skills ?? []);
-  const [importedPlugins, setImportedPlugins] = useState<CloudImportedPlugin[]>(props.importedPlugins ?? []);
-  const [pluginsLoading, setPluginsLoading] = useState(false);
   const [slashOpen, setSlashOpen] = useState(false);
   const [toolMenuOpen, setToolMenuOpen] = useState(false);
   const [toolMenuLayout, setToolMenuLayout] = useState<ToolMenuLayout | null>(null);
@@ -249,18 +217,15 @@ export function ReactSessionComposer(props: ComposerProps) {
   const commandsLoadVersionRef = useRef(0);
   const listCommandsRef = useRef(props.listCommands);
   const listSkillsRef = useRef(props.listSkills);
-  const listImportedPluginsRef = useRef(props.listImportedPlugins);
   const listMcpRef = useRef(props.listMcp);
   const toolMenuLoadRef = useRef({
     openId: 0,
     commands: false,
     skills: false,
-    plugins: false,
     mcps: false,
   });
   const [commandsLoaded, setCommandsLoaded] = useState(false);
   const [skillsLoaded, setSkillsLoaded] = useState(Boolean(props.skills?.length));
-  const [pluginsLoaded, setPluginsLoaded] = useState(Boolean(props.importedPlugins?.length));
   const [mcpLoaded, setMcpLoaded] = useState(Boolean(props.mcpServers?.length));
   const [mcpLoading, setMcpLoading] = useState(false);
   const [agentMenuIndex, setAgentMenuIndex] = useState(0);
@@ -307,19 +272,6 @@ export function ReactSessionComposer(props: ComposerProps) {
       props.onModelPickerOpenChange(false);
     }
   }, [props.modelPickerOpen, props.onModelPickerOpenChange, props.steering]);
-
-  const handleRefreshOrganizationModels = useCallback(async () => {
-    if (!props.onRefreshOrganizationModels || refreshingOrganizationModels) return;
-
-    setRefreshingOrganizationModels(true);
-    try {
-      await props.onRefreshOrganizationModels();
-    } catch {
-      toast.error(t("models.refresh_organization_models_failed"));
-    } finally {
-      setRefreshingOrganizationModels(false);
-    }
-  }, [props.onRefreshOrganizationModels, refreshingOrganizationModels]);
 
   // Input history recall (#2012): ArrowUp on an empty composer recalls the
   // previous sent prompt; repeated ArrowUp/ArrowDown walk the history.
@@ -400,20 +352,12 @@ export function ReactSessionComposer(props: ComposerProps) {
   }, [props.skills]);
 
   useEffect(() => {
-    setImportedPlugins(props.importedPlugins ?? []);
-  }, [props.importedPlugins]);
-
-  useEffect(() => {
     listCommandsRef.current = props.listCommands;
   }, [props.listCommands]);
 
   useEffect(() => {
     listSkillsRef.current = props.listSkills;
   }, [props.listSkills]);
-
-  useEffect(() => {
-    listImportedPluginsRef.current = props.listImportedPlugins;
-  }, [props.listImportedPlugins]);
 
   useEffect(() => {
     listMcpRef.current = props.listMcp;
@@ -473,12 +417,10 @@ export function ReactSessionComposer(props: ComposerProps) {
       openId: toolMenuLoadRef.current.openId + 1,
       commands: false,
       skills: false,
-      plugins: false,
       mcps: false,
     };
     setCommandsLoaded(false);
     setSkillsLoaded(Boolean(props.skills?.length));
-    setPluginsLoaded(Boolean(props.importedPlugins?.length));
     setMcpLoaded(Boolean(props.mcpServers?.length));
   }, [toolMenuOpen]);
 
@@ -594,37 +536,6 @@ export function ReactSessionComposer(props: ComposerProps) {
   useEffect(() => {
     if (!toolMenuOpen) return;
     const openId = toolMenuLoadRef.current.openId;
-    const listImportedPlugins = listImportedPluginsRef.current;
-    if (listImportedPlugins && !toolMenuLoadRef.current.plugins) {
-      let cancelled = false;
-      toolMenuLoadRef.current.plugins = true;
-      setPluginsLoading(true);
-      void listImportedPlugins()
-        .then((next) => {
-          if (!cancelled && toolMenuLoadRef.current.openId === openId) {
-            setImportedPlugins(next);
-            setPluginsLoaded(true);
-          }
-        })
-        .catch(() => {
-          if (!cancelled && toolMenuLoadRef.current.openId === openId) {
-            setImportedPlugins([]);
-            setPluginsLoaded(true);
-          }
-        })
-        .finally(() => {
-          if (!cancelled && toolMenuLoadRef.current.openId === openId) setPluginsLoading(false);
-        });
-      return () => {
-        cancelled = true;
-      };
-    }
-    return undefined;
-  }, [toolMenuOpen]);
-
-  useEffect(() => {
-    if (!toolMenuOpen) return;
-    const openId = toolMenuLoadRef.current.openId;
     const listMcp = listMcpRef.current;
     if (listMcp && !toolMenuLoadRef.current.mcps) {
       let cancelled = false;
@@ -647,26 +558,6 @@ export function ReactSessionComposer(props: ComposerProps) {
     if (!listMcp) setMcpLoaded(true);
     return undefined;
   }, [toolMenuOpen]);
-
-  useEffect(() => {
-    if (!toolMenuOpen) return;
-    void orgMcp.refresh();
-  }, [orgMcp.refresh, toolMenuOpen]);
-
-  const connectingId = orgMcp.connectingId;
-  const connectingIdRef = useRef(connectingId);
-  useEffect(() => {
-    const previous = connectingIdRef.current;
-    connectingIdRef.current = connectingId;
-    if (!previous || connectingId) return;
-    void listMcpRef.current?.();
-    void loadSessionConnectCapabilities();
-  }, [connectingId]);
-
-  useEffect(() => {
-    if (!toolMenuOpen || !orgMcp.error) return;
-    toast.warning(orgMcp.error);
-  }, [orgMcp.error, toolMenuOpen]);
 
   useEffect(() => {
     if (!slashOpen && !toolMenuOpen) return;
@@ -701,10 +592,7 @@ export function ReactSessionComposer(props: ComposerProps) {
     return undefined;
   }, [loadSkills, slashOpen, toolMenuOpen, toolMenuSection]);
 
-  const slashItems = useMemo<ComposerSlashCommandOption[]>(
-    () => [...commands, ...connectSkillSlashCommandOptions(skills)],
-    [commands, skills],
-  );
+  const slashItems = useMemo<ComposerSlashCommandOption[]>(() => [...commands], [commands]);
   const slashFiltered = useMemo(() => {
     if (!slashOpen) return [];
     if (!slashQuery) return slashItems.slice(0, 8);
@@ -738,29 +626,16 @@ export function ReactSessionComposer(props: ComposerProps) {
       description: command.description,
       origin: "local" as const,
     })),
-    ...skills.filter((skill) =>
-      skill.origin === "redrob-connect" || !localCommandSkillNames.has(skill.name)
-    ),
+    ...skills.filter((skill) => !localCommandSkillNames.has(skill.name)),
   ];
-  const connectionInventory = useMemo(
-    () => mergeComposerConnectionInventory({
-      mcpServers: props.mcpServers ?? [],
-      mcpStatuses: props.mcpStatuses,
-      orgConnections: orgMcp.connections,
-    }),
-    [orgMcp.connections, props.mcpServers, props.mcpStatuses],
-  );
-  const activePlugin = toolMenuSection.startsWith("plugin:")
-    ? importedPlugins.find((plugin) => `plugin:${plugin.pluginId}` === toolMenuSection) ?? null
-    : null;
   const canSend = props.draft.trim().length > 0 || props.attachments.length > 0;
 
   const renderConnectionRows = () => {
-    const servers = connectionInventory.servers;
+    const servers = props.mcpServers ?? [];
     if (servers.length === 0) {
       return (
         <div className="px-3 py-2 text-xs text-gray-10">
-          {(!mcpLoaded && mcpLoading) || (orgMcp.loading && !orgMcp.loaded)
+          {!mcpLoaded && mcpLoading
             ? t("composer.loading_commands")
             : t("composer.no_connections_mcps")}
         </div>
@@ -769,12 +644,8 @@ export function ReactSessionComposer(props: ComposerProps) {
     return (
       <div className="grid gap-1">
         {servers.map((server) => {
-          const status = mcpEntryStatus(server, connectionInventory.statuses);
+          const status = mcpEntryStatus(server, props.mcpStatuses);
           const statusLabel = toolMenuMcpStatusLabel(status);
-          const connection = orgMcp.connections.find((entry) => entry.id === server.orgMcpConnectionId);
-          const signIn = composerConnectionSignIn({ server, status, connection });
-          const connecting = Boolean(signIn && orgMcp.connectingId === signIn.connectionId);
-          const source = [server.marketplaceName, server.pluginName].filter(Boolean).join(" · ");
           return (
             <div
               key={server.id ?? server.name}
@@ -783,19 +654,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1 truncate text-xs font-semibold text-gray-11">{server.name}</div>
-                  {signIn ? (
-                    <button
-                      type="button"
-                      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-12 px-2 py-0.5 text-[10px] font-medium text-gray-1 transition-colors hover:bg-gray-11 disabled:opacity-60"
-                      disabled={connecting}
-                      onClick={() => {
-                        void orgMcp.connect(signIn.connectionId, { forceFreshAuthorization: signIn.reconnect });
-                      }}
-                    >
-                      {connecting ? <LoaderCircle size={10} className="animate-spin" /> : null}
-                      {signIn.reconnect ? t("mcp.org_connection_reconnect_action") : t("mcp.org_connection_connect_action")}
-                    </button>
-                  ) : statusLabel ? (
+                  {statusLabel ? (
                     <span className="shrink-0 rounded-full bg-gray-3 px-2 py-0.5 text-[10px] font-medium text-gray-11">
                       {statusLabel}
                     </span>
@@ -805,7 +664,6 @@ export function ReactSessionComposer(props: ComposerProps) {
                     </span>
                   ) : null}
                 </div>
-                {source ? <div className="truncate text-[10px] text-gray-9">{source}</div> : null}
               </div>
             </div>
           );
@@ -813,12 +671,6 @@ export function ReactSessionComposer(props: ComposerProps) {
       </div>
     );
   };
-
-  useEffect(() => {
-    if (!toolMenuSection.startsWith("plugin:")) return;
-    if (activePlugin || !pluginsLoaded) return;
-    setToolMenuSection("plugins");
-  }, [activePlugin, pluginsLoaded, toolMenuSection]);
 
   useEffect(() => {
     if (!activeItems.length) {
@@ -852,29 +704,6 @@ export function ReactSessionComposer(props: ComposerProps) {
     const skill = typeof input === "string"
       ? { name: input, path: "", origin: "local" as const }
       : input;
-    if (skill.origin === "redrob-connect") {
-      const slug = skillSlashCommandName(skill);
-      const token = encodeConnectSkillToken({
-        slug,
-        name: skill.name,
-        marketplace: skill.marketplaceName ?? "assigned",
-        capability: skill.connectCapabilityName ?? skill.name,
-      });
-      if (options?.replaceSkillDraft) {
-        props.onDraftChange(`${token} `);
-      } else {
-        const editor = editorRef.current;
-        if (editor) {
-          editor.insertSkillAtSelection(slug, token);
-        } else {
-          const separator = props.draft.length > 0 && !/\s$/.test(props.draft) ? " " : "";
-          props.onDraftChange(`${props.draft}${separator}${token} `);
-        }
-      }
-      setSlashOpen(false);
-      setToolMenuOpen(false);
-      return;
-    }
     const name = skill.name;
     if (options?.replaceSkillDraft) {
       props.onDraftChange(`[skill ${name}] `);
@@ -888,41 +717,6 @@ export function ReactSessionComposer(props: ComposerProps) {
       }
     }
     setSlashOpen(false);
-    setToolMenuOpen(false);
-  };
-
-  const applyPluginFileSelection = (file: CloudImportedPluginFile) => {
-    if (file.skillOrigin === "redrob-connect") {
-      applySkillSelection({
-        name: file.skillName ?? file.title,
-        path: file.path,
-        origin: "redrob-connect",
-        marketplaceName: file.marketplaceName,
-        pluginName: file.pluginName,
-        connectCapabilityName: file.connectCapabilityName,
-      });
-      return;
-    }
-    if (file.objectType === "command") {
-      applyCommandSelection({
-        id: `plugin:${file.configObjectId}`,
-        name: slugifyLibraryItemName(file.title, "command"),
-        source: "command",
-      });
-      return;
-    }
-    if (file.objectType === "mcp" || file.objectType === "agent") return;
-    const commandName = pluginSlashCommandName(file);
-    if (commandName) {
-      if (file.objectType === "skill") applySkillSelection(commandName);
-      else applyCommandSelection({
-        id: `plugin:${file.configObjectId}`,
-        name: commandName,
-        source: "command",
-      });
-      return;
-    }
-    props.onInsertMention("file", file.path);
     setToolMenuOpen(false);
   };
 
@@ -1560,62 +1354,6 @@ export function ReactSessionComposer(props: ComposerProps) {
                             )
                           ) : null}
                           {toolMenuSection === "connections" ? renderConnectionRows() : null}
-                          {toolMenuSection === "plugins" ? (
-                            importedPlugins.length > 0 ? (
-                              <div className="grid gap-1">
-                                {importedPlugins.map((plugin) => (
-                                  <button
-                                    key={plugin.pluginId}
-                                    type="button"
-                                    className="flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left text-gray-11 transition-colors hover:bg-gray-2/70"
-                                    onClick={() => setToolMenuSection(`plugin:${plugin.pluginId}`)}
-                                  >
-                                    <div className="min-w-0 flex-1">
-                                      <div className="truncate text-xs font-semibold text-gray-11">{plugin.name}</div>
-                                      {plugin.description ? (
-                                        <div className="truncate text-xs text-gray-10">{plugin.description}</div>
-                                      ) : null}
-                                    </div>
-                                    <ChevronRight size={14} className="mt-0.5 shrink-0 text-gray-9" />
-                                  </button>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="px-3 py-2 text-xs text-gray-10">
-                                {!pluginsLoaded && pluginsLoading ? t("composer.loading_commands") : t("composer.no_plugins")}
-                              </div>
-                            )
-                          ) : null}
-                          {activePlugin ? (
-                            activePlugin.files.length > 0 ? (
-                              <div className="grid gap-1">
-                                {activePlugin.files.map((file) => (
-                                  <button
-                                    key={`${file.configObjectId}:${file.path}`}
-                                    type="button"
-                                    className="flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left text-gray-11 transition-colors hover:bg-gray-2/70"
-                                    onClick={() => applyPluginFileSelection(file)}
-                                  >
-                                    <FileText size={14} className="mt-0.5 shrink-0 text-gray-9" />
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-center justify-between gap-3">
-                                        <div className="truncate text-xs font-semibold text-gray-11">{file.title}</div>
-                                        <span className="shrink-0 rounded-full bg-gray-3 px-2 py-0.5 text-[10px] font-medium text-gray-11">
-                                          {formatPluginObjectType(file.objectType)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="px-3 py-2 text-xs text-gray-10">{t("composer.no_plugin_files")}</div>
-                            )
-                          ) : toolMenuSection.startsWith("plugin:") ? (
-                            <div className="px-3 py-2 text-xs text-gray-10">
-                              {!pluginsLoaded && pluginsLoading ? t("composer.loading_commands") : t("composer.plugin_files_unavailable")}
-                            </div>
-                          ) : null}
                           </div>
                         </div>
                       </div>
@@ -1707,15 +1445,12 @@ export function ReactSessionComposer(props: ComposerProps) {
                 <ModelSelect
                   open={props.modelPickerOpen}
                   value={props.selectedModel}
-                  hideValue={props.organizationModelsEmpty}
                   onOpenChange={props.onModelPickerOpenChange}
                   onChange={(model, variant) => {
                     if (!props.steering) props.onModelChange(model, variant);
                   }}
                   disabled={props.steering}
                   sessionId={props.sessionId}
-                  redrobModelsEntitled={props.redrobModelsEntitled}
-                  redrobModelsSyncing={props.redrobModelsSyncing}
                   fallbackOptions={props.modelOptions}
                   behaviorValue={props.modelVariant}
                   behaviorLabel={props.modelVariantLabel}
@@ -1724,23 +1459,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                     if (!props.steering) props.onModelVariantChange(value);
                   }}
                 />
-                {props.modelUnavailable ? props.onRefreshOrganizationModels ? (
-                  <button
-                    type="button"
-                    className="inline-flex h-7 min-w-0 max-w-full items-center gap-1.5 rounded-full border border-red-5 bg-red-2 px-2.5 text-[11px] font-medium text-red-11 transition-colors hover:border-red-6 hover:bg-red-3 disabled:cursor-wait disabled:opacity-70 sm:max-w-80"
-                    onClick={() => void handleRefreshOrganizationModels()}
-                    disabled={refreshingOrganizationModels}
-                    title={t("models.refresh_organization_models")}
-                  >
-                    <span className="min-w-0 truncate">
-                      {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
-                    </span>
-                    <span className="inline-flex shrink-0 items-center gap-1">
-                      <RefreshCw size={11} className={refreshingOrganizationModels ? "animate-spin" : ""} />
-                      {refreshingOrganizationModels ? t("models.refreshing_organization_models") : t("models.retry_organization_models")}
-                    </span>
-                  </button>
-                ) : (
+                {props.modelUnavailable ? (
                   <span className="max-w-[20rem] truncate text-xs font-medium text-red-10">
                     {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
                   </span>

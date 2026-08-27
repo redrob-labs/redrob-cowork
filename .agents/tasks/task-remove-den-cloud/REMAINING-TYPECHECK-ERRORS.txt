@@ -1,12 +1,3 @@
-src/react-app/domains/session/surface/composer/composer.tsx(8,67): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer.tsx(28,41): error TS2307: Cannot find module './connect-skill-token' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer.tsx(30,48): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-inventory-cache' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer.tsx(31,38): error TS2307: Cannot find module '@/react-app/domains/connections/use-org-mcp-connections' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer.tsx(35,8): error TS2307: Cannot find module './composer-connections' or its corresponding type declarations.
-src/react-app/domains/session/surface/composer/composer.tsx(771,23): error TS7006: Parameter 'server' implicitly has an 'any' type.
-src/react-app/domains/session/surface/composer/composer.tsx(774,55): error TS7006: Parameter 'entry' implicitly has an 'any' type.
-src/react-app/domains/session/surface/composer/composer.tsx(1592,58): error TS7006: Parameter 'file' implicitly has an 'any' type.
-src/react-app/domains/session/surface/composer/composer.tsx(1717,19): error TS2322: Type '{ open: boolean; value: ModelRef; hideValue: boolean | undefined; onOpenChange: (open: boolean) => void; onChange: (model: ModelRef, variant: string | null | undefined) => void; ... 8 more ...; onBehaviorChange: (value: string | null) => void; }' is not assignable to type 'IntrinsicAttributes & ModelSelectProps'.
 src/react-app/domains/session/surface/session-surface.tsx(14,42): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(15,50): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/surface/session-surface.tsx(16,41): error TS2307: Cannot find module '@/app/lib/den-session-events' or its corresponding type declarations.
@@ -19,6 +10,7 @@ src/react-app/domains/session/surface/session-surface.tsx(1596,31): error TS7006
 src/react-app/domains/session/surface/session-surface.tsx(1629,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(1676,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(1808,44): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/react-app/domains/session/surface/session-surface.tsx(2171,9): error TS2322: Type '{ draft: string; mentions: Record<string, ComposerMentionKind>; onDraftChange: (value: string) => void; onSend: () => Promise<void>; onSteer: () => Promise<...>; ... 56 more ...; topAccessory: Element | null; }' is not assignable to type 'IntrinsicAttributes & ComposerProps'.
 src/react-app/domains/settings/extension-items.ts(2,67): error TS2307: Cannot find module '../../../app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/settings/extension-items.ts(3,47): error TS2307: Cannot find module '../../../app/cloud/desktop-cloud-sync' or its corresponding type declarations.
 src/react-app/domains/settings/extension-items.ts(11,8): error TS2307: Cannot find module '../../../app/lib/den' or its corresponding type declarations.
