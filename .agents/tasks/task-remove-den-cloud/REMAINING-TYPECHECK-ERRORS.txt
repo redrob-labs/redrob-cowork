@@ -11,26 +11,34 @@ src/react-app/domains/session/surface/session-surface.tsx(1629,31): error TS7006
 src/react-app/domains/session/surface/session-surface.tsx(1676,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(1808,44): error TS7006: Parameter 'entry' implicitly has an 'any' type.
 src/react-app/domains/session/surface/session-surface.tsx(2171,9): error TS2322: Type '{ draft: string; mentions: Record<string, ComposerMentionKind>; onDraftChange: (value: string) => void; onSend: () => Promise<void>; onSteer: () => Promise<...>; ... 56 more ...; topAccessory: Element | null; }' is not assignable to type 'IntrinsicAttributes & ComposerProps'.
-src/react-app/domains/settings/extension-items.ts(2,67): error TS2307: Cannot find module '../../../app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/settings/extension-items.ts(3,47): error TS2307: Cannot find module '../../../app/cloud/desktop-cloud-sync' or its corresponding type declarations.
-src/react-app/domains/settings/extension-items.ts(11,8): error TS2307: Cannot find module '../../../app/lib/den' or its corresponding type declarations.
-src/react-app/domains/settings/extension-items.ts(13,42): error TS2307: Cannot find module '../connections/native-provider-connections' or its corresponding type declarations.
-src/react-app/domains/settings/extension-items.ts(18,8): error TS2307: Cannot find module './connect-cloud-readiness' or its corresponding type declarations.
-src/react-app/domains/settings/extension-items.ts(127,59): error TS7006: Parameter 'file' implicitly has an 'any' type.
-src/react-app/domains/settings/extension-items.ts(233,102): error TS7006: Parameter 'plugin' implicitly has an 'any' type.
-src/react-app/domains/settings/extension-items.ts(239,68): error TS7006: Parameter 'file' implicitly has an 'any' type.
-src/react-app/domains/settings/extension-items.ts(258,133): error TS18046: 'count' is of type 'unknown'.
 src/react-app/domains/settings/pages/mcp-view.tsx(32,67): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
+src/react-app/domains/settings/pages/mcp-view.tsx(36,3): error TS2305: Module '"../extension-items"' has no exported member 'isOrgMcpConnectionReady'.
+src/react-app/domains/settings/pages/mcp-view.tsx(37,3): error TS2305: Module '"../extension-items"' has no exported member 'isOrgMcpConnectionItem'.
+src/react-app/domains/settings/pages/mcp-view.tsx(38,3): error TS2305: Module '"../extension-items"' has no exported member 'orgMcpConnectionActionLabel'.
 src/react-app/domains/settings/pages/mcp-view.tsx(61,33): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(79,8): error TS2307: Cannot find module '../../connections/native-provider-connections' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(96,33): error TS2307: Cannot find module '../cloud/cloud-session-provider' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(97,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(125,8): error TS2307: Cannot find module '../open-in-den' or its corresponding type declarations.
+src/react-app/domains/settings/pages/mcp-view.tsx(367,34): error TS2339: Property 'orgMcpConnection' does not exist on type 'ExtensionItem'.
 src/react-app/domains/settings/pages/mcp-view.tsx(407,38): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/react-app/domains/settings/pages/mcp-view.tsx(420,16): error TS2339: Property 'orgMcpConnection' does not exist on type 'ExtensionItem'.
 src/react-app/domains/settings/pages/mcp-view.tsx(1128,58): error TS7006: Parameter 'file' implicitly has an 'any' type.
 src/react-app/domains/settings/pages/mcp-view.tsx(1149,47): error TS7006: Parameter 'file' implicitly has an 'any' type.
+src/react-app/domains/settings/pages/mcp-view.tsx(1199,45): error TS2339: Property 'orgMcpConnection' does not exist on type 'ExtensionItem'.
 src/react-app/domains/settings/pages/mcp-view.tsx(1430,81): error TS7006: Parameter 'file' implicitly has an 'any' type.
+src/react-app/domains/settings/pages/mcp-view.tsx(1442,20): error TS2339: Property 'orgMcpConnection' does not exist on type 'ExtensionItem'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1446,61): error TS2339: Property 'orgMcpConnection' does not exist on type 'ExtensionItem'.
 src/react-app/domains/settings/pages/mcp-view.tsx(1577,9): error TS2322: Type '{ open: boolean; kind: LibraryAuthorableKind | null; busy: boolean; cloud: any; onClose: () => void; onCreate: (input: CreateLibraryItemInput) => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & AddLibraryItemModalProps'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1597,3): error TS2322: Type '"needs_signin"' is not assignable to type 'ExtensionInventoryGroup'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1598,3): error TS2322: Type '"needs_admin_setup"' is not assignable to type 'ExtensionInventoryGroup'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1606,10): error TS2678: Type '"needs_signin"' is not comparable to type 'ExtensionInventoryGroup'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1608,10): error TS2678: Type '"needs_admin_setup"' is not comparable to type 'ExtensionInventoryGroup'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1620,79): error TS2322: Type '"needs_signin"' is not assignable to type 'ExtensionInventoryGroup'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1627,44): error TS2367: This comparison appears to be unintentional because the types 'ExtensionInventoryGroup' and '"needs_signin"' have no overlap.
+src/react-app/domains/settings/pages/mcp-view.tsx(1628,49): error TS2367: This comparison appears to be unintentional because the types 'ExtensionInventoryGroup' and '"needs_admin_setup"' have no overlap.
+src/react-app/domains/settings/pages/mcp-view.tsx(1946,29): error TS2339: Property 'orgMcpConnection' does not exist on type 'ExtensionItem'.
+src/react-app/domains/settings/pages/mcp-view.tsx(1966,30): error TS2367: This comparison appears to be unintentional because the types 'ExtensionInventoryGroup' and '"needs_signin"' have no overlap.
 src/react-app/domains/settings/state/extensions-store.ts(51,8): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/state/extensions-store.ts(58,8): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/settings/state/extensions-store.ts(64,8): error TS2307: Cannot find module '../../../../app/cloud/desktop-cloud-sync' or its corresponding type declarations.
@@ -121,6 +129,8 @@ src/react-app/shell/settings-route.tsx(1057,5): error TS2353: Object literal may
 src/react-app/shell/settings-route.tsx(1759,46): error TS2339: Property 'runCloudProviderSync' does not exist on type '{ subscribe: (listener: () => void) => () => void; getSnapshot: () => ProviderAuthStoreSnapshot; start: () => void; dispose: () => void; syncFromOptions: () => void; startProviderAuth: (providerId?: string | undefined, methodIndex?: number | undefined) => Promise<...>; ... 7 more ...; closeProviderAuthModal: (option...'.
 src/react-app/shell/settings-route.tsx(1763,51): error TS2339: Property 'syncCloudControlMcp' does not exist on type '{ subscribe: (listener: () => void) => () => void; getSnapshot: () => ConnectionsStoreSnapshot; start: () => void; dispose: () => void; syncFromOptions: () => void; readonly mcpServers: McpServerEntry[]; ... 20 more ...; completeMcpAuthModal: () => Promise<...>; }'.
 src/react-app/shell/settings-route.tsx(1767,28): error TS2339: Property 'runCloudProviderSync' does not exist on type '{ subscribe: (listener: () => void) => () => void; getSnapshot: () => ProviderAuthStoreSnapshot; start: () => void; dispose: () => void; syncFromOptions: () => void; startProviderAuth: (providerId?: string | undefined, methodIndex?: number | undefined) => Promise<...>; ... 7 more ...; closeProviderAuthModal: (option...'.
+src/react-app/shell/settings-route.tsx(1935,7): error TS2353: Object literal may only specify known properties, and 'importedCloudPlugins' does not exist in type 'ExtensionItemBuildInput'.
+src/react-app/shell/settings-route.tsx(1947,48): error TS2339: Property 'orgMcpConnectionItems' does not exist on type '{ items: ExtensionItem[]; builtInItems: ExtensionItem[]; installedMcpEntries: McpDirectoryInfo[]; quickConnectEntries: McpDirectoryInfo[]; installedSkills: { ...; }[]; }'.
 src/react-app/shell/settings-route.tsx(2002,74): error TS2554: Expected 0 arguments, but got 1.
 src/react-app/shell/settings-route.tsx(2247,13): error TS2322: Type '{ busy: boolean; providerAuthBusy: boolean; providerStatusLabel: string; providerStatusStyle: string; providerSummary: string; connectedProviders: { id: string; name: string; source: "custom" | "config" | "env" | "api"; }[]; ... 15 more ...; cloudProvidersView: Element; }' is not assignable to type 'IntrinsicAttributes & AiSettingsViewProps'.
 src/react-app/shell/settings-route.tsx(2249,53): error TS2339: Property 'importedCloudProviders' does not exist on type 'ProviderAuthStoreSnapshot'.
@@ -135,6 +145,7 @@ src/react-app/shell/settings-route.tsx(2273,50): error TS2339: Property 'cloudPr
 src/react-app/shell/settings-route.tsx(2330,37): error TS2339: Property 'syncCloudControlMcp' does not exist on type '{ subscribe: (listener: () => void) => () => void; getSnapshot: () => ConnectionsStoreSnapshot; start: () => void; dispose: () => void; syncFromOptions: () => void; readonly mcpServers: McpServerEntry[]; ... 20 more ...; completeMcpAuthModal: () => Promise<...>; }'.
 src/react-app/shell/settings-route.tsx(2375,22): error TS7006: Parameter 'skill' implicitly has an 'any' type.
 src/react-app/shell/settings-route.tsx(2383,20): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/react-app/shell/settings-route.tsx(2383,59): error TS7006: Parameter 'item' implicitly has an 'any' type.
 src/react-app/shell/settings-route.tsx(2430,53): error TS2339: Property 'cloudOrgProviders' does not exist on type 'ProviderAuthStoreSnapshot'.
 src/react-app/shell/settings-route.tsx(2431,53): error TS2551: Property 'connectCloudProvider' does not exist on type '{ subscribe: (listener: () => void) => () => void; getSnapshot: () => ProviderAuthStoreSnapshot; start: () => void; dispose: () => void; syncFromOptions: () => void; startProviderAuth: (providerId?: string | undefined, methodIndex?: number | undefined) => Promise<...>; ... 7 more ...; closeProviderAuthModal: (option...'. Did you mean 'disconnectProvider'?
 src/react-app/shell/settings-route.tsx(2432,58): error TS2339: Property 'importedCloudProviders' does not exist on type 'ProviderAuthStoreSnapshot'.
