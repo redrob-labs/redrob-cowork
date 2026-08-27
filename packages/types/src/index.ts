@@ -11,3 +11,5 @@ export * from "./den/egress-diagnostics"
 export * from "./den/inference"
 export * from "./den/microsoft-365"
 export * from "./den/mcp-connection-action"
+
+export * from "./memory"

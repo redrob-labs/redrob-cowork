@@ -5,6 +5,7 @@ import {
   type AgentContextDiagnosticsReport,
   type AgentContextDiagnosticsRequest,
 } from "@redrob/types/agent-context-diagnostics";
+import type { Memory } from "@redrob/types/memory";
 import { normalizeBaseUrl } from "@redrob/types/url";
 import {
   AGENT_CONTEXT_DIAGNOSTICS_REQUEST_TIMEOUT_MS,
@@ -1504,6 +1505,34 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       requestJson<RedrobRuntimeSnapshot>(baseUrl, "/runtime/versions", { token, hostToken, timeoutMs: timeouts.status }),
     status: () => requestJson<RedrobServerDiagnostics>(baseUrl, "/status", { token, hostToken, timeoutMs: timeouts.status }),
     capabilities: () => requestJson<RedrobServerCapabilities>(baseUrl, "/capabilities", { token, hostToken, timeoutMs: timeouts.capabilities }),
+    // The memory bank is global, not workspace-scoped: it replaced an
+    // organization-scoped hosted store that followed the user across projects.
+    listMemories: async (): Promise<Memory[]> => {
+      const payload = await requestJson<{ memories?: Memory[] }>(baseUrl, "/memory", {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      });
+      return payload.memories ?? [];
+    },
+    saveMemory: async (payload: { content: string; tags?: string[] | null; source?: string }): Promise<Memory> => {
+      const response = await requestJson<{ memory: Memory }>(baseUrl, "/memory", {
+        token,
+        hostToken,
+        method: "POST",
+        body: payload,
+        timeoutMs: timeouts.config,
+      });
+      return response.memory;
+    },
+    deleteMemory: async (memoryId: string): Promise<void> => {
+      await requestJson<unknown>(baseUrl, `/memory/${encodeURIComponent(memoryId)}`, {
+        token,
+        hostToken,
+        method: "DELETE",
+        timeoutMs: timeouts.config,
+      });
+    },
     getConnectState: (workspaceId?: string | null) => {
       const query = new URLSearchParams();
       if (workspaceId?.trim()) query.set("workspaceId", workspaceId.trim());

@@ -2422,7 +2422,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           />
         );
       case "memory":
-        return <MemoryView onOpenAccount={openCloudAccountSettings} />;
+        return <MemoryView client={redrobServerSnapshot.redrobServerClient} />;
       case "cloud-providers":
         return (
           <CloudProvidersView

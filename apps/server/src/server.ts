@@ -135,6 +135,7 @@ import {
   seedRedrobWorkspaceConfigIfEmpty,
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
+import { deleteMemory, listMemories, saveMemory } from "./local-memory-store.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -2181,6 +2182,38 @@ function createRoutes(
     } finally {
       releaseReservation();
     }
+  });
+
+  // The memory bank is global rather than workspace-scoped: it replaced an
+  // organization-scoped hosted store that followed the user across projects.
+  addRoute(routes, "GET", "/memory", "client", async () => {
+    return jsonResponse({ memories: await listMemories(config) });
+  });
+
+  addRoute(routes, "POST", "/memory", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const content = typeof body.content === "string" ? body.content.trim() : "";
+    if (!content) {
+      throw new ApiError(400, "invalid_payload", "content is required");
+    }
+    const memory = await saveMemory(config, {
+      content,
+      tags: Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null,
+      ...(typeof body.source === "string" ? { source: body.source } : {}),
+    });
+    return jsonResponse({ memory }, 201);
+  });
+
+  addRoute(routes, "DELETE", "/memory/:memoryId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const removed = await deleteMemory(config, ctx.params.memoryId);
+    if (!removed) {
+      throw new ApiError(404, "not_found", "memory not found");
+    }
+    return jsonResponse({ ok: true });
   });
 
   addRoute(routes, "GET", "/workspace/:id/config", "client", async (ctx) => {

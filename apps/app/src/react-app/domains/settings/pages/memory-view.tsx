@@ -10,9 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { t } from "@/i18n";
-import type { DenMemory } from "@/app/lib/den";
+import type { Memory } from "@redrob/types/memory";
+import type { RedrobServerClient } from "@/app/lib/redrob-server";
 import { ConfirmModal } from "@/react-app/design-system/modals/confirm-modal";
-import { useCloudSession } from "@/react-app/domains/settings/cloud/cloud-session-provider";
 import {
   SettingsList,
   SettingsListItem,
@@ -24,7 +24,7 @@ import {
 import { SettingsNotice, SettingsStack } from "@/react-app/domains/settings/settings-section";
 import { visibleMemories } from "./memory-utils";
 
-// The server delete is deferred so "Undo" is a true reversal (no re-create; original id/
+// The delete is deferred so "Undo" is a true reversal (no re-create; original id/
 // timestamps preserved). The undo toast dismisses BEFORE the delete fires, so a user is
 // never offered an undo that can no longer reverse the delete.
 const UNDO_DELETE_DELAY_MS = 6000;
@@ -35,27 +35,31 @@ const UNDO_TOAST_DURATION_MS = 5000;
 const COPY_SAVE_PROMPT =
   "Save this to my memory bank: draft a crisp, self-contained memory of the key fact worth keeping from our conversation, show it to me to confirm or edit, then save it. Do not include any secrets, credentials, tokens, or personal data.";
 
+/** Global rather than per-workspace, matching the store behind it. */
+const MEMORY_QUERY_KEY = ["memory", "local"] as const;
+
 export type MemoryViewProps = {
-  onOpenAccount: () => void;
+  /** Null while the local server is still starting or unreachable. */
+  client: RedrobServerClient | null;
 };
 
-export function MemoryView({ onOpenAccount }: MemoryViewProps) {
-  const { activeOrganization, authToken, client, isSignedIn } = useCloudSession();
+export function MemoryView({ client }: MemoryViewProps) {
   const queryClient = useQueryClient();
-  const activeOrgId = activeOrganization?.id ?? "";
-  const queryKey = React.useMemo(() => ["memory", activeOrgId] as const, [activeOrgId]);
 
-  const memoriesQuery = useQuery<DenMemory[]>({
-    queryKey,
-    enabled: Boolean(authToken.trim() && activeOrgId),
-    queryFn: () => client.listMemory(activeOrgId),
+  const memoriesQuery = useQuery<Memory[]>({
+    queryKey: MEMORY_QUERY_KEY,
+    enabled: Boolean(client),
+    queryFn: () => {
+      if (!client) return Promise.resolve([]);
+      return client.listMemories();
+    },
     staleTime: 30_000,
   });
 
-  // Optimistic-delete "veil": ids removed from the UI while their server delete is deferred.
-  // The query cache keeps the real server list, so a refetch can't resurrect a mid-delete row.
+  // Optimistic-delete "veil": ids removed from the UI while their delete is deferred.
+  // The query cache keeps the real stored list, so a refetch can't resurrect a mid-delete row.
   const [pendingDeleteIds, setPendingDeleteIds] = React.useState<ReadonlySet<string>>(() => new Set());
-  const [confirmTarget, setConfirmTarget] = React.useState<DenMemory | null>(null);
+  const [confirmTarget, setConfirmTarget] = React.useState<Memory | null>(null);
   const [copied, setCopied] = React.useState(false);
 
   type PendingDelete = { timer: ReturnType<typeof setTimeout>; flush: () => void };
@@ -75,14 +79,12 @@ export function MemoryView({ onOpenAccount }: MemoryViewProps) {
   }, []);
 
   const performDelete = React.useCallback(
-    (memory: DenMemory) => {
+    (memory: Memory) => {
       const timers = timersRef.current;
       if (!timers) return;
-      // Capture org/client/key NOW so the deferred delete (timer OR unmount flush) always targets
-      // the org the user deleted in — even if they switch orgs during the undo window.
-      const capturedOrgId = activeOrgId;
+      // Capture the client NOW so the deferred delete (timer OR unmount flush) still
+      // targets a live connection even if the local server is re-resolved meanwhile.
       const capturedClient = client;
-      const capturedKey = ["memory", capturedOrgId] as const;
       const toastKey = `memory-delete-${memory.id}`;
 
       const existing = timers.get(memory.id);
@@ -92,9 +94,10 @@ export function MemoryView({ onOpenAccount }: MemoryViewProps) {
       const commit = async () => {
         timers.delete(memory.id);
         try {
-          await capturedClient.deleteMemory(capturedOrgId, memory.id);
-          // Committed on the server: drop it from the cache and lift the veil.
-          queryClient.setQueryData<DenMemory[]>(capturedKey, (prev) => (prev ?? []).filter((m) => m.id !== memory.id));
+          if (!capturedClient) throw new Error(t("memory.delete_error"));
+          await capturedClient.deleteMemory(memory.id);
+          // Committed: drop it from the cache and lift the veil.
+          queryClient.setQueryData<Memory[]>(MEMORY_QUERY_KEY, (prev) => (prev ?? []).filter((m) => m.id !== memory.id));
           if (mountedRef.current) unveil(memory.id);
         } catch (error) {
           if (mountedRef.current) {
@@ -129,11 +132,11 @@ export function MemoryView({ onOpenAccount }: MemoryViewProps) {
       // modal closes and restores focus, so keyboard users are not stranded on the removed row.
       requestAnimationFrame(() => toolbarRef.current?.focus());
     },
-    [activeOrgId, client, queryClient, unveil],
+    [client, queryClient, unveil],
   );
 
   // On unmount, flush pending deletes so they persist even if the user navigates away during the
-  // undo window. Each flush uses the org/client captured when its delete was queued (not live refs).
+  // undo window. Each flush uses the client captured when its delete was queued (not live refs).
   React.useEffect(() => {
     mountedRef.current = true;
     const timers = timersRef.current;
@@ -162,27 +165,11 @@ export function MemoryView({ onOpenAccount }: MemoryViewProps) {
     }
   }, []);
 
-  if (!isSignedIn) {
+  if (!client) {
     return (
       <SettingsStack>
         <Separator />
-        <SettingsNotice>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span>{t("memory.sign_in_hint")}</span>
-            <Button size="sm" onClick={onOpenAccount}>
-              {t("memory.sign_in_cta")}
-            </Button>
-          </div>
-        </SettingsNotice>
-      </SettingsStack>
-    );
-  }
-
-  if (!activeOrgId) {
-    return (
-      <SettingsStack>
-        <Separator />
-        <SettingsNotice>{t("memory.no_active_org")}</SettingsNotice>
+        <SettingsNotice>{t("memory.server_unavailable")}</SettingsNotice>
       </SettingsStack>
     );
   }

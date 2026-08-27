@@ -34,6 +34,11 @@
       "development": "./src/automations.ts",
       "default": "./src/automations.ts"
     },
+    "./memory": {
+      "types": "./src/memory.ts",
+      "development": "./src/memory.ts",
+      "default": "./src/memory.ts"
+    },
     "./workflows": {
       "types": "./src/workflows.ts",
       "development": "./src/workflows.ts",
