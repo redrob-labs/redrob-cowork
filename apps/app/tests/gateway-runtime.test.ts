@@ -1,15 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
 import {
-  buildDenAuthUrl,
-  createDenClient,
-  getDenMcpUrl,
-  initializeDenBootstrapConfig,
-  readDenBootstrapConfig,
-  readDenSettings,
-  resolveDenBaseUrls,
-} from "../src/app/lib/den";
-import {
   hydrateRedrobServerSettingsFromEnv,
   readRedrobServerSettings,
 } from "../src/app/lib/redrob-server";
@@ -169,75 +160,6 @@ describe("gateway runtime mode", () => {
       hostInfo: null,
       source: "gateway",
     });
-  });
-
-  test("keeps Den web on the configured origin and Den API calls on the gateway origin", () => {
-    const storage = installWindow({ origin: "https://gw.example", gateway: true });
-    storage.setItem("redrob.den.baseUrl", "https://app.redrob.io");
-    storage.setItem("redrob.den.authToken", "den-session-token");
-
-    expect(resolveDenBaseUrls("https://gw.example")).toEqual({
-      baseUrl: "https://app.redrob.io",
-      apiBaseUrl: "https://gw.example/api/den",
-    });
-    expect(readDenSettings().baseUrl).toBe("https://app.redrob.io");
-    expect(readDenSettings().apiBaseUrl).toBe("https://gw.example/api/den");
-    expect(readDenSettings().authToken).toBe("den-session-token");
-  });
-
-  test("builds web auth URLs on the Den web origin with the gateway return origin", () => {
-    installWindow({ origin: "https://gw.example", gateway: true });
-
-    const authUrl = new URL(buildDenAuthUrl(readDenSettings().baseUrl, "sign-up"));
-
-    expect(authUrl.origin).toBe("https://app.redrob.io");
-    expect(authUrl.searchParams.get("mode")).toBe("sign-up");
-    expect(authUrl.searchParams.get("webAuth")).toBe("1");
-    expect(authUrl.searchParams.get("webAuthReturn")).toBe("https://gw.example");
-  });
-
-  test("routes Den auth API paths to Den web and v1 paths through the gateway API", async () => {
-    installWindow({ origin: "https://gw.example", gateway: true });
-    const requestedUrls: string[] = [];
-    Object.defineProperty(globalThis, "fetch", {
-      configurable: true,
-      value: async (input: RequestInfo | URL) => {
-        requestedUrls.push(getRequestUrl(input));
-        return new Response(JSON.stringify({
-          user: { id: "user_test", email: "user@example.com" },
-          token: "tok_test",
-        }), {
-          status: 200,
-          headers: { "content-type": "application/json" },
-        });
-      },
-    });
-
-    const client = createDenClient({ baseUrl: readDenSettings().baseUrl, token: "tok_test" });
-    await client.signInEmail("user@example.com", "password");
-    await client.getSession();
-
-    expect(requestedUrls).toEqual([
-      "https://app.redrob.io/api/auth/sign-in/email",
-      "https://gw.example/api/den/v1/me",
-    ]);
-  });
-
-  test("uses the gateway Den API proxy for MCP", () => {
-    installWindow({ origin: "https://gw.example", gateway: true });
-
-    expect(getDenMcpUrl()).toBe("https://gw.example/api/den/mcp");
-  });
-
-  test("returns a stable gateway bootstrap snapshot for React external stores", () => {
-    installWindow({ origin: "https://web.redrob.io", gateway: true });
-
-    const first = readDenBootstrapConfig();
-    const second = readDenBootstrapConfig();
-
-    expect(second).toBe(first);
-    expect(first.baseUrl).toBe("https://app.redrob.io");
-    expect(first.apiBaseUrl).toBe("https://web.redrob.io/api/den");
   });
 
   test("does not hydrate an instance bootstrap token into server storage behind the gateway", () => {
@@ -445,69 +367,6 @@ describe("non-gateway connection modes", () => {
     expect(buildRedrobHealthHeaders("https://instance.example.com/opencode")).toEqual({
       Authorization: "Bearer instance-token",
     });
-  });
-
-  test("plain web Den settings still use a stored custom base URL without the marker", () => {
-    const storage = installWindow({ origin: "https://instance.example.com" });
-    storage.setItem("redrob.den.baseUrl", "https://den.self-hosted.example.com");
-
-    expect(readDenSettings().baseUrl).toBe("https://den.self-hosted.example.com");
-    expect(readDenSettings().apiBaseUrl).toBe("https://den.self-hosted.example.com/api/den");
-  });
-
-  test("VITE_DEN_API_BASE_URL pins Den API calls to the proxy while sign-in stays on the web base", () => {
-    const previous = process.env.VITE_DEN_API_BASE_URL;
-    process.env.VITE_DEN_API_BASE_URL = "http://127.0.0.1:5178/api/den";
-    installWindow({ origin: "http://127.0.0.1:5178" });
-
-    try {
-      const settings = readDenSettings();
-      expect(settings.baseUrl).toBe("https://app.redrob.io");
-      expect(settings.apiBaseUrl).toBe("http://127.0.0.1:5178/api/den");
-
-      // Every Den client derives its API base the same way, so requests go
-      // through the same-origin proxy even when created from the web base.
-      const client = createDenClient({ baseUrl: settings.baseUrl, token: "den-token" });
-      expect(client.baseUrls.apiBaseUrl).toBe("http://127.0.0.1:5178/api/den");
-      expect(client.baseUrls.baseUrl).toBe("https://app.redrob.io");
-
-      // Sign-in still opens the real Den web app, not the proxy origin.
-      // Loopback cannot use webAuth return URLs against hosted Den, so the
-      // URL uses desktopAuth (copy link / paste grant) instead.
-      const authUrl = new URL(buildDenAuthUrl(settings.baseUrl, "sign-in"));
-      expect(authUrl.origin).toBe("https://app.redrob.io");
-      expect(authUrl.searchParams.get("desktopAuth")).toBe("1");
-      expect(authUrl.searchParams.get("webAuth")).toBeNull();
-    } finally {
-      restoreEnv("VITE_DEN_API_BASE_URL", previous);
-    }
-  });
-
-  test("loopback web auth uses desktop handoff instead of an unapprovable webAuth return URL", () => {
-    installWindow({ origin: "http://127.0.0.1:5178" });
-
-    const authUrl = new URL(buildDenAuthUrl(readDenSettings().baseUrl, "sign-in"));
-
-    expect(authUrl.origin).toBe("https://app.redrob.io");
-    expect(authUrl.searchParams.get("desktopAuth")).toBe("1");
-    expect(authUrl.searchParams.get("desktopScheme")).toBe("redrob");
-    expect(authUrl.searchParams.get("webAuth")).toBeNull();
-    expect(authUrl.searchParams.get("webAuthReturn")).toBeNull();
-  });
-
-  test("force-env clears a stale stored Den base URL on web bootstrap init", async () => {
-    const previous = process.env.VITE_REDROB_FORCE_ENV_SETTINGS;
-    process.env.VITE_REDROB_FORCE_ENV_SETTINGS = "1";
-    const storage = installWindow({ origin: "http://127.0.0.1:5178" });
-    storage.setItem("redrob.den.baseUrl", "http://127.0.0.1:8779");
-
-    try {
-      await initializeDenBootstrapConfig();
-      expect(storage.getItem("redrob.den.baseUrl")).toBeNull();
-      expect(readDenSettings().baseUrl).toBe("https://app.redrob.io");
-    } finally {
-      restoreEnv("VITE_REDROB_FORCE_ENV_SETTINGS", previous);
-    }
   });
 
   test("desktop runtime still uses live desktop server info without the marker", async () => {

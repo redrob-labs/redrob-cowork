@@ -72,14 +72,12 @@ import {
   preserveWorkspaceRouteSession,
   removeWorkspaceRouteSession,
   sessionIdForLegacyWorkspaceInference,
-  automationsRoute,
   workspaceExtensionsRoute,
   workspaceSessionRoute,
 } from "./workspace-routes";
 
 export type UseWorkspaceRouteStateInput = {
   developerMode: boolean;
-  workspaceRoute?: "session" | "automations";
   /** Invoked when the redrob-server settings-changed event fires (the route bumps its settings version). */
   onServerSettingsChanged: () => void;
   /** Receives the local redrob-server host info discovered during refresh. */
@@ -116,7 +114,7 @@ function withRouteRefreshTimeout<T>(promise: Promise<T>, label: string): Promise
 }
 
 export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
-  const { developerMode, onServerSettingsChanged, onHostInfo, workspaceRoute = "session" } = input;
+  const { developerMode, onServerSettingsChanged, onHostInfo } = input;
   const navigate = useNavigate();
   const location = useLocation();
   const local = useLocal();
@@ -149,13 +147,8 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
       navigate(workspaceExtensionsRoute(workspaceId, extensionsRoutePath), options);
       return;
     }
-    if (workspaceRoute === "automations") {
-      if (/^\/automations(?:\/|$)/.test(location.pathname)) return;
-      navigate(automationsRoute(), options);
-      return;
-    }
     navigateToWorkspaceSession(workspaceId, sessionId, options);
-  }, [extensionsRouteActive, extensionsRoutePath, location.pathname, navigate, navigateToWorkspaceSession, workspaceRoute]);
+  }, [extensionsRouteActive, extensionsRoutePath, navigate, navigateToWorkspaceSession]);
 
   const {
     markRouteReady: markBootRouteReady,

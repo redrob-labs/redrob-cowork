@@ -56,7 +56,7 @@ describe("settings route parsing", () => {
   });
 
   test("round-trips Library state sections through settings and first-class route writers", () => {
-    const sections: Array<"needs-sign-in" | "needs-admin-setup"> = ["needs-sign-in", "needs-admin-setup"];
+    const sections: Array<"available" | "ready"> = ["available", "ready"];
     for (const section of sections) {
       const settingsRoute = parseSettingsPath(`/settings/extensions/${section}`);
       expect(settingsRoute).toEqual({ tab: "extensions", redirectPath: null, extensionsSection: section });

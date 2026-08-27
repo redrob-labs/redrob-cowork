@@ -184,7 +184,6 @@ describe("AgentContextDiagnosticsReportView", () => {
     expect(html).toContain("Configured headers present · values redacted");
     expect(html).toContain("Live connection status not queried");
     expect(html).toContain("No LLM turn is started");
-    expect(html).toContain("/mcp/agent");
     expect(html).not.toContain("/wrong-layer/mcp/agent");
     expect(html).toContain("search_capabilities");
     expect(html).toContain("execute_capability");
@@ -199,7 +198,6 @@ describe("AgentContextDiagnosticsReportView", () => {
     expect(html).toContain("Agent diagnostics complete: Warning");
     expect(html).toContain('aria-label="search_capabilities: Yes"');
     expect(html).toContain('data-marker-value="true"');
-    expect(html).toContain('data-testid="agent-diagnostics-cloud-endpoint"');
     expect(html).toContain('data-testid="agent-diagnostics-mcp-sync"');
     expect(html).toContain('data-testid="agent-diagnostics-plugin-tools-unavailable"');
     expect(html).not.toContain("Settings Connect marker");

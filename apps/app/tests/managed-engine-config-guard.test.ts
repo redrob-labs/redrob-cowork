@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 const sourceRoot = join(import.meta.dir, "..", "src");
 const allowedRelativePath = "react-app/domains/connections/managed-engine-config.ts";
@@ -22,9 +22,9 @@ describe("managed engine config guard", () => {
   test("keeps engine config.update writes behind the managed choke point", () => {
     const offenders = sourceFiles(sourceRoot)
       .map((path) => ({ path, relativePath: relative(sourceRoot, path) }))
-      .filter((file) => file.relativePath !== allowedRelativePath)
+      .filter((file) => file.relativePath.split(sep).join("/") !== allowedRelativePath)
       .filter((file) => readFileSync(file.path, "utf8").includes("config.update("))
-      .map((file) => file.relativePath);
+      .map((file) => file.relativePath.split(sep).join("/"));
 
     expect(offenders).toEqual([]);
   });

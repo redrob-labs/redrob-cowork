@@ -45,8 +45,6 @@ export type ModelPickerModalProps = {
   onToggleProvider?: (providerId: string, enabled: boolean) => void;
   onOpenSettings: () => void;
   onClose: (options?: { restorePromptFocus?: boolean }) => void;
-  /** Den entitlement present. Picker no longer upsells here; callers still pass it. */
-  /** The server is waiting to reload this workspace with Redrob Models. */
 };
 
 type ProviderGroup = {

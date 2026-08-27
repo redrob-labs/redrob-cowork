@@ -25,7 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 
-import { isBuiltInRedrobWorkExtension, getMcpServerName, type McpDirectoryInfo } from "../../../../app/constants";
+import { getMcpServerName, type McpDirectoryInfo } from "../../../../app/constants";
 import { evaluateEnablement } from "../../../../app/enablement";
 import type { EnablementResult } from "../../../../app/extensions";
 import { ExtensionCard, type ExtensionLayout } from "../../../design-system/extension-card";
@@ -151,8 +151,6 @@ export type McpViewProps = {
   isExtensionConnected?: (entry: McpDirectoryInfo) => boolean;
   /** Enablement context for evaluating extension active state. */
   enablementContext?: import("../../../../app/enablement").EnablementContext;
-  /** Organization policy restriction for Redrob Work-provided built-in extensions. */
-  builtInExtensionsDisabled?: boolean;
   /** Preview a Claude Code plugin bundle from a GitHub URL ("Will install" disclosure). */
   previewClaudePlugin?: (url: string) => Promise<RedrobClaudePluginPreview>;
   /** Install a Claude Code plugin bundle from a GitHub URL. */
@@ -170,8 +168,6 @@ export type McpViewProps = {
   onLibraryListsRefresh?: () => Promise<void> | void;
   onRefresh?: () => void;
 };
-
-const builtInExtensionDisabledReason = () => t("extensions.disabled_by_organization");
 
 const statusDot = (status: ReactMcpStatus) => {
   switch (status) {
@@ -646,7 +642,6 @@ export function McpView(props: McpViewProps) {
   };
 
   const isEntryConfigured = (entry: McpDirectoryInfo) => {
-    if (props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(entry)) return false;
     const result = enablementForEntry(entry);
     if (result) return result.active;
     // Fallback for entries without enablement context.
@@ -672,10 +667,6 @@ export function McpView(props: McpViewProps) {
 
   const hiddenCount = quickConnectList.filter((entry) => isRedrobWorkExtensionHidden(entry)).length +
     (props.installedSkills ?? []).filter((skill) => isRedrobWorkExtensionHidden(getSkillHiddenId(skill))).length;
-  const policyHiddenBuiltInCount = props.builtInExtensionsDisabled
-    ? quickConnectList.filter((entry) => isBuiltInRedrobWorkExtension(entry) && !isRedrobWorkExtensionHidden(entry)).length
-    : 0;
-  const hiddenOrPolicyCount = hiddenCount + policyHiddenBuiltInCount;
 
   const requestLogout = (name: string) => {
     if (!name.trim()) return;
@@ -737,12 +728,7 @@ export function McpView(props: McpViewProps) {
         const extensionConfigSlot = props.configSlotForEntry?.(detailEntry) ?? null;
         const hasConfigSlot = extensionConfigSlot !== null;
         const hidden = isRedrobWorkExtensionHidden(detailEntry);
-        const disabledReason = props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(detailEntry)
-          ? builtInExtensionDisabledReason()
-          : null;
-        const isConnected = disabledReason
-          ? false
-          : isToggleOnlyExtension(detailEntry)
+        const isConnected = isToggleOnlyExtension(detailEntry)
           ? isRedrobWorkExtensionEnabled(detailEntry)
           : detailEntry.kind === "extension" && !isMcpBackedExtension(detailEntry)
           ? props.isExtensionConnected?.(detailEntry) ?? false
@@ -764,7 +750,6 @@ export function McpView(props: McpViewProps) {
             errorInfo={mcpConnectFailure?.id === getMcpIdentityKey(detailEntry) ? mcpConnectFailure.message : null}
             hidden={hidden}
             preview={detailEntry.preview}
-            disabledReason={disabledReason}
             setupInstructions={detailEntry.extensionManifest?.setup?.instructions}
             resourceLabels={extensionResourceLabels(detailEntry)}
             contributionLabels={extensionContributionLabels(detailEntry)}
@@ -772,9 +757,9 @@ export function McpView(props: McpViewProps) {
             environment={detailEntry.serverName === "redrob-ui" ? redrobUiMcpEnvironment ?? undefined : undefined}
             url={typeof detailEntry.url === "string" ? detailEntry.url : undefined}
             oauth={detailEntry.oauth}
-            configSlot={disabledReason ? null : extensionConfigSlot}
+            configSlot={extensionConfigSlot}
             showEnablementCard
-            onConnect={disabledReason ? undefined : isToggleOnlyExtension(detailEntry) ? () => {
+            onConnect={isToggleOnlyExtension(detailEntry) ? () => {
               setRedrobWorkExtensionEnabled(detailEntry, true);
               closeDetail();
             } : hasConfigSlot ? undefined : async () => {
@@ -789,7 +774,7 @@ export function McpView(props: McpViewProps) {
                 message: result.error.trim() ? result.error : t("mcp.connect_failed"),
               });
             }}
-            onUninstall={disabledReason ? undefined : isToggleOnlyExtension(detailEntry) && isConnected ? () => {
+            onUninstall={isToggleOnlyExtension(detailEntry) && isConnected ? () => {
               setRedrobWorkExtensionEnabled(detailEntry, false);
             } : isQuickConnectConfigured(detailEntry) ? () => {
               const slug = getMcpIdentityKey(detailEntry);
@@ -958,12 +943,6 @@ export function McpView(props: McpViewProps) {
         </div>
       ) : null}
 
-      {props.builtInExtensionsDisabled ? (
-        <div className="mb-5 rounded-xl border border-amber-6 bg-amber-2 px-4 py-3 text-xs text-amber-11">
-          Built-in Redrob Work extensions are disabled by your organization. Use Show hidden to review blocked built-ins.
-        </div>
-      ) : null}
-
       <div className="mb-5">
         <ExtensionStateTabs
           state={inventoryState}
@@ -1009,7 +988,7 @@ export function McpView(props: McpViewProps) {
               : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
           }`}
         >
-          {showHidden ? "Showing hidden" : hiddenOrPolicyCount > 0 ? `Show hidden (${hiddenOrPolicyCount})` : "Show hidden"}
+          {showHidden ? "Showing hidden" : hiddenCount > 0 ? `Show hidden (${hiddenCount})` : "Show hidden"}
         </button>
         <div className="ml-auto flex items-center gap-1">
           <ExtensionLayoutToggle
@@ -1031,7 +1010,7 @@ export function McpView(props: McpViewProps) {
         skillCount={skillCount}
         entries={
           quickConnectList.filter((entry) => {
-            if (!showHidden && (isRedrobWorkExtensionHidden(entry) || (props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(entry)))) return false;
+            if (!showHidden && isRedrobWorkExtensionHidden(entry)) return false;
             if (!matchesExtensionFilter(
               filter,
               taxonomyForDirectoryEntry(entry),
@@ -1090,11 +1069,6 @@ export function McpView(props: McpViewProps) {
         connectingName={props.mcpConnectingName}
         isEntryHidden={(entry) => isRedrobWorkExtensionHidden(entry)}
         isSkillHidden={(skill) => isRedrobWorkExtensionHidden(getSkillHiddenId(skill))}
-        disabledReasonForEntry={(entry) =>
-          props.builtInExtensionsDisabled && isBuiltInRedrobWorkExtension(entry)
-            ? builtInExtensionDisabledReason()
-            : null
-        }
         isConfigured={isEntryConfigured}
         enablementForEntry={props.enablementContext ? enablementForEntry : undefined}
         statusForEntry={quickConnectStatus}
@@ -1363,7 +1337,6 @@ function McpQuickConnectSection(props: {
   connectingName: string | null;
   isEntryHidden: (entry: McpDirectoryInfo) => boolean;
   isSkillHidden: (skill: SkillItem) => boolean;
-  disabledReasonForEntry: (entry: McpDirectoryInfo) => string | null;
   isConfigured: (entry: McpDirectoryInfo) => boolean;
   enablementForEntry?: (entry: McpDirectoryInfo) => { active: boolean; results: EnablementResult[] } | null;
   statusForEntry: (entry: McpDirectoryInfo) => { status: ReactMcpStatus } | undefined;
@@ -1386,13 +1359,10 @@ function McpQuickConnectSection(props: {
     const enablement = props.enablementForEntry?.(entry);
     const connecting = props.connectingName === entry.name;
     const hidden = props.isEntryHidden(entry);
-    const disabledReason = props.disabledReasonForEntry(entry);
     const entryUrl = typeof entry.url === "string" ? entry.url : undefined;
-    const group: ExtensionInventoryGroup = disabledReason
-      ? "disabled"
-      : configured || enablement?.active
-        ? "ready"
-        : "available";
+    const group: ExtensionInventoryGroup = configured || enablement?.active
+      ? "ready"
+      : "available";
     cards.push({
       key: getMcpIdentityKey(entry),
       group,
@@ -1410,11 +1380,10 @@ function McpQuickConnectSection(props: {
           connecting={connecting}
           hidden={hidden}
           preview={entry.preview}
-          disabledReason={disabledReason}
           disabled={props.busy}
           meta={t("extensions.surface_this_device")}
           actionLabel={configured ? "View details" : t("mcp.tap_to_connect")}
-          nextActionLabel={configured || disabledReason ? undefined : t("connect.row_action_connect")}
+          nextActionLabel={configured ? undefined : t("connect.row_action_connect")}
           onClick={() => props.onDetail(entry)}
         />
       ),

@@ -2,12 +2,10 @@
 import * as React from "react";
 import {
   AlertCircle,
-  AlertTriangle,
   Archive,
   ArchiveRestore,
   ArrowLeft,
   ArrowRight,
-  Clock3,
   ChevronRight,
   Columns2,
   FolderPlus,
@@ -844,9 +842,6 @@ export type AppSidebarProps = {
   onTestWorkspaceConnection: (workspaceId: string) => Promise<boolean> | boolean | void;
   onForgetWorkspace: (workspaceId: string) => void;
   onOpenCreateWorkspace: () => void;
-  automationsActive?: boolean;
-  automationsNeedAttention?: boolean;
-  onOpenAutomations?: () => void;
   /** Opens the cross-session message search dialog (Cmd/Ctrl+Shift+F). */
   onOpenSessionSearch?: () => void;
   /** Back/forward across recently viewed conversations, rendered at the top of the sidebar. */
@@ -1125,26 +1120,6 @@ export function AppSidebar(props: AppSidebarProps) {
                   </kbd>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            ) : null}
-            {props.onOpenAutomations ? (
-              <SidebarDestination
-                active={props.automationsActive === true}
-                icon={Clock3}
-                label="Automations"
-                labelContent={(
-                  <span className="flex min-w-0 flex-1 items-center gap-2">
-                    <span className="truncate">Automations</span>
-                    {props.automationsNeedAttention ? (
-                      <AlertTriangle
-                        data-automations-attention-indicator
-                        className="ml-auto size-3.5 shrink-0 text-warning"
-                        aria-label="An Automation needs attention"
-                      />
-                    ) : null}
-                  </span>
-                )}
-                onSelect={props.onOpenAutomations}
-              />
             ) : null}
             <SidebarDestination
               active={props.extensionsActive === true}

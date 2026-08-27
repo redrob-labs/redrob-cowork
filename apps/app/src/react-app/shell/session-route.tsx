@@ -480,7 +480,6 @@ export function SessionRoute() {
     runRemoteWorkspaceConnectionCheck,
   } = useWorkspaceRouteState({
     developerMode,
-    workspaceRoute: "session",
     onServerSettingsChanged: () => setRedrobServerSettingsVersion((value) => value + 1),
     onHostInfo: setRedrobServerHostInfoState,
   });

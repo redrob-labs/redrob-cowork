@@ -6,7 +6,6 @@ import {
   Bug,
   Cable,
   ChevronDown,
-  CloudCog,
   Cog,
   FolderLock,
   Info,
@@ -16,9 +15,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
-  Store,
   Terminal,
-  UserCircle,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -69,14 +66,8 @@ export function getSettingsTabIcon(tab: SettingsTab) {
       return SlidersHorizontal;
     case "permissions":
       return FolderLock;
-    case "cloud-account":
-      return UserCircle;
     case "connect":
       return Cable;
-    case "cloud-marketplaces":
-      return Store;
-    case "cloud-providers":
-      return CloudCog;
     case "skills":
       return Sparkles;
     case "memory":
@@ -108,14 +99,8 @@ export function getSettingsTabLabel(tab: SettingsTab) {
       return "Preferences";
     case "permissions":
       return "Permissions";
-    case "cloud-account":
-      return t("settings.tab_cloud_account");
     case "connect":
       return t("settings.tab_connect");
-    case "cloud-marketplaces":
-      return t("settings.tab_cloud_marketplaces");
-    case "cloud-providers":
-      return t("settings.tab_cloud_providers");
     case "skills":
       return t("settings.tab_skills");
     case "memory":
@@ -149,14 +134,8 @@ export function getSettingsTabDescription(tab: SettingsTab) {
       return "Default model, reasoning, and compaction";
     case "permissions":
       return "Authorized folders and file access";
-    case "cloud-account":
-      return t("settings.tab_description_cloud_account");
     case "connect":
       return t("settings.tab_description_connect");
-    case "cloud-marketplaces":
-      return t("settings.tab_description_cloud_marketplaces");
-    case "cloud-providers":
-      return t("settings.tab_description_cloud_providers");
     case "skills":
       return t("settings.tab_description_skills");
     case "memory":
@@ -189,17 +168,15 @@ export function getWorkspaceSettingsTabs(): SettingsTab[] {
 export function getGlobalSettingsTabs(
   developerMode: boolean,
   capabilities: Pick<PlatformCapabilities, "autoUpdate" | "localRuntimeControl">,
+  memoryEnabled: boolean,
 ): SettingsTab[] {
   const tabs: SettingsTab[] = ["ai", "appearance", "environment"];
+  if (memoryEnabled) tabs.push("memory");
   if (capabilities.autoUpdate) tabs.push("updates");
   if (capabilities.localRuntimeControl) tabs.push("recovery");
   if (developerMode) tabs.push("debug");
   return tabs;
 }
-
-export const CLOUD_SETTINGS_TABS: SettingsTab[] = [
-  "cloud-account",
-];
 
 export function isSettingsTabBeta(_tab: SettingsTab) {
   return false;
@@ -232,14 +209,9 @@ function SettingsSidebarTabLabel({ tab }: { tab: SettingsTab }) {
 }
 
 /**
- * Cloud settings tabs, gated by client-only preview flags. The Memory tab is
- * surfaced only when `featureFlags.memory` is on (C-4). Both settings nav
- * surfaces (sidebar + compact section menu) must use this so they can't drift.
+ * Both settings nav surfaces (sidebar + compact section menu) share the tab
+ * groups above so they can't drift.
  */
-export function getCloudSettingsTabs(memoryEnabled: boolean): SettingsTab[] {
-  return memoryEnabled ? ["cloud-account", "memory"] : CLOUD_SETTINGS_TABS;
-}
-
 type SettingsPageProps = {
   activeTab: SettingsTab;
   onSelectTab: (tab: SettingsTab) => void;
@@ -269,8 +241,7 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
   const platform = usePlatform();
   const { memoryEnabled } = useFeatureFlagsPreferences();
   const workspaceTabs = getWorkspaceSettingsTabs();
-  const globalTabs = getGlobalSettingsTabs(props.developerMode, platform.capabilities);
-  const cloudTabs = getCloudSettingsTabs(memoryEnabled);
+  const globalTabs = getGlobalSettingsTabs(props.developerMode, platform.capabilities, memoryEnabled);
 
   return (
     <Sidebar collapsible="icon" className="mac:**:data-[sidebar=sidebar]:bg-transparent">
@@ -355,27 +326,6 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {globalTabs.map((tab) => {
-                const Icon = getSettingsTabIcon(tab);
-                return (
-                  <SidebarDestination
-                    key={tab}
-                    active={isSettingsTabActive(props.activeTab, tab)}
-                    icon={Icon}
-                    label={getSettingsTabLabel(tab)}
-                    labelContent={<SettingsSidebarTabLabel tab={tab} />}
-                    onSelect={() => props.onSelectTab(tab)}
-                  />
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("settings.group_cloud")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {cloudTabs.map((tab) => {
                 const Icon = getSettingsTabIcon(tab);
                 return (
                   <SidebarDestination

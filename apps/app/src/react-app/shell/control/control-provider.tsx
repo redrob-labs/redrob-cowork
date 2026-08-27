@@ -766,7 +766,7 @@ export function RedrobRouteControlActions() {
           type: "string",
           required: true,
           description:
-            "Settings tab: general | ai | preferences | permissions | shell | environment | advanced | appearance | updates | recovery | debug | cloud-account | cloud-providers",
+            "Settings tab: general | ai | preferences | permissions | shell | environment | advanced | appearance | updates | recovery | debug | memory",
         },
       ],
       previewArgs: { panel: "ai" },

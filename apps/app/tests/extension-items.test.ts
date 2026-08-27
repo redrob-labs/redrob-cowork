@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
 import type { McpDirectoryInfo } from "../src/app/constants";
-import type { DenExternalMcpConnection } from "../src/app/lib/den";
 import type { McpServerEntry } from "../src/app/types";
 import {
   buildExtensionItems,
@@ -62,21 +61,6 @@ const directNotionServer: McpServerEntry = {
   },
 };
 
-function orgMcpConnection(input: Partial<DenExternalMcpConnection> = {}): DenExternalMcpConnection {
-  return {
-    id: input.id ?? "externalMcpConnection_notion",
-    name: input.name ?? "Notion",
-    url: input.url ?? "https://mcp.notion.com/mcp",
-    authType: input.authType ?? "oauth",
-    credentialMode: input.credentialMode ?? "per_member",
-    connected: input.connected ?? true,
-    connectedAt: input.connectedAt ?? null,
-    connectedForMe: input.connectedForMe ?? false,
-    ...(input.needsReconnect !== undefined ? { needsReconnect: input.needsReconnect } : {}),
-    ...(input.missingFeatures !== undefined ? { missingFeatures: input.missingFeatures } : {}),
-  };
-}
-
 describe("extension item projection", () => {
   test("attributes only current Redrob Work-provided local skills", () => {
     expect(isRedrobProvidedSkill({
@@ -107,8 +91,6 @@ describe("extension item projection", () => {
       quickConnect: [connectedBuiltIn, availableBuiltIn, notionQuickConnect],
       mcpServers: [],
       installedSkills: [],
-      importedCloudPlugins: {},
-      cloudMarketplaces: [],
       enablementContext: {},
       isBuiltInConnected: (entry) => entry.id === connectedBuiltIn.id,
     });
@@ -118,73 +100,11 @@ describe("extension item projection", () => {
     expect(result.quickConnectEntries.map((entry) => entry.name)).toEqual(["Redrob Work Browser", "Computer Use"]);
   });
 
-  test("projects per-member org MCP grants as Marketplace items until connected", () => {
-    const result = buildExtensionItems({
-      quickConnect: [notionQuickConnect],
-      mcpServers: [],
-      installedSkills: [],
-      importedCloudPlugins: {},
-      cloudMarketplaces: [],
-      orgMcpConnections: [orgMcpConnection()],
-      enablementContext: {},
-      isBuiltInConnected: () => false,
-    });
-
-    expect(result.orgMcpConnectionItems.map((item) => ({ name: item.name, state: item.installState, active: item.active }))).toEqual([
-      { name: "Notion", state: "available", active: false },
-    ]);
-    expect(result.quickConnectEntries.map((entry) => entry.name)).toEqual([]);
-  });
-
-  test("moves connected per-member org MCP grants into My Extensions", () => {
-    const result = buildExtensionItems({
-      quickConnect: [notionQuickConnect],
-      mcpServers: [],
-      installedSkills: [],
-      importedCloudPlugins: {},
-      cloudMarketplaces: [],
-      orgMcpConnections: [orgMcpConnection({ connectedForMe: true })],
-      enablementContext: {},
-      isBuiltInConnected: () => false,
-    });
-
-    expect(result.orgMcpConnectionItems.map((item) => ({ name: item.name, state: item.installState, active: item.active }))).toEqual([
-      { name: "Notion", state: "installed", active: true },
-    ]);
-    expect(result.items.some((item) => item.source === "org-connection" && item.installState === "installed")).toBe(true);
-  });
-
-  test("keeps a connected grant with missing features out of ready state", () => {
-    const result = buildExtensionItems({
-      quickConnect: [notionQuickConnect],
-      mcpServers: [],
-      installedSkills: [],
-      importedCloudPlugins: {},
-      cloudMarketplaces: [],
-      orgMcpConnections: [orgMcpConnection({
-        connectedForMe: true,
-        needsReconnect: false,
-        missingFeatures: ["databaseWrite"],
-      })],
-      enablementContext: {},
-      isBuiltInConnected: () => false,
-    });
-
-    expect(result.orgMcpConnectionItems.map((item) => ({
-      state: item.installState,
-      setup: item.setupState,
-      active: item.active,
-    }))).toEqual([{ state: "available", setup: "needs_setup", active: false }]);
-  });
-
-  test("keeps configured direct MCPs even when an org equivalent exists", () => {
+  test("keeps configured direct MCPs alongside their quick-connect entry", () => {
     const result = buildExtensionItems({
       quickConnect: [notionQuickConnect],
       mcpServers: [directNotionServer],
       installedSkills: [],
-      importedCloudPlugins: {},
-      cloudMarketplaces: [],
-      orgMcpConnections: [orgMcpConnection()],
       enablementContext: {},
       isBuiltInConnected: () => false,
     });
@@ -193,21 +113,6 @@ describe("extension item projection", () => {
     expect(result.installedMcpEntries.map((entry) => entry.name)).toEqual(["Notion"]);
   });
 
-  test("hides an unfinished shared org MCP instead of offering it as something to add", () => {
-    const result = buildExtensionItems({
-      quickConnect: [notionQuickConnect],
-      mcpServers: [],
-      installedSkills: [],
-      importedCloudPlugins: {},
-      cloudMarketplaces: [],
-      orgMcpConnections: [orgMcpConnection({ credentialMode: "shared", connected: false, connectedForMe: false })],
-      enablementContext: {},
-      isBuiltInConnected: () => false,
-    });
-
-    expect(result.orgMcpConnectionItems).toEqual([]);
-    expect(result.quickConnectEntries).toEqual([]);
-  });
 });
 
 describe("resolveExtensionInventoryGroup", () => {
@@ -238,11 +143,4 @@ describe("resolveExtensionInventoryGroup", () => {
     expect(resolveExtensionInventoryGroup(baseItem())).toBe("ready");
   });
 
-  test("maps org connection readiness", () => {
-    expect(resolveExtensionInventoryGroup(baseItem({
-      source: "org-connection",
-      installState: "available",
-      orgMcpConnection: orgMcpConnection({ connectedForMe: false }),
-    }))).toBe("needs_signin");
-  });
 });

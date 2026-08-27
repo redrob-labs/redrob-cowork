@@ -17,8 +17,6 @@ import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { SettingsInset, SettingsNotice, SettingsSection } from "../settings-section";
 
-const EXPECTED_CLOUD_TOOL_IDS = ["search_capabilities", "execute_capability"];
-
 const STATUS_LABEL_KEYS: Record<AgentContextDiagnosticStatus | AgentContextDiagnosticOverall, string> = {
   passed: "connect.diagnostics_status_passed",
   warning: "connect.diagnostics_status_warning",
@@ -73,12 +71,6 @@ const PROBE_CODE_LABEL_KEYS: Record<NonNullable<AgentContextDiagnosticsReport["o
   list_failed: "connect.diagnostics_probe_code_list_failed",
   not_attempted: "connect.diagnostics_probe_code_not_attempted",
   remote_workspace_privacy: "connect.diagnostics_probe_code_remote_workspace_privacy",
-};
-
-const BRANCH_LABEL_KEYS: Record<AgentContextDiagnosticsReport["connect"]["expectedBranch"], string> = {
-  "cloud-active": "connect.diagnostics_branch_cloud_active",
-  "cloud-disconnected": "connect.diagnostics_branch_cloud_disconnected",
-  "extensions-only": "connect.diagnostics_branch_extensions_only",
 };
 
 const AGENT_STATE_LABEL_KEYS: Record<AgentContextDiagnosticsReport["agent"]["configuredRedrobAgent"]["state"], string> = {
@@ -465,68 +457,6 @@ function McpInventory(props: {
           })}
         </div>
       )}
-    </div>
-  );
-}
-
-function CloudCatalog(props: {
-  report: AgentContextDiagnosticsReport;
-  effectiveEngineObserved: boolean;
-}) {
-  const observed = props.report.observedCloudToolIds;
-  const cloudMcp = props.report.mcps.find(
-    (mcp) => mcp.source === "config.remote" && mcp.name === "redrob-cloud" && mcp.path === "/mcp/agent",
-  ) ?? props.report.mcps.find(
-    (mcp) => mcp.name === "redrob-cloud" && mcp.path === "/mcp/agent",
-  );
-  const observedTerminalPath = cloudMcp?.path === "/mcp/agent" ? cloudMcp.path : null;
-  return (
-    <div className="space-y-3">
-      <div>
-        <div className="text-sm font-semibold text-dls-text">{t("connect.diagnostics_cloud_title")}</div>
-        <div className="text-xs text-dls-secondary">{t("connect.diagnostics_cloud_description")}</div>
-      </div>
-      <div className="grid gap-3 rounded-xl border border-dls-border bg-dls-surface p-3 sm:grid-cols-2">
-        <Fact label={t("connect.diagnostics_expected_endpoint_label")} value="/mcp/agent" />
-        <div data-testid="agent-diagnostics-cloud-endpoint-expected" className="sr-only">/mcp/agent</div>
-        <div data-testid="agent-diagnostics-cloud-endpoint">
-          <Fact
-            label={t(cloudMcp?.source === "config.remote"
-              ? "connect.diagnostics_runtime_endpoint_label"
-              : cloudMcp?.source === "engine.config"
-                ? "connect.diagnostics_effective_endpoint_label"
-                : "connect.diagnostics_configured_endpoint_label")}
-            value={observedTerminalPath ?? t("connect.diagnostics_not_observed")}
-          />
-        </div>
-        <Fact label={t("connect.diagnostics_expected_tools")} value={EXPECTED_CLOUD_TOOL_IDS.join(", ")} />
-      </div>
-      <div className="space-y-1.5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-dls-secondary">
-          {t("connect.diagnostics_observed_tools")}
-        </div>
-        {observed.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {observed.map((toolId) => (
-              <span
-                key={toolId}
-                data-testid="agent-diagnostics-cloud-tool"
-                data-expected={EXPECTED_CLOUD_TOOL_IDS.includes(toolId) ? "true" : "false"}
-                className={cn(
-                  "rounded-md px-2 py-1 font-mono text-xs",
-                  EXPECTED_CLOUD_TOOL_IDS.includes(toolId)
-                    ? "bg-green-3 text-green-11"
-                    : "bg-red-3 text-red-11",
-                )}
-              >
-                {toolId}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <SettingsNotice>{t("connect.diagnostics_cloud_not_observed")}</SettingsNotice>
-        )}
-      </div>
     </div>
   );
 }

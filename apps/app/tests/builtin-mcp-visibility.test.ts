@@ -4,7 +4,7 @@ import { MCP_QUICK_CONNECT } from "../src/app/constants";
 
 describe("built-in Redrob Work MCP visibility", () => {
   test("hides internal Redrob Work MCPs and omits the retired admin connector", () => {
-    expect(MCP_QUICK_CONNECT.find((entry) => entry.serverName === "redrob-cloud")?.defaultHidden).toBe(true);
+    expect(MCP_QUICK_CONNECT.find((entry) => entry.serverName === "redrob-cloud")).toBeUndefined();
     expect(MCP_QUICK_CONNECT.find((entry) => entry.serverName === "redrob-admin")).toBeUndefined();
     expect(MCP_QUICK_CONNECT.find((entry) => entry.serverName === "redrob-ui")?.defaultHidden).toBe(true);
   });
