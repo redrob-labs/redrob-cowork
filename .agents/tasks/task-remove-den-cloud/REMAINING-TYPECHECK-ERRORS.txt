@@ -1,15 +1,3 @@
-src/react-app/domains/session/chat/new-task-composer.tsx(5,42): error TS2307: Cannot find module '@/app/cloud/import-state' or its corresponding type declarations.
-src/react-app/domains/session/chat/new-task-composer.tsx(6,50): error TS2307: Cannot find module '@/app/lib/den' or its corresponding type declarations.
-src/react-app/domains/session/chat/new-task-composer.tsx(22,8): error TS2307: Cannot find module '@/react-app/domains/connections/cloud-inventory-cache' or its corresponding type declarations.
-src/react-app/domains/session/chat/new-task-composer.tsx(23,79): error TS2307: Cannot find module '@/react-app/domains/session/surface/connect-capability-inventory' or its corresponding type declarations.
-src/react-app/domains/session/chat/new-task-composer.tsx(116,35): error TS7006: Parameter 'connect' implicitly has an 'any' type.
-src/react-app/domains/session/chat/new-task-composer.tsx(139,35): error TS7006: Parameter 'connect' implicitly has an 'any' type.
-src/react-app/domains/session/chat/new-task-composer.tsx(162,31): error TS7006: Parameter 'connect' implicitly has an 'any' type.
-src/react-app/domains/session/chat/session-empty-hero.tsx(8,64): error TS2307: Cannot find module '@/react-app/domains/cloud/desktop-config-provider' or its corresponding type declarations.
-src/react-app/domains/session/chat/session-empty-hero.tsx(9,28): error TS2307: Cannot find module '@/react-app/domains/cloud/den-auth-provider' or its corresponding type declarations.
-src/react-app/domains/session/chat/session-empty-hero.tsx(16,8): error TS2307: Cannot find module '@/react-app/domains/cloud/redrob-models-promo' or its corresponding type declarations.
-src/react-app/domains/session/chat/session-empty-hero.tsx(94,32): error TS7006: Parameter 'orgPrompt' implicitly has an 'any' type.
-src/react-app/domains/session/chat/session-empty-hero.tsx(94,43): error TS7006: Parameter 'index' implicitly has an 'any' type.
 src/react-app/domains/session/chat/session-page.tsx(10,57): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/session/chat/session-page.tsx(11,44): error TS2307: Cannot find module '../../../../app/lib/den-sign-in-intent' or its corresponding type declarations.
 src/react-app/domains/session/chat/session-page.tsx(53,28): error TS2307: Cannot find module '../../cloud/den-auth-provider' or its corresponding type declarations.
@@ -55,7 +43,6 @@ src/react-app/domains/settings/extension-items.ts(127,59): error TS7006: Paramet
 src/react-app/domains/settings/extension-items.ts(233,102): error TS7006: Parameter 'plugin' implicitly has an 'any' type.
 src/react-app/domains/settings/extension-items.ts(239,68): error TS7006: Parameter 'file' implicitly has an 'any' type.
 src/react-app/domains/settings/extension-items.ts(258,133): error TS18046: 'count' is of type 'unknown'.
-src/react-app/domains/settings/pages/add-library-item-modal.tsx(133,5): error TS2304: Cannot find name 'setShareOrgWide'.
 src/react-app/domains/settings/pages/mcp-view.tsx(32,67): error TS2307: Cannot find module '../../../../app/cloud/import-state' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(61,33): error TS2307: Cannot find module '../../../../app/lib/den' or its corresponding type declarations.
 src/react-app/domains/settings/pages/mcp-view.tsx(79,8): error TS2307: Cannot find module '../../connections/native-provider-connections' or its corresponding type declarations.

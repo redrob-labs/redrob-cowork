@@ -130,7 +130,6 @@ export function AddLibraryItemModal(props: AddLibraryItemModalProps) {
     setDescription("");
     setInstructions("");
     setComponents([]);
-    setShareOrgWide(false);
     setError(null);
     setSubmitting(false);
   }, [props.open, kind]);
