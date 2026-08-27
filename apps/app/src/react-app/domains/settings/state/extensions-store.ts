@@ -41,40 +41,7 @@ import type {
   RedrobServerClient,
   RedrobServerStatus,
 } from "../../../../app/lib/redrob-server";
-import {
-  DenApiError,
-  createDenClient,
-  readDenSettings,
-  type DenOrgMarketplaceResolved,
-  type DenOrgPlugin,
-  type DenOrgPluginResolved,
-} from "../../../../app/lib/den";
-import {
-  readWorkspaceCloudImports,
-  withWorkspaceCloudImports,
-  type CloudImportedMarketplace,
-  type CloudImportedPlugin,
-  type CloudImportedPluginFile,
-} from "../../../../app/cloud/import-state";
-import {
-  derivePendingCloudPluginChanges,
-  readPendingCloudSyncChanges,
-  refreshDesktopCloudSync,
-  type PendingCloudPluginChange,
-} from "../../../../app/cloud/desktop-cloud-sync";
-import { notifyEvent } from "../../../shell/notifications";
 import type { RedrobServerStore } from "../../connections/redrob-server-store";
-import { clearCloudInventoryCache } from "../../connections/cloud-inventory-cache";
-import {
-  denLibraryPluginCreateRequest,
-  waitForListedLibraryPlugin,
-  type CreateLibraryItemInput,
-  type LibraryAuthorableKind,
-} from "../library";
-
-const OPENCODE_SKILL_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const OPENCODE_MCP_NAME_RE = /^[A-Za-z0-9_][A-Za-z0-9_-]*$/;
-const OPENCODE_MCP_IMPORT_PATH_PREFIX = "opencode.jsonc#mcp.";
 
 type SetStateAction<T> = T | ((current: T) => T);
 
@@ -88,11 +55,6 @@ export type ExtensionsStoreSnapshot = {
   workspaceContextKey: string;
   skills: SkillCard[];
   skillsStatus: string | null;
-  cloudOrgMarketplaces: DenOrgMarketplaceResolved[];
-  cloudOrgMarketplacesStatus: string | null;
-  importedCloudMarketplaces: Record<string, CloudImportedMarketplace>;
-  importedCloudPlugins: Record<string, CloudImportedPlugin>;
-  pendingCloudPluginChanges: Record<string, PendingCloudPluginChange>;
   pluginScope: PluginScope;
   pluginConfig: OpencodeConfigFile | null;
   pluginConfigPath: string | null;
@@ -111,11 +73,6 @@ type MutableState = {
   pluginsContextKey: string;
   skills: SkillCard[];
   skillsStatus: string | null;
-  cloudOrgMarketplaces: DenOrgMarketplaceResolved[];
-  cloudOrgMarketplacesStatus: string | null;
-  importedCloudMarketplaces: Record<string, CloudImportedMarketplace>;
-  importedCloudPlugins: Record<string, CloudImportedPlugin>;
-  pendingCloudPluginChanges: Record<string, PendingCloudPluginChange>;
   pluginScope: PluginScope;
   pluginConfig: OpencodeConfigFile | null;
   pluginConfigPath: string | null;
@@ -129,189 +86,6 @@ type MutableState = {
 
 export type ExtensionsStore = ReturnType<typeof createExtensionsStore>;
 
-function extractSkillBodyMarkdown(skillText: string): string {
-  const trimmed = skillText.trim();
-  if (!trimmed.startsWith("---")) return trimmed;
-  const rest = trimmed.slice(3);
-  const end = rest.indexOf("\n---");
-  if (end === -1) return trimmed;
-  return rest.slice(end + 4).replace(/^\s*\n?/, "");
-}
-
-function stripYamlScalarQuotes(value: string): string {
-  const trimmed = value.trim();
-  if (
-    trimmed.length >= 2 &&
-    ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'")))
-  ) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-}
-
-function parseClaudeFrontmatter(text: string): { data: Record<string, unknown>; body: string } {
-  const trimmed = text.trim();
-  const match = trimmed.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-  if (!match) return { data: {}, body: trimmed };
-  const data: Record<string, unknown> = {};
-  let listKey: string | null = null;
-  for (const line of (match[1] ?? "").split(/\r?\n/)) {
-    if (listKey) {
-      const listItem = line.match(/^\s+-\s*(.*)$/);
-      if (listItem) {
-        const entry = stripYamlScalarQuotes(listItem[1] ?? "");
-        const current = data[listKey];
-        if (entry && Array.isArray(current)) current.push(entry);
-        continue;
-      }
-    }
-    const keyMatch = line.match(/^([A-Za-z0-9_-]+):(.*)$/);
-    if (!keyMatch) continue;
-    const key = keyMatch[1] ?? "";
-    const value = (keyMatch[2] ?? "").trim();
-    if (!value) {
-      data[key] = [];
-      listKey = key;
-      continue;
-    }
-    listKey = null;
-    data[key] = value === "true" ? true : value === "false" ? false : stripYamlScalarQuotes(value);
-  }
-  return { data, body: trimmed.slice(match[0].length) };
-}
-
-const OPENCODE_MODEL_ID_RE = /^[^\s/]+\/[^\s]+$/;
-
-function translateClaudeTools(value: unknown): Record<string, boolean> | null {
-  const names = typeof value === "string"
-    ? value.split(",")
-    : Array.isArray(value)
-      ? value.flatMap((entry) => (typeof entry === "string" ? [entry] : []))
-      : null;
-  if (names) {
-    const tools: Record<string, boolean> = {};
-    for (const raw of names) {
-      const name = raw.trim().toLowerCase();
-      if (name) tools[name] = true;
-    }
-    return Object.keys(tools).length ? tools : null;
-  }
-  if (isRecord(value)) {
-    const tools: Record<string, boolean> = {};
-    for (const [key, entry] of Object.entries(value)) {
-      const name = key.trim().toLowerCase();
-      if (name && typeof entry === "boolean") tools[name] = entry;
-    }
-    return Object.keys(tools).length ? tools : null;
-  }
-  return null;
-}
-
-function translateClaudeModel(value: unknown): string | null {
-  const model = readNonEmptyString(value);
-  return model && OPENCODE_MODEL_ID_RE.test(model) ? model : null;
-}
-
-function buildCloudPluginFrontmatter(data: Record<string, string | boolean | Record<string, boolean>>): string {
-  const lines: string[] = ["---"];
-  for (const [key, value] of Object.entries(data)) {
-    if (typeof value === "string") {
-      lines.push(`${key}: ${JSON.stringify(value)}`);
-    } else if (typeof value === "boolean") {
-      lines.push(`${key}: ${value}`);
-    } else {
-      lines.push(`${key}:`);
-      for (const [name, enabled] of Object.entries(value)) {
-        lines.push(`  ${JSON.stringify(name)}: ${enabled}`);
-      }
-    }
-  }
-  lines.push("---");
-  return lines.join("\n") + "\n";
-}
-
-function buildCloudAgentContent(description: string, rawSourceText: string): string {
-  const { data, body } = parseClaudeFrontmatter(rawSourceText);
-  const safeDescription = (readNonEmptyString(data.description) ?? description).replace(/\s+/g, " ").trim();
-  const model = translateClaudeModel(data.model);
-  const tools = translateClaudeTools(data.tools);
-  const frontmatter = buildCloudPluginFrontmatter({
-    description: safeDescription,
-    ...(model ? { model } : {}),
-    ...(tools ? { tools } : {}),
-  });
-  return frontmatter + "\n" + body.replace(/^\s*\n?/, "");
-}
-
-function buildCloudCommandContent(name: string, description: string, rawSourceText: string): string {
-  const { data, body } = parseClaudeFrontmatter(rawSourceText);
-  const safeDescription = (readNonEmptyString(data.description) ?? description).replace(/\s+/g, " ").trim();
-  const model = translateClaudeModel(data.model);
-  const agent = readNonEmptyString(data.agent);
-  const frontmatter = buildCloudPluginFrontmatter({
-    name,
-    description: safeDescription,
-    ...(agent ? { agent } : {}),
-    ...(model ? { model } : {}),
-    ...(typeof data.subtask === "boolean" ? { subtask: data.subtask } : {}),
-  });
-  return frontmatter + "\n" + body.replace(/^\s*\n?/, "");
-}
-
-function slugifyOpencodeSkillName(title: string): string {
-  let base = title
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  if (!base) base = "skill";
-  if (base.length > 64) base = base.slice(0, 64).replace(/-+$/g, "");
-  if (!OPENCODE_SKILL_NAME_RE.test(base)) base = "skill";
-  return base;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function parseJsonRecord(value: string | null): Record<string, unknown> | null {
-  if (!value?.trim()) return null;
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return isRecord(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function readNonEmptyString(value: unknown): string | null {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-function readStringArray(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.flatMap((entry) => {
-        const text = readNonEmptyString(entry);
-        return text ? [text] : [];
-      })
-    : [];
-}
-
-function readStringRecord(value: unknown): Record<string, string> | null {
-  if (!isRecord(value)) return null;
-  const output: Record<string, string> = {};
-  for (const [key, entry] of Object.entries(value)) {
-    const text = readNonEmptyString(entry);
-    if (text) output[key] = text;
-  }
-  return Object.keys(output).length ? output : null;
-}
-
-function cloudPluginMcpNameFromPath(path: string): string | null {
-  if (!path.startsWith(OPENCODE_MCP_IMPORT_PATH_PREFIX)) return null;
-  const name = path.slice(OPENCODE_MCP_IMPORT_PATH_PREFIX.length).trim();
-  return OPENCODE_MCP_NAME_RE.test(name) ? name : null;
-}
 
 function toConfigPluginListEntries(names: string[]): PluginListEntry[] {
   const next: PluginListEntry[] = [];
@@ -374,35 +148,21 @@ export function createExtensionsStore(options: {
   let disposed = false;
   let started = false;
   let stopRedrobSubscription: (() => void) | null = null;
-  let stopDenSessionListener: (() => void) | null = null;
   let lastWorkspaceContextKey = "";
   let snapshot: ExtensionsStoreSnapshot;
 
   let refreshSkillsInFlight = false;
   let refreshPluginsInFlight = false;
-  let refreshCloudOrgMarketplacesInFlight = false;
-  let refreshCloudOrgMarketplacesInFlightKey = "";
   let refreshSkillsAborted = false;
   let refreshPluginsAborted = false;
-  let refreshCloudOrgMarketplacesAborted = false;
   let skillsLoaded = false;
-  let cloudOrgMarketplacesLoaded = false;
   let skillsRoot = "";
-  let cloudOrgMarketplacesLoadKey = "";
-  /** Plugin IDs the user has already been notified about. Prevents repeated
-   *  "new extension available" notifications across sync cycles. */
-  const seenMarketplacePluginIds = new Set<string>();
 
   let state: MutableState = {
     skillsContextKey: "",
     pluginsContextKey: "",
     skills: [],
     skillsStatus: null,
-    cloudOrgMarketplaces: [],
-    cloudOrgMarketplacesStatus: null,
-    importedCloudMarketplaces: {},
-    importedCloudPlugins: {},
-    pendingCloudPluginChanges: {},
     pluginScope: "project",
     pluginConfig: null,
     pluginConfigPath: null,
@@ -462,11 +222,6 @@ export function createExtensionsStore(options: {
       workspaceContextKey,
       skills: state.skills,
       skillsStatus: state.skillsStatus,
-      cloudOrgMarketplaces: state.cloudOrgMarketplaces,
-      cloudOrgMarketplacesStatus: state.cloudOrgMarketplacesStatus,
-      importedCloudMarketplaces: state.importedCloudMarketplaces,
-      importedCloudPlugins: state.importedCloudPlugins,
-      pendingCloudPluginChanges: state.pendingCloudPluginChanges,
       pluginScope: state.pluginScope,
       pluginConfig: state.pluginConfig,
       pluginConfigPath: state.pluginConfigPath,
@@ -554,129 +309,6 @@ export function createExtensionsStore(options: {
     return false;
   };
 
-  const refreshPendingCloudPluginChanges = async (installedPlugins?: Record<string, CloudImportedPlugin>) => {
-    try {
-      const target = await resolveWorkspaceServerTarget();
-      if (!target.redrobClient || !target.redrobWorkspaceId) {
-        setStateField("pendingCloudPluginChanges", {});
-        return;
-      }
-      const syncResult = await refreshDesktopCloudSync({
-        redrobClient: target.redrobClient,
-        workspaceId: target.redrobWorkspaceId,
-      }).catch(() => null);
-      const changes = syncResult
-        ? syncResult.changes
-        : readPendingCloudSyncChanges(await target.redrobClient.getDesktopCloudSync(target.redrobWorkspaceId));
-      const pending = derivePendingCloudPluginChanges({
-        changes,
-        installedPlugins: installedPlugins ?? snapshot.importedCloudPlugins,
-      });
-      const previousPending = snapshot.pendingCloudPluginChanges;
-      setStateField("pendingCloudPluginChanges", pending);
-
-      // Notify about newly detected plugin updates or removals.
-      for (const [pluginId, change] of Object.entries(pending)) {
-        if (previousPending[pluginId] === change) continue;
-        const installed = (installedPlugins ?? snapshot.importedCloudPlugins)[pluginId];
-        const pluginLabel = installed?.name ?? pluginId;
-        if (change === "modified") {
-          notifyEvent({
-            kind: "cloud",
-            severity: "info",
-            title: "Extension update available",
-            body: `${pluginLabel} has been updated`,
-            dedupeKey: `plugin-update:${pluginId}`,
-            action: { type: "open-extensions-marketplace" },
-            actionLabel: "View updates",
-          });
-        } else if (change === "removed") {
-          notifyEvent({
-            kind: "cloud",
-            severity: "warning",
-            title: "Extension removed by admin",
-            body: `${pluginLabel} is no longer available`,
-            dedupeKey: `plugin-removed:${pluginId}`,
-            action: { type: "open-extensions-marketplace" },
-          });
-        }
-      }
-    } catch {
-      // keep previous pending state on failure
-    }
-  };
-
-  const refreshImportedCloudPlugins = async () => {
-    try {
-      const target = await resolveWorkspaceServerTarget();
-      if (target.redrobClient && target.redrobWorkspaceId) {
-        const result = await target.redrobClient.listCloudPlugins(target.redrobWorkspaceId);
-        setStateField("importedCloudMarketplaces", result.marketplaces);
-        setStateField("importedCloudPlugins", result.plugins);
-        void refreshPendingCloudPluginChanges(result.plugins);
-        return result.plugins;
-      }
-      const config = await readWorkspaceRedrobConfigRecord();
-      const cloudImports = readWorkspaceCloudImports(config);
-      setStateField("importedCloudMarketplaces", cloudImports.marketplaces);
-      setStateField("importedCloudPlugins", cloudImports.plugins);
-      return cloudImports.plugins;
-    } catch {
-      setStateField("importedCloudMarketplaces", {});
-      setStateField("importedCloudPlugins", {});
-      setStateField("pendingCloudPluginChanges", {});
-      return {};
-    }
-  };
-
-  const persistImportedCloudMarketplaces = async (nextMarketplaces: Record<string, CloudImportedMarketplace>) => {
-    const config = await readWorkspaceRedrobConfigRecord();
-    const cloudImports = readWorkspaceCloudImports(config);
-    const nextCloudImports = {
-      ...cloudImports,
-      marketplaces: nextMarketplaces,
-    };
-    const nextConfig = withWorkspaceCloudImports(config, nextCloudImports);
-    const persisted = await writeWorkspaceRedrobConfigRecord(nextConfig);
-    if (!persisted) {
-      throw new Error("Redrob Work server unavailable. Connect to manage imported cloud marketplaces.");
-    }
-    setStateField("importedCloudMarketplaces", nextMarketplaces);
-    void refreshPendingCloudPluginChanges();
-  };
-
-  const persistImportedCloudPlugins = async (nextPlugins: Record<string, CloudImportedPlugin>) => {
-    const config = await readWorkspaceRedrobConfigRecord();
-    const cloudImports = readWorkspaceCloudImports(config);
-    const nextCloudImports = {
-      ...cloudImports,
-      plugins: nextPlugins,
-    };
-    const nextConfig = withWorkspaceCloudImports(config, nextCloudImports);
-    const persisted = await writeWorkspaceRedrobConfigRecord(nextConfig);
-    if (!persisted) {
-      throw new Error("Redrob Work server unavailable. Connect to manage imported cloud plugins.");
-    }
-    setStateField("importedCloudPlugins", nextPlugins);
-    void refreshPendingCloudPluginChanges(nextPlugins);
-  };
-
-  const findCloudMarketplace = (marketplaceId: string) =>
-    snapshot.cloudOrgMarketplaces.find((entry) => entry.marketplace.id === marketplaceId)?.marketplace ?? null;
-
-  const buildCloudSkillContent = (name: string, description: string, body: string) => {
-    const safeDescription = description.replace(/\s+/g, " ").trim();
-    const normalizedBody = body.replace(/^\s*\n?/, "");
-    return [
-      "---",
-      `name: ${JSON.stringify(name)}`,
-      `description: ${JSON.stringify(safeDescription)}`,
-      "---",
-      "",
-      normalizedBody,
-    ].join("\n");
-  };
-
   const deleteWorkspaceSkill = async (name: string) => {
     const isRemoteWorkspace = options.workspaceType() === "remote";
     const isLocalWorkspace = options.workspaceType() === "local";
@@ -714,573 +346,15 @@ export function createExtensionsStore(options: {
     }
   };
 
-  const slugifyConfigObjectName = (title: string, fallback: string) => {
-    const slug = slugifyOpencodeSkillName(title || fallback);
-    return slug === "skill" && fallback ? slugifyOpencodeSkillName(fallback) : slug;
-  };
-
-  const pluginNamespace = (pluginName: string, pluginId: string) => {
-    const base = slugifyConfigObjectName(pluginName, pluginId);
-    return `${base.replace(/-plugin$/, "")}-plugin`;
-  };
-
-  const normalizePluginSourcePath = (path: string, objectType: string, namespace: string) => {
-    const parts = path.trim().replace(/^\/+/, "").split("/").filter(Boolean);
-    if (parts.length === 0 || parts.some((part) => part === ".." || part === ".")) return "";
-
-    const folderByType: Record<string, string> = {
-      agent: "agents",
-      command: "commands",
-      context: "context",
-      hook: "hooks",
-      mcp: "mcps",
-      skill: "skills",
-      tool: "tools",
-    };
-    const folder = folderByType[objectType];
-    if (!folder) return "";
-    const opencodeIndex = parts.findIndex((part) => part === ".opencode");
-    const searchParts = opencodeIndex >= 0 ? parts.slice(opencodeIndex + 1) : parts;
-    const folderIndex = searchParts.findIndex((part) => part === folder);
-    if (folderIndex < 0 || folderIndex === searchParts.length - 1) return "";
-    const rest = searchParts.slice(folderIndex + 1);
-    if (rest[0] === namespace) return [".opencode", folder, ...rest].join("/");
-    return [".opencode", folder, namespace, ...rest].join("/");
-  };
-
-  const getPluginObjectInstallPath = (
-    object: NonNullable<DenOrgPluginResolved["memberships"][number]["configObject"]>,
-    namespace: string,
-  ) => {
-    const existing = normalizePluginSourcePath(object.currentRelativePath ?? "", object.objectType, namespace);
-    if (existing) {
-      if (object.objectType === "skill") {
-        const parts = existing.split("/").filter(Boolean);
-        const lastPart = parts.at(-1) ?? "";
-        const skillName = /^SKILL\.md$/i.test(lastPart)
-          ? parts.at(-2) ?? slugifyConfigObjectName(object.title, object.id)
-          : lastPart || slugifyConfigObjectName(object.title, object.id);
-        return `.opencode/skills/${namespace}/${skillName}/SKILL.md`;
-      }
-      return existing;
-    }
-    const name = slugifyConfigObjectName(object.title, object.id);
-    switch (object.objectType) {
-      case "skill":
-        return `.opencode/skills/${namespace}/${name}/SKILL.md`;
-      case "agent":
-        return `.opencode/agents/${namespace}/${name}.md`;
-      case "command":
-        return `.opencode/commands/${namespace}/${name}.md`;
-      case "mcp":
-        return `.opencode/mcps/${namespace}/${name}.json`;
-      case "hook":
-        return `.opencode/hooks/${namespace}/${name}.json`;
-      case "tool":
-        return `.opencode/tools/${namespace}/${name}.ts`;
-      case "context":
-        return `.opencode/context/${namespace}/${name}.md`;
-      default:
-        return `.opencode/plugins/${namespace}/${name}.txt`;
-    }
-  };
-
-  const pluginMcpName = (rawName: string, namespace: string, fallback: string, namespaceName: boolean) => {
-    const trimmed = rawName.trim();
-    const base = OPENCODE_MCP_NAME_RE.test(trimmed)
-      ? trimmed
-      : slugifyConfigObjectName(trimmed || fallback, fallback);
-    if (!namespaceName) return base;
-    const namespaced = base.startsWith(`${namespace}-`) ? base : `${namespace}-${base}`;
-    return OPENCODE_MCP_NAME_RE.test(namespaced)
-      ? namespaced
-      : slugifyConfigObjectName(namespaced, fallback);
-  };
-
-  const mcpCommandFromConfig = (config: Record<string, unknown>) => {
-    if (Array.isArray(config.command)) return readStringArray(config.command);
-    const command = readNonEmptyString(config.command);
-    if (!command) return [];
-    return [command, ...readStringArray(config.args)];
-  };
-
-  const normalizePluginMcpConfig = (input: unknown): Record<string, unknown> | null => {
-    if (!isRecord(input)) return null;
-    const enabled = typeof input.enabled === "boolean"
-      ? input.enabled
-      : typeof input.disabled === "boolean"
-        ? !input.disabled
-        : true;
-    const url = readNonEmptyString(input.url);
-    if (url) {
-      const config: Record<string, unknown> = { type: "remote", url, enabled };
-      const headers = readStringRecord(input.headers);
-      if (headers) config.headers = headers;
-      if (isRecord(input.oauth)) config.oauth = input.oauth;
-      if (input.oauth === true) config.oauth = {};
-      return config;
-    }
-
-    const command = mcpCommandFromConfig(input);
-    if (command.length > 0) {
-      const config: Record<string, unknown> = { type: "local", command, enabled };
-      const environment = readStringRecord(input.environment) ?? readStringRecord(input.env);
-      if (environment) config.environment = environment;
-      return config;
-    }
-
-    return null;
-  };
-
-  const pluginMcpConfigsFromPayload = (
-    object: NonNullable<DenOrgPluginResolved["memberships"][number]["configObject"]>,
-    namespace: string,
-  ) => {
-    const version = object.latestVersion;
-    const payload = version?.normalizedPayloadJson ?? parseJsonRecord(version?.rawSourceText ?? null);
-    if (!payload) return [];
-
-    const configs = new Map<string, { name: string; config: Record<string, unknown>; path: string }>();
-    const addConfig = (rawName: string, rawConfig: unknown, namespaceName: boolean) => {
-      const config = normalizePluginMcpConfig(rawConfig);
-      if (!config) return;
-      const name = pluginMcpName(rawName, namespace, object.id, namespaceName);
-      configs.set(name, {
-        name,
-        config,
-        path: `${OPENCODE_MCP_IMPORT_PATH_PREFIX}${name}`,
-      });
-    };
-
-    if (isRecord(payload.mcp)) {
-      for (const [name, config] of Object.entries(payload.mcp)) addConfig(name, config, false);
-    }
-    if (isRecord(payload.mcpServers)) {
-      for (const [name, config] of Object.entries(payload.mcpServers)) addConfig(name, config, false);
-    }
-    if (configs.size === 0) addConfig(object.title, payload, true);
-
-    return [...configs.values()];
-  };
-
-  const mcpNoConfigWarning = (title: string) =>
-    `MCP component "${title}" could not be installed: no server config with a "url" or "command" was found.`;
-
-  const mcpInactiveWarning = (title: string) =>
-    `MCP component "${title}" could not be installed because it is not active.`;
-
-  const cloudPluginImportMessage = (pluginName: string, fileCount: number, warnings: string[]) => {
-    const message = `Imported ${pluginName} with ${fileCount} file${fileCount === 1 ? "" : "s"}.`;
-    return warnings.length > 0 ? `${message} ${warnings.join(" ")}` : message;
-  };
-
-  const externalMcpConnectionIdFromPayload = (
-    object: NonNullable<DenOrgPluginResolved["memberships"][number]["configObject"]>,
-  ): string | null => {
-    const version = object.latestVersion;
-    const payload = version?.normalizedPayloadJson ?? parseJsonRecord(version?.rawSourceText ?? null);
-    if (!payload) return null;
-    if (payload.redrobManaged === "den_external_mcp") {
-      const id = readNonEmptyString(payload.externalMcpConnectionId);
-      if (id) return id;
-    }
-    const containers = [
-      isRecord(payload.mcpServers) ? payload.mcpServers : null,
-      isRecord(payload.mcp) ? payload.mcp : null,
-    ].filter((entry): entry is Record<string, unknown> => Boolean(entry));
-    for (const container of containers) {
-      for (const config of Object.values(container)) {
-        if (!isRecord(config) || config.redrobManaged !== "den_external_mcp") continue;
-        const id = readNonEmptyString(config.externalMcpConnectionId);
-        if (id) return id;
-      }
-    }
-    return null;
-  };
-
-  const upsertPluginMcpConfig = async (name: string, config: Record<string, unknown>) => {
-    const redrobSnapshot = getRedrobServerSnapshot();
-    const redrobClient = redrobSnapshot.redrobServerClient;
-    const redrobWorkspaceId = options.runtimeWorkspaceId();
-    if (
-      redrobSnapshot.redrobServerStatus === "connected" &&
-      redrobClient &&
-      redrobWorkspaceId &&
-      redrobSnapshot.redrobServerCapabilities?.mcp?.write
-    ) {
-      await redrobClient.addMcp(redrobWorkspaceId, { name, config });
-      return;
-    }
-    throw new Error("Redrob Work server unavailable. Connect to import MCP servers into this workspace.");
-  };
-
-  const deletePluginMcpConfig = async (name: string) => {
-    const redrobSnapshot = getRedrobServerSnapshot();
-    const redrobClient = redrobSnapshot.redrobServerClient;
-    const redrobWorkspaceId = options.runtimeWorkspaceId();
-    if (
-      redrobSnapshot.redrobServerStatus === "connected" &&
-      redrobClient &&
-      redrobWorkspaceId &&
-      redrobSnapshot.redrobServerCapabilities?.mcp?.write
-    ) {
-      await redrobClient.removeMcp(redrobWorkspaceId, name);
-      return;
-    }
-    throw new Error("Redrob Work server unavailable. Connect to remove imported MCP servers from this workspace.");
-  };
-
-  const pluginReloadReason = (objectType: string): ReloadReason => {
-    switch (objectType) {
-      case "skill":
-        return "skills";
-      case "agent":
-        return "agents";
-      case "command":
-        return "commands";
-      case "mcp":
-        return "mcp";
-      default:
-        return "config";
-    }
-  };
-
-  const writePluginWorkspaceFile = async (path: string, content: string) => {
-    const { redrobSnapshot, redrobClient, redrobWorkspaceId, hasRedrobTarget } =
-      await resolveWorkspaceServerTarget();
-    if (
-      hasRedrobTarget &&
-      redrobClient &&
-      redrobWorkspaceId &&
-      redrobSnapshot.redrobServerCapabilities?.config?.write !== false &&
-      typeof redrobClient.writeWorkspaceFile === "function"
-    ) {
-      await redrobClient.writeWorkspaceFile(redrobWorkspaceId, { path, content, force: true });
-      return;
-    }
-    throw new Error("Redrob Work server unavailable. Connect to import plugin files into this workspace.");
-  };
-
-  const deletePluginWorkspaceFiles = async (files: Array<{ path: string; recursive?: boolean }>) => {
-    if (files.length === 0) return;
-    const { redrobSnapshot, redrobClient, redrobWorkspaceId, hasRedrobTarget } =
-      await resolveWorkspaceServerTarget();
-    if (
-      hasRedrobTarget &&
-      redrobClient &&
-      redrobWorkspaceId &&
-      redrobSnapshot.redrobServerCapabilities?.config?.write !== false &&
-      typeof redrobClient.deleteWorkspaceFiles === "function"
-    ) {
-      const results = await redrobClient.deleteWorkspaceFiles(redrobWorkspaceId, files);
-      const failed = results.filter((result) => !result.ok && result.code !== "file_not_found");
-      if (failed.length > 0) {
-        throw new Error(
-          `Failed to remove ${failed.length} imported plugin file${failed.length === 1 ? "" : "s"} from the workspace.`,
-        );
-      }
-      return;
-    }
-    throw new Error("Redrob Work server unavailable. Connect to remove imported plugin files from this workspace.");
-  };
-
-  const applyCloudOrgPluginImport = async (
-    marketplaceId: string | null,
-    resolved: DenOrgPluginResolved,
-  ): Promise<{ files: CloudImportedPluginFile[]; warnings: string[] }> => {
-    const files: CloudImportedPluginFile[] = [];
-    const warnings: string[] = [];
-    const existing = snapshot.importedCloudPlugins[resolved.plugin.id];
-    const namespace = pluginNamespace(resolved.plugin.name, resolved.plugin.id);
-
-    for (const membership of resolved.memberships) {
-      const object = membership.configObject;
-      const version = object?.latestVersion ?? null;
-      if (!object) continue;
-      if (object.status !== "active") {
-        if (object.objectType === "mcp") warnings.push(mcpInactiveWarning(object.title));
-        continue;
-      }
-
-      if (object.objectType === "mcp") {
-        const externalMcpConnectionId = externalMcpConnectionIdFromPayload(object);
-        if (externalMcpConnectionId) {
-          files.push({
-            configObjectId: object.id,
-            externalMcpConnectionId,
-            versionId: version?.id ?? null,
-            objectType: object.objectType,
-            title: object.title,
-            path: `den#mcp-connection.${externalMcpConnectionId}`,
-            updatedAt: object.updatedAt,
-          });
-          continue;
-        }
-        const configs = pluginMcpConfigsFromPayload(object, namespace);
-        if (configs.length === 0) warnings.push(mcpNoConfigWarning(object.title));
-        for (const config of configs) {
-          await upsertPluginMcpConfig(config.name, config.config);
-          files.push({
-            configObjectId: object.id,
-            versionId: version?.id ?? null,
-            objectType: object.objectType,
-            title: object.title,
-            path: config.path,
-            updatedAt: object.updatedAt,
-          });
-          options.markReloadRequired?.("mcp", {
-            type: "mcp",
-            name: config.name,
-            action: existing ? "updated" : "added",
-          });
-        }
-        continue;
-      }
-
-      if (version?.rawSourceText == null) continue;
-
-      const path = getPluginObjectInstallPath(object, namespace);
-      let content = version.rawSourceText;
-      const rawDesc = (object.description?.trim() || object.title).trim();
-      const description = rawDesc.slice(0, 1024) || object.title.slice(0, 1024);
-      if (object.objectType === "skill") {
-        const installName = path.match(/^\.opencode\/skills\/[^/]+\/([^/]+)\/SKILL\.md$/)?.[1] ?? slugifyConfigObjectName(object.title, object.id);
-        content = buildCloudSkillContent(installName, description || "Skill", extractSkillBodyMarkdown(content));
-      } else if (object.objectType === "agent") {
-        content = buildCloudAgentContent(description, content);
-      } else if (object.objectType === "command") {
-        const fileName = path.match(/\/([^/]+)\.md$/)?.[1] ?? object.title;
-        content = buildCloudCommandContent(slugifyConfigObjectName(fileName, object.id), description, content);
-      }
-      await writePluginWorkspaceFile(path, content);
-
-      files.push({
-        configObjectId: object.id,
-        versionId: version.id,
-        objectType: object.objectType,
-        title: object.title,
-        path,
-        updatedAt: object.updatedAt,
-      });
-      options.markReloadRequired?.(pluginReloadReason(object.objectType), {
-        type:
-          object.objectType === "skill" || object.objectType === "agent" || object.objectType === "command"
-            ? object.objectType
-            : "config",
-        name: object.title,
-        action: existing ? "updated" : "added",
-      });
-    }
-
-    const nextPaths = new Set(files.map((file) => file.path));
-    const removedMcpNames = (existing?.files ?? []).flatMap((file) => {
-      const name = file.objectType === "mcp" && !nextPaths.has(file.path)
-        ? cloudPluginMcpNameFromPath(file.path)
-        : null;
-      return name ? [name] : [];
-    });
-    await Promise.all(removedMcpNames.map((name) => deletePluginMcpConfig(name)));
-
-    const nextPlugins = {
-      ...snapshot.importedCloudPlugins,
-      [resolved.plugin.id]: {
-        pluginId: resolved.plugin.id,
-        marketplaceId,
-        name: resolved.plugin.name,
-        description: resolved.plugin.description,
-        updatedAt: resolved.plugin.updatedAt,
-        files,
-        importedAt: existing?.importedAt ?? Date.now(),
-      },
-    } satisfies Record<string, CloudImportedPlugin>;
-    await persistImportedCloudPlugins(nextPlugins);
-
-    if (marketplaceId) {
-      const marketplace = findCloudMarketplace(marketplaceId);
-      const existingMarketplace = snapshot.importedCloudMarketplaces[marketplaceId] ?? null;
-      const pluginIds = new Set(existingMarketplace?.pluginIds ?? []);
-      pluginIds.add(resolved.plugin.id);
-      await persistImportedCloudMarketplaces({
-        ...snapshot.importedCloudMarketplaces,
-        [marketplaceId]: {
-          marketplaceId,
-          name: marketplace?.name ?? existingMarketplace?.name ?? marketplaceId,
-          updatedAt: marketplace?.updatedAt ?? existingMarketplace?.updatedAt ?? null,
-          pluginIds: [...pluginIds].toSorted(),
-          importedAt: existingMarketplace?.importedAt ?? Date.now(),
-        },
-      });
-    }
-
-    return { files, warnings };
-  };
-
   const invalidateWorkspaceCaches = () => {
     skillsLoaded = false;
-    cloudOrgMarketplacesLoaded = false;
     skillsRoot = "";
-    cloudOrgMarketplacesLoadKey = "";
-  };
-
-  const getCurrentCloudOrgLoadKey = () => {
-    const orgId = readDenSettings().activeOrgId?.trim() ?? "";
-    return `${getWorkspaceContextKey()}::${orgId}`;
   };
 
   const touch = () => {
     refreshSnapshot();
     emitChange();
   };
-
-  async function refreshCloudOrgMarketplaces(optionsOverride?: { force?: boolean }) {
-    const wk = getWorkspaceContextKey();
-    const settings = readDenSettings();
-    const token = settings.authToken?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    const loadKey = `${wk}::${orgId}`;
-
-    if (loadKey !== cloudOrgMarketplacesLoadKey) {
-      cloudOrgMarketplacesLoaded = false;
-    }
-
-    if (!optionsOverride?.force && cloudOrgMarketplacesLoaded) {
-      await refreshImportedCloudPlugins();
-      return;
-    }
-    if (refreshCloudOrgMarketplacesInFlight && refreshCloudOrgMarketplacesInFlightKey === loadKey) return;
-
-    refreshCloudOrgMarketplacesInFlight = true;
-    refreshCloudOrgMarketplacesInFlightKey = loadKey;
-    refreshCloudOrgMarketplacesAborted = false;
-
-    try {
-      setStateField("cloudOrgMarketplacesStatus", null);
-
-      if (!token || !orgId) {
-        mutateState((current) => ({
-          ...current,
-          cloudOrgMarketplaces: [],
-          cloudOrgMarketplacesStatus: null,
-        }));
-        cloudOrgMarketplacesLoaded = true;
-        cloudOrgMarketplacesLoadKey = loadKey;
-        await refreshImportedCloudPlugins();
-        return;
-      }
-
-      const client = createDenClient({ baseUrl: settings.baseUrl, token });
-      const marketplaces = await client.listOrgMarketplaces(orgId);
-      const resolved = await Promise.all(
-        marketplaces.map((marketplace) => client.getOrgMarketplaceResolved(orgId, marketplace.id)),
-      );
-      if (refreshCloudOrgMarketplacesAborted || getCurrentCloudOrgLoadKey() !== loadKey) return;
-      mutateState((current) => ({
-        ...current,
-        cloudOrgMarketplaces: resolved,
-        cloudOrgMarketplacesStatus: null,
-      }));
-
-      // Notify the user about newly available marketplace plugins. On the
-      // first load we seed the seen set silently so only subsequent publishes
-      // trigger a notification.
-      const allPluginIds = new Set<string>();
-      for (const marketplace of resolved) {
-        for (const plugin of marketplace.plugins ?? []) {
-          if (plugin.id) allPluginIds.add(plugin.id);
-        }
-      }
-      if (seenMarketplacePluginIds.size === 0) {
-        // First load: seed without notifying.
-        for (const id of allPluginIds) seenMarketplacePluginIds.add(id);
-      } else {
-        for (const marketplace of resolved) {
-          const marketplaceName = marketplace.marketplace?.name ?? "your marketplace";
-          for (const plugin of marketplace.plugins ?? []) {
-            if (plugin.id && !seenMarketplacePluginIds.has(plugin.id)) {
-              seenMarketplacePluginIds.add(plugin.id);
-              notifyEvent({
-                kind: "cloud",
-                severity: "info",
-                title: "New extension available",
-                body: `${plugin.name ?? plugin.id} was added to ${marketplaceName}`,
-                dedupeKey: `new-marketplace-plugin:${plugin.id}`,
-                action: { type: "open-extensions-marketplace", pluginName: plugin.name ?? plugin.id },
-                actionLabel: t("extensions.view_in_extensions"),
-              });
-            }
-          }
-        }
-      }
-
-      cloudOrgMarketplacesLoaded = true;
-      cloudOrgMarketplacesLoadKey = loadKey;
-      await refreshImportedCloudPlugins();
-    } catch (error) {
-      if (refreshCloudOrgMarketplacesAborted || getCurrentCloudOrgLoadKey() !== loadKey) return;
-      mutateState((current) => ({
-        ...current,
-        cloudOrgMarketplaces: [],
-        cloudOrgMarketplacesStatus:
-          error instanceof Error ? error.message : "Failed to load organization marketplaces.",
-      }));
-    } finally {
-      if (refreshCloudOrgMarketplacesInFlightKey === loadKey) {
-        refreshCloudOrgMarketplacesInFlight = false;
-        refreshCloudOrgMarketplacesInFlightKey = "";
-      }
-    }
-  }
-
-  async function importCloudOrgPlugin(
-    marketplaceId: string | null,
-    plugin: DenOrgPlugin,
-  ): Promise<{ ok: boolean; message: string; warnings: string[]; files: CloudImportedPluginFile[] }> {
-    options.setBusy(true);
-    options.setError(null);
-    setStateField("cloudOrgMarketplacesStatus", null);
-
-    try {
-      const settings = readDenSettings();
-      const token = settings.authToken?.trim() ?? "";
-      const orgId = settings.activeOrgId?.trim() ?? "";
-      if (!token || !orgId) throw new Error("Sign in to Redrob Work Cloud and choose an organization first.");
-      const client = createDenClient({ baseUrl: settings.baseUrl, token });
-      const resolved = await client.getOrgPluginResolved(orgId, plugin);
-      const target = await resolveWorkspaceServerTarget();
-      if (target.redrobClient && target.redrobWorkspaceId) {
-        const marketplace = marketplaceId ? findCloudMarketplace(marketplaceId) : null;
-        const result = await target.redrobClient.installCloudPlugin(target.redrobWorkspaceId, {
-          marketplaceId,
-          marketplace,
-          resolved,
-        });
-        await refreshSkills({ force: true });
-        await refreshCloudOrgMarketplaces({ force: true });
-        void refreshPendingCloudPluginChanges();
-        return {
-          ok: true,
-          message: cloudPluginImportMessage(plugin.name, result.item.files.length, result.warnings),
-          warnings: result.warnings,
-          files: result.item.files,
-        };
-      }
-      const result = await applyCloudOrgPluginImport(marketplaceId, resolved);
-      await refreshSkills({ force: true });
-      await refreshCloudOrgMarketplaces({ force: true });
-      return {
-        ok: true,
-        message: cloudPluginImportMessage(plugin.name, result.files.length, result.warnings),
-        warnings: result.warnings,
-        files: result.files,
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : t("skills.unknown_error");
-      options.setError(addOpencodeCacheHint(message));
-      return { ok: false, message, warnings: [], files: [] };
-    } finally {
-      options.setBusy(false);
-    }
-  }
 
   async function previewClaudePlugin(url: string): Promise<RedrobClaudePluginPreview> {
     const target = await resolveWorkspaceServerTarget();
@@ -1301,72 +375,12 @@ export function createExtensionsStore(options: {
       }
       const result = await target.redrobClient.installClaudePlugin(target.redrobWorkspaceId, { url });
       await refreshSkills({ force: true });
-      await refreshImportedCloudPlugins();
+      await refreshPlugins();
+      const componentCount = result.preview.components.length;
       return {
         ok: true,
-        message: `Installed ${result.item.name} with ${result.item.files.length} component${result.item.files.length === 1 ? "" : "s"}.`,
+        message: `Installed ${result.preview.name} with ${componentCount} component${componentCount === 1 ? "" : "s"}.`,
       };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : t("skills.unknown_error");
-      options.setError(addOpencodeCacheHint(message));
-      return { ok: false, message };
-    } finally {
-      options.setBusy(false);
-    }
-  }
-
-  async function removeCloudOrgPlugin(pluginId: string): Promise<{ ok: boolean; message: string }> {
-    options.setBusy(true);
-    options.setError(null);
-    setStateField("cloudOrgMarketplacesStatus", null);
-
-    try {
-      const target = await resolveWorkspaceServerTarget();
-      if (target.redrobClient && target.redrobWorkspaceId) {
-        const result = await target.redrobClient.removeCloudPlugin(target.redrobWorkspaceId, pluginId);
-        await refreshSkills({ force: true });
-        await refreshCloudOrgMarketplaces({ force: true });
-        void refreshPendingCloudPluginChanges();
-        return {
-          ok: true,
-          message: `Removed ${result.item.name}.`,
-        };
-      }
-
-      const imported = snapshot.importedCloudPlugins[pluginId];
-      if (!imported) throw new Error("Marketplace package is not installed in this workspace.");
-
-      const removedMcpNames: string[] = [];
-      const fileDeletes: Array<{ path: string; recursive?: boolean }> = [];
-      for (const file of imported.files) {
-        const mcpName = file.objectType === "mcp" ? cloudPluginMcpNameFromPath(file.path) : null;
-        if (mcpName) {
-          removedMcpNames.push(mcpName);
-          continue;
-        }
-        if (!file.path.startsWith(".opencode/")) continue;
-        const skillDir = file.path.match(/^(\.opencode\/skills\/[^/]+\/[^/]+)\/SKILL\.md$/)?.[1];
-        fileDeletes.push(skillDir ? { path: skillDir, recursive: true } : { path: file.path });
-      }
-      await Promise.all(removedMcpNames.map((name) => deletePluginMcpConfig(name)));
-      await deletePluginWorkspaceFiles(fileDeletes);
-
-      const nextPlugins = { ...snapshot.importedCloudPlugins };
-      delete nextPlugins[pluginId];
-      await persistImportedCloudPlugins(nextPlugins);
-
-      if (removedMcpNames.length > 0) {
-        options.markReloadRequired?.("mcp", { type: "mcp", name: imported.name, action: "removed" });
-      }
-      if (fileDeletes.length > 0) {
-        options.markReloadRequired?.("config", { type: "config", name: imported.name, action: "removed" });
-      }
-      await Promise.all([
-        refreshSkills({ force: true }),
-        refreshCloudOrgMarketplaces({ force: true }),
-      ]);
-
-      return { ok: true, message: `Removed ${imported.name}.` };
     } catch (error) {
       const message = error instanceof Error ? error.message : t("skills.unknown_error");
       options.setError(addOpencodeCacheHint(message));
@@ -2235,67 +1249,9 @@ export function createExtensionsStore(options: {
     }
   }
 
-  async function createLibraryItem(
-    kind: LibraryAuthorableKind,
-    input: CreateLibraryItemInput,
-  ): Promise<string> {
-    const description = input.description.trim();
-    const instructions = input.instructions.trim();
-    const drafts = input.components?.filter((component) => component.name.trim() && component.content.trim()) ?? [];
-    if (!input.name.trim()) {
-      throw new Error(t("extensions.add_name_required"));
-    }
-    if (kind === "mcp") {
-      if (!instructions) {
-        throw new Error(t("extensions.add_mcp_url_required"));
-      }
-    } else if (kind !== "plugin") {
-      if (!description) {
-        throw new Error(t("extensions.add_description_required"));
-      }
-      if (!instructions) {
-        throw new Error(t("extensions.add_instructions_required"));
-      }
-    }
-    if (kind === "plugin" && drafts.length === 0) {
-      throw new Error(t("extensions.add_plugin_component_required"));
-    }
-
-    const settings = readDenSettings();
-    const token = settings.authToken?.trim() ?? "";
-    const orgId = settings.activeOrgId?.trim() ?? "";
-    if (!token || !orgId) {
-      throw new Error(t("extensions.add_sign_in_required"));
-    }
-    const client = createDenClient({
-      baseUrl: settings.baseUrl,
-      token,
-    });
-    const body = denLibraryPluginCreateRequest(kind, {
-      ...input,
-      components: kind === "plugin" ? drafts : input.components,
-    });
-    try {
-      await client.setActiveOrganization({ organizationId: orgId });
-      const pluginId = await client.createOrgPlugin(orgId, body);
-      await waitForListedLibraryPlugin(
-        () => client.listMeLibraryPlugins(orgId),
-        pluginId,
-      );
-      clearCloudInventoryCache();
-      return pluginId;
-    } catch (error) {
-      if (error instanceof DenApiError && error.status === 401) {
-        throw new Error(t("extensions.add_unauthorized"));
-      }
-      throw error;
-    }
-  }
-
   function abortRefreshes() {
     refreshSkillsAborted = true;
     refreshPluginsAborted = true;
-    refreshCloudOrgMarketplacesAborted = true;
   }
 
   function ensureSkillsFresh() {
@@ -2314,15 +1270,6 @@ export function createExtensionsStore(options: {
     disposed = false;
     started = true;
 
-    if (typeof window !== "undefined") {
-      const onDenSessionUpdated = () => {
-        cloudOrgMarketplacesLoaded = false;
-        touch();
-      };
-      window.addEventListener("redrob-den-session-updated", onDenSessionUpdated);
-      stopDenSessionListener = () => window.removeEventListener("redrob-den-session-updated", onDenSessionUpdated);
-    }
-
     stopRedrobSubscription = options.redrobServer.subscribe(() => {
       syncFromOptions();
     });
@@ -2337,8 +1284,6 @@ export function createExtensionsStore(options: {
     abortRefreshes();
     stopRedrobSubscription?.();
     stopRedrobSubscription = null;
-    stopDenSessionListener?.();
-    stopDenSessionListener = null;
     listeners.clear();
   };
 
@@ -2352,7 +1297,6 @@ export function createExtensionsStore(options: {
     if (!key || key === "::::") return;
     void refreshSkills({ force: true });
     void refreshPlugins();
-    void refreshImportedCloudPlugins();
   };
 
   refreshSnapshot();
@@ -2374,11 +1318,6 @@ export function createExtensionsStore(options: {
     syncFromOptions,
     skills: () => snapshot.skills,
     skillsStatus: () => snapshot.skillsStatus,
-    cloudOrgMarketplaces: () => snapshot.cloudOrgMarketplaces,
-    cloudOrgMarketplacesStatus: () => snapshot.cloudOrgMarketplacesStatus,
-    importedCloudMarketplaces: () => snapshot.importedCloudMarketplaces,
-    importedCloudPlugins: () => snapshot.importedCloudPlugins,
-    pendingCloudPluginChanges: () => snapshot.pendingCloudPluginChanges,
     get pluginScope() {
       return snapshot.pluginScope;
     },
@@ -2407,21 +1346,17 @@ export function createExtensionsStore(options: {
     pluginsStale: () => snapshot.pluginsStale,
     isPluginInstalledByName,
     refreshSkills,
-    refreshCloudOrgMarketplaces,
     refreshPlugins,
     addPlugin,
     removePlugin,
     importLocalSkill,
     installSkillCreator,
-    importCloudOrgPlugin,
-    removeCloudOrgPlugin,
     previewClaudePlugin,
     installClaudePlugin,
     revealSkillsFolder,
     uninstallSkill,
     readSkill,
     saveSkill,
-    createLibraryItem,
     abortRefreshes,
     ensureSkillsFresh,
     ensurePluginsFresh,

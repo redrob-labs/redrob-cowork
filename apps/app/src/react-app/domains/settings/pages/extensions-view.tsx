@@ -16,8 +16,7 @@ export type ExtensionsSection =
   | "commands"
   | "agents"
   | "plugins"
-  | "needs-sign-in"
-  | "needs-admin-setup"
+  | "available"
   | "ready";
 
 /** Sections are the URL spelling of the inventory filters. */
@@ -64,15 +63,13 @@ function sectionForFilter(filter: ExtensionInventoryFilter): ExtensionsSection {
 }
 
 function stateForSection(section: ExtensionsSection | undefined): ExtensionInventoryState {
-  if (section === "needs-sign-in") return "needs_signin";
-  if (section === "needs-admin-setup") return "needs_admin_setup";
+  if (section === "available") return "available";
   if (section === "ready") return "ready";
   return "all";
 }
 
 function sectionForState(state: Exclude<ExtensionInventoryState, "all">): ExtensionsSection {
-  if (state === "needs_signin") return "needs-sign-in";
-  if (state === "needs_admin_setup") return "needs-admin-setup";
+  if (state === "available") return "available";
   return "ready";
 }
 

@@ -15,7 +15,7 @@ export type ExtensionInventoryFilter = "all" | ExtensionTaxonomy;
 
 export type ExtensionTransport = "mcp" | "native" | null;
 
-export type ExtensionInventoryState = "all" | "needs_signin" | "needs_admin_setup" | "ready";
+export type ExtensionInventoryState = "all" | "ready" | "available";
 
 export const extensionInventoryFilters: ExtensionInventoryFilter[] = [
   "all",
