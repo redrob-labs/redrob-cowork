@@ -1,6 +1,6 @@
 /**
  * Korean translations (한국어)
- * Product/brand names kept as-is: Redrob Work (레드롭 워크), OpenCode, MCP, etc.
+ * Product/brand names kept as-is: Redrob Work (레드롭 워크), Redrob Code, MCP, etc.
  */
 
 export default {
@@ -87,7 +87,6 @@ export default {
   "extensions.filter_all": "전체",
   "extensions.filter_apps": "앱",
   "extensions.filter_plugins": "플러그인",
-  "extensions.plugin_count": "플러그인 {count}개",
   "extensions.title": "라이브러리",
   "model_behavior.desc_builtin": "이 모델은 자체 추론 경로를 결정하며 여기에 프로필을 노출하지 않습니다.",
   "model_behavior.desc_generic": "{label} 프로필을 사용합니다.",
@@ -381,7 +380,6 @@ export default {
   "composer.upload_to_shared_folder": "공유 폴더에 업로드",
   "session_management.archive_failed": "세션을 보관할 수 없습니다",
   "session_management.archive_session": "세션 보관",
-  "session_management.archived_count": "보관됨 ({count})",
   "session_management.archived_label": "보관됨",
   "session_management.close_split_view": "분할 보기 닫기",
   "session_management.delete_group": "그룹 삭제",
