@@ -1,43 +1,38 @@
 import type { RedrobServerClient } from "../../../app/lib/redrob-server";
-import {
-  REDROB_API_KEY_ENV,
-  REDROB_PROVIDER_ID,
-  buildRedrobProviderConfig,
-} from "../settings/redrob-provider";
 
 /**
- * The two host-token calls the onboarding key step needs. Narrowed to the
- * methods actually used so the sequence can be exercised without standing up a
- * full client surface.
+ * Redrob Key operations, all of them against Redrob Code's auth store.
+ *
+ * Redrob Work does not own this credential and keeps no copy of it. Onboarding
+ * collects the value and hands it to the engine through one narrow authenticated
+ * Work server route; everything after that reads the engine's own answer.
+ *
+ * That is why there is no `PUT /env` here. Persisting the key in Work's env
+ * store made it a second source of truth that had to be kept in sync with the
+ * engine, and it only reached the engine at all as a side effect of seeding a
+ * provider entry so a server-side env-name match could find it. Both of those
+ * are gone.
  */
+
+/** The methods these operations need — narrowed so callers can be exercised without a full client. */
 export type RedrobKeyConnectClient = Pick<
   RedrobServerClient,
-  "upsertUserEnv" | "patchEngineRuntimeProviders"
+  "getRedrobAuthStatus" | "connectRedrobAuth" | "disconnectRedrobAuth"
 >;
+
+export type RedrobKeyStatus = {
+  connected: boolean;
+  /** Which engine-side origin supplied the credential. Never the credential. */
+  source: "api" | "env" | "config" | "none";
+};
 
 /**
  * Connect inference from a key the user issued at console.redrob.ai.
  *
- * Storing the key is necessary but not sufficient. The engine is spawned with a
- * fixed env allowlist and never reads the server's env store, so the server has
- * to hand the value to the engine's auth API itself. It only does that for
- * providers present in the *engine-global* runtime config, matching the stored
- * key by the `env: ["REDROB_API_KEY"]` names declared on the provider entry.
- *
- * So this is two calls, in this order:
- *
- *   1. `PUT /env` persists `REDROB_API_KEY`.
- *   2. `PATCH /runtime-config/providers` seeds the Redrob provider entry, and
- *      the server re-runs its credential sync after that write — which is the
- *      point at which the engine actually receives the key.
- *
- * Doing step 2 last is deliberate: that route also reloads the engine before
- * syncing, so the credential is delivered to the generation that will serve
- * the user's first request.
- *
- * Both calls are awaited and errors propagate: a half-connected state (key
- * stored, engine unauthenticated) must surface on the key step rather than
- * looking like success and failing later at inference time.
+ * One call. The server delivers it to the engine, brings the engine onto the new
+ * credential, and reads status back; a response that does not confirm a
+ * connected key is an error, so a half-connected state surfaces on the key step
+ * instead of failing later at the user's first prompt.
  */
 export async function connectRedrobKey(
   client: RedrobKeyConnectClient,
@@ -45,8 +40,32 @@ export async function connectRedrobKey(
 ): Promise<void> {
   const trimmed = apiKey.trim();
   if (!trimmed) return;
-  await client.upsertUserEnv([{ key: REDROB_API_KEY_ENV, value: trimmed }]);
-  await client.patchEngineRuntimeProviders({
-    [REDROB_PROVIDER_ID]: buildRedrobProviderConfig(),
-  });
+  await client.connectRedrobAuth(trimmed);
+}
+
+/**
+ * Rotate the key. Identical to connecting: the engine's auth store holds one
+ * entry per provider and writing it replaces whatever was there, so there is no
+ * separate remove-then-add to get half way through.
+ */
+export async function replaceRedrobKey(
+  client: RedrobKeyConnectClient,
+  apiKey: string,
+): Promise<void> {
+  await connectRedrobKey(client, apiKey);
+}
+
+/**
+ * Disconnect inference. The server removes the engine's auth entry and verifies
+ * the engine no longer reports a credential, so this resolving means the key is
+ * actually gone rather than merely requested to be gone.
+ */
+export async function disconnectRedrobKey(client: RedrobKeyConnectClient): Promise<void> {
+  await client.disconnectRedrobAuth();
+}
+
+/** Observe whether the engine currently holds a Redrob Key. */
+export async function readRedrobKeyStatus(client: RedrobKeyConnectClient): Promise<RedrobKeyStatus> {
+  const { connected, source } = await client.getRedrobAuthStatus();
+  return { connected, source };
 }

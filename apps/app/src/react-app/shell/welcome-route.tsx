@@ -279,8 +279,8 @@ export function WelcomeRoute() {
         if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
           throw new Error(t("welcome.redrob_key_error_server"));
         }
-        // Stores the key and seeds the Redrob provider so the server actually
-        // delivers the credential to the engine. See connectRedrobKey.
+        // Hands the key to Redrob Code's auth store. Work keeps no copy; this
+        // resolves only once the engine reports it connected. See connectRedrobKey.
         await connectRedrobKey(
           createRedrobServerClient({
             baseUrl: normalizedBaseUrl,

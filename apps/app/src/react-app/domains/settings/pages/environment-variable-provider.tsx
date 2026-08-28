@@ -11,10 +11,13 @@ const KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
 // Mirrors PERSISTABLE_INTERNAL_KEYS in apps/server/src/env-file.ts. The server
 // is the enforcer; this copy only keeps the editor from rejecting a key the
-// server accepts. `REDROB_API_KEY` is the onboarding credential, so it has to be
-// editable here or a user could never rotate or repair it after first run.
+// server accepts.
+//
+// `REDROB_API_KEY` is not here on purpose. The Redrob Key lives in Redrob Code's
+// auth store, not in this env store, so it is connected and rotated through the
+// Redrob connect flow rather than typed in as an environment variable. Accepting
+// it here would create a second copy the engine never reads.
 const PERSISTABLE_INTERNAL_KEYS = new Set([
-  "REDROB_API_KEY",
   "REDROB_CLOUD_API_KEY",
   "REDROB_MODELS_API_KEY",
   "REDROB_INFERENCE_BASE_URL",

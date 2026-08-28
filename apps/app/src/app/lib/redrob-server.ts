@@ -1766,32 +1766,40 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken, timeoutMs: timeouts.binary },
       ),
 
-    /**
-     * Upsert/delete provider entries in the *engine-global* runtime config
-     * (host-auth only). Record values upsert, explicit `null` deletes.
-     *
-     * Distinct from `patchConfig(workspaceId, { opencode: { provider } })`,
-     * which writes the workspace-scoped runtime config. Server-side credential
-     * delivery (`syncManagedProviderAuth`) reads only the engine-global map, so
-     * a provider that must have its stored API key pushed to the engine has to
-     * be seeded here.
-     */
-    patchEngineRuntimeProviders: (update: Record<string, unknown>) =>
+    // Redrob Key, owned by Redrob Code (host-auth only). The value is written
+    // straight through to the engine's auth store and never persisted by Work,
+    // so there is no getter for it — only whether the engine holds one.
+    //
+    // Connect and disconnect both reload the engine before answering (the engine
+    // resolves the credential once when it builds provider state), so they use
+    // the reload timeout for the same reason `reloadEngine` does: the 10s config
+    // timeout would abort a request that is still succeeding.
+    getRedrobAuthStatus: () =>
       requestJson<{
-        ok: true;
-        changed: boolean;
-        provider: Record<string, Record<string, unknown>>;
-        reload: "reloaded" | "deferred" | "skipped";
-      }>(baseUrl, "/runtime-config/providers", {
+        connected: boolean;
+        source: "api" | "env" | "config" | "none";
+        legacyMigration: "none" | "migrated" | "failed";
+      }>(baseUrl, "/redrob-auth", {
         token,
         hostToken,
-        method: "PATCH",
-        body: { provider: update },
-        // This route reloads the engine before it answers, and the server's own
-        // dispose bound is 30s — the 10s config timeout would abort a request
-        // that is still succeeding. Same reason `reloadEngine` uses this value.
+        // The first call of a session may carry a legacy credential to the
+        // engine and reload it, so this cannot use the short config timeout.
         timeoutMs: ENGINE_RELOAD_TIMEOUT_MS,
       }),
+
+    connectRedrobAuth: (key: string) =>
+      requestJson<{ ok: true; connected: boolean; source: "api" | "env" | "config" | "none" }>(
+        baseUrl,
+        "/redrob-auth",
+        { token, hostToken, method: "PUT", body: { key }, timeoutMs: ENGINE_RELOAD_TIMEOUT_MS },
+      ),
+
+    disconnectRedrobAuth: () =>
+      requestJson<{ ok: true; connected: boolean; source: "api" | "env" | "config" | "none" }>(
+        baseUrl,
+        "/redrob-auth",
+        { token, hostToken, method: "DELETE", timeoutMs: ENGINE_RELOAD_TIMEOUT_MS },
+      ),
 
     // User-level env vars (host-auth only — desktop shell is the sole caller).
     // See apps/server/src/env-file.ts and apps/app/pr/environment-variables.md.
