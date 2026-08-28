@@ -140,7 +140,7 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
       registryId: managedEngineRecordId,
       trustedIdentity: managedOpencodeIdentity,
     });
-    logger.log("info", `Managed OpenCode listening on ${managedOpencode.url}`);
+    logger.log("info", `Managed Redrob Code listening on ${managedOpencode.url}`);
   }
 }
 

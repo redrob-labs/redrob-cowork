@@ -82,10 +82,15 @@ describeMaybe("authorization-required MCP tool error pass-through", () => {
   let engineLogs = "";
 
   const engineUrl = () => `http://127.0.0.1:${enginePort}`;
+  /**
+   * Every attempt is bounded: the engine binds a few seconds after spawn, and a
+   * connect attempt against the not-yet-listening port can hang instead of
+   * failing fast, which would silently consume the whole hook budget.
+   */
   const engineFetch = (path: string, init?: RequestInit) => {
     const url = new URL(`${engineUrl()}${path}`);
     url.searchParams.set("directory", workspace);
-    return fetch(url, init);
+    return fetch(url, { ...init, signal: init?.signal ?? AbortSignal.timeout(10_000) });
   };
 
   beforeAll(async () => {
@@ -195,7 +200,11 @@ describeMaybe("authorization-required MCP tool error pass-through", () => {
       },
       stdio: "ignore",
     });
-    await waitFor(async () => (await fetch(`http://127.0.0.1:${mcpPort}/health`)).ok ? true : null, "MCP mock");
+    await waitFor(
+      async () =>
+        (await fetch(`http://127.0.0.1:${mcpPort}/health`, { signal: AbortSignal.timeout(5_000) })).ok ? true : null,
+      "MCP mock",
+    );
 
     engine = spawn(enginePath!, ["serve", "--pure", "--hostname", "127.0.0.1", "--port", String(enginePort)], {
       env: {
@@ -215,7 +224,7 @@ describeMaybe("authorization-required MCP tool error pass-through", () => {
     engine.stderr?.on("data", (chunk) => {
       engineLogs = `${engineLogs}${String(chunk)}`.slice(-8_000);
     });
-    await waitFor(async () => (await engineFetch("/mcp")).ok ? true : null, "OpenCode engine");
+    await waitFor(async () => (await engineFetch("/mcp")).ok ? true : null, "Redrob Code engine");
     await waitFor(async () => {
       const statuses = await (await engineFetch("/mcp")).json() as Record<string, { status?: string }>;
       return statuses["mock-authorization"]?.status === "connected" ? true : null;

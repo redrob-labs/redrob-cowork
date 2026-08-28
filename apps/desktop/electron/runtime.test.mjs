@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -199,6 +199,81 @@ describe("commandMatchesPackagedSidecar", () => {
       ),
       false,
     );
+  });
+});
+
+describe("Redrob Code engine resolution", () => {
+  const engineScript = ["#!/bin/sh", 'if [ "$1" = "serve" ]; then echo "Usage: redrob serve"; exit 0; fi', 'echo "0.0.1"'].join("\n");
+
+  async function withManager(root, run) {
+    const manager = createRuntimeManager({
+      app: { getPath: () => root, isPackaged: false },
+      desktopRoot: path.dirname(fileURLToPath(import.meta.url)),
+      listLocalWorkspacePaths: async () => [],
+      localManagedMcpVaultKey: "test-key",
+    });
+    await run(manager);
+  }
+
+  it("honors REDROB_CODE_BIN as the explicit engine path", async (t) => {
+    if (process.platform === "win32") return t.skip("POSIX shell fixture");
+    const root = await mkdtemp(path.join(os.tmpdir(), "redrob-engine-bin-"));
+    const bin = path.join(root, "redrob");
+    const previous = process.env.REDROB_CODE_BIN;
+    try {
+      await writeFile(bin, engineScript, { mode: 0o755 });
+      process.env.REDROB_CODE_BIN = bin;
+      await withManager(root, async (manager) => {
+        const doctor = manager.engineDoctor();
+        assert.equal(doctor.found, true);
+        assert.equal(doctor.resolvedPath, bin);
+        assert.equal(doctor.resolvedSource, "custom");
+        assert.equal(doctor.supportsServe, true);
+      });
+    } finally {
+      if (previous === undefined) delete process.env.REDROB_CODE_BIN;
+      else process.env.REDROB_CODE_BIN = previous;
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("finds the conventional ~/.redrob/bin install and never falls back to opencode", async (t) => {
+    if (process.platform === "win32") return t.skip("POSIX shell fixture");
+    const root = await mkdtemp(path.join(os.tmpdir(), "redrob-engine-known-"));
+    const previousBin = process.env.REDROB_CODE_BIN;
+    const previousPath = process.env.PATH;
+    try {
+      delete process.env.REDROB_CODE_BIN;
+      // Only upstream `opencode` is on PATH: starting it would spawn a product
+      // with different env and readiness contracts, so it must not be resolved.
+      const pathDir = path.join(root, "path-bin");
+      await mkdir(pathDir, { recursive: true });
+      await writeFile(path.join(pathDir, "opencode"), engineScript, { mode: 0o755 });
+      process.env.PATH = pathDir;
+
+      await withManager(root, async (manager) => {
+        const missing = manager.engineDoctor();
+        assert.equal(missing.found, false);
+        assert.equal(missing.resolvedPath, null);
+        assert.match(missing.notes.join(" "), /Redrob Code binary not found/);
+      });
+
+      const installed = path.join(root, ".redrob", "bin", "redrob");
+      await mkdir(path.dirname(installed), { recursive: true });
+      await writeFile(installed, engineScript, { mode: 0o755 });
+
+      await withManager(root, async (manager) => {
+        const doctor = manager.engineDoctor();
+        assert.equal(doctor.found, true);
+        assert.equal(doctor.resolvedPath, installed);
+        assert.equal(doctor.resolvedSource, "known-location");
+      });
+    } finally {
+      if (previousBin === undefined) delete process.env.REDROB_CODE_BIN;
+      else process.env.REDROB_CODE_BIN = previousBin;
+      process.env.PATH = previousPath;
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });
 
