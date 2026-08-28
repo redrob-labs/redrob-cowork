@@ -9,13 +9,6 @@ import type {
   RedrobGuidanceDescriptor,
 } from "@redrob/types/redrob-provider";
 
-export type ConnectSkillDescriptor = {
-  name: string;
-  title?: string;
-  description: string;
-  capability: string;
-};
-
 export type EngineMcpDescriptor = {
   name: string;
   status?: string;
@@ -117,31 +110,6 @@ function sessionContribution(): RedrobFeatureContribution {
   };
 }
 
-function automationContribution(): RedrobFeatureContribution {
-  const provider: RedrobProviderRef = { id: "redrob-automations", kind: "builtin" };
-  return {
-    featureId: "automations",
-    provider,
-    affordances: [
-      affordance({
-        id: "automation.propose",
-        kind: "command",
-        title: "Propose an Automation",
-        description: "Offer a scheduled Automation for the person to review and create. This only renders a proposal in the chat; it cannot create, activate, or run anything.",
-        provider,
-        arguments: [
-          argument("name", "string", true, "Short Automation name, at most 120 characters."),
-          argument("instructions", "string", true, "Self-contained instructions the Automation runs on its schedule."),
-          argument("schedule", "object", true, "once/daily/weekly schedule with an IANA timezone. Intervals are not supported."),
-          argument("model", "object", false, "Optional providerId and modelId. Omit to use the person's default."),
-        ],
-        effects: noEffects,
-      }),
-    ],
-    guidance: [],
-  };
-}
-
 function extensionContribution(): RedrobFeatureContribution {
   const provider: RedrobProviderRef = { id: "redrob-extensions", kind: "extension" };
   return {
@@ -175,58 +143,6 @@ function extensionContribution(): RedrobFeatureContribution {
   };
 }
 
-function connectContribution(
-  skills: ConnectSkillDescriptor[],
-  cloudMcp: EngineMcpDescriptor | undefined,
-): RedrobFeatureContribution | null {
-  if (skills.length === 0 && !cloudMcp) return null;
-  const provider: RedrobProviderRef = { id: "redrob-cloud", kind: "connect" };
-  const guidance: RedrobGuidanceDescriptor[] = skills.map((skill) => ({
-    ref: skill.capability,
-    title: skill.title?.trim() || skill.name,
-    description: skill.description,
-    provider,
-    loading: "catalog",
-  }));
-  return {
-    featureId: "connect",
-    provider,
-    affordances: [
-      affordance({
-        id: "connect.capabilities.search",
-        kind: "query",
-        title: "Search Connect capabilities",
-        description: "Discover a remote capability when no exact capability ref is already known.",
-        provider,
-        arguments: [
-          argument("query", "string", true, "Capability keywords."),
-          argument("limit", "number", false, "Maximum capabilities to return."),
-          argument("type", "string", false, "Optional capability type filter."),
-        ],
-        effects: { data: "read", ui: "none", external: true },
-        tool: "redrob-cloud_search_capabilities",
-      }),
-      affordance({
-        id: "connect.capability.execute",
-        kind: "command",
-        title: "Execute a Connect capability",
-        description: "Execute an exact remote capability ref or load a known remote skill.",
-        provider,
-        arguments: [
-          argument("name", "string", false, "Exact capability ref returned by Connect search or remote skill guidance."),
-          argument("schemaDigest", "string", false, "Schema digest returned by Connect search when required."),
-          argument("path", "object", false, "Path parameters for the capability."),
-          argument("query", "object", false, "Query parameters for the capability."),
-          argument("body", "object", false, "Request body for the capability."),
-        ],
-        effects: { data: "write", ui: "none", external: true },
-        tool: "redrob-cloud_execute_capability",
-      }),
-    ],
-    guidance,
-  };
-}
-
 function mcpContribution(mcp: EngineMcpDescriptor): RedrobFeatureContribution {
   return {
     featureId: `mcp:${mcp.name}`,
@@ -237,18 +153,11 @@ function mcpContribution(mcp: EngineMcpDescriptor): RedrobFeatureContribution {
 }
 
 export function buildRedrobProviderContributions(
-  skills: ConnectSkillDescriptor[],
   mcps: EngineMcpDescriptor[] = [],
 ): RedrobFeatureContribution[] {
-  const cloudMcp = mcps.find((mcp) => mcp.name === "redrob-cloud");
-  const connect = connectContribution(skills, cloudMcp);
   return [
     sessionContribution(),
-    automationContribution(),
     extensionContribution(),
-    ...mcps
-      .filter((mcp) => mcp.name !== "redrob-cloud")
-      .map(mcpContribution),
-    ...(connect ? [connect] : []),
+    ...mcps.map(mcpContribution),
   ];
 }

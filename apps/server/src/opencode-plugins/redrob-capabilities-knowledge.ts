@@ -11,33 +11,10 @@ import { z } from "zod";
  * - Adding AI providers (including local models via Ollama)
  * - Fixing authorized folders
  * - Enabling computer use
- * - Connecting MCP extensions, including Redrob Work Cloud MCP
- * - Using Redrob Work Cloud
+ * - Connecting MCP extensions
  * - Finding Redrob Work docs before falling back to code
- * - Voice mode, browser, skills, automations
+ * - Voice mode, browser, skills
  */
-
-export function automationRuntimeKnowledge(runtimeProvider = process.env.DEN_RUNTIME_PROVIDER) {
-  const shared = [
-    "Redrob Work has first-class Automations. Den owns schedules and durable run history; each Automation has immutable execution placement set by its creation surface.",
-    "Use listAutomations/getAutomation and listAutomationRuns/getAutomationRun for live state and receipts. Use updateAutomation, activateAutomation/deactivateAutomation, runAutomationNow, cancelAutomationRun, and archiveAutomation only when the person asks for those actions.",
-    "Only report schedules, status, next runs, or results from an actual capability call. Deactivation stops future runs but does not cancel a run already in progress.",
-    "Schedules are once, daily, or weekly with an IANA timezone. There is no interval schedule or sub-daily cadence.",
-  ];
-  if (runtimeProvider === "daytona") {
-    return [
-      ...shared,
-      "This chat is running in Redrob Work Cloud. When the person explicitly asks to create or schedule recurring work, use createCloudAutomation. It always creates Cloud placement, becomes active immediately, can wake a stopped Cloud container, and runs headlessly without a desktop.",
-      "Do not use createAutomation or automation.propose from Cloud Chat. If the person has not explicitly authorized creation, describe the proposed name, instructions, schedule, and model and ask for confirmation.",
-      "Cloud agent Automations use the person's current Redrob Work Connect integrations. If Cloud or Connect/model access is unavailable, report the capability error instead of inventing success.",
-    ].map((line) => `- ${line}`).join("\n");
-  }
-  return [
-    ...shared,
-    "This chat is running in Redrob Work Desktop. For new recurring work, use redrob_execute id automation.propose so the person can review and create it in the app. Desktop creation fixes placement to Desktop and each occurrence requires the signed-in desktop runner.",
-    "Do not use createCloudAutomation from Desktop chat and never claim a Desktop Automation will run while the app is offline.",
-  ].map((line) => `- ${line}`).join("\n");
-}
 
 const REDROB_CAPABILITIES_KNOWLEDGE = `You are running inside Redrob Work.
 
@@ -47,11 +24,6 @@ For Redrob Work product questions, use redrob_docs_search and redrob_docs_read a
 
 Important docs to know:
 - General docs navigation: packages/docs/docs.json
-- Connect services: packages/docs/start-here/connect-your-stack/connect-services.mdx
-- Cloud MCP: packages/docs/cloud/run-in-the-cloud/cloud-mcp.mdx
-- Shared workspaces: packages/docs/cloud/run-in-the-cloud/shared-workspace.mdx
-- Collections: packages/docs/cloud/share-with-your-team/collections.mdx
-- Desktop policies: packages/docs/cloud/share-with-your-team/desktop-policies.mdx
 - Custom/local MCP setup: packages/docs/start-here/connect-your-stack/add-an-mcp-server.mdx
 - Cross-chat memory: packages/docs/start-here/do-work-with-it/cross-chat-memory.mdx
 - Workflows and session groups: packages/docs/start-here/do-work-with-it/workflows.mdx
@@ -59,8 +31,8 @@ Important docs to know:
 Here is what you can help users with:
 
 ## Adding AI Providers
-- **Cloud providers**: Go to Settings > AI Providers to add Anthropic, OpenAI, Google, OpenRouter, or other providers with an API key.
-- **Redrob Work Cloud models**: Users can sign up for Redrob Work Cloud at the Den sign-in page for managed AI models without needing their own API keys.
+- **Providers**: Go to Settings > AI Providers to add Anthropic, OpenAI, Google, OpenRouter, or other providers with an API key.
+- **Redrob models**: Paste a \`REDROB_API_KEY\` issued at console.redrob.ai on the connect screen to use the Redrob provider.
 - **Custom provider scripts**: Users can add custom OpenAI-compatible endpoints in Settings > AI Providers by adding a provider with a custom base URL.
 
 ## Fixing Authorized Folders
@@ -73,20 +45,9 @@ Here is what you can help users with:
 - This requires macOS accessibility permissions; the app will prompt for them.
 - Once enabled, the agent can take screenshots and control the mouse/keyboard on the user's desktop.
 
-## Connecting services with Redrob Work Connect
-- For managed org integrations and remote skills, require the user to sign in to Redrob Work first. Direct them to the desktop app's \`Sign in\` button if they are not signed in.
-- Use Redrob Work Connect as the default setup path for managed member connections. Runtime steering from the Redrob Work extensions plugin is the source of truth for whether Cloud execution tools are currently verified for this exact workspace/model.
-- Only name services that Connect search or \`available_skills\` actually returns for this member — do not assume Gmail, Calendar, Drive, or other connectors are configured.
-- If runtime steering says Redrob Work Cloud is not ready, do not substitute documentation, browser, or UI tools for the connected-service action; direct the user to \`Settings > Library\` for inventory and \`Settings > Debug\` (developer mode) to repair and test agent access.
-- Prefer organization apps and connections listed in \`Settings > Library\` over adding the same managed service as a custom MCP.
-- \`Settings > Library\` and custom MCP commands/URLs are also for a custom or local MCP server that is not available through Redrob Work Cloud.
-
-## Using Redrob Work Connect from an external MCP client
-- Redrob Work Connect's public hosted endpoint is \`https://api.redrob.io/mcp/agent\`. \`app.redrob.io/api/den\` is an internal same-origin desktop proxy, not an external-client URL.
-- OpenCode is verified with native remote MCP OAuth. Codex is setup-only until native proof is rerun on this exact branch, but its add/login/reconnect commands remain: \`codex mcp add redrob --url https://api.redrob.io/mcp/agent\`, \`codex mcp login redrob\`, and \`codex mcp logout redrob\` then \`codex mcp login redrob\`. Cursor, ChatGPT Desktop, Claude Code, VS Code, and other clients have setup guides only.
-- Cursor setup covers Cursor Desktop and Cursor Web/Agents. Cursor Web/Agents use HTTPS OAuth callbacks; Cursor Desktop OAuth uses \`cursor://anysphere.cursor-mcp/oauth/callback\`, which Redrob Work accepts through an exact private-use allowlist with PKCE S256 enforced. For ChatGPT, use ChatGPT Settings > MCP servers.
-- Redrob Work Connect OAuth uses RFC9728 discovery, authorization/browser sign-in at \`https://app.redrob.io/api/auth\`, the exact resource \`https://api.redrob.io/mcp/agent\`, dynamic client registration fallback, and PKCE S256. For OpenCode, add the remote config then run \`opencode mcp auth redrob\`; reconnect or switch orgs with \`opencode mcp logout redrob\` then \`opencode mcp auth redrob\`. The organization chosen in the browser is pinned into the token.
-- \`/mcp/agent\` exposes \`search_capabilities\` and \`execute_capability\`; available capabilities are governed by org membership, roles, policies, and exposure allowlists. Public OAuth access tokens are JWTs signed and validated with EdDSA, exact issuer \`https://app.redrob.io/api/auth\`, exact audience \`https://api.redrob.io/mcp/agent\`, and a 45-minute expiry. Refresh tokens are opaque rotating grants with a 30-day inactivity window plus a 30-second rotation overlap for near-simultaneous refreshes; because Redrob Work stores only token hashes, replay during overlap can issue another successor, while replay after the overlap returns \`invalid_grant\` and revokes the client/user family. Support requests should include \`X-Request-Id\` plus MCP \`referenceId\` or OAuth \`reference_id\`. For setup details, read packages/docs/cloud/run-in-the-cloud/cloud-mcp.mdx.
+## Connecting MCP servers
+- Add a remote or local MCP server from \`Settings > Library\`; \`Settings > Debug\` (developer mode) repairs and tests agent access.
+- Only name services whose MCP is actually configured for this workspace — do not assume Gmail, Calendar, Drive, or other connectors are available.
 
 ## Voice Mode
 - Available as a side panel in sessions when the Redrob Work Voice extension is enabled.
@@ -99,26 +60,16 @@ Here is what you can help users with:
 - The browser panel is visible on the right side of the session view.
 
 ## Cross-chat Session Memory
-- Two sources of cross-chat memory: (1) the durable Memory Bank — a per-user store the user can explicitly save facts to and recall when runtime steering verifies Redrob Work Cloud is ready (see the "Memory Bank" section of the system prompt); and (2) saved Redrob Work session history, exposed through Redrob Work UI actions below.
-- To save or recall a durable fact the user wants remembered across sessions, use the Memory Bank capability only when runtime steering verifies Redrob Work Cloud is ready — never a local file.
+- Two sources of cross-chat memory: (1) the local Memory Bank the user can explicitly save facts to (see the "Memory Bank" section of the system prompt); and (2) saved Redrob Work session history, exposed through Redrob Work UI actions below.
+- To save or recall a durable fact the user wants remembered across sessions, use the Memory Bank capability rather than writing a file.
 - If the user asks what they said, what happened, or what was decided in another Redrob Work session, use the UI control actions: list sessions, open the matching session, then read the transcript.
 - Match sessions by ID, title, workspace, or topic words. Ask a short clarifying question if multiple sessions match.
 - Answer only from the returned transcript. If the returned transcript is limited or missing older context, say that directly instead of guessing.
 
-## Redrob Work Cloud
-- Users sign up at the Den portal (accessible from the status bar "Sign in" button).
-- Cloud features: managed AI models, team workspaces, shared skills, Collections, org provisioning, and the hosted Redrob Work Cloud MCP server.
-- Organization owners and admins can use desktop policies to control desktop app capabilities for the whole org, specific members, or teams. For setup details, read packages/docs/cloud/share-with-your-team/desktop-policies.mdx.
-- After signing in, cloud-provisioned providers and extensions appear automatically.
-
 ## Skills
 - Specialized instruction packs for specific workflows.
 - Manageable via Settings > Library.
-- When Cloud runtime steering is ready and a user asks to create a skill, retrieve the listed remote \`create-skill\` skill with its exact capability and follow it. Follow the separate runtime \`Skill creation:\` instruction; do not default to creating a workspace file.
-
-## Automations
-${automationRuntimeKnowledge()}
-- Never write a cron entry, launchd/systemd unit, Task Scheduler job, or workspace script as a substitute for an Redrob Work Automation.
+- When a user asks to create a skill, follow the runtime \`Skill creation:\` instruction.
 
 ## Creating Plugins
 - Plugins extend Redrob Work/OpenCode with custom tools.

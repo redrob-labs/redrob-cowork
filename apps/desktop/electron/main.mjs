@@ -46,12 +46,7 @@ import { fetchAgentContextDiagnosticsResponse } from "./agent-context-diagnostic
 import {
   createLinuxDesktopIntegration,
 } from "./linux-desktop-integration.mjs";
-import { createDesktopAutomationRunner, normalizeRunnerBaseUrl } from "./automation-runner.mjs";
-import {
-  desktopActivationRequired,
-  enterprisePreactivationCommandAllowed,
-  resolveDesktopDistribution,
-} from "./desktop-distribution.mjs";
+import { resolveDesktopDistribution } from "./desktop-distribution.mjs";
 import {
   applyWindowsTaskbarIcon,
   windowsBrandAppUserModelId,
@@ -94,13 +89,8 @@ const {
 } = require("electron");
 const pty = require(["node", "pty"].join("-"));
 const NATIVE_DEEP_LINK_EVENT = "redrob:deep-link-native";
-const AUTOMATION_RUNNER_CREDENTIAL_REJECTED_EVENT = "redrob:automation-runner:credential-rejected";
 const isDevMode = process.env.REDROB_DEV_MODE === "1";
-const DESKTOP_DISTRIBUTION = resolveDesktopDistribution({
-  isPackaged: app.isPackaged,
-  packageFlavor: Reflect.get(desktopPackageMetadata, "redrobDistribution"),
-  environmentFlavor: process.env.REDROB_DESKTOP_DISTRIBUTION,
-});
+const DESKTOP_DISTRIBUTION = resolveDesktopDistribution();
 const TAURI_APP_IDENTIFIER = DESKTOP_DISTRIBUTION.appIdentifier;
 const DEV_APP_IDENTIFIER = `${DESKTOP_DISTRIBUTION.appIdentifier}.dev`;
 const DESKTOP_PROTOCOL_SCHEME = DESKTOP_DISTRIBUTION.protocolScheme;
@@ -978,11 +968,7 @@ if (extraLaunchArgs) {
   }
 }
 configureFakeMediaForTests(app, envFlagEnabled("REDROB_ELECTRON_FAKE_MEDIA"));
-const DEFAULT_DEN_BASE_URL = "https://app.redrob.io";
 const DEFAULT_LOCAL_BASE_URL = "http://127.0.0.1:4096";
-const FORCE_DESKTOP_REQUIRE_SIGNIN =
-  DESKTOP_DISTRIBUTION.requireSignin || envFlagEnabled("REDROB_FORCE_SIGNIN");
-const DEFAULT_DESKTOP_REQUIRE_SIGNIN = FORCE_DESKTOP_REQUIRE_SIGNIN;
 
 function envFlagEnabled(name) {
   const value = process.env[name]?.trim().toLowerCase();
@@ -1045,12 +1031,7 @@ const browserPanel = createBrowserPanel({
   onDeepLink: (urls) => queueDeepLinks(urls),
 });
 
-const workspaceStore = createWorkspaceStore({
-  app,
-  defaultDenBaseUrl: DEFAULT_DEN_BASE_URL,
-  defaultRequireSignin: DEFAULT_DESKTOP_REQUIRE_SIGNIN,
-  forceRequireSignin: FORCE_DESKTOP_REQUIRE_SIGNIN,
-});
+const workspaceStore = createWorkspaceStore({ app });
 
 
 function normalizePlatform(value) {
@@ -1168,41 +1149,6 @@ const runtimeManager = createRuntimeManager({
         loadSafeStorage: () => require("electron").safeStorage,
       }),
 });
-const initialRunnerBootstrap = workspaceStore.readDesktopBootstrapConfigSync();
-const legacyRunnerBaseUrls = [
-  initialRunnerBootstrap.apiBaseUrl,
-  initialRunnerBootstrap.baseUrl,
-  initialRunnerBootstrap.baseUrl
-    ? `${String(initialRunnerBootstrap.baseUrl).replace(/\/+$/, "")}/api/den`
-    : null,
-  `${DEFAULT_DEN_BASE_URL}/api/den`,
-].map((value) => normalizeRunnerBaseUrl(value)).filter(Boolean);
-const desktopAutomationRunner = createDesktopAutomationRunner({
-  // v1 credentials predate token audiences. Keep them usable during the Den
-  // rollout only for endpoints trusted before the renderer starts issuing IPC.
-  legacyBaseUrls: legacyRunnerBaseUrls,
-  getLocalRuntime: async () => {
-    const server = await runtimeManager.redrobServerInfo();
-    return { baseUrl: server.baseUrl, token: server.clientToken ?? server.ownerToken };
-  },
-  log: (state) => console.info(`[automation-runner] ${state}`),
-  onCredentialRejected: () => {
-    if (!mainWindow || mainWindow.isDestroyed()) return;
-    mainWindow.webContents.send(AUTOMATION_RUNNER_CREDENTIAL_REJECTED_EVENT);
-  },
-});
-
-// Scheduled Automations are due at wall-clock times a laptop routinely sleeps
-// through. Waking the machine has to poll for work now, not up to a full poll
-// interval later, or a recovered occurrence sits queued while the desktop is
-// already back.
-const wakeAutomationRunner = (wakeEvent) => {
-  if (desktopAutomationRunner.wake().polled) {
-    console.info(`[automation-runner] polling for work after ${wakeEvent}`);
-  }
-};
-powerMonitor.on("resume", () => wakeAutomationRunner("resume"));
-powerMonitor.on("unlock-screen", () => wakeAutomationRunner("unlock-screen"));
 
 let runtimeDisposedForQuit = false;
 let runtimeDisposeInProgress = false;
@@ -1798,27 +1744,7 @@ const desktopCommandHandlers = {
       return workspaceStore.clearDesktopBootstrapConfig();
   },
   "setDesktopBootstrapConfig": async (event, ...args) => {
-      const previous = workspaceStore.readDesktopBootstrapConfigSync();
-      // A locked installation must never be able to unlock itself by writing
-      // policy through the bridge. The activation requirement is cleared only
-      // by an administrator editing desktop-bootstrap.json on disk (which this
-      // process reads, never writes) or by a completed Den activation.
-      const requested = args[0] ?? {};
-      const guarded = desktopActivationRequired(DESKTOP_DISTRIBUTION, previous)
-          && requested?.requireActivation === false
-        ? { ...requested, requireActivation: true }
-        : requested;
-      const next = await workspaceStore.setDesktopBootstrapConfig(guarded);
-      if (
-        desktopActivationRequired(DESKTOP_DISTRIBUTION, previous)
-        && !desktopActivationRequired(DESKTOP_DISTRIBUTION, next)
-      ) {
-        await uiControlServer.start().catch((error) => {
-          console.warn("[ui-control] failed to start", error);
-        });
-        await runtimeManager.prepareFreshRuntime();
-      }
-      return next;
+      return workspaceStore.setDesktopBootstrapConfig(args[0] ?? {});
   },
   "nukeRedrobAndOpencodeConfigPreview": async (event, ...args) => {
       return buildNukeManifest({
@@ -1853,9 +1779,6 @@ const desktopCommandHandlers = {
   },
   "redrobServerInfo": async (event, ...args) => {
       return runtimeManager.redrobServerInfo();
-  },
-  "automationRunnerConfigure": async (event, ...args) => {
-      return desktopAutomationRunner.configure(args[0] ?? null);
   },
   "redrobServerRestart": async (event, ...args) => {
       return runtimeManager.redrobServerRestart(args[0] ?? {});
@@ -2036,7 +1959,7 @@ const desktopCommandHandlers = {
   },
   "__applyBrandAppName": async (event, ...args) => {
     currentDisplayAppName = applyBrandAppName(
-      BLANK_SLATE_LAUNCH.enabled || DESKTOP_DISTRIBUTION.flavor === "enterprise" ? null : args[0],
+      BLANK_SLATE_LAUNCH.enabled ? null : args[0],
       {
       fallbackName: APP_NAME,
       platform: process.platform,
@@ -2267,19 +2190,7 @@ function desktopErrorMessageWithCauses(error) {
   }
 }
 
-function assertDesktopActivation() {
-  if (desktopActivationRequired(
-    DESKTOP_DISTRIBUTION,
-    workspaceStore.readDesktopBootstrapConfigSync(),
-  )) {
-    throw new Error("Redrob Work must be activated from your Den portal before this command is available.");
-  }
-}
-
 async function handleDesktopInvoke(event, command, ...args) {
-  if (!enterprisePreactivationCommandAllowed(command)) {
-    assertDesktopActivation();
-  }
   const handler = desktopCommandHandlers[command];
   if (!handler) {
     throw new Error(`Electron desktop bridge method is not implemented yet: ${command}`);
@@ -2512,12 +2423,7 @@ const { ensureAutoUpdater } = registerUpdaterIpc({
   app,
   ipcMain,
   getMainWindow: () => mainWindow,
-  // All distributions intentionally share one application identifier, so they also
-  // share Squirrel's ShipIt domain. Keep the shared default rather than
-  // implying an isolation the bundle identifier cannot provide.
-  manifestChannel: DESKTOP_DISTRIBUTION.flavor === "public"
-    ? "latest"
-    : DESKTOP_DISTRIBUTION.flavor,
+  manifestChannel: "latest",
   electronNet,
   shell,
   distribution: DESKTOP_DISTRIBUTION.flavor,
@@ -2543,7 +2449,6 @@ or use: pnpm dev:worktree`);
     event.preventDefault();
     if (runtimeDisposeInProgress) return;
     showShutdownScreen();
-    desktopAutomationRunner.stop();
     void Promise.all([
       disposeRuntimeBeforeQuit(),
       uiControlServer.stop(),
@@ -2588,9 +2493,7 @@ or use: pnpm dev:worktree`);
     });
     const bootstrapConfig = await workspaceStore.getDesktopBootstrapConfig();
     currentDisplayAppName = applyBrandAppName(
-      BLANK_SLATE_LAUNCH.enabled || DESKTOP_DISTRIBUTION.flavor === "enterprise"
-        ? null
-        : bootstrapConfig.brandAppName,
+      BLANK_SLATE_LAUNCH.enabled ? null : bootstrapConfig.brandAppName,
       {
       fallbackName: APP_NAME,
       platform: process.platform,
@@ -2607,28 +2510,19 @@ or use: pnpm dev:worktree`);
       await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);
     }
     applicationMenu.install();
-    if (!desktopActivationRequired(DESKTOP_DISTRIBUTION, bootstrapConfig)) {
-      await runtimeManager.prepareFreshRuntime().catch(() => undefined);
-    }
+    await runtimeManager.prepareFreshRuntime().catch(() => undefined);
 
     // Use Tauri's existing workspace state file as canonical so rollback and
     // Electron see the same workspace list. Import the short-lived
     // Electron-only filename only when the shared file is missing.
     await workspaceStore.migrateLegacyElectronWorkspaceStateIfNeeded();
-    // The UI-control bridge evaluates arbitrary JavaScript in the renderer, so
-    // it stays down until the installation is activated. Otherwise it is a
-    // local bypass of the pre-activation restriction.
-    if (!desktopActivationRequired(DESKTOP_DISTRIBUTION, bootstrapConfig)) {
-      await uiControlServer.start().catch((error) => {
-        console.warn("[ui-control] failed to start", error);
-      });
-    }
-    if (!desktopActivationRequired(DESKTOP_DISTRIBUTION, bootstrapConfig)) {
-      runtimeBootstrapPromise = bootRuntimeForSelectedWorkspace().catch((error) => ({
-        ok: false,
-        error: error instanceof Error ? error.message : String(error),
-      }));
-    }
+    await uiControlServer.start().catch((error) => {
+      console.warn("[ui-control] failed to start", error);
+    });
+    runtimeBootstrapPromise = bootRuntimeForSelectedWorkspace().catch((error) => ({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    }));
 
     queueDeepLinks(forwardedDeepLinks(process.argv));
     const win = await createMainWindow();

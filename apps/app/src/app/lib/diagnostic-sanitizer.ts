@@ -66,19 +66,3 @@ function safeCloudTokenMetadata(value: unknown): Record<string, unknown> | null 
   return Object.keys(output).length ? output : null;
 }
 
-export function sanitizeCloudMcpHealthDiagnostic(value: unknown): unknown {
-  const sanitized = sanitizeDiagnosticValue(value);
-  if (!isRecord(value) || !isRecord(sanitized)) return sanitized;
-  const desired = isRecord(value.desired) ? value.desired : null;
-  const desiredSanitized = isRecord(sanitized.desired) ? sanitized.desired : null;
-  const token = desired && isRecord(desired.token) ? desired.token : null;
-  const metadata = token ? safeCloudTokenMetadata(token.metadata) : null;
-  if (!desiredSanitized || !metadata) return sanitized;
-  return {
-    ...sanitized,
-    desired: {
-      ...desiredSanitized,
-      tokenMetadata: metadata,
-    },
-  };
-}

@@ -94,9 +94,6 @@ test("process profile hides an installed bootstrap before workspace-store loads"
     try {
       const store = createWorkspaceStore({
         app: { getPath: () => processBlankSlateProfile.userDataPath },
-        defaultDenBaseUrl: "https://api.redrob.io",
-        defaultRequireSignin: true,
-        forceRequireSignin: true,
       });
       console.log(JSON.stringify({
         bootstrap: store.readDesktopBootstrapConfigSync(),
@@ -116,11 +113,7 @@ test("process profile hides an installed bootstrap before workspace-store loads"
       },
     });
     const result = JSON.parse(stdout);
-    assert.deepEqual(result.bootstrap, {
-      baseUrl: "https://api.redrob.io",
-      requireSignin: true,
-      fromFile: false,
-    });
+    assert.deepEqual(result.bootstrap, { fromFile: false });
     assert.notEqual(result.bootstrapPath, installedBootstrapPath);
     assert.ok(result.bootstrapPath.startsWith(result.rootPath));
   } finally {

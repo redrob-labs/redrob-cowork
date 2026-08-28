@@ -1,6 +1,6 @@
 # Redrob Work Bootstrap CLI
 
-Script-installable `redrob-bootstrap` command for agent-first onboarding.
+Script-installable `redrob-bootstrap` command for agent-first install.
 
 This package is intentionally small and does not assume npm is the install
 channel. A bootstrap script can place `bin/redrob.mjs` on disk, then run:
@@ -10,7 +10,6 @@ redrob-bootstrap install --bin-dir ~/.local/bin --install-dir ~/.redrob/bootstra
 redrob-bootstrap doctor --json
 redrob-bootstrap install app --manifest https://example.com/redrob-install-manifest.json
 redrob-bootstrap doctor --app --json
-REDROB_OWNER_PASSWORD='<generated-password>' redrob-bootstrap cloud onboard --base-url https://den.example.com --owner-email ada@example.com --org-name 'Ada Workspace' --invite-email teammate@example.com --skill-name 'First skill' --json
 ```
 
 Current scope:
@@ -20,8 +19,7 @@ Current scope:
   SHA-256 digest, and installs it into a user-writable app directory.
   Supported artifact types: macOS `.dmg`, `.zip`, `.tar.gz`/`.tgz`, Linux
   `.AppImage`, and Windows `.exe`/`.msi` copy-installs.
-- `doctor` verifies the CLI install and, optionally, a Den API health endpoint.
-- `cloud onboard` drives the headless REST onboarding flow: sign up, sign in,
-  create an org, invite a teammate, and create a starter skill.
+- `doctor` verifies the CLI and desktop app install.
 
-This is a bootstrap layer for install and Cloud onboarding; runtime hosting uses the desktop app, Redrob Work Cloud, or `redrob-server`.
+This is a bootstrap layer for install only; runtime hosting uses the desktop app
+or `redrob-server`.

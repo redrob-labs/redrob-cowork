@@ -1,10 +1,9 @@
 # Warden security clearance.
 #
 # Grants or revokes a "security clearance" review on PRs based on blocking
-# findings from the Warden skills: all security findings plus high desktop↔den
-# sync findings. Advisory sync findings never withhold clearance. Humans still
-# review and merge; the clearance only satisfies the required-review gate in
-# the branch ruleset for clean diffs.
+# findings from the Warden security review. Humans still review and merge; the
+# clearance only satisfies the required-review gate in the branch ruleset for
+# clean diffs.
 #
 # Why workflow_run: this file always executes from the default branch, so a
 # PR cannot tamper with the clearance logic. The verdict step additionally
@@ -76,8 +75,6 @@ jobs:
 
           summary_sha="$(jq -r '.head_sha' warden-summary.json)"
           blocking="$(jq -r '.blocking_count // .findings_count' warden-summary.json)"
-          advisory="$(jq -r '.sync_advisory_count // 0' warden-summary.json)"
-          echo "advisory=$advisory" >> "$GITHUB_OUTPUT"
 
           if [ "$summary_sha" != "$HEAD_SHA" ]; then
             echo "Summary SHA ($summary_sha) does not match analyzed SHA ($HEAD_SHA); skipping."
@@ -130,13 +127,9 @@ jobs:
           PR: ${{ steps.verdict.outputs.pr }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
-          ADVISORY: ${{ steps.verdict.outputs.advisory }}
         run: |
           set -euo pipefail
-          BODY="**Warden security clearance: clear.** No blocking findings (security or desktop↔den sync) in this diff (\`$HEAD_SHA\`)."
-          if [[ "$ADVISORY" =~ ^[0-9]+$ ]] && [ "$ADVISORY" -gt 0 ]; then
-            BODY="$BODY $ADVISORY advisory desktop↔den sync note(s) were posted as review comments; they do not affect clearance."
-          fi
+          BODY="**Warden security clearance: clear.** No blocking security findings in this diff (\`$HEAD_SHA\`)."
           BODY="$BODY Automated clearance satisfies the required-review gate only — a human still reviews and merges. [Analysis run]($RUN_URL)"
           gh api "repos/$REPO/pulls/$PR/reviews" \
             -f event=APPROVE \
@@ -156,7 +149,7 @@ jobs:
             --jq "[.[] | select(.user.login == \"${APP_SLUG}[bot]\" and .state == \"APPROVED\")] | last | .id // empty")"
           if [ -n "$rid" ]; then
             gh api -X PUT "repos/$REPO/pulls/$PR/reviews/$rid/dismissals" \
-              -f message="Warden found new blocking findings (security or desktop↔den sync) on the latest diff; clearance revoked." \
+              -f message="Warden found new blocking security findings on the latest diff; clearance revoked." \
               || echo "Could not dismiss review $rid (may already be dismissed)."
           else
             echo "No active clearance to revoke."

@@ -41,34 +41,4 @@ describe("Electron distribution configs", () => {
     assert.equal(config.artifactName, "redrob-${os}-${arch}-${version}.${ext}");
   });
 
-  it("defines an enterprise flavor with the standard app identity and release provider", async () => {
-    const config = await readConfig("electron-builder.enterprise.yml");
-    assert.equal(config.extends, "./electron-builder.base.yml");
-    assert.equal(config.appId, "io.redrob.work");
-    assert.equal(config.productName, "Redrob Work Enterprise");
-    assert.equal(config.extraMetadata.redrobDistribution, "enterprise");
-    assert.equal(config.protocols[0].schemes[0], "redrob");
-    assert.equal(config.publish[0].provider, "github");
-    assert.equal(config.publish[0].owner, "different-ai");
-    assert.equal(config.publish[0].repo, "redrob");
-    assert.equal(config.publish[0].channel, "enterprise");
-    assert.equal(
-      config.artifactName,
-      "redrob-enterprise-${os}-${arch}-${version}.${ext}",
-    );
-  });
-
-  it("defines a Cloud flavor with its own artifacts and updater channel", async () => {
-    const config = await readConfig("electron-builder.cloud.yml");
-    assert.equal(config.extends, "./electron-builder.base.yml");
-    assert.equal(config.appId, "io.redrob.work");
-    assert.equal(config.productName, "Redrob Work Cloud");
-    assert.equal(config.extraMetadata.redrobDistribution, "cloud");
-    assert.equal(config.protocols[0].schemes[0], "redrob");
-    assert.equal(config.publish[0].channel, "cloud");
-    assert.equal(
-      config.artifactName,
-      "redrob-cloud-${os}-${arch}-${version}.${ext}",
-    );
-  });
 });

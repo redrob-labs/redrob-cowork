@@ -16,7 +16,6 @@ import {
 } from "./redrob-extensions-preview-steering.js";
 import {
   buildRedrobProviderContributions,
-  type ConnectSkillDescriptor,
   type EngineMcpDescriptor,
 } from "./redrob-provider-adapters.js";
 
@@ -362,17 +361,6 @@ async function serverGet(path: string): Promise<unknown> {
   return payload;
 }
 
-async function readConnectSkillDescriptors(): Promise<ConnectSkillDescriptor[]> {
-  try {
-    const parsed = connectSkillsEnvelopeSchema.safeParse(
-      await serverGet("/experimental/connect/skills"),
-    );
-    return parsed.success ? parsed.data.skills : [];
-  } catch {
-    return [];
-  }
-}
-
 async function readEngineMcpDescriptors(
   client: RedrobWorkEngineMcpStatusClient | undefined,
   directory: string | undefined,
@@ -397,12 +385,11 @@ async function readRedrobAgentContext(
   engineMcpStatusClient: RedrobWorkEngineMcpStatusClient | undefined,
   engineMcpStatusDirectory: string | undefined,
 ): Promise<Record<string, unknown>> {
-  const [uiResult, skills, mcps] = await Promise.all([
+  const [uiResult, mcps] = await Promise.all([
     uiBridgeRequest("/context"),
-    readConnectSkillDescriptors(),
     readEngineMcpDescriptors(engineMcpStatusClient, engineMcpStatusDirectory),
   ]);
-  const contributions = buildRedrobProviderContributions(skills, mcps);
+  const contributions = buildRedrobProviderContributions(mcps);
   const providerAffordances = contributions.flatMap((contribution) => contribution.affordances);
   const uiContext = isRecord(uiResult) && isRecord(uiResult.context) ? uiResult.context : null;
   if (!uiContext) {

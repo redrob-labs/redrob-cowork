@@ -34,9 +34,6 @@ async function withIsolatedBootstrapStore(callback) {
     const module = await import(`./workspace-store.mjs?bootstrap-test=${Date.now()}-${Math.random()}`);
     const createStore = (overrides = {}) => module.createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? path.join(root, "userData") : root },
-      defaultDenBaseUrl: "https://default.example.com",
-      defaultRequireSignin: false,
-      forceRequireSignin: false,
       ...overrides,
     });
     const store = createStore();
@@ -82,9 +79,6 @@ test("recovers missing desktop workspace state from token store paths", async ()
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
-      defaultDenBaseUrl: "https://example.test",
-      defaultRequireSignin: false,
-      forceRequireSignin: false,
     });
 
     const state = await store.readWorkspaceState();
@@ -125,9 +119,6 @@ test("keeps persisted empty desktop workspace state authoritative", async () => 
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
-      defaultDenBaseUrl: "https://example.test",
-      defaultRequireSignin: false,
-      forceRequireSignin: false,
     });
 
     const state = await store.readWorkspaceState();
@@ -163,9 +154,6 @@ test("prefers server config workspaces when desktop state is missing", async () 
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
-      defaultDenBaseUrl: "https://example.test",
-      defaultRequireSignin: false,
-      forceRequireSignin: false,
     });
 
     const state = await store.readWorkspaceState();
@@ -188,9 +176,6 @@ test("does not create a default workspace when desktop state is absent", async (
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
-      defaultDenBaseUrl: "https://example.test",
-      defaultRequireSignin: false,
-      forceRequireSignin: false,
     });
 
     const state = await store.readWorkspaceState();
@@ -236,9 +221,6 @@ test("normalizes recovered remote Redrob Work entries before persisting", async 
   try {
     const store = createWorkspaceStore({
       app: { getPath: (name) => name === "userData" ? userData : root },
-      defaultDenBaseUrl: "https://example.test",
-      defaultRequireSignin: false,
-      forceRequireSignin: false,
     });
 
     const state = await store.readWorkspaceState();
@@ -289,9 +271,6 @@ test("forgetting a local workspace removes its recovery token", async () => {
 
   const store = createWorkspaceStore({
     app: { getPath: (name) => name === "userData" ? userData : root },
-    defaultDenBaseUrl: "https://example.test",
-    defaultRequireSignin: false,
-    forceRequireSignin: false,
   });
 
   const state = await store.forgetWorkspace("ws_forgotten");
@@ -308,45 +287,40 @@ test("forgetting a local workspace removes its recovery token", async () => {
 test("desktop bootstrap prefers a newer canonical writtenAt over stale legacy", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://canonical.example.com",
-      requireSignin: false,
+      brandAppName: "https://canonical.example.com",
       writtenAt: "2026-01-02T00:00:00.000Z",
     });
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://legacy.example.com",
-      requireSignin: true,
+      brandAppName: "https://legacy.example.com",
       writtenAt: "2026-01-01T00:00:00.000Z",
     });
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://canonical.example.com");
+    assert.equal(config.brandAppName, "https://canonical.example.com");
     assert.equal(config.fromFile, true);
 
     const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(persisted.baseUrl, "https://canonical.example.com");
+    assert.equal(persisted.brandAppName, "https://canonical.example.com");
   });
 });
 
 test("desktop bootstrap migrates a newer legacy writtenAt to canonical", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://canonical.example.com",
-      requireSignin: false,
+      brandAppName: "https://canonical.example.com",
       writtenAt: "2026-01-01T00:00:00.000Z",
     });
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://legacy.example.com",
-      requireSignin: true,
+      brandAppName: "https://legacy.example.com",
       writtenAt: "2026-01-02T00:00:00.000Z",
     });
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://legacy.example.com");
-    assert.equal(config.requireSignin, true);
+    assert.equal(config.brandAppName, "https://legacy.example.com");
     assert.equal(config.fromFile, true);
 
     const migrated = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(migrated.baseUrl, "https://legacy.example.com");
+    assert.equal(migrated.brandAppName, "https://legacy.example.com");
   });
 });
 
@@ -355,17 +329,11 @@ test("explicit desktop bootstrap path never inherits legacy activation state", a
     const explicitPath = path.join(root, "isolated", "desktop-bootstrap.json");
     process.env.REDROB_DESKTOP_BOOTSTRAP_PATH = explicitPath;
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://app.redrob.io",
-      requireSignin: true,
-      enterpriseActivation: {
-        activatedAt: "2026-07-27T13:30:23.342Z",
-        denBaseUrl: "https://app.redrob.io/api/den",
-      },
+      brandAppName: "https://app.redrob.io",
     });
 
     const config = await store.getDesktopBootstrapConfig();
     assert.equal(config.fromFile, false);
-    assert.equal(config.enterpriseActivation, undefined);
     await assert.rejects(readFile(explicitPath, "utf8"));
   });
 });
@@ -375,68 +343,20 @@ test("explicit desktop bootstrap path still reads its configured bootstrap", asy
     const explicitPath = path.join(root, "isolated", "desktop-bootstrap.json");
     process.env.REDROB_DESKTOP_BOOTSTRAP_PATH = explicitPath;
     await writeBootstrapConfig(explicitPath, {
-      baseUrl: "https://enterprise.example.com",
-      requireSignin: true,
+      brandAppName: "https://enterprise.example.com",
     });
 
     const config = await store.getDesktopBootstrapConfig();
     assert.equal(config.fromFile, true);
-    assert.equal(config.baseUrl, "https://enterprise.example.com");
+    assert.equal(config.brandAppName, "https://enterprise.example.com");
     assert.equal("requireActivation" in config, false);
-  });
-});
-
-test("desktop bootstrap prefers an older legacy organization config over a newer canonical hosted default", async () => {
-  await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
-    await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://app.redrob.io/api/den/",
-      apiBaseUrl: "https://api.unrelated.example",
-      requireSignin: false,
-      writtenAt: "2026-07-10T13:00:00.000Z",
-    });
-    await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://redrob.organization.internal.example",
-      apiBaseUrl: "https://api.organization.internal.example",
-      requireSignin: true,
-      writtenAt: "2026-07-09T12:00:00.000Z",
-    });
-
-    const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://redrob.organization.internal.example");
-    assert.equal(config.fromFile, true);
-    const migrated = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(migrated.baseUrl, "https://redrob.organization.internal.example");
-  });
-});
-
-test("desktop bootstrap keeps an older canonical organization config over a newer legacy hosted default", async () => {
-  await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
-    await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://redrob.organization.internal.example",
-      apiBaseUrl: "https://api.organization.internal.example",
-      requireSignin: true,
-      writtenAt: "2026-07-09T12:00:00.000Z",
-    });
-    await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://api.redrob.io/v1/",
-      apiBaseUrl: "https://api.unrelated.example",
-      requireSignin: false,
-      writtenAt: "2026-07-10T13:00:00.000Z",
-    });
-
-    const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://redrob.organization.internal.example");
-    assert.equal(config.fromFile, true);
-    const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(persisted.baseUrl, "https://redrob.organization.internal.example");
   });
 });
 
 test("desktop bootstrap ignores a newer malformed canonical config when legacy is valid", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://legacy.organization.internal.example",
-      requireSignin: true,
+      brandAppName: "https://legacy.organization.internal.example",
     });
     await mkdir(path.dirname(canonicalPath), { recursive: true });
     await writeFile(canonicalPath, "{ malformed", "utf8");
@@ -446,22 +366,20 @@ test("desktop bootstrap ignores a newer malformed canonical config when legacy i
     await utimes(canonicalPath, newer, newer);
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://legacy.organization.internal.example");
+    assert.equal(config.brandAppName, "https://legacy.organization.internal.example");
     assert.equal(config.fromFile, true);
     const migrated = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(migrated.baseUrl, "https://legacy.organization.internal.example");
+    assert.equal(migrated.brandAppName, "https://legacy.organization.internal.example");
   });
 });
 
 test("desktop bootstrap falls back to mtime when writtenAt is missing", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath }) => {
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://canonical.example.com",
-      requireSignin: false,
+      brandAppName: "https://canonical.example.com",
     });
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://legacy.example.com",
-      requireSignin: true,
+      brandAppName: "https://legacy.example.com",
     });
     const older = new Date("2026-01-01T00:00:00.000Z");
     const newer = new Date("2026-01-02T00:00:00.000Z");
@@ -469,7 +387,7 @@ test("desktop bootstrap falls back to mtime when writtenAt is missing", async ()
     await utimes(legacyPath, newer, newer);
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://legacy.example.com");
+    assert.equal(config.brandAppName, "https://legacy.example.com");
     assert.equal(config.fromFile, true);
   });
 });
@@ -477,8 +395,7 @@ test("desktop bootstrap falls back to mtime when writtenAt is missing", async ()
 test("sync desktop bootstrap reader matches async reader for canonical, legacy, and missing configs", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath }) => {
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://canonical.example.com",
-      requireSignin: false,
+      brandAppName: "https://canonical.example.com",
       writtenAt: "2026-01-02T00:00:00.000Z",
     });
     assert.deepEqual(store.readDesktopBootstrapConfigSync(), await store.getDesktopBootstrapConfig());
@@ -486,8 +403,7 @@ test("sync desktop bootstrap reader matches async reader for canonical, legacy, 
 
   await withIsolatedBootstrapStore(async ({ store, legacyPath }) => {
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://legacy.example.com",
-      requireSignin: true,
+      brandAppName: "https://legacy.example.com",
       writtenAt: "2026-01-02T00:00:00.000Z",
     });
     const syncConfig = store.readDesktopBootstrapConfigSync();
@@ -512,7 +428,6 @@ test("desktop bootstrap fallback marks fromFile false only when no parseable fil
     const syncConfig = store.readDesktopBootstrapConfigSync();
     const asyncConfig = await store.getDesktopBootstrapConfig();
     assert.deepEqual(syncConfig, asyncConfig);
-    assert.equal(syncConfig.baseUrl, "https://default.example.com");
     assert.equal(syncConfig.fromFile, false);
   });
 });
@@ -520,54 +435,20 @@ test("desktop bootstrap fallback marks fromFile false only when no parseable fil
 test("desktop bootstrap writes include a fresh writtenAt stamp", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath }) => {
     const config = await store.setDesktopBootstrapConfig({
-      baseUrl: "https://canonical.example.com",
-      requireSignin: true,
+      brandAppName: "https://canonical.example.com",
     });
     assert.equal(Number.isFinite(Date.parse(config.writtenAt)), true);
 
     const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(persisted.baseUrl, "https://canonical.example.com");
+    assert.equal(persisted.brandAppName, "https://canonical.example.com");
     assert.equal(Number.isFinite(Date.parse(persisted.writtenAt)), true);
   });
 });
 
-test("enterprise activation is preserved, required activation is overrideable, and forced sign-in cannot be disabled", async () => {
-  await withIsolatedBootstrapStore(async ({ createStore, canonicalPath }) => {
-    const store = createStore({
-      defaultRequireSignin: true,
-      forceRequireSignin: true,
-    });
-    await store.setDesktopBootstrapConfig({
-      baseUrl: "https://app.redrob.io",
-      requireSignin: false,
-      requireActivation: false,
-      enterpriseActivation: {
-        activatedAt: "2026-07-27T12:00:00.000Z",
-        denBaseUrl: "https://app.redrob.io",
-      },
-    });
-
-    const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.requireSignin, true);
-    assert.equal(config.requireActivation, false);
-    assert.deepEqual(config.enterpriseActivation, {
-      activatedAt: "2026-07-27T12:00:00.000Z",
-      denBaseUrl: "https://app.redrob.io",
-    });
-    const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
-    assert.equal(persisted.requireSignin, true);
-    assert.equal(persisted.requireActivation, false);
-  });
-});
-
-// Both flavors share one application identifier, so they share this file. An
-// omitted policy must stay omitted: writing the enterprise build default here
-// would gate the public artifact on the same machine.
 test("an omitted requireActivation is never materialized into the shared bootstrap file", async () => {
   await withIsolatedBootstrapStore(async ({ store, canonicalPath }) => {
     await store.setDesktopBootstrapConfig({
-      baseUrl: "https://app.redrob.io",
-      requireSignin: true,
+      brandAppName: "https://app.redrob.io",
     });
 
     const persisted = JSON.parse(await readFile(canonicalPath, "utf8"));
@@ -580,13 +461,11 @@ test("clearDesktopBootstrapConfig removes bootstrap files without deleting works
   await withIsolatedBootstrapStore(async ({ store, canonicalPath, legacyPath, userDataPath }) => {
     const workspaceStatePath = path.join(userDataPath, "redrob-workspaces.json");
     await writeBootstrapConfig(canonicalPath, {
-      baseUrl: "https://canonical.example.com",
-      requireSignin: false,
+      brandAppName: "https://canonical.example.com",
       writtenAt: "2026-01-02T00:00:00.000Z",
     });
     await writeBootstrapConfig(legacyPath, {
-      baseUrl: "https://legacy.example.com",
-      requireSignin: true,
+      brandAppName: "https://legacy.example.com",
       writtenAt: "2026-01-01T00:00:00.000Z",
     });
     await mkdir(userDataPath, { recursive: true });
@@ -600,8 +479,7 @@ test("clearDesktopBootstrapConfig removes bootstrap files without deleting works
     assert.equal(workspaceState.selectedId, "ws_keep");
 
     const config = await store.getDesktopBootstrapConfig();
-    assert.equal(config.baseUrl, "https://default.example.com");
-    assert.equal(config.requireSignin, false);
+
     assert.equal(config.fromFile, false);
   });
 });

@@ -268,13 +268,10 @@ jobs:
           if [ -n "$RELEASE_BODY_INPUT" ]; then
             RELEASE_BODY="$RELEASE_BODY_INPUT"
           else
-            printf -v RELEASE_BODY '%s\n\nRedrob Work %s desktop release.\n\n%s\n%s\n%s\n%s' \
+            printf -v RELEASE_BODY '%s\n\nRedrob Work %s desktop release.\n\n%s' \
               "## What's new" \
               "$TAG" \
-              "- Public artifacts use the redrob-* naming convention." \
-              "- Cloud artifacts use redrob-cloud-* and require sign-in without enterprise activation." \
-              "- Enterprise artifacts use redrob-enterprise-* while retaining the standard Redrob Work app identity." \
-              "- Public, Cloud, and enterprise Electron builds use separate updater manifests on this release."
+              "- Artifacts use the redrob-* naming convention."
           fi
 
           # A release must never be public while its artifacts are still
@@ -501,70 +498,6 @@ jobs:
             builder_config: electron-builder.yml
             asset_prefix: redrob
             manifest_pattern: latest*.yml
-            electron_args: "--linux --arm64"
-            target_triple: aarch64-unknown-linux-gnu
-          - platform: blacksmith-12vcpu-macos-15
-            os_type: macos
-            artifact: electron-cloud-macos-arm64
-            builder_config: electron-builder.cloud.yml
-            asset_prefix: redrob-cloud
-            manifest_pattern: cloud*.yml
-            electron_args: "--mac --arm64"
-            target_triple: aarch64-apple-darwin
-          - platform: blacksmith-12vcpu-macos-15
-            os_type: macos
-            artifact: electron-cloud-macos-x64
-            builder_config: electron-builder.cloud.yml
-            asset_prefix: redrob-cloud
-            manifest_pattern: cloud*.yml
-            electron_args: "--mac --x64"
-            target_triple: x86_64-apple-darwin
-          - platform: blacksmith-16vcpu-ubuntu-2204
-            os_type: linux
-            artifact: electron-cloud-linux-x64
-            builder_config: electron-builder.cloud.yml
-            asset_prefix: redrob-cloud
-            manifest_pattern: cloud*.yml
-            electron_args: "--linux --x64"
-            target_triple: x86_64-unknown-linux-gnu
-          - platform: blacksmith-16vcpu-ubuntu-2204
-            os_type: linux
-            artifact: electron-cloud-linux-arm64
-            builder_config: electron-builder.cloud.yml
-            asset_prefix: redrob-cloud
-            manifest_pattern: cloud*.yml
-            electron_args: "--linux --arm64"
-            target_triple: aarch64-unknown-linux-gnu
-          - platform: blacksmith-12vcpu-macos-15
-            os_type: macos
-            artifact: electron-enterprise-macos-arm64
-            builder_config: electron-builder.enterprise.yml
-            asset_prefix: redrob-enterprise
-            manifest_pattern: enterprise*.yml
-            electron_args: "--mac --arm64"
-            target_triple: aarch64-apple-darwin
-          - platform: blacksmith-12vcpu-macos-15
-            os_type: macos
-            artifact: electron-enterprise-macos-x64
-            builder_config: electron-builder.enterprise.yml
-            asset_prefix: redrob-enterprise
-            manifest_pattern: enterprise*.yml
-            electron_args: "--mac --x64"
-            target_triple: x86_64-apple-darwin
-          - platform: blacksmith-16vcpu-ubuntu-2204
-            os_type: linux
-            artifact: electron-enterprise-linux-x64
-            builder_config: electron-builder.enterprise.yml
-            asset_prefix: redrob-enterprise
-            manifest_pattern: enterprise*.yml
-            electron_args: "--linux --x64"
-            target_triple: x86_64-unknown-linux-gnu
-          - platform: blacksmith-16vcpu-ubuntu-2204
-            os_type: linux
-            artifact: electron-enterprise-linux-arm64
-            builder_config: electron-builder.enterprise.yml
-            asset_prefix: redrob-enterprise
-            manifest_pattern: enterprise*.yml
             electron_args: "--linux --arm64"
             target_triple: aarch64-unknown-linux-gnu
 
@@ -916,38 +849,6 @@ jobs:
             builder_config: electron-builder.yml
             asset_prefix: redrob
             manifest_pattern: latest*.yml
-            electron_args: "--win --arm64"
-            target_triple: aarch64-pc-windows-msvc
-          - platform: blacksmith-8vcpu-windows-2025
-            os_type: windows
-            artifact: electron-cloud-windows-x64
-            builder_config: electron-builder.cloud.yml
-            asset_prefix: redrob-cloud
-            manifest_pattern: cloud*.yml
-            electron_args: "--win --x64"
-            target_triple: x86_64-pc-windows-msvc
-          - platform: blacksmith-8vcpu-windows-2025
-            os_type: windows
-            artifact: electron-cloud-windows-arm64
-            builder_config: electron-builder.cloud.yml
-            asset_prefix: redrob-cloud
-            manifest_pattern: cloud*.yml
-            electron_args: "--win --arm64"
-            target_triple: aarch64-pc-windows-msvc
-          - platform: blacksmith-8vcpu-windows-2025
-            os_type: windows
-            artifact: electron-enterprise-windows-x64
-            builder_config: electron-builder.enterprise.yml
-            asset_prefix: redrob-enterprise
-            manifest_pattern: enterprise*.yml
-            electron_args: "--win --x64"
-            target_triple: x86_64-pc-windows-msvc
-          - platform: blacksmith-8vcpu-windows-2025
-            os_type: windows
-            artifact: electron-enterprise-windows-arm64
-            builder_config: electron-builder.enterprise.yml
-            asset_prefix: redrob-enterprise
-            manifest_pattern: enterprise*.yml
             electron_args: "--win --arm64"
             target_triple: aarch64-pc-windows-msvc
 

@@ -9,7 +9,6 @@ import {
   type RedrobServerInfo,
 } from "./desktop";
 import { readPerfLogs, type PerfLogRecord } from "./perf-log";
-import { sanitizeCloudMcpHealthDiagnostic } from "./diagnostic-sanitizer";
 import {
   readRedrobServerSettings,
   type RedrobServerSettings,
@@ -28,7 +27,6 @@ export type DiagnosticsBundleContext = {
   redrobServerStatus?: RedrobServerStatus;
   redrobServerUrl?: string;
   runtimeWorkspaceId?: string | null;
-  cloudMcpHealth?: unknown;
 };
 
 export type DiagnosticsBundleInputs = {
@@ -41,7 +39,6 @@ export type DiagnosticsBundleInputs = {
   developerLogs: DevLogRecord[];
   perfLogs: PerfLogRecord[];
   context?: DiagnosticsBundleContext;
-  cloudMcpHealth?: unknown;
 };
 
 type DiagnosticsExecution = {
@@ -170,7 +167,6 @@ export function composeDiagnosticsBundleJson(input: DiagnosticsBundleInputs): st
       },
       host: pickHostInfo(input.hostInfo),
     },
-    cloudMcp: sanitizeCloudMcpHealthDiagnostic(input.cloudMcpHealth ?? context?.cloudMcpHealth ?? null),
     reload: {
       canReloadWorkspace: context?.canReloadWorkspace === true,
     },

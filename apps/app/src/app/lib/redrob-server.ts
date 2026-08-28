@@ -381,15 +381,6 @@ export type RedrobArtifactList = {
   items: RedrobArtifactItem[];
 };
 
-export type RedrobConnectState = {
-  ok: true;
-  schemaVersion: 1;
-  status: "available" | "missing" | "invalid" | "unreadable";
-  connectEnabled: boolean;
-  cloudMcpPresent: boolean;
-  googleWorkspace: { legacyConfigured: boolean };
-};
-
 export type RedrobExtensionActionCall = {
   extensionId: string;
   action: string;

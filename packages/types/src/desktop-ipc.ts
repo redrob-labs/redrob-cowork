@@ -189,45 +189,13 @@ export type DesktopDistributionInfo = {
 };
 
 /** Org + first-skill identity shared by the handoff and prepared records. */
-export type DesktopBootstrapOrgSkill = {
-  orgId: string;
-  orgName: string;
-  orgSlug: string;
-  skillId: string;
-  skillTitle: string;
-};
 
 export type DesktopBootstrapConfig = {
-  baseUrl: string;
-  apiBaseUrl?: string | null;
-  requireSignin: boolean;
-  requireActivation?: boolean;
   brandAppName?: string | null;
   brandLogoUrl?: string | null;
   brandIconUrl?: string | null;
   writtenAt?: string | null;
   fromFile?: boolean;
-  claimLinks?: Array<{
-    id: string;
-    role: string;
-    token?: string;
-    url: string;
-    expiresAt: string;
-  }> | null;
-  handoff?: (DesktopBootstrapOrgSkill & {
-    grant: string;
-    denBaseUrl: string;
-    createdAt: string;
-  }) | null;
-  prepared?: (DesktopBootstrapOrgSkill & {
-    skillsDir: string;
-    skillPath: string;
-    preparedAt: string;
-  }) | null;
-  enterpriseActivation?: {
-    activatedAt: string;
-    denBaseUrl: string;
-  } | null;
 };
 
 export type RedrobDockerCleanupResult = {

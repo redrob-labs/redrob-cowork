@@ -116,29 +116,7 @@ const DEFAULT_DESKTOP_BOOTSTRAP_PATH = resolveDesktopBootstrapPath({ homeDir: os
 // LOCALAPPDATA and XDG_CONFIG_HOME. Keep reading that file when the canonical one
 // is missing so existing installs keep their deployment config.
 const LEGACY_DESKTOP_BOOTSTRAP_PATH = resolveLegacyDesktopBootstrapPath({ homeDir: os.homedir() });
-const HOSTED_DESKTOP_WEB_URL = "https://app.redrob.io";
-const HOSTED_DESKTOP_API_URL = "https://api.redrob.io";
-
-function bootstrapUrlOrigin(value) {
-  if (typeof value !== "string" || !value.trim()) return "";
-  try {
-    return new URL(value.trim()).origin;
-  } catch {
-    return value.trim().replace(/\/+$/, "");
-  }
-}
-
-function isHostedDesktopBootstrapConfig(config) {
-  const baseUrlOrigin = bootstrapUrlOrigin(config?.baseUrl);
-  return baseUrlOrigin === HOSTED_DESKTOP_WEB_URL || baseUrlOrigin === HOSTED_DESKTOP_API_URL;
-}
-
-export function createWorkspaceStore({
-  app,
-  defaultDenBaseUrl,
-  defaultRequireSignin,
-  forceRequireSignin,
-}) {
+export function createWorkspaceStore({ app }) {
   function desktopBootstrapPath() {
     if (process.env.REDROB_DESKTOP_BOOTSTRAP_PATH?.trim()) {
       return resolveDesktopBootstrapPath({ env: process.env, homeDir: os.homedir(), userDataDir: app.getPath("userData") });
@@ -203,99 +181,15 @@ export function createWorkspaceStore({
   }
 
   function normalizeDesktopBootstrapConfig(input) {
-    const baseUrl = typeof input?.baseUrl === "string" ? input.baseUrl.trim() : "";
-    if (!baseUrl) {
-      throw new Error("baseUrl is required");
-    }
-
-    // The handoff grant is a one-time, short-lived (~5 min) desktop sign-in
-    // token written to this machine-local config by the bootstrap CLI. The app
-    // exchanges it once on boot and then rewrites this file with `handoff: null`
-    // (see den-auth-provider) so it is never reusable. It is intentionally kept
-    // in plaintext here because it is single-use and local-only; do not persist
-    // long-lived secrets in this file.
-    const handoffInput = input?.handoff;
-    const handoff = handoffInput && typeof handoffInput === "object"
-      ? {
-          grant: typeof handoffInput.grant === "string" ? handoffInput.grant.trim() : "",
-          denBaseUrl: typeof handoffInput.denBaseUrl === "string" ? handoffInput.denBaseUrl.trim() : "",
-          orgId: typeof handoffInput.orgId === "string" ? handoffInput.orgId.trim() : "",
-          orgName: typeof handoffInput.orgName === "string" ? handoffInput.orgName.trim() : "",
-          orgSlug: typeof handoffInput.orgSlug === "string" ? handoffInput.orgSlug.trim() : "",
-          skillId: typeof handoffInput.skillId === "string" ? handoffInput.skillId.trim() : "",
-          skillTitle: typeof handoffInput.skillTitle === "string" ? handoffInput.skillTitle.trim() : "",
-          createdAt: typeof handoffInput.createdAt === "string" ? handoffInput.createdAt.trim() : "",
-        }
-      : null;
-    const normalizedHandoff = handoff?.grant && handoff.denBaseUrl && handoff.orgId && handoff.orgName && handoff.skillId && handoff.skillTitle
-      ? handoff
-      : null;
-    const preparedInput = input?.prepared;
-    const prepared = preparedInput && typeof preparedInput === "object"
-      ? {
-          orgId: typeof preparedInput.orgId === "string" ? preparedInput.orgId.trim() : "",
-          orgName: typeof preparedInput.orgName === "string" ? preparedInput.orgName.trim() : "",
-          orgSlug: typeof preparedInput.orgSlug === "string" ? preparedInput.orgSlug.trim() : "",
-          skillId: typeof preparedInput.skillId === "string" ? preparedInput.skillId.trim() : "",
-          skillTitle: typeof preparedInput.skillTitle === "string" ? preparedInput.skillTitle.trim() : "",
-          skillsDir: typeof preparedInput.skillsDir === "string" ? preparedInput.skillsDir.trim() : "",
-          skillPath: typeof preparedInput.skillPath === "string" ? preparedInput.skillPath.trim() : "",
-          preparedAt: typeof preparedInput.preparedAt === "string" ? preparedInput.preparedAt.trim() : "",
-        }
-      : null;
-    const normalizedPrepared = prepared?.orgId && prepared.orgName && prepared.skillId && prepared.skillTitle && prepared.skillPath
-      ? prepared
-      : null;
-    const claimLinksInput = Array.isArray(input?.claimLinks) ? input.claimLinks : [];
-    const claimLinks = claimLinksInput.flatMap((link) => {
-      if (!link || typeof link !== "object") return [];
-      const id = typeof link.id === "string" ? link.id.trim() : "";
-      const role = typeof link.role === "string" ? link.role.trim() : "";
-      const token = typeof link.token === "string" ? link.token.trim() : "";
-      const url = typeof link.url === "string" ? link.url.trim() : "";
-      const expiresAt = typeof link.expiresAt === "string" ? link.expiresAt.trim() : "";
-      return id && role && url && expiresAt ? [{ id, role, ...(token ? { token } : {}), url, expiresAt }] : [];
-    });
-    const writtenAt = typeof input?.writtenAt === "string" ? input.writtenAt.trim() : "";
-    const apiBaseUrl = typeof input?.apiBaseUrl === "string" ? input.apiBaseUrl.trim() : "";
     const brandAppName = typeof input?.brandAppName === "string" ? input.brandAppName.trim().slice(0, 64) : "";
     const brandLogoUrl = typeof input?.brandLogoUrl === "string" ? input.brandLogoUrl.trim() : "";
     const brandIconUrl = typeof input?.brandIconUrl === "string" ? input.brandIconUrl.trim() : "";
-    const enterpriseActivationInput = input?.enterpriseActivation;
-    const enterpriseActivation = enterpriseActivationInput && typeof enterpriseActivationInput === "object"
-      ? {
-          activatedAt: typeof enterpriseActivationInput.activatedAt === "string"
-            ? enterpriseActivationInput.activatedAt.trim()
-            : "",
-          denBaseUrl: typeof enterpriseActivationInput.denBaseUrl === "string"
-            ? enterpriseActivationInput.denBaseUrl.trim()
-            : "",
-        }
-      : null;
-    const normalizedEnterpriseActivation = enterpriseActivation?.activatedAt && enterpriseActivation.denBaseUrl
-      ? enterpriseActivation
-      : null;
+    const writtenAt = typeof input?.writtenAt === "string" ? input.writtenAt.trim() : "";
     return {
-      baseUrl,
-      ...(apiBaseUrl ? { apiBaseUrl } : {}),
-      requireSignin: forceRequireSignin || input?.requireSignin === true,
-      // Only an explicit policy is carried. The artifact default is never
-      // materialized here: desktop-bootstrap.json is shared by both flavors
-      // (one application identifier, one user-data directory), so persisting
-      // the enterprise default would gate the public artifact on the same
-      // machine. Consumers fall back to their own build default when the key
-      // is absent, which is exactly the documented precedence.
-      ...(typeof input?.requireActivation === "boolean"
-        ? { requireActivation: input.requireActivation }
-        : {}),
       ...(brandAppName ? { brandAppName } : {}),
       ...(brandLogoUrl ? { brandLogoUrl } : {}),
       ...(brandIconUrl ? { brandIconUrl } : {}),
       ...(writtenAt ? { writtenAt } : {}),
-      ...(claimLinks.length > 0 ? { claimLinks } : {}),
-      ...(normalizedHandoff ? { handoff: normalizedHandoff } : {}),
-      ...(normalizedPrepared ? { prepared: normalizedPrepared } : {}),
-      ...(normalizedEnterpriseActivation ? { enterpriseActivation: normalizedEnterpriseActivation } : {}),
     };
   }
 
@@ -306,8 +200,7 @@ export function createWorkspaceStore({
   }
 
   function compareDesktopBootstrapCandidates(left, right) {
-    const classDifference = Number(!isHostedDesktopBootstrapConfig(left.normalized)) - Number(!isHostedDesktopBootstrapConfig(right.normalized));
-    return classDifference || desktopBootstrapCandidateTimeMs(left) - desktopBootstrapCandidateTimeMs(right);
+    return desktopBootstrapCandidateTimeMs(left) - desktopBootstrapCandidateTimeMs(right);
   }
 
   async function readDesktopBootstrapCandidate(candidatePath) {
@@ -424,11 +317,7 @@ export function createWorkspaceStore({
       path: configPath,
       error: primary.error instanceof Error ? primary.error.message : String(primary.error),
     });
-    return {
-      baseUrl: defaultDenBaseUrl,
-      requireSignin: defaultRequireSignin,
-      fromFile: false,
-    };
+    return { fromFile: false };
   }
 
   function readDesktopBootstrapConfigSync() {
@@ -447,11 +336,7 @@ export function createWorkspaceStore({
     if (primary.ok) return { ...primary.normalized, fromFile: true };
     if (legacy?.ok) return { ...legacy.normalized, fromFile: true };
 
-    return {
-      baseUrl: defaultDenBaseUrl,
-      requireSignin: defaultRequireSignin,
-      fromFile: false,
-    };
+    return { fromFile: false };
   }
 
   async function debugDesktopBootstrapConfig() {

@@ -4,7 +4,6 @@ import { z } from "zod";
 import { RedrobWorkExtensionsPreview } from "./redrob-extensions-preview.js";
 import * as RedrobWorkExtensionsPreviewEntry from "./redrob-extensions-preview.js";
 import {
-  REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION,
   REDROB_EXTENSION_DISCOVERY_INSTRUCTION,
   REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION,
 } from "./redrob-extensions-preview-steering.js";
@@ -291,7 +290,7 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
     expect(Object.keys(RedrobWorkExtensionsPreviewEntry)).toEqual(["RedrobWorkExtensionsPreview"]);
   });
 
-  test("projects built-in, extension, and Connect providers into one agent context", async () => {
+  test("projects built-in, extension, and MCP providers into one agent context", async () => {
     startFakeRedrobWorkServer();
     const plugin = await RedrobWorkExtensionsPreview({
       client: {
@@ -299,7 +298,6 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
           status: async () => ({
             data: {
               notion: { status: "connected" },
-              "redrob-cloud": { status: "connected" },
             },
           }),
         },
@@ -335,20 +333,13 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
 
     expect(contributions.map((contribution) => contribution.featureId)).toEqual([
       "sessions",
-      "automations",
       "extensions",
       "mcp:notion",
-      "connect",
     ]);
-    expect(contributions.find((contribution) => contribution.featureId === "connect")?.guidance)
-      .toContainEqual(expect.objectContaining({ ref: "skill:skl_customer_briefing" }));
     expect(
       contributions.flatMap((contribution) => contribution.affordances)
-        .find((affordance) => affordance.id === "connect.capability.execute")?.executor,
-    ).toEqual({
-      kind: "tool",
-      tool: "redrob-cloud_execute_capability",
-    });
+        .map((affordance) => affordance.id),
+    ).not.toContain("connect.capability.execute");
   });
 
   test("routes semantic session queries without navigating the UI", async () => {
@@ -399,8 +390,7 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
     expect(fake.requests.some((request) => request.pathname === "/workspace/ws_1/sessions/ses_alpha/messages" && request.search === "?limit=400")).toBe(true);
   });
 
-  test("merges factory directory into transform steering when hook input omits it", async () => {
-    const fake = startFakeRedrobWorkServer();
+  test("always emits local extension-discovery and local skill-authoring steering", async () => {
     const plugin = await RedrobWorkExtensionsPreview({ directory: "/tmp/archive" });
     const output: { system: string[] } = { system: [] };
 
@@ -409,59 +399,11 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
       model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
     }, output);
 
-    const connectStateRequest = fake.requests.find((request) => request.pathname === "/experimental/connect/state");
-    const connectSkillsRequest = fake.requests.find((request) => request.pathname === "/experimental/connect/skills");
-    expect(connectStateRequest?.search).toBe("?directory=%2Ftmp%2Farchive&provider=anthropic&model=claude-sonnet-4");
-    expect(connectSkillsRequest?.search).toBe("");
-    expect(output.system.join("\n")).toContain("verified ready for this exact workspace/model");
-    expect(output.system.join("\n")).toContain(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).toContain("<name>customer-briefing</name>");
-  });
-
-  test("uses the factory engine client as transform steering source of truth", async () => {
-    const requests: unknown[] = [];
-    const mcp = {
-      result: { data: { "redrob-cloud": { status: "connected" } } },
-      async status(request: unknown) {
-        requests.push(request);
-        return this.result;
-      },
-    };
-    const plugin = await RedrobWorkExtensionsPreview({ client: { mcp }, directory: "/tmp/archive" });
-    const output: { system: string[] } = { system: [] };
-
-    await plugin["experimental.chat.system.transform"]({}, output);
-
-    expect(requests).toEqual([{ query: { directory: "/tmp/archive" } }]);
-    expect(output.system.join("\n")).toContain("verified ready for this exact workspace/model");
-    expect(output.system.join("\n")).toContain(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
-  });
-
-  test("uses neutral transform steering when the engine reports failed Cloud status", async () => {
-    const requests: unknown[] = [];
-    const mcp = {
-      result: { data: { "redrob-cloud": { status: "failed" } } },
-      async status(request: unknown) {
-        requests.push(request);
-        return this.result;
-      },
-    };
-    const plugin = await RedrobWorkExtensionsPreview({ client: { mcp }, directory: "/tmp/archive" });
-    const output: { system: string[] } = { system: [] };
-
-    await plugin["experimental.chat.system.transform"]({}, output);
-
-    expect(requests).toEqual([{ query: { directory: "/tmp/archive" } }]);
     expect(output.system[0]).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
     expect(output.system.join("\n")).toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain(REDROB_CLOUD_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system[0]).not.toContain("not ready");
-    expect(output.system[0]).not.toContain("Repair and test");
-    expect(output.system[0]).not.toContain("Do not use Redrob Work documentation tools");
+    expect(output.system.join("\n")).not.toContain("Redrob Work Cloud");
+    expect(output.system.join("\n")).not.toContain("redrob-cloud_search_capabilities");
   });
-
   test("reads a transcript by session id without opening the UI", async () => {
     startFakeRedrobWorkServer();
     const plugin = await RedrobWorkExtensionsPreview();
@@ -568,45 +510,4 @@ describe("RedrobWorkExtensionsPreview semantic tool surface", () => {
     expect(system).toContain("browser.open_url");
   });
 
-  test("proposes an Automation without creating anything or calling a backend", async () => {
-    const fake = startFakeRedrobWorkServer();
-    const plugin = await RedrobWorkExtensionsPreview({ directory: "/tmp/archive" });
-
-    const output = await plugin.tool.redrob_execute.execute({
-      id: "automation.propose",
-      args: {
-        name: "Morning Slack check",
-        instructions: "Summarize my most recent Slack message.",
-        schedule: { kind: "daily", timezone: "Europe/Berlin", hour: 9, minute: 0 },
-      },
-    }, { sessionID: "ses_origin" });
-    const parsed = affordanceResultSchema("automation.propose", automationProposalResultSchema)
-      .parse(JSON.parse(output));
-
-    expect(parsed.result.created).toBe(false);
-    expect(parsed.result.proposal.name).toBe("Morning Slack check");
-    expect(parsed.result.proposal.schedule).toEqual({
-      kind: "daily",
-      timezone: "Europe/Berlin",
-      hour: 9,
-      minute: 0,
-    });
-    // The whole point of proposal-only: an agent never reaches Den or the
-    // local server, so it cannot bring an Automation into existence.
-    expect(fake.requests).toHaveLength(0);
-    expect(parsed.effects).toEqual({ data: "none", ui: "none", external: false });
-  });
-
-  test("rejects a proposal whose schedule is not a supported kind", async () => {
-    const plugin = await RedrobWorkExtensionsPreview({ directory: "/tmp/archive" });
-
-    await expect(plugin.tool.redrob_execute.execute({
-      id: "automation.propose",
-      args: {
-        name: "Every five minutes",
-        instructions: "Say hello.",
-        schedule: { kind: "interval", timezone: "Europe/Berlin", everyMinutes: 5 },
-      },
-    }, { sessionID: "ses_origin" })).rejects.toThrow();
-  });
 });
