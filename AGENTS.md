@@ -49,3 +49,27 @@ even before a dedicated UI exists.
 - Smallest possible diff, then make it smaller. Propose the simpler solution. No
   fallback expressions when types or control flow already guarantee a value.
 - If asked to do too much at once, stop and say so.
+
+## Cloud commander (Kiro)
+
+Cursor Cloud is the control commander only. Token split is Kiro 9, commander 1.
+
+Kiro owns planning, implementation, tests, code review, and spawning its own
+sub-agents. The commander does not plan, write product code, or drive large
+test matrices.
+
+Dispatch one Kiro run from the repo root:
+
+```bash
+export KIRO_API_KEY="${KIRO_KEY:-$KIRO_API_KEY}"
+kiro-cli chat --no-interactive --model claude-opus-5 --effort max --trust-all-tools "$PROMPT"
+```
+
+The prompt must tell Kiro to plan, implement, review, spawn sub-agents as
+needed, then stop with DONE, files changed, proof commands plus exit codes,
+and remaining risks.
+
+The commander waits until Kiro reports DONE, then spot-checks the diff and
+the proof. Reject and re-dispatch if the proof is missing or the diff is
+wrong. Accept only after that review. Do not redo Kiro's work in the
+commander session.
