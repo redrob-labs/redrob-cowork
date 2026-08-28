@@ -11,27 +11,7 @@ name: Alpha Channel (macOS arm64)
 # See .github/workflows/release-macos-aarch64.yml for the stable channel.
 
 on:
-  push:
-    branches:
-      - dev
-    paths:
-      - apps/app/**
-      - apps/desktop/**
-      - apps/server/**
-      - packages/docs/**
-      - packages/enterprise-mcp-client/**
-      - packages/handsfree/**
-      - packages/install-config/**
-      - packages/paths/**
-      - packages/types/**
-      - packages/ui/**
-      - patches/**
-      - scripts/release/**
-      - constants.json
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - .github/workflows/alpha-macos-aarch64.yml
+  # Paused during local-dev. Restore push to `dev` (app paths) to re-enable alpha.
   workflow_dispatch:
     inputs:
       publish:

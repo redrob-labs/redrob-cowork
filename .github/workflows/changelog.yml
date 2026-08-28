@@ -1,8 +1,7 @@
 name: Changelog
 
 on:
-  release:
-    types: [published]
+  # Paused during local-dev. Restore `release: {types: [published]}` to re-enable.
   workflow_dispatch:
     inputs:
       tag:

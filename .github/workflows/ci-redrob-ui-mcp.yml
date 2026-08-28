@@ -1,18 +1,9 @@
 name: redrob-ui-mcp
 
+# Paused during local-dev. Restore push/pull_request on `dev` and
+# `redrob-ui-mcp-v*` tags to re-enable.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - "packages/redrob-ui-mcp/**"
-      - ".github/workflows/ci-redrob-ui-mcp.yml"
-    tags:
-      - "redrob-ui-mcp-v*"
-  pull_request:
-    branches: [dev]
-    paths:
-      - "packages/redrob-ui-mcp/**"
-      - ".github/workflows/ci-redrob-ui-mcp.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read

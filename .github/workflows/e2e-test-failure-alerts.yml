@@ -3,12 +3,9 @@
 # developer who triggered the run.
 name: E2E Test Failure Alerts
 
+# Paused during local-dev. Restore workflow_run on the nightly E2E job to re-enable.
 on:
-  workflow_run:
-    workflows:
-      - Nightly Critical-Path E2E Journey
-    types:
-      - completed
+  workflow_dispatch:
 
 permissions:
   actions: read

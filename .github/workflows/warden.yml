@@ -5,10 +5,9 @@ name: Warden
 # produce findings_count=0 without analysis and wrongly grant clearance.
 # (ready_for_review is deliberately absent — warden does not support it;
 # draft-to-ready PRs get analyzed on their next push.)
+# Paused during local-dev. Restore pull_request on `dev` to re-enable.
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [dev]
+  workflow_dispatch:
 
 permissions:
   # contents:write is required by GitHub to resolve review threads via

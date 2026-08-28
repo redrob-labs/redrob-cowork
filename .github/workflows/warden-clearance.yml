@@ -17,10 +17,9 @@
 
 name: Warden Clearance
 
+# Paused during local-dev. Restore workflow_run on Warden completed to re-enable.
 on:
-  workflow_run:
-    workflows: [Warden]
-    types: [completed]
+  workflow_dispatch:
 
 permissions:
   actions: read

@@ -1,8 +1,7 @@
 name: Expedited Release Audit
 
 on:
-  push:
-    tags: ['v*']
+  # Paused during local-dev. Restore `push: {tags: [v*]}` to re-enable.
   workflow_dispatch:
     inputs:
       tag:

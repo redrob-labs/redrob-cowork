@@ -27,10 +27,9 @@
 # rejected and take the normal human-review path.
 name: Revert Fast Lane
 
+# Paused during local-dev. Restore pull_request_target on `dev` to re-enable.
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize]
-    branches: [dev]
+  workflow_dispatch:
 
 permissions:
   contents: read
