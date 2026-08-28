@@ -49,6 +49,10 @@ export async function findFreePort() {
   return port;
 }
 
+export function resolveRedrobCodeCommand(env = process.env) {
+  return env.REDROB_CODE_BIN?.trim() || "redrob";
+}
+
 export async function spawnOpencodeServe({
   directory,
   hostname = "127.0.0.1",
@@ -65,14 +69,14 @@ export async function spawnOpencodeServe({
     args.push("--cors", origin);
   }
 
-  const child = spawn("opencode", args, {
+  const child = spawn(resolveRedrobCodeCommand(), args, {
     cwd,
     stdio: ["ignore", "pipe", "pipe"],
     env: {
       ...process.env,
       ...env,
       // Make it explicit we're a non-TUI client.
-      OPENCODE_CLIENT: "redrob-test",
+      REDROB_CLIENT: "redrob-test",
     },
   });
 
