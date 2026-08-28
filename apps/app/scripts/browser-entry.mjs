@@ -142,7 +142,7 @@ try {
         res.end(
           JSON.stringify({
             object: "list",
-            data: [{ id: "qwen-plus", object: "model" }],
+            data: [{ id: "auto", object: "model" }],
           }),
         );
         return;
@@ -196,13 +196,12 @@ try {
 
   await step("workspace.config", async () => {
     await writeFile(
-      path.join(tmpdir, "opencode.json"),
+      path.join(tmpdir, "redrob.json"),
       JSON.stringify(
         {
-          $schema: "https://opencode.ai/config.json",
-          enabled_providers: ["alibaba"],
+          $schema: "https://code.redrob.ai/config.json",
           provider: {
-            alibaba: {
+            redrob: {
               options: {
                 apiKey: "test-key",
                 baseURL,
@@ -241,7 +240,7 @@ try {
       sessionID: sessionId,
       command: "browser-setup",
       arguments: "",
-      model: "alibaba/qwen-plus",
+      model: "redrob/auto",
     });
     return {};
   });
