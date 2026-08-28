@@ -8,7 +8,7 @@
     "dev": "REDROB_DEV_MODE=1 vite",
     "build": "vite build",
     "dev:web": "REDROB_DEV_MODE=1 vite",
-    "build:web": "VITE_REDROB_DEPLOYMENT=web VITE_DEN_REQUIRE_SIGNIN=1 vite build",
+    "build:web": "VITE_REDROB_DEPLOYMENT=web vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:health": "node scripts/health.mjs",

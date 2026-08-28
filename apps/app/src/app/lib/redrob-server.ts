@@ -12,7 +12,6 @@ import {
   requestAgentContextDiagnosticsPayload,
 } from "./agent-context-diagnostics-transport";
 import { desktopFetch, desktopFetchAgentContextDiagnostics } from "./desktop";
-import { isRedrobGatewayRuntime } from "./gateway-runtime";
 import { isDesktopRuntime } from "./runtime-env";
 import type { ExecResult, OpencodeConfigFile, WorkspaceInfo, WorkspaceList } from "./desktop";
 
@@ -1023,7 +1022,6 @@ function readForceEnvSettingsFlag(): boolean {
 
 export function hydrateRedrobServerSettingsFromEnv() {
   if (typeof window === "undefined") return;
-  if (isRedrobGatewayRuntime()) return;
 
   const envUrl = typeof import.meta.env?.VITE_REDROB_URL === "string"
     ? import.meta.env.VITE_REDROB_URL.trim()

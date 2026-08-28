@@ -12,10 +12,6 @@ import {
 import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 
 import { desktopFetch } from "../../app/lib/desktop";
-import {
-  getRedrobGatewayOrigin,
-  readRedrobGatewayDenToken,
-} from "../../app/lib/gateway-runtime";
 import { isWebDeployment } from "../../app/lib/redrob-deployment";
 import { normalizeRedrobServerUrl } from "../../app/lib/redrob-server";
 import { isDesktopRuntime } from "../../app/utils";
@@ -64,8 +60,6 @@ function readStoredActive(): string {
 }
 
 function readRedrobToken(): string {
-  if (getRedrobGatewayOrigin()) return readRedrobGatewayDenToken();
-
   if (typeof window === "undefined") return "";
   try {
     return (window.localStorage.getItem("redrob.server.token") ?? "").trim();
@@ -107,18 +101,16 @@ export function ServerProvider({ children, defaultUrl }: ServerProviderProps) {
     if (readyRef.current) return;
     if (typeof window === "undefined") return;
 
-    const gatewayOrigin = getRedrobGatewayOrigin();
-    const fallback = normalizeServerUrl(gatewayOrigin ? `${gatewayOrigin}/opencode` : defaultUrl) ?? "";
+    const fallback = normalizeServerUrl(defaultUrl) ?? "";
 
     // Hosted web deployments served by Redrob Work must reuse the OpenCode proxy
     // rather than any persisted localhost target.
     const forceProxy =
-      Boolean(gatewayOrigin) ||
-      (!isDesktopRuntime() &&
-        isWebDeployment() &&
-        (import.meta.env.PROD ||
-          (typeof import.meta.env?.VITE_REDROB_URL === "string" &&
-            import.meta.env.VITE_REDROB_URL.trim().length > 0)));
+      !isDesktopRuntime() &&
+      isWebDeployment() &&
+      (import.meta.env.PROD ||
+        (typeof import.meta.env?.VITE_REDROB_URL === "string" &&
+          import.meta.env.VITE_REDROB_URL.trim().length > 0));
 
     if (forceProxy && fallback) {
       dispatchServer({ type: "ready", list: [fallback], active: fallback });

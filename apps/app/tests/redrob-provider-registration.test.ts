@@ -83,7 +83,6 @@ function installWindow(): Storage {
       },
       localStorage,
       location: { origin: "https://self-hosted.example" },
-      __REDROB_GATEWAY__: undefined,
     },
   });
   return localStorage;

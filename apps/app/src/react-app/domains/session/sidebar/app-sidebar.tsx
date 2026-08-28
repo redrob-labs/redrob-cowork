@@ -42,7 +42,6 @@ import {
   isWindowsPlatform,
 } from "../../../../app/utils";
 import { t } from "../../../../i18n";
-import { canCreateWorkspaces } from "../../../../app/lib/workspace-creation-policy";
 
 import {
   Sidebar,
@@ -1153,17 +1152,15 @@ export function AppSidebar(props: AppSidebarProps) {
               <span className={SIDEBAR_SECTION_LABEL}>
                 {t("workspace_list.title")}
               </span>
-              {canCreateWorkspaces() ? (
-                <button
-                  type="button"
-                  className="ml-auto flex size-5 items-center justify-center rounded text-muted-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-foreground"
-                  onClick={props.onOpenCreateWorkspace}
-                  aria-label={t("workspace_list.add_workspace")}
-                  title={t("workspace_list.add_workspace")}
-                >
-                  <Plus className="size-3.5" />
-                </button>
-              ) : null}
+              <button
+                type="button"
+                className="ml-auto flex size-5 items-center justify-center rounded text-muted-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-foreground"
+                onClick={props.onOpenCreateWorkspace}
+                aria-label={t("workspace_list.add_workspace")}
+                title={t("workspace_list.add_workspace")}
+              >
+                <Plus className="size-3.5" />
+              </button>
             </div>
             <Reorder.Group
               as="div"

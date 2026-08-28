@@ -9,10 +9,6 @@ import {
   type RedrobServerInfo,
 } from "../../../app/lib/desktop";
 import {
-  getRedrobGatewayOrigin,
-  readRedrobGatewayDenToken,
-} from "../../../app/lib/gateway-runtime";
-import {
   clearRedrobServerSettings,
   createRedrobServerClient,
   isLoopbackRedrobServerUrl,
@@ -134,9 +130,6 @@ export function createRedrobServerStore(options: CreateRedrobServerStoreOptions)
   };
 
   const getBaseUrl = () => {
-    const gatewayOrigin = getRedrobGatewayOrigin();
-    if (gatewayOrigin) return normalizeRedrobServerUrl(gatewayOrigin) ?? "";
-
     const pref = options.startupPreference();
     const hostInfo = state.redrobServerHostInfo;
     const settingsUrl = normalizeRedrobServerUrl(state.redrobServerSettings.urlOverride ?? "") ?? "";
@@ -150,12 +143,6 @@ export function createRedrobServerStore(options: CreateRedrobServerStoreOptions)
   };
 
   const getAuth = () => {
-    const gatewayOrigin = getRedrobGatewayOrigin();
-    if (gatewayOrigin) {
-      const token = readRedrobGatewayDenToken().trim();
-      return { token: token || undefined, hostToken: undefined };
-    }
-
     const pref = options.startupPreference();
     const hostInfo = state.redrobServerHostInfo;
     const settingsUrl = normalizeRedrobServerUrl(state.redrobServerSettings.urlOverride ?? "") ?? "";

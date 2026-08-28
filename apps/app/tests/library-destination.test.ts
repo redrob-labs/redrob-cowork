@@ -13,15 +13,12 @@ import {
   libraryCommandTriggers,
   libraryCommandsFromSlashOptions,
   libraryPathForSection,
-    denLibraryPluginCreateRequest,
-    libraryAddAction,
-    libraryAddKindsForFilter,
-    libraryPluginFileDisplayName,
-    libraryPluginFileFallbackDetailId,
-    libraryPluginFilePreferredDetailId,
-    parseLibraryPluginFileDetailId,
-    waitForListedLibraryPlugin,
-    slugifyLibraryItemName,
+  libraryAddKindsForFilter,
+  libraryPluginFileDisplayName,
+  libraryPluginFileFallbackDetailId,
+  libraryPluginFilePreferredDetailId,
+  parseLibraryPluginFileDetailId,
+  slugifyLibraryItemName,
 } from "../src/react-app/domains/settings/library";
 
 describe("library destination", () => {
@@ -134,65 +131,6 @@ describe("library destination", () => {
     expect(slugifyLibraryItemName("  ", "agent")).toBe("agent");
   });
 
-  test("Library Add creates on Den when signed in", () => {
-    const signedIn = { cloudSignedIn: true };
-    expect(libraryAddAction("skill", signedIn)).toEqual({ type: "den-modal", kind: "skill" });
-    expect(libraryAddAction("plugin", signedIn)).toEqual({ type: "den-modal", kind: "plugin" });
-    expect(libraryAddAction("mcp", signedIn)).toEqual({ type: "den-modal", kind: "mcp" });
-    expect(libraryAddAction("connection", signedIn)).toEqual({ type: "den-url", kind: "connection" });
-  });
-
-  test("Library Add is unavailable when signed out", () => {
-    const signedOut = { cloudSignedIn: false };
-    expect(libraryAddAction("skill", signedOut)).toBeNull();
-    expect(libraryAddAction("mcp", signedOut)).toBeNull();
-    expect(libraryAddAction("plugin", signedOut)).toBeNull();
-    expect(libraryAddAction("connection", signedOut)).toBeNull();
-  });
-
-  test("signed-in Library Add posts a Den plugin bundle", () => {
-    const request = denLibraryPluginCreateRequest("skill", {
-      name: "Briefing Notes",
-      description: "Prepare a customer briefing.",
-      instructions: "Look up the account first.",
-    });
-    expect(request.name).toBe("Briefing Notes");
-    expect(request.marketplaceId).toBeUndefined();
-    expect(request.orgWide).toBe(false);
-    expect(request.components[0]?.type).toBe("skill");
-    expect(request.components[0]?.input.metadata.name).toBe("briefing-notes");
-    expect(request.components[0]?.input.rawSourceText).toContain("Look up the account first.");
-  });
-
-  test("Library Add MCP posts a Den remote server, not a local config", () => {
-    const request = denLibraryPluginCreateRequest("mcp", {
-      name: "Linear",
-      description: "",
-      instructions: "https://mcp.linear.app/mcp",
-    });
-    expect(request.components[0]?.type).toBe("mcp");
-    expect(request.components[0]?.input.normalizedPayloadJson).toEqual({
-      mcpServers: { linear: { type: "remote", url: "https://mcp.linear.app/mcp" } },
-    });
-  });
-
-  test("Library Add plugin bundle keeps MCP servers and does not auto-publish", () => {
-    const request = denLibraryPluginCreateRequest("plugin", {
-      name: "Sales call prep",
-      description: "Prep a call",
-      instructions: "",
-      components: [
-        { kind: "skill", name: "briefing", description: "Brief the account", content: "Look up the account." },
-        { kind: "mcp", name: "Linear", description: "", content: "https://mcp.linear.app/mcp" },
-      ],
-    });
-    expect(request.marketplaceId).toBeUndefined();
-    expect(request.components.map((component) => component.type)).toEqual(["skill", "mcp"]);
-    expect(request.components[1]?.input.normalizedPayloadJson).toEqual({
-      mcpServers: { linear: { type: "remote", url: "https://mcp.linear.app/mcp" } },
-    });
-  });
-
   test("plugin files map onto Library detail ids", () => {
     const skill = {
       configObjectId: "cfg_skill",
@@ -220,19 +158,5 @@ describe("library destination", () => {
       fileId: "cfg_skill",
     });
     expect(parseLibraryPluginFileDetailId("plugin:plug_1")).toBeNull();
-  });
-
-  test("waits until a created plugin appears in My Library", async () => {
-    let calls = 0;
-    const found = await waitForListedLibraryPlugin(
-      async () => {
-        calls += 1;
-        return calls >= 2 ? [{ id: "plug_new" }] : [];
-      },
-      "plug_new",
-      { attempts: 3, delayMs: 0 },
-    );
-    expect(found).toBe(true);
-    expect(calls).toBe(2);
   });
 });

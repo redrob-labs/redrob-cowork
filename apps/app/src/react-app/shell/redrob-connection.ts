@@ -1,8 +1,4 @@
 import {
-  getRedrobGatewayOrigin,
-  readRedrobGatewayDenToken,
-} from "../../app/lib/gateway-runtime";
-import {
   isLoopbackRedrobServerUrl,
   normalizeRedrobServerUrl,
   readRedrobServerSettings,
@@ -59,17 +55,6 @@ export function isStaleStoredDesktopConnection(input: {
  * connections and for desktop cases where the runtime bridge is unavailable.
  */
 export async function resolveRedrobConnection(): Promise<ResolvedRedrobConnection> {
-  const gatewayOrigin = getRedrobGatewayOrigin();
-  if (gatewayOrigin) {
-    return {
-      normalizedBaseUrl: normalizeRedrobServerUrl(gatewayOrigin) ?? "",
-      resolvedToken: readRedrobGatewayDenToken(),
-      resolvedHostToken: "",
-      hostInfo: null,
-      source: "gateway",
-    };
-  }
-
   let staleDesktopRuntimeBaseUrl = "";
   let desktopServerReportedNotReady = false;
 

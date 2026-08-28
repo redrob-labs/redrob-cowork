@@ -71,7 +71,6 @@ function createTestRedrobServerStore(startupPreference: "local" | "server" = "se
 
 function installWindow(options: {
   origin: string;
-  gateway?: boolean;
   bootstrapToken?: string;
   electronInfo?: {
     baseUrl: string;
@@ -95,7 +94,6 @@ function installWindow(options: {
       setTimeout: () => 1,
       clearTimeout: () => undefined,
       location: { origin: options.origin },
-      __REDROB_GATEWAY__: options.gateway ? { version: 1 } : undefined,
       __REDROB_BOOTSTRAP__: options.bootstrapToken ? { token: options.bootstrapToken } : undefined,
       __REDROB_ELECTRON__: electronBridgeInstalled
         ? {
@@ -124,7 +122,7 @@ function installWindow(options: {
   return localStorage;
 }
 
-describe("gateway runtime mode", () => {
+describe("connection modes", () => {
   beforeEach(() => {
     process.env.VITE_REDROB_DEPLOYMENT = "web";
   });
@@ -145,120 +143,7 @@ describe("gateway runtime mode", () => {
     }
   });
 
-  test("resolves Redrob Work server traffic through the gateway origin with the Den session token", async () => {
-    const storage = installWindow({ origin: "https://web.redrob.io", gateway: true });
-    storage.setItem("redrob.den.authToken", "den-session-token");
-    storage.setItem("redrob.server.urlOverride", "https://direct-instance.example.com");
-    storage.setItem("redrob.server.token", "stale-instance-token");
-
-    const connection = await resolveRedrobConnection();
-
-    expect(connection).toEqual({
-      normalizedBaseUrl: "https://web.redrob.io",
-      resolvedToken: "den-session-token",
-      resolvedHostToken: "",
-      hostInfo: null,
-      source: "gateway",
-    });
-  });
-
-  test("does not hydrate an instance bootstrap token into server storage behind the gateway", () => {
-    const storage = installWindow({
-      origin: "https://web.redrob.io",
-      gateway: true,
-      bootstrapToken: "instance-token-must-not-store",
-    });
-
-    hydrateRedrobServerSettingsFromEnv();
-
-    expect(storage.getItem("redrob.server.token")).toBeNull();
-    expect(readRedrobServerSettings().token).toBeUndefined();
-  });
-
-  test("uses same-origin and the Den bearer for Redrob Work server store env calls behind the gateway", async () => {
-    const storage = installWindow({ origin: "https://gw.example", gateway: true });
-    storage.setItem("redrob.den.authToken", "den-session-token");
-    storage.setItem("redrob.server.urlOverride", "https://direct-instance.example.com");
-    storage.setItem("redrob.server.token", "stale-instance-token");
-    storage.setItem("redrob.server.hostToken", "stale-host-token");
-    const requests: Array<{ url: string; authorization: string | null; hostToken: string | null }> = [];
-    Object.defineProperty(globalThis, "fetch", {
-      configurable: true,
-      value: async (input: RequestInfo | URL, init?: RequestInit) => {
-        const headers = new Headers(init?.headers);
-        requests.push({
-          url: getRequestUrl(input),
-          authorization: headers.get("authorization"),
-          hostToken: headers.get("x-redrob-host-token"),
-        });
-        return new Response(JSON.stringify({ runtimeKey: "runtime-a", pendingChanges: false, ok: true, count: 1 }), {
-          status: 200,
-          headers: { "content-type": "application/json" },
-        });
-      },
-    });
-
-    const store = createTestRedrobServerStore();
-    const snapshot = store.getSnapshot();
-    const client = snapshot.redrobServerClient;
-    if (!client) throw new Error("Expected a gateway Redrob Work server client");
-
-    expect(snapshot.redrobServerBaseUrl).toBe("https://gw.example");
-    expect(snapshot.redrobServerAuth.token).toBe("den-session-token");
-    expect(snapshot.redrobServerAuth.hostToken).toBeUndefined();
-    expect(client.baseUrl).toBe("https://gw.example");
-    expect(client.token).toBe("den-session-token");
-
-    await client.getUserEnvStatus("runtime-a");
-    await client.upsertUserEnv([{ key: "OPENAI_API_KEY", value: "sk-test" }]);
-
-    expect(requests).toEqual([
-      {
-        url: "https://gw.example/env/status?runtimeKey=runtime-a",
-        authorization: "Bearer den-session-token",
-        hostToken: null,
-      },
-      {
-        url: "https://gw.example/env",
-        authorization: "Bearer den-session-token",
-        hostToken: null,
-      },
-    ]);
-  });
-
-  test("uses the Den bearer for same-origin OpenCode health polling behind the gateway", () => {
-    const storage = installWindow({ origin: "https://gw.example", gateway: true });
-    storage.setItem("redrob.den.authToken", "den-session-token");
-    storage.setItem("redrob.server.token", "stale-instance-token");
-
-    expect(buildRedrobHealthHeaders("https://gw.example/opencode")).toEqual({
-      Authorization: "Bearer den-session-token",
-    });
-  });
-});
-
-describe("non-gateway connection modes", () => {
-  beforeEach(() => {
-    process.env.VITE_REDROB_DEPLOYMENT = "web";
-  });
-
-  afterEach(() => {
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: originalWindow,
-    });
-    Object.defineProperty(globalThis, "fetch", {
-      configurable: true,
-      value: originalFetch,
-    });
-    if (originalDeployment === undefined) {
-      delete process.env.VITE_REDROB_DEPLOYMENT;
-    } else {
-      process.env.VITE_REDROB_DEPLOYMENT = originalDeployment;
-    }
-  });
-
-  test("direct instance bootstrap hydration and same-origin resolution are unchanged without the marker", async () => {
+  test("direct instance bootstrap hydration and same-origin resolution work in a browser deployment", async () => {
     installWindow({ origin: "https://instance.example.com", bootstrapToken: "instance-token" });
 
     hydrateRedrobServerSettingsFromEnv();
@@ -337,7 +222,7 @@ describe("non-gateway connection modes", () => {
     }
   });
 
-  test("stored server settings still win without the marker", async () => {
+  test("stored server settings win over the default URL", async () => {
     const storage = installWindow({ origin: "https://instance.example.com" });
     storage.setItem("redrob.server.urlOverride", "https://manual.example.com");
     storage.setItem("redrob.server.token", "manual-token");
@@ -360,7 +245,7 @@ describe("non-gateway connection modes", () => {
     expect(snapshot.redrobServerClient?.token).toBe("manual-token");
   });
 
-  test("OpenCode health polling still uses the stored instance token without the gateway marker", () => {
+  test("OpenCode health polling uses the stored instance token", () => {
     const storage = installWindow({ origin: "https://instance.example.com" });
     storage.setItem("redrob.server.token", "instance-token");
 
@@ -369,7 +254,7 @@ describe("non-gateway connection modes", () => {
     });
   });
 
-  test("desktop runtime still uses live desktop server info without the marker", async () => {
+  test("desktop runtime uses live desktop server info", async () => {
     installWindow({
       origin: "https://instance.example.com",
       electronInfo: {

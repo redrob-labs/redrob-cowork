@@ -212,23 +212,6 @@ export function isLibraryAuthorableKind(kind: LibraryAddKind): kind is LibraryAu
   return kind === "skill" || kind === "command" || kind === "agent" || kind === "plugin" || kind === "mcp";
 }
 
-export type LibraryAddAction =
-  | { type: "den-url"; kind: "connection" }
-  | { type: "den-modal"; kind: LibraryAuthorableKind };
-
-/** Library Add always creates in Redrob Work Cloud. Local workspace files are not an authoring path. */
-export function libraryAddAction(
-  addKind: LibraryAddKind,
-  options: {
-    cloudSignedIn: boolean;
-  },
-): LibraryAddAction | null {
-  if (!options.cloudSignedIn) return null;
-  if (addKind === "connection") return { type: "den-url", kind: "connection" };
-  if (isLibraryAuthorableKind(addKind)) return { type: "den-modal", kind: addKind };
-  return null;
-}
-
 export type LibraryPluginComponentKind = "skill" | "command" | "agent" | "mcp";
 
 export type LibraryPluginComponentDraft = {
@@ -242,92 +225,8 @@ export type CreateLibraryItemInput = {
   name: string;
   description: string;
   instructions: string;
-  orgWide?: boolean;
-  marketplaceId?: string;
   components?: LibraryPluginComponentDraft[];
 };
-
-export type DenLibraryPluginCreateRequest = {
-  name: string;
-  description: string | null;
-  orgWide?: boolean;
-  marketplaceId?: string;
-  components: Array<{
-    type: LibraryPluginComponentKind;
-    input: {
-      rawSourceText?: string;
-      normalizedPayloadJson?: Record<string, unknown>;
-      metadata: { name: string; description?: string };
-    };
-  }>;
-};
-
-function skillMarkdown(name: string, description: string, instructions: string) {
-  return [
-    "---",
-    `name: ${name}`,
-    `description: ${description}`,
-    "---",
-    "",
-    instructions,
-    "",
-  ].join("\n");
-}
-
-export function denLibraryPluginComponentBody(component: LibraryPluginComponentDraft): DenLibraryPluginCreateRequest["components"][number] {
-  const slug = slugifyLibraryItemName(component.name, component.kind === "mcp" ? "plugin" : component.kind);
-  const description = component.description.trim();
-  if (component.kind === "mcp") {
-    return {
-      type: "mcp",
-      input: {
-        normalizedPayloadJson: {
-          mcpServers: {
-            [slug]: { type: "remote", url: component.content.trim() },
-          },
-        },
-        metadata: {
-          name: component.name.trim(),
-          ...(description ? { description } : {}),
-        },
-      },
-    };
-  }
-  return {
-    type: component.kind,
-    input: {
-      rawSourceText: component.kind === "skill"
-        ? skillMarkdown(slug, description || component.name.trim(), component.content.trim())
-        : `${component.content.trim()}\n`,
-      metadata: {
-        name: slug,
-        ...(description ? { description } : {}),
-      },
-    },
-  };
-}
-
-/** Same plugin bundle Den's create screen posts to `/v1/plugins`. */
-export function denLibraryPluginCreateRequest(
-  kind: LibraryAuthorableKind,
-  input: CreateLibraryItemInput,
-): DenLibraryPluginCreateRequest {
-  const drafts = input.components && input.components.length > 0
-    ? input.components
-    : [{
-      kind: kind === "plugin" ? "skill" : kind,
-      name: input.name,
-      description: input.description,
-      content: input.instructions,
-    }];
-  return {
-    name: input.name.trim(),
-    description: input.description.trim() || null,
-    orgWide: input.orgWide === true,
-    marketplaceId: input.marketplaceId?.trim() || undefined,
-    components: drafts.map(denLibraryPluginComponentBody),
-  };
-}
 
 export type LibraryPluginFileKind = "skill" | "command" | "agent" | "mcp" | "app";
 
@@ -387,22 +286,4 @@ export function slugifyLibraryItemName(name: string, fallback: LibraryAuthorable
   if (base.length > 64) base = base.slice(0, 64).replace(/-+$/g, "");
   if (!LIBRARY_ITEM_NAME_RE.test(base)) return fallback;
   return base;
-}
-
-/** Den can lag behind create; poll My Library until the new plugin is listed. */
-export async function waitForListedLibraryPlugin(
-  listPlugins: () => Promise<Array<{ id: string }>>,
-  pluginId: string,
-  options?: { attempts?: number; delayMs?: number },
-): Promise<boolean> {
-  const attempts = options?.attempts ?? 6;
-  const delayMs = options?.delayMs ?? 250;
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    const plugins = await listPlugins();
-    if (plugins.some((plugin) => plugin.id === pluginId)) return true;
-    if (attempt < attempts - 1 && delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs * (attempt + 1)));
-    }
-  }
-  return false;
 }
