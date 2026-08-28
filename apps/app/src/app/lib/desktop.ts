@@ -308,7 +308,6 @@ function isLoopbackUrl(input: RequestInfo | URL): boolean {
 
 type DesktopFetchMainOptions = {
   timeoutMs?: number;
-  agentContextDiagnosticsDeadlineAtMs?: number;
 };
 
 async function desktopFetchThroughMain(
@@ -344,15 +343,11 @@ async function desktopFetchThroughMain(
     body = typeof init?.body === "string" ? init.body : undefined;
   }
 
-  const diagnosticsDeadlineAtMs = options.agentContextDiagnosticsDeadlineAtMs;
   const result = await invokeElectronHelper("__fetch", url, {
     method,
     headers,
     body,
     timeoutMs: options.timeoutMs,
-    agentContextDiagnostics: diagnosticsDeadlineAtMs === undefined
-      ? undefined
-      : { deadlineAtMs: diagnosticsDeadlineAtMs },
   });
 
   // Response constructor rejects bodies for null-body status codes, so we
@@ -376,19 +371,6 @@ export const desktopFetch: typeof globalThis.fetch = async (input, init) => {
 
 export async function desktopFetchViaMain(input: RequestInfo | URL, init?: RequestInit, timeoutMs?: number): Promise<Response> {
   return desktopFetchThroughMain(input, init, { timeoutMs });
-}
-
-export async function desktopFetchAgentContextDiagnostics(
-  input: RequestInfo | URL,
-  init: RequestInit,
-  deadlineAtMs: number,
-): Promise<Response> {
-  if (isLoopbackUrl(input)) {
-    return globalThis.fetch(input, init);
-  }
-  return desktopFetchThroughMain(input, init, {
-    agentContextDiagnosticsDeadlineAtMs: deadlineAtMs,
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -565,8 +547,6 @@ const {
   debugDesktopBootstrapConfig,
   clearDesktopBootstrapConfig,
   setDesktopBootstrapConfig,
-  connectLinkVerify,
-  connectLinkAccept,
   nukeRedrobAndOpencodeConfigPreview,
   nukeRedrobAndOpencodeConfigAndExit,
   sandboxCleanupRedrobContainers,
@@ -620,8 +600,6 @@ export {
   debugDesktopBootstrapConfig,
   clearDesktopBootstrapConfig,
   setDesktopBootstrapConfig,
-  connectLinkVerify,
-  connectLinkAccept,
   nukeRedrobAndOpencodeConfigPreview,
   nukeRedrobAndOpencodeConfigAndExit,
   sandboxCleanupRedrobContainers,

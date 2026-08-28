@@ -39,17 +39,7 @@ import {
   executeNukeFreshStart,
   runPendingNukeCleanup,
 } from "./nuke.mjs";
-import {
-  createConnectLinkReplayGuard,
-  extractConnectExchange,
-  resolveConnectExchangeUrl,
-  verifyConnectLinkUrl,
-} from "./connect-link.mjs";
-import {
-  applyDesktopBootstrapBrandIcon,
-  persistConnectLinkBranding,
-} from "./connect-link-branding.mjs";
-import { resolveConnectLinkPublicKeys } from "./connect-link-keys.mjs";
+import { applyDesktopBootstrapBrandIcon } from "./brand-icon-bootstrap.mjs";
 import { openExternalUrl } from "./open-external.mjs";
 import { resolveAppIdentifier, resolveUserDataPath } from "./dev-profile.mjs";
 import { fetchAgentContextDiagnosticsResponse } from "./agent-context-diagnostics-fetch.mjs";
@@ -1062,68 +1052,6 @@ const workspaceStore = createWorkspaceStore({
   forceRequireSignin: FORCE_DESKTOP_REQUIRE_SIGNIN,
 });
 
-const connectLinkReplayGuard = createConnectLinkReplayGuard({
-  filePath: path.join(app.getPath("userData"), "connect-link-seen.json"),
-});
-
-/**
- * @param {string} rawUrl
- * @returns {import("@redrob/types/connect-link").ConnectLinkVerifyResult}
- */
-function verifyConnectLink(rawUrl) {
-  return verifyConnectLinkUrl(String(rawUrl ?? ""), {
-    publicKeys: resolveConnectLinkPublicKeys(),
-    // http is refused everywhere except loopback targets in dev runs.
-    allowInsecureLoopback: isDevMode,
-  });
-}
-
-async function previewConnectLink(rawUrl) {
-  if (extractConnectExchange(rawUrl)) {
-    return resolveConnectExchangeUrl(rawUrl, {
-      mode: "preview",
-      fetcher: electronNet.fetch,
-      allowInsecureLoopback: isDevMode,
-    });
-  }
-  return verifyConnectLink(rawUrl);
-}
-
-async function acceptConnectLink(rawUrl) {
-  if (extractConnectExchange(rawUrl)) {
-    return resolveConnectExchangeUrl(rawUrl, {
-      mode: "exchange",
-      fetcher: electronNet.fetch,
-      allowInsecureLoopback: isDevMode,
-    });
-  }
-  return verifyConnectLink(rawUrl);
-}
-
-async function persistConnectLinkClaims(claims) {
-  const previous = workspaceStore.readDesktopBootstrapConfigSync();
-  const config = await persistConnectLinkBranding(claims, {
-    persistBootstrap: (config) => workspaceStore.setDesktopBootstrapConfig(config),
-    applyBrandIconUrl: (iconUrl) => applyBrandIconUrl(iconUrl).catch((error) =>
-      brandIconFailure("connect-apply-failed", error)),
-    enterpriseActivation: DESKTOP_DISTRIBUTION.flavor === "enterprise"
-      ? {
-          activatedAt: new Date().toISOString(),
-          denBaseUrl: claims.den.baseUrl,
-        }
-      : null,
-  });
-  if (
-    desktopActivationRequired(DESKTOP_DISTRIBUTION, previous)
-    && !desktopActivationRequired(DESKTOP_DISTRIBUTION, config)
-  ) {
-    await uiControlServer.start().catch((error) => {
-      console.warn("[ui-control] failed to start", error);
-    });
-    await runtimeManager.prepareFreshRuntime();
-  }
-  return config;
-}
 
 function normalizePlatform(value) {
   if (value === "darwin" || value === "linux") return value;
@@ -1891,37 +1819,6 @@ const desktopCommandHandlers = {
         await runtimeManager.prepareFreshRuntime();
       }
       return next;
-  },
-  "connectLinkVerify": async (event, ...args) => {
-      // Read-only check — parses + verifies the deep link, writes nothing.
-      // Replay is surfaced here too so an already-used link gets its refusal
-      // before the user is ever shown a confirmation.
-      const verified = await previewConnectLink(String(args[0] ?? ""));
-      if (verified.ok === false) return verified;
-      if (verified.transport === "signed" && await connectLinkReplayGuard.has(verified.claims.jti)) {
-        return { ok: false, code: "replayed", message: "This connect link was already used on this machine." };
-      }
-      return verified;
-  },
-  "connectLinkAccept": async (event, ...args) => {
-      // The renderer passes the raw URL back after the user confirmed; claims
-      // shaped in the renderer are never trusted (desktop-ipc trust boundary).
-      const verified = await acceptConnectLink(String(args[0] ?? ""));
-      if (verified.ok === false) return verified;
-      if (verified.transport === "exchange") {
-        const config = await persistConnectLinkClaims(verified.claims);
-        return { ok: true, config };
-      }
-      if (await connectLinkReplayGuard.has(verified.claims.jti)) {
-        return { ok: false, code: "replayed", message: "This connect link was already used on this machine." };
-      }
-      // Consume before mutation. If the replay ledger cannot be persisted,
-      // fail closed and leave the existing bootstrap untouched.
-      if (!(await connectLinkReplayGuard.remember(verified.claims.jti))) {
-        return { ok: false, code: "replayed", message: "This connect link was already used on this machine." };
-      }
-      const config = await persistConnectLinkClaims(verified.claims);
-      return { ok: true, config };
   },
   "nukeRedrobAndOpencodeConfigPreview": async (event, ...args) => {
       return buildNukeManifest({

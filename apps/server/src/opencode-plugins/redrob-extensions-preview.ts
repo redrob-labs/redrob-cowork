@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { homedir, platform } from "node:os";
 import { z } from "zod";
 import type { RedrobAffordanceEffects } from "@redrob/types/redrob-affordance";
-import { automationProposalSchema } from "@redrob/types/automations";
 import {
   combineInstructionSections,
   composeAgentInstructions,
@@ -11,8 +10,6 @@ import {
 } from "./agent-instruction-compose.js";
 import {
   composeSkillAuthoringInstruction,
-  resolveRedrobWorkAutomationInstruction,
-  resolveRedrobWorkConnectSkillInstruction,
   resolveRedrobWorkExtensionDiscoveryInstruction,
   type OpenCodeContext,
   type RedrobWorkEngineMcpStatusClient,
@@ -482,13 +479,6 @@ async function executeRedrobAffordance(
       affordanceWriteEffects,
     );
   }
-  if (request.id === "automation.propose") {
-    return affordanceResult(
-      request.id,
-      proposeAutomation(request.args ?? {}),
-      affordanceProposalEffects,
-    );
-  }
   if (request.id === "extension.call") {
     const args = callArgsSchema.parse(request.args ?? {});
     return affordanceResult(
@@ -868,24 +858,6 @@ async function createRedrobWorkSessions(rawArgs: unknown, context: OpenCodeConte
   };
 }
 
-/**
- * Validates a proposed Automation and hands it back for the renderer to show.
- *
- * Deliberately does no I/O. Automations are active from the moment they exist,
- * and the Den credential lives in the renderer, so an agent can describe an
- * Automation but only a person can create one.
- */
-function proposeAutomation(rawArgs: unknown): object {
-  const proposal = automationProposalSchema.parse(rawArgs);
-  return {
-    ok: true,
-    kind: "automation-proposal",
-    proposal,
-    created: false,
-    limitation: "This Desktop proposal creates Desktop placement and runs only while a signed-in desktop runner is connected. Use Web or Cloud Chat to create headless Cloud placement.",
-  };
-}
-
 async function postJson(path: string, body: ExtensionActionPayload | Record<string, unknown>): Promise<unknown> {
   const { url, token } = requireRedrobWorkServer();
   const response = await fetch(url + path, {
@@ -928,14 +900,10 @@ export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown) => {
   },
   "experimental.chat.system.transform": async (input: unknown, output: { system: string[] }) => {
     const mergedInput = mergeTransformInputWithFactoryContext(input, factoryContext);
-    const [extensionInstruction, skillInstruction, automationInstruction] = await Promise.all([
-      resolveRedrobWorkExtensionDiscoveryInstruction(mergedInput, fetch, {
-        client: engineMcpStatusClient,
-        directory: engineMcpStatusDirectory,
-      }),
-      resolveRedrobWorkConnectSkillInstruction(mergedInput, fetch),
-      resolveRedrobWorkAutomationInstruction(mergedInput, fetch),
-    ]);
+    const extensionInstruction = await resolveRedrobWorkExtensionDiscoveryInstruction(mergedInput, fetch, {
+      client: engineMcpStatusClient,
+      directory: engineMcpStatusDirectory,
+    });
     const skillAuthoring = composeSkillAuthoringInstruction(extensionInstruction);
     if (process.env.REDROB_DEV_MODE === "1") {
       console.log("[redrob:skill-authoring] system prompt selected", {
@@ -950,8 +918,6 @@ export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown) => {
       createInstructionSection("routing", extensionInstruction),
       createInstructionSection("agent-surface", REDROB_AGENT_SURFACE_INSTRUCTION),
       createInstructionSection("skill-authoring", skillAuthoring.prompt),
-      createInstructionSection("connect-skills", skillInstruction),
-      createInstructionSection("automations", automationInstruction),
       createInstructionSection("browser", REDROB_BROWSER_INSTRUCTION),
     );
     output.system.push(...composeAgentInstructions(sections));

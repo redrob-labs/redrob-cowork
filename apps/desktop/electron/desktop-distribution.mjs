@@ -73,8 +73,6 @@ export function desktopActivationRequired(distribution, config) {
 const ENTERPRISE_PREACTIVATION_COMMANDS = new Set([
   "__fetch",
   "appBuildInfo",
-  "connectLinkAccept",
-  "connectLinkVerify",
   "getDesktopBootstrapConfig",
   "setDesktopBootstrapConfig",
 ]);

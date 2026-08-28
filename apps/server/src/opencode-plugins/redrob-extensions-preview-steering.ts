@@ -298,34 +298,6 @@ async function fetchRedrobWorkConnectState(input: unknown, fetcher: RedrobWorkFe
   };
 }
 
-export async function resolveRedrobWorkConnectSkillInstruction(_input?: unknown, fetcher: RedrobWorkFetch = fetch): Promise<string> {
-  try {
-    const { url, token } = requireRedrobWorkServer();
-    // Connect skills are server-scoped; workspace/directory query params are unused.
-    const response = await fetcher(`${url}/experimental/connect/skills`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) return "";
-    return connectCatalogResponseSchema.parse(await parseResponse(response)).instruction;
-  } catch {
-    return "";
-  }
-}
-
-export async function resolveRedrobWorkAutomationInstruction(_input?: unknown, fetcher: RedrobWorkFetch = fetch): Promise<string> {
-  try {
-    const { url, token } = requireRedrobWorkServer();
-    // Automations are account-scoped like Connect skills, not per-workspace.
-    const response = await fetcher(`${url}/experimental/connect/automations`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) return "";
-    return connectCatalogResponseSchema.parse(await parseResponse(response)).instruction;
-  } catch {
-    return "";
-  }
-}
-
 export function composeRedrobWorkExtensionDiscoveryInstruction(state: RedrobWorkExtensionConnectState | null): string {
   if (!state) return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;
   if (state.workspace?.resolution && state.workspace.resolution !== "resolved") return REDROB_EXTENSION_DISCOVERY_INSTRUCTION;

@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url"
 
 const APPS = [
   { entry: "skill-created", exportName: "skillCreatedAppHtml" },
-  { entry: "connection-action", exportName: "connectionActionAppHtml" },
   { entry: "plugin-flow", exportName: "pluginFlowAppHtml" },
 ]
 
