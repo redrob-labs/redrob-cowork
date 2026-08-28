@@ -85,7 +85,7 @@ describe("bundled Redrob Code runtime", () => {
     const constantsPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json");
     const constants = JSON.parse(await readFile(constantsPath, "utf8"));
 
-    assert.equal(constants.redrobCodeVersion, "v0.0.1");
+    assert.equal(constants.redrobCodeVersion, "v0.0.2");
     // The upstream OpenCode pin must be gone: a stale reader would resolve an
     // OpenCode version that no longer describes the shipped engine.
     assert.equal(constants.opencodeVersion, undefined);
