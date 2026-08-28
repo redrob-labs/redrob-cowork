@@ -46,10 +46,12 @@ describe("env-file", () => {
     expect(isReservedEnvKey("GCLOUD_PROJECT")).toBe(false);
   });
 
-  test("REDROB_API_KEY is persistable while every other REDROB_ runtime key stays reserved", () => {
-    // The onboarding key step stores the console.redrob.ai credential under
-    // this exact name, so it is the one REDROB_-prefixed key the store accepts.
-    expect(isReservedEnvKey("REDROB_API_KEY")).toBe(false);
+  test("REDROB_API_KEY is reserved because Redrob Code owns that credential", () => {
+    // The Redrob Key lives in the engine's auth store, reached over
+    // PUT /auth/redrob. This store must refuse the name so it can never become a
+    // second copy; the only code that touches the legacy entry is the one-shot
+    // migration, which reads and deletes without going through the write path.
+    expect(isReservedEnvKey("REDROB_API_KEY")).toBe(true);
     for (const key of [
       "REDROB_TOKEN",
       "REDROB_HOST_TOKEN",
@@ -62,28 +64,59 @@ describe("env-file", () => {
     ]) {
       expect(isReservedEnvKey(key)).toBe(true);
     }
+    // The other product-owned service credentials are unaffected.
+    for (const key of [
+      "REDROB_CLOUD_API_KEY",
+      "REDROB_MODELS_API_KEY",
+      "REDROB_INFERENCE_BASE_URL",
+      "REDROB_MODELS_BASE_URL",
+    ]) {
+      expect(isReservedEnvKey(key)).toBe(false);
+    }
   });
 
-  test("upsertMany persists REDROB_API_KEY and still refuses its neighbours", async () => {
+  test("upsertMany refuses REDROB_API_KEY", async () => {
     const svc = new EnvService({ path });
-    await svc.upsertMany([{ key: "REDROB_API_KEY", value: "rk-test-onboarding" }]);
-    expect((await svc.list()).map((entry) => entry.key)).toEqual(["REDROB_API_KEY"]);
-
-    await expect(svc.upsertMany([{ key: "REDROB_HOST_TOKEN", value: "x" }])).rejects.toThrow(
+    await expect(svc.upsertMany([{ key: "REDROB_API_KEY", value: "rk-test-not-a-real-key" }])).rejects.toThrow(
       InvalidEnvKeyError,
     );
-    // The rejected batch must not have disturbed the stored credential.
-    expect((await svc.list()).map((entry) => entry.key)).toEqual(["REDROB_API_KEY"]);
+    expect(await svc.list()).toEqual([]);
   });
 
-  test("readForInjection never leaks the stored REDROB_API_KEY into a child env", async () => {
-    // Persisting the credential must not widen process injection: the engine
-    // gets it over the authenticated PUT /auth/redrob delivery instead.
+  test("a legacy REDROB_API_KEY entry stays readable and deletable so it can be migrated out", async () => {
+    // Installs created before Redrob Code owned the key have it in this store.
+    // The migration must be able to hand it to the engine and then remove it,
+    // even though the write path now rejects the name.
     const svc = new EnvService({ path });
-    await svc.upsertMany([
-      { key: "REDROB_API_KEY", value: "rk-test-onboarding" },
-      { key: "ANTHROPIC_API_KEY", value: "sk-ant" },
-    ]);
+    writeFileSync(
+      path,
+      JSON.stringify({
+        schemaVersion: 1,
+        updatedAt: Date.now(),
+        variables: [{ key: "REDROB_API_KEY", value: "rk-test-legacy-not-a-real-key", updatedAt: Date.now() }],
+      }),
+      "utf8",
+    );
+    expect((await svc.list()).map((entry) => entry.key)).toEqual(["REDROB_API_KEY"]);
+    expect(await svc.delete("REDROB_API_KEY")).toBe(true);
+    expect(await svc.list()).toEqual([]);
+  });
+
+  test("readForInjection never leaks a legacy REDROB_API_KEY into a child env", async () => {
+    // Even mid-migration the value must not widen process injection: the engine
+    // gets it over the authenticated PUT /auth/redrob delivery instead.
+    writeFileSync(
+      path,
+      JSON.stringify({
+        schemaVersion: 1,
+        updatedAt: Date.now(),
+        variables: [
+          { key: "REDROB_API_KEY", value: "rk-test-legacy-not-a-real-key", updatedAt: Date.now() },
+          { key: "ANTHROPIC_API_KEY", value: "sk-ant", updatedAt: Date.now() },
+        ],
+      }),
+      "utf8",
+    );
     const injected = await EnvService.readForInjection(path);
     expect(injected).toEqual({ ANTHROPIC_API_KEY: "sk-ant" });
     expect(Object.keys(injected)).not.toContain("REDROB_API_KEY");

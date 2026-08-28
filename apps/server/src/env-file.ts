@@ -23,17 +23,14 @@ const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
 // The narrow exceptions to the prefix ban: service credentials and endpoints
 // that the product itself owns and has to be able to store.
 //
-// `REDROB_API_KEY` is the inference credential a user issues at
-// console.redrob.ai and pastes on the onboarding key step, which writes it
-// here through `PUT /env`. Without this entry that write is rejected as
-// reserved and inference can never be connected. It is safe to persist and
-// still reserved against process injection: `readForInjection` strips every
-// internal key, so the value never reaches an arbitrary child env. The engine
-// receives it only over the authenticated `PUT /auth/redrob` delivery in
-// `managed-provider-auth.ts`, which is matched to the `env: ["REDROB_API_KEY"]`
-// declaration on the Redrob provider entry.
+// `REDROB_API_KEY` is deliberately absent. The Redrob Key belongs to Redrob
+// Code: onboarding hands it straight to the engine's auth store over
+// `PUT /auth/redrob` (see redrob-auth.ts) and Work keeps no copy, so this store
+// must reject the name rather than become a second place a credential can live.
+// Installs that predate that ownership are migrated out by
+// `migrateLegacyRedrobKey`, which reads and deletes the legacy entry without
+// going through the write path.
 const PERSISTABLE_INTERNAL_KEYS = new Set([
-  "REDROB_API_KEY",
   "REDROB_CLOUD_API_KEY",
   "REDROB_MODELS_API_KEY",
   "REDROB_INFERENCE_BASE_URL",
