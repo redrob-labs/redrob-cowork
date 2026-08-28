@@ -32,7 +32,7 @@ async function createWorkspaceRoot() {
 }
 
 function hostAuth(token: string) {
-  return { "X-Redrob Work-Host-Token": token };
+  return { "X-Redrob-Host-Token": token };
 }
 
 function clientAuth(token: string) {

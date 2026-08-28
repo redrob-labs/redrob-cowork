@@ -133,7 +133,7 @@ All writes are gated by host approval.
 
 Host APIs accept either:
 
-- `X-Redrob Work-Host-Token: <token>` (legacy host token), or
+- `X-Redrob-Host-Token: <token>` (legacy host token), or
 - `Authorization: Bearer <token>` where the token scope is `owner`.
 
 Approvals endpoints:

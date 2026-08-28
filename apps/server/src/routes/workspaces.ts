@@ -135,7 +135,7 @@ async function fetchRedrobWorkspaceList(hostUrl: string, token: string, hostToke
   const timeout = setTimeout(() => controller.abort(), 8_000);
   const headers = new Headers();
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (hostToken) headers.set("X-Redrob Work-Host-Token", hostToken);
+  if (hostToken) headers.set("X-Redrob-Host-Token", hostToken);
 
   try {
     const response = await externalFetch(url, { headers, signal: controller.signal });

@@ -152,7 +152,7 @@ describe("Linux AppImage desktop integration", () => {
 
     const desktopEntry = await readFile(harness.integration.paths.desktopEntryPath, "utf8");
     assert.match(desktopEntry, new RegExp(`^Exec=${quoteDesktopExec(harness.appImagePath)} %U$`, "m"));
-    assert.match(desktopEntry, /^X-Redrob Work-Managed=true$/m);
+    assert.match(desktopEntry, /^X-Redrob-Managed=true$/m);
     for (const size of iconSizes) {
       assert.equal(await readFile(harness.integration.paths.iconPaths[size], "utf8"), String(size));
     }
@@ -211,7 +211,7 @@ describe("Linux AppImage desktop integration", () => {
     assert.equal(relaunched.dialogs.length, 0);
     const entry = await readFile(relaunched.integration.paths.desktopEntryPath, "utf8");
     assert.match(entry, new RegExp(`^TryExec=${updatedPath}$`, "m"));
-    assert.match(entry, /^X-Redrob Work-Version=0\.18\.8$/m);
+    assert.match(entry, /^X-Redrob-Version=0\.18\.8$/m);
   });
 
   it("silently refreshes an owned launcher when only the version changed", async () => {

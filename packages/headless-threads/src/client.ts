@@ -88,7 +88,7 @@ export function createHeadlessThreadClient(options: HeadlessThreadClientOptions)
       method,
       headers: {
         Authorization: `Bearer ${options.token}`,
-        ...(options.hostToken === undefined ? {} : { "X-Redrob Work-Host-Token": options.hostToken }),
+        ...(options.hostToken === undefined ? {} : { "X-Redrob-Host-Token": options.hostToken }),
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),

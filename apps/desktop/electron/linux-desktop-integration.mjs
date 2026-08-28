@@ -22,8 +22,13 @@ export const REDROB_DESKTOP_NAME = "io.redrob.work";
 export const REDROB_PROTOCOL_MIME = "x-scheme-handler/redrob";
 
 const INTEGRATION_STATE_VERSION = 1;
-const OWNERSHIP_MARKER = "X-Redrob Work-Managed";
-const MANAGED_VERSION_MARKER = "X-Redrob Work-Version";
+const OWNERSHIP_MARKER = "X-Redrob-Managed";
+const MANAGED_VERSION_MARKER = "X-Redrob-Version";
+// Entries written before the rebrand used key names containing a space, which
+// the desktop-entry spec does not allow. Read them so an upgrade still
+// recognizes its own installed entry instead of treating it as third-party.
+const LEGACY_OWNERSHIP_MARKER = "X-Redrob Work-Managed";
+const LEGACY_MANAGED_VERSION_MARKER = "X-Redrob Work-Version";
 const ICON_SIZES = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 
 function defaultCommandRunner(command, args) {
@@ -77,6 +82,14 @@ function unquoteDesktopValue(value) {
     return trimmed.slice(1, -1);
   }
   return trimmed;
+}
+
+function isManagedEntry(fields) {
+  return fields.get(OWNERSHIP_MARKER) === "true" || fields.get(LEGACY_OWNERSHIP_MARKER) === "true";
+}
+
+function managedEntryVersion(fields) {
+  return fields.get(MANAGED_VERSION_MARKER) ?? fields.get(LEGACY_MANAGED_VERSION_MARKER);
 }
 
 function entryTargetsAppImage(fields, appImagePath) {
@@ -198,8 +211,8 @@ X-AppImage-Name=${cleanDesktopValue(appName)}
 X-AppImage-Version=${cleanDesktopValue(appVersion)}
 ${OWNERSHIP_MARKER}=true
 ${MANAGED_VERSION_MARKER}=${cleanDesktopValue(appVersion)}
-X-Redrob Work-Distribution=${cleanDesktopValue(distribution)}
-X-Redrob Work-AppImage=${cleanDesktopValue(appImagePath)}
+X-Redrob-Distribution=${cleanDesktopValue(distribution)}
+X-Redrob-AppImage=${cleanDesktopValue(appImagePath)}
 `;
 }
 
@@ -275,7 +288,7 @@ export function createLinuxDesktopIntegration({
     return {
       desktopId,
       path: candidate,
-      managed: fields.get(OWNERSHIP_MARKER) === "true",
+      managed: isManagedEntry(fields),
       acceptsUrl: entryAcceptsUrl(fields),
       handlesProtocol: entryHandlesRedrob(fields),
     };
@@ -304,14 +317,14 @@ export function createLinuxDesktopIntegration({
     const handlerDesktopId = await queryDefaultHandler();
     const ownContent = await readFile(desktopEntryPath, "utf8").catch(() => null);
     const ownFields = ownContent == null ? null : parseDesktopEntry(ownContent);
-    const ownManaged = ownFields?.get(OWNERSHIP_MARKER) === "true";
+    const ownManaged = ownFields != null && isManagedEntry(ownFields);
 
     if (ownFields && ownManaged) {
       /** @type {DesktopIntegrationIssue[]} */
       const issues = [];
       if (!entryTargetsAppImage(ownFields, appImagePath)) issues.push("appimage-path");
       if (!entryHandlesRedrob(ownFields)) issues.push("desktop-entry");
-      if (ownFields.get(MANAGED_VERSION_MARKER) !== app.getVersion()) issues.push("version");
+      if (managedEntryVersion(ownFields) !== app.getVersion()) issues.push("version");
       const iconsPresent = await Promise.all(
         ICON_SIZES.map((size) => fileExists(iconPaths[size])),
       );

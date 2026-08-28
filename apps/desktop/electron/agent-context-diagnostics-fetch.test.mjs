@@ -151,7 +151,7 @@ test("Electron diagnostics fetch does not forward credentials across a remote re
         method: "POST",
         headers: {
           Authorization: `Bearer ${bearerToken}`,
-          "X-Redrob Work-Host-Token": hostToken,
+          "X-Redrob-Host-Token": hostToken,
         },
         body: "{}",
       },

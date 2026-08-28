@@ -1840,7 +1840,7 @@ export function createRuntimeManager({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Redrob Work-Host-Token": hostToken,
+          "X-Redrob-Host-Token": hostToken,
         },
         body: JSON.stringify({ scope: "owner", label: "Redrob Work desktop owner token" }),
       },
