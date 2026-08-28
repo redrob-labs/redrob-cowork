@@ -9,7 +9,12 @@ import type { EnvironmentVariableItem } from "./environment-variable-table";
 
 const KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
+// Mirrors PERSISTABLE_INTERNAL_KEYS in apps/server/src/env-file.ts. The server
+// is the enforcer; this copy only keeps the editor from rejecting a key the
+// server accepts. `REDROB_API_KEY` is the onboarding credential, so it has to be
+// editable here or a user could never rotate or repair it after first run.
 const PERSISTABLE_INTERNAL_KEYS = new Set([
+  "REDROB_API_KEY",
   "REDROB_CLOUD_API_KEY",
   "REDROB_MODELS_API_KEY",
   "REDROB_INFERENCE_BASE_URL",
@@ -24,7 +29,8 @@ export type EnvironmentEditorDraft = {
   value: string;
 };
 
-function validateKey(key: string): string | null {
+/** Exported for the reserved-key policy test; returns null when `key` is allowed. */
+export function validateKey(key: string): string | null {
   const trimmed = key.trim();
   if (!trimmed) {
     return t("settings.environment.validation_empty");

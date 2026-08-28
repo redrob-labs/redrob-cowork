@@ -20,7 +20,8 @@ import { RedrobKeyStep } from "../domains/onboarding/redrob-key-step";
 import { LanguageStep } from "../domains/onboarding/language-step";
 import { EngineDownloadStep } from "../domains/onboarding/engine-download-step";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
-import { REDROB_API_KEY_ENV, REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
+import { REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
+import { connectRedrobKey } from "../domains/onboarding/redrob-key-connect";
 import { CreateWorkspaceModal } from "../domains/workspace/create-workspace-modal";
 import type { CreateWorkspaceOptions } from "../domains/workspace/types";
 
@@ -278,11 +279,16 @@ export function WelcomeRoute() {
         if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
           throw new Error(t("welcome.redrob_key_error_server"));
         }
-        await createRedrobServerClient({
-          baseUrl: normalizedBaseUrl,
-          token: resolvedToken || undefined,
-          hostToken: resolvedHostToken || undefined,
-        }).upsertUserEnv([{ key: REDROB_API_KEY_ENV, value: trimmed }]);
+        // Stores the key and seeds the Redrob provider so the server actually
+        // delivers the credential to the engine. See connectRedrobKey.
+        await connectRedrobKey(
+          createRedrobServerClient({
+            baseUrl: normalizedBaseUrl,
+            token: resolvedToken || undefined,
+            hostToken: resolvedHostToken || undefined,
+          }),
+          trimmed,
+        );
         dispatch({ type: "redrob-key:finish" });
         dispatch({
           type: "attribution-step",

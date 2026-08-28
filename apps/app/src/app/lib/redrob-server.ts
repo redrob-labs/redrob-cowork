@@ -1766,6 +1766,33 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken, timeoutMs: timeouts.binary },
       ),
 
+    /**
+     * Upsert/delete provider entries in the *engine-global* runtime config
+     * (host-auth only). Record values upsert, explicit `null` deletes.
+     *
+     * Distinct from `patchConfig(workspaceId, { opencode: { provider } })`,
+     * which writes the workspace-scoped runtime config. Server-side credential
+     * delivery (`syncManagedProviderAuth`) reads only the engine-global map, so
+     * a provider that must have its stored API key pushed to the engine has to
+     * be seeded here.
+     */
+    patchEngineRuntimeProviders: (update: Record<string, unknown>) =>
+      requestJson<{
+        ok: true;
+        changed: boolean;
+        provider: Record<string, Record<string, unknown>>;
+        reload: "reloaded" | "deferred" | "skipped";
+      }>(baseUrl, "/runtime-config/providers", {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: { provider: update },
+        // This route reloads the engine before it answers, and the server's own
+        // dispose bound is 30s — the 10s config timeout would abort a request
+        // that is still succeeding. Same reason `reloadEngine` uses this value.
+        timeoutMs: ENGINE_RELOAD_TIMEOUT_MS,
+      }),
+
     // User-level env vars (host-auth only — desktop shell is the sole caller).
     // See apps/server/src/env-file.ts and apps/app/pr/environment-variables.md.
     listUserEnvKeys: () =>
