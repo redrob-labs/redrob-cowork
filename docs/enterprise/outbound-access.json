@@ -37,15 +37,6 @@
       "override": null
     },
     {
-      "host": "api.redrob.software",
-      "kind": "fetched",
-      "components": ["server"],
-      "purpose": "Legacy hosted Redrob Work Connect API origin retained for older Cloud configurations.",
-      "requirement": "optional",
-      "blockedEffect": "Older hosted configurations that still use the legacy API origin cannot reconcile Redrob Work Connect or native MCP Apps.",
-      "override": "self-hosted Den API origin"
-    },
-    {
       "host": "api.redrob.io",
       "kind": "fetched",
       "components": ["desktop", "installer", "server"],
@@ -53,33 +44,6 @@
       "requirement": "required-for-cloud",
       "blockedEffect": "Hosted install checks, Redrob Work Connect, or legacy hosted API configurations cannot reach Redrob Work Cloud.",
       "override": "installer apiUrl / self-hosted Den API origin"
-    },
-    {
-      "host": "api.app.redrob.io",
-      "kind": "fetched",
-      "components": ["desktop", "renderer", "server"],
-      "purpose": "Hosted Redrob Work Den API origin derived from app.redrob.io for desktop Den API and Redrob Work Connect MCP calls.",
-      "requirement": "required-for-cloud",
-      "blockedEffect": "Hosted Cloud desktop configuration, telemetry, sign-out, and Redrob Work Connect MCP calls cannot reach the Den API.",
-      "override": "desktop apiBaseUrl / self-hosted Den API origin"
-    },
-    {
-      "host": "app.redrob.software",
-      "kind": "fetched",
-      "components": ["server"],
-      "purpose": "Legacy hosted Redrob Work Cloud web origin retained for older desktop configurations.",
-      "requirement": "optional",
-      "blockedEffect": "Older hosted configurations that still derive Den MCP calls from the legacy web origin cannot reconcile Redrob Work Connect or native MCP Apps.",
-      "override": "desktop base URL (self-hosted Den replaces this host)"
-    },
-    {
-      "host": "app.redrob.io",
-      "kind": "fetched",
-      "components": ["desktop", "renderer", "bootstrap"],
-      "purpose": "Hosted Redrob Work Cloud web origin; the desktop derives Den API and MCP calls from this base URL.",
-      "requirement": "required-for-cloud",
-      "blockedEffect": "Hosted Cloud sign-in, org settings, marketplace, and remote workspace flows cannot load.",
-      "override": "desktop base URL (self-hosted Den replaces this host)"
     },
     {
       "host": "cdn.simpleicons.org",
@@ -106,6 +70,15 @@
       "purpose": "Source-code comment pointing maintainers to the Claude Code plugin format reference.",
       "requirement": "optional",
       "blockedEffect": "No runtime effect; it is not opened or fetched by Redrob Work.",
+      "override": null
+    },
+    {
+      "host": "console.redrob.ai",
+      "kind": "fetched",
+      "components": ["renderer", "server"],
+      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup.",
+      "requirement": "required",
+      "blockedEffect": "Inference and model selection are unavailable.",
       "override": null
     },
     {
