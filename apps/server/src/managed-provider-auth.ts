@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { resolveWorkspaceOpencodeConnection } from "./opencode-connection.js";
+import { REDROB_PROVIDER_ID } from "./redrob-auth.js";
 import { readGlobalRuntimeOpencodeConfig, runtimeProviderMap } from "./runtime-opencode-config-store.js";
 import type { ServerConfig } from "./types.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -18,6 +19,10 @@ import { findManagedEngineWorkspace } from "./workspaces.js";
  * The desktop app has always delivered credentials by calling the engine's auth
  * API directly. This module does the same thing server-side, so cloud
  * credentials never need to reach a browser.
+ *
+ * `redrob` is explicitly out of scope. That credential is owned by Redrob Code
+ * and reached only through `redrob-auth.ts`; env-name matching must never be
+ * able to deliver it and the removal sweep must never be able to revoke it.
  */
 
 type ManagedProviderAuthLogger = {
@@ -38,7 +43,7 @@ export type ManagedProviderAuthResult = {
   delivered: string[];
   unchanged: string[];
   removed: string[];
-  skipped: Array<{ providerId: string; reason: "no_env_names" | "no_stored_credential" }>;
+  skipped: Array<{ providerId: string; reason: "no_env_names" | "no_stored_credential" | "engine_owned" }>;
   failed: Array<{ providerId: string; status: number | null }>;
 };
 
@@ -101,6 +106,10 @@ export async function syncManagedProviderAuth(input: ManagedProviderAuthInput): 
   const managedIds = new Set(Object.keys(providers));
 
   for (const [providerId, entry] of Object.entries(providers)) {
+    if (providerId === REDROB_PROVIDER_ID) {
+      result.skipped.push({ providerId, reason: "engine_owned" });
+      continue;
+    }
     const envNames = readEnvNames(entry);
     if (envNames.length === 0) {
       result.skipped.push({ providerId, reason: "no_env_names" });
@@ -151,9 +160,11 @@ export async function syncManagedProviderAuth(input: ManagedProviderAuthInput): 
   }
 
   // Only ever remove ids this process delivered. Desktop users authenticate
-  // providers themselves and those must never be touched here.
+  // providers themselves and those must never be touched here, and `redrob` is
+  // excluded outright — a stray removal here would revoke the user's Redrob Key.
   for (const key of [...deliveredFingerprints.keys()]) {
     const [keyBaseUrl, providerId] = key.split("\u0000");
+    if (providerId === REDROB_PROVIDER_ID) continue;
     if (keyBaseUrl !== baseUrl || managedIds.has(providerId ?? "")) continue;
     try {
       const response = await fetchImpl(`${baseUrl}/auth/${encodeURIComponent(providerId ?? "")}`, {

@@ -134,6 +134,35 @@ describe("managed provider auth delivery", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  test("never delivers or removes the redrob credential, whatever the provider map says", async () => {
+    // The Redrob Key is owned by Redrob Code and reached only through
+    // redrob-auth.ts. Env-name matching here must never be able to deliver it,
+    // and the removal sweep must never be able to revoke it — that sweep firing
+    // on a redrob entry would silently disconnect the user's inference.
+    const config = await makeConfig(dir);
+    await writeRuntimeOpencodeConfig(config, ENGINE_GLOBAL_RUNTIME_CONFIG_ID, (current) => ({
+      ...current,
+      provider: { redrob: { name: "Redrob", env: ["REDROB_API_KEY"] } },
+    }));
+    const fetchStub = stubFetch();
+    const env = { list: async () => [{ key: "REDROB_API_KEY", value: "rk-test-not-a-real-key" }] };
+
+    const result = await syncManagedProviderAuth({ config, env, fetchImpl: fetchStub.impl });
+    expect(result.skipped).toEqual([{ providerId: "redrob", reason: "engine_owned" }]);
+    expect(result.delivered).toEqual([]);
+    expect(fetchStub.calls).toHaveLength(0);
+
+    // And after the entry disappears, the removal sweep still leaves it alone.
+    await writeRuntimeOpencodeConfig(config, ENGINE_GLOBAL_RUNTIME_CONFIG_ID, (current) => ({
+      ...current,
+      provider: {},
+    }));
+    const second = await syncManagedProviderAuth({ config, env, fetchImpl: fetchStub.impl });
+    expect(second.removed).toEqual([]);
+    expect(fetchStub.calls).toHaveLength(0);
+    await rm(dir, { recursive: true, force: true });
+  });
+
   test("removes engine auth for a provider this process delivered and that is no longer managed", async () => {
     const config = await makeConfig(dir);
     await seedProvider(config, { id: "anthropic", env: ["ANTHROPIC_API_KEY"] });
