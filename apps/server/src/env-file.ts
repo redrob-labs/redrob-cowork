@@ -20,7 +20,20 @@ const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 // tampered file cannot shadow auth credentials, token paths, or process
 // identity.
 const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
+// The narrow exceptions to the prefix ban: service credentials and endpoints
+// that the product itself owns and has to be able to store.
+//
+// `REDROB_API_KEY` is the inference credential a user issues at
+// console.redrob.ai and pastes on the onboarding key step, which writes it
+// here through `PUT /env`. Without this entry that write is rejected as
+// reserved and inference can never be connected. It is safe to persist and
+// still reserved against process injection: `readForInjection` strips every
+// internal key, so the value never reaches an arbitrary child env. The engine
+// receives it only over the authenticated `PUT /auth/redrob` delivery in
+// `managed-provider-auth.ts`, which is matched to the `env: ["REDROB_API_KEY"]`
+// declaration on the Redrob provider entry.
 const PERSISTABLE_INTERNAL_KEYS = new Set([
+  "REDROB_API_KEY",
   "REDROB_CLOUD_API_KEY",
   "REDROB_MODELS_API_KEY",
   "REDROB_INFERENCE_BASE_URL",

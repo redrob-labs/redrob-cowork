@@ -46,6 +46,49 @@ describe("env-file", () => {
     expect(isReservedEnvKey("GCLOUD_PROJECT")).toBe(false);
   });
 
+  test("REDROB_API_KEY is persistable while every other REDROB_ runtime key stays reserved", () => {
+    // The onboarding key step stores the console.redrob.ai credential under
+    // this exact name, so it is the one REDROB_-prefixed key the store accepts.
+    expect(isReservedEnvKey("REDROB_API_KEY")).toBe(false);
+    for (const key of [
+      "REDROB_TOKEN",
+      "REDROB_HOST_TOKEN",
+      "REDROB_API_KEY_2",
+      "REDROB_API_KEYS",
+      "REDROB_SERVER_PASSWORD",
+      "REDROB_ENV_STORE",
+      "REDROB_CODE_BIN",
+      "REDROB_CONFIG",
+    ]) {
+      expect(isReservedEnvKey(key)).toBe(true);
+    }
+  });
+
+  test("upsertMany persists REDROB_API_KEY and still refuses its neighbours", async () => {
+    const svc = new EnvService({ path });
+    await svc.upsertMany([{ key: "REDROB_API_KEY", value: "rk-test-onboarding" }]);
+    expect((await svc.list()).map((entry) => entry.key)).toEqual(["REDROB_API_KEY"]);
+
+    await expect(svc.upsertMany([{ key: "REDROB_HOST_TOKEN", value: "x" }])).rejects.toThrow(
+      InvalidEnvKeyError,
+    );
+    // The rejected batch must not have disturbed the stored credential.
+    expect((await svc.list()).map((entry) => entry.key)).toEqual(["REDROB_API_KEY"]);
+  });
+
+  test("readForInjection never leaks the stored REDROB_API_KEY into a child env", async () => {
+    // Persisting the credential must not widen process injection: the engine
+    // gets it over the authenticated PUT /auth/redrob delivery instead.
+    const svc = new EnvService({ path });
+    await svc.upsertMany([
+      { key: "REDROB_API_KEY", value: "rk-test-onboarding" },
+      { key: "ANTHROPIC_API_KEY", value: "sk-ant" },
+    ]);
+    const injected = await EnvService.readForInjection(path);
+    expect(injected).toEqual({ ANTHROPIC_API_KEY: "sk-ant" });
+    expect(Object.keys(injected)).not.toContain("REDROB_API_KEY");
+  });
+
   test("upsertMany + list round-trips with sorted keys", async () => {
     const svc = new EnvService({ path });
     await svc.upsertMany([
