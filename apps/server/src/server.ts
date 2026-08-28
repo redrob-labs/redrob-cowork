@@ -50,6 +50,12 @@ import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles, readRawOpencodeConf
 import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./validators.js";
 import { TokenService } from "./tokens.js";
 import { resetManagedProviderAuthCache, syncManagedProviderAuth } from "./managed-provider-auth.js";
+import {
+  deleteRedrobEngineAuth,
+  migrateLegacyRedrobKey,
+  putRedrobEngineAuth,
+  readRedrobEngineAuthStatus,
+} from "./redrob-auth.js";
 import { EnvService } from "./env-file.js";
 import { installCloudPlugin, readCloudPluginResolved, readInstalledCloudPlugins, removeCloudPlugin } from "./cloud-plugins.js";
 import { resolveClaudePluginBundle } from "./claude-plugin-bundle.js";
@@ -2432,6 +2438,68 @@ function createRoutes(
   addRoute(routes, "GET", "/runtime-config/providers", "host-token", async () => {
     const runtime = await readGlobalRuntimeOpencodeConfig(config);
     return jsonResponse({ provider: runtimeProviderMap(runtime) });
+  });
+
+  // Redrob Key ownership lives in Redrob Code. These three routes are the only
+  // Work-side surface for it: they carry the credential from onboarding to the
+  // engine's auth store and read status back out. Work never persists the value,
+  // so there is no Work-side copy to rotate, leak, or drift.
+  //
+  // host-token, not client bearer: onboarding runs before any client token
+  // exists, and keeping the credential off the generic `/opencode/*` proxy means
+  // it travels one narrow authenticated path with a body Work controls.
+  //
+  // Reload is not incidental. The engine resolves the Redrob credential once
+  // when it builds provider state and bakes the result into the language model
+  // (the literal string "public" when unauthenticated); nothing invalidates that
+  // on an auth write. Without a reload a freshly connected key is accepted and
+  // then ignored until the next restart, and a disconnected one keeps working.
+  // Reloading is also what makes the read-back a real verification instead of a
+  // replay of pre-change state.
+  const redrobAuthLogger = toManagedProviderAuthLogger(logger);
+
+  async function reloadEngineForRedrobAuthChange(): Promise<void> {
+    const workspace = resolveEngineRuntimeWorkspace(config);
+    // Deliberately not deferred while busy. A credential change the user just
+    // asked for must land now: a deferred connect silently fails at the next
+    // prompt, and a deferred disconnect leaves a live generation still holding
+    // the revoked key.
+    await reloadOpencodeEngine(config, workspace, engineMcpServerState);
+  }
+
+  addRoute(routes, "GET", "/redrob-auth", "host-token", async () => {
+    const legacyMigration = await migrateLegacyRedrobKey({ config, env, logger: redrobAuthLogger });
+    if (legacyMigration === "migrated") {
+      await reloadEngineForRedrobAuthChange();
+    }
+    const status = await readRedrobEngineAuthStatus({ config, logger: redrobAuthLogger });
+    return jsonResponse({ ...status, legacyMigration });
+  });
+
+  addRoute(routes, "PUT", "/redrob-auth", "host-token", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    const key = typeof body.key === "string" ? body.key : "";
+    await putRedrobEngineAuth({ config, logger: redrobAuthLogger }, key);
+    await reloadEngineForRedrobAuthChange();
+    const status = await readRedrobEngineAuthStatus({ config, logger: redrobAuthLogger });
+    if (!status.connected) {
+      throw new ApiError(502, "engine_auth_unconfirmed", "Redrob Code did not report the Redrob Key as connected");
+    }
+    return jsonResponse({ ok: true, ...status });
+  });
+
+  addRoute(routes, "DELETE", "/redrob-auth", "host-token", async () => {
+    ensureWritable(config);
+    await deleteRedrobEngineAuth({ config, logger: redrobAuthLogger });
+    await reloadEngineForRedrobAuthChange();
+    const status = await readRedrobEngineAuthStatus({ config, logger: redrobAuthLogger });
+    // Revocation that leaves the engine still authenticating is a failure, not a
+    // partial success, and must not be reported as a completed disconnect.
+    if (status.connected) {
+      throw new ApiError(502, "engine_auth_stale", "Redrob Code still reports a Redrob Key after the disconnect");
+    }
+    return jsonResponse({ ok: true, ...status });
   });
 
   addRoute(routes, "PATCH", "/runtime-config/providers", "host-token", async (ctx) => {
