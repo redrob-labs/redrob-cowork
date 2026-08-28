@@ -2,14 +2,6 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
-import {
-  CONNECT_MCP_APP_HOST_CAPABILITY,
-  CONNECT_MCP_APP_HOST_CAPABILITY_HEADER,
-  connectMcpAppHostName,
-  findRedrobWorkConnectMcpAppHostServer,
-  readRedrobWorkConnectMcpAppHostAuthorization,
-  refreshRedrobWorkConnectMcpAppHostCatalog,
-} from "./connect-mcp-server-catalog.js";
 import type { ServerConfig } from "./types.js";
 import {
   assertLocalManagedMcpUrl,
@@ -40,12 +32,6 @@ export type McpAppResource = {
   html: string;
   csp: McpAppCsp;
   prefersBorder: boolean;
-};
-
-export type ConnectMcpAppLaunchReference = {
-  connectionId: string;
-  toolName: string;
-  resourceUri: string;
 };
 
 export type SameServerMcpAppLaunchReference = {
@@ -255,48 +241,6 @@ function decodeResourceHtml(content: { text?: string; blob?: string }): { html: 
   throw new McpAppHostError("invalid_resource", "The MCP App resource must contain exactly one of text or blob HTML.");
 }
 
-async function privateConnectMcpConfig(input: {
-  serverConfig: ServerConfig;
-  workspaceId: string;
-  connectionId?: string;
-  serverName?: string;
-}): Promise<{ serverName: string; config: Record<string, unknown> } | null> {
-  let descriptor = await findRedrobWorkConnectMcpAppHostServer(
-    input.serverConfig,
-    input.workspaceId,
-    { connectionId: input.connectionId, serverName: input.serverName },
-  );
-  if (!descriptor) {
-    const refreshed = await refreshRedrobWorkConnectMcpAppHostCatalog(input.serverConfig, input.workspaceId);
-    if (refreshed.status === "synced") {
-      descriptor = await findRedrobWorkConnectMcpAppHostServer(
-        input.serverConfig,
-        input.workspaceId,
-        { connectionId: input.connectionId, serverName: input.serverName },
-      );
-    }
-  }
-  if (!descriptor) return null;
-  const appHostAuthorization = await readRedrobWorkConnectMcpAppHostAuthorization(
-    input.serverConfig,
-    input.workspaceId,
-    descriptor.url,
-  );
-  if (!appHostAuthorization) return null;
-  return {
-    serverName: connectMcpAppHostName(descriptor.connectionId),
-    config: {
-      type: "remote",
-      url: descriptor.url,
-      enabled: true,
-      headers: {
-        Authorization: appHostAuthorization,
-        [CONNECT_MCP_APP_HOST_CAPABILITY_HEADER]: CONNECT_MCP_APP_HOST_CAPABILITY,
-      },
-    },
-  };
-}
-
 function findHtmlResource(
   resourceUri: string,
   result: Awaited<ReturnType<Client["readResource"]>>,
@@ -377,76 +321,6 @@ export async function resolveMcpAppResource(input: {
   return matches[0] ?? null;
 }
 
-/**
- * Resolves a capability-gateway launch back to the exact native Connect MCP
- * tool. The gateway reference is only a routing hint: the local host derives
- * the managed server name, re-lists the provider tool, and requires its live
- * UI binding to match before reading or executing any resource.
- */
-export async function resolveConnectMcpAppResource(input: {
-  serverConfig: ServerConfig;
-  workspaceId: string;
-  workspaceRoot: string;
-  launch: ConnectMcpAppLaunchReference;
-}): Promise<McpAppResource> {
-  if (!/^[a-zA-Z0-9_-]{1,160}$/.test(input.launch.connectionId)) {
-    throw new McpAppHostError("invalid_launch_reference", "The MCP App connection reference is invalid.");
-  }
-  if (!/^[^\s]{1,256}$/.test(input.launch.toolName)) {
-    throw new McpAppHostError("invalid_launch_reference", "The MCP App tool reference is invalid.");
-  }
-  if (!input.launch.resourceUri.startsWith("ui://") || input.launch.resourceUri.length > 2_048) {
-    throw new McpAppHostError("invalid_resource_uri", "MCP App resource URI must use ui://.");
-  }
-
-  const item = await privateConnectMcpConfig({
-    serverConfig: input.serverConfig,
-    workspaceId: input.workspaceId,
-    connectionId: input.launch.connectionId,
-  });
-  if (!item || !remoteUrl(item.config)) {
-    throw new McpAppHostError("server_unavailable", "The originating Connect MCP server is not available to this workspace.");
-  }
-  const { serverName } = item;
-
-  return await withRemoteClient(item.config, async (client) => {
-    const tool = (await listTools(client)).find((candidate) => candidate.name === input.launch.toolName);
-    if (!tool) {
-      throw new McpAppHostError("tool_not_found", "The originating MCP App tool is no longer advertised.");
-    }
-    if (!toolVisibility(tool, "app")) {
-      throw new McpAppHostError("tool_not_visible", "The originating MCP App tool is not visible to apps.");
-    }
-    const resourceUri = toolUiResourceUri(tool);
-    if (resourceUri !== input.launch.resourceUri) {
-      throw new McpAppHostError("tool_resource_mismatch", "The originating MCP App tool now advertises a different resource.");
-    }
-    const projectedName = projectedMcpToolName(serverName, tool.name);
-    if ((await diagnoseMcpToolDenies(input.workspaceRoot, serverName, [projectedName])).length > 0) {
-      throw new McpAppHostError("tool_denied", "This MCP App tool is denied by the workspace tool policy.");
-    }
-    const read = await client.readResource({ uri: resourceUri }).catch(() => {
-      throw new McpAppHostError(
-        "resource_read_failed",
-        "The current MCP App tool definition advertises a resource that resources/read could not load.",
-      );
-    });
-    const resource = findHtmlResource(resourceUri, read);
-    const presentation = resourcePresentationMeta(resource.meta);
-    return {
-      serverName,
-      toolName: tool.name,
-      resourceUri,
-      html: resource.html,
-      ...presentation,
-    };
-  });
-}
-
-/** Resolve an indirect launch against the same MCP server that owns the
- * model-visible capability gateway tool. The target launch tool stays
- * app-visible, but its standard UI binding and resource are revalidated live.
- */
 export async function resolveSameServerMcpAppResource(input: {
   serverConfig: ServerConfig;
   workspaceId: string;
@@ -520,13 +394,8 @@ export async function callMcpAppTool(input: {
   arguments?: Record<string, unknown>;
   approved?: boolean;
 }): Promise<CallToolResult> {
-  const privateItem = await privateConnectMcpConfig({
-    serverConfig: input.serverConfig,
-    workspaceId: input.workspaceId,
-    serverName: input.serverName,
-  });
-  const configured = privateItem ? [] : await listMcp(input.serverConfig, input.workspaceId, input.workspaceRoot);
-  const item = privateItem ?? configured.find((candidate) => candidate.name === input.serverName);
+  const configured = await listMcp(input.serverConfig, input.workspaceId, input.workspaceRoot);
+  const item = configured.find((candidate) => candidate.name === input.serverName);
   if (!item || item.config.enabled === false) {
     throw new McpAppHostError("server_unavailable", "The originating MCP server is not available to this workspace.");
   }

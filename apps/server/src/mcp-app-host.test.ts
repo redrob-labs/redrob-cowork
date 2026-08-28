@@ -11,18 +11,10 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { addMcp } from "./mcp.js";
-import {
-  CONNECT_MCP_SERVER_INDEX_URI,
-  connectMcpAppHostName,
-  readRedrobWorkConnectMcpAppHostCatalog,
-  writeRedrobWorkConnectMcpAppHostAuthorization,
-  writeRedrobWorkConnectMcpAppHostCatalog,
-} from "./connect-mcp-server-catalog.js";
 import { readRuntimeOpencodeConfig, runtimeMcpMap, writeRuntimeOpencodeConfig } from "./runtime-opencode-config-store.js";
 import {
   callMcpAppTool,
   projectedMcpToolName,
-  resolveConnectMcpAppResource,
   resolveMcpAppResource,
   resolveSameServerMcpAppResource,
   toolUiResourceUri,
@@ -62,10 +54,8 @@ function serverConfig(root: string): ServerConfig {
 
 async function startFixtureMcp(
   resourceContent: { text?: string; blob?: string } = { text: RESOURCE_HTML },
-  connectionId?: string,
 ) {
   let activeResourceUri = RESOURCE_URI;
-  let catalogReads = 0;
   const mcp = new Server(
     { name: "mcp-app-fixture", version: "1.0.0" },
     {
@@ -156,45 +146,7 @@ async function startFixtureMcp(
   const http = Bun.serve({
     hostname: "127.0.0.1",
     port: 0,
-    fetch: async (request): Promise<Response> => {
-      if (new URL(request.url).pathname !== "/catalog" || !connectionId) {
-        return await transport.handleRequest(request);
-      }
-      const body: unknown = await request.json();
-      const method = body && typeof body === "object" ? Reflect.get(body, "method") : null;
-      const id = body && typeof body === "object" ? Reflect.get(body, "id") : null;
-      if (method === "initialize") {
-        return Response.json({
-          jsonrpc: "2.0",
-          id,
-          result: { protocolVersion: "2025-06-18", capabilities: { resources: {} } },
-        });
-      }
-      if (method === "notifications/initialized") return new Response(null, { status: 202 });
-      if (method === "resources/read") {
-        catalogReads += 1;
-        return Response.json({
-          jsonrpc: "2.0",
-          id,
-          result: {
-            contents: [{
-              uri: CONNECT_MCP_SERVER_INDEX_URI,
-              mimeType: "application/json",
-              text: JSON.stringify({
-                schemaVersion: "redrob.connect/mcp-servers/1",
-                servers: [{
-                  connectionId,
-                  name: "Fixture provider",
-                  description: null,
-                  url: `${serverOrigin}/provider`,
-                }],
-              }),
-            }],
-          },
-        });
-      }
-      return new Response(null, { status: 404 });
-    },
+    fetch: async (request): Promise<Response> => await transport.handleRequest(request),
   });
   serverOrigin = `http://127.0.0.1:${http.port}`;
   const reconnect = async () => {
@@ -214,8 +166,6 @@ async function startFixtureMcp(
   });
   return {
     url: `${serverOrigin}/provider`,
-    catalogUrl: `${serverOrigin}/catalog`,
-    catalogReads: () => catalogReads,
     activateUpdatedResource: async () => {
       activeResourceUri = UPDATED_RESOURCE_URI;
       // A stateful SDK server transport owns one initialized MCP session. The
@@ -230,12 +180,10 @@ async function configuredFixture(
   prefix: string,
   resourceContent?: { text?: string; blob?: string },
   mcpName = "fixture",
-  connectionId?: string,
 ): Promise<{
   config: ServerConfig;
   root: string;
   activateUpdatedResource: () => Promise<void>;
-  catalogReads: () => number;
 }> {
   const root = await mkdtemp(join(tmpdir(), prefix));
   const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
@@ -251,43 +199,16 @@ async function configuredFixture(
   });
   await mkdir(join(root, ".git"), { recursive: true });
   const config = serverConfig(root);
-  const fixture = await startFixtureMcp(resourceContent, connectionId);
-  const mcpConfig = {
+  const fixture = await startFixtureMcp(resourceContent);
+  await addMcp(config, WORKSPACE_ID, mcpName, {
     type: "remote",
     url: fixture.url,
     enabled: true,
-  };
-  if (connectionId) {
-    if (connectMcpAppHostName(connectionId) !== mcpName) throw new Error("invalid private App-host fixture");
-    await writeRuntimeOpencodeConfig(config, WORKSPACE_ID, (current) => ({
-      ...current,
-      mcp: {
-        ...runtimeMcpMap(current),
-        "redrob-cloud": {
-          ...mcpConfig,
-          url: fixture.catalogUrl,
-          headers: { Authorization: "Bearer member-token" },
-        },
-      },
-    }));
-    await writeRedrobWorkConnectMcpAppHostCatalog(config, WORKSPACE_ID, {
-      schemaVersion: "redrob.connect/mcp-servers/1",
-      servers: [{ connectionId, name: "Fixture provider", description: null, url: fixture.url }],
-    });
-    await writeRedrobWorkConnectMcpAppHostAuthorization(
-      config,
-      WORKSPACE_ID,
-      "Bearer app-host-token",
-      fixture.catalogUrl,
-    );
-  } else {
-    await addMcp(config, WORKSPACE_ID, mcpName, mcpConfig);
-  }
+  });
   return {
     config,
     root,
     activateUpdatedResource: fixture.activateUpdatedResource,
-    catalogReads: fixture.catalogReads,
   };
 }
 
@@ -317,102 +238,6 @@ describe("MCP Apps host transport", () => {
 
   });
 
-  test("resolves a capability gateway launch through its exact native Connect tool", async () => {
-    const connectionId = "emc_01mcpappgatewayfixture";
-    const serverName = connectMcpAppHostName(connectionId);
-    const { config, root, catalogReads } = await configuredFixture(
-      "redrob-mcp-app-host-gateway-",
-      undefined,
-      serverName,
-      connectionId,
-    );
-
-    const app = await resolveConnectMcpAppResource({
-      serverConfig: config,
-      workspaceId: WORKSPACE_ID,
-      workspaceRoot: root,
-      launch: {
-        connectionId,
-        toolName: "render_fixture",
-        resourceUri: RESOURCE_URI,
-      },
-    });
-
-    expect(app).toMatchObject({
-      serverName,
-      toolName: "render_fixture",
-      resourceUri: RESOURCE_URI,
-      html: RESOURCE_HTML,
-    });
-    expect(Object.keys(runtimeMcpMap(await readRuntimeOpencodeConfig(config, WORKSPACE_ID)))).toEqual(["redrob-cloud"]);
-    expect(catalogReads()).toBe(0);
-  });
-
-  test("refreshes a missing private catalog entry when a capability gateway launch arrives", async () => {
-    const connectionId = "emc_01mcpappgatewayrefresh";
-    const serverName = connectMcpAppHostName(connectionId);
-    const { config, root, catalogReads } = await configuredFixture(
-      "redrob-mcp-app-host-gateway-refresh-",
-      undefined,
-      serverName,
-      connectionId,
-    );
-    await writeRedrobWorkConnectMcpAppHostCatalog(config, WORKSPACE_ID, {
-      schemaVersion: "redrob.connect/mcp-servers/1",
-      servers: [],
-    });
-
-    const app = await resolveConnectMcpAppResource({
-      serverConfig: config,
-      workspaceId: WORKSPACE_ID,
-      workspaceRoot: root,
-      launch: {
-        connectionId,
-        toolName: "render_fixture",
-        resourceUri: RESOURCE_URI,
-      },
-    });
-
-    expect(app).toMatchObject({
-      serverName,
-      toolName: "render_fixture",
-      resourceUri: RESOURCE_URI,
-      html: RESOURCE_HTML,
-    });
-    expect((await readRedrobWorkConnectMcpAppHostCatalog(config, WORKSPACE_ID)).servers[0]?.connectionId).toBe(connectionId);
-    expect(catalogReads()).toBe(1);
-  });
-
-  test("rejects a stale private catalog endpoint outside the credential's trusted origin", async () => {
-    const connectionId = "emc_01mcpappcrossorigin";
-    const { config, root } = await configuredFixture(
-      "redrob-mcp-app-host-cross-origin-",
-      undefined,
-      connectMcpAppHostName(connectionId),
-      connectionId,
-    );
-    await writeRedrobWorkConnectMcpAppHostCatalog(config, WORKSPACE_ID, {
-      schemaVersion: "redrob.connect/mcp-servers/1",
-      servers: [{
-        connectionId,
-        name: "Untrusted provider",
-        description: null,
-        url: "https://attacker.example/mcp/agent/connections/emc_01mcpappcrossorigin",
-      }],
-    });
-
-    await expect(resolveConnectMcpAppResource({
-      serverConfig: config,
-      workspaceId: WORKSPACE_ID,
-      workspaceRoot: root,
-      launch: {
-        connectionId,
-        toolName: "render_fixture",
-        resourceUri: RESOURCE_URI,
-      },
-    })).rejects.toMatchObject({ code: "server_unavailable" });
-  });
-
   test("resolves a same-server MCP App through its capability gateway", async () => {
     const { config, root } = await configuredFixture("redrob-mcp-app-host-same-server-");
     const app = await resolveSameServerMcpAppResource({
@@ -431,28 +256,6 @@ describe("MCP Apps host transport", () => {
       resourceUri: RESOURCE_URI,
       html: RESOURCE_HTML,
     });
-  });
-
-  test("rejects a stale gateway launch when the native tool changes its resource binding", async () => {
-    const connectionId = "emc_01mcpappgatewaystale";
-    const { config, root, activateUpdatedResource } = await configuredFixture(
-      "redrob-mcp-app-host-gateway-stale-",
-      undefined,
-      connectMcpAppHostName(connectionId),
-      connectionId,
-    );
-    await activateUpdatedResource();
-
-    await expect(resolveConnectMcpAppResource({
-      serverConfig: config,
-      workspaceId: WORKSPACE_ID,
-      workspaceRoot: root,
-      launch: {
-        connectionId,
-        toolName: "render_fixture",
-        resourceUri: RESOURCE_URI,
-      },
-    })).rejects.toMatchObject({ code: "tool_resource_mismatch" });
   });
 
   test("treats a management tool without a UI resource as a normal result", async () => {

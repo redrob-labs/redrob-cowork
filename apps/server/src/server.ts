@@ -4,7 +4,6 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 import { resolveGlobalOpencodeConfigPath } from "@redrob/paths";
 import type { ApprovalRequest, Capabilities, ServerConfig, WorkspaceInfo, Actor, ReloadReason, ReloadTrigger, TokenScope } from "./types.js";
-import { agentContextDiagnosticsRequestSchema } from "./agent-context-diagnostics-schema.js";
 import { ApprovalService } from "./approvals.js";
 import {
   EnginePool,
@@ -26,11 +25,9 @@ import { addMcp, listMcp, removeMcp, setMcpEnabled } from "./mcp.js";
 import {
   callMcpAppTool,
   McpAppHostError,
-  resolveConnectMcpAppResource,
   resolveMcpAppResource,
   resolveSameServerMcpAppResource,
 } from "./mcp-app-host.js";
-import { CONNECT_MCP_SERVER_NAME_PREFIX } from "./connect-mcp-server-catalog.js";
 import {
   buildMcpAppSandboxCsp,
   MCP_APP_SANDBOX_PROXY_CSS,
@@ -54,12 +51,6 @@ import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./val
 import { TokenService } from "./tokens.js";
 import { resetManagedProviderAuthCache, syncManagedProviderAuth } from "./managed-provider-auth.js";
 import { EnvService } from "./env-file.js";
-import {
-  normalizeResourceSnapshot,
-  readDesktopCloudSyncState,
-  readWorkspaceCloudImports,
-  syncDesktopCloudResources,
-} from "./desktop-cloud-sync.js";
 import { installCloudPlugin, readCloudPluginResolved, readInstalledCloudPlugins, removeCloudPlugin } from "./cloud-plugins.js";
 import { resolveClaudePluginBundle } from "./claude-plugin-bundle.js";
 import {
@@ -94,7 +85,6 @@ import { registerOperationRoutes } from "./routes/operations.js";
 import { addRoute, matchRoute, type AuthMode, type RequestContext, type Route } from "./routes/registry.js";
 import { registerSessionRoutes } from "./routes/sessions.js";
 import { registerWorkspaceRoutes } from "./routes/workspaces.js";
-import { registerCloudMcpRoutes } from "./routes/cloud-mcp.js";
 import { captureServerException, isExpectedRequestCancellation } from "./telemetry.js";
 import {
   completeLocalManagedMcpAuthorization,
@@ -108,13 +98,6 @@ import {
   setLocalManagedMcpEnabled,
   startLocalManagedMcpAuthorization,
 } from "./local-managed-mcp.js";
-import {
-  markRedrobCloudMcpStale,
-  reconcilePersistedRedrobCloudMcp,
-  type CloudMcpHealth,
-} from "./cloud-mcp-health.js";
-import { runAgentContextDiagnostics } from "./agent-context-diagnostics.js";
-import { createAgentDiagnosticsEngineFetch } from "./agent-context-engine-inspection.js";
 import { sanitizeDiagnosticString } from "./diagnostic-sanitizer.js";
 import {
   mergeOpencodeConfigs,
@@ -122,6 +105,7 @@ import {
   readGlobalRuntimeOpencodeConfig,
   readRuntimeOpencodeConfig,
   runtimeDisabledProviderList,
+  LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX,
   runtimeMcpMap,
   runtimeProviderMap,
   type RuntimeOpencodeConfig,
@@ -139,7 +123,6 @@ import { deleteMemory, listMemories, saveMemory } from "./local-memory-store.js"
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
-import { CloudProviderSync, parseCloudProviderDenSession } from "./cloud-provider-sync.js";
 import pkg from "../package.json" with { type: "json" };
 import constants from "../../../constants.json" with { type: "json" };
 
@@ -154,7 +137,6 @@ const OPENCODE_VERSION = constants.opencodeVersion.trim().replace(/^v/, "");
 
 const REDROB_VOICE_REALTIME_MODEL = "gpt-realtime-2";
 const REDROB_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
-let desktopCloudSyncQueue: Promise<void> = Promise.resolve();
 const agentDiagnosticsLastRunByServer = new WeakMap<ServerConfig, Map<string, number>>();
 const agentDiagnosticsInFlightByServer = new WeakMap<ServerConfig, Set<string>>();
 const AGENT_DIAGNOSTICS_RATE_LIMIT_CAPACITY = 1_000;
@@ -517,9 +499,7 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
 async function resolveRedrobWorkModelsVoiceConfig(env: EnvService): Promise<{ baseUrl: string; apiKey: string } | null> {
   const records = await env.list();
   const apiKey =
-    records.find((entry) => entry.key === "REDROB_CLOUD_API_KEY")?.value.trim() ||
     records.find((entry) => entry.key === "REDROB_MODELS_API_KEY")?.value.trim() ||
-    process.env.REDROB_CLOUD_API_KEY?.trim() ||
     process.env.REDROB_MODELS_API_KEY?.trim() ||
     "";
   if (!apiKey) return null;
@@ -565,15 +545,6 @@ Help the user control Redrob Work by using the semantic Redrob Work UI tools.
 - If audio is unclear, ask the user to repeat it instead of guessing.
 - Ignore background speech that is not addressed to Redrob Work.
 - Summarize tool results briefly and offer the next useful step.${contextSection}`;
-}
-
-function enqueueDesktopCloudSync<T>(operation: () => Promise<T>): Promise<T> {
-  const run = desktopCloudSyncQueue.then(operation);
-  desktopCloudSyncQueue = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
 }
 
 function readOpenAiClientSecret(payload: unknown): { clientSecret: string; expiresAt: number | null } {
@@ -983,20 +954,6 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     watcherHandle = startReloadWatchers({ config, reloadEvents, logger });
   };
   const engineMcpServerState = beginEngineMcpServerState(config);
-  const cloudProviderSync = new CloudProviderSync({
-    config,
-    env,
-    reloadEngine: () => reloadOpencodeEngine(
-      config,
-      resolveEngineRuntimeWorkspace(config),
-      engineMcpServerState,
-      { forceStandby: true },
-    ),
-    engineBusy: () => managedEnginePoolForConfig(config)
-      ? Promise.resolve(false)
-      : engineHasActiveSessions(config, resolveEngineRuntimeWorkspace(config)),
-    logger: toManagedProviderAuthLogger(logger),
-  });
   const routes = createRoutes(
     config,
     approvals,
@@ -1005,7 +962,6 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     restartReloadWatchers,
     engineMcpServerState,
     logger,
-    cloudProviderSync,
   );
 
   const serverOptions: {
@@ -1206,7 +1162,6 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     });
   } catch (error) {
     captureServerException(error, { method: "START", route: "startServer" });
-    cloudProviderSync.stop();
     invalidateEngineMcpServerState(config, engineMcpServerState);
     watcherHandle.close();
     reloadBaselineRefreshers.delete(config);
@@ -1234,8 +1189,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   return {
     ...server,
     stop: async () => {
-      cloudProviderSync.stop();
-      invalidateEngineMcpServerState(config, engineMcpServerState);
+        invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
       reloadBaselineRefreshers.delete(config);
       await server.stop();
@@ -1306,9 +1260,7 @@ export function createWorkspaceOpencodeClient(
   }
   const directory = resolveOpencodeDirectory(workspace);
   const baseFetch = directory ? createOpencodeDirectoryFetch(directory) : globalThis.fetch;
-  const clientFetch = options?.boundedDiagnosticsReads
-    ? createAgentDiagnosticsEngineFetch(baseFetch)
-    : directory ? baseFetch : undefined;
+  const clientFetch = directory ? baseFetch : undefined;
 
   return createOpencodeClient({
     baseUrl,
@@ -2034,7 +1986,6 @@ function createRoutes(
   onWorkspacesChanged: () => void,
   engineMcpServerState: EngineMcpServerState,
   logger: ServerLogger,
-  cloudProviderSync: CloudProviderSync,
 ): Route[] {
   const routes: Route[] = [];
   registerCoreRoutes({
@@ -2055,7 +2006,6 @@ function createRoutes(
     resolveWorkspace,
     resolveOpencodeDirectory,
     createWorkspaceOpencodeClient,
-    refreshRegistrationFromLiveStatus: refreshEngineMcpRegistrationFromLiveStatus,
     serializeWorkspace,
     resolveDevLogPath,
     createOpenAiRealtimeVoiceSession,
@@ -2099,93 +2049,6 @@ function createRoutes(
     unwrapOpencodeResult,
   });
 
-  registerCloudMcpRoutes({
-    routes,
-    config,
-    jsonResponse,
-    readJsonBody,
-    ensureWritable,
-    requireClientScope,
-    resolveWorkspace,
-    resolveOpencodeDirectory,
-    createWorkspaceOpencodeClient,
-    refreshRegistrationFromLiveStatus: refreshEngineMcpRegistrationFromLiveStatus,
-    registerRuntimeMcp: (routeConfig, workspace, onlyNames, options) =>
-      syncRuntimeMcpToOpencodeEngine(
-        routeConfig,
-        workspace,
-        onlyNames,
-        options,
-        engineMcpServerState,
-      ),
-    serverMetadata: { serverVersion: SERVER_VERSION, expectedOpencodeVersion: OPENCODE_VERSION },
-  });
-
-  addRoute(routes, "POST", "/workspace/:id/diagnostics/agent-context", "client", async (ctx) => {
-    requireClientScope(ctx, "collaborator");
-    const workspace = await resolveWorkspaceForInspection(config, ctx.params.id);
-    if (workspace.workspaceType === "remote") {
-      throw new ApiError(
-        400,
-        "agent_diagnostics_workspace_unsupported",
-        "Agent diagnostics must run on the Redrob Work server that owns a local workspace",
-      );
-    }
-    // Reserve before consuming untrusted bytes and hold the reservation through
-    // report completion. The cooldown remains charged for invalid, oversized,
-    // timed-out, and otherwise unsuccessful attempts.
-    const releaseReservation = reserveAgentDiagnosticsRun(config, ctx.actor, workspace.id);
-    try {
-      const parsed = agentContextDiagnosticsRequestSchema.safeParse(await readAgentDiagnosticsJsonBody(ctx.request));
-      if (!parsed.success) {
-        throw new ApiError(400, "invalid_agent_diagnostics_request", "Agent diagnostics request is invalid");
-      }
-      const opencode = createWorkspaceOpencodeClient(config, workspace, { boundedDiagnosticsReads: true });
-      const timeoutSignal = AbortSignal.timeout(agentDiagnosticsTimeoutMs());
-      const diagnosticsSignal = AbortSignal.any([ctx.request.signal, timeoutSignal]);
-      let response: Response;
-      try {
-        response = jsonResponse(await runAgentContextDiagnostics({
-          config,
-          workspace,
-          request: parsed.data,
-          inspectRegistration: (name, mcpConfig) =>
-            inspectEngineMcpRegistrationInState(
-              config,
-              engineMcpServerState,
-              workspace,
-              name,
-              mcpConfig,
-            ),
-          dependencies: {
-            signal: diagnosticsSignal,
-            inspectEffectiveEngine: async (signal) => {
-              const [configResult, agentResult] = await Promise.all([
-                opencode.config.get({}, { signal }),
-                opencode.app.agents({}, { signal }),
-              ]);
-              return {
-                config: unwrapOpencodeResult(configResult, "/config"),
-                agents: unwrapOpencodeResult(agentResult, "/agent"),
-              };
-            },
-          },
-        }));
-      } catch (error) {
-        if (timeoutSignal.aborted && !ctx.request.signal.aborted) {
-          throw new ApiError(504, "agent_diagnostics_timeout", "Agent diagnostics timed out");
-        }
-        throw error;
-      }
-      response.headers.set("Cache-Control", "no-store");
-      return response;
-    } finally {
-      releaseReservation();
-    }
-  });
-
-  // The memory bank is global rather than workspace-scoped: it replaced an
-  // organization-scoped hosted store that followed the user across projects.
   addRoute(routes, "GET", "/memory", "client", async () => {
     return jsonResponse({ memories: await listMemories(config) });
   });
@@ -2225,51 +2088,6 @@ function createRoutes(
     );
     const lastAudit = await readLastAudit(workspace.path, workspace.id);
     return jsonResponse({ opencode, redrob, updatedAt: lastAudit?.timestamp ?? null });
-  });
-
-  addRoute(routes, "GET", "/workspace/:id/desktop-cloud-sync", "client", async (ctx) => {
-    const workspace = await resolveWorkspace(config, ctx.params.id);
-    const redrob = await readRedrobConfigForWorkspace(config, workspace);
-    return jsonResponse(readDesktopCloudSyncState(redrob));
-  });
-
-  addRoute(routes, "POST", "/workspace/:id/desktop-cloud-sync", "client", async (ctx) => {
-    ensureWritable(config);
-    requireClientScope(ctx, "collaborator");
-    const workspace = await resolveWorkspace(config, ctx.params.id);
-    const body = await readJsonBody(ctx.request);
-    const snapshot = normalizeResourceSnapshot(body.snapshot);
-    if (!snapshot) {
-      throw new ApiError(400, "invalid_payload", "snapshot is required");
-    }
-
-    const result = await enqueueDesktopCloudSync(async () => {
-      const redrob = await readRedrobConfigForWorkspace(config, workspace);
-      const installed = await readInstalledCloudPlugins(config, workspace.id);
-      const cloudImports = {
-        ...installed,
-        providers: readWorkspaceCloudImports(redrob).providers,
-      };
-      const next = syncDesktopCloudResources({ redrob: { ...redrob, cloudImports }, snapshot });
-      // The plugin DB owns plugins/marketplaces, but provider import baselines live in
-      // the workspace config. Writing the merged cloudImports back erased providers
-      // and drove the provider-sync dispose/create loop.
-      await writeRedrobWorkspaceConfig(config, workspace.id, (current) => ({
-        ...current,
-        desktopCloudSync: next.state,
-      }));
-      await recordAudit(workspace.path, {
-        id: shortId(),
-        workspaceId: workspace.id,
-        actor: ctx.actor ?? { type: "remote" },
-        action: "desktop_cloud_sync.update",
-        target: redrobConfigPath(workspace.path),
-        summary: "Updated desktop cloud sync state",
-        timestamp: Date.now(),
-      });
-      return next;
-    });
-    return jsonResponse({ changes: result.changes, state: result.state });
   });
 
   addRoute(routes, "GET", "/workspace/:id/cloud-plugins", "client", async (ctx) => {
@@ -2600,33 +2418,6 @@ function createRoutes(
     return jsonResponse({ provider: runtimeProviderMap(runtime) });
   });
 
-  addRoute(routes, "PUT", "/den-session", "host-token", async (ctx) => {
-    ensureWritable(config);
-    const session = parseCloudProviderDenSession(await readJsonBody(ctx.request));
-    if (!session) throw new ApiError(400, "invalid_payload", "baseUrl, token, and orgId are required");
-    cloudProviderSync.setSession(session);
-    return new Response(null, { status: 204 });
-  });
-
-  addRoute(routes, "DELETE", "/den-session", "host-token", async () => {
-    ensureWritable(config);
-    await cloudProviderSync.clearSession();
-    return new Response(null, { status: 204 });
-  });
-
-  addRoute(routes, "POST", "/cloud-provider-sync/run", "host-token", async (ctx) => {
-    ensureWritable(config);
-    const body = await readJsonBody(ctx.request);
-    if (body.reason !== undefined && typeof body.reason !== "string") {
-      throw new ApiError(400, "invalid_payload", "reason must be a string");
-    }
-    return jsonResponse(await cloudProviderSync.run(typeof body.reason === "string" ? body.reason : undefined));
-  });
-
-  addRoute(routes, "GET", "/cloud-provider-sync/status", "client", async () => {
-    return jsonResponse(cloudProviderSync.status());
-  });
-
   addRoute(routes, "PATCH", "/runtime-config/providers", "host-token", async (ctx) => {
     ensureWritable(config);
     const workspace = resolveEngineRuntimeWorkspace(config);
@@ -2646,9 +2437,6 @@ function createRoutes(
       && (await shouldDeferInPlaceEngineReload(config, workspace, engineHasActiveSessions));
     if (shouldReload && !reloadDeferred) {
       await reloadOpencodeEngine(config, workspace, engineMcpServerState);
-    }
-    if (reloadDeferred) {
-      cloudProviderSync.markReloadPending();
     }
     // The provider entry only names its credential env vars; the engine needs
     // the value itself via its auth API.
@@ -3112,28 +2900,17 @@ function createRoutes(
       ? body.launch as Record<string, unknown>
       : null;
     try {
-      const app = launch && typeof launch.connectionId === "string"
-        ? await resolveConnectMcpAppResource({
+      const app = launch
+        ? await resolveSameServerMcpAppResource({
             serverConfig: config,
             workspaceId: workspace.id,
             workspaceRoot: workspace.path,
+            projectedToolName,
             launch: {
-              connectionId: typeof launch.connectionId === "string" ? launch.connectionId : "",
               toolName: typeof launch.toolName === "string" ? launch.toolName : "",
               resourceUri: typeof launch.resourceUri === "string" ? launch.resourceUri : "",
             },
           })
-        : launch
-          ? await resolveSameServerMcpAppResource({
-              serverConfig: config,
-              workspaceId: workspace.id,
-              workspaceRoot: workspace.path,
-              projectedToolName,
-              launch: {
-                toolName: typeof launch.toolName === "string" ? launch.toolName : "",
-                resourceUri: typeof launch.resourceUri === "string" ? launch.resourceUri : "",
-              },
-            })
         : await resolveMcpAppResource({
             serverConfig: config,
             workspaceId: workspace.id,
@@ -4243,7 +4020,6 @@ async function postEngineRefreshSync(
   activeState: EngineMcpServerState | undefined,
 ): Promise<void> {
   const directory = resolveOpencodeDirectory(workspace);
-  markRedrobCloudMcpStale(workspace, directory);
   return enqueueWorkspaceMcpRefreshSync({
     config,
     workspace,
@@ -4284,28 +4060,6 @@ async function runWorkspaceMcpRefreshSync(input: WorkspaceMcpRefreshRequest): Pr
     );
   } catch (error) {
     logRuntimeMcpSyncError({ config, workspace, trigger, error });
-  }
-  try {
-    const health = await reconcilePersistedRedrobCloudMcp({
-      config,
-      workspace,
-      directory,
-      serverMetadata: { serverVersion: SERVER_VERSION, expectedOpencodeVersion: OPENCODE_VERSION },
-      createWorkspaceOpencodeClient,
-      refreshRegistrationFromLiveStatus: refreshEngineMcpRegistrationFromLiveStatus,
-      registerRuntimeMcp: (routeConfig, routeWorkspace, onlyNames, options) =>
-        syncRuntimeMcpToOpencodeEngine(
-          routeConfig,
-          routeWorkspace,
-          onlyNames,
-          options,
-          input.serverState ?? null,
-        ),
-      trigger,
-    });
-    logPersistedCloudMcpReconcileResult({ config, workspace, trigger, health });
-  } catch (error) {
-    logPersistedCloudMcpReconcileError({ config, workspace, trigger, error });
   }
   // The MCP re-registration above writes the runtime DB; refresh the
   // engine-visible file synchronously so the next provider-sync pass compares
@@ -4371,7 +4125,7 @@ async function runRuntimeMcpSyncToOpencodeEngine(
 
   const runtimeConfig = await readRuntimeOpencodeConfig(config, workspace.id);
   const entries = Object.entries(runtimeMcpMap(runtimeConfig)).filter(
-    ([name]) => !name.startsWith(CONNECT_MCP_SERVER_NAME_PREFIX)
+    ([name]) => !name.startsWith(LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX)
       && (!onlyNames || onlyNames.includes(name)),
   );
   if (entries.length === 0) {
@@ -5282,29 +5036,6 @@ function deleteEngineMcpRegistration(
   state.registrationByWorkspace.get(workspace.id)?.delete(name);
 }
 
-function logPersistedCloudMcpReconcileResult(input: {
-  config: ServerConfig;
-  workspace: WorkspaceInfo;
-  trigger: "startup" | "engine_reload";
-  health: CloudMcpHealth;
-}): void {
-  if (!input.health.desired.present || input.health.usable) return;
-  const failure = input.health.firstFailure;
-  createServerLogger(input.config).log(
-    "warn",
-    `Cloud MCP ${input.trigger} reconciliation left connected service tools unavailable for workspace ${input.workspace.id}.`,
-    {
-      "workspace.id": input.workspace.id,
-      "mcp.name": "redrob-cloud",
-      "mcp.trigger": input.trigger,
-      "mcp.failure.code": failure?.code ?? "unknown",
-      "mcp.failure.stage": failure?.stage ?? "unknown",
-      "mcp.failure.retryable": failure?.retryable ?? null,
-      "mcp.failure.message": failure?.message ?? "Cloud MCP health remained unusable after reconciliation.",
-    },
-  );
-}
-
 function logRuntimeMcpSyncError(input: {
   config: ServerConfig;
   workspace: WorkspaceInfo;
@@ -5340,29 +5071,6 @@ function logDetachedPostEngineRefreshSyncError(input: {
   );
 }
 
-function logPersistedCloudMcpReconcileError(input: {
-  config: ServerConfig;
-  workspace: WorkspaceInfo;
-  trigger: "startup" | "engine_reload";
-  error: unknown;
-}): void {
-  createServerLogger(input.config).log(
-    "error",
-    `Cloud MCP ${input.trigger} reconciliation crashed for workspace ${input.workspace.id}.`,
-    {
-      "workspace.id": input.workspace.id,
-      "mcp.name": "redrob-cloud",
-      "mcp.trigger": input.trigger,
-      "mcp.failure.code": "cloud_mcp_reconcile_exception",
-      "mcp.failure.message": input.error instanceof Error ? input.error.message : String(input.error),
-    },
-  );
-}
-
-// Re-push every workspace's runtime-DB MCPs into the engine. Used at startup:
-// the runtime config file injected via OPENCODE_CONFIG covers workspaces[0]
-// only, so other workspaces' runtime MCPs are invisible to the engine until
-// something re-syncs them. Best-effort.
 export async function syncAllWorkspacesRuntimeMcpToEngine(config: ServerConfig): Promise<void> {
   const serverState = activeEngineMcpServerState(config);
   for (const workspace of config.workspaces) {
@@ -5370,9 +5078,6 @@ export async function syncAllWorkspacesRuntimeMcpToEngine(config: ServerConfig):
   }
 }
 
-// Counterpart of syncRuntimeMcpToOpencodeEngine for removals: tell the engine
-// to drop the MCP's client so deleted MCPs stop serving tools immediately
-// instead of lingering until the next engine restart. Best-effort.
 async function disconnectMcpFromOpencodeEngine(
   config: ServerConfig,
   workspace: WorkspaceInfo,

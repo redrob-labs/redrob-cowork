@@ -4,14 +4,13 @@ import { useEffect, useReducer, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 
 import type { OpencodeConnectStatus } from "@/app/types";
-import type { RedrobCloudMcpHealth, RedrobRuntimeConfigStatus, RedrobServerStatus } from "@/app/lib/redrob-server";
+import type { RedrobRuntimeConfigStatus, RedrobServerStatus } from "@/app/lib/redrob-server";
 import { t } from "@/i18n";
 import { LayoutStack } from "../settings-layout";
 
 import { advancedLocalReducer, initialAdvancedLocalState } from "./advanced-view-state";
 import {
   AdvancedDeveloperSection,
-  AdvancedCloudMcpDiagnosticsSection,
   AdvancedRuntimeMigrationSection,
   AdvancedRuntimeSection,
 } from "./advanced-view-sections";
@@ -28,8 +27,6 @@ export type AdvancedViewProps = {
   canMigrateRuntimeConfig: boolean;
   migrateRuntimeConfig: () => Promise<{ migrated: boolean; keys: string[] }>;
   getRuntimeConfigStatus: () => Promise<RedrobRuntimeConfigStatus>;
-  cloudMcpHealth: RedrobCloudMcpHealth | null;
-  refreshCloudMcpHealth: () => Promise<RedrobCloudMcpHealth | null>;
 };
 
 type AdvancedStatusTone = "ready" | "warning" | "error" | "neutral";
@@ -172,10 +169,6 @@ export function AdvancedView(props: AdvancedViewProps) {
         redrobDetailLines={redrobDetailLines}
       />
 
-      <AdvancedCloudMcpDiagnosticsSection
-        cloudMcpHealth={props.cloudMcpHealth}
-        onRefresh={props.refreshCloudMcpHealth}
-      />
 
       <AdvancedRuntimeMigrationSection
         busy={props.busy}

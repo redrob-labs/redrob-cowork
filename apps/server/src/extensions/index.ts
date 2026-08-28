@@ -1,11 +1,5 @@
 import { ApiError } from "../errors.js";
 import type { EnvService } from "../env-file.js";
-import {
-  googleWorkspaceConnectGuidance,
-  googleWorkspaceStatusConnectExtra,
-  shouldGateLegacyGoogleWorkspace,
-  type ConnectSnapshot,
-} from "../connect-state.js";
 import type { ServerConfig } from "../types.js";
 import {
   callGoogleWorkspaceExtensionAction,
@@ -17,16 +11,10 @@ import {
   OPENAI_IMAGE_GENERATION_EXTENSION_ACTIONS,
   OPENAI_IMAGE_GENERATION_EXTENSION_ID,
 } from "./openai-image-generation.js";
-import {
-  callRedrobWorkCloudUploadAction,
-  REDROB_CLOUD_UPLOAD_ACTIONS,
-  REDROB_CLOUD_UPLOADS_EXTENSION_ID,
-} from "./cloud-uploads.js";
 
 const REDROB_EXPERIMENTAL_EXTENSION_ACTIONS = [
   ...GOOGLE_WORKSPACE_EXTENSION_ACTIONS,
   ...OPENAI_IMAGE_GENERATION_EXTENSION_ACTIONS,
-  ...REDROB_CLOUD_UPLOAD_ACTIONS,
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -39,16 +27,14 @@ function readStringField(value: unknown, key: string): string {
   return typeof field === "string" ? field.trim() : "";
 }
 
-export function listExperimentalExtensionActions(extensionId: string, connectSnapshot?: ConnectSnapshot) {
+export function listExperimentalExtensionActions(extensionId: string) {
   const filter = extensionId.trim();
-  const actions = filter
+  return filter
     ? REDROB_EXPERIMENTAL_EXTENSION_ACTIONS.filter((action) => action.extensionId === filter)
     : REDROB_EXPERIMENTAL_EXTENSION_ACTIONS;
-  if (!connectSnapshot || !shouldGateLegacyGoogleWorkspace(connectSnapshot)) return actions;
-  return actions.filter((action) => action.extensionId !== GOOGLE_WORKSPACE_EXTENSION_ID || action.action === "status");
 }
 
-export async function callExperimentalExtensionAction(config: ServerConfig, env: EnvService, input: unknown, connectSnapshot?: ConnectSnapshot) {
+export async function callExperimentalExtensionAction(config: ServerConfig, env: EnvService, input: unknown) {
   if (!isRecord(input)) {
     throw new ApiError(400, "invalid_payload", "Expected extension action call payload");
   }
@@ -64,31 +50,13 @@ export async function callExperimentalExtensionAction(config: ServerConfig, env:
     throw new ApiError(404, "extension_action_not_found", "Redrob Work extension action not found");
   }
 
-  if (
-    extensionId === GOOGLE_WORKSPACE_EXTENSION_ID &&
-    action !== "status" &&
-    connectSnapshot &&
-    shouldGateLegacyGoogleWorkspace(connectSnapshot)
-  ) {
-    return {
-      ok: false,
-      error: "use_redrob_cloud",
-      message: googleWorkspaceConnectGuidance(connectSnapshot.cloudHealth),
-    };
-  }
-
   if (extensionId === GOOGLE_WORKSPACE_EXTENSION_ID) {
-    const result = await callGoogleWorkspaceExtensionAction(config, action, args, context, connectSnapshot ? googleWorkspaceStatusConnectExtra(connectSnapshot) : {});
+    const result = await callGoogleWorkspaceExtensionAction(config, action, args, context, {});
     if (result) return result;
   }
 
   if (extensionId === OPENAI_IMAGE_GENERATION_EXTENSION_ID) {
     const result = await callOpenAiImageGenerationExtensionAction(config, env, action, args, context);
-    if (result) return result;
-  }
-
-  if (extensionId === REDROB_CLOUD_UPLOADS_EXTENSION_ID) {
-    const result = await callRedrobWorkCloudUploadAction(config, action, args, context);
     if (result) return result;
   }
 

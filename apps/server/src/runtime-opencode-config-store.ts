@@ -18,6 +18,13 @@ export type RuntimeOpencodeConfig = {
 
 export const ENGINE_GLOBAL_RUNTIME_CONFIG_ID = "__redrob_engine_global__";
 
+/**
+ * Legacy prefix for MCP entries a removed control plane used to manage. No
+ * writer creates them anymore, but an existing runtime DB can still hold them,
+ * so engine syncs keep filtering them out instead of registering dead servers.
+ */
+export const LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX = "redrob-connect-";
+
 export function isEngineGlobalRuntimeConfigId(workspaceId: string): boolean {
   return workspaceId === ENGINE_GLOBAL_RUNTIME_CONFIG_ID;
 }

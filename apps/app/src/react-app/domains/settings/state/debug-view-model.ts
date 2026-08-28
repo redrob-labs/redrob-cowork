@@ -45,7 +45,7 @@ import type { DebugViewProps } from "../pages/debug-view";
 import type { ReleaseChannel } from "../../../../app/types";
 import type { RedrobServerStore, RedrobServerStoreSnapshot } from "../../connections/redrob-server-store";
 
-type DebugViewModelProps = Omit<DebugViewProps, "agentContextDiagnostics">;
+type DebugViewModelProps = DebugViewProps;
 
 const STARTUP_PREFERENCE_KEY = "redrob.startupPreference";
 const ENGINE_SOURCE_KEY = "redrob.engineSource";

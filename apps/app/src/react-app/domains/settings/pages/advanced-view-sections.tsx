@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type { RedrobCloudMcpHealth, RedrobRuntimeConfigStatus, RedrobServerStatus } from "@/app/lib/redrob-server";
-import { sanitizeCloudMcpHealthDiagnostic, sanitizeDiagnosticRecord } from "@/app/lib/diagnostic-sanitizer";
+import type { RedrobRuntimeConfigStatus, RedrobServerStatus } from "@/app/lib/redrob-server";
+import { sanitizeDiagnosticRecord } from "@/app/lib/diagnostic-sanitizer";
 import { isDesktopRuntime } from "@/app/utils";
 import { t } from "@/i18n";
 import {
@@ -126,141 +126,6 @@ function formatMaybe(value: string | number | boolean | null | undefined): strin
 function formatMetadataRecord(value: Record<string, string | number | boolean | null> | null | undefined): string {
   if (!value || Object.keys(value).length === 0) return "none";
   return Object.entries(value).map(([key, nested]) => `${key}=${formatMaybe(nested)}`).join(", ");
-}
-
-function formatSupportedFeatures(features: RedrobCloudMcpHealth["compatibility"]["supportedFeatures"]): string {
-  return Object.entries(features).map(([key, enabled]) => `${key}:${enabled ? "yes" : "no"}`).join(", ");
-}
-
-function formatPluginHashes(hashes: RedrobCloudMcpHealth["compatibility"]["pluginFileHashes"]): string {
-  if (hashes.length === 0) return "none";
-  return hashes.map((hash) => `${hash.name}=${hash.sha256 ? hash.sha256.slice(0, 12) : `unavailable${hash.error ? ` (${hash.error})` : ""}`}`).join(", ");
-}
-
-function formatMcpToolExposure(input: { checked: boolean; includesMcpTools: boolean | null; present: string[]; missing: string[]; limitation?: string }): string {
-  if (!input.checked) return "not checked";
-  const includes = input.includesMcpTools === null ? "unknown" : input.includesMcpTools ? "yes" : "no";
-  return `includes MCP tools: ${includes}; present ${joinList(input.present)}; missing ${joinList(input.missing)}${input.limitation ? `; limitation: ${input.limitation}` : ""}`;
-}
-
-interface AdvancedCloudMcpDiagnosticsSectionProps {
-  cloudMcpHealth: RedrobCloudMcpHealth | null;
-  onRefresh: () => Promise<RedrobCloudMcpHealth | null>;
-}
-
-export function AdvancedCloudMcpDiagnosticsSection(props: AdvancedCloudMcpDiagnosticsSectionProps) {
-  const [busy, setBusy] = useState(false);
-  const [copyStatus, setCopyStatus] = useState<string | null>(null);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
-  const safeHealth = sanitizeCloudMcpHealthDiagnostic(props.cloudMcpHealth);
-  const projection = props.cloudMcpHealth?.tools.providerProjection;
-  const compatibility = props.cloudMcpHealth?.compatibility;
-
-  const refresh = async () => {
-    setBusy(true);
-    setCopyStatus(null);
-    setRefreshError(null);
-    try {
-      await props.onRefresh();
-    } catch (error) {
-      setRefreshError(error instanceof Error ? error.message : "Could not refresh Cloud MCP diagnostics.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const copy = async () => {
-    const payload = JSON.stringify({ cloudMcpHealth: safeHealth }, null, 2);
-    await navigator.clipboard.writeText(payload);
-    setCopyStatus("Copied sanitized Cloud diagnostic.");
-  };
-
-  return (
-    <LayoutSection>
-      <LayoutSectionHeader>
-        <LayoutSectionTitle>Agent access diagnostics</LayoutSectionTitle>
-        <LayoutSectionDescription>
-          Technical details for Redrob Work Cloud MCP delivery. Tokens and Authorization headers are redacted before display or copy.
-        </LayoutSectionDescription>
-      </LayoutSectionHeader>
-
-      <LayoutSectionItem>
-        <LayoutSectionItemHeader>
-          <LayoutSectionItemTitle>Redrob Work Cloud MCP health</LayoutSectionItemTitle>
-          <LayoutSectionItemDescription>
-            Use this when support needs exact runtime state. The main Connect card stays user-facing.
-          </LayoutSectionItemDescription>
-          <LayoutSectionItemHeaderActions>
-            <Button type="button" variant="outline" size="sm" onClick={() => void refresh()} disabled={busy}>
-              <RefreshCcw size={14} className={busy ? "animate-spin" : ""} />
-              Refresh
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => void copy()} disabled={!props.cloudMcpHealth}>
-              Copy sanitized diagnostic
-            </Button>
-          </LayoutSectionItemHeaderActions>
-        </LayoutSectionItemHeader>
-
-        {copyStatus ? <SettingsNotice>{copyStatus}</SettingsNotice> : null}
-        {refreshError ? <SettingsNotice tone="error">{refreshError}</SettingsNotice> : null}
-        {props.cloudMcpHealth ? (
-          <div className="space-y-2 rounded-xl border border-gray-6 bg-gray-1/60 p-3">
-            <div className="grid gap-2">
-              <DiagnosticRow label="Active workspace" value={`${props.cloudMcpHealth.workspace.id} (${props.cloudMcpHealth.workspace.directory ?? "no directory"})`} />
-              <DiagnosticRow label="Desired revision" value={props.cloudMcpHealth.desired.revision ?? "none"} />
-              <DiagnosticRow label="Applied revision" value={props.cloudMcpHealth.delivery.appliedRevision ?? "none"} />
-              <DiagnosticRow label="Delivery" value={`${props.cloudMcpHealth.delivery.state}${props.cloudMcpHealth.delivery.trigger ? ` / ${props.cloudMcpHealth.delivery.trigger}` : ""}`} />
-              <DiagnosticRow label="Engine status" value={props.cloudMcpHealth.engine.status} />
-              {props.cloudMcpHealth.engineInspection?.checked ? (
-                <DiagnosticRow
-                  label="Engine MCP servers"
-                  value={(props.cloudMcpHealth.engineInspection.servers ?? []).length
-                    ? (props.cloudMcpHealth.engineInspection.servers ?? []).map((server) => `${server.name} ${server.status}${server.error ? ` (${server.error})` : ""}`).join("; ")
-                    : "none tracked"}
-                />
-              ) : null}
-              <DiagnosticRow label="Provider/model" value={projection?.checked ? `${projection.provider ?? "unknown"}/${projection.model ?? "unknown"}; source ${projection.source ?? "unknown"}; tool calling ${formatMaybe(projection.toolCalling)}; present ${joinList(projection.present)}; missing ${joinList(projection.missing)}${projection.limitation ? `; limitation: ${projection.limitation}` : ""}` : "not checked"} />
-              <DiagnosticRow label="Cloud tools" value={`derived present ${joinList(props.cloudMcpHealth.tools.present)}; missing ${joinList(props.cloudMcpHealth.tools.missing)}`} />
-              <DiagnosticRow label="Direct tools/list" value={`checked ${props.cloudMcpHealth.tools.direct.checked ? "yes" : "no"}; present ${joinList(props.cloudMcpHealth.tools.direct.present)}; missing ${joinList(props.cloudMcpHealth.tools.direct.missing)}`} />
-              {props.cloudMcpHealth.tools.direct.trace ? (
-                <DiagnosticRow
-                  label="Direct probe"
-                  value={`${props.cloudMcpHealth.tools.direct.trace.endpoint ?? "unknown endpoint"} · ${props.cloudMcpHealth.tools.direct.trace.latencyMs} ms · ${props.cloudMcpHealth.tools.direct.trace.steps.map((step) => `${step.step} ${step.ok ? "ok" : "failed"}${step.httpStatus !== undefined ? ` (HTTP ${step.httpStatus})` : ""} ${Math.max(0, Math.round(step.latencyMs))}ms`).join(" → ") || "no steps"}`}
-                />
-              ) : null}
-              {props.cloudMcpHealth.firstFailure ? (
-                <DiagnosticRow
-                  label="First failure"
-                  value={`${props.cloudMcpHealth.firstFailure.code} (stage ${props.cloudMcpHealth.firstFailure.stage}; ${props.cloudMcpHealth.firstFailure.retryable ? "retryable" : "not retryable"}): ${props.cloudMcpHealth.firstFailure.message}`}
-                />
-              ) : null}
-              <DiagnosticRow label="Plugin canaries" value={`present ${joinList(props.cloudMcpHealth.pluginCanaries.present)}; missing ${joinList(props.cloudMcpHealth.pluginCanaries.missing)}`} />
-              <DiagnosticRow label="Safe capabilities" value={`schema v${props.cloudMcpHealth.schemaVersion}; connect catalog ${props.cloudMcpHealth.connectCatalogEnabled ? "enabled" : "disabled"}`} />
-              {compatibility ? (
-                <>
-                  <DiagnosticRow label="Redrob Work versions" value={`server ${formatMaybe(compatibility.redrob.serverVersion)}; app ${formatMetadataRecord(compatibility.redrob.app)}`} />
-                  <DiagnosticRow label="OpenCode compatibility" value={`expected ${formatMaybe(compatibility.opencode.expectedVersion)}; actual ${formatMaybe(compatibility.opencode.actualVersion)}; probe ${compatibility.opencode.probe}`} />
-                  <DiagnosticRow label="Feature probes" value={formatSupportedFeatures(compatibility.supportedFeatures)} />
-                  <DiagnosticRow label="Experimental tool IDs" value={formatMcpToolExposure(compatibility.experimentalToolIds)} />
-                  <DiagnosticRow label="Experimental provider tools" value={formatMcpToolExposure(compatibility.experimentalProviderTools)} />
-                  <DiagnosticRow label="Plugin hashes" value={formatPluginHashes(compatibility.pluginFileHashes)} />
-                </>
-              ) : null}
-              <DiagnosticRow label="Live verification" value={props.cloudMcpHealth.checkedAt} />
-            </div>
-            <details className="rounded-lg bg-gray-3 p-2">
-              <summary className="cursor-pointer text-[11px] font-medium text-gray-11">Show sanitized health JSON</summary>
-              <pre className="mt-2 max-h-72 overflow-auto font-mono text-[11px] text-gray-11">
-                {JSON.stringify(safeHealth, null, 2)}
-              </pre>
-            </details>
-          </div>
-        ) : (
-          <SettingsNotice>No Cloud MCP health has been loaded for this workspace yet.</SettingsNotice>
-        )}
-      </LayoutSectionItem>
-    </LayoutSection>
-  );
 }
 
 interface AdvancedRuntimeMigrationSectionProps {

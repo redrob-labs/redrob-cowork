@@ -36,13 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  AgentContextDiagnosticsSection,
-  type AgentContextDiagnosticsSectionProps,
-} from "./agent-context-diagnostics-section";
 import type {
-  RedrobCloudMcpHealth,
-  RedrobCloudMcpProviderModelContext,
   RedrobServerClient,
 } from "@/app/lib/redrob-server";
 
@@ -89,13 +83,6 @@ type ServiceStatus = { tone: "success" | "error"; message: string } | null;
 
 export type DebugViewProps = {
   developerMode: boolean;
-  agentContextDiagnostics: AgentContextDiagnosticsSectionProps;
-  agentAccess?: {
-    client: RedrobServerClient | null;
-    workspaceId: string | null;
-    currentModel: RedrobCloudMcpProviderModelContext | null;
-    onHealthChange?: (health: RedrobCloudMcpHealth | null) => void;
-  } | null;
   busy: boolean;
   anyActiveRuns: boolean;
   startupPreference: StartupPreference | null;
@@ -621,7 +608,6 @@ export function DebugView(props: DebugViewProps) {
         ) : null}
       </div>
 
-      <AgentContextDiagnosticsSection {...props.agentContextDiagnostics} />
 
       {/* Section: Diagnostics */}
       <div className={cardClass}>

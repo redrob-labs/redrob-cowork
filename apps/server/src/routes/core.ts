@@ -1,15 +1,6 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
-import {
-  type ConnectSnapshotOptions,
-  getConnectSnapshot,
-  googleWorkspaceStatusConnectExtra,
-  writeConnectState,
-} from "../connect-state.js";
-import type { CloudMcpLiveStatusObserver } from "../cloud-mcp-health.js";
-import { readRedrobWorkConnectSkillCatalog, renderRedrobWorkConnectSkillInstruction } from "../connect-skill-catalog.js";
-import { readRedrobWorkAutomationCatalog, renderRedrobWorkAutomationInstruction } from "../connect-automation-catalog.js";
 import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService } from "../env-file.js";
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
@@ -49,7 +40,6 @@ interface RegisterCoreRoutesOptions {
   resolveWorkspace: (config: ServerConfig, id: string) => Promise<WorkspaceInfo>;
   resolveOpencodeDirectory: (workspace: WorkspaceInfo) => string | null;
   createWorkspaceOpencodeClient: (config: ServerConfig, workspace: WorkspaceInfo) => WorkspaceOpencodeClient;
-  refreshRegistrationFromLiveStatus?: CloudMcpLiveStatusObserver;
   serializeWorkspace: (workspace: ServerConfig["workspaces"][number]) => unknown;
   resolveDevLogPath: () => string | null;
   createOpenAiRealtimeVoiceSession: (env: EnvService, input: unknown) => Promise<unknown>;
@@ -65,31 +55,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function optionalTrimmedString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function providerModelFromValues(provider: unknown, model: unknown): ConnectSnapshotOptions["providerModel"] {
-  const providerValue = optionalTrimmedString(provider);
-  const modelValue = optionalTrimmedString(model);
-  if (!providerValue && !modelValue) return undefined;
-  if (!providerValue || !modelValue) return undefined;
-  return { provider: providerValue, model: modelValue };
-}
-
-function connectSnapshotOptionsFromQuery(url: URL): ConnectSnapshotOptions {
-  return {
-    workspaceId: optionalTrimmedString(url.searchParams.get("workspaceId")) ?? optionalTrimmedString(url.searchParams.get("workspace")),
-    directory: optionalTrimmedString(url.searchParams.get("directory")) ?? optionalTrimmedString(url.searchParams.get("worktree")),
-    providerModel: providerModelFromValues(url.searchParams.get("provider"), url.searchParams.get("model")),
-  };
-}
-
-function connectSnapshotOptionsFromBody(body: Record<string, unknown>): ConnectSnapshotOptions {
-  const context = isRecord(body.context) ? body.context : {};
-  return {
-    workspaceId: optionalTrimmedString(context.workspaceId) ?? optionalTrimmedString(context.workspaceID) ?? optionalTrimmedString(body.workspaceId),
-    directory: optionalTrimmedString(context.worktree) ?? optionalTrimmedString(context.directory) ?? optionalTrimmedString(body.directory),
-    providerModel: providerModelFromValues(context.provider, context.model) ?? providerModelFromValues(body.provider, body.model),
-  };
 }
 
 export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
@@ -110,7 +75,6 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     resolveWorkspace,
     resolveOpencodeDirectory,
     createWorkspaceOpencodeClient,
-    refreshRegistrationFromLiveStatus,
     serializeWorkspace,
     resolveDevLogPath,
     createOpenAiRealtimeVoiceSession,
@@ -118,13 +82,6 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
   } = options;
   const googleWorkspaceConnectFlows = createGoogleWorkspaceConnectFlowManager(config);
   const envPendingChangesByRuntime = new Map<string, boolean>();
-
-  const connectSnapshotBaseOptions = {
-    resolveOpencodeDirectory,
-    createWorkspaceOpencodeClient,
-    refreshRegistrationFromLiveStatus,
-    serverMetadata: { serverVersion, expectedOpencodeVersion: opencodeVersion },
-  };
 
   const healthResponse = () => jsonResponse({
     ok: true,
@@ -275,53 +232,12 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     return jsonResponse(buildCapabilities(config));
   });
 
-  addRoute(routes, "GET", "/experimental/connect/state", "client", async (ctx) => {
-    return jsonResponse({
-      ok: true,
-      schemaVersion: 1,
-      ...(await getConnectSnapshot(config, { ...connectSnapshotBaseOptions, ...connectSnapshotOptionsFromQuery(ctx.url) })),
-    });
-  });
-
-  addRoute(routes, "GET", "/experimental/connect/skills", "client", async (_ctx) => {
-    // Connect skills are server/account-scoped (redrob-cloud on the host), not per-workspace.
-    const skills = await readRedrobWorkConnectSkillCatalog(config);
-    return jsonResponse({
-      ok: true,
-      schemaVersion: 1,
-      skills,
-      instruction: renderRedrobWorkConnectSkillInstruction(skills),
-    });
-  });
-
-  addRoute(routes, "GET", "/experimental/connect/automations", "client", async (_ctx) => {
-    // Owner-scoped through the same redrob-cloud connection as skills.
-    const index = await readRedrobWorkAutomationCatalog(config);
-    return jsonResponse({
-      ok: true,
-      schemaVersion: 1,
-      index,
-      instruction: renderRedrobWorkAutomationInstruction(index),
-    });
-  });
-
-  addRoute(routes, "PUT", "/experimental/connect/state", "host", async (ctx) => {
-    ensureWritable(config);
-    const body = await readJsonBody(ctx.request);
-    if (typeof body.connectEnabled !== "boolean" || Object.keys(body).some((key) => key !== "connectEnabled")) {
-      throw new ApiError(400, "invalid_payload", "connectEnabled must be a boolean");
-    }
-    await writeConnectState(config, { connectEnabled: body.connectEnabled });
-    return jsonResponse({ ok: true, schemaVersion: 1, ...(await getConnectSnapshot(config, connectSnapshotBaseOptions)) });
-  });
-
   addRoute(routes, "GET", "/experimental/extensions/actions", "client", async (ctx) => {
     const extensionId = ctx.url.searchParams.get("extensionId") ?? "";
-    const connectSnapshot = await getConnectSnapshot(config, { ...connectSnapshotBaseOptions, ...connectSnapshotOptionsFromQuery(ctx.url) });
     return jsonResponse({
       ok: true,
       schemaVersion: 1,
-      actions: listExperimentalExtensionActions(extensionId, connectSnapshot),
+      actions: listExperimentalExtensionActions(extensionId),
     });
   });
 
@@ -330,12 +246,11 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
       throw new ApiError(403, "forbidden", "Viewer tokens cannot call extension actions");
     }
     const body = await readJsonBody(ctx.request);
-    return jsonResponse(await callExperimentalExtensionAction(config, env, body, await getConnectSnapshot(config, { ...connectSnapshotBaseOptions, ...connectSnapshotOptionsFromBody(body) })));
+    return jsonResponse(await callExperimentalExtensionAction(config, env, body));
   });
 
   addRoute(routes, "GET", "/experimental/google-workspace/status", "client", async (ctx) => {
-    const connectSnapshot = await getConnectSnapshot(config, { ...connectSnapshotBaseOptions, ...connectSnapshotOptionsFromQuery(ctx.url) });
-    return jsonResponse(await googleWorkspaceStatus(config, googleWorkspaceStatusConnectExtra(connectSnapshot)));
+    return jsonResponse(await googleWorkspaceStatus(config, {}));
   });
 
   addRoute(routes, "POST", "/experimental/google-workspace/connect/start", "client", async (ctx) => {

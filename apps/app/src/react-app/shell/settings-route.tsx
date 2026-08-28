@@ -14,17 +14,11 @@ import {
   createRedrobServerClient,
   isLoopbackRedrobServerUrl,
   readRedrobServerSettings,
-  type RedrobCloudMcpHealth,
-  type RedrobCloudMcpProviderModelContext,
   type RedrobServerCapabilities,
   type RedrobServerClient,
   type RedrobWorkspaceInfo,
 } from "@/app/lib/redrob-server";
 import { buildRedrobEnvRuntimeKey } from "@/app/lib/redrob-env-runtime";
-import {
-  collectAgentContextDiagnosticObservations,
-  isAgentContextDiagnosticsWorkspaceAllowed,
-} from "@/app/lib/agent-context-diagnostics";
 import {
   getInitialThemeMode,
   setThemeMode as setAppThemeMode,
@@ -75,7 +69,6 @@ import { AuthorizedFoldersPanel } from "@/react-app/domains/settings/panels/auth
 import { SettingsStack } from "@/react-app/domains/settings/settings-section";
 import { AdvancedView } from "@/react-app/domains/settings/pages/advanced-view";
 import { AppearanceView } from "@/react-app/domains/settings/pages/appearance-view";
-import { createOpaqueDiagnosticsScopeKey } from "@/react-app/domains/settings/pages/agent-context-diagnostics-section";
 import { MemoryView } from "@/react-app/domains/settings/pages/memory-view";
 import { useFeatureFlagsPreferences } from "@/react-app/domains/settings/state/feature-flags-preferences";
 import { DebugView } from "@/react-app/domains/settings/pages/debug-view";
@@ -477,7 +470,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const [voiceStatus, setVoiceStatus] = useState<string | null>(null);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [userEnvKeys, setUserEnvKeys] = useState<string[]>([]);
-  const [cloudMcpHealth, setCloudMcpHealth] = useState<RedrobCloudMcpHealth | null>(null);
   const emptyWorkspaceDisplay = useMemo<WorkspaceDisplay>(
     () => ({
       id: "",
@@ -835,24 +827,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     workspaceRoot: selectedWorkspaceRoot,
     onLoadError: handleModelPickerLoadError,
   });
-  const currentCloudMcpModel = useMemo<RedrobCloudMcpProviderModelContext | null>(() => {
-    const provider = local.prefs.defaultModel?.providerID.trim() ?? "";
-    const model = local.prefs.defaultModel?.modelID.trim() ?? "";
-    return provider && model ? { provider, model } : null;
-  }, [local.prefs.defaultModel]);
-  const refreshCloudMcpHealth = useCallback(async () => {
-    const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
-    const workspaceId = runtimeWorkspaceId?.trim() ?? "";
-    if (!client || !workspaceId) {
-      setCloudMcpHealth(null);
-      return null;
-    }
-    // probe: the Advanced page refresh should verify the Cloud endpoint
-    // directly (outside the engine), not just report the engine's cached state.
-    const health = await client.getRedrobCloudMcpHealth(workspaceId, currentCloudMcpModel ?? undefined, { probe: true });
-    setCloudMcpHealth(health);
-    return health;
-  }, [currentCloudMcpModel, redrobClient, runtimeWorkspaceId, selectedWorkspaceEndpoint]);
   const { commandPaletteOpen, setCommandPaletteOpen } = useCommandPaletteShortcut(!props.embedded);
   const paletteSessionOptions = useMemo(
     () => buildCommandPaletteSessions(workspaces, sessionsByWorkspaceId, selectedWorkspaceId),
@@ -1689,51 +1663,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     }),
     [connectionsSnapshot.mcpServers, enablementContext, extensionController, extensionsSnapshot, extensionsStore, quickConnectCatalog],
   );
-  const diagnosticsClient = selectedWorkspaceEndpoint?.client ?? redrobClient;
-  const diagnosticsWorkspaceAllowed = isAgentContextDiagnosticsWorkspaceAllowed(selectedWorkspace);
-  const diagnosticsAvailable = Boolean(
-    diagnosticsClient
-    && runtimeWorkspaceId?.trim()
-    && diagnosticsWorkspaceAllowed,
-  );
-  const diagnosticsUnavailableReason = selectedWorkspace?.workspaceType === "remote"
-    && selectedWorkspace.remoteType !== "redrob"
-    ? "direct-remote-opencode" as const
-    : null;
-  const diagnosticsWorkspaceType = selectedWorkspace?.workspaceType === "remote"
-    ? selectedWorkspace.remoteType ?? "legacy-opencode"
-    : "local";
-  const diagnosticsScopeKey = useMemo(() => createOpaqueDiagnosticsScopeKey({
-    client: diagnosticsClient,
-    workspaceCredential: selectedWorkspaceEndpoint?.token ?? token,
-    workspaceId: runtimeWorkspaceId?.trim() ?? "",
-    workspaceType: diagnosticsWorkspaceType,
-  }), [
-    diagnosticsClient,
-    diagnosticsWorkspaceType,
-    runtimeWorkspaceId,
-    selectedWorkspaceEndpoint?.token,
-    token,
-  ]);
-  const runAgentContextDiagnostics = useCallback(async () => {
-    const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
-    const workspaceId = runtimeWorkspaceId?.trim() ?? "";
-    if (
-      !client
-      || !workspaceId
-      || !selectedWorkspace
-      || !isAgentContextDiagnosticsWorkspaceAllowed(selectedWorkspace)
-    ) {
-      throw new Error("Agent diagnostics require a connected workspace.");
-    }
-    const observations = collectAgentContextDiagnosticObservations();
-    return client.runAgentContextDiagnostics(workspaceId, observations);
-  }, [
-    redrobClient,
-    runtimeWorkspaceId,
-    selectedWorkspace,
-    selectedWorkspaceEndpoint,
-  ]);
   const routeRedrobStatus = redrobClient ? "connected" : "disconnected";
   const notFoundRouteError = !loading && routeWorkspaceId && !selectedWorkspace
     ? "Workspace was not found. Select a new workspace from the sidebar."
@@ -2103,8 +2032,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
               }
               return redrobClient.getRuntimeConfigStatus(selectedWorkspaceId);
             }}
-            cloudMcpHealth={cloudMcpHealth}
-            refreshCloudMcpHealth={refreshCloudMcpHealth}
           />
         );
       case "appearance":
@@ -2179,18 +2106,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         return (
           <DebugView
             {...debugViewProps}
-            agentAccess={{
-              client: selectedWorkspaceEndpoint?.client ?? redrobClient,
-              workspaceId: runtimeWorkspaceId,
-              currentModel: currentCloudMcpModel,
-              onHealthChange: setCloudMcpHealth,
-            }}
-            agentContextDiagnostics={{
-              scopeKey: diagnosticsScopeKey,
-              available: diagnosticsAvailable,
-              unavailableReason: diagnosticsUnavailableReason,
-              onRun: runAgentContextDiagnostics,
-            }}
           />
         );
       default:
