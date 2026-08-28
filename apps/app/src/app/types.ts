@@ -184,7 +184,6 @@ export const SETTINGS_TAB_VALUES = [
   "ai",
   "preferences",
   "permissions",
-  "connect",
   "skills",
   "memory",
   "extensions",

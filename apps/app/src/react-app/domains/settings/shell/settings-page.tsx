@@ -66,8 +66,6 @@ export function getSettingsTabIcon(tab: SettingsTab) {
       return SlidersHorizontal;
     case "permissions":
       return FolderLock;
-    case "connect":
-      return Cable;
     case "skills":
       return Sparkles;
     case "memory":
@@ -99,8 +97,6 @@ export function getSettingsTabLabel(tab: SettingsTab) {
       return "Preferences";
     case "permissions":
       return "Permissions";
-    case "connect":
-      return t("settings.tab_connect");
     case "skills":
       return t("settings.tab_skills");
     case "memory":
@@ -134,8 +130,6 @@ export function getSettingsTabDescription(tab: SettingsTab) {
       return "Default model, reasoning, and compaction";
     case "permissions":
       return "Authorized folders and file access";
-    case "connect":
-      return t("settings.tab_description_connect");
     case "skills":
       return t("settings.tab_description_skills");
     case "memory":

@@ -103,7 +103,7 @@ export type SkillItem = {
   trigger?: string;
   path: string;
   content?: string;
-  origin?: "local" | "redrob-connect";
+  origin?: "local";
   marketplaceName?: string;
   pluginName?: string;
 };
@@ -120,9 +120,7 @@ export type McpViewProps = {
   installedCommands?: LibraryCommandItem[];
   /** Composer agents to render in Library. */
   installedAgents?: LibraryAgentItem[];
-  /** MCP capabilities assigned through Redrob Work Connect. */
-  availableConnectMcpServers?: McpServerEntry[];
-  availableConnectMcpStatuses?: McpStatusMap;
+  /** MCP capabilities available to this workspace. */
   /** Organization inventory is still being fetched and nothing is cached yet. */
   inventoryLoading?: boolean;
   /** Uninstall a skill by name. */
@@ -155,7 +153,6 @@ export type McpViewProps = {
   previewClaudePlugin?: (url: string) => Promise<RedrobClaudePluginPreview>;
   /** Install a Claude Code plugin bundle from a GitHub URL. */
   installClaudePlugin?: (url: string) => Promise<{ ok: boolean; message: string }>;
-  organizationName?: string | null;
   initialFilter?: ExtensionInventoryFilter;
   onFilterChange?: (filter: ExtensionInventoryFilter) => void;
   initialState?: ExtensionInventoryState;
@@ -283,7 +280,6 @@ type ExtensionDetailTarget =
   | { kind: "skill"; skill: SkillItem }
   | { kind: "command"; command: LibraryCommandItem }
   | { kind: "agent"; agent: LibraryAgentItem }
-  | { kind: "connect-mcp"; entry: McpServerEntry };
 
 function extensionDetailIdForTarget(target: ExtensionDetailTarget): string {
   switch (target.kind) {
@@ -295,8 +291,6 @@ function extensionDetailIdForTarget(target: ExtensionDetailTarget): string {
       return libraryCommandDetailId(target.command);
     case "agent":
       return libraryAgentDetailId(target.agent);
-    case "connect-mcp":
-      return `connect-mcp:${target.entry.name}`;
   }
 }
 
@@ -307,7 +301,6 @@ function resolveExtensionDetailTarget(
     skills: SkillItem[];
     commands: LibraryCommandItem[];
     agents: LibraryAgentItem[];
-    connectMcps: McpServerEntry[];
   },
 ): ExtensionDetailTarget | null {
   if (detailId.startsWith("skill:")) {
@@ -324,11 +317,6 @@ function resolveExtensionDetailTarget(
   if (agentName) {
     const agent = lists.agents.find((entry) => entry.name === agentName);
     return agent ? { kind: "agent", agent } : null;
-  }
-  if (detailId.startsWith("connect-mcp:")) {
-    const name = detailId.slice("connect-mcp:".length);
-    const entry = lists.connectMcps.find((item) => item.name === name || item.id === name);
-    return entry ? { kind: "connect-mcp", entry } : null;
   }
   const entry = lists.quickConnect.find((item) =>
     getMcpIdentityKey(item) === detailId
@@ -399,13 +387,11 @@ export function McpView(props: McpViewProps) {
   const installedSkills = props.installedSkills ?? [];
   const installedCommands = props.installedCommands ?? [];
   const installedAgents = props.installedAgents ?? [];
-  const availableConnectMcpServers = props.availableConnectMcpServers ?? [];
   const libraryDetailLists = {
     quickConnect: quickConnectList,
     skills: installedSkills,
     commands: installedCommands,
     agents: installedAgents,
-    connectMcps: availableConnectMcpServers,
   };
   const routedTarget = useRoutedDetail && props.detailId
     ? resolveExtensionDetailTarget(props.detailId, libraryDetailLists)
@@ -415,7 +401,6 @@ export function McpView(props: McpViewProps) {
   const detailSkill = activeTarget?.kind === "skill" ? activeTarget.skill : null;
   const detailCommand = activeTarget?.kind === "command" ? activeTarget.command : null;
   const detailAgent = activeTarget?.kind === "agent" ? activeTarget.agent : null;
-  const detailConnectMcp = activeTarget?.kind === "connect-mcp" ? activeTarget.entry : null;
   const detailPresentation = useRoutedDetail ? "page" : "dialog";
   const setInventoryFilter = (nextFilter: ExtensionInventoryFilter) => {
     setFilter(nextFilter);
@@ -438,7 +423,7 @@ export function McpView(props: McpViewProps) {
     setMcpConnectFailure(null);
     if (target.kind === "skill") {
       setDetailSkillContent(target.skill.content ?? null);
-      if (!target.skill.content && target.skill.origin !== "redrob-connect" && props.readSkill) {
+      if (!target.skill.content && props.readSkill) {
         void props.readSkill(target.skill.name).then((result) => {
           if (result?.content) {
             setDetailSkillContent(result.content);
@@ -471,7 +456,7 @@ export function McpView(props: McpViewProps) {
     setDetailTarget(resolved);
     if (resolved?.kind === "skill") {
       setDetailSkillContent(resolved.skill.content ?? null);
-      if (!resolved.skill.content && resolved.skill.origin !== "redrob-connect" && props.readSkill) {
+      if (!resolved.skill.content && props.readSkill) {
         void props.readSkill(resolved.skill.name).then((result) => {
           if (result?.content) {
             setDetailSkillContent(result.content);
@@ -489,7 +474,6 @@ export function McpView(props: McpViewProps) {
     installedSkills,
     installedCommands,
     installedAgents,
-    availableConnectMcpServers,
   ]);
 
   useEffect(() => {
@@ -799,23 +783,18 @@ export function McpView(props: McpViewProps) {
             description={detailSkill.description ?? "Installed skill"}
             taxonomy="skill"
             connected={true}
-            connectedLabel={detailSkill.origin === "redrob-connect" ? "Available through Redrob Work Connect" : undefined}
-            hidden={hidden}
-            path={detailSkill.origin === "redrob-connect" ? undefined : detailSkill.path}
-            sourceLabel={
-              detailSkill.origin === "redrob-connect"
-                ? [detailSkill.pluginName, detailSkill.marketplaceName].filter(Boolean).join(" · ") || t("extensions.surface_cloud")
-                : detailSkill.path
-            }
+           hidden={hidden}
+            path={detailSkill.path}
+            sourceLabel={detailSkill.path}
             triggers={detailSkill.trigger ? [detailSkill.trigger] : []}
             triggerHint={t("extensions.detail_triggers_skill_hint")}
             instructionsHint={t("extensions.detail_instructions_skill_hint")}
             openFileLabel={t("extensions.detail_open_skill")}
             contentPreview={detailSkillContent ?? undefined}
-            onReveal={detailSkill.path && detailSkill.origin !== "redrob-connect" ? () => {
+            onReveal={detailSkill.path ? () => {
               void revealDesktopItemInDir(detailSkill.path);
             } : undefined}
-            onUninstall={props.uninstallSkill && detailSkill.origin !== "redrob-connect" ? () => {
+            onUninstall={props.uninstallSkill ? () => {
               props.uninstallSkill?.(detailSkill.name);
               closeDetail();
             } : undefined}
@@ -870,38 +849,6 @@ export function McpView(props: McpViewProps) {
               ? [{ label: t("extensions.detail_fact_model"), value: `${detailAgent.model.providerID}/${detailAgent.model.modelID}` }]
               : []),
           ]}
-        />
-      ) : null}
-
-      {detailConnectMcp ? (
-        <ExtensionDetailModal
-          open={true}
-          onClose={closeDetail}
-          presentation={detailPresentation}
-          backLabel={t("extensions.title")}
-          name={detailConnectMcp.name}
-          description={
-            detailConnectMcp.pluginName
-              ? `Provided by ${detailConnectMcp.pluginName}${detailConnectMcp.marketplaceName ? ` · ${detailConnectMcp.marketplaceName}` : ""}.`
-              : detailConnectMcp.marketplaceName
-                ? `Provided by ${detailConnectMcp.marketplaceName}.`
-                : "Available through Redrob Work Connect."
-          }
-          taxonomy="connection"
-          connected={(props.availableConnectMcpStatuses?.[detailConnectMcp.id ?? detailConnectMcp.name]?.status) === "connected"}
-          connectedLabel="Available through Redrob Work Connect"
-          disconnectedLabel="Setup required"
-          url={detailConnectMcp.config.type === "remote" ? detailConnectMcp.config.url : undefined}
-          oauth={detailConnectMcp.config.type === "remote"}
-          facts={[
-            ...(detailConnectMcp.pluginName
-              ? [{ label: t("extensions.detail_fact_plugin"), value: detailConnectMcp.pluginName }]
-              : []),
-            ...(detailConnectMcp.marketplaceName
-              ? [{ label: t("extensions.detail_fact_collection"), value: detailConnectMcp.marketplaceName }]
-              : []),
-          ]}
-          showEnablementCard
         />
       ) : null}
 
@@ -1046,25 +993,11 @@ export function McpView(props: McpViewProps) {
             return agent.name.toLowerCase().includes(q) || (agent.description ?? "").toLowerCase().includes(q);
           })
         }
-        availableConnectMcpServers={
-          availableConnectMcpServers.filter((entry) => {
-            if (!matchesExtensionFilter(filter, "connection", "mcp")) return false;
-            if (!search.trim()) return true;
-            const query = search.toLowerCase();
-            return [
-              entry.name,
-              entry.marketplaceName ?? "",
-              entry.pluginName ?? "",
-            ].join(" ").toLowerCase().includes(query);
-          })
-        }
-        availableConnectMcpStatuses={props.availableConnectMcpStatuses ?? {}}
         loading={props.inventoryLoading === true}
         layout={layout}
         filter={filter}
         state={inventoryState}
         onStateCountsChange={setInventoryStateCounts}
-        organizationName={props.organizationName}
         busy={props.busy}
         connectingName={props.mcpConnectingName}
         isEntryHidden={(entry) => isRedrobWorkExtensionHidden(entry)}
@@ -1086,8 +1019,7 @@ export function McpView(props: McpViewProps) {
         onSkillDetail={(skill) => openDetail({ kind: "skill", skill })}
         onCommandDetail={(command) => openDetail({ kind: "command", command })}
         onAgentDetail={(agent) => openDetail({ kind: "agent", agent })}
-        onConnectMcpDetail={(entry) => openDetail({ kind: "connect-mcp", entry })}
-        filtersActive={Boolean(search.trim()) || filter !== "all" || inventoryState !== "all"}
+       filtersActive={Boolean(search.trim()) || filter !== "all" || inventoryState !== "all"}
       />
 
       {visibleMcpServers.length > 0 ? (
@@ -1209,10 +1141,6 @@ function inventoryGroupLabel(group: ExtensionInventoryGroup) {
   }
 }
 
-function connectMcpInventoryGroup(entry: McpServerEntry, statuses: McpStatusMap): ExtensionInventoryGroup {
-  return statuses[entry.id ?? entry.name]?.status === "connected" ? "ready" : "available";
-}
-
 type InventoryStateCounts = Record<Exclude<ExtensionInventoryState, "all">, number>;
 
 export function countInventoryCardGroups(groups: ExtensionInventoryGroup[]): InventoryStateCounts {
@@ -1325,14 +1253,11 @@ function McpQuickConnectSection(props: {
   installedSkills?: SkillItem[];
   installedCommands?: LibraryCommandItem[];
   installedAgents?: LibraryAgentItem[];
-  availableConnectMcpServers?: McpServerEntry[];
-  availableConnectMcpStatuses: McpStatusMap;
   loading: boolean;
   layout: ExtensionLayout;
   filter: ExtensionInventoryFilter;
   state: ExtensionInventoryState;
   onStateCountsChange: (counts: InventoryStateCounts) => void;
-  organizationName?: string | null;
   busy: boolean;
   connectingName: string | null;
   isEntryHidden: (entry: McpDirectoryInfo) => boolean;
@@ -1345,13 +1270,8 @@ function McpQuickConnectSection(props: {
   onSkillDetail?: (skill: SkillItem) => void;
   onCommandDetail?: (command: LibraryCommandItem) => void;
   onAgentDetail?: (agent: LibraryAgentItem) => void;
-  onConnectMcpDetail?: (entry: McpServerEntry) => void;
   filtersActive?: boolean;
 }) {
-  const orgMeta = props.organizationName?.trim()
-    ? t("extensions.from_org", { org: props.organizationName.trim() })
-    : t("extensions.surface_cloud");
-
   const cards: InventoryCard[] = [];
 
   for (const entry of props.entries) {
@@ -1392,7 +1312,7 @@ function McpQuickConnectSection(props: {
 
   for (const skill of props.installedSkills ?? []) {
     const hidden = props.isSkillHidden(skill);
-    const fromOrg = skill.origin === "redrob-connect";
+
     cards.push({
       key: `skill:${skill.path}`,
       group: "ready",
@@ -1403,9 +1323,8 @@ function McpQuickConnectSection(props: {
           description={skill.description ?? "Installed skill"}
           taxonomy="skill"
           connected={true}
-          connectedLabel={fromOrg ? t("connect.row_chip_ready") : undefined}
           hidden={hidden}
-          meta={fromOrg ? orgMeta : t("extensions.surface_this_device")}
+          meta={t("extensions.surface_this_device")}
           actionLabel="View details"
           onClick={() => props.onSkillDetail?.(skill)}
         />
@@ -1451,40 +1370,6 @@ function McpQuickConnectSection(props: {
     });
   }
 
-  for (const entry of props.availableConnectMcpServers ?? []) {
-    const status = props.availableConnectMcpStatuses[entry.id ?? entry.name]?.status;
-    const ready = status === "connected";
-    cards.push({
-      key: `connect-mcp:${entry.id ?? entry.name}`,
-      group: connectMcpInventoryGroup(entry, props.availableConnectMcpStatuses),
-      node: (
-        <ExtensionCard
-          layout={props.layout}
-          name={entry.name}
-          description={
-            entry.pluginName
-              ? `Provided by ${entry.pluginName}${entry.marketplaceName ? ` · ${entry.marketplaceName}` : ""}.`
-              : entry.marketplaceName
-                ? `Provided by ${entry.marketplaceName}.`
-                : t("extensions.surface_cloud")
-          }
-          taxonomy="connection"
-          connected={ready}
-          connectedLabel={ready ? t("connect.row_chip_ready") : undefined}
-          meta={orgMeta}
-          actionLabel="View details"
-          nextActionLabel={ready ? undefined : t("mcp.login_action")}
-          onClick={() => props.onConnectMcpDetail?.(entry)}
-        />
-      ),
-    });
-  }
-
-  const stateCounts = countInventoryCardGroups(cards.map((card) => card.group));
-  useEffect(() => {
-    props.onStateCountsChange(stateCounts);
-  }, [props.onStateCountsChange, stateCounts.ready, stateCounts.available]);
-
   const grouped = inventoryGroupOrder
     .map((group) => ({ group, cards: cards.filter((card) => card.group === group) }))
     .filter((entry) => entry.cards.length > 0);
@@ -1513,13 +1398,7 @@ function McpQuickConnectSection(props: {
             {props.filtersActive ? t("extensions.empty_filtered_title") : t("extensions.empty_title")}
           </p>
           <p className="mt-2 text-[13px] text-dls-secondary">
-            {props.filter === "connection"
-              ? props.organizationName?.trim()
-                ? t("extensions.empty_connections", { org: props.organizationName.trim() })
-                : t("extensions.empty_connections_signed_out")
-              : props.filtersActive
-                ? t("extensions.empty_filtered_hint")
-                : t("extensions.empty_hint")}
+            {props.filtersActive ? t("extensions.empty_filtered_hint") : t("extensions.empty_hint")}
           </p>
         </div>
       ) : props.state === "all" ? (

@@ -42,7 +42,7 @@ export type McpDirectoryInfo = {
   oauth: boolean;
   /** Route OAuth through the local Redrob Work gateway instead of delegating it to OpenCode. */
   managedOAuth?: boolean;
-  /** Identifies MCP entries owned by Redrob Work Connect instead of workspace configuration. */
+  /** Identifies MCP entries owned by the app instead of workspace configuration. */
   managedBy?: "redrob-connect";
   oauthConfig?: {
     clientId?: string;
