@@ -302,7 +302,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     icon: { src: "/ext-redrob.svg" },
     composer: { prompt: "Use the Redrob provider to " },
     setup: {
-      instructions: "Set REDROB_API_KEY, then connect the Redrob provider to use the redrob-ai model.",
+      instructions: "Set REDROB_API_KEY, then connect the Redrob provider to use the auto model.",
       primaryCta: "Connect Redrob",
     },
     resources: [

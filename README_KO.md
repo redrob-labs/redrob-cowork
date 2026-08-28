@@ -14,7 +14,7 @@ Codex, Claude Code, Cursor 또는 다른 호환 에이전트에 레드롭 워크
 
 ## 추론 제공자
 
-레드롭 워크는 **Redrob**을 유일한 추론 제공자로 사용하며, 기본값으로 선택되어 있습니다. 제공자 선택 화면은 없습니다. 앱은 `redrob-ai` 모델을 사용하여 `https://console.redrob.ai/api/backend/v1`의 Redrob 엔드포인트와 통신합니다.
+레드롭 워크는 **Redrob**을 유일한 추론 제공자로 사용하며, 기본값으로 선택되어 있습니다. 제공자 선택 화면은 없습니다. 앱은 `auto` 모델을 사용하여 `https://console.redrob.ai/api/backend/v1`의 Redrob 엔드포인트와 통신합니다.
 
 연결 방법:
 

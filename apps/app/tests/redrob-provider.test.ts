@@ -23,12 +23,14 @@ describe("Redrob provider config", () => {
     expect(config.options?.apiKey).toBeUndefined();
   });
 
-  test("routes the redrob-ai model with the Redrob request extras", () => {
+  test("routes the canonical auto model with no retired request extras", () => {
     const config = buildRedrobProviderConfig();
     const model = config.models?.[REDROB_MODEL_ID];
-    expect(REDROB_MODEL_ID).toBe("redrob-ai");
+    expect(REDROB_MODEL_ID).toBe("auto");
     expect(model).toBeDefined();
-    expect(model?.options?.indicAssist).toBe(true);
-    expect(model?.options?.detectLanguage).toBe(true);
+    // The console API rejects the retired language fields, so `auto` must carry
+    // no per-model options at all.
+    expect(model?.options).toBeUndefined();
+    expect(Object.keys(config.models ?? {})).toEqual(["auto"]);
   });
 });

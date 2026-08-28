@@ -14,7 +14,7 @@ The desktop app is there when you want a dedicated workspace, but it is not requ
 
 ## Inference provider
 
-Redrob Work uses **Redrob** as its only inference provider, and it is selected by default. There is no provider picker: the app talks to the Redrob endpoint at `https://console.redrob.ai/api/backend/v1` using the model `redrob-ai`.
+Redrob Work uses **Redrob** as its only inference provider, and it is selected by default. There is no provider picker: the app talks to the Redrob endpoint at `https://console.redrob.ai/api/backend/v1` using the model `auto`.
 
 To connect:
 

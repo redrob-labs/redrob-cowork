@@ -21,9 +21,9 @@ import {
  *
  * This drives the real store's `openProviderAuthModal()` through a local
  * Redrob Work server endpoint and asserts it PATCHes the workspace config with
- * exactly `buildRedrobProviderConfig()` (base URL + `redrob-ai` model + the
- * indicAssist/detectLanguage extras). It exercises the real builder, so the
- * test fails if the wiring is removed.
+ * exactly `buildRedrobProviderConfig()` (base URL + the canonical `auto`
+ * model, with no retired language extras). It exercises the real builder, so
+ * the test fails if the wiring is removed.
  */
 
 const originalWindow = globalThis.window;
@@ -233,12 +233,14 @@ describe("Redrob provider registration", () => {
       opencode?: { provider?: Record<string, unknown> };
     };
     const seeded = payload.opencode?.provider?.[REDROB_PROVIDER_ID];
-    // The seeded entry must equal the real builder output (base URL, model, extras).
+    // The seeded entry must equal the real builder output (base URL + auto model).
     expect(seeded).toEqual(buildRedrobProviderConfig());
     const seededConfig = seeded as ReturnType<typeof buildRedrobProviderConfig>;
     expect(seededConfig.options?.baseURL).toBe(REDROB_BASE_URL);
-    expect(seededConfig.models?.[REDROB_MODEL_ID]?.options?.indicAssist).toBe(true);
-    expect(seededConfig.models?.[REDROB_MODEL_ID]?.options?.detectLanguage).toBe(true);
+    expect(Object.keys(seededConfig.models ?? {})).toEqual([REDROB_MODEL_ID]);
+    expect(REDROB_MODEL_ID).toBe("auto");
+    // Retired language extras must not reach the console API.
+    expect(seededConfig.models?.[REDROB_MODEL_ID]?.options).toBeUndefined();
 
     store.dispose();
   });

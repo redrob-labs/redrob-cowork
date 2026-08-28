@@ -12,7 +12,7 @@ providers in the app.
 | Provider id | `redrob` |
 | Base URL | `https://console.redrob.ai/api/backend/v1` |
 | API key env var | `REDROB_API_KEY` |
-| Model id | `redrob-ai` |
+| Model id | `auto` |
 
 Supply your Redrob API key through the `REDROB_API_KEY` environment variable
 before connecting the provider. The key is never stored in the repository; only
@@ -20,16 +20,10 @@ the environment variable name is referenced in configuration.
 
 ## Request options
 
-The `redrob-ai` model sends two Redrob-specific request options (the
-OpenAI `extra_body` equivalent) through the provider's per-model `options`
-passthrough:
-
-- `indicAssist: true`
-- `detectLanguage: true`
-
-Redrob returns a top-level `redrob` object alongside the standard response
-(`detectedLanguage`, `translationUsed`, `latencyMs`) plus usual usage tokens.
-This is informational and requires no client-side parsing.
+None. `auto` is a plain OpenAI-compatible model: the console routes each request
+to the right model in its catalog, and it rejects the retired language fields
+(`indicAssist`, `detectLanguage`) that the removed `redrob-ai` alias accepted, so
+no per-model `options` are sent.
 
 ## Connecting
 

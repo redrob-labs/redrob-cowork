@@ -323,7 +323,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   /**
    * Seed the built-in Redrob provider into the engine's runtime config so it
    * appears in the provider list (connect modal + model picker) with the
-   * console.redrob.ai base URL and the `redrob-ai` model. Redrob is not a
+   * console.redrob.ai base URL and the canonical `auto` model. Redrob is not a
    * models.dev catalog provider, so without this write the Redrob-only
    * allowlist would collapse every surface to an empty list. The API key is
    * never written here; it is supplied via REDROB_API_KEY / the key input.

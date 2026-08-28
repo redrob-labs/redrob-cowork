@@ -10,7 +10,14 @@ export const REDROB_PROVIDER_ID = "redrob";
 export const REDROB_PROVIDER_NAME = "Redrob";
 export const REDROB_BASE_URL = "https://console.redrob.ai/api/backend/v1";
 export const REDROB_API_KEY_ENV = "REDROB_API_KEY";
-export const REDROB_MODEL_ID = "redrob-ai";
+
+/**
+ * Canonical Redrob model id. `auto` lets the console route each request to the
+ * best model in its catalog. The retired `redrob-ai` / `redrob-translate`
+ * aliases are gone from the console API and must not be referenced anywhere.
+ */
+export const REDROB_MODEL_ID = "auto";
+export const REDROB_MODEL_NAME = "Auto";
 
 /**
  * Public console where users issue their REDROB_API_KEY. Onboarding links here
@@ -37,19 +44,14 @@ export function isRedrobOnlyProviderId(id: string): boolean {
 }
 
 /**
- * Redrob-specific request extras (the OpenAI `extra_body` equivalent) passed
- * through per model via the AI-SDK/OpenCode provider `options` passthrough.
- */
-export const REDROB_MODEL_OPTIONS = {
-  indicAssist: true,
-  detectLanguage: true,
-} as const;
-
-/**
  * Build the OpenCode provider config for Redrob. Uses the same ProviderConfig
  * shape as `buildLocalProviderConfig` so the engine resolves it as a standard
  * OpenAI-compatible provider. The API key is supplied at runtime through the
  * `REDROB_API_KEY` environment variable and is never embedded here.
+ *
+ * No per-model request extras are sent: the console API rejects the retired
+ * language fields that the old `redrob-ai` alias accepted, so `auto` is a plain
+ * OpenAI-compatible model.
  */
 export function buildRedrobProviderConfig(): ProviderConfig {
   return {
@@ -59,8 +61,7 @@ export function buildRedrobProviderConfig(): ProviderConfig {
     options: { baseURL: REDROB_BASE_URL },
     models: {
       [REDROB_MODEL_ID]: {
-        name: REDROB_PROVIDER_NAME,
-        options: { ...REDROB_MODEL_OPTIONS },
+        name: REDROB_MODEL_NAME,
       },
     },
   };
