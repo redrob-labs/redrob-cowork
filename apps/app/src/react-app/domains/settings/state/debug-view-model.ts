@@ -388,7 +388,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
     () => ({
       appVersionLabel: appBuild?.version ?? "—",
       appCommitLabel: appBuild?.gitSha ?? "—",
-      opencodeVersionLabel: engineInfoState?.baseUrl ? "managed" : "—",
+      redrobCodeVersionLabel: engineInfoState?.baseUrl ? "managed" : "—",
       redrobServerVersionLabel: redrobServerSnapshot.redrobServerDiagnostics?.version ?? "—",
     }),
     [

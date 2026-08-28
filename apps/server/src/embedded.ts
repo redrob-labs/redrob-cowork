@@ -21,7 +21,7 @@ import {
   type EnginePoolSnapshot,
   type EngineSpawnTemplate,
 } from "./engine-pool.js";
-import { createManagedOpencodeServer, type ManagedOpencodeServer, type OpencodeExecutionSnapshot } from "./managed-opencode.js";
+import { createManagedOpencodeServer, resolveRedrobCodeBinEnv, type ManagedOpencodeServer, type OpencodeExecutionSnapshot } from "./managed-opencode.js";
 import {
   clearTrustedOpencodeProcess,
   createEnginePoolForConfig,
@@ -40,7 +40,7 @@ import type { LocalManagedMcpVaultKeyProvider, ServerConfig } from "./types.js";
 export type EmbeddedServerOptions = CliArgs & {
   /** When true, spawn a managed OpenCode child process. */
   manageOpencode?: boolean;
-  /** Path to the OpenCode binary. Falls back to REDROB_OPENCODE_BIN env. */
+  /** Path to the Redrob Code binary. Falls back to REDROB_CODE_BIN / REDROB_OPENCODE_BIN. */
   opencodeBin?: string;
   /** Working directory for the managed OpenCode process. */
   opencodeCwd?: string;
@@ -200,7 +200,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       await duringStartup(() => mkdir(cwd, { recursive: true }));
       await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
 
-      const opencodeBin = options.opencodeBin || process.env.REDROB_OPENCODE_BIN;
+      const opencodeBin = options.opencodeBin || resolveRedrobCodeBinEnv();
       // Shared by the first spawn and by any later rollover standby, so a
       // replacement engine is identical apart from its port.
       const engineEnv: Record<string, string | undefined> = {

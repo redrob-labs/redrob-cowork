@@ -13,7 +13,7 @@ FeedbackPreview.PreviewProps = {
   deployment: "desktop",
   appVersion: "0.13.5",
   redrobServerVersion: "0.13.5",
-  opencodeVersion: "1.4.9",
+  redrobCodeVersion: "0.0.1",
   osName: "macOS",
   osVersion: "15.4",
   platform: "MacIntel",

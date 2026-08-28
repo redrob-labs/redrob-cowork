@@ -10,7 +10,7 @@ import {
   removeEngineInstance,
   reapOrphanEngineInstances,
 } from "./engine-registry.js";
-import { createManagedOpencodeServer, type ManagedOpencodeServer } from "./managed-opencode.js";
+import { createManagedOpencodeServer, REDROB_CODE_BIN_NAME, resolveRedrobCodeBinEnv, type ManagedOpencodeServer } from "./managed-opencode.js";
 import { clearEnginePoolForConfig, computeEngineConfigFingerprint, type EnginePool, type EngineSpawnTemplate } from "./engine-pool.js";
 import {
   clearTrustedOpencodeProcess,
@@ -81,7 +81,7 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
       REDROB_CONFIG: runtimeConfigPath,
     };
     const engineSpawnTemplate: EngineSpawnTemplate = {
-      bin: process.env.REDROB_OPENCODE_BIN,
+      bin: resolveRedrobCodeBinEnv(),
       cwd: managedOpencodeCwd,
       runtimeConfigPath,
       env: engineEnv,
@@ -91,7 +91,7 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
       },
     };
     managedOpencode = await createManagedOpencodeServer({
-      bin: process.env.REDROB_OPENCODE_BIN,
+      bin: resolveRedrobCodeBinEnv(),
       cwd: managedOpencodeCwd,
       excludedPorts: [config.port],
       env: engineEnv,
@@ -129,7 +129,7 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
         serverRunId: managedOpencodeIdentity,
         ownerPid: process.pid,
         authProbe: buildEngineAuthProbeHeader(managedOpencode.username, managedOpencode.password),
-        bin: process.env.REDROB_OPENCODE_BIN?.trim() || "opencode",
+        bin: resolveRedrobCodeBinEnv() ?? REDROB_CODE_BIN_NAME,
       }).catch(() => undefined);
     }
     enginePool = createEnginePoolForConfig({

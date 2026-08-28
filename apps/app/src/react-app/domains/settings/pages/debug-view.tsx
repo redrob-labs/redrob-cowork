@@ -56,7 +56,7 @@ const compactDangerActionClass =
 type RuntimeSummary = {
   appVersionLabel: string;
   appCommitLabel: string;
-  opencodeVersionLabel: string;
+  redrobCodeVersionLabel: string;
   redrobServerVersionLabel: string;
 };
 
@@ -499,7 +499,7 @@ export function DebugView(props: DebugViewProps) {
           <div>{t("settings.debug_desktop_app", { version: props.runtimeSummary.appVersionLabel })}</div>
           <div>{t("settings.debug_commit", { commit: props.runtimeSummary.appCommitLabel })}</div>
           <div>
-            {t("settings.debug_opencode_version", { version: props.runtimeSummary.opencodeVersionLabel })}
+            {t("settings.debug_redrob_code_version", { version: props.runtimeSummary.redrobCodeVersionLabel })}
           </div>
           <div>
             {t("settings.debug_redrob_server_version", {

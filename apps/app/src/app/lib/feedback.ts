@@ -9,7 +9,7 @@ type FeedbackUrlOptions = {
   deployment?: string | null;
   appVersion?: string | null;
   redrobServerVersion?: string | null;
-  opencodeVersion?: string | null;
+  redrobCodeVersion?: string | null;
 };
 
 type ClientOsContext = {
@@ -91,7 +91,7 @@ export function buildFeedbackUrl(options: FeedbackUrlOptions): string {
     deployment: options.deployment?.trim() ?? "",
     appVersion: options.appVersion?.trim() || ENV_APP_VERSION,
     redrobServerVersion: options.redrobServerVersion?.trim() ?? "",
-    opencodeVersion: options.opencodeVersion?.trim() ?? "",
+    redrobCodeVersion: options.redrobCodeVersion?.trim() ?? "",
     osName: osContext.osName?.trim() ?? "",
     osVersion: osContext.osVersion?.trim() ?? "",
     platform: osContext.platform?.trim() ?? "",

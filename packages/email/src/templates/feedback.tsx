@@ -10,7 +10,7 @@ export type FeedbackEmailProps = {
   deployment: string
   appVersion: string
   redrobServerVersion: string
-  opencodeVersion: string
+  redrobCodeVersion: string
   osName: string
   osVersion: string
   platform: string
@@ -28,7 +28,7 @@ export function FeedbackEmail({
   deployment,
   appVersion,
   redrobServerVersion,
-  opencodeVersion,
+  redrobCodeVersion,
   osName,
   osVersion,
   platform,
@@ -44,7 +44,7 @@ export function FeedbackEmail({
     ["Deployment", deployment],
     ["App version", appVersion],
     ["Redrob Work server", redrobServerVersion],
-    ["OpenCode", opencodeVersion],
+    ["Redrob Code", redrobCodeVersion],
     ["OS", osLabel],
     ["Platform", platform],
     ["Submitted", submittedAt],

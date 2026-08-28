@@ -698,7 +698,7 @@ export default {
   "settings.debug_hostname": "Hostname: {hostname}",
   "settings.debug_lan_url": "LAN URL: {url}",
   "settings.debug_mdns_url": "mDNS URL: {url}",
-  "settings.debug_opencode_version": "OpenCode: {version}",
+  "settings.debug_redrob_code_version": "Redrob Code: {version}",
   "settings.debug_redrob_server_version": "Redrob Work server: {version}",
   "settings.debug_pid": "PID: {pid}",
   "settings.debug_port": "Port: {port}",

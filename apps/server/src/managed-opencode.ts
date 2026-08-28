@@ -88,6 +88,18 @@ export function createManagedProcessClose(
   return { isAlive, close };
 }
 
+/**
+ * Explicit path to the Redrob Code engine binary.
+ *
+ * `REDROB_CODE_BIN` is the current name; `REDROB_OPENCODE_BIN` is still read so
+ * existing dev shells and container entrypoints keep working. When neither is
+ * set the engine is resolved from PATH as `redrob` — never as `opencode`, which
+ * is a different product with different env and readiness contracts.
+ */
+export function resolveRedrobCodeBinEnv(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  return env.REDROB_CODE_BIN?.trim() || env.REDROB_OPENCODE_BIN?.trim() || undefined;
+}
+
 const SECRET_ENV_PATTERN = /(TOKEN|PASSWORD|USERNAME|AUTH|SECRET|KEY|CREDENTIAL)/i;
 
 /**

@@ -133,7 +133,7 @@ export {
 } from "./routes/files.js";
 
 const SERVER_VERSION = pkg.version;
-const OPENCODE_VERSION = constants.opencodeVersion.trim().replace(/^v/, "");
+const REDROB_CODE_VERSION = constants.redrobCodeVersion.trim().replace(/^v/, "");
 
 const REDROB_VOICE_REALTIME_MODEL = "gpt-realtime-2";
 const REDROB_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
@@ -1753,7 +1753,7 @@ function buildCapabilities(config: ServerConfig): Capabilities {
   return {
     schemaVersion,
     serverVersion: SERVER_VERSION,
-    opencodeVersion: OPENCODE_VERSION,
+    redrobCodeVersion: REDROB_CODE_VERSION,
     providerSync: true,
     skills: { read: true, write: writeEnabled, source: "redrob" },
     plugins: { read: true, write: writeEnabled },
@@ -2011,7 +2011,7 @@ function createRoutes(
     env,
     managedProviderAuthLogger: toManagedProviderAuthLogger(logger),
     serverVersion: SERVER_VERSION,
-    opencodeVersion: OPENCODE_VERSION,
+    redrobCodeVersion: REDROB_CODE_VERSION,
     jsonResponse,
     readJsonBody,
     readOptionalJsonBody,

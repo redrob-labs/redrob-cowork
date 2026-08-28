@@ -116,7 +116,7 @@ export interface ServerConfig {
 export interface Capabilities {
   schemaVersion: number;
   serverVersion: string;
-  opencodeVersion: string;
+  redrobCodeVersion: string;
   providerSync: true;
   skills: { read: boolean; write: boolean; source: "redrob" | "opencode" };
   plugins: { read: boolean; write: boolean };

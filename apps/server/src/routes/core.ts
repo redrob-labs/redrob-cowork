@@ -29,7 +29,7 @@ interface RegisterCoreRoutesOptions {
   tokens: TokenService;
   env: EnvService;
   serverVersion: string;
-  opencodeVersion: string;
+  redrobCodeVersion: string;
   jsonResponse: JsonResponse;
   readJsonBody: ReadJsonBody;
   readOptionalJsonBody: ReadJsonBody;
@@ -64,7 +64,7 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     tokens,
     env,
     serverVersion,
-    opencodeVersion,
+    redrobCodeVersion,
     jsonResponse,
     readJsonBody,
     readOptionalJsonBody,
@@ -86,7 +86,7 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
   const healthResponse = () => jsonResponse({
     ok: true,
     version: serverVersion,
-    opencodeVersion,
+    redrobCodeVersion,
     uptimeMs: Date.now() - config.startedAt,
   });
 
@@ -146,7 +146,7 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     return jsonResponse({
       ok: true,
       version: serverVersion,
-      opencodeVersion,
+      redrobCodeVersion,
       uptimeMs: Date.now() - config.startedAt,
       readOnly: config.readOnly,
       approval: config.approval,
@@ -181,7 +181,7 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     return jsonResponse({
       ok: true,
       version: serverVersion,
-      opencodeVersion,
+      redrobCodeVersion,
       uptimeMs: Date.now() - config.startedAt,
       readOnly: config.readOnly,
       approval: config.approval,

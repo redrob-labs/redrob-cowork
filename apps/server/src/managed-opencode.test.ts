@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { createManagedOpencodeServer, REDROB_CODE_READY_LINE_PREFIX } from "./managed-opencode.js";
+import { createManagedOpencodeServer, REDROB_CODE_BIN_NAME, REDROB_CODE_READY_LINE_PREFIX, resolveRedrobCodeBinEnv } from "./managed-opencode.js";
 
 const roots: string[] = [];
 
@@ -152,5 +152,16 @@ describe("managed Redrob Code startup", () => {
       value: "<redacted>",
       redacted: true,
     });
+  });
+});
+
+describe("Redrob Code binary resolution", () => {
+  test("prefers REDROB_CODE_BIN, still reads the legacy name, and never names opencode", () => {
+    expect(REDROB_CODE_BIN_NAME).toBe("redrob");
+    expect(resolveRedrobCodeBinEnv({ REDROB_CODE_BIN: "/opt/redrob", REDROB_OPENCODE_BIN: "/opt/legacy" }))
+      .toBe("/opt/redrob");
+    expect(resolveRedrobCodeBinEnv({ REDROB_OPENCODE_BIN: "/opt/legacy" })).toBe("/opt/legacy");
+    expect(resolveRedrobCodeBinEnv({ REDROB_CODE_BIN: "   " })).toBeUndefined();
+    expect(resolveRedrobCodeBinEnv({})).toBeUndefined();
   });
 });
