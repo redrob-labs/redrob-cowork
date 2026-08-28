@@ -7,19 +7,26 @@ import { realpathSync, statSync } from "node:fs";
 import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 
 function resolveBasicAuthHeader() {
-  const password = process.env.OPENCODE_SERVER_PASSWORD?.trim() ?? "";
+  const password = process.env.REDROB_SERVER_PASSWORD?.trim() ?? "";
   if (!password) return undefined;
-  const username = process.env.OPENCODE_SERVER_USERNAME?.trim() || "opencode";
+  const username = process.env.REDROB_SERVER_USERNAME?.trim() || "redrob";
   const encoded = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
   return `Basic ${encoded}`;
 }
 
 export function makeClient({ baseUrl, directory }) {
   const authorization = resolveBasicAuthHeader();
+  const headers = {};
+  if (authorization) headers.Authorization = authorization;
+  // Redrob Code routes on x-redrob-directory. The SDK's `directory` option still
+  // emits the upstream x-opencode-directory header, which the engine ignores.
+  if (directory?.trim()) {
+    const trimmed = directory.trim();
+    headers["x-redrob-directory"] = /[^\x00-\x7F]/.test(trimmed) ? encodeURIComponent(trimmed) : trimmed;
+  }
   return createOpencodeClient({
     baseUrl,
-    directory,
-    headers: authorization ? { Authorization: authorization } : undefined,
+    headers: Object.keys(headers).length ? headers : undefined,
     responseStyle: "data",
     throwOnError: true,
   });

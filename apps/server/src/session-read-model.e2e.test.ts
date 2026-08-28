@@ -45,7 +45,7 @@ function startMockOpencode(input?: { invalidList?: boolean; holdCommand?: Promis
       const record: { pathname: string; search: string; directory: string | null; method: string; body?: unknown } = {
         pathname: url.pathname,
         search: url.search,
-        directory: request.headers.get("x-opencode-directory"),
+        directory: request.headers.get("x-redrob-directory"),
         method: request.method,
       };
       if (request.method === "POST") record.body = await request.json();
@@ -60,7 +60,7 @@ function startMockOpencode(input?: { invalidList?: boolean; holdCommand?: Promis
             id: "ses_created",
             title: typeof title === "string" ? title : "New session",
             slug: "created-session",
-            directory: input?.sessionDirectory ?? request.headers.get("x-opencode-directory"),
+            directory: input?.sessionDirectory ?? request.headers.get("x-redrob-directory"),
             time: { created: 300, updated: 300 },
           });
         }
@@ -72,7 +72,7 @@ function startMockOpencode(input?: { invalidList?: boolean; holdCommand?: Promis
             id: "ses_1",
             title: "Hostname Check",
             slug: "hostname-check",
-            directory: request.headers.get("x-opencode-directory"),
+            directory: request.headers.get("x-redrob-directory"),
             time: { created: 100, updated: 200 },
           },
         ]);
@@ -87,7 +87,7 @@ function startMockOpencode(input?: { invalidList?: boolean; holdCommand?: Promis
           id: "ses_1",
           title: "Hostname Check",
           slug: "hostname-check",
-          directory: input?.sessionDirectory ?? request.headers.get("x-opencode-directory"),
+          directory: input?.sessionDirectory ?? request.headers.get("x-redrob-directory"),
           time: { created: 100, updated: 200 },
         });
       }

@@ -79,7 +79,7 @@ function startMockOpencode() {
         id: SESSION_ID,
         title: "Refund policy",
         slug: "refund-policy",
-        directory: request.headers.get("x-opencode-directory"),
+        directory: request.headers.get("x-redrob-directory"),
         time: { created: 100, updated: 100 },
       };
 

@@ -1217,7 +1217,16 @@ function agentDiagnosticsTimeoutMs(): number {
   return Number.isFinite(configured) && configured > 0 ? configured : 24_000;
 }
 
-function buildOpencodeDirectoryHeader(directory: string) {
+/**
+ * Directory-routing header understood by the Redrob Code engine. Upstream
+ * OpenCode used `x-opencode-directory`; Redrob Code reads only this name and
+ * silently ignores the old one, which would route every request at the engine's
+ * own cwd instead of the workspace.
+ */
+const ENGINE_DIRECTORY_HEADER = "x-redrob-directory";
+const LEGACY_ENGINE_DIRECTORY_HEADER = "x-opencode-directory";
+
+function buildEngineDirectoryHeader(directory: string) {
   return /[^\x00-\x7F]/.test(directory) ? encodeURIComponent(directory) : directory;
 }
 
@@ -1226,7 +1235,11 @@ function createOpencodeDirectoryFetch(directory: string, fetchImpl: typeof fetch
     (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
       const request = input instanceof Request ? input : new Request(input, init);
       const headers = new Headers(init?.headers ?? request.headers);
-      headers.set("x-opencode-directory", buildOpencodeDirectoryHeader(directory));
+      // The upstream SDK sets its own directory header on non-GET requests from
+      // the `directory` client option. Replace it so only the name Redrob Code
+      // honors reaches the engine.
+      headers.delete(LEGACY_ENGINE_DIRECTORY_HEADER);
+      headers.set(ENGINE_DIRECTORY_HEADER, buildEngineDirectoryHeader(directory));
       return fetchImpl(new Request(request, { headers }));
     },
     { preconnect: fetchImpl.preconnect },
@@ -1316,8 +1329,11 @@ export async function proxyOpencodeRequest(input: {
   headers.delete("origin");
 
   const directory = workspace ? resolveOpencodeDirectory(workspace) : null;
-  if (directory && !headers.has("x-opencode-directory")) {
-    headers.set("x-opencode-directory", buildOpencodeDirectoryHeader(directory));
+  // A client that still sends the upstream header must not be able to smuggle a
+  // directory past the engine's routing, and it must not shadow the real one.
+  headers.delete(LEGACY_ENGINE_DIRECTORY_HEADER);
+  if (directory && !headers.has(ENGINE_DIRECTORY_HEADER)) {
+    headers.set(ENGINE_DIRECTORY_HEADER, buildEngineDirectoryHeader(directory));
   }
 
   const auth = route
@@ -1674,7 +1690,7 @@ function withCors(response: Response, request: Request, config: ServerConfig) {
   headers.set("Access-Control-Allow-Origin", allowOrigin);
   headers.set(
     "Access-Control-Allow-Headers",
-    "Authorization, Content-Type, X-Redrob-Host-Token, X-Redrob-Client-Id, X-OpenCode-Directory, X-Opencode-Directory, x-opencode-directory",
+    "Authorization, Content-Type, X-Redrob-Host-Token, X-Redrob-Client-Id, X-Redrob-Directory, x-redrob-directory",
   );
   headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   headers.set("Vary", "Origin");

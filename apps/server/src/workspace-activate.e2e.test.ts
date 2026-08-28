@@ -87,7 +87,7 @@ function startMockOpencode() {
     port: 0,
     async fetch(request) {
       const url = new URL(request.url);
-      const directory = request.headers.get("x-opencode-directory");
+      const directory = request.headers.get("x-redrob-directory");
       requests.push({ method: request.method, pathname: url.pathname, search: url.search, directory });
 
       if (url.pathname === "/session/status") {

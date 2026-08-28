@@ -88,6 +88,14 @@ function resolveRequestTimeoutMs(input: RequestInfo | URL, fallbackMs: number): 
 }
 
 
+/**
+ * Directory-routing header understood by the Redrob Code engine. Upstream
+ * OpenCode used `x-opencode-directory`; Redrob Code reads only this name, so the
+ * client must never rely on the SDK's built-in `directory` option, which still
+ * emits the old header.
+ */
+const ENGINE_DIRECTORY_HEADER = "x-redrob-directory";
+
 function buildDirectoryHeader(directory?: string) {
   if (!directory?.trim()) return undefined;
   const trimmed = directory.trim();
@@ -105,7 +113,7 @@ async function postSessionRequest<T>(
   headers.set("Content-Type", "application/json");
   const directoryHeader = buildDirectoryHeader(options?.directory);
   if (directoryHeader) {
-    headers.set("x-opencode-directory", directoryHeader);
+    headers.set(ENGINE_DIRECTORY_HEADER, directoryHeader);
   }
 
   const response = await fetchImpl(`${baseUrl}${path}`, {
@@ -358,6 +366,14 @@ export function createClient(baseUrl: string, directory?: string, auth?: Opencod
       headers.Authorization = authHeader;
     }
   }
+  // Set the Redrob directory header directly instead of passing `directory` to
+  // the SDK: the SDK derives `x-opencode-directory` from that option, which the
+  // Redrob Code engine ignores. The engine reads this header (or a `directory`
+  // query param) on every route, so a plain header covers GET and POST alike.
+  const directoryHeader = buildDirectoryHeader(directory);
+  if (directoryHeader) {
+    headers[ENGINE_DIRECTORY_HEADER] = directoryHeader;
+  }
 
   const fetchImpl = isDesktopRuntime()
     ? createDesktopFetch(auth)
@@ -367,7 +383,6 @@ export function createClient(baseUrl: string, directory?: string, auth?: Opencod
       };
   const client = createOpencodeClient({
     baseUrl,
-    directory,
     headers: Object.keys(headers).length ? headers : undefined,
     fetch: fetchImpl,
   });
