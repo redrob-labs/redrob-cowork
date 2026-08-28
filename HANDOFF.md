@@ -1,129 +1,148 @@
-# Handoff: Redrob Work is local-only
+# Handoff — redrob-work
 
-The Den control plane and every cloud surface that depended on it are gone. This
-document is the state of `main` after that removal: what the app is now, what was
-taken out, what was deliberately left, and how to verify the tree.
+Current state of `main` as of 2026-08-28. Everything below was checked against the tree at
+`d274cb6` and re-measured locally on this date.
 
-## What the product is now
+## What this repo is
 
-- A desktop app plus a local `redrob-server`, both operating on the user's own
-  files. No sign-in, no account, no organization, no hosted control plane.
-- Inference is the Redrob provider only: paste a `REDROB_API_KEY` issued at
-  console.redrob.ai on the connect screen. Other providers are added with their
-  own API keys in `Settings > AI Providers`.
-- MCP servers, skills, commands, agents, and Anthropic-compatible plugins are all
-  workspace-local. Claude Code plugin bundles still install from GitHub.
+Redrob Work: a desktop app (Electron) plus a local `redrob-server`, both operating on the
+user's own files. **Local-only.** No sign-in, no account, no organization, no hosted control
+plane. The Den control plane and every cloud surface that depended on it are gone.
 
-## Removed
+- `apps/app` — the React web UI, built with Vite, rendered by both the browser and the desktop
+  shell.
+- `apps/server` — `redrob-server`, the local HTTP server. It manages the engine, MCP servers,
+  workspaces, sessions and the environment-variable store.
+- `apps/desktop` — the Electron shell. It packages the engine as a sidecar.
+- `packages/` (14): `codemode`, `docs`, `email`, `enterprise-mcp-client`,
+  `enterprise-mcp-mock-server`, `handsfree`, `headless-threads`, `install-config`, `mcp-apps`,
+  `paths`, `redrob-bootstrap`, `redrob-ui-mcp`, `types`, `ui`.
 
-Server (`apps/server`)
-- Cloud MCP routes, health, and reconcile machinery.
-- Connect state, skill catalog, automation catalog, MCP-server catalog, and their
-  shared transport.
-- Cloud provider sync, desktop cloud resource sync, enterprise Den origin gate,
-  Cloud upload extension.
-- The agent-context diagnostics feature. Its schema required cloud catalog
-  probes, organization connection rows, and cloud tool IDs as preconditions, so
-  with Cloud gone there is no report left to produce.
-- Agent steering that described a control plane: the capabilities-knowledge
-  document's Cloud/Connect/Automations sections, the provider adapters' Connect
-  capability contribution, and Cloud-readiness extension steering (now always
-  local extension discovery + local skill authoring).
+**The engine is Redrob Code.** The desktop shell resolves the engine binary from
+`REDROB_CODE_BIN` or a packaged sidecar, both named `redrob`, pinned to a release of
+`redrob-labs/redrob-code` by `apps/desktop/scripts/redrob-code-release.mjs` and spawned from
+`apps/desktop/electron/runtime.mjs`. Directory routing is the `x-redrob-directory` header, set
+in `apps/app/src/app/lib/opencode.ts` and read in `apps/server/src/server.ts`; upstream
+OpenCode's `x-opencode-directory` is not accepted.
 
-App (`apps/app`)
-- Cloud client methods (`getRedrobCloudMcpHealth`, reconcile, engine refresh) and
-  the Advanced page's Cloud MCP diagnostics.
-- The gateway runtime: nothing injected `window.__REDROB_GATEWAY__` after
-  den-gateway was deleted, so the Den bearer, same-origin gateway base URL, and
-  workspace-creation gate were unreachable.
-- Den library publishing (`/v1/plugins` bundles, My Library polling) and the
-  Library "Add" components.
-- The unreachable Connect connection surface in the extensions inventory, the
-  `redrob-connect` skill origin, and the `connect` settings tab (no renderer).
-- 812 i18n keys the removal left unreachable, including the whole `den.*` and
-  `connect.*` families (`en.ts` went from 1984 keys to 1172).
+Inference is the Redrob provider by default: the user pastes a `REDROB_API_KEY` issued at
+console.redrob.ai on the onboarding key step
+(`apps/app/src/react-app/domains/onboarding/redrob-key-step.tsx`). Other providers are added
+with their own API keys in `Settings > AI Providers`. MCP servers, skills, commands, agents and
+Anthropic-compatible plugins are workspace-local; Claude Code plugin bundles still install from
+GitHub.
 
-Desktop (`apps/desktop`)
-- The `cloud` and `enterprise` distributions. Both gated sign-in and an
-  activation only a control plane could grant, so either build would now be
-  permanently locked: electron-builder configs, release matrix legs, package
-  scripts, the IPC preactivation allowlist, and the activation checks are gone.
-- Connect links: verifier, replay guard, embedded public keys, keypair
-  generator, and the `connectLinkVerify` / `connectLinkAccept` IPC pair.
-- The scheduled-automation runner (it polled a Den runner endpoint with
-  server-signed credentials).
-- The desktop bootstrap payload is reduced to local brand fields; the handoff
-  grant, prepared org/skill, claim links, and enterprise activation are gone.
+Localization is exactly English and Korean, locked at four layers by
+`apps/app/tests/supported-locales.test.ts`. `ko.ts` is deliberately smaller than `en.ts` (~430
+keys against ~1171): it is an overlay and `t()` falls back to English, which the test asserts by
+allowing missing Korean keys but rejecting Korean keys English lacks.
 
-Shared and tooling
-- `packages/types/src/den/**` (7 modules, no consumers), `connect-link`,
-  `connection-action-app`, `automations`, `workflows`, the agent-context
-  diagnostics schema.
-- `packages/connect-link`, `packages/automations`, the connection-action MCP app.
-- The `evals/` harness and its CI lanes (107 of its 141 specs drove Den), the
-  eval-only agent skills, `scripts/dev-web-local.sh`, `scripts/dev-den-local.sh`,
-  `check-connect-installer-parity`, `generate-desktop-versions`, the
-  `update-models` workflow, and the `redrob-models` / `desktop-den-sync-review`
-  skills.
-- The bootstrap CLI's `cloud` command family; `start.md` is now a local install
-  flow.
-- `.env.dev` (its loader no longer exists) and the warden desktop↔den sync
-  clearance path.
+## Current main
 
-Also fixed on the way: `X-Redrob Work-Host-Token` was not a valid HTTP header
-name, so every request that set it threw instead of authenticating. Readers
-already used `x-redrob-host-token`; only the writers were broken. The Linux
-`.desktop` keys had the same space-in-identifier bug.
+`d274cb6` — `Merge PR #8: docs: make Kiro the worker and Cursor Cloud the commander`
 
-## Kept deliberately
+Recent landings:
 
-- `apps/server/src/cloud-plugins.ts` — named "cloud" but it is the plugin
-  install/uninstall engine that local Claude Code plugin bundles persist through.
-- `LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX` in `runtime-opencode-config-store.ts`
-  and the legacy `X-Redrob Work-*` `.desktop` key readers — an existing install's
-  runtime DB and desktop entry still carry the old names.
-- `REDROB_EVAL_*` env hooks in `apps/desktop/electron` — generic fault-injection
-  and recovery-fixture hooks with their own unit coverage.
-- The `[connect-skill ...]` composer regex alternatives and
-  `connectSkillSlashCommandOptions` — unreachable now, but inert and covered by
-  tests.
-- `packages/docs/cloud/**` — documentation-site content, not code.
+| PR | What |
+| --- | --- |
+| #8 (`d274cb6`) | AGENTS.md only: Kiro is the worker, Cursor Cloud the commander |
+| #7 (`ef9b7d6`) | Paused automatic GitHub Actions for local-dev — 12 workflows, +20/−77 |
+| #6 (`b99c9a1`) | Ran Redrob Work on Redrob Code: engine wiring in `apps/app/src/app/lib/opencode.ts`, `redrob-provider.ts`, `apps/desktop/electron/runtime.mjs`, `electron-builder.base.yml`, en/ko locales, plus new tests `engine-directory-header.test.ts`, `redrob-code-spawn.test.ts`, `supported-locales.test.ts` |
 
-## Verification
+Before that: the cloud-removal series (`278f810`, `f7f70da`, `bcdc9fc`) deleting the Den wire
+types, connect links, automations and every cloud UI surface, then `auto` becoming the canonical
+Redrob model id and the engine reporting itself as Redrob Code everywhere the version surfaces.
+
+**CI is paused.** All 14 workflows in `.github/workflows` are `workflow_dispatch` only. Local
+runs are the only gate.
+
+## How to verify locally
+
+`pnpm@11.4.0` (root `packageManager`), Node 24 (`.nvmrc`).
 
 ```bash
-pnpm typecheck                          # 0 errors
-pnpm --filter @redrob/app test          # 414 pass / 0 fail
-pnpm build:ui                           # exit 0
-pnpm --filter redrob-server test
-pnpm --filter @redrob/desktop test
+pnpm install
+pnpm typecheck                          # 0 errors — but note: this only filters @redrob/app
+pnpm --filter redrob-server typecheck   # 0 errors — root typecheck does NOT cover the server
+pnpm --filter @redrob/app test          # 422 pass / 0 fail, 86 files, ~25s
+pnpm build:ui                           # exit 0, ~10s
+pnpm --filter @redrob/desktop test       # 220 tests: 216 pass / 0 fail / 4 skip
+pnpm --filter redrob-server test        # 530 pass / 5 skip / 6 fail — see follow-up 1
+pnpm check:outbound-access              # manifest covers 33 hosts, 28 scanned, no stale entries
 ```
 
-Two caveats when running the non-app suites on Windows:
+`pnpm typecheck` at the root is `pnpm --filter @redrob/app typecheck` and nothing else, so
+server and desktop are not covered by it. Typecheck the server explicitly.
 
-1. Clear `apps/server/dist` first. A stale build leaves compiled copies of
-   deleted tests that `bun test` also runs; regenerate with
-   `pnpm --filter redrob-server build`.
-2. Both suites have pre-existing environment failures unrelated to this work:
-   - `redrob-server`: 120 failures, all from `EBUSY` when `afterEach` removes a
-     temp directory (Windows file locking) and `Managed OpenCode process did not
-     exit after SIGKILL` (POSIX signal semantics).
-   - `@redrob/desktop`: 15 failures — Linux AppImage integration, nuke cleanup,
-     chain repair, and the `HOME`/`XDG` desktop-bootstrap precedence tests.
+Clear `apps/server/dist` before running the server suite. A stale build leaves compiled copies of
+deleted tests that `bun test` also runs; regenerate with `pnpm --filter redrob-server build`.
 
-Both counts were confirmed identical to their pre-removal baselines, so a green
-CI run on Linux is the real gate.
+The Windows-only failure counts that used to be recorded here (120 `EBUSY` server failures, 15
+desktop failures) do not reproduce on Linux. On Linux the desktop suite is fully green and the
+server suite has exactly 6 failures, all of which reproduce when run file-by-file in isolation —
+they are real, not load artifacts.
 
-## Follow-ups
+## Follow-ups that are still real, prioritized
 
-- `apps/server/src/agent-context-*` is gone, so `Settings > Debug` no longer has
-  an agent diagnostics panel. If that local visibility is still wanted, rebuild
-  it around local checks only (engine config, MCP inventory, runtime health).
-- `packages/docs` still ships the cloud documentation tree. It is inert content,
-  but the docs search tool indexes it, so an agent can still surface cloud pages.
-- Several i18n keys outside the removed namespaces were already orphaned before
-  this work; a sweep would need to confirm each key is unreachable first (this
-  repo has no dynamic `t()` key construction, which is what made the 812-key
-  deletion safe).
-- `packages/redrob-bootstrap/evals/agent-test-evidence-redrob-app-install.mjs` is
-  the only surviving evidence script; the other two required a live den-api.
+1. **Six reproducible `redrob-server` failures.** All confirmed to fail in isolation, so none is
+   a flake:
+   - Three `env routes > voice realtime session …` cases in `src/env-routes.e2e.test.ts`. The
+     cause is a concrete name mismatch left by the cloud removal: the tests write
+     `REDROB_CLOUD_API_KEY`, but `resolveRedrobWorkModelsVoiceConfig` in `apps/server/src/server.ts`
+     reads `REDROB_MODELS_API_KEY` (falling back to `process.env`). With no key it returns
+     `null`, the broker branch is skipped entirely, and the request falls through to direct
+     OpenAI — hence 500 where 200 is expected and 400 where 503 is. Both names are still in
+     `PERSISTABLE_INTERNAL_KEYS` in `apps/server/src/env-file.ts`, so the decision is which one
+     is canonical, and whether `REDROB_CLOUD_API_KEY` should be read as a legacy alias for
+     existing installs.
+   - `src/mcp.authorization-link.e2e.test.ts` — `authorization-required MCP tool error
+     pass-through` hangs and times out at 30s.
+   - `src/mcp.engine-sync.e2e.test.ts` — `does not overlap startup registration with explicit
+     cloud reconciliation`. The name still describes cloud reconciliation, which was removed, so
+     check whether the test is asserting a contract that no longer exists.
+   - `src/serve-node.test.ts` — `handles a malformed raw Node TRACE request without an unhandled
+     rejection`.
+2. **`packages/docs/cloud/**` still ships 19 cloud pages** (enterprise, SCIM, SSO, shared
+   workspaces, cloud MCP, team quickstart). It is inert content, but the docs search tool indexes
+   it, so an agent can still surface features the product does not have.
+3. **`Settings > Debug` has no agent diagnostics panel.** `apps/server/src/agent-context-*` was
+   deleted because its schema required cloud catalog probes, organization connection rows and
+   cloud tool IDs as preconditions. If that local visibility is wanted, rebuild it around local
+   checks only: engine config, MCP inventory, runtime health.
+4. **Orphaned i18n keys outside the removed namespaces.** The 812-key deletion was safe because
+   this repo constructs no `t()` keys dynamically. A further sweep would need to confirm each key
+   is unreachable first.
+5. **One surviving evidence script.** `packages/redrob-bootstrap/evals/agent-test-evidence-redrob-app-install.mjs`
+   is the only file in that directory; the other two required a live den-api and are gone. The
+   root `evals/` harness is gone with them.
+
+## Do not
+
+- **Do not delete `apps/server/src/cloud-plugins.ts`.** The name says cloud; the file is the
+  plugin install/uninstall engine that local Claude Code plugin bundles persist through.
+- **Do not remove `LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX`** (`"redrob-connect-"`) from
+  `apps/server/src/runtime-opencode-config-store.ts`. An existing install's runtime DB still
+  carries rows under that prefix. It is imported by `redrob-runtime-config.ts` and `server.ts`.
+- **Do not remove the `REDROB_EVAL_*` env hooks** in `apps/desktop/electron` (`runtime.mjs`,
+  `main.mjs`, `preload.mjs`, `updater.mjs`). They are generic fault-injection and
+  recovery-fixture seams with their own unit coverage, not leftovers from the deleted eval
+  harness.
+- **Do not remove `connectSkillSlashCommandOptions`** or the `[connect-skill …]` composer regex
+  alternatives (`slash-command.ts`, `composer/editor.tsx`, `queued-messages-panel.tsx`,
+  `session-surface.tsx`). Unreachable today, but inert and covered by
+  `apps/app/tests/prompt-file-parts.test.ts`.
+- **Do not rebuild the Den control plane, Connect links, scheduled automations, or the `cloud`
+  and `enterprise` desktop distributions.** Both distributions gated sign-in and an activation
+  only a control plane could grant, so either build would now be permanently locked.
+- **Do not call bare `fetch` in `apps/server/src`.** External egress goes through `externalFetch`
+  and loopback through `loopbackFetch` (`apps/server/src/server-fetch.ts`); `loopbackFetch` is
+  only for 127.0.0.1, localhost and managed engine traffic. `pnpm check:outbound-access` and
+  `apps/desktop/electron/no-bare-external-fetch.test.mjs` enforce the boundary, and adding a new
+  external host requires updating the outbound-access manifest.
+- **Do not add a third locale.** `apps/app/tests/supported-locales.test.ts` asserts the language
+  registry, the UI options list, the bundle barrel and the locales directory are all exactly
+  `en, ko`.
+- **Do not accept `x-opencode-directory`.** Redrob Code reads only `x-redrob-directory`.
+- **Do not use an HTTP header name containing a space.** `X-Redrob Work-Host-Token` was such a
+  bug and every request that set it threw instead of authenticating. The code is correct now
+  (`x-redrob-host-token` / `X-Redrob-Host-Token`); do not reintroduce the pattern when renaming.

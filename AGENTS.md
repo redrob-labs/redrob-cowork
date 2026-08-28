@@ -69,6 +69,12 @@ The prompt must tell Kiro to plan, implement, review, spawn sub-agents as
 needed, then stop with DONE, files changed, proof commands plus exit codes,
 and remaining risks.
 
+Kiro writes append-only one-line checkpoints to a progress file the commander
+names in the prompt, using the exact prefix `CHECKPOINT n: `. At minimum:
+start, after reading the current state, after each deliverable, after
+commit/push, after merge, and DONE. The commander reads that file to follow a
+long run without interrupting it.
+
 The commander waits until Kiro reports DONE, then spot-checks the diff and
 the proof. Reject and re-dispatch if the proof is missing or the diff is
 wrong. Accept only after that review. Do not redo Kiro's work in the
