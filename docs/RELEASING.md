@@ -33,9 +33,8 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
    what electron-builder, `app.getVersion()`, the Vite renderer bundle, and
    the `redrob-server` npm publish all read.
 5. `publish-release` flips the draft public once required assets exist. From
-   that moment den-api serves the new version to orgs: it reads published
-   releases from the GitHub Releases API at runtime
-   (`ee/apps/den-api/src/desktop-releases.ts`) — prereleases and drafts are
+   that moment the desktop updater serves the new version: it reads published
+   releases from the GitHub Releases API at runtime — prereleases and drafts are
    excluded, so a rollback demotion removes a version immediately.
 
 ## Prerequisites
@@ -109,9 +108,8 @@ pnpm release:rollback --bad vX.Y.Z --execute
 Always pin `--bad` when executing: after a successful rollback the *good*
 release is Latest, so a bare re-run would select it as bad. The script
 re-points Latest, demotes the bad release to prerelease, and prepends a
-warning to its notes. Demotion also removes the version from den-api's
-published list at runtime (it excludes prereleases), so org installs and the
-update gate stop offering it within the cache window.
+warning to its notes. Because prereleases are excluded, the updater stops
+offering the demoted version once its cache window passes.
 
 ### 2. Reissue for updated clients
 
@@ -160,8 +158,6 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 - Asset count looks right (macOS + Linux + Windows + updater `latest*.yml`
   manifests — the desktop updater 404s until the manifests are published)
 - `npm view redrob-server version` shows the new version
-- `curl -s https://api.redrob.io/v1/app-version` lists the new version
-  once den-api's cache refreshes (≤5 minutes)
 
 ## Where versions live now
 
@@ -171,11 +167,6 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 | What's the latest? | `gh release view --json tagName` |
 | What commit is vX.Y.Z? | `git rev-parse vX.Y.Z` |
 | What version is this checkout? | `git describe --tags` (package.json says `0.0.0-dev` on purpose) |
-| Oldest supported desktop version? | `MIN_SUPPORTED_DESKTOP_VERSION` — committed policy in `scripts/release/generate-desktop-versions.mjs` |
-
-`ee/apps/den-api/src/generated/desktop-versions.ts` is a cold-start/offline
-fallback snapshot only; refresh it occasionally with
-`node scripts/release/generate-desktop-versions.mjs --version <latest>`.
 
 ## Troubleshooting
 
@@ -193,7 +184,7 @@ fallback snapshot only; refresh it occasionally with
 ## History
 
 - **2026-08**: releases became commit-free (tags are the only version source;
-  CI stamps the workspace; den-api reads published releases at runtime; AUR
+  CI stamps the workspace; the updater reads published releases at runtime; AUR
   renders a committed template). Previously every release required a version
   bump commit, a dev backfill PR, and an AUR packaging PR.
 - **2026-08-05** (v0.18.15/v0.18.16): three releases red since the Electron

@@ -396,8 +396,8 @@ function readRedrobWorkInferenceBaseUrl(providerConfig: JsonRecord): string | nu
   return api ? api.replace(/\/api\/v1\/?$/, "") : null;
 }
 
-// Ported from ee/apps/den-api/src/llm/cloud-provider-materialization.ts.
-// Keep local: the open-source server must never depend on ee modules.
+// Materializes provider env entries locally; the server owns this mapping and
+// must not depend on any control-plane module.
 function providerEnvEntries(provider: DenProviderConnection): EnvEntry[] {
   const entries: EnvEntry[] = [];
   const envNames = readProviderEnvNames(provider.providerConfig);

@@ -4,20 +4,11 @@ Redrob Work (레드롭 워크) is a free, open-source desktop and MCP app (macOS
 Windows, Linux) for doing work with AI agents on your own files. It is built on
 the OpenCode engine, ships in English and Korean, and uses Redrob as its only
 inference provider (console.redrob.ai, model `redrob-ai`), connected by pasting
-a `REDROB_API_KEY`. Desktop mode keeps files local; cloud is optional. Three
-surfaces live in this repo:
+a `REDROB_API_KEY`. Files stay local. This repo holds one surface:
 
 - **Desktop app** (`apps/`, `packages/`) — local-first agent workspace: chat on
-  files, skills, browser automation, scheduled automations, Anthropic-compatible
-  plugins.
-- **Redrob Work MCP gateway** (`ee/apps/den-api`) — one URL
-  (`api.redrob.io/mcp/agent`) that brings org-assigned skills, plugins,
-  and connections (Google Workspace, Microsoft 365, MCPs) into Codex, Claude
-  Code, Cursor, or any MCP client via `search_capabilities` /
-  `execute_capability`.
-- **Redrob Work Den** (`ee/apps/den-*`) — the org control plane: provision
-  inference, manage teams and access, set desktop policies, publish skills and
-  plugins through marketplaces.
+  files, skills, browser automation, Anthropic-compatible plugins, and a local
+  `redrob-server` that any MCP client can talk to.
 
 The app consumes Redrob Work server surfaces (self-hosted or hosted) rather than
 inventing parallel behavior. Anything OpenCode can do is available in Redrob Work,
@@ -48,15 +39,6 @@ even before a dedicated UI exists.
 - Run tests and report commands + results. A runtime-observable change is not
   done until its test evidence is visible on the PR. If validation cannot run,
   say why and give exact repro steps.
-## Local headless web (agents)
-
-- `pnpm dev:headless-web --detach` launches an isolated browser UI + local
- `redrob-server` without Electron, detached from the invoking shell. Read
- `tmp/dev-headless-web.json` for `webUrl`, tokens, logs, and Den proxy URLs.
- It does not use `~/.config/redrob/server.json`. Re-running reuses a healthy
- instance; `--replace` restarts it with fresh tokens (`--keep-tokens` to
- keep the previous ones). Inference is connected by pasting a `REDROB_API_KEY`
- issued at console.redrob.ai; there is no separate account sign-in flow.
 
 ## Coding
 

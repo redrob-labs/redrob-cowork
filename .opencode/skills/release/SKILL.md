@@ -123,11 +123,6 @@ Confirm `npm view redrob-server version` matches.
 
 - Desktop installer fixes only reach users through a new release — the org
   install door (`/v1/install/:platform`) 302s to versioned assets.
-- den-api discovers published versions from the GitHub Releases API at
-  runtime (`ee/apps/den-api/src/desktop-releases.ts`): the new version is
-  live for orgs as soon as the release is published — no den deploy needed.
-  The committed `generated/desktop-versions.ts` is only a cold-start/offline
-  fallback.
 - AUR publishes by rendering the committed `packaging/aur` template
   (pkgver=0.0.0) in the CI workspace and pushing to aur.archlinux.org — the
   AUR-side commit is that channel's publish protocol; this repo stays

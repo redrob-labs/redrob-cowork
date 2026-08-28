@@ -79,17 +79,7 @@ bun --conditions=development test \
 
 cd ../app
 bun test \
-  tests/den-mcp-url.test.ts \
-  tests/mcp-app-frame.test.ts \
-  tests/session-mcp-maintenance.test.ts \
-  tests/cloud-mcp-maintenance-gate.test.ts
-
-cd ../../ee/apps/den-api
-bun test \
-  test/remote-mcp-app-rollout.test.ts \
-  test/external-connection-proxy.test.ts \
-  test/admin-organization-capabilities.test.ts \
-  test/organization-capabilities.test.ts
+  tests/mcp-app-frame.test.ts
 ```
 
 These checks cover exact trusted-origin matching, cross-origin rejection,

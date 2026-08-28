@@ -391,8 +391,8 @@ const APP_ICON_PATH = resolveAppIconPath();
 const APP_ICON_IMAGE = APP_ICON_PATH ? nativeImage.createFromPath(APP_ICON_PATH) : null;
 const BRAND_ICON_MAX_BYTES = 2 * 1024 * 1024;
 const BRAND_ICON_FETCH_TIMEOUT_MS = 10_000;
-// Keep in sync with ee/apps/den-api/src/brand-icon-validation.ts so logo CDNs
-// that expect a browser request behave the same at save time and apply time.
+// Logo CDNs that expect a browser request need a browser user agent, so the
+// same one is used at save time and at apply time.
 const BRAND_ICON_FETCH_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 function scheduleBlankSlateProfileCleanup() {
