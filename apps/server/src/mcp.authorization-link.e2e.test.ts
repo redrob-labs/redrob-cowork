@@ -12,13 +12,13 @@ const connectUrl = "https://connect.example.test/salesforce/start";
 const toolName = "request_salesforce_authorization";
 
 function findEngine(): string | null {
-  const explicit = process.env.REDROB_TEST_OPENCODE_PATH;
+  const explicit = process.env.REDROB_CODE_BIN;
   if (explicit && existsSync(explicit)) return explicit;
   const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
   const name = process.platform === "darwin"
-    ? `opencode-${arch}-apple-darwin`
+    ? `redrob-${arch}-apple-darwin`
     : process.platform === "linux"
-      ? `opencode-${arch}-unknown-linux-gnu`
+      ? `redrob-${arch}-unknown-linux-gnu`
       : "";
   const candidate = join(sidecarDir, name);
   return name && existsSync(candidate) ? candidate : null;
@@ -200,8 +200,8 @@ describeMaybe("authorization-required MCP tool error pass-through", () => {
     engine = spawn(enginePath!, ["serve", "--pure", "--hostname", "127.0.0.1", "--port", String(enginePort)], {
       env: {
         ...process.env,
-        OPENCODE_CONFIG: configPath,
-        OPENCODE_DISABLE_AUTOUPDATE: "1",
+        REDROB_CONFIG: configPath,
+        REDROB_DISABLE_AUTOUPDATE: "1",
         XDG_DATA_HOME: join(dataDir, "data"),
         XDG_CONFIG_HOME: join(dataDir, "config"),
         XDG_STATE_HOME: join(dataDir, "state"),

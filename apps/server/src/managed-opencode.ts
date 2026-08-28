@@ -80,7 +80,7 @@ export function createManagedProcessClose(
         // Re-check below; kill can race a natural exit.
       }
       if (!await waitForExit(options.killTimeoutMs ?? 500)) {
-        throw new Error("Managed OpenCode process did not exit after SIGKILL");
+        throw new Error("Managed Redrob Code process did not exit after SIGKILL");
       }
     })();
     return closePromise;
@@ -89,6 +89,22 @@ export function createManagedProcessClose(
 }
 
 const SECRET_ENV_PATTERN = /(TOKEN|PASSWORD|USERNAME|AUTH|SECRET|KEY|CREDENTIAL)/i;
+
+/**
+ * Default binary name for the Redrob Code engine. Resolved through PATH when no
+ * explicit `bin` is supplied. Never falls back to upstream `opencode`: that
+ * binary reads different env names and emits a different readiness line, so
+ * silently starting it would produce an engine Redrob Work cannot drive.
+ */
+export const REDROB_CODE_BIN_NAME = "redrob";
+
+/**
+ * Exact readiness line prefix printed by `redrob serve` on stdout. Redrob Code
+ * prints `redrob server listening on http://<host>:<port>`; upstream OpenCode
+ * printed `opencode server listening ...`, so this prefix is what makes startup
+ * detection engine-specific.
+ */
+export const REDROB_CODE_READY_LINE_PREFIX = "redrob server listening";
 
 function randomSecret(): string {
   return randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "");
@@ -133,7 +149,7 @@ class ManagedOpencodeExitError extends Error {
   readonly exitCode: number | null;
 
   constructor(exitCode: number | null, output: string) {
-    super(`OpenCode server exited with code ${exitCode}${output.trim() ? `\n${output}` : ""}`);
+    super(`Redrob Code server exited with code ${exitCode}${output.trim() ? `\n${output}` : ""}`);
     this.exitCode = exitCode;
   }
 }
@@ -152,20 +168,23 @@ async function startManagedOpencodeServer(
   const username = randomSecret();
   const password = randomSecret();
   const args = ["serve", "--hostname", hostname, "--port", String(port), "--cors", "*"];
-  const command = options.bin?.trim() || "opencode";
+  const command = options.bin?.trim() || REDROB_CODE_BIN_NAME;
+  // Redrob Code reads REDROB_SERVER_USERNAME/PASSWORD. Upstream OpenCode's
+  // OPENCODE_SERVER_* names are ignored by this engine, which would leave the
+  // managed child unauthenticated.
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     ...options.env,
-    OPENCODE_SERVER_USERNAME: username,
-    OPENCODE_SERVER_PASSWORD: password,
+    REDROB_SERVER_USERNAME: username,
+    REDROB_SERVER_PASSWORD: password,
   };
   // The managed engine needs its own provider environment, but never the key
   // that decrypts Redrob Work-owned OAuth credentials.
   delete env.REDROB_ENCRYPTION_KEY;
   const injectedEnv = Object.entries({
     ...(options.env ?? {}),
-    OPENCODE_SERVER_USERNAME: username,
-    OPENCODE_SERVER_PASSWORD: password,
+    REDROB_SERVER_USERNAME: username,
+    REDROB_SERVER_PASSWORD: password,
   })
     .filter((entry): entry is [string, string] => typeof entry[1] === "string")
     .map(([name, value]) => ({
@@ -174,7 +193,7 @@ async function startManagedOpencodeServer(
       redacted: SECRET_ENV_PATTERN.test(name),
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
-  const child: ChildProcess = spawn(options.bin?.trim() || "opencode", args, {
+  const child: ChildProcess = spawn(command, args, {
     cwd: options.cwd,
     env,
     stdio: ["ignore", "pipe", "pipe"],
@@ -185,7 +204,7 @@ async function startManagedOpencodeServer(
   let url: string;
   try {
     url = await new Promise<string>((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error(`Timeout waiting for OpenCode server after ${options.timeoutMs ?? 15000}ms`)), options.timeoutMs ?? 15000);
+      const timeout = setTimeout(() => reject(new Error(`Timeout waiting for Redrob Code server after ${options.timeoutMs ?? 15000}ms`)), options.timeoutMs ?? 15000);
       let output = "";
       const done = (value: string) => {
         clearTimeout(timeout);
@@ -198,9 +217,9 @@ async function startManagedOpencodeServer(
       child.stdout?.on("data", (chunk) => {
         output += chunk.toString();
         for (const line of output.split("\n")) {
-          if (!line.startsWith("opencode server listening")) continue;
+          if (!line.startsWith(REDROB_CODE_READY_LINE_PREFIX)) continue;
           const match = line.match(/on\s+(https?:\/\/[^\s]+)/);
-          if (!match?.[1]) return fail(new Error(`Failed to parse OpenCode server URL from: ${line}`));
+          if (!match?.[1]) return fail(new Error(`Failed to parse Redrob Code server URL from: ${line}`));
           done(match[1]);
         }
       });

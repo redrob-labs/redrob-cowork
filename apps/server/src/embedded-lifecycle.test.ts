@@ -24,7 +24,6 @@ const ENV_NAMES: string[] = [
   "REDROB_ENCRYPTION_KEY",
   "REDROB_OPENCODE_BASE_URL",
   "REDROB_LIFECYCLE_LOG",
-  "OPENCODE_MODELS_URL",
 ];
 
 type Fixture = {
@@ -59,7 +58,7 @@ async function writeFakeOpencodeBin(root: string): Promise<string> {
     "  port: requestedPort,",
     "  fetch(request) { append(new URL(request.url).pathname); return Response.json({}); },",
     "});",
-    "console.log(`opencode server listening on http://127.0.0.1:${server.port}`);",
+    "console.log(`redrob server listening on http://127.0.0.1:${server.port}`);",
     "process.on('SIGTERM', () => { append('SIGTERM'); server.stop(true); process.exit(0); });",
   ].join("\n"));
   await chmod(binPath, 0o755);
@@ -91,7 +90,6 @@ async function createFixture(): Promise<Fixture> {
   process.env.REDROB_DEV_MODE = "1";
   process.env.REDROB_RUNTIME_DB = join(root, "runtime.sqlite");
   process.env.REDROB_LIFECYCLE_LOG = logPath;
-  process.env.OPENCODE_MODELS_URL = "https://catalog.example.test/models";
   delete process.env.REDROB_OPENCODE_BASE_URL;
 
   return {
@@ -234,7 +232,7 @@ describe("embedded server lifecycle", () => {
     }
   });
 
-  test.serial("does not expose the vault encryption key to managed OpenCode", async () => {
+  test.serial("does not expose the vault encryption key to the managed Redrob Code engine", async () => {
     const fixture = await createFixture();
     process.env.REDROB_ENCRYPTION_KEY = "server-only-vault-key";
     let managed: Awaited<ReturnType<typeof managedOpencodeModule.createManagedOpencodeServer>> | null = null;
@@ -251,7 +249,7 @@ describe("embedded server lifecycle", () => {
     }
   });
 
-  test.serial("managed OpenCode readiness failure closes the spawned child", async () => {
+  test.serial("managed Redrob Code readiness failure closes the spawned child", async () => {
     const fixture = await createFixture();
     try {
       const bin = await writeUnreadyOpencodeBin(fixture.root);
@@ -260,7 +258,7 @@ describe("embedded server lifecycle", () => {
         cwd: fixture.root,
         timeoutMs: 500,
         env: { REDROB_LIFECYCLE_LOG: fixture.logPath },
-      })).rejects.toThrow("Timeout waiting for OpenCode server");
+      })).rejects.toThrow("Timeout waiting for Redrob Code server");
       expect(await logLines(fixture.logPath)).toContain("READY");
       expect((await logLines(fixture.logPath)).filter((line) => line === "SIGTERM")).toHaveLength(1);
     } finally {

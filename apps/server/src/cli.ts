@@ -24,7 +24,6 @@ import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
 import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
-import { resolveOpencodeModelsUrl } from "./opencode-models-url.js";
 import { startWorkerActivityHeartbeat } from "./worker-activity-heartbeat.js";
 import pkg from "../package.json" with { type: "json" };
 
@@ -74,14 +73,12 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
     const managedOpencodeCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
     await mkdir(managedOpencodeCwd, { recursive: true });
     await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
-    const opencodeModelsUrl = await resolveOpencodeModelsUrl();
     const engineEnv: Record<string, string | undefined> = {
       ...(process.env.REDROB_DEV_MODE ? { REDROB_DEV_MODE: process.env.REDROB_DEV_MODE } : {}),
       ...(process.env.REDROB_UI_CONTROL_DISCOVERY ? { REDROB_UI_CONTROL_DISCOVERY: process.env.REDROB_UI_CONTROL_DISCOVERY } : {}),
       REDROB_SERVER_URL: serverUrl,
       REDROB_SERVER_TOKEN: config.token,
-      OPENCODE_CONFIG: runtimeConfigPath,
-      OPENCODE_MODELS_URL: opencodeModelsUrl,
+      REDROB_CONFIG: runtimeConfigPath,
     };
     const engineSpawnTemplate: EngineSpawnTemplate = {
       bin: process.env.REDROB_OPENCODE_BIN,

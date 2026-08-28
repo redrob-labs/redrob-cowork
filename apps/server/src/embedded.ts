@@ -34,7 +34,6 @@ import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
 import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
-import { resolveOpencodeModelsUrl } from "./opencode-models-url.js";
 import type { ServeResult } from "./serve-node.js";
 import type { LocalManagedMcpVaultKeyProvider, ServerConfig } from "./types.js";
 
@@ -200,7 +199,6 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
         || workspace.path;
       await duringStartup(() => mkdir(cwd, { recursive: true }));
       await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
-      const opencodeModelsUrl = await duringStartup(() => resolveOpencodeModelsUrl());
 
       const opencodeBin = options.opencodeBin || process.env.REDROB_OPENCODE_BIN;
       // Shared by the first spawn and by any later rollover standby, so a
@@ -210,8 +208,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
         ...(process.env.REDROB_UI_CONTROL_DISCOVERY ? { REDROB_UI_CONTROL_DISCOVERY: process.env.REDROB_UI_CONTROL_DISCOVERY } : {}),
         REDROB_SERVER_URL: serverUrl,
         REDROB_SERVER_TOKEN: config.token,
-        OPENCODE_CONFIG: runtimeConfigPath,
-        OPENCODE_MODELS_URL: opencodeModelsUrl,
+        REDROB_CONFIG: runtimeConfigPath,
       };
       engineSpawnTemplate = {
         bin: opencodeBin,

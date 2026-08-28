@@ -36,6 +36,11 @@ describe("env-file", () => {
 
   test("isReservedEnvKey blocks REDROB_ / OPENCODE_ prefixes", () => {
     expect(isReservedEnvKey("REDROB_TOKEN")).toBe(true);
+    // Redrob Code reads the managed engine credentials from these names, so a
+    // user-supplied value must never be able to override them.
+    expect(isReservedEnvKey("REDROB_SERVER_USERNAME")).toBe(true);
+    expect(isReservedEnvKey("REDROB_SERVER_PASSWORD")).toBe(true);
+    expect(isReservedEnvKey("REDROB_CONFIG")).toBe(true);
     expect(isReservedEnvKey("OPENCODE_SERVER_PASSWORD")).toBe(true);
     expect(isReservedEnvKey("ANTHROPIC_API_KEY")).toBe(false);
     expect(isReservedEnvKey("GCLOUD_PROJECT")).toBe(false);

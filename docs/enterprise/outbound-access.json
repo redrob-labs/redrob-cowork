@@ -217,15 +217,6 @@
       "override": "MCP server URL setting"
     },
     {
-      "host": "models.redrob.io",
-      "kind": "fetched",
-      "components": ["server"],
-      "purpose": "First-party OpenCode model catalog mirror passed to managed OpenCode as OPENCODE_MODELS_URL.",
-      "requirement": "required-in-practice",
-      "blockedEffect": "The model catalog is unavailable or degraded; model selection may be stale or incomplete.",
-      "override": "OPENCODE_MODELS_URL"
-    },
-    {
       "host": "oauth2.googleapis.com",
       "kind": "fetched",
       "components": ["server"],

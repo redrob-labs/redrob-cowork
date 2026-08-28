@@ -1,16 +1,16 @@
 /**
- * Runtime OpenCode configuration injected via a server-managed config file
- * passed to the engine as OPENCODE_CONFIG.
+ * Runtime engine configuration injected via a server-managed config file
+ * passed to the Redrob Code engine as REDROB_CONFIG.
  *
  * This is the single source of truth for the redrob agent definition,
  * plugins, and any other config that should be injected at runtime rather
  * than written to the user's own config files. Both cli.ts and embedded.ts
  * use this.
  *
- * The engine re-reads the OPENCODE_CONFIG file from disk on every instance
+ * The engine re-reads the REDROB_CONFIG file from disk on every instance
  * rebuild (e.g. /instance/dispose), so the file is synchronized on every
- * runtime-DB write — unlike the previous OPENCODE_CONFIG_CONTENT env var,
- * which was frozen at spawn and reverted MCP state on each dispose.
+ * runtime-DB write — unlike the previous config-content env var, which was
+ * frozen at spawn and reverted MCP state on each dispose.
  */
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";

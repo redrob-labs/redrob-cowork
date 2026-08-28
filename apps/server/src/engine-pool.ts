@@ -289,8 +289,6 @@ export async function computeEngineConfigFingerprint(template: EngineSpawnTempla
     .update(content)
     .update("\u0000")
     .update(template.bin?.trim() ?? "")
-    .update("\u0000")
-    .update(template.env.OPENCODE_MODELS_URL ?? "")
     .digest("hex");
 }
 
@@ -982,7 +980,7 @@ export class EnginePool {
       ...(this.template.spawnTimeoutMs ? { timeoutMs: this.template.spawnTimeoutMs } : {}),
       env: {
         ...this.template.env,
-        OPENCODE_CONFIG: this.template.runtimeConfigPath,
+        REDROB_CONFIG: this.template.runtimeConfigPath,
       },
     });
   }

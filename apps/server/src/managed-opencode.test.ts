@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { createManagedOpencodeServer } from "./managed-opencode.js";
+import { createManagedOpencodeServer, REDROB_CODE_READY_LINE_PREFIX } from "./managed-opencode.js";
 
 const roots: string[] = [];
 
@@ -24,7 +24,7 @@ async function writeExecutable(root: string, name: string, lines: string[]): Pro
   return path;
 }
 
-describe("managed OpenCode startup", () => {
+describe("managed Redrob Code startup", () => {
   test("waits for inherited diagnostic streams before retrying a code-1 EADDRINUSE exit", async () => {
     const root = await createRoot();
     const attemptsPath = join(root, "attempts.log");
@@ -45,7 +45,7 @@ describe("managed OpenCode startup", () => {
       "  process.exit(1);",
       "}",
       "const server = Bun.serve({ hostname: '127.0.0.1', port, fetch: () => Response.json({ ok: true }) });",
-      "console.log(`opencode server listening on http://127.0.0.1:${server.port}`);",
+      "console.log(`redrob server listening on http://127.0.0.1:${server.port}`);",
       "process.on('SIGTERM', () => { appendFileSync(process.env.ATTEMPTS_PATH, 'SIGTERM\\n'); server.stop(true); process.exit(0); });",
     ]);
     const managed = await createManagedOpencodeServer({
@@ -82,10 +82,75 @@ describe("managed OpenCode startup", () => {
     }
 
     expect(thrown).toBeInstanceOf(Error);
-    if (!(thrown instanceof Error)) throw new Error("Expected managed OpenCode startup to fail");
-    expect(thrown.message).toContain("OpenCode server exited with code 1");
+    if (!(thrown instanceof Error)) throw new Error("Expected managed Redrob Code startup to fail");
+    expect(thrown.message).toContain("Redrob Code server exited with code 1");
     expect(thrown.message).toContain("startup diagnostics from stdout");
     expect(thrown.message).toContain("fatal provider configuration mismatch");
     expect((await readFile(attemptsPath, "utf8")).trim().split("\n")).toEqual(["start"]);
+  });
+
+  test("only treats the Redrob Code readiness line as startup, not the upstream OpenCode line", async () => {
+    const root = await createRoot();
+    const bin = await writeExecutable(root, "upstream-ready-line.mjs", [
+      "const port = Number(process.argv[process.argv.indexOf('--port') + 1]);",
+      "console.log(`opencode server listening on http://127.0.0.1:${port}`);",
+      "setTimeout(() => {}, 60_000);",
+    ]);
+    let thrown: unknown;
+
+    try {
+      await createManagedOpencodeServer({ bin, cwd: root, timeoutMs: 1_500 });
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    if (!(thrown instanceof Error)) throw new Error("Expected the upstream readiness line to be ignored");
+    expect(thrown.message).toContain("Timeout waiting for Redrob Code server");
+  });
+
+  test("starts on the Redrob Code readiness line and injects Redrob server auth env", async () => {
+    const root = await createRoot();
+    const envPath = join(root, "env.json");
+    const bin = await writeExecutable(root, "redrob-ready.mjs", [
+      "import { writeFileSync } from 'node:fs';",
+      "const port = Number(process.argv[process.argv.indexOf('--port') + 1]);",
+      "writeFileSync(process.env.ENV_PATH, JSON.stringify({",
+      "  REDROB_SERVER_USERNAME: process.env.REDROB_SERVER_USERNAME ?? null,",
+      "  REDROB_SERVER_PASSWORD: process.env.REDROB_SERVER_PASSWORD ?? null,",
+      "  OPENCODE_SERVER_USERNAME: process.env.OPENCODE_SERVER_USERNAME ?? null,",
+      "  OPENCODE_SERVER_PASSWORD: process.env.OPENCODE_SERVER_PASSWORD ?? null,",
+      "  REDROB_CONFIG: process.env.REDROB_CONFIG ?? null,",
+      "}));",
+      "const server = Bun.serve({ hostname: '127.0.0.1', port, fetch: () => Response.json({ ok: true }) });",
+      "console.log(`redrob server listening on http://127.0.0.1:${server.port}`);",
+      "process.on('SIGTERM', () => { server.stop(true); process.exit(0); });",
+    ]);
+
+    const managed = await createManagedOpencodeServer({
+      bin,
+      cwd: root,
+      env: { ENV_PATH: envPath, REDROB_CONFIG: join(root, "redrob.json") },
+    });
+    await managed.close();
+
+    expect(REDROB_CODE_READY_LINE_PREFIX).toBe("redrob server listening");
+    const observed = JSON.parse(await readFile(envPath, "utf8")) as Record<string, string | null>;
+    expect(observed.REDROB_SERVER_USERNAME).toBe(managed.username);
+    expect(observed.REDROB_SERVER_PASSWORD).toBe(managed.password);
+    expect(observed.OPENCODE_SERVER_USERNAME).toBeNull();
+    expect(observed.OPENCODE_SERVER_PASSWORD).toBeNull();
+    expect(observed.REDROB_CONFIG).toBe(join(root, "redrob.json"));
+    expect(managed.execution.env.map((entry) => entry.name)).toEqual([
+      "ENV_PATH",
+      "REDROB_CONFIG",
+      "REDROB_SERVER_PASSWORD",
+      "REDROB_SERVER_USERNAME",
+    ]);
+    expect(managed.execution.env.find((entry) => entry.name === "REDROB_SERVER_PASSWORD")).toEqual({
+      name: "REDROB_SERVER_PASSWORD",
+      value: "<redacted>",
+      redacted: true,
+    });
   });
 });

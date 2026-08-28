@@ -99,7 +99,7 @@ async function writeFakeEngineBin(root: string): Promise<string> {
     "    return Response.json({ ok: true, port: server.port, path: url.pathname });",
     "  },",
     "});",
-    "console.log(`opencode server listening on http://127.0.0.1:${server.port}`);",
+    "console.log(`redrob server listening on http://127.0.0.1:${server.port}`);",
     "process.on('SIGTERM', () => { append(`${server.port} SIGTERM`); server.stop(true); process.exit(0); });",
   ].join("\n"));
   await chmod(binPath, 0o755);
@@ -191,7 +191,7 @@ async function createFixture(options?: { bin?: "ready" | "unready" }): Promise<F
     env: {
       REDROB_POOL_LOG: logPath,
       REDROB_POOL_STATE: statePath,
-      OPENCODE_CONFIG: runtimeConfigPath,
+      REDROB_CONFIG: runtimeConfigPath,
     },
     reservedPorts: () => [],
     spawnTimeoutMs: 2_000,
