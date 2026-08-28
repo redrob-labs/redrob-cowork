@@ -21,15 +21,25 @@ import {
   summarizeSystemCaSources,
   systemPlatformCertificateLoader,
 } from "./system-ca.mjs";
+import { REDROB_CODE_BINARY_BASE } from "../scripts/redrob-code-release.mjs";
 
 const __runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 
-// PLACEHOLDER: the real "Redrob Code" engine install source is not yet
-// published, so the guided install still points at the upstream OpenCode
-// installer. Override via REDROB_ENGINE_INSTALL_URL once the Redrob Code
-// endpoint is available; behavior is identical when the env var is unset.
-const REDROB_ENGINE_INSTALL_URL =
-  process.env.REDROB_ENGINE_INSTALL_URL?.trim() || "https://opencode.ai/install";
+/**
+ * Guided standalone install of the Redrob Code engine.
+ *
+ * Redrob Code has no public install endpoint: `redrob-labs/redrob-code` is a
+ * private repository and its installer is not published at a stable URL. Rather
+ * than installing a different product, guided install fails with an actionable
+ * message unless an operator supplies a real endpoint through
+ * REDROB_ENGINE_INSTALL_URL. Packaged builds bundle the engine as a sidecar and
+ * never need this path; development can point REDROB_CODE_BIN at a local build.
+ */
+const REDROB_ENGINE_INSTALL_URL = process.env.REDROB_ENGINE_INSTALL_URL?.trim() || null;
+const REDROB_ENGINE_INSTALL_UNAVAILABLE =
+  "Redrob Code has no public install endpoint yet, so Redrob Work will not install an engine for you. " +
+  "Packaged builds ship the engine as a bundled sidecar. For a development or custom setup, point " +
+  "REDROB_CODE_BIN at a Redrob Code binary, or set REDROB_ENGINE_INSTALL_URL to your own install script.";
 
 const DIRECT_RUNTIME = "direct";
 const REDROB_SERVER_PORT_RANGE_START = 48_000;
@@ -315,7 +325,7 @@ export function commandMatchesPackagedSidecar(command, sidecarDirs = []) {
   if (!sidecarDirs.some((dir) => String(dir ?? "").trim() && value.includes(dir))) {
     return false;
   }
-  return /(?:^|[/\\])opencode[^/\\\s]*\s+serve\b/.test(value);
+  return /(?:^|[/\\])redrob[^/\\\s]*\s+serve\b/.test(value);
 }
 
 export function embeddedServerImportUrl(embeddedPath) {
@@ -1592,12 +1602,14 @@ export function createRuntimeManager({
       }
     }
 
-    if (baseName === "opencode") {
+    if (baseName === REDROB_CODE_BINARY_BASE) {
+      const fileName = process.platform === "win32" ? "redrob.exe" : "redrob";
       for (const candidate of [
-        path.join(app.getPath("home"), ".opencode", "bin", process.platform === "win32" ? "opencode.exe" : "opencode"),
-        path.join("/opt/homebrew/bin", process.platform === "win32" ? "opencode.exe" : "opencode"),
-        path.join("/usr/local/bin", process.platform === "win32" ? "opencode.exe" : "opencode"),
-        path.join("/usr/bin", process.platform === "win32" ? "opencode.exe" : "opencode"),
+        // Conventional Redrob Code install location (see the redrob-code installer).
+        path.join(app.getPath("home"), ".redrob", "bin", fileName),
+        path.join("/opt/homebrew/bin", fileName),
+        path.join("/usr/local/bin", fileName),
+        path.join("/usr/bin", fileName),
       ]) {
         if (existsSync(candidate)) {
           return { path: candidate, source: "known-location" };
@@ -1612,9 +1624,17 @@ export function createRuntimeManager({
     return resolveBinaryInfo(baseName, extraPaths)?.path ?? null;
   }
 
-  function resolveOpencodeBinary(opencodeBinPath) {
-    const explicitPath = typeof opencodeBinPath === "string" ? opencodeBinPath.trim() : "";
-    return explicitPath ? { path: explicitPath, source: "custom" } : resolveBinaryInfo("opencode");
+  /**
+   * Resolve the Redrob Code engine binary: an explicit path first, then the
+   * packaged sidecar, PATH, and the conventional install locations. There is
+   * deliberately no fallback to upstream `opencode`: that binary reads different
+   * env names and prints a different readiness line, so starting it would
+   * produce an engine this app cannot drive.
+   */
+  function resolveRedrobCodeBinary(explicitBinPath) {
+    const configured = typeof explicitBinPath === "string" ? explicitBinPath.trim() : "";
+    const explicitPath = configured || process.env.REDROB_CODE_BIN?.trim() || "";
+    return explicitPath ? { path: explicitPath, source: "custom" } : resolveBinaryInfo(REDROB_CODE_BINARY_BASE);
   }
 
   function resolveDockerCandidates() {
@@ -1710,7 +1730,7 @@ export function createRuntimeManager({
   }
 
   function engineDoctor(options = {}) {
-    const resolved = resolveOpencodeBinary(options?.opencodeBinPath);
+    const resolved = resolveRedrobCodeBinary(options?.opencodeBinPath);
     if (!resolved?.path) {
       return {
         found: false,
@@ -1719,7 +1739,7 @@ export function createRuntimeManager({
         resolvedSource: null,
         version: null,
         supportsServe: false,
-        notes: ["OpenCode binary not found in bundled sidecars or PATH."],
+        notes: ["Redrob Code binary not found in bundled sidecars, PATH, or ~/.redrob/bin."],
         serveHelpStatus: null,
         serveHelpStdout: null,
         serveHelpStderr: null,
@@ -1730,10 +1750,10 @@ export function createRuntimeManager({
     const helpResult = spawnSync(resolved.path, ["serve", "--help"], { encoding: "utf8" });
     const notes = [`Using ${resolved.source}: ${resolved.path}`];
     if (versionResult.status !== 0) {
-      notes.push("OpenCode version probe failed.");
+      notes.push("Redrob Code version probe failed.");
     }
     if (helpResult.status !== 0) {
-      notes.push("OpenCode serve --help probe failed.");
+      notes.push("Redrob Code serve --help probe failed.");
     }
 
     return {
@@ -1750,12 +1770,15 @@ export function createRuntimeManager({
     };
   }
 
-  async function pinnedOpencodeInstallCommand() {
+  async function pinnedRedrobCodeInstallCommand() {
+    if (!REDROB_ENGINE_INSTALL_URL) {
+      throw new Error(REDROB_ENGINE_INSTALL_UNAVAILABLE);
+    }
     const constantsPath = path.resolve(desktopRoot, "../../constants.json");
     const payload = JSON.parse(await readFile(constantsPath, "utf8"));
-    const version = String(payload?.opencodeVersion ?? "").trim().replace(/^v/, "");
+    const version = String(payload?.redrobCodeVersion ?? "").trim().replace(/^v/, "");
     if (!version) {
-      throw new Error("constants.json is missing opencodeVersion");
+      throw new Error("constants.json is missing redrobCodeVersion");
     }
     return `curl -fsSL ${REDROB_ENGINE_INSTALL_URL} | bash -s -- --version ${version} --no-modify-path`;
   }
@@ -1886,7 +1909,7 @@ export function createRuntimeManager({
 
     const host = options.remoteAccessEnabled ? "0.0.0.0" : "127.0.0.1";
 
-    const managedOpencode = options.manageOpencode ? resolveOpencodeBinary(options.opencodeBinPath) : null;
+    const managedOpencode = options.manageOpencode ? resolveRedrobCodeBinary(options.opencodeBinPath) : null;
     redrobServerState.managedOpencodeBinPath = managedOpencode?.path ?? null;
     redrobServerState.managedOpencodeBinSource = managedOpencode?.source ?? null;
     if (options.manageOpencode) {
@@ -2217,20 +2240,28 @@ export function createRuntimeManager({
   }
 
   async function engineInstall() {
+    if (!REDROB_ENGINE_INSTALL_URL) {
+      return {
+        ok: false,
+        status: -1,
+        stdout: "",
+        stderr: REDROB_ENGINE_INSTALL_UNAVAILABLE,
+      };
+    }
     if (process.platform === "win32") {
       return {
         ok: false,
         status: -1,
         stdout: "",
         stderr:
-          "Guided install is not supported on Windows yet. Install the Redrob Work-pinned OpenCode version manually, then restart Redrob Work.",
+          "Guided install is not supported on Windows yet. Install the Redrob Work-pinned Redrob Code version manually, then restart Redrob Work.",
       };
     }
 
-    const installDir = path.join(app.getPath("home"), ".opencode", "bin");
-    const command = await pinnedOpencodeInstallCommand();
+    const installDir = path.join(app.getPath("home"), ".redrob", "bin");
+    const command = await pinnedRedrobCodeInstallCommand();
     const result = await runShellCommand("bash", ["-lc", command], {
-      env: { ...(await buildChildEnv()), OPENCODE_INSTALL_DIR: installDir },
+      env: { ...(await buildChildEnv()), REDROB_INSTALL_DIR: installDir },
       timeoutMs: 180_000,
     });
     return {
@@ -2251,9 +2282,9 @@ export function createRuntimeManager({
       throw new Error("server_name is required");
     }
 
-    const program = resolveBinary("opencode");
+    const program = resolveBinary(REDROB_CODE_BINARY_BASE);
     if (!program) {
-      throw new Error("Failed to locate opencode.");
+      throw new Error("Failed to locate the Redrob Code binary.");
     }
 
     const result = await runShellCommand(program, ["mcp", "auth", safeServerName], {

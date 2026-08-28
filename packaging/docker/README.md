@@ -2,7 +2,7 @@
 
 ## Pre-baked Micro-Sandbox Image
 
-For micro-sandbox work, use the pre-baked image that compiles `redrob-server` from source and downloads the pinned `opencode` binary during `docker build`.
+For micro-sandbox work, use the pre-baked image that compiles `redrob-server` from source and downloads the pinned Redrob Code engine during `docker build`. `redrob-labs/redrob-code` is private, so the build needs `REDROB_GITHUB_TOKEN` (or `GH_TOKEN` / `GITHUB_TOKEN`) with read access to it, or `REDROB_CODE_DOWNLOAD_URL` pointing at a reachable archive.
 
 Build it from the repo root:
 
@@ -43,7 +43,7 @@ This is a minimal packaging template to run the Redrob Work Host contract in a s
 It runs:
 
 - `redrob-server` published on `0.0.0.0:8787` (the only published surface)
-- Managed `opencode` launched internally by `redrob-server`
+- Managed Redrob Code engine (`redrob`) launched internally by `redrob-server`
 
 ### Local run (compose)
 
@@ -72,9 +72,9 @@ Optional:
 Persistence:
 
 - Workspace is mounted at `/workspace`
-- Host data dir is mounted at `/data` (OpenCode caches + Redrob Work server config/tokens)
+- Host data dir is mounted at `/data` (Redrob Code caches + Redrob Work server config/tokens)
 
 ### Notes
 
-- OpenCode is not exposed directly; access it via the Redrob Work proxy (`/opencode/*`).
+- The Redrob Code engine is not exposed directly; access it via the Redrob Work proxy (`/opencode/*`).
 - For PaaS, replace `./workspace:/workspace` with a volume or a checkout strategy (git clone on boot).

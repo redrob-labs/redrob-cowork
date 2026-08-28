@@ -6,7 +6,7 @@ services:
       args:
         # Keep this in sync with apps/server/package.json if you want a pinned release.
         REDROB_SERVER_VERSION: 0.18.4
-        OPENCODE_VERSION: 1.17.11
+        REDROB_CODE_VERSION: 0.0.1
     ports:
       - "8787:8787"
     environment:
@@ -22,5 +22,5 @@ services:
     volumes:
       # Mount an existing project/workspace here.
       - ./workspace:/workspace
-      # Persistent host data (OpenCode caches, server config, tokens).
+      # Persistent host data (Redrob Code caches, server config, tokens).
       - ./data:/data

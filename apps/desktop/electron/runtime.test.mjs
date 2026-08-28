@@ -80,14 +80,15 @@ describe("workspace root preparation", () => {
   });
 });
 
-describe("bundled OpenCode runtime", () => {
-  it("pins the engine release containing the timestamp-based session loop repair", async () => {
+describe("bundled Redrob Code runtime", () => {
+  it("pins the Redrob Code engine release the sidecar downloads", async () => {
     const constantsPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json");
     const constants = JSON.parse(await readFile(constantsPath, "utf8"));
 
-    // OpenCode #40990 stops old assistant messages with lexicographically
-    // later IDs from short-circuiting a newly appended user turn.
-    assert.equal(constants.opencodeVersion, "v1.18.18");
+    assert.equal(constants.redrobCodeVersion, "v0.0.1");
+    // The upstream OpenCode pin must be gone: a stale reader would resolve an
+    // OpenCode version that no longer describes the shipped engine.
+    assert.equal(constants.opencodeVersion, undefined);
   });
 });
 
@@ -170,20 +171,30 @@ describe("resolveEvalLocalServerDelayMs", () => {
 });
 
 describe("commandMatchesPackagedSidecar", () => {
-  it("matches packaged opencode sidecars with platform suffixes", () => {
+  it("matches packaged redrob sidecars with platform suffixes", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
-        "/Applications/Redrob Work.app/Contents/Resources/sidecars/opencode-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174 --cors *",
+        "/Applications/Redrob Work.app/Contents/Resources/sidecars/redrob-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174 --cors *",
         ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
       ),
       true,
     );
   });
 
-  it("does not match unrelated opencode processes outside sidecar directories", () => {
+  it("does not match unrelated redrob processes outside sidecar directories", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
-        "/usr/local/bin/opencode serve --hostname 127.0.0.1 --port 49174",
+        "/usr/local/bin/redrob serve --hostname 127.0.0.1 --port 49174",
+        ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
+      ),
+      false,
+    );
+  });
+
+  it("no longer reaps upstream opencode sidecars", () => {
+    assert.equal(
+      commandMatchesPackagedSidecar(
+        "/Applications/Redrob Work.app/Contents/Resources/sidecars/opencode-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174",
         ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
       ),
       false,

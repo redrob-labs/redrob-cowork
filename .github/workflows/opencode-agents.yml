@@ -33,14 +33,21 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install opencode
+      - name: Install Redrob Code engine
+        env:
+          # redrob-labs/redrob-code is private: anonymous release downloads 404, so
+          # the engine is resolved through the authenticated Releases API by asset id.
+          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
         run: |
-          version="$(node -e "const fs=require('fs'); const parsed=JSON.parse(fs.readFileSync('constants.json','utf8')); process.stdout.write(String(parsed.opencodeVersion||'').trim().replace(/^v/,''));")"
-          curl -fsSL https://opencode.ai/install | bash -s -- --version "$version" --no-modify-path
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/redrob-code"
+          rm -rf "$install_dir"
+          node apps/desktop/scripts/prepare-sidecar.mjs --outdir "$install_dir"
+          echo "$install_dir" >> "$GITHUB_PATH"
 
       - name: Triage issue
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          REDROB_API_KEY: ${{ secrets.REDROB_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ inputs.number }}
         run: |
@@ -50,7 +57,7 @@ jobs:
           ISSUE_TITLE="$(gh issue view "$ISSUE_NUMBER" --json title --jq .title)"
           ISSUE_BODY="$(gh issue view "$ISSUE_NUMBER" --json body --jq .body)"
           printf '\nTitle: %s\n\n%s\n' "$ISSUE_TITLE" "$ISSUE_BODY" >> /tmp/issue_prompt.txt
-          opencode run --agent triage "$(cat /tmp/issue_prompt.txt)"
+          redrob run --agent triage "$(cat /tmp/issue_prompt.txt)"
 
   duplicate-prs:
     if: inputs.target == 'pull_request'
@@ -69,10 +76,17 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install opencode
+      - name: Install Redrob Code engine
+        env:
+          # redrob-labs/redrob-code is private: anonymous release downloads 404, so
+          # the engine is resolved through the authenticated Releases API by asset id.
+          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
         run: |
-          version="$(node -e "const fs=require('fs'); const parsed=JSON.parse(fs.readFileSync('constants.json','utf8')); process.stdout.write(String(parsed.opencodeVersion||'').trim().replace(/^v/,''));")"
-          curl -fsSL https://opencode.ai/install | bash -s -- --version "$version" --no-modify-path
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/redrob-code"
+          rm -rf "$install_dir"
+          node apps/desktop/scripts/prepare-sidecar.mjs --outdir "$install_dir"
+          echo "$install_dir" >> "$GITHUB_PATH"
 
       - name: Build prompt
         env:
@@ -92,11 +106,11 @@ jobs:
 
       - name: Check for duplicate PRs
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          REDROB_API_KEY: ${{ secrets.REDROB_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ inputs.number }}
         run: |
-          opencode run --agent duplicate-pr "$(cat pr_info.txt)" > /tmp/comment_output.txt
+          redrob run --agent duplicate-pr "$(cat pr_info.txt)" > /tmp/comment_output.txt
 
           {
             echo "_The following comment was made by an LLM, it may be inaccurate:_"

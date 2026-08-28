@@ -131,19 +131,26 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install opencode
+      - name: Install Redrob Code engine
         if: steps.guard.outputs.stable == 'true' && steps.dedupe.outputs.documented == 'false'
+        env:
+          # redrob-labs/redrob-code is private: anonymous release downloads 404, so
+          # the engine is resolved through the authenticated Releases API by asset id.
+          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
         run: |
-          version="$(node -e "const fs=require('fs'); const parsed=JSON.parse(fs.readFileSync('constants.json','utf8')); process.stdout.write(String(parsed.opencodeVersion||'').trim().replace(/^v/,''));")"
-          curl -fsSL https://opencode.ai/install | bash -s -- --version "$version" --no-modify-path
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/redrob-code"
+          rm -rf "$install_dir"
+          node apps/desktop/scripts/prepare-sidecar.mjs --outdir "$install_dir"
+          echo "$install_dir" >> "$GITHUB_PATH"
 
       - name: Draft changelog entries
         if: steps.guard.outputs.stable == 'true' && steps.dedupe.outputs.documented == 'false'
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-        run: opencode run --agent changelog "$(cat /tmp/changelog_prompt.txt)"
+          REDROB_API_KEY: ${{ secrets.REDROB_API_KEY }}
+        run: redrob run --agent changelog "$(cat /tmp/changelog_prompt.txt)"
 
-      - name: Discard opencode runtime churn
+      - name: Discard engine runtime churn
         if: steps.guard.outputs.stable == 'true' && steps.dedupe.outputs.documented == 'false'
         run: |
           git checkout -- .opencode/

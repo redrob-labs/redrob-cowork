@@ -20,8 +20,8 @@ const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 const appPkg = readJson(resolve(root, "apps", "app", "package.json"));
 const desktopPkg = readJson(resolve(root, "apps", "desktop", "package.json"));
 const serverPkg = readJson(resolve(root, "apps", "server", "package.json"));
-const pinnedOpencodeVersion = String(
-  readJson(resolve(root, "constants.json")).opencodeVersion ?? "",
+const pinnedRedrobCodeVersion = String(
+  readJson(resolve(root, "constants.json")).redrobCodeVersion ?? "",
 )
   .trim()
   .replace(/^v/, "");
@@ -30,7 +30,7 @@ const versions = {
   app: appPkg.version ?? null,
   desktop: desktopPkg.version ?? null,
   server: serverPkg.version ?? null,
-  opencode: pinnedOpencodeVersion || null,
+  redrobCode: pinnedRedrobCodeVersion || null,
 };
 
 const checks = [];
@@ -56,10 +56,10 @@ for (const [name, version] of [
   );
 }
 
-if (versions.opencode) {
-  addCheck("OpenCode version pin exists", true, String(versions.opencode));
+if (versions.redrobCode) {
+  addCheck("Redrob Code version pin exists", true, String(versions.redrobCode));
 } else {
-  addWarning("OpenCode version is not pinned in constants.json.");
+  addWarning("Redrob Code version is not pinned in constants.json.");
 }
 
 const report = { ok, versions, checks, warnings };

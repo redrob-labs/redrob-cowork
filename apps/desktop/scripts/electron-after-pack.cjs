@@ -6,7 +6,7 @@ const asar = require("@electron/asar");
 const computerUseHelperAppName = "OpenWork Computer Use.app";
 
 const sidecarBases = [
-  "opencode",
+  "redrob",
 ];
 
 function targetTriple(platformName, arch) {

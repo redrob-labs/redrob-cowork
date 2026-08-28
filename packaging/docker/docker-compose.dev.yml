@@ -62,17 +62,20 @@ services:
         echo "[redrob-server] Installing dependencies..."
         pnpm install --no-frozen-lockfile --network-concurrency 1 --child-concurrency 1
 
-        # --- Build the server plugins and install the pinned OpenCode binary ---
+        # --- Build the server plugins and fetch the pinned Redrob Code engine ---
         pnpm --filter redrob-server build
-        OPENCODE_VERSION=$$(node -e 'const fs=require("fs"); const parsed=JSON.parse(fs.readFileSync("/app/constants.json", "utf8")); process.stdout.write(String(parsed.opencodeVersion || "").trim().replace(/^v/, ""));')
-        export OPENCODE_INSTALL_DIR="/root/.opencode/bin"
-        mkdir -p "$$OPENCODE_INSTALL_DIR"
-        if ! command -v opencode >/dev/null 2>&1; then
-          curl -fsSL https://opencode.ai/install | bash -s -- --version "$$OPENCODE_VERSION" --no-modify-path
+        export REDROB_CODE_INSTALL_DIR="/root/.redrob/bin"
+        mkdir -p "$$REDROB_CODE_INSTALL_DIR"
+        if [ ! -x "$$REDROB_CODE_INSTALL_DIR/redrob" ]; then
+          # redrob-labs/redrob-code is private, so the helper resolves the release
+          # asset through the authenticated GitHub API (REDROB_GITHUB_TOKEN /
+          # GH_TOKEN / GITHUB_TOKEN), or copies REDROB_CODE_BIN when a local build
+          # is mounted. It fails with an actionable message when neither exists.
+          node apps/desktop/scripts/prepare-sidecar.mjs --outdir "$$REDROB_CODE_INSTALL_DIR"
         fi
-        export PATH="$$OPENCODE_INSTALL_DIR:$$PATH"
+        export PATH="$$REDROB_CODE_INSTALL_DIR:$$PATH"
         export REDROB_MANAGE_OPENCODE=1
-        export REDROB_OPENCODE_BIN="$$(command -v opencode)"
+        export REDROB_CODE_BIN="$$REDROB_CODE_INSTALL_DIR/redrob"
         export REDROB_EXTENSIONS_PLUGIN_DIR="/app/apps/server/dist/opencode-plugins"
 
         # --- Resolve tokens ---
