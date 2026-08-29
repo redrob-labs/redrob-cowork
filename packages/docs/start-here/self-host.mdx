@@ -5,7 +5,7 @@ description: "Run Redrob Work on your own server or infrastructure."
 
 Most users just use the [desktop app](https://redrob.io/download). Self-hosting is for teams that want Redrob Work to run on their own server, VPC, or private cloud and then connect the desktop app to it remotely.
 
-Want hosted workspaces, team Collections, or shared providers without running infra? Use [Redrob Work Cloud](/cloud/get-started) instead. Rolling this out across a company? [Book a call](https://calendar.app.google/86QpCENvhfEzDFLu5) about [Enterprise](/cloud/enterprise).
+There is no hosted Redrob Work to fall back on. The desktop app is the product, and this page is for teams who want the server side on their own infrastructure. Rolling this out across a company? [Book a call](https://calendar.app.google/86QpCENvhfEzDFLu5).
 
 ## What you deploy
 
@@ -16,7 +16,7 @@ Redrob Work is split into normal services:
 - **Den controller**: the control plane for auth, workers, and provisioning.
 - **Inference service**: optional Redrob Models proxy and metering service.
 
-If you only need one private remote workspace, deploy the worker runtime. If you want Redrob Work Cloud-style accounts, teams, and organization management, deploy Den web, Den controller, and optionally the inference service.
+If you only need one private remote workspace, deploy the worker runtime. If you want your own accounts, teams, and organization management, deploy Den web, Den controller, and optionally the inference service.
 
 For Kubernetes installs, use the published Helm chart:
 
@@ -92,9 +92,9 @@ If you do not deploy Den, worker access is token-based with `REDROB_TOKEN` and `
 
 ## Minimal working stack
 
-### Redrob Work Cloud and the desktop app
+### A self-hosted server and the desktop app
 
-Redrob Work cloud-style self-hosting is composed of three main pieces:
+Cloud-style self-hosting is composed of three main pieces:
 
 - Next.js frontend
 - Node.js backend (Hono) with MySQL DB
@@ -129,9 +129,10 @@ Redrob Work does not require many third-party services for the core runtime. The
 
 ## Don't want to run infra?
 
-Skip the server. [**Redrob Work Cloud**](/cloud/get-started) runs hosted workers for your team.
-
-Cloud also gives you org-wide primitives you'd otherwise have to build: [Collections](/cloud/share-with-your-team/collections), [shared LLM providers](/cloud/share-with-your-team/managed-llm-provider), [RBAC](/cloud/members-and-rbac), and [shared workspaces](/cloud/run-in-the-cloud/shared-workspace).
+Then don't. The [desktop app](https://redrob.io/download) needs no server: it runs a
+local `redrob-server` and the Redrob Code engine on each machine, and people connect a
+model with their own Redrob Key. Skip this whole page unless you specifically need a
+shared remote runtime.
 
 ## Looking for support for a larger rollout?
 
@@ -145,4 +146,4 @@ At that scale our customers typically want:
 - **VPC / on-prem deployment** with your own networking and compliance constraints
 - **Support and rollout help** from our team and custom deployment, not just in GitHub.
 
-You can check the [**Enterprise**](/cloud/enterprise) page or [book a 30-minute call](https://calendar.app.google/86QpCENvhfEzDFLu5).
+[Book a 30-minute call](https://calendar.app.google/86QpCENvhfEzDFLu5) to talk it through.

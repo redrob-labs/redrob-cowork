@@ -5,13 +5,11 @@ description: "Customer IT allowlist guidance for Redrob Work desktop, Den, deplo
 
 Redrob Work works best when customer IT approves outbound access by component. The canonical machine-readable source is [`docs/enterprise/outbound-access.json`](https://github.com/redrob-labs/redrob-work/blob/dev/docs/enterprise/outbound-access.json). CI guards that file with `node scripts/check-outbound-access.mjs`; this page is the published human-readable summary.
 
-## Minimum hosted desktop allowlist
+## Minimum desktop allowlist
 
-For a practical Redrob Work Cloud desktop install, allow TCP 443 to these hosts:
+For a practical Redrob Work desktop install, allow TCP 443 to these hosts:
 
 ```text
-app.redrob.io
-api.redrob.io
 github.com
 release-assets.githubusercontent.com
 objects.githubusercontent.com
@@ -29,10 +27,9 @@ Common misses:
 
 | Host | Requirement | Why it is reached | What breaks when blocked |
 | --- | --- | --- | --- |
-| `app.redrob.io` | Required for Redrob Work Cloud | Hosted Cloud web origin. The desktop uses one base URL and derives Den API/MCP calls through `/api/den/...`. | Cloud sign-in, org settings, Collections, and remote workspace flows cannot load. |
-| `api.redrob.io` | Required for hosted install and Redrob Work Connect | Hosted public API and Redrob Work Connect MCP endpoint used by install and external-client flows. | Hosted install checks and public Redrob Work Connect fail. |
-| `app.redrob.software`, `api.redrob.software` | Required only for legacy hosted configurations | Older desktop configurations may still derive Cloud and Redrob Work Connect traffic from these legacy hosted origins. | Legacy configurations cannot reconcile Redrob Work Connect or native MCP Apps until moved to the current hosted origins. |
-| Your self-hosted Den web origin | Required for self-hosted desktop | Replaces `app.redrob.io` for signed-in desktop traffic. In the single-origin shape, API and MCP use `/api/den/...` on the same origin. | The desktop cannot sign in or reach Den. |
+| `app.redrob.io`, `api.redrob.io` | Not required | Retired hosted origins. The current desktop app contains no references to them and reaches no control plane. | Nothing. Safe to leave blocked. |
+| `app.redrob.software`, `api.redrob.software` | Not required | Retired legacy hosted origins. | Nothing. Safe to leave blocked. |
+| Your self-hosted Den web origin | Required only if you run the self-hosted server | Signed-in desktop traffic for a self-hosted deployment. In the single-origin shape, API and MCP use `/api/den/...` on the same origin. | The desktop cannot reach your self-hosted server. |
 | Your separate Den API origin, if configured | Required only for that topology | Used by one-time install-link exchange and external MCP clients when `DEN_API_PUBLIC_URL` points at a separate origin. | Install-link handoff or external MCP clients cannot complete. |
 | `github.com` | Required in practice unless mirrored | Installer/updater release URLs, GitHub issue links, and GitHub plugin source URLs. | Install/update downloads cannot start; GitHub links may not open. |
 | `release-assets.githubusercontent.com` | Required in practice unless mirrored | Current GitHub release-asset redirect target. | Downloads start from `github.com` and fail partway through. |

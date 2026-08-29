@@ -1,26 +1,56 @@
 ---
-title: "Publish and copy a skill"
-description: "Publish a skill through a Cloud Collection or copy it without changing the shared original"
+title: "Share and copy a skill"
+description: "Hand a skill to a teammate by copying its files or by publishing a plugin repository on GitHub"
 ---
 
 <Note>
-**Personal or managed.** Local workspace skills remain free and need no Redrob Work Cloud sign-in. Cloud members can also create personal skills for themselves today. Publishing a skill for other people is a managed Cloud flow for owners and admins by default.
+**Sharing is a copy, not an assignment.** Redrob Work has no control plane, so nothing
+pushes a skill to someone else's machine or updates it later. You either hand over the
+files or publish a plugin repository they choose to install.
 </Note>
 
-## Publish a skill for your team
+## Option 1: copy the files
 
-1. In the Cloud dashboard, open `Plugin Directory` and create or open a plugin.
-2. Add a skill inside the plugin. Give it a clear name, describe when the agent should use it, and write the instructions.
-3. In the plugin's `Share` section, choose a `Collection`. If you need a new one, open `Collections`, click `New collection`, and then return to the plugin.
-4. Open that Collection and use `Who can access this` to grant it to everyone in the organization, selected teams, or individual members.
-5. Assigned members find the plugin and its skill in `Settings > Library` in the desktop app. The plugin creator keeps access automatically.
+A skill is a directory with one file in it. Send it, commit it, or drop it in shared
+storage:
 
-Only owners and admins can create and publish skills for other people by default. Members can currently create personal skills for themselves. An admin restriction that prevents members from creating their own skills is in development.
+```text
+.opencode/skills/<skill-name>/SKILL.md
+```
 
-Follow [Team quickstart](/cloud/team-quickstart) for the complete first-time setup. Use [Collections](/cloud/share-with-your-team/collections) when you need to group several plugins, reuse the same audience, or manage more complex assignments.
+The recipient puts that directory under `.opencode/skills/` in their own workspace, or
+under `~/.config/opencode/skills/` to have it everywhere. It shows up in
+`Settings` > `Library` after a refresh.
 
-## Copy without changing the shared skill
+Committing skills to the repository you already share is the simplest version of this.
+Everyone who clones the repo gets the skills with it.
 
-Create a new private plugin, copy the skill instructions into a new skill, and edit that copy. Do not edit the team plugin unless everyone assigned to its Collection should receive the change.
+## Option 2: publish a plugin repository
 
-For a small personal adjustment, you can instead create a new skill that tells the agent to use the shared skill first and then apply your extra instructions.
+For several skills, commands, agents, or MCP servers that belong together, package
+them as an Anthropic-compatible plugin bundle in a public GitHub repository. Redrob
+Work installs those directly.
+
+1. Create a public GitHub repository laid out as a Claude Code plugin: skills under
+   `skills/<name>/SKILL.md`, commands, agents, and an optional `.mcp.json` for bundled
+   MCP servers.
+2. Push it.
+3. Each teammate opens `Settings` > `Library`, expands `Advanced settings`, and imports
+   the plugin from GitHub by pasting `https://github.com/<owner>/<repo>`.
+4. Redrob Work previews what the bundle contains, asks for approval, then installs the
+   skills and registers any bundled MCP servers with the running engine.
+
+Only public repositories work. Redrob Work fetches the bundle from GitHub without a
+token, so a private repository returns nothing.
+
+To ship an update, push to the repository and have people reinstall. There is no
+automatic update channel.
+
+## Copy without changing the original
+
+To adapt a skill you received, copy its directory to a new name and edit the copy.
+Editing the original means your change disappears the next time that skill is
+reinstalled from its source.
+
+For a small adjustment, write a short new skill that tells the agent to follow the
+original first, then apply your extra instructions.

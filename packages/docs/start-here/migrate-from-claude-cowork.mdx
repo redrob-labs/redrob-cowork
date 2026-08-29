@@ -11,10 +11,10 @@ You do not need to rebuild your setup to move from Claude Cowork to Redrob Work.
 | --- | --- | --- |
 | Local files and folders | Workspace files | Open the same folder or repository as an Redrob Work workspace. |
 | `SKILL.md` skills | Skills | Copy the skill folder into your workspace or install it as a plugin. |
-| Claude-compatible plugins | Plugins | Import the plugin or marketplace manifest; Redrob Work normalizes its skills, commands, and MCP dependencies. |
-| MCP servers | Connectors and custom apps | Reconnect the server through Redrob Work Connect or add its URL as a custom app. |
-| Claude models | Anthropic provider | Add an Anthropic API key, or provision Anthropic centrally through Redrob Work Cloud. |
-| Scheduled tasks | Scheduled tasks | Recreate each schedule and verify its workspace, permissions, and output location. |
+| Claude-compatible plugins | Plugins | Import the plugin from its public GitHub repository; Redrob Work normalizes its skills, commands, agents, and MCP dependencies. |
+| MCP servers | Workspace MCP connections | Add the server URL to the workspace and sign in again. |
+| Claude models | Anthropic provider | Add your own Anthropic API key. |
+| Scheduled tasks | Not available | Redrob Work has no scheduler. Trigger the work from chat, or drive it from outside with your own cron plus an MCP client. |
 
 <Note>
   Conversation history does not transfer automatically. Keep any important instructions in workspace files or skills rather than relying on an old thread.
@@ -35,7 +35,7 @@ Redrob Work is model-agnostic. You can keep using Anthropic models, add another 
 - To keep using Claude, follow [Add an Anthropic API key](/start-here/connect-your-stack/add-anthropic-api-key).
 - To use ChatGPT, follow [Sign in with ChatGPT](/start-here/connect-your-stack/sign-in-with-chatgpt).
 - For another provider, follow [Add a custom LLM](/start-here/connect-your-stack/add-a-custom-llm).
-- For a team-managed provider, follow [Managed LLM provider](/cloud/share-with-your-team/managed-llm-provider).
+- For Redrob's own models, paste a Redrob Key from [console.redrob.ai](https://console.redrob.ai) on the connect screen.
 
 Your Claude subscription and Anthropic API billing may be separate. Confirm API access before removing Cowork from your workflow.
 
@@ -49,44 +49,47 @@ After importing each skill:
 2. Run the smallest task that should trigger it.
 3. Confirm the output before importing the next skill.
 
-See [Connectors, skills, and plugins](/start-here/do-work-with-it/skills-plugins-and-mcp) for how Redrob Work organizes these pieces. For team distribution, see [Publish and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
+See [Connections, skills, and plugins](/start-here/do-work-with-it/skills-plugins-and-mcp) for how Redrob Work organizes these pieces. For handing them to teammates, see [Share and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
 
 ## 4. Reconnect apps and MCP servers
 
 Credentials do not move between products. Reconnect each service so Redrob Work receives its own authorized access.
 
-- For Gmail, Calendar, Drive, Slack, Notion, Linear, and other managed services, use [Connect your services](/start-here/connect-your-stack/connect-services).
-- For another remote or local MCP server, use [Add a custom MCP server](/start-here/connect-your-stack/add-an-mcp-server).
-- For an organization-wide setup, use [Shared MCP connections](/cloud/share-with-your-team/shared-mcp-connections).
+- For the vocabulary and the general flow, read [Connect your services](/start-here/connect-your-stack/connect-services).
+- For each remote or local MCP server, use [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).
+- To hand the same set of servers to teammates, bundle them in a plugin repository: [Share and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
 
 Test read-only actions first. Then test actions that modify data, such as sending a message or updating a record, with a disposable example.
 
-## 5. Recreate schedules and browser tasks
+## 5. Replace schedules and move browser tasks
 
-For every recurring task, record:
+Redrob Work does not run work on a schedule. For every recurring Cowork task, decide
+whether it becomes a skill you trigger from chat, or a job you drive from outside the
+app. For the second option, your own scheduler can start an MCP client that calls
+Redrob Work through [redrob-ui-mcp](/model-context-protocol/overview).
 
-- the prompt;
-- its schedule and time zone;
-- the workspace and files it can use;
-- the connected apps it needs;
-- where the result should be saved or sent.
-
-Recreate one schedule at a time and run it manually before enabling recurrence. For browser-driven work, follow [Control the browser](/start-here/do-work-with-it/control-the-browser) and verify the target site while you are present.
+For browser-driven work, follow
+[Control the browser](/start-here/do-work-with-it/control-the-browser) and verify the
+target site while you are present.
 
 ## 6. Move a team without configuration drift
 
-Do not ask every teammate to repeat your local setup by hand. In Redrob Work Cloud, publish approved skills and connections once, assign them to the right teams, and apply desktop policies centrally.
+There is no central place to assign a setup, so make the setup itself portable.
 
-Start with the [team quickstart](/cloud/team-quickstart), then review [desktop policies](/cloud/share-with-your-team/desktop-policies) and [members and roles](/cloud/members-and-rbac).
+- Commit skills to the repository the team already shares. Everyone who clones gets
+  them.
+- Package anything larger as a plugin repository on GitHub and have people install it
+  once: [Share and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
+- Keep model and service credentials per person. Each teammate connects their own.
 
 ## Cutover checklist
 
 - [ ] The same workspace opens and the agent can read the expected files.
 - [ ] At least one model is connected and billing is understood.
 - [ ] Each required skill triggers on a representative task.
-- [ ] Each connector or MCP server is authorized and tested.
-- [ ] Scheduled and browser tasks have been run manually once.
-- [ ] Team capabilities are published centrally instead of copied machine by machine.
+- [ ] Each MCP server is authorized and tested.
+- [ ] Every recurring Cowork task has a replacement: a skill, or an external trigger.
+- [ ] Shared skills live in a repository or plugin bundle, not in one person's folder.
 - [ ] Important Cowork instructions are saved in files or skills.
 - [ ] Cowork remains available until the representative workflow passes in Redrob Work.
 

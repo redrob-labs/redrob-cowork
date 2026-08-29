@@ -1,71 +1,58 @@
 ---
 title: "Connect your services"
-description: "Sign in to Redrob Work and connect the accounts your agent can use"
+description: "Give the Redrob Work agent access to the systems you work in, one MCP server at a time"
 ---
 
 <Info>
-**Redrob Work Cloud organization setup.** This path requires an Redrob Work Cloud sign-in and an organization that has made services available to you. To stay local, keep using Redrob Work for free and [add a custom MCP server](/start-here/connect-your-stack/add-an-mcp-server) to your workspace. Admins can manage team connections with [Connectors](/cloud/share-with-your-team/shared-mcp-connections).
+**Everything here is local.** Redrob Work has no account, no organization, and no
+service catalog. You connect a service by adding its MCP server to a workspace, and
+the credentials stay in your own `redrob-server` store.
 </Info>
 
-Use `Settings` > `Redrob Work Connect` for services your organization makes available,
-including Gmail, Google Calendar, Google Drive, Slack, Notion, and Linear. This
-is the recommended setup for everyday integrations.
+The Redrob Work agent reaches other systems through MCP servers you add yourself.
+Slack, Notion, Linear, GitHub, an internal API, a local script: if it speaks MCP, the
+agent can use it.
 
-## Before you start
-
-Connect requires signing in to an Redrob Work account and joining an organization
-that has Connect enabled. This is separate from signing in to an LLM provider
-such as ChatGPT.
+## Add a connection
 
 1. Open the Redrob Work desktop app.
-2. Click `Sign in`, or open `Settings` > `Redrob Work Connect` and choose `Sign in`.
-3. Complete sign-in in your browser and return to Redrob Work.
-4. Choose the Redrob Work organization you want to use if prompted.
+2. Go to `Settings` > `Library`.
+3. Expand `Advanced settings` and click `Add workspace MCP`.
+4. Enter a name and the server URL, and say whether the server needs OAuth.
+5. If it does, finish the provider's approval page in your browser. It redirects back
+   to Redrob Work and the connection moves to ready.
 
-If Connect is not available for your organization, ask an organization admin
-to enable it.
-
-## Connect an account
-
-1. Open `Settings` > `Redrob Work Connect`.
-2. Find the service under `Needs your sign-in`.
-3. Click `Connect` and approve access on the provider's sign-in page.
-4. Return to Redrob Work. The service moves to `Ready to use` automatically.
-
-Some connections are managed by your organization. If a service is not
-listed, ask an organization admin to publish it from the Redrob Work Cloud
-`Connectors` page and grant you access.
+The step-by-step version with screenshots is
+[Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server). For a worked
+example with a real provider, see
+[Connect Slack as a custom MCP](/start-here/connect-your-stack/connect-slack-mcp).
 
 ## Ask your agent to use it
 
-You do not need to know an MCP server name or tool name. Ask for the outcome
-you want, for example:
+You do not need to know a server name or a tool name. Ask for the outcome you want:
 
-- “Summarize my five newest emails.”
-- “Find the Q3 launch page in Notion.”
-- “What meetings do I have tomorrow?”
+- "Find the Q3 launch page in Notion."
+- "Open a Linear issue for the crash I just described."
+- "Post the summary to the release channel."
 
-The agent searches the live capabilities available to your signed-in account,
-then executes an exact match. If an account still needs attention, it should
-send you back to `Settings` > `Redrob Work Connect` with the action to take instead of
-telling you to add an MCP server.
+The agent searches the tools its connected servers expose, then calls an exact match.
+If a connection needs attention, it points you back to `Settings` > `Library` with the
+action to take.
 
-## Connect, connectors, and connections
+## Connections, plugins, and the Library
 
-- **Connect** is the member-facing page in the desktop app for signing in to
-  services and checking connection readiness.
-- A **connector** is an MCP service your organization adds on its own, without
-  wrapping it in a plugin. Organization admins publish connectors from the
-  Redrob Work Cloud `Connectors` page and grant member or team access.
-- A **connection** is your own signed-in instance of a connector — one
-  connector, instantiated per user with that user's account.
-- The **MCP Gateway** is the hosted endpoint that lets external MCP clients
-  use capabilities from an Redrob Work organization. See
-  [Redrob Work MCP Gateway](/cloud/run-in-the-cloud/cloud-mcp).
-- **Add an MCP server** is the advanced path for a custom or local server that
-  your organization does not provide through Connect.
+- A **connection** is one MCP server added to one workspace, signed in as you.
+- A **skill** is written instructions the agent loads when a task matches. Skills are
+  files in your workspace, under `.opencode/skills/<name>/SKILL.md`.
+- A **plugin** bundles skills, commands, agents, and MCP servers so they travel
+  together. Redrob Work installs Anthropic-compatible plugin bundles from public
+  GitHub repositories.
+- The **Library** (`Settings` > `Library`) is the single list of what this workspace
+  has: skills, commands, agents, MCP connections, and plugins.
 
-If you are building a custom integration, continue with
-[Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server). If you
-are an organization admin, see
-[Sharing MCP connections with your team](/cloud/share-with-your-team/shared-mcp-connections).
+## What is not here
+
+Redrob Work does not host a shared service catalog, and it does not publish a remote
+MCP endpoint for other clients. If you want another MCP client to drive Redrob Work
+itself, that runs the other direction over a local stdio server: see
+[Control Redrob Work from any MCP client](/model-context-protocol/overview).

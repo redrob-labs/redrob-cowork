@@ -4,7 +4,7 @@ description: "How to connect a custom provider with Redrob Work"
 ---
 
 <Note>
-**Local provider setup.** A custom provider can stay entirely in your workspace. Redrob Work remains free, and you do not need to sign in to Redrob Work Cloud. For centrally managed team access, see [Adding a managed LLM provider](/cloud/share-with-your-team/managed-llm-provider).
+**Local provider setup.** Every provider you add lives in your own workspace config. Redrob Work is free, there is no account, and nothing about this setup leaves your machine. The default provider is Redrob, connected with a Redrob Key from [console.redrob.ai](https://console.redrob.ai).
 </Note>
 
 Because `Redrob Work` is built on `OpenCode` primitives, we support everything that you could modify in `.opencode.json`, like adding a [model](https://opencode.ai/docs/models/). However, our recommendation is to add it to `/path-to-your-workspace/.config/opencode/opencode.json` instead of modifying `~/.config/opencode/opencode.json`.
@@ -56,4 +56,4 @@ Pull the model first with `ollama pull qwen3:8b`, then make sure the Ollama serv
 
 Open your desktop, change the provider name and voila! You have an fully local LLM running in your machine.
 
-For teams, manage the provider in Redrob Work Cloud under [Models > Bring your Own Keys](/cloud/share-with-your-team/managed-llm-provider), then make it available from `Settings > Cloud Providers` in the desktop app.
+To share this setup with a teammate, send them the `opencode.json` fragment. Each person adds it to their own workspace and supplies their own credentials. Secrets belong in `Settings > Environment`, not in the config file.

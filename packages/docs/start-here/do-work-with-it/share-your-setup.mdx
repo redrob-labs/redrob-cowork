@@ -1,18 +1,40 @@
 ---
-title: "Share skills with your team"
-description: "Find personal and team skills in the Library, then share managed skills through Cloud Collections"
+title: "Find and share skills"
+description: "See what your agent already has in the Library, then hand a skill to someone else"
 ---
 
 <Note>
-**Local or managed.** Local workspace skills remain free and require no Redrob Work Cloud sign-in; copy their files yourself when you only need an unmanaged handoff. For centrally assigned team skills and updates, publish a plugin through an Redrob Work Cloud [Collection](/cloud/share-with-your-team/collections).
+**The Library is local.** It lists what this workspace and your home directory
+actually contain. Nothing is assigned to you from elsewhere, and nothing you add is
+shared until you copy it somewhere.
 </Note>
 
-Redrob Work no longer shares skills from a `Workspace > Skills` screen. The desktop app shows what is already available to your agent.
-
-## Find shared skills
+## Find your skills
 
 1. Open `Settings > Library` in the desktop app.
-2. Use the `Skills` filter or search to find skills from your workspace and organization.
-3. Click a skill and choose `View details` to read its description; local skills can be revealed or removed, while Redrob Work Connect skills are read-only.
-4. Click `Refresh` if an admin just updated a Collection or changed your access.
-5. To publish or customize a skill for teammates, follow [Publish and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill). For larger setups with several plugins or audiences, see [Collections](/cloud/share-with-your-team/collections).
+2. Use the `Skills` filter or search.
+3. Click a skill and choose `View details` to read its description, reveal the file on
+   disk, or remove it.
+4. Click `Refresh` after you add or edit a `SKILL.md` outside the app.
+
+The list covers the current workspace and its parent directories up to the `.git`
+boundary, plus the global skill directories in your home folder. See
+[Create a skill from chat](/start-here/do-work-with-it/create-a-skill-from-chat) for
+the exact paths.
+
+## Share one
+
+Skills are plain files, so sharing is copying. Commit them to a repository you already
+share, or publish a plugin repository teammates install on purpose. Both paths are in
+[Share and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
+
+## Share the MCP servers too
+
+MCP connections are not files in your workspace, so they do not travel with a skill
+directory. Two options:
+
+- Bundle them in a plugin repository through its `.mcp.json`. Installing the plugin
+  registers the servers.
+- Have each person add the server themselves with
+  [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server). Credentials
+  are per person in either case.

@@ -3,158 +3,156 @@ title: "Diagnostic prompts"
 description: "Paste-able prompts that let your agent debug Redrob Work issues on its own."
 ---
 
-When something in Redrob Work looks wrong, the fastest debugger is usually the agent itself: it can read its own configuration, probe servers, and verify fixes in-band. This page collects paste-able diagnostic prompts. Copy the whole block for your situation into a chat and let the agent work through it.
+When something in Redrob Work looks wrong, the fastest debugger is usually the agent
+itself: it can read its own configuration, probe the local server, and verify fixes
+in-band. This page collects paste-able diagnostic prompts. Copy the whole block for your
+situation into a chat and let the agent work through it.
 
-Each prompt is safe by default: it gathers evidence first, redacts secrets, and asks before changing anything.
+Each prompt is safe by default: it gathers evidence first, redacts secrets, and asks
+before changing anything.
 
-If the symptom is DNS, TCP 443, TLS chain, proxy, or Den outbound reachability, start with [Network diagnostics](/start-here/network-diagnostics) instead.
+If the symptom is DNS, TCP 443, TLS chain, or proxy reachability, start with
+[Network diagnostics](/start-here/network-diagnostics) instead.
 
-## 1. Cloud search shows old or missing capabilities
+<Note>
+Everything below is local. Redrob Work is a desktop app plus a local `redrob-server`
+running the Redrob Code engine as a sidecar. There is no account and no remote control
+plane to check, so every probe stays on your machine.
+</Note>
+
+## 1. An MCP server is connected, but its tools are missing
 
 **Symptoms**
 
-- `search_capabilities` returns fewer tools than you expect (for example, only `postCapabilitiesGoogleWorkspaceGmailDrafts` when newer Google Workspace capabilities should exist).
-- `execute_capability` returns `unknown_capability` for a tool name that should exist.
-- The cloud dashboard says a connection is "Connected as you", but the agent reports `connected: false`.
+- `Settings > Library` shows the MCP connection as ready, but the agent never calls its
+  tools.
+- The agent answers from documentation instead of acting in the connected system.
+- The agent claims a tool is "conceptual" rather than callable.
 
 **What is usually wrong**
 
-Your agent's `redrob-cloud` MCP entry is a snapshot: it stores a server URL and token from the moment it was connected. If it was created against a local development server or an old deployment — including via a leftover `desktop-bootstrap.json` file that overrides server URLs beneath the Settings UI — the agent keeps querying that old world forever, while the dashboard shows the current one.
+Redrob Work writes a generated `runtime-opencode-config.json` and passes it to the
+engine as `OPENCODE_CONFIG`. A task holds the tool set it started with, so a connection
+added or repaired after the task began is not visible to it. Less often the generated
+config never reached the engine, or a tool-deny policy is filtering the tool out.
 
 **Paste this to your agent**
 
 ````text
-Debug and fix my Redrob Work Cloud MCP connection. It may be pointed at a stale or local server instead of my real Redrob Work Cloud server. Work through ALL phases, show your findings after each, and ask before anything destructive. Never print bearer tokens or Authorization headers — redact them.
+Diagnose whether my MCP server's tools are actually available in this workspace. Gather evidence only: do not modify configuration, authenticate, log out, remove anything, or restart services. Never print configuration-file contents, bearer tokens, Authorization values, cookies, API keys, or local server tokens.
 
-My expected cloud web URL: https://app.redrob.io (replace with your self-hosted Den web URL if you run your own).
+Replace <server-name> with the connection name shown in Settings > Library.
 
-## Phase 1 — Evidence: what am I actually connected to?
+## Phase 1 - Test the task's actual tools
 
-1. Print the `redrob-cloud` MCP entry's `url` (redact headers) from every config you can find:
-   - `~/.config/opencode/opencode.json`
-   - any `.opencode/opencode.json` or `opencode.jsonc` in the current project
-   - your own runtime config if you have an export tool
-2. Inspect these files if they exist (they can silently override server URLs beneath the Settings UI), but report only `baseUrl`, `apiBaseUrl`, `requireSignin`, and `writtenAt`. Never print `handoff`, `claimLinks`, grants, tokens, or other credential-bearing fields:
-   - `~/.config/redrob/desktop-bootstrap.json`
-   - `~/Library/Application Support/io.redrob.work/desktop-bootstrap.json`
-3. If the url from step 1 is a localhost address, find what serves that port:
-   - `lsof -nP -iTCP:<port> -sTCP:LISTEN`
-   - for each PID: `ps -p <PID> -o pid=,command=` and `lsof -a -p <PID> -d cwd -Fn | tail -1`
+1. Attempt to call one tool from `<server-name>` with a harmless read-only argument. Do not substitute documentation and do not explain alternatives. Record whether the runtime accepts the call, and its exact non-secret result or rejection.
+2. Attempt to call `redrob_extension_list_actions`. Record whether the runtime accepts the call. Do not infer availability by asking yourself to "list your tools"; models omit and invent tools.
 
-## Phase 2 — Probe both servers directly (no auth needed)
-
-4. The server from Phase 1, through the Den web proxy:
-   `curl -s -m 5 <that-origin>/api/den/openapi.json | python3 -c "import json,sys; d=json.load(sys.stdin); ps=[p for p in d.get('paths',{}) if 'google-workspace' in p]; print(len(ps)); [print(p) for p in ps]"`
-5. The expected cloud web URL, same command. Compare the two lists.
-
-## Phase 3 — Probe through your own MCP tools (in-band ground truth)
-
-6. Call search_capabilities with {"query":"google workspace","limit":10} and report the match names.
-7. Call execute_capability with {"name":"getCapabilitiesGoogleWorkspaceCalendarEvents"} and report the exact error or result shape.
-
-## Phase 4 — Diagnose
-
-State which world you are in:
-- redrob-cloud url is localhost/127.0.0.1, OR search returned only gmail-drafts, OR execute returned unknown_capability → you are bound to a STALE server, not the expected cloud.
-- a desktop-bootstrap.json contains localhost URLs → that file is the root cause (it is the desktop app's Cloud URL source of truth).
-
-## Phase 5 — Fix (confirm with me before each destructive step)
-
-8. If a desktop-bootstrap.json contains stale/localhost URLs: show it, then delete that file.
-9. If a stale local server process is still listening: show the process, then stop it, so nothing can silently serve old answers again.
-10. Tell me to do these steps in Redrob Work, then wait:
-    - Restart the Redrob Work app.
-    - In the affected workspace, open Settings → Library and click Refresh (re-mints the token and rewrites the Cloud MCP config).
-    - Click Show hidden, then verify Redrob Work Cloud Control under Your apps.
-    - Run Reload OpenCode config from the command palette.
-    - Start a NEW task so it receives the current tool set.
-
-## Phase 6 — Verify (run in the NEW session)
-
-11. search_capabilities {"query":"google workspace","limit":10} → PASS = the full current capability set (calendar, drive, and gmail capabilities ranked on top), not just drafts.
-12. execute_capability {"name":"getCapabilitiesGoogleWorkspaceCalendarEvents","query":{"timeMin":"<today ISO>","timeMax":"<+3 days ISO>"}} → PASS = real events, or a clean needs_connection / missing-permission message — NOT unknown_capability.
-13. Print a final report: root cause, what changed, and the before/after of probes 6/7 vs 11/12.
-````
-
-**Expected passing state**
-
-- The `redrob-cloud` entry's `url` points at your real server and ends in `/mcp/agent` (either a direct API host or the web app's `/api/den` proxy).
-- `search_capabilities` reflects your server's current catalog.
-- `execute_capability` on a known capability returns data or an actionable connection message — never `unknown_capability`.
-
-If the agent completes all phases and verification still fails, [open an issue](https://github.com/redrob-labs/redrob-work/issues) and paste the agent's final report (it is already redacted).
-
-## 2. Cloud MCP is configured, but its tools are missing
-
-**Symptoms**
-
-- Settings shows an `redrob-cloud` MCP entry, but the agent calls `redrob_docs_search` for requests involving connected services.
-- The agent claims that `search_capabilities` and `execute_capability` are only "conceptual capabilities" rather than callable tools.
-- A connected service such as ServiceNow appears ready in Redrob Work Cloud, but the task does not expose `redrob-cloud_search_capabilities` or `redrob-cloud_execute_capability`.
-
-**What this diagnostic checks**
-
-The prompt below runs Redrob Work's bundled OpenCode executable against its generated runtime config and checks whether a fresh OpenCode process can connect to `redrob-cloud`. It does not attach to the OpenCode server already running inside Redrob Work, so it combines that result with the live status shown in Redrob Work and a forced tool call from a new task.
-
-**Paste this to your agent**
-
-````text
-Diagnose whether Redrob Work Cloud MCP tools are available in this workspace. Gather evidence only: do not modify configuration, authenticate, log out, remove anything, restart services, or print configuration-file contents.
-
-## Phase 1 — Test the task's actual tools
-
-1. Attempt to call `redrob-cloud_search_capabilities` with `{"query":"ServiceNow incident","type":"mcp","limit":10}`. Do not use documentation or explain alternatives. Record whether the runtime accepts the tool call and its exact non-secret result or rejection.
-2. Attempt to call `redrob_extension_list_actions`. Record whether the runtime accepts the call. Do not infer tool availability from an answer to "list your tools"; models can omit or invent tools.
-
-## Phase 2 — Find Redrob Work's exact OpenCode runtime
+## Phase 2 - Find the engine and its generated config
 
 3. Detect whether this machine is Windows, macOS, or Linux.
-4. Find the exact OpenCode executable used by the Redrob Work desktop app. Prefer the bundled executable in Redrob Work's `resources/sidecars` directory; do not assume an unrelated `opencode` on `PATH` is the same binary. If multiple Redrob Work builds are running, use the process associated with this task when that can be established safely; otherwise report the ambiguity.
-5. Find Redrob Work's generated `runtime-opencode-config.json` beside the active `server.json`. Respect discovered `REDROB_SERVER_CONFIG`, `REDROB_RUNTIME_DB`, or XDG overrides. Typical locations are:
+4. Find the exact Redrob Code executable the desktop app is using. It is named `redrob`, and it is either the packaged sidecar under the app's `resources/sidecars` directory or the path in `REDROB_CODE_BIN`. Do not assume an unrelated binary on `PATH` is the same one.
+5. Find the generated `runtime-opencode-config.json` beside the active `server.json`. Respect any discovered `REDROB_SERVER_CONFIG`, `REDROB_RUNTIME_DB`, or XDG overrides. Typical locations:
    - Windows: `%APPDATA%\redrob\runtime-opencode-config.json`
-   - macOS/Linux: `${XDG_CONFIG_HOME:-$HOME/.config}/redrob/runtime-opencode-config.json`
-6. Report whether the runtime config exists and its last-modified time. Never display, copy, parse, or summarize its contents: it can contain Authorization headers and other credentials.
+   - macOS and Linux: `${XDG_CONFIG_HOME:-$HOME/.config}/redrob/runtime-opencode-config.json`
+6. Report whether it exists and its last-modified time. Never display, copy, parse, or summarize its contents: it can contain Authorization headers.
 
-## Phase 3 — Run a safe fresh-process probe
+## Phase 3 - Run a safe fresh-process probe
 
-7. From this task's workspace root, set `OPENCODE_CONFIG` to the discovered runtime config for the subprocess only, then run:
-   - `<exact-opencode-executable> --version`
-   - `<exact-opencode-executable> mcp list`
-8. Do not run `mcp add`, `mcp auth`, `mcp logout`, `debug config`, or any command that changes or prints configuration. Do not use `--print-logs` if it could expose headers or tokens.
+7. From this workspace root, set `OPENCODE_CONFIG` to the discovered runtime config for the subprocess only, then run:
+   - `<exact-engine-executable> --version`
+   - `<exact-engine-executable> mcp list`
+8. Do not run `mcp add`, `mcp auth`, `mcp logout`, `debug config`, or anything that changes or prints configuration. Do not pass `--print-logs` if it could expose headers.
 9. Report:
    - operating system
-   - exact OpenCode executable path and version
+   - engine executable path and version
    - runtime config path, existence, and last-modified time
-   - whether `redrob-cloud` is listed
+   - whether `<server-name>` is listed
    - its exact status and non-secret error
-   - whether the failing workspace is the primary managed workspace or may be a secondary workspace configured dynamically
+   - whether this workspace is the primary managed workspace or a secondary one
 
-Important: `opencode mcp list` starts a fresh process. Do not claim that it attaches to or tests the OpenCode server already running inside Redrob Work. Describe it only as a fresh-process probe using the same binary and generated config.
+Important: `mcp list` starts a fresh process. Do not claim it attaches to the engine already running inside Redrob Work. Describe it only as a fresh-process probe using the same binary and generated config.
 
-## Phase 4 — Classify the result
+## Phase 4 - Classify the result
 
-- Fresh probe omits `redrob-cloud`: the generated config is missing, the wrong runtime config was selected, or this is a secondary workspace whose MCPs are registered dynamically.
-- Fresh probe reports `failed` or `needs_auth`: preserve the exact non-secret error; investigate token, endpoint, TLS, or authentication.
-- Fresh probe reports `connected`, but Phase 1 rejects the Cloud tool: the stored endpoint and token work, but the live desktop engine or task has stale/missing tool registration.
-- Both Phase 1 calls are rejected: investigate whether the running engine loaded the injected config and plugins, plus project/global tool-deny policy.
-- The forced Cloud call works, but a natural request chooses documentation: tool exposure is healthy; investigate system-prompt steering.
+- Fresh probe omits `<server-name>`: the generated config is missing, the wrong config was selected, or this is a secondary workspace whose MCP servers are registered dynamically.
+- Fresh probe reports `failed` or `needs_auth`: keep the exact non-secret error and investigate the endpoint, credential, or TLS chain.
+- Fresh probe reports `connected` but Phase 1 rejected the tool: the stored endpoint works and the live task has a stale tool snapshot.
+- Both Phase 1 calls rejected: investigate whether the running engine loaded the injected config and plugins, plus project and global tool-deny policy.
+- Forced call works but a natural request chooses documentation: exposure is healthy; this is system-prompt steering.
 
-Finish with a concise redacted report. Never reveal bearer tokens, Authorization values, cookies, passwords, API keys, local server tokens, or strings beginning with `ow_mcp_at_`.
+Finish with a concise redacted report.
 ````
 
-**Verify inside Redrob Work**
+**Then verify inside Redrob Work**
 
-1. In the affected workspace, open **Settings → Library** and click **Refresh**.
-2. Click **Show hidden**, then find **Redrob Work Cloud Control** under **Your apps**. This row shows live OpenCode MCP status; the catalog card only proves that the entry is configured.
-3. Expand the row and retain its status and non-secret error: **Ready**, **Issue**, **Sign in needed**, **Offline**, or **Paused**.
-4. Return to the task, open the command palette, run **Reload OpenCode config**, and create a new task in the same workspace.
-5. Repeat the forced Cloud tool call from Phase 1.
+1. Open `Settings` > `Library` and click `Refresh`.
+2. Find the connection and expand it. Keep its status and non-secret error: `Ready`,
+   `Issue`, `Sign in needed`, `Offline`, or `Paused`.
+3. Open the command palette and run `Reload OpenCode config`.
+4. Start a **new** task in the same workspace so it picks up the current tool set.
+5. Repeat the forced tool call from Phase 1.
 
 **How to interpret both results**
 
-| Fresh `opencode mcp list` | Redrob Work status / forced call | Likely boundary |
+| Fresh `mcp list` | In-app status and forced call | Likely boundary |
 | --- | --- | --- |
-| Missing or failed | Missing or failed | Generated config, endpoint, token, TLS, or authentication |
+| Missing or failed | Missing or failed | Generated config, endpoint, credential, or TLS |
 | Connected | In-app status failed | Live engine registration or workspace routing |
 | Connected | In-app Ready, forced call rejected | Stale task tool snapshot or engine compatibility |
-| Connected | Forced call succeeds, natural request uses docs | Agent steering rather than MCP exposure |
+| Connected | Forced call succeeds, natural request uses docs | Agent steering rather than tool exposure |
+
+## 2. No models, or the Redrob Key looks disconnected
+
+**Symptoms**
+
+- The model picker is empty, or the Redrob provider is missing.
+- A request fails with an authentication error against the model provider.
+- You pasted a Redrob Key and the connect screen still says it is not connected.
+
+**What is usually wrong**
+
+The Redrob Code engine owns the Redrob Key. Redrob Work hands the key to the engine and
+keeps no copy of it, so the engine's own auth store is the only source of truth. A key
+that was never accepted, was rotated in the console, or was saved while the engine was
+unreachable produces exactly this symptom. The engine also fetches the model catalog
+from `console.redrob.ai` itself, so a blocked host looks identical to a bad key.
+
+**Paste this to your agent**
+
+````text
+Diagnose why no models are available in this workspace. Gather evidence only: do not rotate, delete, or print any credential. Never echo a key value, an Authorization header, or anything that looks like an API key. Report only whether a credential is present, never what it is.
+
+## Phase 1 - Evidence
+
+1. Report the desktop app version and the Redrob Code engine version. The pinned engine version is in `constants.json` as `redrobCodeVersion` at the repo root of a source checkout; in an installed app, report what the app's own status surface shows.
+2. Report whether the local `redrob-server` is running and reachable, and on which loopback port.
+3. Report whether the engine reports a Redrob credential as connected. Do not read credential files directly; use the app's status surface.
+4. Report whether `REDROB_API_KEY` appears anywhere in the environment-variable store. It should not: that store rejects the name on purpose, because the engine is the only place the key lives.
+
+## Phase 2 - Probe the catalog host
+
+5. Check whether `console.redrob.ai` resolves and whether TCP 443 to it completes. Report the result without sending a credential.
+6. If a proxy or custom CA is in play, report which one, from configuration only.
+
+## Phase 3 - Classify
+
+- Engine reports no credential: the key was never accepted. Paste it again on the connect screen and watch for a confirmation.
+- Engine reports a credential but requests fail with an authentication error: the key was revoked or rotated at console.redrob.ai. Issue a new one and paste it again.
+- `console.redrob.ai` is unreachable: this is a network or proxy problem, not a key problem. See Outbound network access.
+- Engine and host are both fine but the picker is empty: reload the engine config, then start a new task.
+
+Finish with a short report naming the single most likely boundary.
+````
+
+**Then verify inside Redrob Work**
+
+1. Reissue a key at [console.redrob.ai](https://console.redrob.ai) if the engine reports
+   no credential, and paste it on the connect screen.
+2. Confirm the connect screen reports success. If it does not, the engine did not accept
+   the key and nothing was stored.
+3. Start a new task and open the model picker.
+
+If the agent completes all phases and verification still fails,
+[open an issue](https://github.com/redrob-labs/redrob-work/issues) and paste the agent's
+final report. It is already redacted.

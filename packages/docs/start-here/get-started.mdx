@@ -4,10 +4,12 @@ description: "Privacy-first, open-source alternative to Claude Cowork."
 ---
 
 <Note>
-**Redrob Work stays free when you use it locally.** Download the desktop app, connect your own model provider, and add custom MCP servers without signing in to Redrob Work Cloud. Sign in only when you want organization-managed providers, skills, connections, or policies. See [Redrob Work Cloud](/cloud/get-started) for those team features.
+**Redrob Work is free and runs entirely on your machine.** Download the desktop app, paste a Redrob Key from [console.redrob.ai](https://console.redrob.ai), and start working on your own files. There is no account to create, no organization to join, and nothing to sign in to.
 </Note>
 
-Most people should start with the [Redrob Work app](https://redrob.io/download). It lets you use your own LLMs, skills, plugins, and MCP servers locally, then add Cloud when your team needs shared management.
+Start with the [Redrob Work app](https://redrob.io/download). It is a desktop app plus a
+local `redrob-server`, running the Redrob Code engine as a sidecar. Your files, your
+skills, your MCP servers, and your model credentials all stay on your computer.
 
 ## Start
 
@@ -18,7 +20,7 @@ Get started by connecting your LLM provider of choice and sending your first mes
     Sign in with ChatGPT or bring your own LLM key in a few clicks.
   </Card>
   <Card title="Connect your services" icon="plug" href="/start-here/connect-your-stack/connect-services">
-    Join an Redrob Work Cloud organization, then connect the managed services it makes available.
+    Add an MCP server so the agent can act in Slack, Notion, Linear, or your own systems.
   </Card>
   <Card title="Control the browser" icon="globe" href="/start-here/do-work-with-it/control-the-browser">
     Let Redrob Work run and screenshot tasks in Chrome for you.
@@ -29,13 +31,13 @@ Get started by connecting your LLM provider of choice and sending your first mes
 
 <CardGroup cols={3}>
   <Card title="Download Redrob Work" icon="download" href="https://redrob.io/download">
-    Start free with the desktop app, your own provider, and no Redrob Work Cloud account.
+    The desktop app, the local server, and the Redrob Code engine in one installer.
   </Card>
-  <Card title="Redrob Work Cloud" icon="users" href="/cloud/get-started">
-    For teams: Collections, managed connections and models, organization policies, and hosted workspaces.
+  <Card title="Control it from another client" icon="plug" href="/model-context-protocol/overview">
+    Drive Redrob Work from OpenCode, Claude Code, Codex, Cursor, and other MCP clients.
   </Card>
-  <Card title="Enterprise" icon="building" href="/cloud/enterprise">
-    Get support with an enterprise deployment if you need a private rollout or custom requirements.
+  <Card title="Plan a rollout" icon="building" href="/start-here/enterprise-desktop-deployment">
+    Install and configure the desktop app across a fleet, including offline networks.
   </Card>
 </CardGroup>
 

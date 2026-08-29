@@ -1,53 +1,59 @@
 ---
 title: "Roadmap"
-description: "The roadmap for the Redrob Work desktop app, portable capabilities, hosted workspaces, and every surface where work happens."
+description: "The roadmap for the Redrob Work desktop app, the local server, the Redrob Code engine, and the MCP surfaces around them."
 ---
 
-Most people use Redrob Work through the desktop app today. It is where you create a workspace, work with files, connect services, add skills, and customize how your agent works.
-
-What you create there should not stay trapped there. Redrob Work Connect already brings the same capabilities into compatible agents. Next come persistent hosted workspaces, Slack, mobile, and more.
+Redrob Work is a desktop app plus a local `redrob-server`, running the Redrob Code
+engine as a sidecar. Everything happens on your own machine, against your own files.
+There is no account, no organization, and no hosted control plane, and none is planned.
 
 Last updated: August 2026
 
 <Info>
-  **Live** means available today. **Preview** means available today for select customers — contact us for access. **Partial** means supported with limitations. **Building** means active work. **Next** is the next product horizon. **Exploring** is a direction, not a commitment.
+  **Live** means available today. **Preview** means present but rough. **Partial** means supported with limitations. **Building** means active work. **Next** is the next thing we intend to pick up. **Exploring** is a direction, not a commitment.
 </Info>
 
-## The desktop app is home
-
-The desktop app is the main Redrob Work experience. It is where people work with files, run agents, manage sessions, create skills, connect services, and customize a workspace.
+## The desktop app is the product
 
 | Capability | What it does | Status |
 | --- | --- | --- |
 | Desktop app for macOS, Windows, and Linux | A complete local-first workspace for agentic work. | Live |
 | Local files and workspaces | Work directly with the files and repositories already on your computer. | Live |
-| Skills, plugins, MCPs, and connected services | Customize what your agent knows and which systems it can use. | Live |
-| Organization-managed capabilities | Share approved skills and connections without rebuilding every setup by hand. | Live |
-| Artifacts | Preview, edit, download, and reopen generated files without leaving the desktop workspace. | Live |
-| Live artifacts | Persistent, interactive dashboards that refresh with current data from your connected apps and files every time you open them. | Preview |
-| MCP Apps | Rich, interactive app views rendered directly from agent results — a created-skill card, a workflow result view, a connection status card. | Preview |
-| Scheduled tasks | Run any prompt on a schedule or trigger — set it once and let it handle itself. | Partial |
+| Redrob Code engine as a sidecar | The app ships a pinned engine build and manages its lifecycle. No separate install. | Live |
+| Redrob Key for inference | Paste a key issued at console.redrob.ai. The engine owns it; the app keeps no copy. | Live |
+| Bring your own provider | Anthropic, OpenAI-compatible endpoints, and local models such as Ollama through workspace config. | Live |
+| Skills, commands, agents, plugins, and MCP servers | Customize what your agent knows and which systems it can reach, per workspace. | Live |
+| Anthropic-compatible plugin bundles | Install a Claude Code plugin bundle from a public GitHub repository, with a preview and an approval step. | Live |
 | Built-in browser control | Let agents navigate, click, type, and capture pages in a browser that stays visible inside the app. | Live |
-| Isolated sandbox workspaces | Run work in a separate Docker or microsandbox environment, with some platform and setup limitations today. | Partial |
+| Voice mode | Talk to a voice-first control layer that can drive the app on your behalf. | Live |
+| Cross-chat memory | A local Memory Bank plus recall over saved session history. | Live |
+| Artifacts | Preview, edit, download, and reopen generated files without leaving the workspace. | Live |
+| English and Korean | Two locales, with English as the fallback for untranslated strings. | Live |
+| Live artifacts | Persistent, interactive dashboards that refresh from your connected servers and files. | Preview |
+| MCP Apps | Rich, interactive views rendered from a tool result, such as a created-skill card. | Preview |
+| Code Mode | Authenticated multi-step scripts across your connected tools. | Preview |
+| Isolated sandbox workspaces | Run work in a separate Docker or microsandbox environment, with platform limits today. | Partial |
 | Better organization for long-running work | Make active, waiting, and completed work easier to understand and return to. | Building |
 
-> The desktop app is where most people configure Redrob Work today. Connect is how that configuration travels.
+## Redrob Work as an MCP surface
 
-## Your setup follows you
+The app is an MCP client for the servers you add, and it exposes its own UI as a local
+MCP server so other agents can drive it.
 
-What you configure in Redrob Work should not stay trapped in one interface. Redrob Work Connect brings the same capabilities into the agents you already use.
-
-| Capability | Status |
-| --- | --- |
-| Redrob Work Connect MCP | Live |
-| Codex, Claude Code, Cursor, and OpenCode | Live |
-| Organization Collections and access controls | Live |
-| Shared and per-user authentication | Live |
-| Git-based publishing and automatic sync | Building |
+| Capability | What it does | Status |
+| --- | --- | --- |
+| Workspace MCP connections | Add any MCP server to a workspace, with OAuth handled locally. | Live |
+| `redrob-ui-mcp` | A local stdio server that lets OpenCode, Claude Code, Codex, Cursor, VS Code, Windsurf, Zed, and Gemini CLI read app context and run named UI actions. | Live |
+| Semantic UI control for in-app agents | The workspace agent drives the app through affordance ids rather than pixels. | Live |
+| Portable skills | Skills are plain `SKILL.md` files, so a repository or a plugin bundle is all it takes to hand one over. | Live |
+| Git-based plugin publishing and refresh | Install from a repository today; reinstall by hand to update. | Building |
 
 ## MCP spec compliance
 
-Redrob Work implements the [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization) on both sides of the wire: as an MCP client (the desktop app and Redrob Work Cloud connections) and as an MCP server with its own authorization server (Redrob Work Cloud). Items marked Building or Next track the 2026-07-28 MCP specification release.
+Redrob Work implements the [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+as an MCP client, so the desktop app can connect to a compliant server or an enterprise
+MCP gateway. Items marked Building or Next track the 2026-07-28 MCP specification
+release.
 
 | Capability | What it does | Status |
 | --- | --- | --- |
@@ -56,75 +62,41 @@ Redrob Work implements the [MCP authorization specification](https://modelcontex
 | Silent session renewal | Short-lived access tokens backed by rotating refresh grants with replay protection, so connections renew without re-prompting for login. | Live |
 | Manual client credentials fallback | Enter a client ID and secret for authorization servers that do not offer Dynamic Client Registration. | Live |
 | `application_type` declaration (SEP-837) | Declare native or web application type during Dynamic Client Registration for compatibility with OIDC-backed enterprise authorization servers. | Building |
-| Client ID Metadata Documents (SEP-991) | A single, stable HTTPS client identity for Redrob Work that enterprises allowlist once, replacing per-connection registrations and wildcard redirect allowlists. | Building |
+| Client ID Metadata Documents (SEP-991) | A single, stable HTTPS client identity that enterprises allowlist once, replacing per-connection registrations and wildcard redirect allowlists. | Building |
 | Issuer-bound credentials (SEP-2352) | Key stored client credentials to the issuing authorization server and re-register automatically when a server's authorization server changes. | Building |
 | Authorization hardening (SEP-2468, SEP-2207) | Validate the `iss` parameter on authorization responses (RFC 9207) and adopt clarified refresh-token scope semantics. | Next |
-| URL-based client IDs in Redrob Work Cloud | Accept Client ID Metadata Document identities in the Redrob Work Cloud authorization server. | Next |
 
-> Following the spec is what makes Redrob Work drop-in compatible with enterprise MCP gateways: paste the gateway URL, sign in with your identity provider, and every downstream system it fronts becomes available.
+> Following the spec is what makes Redrob Work drop-in compatible with enterprise MCP
+> gateways: paste the gateway URL, sign in with your identity provider, and every
+> downstream system it fronts becomes available.
 
-## Central management
+## Deploying it across a fleet
 
-Redrob Work Cloud is the control plane for distributing capabilities, applying desktop policies, managing identity and access, and understanding adoption across the organization.
+Redrob Work installs per machine, so a rollout is an installer and configuration
+problem, not a hosted service problem.
 
 | Capability | What it does | Status |
 | --- | --- | --- |
-| Desktop policies | Control custom providers, OpenCode models, workspaces, settings, extensions, built-in tools, and onboarding by organization, team, or member. | Live |
-| Fully managed desktop | A stronger policy mode where your organization decides exactly what the app can do: only approved providers, connections, skills, and tools — nothing else. | Building |
-| Provider spending controls | Set budgets and caps on model spend for managed providers, by organization, team, or member. | Next |
-| Members, teams, and roles | Invite people, organize teams, and decide who can manage capabilities and security settings. | Live |
-| Skills and plugin Collections | Publish skills, commands, MCP dependencies, and extensions once, then assign them to the right people and teams. | Live |
-| Anthropic-compatible plugins | Import Claude-compatible plugin and marketplace manifests and normalize their skills, MCPs, commands, and tools into Redrob Work extensions. | Live |
-| SAML SSO | Connect an identity provider and provision organization members when they first sign in. | Live |
-| Usage and adoption telemetry | See active members, sessions, and task outcomes over time using event metadata, never prompts, code, or file contents. | Live |
-| OpenTelemetry coverage | Extend OTLP traces, metrics, and logs across Redrob Work services and deployment paths. | Building |
+| Enterprise desktop deployment | MDM distribution and a `desktop-bootstrap.json` reference for preconfiguring installs. | Live |
+| Air-gapped and private-network installs | Documented outbound requirements, certificate trust, and proxy handling. | Live |
+| On-prem branding | Replace names, wordmarks, and desktop icons inside your own deployment. | Live |
+| Self-hosted remote runtime | Run the server side on your own infrastructure and point the desktop at it. | Partial |
 
-> Configure policies and access once in Redrob Work Cloud. The desktop app and Redrob Work Connect apply them for each member and team.
+See [Self-host](/start-here/self-host) for what that involves today.
 
-## A workspace that stays on
+## Not on the roadmap
 
-Hosted workspaces give a person or team a persistent filesystem and a predictable environment in the cloud. Files, dependencies, repository state, and running work remain available after the laptop closes.
+These existed in an earlier hosted version of Redrob Work and are not coming back:
 
-| Capability | Status |
-| --- | --- |
-| Remote workspace connections | Live |
-| Persistent hosted workspaces | Building |
-| Reproducible environments | Building |
-| Long-running and background tasks | Building |
-| Scheduled workflows | Next |
-| Continue from another surface | Next |
-
-> Start with the desktop app. Leave work running in a hosted workspace. Return from the desktop, Slack, mobile, or another surface.
-
-## Redrob Work on every surface
-
-The desktop app remains the richest Redrob Work experience. Other surfaces provide focused ways to reach the same capabilities, permissions, workspaces, and history.
-
-| Surface | Status |
-| --- | --- |
-| Redrob Work desktop | Live |
-| Existing AI agents through MCP | Live |
-| Redrob Work Web — the full workspace in your browser, nothing to install | Preview |
-| Slack | Next |
-| Mobile | Next |
-| Dispatch from your phone — assign tasks that run on your desktop | Next |
-| Email and messaging | Exploring |
-| Custom organization agents | Exploring |
-
-## Systems, not just conversations
-
-Persistent environments and portable authentication make it possible to turn successful agent work into reliable systems that can run again.
-
-| Capability | Status |
-| --- | --- |
-| Search and execute | Live |
-| Code Mode — authenticated multi-step scripts across your connected tools | Preview |
-| Schedules and event triggers | Next |
-| Human approvals and resumable runs | Next |
-| Retries, logs, and run history | Next |
+- Accounts, sign-in, organizations, teams, and roles.
+- A hosted control plane for distributing skills, connections, or policies.
+- A hosted MCP endpoint other clients can point at.
+- Hosted workspaces and remote workers.
+- Scheduled and event-triggered runs inside the app. Drive recurring work from your own
+  scheduler through [redrob-ui-mcp](/model-context-protocol/overview).
 
 ## Help shape what comes next
 
-Tell us which workflow, workspace, or surface would make the biggest difference to how you work.
+Tell us which workflow or surface would make the biggest difference to how you work.
 
 [Share feedback](https://redrob.io/feedback?source=roadmap)

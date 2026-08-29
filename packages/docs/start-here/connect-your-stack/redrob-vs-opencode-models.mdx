@@ -7,31 +7,36 @@ Redrob Work and OpenCode are different model providers. A subscription or API ke
 
 | Provider | Where to manage it | What it controls |
 | --- | --- | --- |
-| Redrob Work inference | [Redrob Work inference dashboard](https://app.redrob.io/dashboard/inference) | Redrob Work-managed model access and organization usage limits |
+| Redrob inference | [console.redrob.ai](https://console.redrob.ai) | Your Redrob Key and its usage limits |
 | OpenCode Go / Zen | [OpenCode Go](https://opencode.ai/go) and [OpenCode auth](https://opencode.ai/auth) | OpenCode-managed models, subscription, and API access |
 
-## How to tell whether you are subscribed to Redrob Work inference
+Redrob is the default provider in Redrob Work. You connect it by pasting a Redrob Key
+on the connect screen; the Redrob Code engine owns that key and Redrob Work never
+stores a second copy of it.
 
-Open the [Redrob Work inference dashboard](https://app.redrob.io/dashboard/inference).
+## How to tell whether your Redrob Key is active
 
-- If the page shows `Subscribe`, you are not subscribed to Redrob Work inference.
-- If the page shows usage limits and usage remaining, you are subscribed to Redrob Work inference.
+Open [console.redrob.ai](https://console.redrob.ai) and look at the key you issued.
+
+- If the console has no key for this machine, issue one and paste it into Redrob Work.
+- If the console shows usage limits and usage remaining, the key is active.
 
 <Frame>
   ![Redrob Work inference usage limits](/images/redrob-inference-usage-limits.png)
 </Frame>
 
-## How Redrob Work usage buckets work
+## How Redrob usage buckets work
 
-Redrob Work inference usage is tracked with separate usage buckets. You may see buckets such as:
+Redrob inference usage is tracked with separate usage buckets. You may see buckets such
+as:
 
-- `5 hour usage limit` — a short-term bucket that resets during the day.
-- `Weekly usage limit` — a weekly bucket that resets on the listed date.
-- `Monthly usage limit` — a monthly bucket that resets on the listed date.
+- `5 hour usage limit`, a short-term bucket that resets during the day.
+- `Weekly usage limit`, a weekly bucket that resets on the listed date.
+- `Monthly usage limit`, a monthly bucket that resets on the listed date.
 
-The dashboard shows how much remains in each bucket and when each bucket resets. Usage is shared across your whole Redrob Work organization, not just your personal desktop app.
-
-Organization limits scale with the number of active members in the org. For example, adding active members increases the shared organization allowance, and usage by any member draws from the same shared buckets.
+The console shows how much remains in each bucket and when each one resets. Buckets
+belong to the key, so every machine using the same Redrob Key draws from the same
+allowance.
 
 ## If you meant to use OpenCode models
 
