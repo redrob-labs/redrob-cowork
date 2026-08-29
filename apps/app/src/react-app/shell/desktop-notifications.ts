@@ -6,6 +6,7 @@ import {
   type DesktopNotificationPreference,
 } from "@/react-app/kernel/desktop-notification-preferences";
 import { LOCAL_PREFERENCES_KEY } from "@/react-app/kernel/local-preferences-storage";
+import { t } from "@/i18n";
 
 type DesktopNotificationImportance = "important" | "routine";
 type WebNotificationHandler = (title: string, description?: string, href?: string) => Promise<void>;
@@ -63,26 +64,26 @@ function copyForEvent(event: DesktopNotificationEvent): NotificationCopy {
   switch (event.type) {
     case "task.completed":
       return {
-        title: "Task completed",
-        body: "The session finished running.",
+        title: t("notify.task_completed_title"),
+        body: t("notify.task_completed_body"),
         importance: "routine",
       };
     case "task.failed":
       return {
-        title: "Task failed",
-        body: event.errorText?.trim() || "The session stopped with an error.",
+        title: t("notify.task_failed_title"),
+        body: event.errorText?.trim() || t("notify.task_failed_body"),
         importance: "important",
       };
     case "permission.asked":
       return {
-        title: "Permission needed",
-        body: event.detail?.trim() || "A session is waiting for permission before it can continue.",
+        title: t("notify.permission_title"),
+        body: event.detail?.trim() || t("notify.permission_body"),
         importance: "important",
       };
     case "question.asked":
       return {
-        title: "Question needs your answer",
-        body: event.question?.trim() || "A session is waiting for your answer.",
+        title: t("notify.question_title"),
+        body: event.question?.trim() || t("notify.question_body"),
         importance: "important",
       };
   }

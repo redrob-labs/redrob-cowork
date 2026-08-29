@@ -1,3 +1,4 @@
+import { t } from "@/i18n"
 import type { DynamicToolUIPart } from "ai"
 
 /**
@@ -16,46 +17,19 @@ export type CapabilityCallSentence = {
   past: string
 }
 
-const PAST_TENSE: Record<string, string> = {
-  ask: "Asked",
-  search: "Searched",
-  find: "Found",
-  get: "Fetched",
-  fetch: "Fetched",
-  list: "Listed",
-  read: "Read",
-  check: "Checked",
-  create: "Created",
-  add: "Added",
-  send: "Sent",
-  update: "Updated",
-  delete: "Deleted",
-  remove: "Removed",
-  execute: "Ran",
-  run: "Ran",
-  open: "Opened",
-  query: "Queried",
-}
+const CAPABILITY_VERBS = new Set([
+  "ask", "search", "find", "get", "fetch", "list", "read", "check", "create",
+  "add", "send", "update", "delete", "remove", "execute", "run", "open", "query",
+])
 
-const PRESENT_TENSE: Record<string, string> = {
-  ask: "Asking",
-  search: "Searching",
-  find: "Finding",
-  get: "Fetching",
-  fetch: "Fetching",
-  list: "Listing",
-  read: "Reading",
-  check: "Checking",
-  create: "Creating",
-  add: "Adding",
-  send: "Sending",
-  update: "Updating",
-  delete: "Deleting",
-  remove: "Removing",
-  execute: "Running",
-  run: "Running",
-  open: "Opening",
-  query: "Querying",
+/**
+ * Resolved per call rather than cached in a module-level map: the locale can
+ * change while the app is running, and a frozen map would keep rendering the
+ * language that happened to be active at import time.
+ */
+function capabilityVerb(verb: string | undefined, tense: "past" | "present"): string | undefined {
+  if (!verb || !CAPABILITY_VERBS.has(verb)) return undefined
+  return t(`verb.${verb}_${tense}`)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -127,7 +101,7 @@ function splitCapabilityName(name: string): { service: string; action: string } 
 function verbPhrase(action: string, tense: "present" | "past"): string {
   const words = action.split(/[-_.\s]+/).filter(Boolean)
   const first = words[0]?.toLowerCase()
-  const mapped = first ? (tense === "past" ? PAST_TENSE[first] : PRESENT_TENSE[first]) : undefined
+  const mapped = capabilityVerb(first, tense === "past" ? "past" : "present")
   if (mapped) {
     return [mapped, ...words.slice(1)].join(" ")
   }
@@ -206,8 +180,8 @@ export function getCapabilityCallSentence(
     if (name) {
       const words = name.split(/(?=[A-Z])|[-_.\s]+/).filter(Boolean)
       const first = words[0]?.toLowerCase()
-      const verbPast = first ? PAST_TENSE[first] : undefined
-      const verbPresent = first ? PRESENT_TENSE[first] : undefined
+      const verbPast = capabilityVerb(first, "past")
+      const verbPresent = capabilityVerb(first, "present")
       let rest = words.slice(1)
       if (/^capabilit(y|ies)$/i.test(rest[0] ?? "")) rest = rest.slice(1)
       if (verbPast && verbPresent && rest.length > 0) {

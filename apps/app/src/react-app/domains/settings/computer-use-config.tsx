@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea, ScrollAreaViewport } from "@/components/ui/scroll-area";
+import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { registerExtensionConfig } from "./extension-registry";
 
@@ -62,7 +63,7 @@ function hasDesktopBridge() {
 
 function parsePermissionResult(value: unknown): PermissionResult {
   if (typeof value !== "object" || value === null) {
-    throw new Error("Unreadable response.");
+    throw new Error(t("settings.computer_use_alert_unreadable"));
   }
   return {
     ok: "ok" in value && value.ok === true,
@@ -110,7 +111,7 @@ export function ComputerUseConfig({
   } = useMutation({
     mutationFn: async () => {
       if (!hasDesktopBridge()) {
-        throw new Error("Computer Use is Mac only and requires the Redrob Work desktop app on macOS.");
+        throw new Error(t("settings.computer_use_mac_only_error"));
       }
 
       return parsePermissionResult(await desktopBridge.openComputerUsePermissionSetup());
@@ -145,10 +146,8 @@ export function ComputerUseConfig({
   return (
     <Card variant="outline" size="sm">
       <CardHeader>
-        <CardTitle>Computer Use setup (Mac only)</CardTitle>
-        <CardDescription>
-          Computer Use only works on Mac. Connect the local MCP server and grant the macOS permissions it needs to control apps.
-        </CardDescription>
+        <CardTitle>{t("settings.computer_use_title")}</CardTitle>
+        <CardDescription>{t("settings.computer_use_desc")}</CardDescription>
         <CardAction>
           <Button variant="ghost" size="icon-sm" onClick={() => void verify()} disabled={isBusy}>
             <RefreshCw className={cn(isBusy && "animate-spin")} />
@@ -166,8 +165,8 @@ export function ComputerUseConfig({
 
         {/* Step 1 — MCP */}
         <SetupRow
-          title="1. Connect Computer Use MCP"
-          description="Adds the local Computer Use server to this workspace so Composer can use the computer-control tools."
+          title={t("settings.computer_use_setup_mcp_title")}
+          description={t("settings.computer_use_setup_mcp_desc")}
           complete={connected}
         >
           <Button
@@ -177,21 +176,33 @@ export function ComputerUseConfig({
           >
             {connecting ? <Loader2 className="size-4 shrink-0 animate-spin" /> : null}
             <span className="min-w-0 break-words">
-              {connected ? "Configured" : connecting ? "Connecting…" : "Connect MCP"}
+              {connected
+                ? t("settings.computer_use_mcp_configured")
+                : connecting
+                  ? t("settings.computer_use_mcp_connecting")
+                  : t("settings.computer_use_mcp_connect")}
             </span>
           </Button>
         </SetupRow>
 
         {/* Step 2 — Permissions */}
         <SetupRow
-          title="2. Grant macOS permissions"
-          description="Opens the Redrob Work Computer Use helper. Grant both permissions there, then click Verify below."
+          title={t("settings.computer_use_permissions_title")}
+          description={t("settings.computer_use_permissions_desc")}
           complete={allGranted}
         >
           <div className="flex w-full min-w-0 flex-col gap-3">
             <div className="grid gap-2">
-              <Pill label="Accessibility" granted={result?.accessibility === true} checked={result !== null} />
-              <Pill label="Screen Recording" granted={result?.screenRecording === true} checked={result !== null} />
+              <Pill
+                label={t("settings.computer_use_pill_accessibility")}
+                granted={result?.accessibility === true}
+                checked={result !== null}
+              />
+              <Pill
+                label={t("settings.computer_use_pill_screen_recording")}
+                granted={result?.screenRecording === true}
+                checked={result !== null}
+              />
             </div>
 
             <Button
@@ -205,7 +216,11 @@ export function ComputerUseConfig({
                 <Settings2 className="size-4 shrink-0" />
               )}
               <span className="min-w-0 wrap-break-word">
-                {isBusy ? "Opening…" : allGranted ? "Reopen helper" : "Grant permissions"}
+                {isBusy
+                  ? t("settings.computer_use_permissions_opening")
+                  : allGranted
+                    ? t("settings.computer_use_permissions_reopen")
+                    : t("settings.computer_use_permissions_grant")}
               </span>
             </Button>
           </div>
@@ -216,8 +231,8 @@ export function ComputerUseConfig({
         <div className="flex w-full flex-col gap-3">
           <p className="text-xs text-muted-foreground">
             {allGranted
-              ? "Permissions verified. Try a Composer prompt that uses Computer Use."
-              : "After granting permissions in the helper, click Verify."}
+              ? t("settings.computer_use_footer_verified")
+              : t("settings.computer_use_footer_verify")}
           </p>
           <div className="flex w-full justify-end gap-2">
             {onRefresh ? (
@@ -225,7 +240,7 @@ export function ComputerUseConfig({
                 variant="outline"
                 onClick={() => void onRefresh?.()}
               >
-                Refresh
+                {t("settings.computer_use_refresh")}
               </Button>
             ) : null}
             <Button
@@ -233,7 +248,7 @@ export function ComputerUseConfig({
               disabled={isBusy}
             >
               {isBusy ? <Loader2 className="size-4 shrink-0 animate-spin" /> : null}
-              Verify permissions
+              {t("settings.computer_use_verify_permissions")}
             </Button>
           </div>
         </div>
@@ -291,7 +306,11 @@ function Pill({ label, granted, checked }: PillProps) {
           checked && !granted && "text-amber-11",
         )}
       >
-        {!checked ? "…" : granted ? "Granted" : "Needed"}
+        {!checked
+          ? t("settings.computer_use_pill_pending")
+          : granted
+            ? t("settings.computer_use_pill_granted")
+            : t("settings.computer_use_pill_needed")}
       </span>
     </div>
   );

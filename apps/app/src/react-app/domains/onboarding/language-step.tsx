@@ -34,39 +34,50 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
       title={t("onboarding.language_title")}
       description={t("onboarding.language_subtitle")}
     >
-      <div className="space-y-3">
-        {LANGUAGE_OPTIONS.map((option) => {
-          const selected = option.value === language;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={selected}
-              className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition-colors ${
-                selected
-                  ? "border-blue-7/60 bg-blue-2/30"
-                  : "border-border bg-card hover:bg-accent"
-              }`}
-              onClick={() => setLocale(option.value)}
-              data-testid={`onboarding-language-${option.value}`}
-            >
-              <div>
-                <div className="text-sm font-medium text-foreground">
-                  {option.nativeName}
+      <div className="space-y-6">
+        <div className="flex flex-col gap-2.5" role="radiogroup" aria-label={t("onboarding.language_title")}>
+          {LANGUAGE_OPTIONS.map((option) => {
+            const selected = option.value === language;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-pressed={selected}
+                className={`flex w-full items-center justify-between rounded-2xl border p-4 text-left transition-colors ${
+                  selected
+                    ? "border-blue-8 bg-blue-2/50 ring-1 ring-blue-8/30"
+                    : "border-border bg-card hover:border-foreground/15 hover:bg-accent"
+                }`}
+                onClick={() => setLocale(option.value)}
+                data-testid={`onboarding-language-${option.value}`}
+              >
+                <div>
+                  <div className="text-[15px] font-medium text-foreground">
+                    {option.nativeName}
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    {option.label}
+                  </div>
                 </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  {option.label}
-                </div>
-              </div>
-              {selected ? <CheckIcon className="size-5 shrink-0 text-blue-10" /> : null}
-            </button>
-          );
-        })}
+                <span
+                  className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                    selected ? "border-blue-9 bg-blue-9" : "border-border bg-transparent"
+                  }`}
+                  aria-hidden="true"
+                >
+                  {selected ? <CheckIcon className="size-3.5 text-white" /> : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         <Button
           type="button"
           size="lg"
-          className="h-11 w-full text-[15px] font-semibold"
+          className="h-12 w-full text-[15px] font-semibold"
           onClick={onContinue}
           data-testid="onboarding-language-continue"
         >

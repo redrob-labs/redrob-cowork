@@ -1694,8 +1694,8 @@ export function SessionRoute() {
 
   const sessionSearchPaletteItem = useMemo<PaletteItem>(() => ({
     id: "session-search.open",
-    title: "Search session messages",
-    detail: "Deep search every session, including message content",
+    title: t("palette.search_messages"),
+    detail: t("palette.search_messages_detail"),
     meta: "Cmd/Ctrl+Shift+F",
     searchText: "search find sessions messages history transcript content",
     action: () => {
@@ -1708,8 +1708,8 @@ export function SessionRoute() {
     if (!selectedSessionId) return null;
     return {
       id: "session-find.open",
-      title: "Find in conversation",
-      detail: "Search within the current conversation",
+      title: t("find.in_conversation"),
+      detail: t("palette.find_in_conversation_detail"),
       meta: "Cmd/Ctrl+F",
       searchText: "find search current conversation session messages transcript",
       action: () => {
@@ -1723,7 +1723,7 @@ export function SessionRoute() {
     {
       id: "terminal.toggle",
       title: terminalOpen ? "Hide terminal" : "Show terminal",
-      detail: "Toggle the integrated terminal panel for this workspace",
+      detail: t("palette.toggle_terminal_detail"),
       meta: "Cmd/Ctrl+J",
       searchText: "terminal shell command line console show hide toggle",
       action: () => {
@@ -1806,8 +1806,8 @@ export function SessionRoute() {
 
   const nextSessionTabPaletteItem = useMemo<PaletteItem>(() => ({
     id: "session-tab.next",
-    title: "Next session tab",
-    detail: "Switch to the next session in this workspace",
+    title: t("palette.next_session_tab"),
+    detail: t("palette.next_session_tab_detail"),
     meta: "Cmd/Ctrl+T",
     searchText: "next session tab switch forward",
     action: () => {
@@ -1818,8 +1818,8 @@ export function SessionRoute() {
 
   const prevSessionTabPaletteItem = useMemo<PaletteItem>(() => ({
     id: "session-tab.previous",
-    title: "Previous session tab",
-    detail: "Switch to the previous session in this workspace",
+    title: t("palette.previous_session_tab"),
+    detail: t("palette.previous_session_tab_detail"),
     meta: "Cmd/Ctrl+Shift+T",
     searchText: "previous session tab switch back",
     action: () => {

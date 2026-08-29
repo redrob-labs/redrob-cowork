@@ -19,6 +19,7 @@ import {
   warningBannerClass,
 } from "./modal-styles";
 import type { ShareField } from "./types";
+import { t } from "@/i18n";
 
 const isInviteField = (label: string) => /invite link/i.test(label);
 const isCollaboratorField = (label: string) =>
@@ -152,9 +153,7 @@ export function ShareWorkspaceAccessPanel(
         <div className={surfaceCardClass}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-[18px] font-semibold tracking-[-0.3px] text-dls-text">
-                Remote access
-              </h3>
+              <h3 className="text-[18px] font-semibold tracking-[-0.3px] text-dls-text">{t("workspace.remote_access")}</h3>
               <p className="mt-1 text-[14px] leading-relaxed text-dls-secondary">
                 Off by default. Turn this on only when you want this worker
                 reachable from another machine.
@@ -164,7 +163,7 @@ export function ShareWorkspaceAccessPanel(
               <input
                 id={remoteAccessToggleId}
                 type="checkbox"
-                aria-label="Remote access"
+                aria-label={t("workspace.remote_access")}
                 className="peer sr-only"
                 checked={props.remoteAccessEnabled}
                 onChange={(event) =>
@@ -209,9 +208,7 @@ export function ShareWorkspaceAccessPanel(
 
       {primaryAccessFields.length > 0 ? (
         <div className={surfaceCardClass}>
-          <div className="mb-4 text-[13px] font-medium text-dls-text">
-            Connection details
-          </div>
+          <div className="mb-4 text-[13px] font-medium text-dls-text">{t("workspace.connection_details")}</div>
           <div className="space-y-4">
             {primaryAccessFields.map((field) => (
               <div key={field.label}>
@@ -244,7 +241,7 @@ export function ShareWorkspaceAccessPanel(
             onClick={props.onToggleCollaboratorExpanded}
             aria-expanded={props.collaboratorExpanded}
           >
-            <span>Optional collaborator access</span>
+            <span>{t("workspace.optional_collaborator_access")}</span>
             <ChevronDown
               size={13}
               className={`shrink-0 transition-transform ${
@@ -254,9 +251,7 @@ export function ShareWorkspaceAccessPanel(
           </button>
           {props.collaboratorExpanded ? (
             <div className={`${softCardClass} mt-3`}>
-              <div className="mb-3 text-[12px] text-dls-secondary">
-                Routine access without permission approvals.
-              </div>
+              <div className="mb-3 text-[12px] text-dls-secondary">{t("workspace.routine_access")}</div>
               <CredentialField
                 field={collaboratorField}
                 fieldKey={`collaborator:${collaboratorField.label}`}

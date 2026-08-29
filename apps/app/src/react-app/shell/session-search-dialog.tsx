@@ -30,6 +30,7 @@ import {
   type SessionSearchSnippet,
 } from "@/react-app/domains/session/search/session-search";
 import { useSessionFindStore } from "@/react-app/domains/session/surface/find-store";
+import { t } from "@/i18n";
 
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 200;
@@ -240,7 +241,7 @@ export function SessionSearchDialog(props: SessionSearchDialogProps) {
       }}
     >
       <CommandDialogPopup>
-        <CommandDialogTitle>Search sessions</CommandDialogTitle>
+        <CommandDialogTitle>{t("session.cmd_sessions_title")}</CommandDialogTitle>
         <Command
           items={groups}
           filter={null}
@@ -250,7 +251,7 @@ export function SessionSearchDialog(props: SessionSearchDialogProps) {
           <CommandHeader>
             <CommandInput
               className="w-full"
-              placeholder="Search all sessions and messages…"
+              placeholder={t("session.search_placeholder")}
             />
           </CommandHeader>
           <CommandPanel>

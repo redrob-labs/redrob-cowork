@@ -3,36 +3,15 @@ import { useState } from "react";
 import { Zap } from "lucide-react";
 
 import type { ComposerAttachment } from "@/app/types";
+import { t } from "@/i18n";
 import { NewTaskComposer, type NewTaskComposerContext } from "./new-task-composer";
 
-type HeroSuggestion = {
-  title: string;
-  description: string;
-  prompt: string;
-};
-
-const DEFAULT_SUGGESTIONS: HeroSuggestion[] = [
-  {
-    title: "Summarize my week",
-    description: "Pull highlights from email and calendar.",
-    prompt: "Summarize my week: pull the highlights from my connected email and calendar and give me a short digest of what happened and what needs my attention.",
-  },
-  {
-    title: "Clean up a spreadsheet",
-    description: "Drop in a CSV and describe the result you want.",
-    prompt: "Create a sample CSV file with 20 rows of fake customer data (name, email, company, revenue). Then show me a summary of the data.",
-  },
-  {
-    title: "Draft a document",
-    description: "Reports, emails, or briefs from a few bullet points.",
-    prompt: "Draft a one-page project brief. Ask me for the bullet points you need, then turn them into a clear, well-structured document.",
-  },
-  {
-    title: "Automate a web task",
-    description: "Use the built-in browser for repetitive steps.",
-    prompt: "Open craigslist.org in the browser and search for couches for sale. Show me the top 5 results with prices.",
-  },
-];
+/**
+ * The starter card's prompt is sent to the model verbatim, so it is
+ * translated with the card: a Korean user should not have their first task
+ * silently written in English on their behalf.
+ */
+const SUGGESTION_IDS = ["week", "spreadsheet", "document", "web_task"] as const;
 
 export type SessionEmptyHeroProps = {
   providerCount: number;
@@ -51,7 +30,12 @@ export type SessionEmptyHeroProps = {
  */
 export function SessionEmptyHero(props: SessionEmptyHeroProps) {
   const [prompt, setPrompt] = useState("");
-  const suggestions: HeroSuggestion[] = DEFAULT_SUGGESTIONS;
+  const suggestions = SUGGESTION_IDS.map((id) => ({
+    id,
+    title: t(`hero.suggestion_${id}_title`),
+    description: t(`hero.suggestion_${id}_description`),
+    prompt: t(`hero.suggestion_${id}_prompt`),
+  }));
 
   const submit = (resolvedPrompt: string, attachments: ComposerAttachment[]) => {
     const trimmedPrompt = resolvedPrompt.trim();
@@ -68,9 +52,9 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
     <div className="mx-auto w-full max-w-[640px] space-y-6 px-4 max-lg:px-4 sm:px-6">
       <div className="space-y-1.5 text-center">
         <h2 className="text-[24px] font-semibold leading-[30px] tracking-[-0.02em] text-foreground">
-          What do you need done?
+          {t("hero.title")}
         </h2>
-        <p className="text-[13px] text-muted-foreground">Describe it in plain language</p>
+        <p className="text-[13px] text-muted-foreground">{t("hero.subtitle")}</p>
       </div>
 
       <NewTaskComposer
@@ -89,9 +73,11 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
         >
           <Zap className="mt-0.5 size-4 shrink-0 text-blue-10" />
           <div>
-            <div className="text-[13px] font-medium text-foreground">Connect a model provider</div>
+            <div className="text-[13px] font-medium text-foreground">
+              {t("hero.connect_provider_title")}
+            </div>
             <div className="mt-0.5 text-[12px] text-muted-foreground">
-              Add an API key for Anthropic, OpenAI, Google, or other providers so tasks can run.
+              {t("hero.connect_provider_description")}
             </div>
           </div>
         </button>
@@ -100,7 +86,7 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
       <div className="grid gap-2 sm:grid-cols-2">
         {suggestions.map((suggestion) => (
           <button
-            key={suggestion.title}
+            key={suggestion.id}
             type="button"
             className="rounded-xl border border-border bg-background p-3.5 text-left transition-colors hover:bg-accent"
             onClick={() => fillPrompt(suggestion.prompt)}

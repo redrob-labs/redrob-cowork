@@ -36,6 +36,7 @@ import type {
   ProviderAuthProvider,
   ProviderOAuthStartResult,
 } from "./store";
+import { t } from "@/i18n";
 
 type ProviderAuthEntry = {
   id: string;
@@ -648,10 +649,8 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     >
       <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Connect providers</DialogTitle>
-          <DialogDescription>
-            Enter your Redrob API key to connect the Redrob provider.
-          </DialogDescription>
+          <DialogTitle>{t("provider_auth.title")}</DialogTitle>
+          <DialogDescription>{t("provider_auth.enter_redrob_key")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4">
@@ -674,7 +673,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Filter providers by name or ID"
+                      placeholder={t("provider_auth.filter_placeholder")}
                       value={searchQuery}
                       onChange={(event) => {
                         setSearchQuery(event.currentTarget.value);
@@ -692,9 +691,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     filteredEntries.map((entry, index) => (
                       <div key={entry.id}>
                         {index === 0 && entry.connected ? (
-                          <div className="px-1 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
-                            Connected
-                          </div>
+                          <div className="px-1 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">{t("provider_auth.connected")}</div>
                         ) : null}
                         {index === connectedCount && !entry.connected ? (
                           <div className="px-1 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
@@ -724,13 +721,9 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                               <div className="flex items-center justify-end shrink-0">
                                 {entry.connected ? (
                                   <div className="flex items-center gap-1 text-[11px] font-medium text-green-11 bg-green-4/20 border border-green-5/30 px-1.5 py-0.5 rounded-md">
-                                    <CheckCircle2 size={12} strokeWidth={2.5} />
-                                    Connected
-                                  </div>
+                                    <CheckCircle2 size={12} strokeWidth={2.5} />{t("provider_auth.connected")}</div>
                                 ) : (
-                                  <div className="text-[12px] font-medium text-gray-9 group-hover:text-gray-12 transition-colors flex items-center gap-0.5 opacity-80 group-hover:opacity-100">
-                                    Connect
-                                    <ChevronRight size={14} className="opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+                                  <div className="text-[12px] font-medium text-gray-9 group-hover:text-gray-12 transition-colors flex items-center gap-0.5 opacity-80 group-hover:opacity-100">{t("provider_auth.connect")}<ChevronRight size={14} className="opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
                                   </div>
                                 )}
                               </div>
@@ -763,7 +756,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     </div>
                   )}
 
-                  <div className="text-[11px] text-gray-9">Arrow keys to navigate, Enter to select.</div>
+                  <div className="text-[11px] text-gray-9">{t("provider_auth.keyboard_hint")}</div>
                 </div>
               ) : null}
 
@@ -772,7 +765,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
-                      <div className="text-xs text-gray-10 mt-1">Choose how you'd like to connect.</div>
+                      <div className="text-xs text-gray-10 mt-1">{t("provider_auth.choose_method")}</div>
                     </div>
                     <Button variant="outline" onClick={handleBack} disabled={actionDisabled}>
                       Back
@@ -810,9 +803,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                       <div className="text-[11px] text-gray-9 font-mono truncate">{selectedEntry.id}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-gray-10">
-                    Paste your API key to connect.
-                  </div>
+                  <div className="text-xs text-gray-10">{t("provider_auth.paste_api_key")}</div>
                   <TextInput
                     label="API key"
                     type="password"
@@ -848,15 +839,13 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
-                      <div className="text-xs text-gray-10 mt-1">Finish OAuth by pasting the authorization code.</div>
+                      <div className="text-xs text-gray-10 mt-1">{t("provider_auth.finish_oauth")}</div>
                     </div>
                     <Button variant="outline" onClick={handleBack} disabled={actionDisabled}>
                       Back
                     </Button>
                   </div>
-                  <div className="text-xs text-gray-9">
-                    Complete sign-in in your browser, then paste the code here.
-                  </div>
+                  <div className="text-xs text-gray-9">{t("provider_auth.complete_signin")}</div>
                   {oauthInstructions ? (
                     <div className="rounded-lg border border-gray-6/60 bg-gray-1/60 px-3 py-2 text-[11px] text-gray-9 font-mono break-all">
                       {oauthInstructions}
@@ -865,7 +854,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   <TextInput
                     label="Authorization code"
                     type="text"
-                    placeholder="Paste code"
+                    placeholder={t("provider_auth.paste_code")}
                     value={oauthCodeInput}
                     onChange={(event) => {
                       setOauthCodeInput(event.currentTarget.value);
@@ -887,9 +876,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                       onClick={() => {
                         void openOauthUrl(oauthSession.authorization.url ?? "");
                       }}
-                    >
-                      Open browser again
-                    </Button>
+                    >{t("provider_auth.open_browser_again")}</Button>
                     <Button
                       onClick={() => void handleOauthCodeSubmit()}
                       disabled={actionDisabled || !oauthCodeInput.trim()}
@@ -905,7 +892,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
-                      <div className="text-xs text-gray-10 mt-1">Waiting for browser confirmation.</div>
+                      <div className="text-xs text-gray-10 mt-1">{t("provider_auth.waiting_browser")}</div>
                     </div>
                     <Button variant="outline" onClick={handleBack} disabled={actionDisabled}>
                       Back
@@ -913,20 +900,18 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   </div>
                   {isOpenAiHeadlessSession ? (
                     <div className="space-y-2 text-xs text-gray-9">
-                      <div>You'll need to sign in to your OpenAI account and provide the code below.</div>
-                      <div>The first time you do this you'll need to enable Device auth in your account settings.</div>
+                      <div>{t("provider_auth.device_signin")}</div>
+                      <div>{t("provider_auth.device_auth_first_time")}</div>
                       <div>ChatGPT &gt; Account Settings &gt; Security &gt; Enable device code authorization</div>
                       <div>When you're ready, copy the code below, and click &quot;Open Browser&quot;.</div>
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-9">
-                      Sign in in the browser tab we just opened. We will complete the connection automatically.
-                    </div>
+                    <div className="text-xs text-gray-9">{t("provider_auth.browser_tab_opened")}</div>
                   )}
                   {oauthDisplayCode ? (
                     <div className="rounded-xl border border-gray-6/70 bg-gray-2/40 p-3 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[10px] uppercase tracking-wide text-gray-8">Confirmation code</div>
+                        <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("provider_auth.confirmation_code")}</div>
                         <div className="text-sm text-gray-12 font-mono break-all">{oauthDisplayCode}</div>
                       </div>
                       <Button variant="outline" size="sm" className="shrink-0" onClick={() => void copyOauthDisplayCode()}>
@@ -936,7 +921,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   ) : null}
                   {isOpenAiHeadlessSession && !oauthBrowserOpened ? (
                     <div className="flex items-center gap-2 text-xs text-gray-9">
-                      <span>Authorization checks will start after you click Open Browser.</span>
+                      <span>{t("provider_auth.checks_start_hint")}</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-xs text-gray-9">
@@ -957,9 +942,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                           : "Open Browser"
                         : "Open browser again"}
                     </Button>
-                    <div className="text-[11px] text-gray-9 text-right">
-                      This window will close once the provider is connected.
-                    </div>
+                    <div className="text-[11px] text-gray-9 text-right">{t("provider_auth.window_closes")}</div>
                   </div>
                 </div>
               ) : null}

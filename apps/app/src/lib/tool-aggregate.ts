@@ -10,6 +10,7 @@ import {
   isWriteToolPart,
 } from "@/lib/build-in-tools"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
+import { t } from "@/i18n"
 
 export type AnyToolPart = ToolUIPart | DynamicToolUIPart
 
@@ -42,10 +43,6 @@ function filePathOf(part: AnyToolPart): string | null {
   return typeof value === "string" && value ? value : null
 }
 
-function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
-  return `${count} ${count === 1 ? singular : pluralForm}`
-}
-
 /**
  * "Editing 3 files, running 8 commands" / "Edited 3 files, ran 8 commands".
  * File counts are unique paths; searches and commands are call counts.
@@ -76,17 +73,17 @@ export function getAggregateSummary(parts: AnyToolPart[], tense: "present" | "pa
   const pieces: string[] = []
   if (editCalls > 0) {
     const count = editPaths.size > 0 ? editPaths.size : editCalls
-    pieces.push(`${tense === "past" ? "edited" : "editing"} ${plural(count, "file")}`)
+    pieces.push(t(`aggregate.files_${tense === "past" ? "edited" : "editing"}`, { count }))
   }
   if (commands > 0) {
-    pieces.push(`${tense === "past" ? "ran" : "running"} ${plural(commands, "command")}`)
+    pieces.push(t(`aggregate.commands_${tense === "past" ? "ran" : "running"}`, { count: commands }))
   }
   if (readCalls > 0) {
     const count = readPaths.size > 0 ? readPaths.size : readCalls
-    pieces.push(`${tense === "past" ? "read" : "reading"} ${plural(count, "file")}`)
+    pieces.push(t(`aggregate.files_${tense === "past" ? "read" : "reading"}`, { count }))
   }
   if (searches > 0) {
-    pieces.push(`${tense === "past" ? "ran" : "running"} ${plural(searches, "search", "searches")}`)
+    pieces.push(t(`aggregate.searches_${tense === "past" ? "ran" : "running"}`, { count: searches }))
   }
 
   const joined = pieces.join(", ")
@@ -106,9 +103,9 @@ export function getAggregateRowFile(part: AnyToolPart): { verb: string; path: st
   const running = isToolPartInFlight(part)
   const path = filePathOf(part)
   if (!path) return null
-  if (isEditToolPart(part)) return { verb: running ? "Editing" : "Edited", path }
-  if (isWriteToolPart(part)) return { verb: running ? "Writing" : "Wrote", path }
-  if (isReadToolPart(part)) return { verb: running ? "Reading" : "Read", path }
+  if (isEditToolPart(part)) return { verb: t(running ? "verb.editing" : "verb.edited"), path }
+  if (isWriteToolPart(part)) return { verb: t(running ? "verb.writing" : "verb.wrote"), path }
+  if (isReadToolPart(part)) return { verb: t(running ? "verb.reading" : "verb.read"), path }
   return null
 }
 

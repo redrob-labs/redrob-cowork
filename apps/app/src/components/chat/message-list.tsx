@@ -107,6 +107,7 @@ import {
 } from "@/lib/build-in-tools"
 import type { ThreadStatus } from "@/lib/messages"
 import { formatToolCallDuration } from "@/lib/tool-call-duration"
+import { t } from "@/i18n"
 import { collectLatestAssistantToolParts } from "@/lib/latest-assistant-tool-parts"
 import { getActiveToolLabel } from "@/lib/tool-activity"
 import { faviconUrlForHref } from "@/lib/favicon"
@@ -770,7 +771,7 @@ const LoadingMessage = React.memo(({ label }: { label?: string }) => (
             style={{ backgroundColor: "#818cf8", width: "100%", height: "100%", borderRadius: "50%" }}
           />
         </div>
-        <span>{label ?? "Thinking…"}</span>
+        <span>{label ?? t("session.assistant_thinking")}</span>
       </div>
     </div>
   </Message>
@@ -1039,10 +1040,10 @@ function MessageGroup({
     ) + proseReasoning.length
   const stepRunLabel =
     stepsStartedAt !== null && stepsEndedAt !== null && stepsEndedAt > stepsStartedAt
-      ? `Worked for ${formatToolCallDuration(stepsEndedAt - stepsStartedAt)}`
-      : stepRowCount === 1
-        ? "1 step"
-        : `${stepRowCount} steps`
+      ? t("session.worked_for", {
+          duration: formatToolCallDuration(stepsEndedAt - stepsStartedAt),
+        })
+      : t("session.step_count", { count: stepRowCount })
   // A short finished run reads fine as a list, so only long ones fold away.
   const collapseSteps =
     !isLiveGroup && stepItems.length > 0 && stepRowCount > COLLAPSED_STEP_RUN_MIN_ROWS

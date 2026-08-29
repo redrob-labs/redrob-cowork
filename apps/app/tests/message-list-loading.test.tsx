@@ -9,6 +9,7 @@ import {
 } from "../src/components/chat/message-list";
 import { MessageListProvider } from "../src/components/chat/message-list-provider";
 import type { ThreadStatus } from "../src/lib/messages";
+import en from "../src/i18n/locales/en";
 
 const userMessage: UIMessage = {
   id: "user-1",
@@ -40,7 +41,7 @@ describe("message-list loading feedback", () => {
   test("acknowledges a submitted message before streaming starts", () => {
     const markup = renderList([userMessage], "submitted");
 
-    expect(markup).toContain("Thinking…");
+    expect(markup).toContain(en["session.assistant_thinking"]);
     expect(markup).not.toContain("Loading…");
   });
 
@@ -51,7 +52,7 @@ describe("message-list loading feedback", () => {
   test("keeps the same loading treatment when streaming begins", () => {
     const markup = renderList([userMessage], "streaming");
 
-    expect(markup).toContain("Thinking…");
+    expect(markup).toContain(en["session.assistant_thinking"]);
     expect(markup).not.toContain("Loading…");
   });
 });

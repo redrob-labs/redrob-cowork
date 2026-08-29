@@ -780,7 +780,7 @@ export function McpView(props: McpViewProps) {
             presentation={detailPresentation}
             backLabel={t("extensions.title")}
             name={detailSkill.name}
-            description={detailSkill.description ?? "Installed skill"}
+            description={detailSkill.description ?? t("extensions.fallback_description_skill")}
             taxonomy="skill"
             connected={true}
            hidden={hidden}
@@ -899,10 +899,10 @@ export function McpView(props: McpViewProps) {
         />
       </div>
 
-      <div className="mb-7 flex flex-wrap items-center gap-2" aria-label="Library filters">
+      <div className="mb-7 flex flex-wrap items-center gap-2" aria-label={t("extensions.filters_label")}>
         <div className="w-full sm:w-[220px]">
           <SettingsListSearchInput
-            placeholder="Search your library"
+            placeholder={t("extensions.search_placeholder")}
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
           />
@@ -935,7 +935,11 @@ export function McpView(props: McpViewProps) {
               : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
           }`}
         >
-          {showHidden ? "Showing hidden" : hiddenCount > 0 ? `Show hidden (${hiddenCount})` : "Show hidden"}
+          {showHidden
+            ? t("extensions.showing_hidden")
+            : hiddenCount > 0
+              ? t("extensions.show_hidden_count", { count: hiddenCount })
+              : t("extensions.show_hidden")}
         </button>
         <div className="ml-auto flex items-center gap-1">
           <ExtensionLayoutToggle
@@ -1185,7 +1189,7 @@ export function ExtensionStateTabs(props: {
   }>;
 
   return (
-    <div className="flex flex-wrap gap-6 border-b border-dls-border" role="tablist" aria-label="Library state">
+    <div className="flex flex-wrap gap-6 border-b border-dls-border" role="tablist" aria-label={t("extensions.state_tabs_label")}>
       {tabs.filter((tab) => tab.state === "all" || tab.count !== 0).map((tab) => {
         const active = props.state === tab.state;
         return (
@@ -1302,7 +1306,7 @@ function McpQuickConnectSection(props: {
           preview={entry.preview}
           disabled={props.busy}
           meta={t("extensions.surface_this_device")}
-          actionLabel={configured ? "View details" : t("mcp.tap_to_connect")}
+          actionLabel={configured ? t("extensions.view_details") : t("mcp.tap_to_connect")}
           nextActionLabel={configured ? undefined : t("connect.row_action_connect")}
           onClick={() => props.onDetail(entry)}
         />
@@ -1320,12 +1324,12 @@ function McpQuickConnectSection(props: {
         <ExtensionCard
           layout={props.layout}
           name={skill.name}
-          description={skill.description ?? "Installed skill"}
+          description={skill.description ?? t("extensions.fallback_description_skill")}
           taxonomy="skill"
           connected={true}
           hidden={hidden}
           meta={t("extensions.surface_this_device")}
-          actionLabel="View details"
+          actionLabel={t("extensions.view_details")}
           onClick={() => props.onSkillDetail?.(skill)}
         />
       ),
@@ -1340,11 +1344,11 @@ function McpQuickConnectSection(props: {
         <ExtensionCard
           layout={props.layout}
           name={`/${command.name}`}
-          description={command.description ?? "Slash command"}
+          description={command.description ?? t("extensions.fallback_description_command")}
           taxonomy="command"
           connected={true}
           meta={t("extensions.surface_this_device")}
-          actionLabel="View details"
+          actionLabel={t("extensions.view_details")}
           onClick={() => props.onCommandDetail?.(command)}
         />
       ),
@@ -1359,11 +1363,11 @@ function McpQuickConnectSection(props: {
         <ExtensionCard
           layout={props.layout}
           name={agent.name}
-          description={agent.description ?? "Session agent"}
+          description={agent.description ?? t("extensions.fallback_description_agent")}
           taxonomy="agent"
           connected={true}
           meta={t("extensions.surface_this_device")}
-          actionLabel="View details"
+          actionLabel={t("extensions.view_details")}
           onClick={() => props.onAgentDetail?.(agent)}
         />
       ),
@@ -1701,9 +1705,7 @@ function McpAdvancedConfigSection(props: {
               </Button>
               {props.onImportFromGithub ? (
                 <Button variant="outline" onClick={props.onImportFromGithub}>
-                  <Download size={14} />
-                  From GitHub
-                </Button>
+                  <Download size={14} />{t("mcp.from_github")}</Button>
               ) : null}
             </div>
           </div>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { RecoveryActionResult } from "@/app/lib/desktop";
 import { bootOverlayCanHide, useBootState, useBootOverlayVisible } from "./boot-state";
 import { OwDotTicker } from "./dot-ticker";
+import { t } from "@/i18n";
 
 /**
  * Quiet, opaque boot overlay. Solid surface fill so nothing bleeds through.
@@ -50,18 +51,16 @@ export function LoadingOverlay() {
       <div className="flex w-full max-w-[320px] flex-col items-center gap-4 px-6 text-center">
         {error ? (
           <div className="flex w-full flex-col gap-3 text-[12px] leading-5">
-            <div className="text-base font-medium text-dls-primary">Redrob Work couldn't start</div>
-            <div className="text-dls-secondary">Return to a version that works on this computer.</div>
+            <div className="text-base font-medium text-dls-primary">{t("boot.failed_title")}</div>
+            <div className="text-dls-secondary">{t("boot.failed_description")}</div>
             <button
               type="button"
               className="rounded-md bg-dls-accent px-3 py-2 font-medium text-dls-accent-foreground disabled:opacity-50"
               onClick={() => void runRecovery(window.__REDROB_ELECTRON__?.recovery?.restorePrevious)}
-            >
-              Restore previous version
-            </button>
+            >{t("boot.restore_previous")}</button>
             {actionState ? <div className="text-dls-secondary">{actionState}</div> : null}
             <details className="text-left text-dls-secondary">
-              <summary className="cursor-pointer">Technical details</summary>
+              <summary className="cursor-pointer">{t("boot.technical_details")}</summary>
               <div className="mt-2 break-words">{error}</div>
             </details>
           </div>

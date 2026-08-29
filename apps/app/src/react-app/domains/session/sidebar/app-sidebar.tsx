@@ -1062,14 +1062,14 @@ export function AppSidebar(props: AppSidebarProps) {
           <div
             className="flex shrink-0 items-center justify-end gap-0.5 px-2 pb-1 max-lg:hidden mac:absolute mac:right-1.5 mac:top-[7px] mac:z-50 mac:p-0 mac:titlebar-no-drag"
             role="group"
-            aria-label="Conversation history controls"
+            aria-label={t("sidebar.history_controls")}
           >
             <Button
               variant="ghost"
               size="icon-xs"
               className="rounded-lg text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground disabled:opacity-40"
-              aria-label="Back in conversation history"
-              title="Back in conversation history"
+              aria-label={t("sidebar.history_back")}
+              title={t("sidebar.history_back")}
               data-conversation-history-control="back"
               disabled={!props.conversationHistory.canGoBack}
               onClick={() => props.conversationHistory?.onNavigate("back")}
@@ -1080,8 +1080,8 @@ export function AppSidebar(props: AppSidebarProps) {
               variant="ghost"
               size="icon-xs"
               className="rounded-lg text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground disabled:opacity-40"
-              aria-label="Forward in conversation history"
-              title="Forward in conversation history"
+              aria-label={t("sidebar.history_forward")}
+              title={t("sidebar.history_forward")}
               data-conversation-history-control="forward"
               disabled={!props.conversationHistory.canGoForward}
               onClick={() => props.conversationHistory?.onNavigate("forward")}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { parseSpreadsheet, serializeSpreadsheet, type SpreadsheetRows } from "./artifact-spreadsheet-model";
 import { cn } from "@/lib/utils";
 import type { Data } from "./open-target";
+import { t } from "@/i18n";
 
 type ArtifactSpreadsheetEditorProps = {
   className?: string;
@@ -109,7 +110,7 @@ export function ArtifactSpreadsheetEditor(props: ArtifactSpreadsheetEditorProps)
         <Button variant="ghost" size="xs" onClick={addRow}><Plus className="size-3" /> Row</Button>
         <Button variant="ghost" size="xs" onClick={addColumn}><Plus className="size-3" /> Column</Button>
         <div className="min-w-0 flex-1" />
-        <Button variant="ghost" size="xs" onClick={discard} disabled={!isDirty || saving}>Discard</Button>
+        <Button variant="ghost" size="xs" onClick={discard} disabled={!isDirty || saving}>{t("artifact.discard")}</Button>
         <Button variant="default" size="xs" onClick={() => save()} disabled={!isDirty || saving}>{saving ? "Saving" : "Save"}</Button>
       </div>
       <div className="min-h-0 flex-1 overflow-auto">

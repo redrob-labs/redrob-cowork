@@ -7,6 +7,7 @@ import type {
   DesktopIntegrationResult,
   DesktopIntegrationStatus,
 } from "@/app/lib/desktop-types";
+import { t } from "@/i18n";
 import {
   LayoutSection,
   LayoutSectionDescription,
@@ -21,27 +22,27 @@ import {
 
 function statusDescription(status: DesktopIntegrationStatus) {
   if (status.state === "integrated") {
-    return "Redrob Work is in your application launcher and handles redrob:// browser callbacks.";
+    return t("settings.desktop_integration_desc_integrated");
   }
   if (status.state === "managed_externally") {
-    return "This AppImage is integrated by another app. Redrob Work will leave its launcher untouched.";
+    return t("settings.desktop_integration_desc_managed_externally");
   }
   if (status.state === "needs_repair" && status.ownership === "external") {
     return status.issues.includes("desktop-entry")
-      ? "The manager-owned launcher cannot accept browser callbacks. Re-integrate this AppImage with its manager."
-      : "Another app manages this AppImage. Select its launcher for Redrob Work browser callbacks.";
+      ? t("settings.desktop_integration_desc_needs_repair_manager")
+      : t("settings.desktop_integration_desc_managed_externally_select");
   }
   if (status.state === "needs_repair") {
-    return "The AppImage moved or its launcher, icon, or browser callback needs repair.";
+    return t("settings.desktop_integration_desc_needs_repair");
   }
-  return "Add this AppImage to your application launcher and enable browser sign-in callbacks.";
+  return t("settings.desktop_integration_desc_not_integrated");
 }
 
 function statusLabel(status: DesktopIntegrationStatus) {
-  if (status.state === "integrated") return "Integrated";
-  if (status.state === "managed_externally") return "Managed by another app";
-  if (status.state === "needs_repair") return "Needs repair";
-  return "Not integrated";
+  if (status.state === "integrated") return t("settings.desktop_integration_status_integrated");
+  if (status.state === "managed_externally") return t("settings.desktop_integration_status_managed_externally");
+  if (status.state === "needs_repair") return t("settings.desktop_integration_status_needs_repair");
+  return t("settings.desktop_integration_status_not_integrated");
 }
 
 export function DesktopIntegrationSection() {
@@ -68,7 +69,7 @@ export function DesktopIntegrationSection() {
     try {
       const result = await action();
       setStatus(result.status);
-      if (!result.ok) setError(result.error ?? "Desktop integration failed.");
+      if (!result.ok) setError(result.error ?? t("settings.desktop_integration_failed"));
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : String(actionError));
     } finally {
@@ -84,9 +85,9 @@ export function DesktopIntegrationSection() {
   return (
     <LayoutSection>
       <LayoutSectionHeader>
-        <LayoutSectionTitle>AppImage desktop integration</LayoutSectionTitle>
+        <LayoutSectionTitle>{t("settings.desktop_integration_title")}</LayoutSectionTitle>
         <LayoutSectionDescription>
-          Control the launcher, icon, and redrob:// callback for this AppImage.
+          {t("settings.desktop_integration_desc")}
         </LayoutSectionDescription>
       </LayoutSectionHeader>
 
@@ -101,7 +102,7 @@ export function DesktopIntegrationSection() {
                 disabled={busy}
                 onClick={() => void run(() => desktopBridge.desktopIntegrationInstall())}
               >
-                Integrate
+                {t("settings.desktop_integration_action_integrate")}
               </Button>
             ) : null}
             {redrobManaged ? (
@@ -111,7 +112,7 @@ export function DesktopIntegrationSection() {
                   disabled={busy}
                   onClick={() => void run(() => desktopBridge.desktopIntegrationInstall())}
                 >
-                  Repair
+                  {t("settings.desktop_integration_action_repair")}
                 </Button>
                 <Button
                   size="sm"
@@ -119,7 +120,7 @@ export function DesktopIntegrationSection() {
                   disabled={busy}
                   onClick={() => void run(() => desktopBridge.desktopIntegrationRemove())}
                 >
-                  Remove
+                  {t("settings.desktop_integration_action_remove")}
                 </Button>
               </>
             ) : null}
@@ -131,12 +132,12 @@ export function DesktopIntegrationSection() {
                   desktopBridge.desktopIntegrationInstall({ useExternalLauncher: true })
                 ))}
               >
-                Use manager launcher
+                {t("settings.desktop_integration_action_use_manager_launcher")}
               </Button>
             ) : null}
             {externallyManaged ? (
               <Button size="sm" variant="outline" disabled={busy} onClick={() => void refresh()}>
-                Recheck
+                {t("settings.desktop_integration_action_recheck")}
               </Button>
             ) : null}
           </LayoutSectionItemHeaderActions>

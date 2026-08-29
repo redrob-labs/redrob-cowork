@@ -105,9 +105,9 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
       description={t("onboarding.engine_subtitle")}
       onBack={phase === "downloading" ? null : onBack}
     >
-      <div className="space-y-4">
+      <div className="space-y-5">
         {phase === "checking" ? (
-          <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
             <Loader2Icon className="size-5 shrink-0 animate-spin text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               {t("onboarding.engine_checking")}
@@ -116,7 +116,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
         ) : null}
 
         {phase === "present" || phase === "success" ? (
-          <div className="flex items-start gap-3 rounded-xl border border-green-7/50 bg-green-2/30 p-4">
+          <div className="flex items-start gap-3 rounded-2xl border border-green-7/40 bg-green-2/40 p-4">
             <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-green-10" />
             <div className="min-w-0">
               <div className="text-sm font-medium text-foreground">
@@ -139,13 +139,13 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
         ) : null}
 
         {phase === "download" ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-center text-[15px] leading-[23px] text-muted-foreground">
             {t("onboarding.engine_download_hint")}
           </p>
         ) : null}
 
         {phase === "downloading" ? (
-          <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
             <Loader2Icon className="size-5 shrink-0 animate-spin text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               {t("onboarding.engine_downloading")}
@@ -154,7 +154,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
         ) : null}
 
         {phase === "error" ? (
-          <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4">
+          <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
             <TriangleAlertIcon className="mt-0.5 size-5 shrink-0 text-destructive" />
             <div className="min-w-0">
               <div className="text-sm font-medium text-foreground">
@@ -168,7 +168,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
         ) : null}
 
         {phase === "unavailable" ? (
-          <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+          <p className="rounded-2xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
             {t("onboarding.engine_unavailable")}
           </p>
         ) : null}
@@ -177,7 +177,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
           <Button
             type="button"
             size="lg"
-            className="h-11 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-[15px] font-semibold"
             onClick={() => void handleInstall()}
             data-testid="onboarding-engine-download"
           >
@@ -191,7 +191,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
             type="button"
             size="lg"
             variant="outline"
-            className="h-11 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-[15px] font-semibold"
             onClick={() => void handleInstall()}
             data-testid="onboarding-engine-retry"
           >
@@ -207,7 +207,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
           <Button
             type="button"
             size="lg"
-            className="h-11 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-[15px] font-semibold"
             onClick={onContinue}
             data-testid="onboarding-engine-continue"
           >

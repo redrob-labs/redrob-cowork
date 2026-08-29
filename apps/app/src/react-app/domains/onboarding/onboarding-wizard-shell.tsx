@@ -2,15 +2,9 @@
 import type { ReactNode } from "react";
 import { ChevronLeftIcon } from "lucide-react";
 
-import {
-  PageBackground,
-  PageDescription,
-  PageHeader,
-  PageTitle,
-  PageTitlebarRegion,
-} from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { t } from "../../../i18n";
+import { OnboardingBrandMark } from "./onboarding-brand-mark";
 import { ONBOARDING_STEP_COUNT, type OnboardingStep, onboardingStepNumber } from "./onboarding-steps";
 
 type OnboardingWizardShellProps = {
@@ -23,10 +17,12 @@ type OnboardingWizardShellProps = {
 };
 
 /**
- * Shared chrome for the first-run onboarding steps. Matches the full-screen
- * overlay convention used by redrob-key-step.tsx / provider-selection-step.tsx
- * (fixed inset-0 z-50 over PageBackground) and adds a "Step N of 2" indicator
- * plus an optional Back control so the wizard reads as one coherent flow.
+ * Shared chrome for the first-run onboarding steps: a calm, full-page neutral
+ * backdrop with one centered card, a compact brand lockup, a slim progress
+ * track (replacing the earlier "Step N of 2" text-only indicator with a
+ * visual read while keeping the same text for screen readers), an optional
+ * Back control, a large headline, and short support copy. One primary action
+ * per step lives in `children`.
  */
 export function OnboardingWizardShell({
   step,
@@ -36,14 +32,15 @@ export function OnboardingWizardShell({
   children,
 }: OnboardingWizardShellProps) {
   const current = onboardingStepNumber(step);
+  const progressPercent = Math.round((current / ONBOARDING_STEP_COUNT) * 100);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-      <PageBackground />
-      <PageTitlebarRegion />
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-muted px-4 py-10 dark:bg-background">
+      <div className="mac:titlebar-drag fixed inset-x-0 top-0 z-20 h-10" />
 
-      <div className="relative z-10 mx-6 w-full max-w-md rounded-3xl border border-border bg-background px-8 py-10">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="animate-in fade-in slide-in-from-bottom-2 relative z-10 flex w-full max-w-[440px] flex-col gap-6 duration-300">
+        <div className="flex items-center justify-between px-1">
+          <OnboardingBrandMark />
           {onBack ? (
             <Button
               type="button"
@@ -51,27 +48,43 @@ export function OnboardingWizardShell({
               size="sm"
               onClick={onBack}
               data-testid="onboarding-back"
+              className="text-muted-foreground"
             >
               <ChevronLeftIcon className="mr-1 size-4" />
               {t("onboarding.back")}
             </Button>
-          ) : (
-            <span aria-hidden="true" />
-          )}
-          <span className="text-xs font-medium text-muted-foreground">
-            {t("onboarding.step_indicator", {
+          ) : null}
+        </div>
+
+        <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
+          <div
+            className="mb-8 h-1.5 w-full overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuenow={current}
+            aria-valuemin={1}
+            aria-valuemax={ONBOARDING_STEP_COUNT}
+            aria-label={t("onboarding.step_indicator", {
               current,
               total: ONBOARDING_STEP_COUNT,
             })}
-          </span>
+          >
+            <div
+              className="h-full rounded-full bg-blue-9 transition-[width] duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          <div className="mb-9 space-y-2.5 text-center">
+            <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-[32px] sm:leading-[38px]">
+              {title}
+            </h1>
+            <p className="text-[15px] leading-[23px] text-muted-foreground">
+              {description}
+            </p>
+          </div>
+
+          {children}
         </div>
-
-        <PageHeader className="mb-8 text-center">
-          <PageTitle>{title}</PageTitle>
-          <PageDescription>{description}</PageDescription>
-        </PageHeader>
-
-        {children}
       </div>
     </div>
   );

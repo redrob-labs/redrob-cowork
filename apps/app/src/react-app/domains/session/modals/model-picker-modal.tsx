@@ -324,7 +324,7 @@ function ProviderAccordion({
               <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">New</span>
             ) : null}
             {group.hasCurrent ? (
-              <span className="rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">Current</span>
+              <span className="rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">{t("model_picker.current")}</span>
             ) : null}
           </span>
         </button>
@@ -350,9 +350,7 @@ function ProviderAccordion({
         <div className="ml-9 space-y-0.5 pb-2 pt-0.5">
           {group.recommended.length > 0 ? (
             <>
-              <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">
-                Recommended
-              </div>
+              <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">{t("model_picker.recommended")}</div>
               {group.recommended.map((opt) => (
                 <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} recommended />
               ))}
@@ -361,9 +359,7 @@ function ProviderAccordion({
           {group.other.length > 0 ? (
             <>
               {group.recommended.length > 0 ? (
-                <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">
-                  All models
-                </div>
+                <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">{t("model_picker.all_models")}</div>
               ) : null}
               {group.other.map((opt) => (
                 <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} />

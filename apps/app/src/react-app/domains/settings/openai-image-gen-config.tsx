@@ -19,6 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { t } from "@/i18n";
 import { registerExtensionConfig, type ExtensionConfigContext } from "./extension-registry";
 
 export type OpenAiImageGenConfigProps = {
@@ -54,33 +55,33 @@ export function OpenAiImageGenConfig(props: OpenAiImageGenConfigProps) {
   return (
     <Card variant="outline" size="sm">
       <CardHeader>
-        <CardTitle>Configuration</CardTitle>
-        <CardDescription>Connect OpenAI image generation with an OpenAI API key.</CardDescription>
+        <CardTitle>{t("settings.image_gen_config_title")}</CardTitle>
+        <CardDescription>{t("settings.image_gen_config_desc")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {props.envKeyDetected ? (
           <Alert variant="warning">
             <Image />
-            <AlertTitle>API key found in environment</AlertTitle>
+            <AlertTitle>{t("settings.image_gen_env_key_title")}</AlertTitle>
             <AlertDescription>
-              An existing OPENAI_API_KEY was detected. The key you save here will take precedence.
+              {t("settings.image_gen_env_key_desc")}
             </AlertDescription>
           </Alert>
         ) : null}
 
         <FieldGroup className="gap-4">
           <Field>
-            <FieldLabel htmlFor="openai-image-api-key">OpenAI API key</FieldLabel>
+            <FieldLabel htmlFor="openai-image-api-key">{t("settings.image_gen_api_key_label")}</FieldLabel>
             <Input
               id="openai-image-api-key"
               type="password"
               value={apiKey}
               onChange={(event) => setApiKey(event.currentTarget.value)}
-              placeholder="sk-..."
+              placeholder={t("settings.image_gen_api_key_placeholder")}
             />
             {props.envKeyDetected ? (
               <FieldDescription>
-                Overrides the OPENAI_API_KEY environment variable if set.
+                {t("settings.image_gen_api_key_override_desc")}
               </FieldDescription>
             ) : null}
           </Field>
@@ -105,14 +106,14 @@ export function OpenAiImageGenConfig(props: OpenAiImageGenConfigProps) {
           disabled={props.busy || !canSubmit}
         >
           {props.busy && <Loader2 className="size-4 animate-spin" />}
-          Enable
+          {t("settings.image_gen_enable_button")}
         </Button>
         <Button
           variant="outline"
           onClick={() => void props.onTestGenerate({ apiKey, prompt: DEFAULT_PROMPT })}
           disabled={props.busy || !canSubmit}
         >
-          Generate test image
+          {t("settings.image_gen_test_button")}
         </Button>
       </CardFooter>
     </Card>

@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { isElectronRuntime } from "../../../../app/utils";
+import { t } from "@/i18n";
 
 type TerminalDockProps = {
   workspaceRoot: string;
@@ -117,12 +118,12 @@ export function TerminalDock({ workspaceRoot, isRemoteWorkspace, onClose }: Term
   }, [isRemoteWorkspace, workspaceRoot]);
 
   return (
-    <section className="flex h-full min-h-0 flex-col border-t border-border bg-[#0b0d12] text-white" aria-label="Terminal">
+    <section className="flex h-full min-h-0 flex-col border-t border-border bg-[#0b0d12] text-white" aria-label={t("terminal.label")}>
       <header className="flex h-9 shrink-0 items-center justify-between border-b border-white/10 bg-black/35 px-3 text-xs">
         <div className="min-w-0 truncate text-white/75">Terminal · {status}</div>
         <Button variant="ghost" size="icon-sm" className="text-white/70 hover:bg-white/10 hover:text-white" onClick={onClose}>
           <X className="size-4" />
-          <span className="sr-only">Hide terminal</span>
+          <span className="sr-only">{t("terminal.hide")}</span>
         </Button>
       </header>
       <div ref={containerRef} className="min-h-0 flex-1 px-2 py-1 [&_.xterm]:h-full" />

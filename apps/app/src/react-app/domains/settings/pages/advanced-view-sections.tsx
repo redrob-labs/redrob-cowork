@@ -115,16 +115,16 @@ function DiagnosticRow(props: { label: string; value: string }) {
 }
 
 function joinList(values: string[]): string {
-  return values.length ? values.join(", ") : "none";
+  return values.length ? values.join(", ") : t("settings.diag_none");
 }
 
 function formatMaybe(value: string | number | boolean | null | undefined): string {
-  if (value === null || value === undefined || value === "") return "unknown";
+  if (value === null || value === undefined || value === "") return t("settings.diag_unknown");
   return String(value);
 }
 
 function formatMetadataRecord(value: Record<string, string | number | boolean | null> | null | undefined): string {
-  if (!value || Object.keys(value).length === 0) return "none";
+  if (!value || Object.keys(value).length === 0) return t("settings.diag_none");
   return Object.entries(value).map(([key, nested]) => `${key}=${formatMaybe(nested)}`).join(", ");
 }
 
@@ -141,7 +141,7 @@ interface AdvancedRuntimeMigrationSectionProps {
 }
 
 function formatKeys(keys: string[]) {
-  return keys.length ? keys.join(", ") : "none";
+  return keys.length ? keys.join(", ") : t("settings.diag_none");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -177,29 +177,29 @@ function RuntimeConfigSummary(props: { config: Record<string, unknown> }) {
   const mcps = countRecord(config.mcp);
   const permissions = countRecord(config.permission);
   const disabledProviders = countArray(config.disabled_providers);
-  const defaultAgent = typeof config.default_agent === "string" ? config.default_agent : "not set";
+  const defaultAgent = typeof config.default_agent === "string" ? config.default_agent : t("settings.diag_not_set");
 
   return (
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       <div className="rounded-lg border border-gray-6 bg-gray-2/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-gray-8">Default agent</div>
+        <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("settings.diag_default_agent")}</div>
         <div className="mt-1 truncate font-mono text-[11px] text-gray-12" title={defaultAgent}>{defaultAgent}</div>
       </div>
       <div className="rounded-lg border border-gray-6 bg-gray-2/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-gray-8">Providers / models</div>
-        <div className="mt-1 font-mono text-[11px] text-gray-12">{providers} providers, {models} models</div>
+        <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("settings.diag_providers_models")}</div>
+        <div className="mt-1 font-mono text-[11px] text-gray-12">{t("settings.diag_providers_models_value", { providers, models })}</div>
       </div>
       <div className="rounded-lg border border-gray-6 bg-gray-2/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-gray-8">Agents / plugins</div>
-        <div className="mt-1 font-mono text-[11px] text-gray-12">{agents} agents, {plugins} plugins</div>
+        <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("settings.diag_agents_plugins")}</div>
+        <div className="mt-1 font-mono text-[11px] text-gray-12">{t("settings.diag_agents_plugins_value", { agents, plugins })}</div>
       </div>
       <div className="rounded-lg border border-gray-6 bg-gray-2/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-gray-8">MCP / permissions</div>
-        <div className="mt-1 font-mono text-[11px] text-gray-12">{mcps} MCPs, {permissions} permission keys</div>
+        <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("settings.diag_mcp_permissions")}</div>
+        <div className="mt-1 font-mono text-[11px] text-gray-12">{t("settings.diag_mcp_permissions_value", { mcps, permissions })}</div>
       </div>
       {disabledProviders ? (
         <div className="rounded-lg border border-gray-6 bg-gray-2/60 p-2 sm:col-span-2 lg:col-span-4">
-          <div className="text-[10px] uppercase tracking-wide text-gray-8">Disabled providers</div>
+          <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("settings.diag_disabled_providers")}</div>
           <div className="mt-1 font-mono text-[11px] text-gray-12">{disabledProviders}</div>
         </div>
       ) : null}
@@ -222,12 +222,12 @@ function RuntimeConfigSourceBlock(props: {
         <div className="font-medium text-gray-12">{props.title}</div>
         <div className="text-[11px] text-gray-9">{props.description}</div>
         {props.path ? <div className="mt-1 break-all font-mono text-[11px] text-gray-8">{props.path}</div> : null}
-        {props.exists !== undefined ? <div className="text-[11px] text-gray-9">{props.exists ? "Found" : "Not found"}</div> : null}
-        <div className="text-[11px] text-gray-9">Keys: {formatKeys(props.keys)}</div>
+        {props.exists !== undefined ? <div className="text-[11px] text-gray-9">{props.exists ? t("settings.diag_found") : t("settings.diag_not_found")}</div> : null}
+        <div className="text-[11px] text-gray-9">{t("settings.diag_keys_prefix", { keys: formatKeys(props.keys) })}</div>
       </div>
       <RuntimeConfigSummary config={safeConfig} />
       <details className="rounded-lg bg-gray-3 p-2">
-        <summary className="cursor-pointer text-[11px] font-medium text-gray-11">Show raw JSON</summary>
+        <summary className="cursor-pointer text-[11px] font-medium text-gray-11">{t("settings.diag_show_raw_json")}</summary>
         <pre className="mt-2 max-h-56 overflow-auto font-mono text-[11px] text-gray-11">
           {JSON.stringify(safeConfig, null, 2)}
         </pre>
@@ -244,17 +244,17 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
   return (
     <LayoutSection>
       <LayoutSectionHeader>
-        <LayoutSectionTitle>OpenCode config sources</LayoutSectionTitle>
+        <LayoutSectionTitle>{t("settings.opencode_config_sources_title")}</LayoutSectionTitle>
         <LayoutSectionDescription>
-          Inspect what Redrob Work controls at runtime versus what belongs to your workspace config. This works through the Redrob Work server and does not require the OpenCode engine to be healthy.
+          {t("settings.opencode_config_sources_desc")}
         </LayoutSectionDescription>
       </LayoutSectionHeader>
 
       <LayoutSectionItem>
         <LayoutSectionItemHeader>
-          <LayoutSectionItemTitle>Move Redrob Work-managed config</LayoutSectionItemTitle>
+          <LayoutSectionItemTitle>{t("settings.move_managed_config_title")}</LayoutSectionItemTitle>
           <LayoutSectionItemDescription>
-            Moves older Redrob Work-owned runtime keys from `.opencode/redrob.json` and safe Redrob Work-managed keys from `opencode.jsonc` into the runtime database.
+            {t("settings.move_managed_config_desc")}
           </LayoutSectionItemDescription>
           <LayoutSectionItemHeaderActions>
             <Button
@@ -265,7 +265,7 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
               disabled={props.busy || props.configStatusBusy || !props.canMigrate}
             >
               <RefreshCcw size={14} className={props.configStatusBusy ? "animate-spin" : ""} />
-              Refresh
+              {t("common.refresh")}
             </Button>
             <Button
               type="button"
@@ -275,7 +275,7 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
               disabled={props.busy || props.migrationBusy || !props.canMigrate}
             >
               <Database size={14} />
-              {props.migrationBusy ? "Migrating..." : "Migrate"}
+              {props.migrationBusy ? t("settings.migrating") : t("settings.migrate")}
             </Button>
           </LayoutSectionItemHeaderActions>
         </LayoutSectionItemHeader>
@@ -284,13 +284,13 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
         {props.configStatus ? (
           <div className="space-y-3 rounded-xl border border-gray-6 bg-gray-1/60 p-3 text-xs text-gray-10">
             <div className="space-y-2 rounded-xl border border-blue-6/50 bg-blue-2/40 p-3">
-              <div className="font-medium text-gray-12">Desired Redrob Work runtime config</div>
+              <div className="font-medium text-gray-12">{t("settings.desired_runtime_config_title")}</div>
               <div className="text-[11px] text-gray-9">
-                This is the Redrob Work-built config object requested for the runtime database and injected safely by the server. Sensitive headers are redacted here.
+                {t("settings.desired_runtime_config_desc")}
               </div>
               <RuntimeConfigSummary config={effectiveRuntimeConfig ?? {}} />
               <details className="rounded-lg bg-gray-3 p-2">
-                <summary className="cursor-pointer text-[11px] font-medium text-gray-11">Show desired JSON</summary>
+                <summary className="cursor-pointer text-[11px] font-medium text-gray-11">{t("settings.diag_show_desired_json")}</summary>
                 <pre className="mt-2 max-h-72 overflow-auto font-mono text-[11px] text-gray-11">
                   {JSON.stringify(effectiveRuntimeConfig, null, 2)}
                 </pre>
@@ -299,62 +299,62 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
             {props.configStatus.sources ? (
               <div className="space-y-3">
                 <div>
-                  <div className="font-medium text-gray-12">OpenCode source breakdown</div>
+                  <div className="font-medium text-gray-12">{t("settings.opencode_source_breakdown_title")}</div>
                   <div className="text-[11px] text-gray-9">
-                    OpenCode also reads its own project and global config files. Redrob Work injects the runtime config separately; for Redrob Work-managed keys, the injected config is the source to inspect.
+                    {t("settings.opencode_source_breakdown_desc")}
                   </div>
                 </div>
                 <RuntimeConfigSourceBlock
-                  title="Project opencode config"
-                  description="Workspace-level OpenCode config owned by the user/project."
+                  title={t("settings.source_project_opencode_title")}
+                  description={t("settings.source_project_opencode_desc")}
                   path={props.configStatus.sources.projectOpencode.path}
                   exists={props.configStatus.sources.projectOpencode.exists}
                   keys={props.configStatus.sources.projectOpencode.keys}
                   config={props.configStatus.sources.projectOpencode.config}
                 />
                 <RuntimeConfigSourceBlock
-                  title="Global opencode config"
-                  description="User-level OpenCode config under ~/.config/opencode."
+                  title={t("settings.source_global_opencode_title")}
+                  description={t("settings.source_global_opencode_desc")}
                   path={props.configStatus.sources.globalOpencode.path}
                   exists={props.configStatus.sources.globalOpencode.exists}
                   keys={props.configStatus.sources.globalOpencode.keys}
                   config={props.configStatus.sources.globalOpencode.config}
                 />
                 <RuntimeConfigSourceBlock
-                  title="Redrob Work runtime DB"
-                  description="Redrob Work-managed runtime values stored outside workspace files."
+                  title={t("settings.source_runtime_db_title")}
+                  description={t("settings.source_runtime_db_desc")}
                   keys={props.configStatus.sources.runtimeDatabase.keys}
                   config={props.configStatus.sources.runtimeDatabase.config}
                 />
                 <RuntimeConfigSourceBlock
-                  title="Redrob Work injected config"
-                  description="The object Redrob Work injects into OpenCode at runtime."
+                  title={t("settings.source_injected_config_title")}
+                  description={t("settings.source_injected_config_desc")}
                   keys={props.configStatus.sources.injected.keys}
                   config={props.configStatus.sources.injected.config}
                 />
               </div>
             ) : null}
             <div>
-              <div className="font-medium text-gray-12">Runtime database</div>
-              <div>Stored keys: {formatKeys(props.configStatus.runtimeKeys)}</div>
+              <div className="font-medium text-gray-12">{t("settings.runtime_database_title")}</div>
+              <div>{t("settings.diag_stored_keys", { keys: formatKeys(props.configStatus.runtimeKeys) })}</div>
             </div>
             <div>
-              <div className="font-medium text-gray-12">Legacy Redrob Work metadata</div>
+              <div className="font-medium text-gray-12">{t("settings.legacy_metadata_title")}</div>
               <div className="break-all">{props.configStatus.legacyRedrob.path}</div>
               {props.configStatus.legacyRedrob.error ? (
-                <div className="text-amber-11">{props.configStatus.legacyRedrob.error}; fix this file before moving legacy config.</div>
+                <div className="text-amber-11">{t("settings.legacy_metadata_error", { error: props.configStatus.legacyRedrob.error })}</div>
               ) : null}
-              <div>Migratable keys: {formatKeys(props.configStatus.legacyRedrob.keys)}</div>
+              <div>{t("settings.diag_migratable_keys", { keys: formatKeys(props.configStatus.legacyRedrob.keys) })}</div>
             </div>
             <div>
-              <div className="font-medium text-gray-12">User opencode.jsonc</div>
+              <div className="font-medium text-gray-12">{t("settings.user_opencode_jsonc_title")}</div>
               <div className="break-all">{props.configStatus.userOpencode.path}</div>
-              <div>{props.configStatus.userOpencode.exists ? "Found" : "Not found"}</div>
-              <div>User-owned keys: {formatKeys(props.configStatus.userOpencode.keys)}</div>
-              <div>Migratable keys: {formatKeys(props.configStatus.userOpencode.migratableKeys)}</div>
+              <div>{props.configStatus.userOpencode.exists ? t("settings.diag_found") : t("settings.diag_not_found")}</div>
+              <div>{t("settings.diag_user_owned_keys", { keys: formatKeys(props.configStatus.userOpencode.keys) })}</div>
+              <div>{t("settings.diag_migratable_keys", { keys: formatKeys(props.configStatus.userOpencode.migratableKeys) })}</div>
             </div>
             <div>
-              <div className="font-medium text-gray-12">Runtime DB JSON</div>
+              <div className="font-medium text-gray-12">{t("settings.runtime_db_json_title")}</div>
               <pre className="mt-1 max-h-48 overflow-auto rounded-lg bg-gray-3 p-2 font-mono text-[11px] text-gray-11">
                 {JSON.stringify(runtimeConfig, null, 2)}
               </pre>
@@ -415,19 +415,19 @@ export function AdvancedFeatureFlagsSection(props: AdvancedFeatureFlagsSectionPr
   return (
     <LayoutSection>
       <LayoutSectionHeader>
-        <LayoutSectionTitle>Feature flags</LayoutSectionTitle>
-        <LayoutSectionDescription>Experimental controls for sandbox and workspace behaviors.</LayoutSectionDescription>
+        <LayoutSectionTitle>{t("settings.feature_flags_title")}</LayoutSectionTitle>
+        <LayoutSectionDescription>{t("settings.feature_flags_desc")}</LayoutSectionDescription>
       </LayoutSectionHeader>
 
       <LayoutSectionItem>
         <LayoutSectionItemHeader>
-          <LayoutSectionItemTitle>Create Sandbox uses microsandbox image</LayoutSectionItemTitle>
+          <LayoutSectionItemTitle>{t("settings.microsandbox_flag_title")}</LayoutSectionItemTitle>
           <LayoutSectionItemDescription>
-            When enabled, Create Sandbox launches the detached worker with the microsandbox image flow instead of the default Docker image flow.
+            {t("settings.microsandbox_flag_desc")}
           </LayoutSectionItemDescription>
           <LayoutSectionItemHeaderActions>
             <Switch
-              aria-label="Create Sandbox uses microsandbox image"
+              aria-label={t("settings.microsandbox_flag_title")}
               checked={props.microsandboxCreateSandboxEnabled}
               disabled={props.busy || !isDesktopRuntime()}
               onCheckedChange={props.onToggleMicrosandboxCreateSandbox}

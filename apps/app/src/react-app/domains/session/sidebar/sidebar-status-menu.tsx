@@ -186,7 +186,7 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
             data-testid="sidebar-status-menu"
             data-runtime-state={runtimeStatus?.variant}
             className="flex w-full items-center gap-2 rounded-lg ps-1.5 pe-2 py-1.5 text-left transition-colors hover:bg-sidebar-accent max-lg:min-h-11"
-            aria-label="Status and settings"
+            aria-label={t("sidebar.status_and_settings")}
             title={runtimeStatus?.label}
           >
             {runtimeStatus ? (

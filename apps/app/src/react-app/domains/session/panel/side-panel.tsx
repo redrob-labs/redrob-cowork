@@ -41,6 +41,7 @@ import {
   hasNativeBrowserOccluder,
   sameBounds,
 } from "./utils";
+import { t } from "@/i18n";
 
 type SidePanelProps = {
   sessionId: string;
@@ -314,7 +315,7 @@ function BrowserPanelContent({
                     size="icon-sm"
                     onClick={back}
                     disabled={!tab.canGoBack}
-                    aria-label="Go back"
+                    aria-label={t("panel.go_back")}
                   >
                     <ArrowLeft />
                   </Button>
@@ -330,13 +331,13 @@ function BrowserPanelContent({
                     size="icon-sm"
                     onClick={forward}
                     disabled={!tab.canGoForward}
-                    aria-label="Go forward"
+                    aria-label={t("panel.go_forward")}
                   >
                     <ArrowRight />
                   </Button>
                 )}
               />
-              <TooltipContent>Forward</TooltipContent>
+              <TooltipContent>{t("panel.go_forward")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger
@@ -345,7 +346,7 @@ function BrowserPanelContent({
                     variant="ghost"
                     size="icon-sm"
                     onClick={reload}
-                    aria-label="Reload page"
+                    aria-label={t("panel.reload_page")}
                   >
                     {tab.status === "loading" ? <Loader2 className="animate-spin" /> : <RotateCw />}
                   </Button>
@@ -368,7 +369,7 @@ function BrowserPanelContent({
                 onBlur={() => {
                   urlFocusedRef.current = false;
                 }}
-                placeholder="Enter URL..."
+                placeholder={t("panel.url_placeholder")}
                 spellCheck={false}
                 autoComplete="off"
               />
@@ -378,16 +379,14 @@ function BrowserPanelContent({
             </InputGroup>
           </>
         ) : (
-          <p className="px-2 text-sm text-muted-foreground">
-            Browser panel is only available in the desktop app.
-          </p>
+          <p className="px-2 text-sm text-muted-foreground">{t("panel.browser_desktop_only")}</p>
         )}
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onClose}
-          title="Close panel"
-          aria-label="Close panel"
+          title={t("panel.close")}
+          aria-label={t("panel.close")}
         >
           <X />
         </Button>
@@ -617,7 +616,7 @@ export function SidePanel({
                 ))}
               </PanelTabList>
             </div>
-            {!activeTab ? <span className="sr-only">Panel destinations</span> : null}
+            {!activeTab ? <span className="sr-only">{t("panel.destinations")}</span> : null}
             {activeTab && isBrowserAvailable ? (
               <Tooltip>
                 <TooltipTrigger
@@ -626,20 +625,20 @@ export function SidePanel({
                       variant="ghost"
                       size="icon-sm"
                       onClick={() => createTab()}
-                      aria-label="New tab"
+                      aria-label={t("panel.new_tab")}
                     >
                       <Plus />
                     </Button>
                   )}
                 />
-                <TooltipContent>New tab</TooltipContent>
+                <TooltipContent>{t("panel.new_tab")}</TooltipContent>
               </Tooltip>
             ) : !activeTab ? (
               <Button
                 variant="ghost"
                 size="icon-sm"
                 onClick={onClose}
-                aria-label="Close panel"
+                aria-label={t("panel.close")}
               >
                 <X />
               </Button>

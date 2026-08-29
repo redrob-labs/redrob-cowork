@@ -277,9 +277,7 @@ export function ExtensionDetailModal({
         </span>
       ) : null}
       {preview ? (
-        <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">
-          Preview
-        </span>
+        <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
       ) : null}
       {beta ? (
         <span className="rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
@@ -374,13 +372,13 @@ export function ExtensionDetailModal({
       {resourceLabels.length > 0 || contributionLabels.length > 0 ? (
         <Card variant="outline" size="sm">
           <CardHeader>
-            <CardTitle>Extension manifest</CardTitle>
+            <CardTitle>{t("extension.manifest")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 text-sm">
               {resourceLabels.length > 0 ? (
                 <div>
-                  <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Resources</div>
+                  <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("extension.resources")}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {resourceLabels.map((label) => (
                       <span key={label} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">{label}</span>
@@ -390,7 +388,7 @@ export function ExtensionDetailModal({
               ) : null}
               {contributionLabels.length > 0 ? (
                 <div>
-                  <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contributions</div>
+                  <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("extension.contributions")}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {contributionLabels.map((label) => (
                       <span key={label} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">{label}</span>
@@ -470,7 +468,7 @@ export function ExtensionDetailModal({
       {!composerCapability ? (
         <Card variant="outline" size="sm">
           <CardHeader>
-            <CardTitle>Details</CardTitle>
+            <CardTitle>{t("extension.details")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -481,7 +479,7 @@ export function ExtensionDetailModal({
 
               {url ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Endpoint</span>
+                  <span className="text-muted-foreground">{t("extension.endpoint")}</span>
                   <span className="flex items-center gap-1.5 truncate font-mono text-xs text-card-foreground">
                     {url.replace(/^https?:\/\//, "").slice(0, 40)}
                     <ExternalLink size={10} className="shrink-0 text-muted-foreground" />
@@ -498,22 +496,20 @@ export function ExtensionDetailModal({
 
               {path && onReveal ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Location</span>
+                  <span className="text-muted-foreground">{t("extension.location")}</span>
                   <Button
                     variant="link"
                     size="xs"
                     onClick={onReveal}
-                  >
-                    Reveal in Finder
-                    <ExternalLink data-icon="inline-end" />
+                  >{t("extension.reveal_in_finder")}<ExternalLink data-icon="inline-end" />
                   </Button>
                 </div>
               ) : null}
 
               {oauth ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Authentication</span>
-                  <span className="font-medium text-card-foreground">OAuth required</span>
+                  <span className="text-muted-foreground">{t("extension.authentication")}</span>
+                  <span className="font-medium text-card-foreground">{t("extension.oauth_required")}</span>
                 </div>
               ) : null}
 
@@ -536,27 +532,27 @@ export function ExtensionDetailModal({
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Visibility</span>
+                <span className="text-muted-foreground">{t("extension.visibility")}</span>
                 <span className="font-medium text-card-foreground">{hidden ? "Hidden" : "Shown"}</span>
               </div>
 
               {preview ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Release stage</span>
-                  <span className="font-medium text-blue-11">Preview</span>
+                  <span className="text-muted-foreground">{t("extension.release_stage")}</span>
+                  <span className="font-medium text-blue-11">{t("extension.preview")}</span>
                 </div>
               ) : null}
 
               {beta ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Release stage</span>
+                  <span className="text-muted-foreground">{t("extension.release_stage")}</span>
                   <span className="font-medium text-amber-11">Beta</span>
                 </div>
               ) : null}
 
               {disabledReason ? (
                 <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="text-muted-foreground">Availability</span>
+                  <span className="text-muted-foreground">{t("extension.availability")}</span>
                   <span className="text-right font-medium text-amber-11">{disabledReason}</span>
                 </div>
               ) : null}
@@ -605,7 +601,7 @@ export function ExtensionDetailModal({
       {showEnablementCard && !composerCapability && !uiControl ? (
         <Card variant="outline" size="sm">
           <CardHeader>
-            <CardTitle>What this enables</CardTitle>
+            <CardTitle>{t("extension.what_this_enables")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm leading-relaxed text-muted-foreground">
@@ -779,13 +775,13 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
     <div className="space-y-4">
       <Card variant="outline" size="sm">
         <CardHeader>
-          <CardTitle>How to connect another client</CardTitle>
+          <CardTitle>{t("extension.connect_another_client")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2 text-sm leading-relaxed text-muted-foreground">
-            <div>Redrob Work desktop starts a private localhost bridge automatically.</div>
-            <div>Your MCP client starts <span className="font-mono text-card-foreground">redrob-ui-mcp</span> over stdio; the wrapper discovers the bridge and proxies UI tools to it.</div>
-            <div>Do not point clients at the random localhost bridge URL directly.</div>
+            <div>{t("extension.bridge_auto")}</div>
+            <div>{t("extension.bridge_stdio")}</div>
+            <div>{t("extension.bridge_warning")}</div>
           </div>
         </CardContent>
       </Card>
@@ -814,41 +810,33 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
 
       <Card variant="outline" size="sm">
         <CardHeader>
-          <CardTitle>Discovery</CardTitle>
+          <CardTitle>{t("extension.discovery")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="relative overflow-hidden rounded-xl bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-xl)-1px)] before:border before:border-border">
             <Table className="text-xs">
               <TableBody>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
-                  <TableCell className="bg-muted/50 w-40 py-2 text-xs font-medium">
-                    Production discovery file
-                  </TableCell>
+                  <TableCell className="bg-muted/50 w-40 py-2 text-xs font-medium">{t("extension.production_discovery_file")}</TableCell>
                   <TableCell className="py-2 whitespace-normal">
                     <span className="font-mono text-xs break-all">~/Library/Application Support/io.redrob.work/redrob-ui-control.json</span>
                   </TableCell>
                 </TableRow>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
-                  <TableCell className="bg-muted/50 py-2 text-xs font-medium">
-                    Dev discovery file
-                  </TableCell>
+                  <TableCell className="bg-muted/50 py-2 text-xs font-medium">{t("extension.dev_discovery_file")}</TableCell>
                   <TableCell className="py-2 whitespace-normal">
                     <span className="font-mono text-xs break-all">~/Library/Application Support/io.redrob.work.dev/redrob-ui-control.json</span>
                   </TableCell>
                 </TableRow>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
-                  <TableCell className="bg-muted/50 py-2 text-xs font-medium">
-                    Override
-                  </TableCell>
+                  <TableCell className="bg-muted/50 py-2 text-xs font-medium">{t("extension.override")}</TableCell>
                   <TableCell className="py-2 whitespace-normal">
                     <span className="font-mono text-xs break-all">REDROB_UI_CONTROL_DISCOVERY=/path/to/redrob-ui-control.json</span>
                   </TableCell>
                 </TableRow>
                 {props.environment?.REDROB_UI_CONTROL_DISCOVERY ? (
                   <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
-                    <TableCell className="bg-muted/50 py-2 text-xs font-medium">
-                      Current override
-                    </TableCell>
+                    <TableCell className="bg-muted/50 py-2 text-xs font-medium">{t("extension.current_override")}</TableCell>
                     <TableCell className="py-2 whitespace-normal">
                       <span className="font-mono text-xs break-all">{props.environment.REDROB_UI_CONTROL_DISCOVERY}</span>
                     </TableCell>

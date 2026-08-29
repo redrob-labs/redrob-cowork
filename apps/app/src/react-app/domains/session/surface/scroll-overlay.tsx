@@ -5,6 +5,7 @@ import {
   selectSessionTopClippedMessageId,
   useSessionScrollStore,
 } from "./scroll-store";
+import { t } from "@/i18n";
 
 function useSessionScrollOverlayState(sessionId: string) {
   const isAtBottom = useSessionScrollStore((state) => selectSessionIsStickyBottom(state.sessions, sessionId));
@@ -29,9 +30,7 @@ const JumpToStartButton = memo(function JumpToStartButton({
       type="button"
       className="rounded-full px-3 py-1.5 text-xs text-dls-text transition-colors hover:bg-dls-hover"
       onClick={handleClick}
-    >
-      Jump to start
-    </button>
+    >{t("session.jump_to_start")}</button>
   );
 });
 
@@ -51,9 +50,7 @@ const JumpToLatestButton = memo(function JumpToLatestButton({
       type="button"
       className="rounded-full px-3 py-1.5 text-xs text-dls-text transition-colors hover:bg-dls-hover"
       onClick={handleClick}
-    >
-      Jump to latest
-    </button>
+    >{t("session.jump_to_latest")}</button>
   );
 });
 

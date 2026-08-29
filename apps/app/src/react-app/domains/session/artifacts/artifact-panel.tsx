@@ -13,6 +13,7 @@ import { usePlatform } from "@/react-app/kernel/platform";
 import { type ArtifactPanelTab, usePanelTabStore } from "../panel/panel-tab-store";
 import { isCollectibleArtifactTarget, type BinaryData, type Data, type OpenTarget, type TextData } from "./open-target";
 import { HTMLPreview, ImagePreview, MarkdownPreview, PdfPreview, PlainText, PreviewError, PreviewLoading, PreviewUnavailable } from "./preview";
+import { t } from "@/i18n";
 
 const ArtifactTextEditor = lazy(() =>
   import("./artifact-text-editor").then((module) => ({ default: module.ArtifactTextEditor })),
@@ -307,24 +308,24 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
             <Tooltip>
               <TooltipTrigger
                 render={(
-                  <Button variant="ghost" size="icon-sm" onClick={() => void download()} aria-label="Download artifact">
+                  <Button variant="ghost" size="icon-sm" onClick={() => void download()} aria-label={t("artifact.download")}>
                     <Download />
                   </Button>
                 )}
               />
-              <TooltipContent>Download artifact</TooltipContent>
+              <TooltipContent>{t("artifact.download")}</TooltipContent>
             </Tooltip>
           ) : null}
           {canUseDesktopFileActions ? (
             <Tooltip>
               <TooltipTrigger
                 render={(
-                  <Button variant="ghost" size="icon-sm" onClick={() => void revealExternal()} aria-label="Show in folder">
+                  <Button variant="ghost" size="icon-sm" onClick={() => void revealExternal()} aria-label={t("artifact.show_in_folder")}>
                     <FolderOpen />
                   </Button>
                 )}
               />
-              <TooltipContent>Show in folder</TooltipContent>
+              <TooltipContent>{t("artifact.show_in_folder")}</TooltipContent>
             </Tooltip>
           ) : null}
           {target.kind === "url" || isRemoteWorkspace || canUseDesktopFileActions ? (
@@ -342,12 +343,12 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
           <Tooltip>
             <TooltipTrigger
               render={(
-                <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close artifact">
+                <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("artifact.close")}>
                   <X />
                 </Button>
               )}
             />
-            <TooltipContent>Close artifact</TooltipContent>
+            <TooltipContent>{t("artifact.close")}</TooltipContent>
           </Tooltip>
           </div>
         </div>

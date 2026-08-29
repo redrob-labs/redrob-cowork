@@ -19,6 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { t } from "@/i18n";
 import { registerExtensionConfig, type ExtensionConfigContext } from "./extension-registry";
 
 export type RedrobWorkVoiceConfigProps = {
@@ -51,35 +52,29 @@ export function RedrobWorkVoiceConfig(props: RedrobWorkVoiceConfigProps) {
   return (
     <Card variant="outline" size="sm">
       <CardHeader>
-        <CardTitle>Realtime voice</CardTitle>
-        <CardDescription>
-          Voice Mode uses OpenAI Realtime and the same Redrob Work UI control surface exposed through Redrob Work UI MCP.
-        </CardDescription>
+        <CardTitle>{t("settings.voice_title")}</CardTitle>
+        <CardDescription>{t("settings.voice_desc")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {props.envKeyDetected ? (
           <Alert>
             <Mic2 />
-            <AlertTitle>OpenAI key detected</AlertTitle>
-            <AlertDescription>
-              Voice Mode will use OPENAI_REALTIME_API_KEY when present, otherwise OPENAI_API_KEY from Redrob Work environment variables.
-            </AlertDescription>
+            <AlertTitle>{t("settings.voice_env_key_detected_title")}</AlertTitle>
+            <AlertDescription>{t("settings.voice_env_key_detected_desc")}</AlertDescription>
           </Alert>
         ) : null}
 
         <FieldGroup className="gap-4">
           <Field>
-            <FieldLabel htmlFor="redrob-voice-api-key">OpenAI API key</FieldLabel>
+            <FieldLabel htmlFor="redrob-voice-api-key">{t("settings.voice_api_key_label")}</FieldLabel>
             <Input
               id="redrob-voice-api-key"
               type="password"
               value={apiKey}
               onChange={(event) => setApiKey(event.currentTarget.value)}
-              placeholder="sk-..."
+              placeholder={t("settings.voice_api_key_placeholder")}
             />
-            <FieldDescription>
-              Saved as OPENAI_API_KEY in Redrob Work's local env store. The renderer only receives short-lived Realtime client secrets.
-            </FieldDescription>
+            <FieldDescription>{t("settings.voice_api_key_desc")}</FieldDescription>
           </Field>
         </FieldGroup>
 
@@ -99,10 +94,10 @@ export function RedrobWorkVoiceConfig(props: RedrobWorkVoiceConfigProps) {
       <CardFooter className="flex-wrap gap-2 border-t border-border justify-between">
         <Button onClick={() => void props.onSaveApiKey(apiKey)} disabled={props.busy || !canSave}>
           {props.busy ? <Loader2 data-icon="inline-start" className="animate-spin" /> : null}
-          Save key
+          {t("settings.voice_save_key")}
         </Button>
         <Button variant="outline" onClick={() => void props.onTestSession()} disabled={props.busy || !props.envKeyDetected}>
-          Test Realtime
+          {t("settings.voice_test_realtime")}
         </Button>
       </CardFooter>
     </Card>

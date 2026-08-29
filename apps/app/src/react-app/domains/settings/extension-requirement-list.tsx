@@ -3,6 +3,7 @@ import { CheckCircle2, Circle } from "lucide-react";
 
 import type { EnablementCondition, EnablementResult } from "@/app/extensions";
 import { Button } from "@/components/ui/button";
+import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export type ExtensionRequirementListProps = {
@@ -16,9 +17,10 @@ export type ExtensionRequirementListProps = {
 export function ExtensionRequirementList({
   results,
   onRun,
-  runLabel = "Fix",
+  runLabel,
   className,
 }: ExtensionRequirementListProps) {
+  const resolvedRunLabel = runLabel ?? t("common.fix");
   if (results.length === 0) return null;
 
   return (
@@ -41,7 +43,7 @@ export function ExtensionRequirementList({
             </div>
             {!result.met && onRun ? (
               <Button size="sm" variant="outline" onClick={() => onRun(result.condition)}>
-                {runLabel}
+                {resolvedRunLabel}
               </Button>
             ) : null}
           </li>

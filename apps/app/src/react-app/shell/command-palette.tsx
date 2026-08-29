@@ -204,8 +204,8 @@ export function CommandPalette(props: CommandPaletteProps) {
     ...(props.onOpenModelPicker
       ? [{
           id: "models",
-          title: "Switch model",
-          detail: "Choose the LLM that runs your next prompts",
+          title: t("palette.switch_model"),
+          detail: t("palette.switch_model_detail"),
           meta: props.selectedModelLabel ?? t("session.default_model"),
           icon: <BrainCircuit className="size-4 text-primary" />,
           searchText: "model models llm provider openai anthropic claude gpt gemini switch pick select default",
@@ -232,11 +232,11 @@ export function CommandPalette(props: CommandPaletteProps) {
     ...(canMoveCurrentSessionToGroup
       ? [{
           id: "move-to-group",
-          title: "Move to Group",
+          title: t("palette.move_to_group"),
           detail: props.currentSessionForGroupMove
-            ? `Add ${props.currentSessionForGroupMove.title} to an existing group`
-            : "Add the selected task to an existing group",
-          meta: sessionGroupCount > 0 ? `${sessionGroupCount.toLocaleString()} groups` : "No groups",
+            ? t("palette.move_to_group_detail", { title: props.currentSessionForGroupMove.title })
+            : t("palette.move_to_group_detail_generic"),
+          meta: sessionGroupCount > 0 ? t("palette.group_count", { count: sessionGroupCount.toLocaleString() }) : t("palette.no_groups"),
           icon: <FolderInput className="size-4 text-primary" />,
           searchText: "move to group add task session folder organize",
           action: () => {
@@ -246,11 +246,11 @@ export function CommandPalette(props: CommandPaletteProps) {
       : []),
     {
       id: "accessible-items",
-      title: "Accessible items",
+      title: t("palette.accessible_items"),
       detail: accessibleTargetCount > 0
-        ? `Open ${accessibleTargetCount.toLocaleString()} servers and artifacts detected in this session`
-        : "No servers or artifacts detected in this session yet",
-      meta: "Session",
+        ? t("palette.accessible_items_detail", { count: accessibleTargetCount.toLocaleString() })
+        : t("palette.accessible_items_empty"),
+      meta: t("palette.meta_session"),
       action: () => {
         setMode("accessible-items");
       },
@@ -367,7 +367,7 @@ export function CommandPalette(props: CommandPaletteProps) {
         id: `accessible-hide:${target.id}`,
         title: `Stop tracking ${target.name || target.value}`,
         detail: target.value,
-        meta: "Hide",
+        meta: t("palette.meta_hide"),
         icon: targetIcon(target),
         searchText: `stop tracking hide ${target.name} ${target.value} ${target.preview}`.toLowerCase(),
         action: () => {

@@ -15,6 +15,7 @@ import {
 import type { WebSearchToolPart } from "@/lib/build-in-tools"
 import { Tool } from "@/components/ui/tool"
 import { parseWebSearchResults } from "@/lib/websearch-results"
+import { t } from "@/i18n"
 
 interface WebsearchToolProps {
   part: WebSearchToolPart
@@ -35,7 +36,9 @@ export function WebsearchTool({ part }: WebsearchToolProps) {
     <ChainOfThought>
       <ChainOfThoughtStep>
         <ChainOfThoughtTrigger leftIcon={<Search className="size-4" />}>
-          {results.length > 0 ? `Searching for "${part.input.query}"` : "Web search (No results)"}
+          {results.length > 0
+            ? t("activity.searching_for", { pattern: `"${part.input.query}"` })
+            : t("activity.web_search_no_results")}
         </ChainOfThoughtTrigger>
         <ChainOfThoughtContent>
           <div className="flex flex-wrap items-center gap-2">

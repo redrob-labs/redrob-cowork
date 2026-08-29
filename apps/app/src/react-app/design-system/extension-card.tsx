@@ -131,9 +131,7 @@ function ExtensionBadges(props: {
           {props.connectedLabel}
         </span>
       ) : props.readiness === "partial" ? (
-        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
-          Partially set up
-        </span>
+        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">{t("extension.partially_set_up")}</span>
       ) : (
         <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${taxonomyStyle[props.taxonomy]}`}>
           {extensionTaxonomyLabel(props.taxonomy)}
@@ -145,9 +143,7 @@ function ExtensionBadges(props: {
         </span>
       ) : null}
       {props.preview ? (
-        <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">
-          Preview
-        </span>
+        <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
       ) : null}
       {props.beta ? (
         <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
@@ -155,9 +151,7 @@ function ExtensionBadges(props: {
         </span>
       ) : null}
       {props.disabledReason ? (
-        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
-          Disabled
-        </span>
+        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">{t("extension.disabled")}</span>
       ) : null}
     </>
   );
@@ -270,9 +264,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
           {disabledReason ?? description}
         </p>
         {preview ? (
-          <span className="shrink-0 rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">
-            Preview
-          </span>
+          <span className="shrink-0 rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
         ) : null}
         {beta ? (
           <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">

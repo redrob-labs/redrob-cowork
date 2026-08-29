@@ -12,6 +12,7 @@ import { ScrollArea, ScrollAreaViewport } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { publishInspectorSlice, recordInspectorEvent } from "@/app/lib/app-inspector";
 import { useControlAction, type RedrobControlAction } from "../../../shell/control/control-provider";
+import { t } from "@/i18n";
 
 type VoiceStatus = "idle" | "connecting" | "listening" | "muted" | "speaking" | "error";
 
@@ -792,12 +793,10 @@ export function VoicePanel(props: VoicePanelProps) {
                 status === "error" && "bg-destructive",
               )}
             />
-            <Radio className="text-primary" />
-            Voice Mode
-          </div>
-          <div className="truncate text-xs text-muted-foreground">Realtime voice over Redrob Work UI MCP controls</div>
+            <Radio className="text-primary" />{t("voice.mode")}</div>
+          <div className="truncate text-xs text-muted-foreground">{t("voice.subtitle")}</div>
         </div>
-        <Button variant="ghost" size="icon-sm" onClick={props.onClose} aria-label="Close Voice Mode">
+        <Button variant="ghost" size="icon-sm" onClick={props.onClose} aria-label={t("voice.close")}>
           <X />
         </Button>
       </div>
@@ -848,11 +847,9 @@ export function VoicePanel(props: VoicePanelProps) {
           {!props.client ? (
             <Card variant="outline" size="sm">
               <CardHeader>
-                <CardTitle>Host connection required</CardTitle>
+                <CardTitle>{t("voice.host_connection_required")}</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                Voice Mode needs the local Redrob Work server so it can mint short-lived Realtime client secrets without exposing your API key to the renderer.
-              </CardContent>
+              <CardContent className="text-sm text-muted-foreground">{t("voice.host_required_description")}</CardContent>
             </Card>
           ) : null}
 
@@ -872,7 +869,7 @@ export function VoicePanel(props: VoicePanelProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-2 px-3 pb-3 pt-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Rendering response</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("voice.rendering_response")}</div>
                   <div className="whitespace-pre-wrap break-words text-sm leading-relaxed text-card-foreground" aria-live="polite">
                     {assistantPreview}
                   </div>
@@ -884,16 +881,14 @@ export function VoicePanel(props: VoicePanelProps) {
           <Card variant="outline" size="sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
-                <Radio className="text-primary" />
-                Voice diagnostics
-              </CardTitle>
+                <Radio className="text-primary" />{t("voice.diagnostics")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">
               <div>
-                <span className="font-medium text-foreground">Connection:</span> {realtimeDiagnostics}
+                <span className="font-medium text-foreground">{t("voice.connection_label")}</span> {realtimeDiagnostics}
               </div>
               <div>
-                <span className="font-medium text-foreground">Microphone:</span> {micDiagnostics}
+                <span className="font-medium text-foreground">{t("voice.microphone_label")}</span> {micDiagnostics}
               </div>
               {status === "error" ? (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-2.5 py-2 text-destructive">
@@ -906,9 +901,7 @@ export function VoicePanel(props: VoicePanelProps) {
           <Card variant="outline" size="sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
-                <Sparkles className="text-primary" />
-                Typed voice command
-              </CardTitle>
+                <Sparkles className="text-primary" />{t("voice.typed_command")}</CardTitle>
             </CardHeader>
             <CardContent>
               <InputGroup>
@@ -945,7 +938,7 @@ export function VoicePanel(props: VoicePanelProps) {
           </Card>
 
           <div className="flex flex-col gap-2">
-            <div className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">Timeline</div>
+            <div className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">{t("voice.timeline")}</div>
             {entries.length ? entries.map((entry) => (
               <VoiceTimelineRow
                 key={entry.id}
@@ -954,9 +947,7 @@ export function VoicePanel(props: VoicePanelProps) {
                 onToggle={() => toggleEntryExpanded(entry.id)}
               />
             )) : (
-              <div className="rounded-2xl border border-dashed border-border px-4 py-5 text-center text-sm text-muted-foreground">
-                Start voice or inject a transcript from UI MCP to see the voice timeline.
-              </div>
+              <div className="rounded-2xl border border-dashed border-border px-4 py-5 text-center text-sm text-muted-foreground">{t("voice.timeline_empty")}</div>
             )}
             <div ref={timelineEndRef} />
           </div>

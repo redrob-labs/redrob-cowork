@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TextInput } from "../../../design-system/text-input";
 import type { RedrobClaudePluginPreview } from "../../../../app/lib/redrob-server";
+import { t } from "@/i18n";
 
 export type ClaudePluginImportModalProps = {
   open: boolean;
@@ -134,7 +135,7 @@ export function ClaudePluginImportModal(props: ClaudePluginImportModalProps) {
     >
       <DialogContent className="flex max-h-[90vh] min-h-0 w-full max-w-lg flex-col overflow-hidden sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Install a plugin from GitHub</DialogTitle>
+          <DialogTitle>{t("plugins.install_from_github")}</DialogTitle>
           <DialogDescription>
             Works with Claude Code plugins: a repo with .claude-plugin/plugin.json bundling an MCP
             server, skills, and commands.
@@ -186,7 +187,7 @@ export function ClaudePluginImportModal(props: ClaudePluginImportModalProps) {
               </div>
 
               <div>
-                <div className="mb-1.5 text-xs font-medium text-dls-text">Will install</div>
+                <div className="mb-1.5 text-xs font-medium text-dls-text">{t("plugins.will_install")}</div>
                 <div className="space-y-2">
                   {groups.map((group) => (
                     <div key={group.type}>

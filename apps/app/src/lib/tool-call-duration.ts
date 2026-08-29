@@ -1,6 +1,7 @@
 import type { DynamicToolUIPart, ToolUIPart } from "ai"
 
 import { isToolPartInFlight } from "@/lib/tool-activity"
+import { t } from "@/i18n"
 
 type AnyToolPart = ToolUIPart | DynamicToolUIPart
 
@@ -33,9 +34,12 @@ export function trackToolCallDuration(part: AnyToolPart): string | null {
 
 export function formatToolCallDuration(ms: number): string {
   const seconds = ms / 1000
-  if (seconds < 10) return `${Math.max(0.1, Number(seconds.toFixed(1)))}s`
-  if (seconds < 60) return `${Math.round(seconds)}s`
-  const minutes = Math.floor(seconds / 60)
-  const rest = Math.round(seconds % 60)
-  return `${minutes}m ${rest}s`
+  if (seconds < 10) {
+    return t("duration.seconds", { value: Math.max(0.1, Number(seconds.toFixed(1))) })
+  }
+  if (seconds < 60) return t("duration.seconds", { value: Math.round(seconds) })
+  return t("duration.minutes_seconds", {
+    minutes: Math.floor(seconds / 60),
+    seconds: Math.round(seconds % 60),
+  })
 }

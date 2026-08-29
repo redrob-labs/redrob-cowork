@@ -1109,7 +1109,7 @@ export function SessionPage(props: SessionPageProps) {
                         variant="ghost"
                         size="icon-sm"
                         className="hidden rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:inline-flex"
-                        aria-label="Find in conversation"
+                        aria-label={t("find.in_conversation")}
                         onClick={() => useSessionFindStore.getState().openFind({ sessionId: findButtonSessionId })}
                       >
                         <TextSearch size={16} />
@@ -1152,7 +1152,7 @@ export function SessionPage(props: SessionPageProps) {
                       variant="ghost"
                       size="icon-sm"
                       className="rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-                      aria-label="More actions"
+                      aria-label={t("session.more_actions")}
                     >
                       <MoreHorizontal size={18} />
                     </Button>
@@ -1163,9 +1163,7 @@ export function SessionPage(props: SessionPageProps) {
                     <DropdownMenuItem
                       onClick={() => useSessionFindStore.getState().openFind({ sessionId: findButtonSessionId })}
                     >
-                      <TextSearch className="size-4" />
-                      Find in conversation
-                    </DropdownMenuItem>
+                      <TextSearch className="size-4" />{t("find.in_conversation")}</DropdownMenuItem>
                   ) : null}
                   <DropdownMenuItem onClick={openArtifactRailPane}>
                     <FileText className="size-4" />
@@ -1173,9 +1171,7 @@ export function SessionPage(props: SessionPageProps) {
                   </DropdownMenuItem>
                   {voiceExtensionEnabled ? (
                     <DropdownMenuItem onClick={openVoiceRailPane}>
-                      <Mic2 className="size-4" />
-                      Voice Mode
-                    </DropdownMenuItem>
+                      <Mic2 className="size-4" />{t("voice.mode")}</DropdownMenuItem>
                   ) : null}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1190,10 +1186,8 @@ export function SessionPage(props: SessionPageProps) {
                       window.localStorage.removeItem("redrob.orgOnboardingSeen");
                     } catch {}
                   }}
-                  title="Clears acknowledged providers + org onboarding so they trigger again"
-                >
-                  Reset notifications
-                </Button>
+                  title={t("session.reset_onboarding_hint")}
+                >{t("session.reset_notifications")}</Button>
               ) : null}
             </div>
           </header>
@@ -1337,7 +1331,7 @@ export function SessionPage(props: SessionPageProps) {
                   {props.notFoundMessage ? (
                     <div className="px-6 py-16 text-center">
                       <div className="mx-auto max-w-md rounded-2xl border border-dls-border bg-dls-card px-5 py-6 shadow-[var(--dls-card-shadow)]">
-                        <h3 className="text-base font-medium text-dls-text">Workspace or session not found</h3>
+                        <h3 className="text-base font-medium text-dls-text">{t("session.workspace_or_session_missing")}</h3>
                         <p className="mt-2 text-sm leading-6 text-dls-secondary">{props.notFoundMessage}</p>
                       </div>
                     </div>
@@ -1471,8 +1465,8 @@ export function SessionPage(props: SessionPageProps) {
                   className="h-[min(88dvh,100dvh)] max-h-[88dvh] p-0 pb-[env(safe-area-inset-bottom)]"
                 >
                   <SheetHeader className="sr-only">
-                    <SheetTitle>Session panel</SheetTitle>
-                    <SheetDescription>Artifacts, files, and session tools</SheetDescription>
+                    <SheetTitle>{t("panel.session_panel")}</SheetTitle>
+                    <SheetDescription>{t("panel.session_panel_description")}</SheetDescription>
                   </SheetHeader>
                   <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-dls-surface">
                     {activeSidePanel === "extensions" && props.settingsSlot ? (
@@ -1530,8 +1524,8 @@ export function SessionPage(props: SessionPageProps) {
                   voiceRailActive && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
                 )}
                 onClick={openVoiceRailPane}
-                title="Voice Mode"
-                aria-label="Voice Mode"
+                title={t("voice.mode")}
+                aria-label={t("voice.mode")}
                 aria-pressed={voiceRailActive}
               >
                 <Mic2 size={15} />

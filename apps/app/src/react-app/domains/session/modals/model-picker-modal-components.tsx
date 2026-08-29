@@ -305,9 +305,7 @@ function ModelOptionRow(props: {
                 </span>
               ) : null}
               {active ? (
-                <span className="rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">
-                  Current
-                </span>
+                <span className="rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">{t("model_picker.current")}</span>
               ) : null}
             </span>
           </div>
