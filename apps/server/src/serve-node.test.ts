@@ -53,7 +53,13 @@ describe("serve", () => {
 
       await delay(25);
       expect(response).toContain("HTTP/1.1 500 Internal Server Error");
+      // Content-Length, not chunked framing: the body is a fixed few bytes of JSON, so a client
+      // reading the raw socket sees the response end with the body itself.
+      expect(response).toContain(`Content-Length: ${Buffer.byteLength(JSON.stringify({ error: "internal_error" }))}`);
+      expect(response).not.toContain("Transfer-Encoding");
       expect(response).toEndWith(JSON.stringify({ error: "internal_error" }));
+      // The absolute-form target is refused before the handler runs, so no route ever sees a
+      // request whose URL could not be resolved against this server's origin.
       expect(fetchCalls).toBe(0);
       expect(unhandled).toEqual([]);
     } finally {

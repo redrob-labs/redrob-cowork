@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -11,17 +11,35 @@ const sidecarDir = join(repoRoot, "apps/desktop/resources/sidecars");
 const connectUrl = "https://connect.example.test/salesforce/start";
 const toolName = "request_salesforce_authorization";
 
+/**
+ * A path existing is not the same as an engine being available.
+ *
+ * The sidecar directory is gitignored and gets whatever a previous fetch or packaging step left
+ * behind, which is sometimes the npm launcher shim rather than a compiled engine — and that shim is
+ * CommonJS under a `"type": "module"` root, so it exits immediately with `require is not defined`.
+ * `existsSync` alone accepted it, this suite decided an engine was available, and then spent the
+ * whole 30s `waitFor` budget waiting for a process that had already died. Ask the candidate for its
+ * version instead: a real engine answers, anything else is treated as no engine and the suite skips
+ * the way it already does on a machine that has none.
+ */
+function runnableEngine(candidate: string): boolean {
+  if (!existsSync(candidate)) return false;
+  const probe = spawnSync(candidate, ["--version"], { timeout: 20_000, stdio: "ignore" });
+  return !probe.error && probe.status === 0;
+}
+
 function findEngine(): string | null {
   const explicit = process.env.REDROB_CODE_BIN;
-  if (explicit && existsSync(explicit)) return explicit;
+  if (explicit) return runnableEngine(explicit) ? explicit : null;
   const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
   const name = process.platform === "darwin"
     ? `redrob-${arch}-apple-darwin`
     : process.platform === "linux"
       ? `redrob-${arch}-unknown-linux-gnu`
       : "";
+  if (!name) return null;
   const candidate = join(sidecarDir, name);
-  return name && existsSync(candidate) ? candidate : null;
+  return runnableEngine(candidate) ? candidate : null;
 }
 
 async function freePort(): Promise<number> {

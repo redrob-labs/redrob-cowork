@@ -30,6 +30,10 @@ const RESERVED_PREFIXES = ["REDROB_", "OPENCODE_"] as const;
 // Installs that predate that ownership are migrated out by
 // `migrateLegacyRedrobKey`, which reads and deletes the legacy entry without
 // going through the write path.
+// `REDROB_MODELS_API_KEY` is the canonical name for the Redrob Models voice broker credential;
+// `REDROB_CLOUD_API_KEY` is a legacy alias kept persistable because it is the name this store has
+// written since the OpenWork rebrand, so an existing install carries it on disk. Both are accepted
+// on write and both are read by `resolveRedrobWorkModelsVoiceConfig`, canonical first.
 const PERSISTABLE_INTERNAL_KEYS = new Set([
   "REDROB_CLOUD_API_KEY",
   "REDROB_MODELS_API_KEY",

@@ -48,6 +48,42 @@ function endResponse(nodeRes: ServerResponse, chunk?: string): void {
   nodeRes.end(chunk);
 }
 
+const INTERNAL_ERROR_BODY = JSON.stringify({ error: "internal_error" });
+
+/**
+ * A request-target this adapter cannot serve.
+ *
+ * Node hands `req.url` through verbatim, so a request line in absolute form —
+ * `TRACE http://example.com/ HTTP/1.1`, which only a proxy is meant to answer — arrives as
+ * `http://example.com/`. Appending that to this server's origin produced strings like
+ * `http://127.0.0.1:1234http://example.com/`, and the only thing stopping the process was
+ * `new Request` throwing a bare `ERR_INVALID_URL` that the generic catch happened to swallow and
+ * report as an unhandled adapter error. Refusing the target up front keeps the failure named and
+ * keeps the fetch handler from ever seeing a request whose URL could not be resolved.
+ */
+class UnsupportedRequestTargetError extends Error {
+  constructor(readonly target: string) {
+    super(`Unsupported HTTP request-target: ${target}`);
+    this.name = "UnsupportedRequestTargetError";
+  }
+}
+
+/**
+ * Send the fixed error body with a Content-Length rather than letting Node fall back to chunked
+ * framing. The body is a few bytes of JSON, and a client reading the raw socket should see the
+ * response end with it instead of with a chunk terminator.
+ */
+function writeInternalError(nodeRes: ServerResponse): void {
+  if (!isResponseWritable(nodeRes)) return;
+  if (!nodeRes.headersSent) {
+    nodeRes.writeHead(500, {
+      "Content-Type": "application/json",
+      "Content-Length": String(Buffer.byteLength(INTERNAL_ERROR_BODY)),
+    });
+  }
+  nodeRes.end(INTERNAL_ERROR_BODY);
+}
+
 async function waitForDrainOrClose(nodeRes: ServerResponse): Promise<void> {
   if (!isResponseWritable(nodeRes)) return;
 
@@ -84,7 +120,10 @@ function toWebRequest(
   hostname: string,
   port: number,
 ): { request: Request; detachCancellation: () => void } {
-  const url = `http://${hostname}:${port}${nodeReq.url ?? "/"}`;
+  const target = nodeReq.url ?? "/";
+  // Only origin-form ("/path?query") can be resolved against this server's own origin.
+  if (!target.startsWith("/")) throw new UnsupportedRequestTargetError(target);
+  const url = `http://${hostname}:${port}${target}`;
   const method = nodeReq.method ?? "GET";
   const headers = new Headers();
   const controller = new AbortController();
@@ -214,12 +253,12 @@ export function serve(options: ServeOptions): Promise<ServeResult> {
         }
         return;
       }
-      console.error("[serve-node] Unhandled error:", error);
-      if (!isResponseWritable(nodeRes)) return;
-      if (!nodeRes.headersSent) {
-        nodeRes.writeHead(500, { "Content-Type": "application/json" });
+      if (error instanceof UnsupportedRequestTargetError) {
+        console.warn(`[serve-node] Refused request: ${error.message}`);
+      } else {
+        console.error("[serve-node] Unhandled error:", error);
       }
-      endResponse(nodeRes, JSON.stringify({ error: "internal_error" }));
+      writeInternalError(nodeRes);
     } finally {
       detachCancellation?.();
     }

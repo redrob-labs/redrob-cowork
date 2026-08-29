@@ -502,11 +502,24 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
     "";
 }
 
+/**
+ * Credentials for the Redrob Models voice broker.
+ *
+ * `REDROB_MODELS_API_KEY` is the canonical name: it names what it authenticates and pairs with
+ * `REDROB_MODELS_BASE_URL`. `REDROB_CLOUD_API_KEY` is a legacy alias and has to stay readable —
+ * it is the name this store has persisted since the OpenWork rebrand, so it is what an existing
+ * install actually carries on disk. The cloud-removal sweep (`10b401c`) deleted the two lines that
+ * read it, on the strength of the name alone, which left the broker branch unreachable for every
+ * one of those installs: with no key it returned null, the request fell through to direct OpenAI,
+ * and a managed-voice user got a raw OpenAI failure instead of the broker.
+ */
 async function resolveRedrobWorkModelsVoiceConfig(env: EnvService): Promise<{ baseUrl: string; apiKey: string } | null> {
   const records = await env.list();
   const apiKey =
     records.find((entry) => entry.key === "REDROB_MODELS_API_KEY")?.value.trim() ||
+    records.find((entry) => entry.key === "REDROB_CLOUD_API_KEY")?.value.trim() ||
     process.env.REDROB_MODELS_API_KEY?.trim() ||
+    process.env.REDROB_CLOUD_API_KEY?.trim() ||
     "";
   if (!apiKey) return null;
 

@@ -454,7 +454,14 @@ describe("runtime MCP engine sync", () => {
     }
   });
 
-  test("does not overlap startup registration with explicit cloud reconciliation", async () => {
+  // This used to drive the second, concurrent registration through
+  // `POST /workspace/:id/mcp/:name/reconcile`, the cloud MCP reconcile endpoint, and assert a 200
+  // from it. That route went with the Den control plane, so the test was asserting a contract the
+  // product no longer has and could only ever return 404. The invariant it was built for is still
+  // real and still worth pinning: an explicit registration arriving while the startup sync is
+  // mid-flight must queue behind it rather than run alongside it. The local hot-add path is what
+  // delivers an explicit registration now, so that is what drives it.
+  test("does not overlap startup registration with an explicit MCP add", async () => {
     const workspaceRoot = await createWorkspaceRoot();
     const previousDb = process.env.REDROB_RUNTIME_DB;
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");
@@ -471,7 +478,6 @@ describe("runtime MCP engine sync", () => {
     let maxRegistrationsInFlight = 0;
     try {
       const mock = startMockOpencode({
-        liveMcpStatusByName: () => ({ "redrob-cloud": { status: "connected" } }),
         mcpResponseForName: (name) => {
           registrationNames.push(name);
           registrationsInFlight += 1;
@@ -494,31 +500,27 @@ describe("runtime MCP engine sync", () => {
 
       const startupSync = syncAllWorkspacesRuntimeMcpToEngine(redrob.config);
       await startupRegistrationReached;
-      const explicitReconcile = fetch(`${redrob.base}/workspace/ws_1/mcp/redrob-cloud/reconcile`, {
+      const explicitAdd = fetch(`${redrob.base}/workspace/ws_1/mcp`, {
         method: "POST",
         headers: auth(redrob.token),
         body: JSON.stringify({
-          config: {
-            type: "remote",
-            url: `http://127.0.0.1:${mock.server.port}/api/den/mcp/agent`,
-            enabled: true,
-            headers: { Authorization: "Bearer test-token" },
-            oauth: false,
-          },
-          trigger: "test",
+          name: "linear",
+          config: { type: "remote", url: "https://mcp.linear.app/mcp", enabled: true, oauth: {} },
         }),
       });
 
       await Bun.sleep(25);
+      // The startup registration still holds the workspace's sync slot, so the explicit add has not
+      // reached the engine yet.
       expect(registrationNames).toEqual(["posthog"]);
       expect(maxRegistrationsInFlight).toBe(1);
 
       releaseStartupRegistration(Response.json({ posthog: { status: "connected" } }));
-      const [, reconcileResponse] = await Promise.all([startupSync, explicitReconcile]);
-      expect(reconcileResponse.status).toBe(200);
-      await reconcileResponse.text();
+      const [, addResponse] = await Promise.all([startupSync, explicitAdd]);
+      expect(addResponse.status).toBe(200);
+      await addResponse.text();
       expect(registrationNames.filter((name) => name === "posthog")).toHaveLength(1);
-      expect(registrationNames.filter((name) => name === "redrob-cloud").length).toBeGreaterThanOrEqual(1);
+      expect(registrationNames.filter((name) => name === "linear").length).toBeGreaterThanOrEqual(1);
       expect(maxRegistrationsInFlight).toBe(1);
     } finally {
       releaseStartupRegistration(Response.json({ posthog: { status: "connected" } }));

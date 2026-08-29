@@ -18,6 +18,7 @@ const priorEnvStore = process.env.REDROB_ENV_STORE;
 const priorTokenStore = process.env.REDROB_TOKEN_STORE;
 const priorOpenAiApiKey = process.env.OPENAI_API_KEY;
 const priorRedrobWorkApiKey = process.env.REDROB_CLOUD_API_KEY;
+const priorRedrobModelsApiKey = process.env.REDROB_MODELS_API_KEY;
 const priorRedrobWorkInferenceBaseUrl = process.env.REDROB_INFERENCE_BASE_URL;
 const nativeFetch = globalThis.fetch;
 
@@ -60,6 +61,10 @@ beforeEach(() => {
   // touches the developer's real ~/.config/redrob/env.json.
   process.env.REDROB_ENV_STORE = join(dir, "env.json");
   process.env.REDROB_TOKEN_STORE = join(dir, "tokens.json");
+  // Both broker credential names are now read from the process environment, so a developer with
+  // either one exported would otherwise satisfy the branches these tests drive from the env store.
+  delete process.env.REDROB_CLOUD_API_KEY;
+  delete process.env.REDROB_MODELS_API_KEY;
 });
 
 afterEach(async () => {
@@ -88,6 +93,11 @@ afterEach(async () => {
     delete process.env.REDROB_CLOUD_API_KEY;
   } else {
     process.env.REDROB_CLOUD_API_KEY = priorRedrobWorkApiKey;
+  }
+  if (priorRedrobModelsApiKey === undefined) {
+    delete process.env.REDROB_MODELS_API_KEY;
+  } else {
+    process.env.REDROB_MODELS_API_KEY = priorRedrobModelsApiKey;
   }
   if (priorRedrobWorkInferenceBaseUrl === undefined) {
     delete process.env.REDROB_INFERENCE_BASE_URL;
@@ -426,6 +436,110 @@ describe("env routes", () => {
       expiresAt: 456,
       source: "redrob-models",
     });
+  });
+
+  // The test above stores the credential under `REDROB_CLOUD_API_KEY`, which is the legacy alias an
+  // existing install carries on disk. These two cover the canonical name and which one wins, so the
+  // pair is pinned rather than left to whichever the next sweep happens to keep.
+  test("voice realtime session accepts the canonical REDROB_MODELS_API_KEY", async () => {
+    process.env.OPENAI_API_KEY = "sk-should-not-be-used";
+    const { base } = await boot();
+
+    const envPut = await fetch(`${base}/env`, {
+      method: "PUT",
+      headers: hostAuth(),
+      body: JSON.stringify({
+        entries: [
+          { key: "REDROB_MODELS_API_KEY", value: "ow_models_canonical" },
+          { key: "REDROB_MODELS_BASE_URL", value: "https://inference.example.test" },
+        ],
+      }),
+    });
+    expect(envPut.status).toBe(200);
+
+    globalThis.fetch = ((input, init) => {
+      const url = String(input);
+      if (url === "https://inference.example.test/voice/realtime/session") {
+        expect(init?.headers).toMatchObject({ Authorization: "Bearer ow_models_canonical" });
+        return Promise.resolve(new Response(JSON.stringify({
+          ok: true,
+          clientSecret: "canonical-rt-secret",
+          expiresAt: 456,
+          model: "gpt-realtime-2",
+          tools: ["redrob_snapshot"],
+          source: "redrob-models",
+        }), { status: 200, headers: { "content-type": "application/json" } }));
+      }
+      if (url === "https://api.openai.com/v1/realtime/client_secrets") {
+        return Promise.resolve(new Response("direct OpenAI should not be called", { status: 500 }));
+      }
+      return nativeFetch(input, init);
+    }) as typeof fetch;
+
+    const issued = await fetch(`${base}/tokens`, {
+      method: "POST",
+      headers: hostAuth(),
+      body: JSON.stringify({ scope: "owner", label: "canonical voice owner" }),
+    });
+    const tokenBody = (await issued.json()) as { token: string };
+
+    const response = await fetch(`${base}/voice/realtime/session`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${tokenBody.token}`, "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ clientSecret: "canonical-rt-secret", source: "redrob-models" });
+  });
+
+  test("voice realtime session prefers the canonical key over the legacy alias", async () => {
+    const { base } = await boot();
+
+    await fetch(`${base}/env`, {
+      method: "PUT",
+      headers: hostAuth(),
+      body: JSON.stringify({
+        entries: [
+          { key: "REDROB_CLOUD_API_KEY", value: "ow_legacy_alias" },
+          { key: "REDROB_MODELS_API_KEY", value: "ow_models_canonical" },
+          { key: "REDROB_INFERENCE_BASE_URL", value: "https://inference.example.test" },
+        ],
+      }),
+    });
+
+    const seen: string[] = [];
+    globalThis.fetch = ((input, init) => {
+      const url = String(input);
+      if (url === "https://inference.example.test/voice/realtime/session") {
+        seen.push(String((init?.headers as Record<string, string>)?.Authorization));
+        return Promise.resolve(new Response(JSON.stringify({
+          ok: true,
+          clientSecret: "precedence-rt-secret",
+          expiresAt: 1,
+          model: "gpt-realtime-2",
+          tools: ["redrob_snapshot"],
+          source: "redrob-models",
+        }), { status: 200, headers: { "content-type": "application/json" } }));
+      }
+      return nativeFetch(input, init);
+    }) as typeof fetch;
+
+    const issued = await fetch(`${base}/tokens`, {
+      method: "POST",
+      headers: hostAuth(),
+      body: JSON.stringify({ scope: "owner", label: "precedence voice owner" }),
+    });
+    const tokenBody = (await issued.json()) as { token: string };
+
+    const response = await fetch(`${base}/voice/realtime/session`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${tokenBody.token}`, "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+
+    expect(response.status).toBe(200);
+    expect(seen).toEqual(["Bearer ow_models_canonical"]);
   });
 
   test("voice realtime session falls back to direct OpenAI when broker returns 503", async () => {
