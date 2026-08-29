@@ -40,9 +40,9 @@
       "host": "api.redrob.io",
       "kind": "fetched",
       "components": ["desktop", "installer", "server"],
-      "purpose": "Hosted Redrob Work public API and Redrob Work Connect MCP endpoint used by hosted Cloud and install flows.",
+      "purpose": "Hosted Redrob Work public API and Redrob Work Connect MCP endpoint used by hosted install flows.",
       "requirement": "required-for-cloud",
-      "blockedEffect": "Hosted install checks, Redrob Work Connect, or legacy hosted API configurations cannot reach Redrob Work Cloud.",
+      "blockedEffect": "Hosted install checks, Redrob Work Connect, or legacy hosted API configurations cannot reach the hosted Redrob Work API.",
       "override": "installer apiUrl / self-hosted Den API origin"
     },
     {

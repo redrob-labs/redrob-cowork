@@ -93,7 +93,7 @@ package.
 ## Runtime boundary
 
 The package covers Den's outbound server-side remote MCP client only. It does
-not change local/direct engine MCP, the incoming Redrob Work Cloud meta-MCP,
+not change local/direct engine MCP, the incoming Redrob Work Connect meta-MCP,
 desktop UI, or provider-specific tenant administration.
 
 Den uses this package as its only remote MCP OAuth runtime. New connections use

@@ -413,7 +413,7 @@ const ko = {
   "model_picker.recommended": "최근",
   "notifications.clear_all": "모두 지우기",
   "notifications.empty": "아직 알림이 없습니다",
-  "notifications.empty_hint": "Redrob Work Cloud 및 워크스페이스의 업데이트가 여기에 표시됩니다.",
+  "notifications.empty_hint": "워크스페이스의 업데이트가 여기에 표시됩니다.",
   "notifications.engine_reloaded": "업데이트가 적용되었습니다",
   "notifications.just_now": "방금 전",
   "notifications.reconnect_failed": "Redrob Work 서버에 다시 연결할 수 없습니다",

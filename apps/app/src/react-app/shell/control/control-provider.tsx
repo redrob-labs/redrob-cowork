@@ -817,7 +817,7 @@ export function RedrobRouteControlActions() {
           ...(isDesktopRuntime()
             ? [{ id: "automations", label: "Automations", description: "Schedule recurring tasks and background agents." }]
             : []),
-          { id: "sharing", label: "Share sessions", description: "Share workspace sessions with collaborators via Redrob Work Cloud." },
+          { id: "sharing", label: "Share sessions", description: "Share a workspace with collaborators over your own Redrob Work worker, using a URL and password you control." },
         ],
         hint: "Use settings.panel.open for settings such as AI providers, and route.extensions.skills to browse Library.",
       }),

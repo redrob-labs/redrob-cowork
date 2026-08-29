@@ -156,9 +156,9 @@ export const roadmapSections: RoadmapSection[] = [
     eyebrow: "03 · central management",
     title: "central management",
     description:
-      "Redrob Work Cloud is the control plane for distributing capabilities, applying desktop policies, managing identity and access, and understanding adoption across the organization.",
+      "Central management runs on a Redrob Work server your team hosts. Distribute capabilities, apply desktop policies, manage identity and access, and understand adoption without handing any of it to someone else's service.",
     callout:
-      "Configure policies and access once in Redrob Work Cloud. The desktop app and Redrob Work Connect apply them for each member and team.",
+      "Configure policies and access once on your own Redrob Work server. The desktop app and Redrob Work Connect apply them for each member and team.",
     items: [
       {
         title: "Desktop policies",
