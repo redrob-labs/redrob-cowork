@@ -97,7 +97,7 @@ export const roadmapSections: RoadmapSection[] = [
       },
       {
         title: "Scheduled tasks",
-        description: "Run any prompt on a schedule or trigger — set it once and let it handle itself.",
+        description: "Run any prompt on a schedule or trigger. Set it once and let it handle itself.",
         status: "partial",
       },
       {
@@ -267,7 +267,7 @@ export const roadmapSections: RoadmapSection[] = [
       },
       {
         title: "Dispatch from your phone",
-        description: "Assign a task from your phone and let it run on your desktop — with your local files, connections, and skills.",
+        description: "Assign a task from your phone and let it run on your desktop, with your local files, connections, and skills.",
         status: "next",
       },
       {

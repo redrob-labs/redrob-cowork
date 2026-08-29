@@ -102,6 +102,62 @@ describe("supported locales", () => {
     expect(t("account.mcp_connected", { count: 3, lng: "en" })).toBe("3 MCP servers");
   });
 
+  test("no user-facing string uses an em dash", () => {
+    const offenders = [...Object.entries(en), ...Object.entries(ko)]
+      .filter(([, value]) => value.includes("—"))
+      .map(([key]) => key);
+    expect(offenders).toEqual([]);
+  });
+
+  test("Korean prose names the product 레드롭 워크", () => {
+    // "Redrob Work" stays in Latin script only where it names a technical
+    // component the user also meets in logs, paths, and config. Anywhere else
+    // the product is 레드롭 워크, so the bundle cannot drift back to a mix.
+    const COMPONENT_SUFFIXES = [
+      "서버",
+      "워커",
+      "호스트",
+      "토큰",
+      "런타임",
+      "브라우저",
+      "UI",
+      "Connect",
+      "Code",
+    ];
+    const componentUse = new RegExp(
+      `Redrob Work(?: (?:${COMPONENT_SUFFIXES.join("|")})|/OpenCode|\\.app\\.migrate-bak)`,
+      "g",
+    );
+
+    const offenders: string[] = [];
+    for (const [key, value] of Object.entries(ko)) {
+      if (value.replace(componentUse, " ").includes("Redrob Work")) offenders.push(key);
+    }
+    expect(offenders).toEqual([]);
+
+    // And the localized name is actually in use, so the rule is not vacuous.
+    expect(Object.values(ko).filter((value) => value.includes("레드롭 워크")).length)
+      .toBeGreaterThan(50);
+  });
+
+  test("a Korean particle after a placeholder uses the dual form", () => {
+    // The interpolated value's final sound is unknown at build time, so a fixed
+    // particle is wrong about half the time. Korean convention writes both.
+    const DUAL_FORMS = ["을(를)", "를(을)", "은(는)", "는(은)", "이(가)", "가(이)", "과(와)", "와(과)"];
+    const offenders: string[] = [];
+
+    for (const [key, value] of Object.entries(ko)) {
+      for (const match of value.matchAll(/\{[a-zA-Z][a-zA-Z0-9]*\}([을를은는이가와과]|으로|로)/g)) {
+        const tail = value.slice(match.index + match[0].length - 1);
+        if (DUAL_FORMS.some((form) => tail.startsWith(form))) continue;
+        // Instrumental 로 / 으로 is chosen by the same rule; flag a bare one too.
+        offenders.push(`${key}: ${match[0]}`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
   test("Korean values contain no leftover English-only prose", () => {
     // A residual-English guard for the *values*, not the keys: after the
     // permitted tokens are stripped (product/brand names, code, URLs, env
