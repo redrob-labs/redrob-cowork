@@ -468,7 +468,7 @@ export function createConnectionsStore(options: {
           mcpStatuses: serverResult.nextStatuses,
           managedOAuthAvailable: serverResult.managedOAuthAvailable,
           mcpStatus: failedNames
-            ? `Some MCPs could not be registered with the engine: ${failedNames}. They may appear disconnected — try reloading the engine.`
+            ? t("mcp.status_partial_registration", { names: failedNames })
             : serverResult.next.length ? null : t("mcp.status_none_configured"),
         }));
         void healUnhealthyMcpEntries(serverResult.next, serverResult.nextStatuses);
@@ -797,7 +797,7 @@ export function createConnectionsStore(options: {
           const details = parseErrors
             .map((entry) => printParseErrorCode(entry.error))
             .join(", ");
-          throw new Error(`Failed to parse opencode config: ${details}`);
+          throw new Error(t("mcp.status_config_parse_failed", { details }));
         }
 
         let updated = raw;

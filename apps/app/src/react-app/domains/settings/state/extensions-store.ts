@@ -322,7 +322,7 @@ export function createExtensionsStore(options: {
       const componentCount = result.preview.components.length;
       return {
         ok: true,
-        message: `Installed ${result.preview.name} with ${componentCount} component${componentCount === 1 ? "" : "s"}.`,
+        message: t("plugins.status_installed", { name: result.preview.name, count: componentCount }),
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : t("skills.unknown_error");

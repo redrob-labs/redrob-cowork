@@ -1754,6 +1754,9 @@ const ko = {
   "composer.pasted_expand_aria": "작성창에서 붙여넣은 텍스트 펼치기",
   "composer.pasted_text_chip": "붙여넣은 텍스트",
   "common.show": "표시",
+  "mcp.status_partial_registration": "일부 MCP를 엔진에 등록하지 못했습니다: {names}. 연결이 끊긴 것처럼 보일 수 있으니 엔진을 다시 로드해 보세요.",
+  "mcp.status_config_parse_failed": "opencode 구성을 해석하지 못했습니다: {details}",
+  "plugins.status_installed": "{name}을(를) 설치했습니다. 구성 요소 {count}개.",
 } satisfies Record<EnglishLogicalKey, string>;
 
 export default ko;

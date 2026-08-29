@@ -177,18 +177,28 @@ describe("new session and library localization", () => {
   test("no Library store emits a hardcoded English status string", () => {
     const violations: string[] = [];
 
+    // Status strings read as sentences: they start with a capital and end with a
+    // period or a question mark. Config keys, paths, and log prefixes do not.
+    const looksLikeStatusSentence = (text: string) => /^[A-Z].*[.?]$/.test(text) && looksLikeEnglishProse(text);
+
     for (const relativePath of GUARDED_STORES) {
       const code = readSource(relativePath);
+
       for (const match of code.matchAll(/"([^"\\]{12,})"/g)) {
         const before = code.slice(0, match.index);
         // A string handed straight to `t()` is a key, not copy.
         if (/\bt\($/.test(before)) continue;
         if (/\bfrom\s*$/.test(before)) continue;
-        // Status strings read as sentences: they start with a capital and end
-        // with a period or a question mark. Config keys and paths do not.
-        if (!/^[A-Z].*[.?]$/.test(match[1])) continue;
-        if (!looksLikeEnglishProse(match[1])) continue;
+        if (!looksLikeStatusSentence(match[1])) continue;
         violations.push(`${relativePath}: "${match[1]}"`);
+      }
+
+      // Template literals are the easy way to smuggle a sentence back in, so
+      // check them with the holes removed.
+      for (const match of code.matchAll(/`([^`]{12,})`/g)) {
+        const withoutHoles = match[1].replace(/\$\{[^}]*\}/g, "").replace(/\s+/g, " ").trim();
+        if (!looksLikeStatusSentence(withoutHoles)) continue;
+        violations.push(`${relativePath}: \`${match[1]}\``);
       }
     }
 

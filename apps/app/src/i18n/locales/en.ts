@@ -1760,6 +1760,10 @@ const en = {
   "composer.pasted_expand_aria": "Expand pasted text in composer",
   "composer.pasted_text_chip": "Pasted text",
   "common.show": "Show",
+  "mcp.status_partial_registration": "Some MCPs could not be registered with the engine: {names}. They may appear disconnected, so try reloading the engine.",
+  "mcp.status_config_parse_failed": "Failed to parse opencode config: {details}",
+  "plugins.status_installed_one": "Installed {name} with {count} component.",
+  "plugins.status_installed_other": "Installed {name} with {count} components.",
 } as const;
 
 /**
