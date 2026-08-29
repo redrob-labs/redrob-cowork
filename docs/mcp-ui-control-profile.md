@@ -15,7 +15,7 @@ This means:
 - **Claude Desktop, Codex, Cursor**, or any MCP-compatible tool can add Redrob Work control with a single config line.
 - Your own app can do the same.
 
-> Want to control Redrob Work Cloud workers and server APIs instead of the desktop UI? Check out the **Redrob Work Cloud MCP** (separate package, coming soon).
+> This is the only MCP surface Redrob Work exposes to external clients. There is no hosted endpoint: the desktop app and its `redrob-server` run locally, so a client must be able to spawn a local stdio process on the same machine.
 
 ## Quick start with HandsFree
 
