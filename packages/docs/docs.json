@@ -111,38 +111,6 @@
         ]
       },
       {
-        "tab": "Cloud",
-        "pages": [
-          "cloud/get-started",
-          "cloud/team-quickstart",
-          {
-            "group": "Share with your team",
-            "pages": [
-              "cloud/share-with-your-team/collections",
-              "cloud/share-with-your-team/desktop-policies",
-              "cloud/share-with-your-team/team-prompt-cards",
-              "cloud/share-with-your-team/managed-llm-provider",
-              "cloud/share-with-your-team/custom-llm-provider",
-              "cloud/share-with-your-team/shared-mcp-connections"
-            ]
-          },
-          {
-            "group": "Run in the cloud",
-            "pages": [
-              "cloud/run-in-the-cloud/shared-workspace",
-              "cloud/run-in-the-cloud/open-cloud-in-browser"
-            ]
-          },
-          "cloud/members-and-rbac",
-          "cloud/sso-okta",
-          "cloud/scim-okta",
-          "cloud/sso-microsoft-entra",
-          "cloud/scim-microsoft-entra",
-          "cloud/security-and-operations",
-          "cloud/enterprise"
-        ]
-      },
-      {
         "tab": "MCP",
         "pages": [
           "model-context-protocol/overview",
@@ -191,7 +159,7 @@
     },
     {
       "source": "/introduction",
-      "destination": "/cloud/get-started"
+      "destination": "/start-here/get-started"
     },
     {
       "source": "/roadmap/roadmap",
@@ -202,8 +170,16 @@
       "destination": "/changelog"
     },
     {
-      "source": "/cloud/share-with-your-team/team-templates",
-      "destination": "/cloud/share-with-your-team/collections"
+      "source": "/cloud/run-in-the-cloud/cloud-mcp",
+      "destination": "/model-context-protocol/overview"
+    },
+    {
+      "source": "/cloud/run-in-the-cloud/connect-redrob-mcp-remote-machine",
+      "destination": "/model-context-protocol/overview"
+    },
+    {
+      "source": "/cloud/:slug*",
+      "destination": "/start-here/get-started"
     }
   ],
   "errors": {
