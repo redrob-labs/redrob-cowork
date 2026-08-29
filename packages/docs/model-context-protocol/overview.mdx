@@ -1,0 +1,145 @@
+---
+title: "Control Redrob Work from any MCP client"
+sidebarTitle: "Overview"
+description: "Redrob Work exposes its own app surface as a local stdio MCP server, so OpenCode, Claude Code, Codex, Cursor, VS Code, and other MCP clients can read what is on screen and run actions."
+---
+
+Redrob Work runs entirely on your machine: the desktop app, a local `redrob-server`,
+and the Redrob Code engine as a sidecar. There is no account, no organization, and
+no hosted endpoint to point an MCP client at.
+
+What Redrob Work does expose is its own app surface. The `redrob-ui-mcp` package is a
+local MCP server that lets any MCP-capable client read Redrob Work's semantic app
+context and execute named UI actions. No screenshots, no coordinates, no DOM
+scraping.
+
+## How it works
+
+```text
+MCP client  <-- MCP stdio -->  redrob-ui-mcp  <-- HTTP loopback -->  Redrob Work desktop
+```
+
+1. The Redrob Work desktop app starts a private HTTP bridge on `127.0.0.1` with a
+   random port and a per-process bearer token. This happens automatically at launch.
+2. It writes a discovery file so `redrob-ui-mcp` can find the port and the token.
+3. Your MCP client spawns `redrob-ui-mcp` over stdio. The server proxies tool calls
+   to the bridge and returns structured results.
+
+The bridge and the discovery file are implementation details. Point your client at
+`redrob-ui-mcp` and nothing else.
+
+## Configure your client
+
+Every client uses the same command. The shape of the config file differs:
+
+```json
+{
+  "mcpServers": {
+    "redrob-ui": {
+      "command": "npx",
+      "args": ["-y", "redrob-ui-mcp"]
+    }
+  }
+}
+```
+
+<CardGroup cols={3}>
+  <Card title="OpenCode" href="/model-context-protocol/opencode" />
+  <Card title="Claude Code" href="/model-context-protocol/claude-code" />
+  <Card title="Codex" href="/model-context-protocol/codex" />
+  <Card title="Claude Desktop" href="/model-context-protocol/claude-desktop" />
+  <Card title="Cursor" href="/model-context-protocol/cursor" />
+  <Card title="VS Code" href="/model-context-protocol/vs-code" />
+  <Card title="Windsurf" href="/model-context-protocol/windsurf" />
+  <Card title="Zed" href="/model-context-protocol/zed" />
+  <Card title="Gemini CLI" href="/model-context-protocol/gemini-cli" />
+  <Card title="ChatGPT" href="/model-context-protocol/chatgpt" />
+</CardGroup>
+
+## Client support
+
+`redrob-ui-mcp` speaks MCP over stdio only. It has no HTTP or SSE transport, so a
+client must be able to spawn a local process.
+
+| Client | Supported | Notes |
+| --- | --- | --- |
+| OpenCode | Yes | `type: "local"` MCP entry in `opencode.json`. |
+| Claude Code | Yes | `claude mcp add` with a local command. |
+| Codex | Yes | Same `mcpServers` shape as Claude Desktop. |
+| Claude Desktop | Yes | `claude_desktop_config.json`. |
+| Cursor | Yes | `mcp.json` local server entry. |
+| VS Code | Yes | `stdio` server in `mcp.json`. |
+| Windsurf | Yes | `~/.codeium/windsurf/mcp_config.json`. |
+| Zed | Yes | `context_servers` in `settings.json`. |
+| Gemini CLI | Yes | `gemini mcp add` with a local command. |
+| ChatGPT | No | ChatGPT connectors accept remote MCP servers only. See [ChatGPT](/model-context-protocol/chatgpt). |
+
+## Tools
+
+| Tool | What it does |
+| --- | --- |
+| `ui_status` | Check whether Redrob Work is running and the bridge is reachable. |
+| `ui_context` | Read the semantic app context: current screen, open conversation tabs, split layout, focused pane, sidebar, side panel, settings, and the queries and commands available right now. Does not focus the window. |
+| `ui_snapshot` | Read the active route, narration, visible actions, and status. Call this before acting. |
+| `ui_list_actions` | List every UI action currently available, with its id and argument info. |
+| `ui_execute_action` | Run an action by id, for example `composer.set_text` or `session.open`. |
+| `ui_query` | Run a side-effect-free query by id. Never navigates or focuses the app. |
+| `ui_command` | Run a semantic command by id while Redrob Work stays in the background. Pass the `ui_context` revision to avoid acting on stale state. |
+
+There is one resource, `redrob://context/current`, which returns the same JSON as
+`ui_context`.
+
+## Common actions
+
+The exact list depends on the current route and state. Call `ui_list_actions` to see
+what is live. Frequently used ids:
+
+| Action | Description |
+| --- | --- |
+| `session.create_task` | Create a session in the selected workspace |
+| `session.list_sessions` | List sessions across workspaces |
+| `session.open` | Navigate to a session by id |
+| `session.read_transcript` | Read the last N messages as text |
+| `composer.set_text` | Type into the composer |
+| `composer.send` | Send the current draft |
+| `composer.stop` | Stop a running session |
+| `command_palette.open` | Open the command palette |
+| `route.settings.*` | Navigate to a settings page |
+
+## Reading past sessions
+
+Cross-session recall comes from saved session history exposed through this surface,
+not from a separate memory database. To answer "what did we decide in the customer
+migration session":
+
+1. `session.list_sessions` to find a match by id, title, workspace, or topic words.
+2. `session.open` with the selected `sessionId`.
+3. `session.read_transcript` to read recent messages.
+
+This navigates Redrob Work away from the user's current session while the lookup
+runs. If several sessions match, ask which one.
+
+## Requirements
+
+- The Redrob Work desktop app must be running. The bridge starts with it.
+- Node.js on `PATH`, so your client can run `npx -y redrob-ui-mcp`. Install it
+  globally with `npm install -g redrob-ui-mcp` if you would rather not use `npx`.
+- The discovery file lives under your user config directory:
+  `~/Library/Application Support/io.redrob.work/` on macOS, `%APPDATA%\io.redrob.work\`
+  on Windows, `~/.config/io.redrob.work/` on Linux. Set
+  `REDROB_UI_CONTROL_DISCOVERY` to override the path.
+
+## Adding MCP servers to Redrob Work
+
+This page is about driving Redrob Work from another client. To give the Redrob Work
+agent access to a service such as Slack or Notion, add that MCP server inside the
+app instead: see [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).
+
+## Troubleshooting
+
+- **"Redrob Work is not running"**: launch the desktop app, then call `ui_status`
+  again. The MCP server rereads the discovery file on every failure.
+- **"Bridge unreachable"**: the app was running when the discovery file was written
+  but is not now. Restart Redrob Work.
+- **Tools missing from the client**: restart the client after editing its MCP config.
+  Most clients read MCP configuration only at startup.

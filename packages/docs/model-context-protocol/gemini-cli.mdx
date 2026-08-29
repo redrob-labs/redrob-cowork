@@ -1,75 +1,44 @@
 ---
-title: "Redrob Work MCP for Gemini CLI"
+title: "Control Redrob Work from Gemini CLI"
 sidebarTitle: "Gemini CLI"
-description: "Gemini CLI MCP setup for Redrob Work Connect, with OAuth access to your org's Gmail, Calendar, Drive, shared connections, skills, and Cloud resources."
+description: "Add the local redrob-ui-mcp server to Gemini CLI so it can read Redrob Work's app context and run UI actions."
 ---
 
-The Redrob Work MCP server ([Redrob Work Connect](/cloud/run-in-the-cloud/cloud-mcp))
-enables Gemini CLI to use the Redrob Work capabilities your organization has made
-available to you: Gmail read/search, Calendar list/create, Drive search/read,
-Gmail draft creation, shared MCP connections such as Notion, Linear, Slack,
-Stripe, Exa, and Context7, shared skills, and Redrob Work Cloud resources like
-skills, plugins, Collections, workers, members, roles, teams, and LLM
-providers. The server exposes only `search_capabilities` and
-`execute_capability`, so Gemini CLI searches what you can access and runs exact
-capability names instead of loading hundreds of tool definitions into context.
-
-## Server URL
-
-```text
-https://api.redrob.io/mcp/agent
-```
-
-OAuth sign-in uses your Redrob Work account, and the organization you pick is
-pinned into the token. If you do not have an account, create a
-[free Redrob Work account](https://app.redrob.io?mode=sign-up).
+`redrob-ui-mcp` is a local stdio MCP server that exposes the running Redrob Work
+desktop app: its current screen, its open sessions, and every UI action available
+right now. Gemini CLI spawns it as a local MCP server, so there is no URL, no OAuth,
+and no account. Read the [overview](/model-context-protocol/overview) for the tool
+list and how the bridge works.
 
 ## Setup
 
-1. Add Redrob Work Connect as a remote HTTP MCP server:
+1. Launch the Redrob Work desktop app. The local control bridge starts with it.
+
+2. Add the server:
 
    ```sh
-   gemini mcp add --transport http redrob https://api.redrob.io/mcp/agent
+   gemini mcp add redrob-ui npx -y redrob-ui-mcp
    ```
 
-2. Start Gemini CLI:
+3. Start Gemini CLI and list the servers:
 
    ```sh
    gemini
    ```
 
-3. Authenticate Redrob Work inside Gemini:
-
    ```text
-   /mcp auth redrob
+   /mcp
    ```
-
-4. Finish the browser sign-in and choose your organization.
-
-## Switch organizations
-
-Remove the stored MCP auth token for `redrob`, then run `/mcp auth redrob`
-again and choose the organization you want during browser sign-in.
-
-<Note>
-This is a setup guide. These steps match Redrob Work Connect's OAuth profile:
-HTTPS or HTTP loopback callbacks, PKCE S256, and dynamic client registration
-fallback. Gemini CLI is listed as setup only because native proof is not
-complete. See the
-[client support status](/cloud/run-in-the-cloud/cloud-mcp#client-support-status)
-table.
-</Note>
 
 ## What you can ask
 
-- "Which Redrob Work organization am I connected to?"
-- "Add omar@example.com to my organization."
-- "Search my org's capabilities for calendar tools, then list tomorrow's events."
-- "Create a skill that writes weekly status reports and share it with my whole organization."
+- "Use `ui_status` to check whether Redrob Work is reachable."
+- "List my Redrob Work sessions, then open the one about the customer migration."
+- "Type a summary request into the Redrob Work composer and send it."
 
 ## What's next
 
-- Read the [hub overview](/cloud/run-in-the-cloud/cloud-mcp) for OAuth, token,
-  server exposure, and troubleshooting details.
-- Publish Notion, Linear, Slack, and other shared tools with
-  [shared MCP connections](/cloud/share-with-your-team/shared-mcp-connections).
+- Read the [overview](/model-context-protocol/overview) for the full tool and action
+  reference.
+- To give the Redrob Work agent its own access to a service, add that MCP server in
+  the app: [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).

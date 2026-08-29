@@ -1,67 +1,27 @@
 ---
-title: "Redrob Work MCP for ChatGPT"
+title: "ChatGPT and Redrob Work"
 sidebarTitle: "ChatGPT"
-description: "ChatGPT MCP setup for Redrob Work Connect, so ChatGPT Desktop can use your org's shared Redrob Work capabilities through OAuth."
+description: "ChatGPT connectors accept remote MCP servers only, and Redrob Work ships a local stdio server, so there is no supported connection today."
 ---
 
-The Redrob Work MCP server ([Redrob Work Connect](/cloud/run-in-the-cloud/cloud-mcp))
-enables ChatGPT Desktop to use the Redrob Work capabilities your organization has
-made available to you: Gmail read/search, Calendar list/create, Drive
-search/read, Gmail draft creation, shared MCP connections such as Notion,
-Linear, Slack, Stripe, Exa, and Context7, shared skills, and Redrob Work Cloud
-resources like skills, plugins, Collections, workers, members, roles, teams,
-and LLM providers. The server exposes only `search_capabilities` and
-`execute_capability`, so ChatGPT searches what you can access and runs exact
-capability names instead of loading hundreds of tool definitions into context.
+There is no supported way to connect ChatGPT to Redrob Work right now.
 
-## Server URL
+ChatGPT connectors accept remote MCP servers reached over HTTPS. Redrob Work exposes
+its app surface through `redrob-ui-mcp`, which speaks MCP over stdio and talks to a
+bridge bound to `127.0.0.1` on your own machine. ChatGPT cannot spawn a local process
+and cannot reach loopback, so the two do not meet.
 
-```text
-https://api.redrob.io/mcp/agent
-```
+Redrob Work no longer publishes a hosted MCP endpoint. The retired hosted gateway at
+`api.redrob.io/mcp/agent` is gone along with the accounts and organizations it
+depended on.
 
-OAuth sign-in uses your Redrob Work account, and the organization you pick is
-pinned into the token. If you do not have an account, create a
-[free Redrob Work account](https://app.redrob.io?mode=sign-up).
+## What to do instead
 
-## Setup
-
-1. Open ChatGPT `Settings > MCP servers`
-   ([open settings](https://chatgpt.com/#settings/Connectors)).
-
-2. Paste the server URL:
-
-   ```text
-   https://api.redrob.io/mcp/agent
-   ```
-
-3. Start OAuth from ChatGPT's connection prompt, sign in to Redrob Work, and pick
-   the organization ChatGPT should use.
-
-## Switch organizations
-
-Open ChatGPT `Settings > MCP servers`, disconnect or clear the `Redrob Work`
-server's stored auth, then connect again and choose the organization you want.
-
-<Note>
-This is a setup guide. These steps match Redrob Work Connect's OAuth profile:
-HTTPS or HTTP loopback callbacks, PKCE S256, and dynamic client registration
-fallback. ChatGPT Desktop is listed as setup only because native proof is not
-complete. See the
-[client support status](/cloud/run-in-the-cloud/cloud-mcp#client-support-status)
-table.
-</Note>
-
-## What you can ask
-
-- "Which Redrob Work organization am I connected to?"
-- "Search my org's capabilities for calendar tools, then list tomorrow's events."
-- "Create a skill that writes weekly status reports and share it with my whole organization."
-- "Find the Q3 launch page in Notion and summarize it."
-
-## What's next
-
-- Read the [hub overview](/cloud/run-in-the-cloud/cloud-mcp) for OAuth, token,
-  server exposure, and troubleshooting details.
-- Publish Notion, Linear, Slack, and other shared tools with
-  [shared MCP connections](/cloud/share-with-your-team/shared-mcp-connections).
+- **Use a client that supports local MCP servers.** OpenCode, Claude Code, Codex,
+  Claude Desktop, Cursor Desktop, VS Code, Windsurf, Zed, and Gemini CLI can all
+  spawn `redrob-ui-mcp`. See the [overview](/model-context-protocol/overview).
+- **Work in Redrob Work directly.** The desktop app runs its own agent on the Redrob
+  Code engine against your local files. Connect a model with the Redrob Key from
+  [console.redrob.ai](https://console.redrob.ai) and start a session.
+- **Give the Redrob Work agent the tools instead.** Add the MCP servers you care
+  about inside the app: [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).

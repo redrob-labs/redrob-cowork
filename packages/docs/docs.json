@@ -133,23 +133,6 @@
               "cloud/run-in-the-cloud/open-cloud-in-browser"
             ]
           },
-          {
-            "group": "MCP Gateway",
-            "pages": [
-              "cloud/run-in-the-cloud/cloud-mcp",
-              "model-context-protocol/opencode",
-              "model-context-protocol/claude-code",
-              "model-context-protocol/codex",
-              "model-context-protocol/claude-desktop",
-              "model-context-protocol/chatgpt",
-              "model-context-protocol/cursor",
-              "model-context-protocol/vs-code",
-              "model-context-protocol/windsurf",
-              "model-context-protocol/zed",
-              "model-context-protocol/gemini-cli",
-              "cloud/run-in-the-cloud/connect-redrob-mcp-remote-machine"
-            ]
-          },
           "cloud/members-and-rbac",
           "cloud/sso-okta",
           "cloud/scim-okta",
@@ -157,6 +140,22 @@
           "cloud/scim-microsoft-entra",
           "cloud/security-and-operations",
           "cloud/enterprise"
+        ]
+      },
+      {
+        "tab": "MCP",
+        "pages": [
+          "model-context-protocol/overview",
+          "model-context-protocol/opencode",
+          "model-context-protocol/claude-code",
+          "model-context-protocol/codex",
+          "model-context-protocol/claude-desktop",
+          "model-context-protocol/cursor",
+          "model-context-protocol/vs-code",
+          "model-context-protocol/windsurf",
+          "model-context-protocol/zed",
+          "model-context-protocol/gemini-cli",
+          "model-context-protocol/chatgpt"
         ]
       },
       {
@@ -184,7 +183,7 @@
     },
     {
       "source": "/model-context-protocol",
-      "destination": "/cloud/run-in-the-cloud/cloud-mcp"
+      "destination": "/model-context-protocol/overview"
     },
     {
       "source": "/quickstart",

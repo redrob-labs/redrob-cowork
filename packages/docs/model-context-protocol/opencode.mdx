@@ -1,84 +1,49 @@
 ---
-title: "Redrob Work MCP for OpenCode"
+title: "Control Redrob Work from OpenCode"
 sidebarTitle: "OpenCode"
-description: "OpenCode MCP setup for Redrob Work Connect, Redrob Work's hosted MCP server for Gmail, Calendar, Drive, shared connections, skills, and Cloud resources."
+description: "Add the local redrob-ui-mcp server to OpenCode so it can read Redrob Work's app context and run UI actions."
 ---
 
-The Redrob Work MCP server ([Redrob Work Connect](/cloud/run-in-the-cloud/cloud-mcp))
-enables OpenCode to use the Redrob Work capabilities your organization has made
-available to you: Gmail read/search, Calendar list/create, Drive search/read,
-Gmail draft creation, shared MCP connections such as Notion, Linear, Slack,
-Stripe, Exa, and Context7, shared skills, and Redrob Work Cloud resources like
-skills, plugins, Collections, workers, members, roles, teams, and LLM
-providers. The server exposes only `search_capabilities` and
-`execute_capability`, so OpenCode searches what you can access and runs exact
-capability names instead of loading hundreds of tool definitions into context.
-
-## Server URL
-
-```text
-https://api.redrob.io/mcp/agent
-```
-
-OAuth sign-in uses your Redrob Work account, and the organization you pick is
-pinned into the token. If you do not have an account, create a
-[free Redrob Work account](https://app.redrob.io?mode=sign-up).
+`redrob-ui-mcp` is a local stdio MCP server that exposes the running Redrob Work
+desktop app: its current screen, its open sessions, and every UI action available
+right now. OpenCode spawns it as a local MCP server, so there is no URL, no OAuth,
+and no account. Read the [overview](/model-context-protocol/overview) for the tool
+list and how the bridge works.
 
 ## Setup
 
-1. Add this MCP entry to your `opencode.json` file:
+1. Launch the Redrob Work desktop app. The local control bridge starts with it.
+
+2. Add the MCP entry to your workspace or global `opencode.json`:
 
    ```json
    {
      "mcp": {
-       "redrob": {
-         "type": "remote",
-         "enabled": true,
-         "url": "https://api.redrob.io/mcp/agent",
-         "oauth": {}
+       "redrob-ui": {
+         "type": "local",
+         "command": ["npx", "-y", "redrob-ui-mcp"],
+         "enabled": true
        }
      }
    }
    ```
 
-2. Authenticate the server:
+3. Start OpenCode and confirm the connection:
 
-   ```sh
-   opencode mcp auth redrob
+   ```text
+   Use ui_status to check whether Redrob Work is reachable.
    ```
-
-3. Finish the browser sign-in, then choose the organization OpenCode should use.
-
-If OpenCode runs on a remote machine or SSH host, follow
-[Connect Redrob Work MCP from a remote machine](/cloud/run-in-the-cloud/connect-redrob-mcp-remote-machine).
-
-## Switch organizations
-
-Log out, then authenticate again and pick the organization you want in the
-browser:
-
-```sh
-opencode mcp logout redrob
-opencode mcp auth redrob
-```
-
-<Note>
-OpenCode is the verified Redrob Work Connect client. Native remote MCP OAuth passed
-end-to-end implementation testing.
-</Note>
 
 ## What you can ask
 
-- "Which Redrob Work organization am I connected to?"
-- "Add omar@example.com to my organization."
-- "Create a skill that writes weekly status reports and share it with my whole organization."
-- "Find the Q3 launch page in Notion and summarize it."
+- "Use `ui_snapshot` to see what is on screen in Redrob Work."
+- "List my Redrob Work sessions, then open the one about the customer migration."
+- "Type a summary request into the Redrob Work composer and send it."
+- "What did I decide in the session named Q3 planning?"
 
 ## What's next
 
-- Read the [hub overview](/cloud/run-in-the-cloud/cloud-mcp) for OAuth, token,
-  server exposure, and troubleshooting details.
-- Publish Notion, Linear, Slack, and other shared tools with
-  [shared MCP connections](/cloud/share-with-your-team/shared-mcp-connections).
-- Connect from an SSH host with
-  [Redrob Work MCP on a remote machine](/cloud/run-in-the-cloud/connect-redrob-mcp-remote-machine).
+- Read the [overview](/model-context-protocol/overview) for the full tool and action
+  reference.
+- To give the Redrob Work agent its own access to a service, add that MCP server in
+  the app: [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).
