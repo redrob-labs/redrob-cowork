@@ -42,7 +42,6 @@ import {
 import { applyDesktopBootstrapBrandIcon } from "./brand-icon-bootstrap.mjs";
 import { openExternalUrl } from "./open-external.mjs";
 import { resolveAppIdentifier, resolveUserDataPath } from "./dev-profile.mjs";
-import { fetchAgentContextDiagnosticsResponse } from "./agent-context-diagnostics-fetch.mjs";
 import {
   createLinuxDesktopIntegration,
 } from "./linux-desktop-integration.mjs";
@@ -2075,14 +2074,6 @@ const desktopCommandHandlers = {
         credentials: "omit",
         cache: "no-store",
       };
-      if (init.agentContextDiagnostics && typeof init.agentContextDiagnostics === "object") {
-        return fetchAgentContextDiagnosticsResponse(
-          electronNet.fetch,
-          url,
-          requestInit,
-          init.agentContextDiagnostics.deadlineAtMs,
-        );
-      }
       const timeoutMs = Number(init.timeoutMs);
       const response = await electronNet.fetch(url, {
         ...requestInit,
