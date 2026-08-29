@@ -36,6 +36,7 @@ import {
 import type { InitialConfigType } from "@lexical/react/LexicalComposer.js";
 import { decodeComposerMentionValue, encodeComposerMentionValue, type ComposerMentionKind } from "./mention-encoding";
 
+import { t } from "@/i18n";
 import { shouldCollapsePastedText, splitPastedText } from "./pasted-text";
 import { insertPastedText } from "./pasted-text-insertion";
 
@@ -321,7 +322,7 @@ function $createComposerSkillNode(skillName: string, skillToken?: string) {
 }
 
 function pastedTextChipLabel(lines: number) {
-  return `Pasted · ${lines} line${lines === 1 ? "" : "s"}`;
+  return t("composer.pasted_lines", { count: lines });
 }
 
 function createPastedTextChipDom(label: string, lines: number) {
@@ -329,7 +330,7 @@ function createPastedTextChipDom(label: string, lines: number) {
   dom.className = "inline-flex items-center gap-1 rounded-full border border-amber-6/35 bg-amber-3/15 px-2.5 py-1 text-xs font-medium text-amber-11";
   dom.contentEditable = "false";
   dom.setAttribute("spellcheck", "false");
-  dom.title = `Pasted text · ${label}`;
+  dom.title = `${t("composer.pasted_text_chip")} · ${label}`;
 
   const text = document.createElement("span");
   text.textContent = pastedTextChipLabel(lines);
@@ -337,12 +338,12 @@ function createPastedTextChipDom(label: string, lines: number) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[11px] font-medium text-amber-11 underline decoration-amber-8 underline-offset-2 transition-colors hover:bg-amber-4 hover:text-amber-12";
-  button.title = "Expand";
-  button.setAttribute("aria-label", "Expand pasted text in composer");
+  button.title = t("composer.pasted_expand");
+  button.setAttribute("aria-label", t("composer.pasted_expand_aria"));
   button.dataset.pastedExpandLabel = label;
 
   const actionText = document.createElement("span");
-  actionText.textContent = "Expand";
+  actionText.textContent = t("composer.pasted_expand");
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 16 16");
@@ -366,11 +367,11 @@ function updatePastedTextChipDom(dom: HTMLElement, label: string, lines: number)
   if (text) text.textContent = pastedTextChipLabel(lines);
   const button = dom.querySelector("button[data-pasted-expand-label]");
   if (button instanceof HTMLButtonElement) {
-    button.title = "Expand";
-    button.setAttribute("aria-label", "Expand pasted text in composer");
+    button.title = t("composer.pasted_expand");
+    button.setAttribute("aria-label", t("composer.pasted_expand_aria"));
     button.dataset.pastedExpandLabel = label;
   }
-  dom.title = `Pasted text · ${label}`;
+  dom.title = `${t("composer.pasted_text_chip")} · ${label}`;
 }
 
 type SerializedComposerPastedTextNode = Spread<

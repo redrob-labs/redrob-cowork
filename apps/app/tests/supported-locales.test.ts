@@ -5,7 +5,7 @@ import { join } from "node:path";
 import en from "../src/i18n/locales/en";
 import ko from "../src/i18n/locales/ko";
 import * as localeBundles from "../src/i18n/locales";
-import { isLanguage, LANGUAGES, LANGUAGE_OPTIONS } from "../src/i18n";
+import { isLanguage, LANGUAGES, LANGUAGE_OPTIONS, t } from "../src/i18n";
 
 /**
  * Product localization is narrowed to English and Korean. These assertions lock
@@ -69,6 +69,39 @@ describe("supported locales", () => {
     expect(Object.keys(ko).length).toBe(englishLogicalKeys.size);
   });
 
+  test("every plural family renders the Korean translation, not the English variant", () => {
+    // Korean defines the bare key where English defines `_one` / `_other`. The
+    // resolver must reach that bare key instead of matching English's `_other`,
+    // otherwise every counted string in the app renders English to a Korean user.
+    const pluralBases = [
+      ...new Set(
+        Object.keys(en)
+          .filter((key) => /_(zero|one|two|few|many|other)$/.test(key))
+          .map((key) => key.replace(/_(zero|one|two|few|many|other)$/, "")),
+      ),
+    ].sort();
+
+    expect(pluralBases.length).toBeGreaterThan(10);
+
+    const leaked: string[] = [];
+    for (const base of pluralBases) {
+      for (const count of [0, 1, 3]) {
+        const rendered = t(base, { count, lng: "ko" });
+        const expected = (ko as Record<string, string>)[base].replace("{count}", String(count));
+        if (rendered !== expected) leaked.push(`${base} (count ${count}): ${rendered}`);
+      }
+    }
+
+    expect(leaked).toEqual([]);
+  });
+
+  test("an untranslated plural key still falls back to the English variant", () => {
+    // The locale-first rule must not disable the English fallback for a key
+    // Korean genuinely lacks.
+    expect(t("account.mcp_connected", { count: 1, lng: "en" })).toBe("1 MCP server");
+    expect(t("account.mcp_connected", { count: 3, lng: "en" })).toBe("3 MCP servers");
+  });
+
   test("Korean values contain no leftover English-only prose", () => {
     // A residual-English guard for the *values*, not the keys: after the
     // permitted tokens are stripped (product/brand names, code, URLs, env
@@ -77,8 +110,10 @@ describe("supported locales", () => {
     // This does not run on en.ts (which is English), nor on developer-facing
     // strings outside i18n dictionaries (a separate guard covers those).
     const allowedTokens = [
-      // Brand / product identifiers kept as-is in Korean copy.
-      /Redrob Work( Connect| Cloud| UI Control)?/g,
+      // Brand / product identifiers kept as-is in Korean copy. There is no
+      // hosted "Redrob Work Cloud" product, so that suffix is deliberately
+      // absent: `no-hosted-cloud-product-copy.test.ts` keeps it out entirely.
+      /Redrob Work( Connect| UI Control)?/g,
       /Redrob Code/g,
       /Redrob(?!\p{L})/gu,
       /OpenCode/g,

@@ -1550,7 +1550,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
       source: entry.source,
       origin: "local",
     } satisfies McpServerEntry));
-    const status = servers.length ? null : "No MCP servers loaded.";
+    const status = servers.length ? null : t("mcp.status_none_loaded");
     setToolMcpServers(servers);
     setToolMcpStatuses(statuses);
     setToolMcpStatus(status);

@@ -35,8 +35,8 @@ export function getPanelDestinations(
   if (actions.onOpenBrowser) {
     destinations.push({
       id: "browser",
-      label: "Browser",
-      description: "Open a new page in the built-in browser.",
+      label: t("panel.browser"),
+      description: t("panel.browser_description"),
       icon: <Globe aria-hidden="true" />,
       activate: actions.onOpenBrowser,
     });
@@ -44,8 +44,8 @@ export function getPanelDestinations(
 
   destinations.push({
     id: "files",
-    label: "Files & artifacts",
-    description: "View files and artifacts created in this session.",
+    label: t("panel.files"),
+    description: t("panel.files_description"),
     icon: <FileText aria-hidden="true" />,
     activate: onOpenFiles,
   });
@@ -53,8 +53,8 @@ export function getPanelDestinations(
   if (actions.onOpenExtensions) {
     destinations.push({
       id: "extensions",
-      label: "Library",
-      description: "Browse the skills and connections available to your agent.",
+      label: t("extensions.title"),
+      description: t("panel.library_description"),
       icon: <Puzzle aria-hidden="true" />,
       activate: actions.onOpenExtensions,
     });
@@ -63,8 +63,8 @@ export function getPanelDestinations(
   if (actions.onOpenVoice) {
     destinations.push({
       id: "voice",
-      label: "Voice Mode",
-      description: "Talk to Redrob Work with real-time voice.",
+      label: t("voice.mode"),
+      description: t("panel.voice_description"),
       icon: <Mic2 aria-hidden="true" />,
       activate: actions.onOpenVoice,
     });

@@ -255,8 +255,8 @@ export function PluginsView(props: PluginsViewProps) {
                   {!plugin.removable ? (
                     <div className="mt-1 text-xs text-gray-10">
                       {plugin.source === "dir.global"
-                        ? "Discovered from a global plugin folder."
-                        : "Discovered from the workspace plugin folder."}
+                        ? t("plugins.source_global_folder")
+                        : t("plugins.source_workspace_folder")}
                     </div>
                   ) : null}
                 </div>

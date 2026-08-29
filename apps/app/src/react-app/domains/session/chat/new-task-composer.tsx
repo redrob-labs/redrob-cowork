@@ -106,7 +106,7 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
           source: entry.source,
           origin: "local",
         } satisfies McpServerEntry));
-        const status = localServers.length ? null : "No MCP servers loaded.";
+        const status = localServers.length ? null : t("mcp.status_none_loaded");
         setMcpServers(localServers);
         setMcpStatuses({});
         setMcpStatus(status);

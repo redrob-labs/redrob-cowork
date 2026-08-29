@@ -314,7 +314,7 @@ export function createConnectionsStore(options: {
     });
 
     if (hasRedrobTarget && !canTryRedrobServer) {
-      throw new Error("Redrob Work server cannot read MCP config for this workspace.");
+      throw new Error(t("mcp.status_cannot_read_config"));
     }
 
     if (!canTryRedrobServer || !redrobClient || !redrobWorkspaceId) return null;
@@ -378,7 +378,7 @@ export function createConnectionsStore(options: {
       if (!fallbackOnError) {
         throw error instanceof Error
           ? error
-          : new Error("Computer Use helper app is unavailable. Restart Redrob Work or reinstall the app.");
+          : new Error(t("mcp.status_computer_use_unavailable"));
       }
       // Fall through to the published package command in the manifest/catalog.
     }
@@ -469,7 +469,7 @@ export function createConnectionsStore(options: {
           managedOAuthAvailable: serverResult.managedOAuthAvailable,
           mcpStatus: failedNames
             ? `Some MCPs could not be registered with the engine: ${failedNames}. They may appear disconnected — try reloading the engine.`
-            : serverResult.next.length ? null : "No MCP servers configured yet.",
+            : serverResult.next.length ? null : t("mcp.status_none_configured"),
         }));
         void healUnhealthyMcpEntries(serverResult.next, serverResult.nextStatuses);
         return;
@@ -484,7 +484,7 @@ export function createConnectionsStore(options: {
           ...current,
           mcpServers: [],
           mcpStatuses: {},
-          mcpStatus: error instanceof Error ? error.message : "Failed to load MCP servers",
+          mcpStatus: error instanceof Error ? error.message : t("mcp.status_load_failed"),
         }));
         return;
       }
@@ -493,7 +493,7 @@ export function createConnectionsStore(options: {
     if (isRemoteWorkspace) {
       mutateState((current) => ({
         ...current,
-        mcpStatus: "Redrob Work server unavailable. MCP config is read-only.",
+        mcpStatus: t("mcp.status_config_read_only_offline"),
         mcpServers: [],
         mcpStatuses: {},
       }));
@@ -503,7 +503,7 @@ export function createConnectionsStore(options: {
     if (!isDesktopRuntime()) {
       mutateState((current) => ({
         ...current,
-        mcpStatus: "MCP configuration is only available for local workspaces.",
+        mcpStatus: t("mcp.status_local_workspaces_only"),
         mcpServers: [],
         mcpStatuses: {},
       }));
@@ -513,7 +513,7 @@ export function createConnectionsStore(options: {
     if (!projectDir) {
       mutateState((current) => ({
         ...current,
-        mcpStatus: "Pick a workspace folder to load MCP servers.",
+        mcpStatus: t("mcp.status_pick_workspace"),
         mcpServers: [],
         mcpStatuses: {},
       }));
@@ -566,7 +566,7 @@ export function createConnectionsStore(options: {
           ...current,
           mcpServers: [],
           mcpStatuses: {},
-          mcpStatus: "No opencode.json found yet. Create one by connecting an MCP.",
+          mcpStatus: t("mcp.status_no_config_file"),
         }));
         return;
       }
@@ -587,7 +587,7 @@ export function createConnectionsStore(options: {
         mcpServers: next,
         mcpLastUpdatedAt: Date.now(),
         mcpStatuses: nextStatuses,
-        mcpStatus: next.length ? null : "No MCP servers configured yet.",
+        mcpStatus: next.length ? null : t("mcp.status_none_configured"),
       }));
       void healUnhealthyMcpEntries(next, nextStatuses);
     } catch (error) {
@@ -595,7 +595,7 @@ export function createConnectionsStore(options: {
         ...current,
         mcpServers: [],
         mcpStatuses: {},
-        mcpStatus: error instanceof Error ? error.message : "Failed to load MCP servers",
+        mcpStatus: error instanceof Error ? error.message : t("mcp.status_load_failed"),
       }));
     }
   }
@@ -620,7 +620,7 @@ export function createConnectionsStore(options: {
       await resolveWritableRedrobTarget();
 
     if (isRemoteWorkspace && !canUseRedrobServer) {
-      const error = "Redrob Work server unavailable. MCP config is read-only.";
+      const error = t("mcp.status_config_read_only_offline");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
         reason: "redrob-server-unavailable",
@@ -629,7 +629,7 @@ export function createConnectionsStore(options: {
     }
 
     if (hasRedrobTarget && !canUseRedrobServer) {
-      const error = "Redrob Work server MCP config is read-only.";
+      const error = t("mcp.status_config_read_only");
       setStateField("mcpStatus", error);
       finishPerf(options.developerMode(), "mcp.connect", "blocked", startedAt, {
         reason: "redrob-server-read-only",
@@ -683,13 +683,13 @@ export function createConnectionsStore(options: {
 
       if (entry.managedOAuth) {
         if (isRemoteWorkspace || !isDesktopRuntime()) {
-          throw new Error("Redrob Work-managed MCP OAuth is currently available for local desktop workspaces only.");
+          throw new Error(t("mcp.status_managed_oauth_local_only"));
         }
         if (entryType !== "remote" || !entry.url) {
-          throw new Error("Redrob Work-managed OAuth requires a remote MCP URL.");
+          throw new Error(t("mcp.status_managed_oauth_needs_url"));
         }
         if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
-          throw new Error("The local Redrob Work server is required for managed MCP sign-in.");
+          throw new Error(t("mcp.status_managed_signin_needs_local_server"));
         }
         const result = await redrobClient.addManagedMcp(redrobWorkspaceId, {
           name: slug,
@@ -719,7 +719,7 @@ export function createConnectionsStore(options: {
           ? { ok: true }
           : {
               ok: false,
-              error: state.mcpStatus ?? "MCP sign-in is still pending. Finish it in your browser, then refresh connections.",
+              error: state.mcpStatus ?? t("mcp.status_signin_pending"),
             };
       }
 
@@ -747,7 +747,7 @@ export function createConnectionsStore(options: {
 
       if (entryType === "remote") {
         if (!resolvedUrl) {
-          throw new Error("Missing MCP URL. Is the Redrob Work desktop app running?");
+          throw new Error(t("mcp.status_missing_url"));
         }
         mcpEntryConfig["url"] = resolvedUrl;
         if (resolvedHeaders) {
@@ -767,7 +767,7 @@ export function createConnectionsStore(options: {
 
       if (entryType === "local") {
         if (!entry.command?.length) {
-          throw new Error("Missing MCP command.");
+          throw new Error(t("mcp.status_missing_command"));
         }
         mcpEntryConfig["command"] = await resolveLocalMcpCommand(entry);
         const environment = await resolveLocalMcpEnvironment(entry);
@@ -817,7 +817,7 @@ export function createConnectionsStore(options: {
           updated.endsWith("\n") ? updated : `${updated}\n`,
         ) as { ok: boolean; stderr?: string; stdout?: string };
         if (!writeResult.ok) {
-          throw new Error(writeResult.stderr || writeResult.stdout || "Failed to write opencode.json");
+          throw new Error(writeResult.stderr || writeResult.stdout || t("mcp.status_write_config_failed"));
         }
       }
 
@@ -926,10 +926,10 @@ export function createConnectionsStore(options: {
       const connection = await redrobClient.getManagedMcp(workspaceId, name);
       if (connection.status === "connected") return true;
       if (connection.status === "reconnect_required") {
-        throw new Error(connection.lastError || "MCP sign-in needs to be restarted.");
+        throw new Error(connection.lastError || t("mcp.status_signin_restart_required"));
       }
     }
-    setStateField("mcpStatus", "MCP sign-in is still pending. Finish it in your browser, then refresh connections.");
+    setStateField("mcpStatus", t("mcp.status_signin_pending"));
     return false;
   }
 
@@ -938,7 +938,7 @@ export function createConnectionsStore(options: {
       try {
         const { redrobClient, redrobWorkspaceId, canUseRedrobServer } = await resolveWritableRedrobTarget();
         if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
-          throw new Error("The local Redrob Work server is required for managed MCP sign-in.");
+          throw new Error(t("mcp.status_managed_signin_needs_local_server"));
         }
         mutateState((current) => ({ ...current, mcpStatus: null, mcpConnectingName: entry.name }));
         const result = await redrobClient.connectManagedMcp(redrobWorkspaceId, entry.name);
@@ -988,12 +988,12 @@ export function createConnectionsStore(options: {
       await resolveWritableRedrobTarget();
 
     if (isRemoteWorkspace && !canUseRedrobServer) {
-      setStateField("mcpStatus", "Redrob Work server unavailable. MCP auth is read-only.");
+      setStateField("mcpStatus", t("mcp.status_auth_read_only_offline"));
       return;
     }
 
     if (hasRedrobTarget && !canUseRedrobServer) {
-      setStateField("mcpStatus", "Redrob Work server MCP auth is read-only.");
+      setStateField("mcpStatus", t("mcp.status_auth_read_only"));
       return;
     }
 
@@ -1062,7 +1062,7 @@ export function createConnectionsStore(options: {
         await redrobClient.removeMcp(redrobWorkspaceId, name);
       } else {
         if (hasRedrobTarget) {
-          setStateField("mcpStatus", "Redrob Work server MCP config is read-only.");
+          setStateField("mcpStatus", t("mcp.status_config_read_only"));
           return;
         }
         const projectDir = options.projectDir().trim();

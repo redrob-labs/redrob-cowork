@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { t } from "@/i18n";
 import {
+  extensionTaxonomyDescription,
   extensionTaxonomyLabel,
   type ExtensionTaxonomy,
 } from "../domains/settings/extension-taxonomy";
@@ -113,16 +114,6 @@ export type ExtensionDetailModalProps = {
   presentation?: "dialog" | "page";
   /** Back-link label when presentation is "page". */
   backLabel?: string;
-};
-
-const taxonomyDesc: Record<ExtensionTaxonomy, string> = {
-  app: "Runs on this device and gives your agent tools it can use here.",
-  connection: "An account your agent can act in, once it is signed in.",
-  mcp: "Connects as a Model Context Protocol server, giving your agent access to external tools and data.",
-  skill: "A reusable workflow that your agent can execute on demand.",
-  command: "A slash command the composer can run in this workspace.",
-  agent: "A named agent the composer can run a session as.",
-  plugin: "Extends Redrob Work with additional capabilities managed by your organization.",
 };
 
 const uiControlClientConfig = `{
@@ -280,9 +271,7 @@ export function ExtensionDetailModal({
         <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
       ) : null}
       {beta ? (
-        <span className="rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
-          Beta
-        </span>
+        <span className="rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">{t("common.beta")}</span>
       ) : null}
     </div>
   );
@@ -359,7 +348,7 @@ export function ExtensionDetailModal({
       {setupInstructions ? (
         <Card variant="outline" size="sm">
           <CardHeader>
-            <CardTitle>Setup</CardTitle>
+            <CardTitle>{t("extension.setup")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm leading-relaxed text-muted-foreground">
@@ -473,7 +462,7 @@ export function ExtensionDetailModal({
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Type</span>
+                <span className="text-muted-foreground">{t("extension.type")}</span>
                 <span className="font-medium text-card-foreground">{extensionTaxonomyLabel(taxonomy)}</span>
               </div>
 
@@ -489,7 +478,7 @@ export function ExtensionDetailModal({
 
               {uiControl ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Launch</span>
+                  <span className="text-muted-foreground">{t("extension.launch")}</span>
                   <span className="max-w-[300px] truncate font-mono text-xs text-card-foreground">{(launchCommand ?? fallbackUiControlCommand).join(" ")}</span>
                 </div>
               ) : null}
@@ -521,19 +510,19 @@ export function ExtensionDetailModal({
               ))}
 
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Status</span>
+                <span className="text-muted-foreground">{t("extension.status")}</span>
                 <span className={cn("font-medium", connected ? "text-green-11" : "text-muted-foreground")}>
                   {connected
-                    ? connectedLabel ?? (taxonomy === "plugin" ? "Installed" : "Connected")
+                    ? connectedLabel ?? (taxonomy === "plugin" ? t("extension.installed") : t("extension.connected"))
                     : connecting
                       ? connectingLabel
-                      : disconnectedLabel ?? (taxonomy === "plugin" ? "Not installed" : "Not connected")}
+                      : disconnectedLabel ?? (taxonomy === "plugin" ? t("extension.not_installed") : t("extension.not_connected"))}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("extension.visibility")}</span>
-                <span className="font-medium text-card-foreground">{hidden ? "Hidden" : "Shown"}</span>
+                <span className="font-medium text-card-foreground">{hidden ? t("extension.hidden") : t("extension.shown")}</span>
               </div>
 
               {preview ? (
@@ -546,7 +535,7 @@ export function ExtensionDetailModal({
               {beta ? (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t("extension.release_stage")}</span>
-                  <span className="font-medium text-amber-11">Beta</span>
+                  <span className="font-medium text-amber-11">{t("common.beta")}</span>
                 </div>
               ) : null}
 
@@ -605,7 +594,7 @@ export function ExtensionDetailModal({
           </CardHeader>
           <CardContent>
             <div className="text-sm leading-relaxed text-muted-foreground">
-              {taxonomyDesc[taxonomy]}
+              {extensionTaxonomyDescription(taxonomy)}
             </div>
           </CardContent>
         </Card>
@@ -627,7 +616,7 @@ export function ExtensionDetailModal({
               onClose();
             }}
           >
-            Show
+            {t("common.show")}
           </Button>
         ) : !hidden && onHide ? (
           <Button
@@ -638,18 +627,18 @@ export function ExtensionDetailModal({
               onClose();
             }}
           >
-            Hide
+            {t("common.hide")}
           </Button>
         ) : null}
       </div>
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         {presentation === "dialog" ? (
           <DialogClose render={<Button variant="outline" />}>
-            Close
+            {t("common.close")}
           </DialogClose>
         ) : (
           <Button variant="outline" onClick={onClose}>
-            Close
+            {t("common.close")}
           </Button>
         )}
         {connected && onReconnect ? (

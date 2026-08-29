@@ -17,8 +17,8 @@ export type ExtensionTransport = "mcp" | "native" | null;
 
 export type ExtensionInventoryState = "all" | "ready" | "available";
 
-export const extensionInventoryFilters: ExtensionInventoryFilter[] = [
-  "all",
+/** Every taxonomy a Library row can carry, in inventory order. */
+export const EXTENSION_TAXONOMIES: ExtensionTaxonomy[] = [
   "app",
   "connection",
   "mcp",
@@ -26,6 +26,11 @@ export const extensionInventoryFilters: ExtensionInventoryFilter[] = [
   "command",
   "agent",
   "plugin",
+];
+
+export const extensionInventoryFilters: ExtensionInventoryFilter[] = [
+  "all",
+  ...EXTENSION_TAXONOMIES,
 ];
 
 /** Built-ins ship with Redrob Work and run here, so they are apps. Accounts arrive as org connections. */
@@ -79,5 +84,25 @@ export function extensionTaxonomyLabel(taxonomy: ExtensionTaxonomy) {
       return t("extensions.badge_agent");
     case "plugin":
       return t("extensions.badge_plugin");
+  }
+}
+
+/** One sentence explaining what a taxonomy is, shown on Library detail. */
+export function extensionTaxonomyDescription(taxonomy: ExtensionTaxonomy) {
+  switch (taxonomy) {
+    case "app":
+      return t("extension.taxonomy_desc_app");
+    case "connection":
+      return t("extension.taxonomy_desc_connection");
+    case "mcp":
+      return t("extension.taxonomy_desc_mcp");
+    case "skill":
+      return t("extension.taxonomy_desc_skill");
+    case "command":
+      return t("extension.taxonomy_desc_command");
+    case "agent":
+      return t("extension.taxonomy_desc_agent");
+    case "plugin":
+      return t("extension.taxonomy_desc_plugin");
   }
 }

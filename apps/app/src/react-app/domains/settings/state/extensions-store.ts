@@ -268,11 +268,11 @@ export function createExtensionsStore(options: {
     }
 
     if (hasRedrobTarget) {
-      throw new Error("Redrob Work server cannot remove skills for this workspace.");
+      throw new Error(t("skills.status_cannot_remove"));
     }
 
     if (isRemoteWorkspace) {
-      throw new Error("Redrob Work server unavailable. Connect to remove skills.");
+      throw new Error(t("skills.status_connect_to_remove"));
     }
 
     if (!isDesktopRuntime()) {
@@ -302,7 +302,7 @@ export function createExtensionsStore(options: {
   async function previewClaudePlugin(url: string): Promise<RedrobClaudePluginPreview> {
     const target = await resolveWorkspaceServerTarget();
     if (!target.redrobClient || !target.redrobWorkspaceId) {
-      throw new Error("Redrob Work server unavailable. Connect to install plugins from GitHub.");
+      throw new Error(t("plugins.status_connect_to_install_github"));
     }
     const result = await target.redrobClient.previewClaudePlugin(target.redrobWorkspaceId, { url });
     return result.preview;
@@ -314,7 +314,7 @@ export function createExtensionsStore(options: {
     try {
       const target = await resolveWorkspaceServerTarget();
       if (!target.redrobClient || !target.redrobWorkspaceId) {
-        throw new Error("Redrob Work server unavailable. Connect to install plugins from GitHub.");
+        throw new Error(t("plugins.status_connect_to_install_github"));
       }
       const result = await target.redrobClient.installClaudePlugin(target.redrobWorkspaceId, { url });
       await refreshSkills({ force: true });
@@ -418,7 +418,7 @@ export function createExtensionsStore(options: {
       mutateState((current) => ({
         ...current,
         skills: [],
-        skillsStatus: "Redrob Work server cannot read skills for this workspace.",
+        skillsStatus: t("skills.status_cannot_read"),
       }));
       return;
     }
@@ -468,7 +468,7 @@ export function createExtensionsStore(options: {
       mutateState((current) => ({
         ...current,
         skills: [],
-        skillsStatus: "Redrob Work server unavailable. Connect to load skills.",
+        skillsStatus: t("skills.status_connect_to_load"),
       }));
       return;
     }
@@ -482,7 +482,7 @@ export function createExtensionsStore(options: {
     try {
       setStateField("skillsStatus", null);
       const rawClient = client as unknown as { _client?: { get: (input: { url: string }) => Promise<unknown> } };
-      if (!rawClient._client) throw new Error("OpenCode client unavailable.");
+      if (!rawClient._client) throw new Error(t("skills.status_opencode_unavailable"));
       const result = await rawClient._client.get({ url: "/skill" }) as {
         data?: Array<{ name: string; description: string; location: string }>;
         error?: unknown;
@@ -539,9 +539,9 @@ export function createExtensionsStore(options: {
     if (scope !== "project" && !isLocalWorkspace) {
       mutateState((current) => ({
         ...current,
-        pluginStatus: "Global plugins are only available for local workers.",
+        pluginStatus: t("plugins.status_global_local_only"),
         pluginList: [],
-        sidebarPluginStatus: "Global plugins require a local worker.",
+        sidebarPluginStatus: t("plugins.status_global_needs_local"),
         sidebarPluginList: [],
       }));
       refreshPluginsInFlight = false;
@@ -566,7 +566,7 @@ export function createExtensionsStore(options: {
           ...current,
           pluginList: list,
           sidebarPluginList: list.map((entry) => entry.name),
-          pluginStatus: list.length ? null : "No plugins configured yet.",
+          pluginStatus: list.length ? null : t("plugins.status_none_configured"),
           sidebarPluginStatus: null,
           pluginsContextKey: getWorkspaceContextKey(),
         }));
@@ -576,8 +576,8 @@ export function createExtensionsStore(options: {
           ...current,
           pluginList: [],
           sidebarPluginList: [],
-          sidebarPluginStatus: "Failed to load plugins.",
-          pluginStatus: error instanceof Error ? error.message : "Failed to load plugins.",
+          sidebarPluginStatus: t("plugins.status_load_failed"),
+          pluginStatus: error instanceof Error ? error.message : t("plugins.status_load_failed"),
         }));
       } finally {
         refreshPluginsInFlight = false;
@@ -588,9 +588,9 @@ export function createExtensionsStore(options: {
     if (scope === "project" && hasRedrobTarget) {
       mutateState((current) => ({
         ...current,
-        pluginStatus: "Redrob Work server cannot read plugins for this workspace.",
+        pluginStatus: t("plugins.status_cannot_read"),
         pluginList: [],
-        sidebarPluginStatus: "Redrob Work server cannot read plugins for this workspace.",
+        sidebarPluginStatus: t("plugins.status_cannot_read"),
         sidebarPluginList: [],
       }));
       refreshPluginsInFlight = false;
@@ -612,9 +612,9 @@ export function createExtensionsStore(options: {
     if (!isLocalWorkspace && !canUseRedrobServer) {
       mutateState((current) => ({
         ...current,
-        pluginStatus: "Redrob Work server unavailable. Connect to manage plugins.",
+        pluginStatus: t("plugins.status_connect_to_manage"),
         pluginList: [],
-        sidebarPluginStatus: "Connect an Redrob Work server to load plugins.",
+        sidebarPluginStatus: t("plugins.status_connect_to_load"),
         sidebarPluginList: [],
       }));
       refreshPluginsInFlight = false;
@@ -714,7 +714,7 @@ export function createExtensionsStore(options: {
     }
 
     if (snapshot.pluginScope !== "project" && !isLocalWorkspace) {
-      setStateField("pluginStatus", "Global plugins are only available for local workers.");
+      setStateField("pluginStatus", t("plugins.status_global_local_only"));
       return;
     }
 
@@ -726,13 +726,13 @@ export function createExtensionsStore(options: {
         if (isManualInput) setStateField("pluginInput", "");
         await refreshPlugins("project");
       } catch (error) {
-        setStateField("pluginStatus", error instanceof Error ? error.message : "Failed to add plugin.");
+        setStateField("pluginStatus", error instanceof Error ? error.message : t("plugins.status_add_failed"));
       }
       return;
     }
 
     if (snapshot.pluginScope === "project" && hasRedrobTarget) {
-      setStateField("pluginStatus", "Redrob Work server cannot write plugins for this workspace.");
+      setStateField("pluginStatus", t("plugins.status_cannot_write"));
       return;
     }
 
@@ -742,7 +742,7 @@ export function createExtensionsStore(options: {
     }
 
     if (!isLocalWorkspace) {
-      setStateField("pluginStatus", "Redrob Work server unavailable. Connect to manage plugins.");
+      setStateField("pluginStatus", t("plugins.status_connect_to_manage"));
       return;
     }
 
@@ -793,7 +793,7 @@ export function createExtensionsStore(options: {
     const triggerName = stripPluginVersion(name);
     const existingPlugin = snapshot.pluginList.find((entry) => entry.name === name);
     if (existingPlugin && !existingPlugin.removable) {
-      setStateField("pluginStatus", "Directory-discovered plugins are read-only.");
+      setStateField("pluginStatus", t("plugins.status_directory_read_only"));
       return;
     }
 
@@ -805,7 +805,7 @@ export function createExtensionsStore(options: {
       redrobSnapshot.redrobServerCapabilities?.plugins?.write !== false;
 
     if (snapshot.pluginScope !== "project" && !isLocalWorkspace) {
-      setStateField("pluginStatus", "Global plugins are only available for local workers.");
+      setStateField("pluginStatus", t("plugins.status_global_local_only"));
       return;
     }
 
@@ -816,13 +816,13 @@ export function createExtensionsStore(options: {
         options.markReloadRequired?.("plugins", { type: "plugin", name: triggerName, action: "removed" });
         await refreshPlugins("project");
       } catch (error) {
-        setStateField("pluginStatus", error instanceof Error ? error.message : "Failed to remove plugin.");
+        setStateField("pluginStatus", error instanceof Error ? error.message : t("plugins.status_remove_failed"));
       }
       return;
     }
 
     if (snapshot.pluginScope === "project" && hasRedrobTarget) {
-      setStateField("pluginStatus", "Redrob Work server cannot write plugins for this workspace.");
+      setStateField("pluginStatus", t("plugins.status_cannot_write"));
       return;
     }
 
@@ -832,7 +832,7 @@ export function createExtensionsStore(options: {
     }
 
     if (!isLocalWorkspace) {
-      setStateField("pluginStatus", "Redrob Work server unavailable. Connect to manage plugins.");
+      setStateField("pluginStatus", t("plugins.status_connect_to_manage"));
       return;
     }
 
@@ -848,7 +848,7 @@ export function createExtensionsStore(options: {
       const config = (await readOpencodeConfig(scope, targetDir)) as OpencodeConfigFile;
       const raw = config.content ?? "";
       if (!raw.trim()) {
-        setStateField("pluginStatus", "No plugins configured yet.");
+        setStateField("pluginStatus", t("plugins.status_none_configured"));
         return;
       }
 
@@ -856,7 +856,7 @@ export function createExtensionsStore(options: {
       const desired = stripPluginVersion(name).toLowerCase();
       const next = plugins.filter((entry) => stripPluginVersion(entry).toLowerCase() !== desired);
       if (next.length === plugins.length) {
-        setStateField("pluginStatus", "Plugin not found.");
+        setStateField("pluginStatus", t("plugins.status_not_found"));
         return;
       }
 
@@ -877,7 +877,7 @@ export function createExtensionsStore(options: {
       return;
     }
     if (!isLocalWorkspace) {
-      options.setError("Local workers are required to import skills.");
+      options.setError(t("skills.status_import_needs_local"));
       return;
     }
     const targetDir = options.projectDir().trim();
@@ -942,13 +942,13 @@ export function createExtensionsStore(options: {
     }
 
     if (hasRedrobTarget) {
-      const message = "Redrob Work server cannot write skills for this workspace.";
+      const message = t("skills.status_cannot_write");
       setStateField("skillsStatus", message);
       return { ok: false, message };
     }
 
     if (isRemoteWorkspace) {
-      const message = "Redrob Work server unavailable. Connect to install skills.";
+      const message = t("skills.status_connect_to_install");
       setStateField("skillsStatus", message);
       return { ok: false, message };
     }
@@ -958,7 +958,7 @@ export function createExtensionsStore(options: {
       return { ok: false, message };
     }
     if (!isLocalWorkspace) {
-      const message = "Local workers are required to install skills.";
+      const message = t("skills.status_install_needs_local");
       options.setError(message);
       setStateField("skillsStatus", message);
       return { ok: false, message };
@@ -1083,7 +1083,7 @@ export function createExtensionsStore(options: {
     }
 
     if (hasRedrobTarget) {
-      setStateField("skillsStatus", "Redrob Work server cannot read skills for this workspace.");
+      setStateField("skillsStatus", t("skills.status_cannot_read"));
       return null;
     }
 
@@ -1093,7 +1093,7 @@ export function createExtensionsStore(options: {
     }
 
     if (isRemoteWorkspace) {
-      setStateField("skillsStatus", "Redrob Work server unavailable. Connect to view skills.");
+      setStateField("skillsStatus", t("skills.status_connect_to_view"));
       return null;
     }
     if (!isDesktopRuntime()) {
@@ -1101,7 +1101,7 @@ export function createExtensionsStore(options: {
       return null;
     }
     if (!isLocalWorkspace) {
-      setStateField("skillsStatus", "Local workers are required to view skills.");
+      setStateField("skillsStatus", t("skills.status_view_needs_local"));
       return null;
     }
 
@@ -1150,7 +1150,7 @@ export function createExtensionsStore(options: {
     }
 
     if (hasRedrobTarget) {
-      setStateField("skillsStatus", "Redrob Work server cannot write skills for this workspace.");
+      setStateField("skillsStatus", t("skills.status_cannot_write"));
       return;
     }
 
@@ -1160,7 +1160,7 @@ export function createExtensionsStore(options: {
     }
 
     if (isRemoteWorkspace) {
-      setStateField("skillsStatus", "Redrob Work server unavailable. Connect to edit skills.");
+      setStateField("skillsStatus", t("skills.status_connect_to_edit"));
       return;
     }
     if (!isDesktopRuntime()) {
@@ -1168,7 +1168,7 @@ export function createExtensionsStore(options: {
       return;
     }
     if (!isLocalWorkspace) {
-      setStateField("skillsStatus", "Local workers are required to edit skills.");
+      setStateField("skillsStatus", t("skills.status_edit_needs_local"));
       return;
     }
 

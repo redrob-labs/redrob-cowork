@@ -128,15 +128,23 @@ const pluralRule = (loc: Language, count: number): Intl.LDMLPluralRule => {
 /**
  * Pick the right key variant for a count. Tries `${key}_zero` (only when count === 0),
  * then `${key}_${rule}` (e.g. `_one` / `_other`), then `${key}_other`, then the bare
- * key. Asian locales (no grammatical plural) define only the bare key and hit the
- * final step. Each candidate runs through the locale → English fallback so an
- * untranslated key still resolves to the English `_one` / `_other` variant.
+ * key.
+ *
+ * The target locale gets first refusal on every candidate. Asian locales have no
+ * grammatical plural and define only the bare key, so consulting the English
+ * fallback candidate-by-candidate would match English's `_other` before ever
+ * reaching the translated bare key and render English to a Korean user. Only
+ * once the locale defines none of the variants does the English fallback run,
+ * which is what makes an untranslated key resolve to English `_one` / `_other`.
  */
 const resolvePluralKey = (loc: Language, key: string, count: number): string => {
   const candidates: string[] = [];
   if (count === 0) candidates.push(`${key}_zero`);
   candidates.push(`${key}_${pluralRule(loc, count)}`, `${key}_other`, key);
 
+  for (const candidate of candidates) {
+    if (TRANSLATIONS[loc]?.[candidate]) return candidate;
+  }
   for (const candidate of candidates) {
     if (lookupEntry(loc, candidate) !== null) return candidate;
   }
