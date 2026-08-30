@@ -18,10 +18,12 @@ Redrob Work uses **Redrob** as its only inference provider, and it is selected b
 
 To connect:
 
-1. Go to [console.redrob.ai](https://console.redrob.ai) and issue an API key.
-2. In Redrob Work, open the connect screen and paste your key. It is stored as the `REDROB_API_KEY` credential and is never embedded in the app.
+1. On the connect screen, press **Redrob로 연결**. Redrob Work asks the console for a short code and opens [console.redrob.ai](https://console.redrob.ai) in your browser.
+2. Sign in, check the code matches the one the app is showing, and approve it. The console issues one workspace API key and the app collects it by itself.
 
-That is the whole setup. Onboarding sends you straight to the console to issue and paste a key, so there is no separate account sign-in step.
+That is the whole setup. There is no account sign-in inside the app and no key to copy: the key is handed to the Redrob Code engine as the `REDROB_API_KEY` credential and is never shown, never embedded in the app, and revocable from the console's key list at any time.
+
+If a machine cannot open a browser, the same screen still takes a key you paste yourself. Issue one at [console.redrob.ai](https://console.redrob.ai) and paste it there.
 
 ## Install with your AI agent
 

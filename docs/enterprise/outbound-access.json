@@ -76,7 +76,7 @@
       "host": "console.redrob.ai",
       "kind": "fetched",
       "components": ["renderer", "server"],
-      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup.",
+      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup, and the device authorization endpoints Work uses to connect a workspace without the user handling an API key.",
       "requirement": "required",
       "blockedEffect": "Inference and model selection are unavailable.",
       "override": null

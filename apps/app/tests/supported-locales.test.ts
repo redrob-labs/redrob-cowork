@@ -171,6 +171,13 @@ describe("supported locales", () => {
       // absent: `no-hosted-cloud-product-copy.test.ts` keeps it out entirely.
       /Redrob Work( Connect| UI Control)?/g,
       /Redrob Code/g,
+      /**
+       * Korean attaches its particles straight onto the brand name, with no space, which the
+       * bare-brand rule below cannot see past: in "Redrob로 연결" the character after "Redrob" is a
+       * letter, so the lookahead fails and the brand reads as leftover English. Matched here so the
+       * primary connect call to action can carry the particle it needs.
+       */
+      /Redrob(?=[로은는을를의와과에서])/g,
       /Redrob(?!\p{L})/gu,
       /OpenCode/g,
       // Literal CLI command example shown verbatim in copy. Must run before

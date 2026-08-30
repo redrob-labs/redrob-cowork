@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { t } from "../../i18n";
@@ -22,6 +22,10 @@ import { EngineDownloadStep } from "../domains/onboarding/engine-download-step";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
 import { REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
 import { connectRedrobKey } from "../domains/onboarding/redrob-key-connect";
+import {
+  runRedrobDeviceConnect,
+  type RedrobDeviceConnectPrompt,
+} from "../domains/onboarding/redrob-device-connect";
 import { CreateWorkspaceModal } from "../domains/workspace/create-workspace-modal";
 import type { CreateWorkspaceOptions } from "../domains/workspace/types";
 
@@ -61,6 +65,10 @@ type WelcomeState = {
   redrobKeyStep: boolean;
   redrobKeyBusy: boolean;
   redrobKeyError: string | null;
+  /** True from the moment "Redrob로 연결" is pressed until the attempt settles. */
+  redrobConnectBusy: boolean;
+  /** The code the console gave us, once there is one to show. */
+  redrobConnectPrompt: RedrobDeviceConnectPrompt | null;
   attributionStep: boolean;
   pendingRoute: string | null;
   pendingWorkspaceId: string | null;
@@ -78,6 +86,9 @@ type WelcomeAction =
   | { type: "redrob-key:start" }
   | { type: "redrob-key:error"; error: string }
   | { type: "redrob-key:finish" }
+  | { type: "redrob-connect:start" }
+  | { type: "redrob-connect:prompt"; prompt: RedrobDeviceConnectPrompt }
+  | { type: "redrob-connect:error"; error: string | null }
   | { type: "attribution-step"; route: string };
 
 const initialWelcomeState: WelcomeState = {
@@ -88,6 +99,8 @@ const initialWelcomeState: WelcomeState = {
   redrobKeyStep: false,
   redrobKeyBusy: false,
   redrobKeyError: null,
+  redrobConnectBusy: false,
+  redrobConnectPrompt: null,
   attributionStep: false,
   pendingRoute: null,
   pendingWorkspaceId: null,
@@ -113,6 +126,8 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
         ...state,
         redrobKeyStep: true,
         redrobKeyError: null,
+        redrobConnectBusy: false,
+        redrobConnectPrompt: null,
         pendingWorkspaceId: action.workspaceId,
         pendingSessionId: action.sessionId,
       };
@@ -122,10 +137,27 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
       return { ...state, redrobKeyBusy: false, redrobKeyError: action.error };
     case "redrob-key:finish":
       return { ...state, redrobKeyBusy: false };
+    case "redrob-connect:start":
+      return { ...state, redrobConnectBusy: true, redrobConnectPrompt: null, redrobKeyError: null };
+    case "redrob-connect:prompt":
+      return { ...state, redrobConnectPrompt: action.prompt };
+    /**
+     * Clears the code as well as setting the message. A code left on screen after the attempt ended
+     * is a code someone will keep waiting on.
+     */
+    case "redrob-connect:error":
+      return {
+        ...state,
+        redrobConnectBusy: false,
+        redrobConnectPrompt: null,
+        redrobKeyError: action.error,
+      };
     case "attribution-step":
       return {
         ...state,
         redrobKeyStep: false,
+        redrobConnectBusy: false,
+        redrobConnectPrompt: null,
         attributionStep: true,
         pendingRoute: action.route,
       };
@@ -264,9 +296,13 @@ export function WelcomeRoute() {
     await handleCreateWorkspace("starter", folder);
   }, [handleCreateWorkspace, manualFolder]);
 
+  /**
+   * Opens the console. While a device connection is waiting this opens the page with the code already
+   * in it, so "open again" lands on the confirm screen rather than on the dashboard.
+   */
   const handleOpenRedrobConsole = useCallback(() => {
-    platform.openLink(REDROB_CONSOLE_URL);
-  }, [platform]);
+    platform.openLink(state.redrobConnectPrompt?.verificationUriComplete ?? REDROB_CONSOLE_URL);
+  }, [platform, state.redrobConnectPrompt]);
 
   const handleSubmitRedrobKey = useCallback(
     async (apiKey: string) => {
@@ -305,6 +341,79 @@ export function WelcomeRoute() {
     },
     [state.pendingSessionId, state.pendingWorkspaceId],
   );
+
+  /**
+   * Set while a device connection is waiting, and cleared to stop the loop. A ref rather than state
+   * because the loop reads it between polls and must see the current value, not the one captured
+   * when the attempt started.
+   */
+  const redrobConnectCancelled = useRef(false);
+
+  const handleCancelRedrobConnect = useCallback(() => {
+    redrobConnectCancelled.current = true;
+    dispatch({ type: "redrob-connect:error", error: null });
+  }, []);
+
+  /**
+   * "Redrob로 연결": the primary path. The console issues a short code, the browser opens on the
+   * confirm screen, and the key arrives here on its own and goes to Redrob Code's auth store, which
+   * is exactly where the pasted one goes. Nobody sees the key.
+   *
+   * Every ending is reported. A denial, an expiry, or a console that could not finish leaves the step
+   * saying what happened, with the paste field still there for a machine that cannot open a browser.
+   */
+  const handleConnectRedrob = useCallback(async () => {
+    redrobConnectCancelled.current = false;
+    dispatch({ type: "redrob-connect:start" });
+    try {
+      const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await resolveRedrobConnection();
+      if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
+        throw new Error(t("welcome.redrob_key_error_server"));
+      }
+      const outcome = await runRedrobDeviceConnect({
+        client: createRedrobServerClient({
+          baseUrl: normalizedBaseUrl,
+          token: resolvedToken || undefined,
+          hostToken: resolvedHostToken || undefined,
+        }),
+        onPrompt: (prompt) => dispatch({ type: "redrob-connect:prompt", prompt }),
+        openLink: (url) => platform.openLink(url),
+        isCancelled: () => redrobConnectCancelled.current,
+      });
+
+      if (outcome.status === "connected") {
+        captureAnalyticsEvent("redrob_connected", { method: "device_code" });
+        dispatch({ type: "redrob-key:finish" });
+        dispatch({
+          type: "attribution-step",
+          route: state.pendingWorkspaceId
+            ? `${workspaceSessionRoute(state.pendingWorkspaceId, state.pendingSessionId)}?onboarding=1`
+            : "/session?onboarding=1",
+        });
+        return;
+      }
+
+      if (outcome.status === "cancelled") {
+        dispatch({ type: "redrob-connect:error", error: null });
+        return;
+      }
+
+      dispatch({
+        type: "redrob-connect:error",
+        error:
+          outcome.status === "denied"
+            ? t("welcome.redrob_connect_error_denied")
+            : outcome.status === "expired"
+              ? t("welcome.redrob_connect_error_expired")
+              : t("welcome.redrob_connect_error_failed"),
+      });
+    } catch (error) {
+      dispatch({
+        type: "redrob-connect:error",
+        error: error instanceof Error ? error.message : t("welcome.redrob_connect_error_failed"),
+      });
+    }
+  }, [platform, state.pendingSessionId, state.pendingWorkspaceId]);
 
   const finishOnboarding = useCallback(() => {
     markOnboardingComplete();
@@ -395,6 +504,10 @@ export function WelcomeRoute() {
           onSubmitKey={handleSubmitRedrobKey}
           onOpenConsole={handleOpenRedrobConsole}
           onSkip={handleLookAround}
+          onConnect={handleConnectRedrob}
+          onCancelConnect={handleCancelRedrobConnect}
+          connectBusy={state.redrobConnectBusy}
+          connectPrompt={state.redrobConnectPrompt}
           skipLabel={t("onboarding.look_around_cta")}
           skipDescription={t("onboarding.look_around_description")}
         />

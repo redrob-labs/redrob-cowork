@@ -56,6 +56,7 @@ import {
   putRedrobEngineAuth,
   readRedrobEngineAuthStatus,
 } from "./redrob-auth.js";
+import { createRedrobDeviceConnections } from "./redrob-device.js";
 import { EnvService } from "./env-file.js";
 import { installCloudPlugin, readCloudPluginResolved, readInstalledCloudPlugins, removeCloudPlugin } from "./cloud-plugins.js";
 import { resolveClaudePluginBundle } from "./claude-plugin-bundle.js";
@@ -2513,6 +2514,53 @@ function createRoutes(
       throw new ApiError(502, "engine_auth_stale", "Redrob Code still reports a Redrob Key after the disconnect");
     }
     return jsonResponse({ ok: true, ...status });
+  });
+
+  /**
+   * Connecting without anyone handling the key: the console's device authorization grant.
+   *
+   * The renderer drives the loop, one request per poll, so it can show a code, count down, and be
+   * cancelled by the user closing the step. The device code itself never leaves this process; the
+   * renderer holds an opaque id. See apps/server/src/redrob-device.ts.
+   */
+  const redrobDeviceConnections = createRedrobDeviceConnections();
+
+  addRoute(routes, "POST", "/redrob-auth/device", "host-token", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request).catch(() => ({}) as Record<string, unknown>);
+    const product = typeof body.product === "string" && body.product.trim() ? body.product.trim() : undefined;
+    return jsonResponse(await redrobDeviceConnections.start(product));
+  });
+
+  addRoute(routes, "POST", "/redrob-auth/device/poll", "host-token", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    const id = typeof body.id === "string" ? body.id.trim() : "";
+    if (!id) {
+      throw new ApiError(400, "invalid_device_connection", "A connection id is required");
+    }
+
+    const result = await redrobDeviceConnections.poll(id);
+    if (result.status !== "connected") {
+      // Refusals are forwarded as they are. Nothing here retries or reinterprets them.
+      return jsonResponse(result);
+    }
+
+    // From here it is the paste path exactly: the key goes to the engine and nowhere else, and the
+    // engine's own report of being connected is what makes this a success.
+    await putRedrobEngineAuth({ config, logger: redrobAuthLogger }, result.key);
+    await reloadEngineForRedrobAuthChange();
+    const status = await readRedrobEngineAuthStatus({ config, logger: redrobAuthLogger });
+    if (!status.connected) {
+      throw new ApiError(502, "engine_auth_unconfirmed", "Redrob Code did not report the Redrob Key as connected");
+    }
+    return jsonResponse({ status: "connected", ...status });
+  });
+
+  addRoute(routes, "POST", "/redrob-auth/device/cancel", "host-token", async (ctx) => {
+    const body = await readJsonBody(ctx.request).catch(() => ({}) as Record<string, unknown>);
+    const id = typeof body.id === "string" ? body.id.trim() : "";
+    return jsonResponse({ ok: true, cancelled: id ? redrobDeviceConnections.cancel(id) : false });
   });
 
   addRoute(routes, "PATCH", "/runtime-config/providers", "host-token", async (ctx) => {

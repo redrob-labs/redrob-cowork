@@ -1801,6 +1801,52 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken, method: "DELETE", timeoutMs: ENGINE_RELOAD_TIMEOUT_MS },
       ),
 
+    // The device flow, for connecting without the user handling a key at all. The renderer drives
+    // the polling loop so it can show the code and be cancelled; the device code stays on the
+    // server. Only the poll that lands a key reloads the engine, so start and cancel use the
+    // ordinary config timeout and the poll uses the reload one.
+    startRedrobDeviceConnection: (product?: string) =>
+      requestJson<{
+        id: string;
+        userCode: string;
+        verificationUri: string;
+        verificationUriComplete: string;
+        expiresAt: number;
+        intervalMs: number;
+      }>(baseUrl, "/redrob-auth/device", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { product },
+        timeoutMs: timeouts.config,
+      }),
+
+    pollRedrobDeviceConnection: (id: string) =>
+      requestJson<
+        | { status: "pending" }
+        | { status: "slow_down" }
+        | { status: "unreachable" }
+        | { status: "denied" }
+        | { status: "expired" }
+        | { status: "failed"; code: string }
+        | { status: "connected"; connected: boolean; source: "api" | "env" | "config" | "none" }
+      >(baseUrl, "/redrob-auth/device/poll", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { id },
+        timeoutMs: ENGINE_RELOAD_TIMEOUT_MS,
+      }),
+
+    cancelRedrobDeviceConnection: (id: string) =>
+      requestJson<{ ok: true; cancelled: boolean }>(baseUrl, "/redrob-auth/device/cancel", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { id },
+        timeoutMs: timeouts.config,
+      }),
+
     // User-level env vars (host-auth only — desktop shell is the sole caller).
     // See apps/server/src/env-file.ts and apps/app/pr/environment-variables.md.
     listUserEnvKeys: () =>
