@@ -625,6 +625,22 @@ describe("the emitted stylesheet", () => {
   });
 
   /**
+   * And the safelist names one ramp too.
+   *
+   * `@source inline(...)` force-generates a utility whether or not a call site asks for
+   * it, and it named all thirty-one ramps at twelve steps across three properties: over
+   * a thousand utilities that existed because the line existed. The palette reset makes
+   * them resolve to nothing, so they stopped being emitted the moment the ramps went,
+   * but the line would generate them again the day a namespace came back. It names gray.
+   */
+  test("safelists one numbered ramp and no more", () => {
+    const inlineSources = [...TOKENS.matchAll(/@source inline\("([^"]+)"\)/g)].map(
+      (match) => match[1],
+    );
+    expect(inlineSources).toEqual(['{bg,text,border}-gray-{1..12}']);
+  });
+
+  /**
    * Named specifically, because "not a Redrob value" is a large set and these are the
    * ones that were here. A step-9 fill and a step-11 ink are the fingerprints: if one
    * of them is back, somebody wrote `bg-red-9` or `text-amber-11` again.
