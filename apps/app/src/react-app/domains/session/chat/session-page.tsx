@@ -995,7 +995,7 @@ export function SessionPage(props: SessionPageProps) {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_top,rgba(74,111,255,0.12),transparent_42%),var(--app-bg,#0b1020)] text-dls-text max-lg:pt-[env(safe-area-inset-top)] mac:bg-transparent">
+    <div className="flex h-full min-h-0 flex-col bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--primary)_12%,transparent),transparent_42%),var(--dls-app-bg)] text-dls-text max-lg:pt-[env(safe-area-inset-top)] mac:bg-transparent">
       <SidebarProvider
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
