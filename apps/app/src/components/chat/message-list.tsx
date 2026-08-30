@@ -1255,7 +1255,13 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
       {showLoading && <LoadingMessage label={liveActionLabel ?? undefined} />}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}
       {error && !hasSessionErrorMessage ? <ErrorMessage error={error} /> : null}
-      {paymentRefusal ? <RedrobPayNotice refusal={paymentRefusal} /> : null}
+      {/*
+        Keyed by what the console said, so a later refusal replaces this one instead of leaving the
+        first one's detail on screen.
+      */}
+      {paymentRefusal ? (
+        <RedrobPayNotice key={paymentRefusal.detail} refusal={paymentRefusal} />
+      ) : null}
     </div>
   )
 }
