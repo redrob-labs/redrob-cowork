@@ -1163,12 +1163,16 @@ function showShutdownScreen() {
   <head>
     <meta charset="utf-8" />
     <style>
-      html, body { height: 100%; margin: 0; background: #0b0b0f; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      /* Redrob Black, Gray 1 and Gray 5 - the brand primitives behind the app's
+         dark theme. This screen is a standalone data: document with no access to
+         the renderer's stylesheet or its vendored face, so the values are
+         written out and the family names Pretendard for machines that have it. */
+      html, body { height: 100%; margin: 0; background: #0a0b0c; color: #f8f9fb; font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
       body { display: grid; place-items: center; }
       main { display: grid; gap: 10px; justify-items: center; }
-      .spinner { width: 22px; height: 22px; border: 2px solid rgba(244,244,245,.25); border-top-color: #f4f4f5; border-radius: 50%; animation: spin .9s linear infinite; }
+      .spinner { width: 22px; height: 22px; border: 2px solid rgba(248,249,251,.25); border-top-color: #f8f9fb; border-radius: 50%; animation: spin .9s linear infinite; }
       .title { font-size: 15px; font-weight: 600; }
-      .body { font-size: 13px; color: #a1a1aa; }
+      .body { font-size: 13px; color: #aab0bb; }
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
   </head>

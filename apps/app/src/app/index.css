@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 
 @import "../styles/colors.css";
+@import "../styles/redrob-tokens.css";
+@import "../styles/fonts.css";
 @import "../styles/tailwind-theme.css";
 
 @import "tw-animate-css";
@@ -8,10 +10,6 @@
 @import "shadcn/tailwind.css";
 
 @import "katex/dist/katex.min.css";
-
-@import "@fontsource-variable/geist";
-
-@import "@fontsource-variable/ibm-plex-sans";
 
 @source "../../index.html";
 @source "../";
@@ -90,84 +88,178 @@
   }
 }
 
+/**
+ * Semantic tokens - light.
+ *
+ * Role names the app and its component library (shadcn/ui on Base UI) already
+ * speak, re-pointed onto the Redrob primitives in `styles/redrob-tokens.css`.
+ * The role names, the values behind them, and the light/dark split are the
+ * Console token system, so a screen in Redrob Work and a screen in the Console
+ * are the same colour by construction rather than by resemblance. The
+ * correspondence to the token proposal's names, in full:
+ *
+ *   proposal                   here                       light        dark
+ *   ─────────────────────────  ─────────────────────────  ───────────  ───────────
+ *   background                 background                 Gray 1       Gray 9
+ *   background-secondary       background-secondary       Gray 2       Redrob Black
+ *   surface / surface-elevated card / popover             White        Gray 8/9 mix
+ *   surface-hover              accent                     Gray 2       Gray 8/9 mix
+ *   surface-active             accent-active              Gray 3       Gray 8
+ *   border-subtle              border-subtle              Gray 2       Gray 8/9 mix
+ *   border                     border                     Gray 3       Gray 8
+ *   border-strong              border-strong              Gray 4       Gray 7
+ *   -                          input                      Gray 6       Gray 6
+ *   text-primary               foreground                 Gray 9       Gray 1
+ *   text-secondary             muted-foreground           Gray 7       Gray 5
+ *   text-muted                 subtle-foreground          Gray 6       Gray 6
+ *   text-disabled              disabled-foreground        Gray 5       Gray 7
+ *   accent                     primary / ring             Blue 6       Blue 5
+ *   accent-hover               primary-hover              Blue 7       Blue 4
+ *   accent-muted               primary-muted              Blue 3       Blue 9
+ *   accent-soft                primary-soft               Blue 1       Blue 10
+ *   on-accent                  primary-foreground         White        Redrob Black
+ *   -                          primary-ink                Blue 6       Blue 4
+ *   success / warning / error  success / warning / destructive  (four roles each)
+ *   overlay                    overlay                    Black 45%    Black 65%
+ *
+ * `input` and `primary-ink` are roles the proposal does not name and a contrast
+ * minimum needs; both are commented where Console declares them. The `--dls-*`
+ * aliases below are this app's own vocabulary for the same roles, kept because
+ * `.ow-*` classes and the MCP Apps style bridge read them by name, and now
+ * pointed at the semantic layer instead of carrying literal colours of their own.
+ *
+ * The type scale, spacing and control heights are unchanged, the same call
+ * Console made: those steps differ from Tailwind's at every level, so adopting
+ * them re-flows every screen at once and wants reviewing against live layouts
+ * rather than arriving with a colour change.
+ */
 :root {
   color-scheme: light;
-  --dls-surface: var(--slate-1);
-  --dls-sidebar: var(--slate-2);
-  --dls-app-bg: var(--slate-1);
-  --dls-background: var(--slate-1);
-  --dls-canvas: var(--slate-2);
-  --dls-surface-muted: var(--slate-3);
-  --dls-border: #f3f4f6;
-  --dls-accent: #011627;
-  --dls-accent-hover: #000000;
-  --dls-accent-fg: #ffffff;
-  --dls-accent-rgb: 1 22 39;
-  --dls-secondary-rgb: 96 100 108;
-  --dls-text-primary: var(--slate-12);
-  --dls-text-secondary: var(--slate-11);
-  --dls-hover: var(--slate-3);
-  --dls-active: var(--slate-5);
+  --background: var(--rr-gray-1);
+  --background-secondary: var(--rr-gray-2);
+  --foreground: var(--rr-gray-9);
+  --card: var(--rr-white);
+  --card-foreground: var(--rr-gray-9);
+  --popover: var(--rr-white);
+  --popover-foreground: var(--rr-gray-9);
+  --popover-border: var(--rr-gray-3);
+
+  /* Text. Four steps, and only the first two are for body copy: Gray 6 on the
+     page is 3.62:1, which clears 3:1 for large text, icons and non-text UI and
+     does not clear 4.5:1 for a sentence. Disabled text is exempt from the
+     minimum, which is the only reason Gray 5 is here. */
+  --muted-foreground: var(--rr-gray-7);
+  --subtle-foreground: var(--rr-gray-6);
+  --disabled-foreground: var(--rr-gray-5);
+
+  /* Interactive surfaces. `accent` is the shadcn role for the surface a hover or
+     an open menu item paints; the brand accent colour is `primary`. */
+  --accent: var(--rr-gray-2);
+  --accent-foreground: var(--rr-gray-9);
+  --accent-active: var(--rr-gray-3);
+  --secondary: var(--rr-gray-2);
+  --secondary-foreground: var(--rr-gray-9);
+  --muted: var(--rr-gray-2);
+
+  /* Brand. Blue 6 with White reads 5.6:1, so a primary button carries
+     body-size text. `primary-ink` is brand-coloured text rather than a fill;
+     light needs no step away from the accent, dark does. */
+  --primary: var(--rr-blue-6);
+  --primary-foreground: var(--rr-white);
+  --primary-hover: var(--rr-blue-7);
+  --primary-muted: var(--rr-blue-3);
+  --primary-soft: var(--rr-blue-1);
+  --primary-ink: var(--rr-blue-6);
+
+  --border-subtle: var(--rr-gray-2);
+  --border: var(--rr-gray-3);
+  --border-strong: var(--rr-gray-4);
+  /* The boundary of a control. WCAG 1.4.11 asks 3:1 of it, and every step up to
+     Gray 5 is under 3:1 on a White surface; Gray 6 is 3.8:1 there and 3.6:1 on
+     the page, so control boundaries take it and `border-strong` keeps Gray 4 for
+     the decorative emphasis it was drawn for. */
+  --input: var(--rr-gray-6);
+  /* The focus ring is the brand blue rather than a gray: 5.6:1 against the page
+     where the Gray 8 it replaces was drawn at half opacity. */
+  --ring: var(--rr-blue-6);
+
+  /**
+   * Status. The brand document defines no product status colours, so these come
+   * from the accent spectrum: level 4 on light, level 3 on dark. Four roles
+   * each, because a status appears as all four and one value cannot be all four:
+   * the solid fill, the ink on that fill, the tinted strip behind a message, and
+   * the readable text or icon. Green 4 as ink is 4.42:1 on the page, so
+   * `success-ink` steps to Green 5; Orange 4 and Red 4 clear 4.5:1 as ink.
+   */
+  --success: var(--rr-green-4);
+  --success-foreground: var(--rr-white);
+  --success-soft: var(--rr-green-1);
+  --success-ink: var(--rr-green-5);
+  --warning: var(--rr-orange-4);
+  --warning-foreground: var(--rr-white);
+  --warning-soft: var(--rr-orange-1);
+  --warning-ink: var(--rr-orange-4);
+  --destructive: var(--rr-red-4);
+  --destructive-foreground: var(--rr-white);
+  --destructive-soft: var(--rr-red-1);
+  --destructive-ink: var(--rr-red-4);
+
+  --overlay: color-mix(in srgb, var(--rr-black) 45%, transparent);
+  /* A tooltip stays dark in both palettes so it reads as an overlay rather than
+     as another panel. */
+  --tooltip: var(--rr-gray-9);
+  --tooltip-foreground: var(--rr-gray-1);
+
+  /* The sidebar is a surface, like a card, separated from the page behind it. */
+  --sidebar: var(--rr-white);
+  --sidebar-foreground: var(--rr-gray-9);
+  --sidebar-primary: var(--rr-blue-6);
+  --sidebar-primary-foreground: var(--rr-white);
+  --sidebar-accent: var(--rr-gray-2);
+  --sidebar-accent-foreground: var(--rr-gray-9);
+  --sidebar-border: var(--rr-gray-3);
+  --sidebar-ring: var(--rr-blue-6);
+
+  /* Chart series, drawn from the spectrum and ordered so neighbouring hues are
+     not neighbouring indices. */
+  --chart-1: var(--rr-sky-4);
+  --chart-2: var(--rr-pink-4);
+  --chart-3: var(--rr-lime-5);
+  --chart-4: var(--rr-orange-4);
+  --chart-5: var(--rr-violet-4);
+
+  /* Elevation. Three steps, tinted with Gray 8 rather than pure black on light. */
+  --shadow-soft: 0 1px 2px color-mix(in srgb, var(--rr-gray-8) 5%, transparent);
+  --shadow-card:
+    0 1px 2px color-mix(in srgb, var(--rr-gray-8) 5%, transparent),
+    0 4px 16px color-mix(in srgb, var(--rr-gray-8) 7%, transparent);
+  --shadow-elevated:
+    0 2px 4px color-mix(in srgb, var(--rr-gray-8) 6%, transparent),
+    0 12px 32px color-mix(in srgb, var(--rr-gray-8) 12%, transparent);
+
+  --radius: 0.45rem;
+  --dls-surface: var(--card);
+  --dls-sidebar: var(--sidebar);
+  --dls-app-bg: var(--background);
+  --dls-background: var(--background);
+  --dls-canvas: var(--background);
+  --dls-surface-muted: var(--muted);
+  --dls-border: var(--border);
+  --dls-accent: var(--primary);
+  --dls-accent-hover: var(--primary-hover);
+  --dls-accent-fg: var(--primary-foreground);
+  /* Channel triplets for the `rgb(... / <alpha>)` shimmer and ticker keyframes
+     below, which need components rather than a colour: Blue 6 and Gray 7. */
+  --dls-accent-rgb: 43 82 255;
+  --dls-secondary-rgb: 87 96 113;
+  --dls-text-primary: var(--foreground);
+  --dls-text-secondary: var(--muted-foreground);
+  --dls-hover: var(--accent);
+  --dls-active: var(--accent-active);
   --dls-radius: 16px;
   --dls-radius-lg: 24px;
-  --dls-shell-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  --dls-card-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-  --background: var(--slate-1);
-  --foreground: var(--slate-12);
-  --card: var(--slate-1);
-  --card-foreground: var(--slate-12);
-  --popover: var(--slate-1);
-  --popover-foreground: var(--slate-12);
-  --popover-border: var(--slate-5);
-  --primary: var(--blue-9);
-  --primary-foreground: white;
-  --secondary: var(--slate-3);
-  --secondary-foreground: var(--slate-12);
-  --muted: var(--slate-3);
-  --muted-foreground: var(--slate-11);
-  --accent: var(--slate-3);
-  --accent-foreground: var(--slate-12);
-  --destructive: var(--red-9);
-  --warning: var(--amber-11);
-  --border: var(--slate-5);
-  --input: var(--slate-6);
-  --ring: var(--slate-8);
-  --chart-1: var(--sky-9);
-  --chart-2: var(--blue-9);
-  --chart-3: var(--indigo-9);
-  --chart-4: var(--violet-9);
-  --chart-5: var(--purple-9);
-  --radius: 0.45rem;
-  --sidebar: var(--slate-2);
-  --sidebar-foreground: var(--slate-12);
-  --sidebar-primary: var(--blue-9);
-  --sidebar-primary-foreground: white;
-  --sidebar-accent: var(--slate-3);
-  --sidebar-accent-foreground: var(--slate-12);
-  --sidebar-border: var(--slate-6);
-  --sidebar-ring: var(--slate-8);
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-  --dls-surface: var(--slate-1);
-  --dls-sidebar: var(--slate-2);
-  --dls-app-bg: var(--slate-1);
-  --dls-background: var(--slate-1);
-  --dls-canvas: var(--slate-2);
-  --dls-surface-muted: var(--slate-3);
-  --dls-border: #262626;
-  --dls-accent: #011627;
-  --dls-accent-hover: #0a2540;
-  --dls-accent-fg: #ffffff;
-  --dls-accent-rgb: 1 22 39;
-  --dls-secondary-rgb: 176 180 186;
-  --dls-text-primary: var(--slate-12);
-  --dls-text-secondary: var(--slate-11);
-  --dls-hover: var(--slate-3);
-  --dls-active: var(--slate-5);
-  --dls-shell-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
-  --dls-card-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+  --dls-shell-shadow: var(--shadow-elevated);
+  --dls-card-shadow: var(--shadow-card);
 }
 
 html,
@@ -187,18 +279,7 @@ html {
 
 body {
   margin: 0;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    system-ui,
-    ui-sans-serif,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    "Noto Sans",
-    "Apple Color Emoji",
-    "Segoe UI Emoji";
+  font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.5;
   color: var(--dls-text-primary);
@@ -242,7 +323,7 @@ body {
 }
 
 .markdown-content [data-redrob-math-error] {
-  color: var(--color-red-11, inherit);
+  color: var(--destructive-ink);
 }
 
 .ow-soft-shell {
@@ -344,21 +425,21 @@ body {
 }
 
 .ow-status-pill-positive {
-  border: 1px solid var(--green-a6);
-  background: var(--green-3);
-  color: var(--green-11);
+  border: 1px solid var(--success);
+  background: var(--success-soft);
+  color: var(--success-ink);
 }
 
 .ow-status-pill-warning {
-  border: 1px solid var(--amber-a6);
-  background: var(--amber-3);
-  color: var(--amber-11);
+  border: 1px solid var(--warning);
+  background: var(--warning-soft);
+  color: var(--warning-ink);
 }
 
 .ow-status-pill-neutral {
-  border: 1px solid var(--slate-6);
-  background: var(--slate-2);
-  color: var(--slate-11);
+  border: 1px solid var(--border);
+  background: var(--muted);
+  color: var(--muted-foreground);
 }
 
 .ow-icon-tile {
@@ -366,8 +447,8 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0.85rem;
-  background: var(--slate-3);
-  color: var(--slate-12);
+  background: var(--accent);
+  color: var(--foreground);
 }
 
 .ow-icon-tile-muted {
@@ -375,8 +456,8 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0.85rem;
-  background: var(--slate-3);
-  color: var(--slate-11);
+  background: var(--accent);
+  color: var(--muted-foreground);
 }
 
 .ow-input {
@@ -384,13 +465,13 @@ body {
   width: 100%;
   border: 0;
   border-radius: 0.9rem;
-  background: var(--slate-1);
-  box-shadow: inset 0 0 0 1px var(--slate-6);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--input);
   color: var(--dls-text-primary);
 }
 
 .ow-input::placeholder {
-  color: var(--slate-11);
+  color: var(--muted-foreground);
 }
 
 .ow-input:focus {
@@ -437,25 +518,26 @@ select:disabled {
   animation: soft-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Highlight animation for just-saved command */
+/* Highlight animation for just-saved command. The brand accent announces the
+   save and settles back onto the ordinary border. */
 @keyframes command-highlight {
   0% {
-    box-shadow: 0 0 0 0 var(--indigo-a9);
-    border-color: var(--indigo-a9);
+    box-shadow: 0 0 0 0 var(--primary);
+    border-color: var(--primary);
   }
   50% {
-    box-shadow: 0 0 0 8px var(--indigo-a1);
-    border-color: var(--indigo-a7);
+    box-shadow: 0 0 0 8px var(--primary-soft);
+    border-color: var(--primary-hover);
   }
   100% {
-    box-shadow: 0 0 0 0 var(--indigo-a1);
-    border-color: var(--slate-a3);
+    box-shadow: 0 0 0 0 var(--primary-soft);
+    border-color: var(--border);
   }
 }
 
 .command-just-saved {
   animation: command-highlight 2s ease-out;
-  border-color: var(--indigo-a9);
+  border-color: var(--primary);
 }
 
 @keyframes progress-shimmer {
@@ -551,46 +633,128 @@ select:disabled {
   }
 }
 
+/**
+ * Semantic tokens - dark. Only aliases are re-pointed; no new primitive is
+ * invented here. Gray 9 is the dark background per the brand document, which
+ * leaves Redrob Black as the deeper recessed layer beneath it. The scale has
+ * nothing between Gray 9 and Gray 8, so a raised surface would jump twelve steps
+ * of lightness at once; Console's answer, kept here, is to mix them for the
+ * panel surface.
+ */
 .dark,
 [data-theme="dark"] {
-  --background: var(--slate-1);
-  --foreground: var(--slate-12);
-  --card: var(--slate-2);
-  --card-foreground: var(--slate-12);
-  --popover: var(--slate-2);
-  --popover-foreground: var(--slate-12);
-  --popover-border: var(--slate-5);
-  --primary: var(--blue-10);
-  --primary-foreground: var(--slate-12);
-  --secondary: var(--slate-3);
-  --secondary-foreground: var(--slate-12);
-  --muted: var(--slate-3);
-  --muted-foreground: var(--slate-10);
-  --accent: var(--slate-3);
-  --accent-foreground: var(--slate-12);
-  --destructive: var(--red-9);
-  --warning: var(--amber-11);
-  --border: var(--slate-3);
-  --input: var(--slate-6);
-  --ring: var(--slate-8);
-  --chart-1: var(--sky-9);
-  --chart-2: var(--blue-9);
-  --chart-3: var(--indigo-9);
-  --chart-4: var(--violet-9);
-  --chart-5: var(--purple-9);
-  --sidebar: var(--slate-2);
-  --sidebar-foreground: var(--slate-12);
-  --sidebar-primary: var(--blue-9);
-  --sidebar-primary-foreground: var(--slate-12);
-  --sidebar-accent: var(--slate-3);
-  --sidebar-accent-foreground: var(--slate-12);
-  --sidebar-border: var(--slate-6);
-  --sidebar-ring: var(--slate-8);
+  color-scheme: dark;
+  --background: var(--rr-gray-9);
+  --background-secondary: var(--rr-black);
+  --foreground: var(--rr-gray-1);
+  --card: color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9));
+  --card-foreground: var(--rr-gray-1);
+  --popover: color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9));
+  --popover-foreground: var(--rr-gray-1);
+  --popover-border: var(--rr-gray-8);
+
+  --muted-foreground: var(--rr-gray-5);
+  /* Gray 6 clears 4.5:1 on Gray 9, unlike on light, but the token keeps one
+     meaning on both sides so its use stays the same. */
+  --subtle-foreground: var(--rr-gray-6);
+  --disabled-foreground: var(--rr-gray-7);
+
+  --accent: color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9));
+  --accent-foreground: var(--rr-gray-1);
+  --accent-active: var(--rr-gray-8);
+  --secondary: var(--rr-gray-8);
+  --secondary-foreground: var(--rr-gray-1);
+  --muted: var(--rr-gray-8);
+
+  /* Blue 6 does not carry enough contrast against Gray 9, so dark steps one tint
+     lighter and pairs it with Redrob Black ink: Blue 5 is 5.5:1 with Black and
+     only 3.6:1 with White. Brand-coloured text steps once more, to Blue 4, which
+     is 7.4:1 on a raised panel where Blue 5 is 4.47:1. */
+  --primary: var(--rr-blue-5);
+  --primary-foreground: var(--rr-black);
+  --primary-hover: var(--rr-blue-4);
+  --primary-muted: var(--rr-blue-9);
+  --primary-soft: var(--rr-blue-10);
+  --primary-ink: var(--rr-blue-4);
+
+  --border-subtle: color-mix(in srgb, var(--rr-gray-8) 55%, var(--rr-gray-9));
+  --border: var(--rr-gray-8);
+  --border-strong: var(--rr-gray-7);
+  /* Gray 7 is 2.5:1 against a raised panel, so a control boundary takes Gray 6
+     here for the same reason it does on light. It is the one step that is the
+     same value in both themes. */
+  --input: var(--rr-gray-6);
+  --ring: var(--rr-blue-5);
+
+  /* Level 3 on dark, and Redrob Black as the ink on a fill: Red 3 with White is
+     3.2:1. */
+  --success: var(--rr-green-3);
+  --success-foreground: var(--rr-black);
+  --success-soft: var(--rr-green-5);
+  --success-ink: var(--rr-green-3);
+  --warning: var(--rr-orange-3);
+  --warning-foreground: var(--rr-black);
+  --warning-soft: var(--rr-orange-5);
+  --warning-ink: var(--rr-orange-3);
+  --destructive: var(--rr-red-3);
+  --destructive-foreground: var(--rr-black);
+  --destructive-soft: var(--rr-red-5);
+  --destructive-ink: var(--rr-red-3);
+
+  --overlay: color-mix(in srgb, var(--rr-black) 65%, transparent);
+  --tooltip: var(--rr-black);
+  --tooltip-foreground: var(--rr-gray-1);
+
+  --sidebar: var(--rr-black);
+  --sidebar-foreground: var(--rr-gray-1);
+  --sidebar-primary: var(--rr-blue-5);
+  --sidebar-primary-foreground: var(--rr-black);
+  --sidebar-accent: var(--rr-gray-8);
+  --sidebar-accent-foreground: var(--rr-gray-1);
+  --sidebar-border: var(--rr-gray-8);
+  --sidebar-ring: var(--rr-blue-5);
+
+  --chart-1: var(--rr-sky-3);
+  --chart-2: var(--rr-pink-3);
+  --chart-3: var(--rr-lime-3);
+  --chart-4: var(--rr-orange-3);
+  --chart-5: var(--rr-violet-3);
+
+  /* A shadow has to be darker than the surface to read at all on dark. */
+  --shadow-soft: 0 1px 2px color-mix(in srgb, var(--rr-black) 30%, transparent);
+  --shadow-card:
+    0 1px 2px color-mix(in srgb, var(--rr-black) 25%, transparent),
+    0 4px 16px color-mix(in srgb, var(--rr-black) 35%, transparent);
+  --shadow-elevated:
+    0 2px 4px color-mix(in srgb, var(--rr-black) 30%, transparent),
+    0 12px 32px color-mix(in srgb, var(--rr-black) 50%, transparent);
+
+  /* Blue 5 and Gray 5 as channel triplets, for the keyframes that need
+     components rather than a colour. */
+  --dls-accent-rgb: 80 127 255;
+  --dls-secondary-rgb: 170 176 187;
 }
 
 @theme inline {
-  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, ui-sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-heading: -apple-system, BlinkMacSystemFont, system-ui, ui-sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /**
+   * Type. One family for Latin and Hangul, declared in `styles/fonts.css` and
+   * named the way Console names it: `Pretendard Variable` is the vendored
+   * variable face, bare `Pretendard` covers an OS install, and the system stack
+   * is a last resort while the face is in flight rather than an alternative.
+   * `--font-heading` is a deliberate alias: there is no second display face, and
+   * brand moments use the same family at a heavier weight.
+   */
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, ui-sans-serif, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  /* Code only: editor surfaces, token values, terminal output, diffs. The
+     brand's monospace is JetBrains Mono, which this app does not vendor, so the
+     stack names it for machines that have it and falls through to the system
+     face. Nothing is fetched for it either way. */
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
   --text-sm: 0.8125rem;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -608,16 +772,35 @@ select:disabled {
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-ink: var(--destructive-ink);
   --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-ink: var(--warning-ink);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-ink: var(--success-ink);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-accent-active: var(--accent-active);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-disabled-foreground: var(--disabled-foreground);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-ink: var(--primary-ink);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover-border: var(--popover-border);
   --color-popover: var(--popover);
@@ -625,6 +808,10 @@ select:disabled {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-overlay: var(--overlay);
+  --color-tooltip: var(--tooltip);
+  --color-tooltip-foreground: var(--tooltip-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -635,8 +822,12 @@ select:disabled {
 }
 
 @layer base {
+  /* The focus ring is drawn at full opacity. At `ring/50` it was a half wash of
+     the ring colour over the background, under the 3:1 a focus indicator has to
+     clear against what surrounds it; Blue 6 at full opacity is 5.6:1 on the page
+     and Blue 5 is 5.1:1 on the dark one. */
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   html {
     @apply font-sans;

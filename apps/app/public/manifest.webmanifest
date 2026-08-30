@@ -1,11 +1,11 @@
 {
-  "name": "OpenWork",
-  "short_name": "OpenWork",
+  "name": "Redrob Work",
+  "short_name": "Redrob Work",
   "description": "Local-first agent workspace",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#f8fafc",
+  "background_color": "#f8f9fb",
+  "theme_color": "#f8f9fb",
   "icons": [
     {
       "src": "/apple-touch-icon.png",
@@ -13,7 +13,7 @@
       "type": "image/png"
     },
     {
-      "src": "/openwork-mark.svg",
+      "src": "/redrob-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

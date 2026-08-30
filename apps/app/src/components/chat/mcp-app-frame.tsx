@@ -150,32 +150,34 @@ function mcpToolResult(result: RedrobMcpAppToolResult): CallToolResult {
 /**
  * Maps the app's live design tokens onto the standard MCP Apps style
  * vocabulary so first-party and third-party cards render with the same
- * palette, type, and radii as the surrounding chat.
+ * palette, type, and radii as the surrounding chat. Every source is a semantic
+ * role from the Redrob token system, so a card follows the theme and the brand
+ * without naming a colour of its own.
  */
 const HOST_STYLE_SOURCES: Partial<Record<McpUiStyleVariableKey, string>> = {
-  "--color-background-primary": "--dls-surface",
-  "--color-background-secondary": "--dls-surface-muted",
-  "--color-background-tertiary": "--dls-hover",
-  "--color-background-inverse": "--dls-accent",
-  "--color-background-success": "--green-3",
-  "--color-background-warning": "--amber-3",
-  "--color-background-danger": "--red-3",
-  "--color-background-info": "--blue-3",
-  "--color-text-primary": "--dls-text-primary",
-  "--color-text-secondary": "--dls-text-secondary",
-  "--color-text-inverse": "--dls-accent-fg",
-  "--color-text-success": "--green-11",
-  "--color-text-warning": "--amber-11",
-  "--color-text-danger": "--red-11",
-  "--color-text-info": "--blue-11",
-  "--color-border-primary": "--dls-border",
-  "--color-border-secondary": "--dls-border",
-  "--color-border-success": "--green-a6",
-  "--color-border-warning": "--amber-a6",
-  "--color-border-danger": "--red-a6",
-  "--color-border-info": "--blue-a6",
+  "--color-background-primary": "--card",
+  "--color-background-secondary": "--muted",
+  "--color-background-tertiary": "--accent",
+  "--color-background-inverse": "--primary",
+  "--color-background-success": "--success-soft",
+  "--color-background-warning": "--warning-soft",
+  "--color-background-danger": "--destructive-soft",
+  "--color-background-info": "--primary-soft",
+  "--color-text-primary": "--foreground",
+  "--color-text-secondary": "--muted-foreground",
+  "--color-text-inverse": "--primary-foreground",
+  "--color-text-success": "--success-ink",
+  "--color-text-warning": "--warning-ink",
+  "--color-text-danger": "--destructive-ink",
+  "--color-text-info": "--primary-ink",
+  "--color-border-primary": "--border",
+  "--color-border-secondary": "--border-subtle",
+  "--color-border-success": "--success",
+  "--color-border-warning": "--warning",
+  "--color-border-danger": "--destructive",
+  "--color-border-info": "--primary",
   "--border-radius-lg": "--dls-radius",
-  "--shadow-sm": "--dls-card-shadow",
+  "--shadow-sm": "--shadow-card",
 }
 
 function hostStyleVariables(): McpUiStyles {

@@ -1,32 +1,40 @@
+/**
+ * A card is styled by whatever the host sends through the MCP Apps style
+ * vocabulary; Redrob Work sends its semantic roles, so a card matches the chat
+ * around it. The fallbacks are for a host that sends nothing, and they are the
+ * Redrob primitives rather than a nearby grey: White and Gray 1/2/3/7/9, Blue 6,
+ * and the status hues at level 1 and 4. Values, not variables, because this
+ * stylesheet ships inside the card document and cannot read the app's tokens.
+ */
 :root {
   color-scheme: light dark;
-  color: var(--color-text-primary, #1c2024);
+  color: var(--color-text-primary, #141719);
   background: transparent;
   font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 
-  --app-bg: var(--color-background-primary, #fff);
-  --app-bg-subtle: var(--color-background-secondary, #f1f3f5);
-  --app-bg-hover: var(--color-background-tertiary, #f8f9fa);
-  --app-text: var(--color-text-primary, #1c2024);
-  --app-muted: var(--color-text-secondary, #60646c);
-  --app-border: var(--color-border-primary, #f3f4f6);
-  --app-accent: var(--color-background-inverse, #011627);
-  --app-accent-fg: var(--color-text-inverse, #fff);
-  --app-success: var(--color-text-success, #2a7e3b);
-  --app-success-bg: var(--color-background-success, #e9f6e9);
-  --app-success-border: var(--color-border-success, rgb(42 126 59 / 25%));
-  --app-warning: var(--color-text-warning, #ab6400);
-  --app-warning-bg: var(--color-background-warning, #fff1d6);
-  --app-warning-border: var(--color-border-warning, rgb(171 100 0 / 28%));
-  --app-danger: var(--color-text-danger, #ce2c31);
-  --app-danger-bg: var(--color-background-danger, #feebec);
-  --app-danger-border: var(--color-border-danger, rgb(206 44 49 / 25%));
-  --app-info: var(--color-text-info, #0d74ce);
-  --app-info-bg: var(--color-background-info, #e6f4fe);
-  --app-info-border: var(--color-border-info, rgb(13 116 206 / 25%));
+  --app-bg: var(--color-background-primary, #ffffff);
+  --app-bg-subtle: var(--color-background-secondary, #eff1f4);
+  --app-bg-hover: var(--color-background-tertiary, #f8f9fb);
+  --app-text: var(--color-text-primary, #141719);
+  --app-muted: var(--color-text-secondary, #576071);
+  --app-border: var(--color-border-primary, #dfe2e8);
+  --app-accent: var(--color-background-inverse, #2b52ff);
+  --app-accent-fg: var(--color-text-inverse, #ffffff);
+  --app-success: var(--color-text-success, #004829);
+  --app-success-bg: var(--color-background-success, #d6ffe1);
+  --app-success-border: var(--color-border-success, #00864a);
+  --app-warning: var(--color-text-warning, #ae5100);
+  --app-warning-bg: var(--color-background-warning, #ffedda);
+  --app-warning-border: var(--color-border-warning, #ae5100);
+  --app-danger: var(--color-text-danger, #a31310);
+  --app-danger-bg: var(--color-background-danger, #ffe8e1);
+  --app-danger-border: var(--color-border-danger, #a31310);
+  --app-info: var(--color-text-info, #2b52ff);
+  --app-info-bg: var(--color-background-info, #eff4ff);
+  --app-info-border: var(--color-border-info, #2b52ff);
   --app-radius: var(--border-radius-lg, 16px);
   --app-radius-sm: 10px;
-  --app-shadow: var(--shadow-sm, 0 1px 2px rgb(15 23 42 / 5%));
+  --app-shadow: var(--shadow-sm, 0 1px 2px rgb(41 46 55 / 5%));
 }
 
 * {

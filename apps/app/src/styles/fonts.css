@@ -1,0 +1,23 @@
+/**
+ * Type. Pretendard is the single Redrob product family and the only approved
+ * product typeface: it carries Latin and Hangul in one face, so Korean is not a
+ * fallback here, it is the same font. Geist, IBM Plex and Inter are not part of
+ * product typography.
+ *
+ * Console names the same family and loads `Pretendard Variable` from jsDelivr.
+ * This app is local-first and runs packaged in Electron, so the file is vendored
+ * instead of fetched: one variable face covers every weight the UI asks for
+ * (45-920), it resolves from the app bundle with no network, and the family name
+ * matches Console's token exactly. Pinned at Pretendard v1.3.9, licensed
+ * OFL-1.1 - see `assets/fonts/LICENSE-Pretendard.txt`.
+ *
+ * The URL is relative so Vite fingerprints the asset and the packaged build
+ * (`base: "./"`, loaded over `file:`) resolves it.
+ */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/PretendardVariable.woff2") format("woff2-variations");
+}
