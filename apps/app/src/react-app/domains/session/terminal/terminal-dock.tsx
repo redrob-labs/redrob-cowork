@@ -50,13 +50,18 @@ export function TerminalDock({ workspaceRoot, isRemoteWorkspace, onClose }: Term
     const terminal = new Terminal({
       cursorBlink: true,
       convertEol: true,
-      fontFamily: "'SFMono-Regular', 'Cascadia Code', 'Liberation Mono', Menlo, monospace",
+      // xterm needs concrete values rather than the CSS tokens: it paints to a
+      // canvas. These are the Redrob primitives the token layer declares, and
+      // the mono stack `--font-mono` names. The terminal stays dark in both
+      // themes, the way a tooltip does, so output reads as machine output
+      // rather than as another panel.
+      fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
       fontSize: 12,
       theme: {
-        background: "#0b0d12",
-        foreground: "#d7dde8",
+        background: "#0a0b0c",
+        foreground: "#f8f9fb",
         cursor: "#ffffff",
-        selectionBackground: "#334155",
+        selectionBackground: "#292e37",
       },
     });
     terminal.loadAddon(fitAddon);

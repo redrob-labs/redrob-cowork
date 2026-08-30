@@ -370,7 +370,9 @@ body {
   justify-content: center;
   border-radius: 9999px;
   background: var(--dls-accent);
-  color: white;
+  /* The ink the accent was drawn to carry: White on Blue 6, Redrob Black on the
+     lighter Blue 5 dark uses, where White would be 3.6:1. */
+  color: var(--dls-accent-fg);
   box-shadow: 0 8px 20px -16px rgba(var(--dls-accent-rgb), 0.45);
 }
 

@@ -277,6 +277,31 @@ describe("Redrob design tokens", () => {
     expect(missing).toEqual([]);
   });
 
+  test("the primary button carries the ink its accent was drawn for", () => {
+    // White on Blue 6 and Redrob Black on Blue 5. A fixed `white` here would be
+    // 3.6:1 on the dark theme's lighter accent.
+    const button = /\.ow-button-primary \{([\s\S]*?)\n\}/.exec(TOKENS);
+    expect(button).not.toBeNull();
+    expect(declaration(button![1], "color")).toBe("var(--dls-accent-fg)");
+    expect(declaration(button![1], "background")).toBe("var(--dls-accent)");
+  });
+
+  test("the terminal paints in brand primitives", () => {
+    // xterm draws to a canvas, so it takes values rather than tokens. They still
+    // have to be the brand's, and the stack has to be the mono token's.
+    const dock = readFileSync(
+      join(APP_ROOT, "src/react-app/domains/session/terminal/terminal-dock.tsx"),
+      "utf8",
+    );
+    const theme = /theme: \{([\s\S]*?)\n      \}/.exec(dock);
+    expect(theme).not.toBeNull();
+    const allowed = new Set(["#0a0b0c", "#f8f9fb", "#ffffff", "#292e37"]);
+    const used = [...theme![1].matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((match) => match[0]);
+    expect(used.length).toBeGreaterThan(0);
+    expect(used.filter((hex) => !allowed.has(hex))).toEqual([]);
+    expect(dock).toContain("'JetBrains Mono', ui-monospace");
+  });
+
   test("the focus ring is drawn at full opacity", () => {
     // Under the 3:1 a focus indicator has to clear, a half-opacity wash of the
     // ring colour does not qualify.
