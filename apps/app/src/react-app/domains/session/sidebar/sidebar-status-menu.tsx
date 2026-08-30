@@ -29,15 +29,15 @@ function StatusDot({ variant }: { variant: StatusDotVariant }) {
   return (
     <span className="relative flex size-2 shrink-0 items-center justify-center">
       {variant === "loading" ? (
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-9/35" />
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-warning/35" />
       ) : null}
       <span
         className={cn(
           "relative inline-flex size-2 rounded-full",
-          variant === "connected" && "bg-green-9",
-          variant === "loading" && "bg-amber-9",
-          variant === "partial" && "bg-amber-9",
-          variant === "disconnected" && "bg-red-9",
+          variant === "connected" && "bg-success",
+          variant === "loading" && "bg-warning",
+          variant === "partial" && "bg-warning",
+          variant === "disconnected" && "bg-destructive",
         )}
       />
     </span>

@@ -201,11 +201,11 @@ export function RedrobPayNotice({ refusal, recheck, openCheckout }: RedrobPayNot
 
   return (
     <div
-      className="mx-auto flex w-full max-w-3xl flex-col gap-2 rounded-2xl border border-amber-6 bg-amber-2 px-4 py-3 md:px-10"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-2 rounded-2xl border border-warning-muted bg-warning-soft px-4 py-3 md:px-10"
       data-testid="redrob-pay-notice"
     >
       <div className="flex items-start gap-2">
-        <WalletIcon className="mt-0.5 size-4 shrink-0 text-amber-11" />
+        <WalletIcon className="mt-0.5 size-4 shrink-0 text-warning-ink" />
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">{t("billing.pay_notice_title")}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{t("billing.pay_notice_desc")}</p>

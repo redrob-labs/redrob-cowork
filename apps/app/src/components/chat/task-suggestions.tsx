@@ -77,7 +77,7 @@ export function TaskSuggestions({ className }: TaskSuggestionsProps) {
 
           <DescriptiveButton orientation="vertical" onClick={() => setPrompt(CSV_PROMPT)}>
             <DescriptiveButtonIcon>
-              <DocumentChartBarIcon className="size-6 text-green-10" aria-hidden />
+              <DocumentChartBarIcon className="size-6 text-success-ink" aria-hidden />
             </DescriptiveButtonIcon>
             <DescriptiveButtonContent>
               <DescriptiveButtonTitle>Edit a CSV</DescriptiveButtonTitle>
@@ -106,7 +106,7 @@ export function TaskSuggestions({ className }: TaskSuggestionsProps) {
             }
           >
             <DescriptiveButtonIcon>
-              <CubeIcon className="size-6 text-amber-10" aria-hidden />
+              <CubeIcon className="size-6 text-warning-ink" aria-hidden />
             </DescriptiveButtonIcon>
             <DescriptiveButtonContent>
               <DescriptiveButtonTitle>Connect an extension</DescriptiveButtonTitle>

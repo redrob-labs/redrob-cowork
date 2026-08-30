@@ -324,7 +324,7 @@ function ProviderAccordion({
               <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">New</span>
             ) : null}
             {group.hasCurrent ? (
-              <span className="rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">{t("model_picker.current")}</span>
+              <span className="rounded-md bg-success-soft px-1.5 py-0.5 text-[10px] font-medium text-success-ink">{t("model_picker.current")}</span>
             ) : null}
           </span>
         </button>
@@ -335,7 +335,7 @@ function ProviderAccordion({
               "mr-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors",
               group.isDisabled
                 ? "border border-dls-border text-dls-secondary hover:bg-dls-hover hover:text-dls-text"
-                : "bg-green-3 text-green-11 hover:bg-green-4",
+                : "bg-success-soft/70 text-success-ink hover:bg-success-soft",
             ].join(" ")}
             onClick={(e) => { e.stopPropagation(); onToggleProvider?.(group.id, group.isDisabled); }}
             title={group.isDisabled ? "Enable this provider" : "Disable this provider"}
@@ -388,16 +388,16 @@ function DefaultModelRow({
       type="button"
       className={[
         "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors",
-        active ? "bg-green-3/50" : "hover:bg-dls-hover",
+        active ? "bg-success-soft/50" : "hover:bg-dls-hover",
       ].join(" ")}
       onClick={() => onSelect(opt)}
     >
-      {recommended ? <Star size={12} className="shrink-0 text-amber-9" /> : <div className="w-3 shrink-0" />}
+      {recommended ? <Star size={12} className="shrink-0 text-warning" /> : <div className="w-3 shrink-0" />}
       <div className="min-w-0 flex-1">
         <span className={["text-[12px]", active ? "font-medium text-dls-text" : "text-dls-text"].join(" ")}>{opt.title}</span>
         <span className="ml-2 font-mono text-[10px] text-dls-secondary/60">{opt.modelID}</span>
       </div>
-      {active ? <Check size={14} className="shrink-0 text-green-11" /> : null}
+      {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}
     </button>
   );
 }

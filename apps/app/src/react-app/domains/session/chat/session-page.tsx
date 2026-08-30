@@ -1347,9 +1347,9 @@ export function SessionPage(props: SessionPageProps) {
                     />
                   ) : showSelectedWorkspaceError ? (
                     <div className="px-6 py-16">
-                      <div className="mx-auto max-w-lg rounded-2xl border border-red-7/35 bg-red-1/40 p-5 text-left shadow-[var(--dls-card-shadow)]">
-                        <div className="text-sm font-medium text-red-11">{selectedWorkspaceErrorTitle}</div>
-                        <p className="mt-2 whitespace-pre-wrap wrap-anywhere text-sm leading-6 text-red-11/90">
+                      <div className="mx-auto max-w-lg rounded-2xl border border-destructive-muted/35 bg-destructive-soft/40 p-5 text-left shadow-[var(--dls-card-shadow)]">
+                        <div className="text-sm font-medium text-destructive-ink">{selectedWorkspaceErrorTitle}</div>
+                        <p className="mt-2 whitespace-pre-wrap wrap-anywhere text-sm leading-6 text-destructive-ink/90">
                           {selectedWorkspaceErrorMessage}
                         </p>
                         <div className="mt-4 flex flex-wrap gap-2">

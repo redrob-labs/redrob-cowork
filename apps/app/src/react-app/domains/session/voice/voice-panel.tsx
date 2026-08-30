@@ -788,8 +788,8 @@ export function VoicePanel(props: VoicePanelProps) {
             <span
               className={cn(
                 "size-2 rounded-full bg-muted-foreground",
-                status === "connecting" && "animate-pulse bg-amber-9",
-                (status === "listening" || status === "speaking") && "bg-green-9",
+                status === "connecting" && "animate-pulse bg-warning",
+                (status === "listening" || status === "speaking") && "bg-success",
                 status === "error" && "bg-destructive",
               )}
             />

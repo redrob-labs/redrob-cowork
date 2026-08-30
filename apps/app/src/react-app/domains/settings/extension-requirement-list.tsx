@@ -35,7 +35,7 @@ export function ExtensionRequirementList({
             <div className="flex min-w-0 items-center gap-2">
               <Icon
                 size={14}
-                className={result.met ? "shrink-0 text-green-11" : "shrink-0 text-dls-secondary"}
+                className={result.met ? "shrink-0 text-success-ink" : "shrink-0 text-dls-secondary"}
               />
               <span className={cn("truncate text-sm", result.met ? "text-dls-text" : "text-dls-secondary")}>
                 {result.condition.label}

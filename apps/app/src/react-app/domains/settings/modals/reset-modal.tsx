@@ -68,7 +68,7 @@ export function ResetModal(props: ResetModalProps) {
             </div>
 
             {props.hasActiveRuns ? (
-              <div className="text-xs text-red-11">
+              <div className="text-xs text-destructive-ink">
                 {t("settings.reset_stop_active_runs")}
               </div>
             ) : null}

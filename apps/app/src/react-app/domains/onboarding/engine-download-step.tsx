@@ -116,8 +116,8 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
         ) : null}
 
         {phase === "present" || phase === "success" ? (
-          <div className="flex items-start gap-3 rounded-2xl border border-green-7/40 bg-green-2/40 p-4">
-            <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-green-10" />
+          <div className="flex items-start gap-3 rounded-2xl border border-success-muted/40 bg-success-soft/40 p-4">
+            <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-success-ink" />
             <div className="min-w-0">
               <div className="text-sm font-medium text-foreground">
                 {phase === "success"

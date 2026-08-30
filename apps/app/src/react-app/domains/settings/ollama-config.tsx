@@ -349,7 +349,7 @@ export function OllamaConfig(props: OllamaConfigProps) {
           {status === "checking" ? (
             <Loader2 className="animate-spin" />
           ) : status === "running" ? (
-            <CheckCircle2 className="text-green-11!" />
+            <CheckCircle2 className="text-success-ink!" />
           ) : (
             <XCircle  />
           )}

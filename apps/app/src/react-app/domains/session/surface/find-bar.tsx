@@ -14,8 +14,8 @@ const MUTATION_DEBOUNCE_MS = 100;
 const COLLECT_AFTER_RENDER_MS = 50;
 const TARGET_RESOLVE_TIMEOUT_MS = 2_500;
 const SEARCH_HIGHLIGHT_ACTIVE_ATTR = "data-search-highlight-active";
-const SEARCH_HIGHLIGHT_BASE_BG_CLASS = "bg-amber-4/70";
-const SEARCH_HIGHLIGHT_ACTIVE_CLASSES = ["bg-amber-7", "ring-1", "ring-amber-9"];
+const SEARCH_HIGHLIGHT_BASE_BG_CLASS = "bg-warning-soft/70";
+const SEARCH_HIGHLIGHT_ACTIVE_CLASSES = ["bg-warning-muted", "ring-1", "ring-warning"];
 
 type SessionFindBarProps = {
   sessionId: string;

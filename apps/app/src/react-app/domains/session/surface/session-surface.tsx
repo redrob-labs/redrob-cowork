@@ -481,15 +481,15 @@ function TodoPanel(props: { todos: TodoItem[] }) {
                     <div
                       className={`flex size-4.5 items-center justify-center rounded-full border ${
                         done
-                          ? "border-green-6 bg-green-2 text-green-11"
+                          ? "border-success-muted bg-success-soft text-success-ink"
                           : active
-                            ? "border-amber-6 bg-amber-2 text-amber-11"
+                            ? "border-warning-muted bg-warning-soft text-warning-ink"
                             : cancelled
                               ? "border-gray-6 bg-gray-2 text-gray-8"
                               : "border-gray-6 bg-gray-1 text-gray-8"
                       }`}
                     >
-                      {done ? <Check size={10} /> : active ? <span className="size-1.5 rounded-full bg-amber-9" /> : null}
+                      {done ? <Check size={10} /> : active ? <span className="size-1.5 rounded-full bg-warning" /> : null}
                     </div>
                   </div>
                   <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-gray-9 line-through" : "text-gray-12"}`}>
@@ -538,10 +538,10 @@ function SessionErrorCard({ error, onDismiss, onChangeModel, onOpenModelPicker }
 }) {
   return (
     <div className="mx-auto max-w-[720px] px-3 py-3 sm:px-5" data-testid="session-error-card" role="alert">
-      <div className="rounded-2xl border border-red-6/30 bg-red-3/15 px-5 py-4">
+      <div className="rounded-2xl border border-destructive-muted/30 bg-destructive-soft/15 px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <div className="text-sm font-medium text-red-11">{error.message}</div>
+            <div className="text-sm font-medium text-destructive-ink">{error.message}</div>
             {error.kind === "model-not-found" ? (
               <div className="mt-2 flex flex-wrap gap-2">
                 {error.suggestions && error.suggestions.length > 0 ? (
@@ -574,7 +574,7 @@ function SessionErrorCard({ error, onDismiss, onChangeModel, onOpenModelPicker }
           </div>
           <button
             type="button"
-            className="shrink-0 rounded-full p-1 text-red-10 transition-colors hover:bg-red-3 hover:text-red-11"
+            className="shrink-0 rounded-full p-1 text-destructive-ink transition-colors hover:bg-destructive-soft"
             onClick={onDismiss}
             aria-label={t("session.dismiss_error")}
           >
@@ -589,7 +589,7 @@ function SessionErrorCard({ error, onDismiss, onChangeModel, onOpenModelPicker }
 function RevertedMessagesBanner(props: { hiddenCount: number; restoring: boolean; onRestore: () => void }) {
   return (
     <div
-      className="mb-3 flex items-center gap-3 rounded-2xl border border-amber-7/40 bg-amber-2/30 px-4 py-3 text-sm text-amber-11"
+      className="mb-3 flex items-center gap-3 rounded-2xl border border-warning-muted/40 bg-warning-soft/30 px-4 py-3 text-sm text-warning-ink"
       data-testid="reverted-messages-banner"
       role="status"
     >
@@ -598,7 +598,7 @@ function RevertedMessagesBanner(props: { hiddenCount: number; restoring: boolean
       </span>
       <button
         type="button"
-        className="shrink-0 rounded-full border border-amber-7/50 bg-dls-surface px-3 py-1.5 text-xs font-medium text-dls-text transition-colors hover:bg-dls-hover disabled:opacity-50"
+        className="shrink-0 rounded-full border border-warning-muted/50 bg-dls-surface px-3 py-1.5 text-xs font-medium text-dls-text transition-colors hover:bg-dls-hover disabled:opacity-50"
         disabled={props.restoring}
         onClick={props.onRestore}
       >
@@ -1827,7 +1827,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
                     onOpenModelPicker={handleOpenModelPicker}
                   />
                 ) : (
-                  <div className="mx-auto max-w-xl rounded-3xl border border-red-6/40 bg-red-3/20 px-6 py-5 text-sm text-red-11">
+                  <div className="mx-auto max-w-xl rounded-3xl border border-destructive-muted/40 bg-destructive-soft/20 px-6 py-5 text-sm text-destructive-ink">
                     {snapshotQuery.error instanceof Error ? snapshotQuery.error.message : "Failed to load session."}
                   </div>
                 )}
@@ -1897,11 +1897,11 @@ export function SessionSurface(props: SessionSurfaceProps) {
         {(props.providerConnectedCount ?? 0) === 0 ? (
           <button
             type="button"
-            className="mx-3 mb-2 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-lg border border-amber-7/40 bg-amber-2/30 px-3 py-2 text-left text-xs text-amber-11 transition-colors hover:bg-amber-3/40"
+            className="mx-3 mb-2 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-lg border border-warning-muted/40 bg-warning-soft/30 px-3 py-2 text-left text-xs text-warning-ink transition-colors hover:bg-warning-soft/40"
             onClick={() => props.onOpenSettingsSection?.("providers")}
           >
             <span className="font-medium">{t("session.no_model_connected")}</span>
-            <span className="text-amber-11/70">{t("session.add_provider_hint")}</span>
+            <span className="text-warning-ink/70">{t("session.add_provider_hint")}</span>
           </button>
         ) : null}
         <DevProfiler id="SessionComposer">

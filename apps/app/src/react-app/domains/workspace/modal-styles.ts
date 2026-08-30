@@ -43,19 +43,19 @@ export const infoBannerClass =
   "rounded-[20px] border border-dls-border bg-dls-hover px-4 py-3 text-[13px] text-dls-secondary";
 
 export const warningBannerClass =
-  "rounded-[20px] border border-amber-7/20 bg-amber-3/30 px-4 py-3 text-[13px] text-amber-11";
+  "rounded-[20px] border border-warning-muted/20 bg-warning-soft/30 px-4 py-3 text-[13px] text-warning-ink";
 
 export const errorBannerClass =
-  "rounded-[20px] border border-red-7/20 bg-red-1/40 px-4 py-3 text-[13px] text-red-11";
+  "rounded-[20px] border border-destructive-muted/20 bg-destructive-soft/40 px-4 py-3 text-[13px] text-destructive-ink";
 
 export const successBannerClass =
-  "rounded-[20px] border border-emerald-7/20 bg-emerald-3/30 px-4 py-3 text-[13px] text-emerald-11";
+  "rounded-[20px] border border-success-muted/20 bg-success-soft/30 px-4 py-3 text-[13px] text-success-ink";
 
 export const modalNoticeNeutralClass =
   "rounded-xl border border-dls-border bg-dls-hover px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
 
 export const modalNoticeSuccessClass =
-  "rounded-xl border border-dls-border bg-emerald-2/25 px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
+  "rounded-xl border border-dls-border bg-success-soft/25 px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
 
 export const modalNoticeErrorClass =
-  "rounded-xl border border-dls-border bg-red-2/20 px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
+  "rounded-xl border border-dls-border bg-destructive-soft/20 px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";

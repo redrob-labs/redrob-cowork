@@ -71,7 +71,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
   return (
     <div className="not-prose w-full max-w-xl rounded-2xl border border-dls-border bg-dls-surface/95 p-4 shadow-sm">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-violet-6/35 bg-violet-3/30 text-violet-11">
+        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 text-foreground">
           <KeyRound className="size-4" />
         </div>
         <div className="min-w-0 flex-1 space-y-3">
@@ -79,7 +79,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-dls-primary">Add {label}</h3>
               {saved ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-green-6/40 bg-green-3/30 px-2 py-0.5 text-[11px] font-medium text-green-11">
+                <span className="inline-flex items-center gap-1 rounded-full border border-success-muted/40 bg-success-soft/30 px-2 py-0.5 text-[11px] font-medium text-success-ink">
                   <Check className="size-3" />
                   Saved
                 </span>
@@ -100,12 +100,12 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
           />
 
           {!canModify ? (
-            <p className="rounded-lg border border-amber-6/40 bg-amber-3/20 px-3 py-2 text-xs text-amber-11">
+            <p className="rounded-lg border border-warning-muted/40 bg-warning-soft/20 px-3 py-2 text-xs text-warning-ink">
               Environment variables can only be edited from a local desktop workspace.
             </p>
           ) : null}
           {applyError ? (
-            <p className="rounded-lg border border-red-6/40 bg-red-3/20 px-3 py-2 text-xs text-red-11">
+            <p className="rounded-lg border border-destructive-muted/40 bg-destructive-soft/20 px-3 py-2 text-xs text-destructive-ink">
               {applyError.message}
             </p>
           ) : null}
@@ -134,7 +134,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
             ) : null}
           </div>
 
-          <p className={cn("text-[11px] leading-4 text-dls-tertiary", saved && pendingChanges ? "text-amber-11" : "")}>
+          <p className={cn("text-[11px] leading-4 text-dls-tertiary", saved && pendingChanges ? "text-warning-ink" : "")}>
             {saved && pendingChanges
               ? "Saved locally. Apply changes so local agents can read the latest value."
               : "The token is written through the same local Environment Variables store used by Settings."}

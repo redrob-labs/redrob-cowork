@@ -657,15 +657,15 @@ function RemoteConnectionIssueCard(props: {
     <SidebarMenuSubItem>
       <div
         className={cn(
-          "w-full rounded-[15px] border border-red-7/35 bg-red-1/40 px-3 py-3 text-left",
-          isOffline && "border-amber-7/35 bg-amber-2/45",
+          "w-full rounded-[15px] border border-destructive-muted/35 bg-destructive-soft/40 px-3 py-3 text-left",
+          isOffline && "border-warning-muted/35 bg-warning-soft/45",
         )}
       >
         <div className="flex items-start gap-2.5">
           <div
             className={cn(
-              "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-3/60 text-red-11",
-              isOffline && "bg-amber-3/60 text-amber-11",
+              "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-destructive-soft/60 text-destructive-ink",
+              isOffline && "bg-warning-soft/60 text-warning-ink",
             )}
           >
             <AlertCircle size={14} />
@@ -679,8 +679,8 @@ function RemoteConnectionIssueCard(props: {
             </div>
             <div
               className={cn(
-                "mt-2 rounded-lg border border-red-7/25 bg-red-1/40 px-2 py-1.5 text-[11px] leading-4 text-red-11 whitespace-pre-wrap wrap-anywhere",
-                isOffline && "border-amber-7/25 bg-amber-1/40 text-amber-11",
+                "mt-2 rounded-lg border border-destructive-muted/25 bg-destructive-soft/40 px-2 py-1.5 text-[11px] leading-4 text-destructive-ink whitespace-pre-wrap wrap-anywhere",
+                isOffline && "border-warning-muted/25 bg-warning-soft/40 text-warning-ink",
               )}
               title={props.message}
             >
@@ -1663,7 +1663,7 @@ function WorkspaceSidebarGroup({
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton
                       aria-disabled
-                      className={cn("text-xs", taskLoadError.tone === "offline" ? "text-amber-600" : "text-destructive")}
+                      className={cn("text-xs", taskLoadError.tone === "offline" ? "text-warning-ink" : "text-destructive-ink")}
                     >
                       <span className="truncate">{taskLoadError.message}</span>
                     </SidebarMenuSubButton>

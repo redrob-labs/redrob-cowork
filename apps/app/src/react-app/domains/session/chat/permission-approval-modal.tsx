@@ -205,7 +205,7 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
   const detailRows = permissionDetailRows(metadata);
   const Icon = presentation.isDoomLoop ? RefreshCcw : ShieldCheck;
   const iconClass = presentation.isDoomLoop
-    ? "bg-amber-3/30 text-amber-11"
+    ? "bg-warning-soft/30 text-warning-ink"
     : "bg-[rgba(var(--dls-accent-rgb),0.1)] text-dls-accent";
 
   useEffect(() => {
@@ -399,7 +399,7 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
               type="button"
               variant="outline"
               size="sm"
-              className="border-red-7/25 text-red-11 hover:bg-red-1/40"
+              className="border-destructive-muted/25 text-destructive-ink hover:bg-destructive-soft/40"
               onClick={() => props.respondPermission?.(props.permission.id, "reject")}
               disabled={props.busy || !props.respondPermission}
             >

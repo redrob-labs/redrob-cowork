@@ -1550,7 +1550,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const defaultModelVariantLabel = local.prefs.modelVariant ?? t("settings.default_label");
   const providerStatusLabel = providerConnectedIds.length > 0 ? t("status.connected") : t("status.disconnected_label");
   const providerStatusStyle = providerConnectedIds.length > 0
-    ? "bg-green-7/10 text-green-11 border-green-7/20"
+    ? "bg-success-soft/10 text-success-ink border-success-muted/20"
     : "bg-gray-4/60 text-gray-11 border-gray-7/50";
   const providerSummary = providerConnectedIds.length > 0
     ? t("status.providers_connected", { count: providerConnectedIds.length })

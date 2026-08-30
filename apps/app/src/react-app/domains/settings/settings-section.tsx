@@ -111,9 +111,9 @@ export function SettingsPill({ children, className }: SettingsPillProps) {
 const statusDotVariants = cva("", {
   variants: {
     tone: {
-      ready: "bg-green-9",
-      warning: "bg-amber-9",
-      error: "bg-red-9",
+      ready: "bg-success",
+      warning: "bg-warning",
+      error: "bg-destructive",
       neutral: "bg-gray-8",
     },
   },
@@ -152,7 +152,7 @@ export function SettingsNotice({
     <div
       className={cn(
         "rounded-xl border border-dls-border bg-dls-hover px-3 py-2 text-xs text-muted-foreground",
-        tone === "error" && "border-red-7/30 bg-red-1/40 text-red-11",
+        tone === "error" && "border-destructive-muted/30 bg-destructive-soft/40 text-destructive-ink",
         className,
       )}
     >

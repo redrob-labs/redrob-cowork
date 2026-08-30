@@ -262,7 +262,7 @@ export function ExtensionDetailModal({
         {extensionTaxonomyLabel(taxonomy)}
       </span>
       {connected ? (
-        <span className="flex items-center gap-1 rounded-md bg-green-3 px-2 py-0.5 text-[10px] font-medium text-green-11">
+        <span className="flex items-center gap-1 rounded-md bg-success-soft px-2 py-0.5 text-[10px] font-medium text-success-ink">
           <CheckCircle2 size={10} strokeWidth={3} />
           {t("extensions.detail_ready")}
         </span>
@@ -271,7 +271,7 @@ export function ExtensionDetailModal({
         <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
       ) : null}
       {beta ? (
-        <span className="rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">{t("common.beta")}</span>
+        <span className="rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("common.beta")}</span>
       ) : null}
     </div>
   );
@@ -282,7 +282,7 @@ export function ExtensionDetailModal({
         <div
           className={cn(
             "flex size-12 items-center justify-center rounded-xl border",
-            connected ? "border-green-6 bg-green-2" : "border-dls-border bg-dls-hover",
+            connected ? "border-success-muted bg-success-soft" : "border-dls-border bg-dls-hover",
           )}
         >
           {resolvedIconSrc ? (
@@ -298,7 +298,7 @@ export function ExtensionDetailModal({
           )}
         </div>
         {connected ? (
-          <div className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-dls-surface bg-green-9">
+          <div className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-dls-surface bg-success">
             <CheckCircle2 size={11} className="text-white" strokeWidth={3} />
           </div>
         ) : null}
@@ -340,7 +340,7 @@ export function ExtensionDetailModal({
       ) : null}
 
       {errorInfo ? (
-        <div role="alert" className="rounded-lg border border-red-6 bg-red-2 px-3 py-2 text-sm text-red-11">
+        <div role="alert" className="rounded-lg border border-destructive-muted bg-destructive-soft px-3 py-2 text-sm text-destructive-ink">
           {errorInfo}
         </div>
       ) : null}
@@ -511,7 +511,7 @@ export function ExtensionDetailModal({
 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("extension.status")}</span>
-                <span className={cn("font-medium", connected ? "text-green-11" : "text-muted-foreground")}>
+                <span className={cn("font-medium", connected ? "text-success-ink" : "text-muted-foreground")}>
                   {connected
                     ? connectedLabel ?? (taxonomy === "plugin" ? t("extension.installed") : t("extension.connected"))
                     : connecting
@@ -535,14 +535,14 @@ export function ExtensionDetailModal({
               {beta ? (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t("extension.release_stage")}</span>
-                  <span className="font-medium text-amber-11">{t("common.beta")}</span>
+                  <span className="font-medium text-warning-ink">{t("common.beta")}</span>
                 </div>
               ) : null}
 
               {disabledReason ? (
                 <div className="flex items-center justify-between gap-4 text-sm">
                   <span className="text-muted-foreground">{t("extension.availability")}</span>
-                  <span className="text-right font-medium text-amber-11">{disabledReason}</span>
+                  <span className="text-right font-medium text-warning-ink">{disabledReason}</span>
                 </div>
               ) : null}
             </div>

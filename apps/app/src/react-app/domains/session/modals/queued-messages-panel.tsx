@@ -64,7 +64,7 @@ function QueuedDraftContent(props: { draft: ComposerDraft }) {
       nodes.push(
         <span
           key={key}
-          className="mx-0.5 inline-flex items-center rounded-full border border-amber-6/35 bg-amber-3/15 px-2.5 py-1 text-xs font-medium text-amber-11 align-middle"
+          className="mx-0.5 inline-flex items-center rounded-full border border-spectrum-yellow/35 bg-spectrum-yellow/15 px-2.5 py-1 text-xs font-medium text-foreground align-middle"
           title={`Pasted text · ${pasteMatch[1]}`}
         >
           {`Pasted · ${lines} line${lines === 1 ? "" : "s"}`}
@@ -79,7 +79,7 @@ function QueuedDraftContent(props: { draft: ComposerDraft }) {
       nodes.push(
         <span
           key={key}
-          className="mx-0.5 inline-flex items-center rounded-full border border-violet-6/35 bg-violet-3/20 px-2.5 py-1 text-xs font-medium text-violet-11 align-middle"
+          className="mx-0.5 inline-flex items-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 px-2.5 py-1 text-xs font-medium text-foreground align-middle"
           title={`Skill: ${skillName}`}
         >
           {`/${skillName}`}

@@ -78,7 +78,7 @@ function CredentialField(props: CredentialFieldProps) {
           title="Copy"
         >
           {props.copiedKey === props.fieldKey ? (
-            <Check size={14} className="text-emerald-600" />
+            <Check size={14} className="text-success-ink" />
           ) : (
             <Copy size={14} />
           )}

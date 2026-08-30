@@ -11,35 +11,35 @@ interface ArtifactIconProps {
 
 export function ArtifactIcon({ type, className }: ArtifactIconProps) {
   if (type === "browser") {
-    return <Globe className={cn("size-3.5 shrink-0 text-sky-9", className)} />;
+    return <Globe className={cn("size-3.5 shrink-0 text-spectrum-sky", className)} />;
   }
 
   if (type === "markdown") {
-    return <FileText className={cn("size-3.5 shrink-0 text-blue-9", className)} />;
+    return <FileText className={cn("size-3.5 shrink-0 text-spectrum-teal", className)} />;
   }
 
   if (type === "sheet") {
-    return <FileSpreadsheet className={cn("size-3.5 shrink-0 text-green-9", className)} />;
+    return <FileSpreadsheet className={cn("size-3.5 shrink-0 text-spectrum-green", className)} />;
   }
 
   if (type === "slides") {
-    return <Presentation className={cn("size-3.5 shrink-0 text-amber-9", className)} />;
+    return <Presentation className={cn("size-3.5 shrink-0 text-spectrum-yellow", className)} />;
   }
 
   if (type === "document") {
-    return <FileText className={cn("size-3.5 shrink-0 text-blue-9", className)} />;
+    return <FileText className={cn("size-3.5 shrink-0 text-spectrum-teal", className)} />;
   }
 
   if (type === "image") {
-    return <FileImage className={cn("size-3.5 shrink-0 text-violet-9", className)} />;
+    return <FileImage className={cn("size-3.5 shrink-0 text-spectrum-violet", className)} />;
   }
 
   if (type === "pdf") {
-    return <FileText className={cn("size-3.5 shrink-0 text-red-9", className)} />;
+    return <FileText className={cn("size-3.5 shrink-0 text-spectrum-red", className)} />;
   }
 
   if (type === "html") {
-    return <FileCode className={cn("size-3.5 shrink-0 text-orange-9", className)} />;
+    return <FileCode className={cn("size-3.5 shrink-0 text-spectrum-orange", className)} />;
   }
 
   if (type === "text") {

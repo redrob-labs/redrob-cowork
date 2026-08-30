@@ -99,12 +99,12 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
   if (!info?.mismatch) return <>{children}</>;
 
   return (
-    <main className="min-h-dvh bg-[#05070c] text-white">
+    <main className="dark min-h-dvh bg-background-secondary text-foreground">
       <div className="mx-auto flex min-h-dvh w-full max-w-5xl items-center px-6 py-12">
         <section className="w-full overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/40">
           <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-8 p-8 sm:p-10 lg:p-12">
-              <div className="inline-flex rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-100">{t("architecture.mismatch")}</div>
+              <div className="inline-flex rounded-full border border-warning-muted/40 bg-warning-soft/50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-warning-ink">{t("architecture.mismatch")}</div>
               <div className="space-y-4">
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">{t("architecture.install_correct_build")}</h1>
                 <p className="max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
@@ -118,10 +118,10 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
                   <div className="mt-2 text-2xl font-semibold text-white">{info.appArchLabel}</div>
                   <div className="mt-1 font-mono text-xs text-white/45">{info.appArch}</div>
                 </div>
-                <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
-                  <div className="text-xs uppercase tracking-[0.2em] text-emerald-100/70">{t("architecture.your_system")}</div>
-                  <div className="mt-2 text-2xl font-semibold text-emerald-50">{info.systemArchLabel}</div>
-                  <div className="mt-1 font-mono text-xs text-emerald-100/55">{info.systemArch}</div>
+                <div className="rounded-2xl border border-success-muted/30 bg-success-soft/50 p-4">
+                  <div className="text-xs uppercase tracking-[0.2em] text-success-ink">{t("architecture.your_system")}</div>
+                  <div className="mt-2 text-2xl font-semibold text-foreground">{info.systemArchLabel}</div>
+                  <div className="mt-1 font-mono text-xs text-muted-foreground">{info.systemArch}</div>
                 </div>
               </div>
 
@@ -129,7 +129,7 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
                 <button
                   type="button"
                   onClick={openDownload}
-                  className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-100"
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
                 >{t("architecture.download_correct")}</button>
                 <button
                   type="button"
@@ -139,7 +139,7 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
               </div>
             </div>
 
-            <aside className="border-t border-white/10 bg-gradient-to-br from-emerald-300/12 via-sky-300/8 to-transparent p-8 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
+            <aside className="border-t border-white/10 bg-gradient-to-br from-success-soft/50 via-primary-soft/50 to-transparent p-8 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
               <div className="space-y-5 rounded-[28px] border border-white/10 bg-black/25 p-6 text-sm leading-6 text-white/68">
                 <div className="text-lg font-semibold text-white">{t("architecture.why_stopped")}</div>
                 <p>{t("architecture.explanation")}</p>

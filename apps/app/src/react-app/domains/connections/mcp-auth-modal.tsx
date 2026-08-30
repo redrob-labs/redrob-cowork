@@ -649,9 +649,9 @@ export function McpAuthModal(props: McpAuthModalProps) {
           ) : null}
 
           {!isBusy && isPreparingReload ? (
-            <div className="space-y-4 rounded-xl border border-amber-6/60 bg-amber-2/40 px-5 py-6 text-center">
+            <div className="space-y-4 rounded-xl border border-warning-muted/60 bg-warning-soft/40 px-5 py-6 text-center">
               <div className="flex items-center justify-center">
-                <Loader2 size={32} className="animate-spin text-amber-11" />
+                <Loader2 size={32} className="animate-spin text-warning-ink" />
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-12">
@@ -670,14 +670,14 @@ export function McpAuthModal(props: McpAuthModalProps) {
                   {(props.activeSessions ?? []).map((session) => (
                     <div
                       key={session.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-amber-6/50 bg-amber-1/40 px-3 py-2"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-warning-muted/50 bg-warning-soft/40 px-3 py-2"
                     >
                       <span className="text-xs text-gray-11">
                         {t("mcp.auth.waiting_for_session", { session: session.title })}
                       </span>
                       <button
                         type="button"
-                        className="text-xs text-amber-11 underline underline-offset-2 transition-colors hover:text-amber-12 disabled:no-underline disabled:opacity-60"
+                        className="text-xs text-warning-ink underline underline-offset-2 transition-colors hover:text-foreground disabled:no-underline disabled:opacity-60"
                         onClick={() => void handleForceStopSession(session.id)}
                         disabled={forceStopBusySessionID === session.id}
                       >
@@ -693,10 +693,10 @@ export function McpAuthModal(props: McpAuthModalProps) {
           ) : null}
 
           {!isBusy && alreadyConnected ? (
-            <div className="space-y-4 rounded-xl border border-green-7/20 bg-green-7/10 p-5">
+            <div className="space-y-4 rounded-xl border border-success-muted/20 bg-success-soft/10 p-5">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-green-7/20">
-                  <CheckCircle2 size={24} className="text-green-11" />
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success-soft/20">
+                  <CheckCircle2 size={24} className="text-success-ink" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-12">{t("mcp.auth.already_connected")}</p>
@@ -732,8 +732,8 @@ export function McpAuthModal(props: McpAuthModalProps) {
           ) : null}
 
           {error ? (
-            <div className="space-y-3 rounded-xl border border-red-7/20 bg-red-7/10 p-4">
-              <p className="whitespace-pre-wrap text-sm text-red-11">{error}</p>
+            <div className="space-y-3 rounded-xl border border-destructive-muted/20 bg-destructive-soft/10 p-4">
+              <p className="whitespace-pre-wrap text-sm text-destructive-ink">{error}</p>
 
               {needsReload ? (
                 <div className="flex flex-wrap gap-2 pt-2">
@@ -761,7 +761,7 @@ export function McpAuthModal(props: McpAuthModalProps) {
 
               {isInvalidRefreshToken() ? (
                 <div className="space-y-2 pt-2">
-                  <p className="text-xs text-red-11">{t("mcp.auth.invalid_refresh_token")}</p>
+                  <p className="text-xs text-destructive-ink">{t("mcp.auth.invalid_refresh_token")}</p>
                   {!props.isRemoteWorkspace ? (
                     isDesktopRuntime() ? (
                       <Button onClick={() => void handleCliReauth()} disabled={cliAuthBusy}>
@@ -771,14 +771,14 @@ export function McpAuthModal(props: McpAuthModalProps) {
                           : t("mcp.auth.reauth_action")}
                       </Button>
                     ) : (
-                      <div className="text-[11px] text-red-10">
+                      <div className="text-[11px] text-destructive-ink">
                         {t("mcp.auth.reauth_cli_hint", { server: serverName })}
                       </div>
                     )
                   ) : (
-                    <div className="text-[11px] text-red-10">{t("mcp.auth.reauth_remote_hint")}</div>
+                    <div className="text-[11px] text-destructive-ink">{t("mcp.auth.reauth_remote_hint")}</div>
                   )}
-                  {cliAuthResult ? <div className="text-[11px] text-red-10">{cliAuthResult}</div> : null}
+                  {cliAuthResult ? <div className="text-[11px] text-destructive-ink">{cliAuthResult}</div> : null}
                 </div>
               ) : null}
             </div>

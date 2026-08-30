@@ -302,8 +302,8 @@ function Pill({ label, granted, checked }: PillProps) {
         className={cn(
           "shrink-0 text-xs font-medium",
           !checked && "text-muted-foreground",
-          checked && granted && "text-green-11",
-          checked && !granted && "text-amber-11",
+          checked && granted && "text-success-ink",
+          checked && !granted && "text-warning-ink",
         )}
       >
         {!checked
@@ -323,12 +323,12 @@ interface StatusIconProps {
 
 function StatusIcon(props: StatusIconProps) {
   if (props.complete) {
-    return <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-green-11" />;
+    return <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success-ink" />;
   }
 
   return (
     <CircleAlert
-      className={cn("mt-0.5 size-4 shrink-0", props.muted ? "text-muted-foreground" : "text-amber-11")}
+      className={cn("mt-0.5 size-4 shrink-0", props.muted ? "text-muted-foreground" : "text-warning-ink")}
     />
   );
 }

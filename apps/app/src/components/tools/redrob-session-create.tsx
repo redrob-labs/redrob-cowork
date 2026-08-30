@@ -120,8 +120,8 @@ export function RedrobWorkSessionCreateTool({ part }: { part: DynamicToolUIPart 
     >
       <div className="flex items-start gap-3 border-b border-dls-border px-4 py-3">
         <div className={allCreated
-          ? "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-green-6/35 bg-green-3/30 text-green-11"
-          : "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-amber-6/35 bg-amber-3/30 text-amber-11"
+          ? "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-success-muted/35 bg-success-soft/30 text-success-ink"
+          : "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-warning-muted/35 bg-warning-soft/30 text-warning-ink"
         }>
           <HeaderIcon className="size-4" />
         </div>
@@ -165,12 +165,12 @@ export function RedrobWorkSessionCreateTool({ part }: { part: DynamicToolUIPart 
 
         {result.failures.map((failure) => (
           <div key={`${failure.title}:${failure.error}`} className="flex min-w-0 items-start gap-3 px-4 py-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-red-3/30 text-red-11">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-destructive-soft/30 text-destructive-ink">
               <AlertTriangle className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-dls-primary" title={failure.title}>{failure.title}</p>
-              <p className="text-xs text-red-11">{failure.error}</p>
+              <p className="text-xs text-destructive-ink">{failure.error}</p>
             </div>
           </div>
         ))}

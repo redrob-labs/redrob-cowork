@@ -55,20 +55,20 @@ export type ExtensionCardProps = {
 };
 
 const taxonomyStyle: Record<ExtensionTaxonomy, string> = {
-  app: "bg-teal-3 text-teal-11",
-  connection: "bg-blue-3 text-blue-11",
+  app: "bg-spectrum-teal/15 text-foreground",
+  connection: "bg-spectrum-sky/15 text-foreground",
   mcp: "bg-dls-hover text-dls-secondary",
-  skill: "bg-amber-3 text-amber-11",
-  command: "bg-orange-3 text-orange-11",
-  agent: "bg-pink-3 text-pink-11",
-  plugin: "bg-violet-3 text-violet-11",
+  skill: "bg-spectrum-yellow/15 text-foreground",
+  command: "bg-spectrum-orange/15 text-foreground",
+  agent: "bg-spectrum-pink/15 text-foreground",
+  plugin: "bg-spectrum-violet/15 text-foreground",
 };
 
 type ReadinessState = "ready" | "partial" | "none";
 
 function readinessSurface(state: ReadinessState) {
-  if (state === "ready") return "border-green-6 bg-green-2";
-  if (state === "partial") return "border-amber-6 bg-amber-2";
+  if (state === "ready") return "border-success-muted bg-success-soft";
+  if (state === "partial") return "border-warning-muted bg-warning-soft";
   return "border-dls-border bg-dls-hover";
 }
 
@@ -103,11 +103,11 @@ function ExtensionIcon(props: {
       </div>
       {/* In the dense list, readiness lives as a dot next to the name instead of a corner overlay. */}
       {props.compact ? null : props.readiness === "ready" ? (
-        <div className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-dls-surface bg-green-9">
+        <div className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-dls-surface bg-success">
           <CheckCircle2 size={9} className="text-white" strokeWidth={3} />
         </div>
       ) : props.readiness === "partial" ? (
-        <div className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-dls-surface bg-amber-9">
+        <div className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border-2 border-dls-surface bg-warning">
           <AlertCircle size={9} className="text-white" strokeWidth={3} />
         </div>
       ) : null}
@@ -127,11 +127,11 @@ function ExtensionBadges(props: {
   return (
     <>
       {props.readiness === "ready" ? (
-        <span className="shrink-0 rounded-md bg-green-3 px-1.5 py-0.5 text-[10px] font-medium text-green-11">
+        <span className="shrink-0 rounded-md bg-success-soft px-1.5 py-0.5 text-[10px] font-medium text-success-ink">
           {props.connectedLabel}
         </span>
       ) : props.readiness === "partial" ? (
-        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">{t("extension.partially_set_up")}</span>
+        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("extension.partially_set_up")}</span>
       ) : (
         <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${taxonomyStyle[props.taxonomy]}`}>
           {extensionTaxonomyLabel(props.taxonomy)}
@@ -146,12 +146,12 @@ function ExtensionBadges(props: {
         <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
       ) : null}
       {props.beta ? (
-        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
+        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">
           {t("common.beta")}
         </span>
       ) : null}
       {props.disabledReason ? (
-        <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">{t("extension.disabled")}</span>
+        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("extension.disabled")}</span>
       ) : null}
     </>
   );
@@ -193,9 +193,9 @@ export function ExtensionCard(props: ExtensionCardProps) {
   const readiness: ReadinessState = allMet ? "ready" : someMet ? "partial" : "none";
   const resolvedIconSrc = resolveExtensionIconUrl({ iconSrc, iconSlug, serviceUrl: url }) ?? null;
   const shellState = readiness === "ready"
-    ? "border-green-6 bg-green-2"
+    ? "border-success-muted bg-success-soft"
     : readiness === "partial"
-      ? "border-amber-6 bg-amber-2"
+      ? "border-warning-muted bg-warning-soft"
       : "border-dls-border bg-dls-surface hover:bg-dls-hover";
   const shellClassName = `group w-full border text-left transition-all ${shellState} ${hidden ? "border-dashed opacity-70" : ""}`;
   const badges = (
@@ -250,9 +250,9 @@ export function ExtensionCard(props: ExtensionCardProps) {
         <div className="flex w-44 shrink-0 items-center gap-1.5">
           <h4 className="min-w-0 truncate text-[13px] font-medium text-dls-text">{name}</h4>
           {readiness === "ready" ? (
-            <span className="size-1.5 shrink-0 rounded-full bg-green-9" />
+            <span className="size-1.5 shrink-0 rounded-full bg-success" />
           ) : readiness === "partial" ? (
-            <span className="size-1.5 shrink-0 rounded-full bg-amber-9" />
+            <span className="size-1.5 shrink-0 rounded-full bg-warning" />
           ) : null}
         </div>
         <div className="flex w-20 shrink-0 items-center">
@@ -267,7 +267,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
           <span className="shrink-0 rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
         ) : null}
         {beta ? (
-          <span className="shrink-0 rounded-md bg-amber-3 px-1.5 py-0.5 text-[10px] font-medium text-amber-11">
+          <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">
             {t("common.beta")}
           </span>
         ) : null}
@@ -311,7 +311,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
             <div className="mt-1 text-[11px] text-dls-secondary">{meta}</div>
           ) : null}
           {disabledReason ? (
-            <div className="mt-2 text-[11px] font-medium text-amber-11">
+            <div className="mt-2 text-[11px] font-medium text-warning-ink">
               {disabledReason}
             </div>
           ) : null}

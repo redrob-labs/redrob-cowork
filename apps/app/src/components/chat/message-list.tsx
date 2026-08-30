@@ -120,7 +120,7 @@ import { cn } from "@/lib/utils"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 
-const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-amber-4/70 text-current"
+const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
 
 /** Above this many step rows a finished turn folds into one summary line. */
 const COLLAPSED_STEP_RUN_MIN_ROWS = 4
@@ -487,7 +487,7 @@ const USER_SKILL_TOKEN_RE = /(Load \[skill [^\]]+\] and follow its instructions\
 
 function UserSkillChip(props: { name: string }) {
   return (
-    <span className="mx-0.5 inline-flex items-center rounded-full border border-violet-6/35 bg-violet-3/20 px-2.5 py-1 text-xs font-medium text-violet-11 align-middle" title={`Skill: ${props.name}`}>
+    <span className="mx-0.5 inline-flex items-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 px-2.5 py-1 text-xs font-medium text-foreground align-middle" title={`Skill: ${props.name}`}>
       {props.name}
     </span>
   )
@@ -552,7 +552,7 @@ function renderPlainTextWithLinks(text: string, highlightQuery: string | undefin
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="text-indigo-10 transition-colors hover:text-indigo-8 break-all"
+        className="text-primary-ink transition-colors hover:underline break-all"
       >
         {favicon ? (
           <img
@@ -792,7 +792,7 @@ function ErrorMessage({ error }: ErrorMessageProps) {
   return (
     <Message className="not-prose mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-0 md:px-10">
       <div className="group flex w-full flex-col items-start gap-0">
-        <div className="text-foreground flex min-w-0 flex-1 flex-row items-start gap-2 rounded-lg border-2 border-red-300 bg-red-300/20 px-2 py-1">
+        <div className="text-foreground flex min-w-0 flex-1 flex-row items-start gap-2 rounded-lg border-2 border-destructive-muted bg-destructive-soft/40 px-2 py-1">
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-destructive" />
           <p className="whitespace-pre-wrap text-destructive">{error}</p>
         </div>
@@ -810,7 +810,7 @@ function RetryActionButton(props: { link: string; label: string }) {
     <Button
       variant="outline"
       size="sm"
-      className="h-7 border-amber-500/70 bg-amber-50 text-xs text-amber-950 hover:bg-amber-100"
+      className="h-7 border-warning-muted bg-warning-soft/70 text-xs text-warning-ink hover:bg-warning-soft"
       onClick={() => void openDesktopUrl(props.link)}
     >
       {props.label}
@@ -836,18 +836,18 @@ const RetryMessage = React.memo(({ status }: RetryMessageProps) => {
   return (
     <Message className="not-prose mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-0 md:px-10">
       <div className="group flex w-full flex-col items-start gap-0">
-        <div className="text-foreground flex min-w-0 flex-1 flex-col gap-2 rounded-lg border-2 border-amber-300 bg-amber-300/20 px-3 py-2">
+        <div className="text-foreground flex min-w-0 flex-1 flex-col gap-2 rounded-lg border-2 border-warning-muted bg-warning-soft/40 px-3 py-2">
           <div className="flex items-start gap-2">
-            <LoaderCircle size={16} className="mt-0.5 shrink-0 animate-spin text-amber-700" />
+            <LoaderCircle size={16} className="mt-0.5 shrink-0 animate-spin text-warning-ink" />
             <div className="min-w-0 space-y-1">
-              <p className="whitespace-pre-wrap text-sm font-medium text-amber-900">{status.message}</p>
-              <p className="text-xs text-amber-800">{info}</p>
+              <p className="whitespace-pre-wrap text-sm font-medium text-foreground">{status.message}</p>
+              <p className="text-xs text-muted-foreground">{info}</p>
             </div>
           </div>
           {action ? (
-            <div className="ml-6 space-y-1 border-t border-amber-400/60 pt-2">
-              <p className="text-xs font-medium text-amber-950">{action.title}</p>
-              <p className="text-xs text-amber-900">{action.message}</p>
+            <div className="ml-6 space-y-1 border-t border-warning-muted pt-2">
+              <p className="text-xs font-medium text-foreground">{action.title}</p>
+              <p className="text-xs text-muted-foreground">{action.message}</p>
               {action.link ? (
                 <RetryActionButton link={action.link} label={action.label} />
               ) : null}

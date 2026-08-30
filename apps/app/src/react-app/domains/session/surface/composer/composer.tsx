@@ -956,7 +956,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                       <div className="flex items-center justify-between gap-3">
                         <div className="truncate text-xs font-semibold">/{command.name}</div>
                         {command.source && command.source !== "command" ? (
-                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${command.source === "skill" ? "bg-violet-3/40 text-violet-11" : "bg-cyan-3/40 text-cyan-11"}`}>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${command.source === "skill" ? "bg-spectrum-violet/20 text-foreground" : "bg-spectrum-teal/20 text-foreground"}`}>
                             {command.source === "skill" ? t("composer.skill_source") : t("composer.mcps_label")}
                           </span>
                         ) : null}
@@ -1451,7 +1451,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   }}
                 />
                 {props.modelUnavailable ? (
-                  <span className="max-w-[20rem] truncate text-xs font-medium text-red-10">
+                  <span className="max-w-[20rem] truncate text-xs font-medium text-destructive-ink">
                     {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
                   </span>
                 ) : null}

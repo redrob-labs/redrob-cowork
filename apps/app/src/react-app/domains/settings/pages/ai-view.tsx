@@ -52,7 +52,7 @@ function providerSourceLabel(source?: ConnectedProvider["source"]) {
 
 function providerSourceBadgeClassName(input: { source?: ConnectedProvider["source"] }) {
   if (input.source === "env") {
-    return "shrink-0 rounded-full border border-amber-6 bg-amber-2 px-2 py-0.5 text-[10px] font-medium text-amber-11";
+    return "shrink-0 rounded-full border border-warning-muted bg-warning-soft px-2 py-0.5 text-[10px] font-medium text-warning-ink";
   }
   return "shrink-0 rounded-full border border-dls-border bg-dls-sidebar/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground";
 }

@@ -102,8 +102,8 @@ type SerializedComposerSkillNode = Spread<
 
 const MENTION_PILL_CLASS: Record<ComposerMentionKind, string> = {
   file: "inline-flex items-center rounded-full border border-gray-6 bg-gray-3 px-2.5 py-1 text-xs font-medium text-gray-11",
-  agent: "inline-flex items-center rounded-full border border-sky-6/35 bg-sky-3/20 px-2.5 py-1 text-xs font-medium text-sky-11",
-  app: "inline-flex items-center rounded-full border border-cyan-6/35 bg-cyan-3/20 px-2.5 py-1 text-xs font-medium text-cyan-11",
+  agent: "inline-flex items-center rounded-full border border-spectrum-sky/35 bg-spectrum-sky/15 px-2.5 py-1 text-xs font-medium text-foreground",
+  app: "inline-flex items-center rounded-full border border-spectrum-teal/35 bg-spectrum-teal/15 px-2.5 py-1 text-xs font-medium text-foreground",
 };
 
 function mentionPillText(value: string, kind: ComposerMentionKind) {
@@ -213,7 +213,7 @@ class ComposerSlashCommandNode extends TextNode {
 
   override createDOM(_config: EditorConfig) {
     const dom = document.createElement("span");
-    dom.className = "inline-flex items-center rounded-full border border-violet-6/35 bg-violet-3/20 px-2.5 py-1 text-xs font-medium text-violet-11";
+    dom.className = "inline-flex items-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 px-2.5 py-1 text-xs font-medium text-foreground";
     dom.textContent = `/${this.__commandName}`;
     dom.contentEditable = "false";
     dom.setAttribute("spellcheck", "false");
@@ -284,7 +284,7 @@ class ComposerSkillNode extends TextNode {
 
   override createDOM(_config: EditorConfig) {
     const dom = document.createElement("span");
-    dom.className = "inline-flex items-center rounded-full border border-violet-6/35 bg-violet-3/20 px-2.5 py-1 text-xs font-medium text-violet-11";
+    dom.className = "inline-flex items-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 px-2.5 py-1 text-xs font-medium text-foreground";
     dom.textContent = `/${this.__skillName}`;
     dom.contentEditable = "false";
     dom.setAttribute("spellcheck", "false");
@@ -327,7 +327,7 @@ function pastedTextChipLabel(lines: number) {
 
 function createPastedTextChipDom(label: string, lines: number) {
   const dom = document.createElement("span");
-  dom.className = "inline-flex items-center gap-1 rounded-full border border-amber-6/35 bg-amber-3/15 px-2.5 py-1 text-xs font-medium text-amber-11";
+  dom.className = "inline-flex items-center gap-1 rounded-full border border-spectrum-yellow/35 bg-spectrum-yellow/15 px-2.5 py-1 text-xs font-medium text-foreground";
   dom.contentEditable = "false";
   dom.setAttribute("spellcheck", "false");
   dom.title = `${t("composer.pasted_text_chip")} · ${label}`;
@@ -337,7 +337,7 @@ function createPastedTextChipDom(label: string, lines: number) {
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[11px] font-medium text-amber-11 underline decoration-amber-8 underline-offset-2 transition-colors hover:bg-amber-4 hover:text-amber-12";
+  button.className = "ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[11px] font-medium text-foreground underline underline-offset-2 transition-colors hover:bg-spectrum-yellow/25";
   button.title = t("composer.pasted_expand");
   button.setAttribute("aria-label", t("composer.pasted_expand_aria"));
   button.dataset.pastedExpandLabel = label;

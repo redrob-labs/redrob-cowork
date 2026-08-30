@@ -83,11 +83,11 @@ const toastTile = cva(
   {
     variants: {
       type: {
-        default: "text-sky-11",
-        success: "text-emerald-11",
-        info: "text-sky-11",
-        warning: "text-amber-11",
-        error: "text-red-11",
+        default: "text-primary-ink",
+        success: "text-success-ink",
+        info: "text-primary-ink",
+        warning: "text-warning-ink",
+        error: "text-destructive-ink",
       },
       size: {
         default: "size-10 rounded-2xl border",
@@ -95,11 +95,11 @@ const toastTile = cva(
       },
     },
     compoundVariants: [
-      { size: "default", type: "default", className: "border-sky-6/40 bg-sky-4/80" },
-      { size: "default", type: "success", className: "border-emerald-6/40 bg-emerald-4/80" },
-      { size: "default", type: "info", className: "border-sky-6/40 bg-sky-4/80" },
-      { size: "default", type: "warning", className: "border-amber-6/40 bg-amber-4/80" },
-      { size: "default", type: "error", className: "border-red-6/40 bg-red-4/80" },
+      { size: "default", type: "default", className: "border-primary-muted/40 bg-primary-soft/80" },
+      { size: "default", type: "success", className: "border-success-muted/40 bg-success-soft/80" },
+      { size: "default", type: "info", className: "border-primary-muted/40 bg-primary-soft/80" },
+      { size: "default", type: "warning", className: "border-warning-muted/40 bg-warning-soft/80" },
+      { size: "default", type: "error", className: "border-destructive-muted/40 bg-destructive-soft/80" },
     ],
     defaultVariants: { type: "default", size: "default" },
   },

@@ -342,7 +342,7 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
               <div className="font-medium text-gray-12">{t("settings.legacy_metadata_title")}</div>
               <div className="break-all">{props.configStatus.legacyRedrob.path}</div>
               {props.configStatus.legacyRedrob.error ? (
-                <div className="text-amber-11">{t("settings.legacy_metadata_error", { error: props.configStatus.legacyRedrob.error })}</div>
+                <div className="text-warning-ink">{t("settings.legacy_metadata_error", { error: props.configStatus.legacyRedrob.error })}</div>
               ) : null}
               <div>{t("settings.diag_migratable_keys", { keys: formatKeys(props.configStatus.legacyRedrob.keys) })}</div>
             </div>

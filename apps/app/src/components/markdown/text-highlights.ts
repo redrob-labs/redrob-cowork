@@ -1,6 +1,6 @@
 const SEARCH_HIGHLIGHT_MARK_ATTR = "data-search-highlight";
 export const SEARCH_HIGHLIGHT_SELECTOR = `mark[${SEARCH_HIGHLIGHT_MARK_ATTR}="true"]`;
-const SEARCH_HIGHLIGHT_CLASS_NAME = "rounded px-0.5 bg-amber-4/70 text-current";
+const SEARCH_HIGHLIGHT_CLASS_NAME = "rounded px-0.5 bg-warning-soft/70 text-current";
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export type TextHighlightPart = {

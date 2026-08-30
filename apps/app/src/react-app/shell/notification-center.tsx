@@ -34,10 +34,10 @@ const SEVERITY_ICONS: Record<NotificationSeverity, LucideIcon> = {
 };
 
 const SEVERITY_CLASSES: Record<NotificationSeverity, string> = {
-  info: "text-sky-11",
-  success: "text-emerald-11",
-  warning: "text-amber-11",
-  error: "text-red-11",
+  info: "text-primary-ink",
+  success: "text-success-ink",
+  warning: "text-warning-ink",
+  error: "text-destructive-ink",
 };
 
 function formatTimeAgo(timestamp: number): string {

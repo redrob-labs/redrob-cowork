@@ -51,7 +51,7 @@ const monoPreClass =
 const miniPreClass =
   "max-h-28 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-dls-border bg-dls-sidebar/30 p-2 text-[11px] font-mono text-dls-text";
 const compactDangerActionClass =
-  "inline-flex h-9 items-center gap-2 rounded-xl border border-red-7/40 bg-red-9 px-4 text-xs font-medium text-white transition-colors hover:bg-red-10 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex h-9 items-center gap-2 rounded-xl border border-destructive-muted/40 bg-destructive px-4 text-xs font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60";
 
 type RuntimeSummary = {
   appVersionLabel: string;
@@ -222,9 +222,9 @@ function DebugLines(props: { lines: string[] }) {
 function StatusBanner(props: { tone: "success" | "error" | "info"; message: string }) {
   const cls =
     props.tone === "success"
-      ? "border-green-6 bg-green-3/40 text-green-11"
+      ? "border-success-muted bg-success-soft/40 text-success-ink"
       : props.tone === "error"
-        ? "border-red-6 bg-red-3/40 text-red-11"
+        ? "border-destructive-muted bg-destructive-soft/40 text-destructive-ink"
         : "border-dls-border bg-dls-sidebar/40 text-dls-secondary";
   return (
     <div className={`rounded-lg border px-3 py-2 text-[11px] ${cls}`}>{props.message}</div>
@@ -918,7 +918,7 @@ export function DebugView(props: DebugViewProps) {
             <div className="flex items-center gap-3">
               <div
                 className={`rounded-lg p-2 ${
-                  isLocalPreference ? "bg-indigo-7/10 text-indigo-11" : "bg-green-7/10 text-green-11"
+                  isLocalPreference ? "bg-primary-soft/10 text-primary-ink" : "bg-success-soft/10 text-success-ink"
                 }`}
               >
                 {isLocalPreference ? <HardDrive size={18} /> : <Smartphone size={18} />}
@@ -1012,7 +1012,7 @@ export function DebugView(props: DebugViewProps) {
             </Button>
           </div>
 
-          <div className="rounded-xl border border-green-7/25 bg-green-3/10 px-3 py-2 text-[12px] leading-relaxed text-green-11">
+          <div className="rounded-xl border border-success-muted/25 bg-success-soft/10 px-3 py-2 text-[12px] leading-relaxed text-success-ink">
             {t("settings.electron_migration_safe_default_intro")}<strong>{t("settings.electron_migration_prepare_button")}</strong>
             {t("settings.electron_migration_safe_default_outro")}
             <code className="font-mono">Redrob Work.app.migrate-bak</code>.
@@ -1164,9 +1164,9 @@ export function DebugView(props: DebugViewProps) {
 
       {/* Section: Danger zone */}
       {isDesktop ? (
-        <div className="space-y-3 rounded-2xl border border-red-7/30 bg-red-3/10 p-5">
+        <div className="space-y-3 rounded-2xl border border-destructive-muted/30 bg-destructive-soft/10 p-5">
           <div className={sectionHeaderClass}>
-            <div className="text-[15px] font-semibold tracking-[-0.2px] text-red-11">
+            <div className="text-[15px] font-semibold tracking-[-0.2px] text-destructive-ink">
               {t("settings.danger_section_title")}
             </div>
             <div className={sectionDescClass}>{t("settings.danger_section_desc")}</div>
@@ -1232,8 +1232,8 @@ export function DebugView(props: DebugViewProps) {
         </AlertDialogHeader>
 
         <div className="space-y-4 overflow-y-auto pr-1 text-sm">
-          <div className="rounded-xl border border-red-7/30 bg-red-3/10 p-3">
-            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-red-11">
+          <div className="rounded-xl border border-destructive-muted/30 bg-destructive-soft/10 p-3">
+            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-destructive-ink">
               {t("settings.nuke_deleted_title")}
             </div>
             <div className="max-h-40 overflow-auto rounded-lg bg-dls-sidebar/40 p-2 font-mono text-[11px] text-dls-text">

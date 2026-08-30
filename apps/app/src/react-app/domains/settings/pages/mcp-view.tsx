@@ -169,17 +169,17 @@ export type McpViewProps = {
 const statusDot = (status: ReactMcpStatus) => {
   switch (status) {
     case "connected":
-      return "bg-green-9";
+      return "bg-success";
     case "needs_auth":
     case "reconnect_required":
     case "needs_client_registration":
-      return "bg-amber-9";
+      return "bg-warning";
     case "disabled":
       return "bg-gray-8";
     case "disconnected":
       return "bg-gray-7";
     default:
-      return "bg-red-9";
+      return "bg-destructive";
   }
 };
 
@@ -204,16 +204,16 @@ const friendlyStatus = (status: ReactMcpStatus) => {
 const statusBadgeStyle = (status: ReactMcpStatus) => {
   switch (status) {
     case "connected":
-      return "bg-green-3 text-green-11";
+      return "bg-success-soft text-success-ink";
     case "needs_auth":
     case "reconnect_required":
     case "needs_client_registration":
-      return "bg-amber-3 text-amber-11";
+      return "bg-warning-soft text-warning-ink";
     case "disabled":
     case "disconnected":
       return "bg-gray-3 text-gray-11";
     default:
-      return "bg-red-3 text-red-11";
+      return "bg-destructive-soft text-destructive-ink";
   }
 };
 
@@ -235,12 +235,12 @@ const serviceIcon = (name: string) => {
 const serviceColor = (name: string) => {
   const lower = name.toLowerCase();
   if (lower.includes("notion")) return "text-gray-12";
-  if (lower.includes("linear")) return "text-blue-11";
-  if (lower.includes("sentry")) return "text-purple-11";
-  if (lower.includes("stripe")) return "text-blue-11";
-  if (lower.includes("context")) return "text-green-11";
+  if (lower.includes("linear")) return "text-spectrum-sky";
+  if (lower.includes("sentry")) return "text-spectrum-violet";
+  if (lower.includes("stripe")) return "text-spectrum-sky";
+  if (lower.includes("context")) return "text-spectrum-green";
   if (lower.includes("devtools")) {
-    return "text-amber-11";
+    return "text-spectrum-orange";
   }
   if (lower.includes("redrob")) return "text-gray-12";
   return "text-dls-secondary";
@@ -249,12 +249,12 @@ const serviceColor = (name: string) => {
 const serviceIconBg = (name: string) => {
   const lower = name.toLowerCase();
   if (lower.includes("notion")) return "bg-gray-3 border-gray-6";
-  if (lower.includes("linear")) return "bg-blue-3 border-blue-6";
-  if (lower.includes("sentry")) return "bg-purple-3 border-purple-6";
-  if (lower.includes("stripe")) return "bg-blue-3 border-blue-6";
-  if (lower.includes("context")) return "bg-green-3 border-green-6";
+  if (lower.includes("linear")) return "bg-spectrum-sky/15 border-spectrum-sky/35";
+  if (lower.includes("sentry")) return "bg-spectrum-violet/15 border-spectrum-violet/35";
+  if (lower.includes("stripe")) return "bg-spectrum-sky/15 border-spectrum-sky/35";
+  if (lower.includes("context")) return "bg-spectrum-green/15 border-spectrum-green/35";
   if (lower.includes("devtools")) {
-    return "bg-amber-3 border-amber-6";
+    return "bg-spectrum-orange/15 border-spectrum-orange/35";
   }
   if (lower.includes("redrob")) return "bg-gray-3 border-gray-6";
   return "bg-dls-hover border-dls-border";
@@ -1179,7 +1179,7 @@ export function ExtensionStateTabs(props: {
       state: "available",
       label: t("extensions.group_ready_to_set_up"),
       count: props.availableCount,
-      countClassName: "bg-amber-3 text-amber-11",
+      countClassName: "bg-warning-soft text-warning-ink",
     },
   ] satisfies Array<{
     state: ExtensionInventoryState;
@@ -1468,7 +1468,7 @@ function McpConfiguredServersSection(props: {
       {props.managedOAuthUnavailable ? (
         <div
           data-testid="mcp-managed-oauth-unavailable"
-          className="rounded-lg border border-amber-6 bg-amber-2 px-3 py-2 text-xs text-amber-11"
+          className="rounded-lg border border-warning-muted bg-warning-soft px-3 py-2 text-xs text-warning-ink"
         >
           {t("mcp.managed_oauth_unavailable")}
         </div>
@@ -1537,8 +1537,8 @@ function McpConfiguredServerRow(props: {
     <div className={`rounded-xl border transition-all ${props.selected ? "border-blue-7 bg-blue-2 shadow-sm" : "border-dls-border bg-dls-surface hover:bg-dls-hover"}`}>
       <button type="button" className="w-full px-4 py-3.5 text-left" onClick={() => props.onSelect(props.selected ? null : props.entry.name)}>
         <div className="flex items-center gap-3">
-          <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg border ${props.status === "connected" ? "border-green-6 bg-green-3" : serviceIconBg(props.entry.name)}`}>
-            <Icon size={15} className={props.status === "connected" ? "text-green-11" : serviceColor(props.entry.name)} />
+          <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg border ${props.status === "connected" ? "border-success-muted bg-success-soft" : serviceIconBg(props.entry.name)}`}>
+            <Icon size={15} className={props.status === "connected" ? "text-success-ink" : serviceColor(props.entry.name)} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium text-dls-text">{props.displayName(props.entry.name)}</div>
@@ -1575,11 +1575,11 @@ function McpConfiguredServerDetails(props: Parameters<typeof McpConfiguredServer
           </span>
         ) : null}
       </div>
-      {props.errorInfo ? <div className="rounded-lg border border-red-6 bg-red-2 px-3 py-2 text-xs text-red-11">{props.errorInfo}</div> : null}
+      {props.errorInfo ? <div className="rounded-lg border border-destructive-muted bg-destructive-soft px-3 py-2 text-xs text-destructive-ink">{props.errorInfo}</div> : null}
       {props.entry.managedOAuth?.status === "reconnect_required" && props.entry.managedOAuth.lastError ? (
         <div
           data-testid="mcp-managed-reconnect-reason"
-          className="rounded-lg border border-amber-6 bg-amber-2 px-3 py-2 text-xs text-amber-11"
+          className="rounded-lg border border-warning-muted bg-warning-soft px-3 py-2 text-xs text-warning-ink"
         >
           {props.entry.managedOAuth.lastError}
         </div>
@@ -1741,7 +1741,7 @@ function McpAdvancedConfigSection(props: {
             </div>
             {props.activeConfig && props.activeConfig.exists === false ? <div className="text-[11px] text-dls-secondary">{t("mcp.file_not_found")}</div> : null}
           </div>
-          {props.configError ? <div className="text-xs text-red-11">{props.configError}</div> : null}
+          {props.configError ? <div className="text-xs text-destructive-ink">{props.configError}</div> : null}
         </div>
       ) : null}
     </div>

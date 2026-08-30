@@ -80,10 +80,10 @@ export type CreateWorkspaceLocalPanelProps = {
 
 function stepIcon(status: CreateWorkspaceProgressStep["status"]) {
   if (status === "done")
-    return <XCircle size={16} className="text-emerald-10" />;
+    return <XCircle size={16} className="text-success-ink" />;
   if (status === "active")
     return <Loader2 size={16} className="animate-spin text-dls-accent" />;
-  if (status === "error") return <XCircle size={16} className="text-red-10" />;
+  if (status === "error") return <XCircle size={16} className="text-destructive-ink" />;
   return <div className="size-4 rounded-full border-2 border-dls-border" />;
 }
 
@@ -99,7 +99,7 @@ function toKeyedLines(lines: string[]) {
 function stepTextClass(status: CreateWorkspaceProgressStep["status"]) {
   if (status === "done") return "text-dls-text font-medium";
   if (status === "active") return "text-dls-text font-semibold";
-  if (status === "error") return "text-red-11 font-medium";
+  if (status === "error") return "text-destructive-ink font-medium";
   return "text-dls-secondary";
 }
 
@@ -124,15 +124,15 @@ export function CreateWorkspaceLocalPanel(
             </div>
             <ul className="mt-3 space-y-1.5 pl-1">
               <li className="flex items-start gap-2 text-[13px] text-dls-secondary">
-                <Check size={14} className="mt-0.5 shrink-0 text-emerald-10" />
+                <Check size={14} className="mt-0.5 shrink-0 text-success-ink" />
                 {t("welcome.folder_read")}
               </li>
               <li className="flex items-start gap-2 text-[13px] text-dls-secondary">
-                <Check size={14} className="mt-0.5 shrink-0 text-emerald-10" />
+                <Check size={14} className="mt-0.5 shrink-0 text-success-ink" />
                 {t("welcome.folder_write")}
               </li>
               <li className="flex items-start gap-2 text-[13px] text-dls-secondary">
-                <Check size={14} className="mt-0.5 shrink-0 text-emerald-10" />
+                <Check size={14} className="mt-0.5 shrink-0 text-success-ink" />
                 {t("welcome.folder_anything")}
               </li>
             </ul>
@@ -214,7 +214,7 @@ export function CreateWorkspaceLocalPanel(
               <div className="min-w-0">
                 <div className="flex items-center gap-2 text-[12px] font-semibold text-dls-text">
                   {progress.error ? (
-                    <XCircle size={14} className="text-red-11" />
+                    <XCircle size={14} className="text-destructive-ink" />
                   ) : (
                     <Loader2 size={14} className="animate-spin text-dls-accent" />
                   )}
@@ -286,7 +286,7 @@ export function CreateWorkspaceLocalPanel(
         props.workerDisabled &&
         props.workerDisabledReason ? (
           <div className={warningBannerClass}>
-            <div className="font-semibold text-amber-12">
+            <div className="font-semibold text-warning-ink">
               {t("dashboard.sandbox_get_ready_title")}
             </div>
             <div className="mt-1 leading-relaxed">
@@ -330,7 +330,7 @@ export function CreateWorkspaceLocalPanel(
         ) : null}
 
         {props.localError ? (
-          <div className="mb-3 whitespace-pre-line rounded-[20px] border border-red-7/20 bg-red-1/40 px-4 py-3 text-[13px] text-red-11">
+          <div className="mb-3 whitespace-pre-line rounded-[20px] border border-destructive-muted/20 bg-destructive-soft/40 px-4 py-3 text-[13px] text-destructive-ink">
             {props.localError}
           </div>
         ) : null}

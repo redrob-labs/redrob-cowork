@@ -136,7 +136,7 @@ function statusPill(
   return running
     ? {
         label: connectedLabel ?? t("status.connected"),
-        className: "border-green-7/30 bg-green-7/10 text-green-11",
+        className: "border-success-muted/30 bg-success-soft/10 text-success-ink",
       }
     : {
         label: disconnectedLabel ?? t("status.disconnected_label"),
@@ -157,7 +157,7 @@ function auditStatusPill(status: "idle" | "loading" | "error"): {
   if (status === "error") {
     return {
       label: t("settings.error"),
-      className: "border-red-7/30 bg-red-7/10 text-red-11",
+      className: "border-destructive-muted/30 bg-destructive-soft/10 text-destructive-ink",
     };
   }
   return {

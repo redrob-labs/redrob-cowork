@@ -655,7 +655,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
 
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           {errorMessage ? (
-            <div className="rounded-xl border border-red-7/30 bg-red-1/40 px-3 py-2 text-xs text-red-11">
+            <div className="rounded-xl border border-destructive-muted/30 bg-destructive-soft/40 px-3 py-2 text-xs text-destructive-ink">
               {errorMessage}
             </div>
           ) : props.loading ? (
@@ -720,7 +720,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                               </div>
                               <div className="flex items-center justify-end shrink-0">
                                 {entry.connected ? (
-                                  <div className="flex items-center gap-1 text-[11px] font-medium text-green-11 bg-green-4/20 border border-green-5/30 px-1.5 py-0.5 rounded-md">
+                                  <div className="flex items-center gap-1 text-[11px] font-medium text-success-ink bg-success-soft/20 border border-success-muted/30 px-1.5 py-0.5 rounded-md">
                                     <CheckCircle2 size={12} strokeWidth={2.5} />{t("provider_auth.connected")}</div>
                                 ) : (
                                   <div className="text-[12px] font-medium text-gray-9 group-hover:text-gray-12 transition-colors flex items-center gap-0.5 opacity-80 group-hover:opacity-100">{t("provider_auth.connect")}<ChevronRight size={14} className="opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
@@ -738,7 +738,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                                   key={`${entry.id}-${method.type}-${method.methodIndex ?? method.label}`}
                                   className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
                                     method.type === "oauth"
-                                      ? "bg-indigo-3/30 text-indigo-11 border-indigo-5/30"
+                                      ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
                                       : "bg-gray-3/40 text-gray-11 border-gray-6/40"
                                   }`}
                                 >
@@ -778,7 +778,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                         type="button"
                         className={`w-full rounded-xl border px-4 py-3.5 text-left transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                           method.type === "oauth"
-                            ? "border-indigo-5/40 bg-indigo-3/20 hover:bg-indigo-4/30 shadow-sm"
+                            ? "border-primary-muted/40 bg-primary-soft/20 hover:bg-primary-soft/40 shadow-sm"
                             : "border-gray-5/50 bg-gray-2 hover:bg-gray-3/50 shadow-sm"
                         }`}
                         onClick={() => void handleMethodSelect(method)}
