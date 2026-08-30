@@ -28,6 +28,17 @@ export const REDROB_MODEL_NAME = "Auto";
 export const REDROB_CONSOLE_URL = "https://console.redrob.ai";
 
 /**
+ * Console-hosted payment page. Redrob Work links here and stops: the console
+ * owns the checkout, the amount, and which payment methods Stripe offers, so
+ * this app never collects, forwards, or proxies card data.
+ *
+ * Under the same confirmed host as the API base and the connect flow, so
+ * `pnpm check:outbound-access` needs no new entry for it and a user who reads
+ * the link before pressing it sees a host they already trust.
+ */
+export const REDROB_CONSOLE_BILLING_URL = "https://console.redrob.ai/billing";
+
+/**
  * Single source-of-truth allowlist of inference provider ids the app exposes.
  * Redrob is currently the only usable provider: the connect modal, the model
  * picker, and every provider list filter through this so no other provider can

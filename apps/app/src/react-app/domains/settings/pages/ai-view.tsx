@@ -1,7 +1,9 @@
 /** @jsxImportSource react */
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import { t } from "@/i18n";
+import { RedrobPaySheet } from "../../billing/redrob-pay-sheet";
 import { ProviderIcon } from "../../../design-system/provider-icon";
 import { SettingsNotice, SettingsStatusBadge } from "../settings-section";
 import {
@@ -153,6 +155,42 @@ export function AiSettingsView(props: AiSettingsViewProps) {
         <LayoutSectionItemFootnote>{t("settings.api_keys_info")}</LayoutSectionItemFootnote>
       </LayoutSection>
 
+      {/* ---- Credit and payment ---- */}
+      <RedrobCreditSection />
+
     </LayoutStack>
+  );
+}
+
+/**
+ * Where a first payment or a top-up starts, without anyone hunting for the console.
+ *
+ * Self-contained on purpose: it owns nothing but the sheet's open state, so it needs no props from
+ * the settings route and adds no wiring to it. The sheet is the only thing that talks about money,
+ * and it hands off to the console rather than pretending Work can charge a card.
+ */
+function RedrobCreditSection() {
+  const [payOpen, setPayOpen] = useState(false);
+
+  return (
+    <LayoutSection>
+      <LayoutSectionHeader>
+        <LayoutSectionTitle>{t("settings.redrob_credit_title")}</LayoutSectionTitle>
+        <LayoutSectionDescription>{t("settings.redrob_credit_desc")}</LayoutSectionDescription>
+      </LayoutSectionHeader>
+
+      <LayoutSectionItem>
+        <LayoutSectionItemHeader>
+          <LayoutSectionItemTitle>{t("billing.pay_status_unknown")}</LayoutSectionItemTitle>
+          <LayoutSectionItemHeaderActions>
+            <Button onClick={() => setPayOpen(true)} data-testid="redrob-credit-open-pay">
+              {t("settings.redrob_credit_cta")}
+            </Button>
+          </LayoutSectionItemHeaderActions>
+        </LayoutSectionItemHeader>
+      </LayoutSectionItem>
+
+      <RedrobPaySheet open={payOpen} onOpenChange={setPayOpen} />
+    </LayoutSection>
   );
 }

@@ -44,6 +44,11 @@ import { WebsearchTool } from "@/components/tools/websearch"
 import { useMessageList, useSessionErrorMessage } from "@/components/chat/message-list-provider"
 import { ArtifactList } from "@/components/chat/artifact"
 import { TaskSuggestions } from "@/components/chat/task-suggestions"
+import { RedrobPayNotice } from "@/react-app/domains/billing/redrob-pay-sheet"
+import {
+  classifyRedrobPaymentRefusal,
+  redrobPaymentRefusalFromMessages,
+} from "@/react-app/domains/billing/redrob-pay"
 import {
   DescriptiveButtonContent,
   DescriptiveButtonDescription,
@@ -1201,6 +1206,15 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
   const error = useSessionErrorMessage();
   const hasSessionErrorMessage = React.useMemo(() => messages.some(isSessionErrorMessage), [messages])
+  /**
+   * The console refusing to spend credit the workspace does not have. Read from the transcript first
+   * so a reload keeps saying it, and from the live error otherwise. Either way the top-up is offered
+   * here rather than leaving the user to find the console.
+   */
+  const paymentRefusal = React.useMemo(
+    () => redrobPaymentRefusalFromMessages(messages) ?? classifyRedrobPaymentRefusal(error),
+    [messages, error],
+  )
   const liveActionLabel = isStreaming
     ? getActiveToolLabel(collectLatestAssistantToolParts(messages))
     : null
@@ -1241,6 +1255,7 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
       {showLoading && <LoadingMessage label={liveActionLabel ?? undefined} />}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}
       {error && !hasSessionErrorMessage ? <ErrorMessage error={error} /> : null}
+      {paymentRefusal ? <RedrobPayNotice refusal={paymentRefusal} /> : null}
     </div>
   )
 }
