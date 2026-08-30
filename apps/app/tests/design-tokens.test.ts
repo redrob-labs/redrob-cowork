@@ -114,6 +114,15 @@ const SEMANTIC_MAPPING: Array<[string, string, string]> = [
   ["--tooltip", "--rr-gray-9", "--rr-black"],
   ["--sidebar", "--rr-white", "--rr-black"],
   ["--sidebar-primary", "--rr-blue-6", "--rr-blue-5"],
+  ["--spectrum-teal", "--rr-teal-5", "--rr-teal-3"],
+  ["--spectrum-sky", "--rr-sky-4", "--rr-sky-3"],
+  ["--spectrum-violet", "--rr-violet-4", "--rr-violet-3"],
+  ["--spectrum-pink", "--rr-pink-4", "--rr-pink-3"],
+  ["--spectrum-red", "--rr-red-4", "--rr-red-3"],
+  ["--spectrum-orange", "--rr-orange-4", "--rr-orange-3"],
+  ["--spectrum-yellow", "--rr-yellow-5", "--rr-yellow-3"],
+  ["--spectrum-lime", "--rr-lime-5", "--rr-lime-3"],
+  ["--spectrum-green", "--rr-green-4", "--rr-green-3"],
 ];
 
 /** Roles product code reads that must exist in both themes or in neither. */

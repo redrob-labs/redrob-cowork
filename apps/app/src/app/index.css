@@ -241,13 +241,39 @@
   --sidebar-border: var(--rr-gray-3);
   --sidebar-ring: var(--rr-blue-6);
 
+  /**
+   * Graphics. The accent spectrum's own use, which the brand document scopes to
+   * category distinction and point colour rather than product chrome: an artifact
+   * icon, an extension kind, a chart series. Console declares these nine and Work
+   * did not, which is why the categorical colours in this app were Radix steps and
+   * the chart series read the primitive layer directly.
+   *
+   * Held to 3:1 against the surface, because a category is needed to read the
+   * screen. Level 4 on light, except teal, yellow and lime, whose mid step cannot
+   * read on white; level 3 on dark clears 3:1 for all nine.
+   *
+   * A soft categorical chip takes a low alpha of these with `text-foreground` on
+   * it. The five-level spectrum has no equivalent of Radix's step 11, so a hue at
+   * 15% cannot also supply an ink that clears 4.5:1 on itself: the wash carries the
+   * category and the label stays body copy.
+   */
+  --spectrum-teal: var(--rr-teal-5);
+  --spectrum-sky: var(--rr-sky-4);
+  --spectrum-violet: var(--rr-violet-4);
+  --spectrum-pink: var(--rr-pink-4);
+  --spectrum-red: var(--rr-red-4);
+  --spectrum-orange: var(--rr-orange-4);
+  --spectrum-yellow: var(--rr-yellow-5);
+  --spectrum-lime: var(--rr-lime-5);
+  --spectrum-green: var(--rr-green-4);
+
   /* Chart series, drawn from the spectrum and ordered so neighbouring hues are
      not neighbouring indices. */
-  --chart-1: var(--rr-sky-4);
-  --chart-2: var(--rr-pink-4);
-  --chart-3: var(--rr-lime-5);
-  --chart-4: var(--rr-orange-4);
-  --chart-5: var(--rr-violet-4);
+  --chart-1: var(--spectrum-sky);
+  --chart-2: var(--spectrum-pink);
+  --chart-3: var(--spectrum-lime);
+  --chart-4: var(--spectrum-orange);
+  --chart-5: var(--spectrum-violet);
 
   /* Elevation. Three steps, tinted with Gray 8 rather than pure black on light. */
   --shadow-soft: 0 1px 2px color-mix(in srgb, var(--rr-gray-8) 5%, transparent);
@@ -743,11 +769,21 @@ select:disabled {
   --sidebar-border: var(--rr-gray-8);
   --sidebar-ring: var(--rr-blue-5);
 
-  --chart-1: var(--rr-sky-3);
-  --chart-2: var(--rr-pink-3);
-  --chart-3: var(--rr-lime-3);
-  --chart-4: var(--rr-orange-3);
-  --chart-5: var(--rr-violet-3);
+  --spectrum-teal: var(--rr-teal-3);
+  --spectrum-sky: var(--rr-sky-3);
+  --spectrum-violet: var(--rr-violet-3);
+  --spectrum-pink: var(--rr-pink-3);
+  --spectrum-red: var(--rr-red-3);
+  --spectrum-orange: var(--rr-orange-3);
+  --spectrum-yellow: var(--rr-yellow-3);
+  --spectrum-lime: var(--rr-lime-3);
+  --spectrum-green: var(--rr-green-3);
+
+  --chart-1: var(--spectrum-sky);
+  --chart-2: var(--spectrum-pink);
+  --chart-3: var(--spectrum-lime);
+  --chart-4: var(--spectrum-orange);
+  --chart-5: var(--spectrum-violet);
 
   /* A shadow has to be darker than the surface to read at all on dark. */
   --shadow-soft: 0 1px 2px color-mix(in srgb, var(--rr-black) 30%, transparent);
@@ -793,6 +829,15 @@ select:disabled {
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-spectrum-teal: var(--spectrum-teal);
+  --color-spectrum-sky: var(--spectrum-sky);
+  --color-spectrum-violet: var(--spectrum-violet);
+  --color-spectrum-pink: var(--spectrum-pink);
+  --color-spectrum-red: var(--spectrum-red);
+  --color-spectrum-orange: var(--spectrum-orange);
+  --color-spectrum-yellow: var(--spectrum-yellow);
+  --color-spectrum-lime: var(--spectrum-lime);
+  --color-spectrum-green: var(--spectrum-green);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
