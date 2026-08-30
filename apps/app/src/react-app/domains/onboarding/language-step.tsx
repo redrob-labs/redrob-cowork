@@ -47,7 +47,7 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
                 aria-pressed={selected}
                 className={`flex w-full items-center justify-between rounded-2xl border p-4 text-left transition-colors ${
                   selected
-                    ? "border-blue-8 bg-blue-2/50 ring-1 ring-blue-8/30"
+                    ? "border-primary-muted bg-primary-soft/50 ring-1 ring-primary-muted/30"
                     : "border-border bg-card hover:border-foreground/15 hover:bg-accent"
                 }`}
                 onClick={() => setLocale(option.value)}
@@ -63,7 +63,7 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
                 </div>
                 <span
                   className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                    selected ? "border-blue-9 bg-blue-9" : "border-border bg-transparent"
+                    selected ? "border-primary bg-primary" : "border-border bg-transparent"
                   }`}
                   aria-hidden="true"
                 >

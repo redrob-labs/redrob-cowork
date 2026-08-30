@@ -43,8 +43,8 @@ export function ArtifactIcon({ type, className }: ArtifactIconProps) {
   }
 
   if (type === "text") {
-    return <FileType className={cn("size-3.5 shrink-0 text-slate-9", className)} />;
+    return <FileType className={cn("size-3.5 shrink-0 text-subtle-foreground", className)} />;
   }
 
-  return <File className={cn("size-3.5 shrink-0 text-slate-9", className)} />;
+  return <File className={cn("size-3.5 shrink-0 text-subtle-foreground", className)} />;
 }

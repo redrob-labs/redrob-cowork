@@ -101,7 +101,7 @@ function getInputDiff(input: unknown): string | null {
 function diffLineClass(line: string) {
   if (line.startsWith("+")) return "text-success-ink bg-success-soft/40"
   if (line.startsWith("-")) return "text-destructive-ink bg-destructive-soft/40"
-  if (line.startsWith("@@")) return "text-blue-11 bg-blue-1/30"
+  if (line.startsWith("@@")) return "text-primary-ink bg-primary-soft/30"
   return ""
 }
 

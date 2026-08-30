@@ -283,7 +283,7 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
         {props.configStatusError ? <SettingsNotice>{props.configStatusError}</SettingsNotice> : null}
         {props.configStatus ? (
           <div className="space-y-3 rounded-xl border border-gray-6 bg-gray-1/60 p-3 text-xs text-gray-10">
-            <div className="space-y-2 rounded-xl border border-blue-6/50 bg-blue-2/40 p-3">
+            <div className="space-y-2 rounded-xl border border-primary-muted/50 bg-primary-soft/40 p-3">
               <div className="font-medium text-gray-12">{t("settings.desired_runtime_config_title")}</div>
               <div className="text-[11px] text-gray-9">
                 {t("settings.desired_runtime_config_desc")}

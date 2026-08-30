@@ -151,7 +151,7 @@ function auditStatusPill(status: "idle" | "loading" | "error"): {
   if (status === "loading") {
     return {
       label: t("settings.loading"),
-      className: "border-blue-7/30 bg-blue-7/10 text-blue-11",
+      className: "border-primary-muted/30 bg-primary-soft/10 text-primary-ink",
     };
   }
   if (status === "error") {

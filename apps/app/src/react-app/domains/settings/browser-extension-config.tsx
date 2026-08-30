@@ -14,7 +14,7 @@ function RedrobWorkBrowserConfig() {
   return (
     <div className={`${surfaceCardClass} space-y-3 p-4`}>
       <div className="flex items-start gap-3">
-        <MonitorSmartphone className="mt-0.5 size-4 shrink-0 text-blue-11" />
+        <MonitorSmartphone className="mt-0.5 size-4 shrink-0 text-primary-ink" />
         <div className="space-y-1 text-[13px] leading-relaxed text-dls-secondary">
           <div className="font-medium text-dls-text">{t("settings.browser_ready_title")}</div>
           <div>{t("settings.browser_ready_desc")}</div>

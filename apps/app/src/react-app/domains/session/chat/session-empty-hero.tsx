@@ -68,10 +68,10 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
       {props.providerCount === 0 && props.onOpenProviderAuth ? (
         <button
           type="button"
-          className="flex w-full items-start gap-3 rounded-xl border border-blue-7/50 bg-blue-2/40 p-3.5 text-left transition-colors hover:bg-blue-3/50"
+          className="flex w-full items-start gap-3 rounded-xl border border-primary-muted/50 bg-primary-soft/40 p-3.5 text-left transition-colors hover:bg-primary-soft/50"
           onClick={props.onOpenProviderAuth}
         >
-          <Zap className="mt-0.5 size-4 shrink-0 text-blue-10" />
+          <Zap className="mt-0.5 size-4 shrink-0 text-primary-ink" />
           <div>
             <div className="text-[13px] font-medium text-foreground">
               {t("hero.connect_provider_title")}

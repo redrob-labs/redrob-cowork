@@ -150,7 +150,7 @@ export function QuestionPanel(props: QuestionPanelProps) {
     <div className="overflow-hidden border-b border-dls-border bg-transparent">
       <div className="border-b border-dls-border px-4 py-3">
         <div className="flex items-start gap-2.5">
-          <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-blue-7/30 bg-blue-3/20 text-blue-11">
+          <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-primary-muted/30 bg-primary-soft/20 text-primary-ink">
             <HelpCircle size={12} />
           </div>
           <div className="min-w-0 flex-1">
@@ -186,10 +186,10 @@ export function QuestionPanel(props: QuestionPanelProps) {
                   className={`flex w-full items-start justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60
                         ${
                           isSelected
-                            ? "bg-blue-9/10 border-blue-9/30 text-gray-12 shadow-sm"
+                            ? "bg-primary/10 border-primary/30 text-gray-12 shadow-sm"
                             : "bg-gray-1 border-gray-6 hover:border-gray-8 text-gray-11 hover:text-gray-12 hover:bg-gray-3"
                         }
-                        ${isFocused ? "ring-2 ring-blue-9/20 border-blue-9/40 bg-gray-3" : ""}
+                        ${isFocused ? "ring-2 ring-primary/20 border-primary/40 bg-gray-3" : ""}
                       `}
                   onClick={() => {
                     dispatch({ type: "setFocusedOptionIndex", value: idx });
@@ -203,7 +203,7 @@ export function QuestionPanel(props: QuestionPanelProps) {
                     ) : null}
                   </span>
                   {isSelected ? (
-                    <div className="size-5 rounded-full bg-blue-9 flex items-center justify-center shadow-sm">
+                    <div className="size-5 rounded-full bg-primary flex items-center justify-center shadow-sm">
                       <Check size={12} className="text-white" strokeWidth={3} />
                     </div>
                   ) : null}

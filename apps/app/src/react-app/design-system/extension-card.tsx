@@ -143,7 +143,7 @@ function ExtensionBadges(props: {
         </span>
       ) : null}
       {props.preview ? (
-        <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
+        <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">{t("extension.preview")}</span>
       ) : null}
       {props.beta ? (
         <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">
@@ -264,7 +264,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
           {disabledReason ?? description}
         </p>
         {preview ? (
-          <span className="shrink-0 rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
+          <span className="shrink-0 rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">{t("extension.preview")}</span>
         ) : null}
         {beta ? (
           <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">

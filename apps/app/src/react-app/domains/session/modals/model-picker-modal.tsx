@@ -321,7 +321,7 @@ function ProviderAccordion({
           {" "}
           <span className="flex shrink-0 items-center gap-1.5">
             {group.isNew ? (
-              <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">New</span>
+              <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">New</span>
             ) : null}
             {group.hasCurrent ? (
               <span className="rounded-md bg-success-soft px-1.5 py-0.5 text-[10px] font-medium text-success-ink">{t("model_picker.current")}</span>

@@ -51,8 +51,8 @@ export function ArtifactIcon({ className, type }: ArtifactIconProps) {
   }
 
   if (type === "text") {
-    return <FileType className={cn("text-slate-9", className)} />;
+    return <FileType className={cn("text-subtle-foreground", className)} />;
   }
 
-  return <File className={cn("text-slate-9", className)} />;
+  return <File className={cn("text-subtle-foreground", className)} />;
 }

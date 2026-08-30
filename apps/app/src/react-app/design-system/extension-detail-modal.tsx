@@ -268,7 +268,7 @@ export function ExtensionDetailModal({
         </span>
       ) : null}
       {preview ? (
-        <span className="rounded-md bg-blue-3 px-1.5 py-0.5 text-[10px] font-medium text-blue-11">{t("extension.preview")}</span>
+        <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">{t("extension.preview")}</span>
       ) : null}
       {beta ? (
         <span className="rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("common.beta")}</span>
@@ -528,7 +528,7 @@ export function ExtensionDetailModal({
               {preview ? (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t("extension.release_stage")}</span>
-                  <span className="font-medium text-blue-11">{t("extension.preview")}</span>
+                  <span className="font-medium text-primary-ink">{t("extension.preview")}</span>
                 </div>
               ) : null}
 

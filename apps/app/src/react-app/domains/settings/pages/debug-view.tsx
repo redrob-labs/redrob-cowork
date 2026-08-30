@@ -242,13 +242,13 @@ function formatExecutionCommand(execution: OpencodeExecutionSnapshot) {
 
 function ExecutionDetails(props: { execution: OpencodeExecutionSnapshot }) {
   return (
-    <div className="rounded-xl border border-blue-6/30 bg-blue-3/20 p-3">
+    <div className="rounded-xl border border-primary-muted/30 bg-primary-soft/20 p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-blue-11">{t("settings.debug_execution_title")}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-primary-ink">{t("settings.debug_execution_title")}</div>
           <div className="text-[11px] text-dls-secondary">{t("settings.debug_execution_desc")}</div>
         </div>
-        <div className="shrink-0 rounded-full border border-blue-7/30 bg-blue-7/10 px-2 py-1 text-[10px] font-medium text-blue-11">
+        <div className="shrink-0 rounded-full border border-primary-muted/30 bg-primary-soft/10 px-2 py-1 text-[10px] font-medium text-primary-ink">
           {t("settings.debug_execution_redacted")}
         </div>
       </div>
@@ -1186,7 +1186,7 @@ export function DebugView(props: DebugViewProps) {
             <div
               className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
                 props.opencodeDevModeEnabled
-                  ? "border-blue-7/35 bg-blue-3/25 text-blue-11"
+                  ? "border-primary-muted/35 bg-primary-soft/25 text-primary-ink"
                   : "border-dls-border bg-dls-sidebar/50 text-dls-secondary"
               }`}
             >

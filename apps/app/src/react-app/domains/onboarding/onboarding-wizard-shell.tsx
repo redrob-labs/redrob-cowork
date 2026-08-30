@@ -69,7 +69,7 @@ export function OnboardingWizardShell({
             })}
           >
             <div
-              className="h-full rounded-full bg-blue-9 transition-[width] duration-500 ease-out"
+              className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

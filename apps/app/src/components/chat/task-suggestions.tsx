@@ -54,7 +54,7 @@ export function TaskSuggestions({ className }: TaskSuggestionsProps) {
         {noProviders ? (
           <DescriptiveButton
             orientation="vertical"
-            className="border-blue-7/50 bg-blue-2/30 hover:bg-blue-3/40 @lg:col-span-2 @2xl:col-span-3"
+            className="border-primary-muted/50 bg-primary-soft/30 hover:bg-primary-soft/40 @lg:col-span-2 @2xl:col-span-3"
             onClick={() =>
               dispatchAction({
                 target: "settings",
@@ -64,7 +64,7 @@ export function TaskSuggestions({ className }: TaskSuggestionsProps) {
             }
           >
             <DescriptiveButtonIcon>
-              <BoltIcon className="size-6 text-blue-10" aria-hidden />
+              <BoltIcon className="size-6 text-primary-ink" aria-hidden />
             </DescriptiveButtonIcon>
             <DescriptiveButtonContent>
               <DescriptiveButtonTitle>Connect a model provider</DescriptiveButtonTitle>
@@ -87,7 +87,7 @@ export function TaskSuggestions({ className }: TaskSuggestionsProps) {
 
           <DescriptiveButton orientation="vertical" onClick={() => setPrompt(BROWSER_PROMPT)}>
             <DescriptiveButtonIcon>
-              <GlobeAltIcon className="size-6 text-blue-10" aria-hidden />
+              <GlobeAltIcon className="size-6 text-primary-ink" aria-hidden />
             </DescriptiveButtonIcon>
             <DescriptiveButtonContent>
               <DescriptiveButtonTitle>Browse the web</DescriptiveButtonTitle>

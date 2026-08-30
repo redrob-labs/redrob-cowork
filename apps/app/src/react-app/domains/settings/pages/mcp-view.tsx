@@ -1534,7 +1534,7 @@ function McpConfiguredServerRow(props: {
 }) {
   const Icon = serviceIcon(props.entry.name);
   return (
-    <div className={`rounded-xl border transition-all ${props.selected ? "border-blue-7 bg-blue-2 shadow-sm" : "border-dls-border bg-dls-surface hover:bg-dls-hover"}`}>
+    <div className={`rounded-xl border transition-all ${props.selected ? "border-primary-muted bg-primary-soft shadow-sm" : "border-dls-border bg-dls-surface hover:bg-dls-hover"}`}>
       <button type="button" className="w-full px-4 py-3.5 text-left" onClick={() => props.onSelect(props.selected ? null : props.entry.name)}>
         <div className="flex items-center gap-3">
           <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg border ${props.status === "connected" ? "border-success-muted bg-success-soft" : serviceIconBg(props.entry.name)}`}>
@@ -1560,7 +1560,7 @@ function McpConfiguredServerRow(props: {
 
 function McpConfiguredServerDetails(props: Parameters<typeof McpConfiguredServerRow>[0]) {
   return (
-    <div className="animate-in fade-in slide-in-from-top-1 space-y-3 border-t border-blue-6/20 px-4 py-3 duration-200">
+    <div className="animate-in fade-in slide-in-from-top-1 space-y-3 border-t border-primary-muted/20 px-4 py-3 duration-200">
       <div className="flex items-center gap-4 text-xs">
         <span className="text-dls-secondary">{t("mcp.connection_type")}</span>
         <span className="text-dls-text">{props.entry.config.type === "remote" ? t("mcp.type_cloud") : t("mcp.type_local")}</span>
