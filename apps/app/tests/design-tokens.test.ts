@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 /**
  * Redrob Work and the Redrob Console draw from one token system. Console main is
@@ -414,6 +414,344 @@ describe("Redrob branding surfaces", () => {
     const offenders = [...cardTheme.matchAll(/#[0-9a-fA-F]{3,8}\b/g)]
       .map((match) => match[0])
       .filter((hex) => !brandValues.has(hex));
+    expect(offenders).toEqual([]);
+  });
+});
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════════════════════
+ * The stylesheet Tailwind actually emits
+ * ═══════════════════════════════════════════════════════════════════════════════════════════════
+ *
+ * Everything above reads source files. That catches a class somebody wrote and
+ * misses a colour the build puts there on its own: a step of a ramp nobody
+ * remembered was still bound, a Tailwind default underneath an `@theme inline`
+ * override, a utility that compiles because a namespace was never cleared. And
+ * nobody reviewing this on a machine without a screen can see any of it.
+ *
+ * So this compiles the app's own stylesheet with Tailwind v4's compiler, against
+ * every class token in `src`, and reads every colour out of the result. Vendor
+ * stylesheets are resolved to nothing on purpose: katex, shadcn and tw-animate-css
+ * carry their own palettes and this is a check on ours.
+ *
+ * The rule: an emitted colour is a value `redrob-tokens.css` declares, or pure black,
+ * or pure white, or a step of the Radix gray ramp, which is the one numbered ramp
+ * `colors.css` still declares and the other half of this migration. That exception is
+ * counted rather than waved through, so it can only shrink.
+ */
+const VENDOR_STYLESHEETS = ["katex", "shadcn", "tw-animate-css"];
+
+async function compileAppStylesheet(): Promise<string> {
+  const { compile } = (await import("tailwindcss")) as {
+    compile: (
+      css: string,
+      options: {
+        base: string;
+        loadStylesheet: (
+          id: string,
+          base: string,
+        ) => { path: string; base: string; content: string };
+        loadModule: () => Promise<{ module: unknown; base: string }>;
+      },
+    ) => Promise<{ build: (candidates: string[]) => string }>;
+  };
+  const tailwindRoot = join(APP_ROOT, "node_modules/tailwindcss");
+  const appBase = join(APP_ROOT, "src/app");
+
+  const loadStylesheet = (id: string, base: string) => {
+    if (id === "tailwindcss" || id.startsWith("tailwindcss/")) {
+      const path =
+        id === "tailwindcss"
+          ? join(tailwindRoot, "index.css")
+          : join(tailwindRoot, id.slice("tailwindcss/".length));
+      return { path, base: dirname(path), content: readFileSync(path, "utf8") };
+    }
+    if (id.startsWith(".")) {
+      const path = join(base, id);
+      return { path, base: dirname(path), content: readFileSync(path, "utf8") };
+    }
+    // A vendor stylesheet, and its palette is not ours to police. Anything not on the
+    // list is a new third-party import and fails here rather than passing silently.
+    expect(
+      VENDOR_STYLESHEETS.some((name) => id.startsWith(name)),
+      `unknown stylesheet import ${id}`,
+    ).toBe(true);
+    return { path: id, base, content: "" };
+  };
+
+  const compiler = await compile(readFileSync(join(appBase, "index.css"), "utf8"), {
+    base: appBase,
+    loadStylesheet,
+    loadModule: async () => ({ module: {}, base: appBase }),
+  });
+
+  const candidates = new Set<string>();
+  for (const file of walkFiles(join(APP_ROOT, "src"))) {
+    if (!/\.(tsx?|html)$/.test(file)) continue;
+    for (const match of readFileSync(file, "utf8").matchAll(
+      /[a-zA-Z0-9@!:_\-./[\]()%#*]+/g,
+    )) {
+      candidates.add(match[0]);
+    }
+  }
+  return compiler.build([...candidates]);
+}
+
+function walkFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory() ? walkFiles(path) : [path];
+  });
+}
+
+/** `#abc`, `#abcd`, `#aabbcc` and `#aabbccdd` all to `aabbcc`. */
+function sixDigits(hex: string): string {
+  const value = hex.replace("#", "").toLowerCase();
+  if (value.length === 3 || value.length === 4) {
+    return value
+      .slice(0, 3)
+      .split("")
+      .map((channel) => channel + channel)
+      .join("");
+  }
+  return value.slice(0, 6);
+}
+
+/** Every colour in a stylesheet, as six hex digits, hex notation and `rgb()` alike. */
+function stylesheetColours(css: string): string[] {
+  const found: string[] = [];
+  for (const match of css.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) found.push(sixDigits(match[0]));
+  for (const match of css.matchAll(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/g)) {
+    found.push(
+      [match[1], match[2], match[3]]
+        .map((part) => Number(part).toString(16).padStart(2, "0"))
+        .join(""),
+    );
+  }
+  return found;
+}
+
+const BRAND_VALUES = new Set(
+  [...PRIMITIVES.matchAll(/#([0-9a-fA-F]{3,8})\b/g)].map((match) => sixDigits(match[0])),
+);
+const RADIX_GRAY = new Set(
+  [...readFileSync(join(APP_ROOT, "src/styles/colors.css"), "utf8").matchAll(
+    /--(?:gray|black|white)-a?\d+:\s*([^;]+);/g,
+  )]
+    .flatMap((match) => [
+      ...match[1].matchAll(/#[0-9a-fA-F]{3,8}\b/g),
+      ...match[1].matchAll(/rgba?\(\s*\d+[\s,]+\d+[\s,]+\d+/g),
+    ])
+    .map((match) =>
+      match[0].startsWith("#")
+        ? sixDigits(match[0])
+        : (/(\d+)[\s,]+(\d+)[\s,]+(\d+)/.exec(match[0]) as RegExpExecArray)
+            .slice(1)
+            .map((part) => Number(part).toString(16).padStart(2, "0"))
+            .join(""),
+    ),
+);
+
+describe("the emitted stylesheet", () => {
+  /**
+   * The numbered ramps, counted so the number can only fall.
+   *
+   * Thirty of the thirty-one Radix ramps are at zero. `red`, `amber` and `green` were
+   * the status vocabulary at 301 call sites, `blue` was the accent at 54, and the rest
+   * were categories: an artifact icon by file type, an extension by kind, a mention
+   * chip by what it mentions. The status roles took the first group, `--primary` took
+   * the second and the accent spectrum took the third.
+   *
+   * `gray` is the exception and it is written as a ceiling rather than deleted, because
+   * the number is the point: it is the neutral ramp and moving it is the other half of
+   * this migration, with `--foreground`, `--muted-foreground`, `--border` and `--muted`
+   * declared and waiting.
+   */
+  test("names no numbered ramp the palette has stopped offering", () => {
+    const budget: Record<string, number> = {
+      red: 0, orange: 0, amber: 0, yellow: 0, lime: 0, green: 0, emerald: 0, teal: 0,
+      cyan: 0, sky: 0, blue: 0, indigo: 0, violet: 0, purple: 0, fuchsia: 0, pink: 0,
+      rose: 0, slate: 0, zinc: 0, neutral: 0, stone: 0, bronze: 0, brown: 0,
+      crimson: 0, gold: 0, grass: 0, iris: 0, jade: 0, mauve: 0, mint: 0, olive: 0,
+      plum: 0, ruby: 0, sage: 0, sand: 0, tomato: 0,
+      // The neutral ramp, and the other half of this migration.
+      gray: 428,
+    };
+    const sources = walkFiles(join(APP_ROOT, "src"))
+      .filter((file) => /\.tsx?$/.test(file))
+      .map((file) => readFileSync(file, "utf8"))
+      .join("\n");
+    for (const [hue, allowed] of Object.entries(budget)) {
+      const pattern = new RegExp(
+        `\\b(?:bg|text|border|ring|outline|from|via|to|divide|placeholder|decoration|fill|stroke|shadow|caret|accent)-${hue}-a?\\d{1,3}(?:\\/\\d+)?\\b`,
+        "g",
+      );
+      expect((sources.match(pattern) ?? []).length, `${hue} call sites`).toBeLessThanOrEqual(
+        allowed,
+      );
+    }
+  });
+
+  test("paints with nothing but declared values", async () => {
+    const css = await compileAppStylesheet();
+    expect(css.length).toBeGreaterThan(50_000);
+    const offenders = new Map<string, number>();
+    for (const colour of stylesheetColours(css)) {
+      if (BRAND_VALUES.has(colour)) continue;
+      if (colour === "000000" || colour === "ffffff") continue;
+      if (RADIX_GRAY.has(colour)) continue;
+      offenders.set(colour, (offenders.get(colour) ?? 0) + 1);
+    }
+    expect(
+      [...offenders].map(([colour, count]) => `#${colour} x${count}`),
+      "colours in the built stylesheet that no Redrob token and no gray step declares",
+    ).toEqual([]);
+  });
+
+  /**
+   * And the Radix exception, counted. Gray is the one numbered ramp left and it is 428
+   * call sites; every other ramp is deleted from `colors.css` rather than merely
+   * unbound, because an unreachable ramp still ships in every build. The number below
+   * is the gray ramp and nothing else, so a hue coming back shows up as a rise here
+   * even before anybody writes a class for it.
+   */
+  test("declares one numbered ramp and no more", () => {
+    const colours = readFileSync(join(APP_ROOT, "src/styles/colors.css"), "utf8");
+    const ramps = new Set(
+      [...colours.matchAll(/^\s*--([a-z]+)-a?\d+:/gm)].map((match) => match[1]),
+    );
+    expect([...ramps].sort()).toEqual(["black", "gray", "white"]);
+    expect(RADIX_GRAY.size).toBeLessThanOrEqual(58);
+  });
+
+  /**
+   * Named specifically, because "not a Redrob value" is a large set and these are the
+   * ones that were here. A step-9 fill and a step-11 ink are the fingerprints: if one
+   * of them is back, somebody wrote `bg-red-9` or `text-amber-11` again.
+   */
+  test("keeps no step of a status hue Radix or Tailwind supplies", async () => {
+    const css = await compileAppStylesheet();
+    const present = new Set(stylesheetColours(css));
+    const fingerprints: Record<string, string> = {
+      // Radix, the palette this app was drawing statuses from.
+      "radix red 9": "e5484d",
+      "radix red 11": "ce2c31",
+      "radix amber 9": "ffc53d",
+      "radix amber 11": "ab6400",
+      "radix green 9": "30a46c",
+      "radix green 11": "218358",
+      "radix blue 9": "0090ff",
+      "radix blue 11": "0d74ce",
+      "radix sky 11": "00749e",
+      "radix indigo 9": "3e63dd",
+      "radix violet 9": "6e56cf",
+      "radix teal 9": "12a594",
+      "radix cyan 9": "00a2c7",
+      "radix orange 9": "f76b15",
+      "radix pink 9": "d6409f",
+      "radix purple 9": "8e4ec6",
+      "radix slate 9": "8b8d98",
+      // Tailwind's own, which an `extend` left reachable underneath the ramps.
+      "tailwind red 500": "ef4444",
+      "tailwind amber 500": "f59e0b",
+      "tailwind emerald 500": "10b981",
+      "tailwind sky 500": "0ea5e9",
+      "tailwind violet 500": "8b5cf6",
+      "tailwind red 50": "fef2f2",
+      "tailwind amber 50": "fffbeb",
+      "tailwind emerald 50": "ecfdf5",
+    };
+    for (const [name, value] of Object.entries(fingerprints)) {
+      expect(present.has(value), `${name} (#${value}) is back in the build`).toBe(false);
+    }
+  });
+
+  /**
+   * A `dark:` twin that reads a role is a mistake rather than a nicety: the role
+   * already carries the theme, so `dark:bg-warning-soft` beside `bg-warning-soft` is
+   * the same declaration twice and the pair drifts the day one of them is edited.
+   *
+   * Scoped to the status and spectrum roles this migration put in, and to classes with
+   * no alpha on them. `dark:ring-destructive/40` beside `ring-destructive/20` is the
+   * vendored shadcn idiom and is a different value in each theme rather than a
+   * restatement of one.
+   */
+  test("writes no dark twin for a role that carries its own theme", () => {
+    const roles = [
+      "success",
+      "success-soft",
+      "success-muted",
+      "success-ink",
+      "warning",
+      "warning-soft",
+      "warning-muted",
+      "warning-ink",
+      "destructive-soft",
+      "destructive-muted",
+      "destructive-ink",
+      "primary-soft",
+      "primary-muted",
+      "primary-ink",
+      "spectrum-teal",
+      "spectrum-sky",
+      "spectrum-violet",
+      "spectrum-pink",
+      "spectrum-red",
+      "spectrum-orange",
+      "spectrum-yellow",
+      "spectrum-lime",
+      "spectrum-green",
+    ];
+    const offenders: string[] = [];
+    for (const file of walkFiles(join(APP_ROOT, "src"))) {
+      if (!/\.tsx?$/.test(file)) continue;
+      const source = readFileSync(file, "utf8");
+      for (const role of roles) {
+        for (const match of source.matchAll(
+          new RegExp(
+            `\\bdark:(?:[a-z-]+:)*(?:bg|text|border|ring|fill|stroke|divide|outline)-${role}(?![\\w/-])`,
+            "g",
+          ),
+        )) {
+          offenders.push(`${file.slice(APP_ROOT.length + 1)}: ${match[0]}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  /**
+   * No component may name a colour of its own either.
+   *
+   * The session page painted itself `var(--app-bg, #0b1020)`, and `--app-bg` is not a
+   * token this app declares: the fallback was the colour, in both themes, under text
+   * that assumed a light page. The role is `--dls-app-bg`. That is the failure mode a
+   * literal in a component has, and it is why they are counted here.
+   *
+   * `rgba(var(--dls-accent-rgb), 0.2)` is not one: those channels are a token, declared
+   * as channels for exactly this reason, and pure white and pure black at an alpha are
+   * a scrim rather than a choice from the palette.
+   */
+  test("lets no component name a colour of its own", () => {
+    const arbitrary = /\b(?:bg|text|border|ring|outline|fill|stroke|from|via|to|divide|placeholder|caret|accent|decoration)-\[[^\]]*\]/g;
+    const literal = /#[0-9a-fA-F]{3,8}\b|(?:rgba?|hsla?)\(\s*\d/;
+    const scrim = /^(?:rgba?\(\s*(?:0\s*,\s*0\s*,\s*0|255\s*,\s*255\s*,\s*255)\b)/;
+    const offenders: string[] = [];
+    for (const file of walkFiles(join(APP_ROOT, "src"))) {
+      if (!/\.tsx?$/.test(file)) continue;
+      for (const match of readFileSync(file, "utf8").matchAll(arbitrary)) {
+        const value = match[0];
+        if (!literal.test(value)) continue;
+        // Pure black and pure white at an alpha are a scrim, not a palette choice.
+        const numeric = [...value.matchAll(/(?:rgba?|hsla?)\([^)]*/g)].map((m) => m[0]);
+        if (numeric.length > 0 && numeric.every((n) => scrim.test(n.replace(/^[a-z]*/, (h) => h)))) {
+          continue;
+        }
+        offenders.push(`${file.slice(APP_ROOT.length + 1)}: ${value}`);
+      }
+    }
+    // The voice orb hands a four-colour palette to a WebGL gradient rather than to
+    // CSS, so it is not in this set; it is still off palette and named in the report.
     expect(offenders).toEqual([]);
   });
 });
