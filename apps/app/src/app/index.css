@@ -204,6 +204,27 @@
   --destructive-soft: var(--rr-red-1);
   --destructive-ink: var(--rr-red-4);
 
+  /**
+   * The fifth status role, and the step the four above turned out to be missing:
+   * the edge of a `-soft` strip.
+   *
+   * Every status message in this app was written as a Radix triple, a tint at
+   * step 2 or 3, a boundary at step 6 or 7, and its ink at step 11. `-soft` is
+   * the tint and `-ink` is the ink; nothing named the boundary. Drawing it with
+   * `-soft` erases it and drawing it with the solid fill turns a quiet notice
+   * into a bordered alarm, so the pair each of those lines was carrying, fill
+   * against border, needs a step of its own. It is the shape `--primary-muted`
+   * already has one layer up: soft, muted, fill, in one direction on light and
+   * the other on dark.
+   *
+   * An edge, never a surface under text. The spectrum's level 4 is a mid tone, so
+   * on dark `--success-ink` on `--success-muted` is 2.8:1; a chip that needs its
+   * own fill inside a soft panel takes the solid role with its `-foreground`.
+   */
+  --success-muted: var(--rr-green-2);
+  --warning-muted: var(--rr-orange-2);
+  --destructive-muted: var(--rr-red-2);
+
   --overlay: color-mix(in srgb, var(--rr-black) 45%, transparent);
   /* A tooltip stays dark in both palettes so it reads as an overlay rather than
      as another panel. */
@@ -703,6 +724,12 @@ select:disabled {
   --destructive-soft: var(--rr-red-5);
   --destructive-ink: var(--rr-red-3);
 
+  /* The edge of a `-soft` strip, one step in from the fill the way it is on
+     light. Soft is level 5 here and the fill is level 3, so the boundary is 4. */
+  --success-muted: var(--rr-green-4);
+  --warning-muted: var(--rr-orange-4);
+  --destructive-muted: var(--rr-red-4);
+
   --overlay: color-mix(in srgb, var(--rr-black) 65%, transparent);
   --tooltip: var(--rr-black);
   --tooltip-foreground: var(--rr-gray-1);
@@ -780,14 +807,17 @@ select:disabled {
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-soft: var(--destructive-soft);
   --color-destructive-ink: var(--destructive-ink);
+  --color-destructive-muted: var(--destructive-muted);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-soft: var(--warning-soft);
   --color-warning-ink: var(--warning-ink);
+  --color-warning-muted: var(--warning-muted);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-success-soft: var(--success-soft);
   --color-success-ink: var(--success-ink);
+  --color-success-muted: var(--success-muted);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-accent-active: var(--accent-active);
