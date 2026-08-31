@@ -24,6 +24,7 @@ import {
   CDN_REGION,
   LINUX_TARGETS,
   artifactName,
+  builtArtifactName,
   cdnObjectKeys,
   cdnTarget,
   latestName,
@@ -45,7 +46,7 @@ async function builtDist(targets = LINUX_TARGETS) {
   const dist = path.join(root, "dist-electron");
   await mkdir(dist, { recursive: true });
   for (const target of targets) {
-    await writeFile(path.join(dist, artifactName(target, version)), artifactBytes(target));
+    await writeFile(path.join(dist, builtArtifactName(target, version)), artifactBytes(target));
   }
   return { root, dist, out: path.join(dist, "cdn") };
 }
@@ -206,12 +207,39 @@ test("packing refuses to invent an artefact that was never built", async () => {
 
 test("packing refuses an empty artefact", async () => {
   const { root, dist, out } = await builtDist();
-  await writeFile(path.join(dist, artifactName(LINUX_TARGETS[0], version)), "");
+  await writeFile(path.join(dist, builtArtifactName(LINUX_TARGETS[0], version)), "");
   await assert.rejects(
     pack({ dist, out, version }),
     /is empty, and an empty file is not a distributable/,
   );
   assert.ok(root);
+});
+
+// electron-builder names an AppImage with the kernel's arch and a tar.gz with
+// Node's, so reading the AppImage back as `-x64-` finds nothing and the upload
+// fails after a full build. The published key stays `x64` either way.
+test("the AppImage is read under the x86_64 name electron-builder writes", async () => {
+  assert.equal(
+    builtArtifactName(LINUX_TARGETS[0], "1.2.3"),
+    "redrob-linux-x86_64-1.2.3.AppImage",
+  );
+  assert.equal(artifactName(LINUX_TARGETS[0], "1.2.3"), "redrob-linux-x64-1.2.3.AppImage");
+  assert.equal(builtArtifactName(LINUX_TARGETS[1], "1.2.3"), "redrob-linux-x64-1.2.3.tar.gz");
+
+  const { dist, out } = await builtDist();
+  const staged = await pack({ dist, out, version });
+  const appImage = staged.filter((item) => item.name.endsWith(".AppImage"));
+  assert.deepEqual(
+    appImage.map((item) => path.relative(out, item.path)),
+    [
+      path.join(version, "redrob-linux-x64-0.3.1.AppImage"),
+      path.join("latest", "redrob-linux-x64.AppImage"),
+    ],
+  );
+  const source = await readFile(path.join(dist, `redrob-linux-x86_64-${version}.AppImage`));
+  for (const item of appImage) {
+    assert.deepEqual(await readFile(item.path), source);
+  }
 });
 
 /**

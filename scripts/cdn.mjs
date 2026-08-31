@@ -56,15 +56,25 @@ export const CDN_PUBLIC_HOST = "https://cdn.redrob.ai";
  * template `redrob-${os}-${arch}-${version}.${ext}`, resolved for the only
  * platform a plain runner can produce: linux/x64. When a target is added to
  * `electron-builder.base.yml`, add it here and its keys follow.
+ *
+ * `buildArch` exists because electron-builder resolves `${arch}` per target
+ * family: an AppImage is named with the kernel's `x86_64`, a tar.gz with Node's
+ * `x64`. The published key stays `x64` for both, so a download page has one name
+ * per platform instead of two spellings of the same machine.
  */
 export const LINUX_TARGETS = [
-  { os: "linux", arch: "x64", ext: "AppImage" },
+  { os: "linux", arch: "x64", buildArch: "x86_64", ext: "AppImage" },
   { os: "linux", arch: "x64", ext: "tar.gz" },
 ];
 
-/** The versioned artifact name electron-builder writes for one target. */
+/** The versioned key name published for one target. */
 export function artifactName(target, version) {
   return `redrob-${target.os}-${target.arch}-${version}.${target.ext}`;
+}
+
+/** The file name electron-builder actually wrote into `dist-electron/`. */
+export function builtArtifactName(target, version) {
+  return `redrob-${target.os}-${target.buildArch ?? target.arch}-${version}.${target.ext}`;
 }
 
 /**
@@ -90,8 +100,8 @@ export function cdnArtifacts(version, options = {}) {
   const versioned = [];
   const latest = [];
   for (const target of targets) {
-    const source = artifactName(target, version);
-    versioned.push({ folder: version, source, name: source });
+    const source = builtArtifactName(target, version);
+    versioned.push({ folder: version, source, name: artifactName(target, version) });
     if (options.latest !== false) {
       latest.push({ folder: "latest", source, name: latestName(target) });
     }
