@@ -80,31 +80,20 @@ jobs:
       - name: Stamp the version into the workspace
         run: node scripts/release/stamp-version.mjs --version "${{ steps.version.outputs.version }}"
 
-      - name: Verify the CDN uploader
-        run: node --test scripts/cdn.test.mjs
-
-      # The desktop app bundles the Redrob Code engine as a sidecar, downloaded
-      # from the private redrob-labs/redrob-code repository, so the pack cannot
-      # produce a runnable distributable without a token that can read it. That
-      # token is an org grant, not something this repository can fix, so its
-      # absence stops the job with a warning instead of a red build or, worse, an
-      # app uploaded that cannot start. A token that is present and a build that
-      # then fails is a real failure and still reddens.
-      - name: Check for the engine sidecar token
-        id: engine
-        env:
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
+      - name: Verify the CDN uploader and the engine sidecar fetch
         run: |
           set -euo pipefail
-          if [ -n "${REDROB_GITHUB_TOKEN:-}" ]; then
-            echo "available=1" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=0" >> "$GITHUB_OUTPUT"
-            echo "::warning::REDROB_GITHUB_TOKEN is not available to this repository, so the Redrob Code engine sidecar cannot be downloaded and no distributable was built or published. Nothing was uploaded in its place."
-          fi
+          node --test scripts/cdn.test.mjs
+          node --test apps/desktop/scripts/redrob-code-cdn.test.mjs
 
+      # The desktop app bundles the Redrob Code engine as a sidecar.
+      # prepare-sidecar.mjs fetches it from the public Code CDN
+      # (https://cdn.redrob.ai/code/) and verifies the published sha256 sidecar,
+      # so this job needs no credentials to produce a runnable distributable.
+      # REDROB_GITHUB_TOKEN stays wired as the secondary source for targets the
+      # CDN does not publish; when it is absent the CDN path is the only one and
+      # a failure there is a real failure that reddens the build.
       - name: Build the Linux distributable (unsigned)
-        if: steps.engine.outputs.available == '1'
         env:
           REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
           REDROB_CODE_GITHUB_REPO: ${{ vars.REDROB_CODE_GITHUB_REPO || 'redrob-labs/redrob-code' }}
@@ -122,7 +111,6 @@ jobs:
             --publish never
 
       - name: Publish to cdn.redrob.ai
-        if: steps.engine.outputs.available == '1'
         env:
           REDROB_WORK_CDN_BUCKET: ${{ vars.REDROB_CDN_BUCKET }}
           REDROB_WORK_CDN_ACCESS_KEY_ID: ${{ secrets.REDROB_CDN_ACCESS_KEY_ID }}
