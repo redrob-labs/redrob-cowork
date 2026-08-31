@@ -20,13 +20,21 @@ import { tmpdir } from "os";
 import { fileURLToPath } from "url";
 
 import {
+  downloadRedrobCodeCdnArchive,
+  normalizeCdnBaseUrl,
+  redrobCodeCdnArchiveName,
+  redrobCodeCdnBinaryName,
+} from "./redrob-code-cdn.mjs";
+import {
   downloadRedrobCodeArchive,
+  missingGithubTokenMessage,
   normalizeGithubRepo,
   normalizeReleaseVersion,
   packagedSidecarNames,
   redrobCodeArchiveName,
   redrobCodeBinaryName,
   REDROB_CODE_REPO,
+  selectGithubToken,
 } from "./redrob-code-release.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -134,14 +142,15 @@ const readDirectory = (dir) => {
   });
 };
 
-const findEngineBinary = (dir) => {
+const findEngineBinary = (dir, preferredNames = []) => {
   const candidates = readDirectory(dir);
-  return (
-    candidates.find((file) => file.endsWith(`/${engineBaseName}`) || file.endsWith(`\\${engineBaseName}`)) ??
-    candidates.find((file) => file.endsWith("/redrob.exe") || file.endsWith("\\redrob.exe")) ??
-    candidates.find((file) => file.endsWith("/redrob") || file.endsWith("\\redrob")) ??
-    null
-  );
+  const named = (name) =>
+    candidates.find((file) => file.endsWith(`/${name}`) || file.endsWith(`\\${name}`)) ?? null;
+  for (const name of [...preferredNames, engineBaseName, "redrob.exe", "redrob"]) {
+    const match = named(name);
+    if (match) return match;
+  }
+  return null;
 };
 
 const readBinaryVersion = (filePath) => {
@@ -211,6 +220,19 @@ if (!normalizedEngineVersion) {
 
 const engineArchive = archiveOverride ?? (resolvedTargetTriple ? redrobCodeArchiveName(resolvedTargetTriple) : null);
 
+// The public Code CDN needs no credentials, so it is the primary source and an
+// explicit REDROB_CODE_ASSET (a Releases API asset name) is the only thing that
+// takes it out of the running. REDROB_CODE_CDN_VERSION=latest follows the CDN's
+// own stable alias; by default the pinned constants.json version is fetched from
+// its own prefix so a build stays reproducible.
+const cdnArchive = archiveOverride
+  ? null
+  : resolvedTargetTriple
+    ? redrobCodeCdnArchiveName(resolvedTargetTriple)
+    : null;
+const cdnBaseUrl = normalizeCdnBaseUrl(process.env.REDROB_CODE_CDN_BASE_URL);
+const cdnVersion = process.env.REDROB_CODE_CDN_VERSION?.trim() || normalizedEngineVersion;
+
 const shouldDownloadEngine =
   !engineCandidatePath ||
   !existsSync(engineCandidatePath) ||
@@ -231,7 +253,7 @@ if (shouldDownloadEngine) {
     installEngineBinary(localBin);
     console.log(`Redrob Code sidecar copied from REDROB_CODE_BIN (${localBin}).`);
   } else {
-    if (!engineArchive) {
+    if (!cdnArchive && !engineArchive) {
       console.error(
         `No Redrob Code asset configured for target ${resolvedTargetTriple ?? "unknown"}. Set REDROB_CODE_ASSET to override.`,
       );
@@ -241,29 +263,70 @@ if (shouldDownloadEngine) {
     mkdirSync(sidecarDir, { recursive: true });
 
     const stamp = Date.now();
-    const archivePath = join(tmpdir(), `redrob-code-${stamp}-${engineArchive}`);
     const extractDir = join(tmpdir(), `redrob-code-${stamp}`);
 
     mkdirSync(extractDir, { recursive: true });
 
-    try {
-      const result = await downloadRedrobCodeArchive({
-        repo: redrobCodeGithubRepo,
-        version: normalizedEngineVersion,
-        archiveName: engineArchive,
-        destPath: archivePath,
-        env: process.env,
-        writeArchive: (path, bytes) => writeFile(path, bytes),
-      });
-      console.log(
-        `Downloaded ${engineArchive} (${result.bytes} bytes) from ${redrobCodeGithubRepo} using ${result.tokenSource}.`,
+    const failures = [];
+    const errorMessage = (error) => (error instanceof Error ? error.message : String(error));
+    let downloadedArchive = null;
+
+    if (cdnArchive) {
+      const archivePath = join(tmpdir(), `redrob-code-${stamp}-${cdnArchive}`);
+      try {
+        const result = await downloadRedrobCodeCdnArchive({
+          baseUrl: cdnBaseUrl,
+          version: cdnVersion,
+          archiveName: cdnArchive,
+          destPath: archivePath,
+          writeArchive: (path, bytes) => writeFile(path, bytes),
+        });
+        console.log(
+          `Downloaded ${cdnArchive} (${result.bytes} bytes) from ${result.archiveUrl}; sha256 ${result.sha256} matches the published sidecar.`,
+        );
+        downloadedArchive = { name: cdnArchive, path: archivePath };
+      } catch (error) {
+        failures.push(errorMessage(error));
+      }
+    }
+
+    // The authenticated Releases API is the secondary source: it covers targets
+    // the CDN does not publish and versions that have not reached it yet, but
+    // only when a token is actually configured.
+    if (!downloadedArchive && engineArchive) {
+      if (selectGithubToken(process.env)) {
+        const archivePath = join(tmpdir(), `redrob-code-${stamp}-${engineArchive}`);
+        try {
+          const result = await downloadRedrobCodeArchive({
+            repo: redrobCodeGithubRepo,
+            version: normalizedEngineVersion,
+            archiveName: engineArchive,
+            destPath: archivePath,
+            env: process.env,
+            writeArchive: (path, bytes) => writeFile(path, bytes),
+          });
+          console.log(
+            `Downloaded ${engineArchive} (${result.bytes} bytes) from ${redrobCodeGithubRepo} using ${result.tokenSource}.`,
+          );
+          downloadedArchive = { name: engineArchive, path: archivePath };
+        } catch (error) {
+          failures.push(errorMessage(error));
+        }
+      } else {
+        failures.push(missingGithubTokenMessage(redrobCodeGithubRepo));
+      }
+    }
+
+    if (!downloadedArchive) {
+      console.error(
+        [`Could not obtain the Redrob Code engine for ${resolvedTargetTriple ?? "unknown"}:`, ...failures].join("\n  "),
       );
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : String(error));
       process.exit(1);
     }
 
-    if (engineArchive.endsWith(".zip")) {
+    const { name: downloadedName, path: archivePath } = downloadedArchive;
+
+    if (downloadedName.endsWith(".zip")) {
       const unzipResult = process.platform === "win32"
         ? spawnSync(
           "powershell",
@@ -278,17 +341,21 @@ if (shouldDownloadEngine) {
       if (unzipResult.status !== 0) {
         process.exit(unzipResult.status ?? 1);
       }
-    } else if (engineArchive.endsWith(".tar.gz")) {
+    } else if (downloadedName.endsWith(".tar.gz")) {
       const tarResult = spawnSync("tar", ["-xzf", archivePath, "-C", extractDir], { stdio: "inherit" });
       if (tarResult.status !== 0) {
         process.exit(tarResult.status ?? 1);
       }
     } else {
-      console.error(`Unknown Redrob Code archive type: ${engineArchive}`);
+      console.error(`Unknown Redrob Code archive type: ${downloadedName}`);
       process.exit(1);
     }
 
-    const extractedBinary = findEngineBinary(extractDir);
+    // The CDN archives ship the binary as `redrob-code`; the release archives
+    // ship it as `redrob`. Look for both rather than assuming one layout.
+    const extractedBinary = findEngineBinary(extractDir, [
+      redrobCodeCdnBinaryName({ isWindows: isWindowsTarget }),
+    ]);
     if (!extractedBinary) {
       console.error("Redrob Code binary not found after extraction.");
       process.exit(1);
