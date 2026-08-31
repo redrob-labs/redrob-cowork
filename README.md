@@ -90,9 +90,11 @@ the real version in at build time, so this one does too. Dispatching `cdn` with 
 way publishes a preview under `0.0.0-cdn.{sha}` and leaves `latest/` pointing at
 the last release, because a prefix nobody released should not be what a download
 page hands out. The build also needs `REDROB_GITHUB_TOKEN` to fetch the engine
-sidecar from the private `redrob-code` repository; without it the pack cannot
-produce a runnable app, and the job fails there rather than publishing one that
-will not start.
+sidecar from the private `redrob-code` repository. That is an org grant this
+repository cannot make for itself, so when the token is absent the job warns,
+builds nothing and uploads nothing rather than reddening or publishing an app
+that cannot start. Once the token is granted, a failing build is a real failure
+again.
 
 ## Local development
 

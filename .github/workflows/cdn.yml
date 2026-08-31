@@ -84,10 +84,27 @@ jobs:
         run: node --test scripts/cdn.test.mjs
 
       # The desktop app bundles the Redrob Code engine as a sidecar, downloaded
-      # from the private redrob-labs/redrob-code repository. Without a token that
-      # can read it the pack cannot produce a runnable distributable, so the
-      # build is blocked rather than shipping an app that cannot start.
+      # from the private redrob-labs/redrob-code repository, so the pack cannot
+      # produce a runnable distributable without a token that can read it. That
+      # token is an org grant, not something this repository can fix, so its
+      # absence stops the job with a warning instead of a red build or, worse, an
+      # app uploaded that cannot start. A token that is present and a build that
+      # then fails is a real failure and still reddens.
+      - name: Check for the engine sidecar token
+        id: engine
+        env:
+          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${REDROB_GITHUB_TOKEN:-}" ]; then
+            echo "available=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=0" >> "$GITHUB_OUTPUT"
+            echo "::warning::REDROB_GITHUB_TOKEN is not available to this repository, so the Redrob Code engine sidecar cannot be downloaded and no distributable was built or published. Nothing was uploaded in its place."
+          fi
+
       - name: Build the Linux distributable (unsigned)
+        if: steps.engine.outputs.available == '1'
         env:
           REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
           REDROB_CODE_GITHUB_REPO: ${{ vars.REDROB_CODE_GITHUB_REPO || 'redrob-labs/redrob-code' }}
@@ -105,6 +122,7 @@ jobs:
             --publish never
 
       - name: Publish to cdn.redrob.ai
+        if: steps.engine.outputs.available == '1'
         env:
           REDROB_WORK_CDN_BUCKET: ${{ vars.REDROB_CDN_BUCKET }}
           REDROB_WORK_CDN_ACCESS_KEY_ID: ${{ secrets.REDROB_CDN_ACCESS_KEY_ID }}
