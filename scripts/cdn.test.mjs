@@ -13,7 +13,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
-import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -28,6 +28,7 @@ import {
   cdnObjectKeys,
   cdnTarget,
   latestName,
+  latestRequested,
   pack,
   signedPut,
   upload,
@@ -240,6 +241,32 @@ test("the AppImage is read under the x86_64 name electron-builder writes", async
   for (const item of appImage) {
     assert.deepEqual(await readFile(item.path), source);
   }
+});
+
+// The preview flag has to reach `pack`, not just `upload`: whatever is staged is
+// what gets walked and uploaded, so a preview that stages `latest/` publishes
+// itself as the download a page hands out.
+test("a preview stages nothing under latest", async () => {
+  assert.equal(latestRequested({}), true);
+  assert.equal(latestRequested({ REDROB_WORK_CDN_LATEST: "1" }), true);
+  assert.equal(latestRequested({ REDROB_WORK_CDN_LATEST: "0" }), false);
+  assert.equal(cdnTarget(configuredEnv(undefined, { REDROB_WORK_CDN_LATEST: "0" })).latest, false);
+
+  const { dist, out } = await builtDist();
+  const staged = await pack({
+    dist,
+    out,
+    version,
+    latest: latestRequested({ REDROB_WORK_CDN_LATEST: "0" }),
+  });
+  assert.deepEqual(
+    staged.map((item) => path.relative(out, item.path)),
+    [
+      path.join(version, "redrob-linux-x64-0.3.1.AppImage"),
+      path.join(version, "redrob-linux-x64-0.3.1.tar.gz"),
+    ],
+  );
+  assert.deepEqual(await readdir(out), [version]);
 });
 
 /**

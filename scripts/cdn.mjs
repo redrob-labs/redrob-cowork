@@ -119,6 +119,18 @@ export function cdnObjectKeys(version, options = {}) {
 }
 
 /**
+ * Whether this run may move `latest/`.
+ *
+ * `REDROB_WORK_CDN_LATEST=0` is how a preview says it is not the download a page
+ * should hand out. It is read here rather than inside `cdnTarget` alone because
+ * `pack` decides what is staged, and an object that is staged is an object that
+ * gets uploaded.
+ */
+export function latestRequested(env = process.env) {
+  return env["REDROB_WORK_CDN_LATEST"]?.trim() !== "0";
+}
+
+/**
  * Where the distributables go, or why they are going nowhere.
  *
  * Credentials fall back to the ambient `AWS_*` names so a runner with a role,
@@ -163,7 +175,7 @@ export function cdnTarget(env = process.env) {
     region: env["REDROB_WORK_CDN_REGION"]?.trim() || CDN_REGION,
     endpoint: env["REDROB_WORK_CDN_ENDPOINT"]?.trim(),
     prefix: prefix ? `${prefix}/` : `${CDN_PREFIX}/`,
-    latest: env["REDROB_WORK_CDN_LATEST"]?.trim() !== "0",
+    latest: latestRequested(env),
   };
 }
 
@@ -420,7 +432,8 @@ if (import.meta.filename === process.argv[1]) {
 
   // Stage into a fresh directory so a walk of it is exactly this release.
   await rm(out, { recursive: true, force: true });
-  for (const item of await pack({ dist, out, version })) {
+  const latest = latestRequested(process.env);
+  for (const item of await pack({ dist, out, version, latest })) {
     console.log(
       `packed ${path.relative(root, item.path)} ${item.bytes} bytes ${item.sha256}`,
     );
@@ -440,6 +453,8 @@ if (import.meta.filename === process.argv[1]) {
     console.log(
       `${CDN_PUBLIC_HOST}/${CDN_PREFIX}/${version}/${artifactName(target, version)}`,
     );
-    console.log(`${CDN_PUBLIC_HOST}/${CDN_PREFIX}/latest/${latestName(target)}`);
+    if (latest) {
+      console.log(`${CDN_PUBLIC_HOST}/${CDN_PREFIX}/latest/${latestName(target)}`);
+    }
   }
 }
