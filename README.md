@@ -51,6 +51,39 @@ A hosted Redrob Work MCP gateway is planned: one URL that brings your skills, pl
 
 Redrob Work registers the `redrob://` URL scheme (and `redrob-dev://` in development) so connect links and other deep links open the app directly.
 
+## Downloading builds from cdn.redrob.ai
+
+Alongside the download page, the Linux desktop distributables are published to a
+CDN for anyone side-loading them. Each build goes to two keys, one by version and
+one stable alias that a download page can link without being edited on every
+release:
+
+```text
+https://cdn.redrob.ai/work/{version}/redrob-linux-x64-{version}.AppImage
+https://cdn.redrob.ai/work/{version}/redrob-linux-x64-{version}.tar.gz
+https://cdn.redrob.ai/work/latest/redrob-linux-x64.AppImage
+https://cdn.redrob.ai/work/latest/redrob-linux-x64.tar.gz
+```
+
+Every object has a `.sha256` sidecar beside it in `sha256sum` format naming the
+file it describes, so a download can be checked in place with
+`sha256sum -c redrob-linux-x64.AppImage.sha256`.
+
+**These Linux artefacts are unsigned.** A plain GitHub runner has no Linux
+code-signing identity, so the AppImage and tarball are published as built; verify
+them with the checksum above rather than expecting a signature.
+
+`.github/workflows/cdn.yml` builds the distributable on `ubuntu-latest` and runs
+`scripts/cdn.mjs`, which uploads only when the bucket and credentials are set and
+otherwise prints which variable is missing and exits 0 — an unprovisioned CDN
+never fails the build, and there is no GitHub Releases fallback. In CI the target
+comes from the org variable `REDROB_CDN_BUCKET` and the org secrets
+`REDROB_CDN_ACCESS_KEY_ID` / `REDROB_CDN_SECRET_ACCESS_KEY`, mapped to the
+uploader's `REDROB_WORK_CDN_BUCKET` / `REDROB_WORK_CDN_ACCESS_KEY_ID` /
+`REDROB_WORK_CDN_SECRET_ACCESS_KEY`. Those credentials carry `s3:PutObject` and
+nothing else: no ACL is sent, no object is listed, and nothing is read back, so
+the only verification of a published key is an HTTP GET through CloudFront.
+
 ## Local development
 
 Redrob Work is a pnpm + Turborepo monorepo. Use **pnpm** only, and Node 24 (pinned in `.nvmrc`, e.g. `nvm use 24`).
