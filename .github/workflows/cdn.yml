@@ -14,6 +14,11 @@ name: cdn
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to publish under, e.g. 0.3.1. Empty publishes a commit-stamped preview and leaves latest/ alone."
+        required: false
+        type: string
   push:
     paths:
       - .github/workflows/cdn.yml
@@ -31,6 +36,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.3.1
+
+      # The workspace commits `0.0.0-dev` on purpose and the release workflows
+      # stamp the real version in at build time, so this job has to decide one
+      # too or electron-builder would name every artifact `-0.0.0-dev` and the
+      # CDN would carry that as a version prefix. A dispatch with a version is a
+      # publish; anything else is a preview stamped with the commit, which gets
+      # its own prefix and must not move `latest/` to something nobody released.
+      - name: Resolve the version to publish
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_VERSION:-}" ]; then
+            echo "version=${INPUT_VERSION#v}" >> "$GITHUB_OUTPUT"
+            echo "latest=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=0.0.0-cdn.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "latest=0" >> "$GITHUB_OUTPUT"
+          fi
 
       # pnpm must be installed BEFORE setup-node so setup-node can find the pnpm
       # binary on PATH, matching this repo's other workflows.
@@ -51,6 +76,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Stamp the version into the workspace
+        run: node scripts/release/stamp-version.mjs --version "${{ steps.version.outputs.version }}"
 
       - name: Verify the CDN uploader
         run: node --test scripts/cdn.test.mjs
@@ -82,5 +110,7 @@ jobs:
           REDROB_WORK_CDN_ACCESS_KEY_ID: ${{ secrets.REDROB_CDN_ACCESS_KEY_ID }}
           REDROB_WORK_CDN_SECRET_ACCESS_KEY: ${{ secrets.REDROB_CDN_SECRET_ACCESS_KEY }}
           REDROB_WORK_CDN_PREFIX: work
-          REDROB_WORK_CDN_LATEST: "1"
+          # A preview publishes under its own commit-stamped prefix and leaves
+          # `latest/` pointing at the last real release.
+          REDROB_WORK_CDN_LATEST: ${{ steps.version.outputs.latest }}
         run: node scripts/cdn.mjs

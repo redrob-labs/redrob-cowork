@@ -84,6 +84,16 @@ uploader's `REDROB_WORK_CDN_BUCKET` / `REDROB_WORK_CDN_ACCESS_KEY_ID` /
 nothing else: no ACL is sent, no object is listed, and nothing is read back, so
 the only verification of a published key is an HTTP GET through CloudFront.
 
+The workspace commits the `0.0.0-dev` placeholder and the release workflows stamp
+the real version in at build time, so this one does too. Dispatching `cdn` with a
+`version` publishes under that prefix and moves `latest/`; running it any other
+way publishes a preview under `0.0.0-cdn.{sha}` and leaves `latest/` pointing at
+the last release, because a prefix nobody released should not be what a download
+page hands out. The build also needs `REDROB_GITHUB_TOKEN` to fetch the engine
+sidecar from the private `redrob-code` repository; without it the pack cannot
+produce a runnable app, and the job fails there rather than publishing one that
+will not start.
+
 ## Local development
 
 Redrob Work is a pnpm + Turborepo monorepo. Use **pnpm** only, and Node 24 (pinned in `.nvmrc`, e.g. `nvm use 24`).
