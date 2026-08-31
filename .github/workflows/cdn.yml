@@ -1,5 +1,9 @@
 # Publish the Linux desktop distributables to https://cdn.redrob.ai/work/.
 #
+# The Redrob Code engine sidecar this pack bundles comes from the public Code CDN
+# (https://cdn.redrob.ai/code/), verified against its published sha256 sidecar, so
+# no credential is needed to build a runnable app here.
+#
 # The Linux AppImage and tarball built here are UNSIGNED: a plain ubuntu-latest
 # runner has no Linux code-signing identity, and the download page must not imply
 # otherwise. macOS notarization and Windows NSIS are skipped entirely by
