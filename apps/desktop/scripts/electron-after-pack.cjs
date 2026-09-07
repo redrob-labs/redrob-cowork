@@ -146,7 +146,9 @@ async function afterPack(context) {
   if (!sidecarsDir || !fs.existsSync(sidecarsDir)) return;
 
   const isWindows = context.electronPlatformName === "win32";
-  const executableSuffix = isWindows ? ".exe" : "";
+  // The Code CDN sidecar is already Authenticode-signed. Keep its packaged
+  // .bin name so electron-builder does not attempt a second nested signing.
+  const executableSuffix = isWindows ? ".bin" : "";
   const keep = new Set();
 
   for (const base of sidecarBases) {

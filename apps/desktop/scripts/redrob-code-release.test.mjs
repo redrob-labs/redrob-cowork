@@ -51,8 +51,8 @@ describe("Redrob Code archive naming", () => {
       target: "redrob-aarch64-apple-darwin",
     });
     assert.deepEqual(packagedSidecarNames({ targetTriple: "x86_64-pc-windows-msvc" }), {
-      alias: "redrob.exe",
-      target: "redrob-x86_64-pc-windows-msvc.exe",
+      alias: "redrob.bin",
+      target: "redrob-x86_64-pc-windows-msvc.bin",
     });
     assert.deepEqual(packagedSidecarNames({}), { alias: "redrob", target: null });
   });

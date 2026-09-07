@@ -73,7 +73,11 @@ export function redrobCodeBinaryName(options = {}) {
 export function packagedSidecarNames(options = {}) {
   const { targetTriple, isWindows } = options;
   const windows = isWindows ?? isWindowsTargetTriple(targetTriple);
-  const suffix = windows ? ".exe" : "";
+  // The Windows engine is already Authenticode-signed by the Code release.
+  // Store it with a non-.exe resource name so electron-builder does not try to
+  // sign the nested executable again. CreateProcess accepts an explicit PE
+  // path regardless of extension, and renaming does not alter its signature.
+  const suffix = windows ? ".bin" : "";
   return {
     alias: `${REDROB_CODE_BINARY_BASE}${suffix}`,
     target: targetTriple ? `${REDROB_CODE_BINARY_BASE}-${targetTriple}${suffix}` : null,

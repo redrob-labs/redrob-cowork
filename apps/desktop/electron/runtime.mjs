@@ -1603,7 +1603,9 @@ export function createRuntimeManager({
     }
 
     if (baseName === REDROB_CODE_BINARY_BASE) {
-      const fileName = process.platform === "win32" ? "redrob.exe" : "redrob";
+      // Windows packages keep the already-signed Code CDN PE under .bin so
+      // electron-builder does not try to sign the nested executable again.
+      const fileName = process.platform === "win32" ? "redrob.bin" : "redrob";
       for (const candidate of [
         // Conventional Redrob Code install location (see the redrob-code installer).
         path.join(app.getPath("home"), ".redrob", "bin", fileName),

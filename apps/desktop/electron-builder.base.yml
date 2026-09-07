@@ -91,12 +91,12 @@ win:
     - from: resources/sidecars
       to: sidecars
       filter:
-        - redrob.exe
-        - redrob-aarch64-pc-windows-msvc.exe
-        - redrob-x86_64-pc-windows-msvc.exe
+        - redrob.bin
+        - redrob-aarch64-pc-windows-msvc.bin
+        - redrob-x86_64-pc-windows-msvc.bin
         - versions.json
-        - versions.json-aarch64-pc-windows-msvc.exe
-        - versions.json-x86_64-pc-windows-msvc.exe
+        - versions.json-aarch64-pc-windows-msvc.bin
+        - versions.json-x86_64-pc-windows-msvc.bin
   target:
     - nsis
 nsis:
