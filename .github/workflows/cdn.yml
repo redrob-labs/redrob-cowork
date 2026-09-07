@@ -29,6 +29,12 @@ on:
   push:
     paths:
       - .github/workflows/cdn.yml
+      # The uploader and the sidecar staging are the rest of this pipeline, so a
+      # change to either is exercised the same way a change to the workflow is.
+      - scripts/cdn.mjs
+      - apps/desktop/scripts/prepare-sidecar.mjs
+      - apps/desktop/scripts/redrob-code-cdn.mjs
+      - apps/desktop/scripts/redrob-code-release.mjs
 
 permissions:
   contents: read
