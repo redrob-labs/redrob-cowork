@@ -128,6 +128,8 @@ jobs:
     # a versioned dispatch or a main push moves latest; branch previews do not.
     #
     # This job needs the signed Windows engine sidecar from the public Code CDN.
+    # It is packaged under a .bin resource name so electron-builder does not
+    # attempt to Authenticode-sign the already-signed nested PE a second time.
     # With no archive there is nothing to package, so the job says which public
     # key is missing and publishes nothing rather than reaching into a private
     # GitHub Release or shipping an installer with no engine in it.
