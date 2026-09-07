@@ -456,6 +456,7 @@ jobs:
       MACOS_NOTARIZE: ${{ needs.resolve-release.outputs.notarize }}
       SIGN_WINDOWS: ${{ needs.resolve-release.outputs.sign_windows }}
       BENCHMARK_ONLY: ${{ needs.resolve-release.outputs.benchmark_only }}
+      HAS_WIN_CSC: ${{ secrets.WIN_CSC_LINK != '' }}
       # A filtered frozen install already materializes the complete desktop
       # dependency closure. Without this, pnpm may "repair" the intentionally
       # partial workspace with a second all-workspace install before scripts.
@@ -673,14 +674,14 @@ jobs:
           printf 'Version-checked artifact: %s\n' "${matches[@]}"
 
       - name: Use unsigned Windows installer fallback
-        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true' && secrets.WIN_CSC_LINK == ''
+        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true' && env.HAS_WIN_CSC != 'true'
         shell: bash
         run: |
           set -euo pipefail
           echo "::warning::Publishing unsigned Windows installer because SIGN_WINDOWS is not enabled and WIN_CSC_LINK is not set."
 
       - name: Verify Authenticode signature (PFX)
-        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true' && secrets.WIN_CSC_LINK != ''
+        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true' && env.HAS_WIN_CSC == 'true'
         shell: pwsh
         run: |
           $dist = Join-Path $env:GITHUB_WORKSPACE "apps\desktop\dist-electron"
@@ -853,6 +854,7 @@ jobs:
       MACOS_NOTARIZE: ${{ needs.resolve-release.outputs.notarize }}
       SIGN_WINDOWS: ${{ needs.resolve-release.outputs.sign_windows }}
       BENCHMARK_ONLY: ${{ needs.resolve-release.outputs.benchmark_only }}
+      HAS_WIN_CSC: ${{ secrets.WIN_CSC_LINK != '' }}
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
       REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
       REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
