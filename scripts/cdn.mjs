@@ -74,7 +74,14 @@ export const LINUX_TARGETS = [
  * The Windows NSIS installer electron-builder emits on windows-latest. `${os}`
  * in the artifactName template is `win`, not `windows`.
  */
-export const WINDOWS_TARGETS = [{ os: "win", arch: "x64", ext: "exe" }];
+export const WINDOWS_TARGETS = [{
+  os: "win",
+  arch: "x64",
+  ext: "exe",
+  // Fresh, product-named key: the old redrob-win-x64.exe alias was published
+  // without Cache-Control and CloudFront still serves its pre-engine bytes.
+  stableName: "redrob-work-x64-setup.exe",
+}];
 
 /** Which family this run packed. Linux is the default so a job that never
  * built NSIS cannot invent a Windows key. */
@@ -99,7 +106,7 @@ export function builtArtifactName(target, version) {
  * hardcode it.
  */
 export function latestName(target) {
-  return `redrob-${target.os}-${target.arch}.${target.ext}`;
+  return target.stableName ?? `redrob-${target.os}-${target.arch}.${target.ext}`;
 }
 
 /**
