@@ -296,6 +296,7 @@ export function signedPut(input) {
   const headers = {
     host: url.host,
     "content-type": input.contentType,
+    ...(input.cacheControl ? { "cache-control": input.cacheControl } : {}),
     "x-amz-content-sha256": payloadHash,
     "x-amz-date": amzDate,
     ...(input.sessionToken
@@ -354,6 +355,22 @@ function contentTypeFor(name) {
 }
 
 /**
+ * How long the CDN in front of the bucket may keep a key.
+ *
+ * A versioned key is written once, so it can be kept forever. `latest/` is
+ * rewritten by every release and must be allowed to move: without a header the
+ * distribution applies its own default, which held a superseded installer for
+ * hours after a new one was published and made a fixed build look unfixed. Five
+ * minutes is short enough that a release is visible and long enough that the
+ * bucket is not the download path for every reader.
+ */
+export function cacheControlFor(folder) {
+  return folder === "latest"
+    ? "public, max-age=300"
+    : "public, max-age=31536000, immutable";
+}
+
+/**
  * Put everything under `input.dir`, each artefact before the sidecar describing
  * it, so a reader who catches the window sees a missing checksum rather than one
  * that does not match. The directory is walked rather than recomputed so the
@@ -385,6 +402,7 @@ export async function upload(input) {
       key,
       body,
       contentType: contentTypeFor(name),
+      cacheControl: cacheControlFor(folder),
     });
 
     const response = await (input.fetch ?? fetch)(request.url, {

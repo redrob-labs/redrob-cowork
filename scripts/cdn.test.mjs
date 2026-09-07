@@ -371,6 +371,23 @@ test("uploading puts every staged object and nothing else", async () => {
       assert.equal("x-amz-acl" in put.headers, false);
     }
 
+    /**
+     * The alias has to be allowed to move. With no Cache-Control the CDN in
+     * front of the bucket applied its own default and kept serving a superseded
+     * installer for hours after a fixed one was published, which reads as a fix
+     * that did not work. A versioned key is written once and may be kept.
+     */
+    for (const put of bucket.puts) {
+      const latest = put.url.includes("/latest/");
+      assert.equal(
+        put.headers["cache-control"],
+        latest ? "public, max-age=300" : "public, max-age=31536000, immutable",
+        `${put.url} carries the wrong cache policy`,
+      );
+      // Sent means signed, or S3 rejects the request.
+      assert.match(put.headers.authorization, /SignedHeaders=[^,]*cache-control/);
+    }
+
     // First put is the versioned AppImage; its sidecar follows immediately and
     // names the file beside it.
     const [appimage, appimageSidecar] = bucket.puts;
