@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version to publish under, e.g. 0.3.1. Empty publishes a commit-stamped preview and leaves latest/ alone."
+        description: "Release version to publish under, e.g. 0.3.1. Empty publishes a commit-stamped preview; only main may move latest/."
         required: false
         type: string
   push:
@@ -48,8 +48,8 @@ jobs:
       # stamp the real version in at build time, so this job has to decide one
       # too or electron-builder would name every artifact `-0.0.0-dev` and the
       # CDN would carry that as a version prefix. A dispatch with a version is a
-      # publish; anything else is a preview stamped with the commit, which gets
-      # its own prefix and must not move `latest/` to something nobody released.
+      # publish; anything else is a preview stamped with the commit. A main push
+      # owns the public latest alias; feature-branch previews never move it.
       - name: Resolve the version to publish
         id: version
         env:
@@ -61,7 +61,7 @@ jobs:
             echo "latest=1" >> "$GITHUB_OUTPUT"
           else
             echo "version=0.0.0-cdn.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-            echo "latest=0" >> "$GITHUB_OUTPUT"
+            echo "latest=${{ github.ref_name == 'main' && '1' || '0' }}" >> "$GITHUB_OUTPUT"
           fi
 
       # pnpm must be installed BEFORE setup-node so setup-node can find the pnpm
@@ -119,14 +119,13 @@ jobs:
           REDROB_WORK_CDN_SECRET_ACCESS_KEY: ${{ secrets.REDROB_CDN_SECRET_ACCESS_KEY }}
           REDROB_WORK_CDN_PREFIX: work
           REDROB_WORK_CDN_TARGETS: linux
-          # A preview publishes under its own commit-stamped prefix and leaves
-          # `latest/` pointing at the last real release.
+          # Main owns `latest/`; a feature-branch preview leaves it alone.
           REDROB_WORK_CDN_LATEST: ${{ steps.version.outputs.latest }}
         run: node scripts/cdn.mjs
 
   windows:
     # Signed NSIS on a Windows runner. Same version/latest gate as the Linux job:
-    # a dispatch with a version may move latest/; a path-push preview must not.
+    # a versioned dispatch or a main push moves latest; branch previews do not.
     #
     # This job needs the signed Windows engine sidecar from the public Code CDN.
     # With no archive there is nothing to package, so the job says which public
@@ -171,7 +170,7 @@ jobs:
             echo "latest=1" >> "$GITHUB_OUTPUT"
           else
             echo "version=0.0.0-cdn.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-            echo "latest=0" >> "$GITHUB_OUTPUT"
+            echo "latest=${{ github.ref_name == 'main' && '1' || '0' }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup pnpm
