@@ -175,8 +175,25 @@ jobs:
         with:
           bun-version: 1.3.14
 
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-cdn-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-cdn-pnpm-
+
+      # The same filtered install the Electron release job uses. A full install
+      # on Windows drags in packages whose node-gyp builds are not needed to
+      # package the desktop app and fail on the runner.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm --filter @redrob/desktop... --filter @redrob/app... --filter redrob-server... install --frozen-lockfile --prefer-offline
 
       - name: Stamp the version into the workspace
         shell: bash
@@ -190,6 +207,8 @@ jobs:
 
       - name: Build the Windows installer (signed)
         env:
+          # Which engine sidecar prepare-sidecar.mjs fetches from the Code CDN.
+          TARGET: x86_64-pc-windows-msvc
           REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
           REDROB_CODE_GITHUB_REPO: ${{ vars.REDROB_CODE_GITHUB_REPO || 'redrob-labs/redrob-code' }}
           REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
