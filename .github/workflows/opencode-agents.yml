@@ -34,10 +34,6 @@ jobs:
           node-version: 24
 
       - name: Install Redrob Code engine
-        env:
-          # redrob-labs/redrob-code is private: anonymous release downloads 404, so
-          # the engine is resolved through the authenticated Releases API by asset id.
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           install_dir="$RUNNER_TEMP/redrob-code"
@@ -77,10 +73,6 @@ jobs:
           node-version: 24
 
       - name: Install Redrob Code engine
-        env:
-          # redrob-labs/redrob-code is private: anonymous release downloads 404, so
-          # the engine is resolved through the authenticated Releases API by asset id.
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           install_dir="$RUNNER_TEMP/redrob-code"

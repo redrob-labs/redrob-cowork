@@ -7,9 +7,8 @@
  * private `redrob-labs/redrob-code` repository. Every archive has a `.sha256`
  * sidecar in `sha256sum` format beside it, and an unauthenticated download is
  * only trustworthy if that digest is checked, so a mismatch refuses the archive
- * instead of unpacking it. The authenticated Releases API path in
- * redrob-code-release.mjs stays as the secondary source for targets the CDN does
- * not publish (Windows) and for versions that are not on it yet.
+ * instead of unpacking it. There is deliberately no private-GitHub fallback:
+ * desktop builds consume the same public, checksummed artifacts users do.
  */
 
 import { createHash } from "node:crypto";
@@ -21,15 +20,15 @@ export const REDROB_CODE_CDN_BINARY_BASE = "redrob-code";
 
 /**
  * Archives published to the CDN, keyed by the Rust target triple the desktop
- * build already uses for sidecar naming. Windows is absent on purpose: the CDN
- * does not publish it, and guessing a name would turn a missing artifact into a
- * confusing 403 instead of an immediate fall back to the Releases API.
+ * build already uses for sidecar naming.
  */
 export const REDROB_CODE_CDN_ARCHIVE_BY_TARGET = {
   "x86_64-unknown-linux-gnu": "redrob-code-linux-x64.tar.gz",
   "aarch64-unknown-linux-gnu": "redrob-code-linux-arm64.tar.gz",
   "x86_64-apple-darwin": "redrob-code-darwin-x64.tar.gz",
   "aarch64-apple-darwin": "redrob-code-darwin-arm64.tar.gz",
+  "x86_64-pc-windows-msvc": "redrob-code-windows-x64.tar.gz",
+  "aarch64-pc-windows-msvc": "redrob-code-windows-arm64.tar.gz",
 };
 
 /** CDN archive name for a target triple, or null when the CDN has no build. */

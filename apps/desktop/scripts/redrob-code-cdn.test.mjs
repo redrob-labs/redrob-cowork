@@ -47,12 +47,13 @@ function cdnFetch({ sidecar = `${DIGEST}  ${ARCHIVE}`, archive = BODY, status = 
 }
 
 describe("Code CDN archive naming", () => {
-  it("maps the targets the CDN publishes and refuses to guess the ones it does not", () => {
+  it("maps every desktop target the Code CDN publishes", () => {
     assert.equal(redrobCodeCdnArchiveName("x86_64-unknown-linux-gnu"), "redrob-code-linux-x64.tar.gz");
     assert.equal(redrobCodeCdnArchiveName("aarch64-unknown-linux-gnu"), "redrob-code-linux-arm64.tar.gz");
     assert.equal(redrobCodeCdnArchiveName("x86_64-apple-darwin"), "redrob-code-darwin-x64.tar.gz");
     assert.equal(redrobCodeCdnArchiveName("aarch64-apple-darwin"), "redrob-code-darwin-arm64.tar.gz");
-    assert.equal(redrobCodeCdnArchiveName("x86_64-pc-windows-msvc"), null);
+    assert.equal(redrobCodeCdnArchiveName("x86_64-pc-windows-msvc"), "redrob-code-windows-x64.tar.gz");
+    assert.equal(redrobCodeCdnArchiveName("aarch64-pc-windows-msvc"), "redrob-code-windows-arm64.tar.gz");
     assert.equal(redrobCodeCdnArchiveName("riscv64-unknown-linux-gnu"), null);
   });
 

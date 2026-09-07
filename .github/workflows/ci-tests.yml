@@ -32,12 +32,6 @@ jobs:
 
       - name: Install Redrob Code engine
         shell: bash
-        env:
-          # redrob-labs/redrob-code is private: anonymous release downloads 404, so
-          # the engine is resolved through the authenticated Releases API by asset
-          # id. This token needs read access to that repository.
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
-          REDROB_CODE_GITHUB_REPO: ${{ vars.REDROB_CODE_GITHUB_REPO || 'redrob-labs/redrob-code' }}
         run: |
           set -euo pipefail
           install_dir="$RUNNER_TEMP/redrob-code"

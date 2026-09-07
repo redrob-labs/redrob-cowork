@@ -97,13 +97,8 @@ jobs:
       # prepare-sidecar.mjs fetches it from the public Code CDN
       # (https://cdn.redrob.ai/code/) and verifies the published sha256 sidecar,
       # so this job needs no credentials to produce a runnable distributable.
-      # REDROB_GITHUB_TOKEN stays wired as the secondary source for targets the
-      # CDN does not publish; when it is absent the CDN path is the only one and
-      # a failure there is a real failure that reddens the build.
       - name: Build the Linux distributable (unsigned)
         env:
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
-          REDROB_CODE_GITHUB_REPO: ${{ vars.REDROB_CODE_GITHUB_REPO || 'redrob-labs/redrob-code' }}
           REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
           REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
           # No Linux signing identity exists on a plain runner; make the absence
@@ -133,13 +128,10 @@ jobs:
     # Signed NSIS on a Windows runner. Same version/latest gate as the Linux job:
     # a dispatch with a version may move latest/; a path-push preview must not.
     #
-    # This job needs an engine sidecar for Windows, which the public Code CDN
-    # does not publish: the Code release signs its Windows CLI with Azure and
-    # uploads it to a private GitHub Release. So the engine comes from either the
-    # CDN, once it carries a Windows archive, or the Releases API with
-    # REDROB_GITHUB_TOKEN. With neither, there is nothing to package, and the
-    # job says which one is missing and publishes nothing rather than shipping an
-    # installer with no engine in it.
+    # This job needs the signed Windows engine sidecar from the public Code CDN.
+    # With no archive there is nothing to package, so the job says which public
+    # key is missing and publishes nothing rather than reaching into a private
+    # GitHub Release or shipping an installer with no engine in it.
     if: github.repository == 'redrob-labs/redrob-work'
     runs-on: windows-latest
     env:
@@ -156,15 +148,8 @@ jobs:
       - name: Decide whether an engine sidecar can be obtained
         id: engine
         shell: bash
-        env:
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -n "${REDROB_GITHUB_TOKEN:-}" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-            echo "The engine comes from the Releases API."
-            exit 0
-          fi
           archive=https://cdn.redrob.ai/code/latest/redrob-code-windows-x64.tar.gz
           if curl --fail --silent --show-error --location --head -o /dev/null "$archive"; then
             echo "available=true" >> "$GITHUB_OUTPUT"
@@ -172,7 +157,7 @@ jobs:
             exit 0
           fi
           echo "available=false" >> "$GITHUB_OUTPUT"
-          echo "::notice::No Windows engine sidecar is available: $archive is not published and REDROB_GITHUB_TOKEN is not set. Nothing was built or uploaded."
+          echo "::notice::No Windows engine sidecar is available at $archive. Nothing was built or uploaded."
 
       - name: Resolve the version to publish
         id: version
@@ -247,8 +232,7 @@ jobs:
         env:
           # Which engine sidecar prepare-sidecar.mjs fetches from the Code CDN.
           TARGET: x86_64-pc-windows-msvc
-          REDROB_GITHUB_TOKEN: ${{ secrets.REDROB_GITHUB_TOKEN }}
-          REDROB_CODE_GITHUB_REPO: ${{ vars.REDROB_CODE_GITHUB_REPO || 'redrob-labs/redrob-code' }}
+          REDROB_CODE_CDN_VERSION: latest
           REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
           REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
         run: |

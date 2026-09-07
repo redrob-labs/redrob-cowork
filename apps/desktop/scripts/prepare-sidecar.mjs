@@ -26,15 +26,9 @@ import {
   redrobCodeCdnBinaryName,
 } from "./redrob-code-cdn.mjs";
 import {
-  downloadRedrobCodeArchive,
-  missingGithubTokenMessage,
-  normalizeGithubRepo,
   normalizeReleaseVersion,
   packagedSidecarNames,
-  redrobCodeArchiveName,
   redrobCodeBinaryName,
-  REDROB_CODE_REPO,
-  selectGithubToken,
 } from "./redrob-code-release.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -51,9 +45,6 @@ const sidecarOverride = process.env.REDROB_SIDECAR_DIR?.trim() || readArg("--out
 const sidecarDir = sidecarOverride ? resolve(sidecarOverride) : join(__dirname, "..", "resources", "sidecars");
 const constantsPath = resolve(__dirname, "..", "..", "..", "constants.json");
 
-const redrobCodeGithubRepo = normalizeGithubRepo(
-  process.env.REDROB_CODE_GITHUB_REPO?.trim() || REDROB_CODE_REPO,
-);
 const pinnedRedrobCodeVersion = (() => {
   try {
     const raw = readFileSync(constantsPath, "utf8");
@@ -218,18 +209,13 @@ if (!normalizedEngineVersion) {
   process.exit(1);
 }
 
-const engineArchive = archiveOverride ?? (resolvedTargetTriple ? redrobCodeArchiveName(resolvedTargetTriple) : null);
-
 // The public Code CDN needs no credentials, so it is the primary source and an
-// explicit REDROB_CODE_ASSET (a Releases API asset name) is the only thing that
-// takes it out of the running. REDROB_CODE_CDN_VERSION=latest follows the CDN's
-// own stable alias; by default the pinned constants.json version is fetched from
+// only remote source. REDROB_CODE_CDN_VERSION=latest follows the CDN's own
+// stable alias; by default the pinned constants.json version is fetched from
 // its own prefix so a build stays reproducible.
-const cdnArchive = archiveOverride
-  ? null
-  : resolvedTargetTriple
-    ? redrobCodeCdnArchiveName(resolvedTargetTriple)
-    : null;
+const cdnArchive = archiveOverride ?? (
+  resolvedTargetTriple ? redrobCodeCdnArchiveName(resolvedTargetTriple) : null
+);
 const cdnBaseUrl = normalizeCdnBaseUrl(process.env.REDROB_CODE_CDN_BASE_URL);
 const cdnVersion = process.env.REDROB_CODE_CDN_VERSION?.trim() || normalizedEngineVersion;
 
@@ -253,9 +239,9 @@ if (shouldDownloadEngine) {
     installEngineBinary(localBin);
     console.log(`Redrob Code sidecar copied from REDROB_CODE_BIN (${localBin}).`);
   } else {
-    if (!cdnArchive && !engineArchive) {
+    if (!cdnArchive) {
       console.error(
-        `No Redrob Code asset configured for target ${resolvedTargetTriple ?? "unknown"}. Set REDROB_CODE_ASSET to override.`,
+        `No Code CDN archive configured for target ${resolvedTargetTriple ?? "unknown"}. Set REDROB_CODE_ASSET to a CDN archive name to override.`,
       );
       process.exit(1);
     }
@@ -287,33 +273,6 @@ if (shouldDownloadEngine) {
         downloadedArchive = { name: cdnArchive, path: archivePath };
       } catch (error) {
         failures.push(errorMessage(error));
-      }
-    }
-
-    // The authenticated Releases API is the secondary source: it covers targets
-    // the CDN does not publish and versions that have not reached it yet, but
-    // only when a token is actually configured.
-    if (!downloadedArchive && engineArchive) {
-      if (selectGithubToken(process.env)) {
-        const archivePath = join(tmpdir(), `redrob-code-${stamp}-${engineArchive}`);
-        try {
-          const result = await downloadRedrobCodeArchive({
-            repo: redrobCodeGithubRepo,
-            version: normalizedEngineVersion,
-            archiveName: engineArchive,
-            destPath: archivePath,
-            env: process.env,
-            writeArchive: (path, bytes) => writeFile(path, bytes),
-          });
-          console.log(
-            `Downloaded ${engineArchive} (${result.bytes} bytes) from ${redrobCodeGithubRepo} using ${result.tokenSource}.`,
-          );
-          downloadedArchive = { name: engineArchive, path: archivePath };
-        } catch (error) {
-          failures.push(errorMessage(error));
-        }
-      } else {
-        failures.push(missingGithubTokenMessage(redrobCodeGithubRepo));
       }
     }
 
