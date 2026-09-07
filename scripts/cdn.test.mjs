@@ -23,6 +23,7 @@ import {
   CDN_PUBLIC_HOST,
   CDN_REGION,
   LINUX_TARGETS,
+  WINDOWS_TARGETS,
   artifactName,
   builtArtifactName,
   cdnObjectKeys,
@@ -30,6 +31,7 @@ import {
   latestName,
   latestRequested,
   pack,
+  packTargets,
   signedPut,
   upload,
 } from "../scripts/cdn.mjs";
@@ -114,6 +116,19 @@ test("the public download URLs are the ones a page can hardcode", () => {
     "work/latest/redrob-linux-x64.AppImage.sha256",
     "work/latest/redrob-linux-x64.tar.gz",
     "work/latest/redrob-linux-x64.tar.gz.sha256",
+  ]);
+});
+
+test("Windows NSIS uses win in the filename, not windows", () => {
+  assert.deepEqual(packTargets({}), LINUX_TARGETS);
+  assert.deepEqual(packTargets({ REDROB_WORK_CDN_TARGETS: "windows" }), WINDOWS_TARGETS);
+  assert.equal(artifactName(WINDOWS_TARGETS[0], "1.2.3"), "redrob-win-x64-1.2.3.exe");
+  assert.equal(latestName(WINDOWS_TARGETS[0]), "redrob-win-x64.exe");
+  assert.deepEqual(cdnObjectKeys("1.2.3", { targets: WINDOWS_TARGETS }), [
+    "work/1.2.3/redrob-win-x64-1.2.3.exe",
+    "work/1.2.3/redrob-win-x64-1.2.3.exe.sha256",
+    "work/latest/redrob-win-x64.exe",
+    "work/latest/redrob-win-x64.exe.sha256",
   ]);
 });
 

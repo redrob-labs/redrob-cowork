@@ -246,6 +246,7 @@ jobs:
           DEFAULT_NOTARIZE: ${{ vars.MACOS_NOTARIZE }}
           DEFAULT_BUILD_ELECTRON: ${{ vars.RELEASE_PUBLISH_ELECTRON }}
           DEFAULT_SIGN_WINDOWS: ${{ vars.RELEASE_SIGN_WINDOWS }}
+          HAS_WIN_CSC: ${{ secrets.WIN_CSC_LINK != '' }}
         run: |
           set -euo pipefail
 
@@ -294,6 +295,9 @@ jobs:
 
           if [ "$sign_windows" = "true" ]; then
             WINDOWS_SIGNED_NOTE='*Windows installers are signed using Microsoft Artifact Signing.*'
+            printf -v RELEASE_BODY '%s\n\n%s' "$RELEASE_BODY" "$WINDOWS_SIGNED_NOTE"
+          elif [ "${HAS_WIN_CSC:-}" = "true" ]; then
+            WINDOWS_SIGNED_NOTE='*Windows installers are signed with the organization Authenticode certificate.*'
             printf -v RELEASE_BODY '%s\n\n%s' "$RELEASE_BODY" "$WINDOWS_SIGNED_NOTE"
           else
             WINDOWS_UNSIGNED_NOTE='*Windows installer is temporarily unsigned while production code signing is being finalized.*'
@@ -638,6 +642,12 @@ jobs:
       - name: Package Electron (Windows)
         if: matrix.os_type == 'windows'
         shell: bash
+        env:
+          # Azure Trusted Signing (SIGN_WINDOWS=true) expects an unsigned exe
+          # and signs it afterwards. Otherwise electron-builder signs with the
+          # org PFX (WIN_CSC_LINK / WIN_CSC_KEY_PASSWORD). Do not set both.
+          CSC_LINK: ${{ env.SIGN_WINDOWS != 'true' && secrets.WIN_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ env.SIGN_WINDOWS != 'true' && secrets.WIN_CSC_KEY_PASSWORD || '' }}
         run: |
           set -euo pipefail
           pnpm --dir apps/desktop exec electron-builder \
@@ -663,11 +673,32 @@ jobs:
           printf 'Version-checked artifact: %s\n' "${matches[@]}"
 
       - name: Use unsigned Windows installer fallback
-        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true'
+        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true' && secrets.WIN_CSC_LINK == ''
         shell: bash
         run: |
           set -euo pipefail
-          echo "::warning::Publishing unsigned Windows installer because SIGN_WINDOWS is not enabled."
+          echo "::warning::Publishing unsigned Windows installer because SIGN_WINDOWS is not enabled and WIN_CSC_LINK is not set."
+
+      - name: Verify Authenticode signature (PFX)
+        if: matrix.os_type == 'windows' && env.SIGN_WINDOWS != 'true' && secrets.WIN_CSC_LINK != ''
+        shell: pwsh
+        run: |
+          $dist = Join-Path $env:GITHUB_WORKSPACE "apps\desktop\dist-electron"
+          $installers = Get-ChildItem $dist -Filter "*.exe"
+          if ($installers.Count -lt 1) {
+            throw "Expected a signed Windows installer"
+          }
+          $accepted = @("Valid", "UnknownError", "NotTrusted")
+          foreach ($installer in $installers) {
+            $signature = Get-AuthenticodeSignature $installer.FullName
+            Write-Host "$($installer.Name): $($signature.Status) - $($signature.SignerCertificate.Subject)"
+            if (-not $signature.SignerCertificate) {
+              throw "$($installer.Name) has no Authenticode signer certificate"
+            }
+            if ($accepted -notcontains $signature.Status.ToString()) {
+              throw "$($installer.Name) signature is $($signature.Status) ($($signature.StatusMessage))"
+            }
+          }
 
       # electron-builder may still emit latest*.yml for a custom distribution.
       # Normalize each non-public feed so it cannot update into another flavor.

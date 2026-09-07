@@ -5,11 +5,12 @@
  * CDN is what a download page on the marketing site, or an enterprise that
  * side-loads a build, can link to without a release listing in between. The
  * object keys are a contract and so they are computed here rather than typed
- * into a workflow. For every Linux target electron-builder produced, two keys
- * go up:
+ * into a workflow. For every target electron-builder produced, two keys go up:
  *
  *     work/{version}/redrob-linux-x64-{version}.AppImage   the build, by version
  *     work/latest/redrob-linux-x64.AppImage                the link that never moves
+ *     work/{version}/redrob-win-x64-{version}.exe          signed Windows NSIS
+ *     work/latest/redrob-win-x64.exe
  *
  * each with a `.sha256` sidecar beside it naming the file it describes, so
  * `sha256sum -c` works in the directory a downloader landed in. The stable name
@@ -27,8 +28,10 @@
  * download is this bucket or nothing, since a 404 from a host we guessed at is
  * worse than an honest absence.
  *
- * The artefacts are unsigned: a plain ubuntu-latest runner has no Linux signing
- * identity, so nothing here or on the download page may imply otherwise.
+ * Linux artefacts are unsigned: a plain ubuntu-latest runner has no Linux
+ * signing identity, so nothing here or on the download page may imply otherwise.
+ * Windows NSIS is signed on windows-latest with the organization Authenticode
+ * certificate (`WIN_CSC_LINK` / `WIN_CSC_KEY_PASSWORD`).
  *
  * The uploader signs its own requests with SigV4 over `fetch` rather than
  * pulling an AWS SDK into a repository that ships no server code. One PUT per
@@ -67,6 +70,19 @@ export const LINUX_TARGETS = [
   { os: "linux", arch: "x64", ext: "tar.gz" },
 ];
 
+/**
+ * The Windows NSIS installer electron-builder emits on windows-latest. `${os}`
+ * in the artifactName template is `win`, not `windows`.
+ */
+export const WINDOWS_TARGETS = [{ os: "win", arch: "x64", ext: "exe" }];
+
+/** Which family this run packed. Linux is the default so a job that never
+ * built NSIS cannot invent a Windows key. */
+export function packTargets(env = process.env) {
+  if (env["REDROB_WORK_CDN_TARGETS"]?.trim() === "windows") return WINDOWS_TARGETS;
+  return LINUX_TARGETS;
+}
+
 /** The versioned key name published for one target. */
 export function artifactName(target, version) {
   return `redrob-${target.os}-${target.arch}-${version}.${target.ext}`;
@@ -96,7 +112,7 @@ export function latestName(target) {
  * out.
  */
 export function cdnArtifacts(version, options = {}) {
-  const targets = options.targets ?? LINUX_TARGETS;
+  const targets = options.targets ?? packTargets();
   const versioned = [];
   const latest = [];
   for (const target of targets) {
@@ -225,7 +241,7 @@ export async function pack(input) {
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
       throw new Error(
-        `${from} does not exist, so ${source} was never built. Build the Linux distributable before uploading.`,
+        `${from} does not exist, so ${source} was never built. Build that distributable before uploading.`,
       );
     }
     if (contents.length === 0) {
@@ -433,7 +449,8 @@ if (import.meta.filename === process.argv[1]) {
   // Stage into a fresh directory so a walk of it is exactly this release.
   await rm(out, { recursive: true, force: true });
   const latest = latestRequested(process.env);
-  for (const item of await pack({ dist, out, version, latest })) {
+  const targets = packTargets(process.env);
+  for (const item of await pack({ dist, out, version, latest, targets })) {
     console.log(
       `packed ${path.relative(root, item.path)} ${item.bytes} bytes ${item.sha256}`,
     );
@@ -449,7 +466,7 @@ if (import.meta.filename === process.argv[1]) {
   }
 
   for (const key of result.keys) console.log(`uploaded ${result.bucket}/${key}`);
-  for (const target of LINUX_TARGETS) {
+  for (const target of targets) {
     console.log(
       `${CDN_PUBLIC_HOST}/${CDN_PREFIX}/${version}/${artifactName(target, version)}`,
     );
