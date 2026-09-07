@@ -21,7 +21,7 @@ import {
   summarizeSystemCaSources,
   systemPlatformCertificateLoader,
 } from "./system-ca.mjs";
-import { REDROB_CODE_BINARY_BASE } from "../scripts/redrob-code-release.mjs";
+import { REDROB_CODE_BINARY_BASE, sidecarFileNames } from "../scripts/redrob-code-release.mjs";
 
 const __runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -544,12 +544,7 @@ function targetTriple() {
 }
 
 function binaryFileNames(baseName) {
-  const ext = process.platform === "win32" ? ".exe" : "";
-  const triple = targetTriple();
-  return [
-    triple ? `${baseName}-${triple}${ext}` : null,
-    `${baseName}${ext}`,
-  ].filter(Boolean);
+  return sidecarFileNames(baseName, { targetTriple: targetTriple() });
 }
 
 function isDirectory(targetPath) {
@@ -1603,18 +1598,18 @@ export function createRuntimeManager({
     }
 
     if (baseName === REDROB_CODE_BINARY_BASE) {
-      // Windows packages keep the already-signed Code CDN PE under .bin so
-      // electron-builder does not try to sign the nested executable again.
-      const fileName = process.platform === "win32" ? "redrob.bin" : "redrob";
-      for (const candidate of [
-        // Conventional Redrob Code install location (see the redrob-code installer).
-        path.join(app.getPath("home"), ".redrob", "bin", fileName),
-        path.join("/opt/homebrew/bin", fileName),
-        path.join("/usr/local/bin", fileName),
-        path.join("/usr/bin", fileName),
-      ]) {
-        if (existsSync(candidate)) {
-          return { path: candidate, source: "known-location" };
+      const home = app.getPath("home");
+      for (const fileName of binaryFileNames(REDROB_CODE_BINARY_BASE)) {
+        for (const candidate of [
+          // Conventional Redrob Code install location (see the redrob-code installer).
+          path.join(home, ".redrob", "bin", fileName),
+          path.join("/opt/homebrew/bin", fileName),
+          path.join("/usr/local/bin", fileName),
+          path.join("/usr/bin", fileName),
+        ]) {
+          if (existsSync(candidate)) {
+            return { path: candidate, source: "known-location" };
+          }
         }
       }
     }

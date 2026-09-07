@@ -84,6 +84,49 @@ export function packagedSidecarNames(options = {}) {
   };
 }
 
+/**
+ * Names for the sidecar version metadata, which rides in the same directory.
+ *
+ * It takes the engine's suffix rather than `.json` because electron-builder
+ * filters this directory by exact filename: a suffix the filter does not list
+ * is a file that never reaches the package, and `afterPack` then finds a
+ * sidecar directory with no metadata in it.
+ *
+ * @param {{ targetTriple?: string | null, isWindows?: boolean }} [options]
+ * @returns {{ alias: string, target: string | null }}
+ */
+export function packagedSidecarMetadataNames(options = {}) {
+  const { targetTriple, isWindows } = options;
+  const windows = isWindows ?? isWindowsTargetTriple(targetTriple);
+  const suffix = windows ? ".bin" : "";
+  return {
+    alias: "versions.json",
+    target: targetTriple ? `versions.json-${targetTriple}${suffix}` : null,
+  };
+}
+
+/**
+ * Every filename the packaged app may find a sidecar under, most specific
+ * first. This is the read side of `packagedSidecarNames`, and it is here so the
+ * two cannot drift: a Windows engine written as `.bin` and looked up only as
+ * `.exe` is a bundled engine the app reports as missing.
+ *
+ * `.exe` stays ahead of `.bin` because a pack builds its own helpers as `.exe`
+ * and an installed CLI on PATH is `redrob.exe`; only the pre-signed engine
+ * resource takes the `.bin` name.
+ *
+ * @param {string} baseName
+ * @param {{ platform?: string, targetTriple?: string | null }} [options]
+ * @returns {string[]}
+ */
+export function sidecarFileNames(baseName, options = {}) {
+  const { platform = process.platform, targetTriple = null } = options;
+  const extensions = platform === "win32" ? [".exe", ".bin"] : [""];
+  return extensions
+    .flatMap((ext) => [targetTriple ? `${baseName}-${targetTriple}${ext}` : null, `${baseName}${ext}`])
+    .filter(Boolean);
+}
+
 /** First configured GitHub token, with the env name that supplied it. */
 export function selectGithubToken(env = {}) {
   for (const name of GITHUB_TOKEN_ENV_NAMES) {

@@ -27,6 +27,7 @@ import {
 } from "./redrob-code-cdn.mjs";
 import {
   normalizeReleaseVersion,
+  packagedSidecarMetadataNames,
   packagedSidecarNames,
   redrobCodeBinaryName,
 } from "./redrob-code-release.mjs";
@@ -383,10 +384,12 @@ try {
   mkdirSync(sidecarDir, { recursive: true });
   const content = JSON.stringify(versions, null, 2) + "\n";
   writeFileSync(versionsPath, content, "utf8");
-  if (resolvedTargetTriple) {
-    const targetSuffix = isWindowsTarget ? ".exe" : "";
-    const targetVersionsPath = join(sidecarDir, `versions.json-${resolvedTargetTriple}${targetSuffix}`);
-    writeFileSync(targetVersionsPath, content, "utf8");
+  const metadataNames = packagedSidecarMetadataNames({
+    targetTriple: resolvedTargetTriple,
+    isWindows: isWindowsTarget,
+  });
+  if (metadataNames.target) {
+    writeFileSync(join(sidecarDir, metadataNames.target), content, "utf8");
   }
 } catch (error) {
   console.error(`Failed to write versions.json: ${error}`);

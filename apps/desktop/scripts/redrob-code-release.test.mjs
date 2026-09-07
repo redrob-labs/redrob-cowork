@@ -15,6 +15,7 @@ import {
   releaseTagApiUrl,
   selectGithubToken,
   selectReleaseAssetId,
+  sidecarFileNames,
 } from "./redrob-code-release.mjs";
 
 const RELEASE = {
@@ -55,6 +56,43 @@ describe("Redrob Code archive naming", () => {
       target: "redrob-x86_64-pc-windows-msvc.bin",
     });
     assert.deepEqual(packagedSidecarNames({}), { alias: "redrob", target: null });
+  });
+
+  /**
+   * The bug this pins: the Windows engine is written as `.bin` so the already
+   * signed PE is not re-signed, and a resolver that only looked for `.exe`
+   * reported a bundled engine as missing. The written name must be a name the
+   * app looks under, on every target.
+   */
+  it("looks for every name the pack writes, so a packaged engine is findable", () => {
+    for (const targetTriple of [
+      "x86_64-pc-windows-msvc",
+      "aarch64-pc-windows-msvc",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu",
+    ]) {
+      const platform = targetTriple.includes("windows") ? "win32" : "linux";
+      const written = packagedSidecarNames({ targetTriple });
+      const looked = sidecarFileNames("redrob", { platform, targetTriple });
+      assert.ok(
+        looked.includes(written.alias),
+        `${targetTriple}: the packaged alias ${written.alias} is never looked for`,
+      );
+      assert.ok(
+        looked.includes(written.target),
+        `${targetTriple}: the packaged artifact ${written.target} is never looked for`,
+      );
+    }
+  });
+
+  it("prefers an installed .exe over the packaged .bin resource on Windows", () => {
+    assert.deepEqual(sidecarFileNames("redrob", { platform: "win32", targetTriple: "x86_64-pc-windows-msvc" }), [
+      "redrob-x86_64-pc-windows-msvc.exe",
+      "redrob.exe",
+      "redrob-x86_64-pc-windows-msvc.bin",
+      "redrob.bin",
+    ]);
+    assert.deepEqual(sidecarFileNames("redrob", { platform: "linux", targetTriple: null }), ["redrob"]);
   });
 
   it("defaults to the redrob-code repository and rejects malformed overrides", () => {

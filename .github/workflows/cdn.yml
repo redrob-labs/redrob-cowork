@@ -240,6 +240,26 @@ jobs:
           pnpm --filter @redrob/desktop run build:electron
           pnpm --dir apps/desktop exec electron-builder --config electron-builder.yml --win nsis --x64 --publish never
 
+      # A filter that does not name a staged file drops it silently, and the
+      # pack still succeeds, so the app would install with no engine in it. The
+      # unpacked tree is the only place that can be asserted before upload.
+      - name: Verify the engine is packaged
+        if: steps.engine.outputs.available == 'true'
+        shell: pwsh
+        run: |
+          $sidecars = "apps/desktop/dist-electron/win-unpacked/resources/sidecars"
+          if (-not (Test-Path $sidecars)) { throw "The package carries no sidecars directory" }
+          $engine = Join-Path $sidecars "redrob.bin"
+          if (-not (Test-Path $engine)) {
+            throw "The packaged app has no Redrob Code engine: $((Get-ChildItem $sidecars).Name -join ', ')"
+          }
+          $signature = Get-AuthenticodeSignature $engine
+          if (-not $signature.SignerCertificate) {
+            throw "The packaged engine lost its Authenticode signature"
+          }
+          Write-Host "Engine: $((Get-Item $engine).Length) bytes, signed by $($signature.SignerCertificate.Subject)"
+          Get-ChildItem $sidecars | ForEach-Object { Write-Host "  packaged: $($_.Name)" }
+
       - name: Verify Authenticode signature
         if: steps.engine.outputs.available == 'true'
         shell: pwsh

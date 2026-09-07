@@ -5,6 +5,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
+import {
+  packagedSidecarMetadataNames,
+  packagedSidecarNames,
+} from "../scripts/redrob-code-release.mjs";
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function readConfig(name) {
@@ -41,4 +46,40 @@ describe("Electron distribution configs", () => {
     assert.equal(config.artifactName, "redrob-${os}-${arch}-${version}.${ext}");
   });
 
+  /**
+   * electron-builder filters the sidecar directory by exact filename, so a name
+   * the sidecar writer produces and this filter omits is a file that silently
+   * never reaches the package: the build stays green and the installed app
+   * reports no engine. This ties the two together per platform.
+   */
+  it("ships every sidecar filename the writer produces, per platform", async () => {
+    const config = await readConfig("electron-builder.base.yml");
+
+    for (const [platform, triples] of [
+      ["win", ["aarch64-pc-windows-msvc", "x86_64-pc-windows-msvc"]],
+      ["mac", ["aarch64-apple-darwin", "x86_64-apple-darwin"]],
+      ["linux", ["aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu"]],
+    ]) {
+      const entry = config[platform].extraResources.find(resource => resource.to === "sidecars");
+      assert.ok(entry, `${platform} packages no sidecars directory`);
+
+      const written = new Set();
+      for (const targetTriple of triples) {
+        const engine = packagedSidecarNames({ targetTriple });
+        const metadata = packagedSidecarMetadataNames({ targetTriple });
+        written.add(engine.alias).add(engine.target);
+        written.add(metadata.alias).add(metadata.target);
+      }
+
+      for (const name of written) {
+        assert.ok(
+          entry.filter.includes(name),
+          `${platform} writes ${name} into resources/sidecars but never packages it`,
+        );
+      }
+      // And nothing is filtered in that no writer produces, which would make
+      // afterPack demand a file that is never there.
+      assert.deepEqual([...entry.filter].sort(), [...written].sort(), `${platform} filter drifted`);
+    }
+  });
 });
