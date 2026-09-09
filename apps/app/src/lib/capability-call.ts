@@ -17,10 +17,32 @@ export type CapabilityCallSentence = {
   past: string
 }
 
-const CAPABILITY_VERBS = new Set([
-  "ask", "search", "find", "get", "fetch", "list", "read", "check", "create",
-  "add", "send", "update", "delete", "remove", "execute", "run", "open", "query",
-])
+const CAPABILITY_VERB_KEYS = {
+  add: { past: "verb.add_past", present: "verb.add_present" },
+  ask: { past: "verb.ask_past", present: "verb.ask_present" },
+  check: { past: "verb.check_past", present: "verb.check_present" },
+  create: { past: "verb.create_past", present: "verb.create_present" },
+  delete: { past: "verb.delete_past", present: "verb.delete_present" },
+  execute: { past: "verb.execute_past", present: "verb.execute_present" },
+  fetch: { past: "verb.fetch_past", present: "verb.fetch_present" },
+  find: { past: "verb.find_past", present: "verb.find_present" },
+  get: { past: "verb.get_past", present: "verb.get_present" },
+  list: { past: "verb.list_past", present: "verb.list_present" },
+  open: { past: "verb.open_past", present: "verb.open_present" },
+  query: { past: "verb.query_past", present: "verb.query_present" },
+  read: { past: "verb.read_past", present: "verb.read_present" },
+  remove: { past: "verb.remove_past", present: "verb.remove_present" },
+  run: { past: "verb.run_past", present: "verb.run_present" },
+  search: { past: "verb.search_past", present: "verb.search_present" },
+  send: { past: "verb.send_past", present: "verb.send_present" },
+  update: { past: "verb.update_past", present: "verb.update_present" },
+} as const
+
+type CapabilityVerb = keyof typeof CAPABILITY_VERB_KEYS
+
+function isCapabilityVerb(value: string): value is CapabilityVerb {
+  return Object.hasOwn(CAPABILITY_VERB_KEYS, value)
+}
 
 /**
  * Resolved per call rather than cached in a module-level map: the locale can
@@ -28,8 +50,8 @@ const CAPABILITY_VERBS = new Set([
  * language that happened to be active at import time.
  */
 function capabilityVerb(verb: string | undefined, tense: "past" | "present"): string | undefined {
-  if (!verb || !CAPABILITY_VERBS.has(verb)) return undefined
-  return t(`verb.${verb}_${tense}`)
+  if (!verb || !isCapabilityVerb(verb)) return undefined
+  return t(CAPABILITY_VERB_KEYS[verb][tense])
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

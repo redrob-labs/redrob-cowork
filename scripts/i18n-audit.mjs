@@ -74,14 +74,32 @@ function parseExportedConst(filePath, exportName) {
   return new Function(`return {${match[1]}}`)();
 }
 
+/** Locate the object body exported by a locale module. */
+function localeObjectBody(content, filePath) {
+  const direct = content.match(/export default \{([\s\S]*?)\}\s+as\s+const;/);
+  if (direct) return direct[1];
+
+  const defaultBinding = content.match(/export\s+default\s+([A-Za-z_$][\w$]*)\s*;/)?.[1];
+  if (defaultBinding) {
+    const escapedName = defaultBinding.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const declaration = content.match(
+      new RegExp(
+        `(?:export\\s+)?const\\s+${escapedName}\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*(?:as\\s+const|satisfies\\s+[^;]+);`,
+      ),
+    );
+    if (declaration) return declaration[1];
+  }
+
+  throw new Error(`Could not parse ${filePath}`);
+}
+
 /** Parse a locale .ts file into a JS object via eval. */
 function parseLocale(filePath) {
   const content = readFileSync(filePath, "utf-8");
-  const match = content.match(/export default \{([\s\S]*?)\} as const;/);
-  if (!match) throw new Error(`Could not parse ${filePath}`);
+  const objectBody = localeObjectBody(content, filePath);
 
   const imported = importedConstBindings(content, filePath);
-  const spreadNames = [...match[1].matchAll(/\.\.\.([A-Za-z_$][\w$]*)/g)]
+  const spreadNames = [...objectBody.matchAll(/\.\.\.([A-Za-z_$][\w$]*)/g)]
     .map((spread) => spread[1]);
   const bindings = new Map();
   for (const name of spreadNames) {
@@ -90,7 +108,7 @@ function parseLocale(filePath) {
     bindings.set(name, parseExportedConst(source.sourcePath, source.imported));
   }
 
-  return new Function(...bindings.keys(), `return {${match[1]}}`)(...bindings.values());
+  return new Function(...bindings.keys(), `return {${objectBody}}`)(...bindings.values());
 }
 
 /** Extract translation keys from a locale .ts file (as a Set). */

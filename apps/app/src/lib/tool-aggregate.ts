@@ -73,17 +73,17 @@ export function getAggregateSummary(parts: AnyToolPart[], tense: "present" | "pa
   const pieces: string[] = []
   if (editCalls > 0) {
     const count = editPaths.size > 0 ? editPaths.size : editCalls
-    pieces.push(t(`aggregate.files_${tense === "past" ? "edited" : "editing"}`, { count }))
+    pieces.push(t(tense === "past" ? "aggregate.files_edited" : "aggregate.files_editing", { count }))
   }
   if (commands > 0) {
-    pieces.push(t(`aggregate.commands_${tense === "past" ? "ran" : "running"}`, { count: commands }))
+    pieces.push(t(tense === "past" ? "aggregate.commands_ran" : "aggregate.commands_running", { count: commands }))
   }
   if (readCalls > 0) {
     const count = readPaths.size > 0 ? readPaths.size : readCalls
-    pieces.push(t(`aggregate.files_${tense === "past" ? "read" : "reading"}`, { count }))
+    pieces.push(t(tense === "past" ? "aggregate.files_read" : "aggregate.files_reading", { count }))
   }
   if (searches > 0) {
-    pieces.push(t(`aggregate.searches_${tense === "past" ? "ran" : "running"}`, { count: searches }))
+    pieces.push(t(tense === "past" ? "aggregate.searches_ran" : "aggregate.searches_running", { count: searches }))
   }
 
   const joined = pieces.join(", ")

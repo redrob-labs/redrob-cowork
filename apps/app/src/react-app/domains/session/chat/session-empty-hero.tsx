@@ -11,7 +11,32 @@ import { NewTaskComposer, type NewTaskComposerContext } from "./new-task-compose
  * translated with the card: a Korean user should not have their first task
  * silently written in English on their behalf.
  */
-const SUGGESTION_IDS = ["week", "spreadsheet", "document", "web_task"] as const;
+const SUGGESTIONS = [
+  {
+    id: "week",
+    titleKey: "hero.suggestion_week_title",
+    descriptionKey: "hero.suggestion_week_description",
+    promptKey: "hero.suggestion_week_prompt",
+  },
+  {
+    id: "spreadsheet",
+    titleKey: "hero.suggestion_spreadsheet_title",
+    descriptionKey: "hero.suggestion_spreadsheet_description",
+    promptKey: "hero.suggestion_spreadsheet_prompt",
+  },
+  {
+    id: "document",
+    titleKey: "hero.suggestion_document_title",
+    descriptionKey: "hero.suggestion_document_description",
+    promptKey: "hero.suggestion_document_prompt",
+  },
+  {
+    id: "web_task",
+    titleKey: "hero.suggestion_web_task_title",
+    descriptionKey: "hero.suggestion_web_task_description",
+    promptKey: "hero.suggestion_web_task_prompt",
+  },
+] as const;
 
 export type SessionEmptyHeroProps = {
   providerCount: number;
@@ -30,11 +55,11 @@ export type SessionEmptyHeroProps = {
  */
 export function SessionEmptyHero(props: SessionEmptyHeroProps) {
   const [prompt, setPrompt] = useState("");
-  const suggestions = SUGGESTION_IDS.map((id) => ({
-    id,
-    title: t(`hero.suggestion_${id}_title`),
-    description: t(`hero.suggestion_${id}_description`),
-    prompt: t(`hero.suggestion_${id}_prompt`),
+  const suggestions = SUGGESTIONS.map((suggestion) => ({
+    id: suggestion.id,
+    title: t(suggestion.titleKey),
+    description: t(suggestion.descriptionKey),
+    prompt: t(suggestion.promptKey),
   }));
 
   const submit = (resolvedPrompt: string, attachments: ComposerAttachment[]) => {

@@ -15,7 +15,7 @@ import {
   writeFileSync,
 } from "fs";
 import { writeFile } from "fs/promises";
-import { dirname, join, resolve } from "path";
+import { basename, dirname, join, resolve } from "path";
 import { tmpdir } from "os";
 import { fileURLToPath } from "url";
 
@@ -302,7 +302,14 @@ if (shouldDownloadEngine) {
         process.exit(unzipResult.status ?? 1);
       }
     } else if (downloadedName.endsWith(".tar.gz")) {
-      const tarResult = spawnSync("tar", ["-xzf", archivePath, "-C", extractDir], { stdio: "inherit" });
+      // GNU tar treats a Windows drive-letter path such as `C:\\...` as
+      // remote-host syntax. Both paths live directly under tmpdir(), so pass
+      // relative basenames from that directory on every platform.
+      const tarResult = spawnSync(
+        "tar",
+        ["-xzf", basename(archivePath), "-C", basename(extractDir)],
+        { cwd: tmpdir(), stdio: "inherit" },
+      );
       if (tarResult.status !== 0) {
         process.exit(tarResult.status ?? 1);
       }
