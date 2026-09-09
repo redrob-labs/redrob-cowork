@@ -1,6 +1,6 @@
 name: Alpha Channel (macOS arm64)
 
-# Every app-related push to `dev` publishes a fresh macOS arm64 build to the
+# Every app-related push to `main` publishes a fresh macOS arm64 build to the
 # single rolling `alpha-macos-latest` release. Each run appends
 # uniquely-versioned dmg, zip, and blockmap assets, then re-uploads
 # `latest-mac.yml` last so the manifest never references missing assets.
@@ -11,7 +11,7 @@ name: Alpha Channel (macOS arm64)
 # See .github/workflows/release-macos-aarch64.yml for the stable channel.
 
 on:
-  # Paused during local-dev. Restore push to `dev` (app paths) to re-enable alpha.
+  # Paused during local-dev. Restore push to `main` (app paths) to re-enable alpha.
   workflow_dispatch:
     inputs:
       publish:

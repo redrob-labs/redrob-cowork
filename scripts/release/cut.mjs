@@ -4,7 +4,7 @@
  *
  * Cuts a release with zero local mutations: dispatches the Release App
  * workflow, which resolves the next version from existing v* tags, creates
- * the tag on origin/dev HEAD, stamps versions into the CI workspace, builds,
+ * the tag on origin/main HEAD, stamps versions into the CI workspace, builds,
  * and publishes. Nothing is committed to the repo — anywhere.
  */
 import { execSync } from "node:child_process";
@@ -64,7 +64,7 @@ if (explicitVersion) {
 }
 
 log(`Runs: https://github.com/${REPO}/actions/workflows/release-macos-aarch64.yml`);
-log("The run resolves the version from v* tags and creates the tag on origin/dev HEAD.");
+log("The run resolves the version from v* tags and creates the tag on origin/main HEAD.");
 
 if (watch && !dryRun) {
   heading("Watching workflow run");

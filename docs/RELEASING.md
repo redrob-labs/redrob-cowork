@@ -19,7 +19,7 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
 
 1. `release:cut` dispatches `Release App` (or run it from the Actions tab).
 2. The `resolve-release` job computes the next version from the highest stable
-   `v*` tag (`scripts/release/versions.mjs`) and pushes the tag on `origin/dev`
+   `v*` tag (`scripts/release/versions.mjs`) and pushes the tag on `origin/main`
    HEAD with `GITHUB_TOKEN`. That push does not retrigger the workflow, so the
    dispatch run *is* the release run.
 3. `verify-release` checks the tag (`scripts/release/verify-tag.mjs`): strict
@@ -48,19 +48,19 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
 
 ## How protection actually works here
 
-- **`dev` is protected for everyone, including admins**: PR required, one
+- **`main` is protected for everyone, including admins**: PR required, one
   approval, approval from someone other than the last pusher, signed commits,
-  linear history. The release never touches `dev` — nothing to backfill.
+  linear history. The release never touches `main` — nothing to backfill.
 - **`v*` tags are creation-restricted**: admins and the GitHub Actions
   principal (for workflow-created tags) can create them.
 
 Two entry paths:
 
 **Dispatch (default)** — `pnpm release:cut`. The tag is created on
-`origin/dev` HEAD, so the released code is always reviewed code.
+`origin/main` HEAD, so the released code is always reviewed code.
 
 **Tag-first (expedited, admins only)** — when a release must go out now from
-a commit not yet on `dev`:
+a commit not yet on `main`:
 
 ```bash
 git tag vX.Y.Z <sha>
@@ -69,7 +69,7 @@ git push origin vX.Y.Z
 
 The tag names exactly the code that ships (there is no bump commit). The
 Expedited Release Audit workflow opens a post-hoc review issue whenever a
-released tag's commit is not on `dev`; land the same changes on `dev` through
+released tag's commit is not on `main`; land the same changes on `main` through
 a normal reviewed PR and close the loop there.
 
 ## Recovery and reruns
@@ -81,11 +81,11 @@ a normal reviewed PR and close the loop there.
   ```
 
   Recovery runs skip tag creation and monotonicity. Sources are pinned to the
-  tag; workflow-file fixes are picked up from `dev` automatically because the
+  tag; workflow-file fixes are picked up from `main` automatically because the
   workflow definition runs from the dispatched ref.
 
 - **A tagged version turned out defective before publish**: leave the release
-  as a draft or delete it (`gh release delete vX.Y.Z`), fix forward on `dev`,
+  as a draft or delete it (`gh release delete vX.Y.Z`), fix forward on `main`,
   and cut the next patch. If the bad version reached npm, deprecate it:
   `npm deprecate redrob-server@X.Y.Z "<reason — use X.Y.Z+1>"`.
 
@@ -129,7 +129,7 @@ npm deprecate redrob-server@<bad-version> "rolled back — use <next>"
 | Not yet updated | Fixed by step 1 |
 | Already updated | Fixed only by step 2 |
 
-Revert the offending PR on `dev` through the normal reviewed-PR flow. That
+Revert the offending PR on `main` through the normal reviewed-PR flow. That
 cleanup is not in the critical path of user recovery.
 
 ## What blocks publishing (and what doesn't)
@@ -183,7 +183,7 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 - **2026-08**: releases became commit-free (tags are the only version source;
   CI stamps the workspace; the updater reads published releases at runtime; AUR
   renders a committed template). Previously every release required a version
-  bump commit, a dev backfill PR, and an AUR packaging PR.
+  bump commit, a main backfill PR, and an AUR packaging PR.
 - **2026-08-05** (v0.18.15/v0.18.16): three releases red since the Electron
   35→43 upgrade left `apps/server` on better-sqlite3 v12 while desktop moved
   to v13 — electron-builder rebuilds every copy of a native module it finds.

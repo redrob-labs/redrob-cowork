@@ -2,11 +2,11 @@
 # "Allow GitHub Actions to create and approve pull requests".
 # The bot approval satisfies the "someone other than the last pusher" rule because
 # this workflow's bot never pushes. For SOC 2 four-eyes, this automated control
-# inherits the original human review of the commit already landed on protected dev.
+# inherits the original human review of the commit already landed on protected main.
 #
 # Security model (warden SEP-C6H): this runs on pull_request_target, so the
 # workflow definition AND scripts/ci/verify-clean-revert.mjs execute from the
-# trusted base branch (dev) — never from the PR. PR commits are fetched as git
+# trusted base branch (main) — never from the PR. PR commits are fetched as git
 # data only: the verifier re-applies `git revert` to them as patch content and
 # compares tree hashes. A PR that modifies this workflow or the verifier cannot
 # change what executes here. actions/checkout is pinned to an immutable commit
@@ -16,7 +16,7 @@
 # the reviews API with commit_id bound to the verified head; if the head moves
 # before approval, it is withheld and the new push re-verifies.
 # GitHub offers no atomic compare-and-approve, so the residual read-then-approve
-# race is closed server-side by dev's ruleset (warden round 3):
+# race is closed server-side by main's ruleset (warden round 3):
 # dismiss_stale_reviews_on_push plus require_last_push_approval dismiss or ignore
 # any approval whose head moved afterward. Immediately before approving, the job
 # verifies both flags at runtime and withholds approval if either is disabled, so
@@ -27,7 +27,7 @@
 # rejected and take the normal human-review path.
 name: Revert Fast Lane
 
-# Paused during local-dev. Restore pull_request_target on `dev` to re-enable.
+# Paused during local-dev. Restore pull_request_target on `main` to re-enable.
 on:
   workflow_dispatch:
 
@@ -44,7 +44,7 @@ jobs:
     if: startsWith(github.event.pull_request.title, 'Revert "') && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout trusted base (dev)
+      - name: Checkout trusted base (main)
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
@@ -101,10 +101,10 @@ jobs:
         run: |
           set -euo pipefail
           # This control's residual read-then-approve race is closed server-side by
-          # dev's ruleset. Refuse to approve if those guarantees are not confirmed.
-          rules="$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/dev" --jq '[.[] | select(.type=="pull_request") | .parameters | (.dismiss_stale_reviews_on_push and .require_last_push_approval)] | any' 2>/dev/null || true)"
+          # main's ruleset. Refuse to approve if those guarantees are not confirmed.
+          rules="$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main" --jq '[.[] | select(.type=="pull_request") | .parameters | (.dismiss_stale_reviews_on_push and .require_last_push_approval)] | any' 2>/dev/null || true)"
           if [[ "$rules" != "true" ]]; then
-            printf '## Revert Fast Lane\n\nApproval withheld: could not confirm the dev ruleset still enforces dismiss_stale_reviews_on_push AND require_last_push_approval, which this control depends on to invalidate any approval whose head moves.\n' >> "$GITHUB_STEP_SUMMARY"
+            printf '## Revert Fast Lane\n\nApproval withheld: could not confirm the main ruleset still enforces dismiss_stale_reviews_on_push AND require_last_push_approval, which this control depends on to invalidate any approval whose head moves.\n' >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           # Bind the approval to the verified head. If the head moved since

@@ -11,10 +11,10 @@ description: Prove a PR, prepare merge verification, report the verdict, check a
   after any history rewrite; a verdict is bound to a commit SHA.
 - Before merging a stacked PR, inspect
   `gh pr view <n> --json baseRefName,headRefName,headRefOid`. If its base PR
-  merged first, the stack can merge into the feature branch instead of `dev`;
+  merged first, the stack can merge into the feature branch instead of `main`;
   GitHub then recreates commits with new SHAs and orphans their evidence.
-- Detect stray commits with `git log --oneline <branch> ^origin/dev`. Remedy a
-  bad stack by cherry-picking only the intended commits onto current `dev`, then
+- Detect stray commits with `git log --oneline <branch> ^origin/main`. Remedy a
+  bad stack by cherry-picking only the intended commits onto current `main`, then
   re-run every check.
 
 ## Run the checks
@@ -41,7 +41,7 @@ pnpm build
 - Report each skip as `skipped — needs: X`; never call it passed. A green
   command containing skips makes the overall verdict `Incomplete`.
 - Call a failure pre-existing only after the same command demonstrates it in a
-  clean `origin/dev` worktree. Quote the control command and matching failure.
+  clean `origin/main` worktree. Quote the control command and matching failure.
 
 ## Publish human verification
 

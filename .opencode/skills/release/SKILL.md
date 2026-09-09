@@ -32,7 +32,7 @@ gh workflow run "Release App" --repo redrob-labs/redrob-work -f bump=patch
 ```
 
 The run resolves the next version from existing `v*` tags, creates the tag on
-`origin/dev` HEAD, verifies it (`scripts/release/verify-tag.mjs`: stable
+`origin/main` HEAD, verifies it (`scripts/release/verify-tag.mjs`: stable
 format + strictly greater than every other stable tag), stamps the version
 into the CI workspace, builds all 18 electron matrix legs, publishes npm +
 Daytona + AUR, and flips the draft release public.
@@ -44,7 +44,7 @@ ruleset, or push the tag manually as an admin and rerun in recovery mode.
 
 ## Tag-first (expedited, admins only)
 
-To release a commit that is not yet reviewed onto `dev` (incident response),
+To release a commit that is not yet reviewed onto `main` (incident response),
 push the tag manually — the tag names exactly the code that ships:
 
 ```bash
@@ -53,7 +53,7 @@ git push origin vX.Y.Z     # v* ruleset grants admins bypass
 ```
 
 The Expedited Release Audit workflow opens a post-hoc review issue when the
-tagged commit is not on `dev`. Never push `dev` directly or bypass its branch
+tagged commit is not on `main`. Never push `main` directly or bypass its branch
 rules.
 
 ---
@@ -78,11 +78,11 @@ gh workflow run "Release App" --repo redrob-labs/redrob-work -f tag=vX.Y.Z
 ```
 
 Recovery runs skip tag creation and monotonicity, build source pinned to the
-tag, and pick up workflow-file fixes from `dev` automatically (the workflow
+tag, and pick up workflow-file fixes from `main` automatically (the workflow
 definition runs from the dispatched ref; only the checked-out sources are
 pinned to the tag).
 
-**If the run fails before the release is published:** land the fix on `dev`
+**If the run fails before the release is published:** land the fix on `main`
 via a normal protected-branch PR and cut the next patch (`pnpm release:cut`).
 Only delete/recreate a tag after verifying the GitHub release is still
 draft-only:

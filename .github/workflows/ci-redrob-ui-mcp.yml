@@ -1,6 +1,6 @@
 name: redrob-ui-mcp
 
-# Paused during local-dev. Restore push/pull_request on `dev` and
+# Paused during local-dev. Restore push/pull_request on `main` and
 # `redrob-ui-mcp-v*` tags to re-enable.
 on:
   workflow_dispatch:

@@ -26,8 +26,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch dev
-        run: git fetch origin dev
+      - name: Fetch main
+        run: git fetch origin main
 
       - name: Audit release path
         env:
@@ -44,8 +44,8 @@ jobs:
             exit 0
           fi
 
-          if git merge-base --is-ancestor "$(git rev-list -n1 "$TAG")" origin/dev; then
-            echo "PR-first release; tag commit is on dev; no action" >> "$GITHUB_STEP_SUMMARY"
+          if git merge-base --is-ancestor "$(git rev-list -n1 "$TAG")" origin/main; then
+            echo "PR-first release; tag commit is on main; no action" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -83,7 +83,7 @@ jobs:
 
           Release actor: @$ACTOR
 
-          Only the reviewer closes this issue, per [the emergency-change policy]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/dev/docs/EMERGENCY-CHANGES.md).
+          Only the reviewer closes this issue, per [the emergency-change policy]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/main/docs/EMERGENCY-CHANGES.md).
           EOF
 
           issue_url="$(gh issue create \

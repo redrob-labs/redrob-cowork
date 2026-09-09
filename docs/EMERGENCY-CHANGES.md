@@ -2,7 +2,7 @@
 
 ## Why this exists
 
-The change management control is a reviewed pull request into `dev`.
+The change management control is a reviewed pull request into `main`.
 Incidents sometimes require a faster path.
 Every expedited path below has a compensating control and leaves evidence. No undocumented bypasses are permitted.
 
@@ -10,7 +10,7 @@ Every expedited path below has a compensating control and leaves evidence. No un
 
 | Path | When | Compensating control | Evidence |
 | --- | --- | --- | --- |
-| Tag-first release (manual `git tag vX.Y.Z <sha> && git push origin vX.Y.Z`, admins only) | A release must go out now from a commit not yet on `dev` | The `v*` tag ruleset limits this path to admins. Versions live in tags only — no version-bump commit exists; the tag names exactly the code that ships. | Auto-opened `Post-hoc review` issue from the expedited release audit workflow when the tagged commit is not on `dev` |
+| Tag-first release (manual `git tag vX.Y.Z <sha> && git push origin vX.Y.Z`, admins only) | A release must go out now from a commit not yet on `main` | The `v*` tag ruleset limits this path to admins. Versions live in tags only — no version-bump commit exists; the tag names exactly the code that ships. | Auto-opened `Post-hoc review` issue from the expedited release audit workflow when the tagged commit is not on `main` |
 | Published-release rollback (`pnpm release:rollback`) | A bad version is live | The script is non-destructive: it re-points Latest and demotes the bad release, but never deletes it. It redeploys only previously reviewed artifacts. | GitHub audit log, release timeline, and a note in the post-hoc issue |
 | Clean-revert fast lane (auto-approved revert PRs) | A reviewed change must be undone immediately | A machine verifies that the PR tree is the exact inverse of a commit that already passed review. Approval inherits the original review. | Bot approval with the verified SHA on the PR |
 

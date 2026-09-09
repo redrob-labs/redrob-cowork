@@ -16,14 +16,14 @@ description: Test is red, typecheck failed, CI job failed, flaky, timed out, was
 Never call a failure pre-existing from memory or from a modified checkout.
 
 ```bash
-git fetch origin dev
-git worktree add /tmp/redrob-dev-control --detach origin/dev
+git fetch origin main
+git worktree add /tmp/redrob-main-control --detach origin/main
 # In that clean worktree, prepare the same prerequisites and run the exact command.
-git worktree remove /tmp/redrob-dev-control
+git worktree remove /tmp/redrob-main-control
 ```
 
 - Keep tool versions, environment, services, flags, and secrets equivalent.
-- Quote the control command, `origin/dev` SHA, exit code, counts, and matching
+- Quote the control command, `origin/main` SHA, exit code, counts, and matching
   failure text.
 - Classify as pre-existing only when the clean control demonstrates the same
   failure. Otherwise classify it as introduced, environment-specific, or

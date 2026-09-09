@@ -8,7 +8,7 @@ harness in one stable path.
 `scripts/support/redrob-doctor.ps1` is a Windows PowerShell 5.1-compatible, no-admin, read-only report for customer IT. It checks DNS, TCP 443, the live TLS certificate/chain with `SslStream`, served certificates with `openssl` when available, WinHTTP/.NET proxy settings, PowerShell/OS version, and `NODE_EXTRA_CA_CERTS`. Send this Teams-ready one-liner to the customer's IT contact once the file is available at the raw URL:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command "`$p=Join-Path `$env:TEMP 'redrob-doctor.ps1'; Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/redrob-labs/redrob-work/dev/scripts/support/redrob-doctor.ps1' -OutFile `$p; & `$p -WebUrl 'https://redrob.example.com' -ApiUrl 'https://api.redrob.example.com' -ExpectedIssuerMatch 'DigiCert'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "`$p=Join-Path `$env:TEMP 'redrob-doctor.ps1'; Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/redrob-labs/redrob-work/main/scripts/support/redrob-doctor.ps1' -OutFile `$p; & `$p -WebUrl 'https://redrob.example.com' -ApiUrl 'https://api.redrob.example.com' -ExpectedIssuerMatch 'DigiCert'"
 ```
 
 If raw download is blocked, save `scripts/support/redrob-doctor.ps1` locally and run:

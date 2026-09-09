@@ -24,7 +24,12 @@ function toRepoPath(filePath) {
 
 function isTestFile(filePath) {
   const parts = filePath.split(path.sep);
-  return parts.includes("__tests__") || path.basename(filePath).includes(".test.");
+  const basename = path.basename(filePath);
+  return (
+    parts.includes("__tests__") ||
+    basename.includes(".test.") ||
+    /^LICENSE(?:[.-]|$)/i.test(basename)
+  );
 }
 
 function ignoredHostReason(host) {
