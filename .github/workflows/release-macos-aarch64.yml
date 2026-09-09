@@ -1,7 +1,9 @@
 name: Release App
 
 on:
-  # Paused during local-dev. Restore `push: {tags: [v*]}` to re-enable.
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       benchmark_only:
