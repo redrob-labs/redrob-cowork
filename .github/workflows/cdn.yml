@@ -141,9 +141,9 @@ jobs:
     # GitHub Release or shipping an installer with no engine in it.
     if: github.repository == 'redrob-labs/redrob-work'
     runs-on: windows-latest
-    env:
-      CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -227,16 +227,49 @@ jobs:
         shell: bash
         run: node scripts/release/stamp-version.mjs --version "${{ steps.version.outputs.version }}"
 
-      - name: Require Windows signing certificate
+      - name: Select Windows signing provider
+        id: windows-signing
         if: steps.engine.outputs.available == 'true'
         shell: pwsh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_ARTIFACT_SIGNING_ENDPOINT: ${{ secrets.AZURE_ARTIFACT_SIGNING_ENDPOINT }}
+          AZURE_ARTIFACT_SIGNING_ACCOUNT: ${{ secrets.AZURE_ARTIFACT_SIGNING_ACCOUNT }}
+          AZURE_ARTIFACT_SIGNING_CERTIFICATE_PROFILE: ${{ secrets.AZURE_ARTIFACT_SIGNING_CERTIFICATE_PROFILE }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: |
-          if (-not $env:CSC_LINK) { throw "Missing WIN_CSC_LINK organization secret" }
-          if (-not $env:CSC_KEY_PASSWORD) { throw "Missing WIN_CSC_KEY_PASSWORD organization secret" }
+          $azureNames = @(
+            "AZURE_CLIENT_ID",
+            "AZURE_TENANT_ID",
+            "AZURE_SUBSCRIPTION_ID",
+            "AZURE_ARTIFACT_SIGNING_ENDPOINT",
+            "AZURE_ARTIFACT_SIGNING_ACCOUNT",
+            "AZURE_ARTIFACT_SIGNING_CERTIFICATE_PROFILE"
+          )
+          $present = @($azureNames | Where-Object { -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) })
+          if ($present.Count -eq $azureNames.Count) {
+            $mode = "azure"
+          } elseif ($present.Count -eq 0) {
+            if ([string]::IsNullOrWhiteSpace($env:WIN_CSC_LINK) -or [string]::IsNullOrWhiteSpace($env:WIN_CSC_KEY_PASSWORD)) {
+              throw "Azure signing is not configured; WIN_CSC_LINK and WIN_CSC_KEY_PASSWORD are required for fallback"
+            }
+            $mode = "pfx"
+          } else {
+            $missing = @($azureNames | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) })
+            throw "Partial Azure Artifact Signing configuration; missing: $($missing -join ', ')"
+          }
+          "mode=$mode" >> $env:GITHUB_OUTPUT
+          Write-Host "Windows signing provider: $mode"
 
-      - name: Build the Windows installer (signed)
+      - name: Build the Windows installer
         if: steps.engine.outputs.available == 'true'
         env:
+          # Azure signs after packaging; the PFX fallback signs in electron-builder.
+          CSC_LINK: ${{ steps.windows-signing.outputs.mode == 'pfx' && secrets.WIN_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ steps.windows-signing.outputs.mode == 'pfx' && secrets.WIN_CSC_KEY_PASSWORD || '' }}
           # Which engine sidecar prepare-sidecar.mjs fetches from the Code CDN.
           TARGET: x86_64-pc-windows-msvc
           REDROB_CODE_CDN_VERSION: latest
@@ -245,6 +278,28 @@ jobs:
         run: |
           pnpm --filter @redrob/desktop run build:electron
           pnpm --dir apps/desktop exec electron-builder --config electron-builder.yml --win nsis --x64 --publish never
+
+      - name: Azure login with GitHub OIDC
+        if: steps.engine.outputs.available == 'true' && steps.windows-signing.outputs.mode == 'azure'
+        uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign Windows installer with Azure Artifact Signing
+        if: steps.engine.outputs.available == 'true' && steps.windows-signing.outputs.mode == 'azure'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: ${{ secrets.AZURE_ARTIFACT_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_ARTIFACT_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_ARTIFACT_SIGNING_CERTIFICATE_PROFILE }}
+          files-folder: ${{ github.workspace }}\apps\desktop\dist-electron
+          files-folder-filter: exe
+          files-folder-recurse: false
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       # A filter that does not name a staged file drops it silently, and the
       # pack still succeeds, so the app would install with no engine in it. The
@@ -269,6 +324,8 @@ jobs:
       - name: Verify Authenticode signature
         if: steps.engine.outputs.available == 'true'
         shell: pwsh
+        env:
+          WINDOWS_SIGNING_MODE: ${{ steps.windows-signing.outputs.mode }}
         run: |
           $installer = Get-ChildItem "apps/desktop/dist-electron/redrob-win-x64-*.exe" | Select-Object -First 1
           if (-not $installer) { throw "Signed installer was not produced" }
@@ -276,7 +333,7 @@ jobs:
           if (-not $signature.SignerCertificate) {
             throw "Installer has no Authenticode signer certificate"
           }
-          $accepted = @("Valid", "UnknownError", "NotTrusted")
+          $accepted = if ($env:WINDOWS_SIGNING_MODE -eq "azure") { @("Valid") } else { @("Valid", "UnknownError", "NotTrusted") }
           if ($accepted -notcontains $signature.Status.ToString()) {
             throw "Invalid Authenticode signature: $($signature.Status) ($($signature.StatusMessage))"
           }
