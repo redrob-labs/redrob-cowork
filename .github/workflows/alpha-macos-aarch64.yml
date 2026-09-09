@@ -102,7 +102,20 @@ jobs:
           # stable 0.11.208 ships, its semver beats the alpha prerelease tag
           # and alpha users cleanly migrate forward. Tags are the version
           # source of truth — package.json is a permanent placeholder.
-          base="$(node scripts/release/versions.mjs next --bump patch)"
+          # No stable release has been cut yet, so there is no tag to bump
+          # from. versions.mjs refuses to guess because the same empty tag list
+          # also means "shallow clone", which would silently ship a wrong
+          # version. Distinguish the two here: fall back only when this
+          # full-history checkout really carries no v* tag, and otherwise let
+          # the script's own error stand.
+          if ! base="$(node scripts/release/versions.mjs next --bump patch 2>/dev/null)"; then
+            if [ -n "$(git tag --list 'v*')" ]; then
+              node scripts/release/versions.mjs next --bump patch
+              exit 1
+            fi
+            base="0.0.1"
+            echo "No stable v* tag exists yet; basing the first alpha on ${base}."
+          fi
           run="${GITHUB_RUN_NUMBER:-0}"
           sha="$(printf '%.7s' "${GITHUB_SHA:-local}")"
           echo "alpha_version=${base}-alpha.${run}+${sha}" >> "$GITHUB_OUTPUT"
