@@ -28,7 +28,7 @@ dashboard. Everything a user can do happens in this app.
 `constants.json` at the repo root is the single pin:
 
 ```json
-{ "redrobCodeVersion": "v0.0.3" }
+{ "redrobCodeVersion": "v0.0.12" }
 ```
 
 Everything reads that one value:
