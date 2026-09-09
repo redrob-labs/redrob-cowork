@@ -2,7 +2,17 @@ name: Build Electron Desktop
 
 on:
   workflow_dispatch:
-  # Paused during local-dev. Restore push to electron-notary-test to re-enable.
+  push:
+    branches:
+      - electron-notary-test
+    paths:
+      - apps/app/**
+      - apps/desktop/**
+      - packages/ui/**
+      - constants.json
+      - pnpm-lock.yaml
+      - package.json
+      - .github/workflows/build-electron-desktop.yml
 
 permissions:
   contents: read
