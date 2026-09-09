@@ -53,6 +53,14 @@ jobs:
         env:
           REDROB_DESKTOP_SENTRY_DSN: ${{ secrets.REDROB_DESKTOP_SENTRY_DSN || vars.REDROB_DESKTOP_SENTRY_DSN }}
           REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.REDROB_DESKTOP_SENTRY_TRACES_SAMPLE_RATE || '0.01' }}
+          # The Code CDN gets its Windows engine only from the signed release
+          # job in redrob-code, so the prefix constants.json pins carries no
+          # Windows archive and the sidecar fetch 403s. cdn.yml already builds
+          # the shipped Windows installer against the CDN's `latest` alias;
+          # match that here instead of failing on a missing object. Every
+          # other platform stays on the pin (an empty value falls through to
+          # it in prepare-sidecar.mjs).
+          REDROB_CODE_CDN_VERSION: ${{ startsWith(matrix.os, 'windows') && 'latest' || '' }}
         run: pnpm --filter @redrob/desktop package:electron:dir
 
       - name: Upload Electron artifacts
