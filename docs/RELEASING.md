@@ -19,9 +19,8 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
 
 1. `release:cut` dispatches `Release App` (or run it from the Actions tab).
 2. The `resolve-release` job computes the next version from the highest stable
-   `v*` tag (`scripts/release/versions.mjs`), creates the tag on `origin/dev`
-   HEAD, and creates it via REST as the diff-warden app. The app's tag retriggers
-   the workflow, but that duplicate run is skipped by an actor guard — the
+   `v*` tag (`scripts/release/versions.mjs`) and pushes the tag on `origin/dev`
+   HEAD with `GITHUB_TOKEN`. That push does not retrigger the workflow, so the
    dispatch run *is* the release run.
 3. `verify-release` checks the tag (`scripts/release/verify-tag.mjs`): strict
    stable `vX.Y.Z` format, and fresh tags must be strictly greater than every
@@ -40,12 +39,10 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
 ## Prerequisites
 
 - `gh` authenticated with permission to dispatch workflows.
-- **One-time repo setting (done)**: the org-owned **diff-warden** GitHub App
-  is a bypass actor on the `v*` tag ruleset; `resolve-release` mints its
-  token (`WARDEN_APP_ID` + `WARDEN_PRIVATE_KEY` in the `warden-clearance`
-  environment) to create the tag ref via REST. The built-in GitHub Actions app cannot be a bypass actor —
-  GitHub rejects it. Without the app token the run falls back to
-  GITHUB_TOKEN and fails with instructions.
+- The `v*` tag ruleset must let `GITHUB_TOKEN` create tags. A ruleset that
+  demands a bypass actor rejects the push (the built-in GitHub Actions app
+  cannot be one), and the run fails with instructions: create the tag
+  manually as an admin and rerun in recovery mode.
 - Manual tag pushes (expedited path below) additionally require repo/org
   admin, as before.
 
@@ -172,7 +169,7 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| Run fails pushing the tag | diff-warden app missing from the `v*` ruleset bypass list, or its secrets unset | re-add the app (Settings → Rules) / restore `WARDEN_APP_ID`+`WARDEN_PRIVATE_KEY`, or push the tag manually as an admin and rerun |
+| Run fails pushing the tag | the `v*` tag ruleset rejects `GITHUB_TOKEN` pushes | allow it in Settings → Rules, or push the tag manually as an admin and rerun with `-f tag=vX.Y.Z` |
 | `Tag vX.Y.Z already exists` on a fresh cut | version already released | rerun with `-f tag=vX.Y.Z` (recovery) or pick a higher version |
 | `verify-release` fails monotonicity | manual tag lower than an existing release | choose a version above the current highest stable tag |
 | `release:review` fails placeholder check | someone committed a real version into package.json | restore `0.0.0-dev` — CI stamps versions from the tag |

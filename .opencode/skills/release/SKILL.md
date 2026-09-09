@@ -37,11 +37,10 @@ format + strictly greater than every other stable tag), stamps the version
 into the CI workspace, builds all 18 electron matrix legs, publishes npm +
 Daytona + AUR, and flips the draft release public.
 
-The tag ref is created via REST with the org-owned **diff-warden** app token
-(a `v*` ruleset bypass actor; `WARDEN_APP_ID` + `WARDEN_PRIVATE_KEY` in the
-`warden-clearance` environment). The app's tag retriggers the workflow; that duplicate run is skipped by an
-actor guard. If the tag push is rejected, the run fails with instructions —
-fix the ruleset bypass or fall back to a manual admin tag push.
+The tag is pushed with `GITHUB_TOKEN`, and such a push does not retrigger the
+workflow, so the dispatch run is the only run that builds it. If the `v*`
+ruleset rejects the push, the run fails with instructions — allow it in the
+ruleset, or push the tag manually as an admin and rerun in recovery mode.
 
 ## Tag-first (expedited, admins only)
 
