@@ -103,8 +103,8 @@ function validRecoveryArtifactIdentity(artifact) {
   } catch {
     return false;
   }
-  const prefix = `/redrob-labs/redrob-work/releases/download/v${version}/`;
-  if (url.protocol !== "https:" || url.hostname !== "github.com" || !url.pathname.startsWith(prefix)) return false;
+  const prefix = `/work/${version}/`;
+  if (url.protocol !== "https:" || url.hostname !== "cdn.redrob.ai" || !url.pathname.startsWith(prefix)) return false;
   const assetArch = artifact.platform === "linux" && artifact.arch === "x64" ? "x86_64" : artifact.arch;
   const platformSlug = artifact.platform === "darwin" ? "mac" : artifact.platform === "win32" ? "win" : "linux";
   const fileName = path.basename(url.pathname);
@@ -124,10 +124,10 @@ export function selectRecoveryArtifact(files, { version, platform, arch, distrib
     && typeof file.sha512 === "string"
     && file.sha512.trim(),
   );
-  const baseUrl = `https://github.com/redrob-labs/redrob-work/releases/download/v${normalizedVersion}/`;
+  const baseUrl = `https://cdn.redrob.ai/work/${normalizedVersion}/`;
   for (const selected of matching) {
     const url = new URL(selected.url, baseUrl);
-    if (url.origin !== "https://github.com" || !url.pathname.startsWith(`/redrob-labs/redrob-work/releases/download/v${normalizedVersion}/`)) {
+    if (url.origin !== "https://cdn.redrob.ai" || !url.pathname.startsWith(`/work/${normalizedVersion}/`)) {
       continue;
     }
     const artifact = {

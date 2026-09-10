@@ -36,7 +36,7 @@ const ALLOWED_LITERALS = new Set([
   "https://github.com/slackapi/slack-mcp-plugin",
   "Redrob Work.app.migrate-bak",
   "alpha-macos-latest/latest-mac.yml",
-  "releases/latest/download/latest-mac.yml",
+  "cdn.redrob.ai/work/latest/latest-mac.yml",
 ]);
 
 /**

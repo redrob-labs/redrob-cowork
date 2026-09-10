@@ -43,8 +43,9 @@ function resolveAppVersion(app) {
   }
   return _cachedAppVersion;
 }
+const WORK_CDN_BASE_URL = "https://cdn.redrob.ai/work";
 const ELECTRON_UPDATER_FEEDS = Object.freeze({
-  stable: "https://github.com/redrob-labs/redrob-work/releases/latest/download",
+  stable: `${WORK_CDN_BASE_URL}/latest`,
   alpha: "https://github.com/redrob-labs/redrob-work/releases/download/alpha-macos-latest",
 });
 
@@ -176,7 +177,7 @@ export function targetedStableUpdaterFeed(currentVersion, targetVersion, allowOl
       ? "Recovery target version must differ from the installed version."
       : "Target update version must be newer than the installed version.");
   }
-  return `https://github.com/redrob-labs/redrob-work/releases/download/v${normalizedTarget}`;
+  return `${WORK_CDN_BASE_URL}/${normalizedTarget}`;
 }
 
 function updaterChannelState(app, channel, targetVersion = null, manifestChannel = "latest") {
@@ -385,7 +386,7 @@ export function registerUpdaterIpc({
   async function resolveRecoveryArtifact(version) {
     if (!electronNet?.fetch) return null;
     try {
-      const manifestUrl = `https://github.com/redrob-labs/redrob-work/releases/download/v${version}/${recoveryManifestName(platform, arch, distribution)}`;
+      const manifestUrl = `${WORK_CDN_BASE_URL}/${version}/${recoveryManifestName(platform, arch, distribution)}`;
       const response = await electronNet.fetch(manifestUrl, { headers: { Accept: "text/yaml, text/plain, */*" } });
       if (!response.ok) return null;
       return selectRecoveryArtifact(parseRecoveryManifest(await response.text()), {

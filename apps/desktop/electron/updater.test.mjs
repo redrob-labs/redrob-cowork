@@ -97,10 +97,10 @@ describe("staleUpdaterStatePaths", () => {
 });
 
 describe("targetedStableUpdaterFeed", () => {
-  it("builds a fixed GitHub release feed from a strict stable version", () => {
+  it("builds a fixed CDN release feed from a strict stable version", () => {
     assert.equal(
       targetedStableUpdaterFeed("0.17.22", "0.17.23"),
-      "https://github.com/redrob-labs/redrob-work/releases/download/v0.17.23",
+      "https://cdn.redrob.ai/work/0.17.23",
     );
   });
 
@@ -129,7 +129,7 @@ describe("targetedStableUpdaterFeed", () => {
   it("allows only an explicit exact recovery downgrade", () => {
     assert.equal(
       targetedStableUpdaterFeed("0.17.23", "0.17.22", true),
-      "https://github.com/redrob-labs/redrob-work/releases/download/v0.17.22",
+      "https://cdn.redrob.ai/work/0.17.22",
     );
     assert.throws(
       () => targetedStableUpdaterFeed("0.17.23", "0.17.23", true),
@@ -218,7 +218,7 @@ describe("recovery metadata and candidates", () => {
       platform: "darwin",
       arch: "arm64",
       distribution: "public",
-      url: "https://github.com/redrob-labs/redrob-work/releases/download/v1.2.3/redrob-mac-arm64-1.2.3.dmg",
+      url: "https://cdn.redrob.ai/work/1.2.3/redrob-mac-arm64-1.2.3.dmg",
       sha512: "verified",
     });
     assert.equal(selectRecoveryArtifact(files, {
@@ -239,7 +239,7 @@ describe("recovery metadata and candidates", () => {
       const files = [{ url: fileName, sha512: `${distribution}-checksum` }];
       assert.equal(selectRecoveryArtifact(files, {
         version: "1.2.3", platform: "darwin", arch: "arm64", distribution,
-      })?.url, `https://github.com/redrob-labs/redrob-work/releases/download/v1.2.3/${fileName}`);
+      })?.url, `https://cdn.redrob.ai/work/1.2.3/${fileName}`);
       for (const otherDistribution of Object.keys(artifacts).filter((flavor) => flavor !== distribution)) {
         assert.equal(selectRecoveryArtifact(files, {
           version: "1.2.3", platform: "darwin", arch: "arm64", distribution: otherDistribution,
@@ -282,7 +282,7 @@ releaseDate: '2026-08-11T00:00:00.000Z'
       await assert.rejects(
         cacheVerifiedRecoveryArtifact({
           app: { getPath: () => userData },
-          artifact: { url: "https://github.com/redrob-labs/redrob-work/releases/download/v1.2.3/redrob.dmg", sha512: "invalid" },
+          artifact: { url: "https://cdn.redrob.ai/work/1.2.3/redrob.dmg", sha512: "invalid" },
           fetchArtifact: async () => new Response("tampered"),
         }),
         /checksum did not match/,
@@ -301,7 +301,7 @@ releaseDate: '2026-08-11T00:00:00.000Z'
       platform: "darwin",
       arch: "arm64",
       distribution: "public",
-      url: "https://github.com/redrob-labs/redrob-work/releases/download/v1.2.3/redrob-mac-arm64-1.2.3.dmg",
+      url: "https://cdn.redrob.ai/work/1.2.3/redrob-mac-arm64-1.2.3.dmg",
       sha512: createHash("sha512").update(bytes).digest("base64"),
     };
     try {
@@ -337,7 +337,7 @@ releaseDate: '2026-08-11T00:00:00.000Z'
       platform: "darwin",
       arch: "arm64",
       distribution: "public",
-      url: "https://github.com/redrob-labs/redrob-work/releases/download/v0.18.18/redrob-mac-arm64-0.18.18.dmg",
+      url: "https://cdn.redrob.ai/work/0.18.18/redrob-mac-arm64-0.18.18.dmg",
       sha512: createHash("sha512").update(bytes).digest("base64"),
     };
     const expected = { platform: "darwin", arch: "arm64", distribution: "public" };
@@ -369,7 +369,7 @@ releaseDate: '2026-08-11T00:00:00.000Z'
       platform: "darwin",
       arch: "arm64",
       distribution: "public",
-      url: "https://github.com/redrob-labs/redrob-work/releases/download/v1.9.0/redrob-mac-arm64-1.9.0.dmg",
+      url: "https://cdn.redrob.ai/work/1.9.0/redrob-mac-arm64-1.9.0.dmg",
       sha512: createHash("sha512").update(bytes).digest("base64"),
     };
     const handlers = new Map();
@@ -432,7 +432,7 @@ releaseDate: '2026-08-11T00:00:00.000Z'
         ipcMain: { handle: (name, handler) => handlers.set(name, handler) },
         getMainWindow: () => null,
         electronNet: { fetch: async (url) => {
-          if (!url.includes("/v1.9.0/")) return new Response("missing", { status: 404 });
+          if (!url.includes("/work/1.9.0/")) return new Response("missing", { status: 404 });
           candidateFetches += 1;
           return new Response(manifest(candidateFetches === 1 ? "first-checksum" : "changed-checksum"));
         } },
@@ -612,7 +612,7 @@ describe("release channel changes", () => {
       assert.equal(typeof setChannel, "function");
       assert.deepEqual(await setChannel(null, "alpha"), {
         channel: "stable",
-        feedUrl: "https://github.com/redrob-labs/redrob-work/releases/latest/download",
+        feedUrl: "https://cdn.redrob.ai/work/latest",
         currentVersion: desktopVersion,
       });
     } finally {

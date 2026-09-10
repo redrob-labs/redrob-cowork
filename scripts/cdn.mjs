@@ -1,11 +1,12 @@
 /**
  * Publish the desktop distributables to https://cdn.redrob.ai/work/.
  *
- * The GitHub release is the update channel the app pulls from, but a file on a
- * CDN is what a download page on the marketing site, or an enterprise that
- * side-loads a build, can link to without a release listing in between. The
- * object keys are a contract and so they are computed here rather than typed
- * into a workflow. For every target electron-builder produced, two keys go up:
+ * The public CDN is both the stable update channel and the download surface
+ * for marketing pages and enterprises that side-load a build. GitHub Releases
+ * remain the private build-asset source; promotion copies those exact assets
+ * here without rebuilding. The object keys are a contract and so they are
+ * computed here rather than typed into a workflow. For every target
+ * electron-builder produced, two keys go up:
  *
  *     work/{version}/redrob-linux-x64-{version}.AppImage   the build, by version
  *     work/latest/redrob-linux-x64.AppImage                the link that never moves

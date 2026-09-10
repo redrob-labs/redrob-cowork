@@ -855,6 +855,9 @@ jobs:
 
   publish-release:
     name: Publish Electron Assets + GitHub Release
+    permissions:
+      actions: write
+      contents: write
     needs:
       - resolve-release
       - verify-release
@@ -920,6 +923,17 @@ jobs:
           else
             gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           fi
+
+      - name: Promote published assets to CDN without rebuilding
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ needs.resolve-release.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          gh workflow run promote-release-to-cdn.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f version="$RELEASE_VERSION"
 
   prepare-npm:
     name: Prepare redrob-server npm package

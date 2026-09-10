@@ -126,8 +126,8 @@ if (BLANK_SLATE_LAUNCH.enabled || process.env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN 
   // system keychain normally.
   app.commandLine.appendSwitch("use-mock-keychain");
 }
-const RELEASE_DOWNLOAD_BASE_URL = "https://github.com/redrob-labs/redrob-work/releases/latest/download";
-const RELEASE_PAGE_URL = "https://github.com/redrob-labs/redrob-work/releases/latest";
+const RELEASE_DOWNLOAD_BASE_URL = "https://cdn.redrob.ai/work/latest";
+const RELEASE_PAGE_URL = "https://console.redrob.ai/work";
 const DOCS_PAGE_URL = "https://redrob.io/docs";
 const applicationMenu = createApplicationMenu({
   appName: APP_NAME,
