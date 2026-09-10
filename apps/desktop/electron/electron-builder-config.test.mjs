@@ -55,11 +55,11 @@ describe("Electron distribution configs", () => {
   it("ships every sidecar filename the writer produces, per platform", async () => {
     const config = await readConfig("electron-builder.base.yml");
 
-    for (const [platform, triples] of [
-      ["win", ["aarch64-pc-windows-msvc", "x86_64-pc-windows-msvc"]],
-      ["mac", ["aarch64-apple-darwin", "x86_64-apple-darwin"]],
-      ["linux", ["aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu"]],
-    ]) {
+    for (const [platform, triples] of Object.entries({
+      win: ["aarch64-pc-windows-msvc", "x86_64-pc-windows-msvc"],
+      mac: ["aarch64-apple-darwin", "x86_64-apple-darwin"],
+      linux: ["aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu"],
+    })) {
       const entry = config[platform].extraResources.find(resource => resource.to === "sidecars");
       assert.ok(entry, `${platform} packages no sidecars directory`);
 

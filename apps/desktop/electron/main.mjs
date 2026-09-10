@@ -2362,7 +2362,6 @@ ipcMain.handle("redrob:system:askMicrophoneAccess", async () => {
 
 // ── Terminal IPC ────────────────────────────────────────────────────────
 ipcMain.handle("redrob:terminal:create", async (event, options = {}) => {
-  assertDesktopActivation();
   const cwd = await resolveTerminalCwd(options?.cwd);
   const cols = Number.isFinite(options?.cols) ? Math.max(20, Math.floor(options.cols)) : 80;
   const rows = Number.isFinite(options?.rows) ? Math.max(5, Math.floor(options.rows)) : 24;

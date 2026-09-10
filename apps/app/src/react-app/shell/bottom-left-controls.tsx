@@ -1,8 +1,10 @@
 /** @jsxImportSource react */
 import { useSyncExternalStore } from "react";
 import { LanguagesIcon, MoonIcon, SunIcon } from "lucide-react";
+import { useLocation } from "react-router";
 
 import { getResolvedThemeMode, setThemeMode, subscribeToTheme } from "@/app/theme";
+import { cn } from "@/lib/utils";
 import { currentLocale, setLocale, subscribeToLocale, t, type Language } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -31,8 +33,10 @@ function useResolvedTheme() {
  * persist across reloads without introducing competing state.
  */
 export function BottomLeftControls() {
+  const { pathname } = useLocation();
   const language = useLanguage();
   const resolvedTheme = useResolvedTheme();
+  const isWelcomeRoute = pathname === "/welcome";
 
   const nextLanguage: Language = language === "ko" ? "en" : "ko";
   const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
@@ -44,7 +48,12 @@ export function BottomLeftControls() {
       : t("shell.controls.switch_to_dark");
 
   return (
-    <div className="pointer-events-none fixed inset-y-auto bottom-3 left-3 z-40 flex items-center gap-1.5">
+    <div
+      className={cn(
+        "pointer-events-none fixed left-3 z-40 flex items-center gap-1.5",
+        isWelcomeRoute ? "bottom-3" : "bottom-14",
+      )}
+    >
       <Tooltip>
         <TooltipTrigger
           render={

@@ -18,6 +18,8 @@ export const REDROB_API_KEY_ENV = "REDROB_API_KEY";
  */
 export const REDROB_MODEL_ID = "auto";
 export const REDROB_MODEL_NAME = "Auto";
+export const REDROB_OPUS_MODEL_ID = "claude-opus-5";
+export const REDROB_OPUS_MODEL_NAME = "Claude Opus 5";
 
 /**
  * Public console where users issue their REDROB_API_KEY. Onboarding links here
@@ -73,6 +75,9 @@ export function buildRedrobProviderConfig(): ProviderConfig {
     models: {
       [REDROB_MODEL_ID]: {
         name: REDROB_MODEL_NAME,
+      },
+      [REDROB_OPUS_MODEL_ID]: {
+        name: REDROB_OPUS_MODEL_NAME,
       },
     },
   };

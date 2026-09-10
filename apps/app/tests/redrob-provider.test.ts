@@ -5,6 +5,7 @@ import {
   REDROB_API_KEY_ENV,
   REDROB_BASE_URL,
   REDROB_MODEL_ID,
+  REDROB_OPUS_MODEL_ID,
 } from "../src/react-app/domains/settings/redrob-provider";
 
 describe("Redrob provider config", () => {
@@ -31,6 +32,8 @@ describe("Redrob provider config", () => {
     // The console API rejects the retired language fields, so `auto` must carry
     // no per-model options at all.
     expect(model?.options).toBeUndefined();
-    expect(Object.keys(config.models ?? {})).toEqual(["auto"]);
+    expect(config.models?.[REDROB_OPUS_MODEL_ID]?.name).toBe("Claude Opus 5");
+    expect(config.models?.[REDROB_OPUS_MODEL_ID]?.options).toBeUndefined();
+    expect(Object.keys(config.models ?? {})).toEqual(["auto", "claude-opus-5"]);
   });
 });

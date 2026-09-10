@@ -9,6 +9,7 @@ import { createProviderAuthStore } from "../src/react-app/domains/connections/pr
 import {
   REDROB_BASE_URL,
   REDROB_MODEL_ID,
+  REDROB_OPUS_MODEL_ID,
   REDROB_PROVIDER_ID,
   buildRedrobProviderConfig,
 } from "../src/react-app/domains/settings/redrob-provider";
@@ -237,7 +238,7 @@ describe("Redrob provider registration", () => {
     expect(seeded).toEqual(buildRedrobProviderConfig());
     const seededConfig = seeded as ReturnType<typeof buildRedrobProviderConfig>;
     expect(seededConfig.options?.baseURL).toBe(REDROB_BASE_URL);
-    expect(Object.keys(seededConfig.models ?? {})).toEqual([REDROB_MODEL_ID]);
+    expect(Object.keys(seededConfig.models ?? {})).toEqual([REDROB_MODEL_ID, REDROB_OPUS_MODEL_ID]);
     expect(REDROB_MODEL_ID).toBe("auto");
     // Retired language extras must not reach the console API.
     expect(seededConfig.models?.[REDROB_MODEL_ID]?.options).toBeUndefined();

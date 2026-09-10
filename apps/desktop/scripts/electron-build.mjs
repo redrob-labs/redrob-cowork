@@ -3,6 +3,8 @@ import { copyFileSync, cpSync, readFileSync, readdirSync, rmSync, writeFileSync 
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { packageManagerInvocation } from "./package-manager.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const desktopRoot = resolve(__dirname, "..");
 const repoRoot = resolve(desktopRoot, "../..");
@@ -13,7 +15,7 @@ const packagedServerRoot = resolve(desktopRoot, "server");
 const packagedRuntimeRoot = resolve(desktopRoot, ".electron-runtime", "node_modules");
 const sentryBuildConfigPath = resolve(desktopRoot, ".electron-runtime", "redrob-sentry.json");
 
-const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const packageManager = packageManagerInvocation();
 const nodeCmd = process.execPath;
 
 function needsShell(command) {
@@ -50,11 +52,11 @@ run(nodeCmd, [resolve(__dirname, "prepare-computer-use-helper.mjs"), "--force", 
 run(nodeCmd, [resolve(__dirname, "prepare-runtime-node-modules.mjs"), "--outdir", packagedRuntimeRoot], desktopRoot);
 writeSentryBuildConfig();
 // Build the server TS → JS so Electron can import it in-process
-run(pnpmCmd, ["--filter", "redrob-server", "build"], repoRoot);
+run(packageManager.command, [...packageManager.args, ...["--filter", "redrob-server", "build"]], repoRoot);
 // REDROB_ELECTRON_BUILD tells Vite to emit relative asset paths so
 // index.html resolves /assets/* correctly when loaded via file:// from
 // inside the packaged .app bundle.
-run(pnpmCmd, ["--filter", "@redrob/app", "build"], repoRoot, {
+run(packageManager.command, [...packageManager.args, ...["--filter", "@redrob/app", "build"]], repoRoot, {
   REDROB_ELECTRON_BUILD: "1",
 });
 // Copy constants.json next to server dist so the packaged asar can resolve it.

@@ -3,6 +3,8 @@ import net from "node:net";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { packageManagerInvocation } from "./package-manager.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const desktopRoot = resolve(__dirname, "..");
 const repoRoot = resolve(desktopRoot, "../..");
@@ -14,7 +16,7 @@ const defaultDevDataDir = resolve(
   "redrob-server-dev",
 );
 
-const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const packageManager = packageManagerInvocation();
 const nodeCmd = process.execPath;
 
 async function findFreeTcpPort() {
@@ -227,7 +229,7 @@ if (process.env.REDROB_ELECTRON_SKIP_SHARED_PREPARE !== "1") {
 
 // Build the server TS → JS so Electron can import it in-process
 console.log("[electron-dev] Building redrob-server (tsc)...");
-runSync(pnpmCmd, ["--filter", "redrob-server", "build"], { cwd: repoRoot });
+runSync(packageManager.command, [...packageManager.args, ...["--filter", "redrob-server", "build"]], { cwd: repoRoot });
 
 const initialProbeUrls = [startUrl, ...viteProbeUrls].filter(Boolean);
 let viteReady = false;
@@ -248,7 +250,7 @@ if (!viteReady) {
 }
 
 if (!viteReady) {
-  uiChild = run(pnpmCmd, ["-w", "dev:ui"], {
+  uiChild = run(packageManager.command, [...packageManager.args, "--filter", "@redrob/app", "dev"], {
     cwd: repoRoot,
     env: {
       ...process.env,
@@ -267,7 +269,7 @@ if (process.env.REDROB_ELECTRON_SKIP_NATIVE_REBUILD === "1") {
   console.log("[electron-dev] Using prebuilt Electron native dependencies.");
 } else {
   console.log("[electron-dev] Rebuilding native dependencies for Electron...");
-  runSync(pnpmCmd, ["--filter", "@redrob/desktop", "run", "rebuild:electron-native"], { cwd: repoRoot });
+  runSync(packageManager.command, [...packageManager.args, ...["--filter", "@redrob/desktop", "run", "rebuild:electron-native"]], { cwd: repoRoot });
 }
 
 // Optional Electron CDP for external debugging / raw CDP clients.
@@ -277,7 +279,7 @@ const cdpPortRaw = process.env.REDROB_ELECTRON_REMOTE_DEBUG_PORT?.trim() ?? "";
 const cdpPort = cdpPortRaw === "" || cdpPortRaw === "0" ? "" : cdpPortRaw;
 
 const blankSlateArgs = process.argv.includes("--blank-slate") ? ["--blank-slate"] : [];
-electronChild = run(pnpmCmd, ["exec", "electron", "./electron/main.mjs", ...blankSlateArgs], {
+electronChild = run(packageManager.command, [...packageManager.args, ...["exec", "electron", "./electron/main.mjs", ...blankSlateArgs]], {
   cwd: desktopRoot,
   env: {
     ...process.env,
