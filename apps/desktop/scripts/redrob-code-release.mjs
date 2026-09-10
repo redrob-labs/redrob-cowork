@@ -7,10 +7,24 @@
  * is the Releases API asset endpoint addressed by asset id, which is what the
  * Redrob Code installer itself uses. This module keeps that resolution testable
  * and separate from prepare-sidecar.mjs's filesystem work.
+ *
+ * The sidecar NAMING rules live in `../electron/sidecar-names.mjs` and are
+ * re-exported here, because the packaged main process needs them and app.asar
+ * contains `electron/**` but not `scripts/**`. Do not move them back: an
+ * `electron/` import of this file resolves in the repo and fails at boot on a
+ * user's machine with ERR_MODULE_NOT_FOUND.
  */
 
+export {
+  REDROB_CODE_BINARY_BASE,
+  isWindowsTargetTriple,
+  packagedSidecarMetadataNames,
+  packagedSidecarNames,
+  redrobCodeBinaryName,
+  sidecarFileNames,
+} from "../electron/sidecar-names.mjs";
+
 export const REDROB_CODE_REPO = "redrob-labs/redrob-code";
-export const REDROB_CODE_BINARY_BASE = "redrob";
 
 /**
  * Token lookup order, matching the Redrob Code installer. A build environment
@@ -42,89 +56,9 @@ export function normalizeGithubRepo(raw, fallback = REDROB_CODE_REPO) {
   return REPO_PATTERN.test(normalized) ? normalized : fallback;
 }
 
-export function isWindowsTargetTriple(targetTriple) {
-  return String(targetTriple ?? "").includes("windows");
-}
-
 /** Archive name for a target triple, or null when the target is unsupported. */
 export function redrobCodeArchiveName(targetTriple) {
   return REDROB_CODE_ARCHIVE_BY_TARGET[targetTriple] ?? null;
-}
-
-/**
- * Binary name inside the extracted archive and on disk.
- *
- * @param {{ targetTriple?: string | null, isWindows?: boolean }} [options]
- * @returns {string}
- */
-export function redrobCodeBinaryName(options = {}) {
-  const { targetTriple, isWindows } = options;
-  const windows = isWindows ?? isWindowsTargetTriple(targetTriple);
-  return windows ? `${REDROB_CODE_BINARY_BASE}.exe` : REDROB_CODE_BINARY_BASE;
-}
-
-/**
- * Sidecar filenames the packaged app looks for: the plain alias plus the
- * target-suffixed artifact electron-builder filters on.
- *
- * @param {{ targetTriple?: string | null, isWindows?: boolean }} [options]
- * @returns {{ alias: string, target: string | null }}
- */
-export function packagedSidecarNames(options = {}) {
-  const { targetTriple, isWindows } = options;
-  const windows = isWindows ?? isWindowsTargetTriple(targetTriple);
-  // The Windows engine is already Authenticode-signed by the Code release.
-  // Store it with a non-.exe resource name so electron-builder does not try to
-  // sign the nested executable again. CreateProcess accepts an explicit PE
-  // path regardless of extension, and renaming does not alter its signature.
-  const suffix = windows ? ".bin" : "";
-  return {
-    alias: `${REDROB_CODE_BINARY_BASE}${suffix}`,
-    target: targetTriple ? `${REDROB_CODE_BINARY_BASE}-${targetTriple}${suffix}` : null,
-  };
-}
-
-/**
- * Names for the sidecar version metadata, which rides in the same directory.
- *
- * It takes the engine's suffix rather than `.json` because electron-builder
- * filters this directory by exact filename: a suffix the filter does not list
- * is a file that never reaches the package, and `afterPack` then finds a
- * sidecar directory with no metadata in it.
- *
- * @param {{ targetTriple?: string | null, isWindows?: boolean }} [options]
- * @returns {{ alias: string, target: string | null }}
- */
-export function packagedSidecarMetadataNames(options = {}) {
-  const { targetTriple, isWindows } = options;
-  const windows = isWindows ?? isWindowsTargetTriple(targetTriple);
-  const suffix = windows ? ".bin" : "";
-  return {
-    alias: "versions.json",
-    target: targetTriple ? `versions.json-${targetTriple}${suffix}` : null,
-  };
-}
-
-/**
- * Every filename the packaged app may find a sidecar under, most specific
- * first. This is the read side of `packagedSidecarNames`, and it is here so the
- * two cannot drift: a Windows engine written as `.bin` and looked up only as
- * `.exe` is a bundled engine the app reports as missing.
- *
- * `.exe` stays ahead of `.bin` because a pack builds its own helpers as `.exe`
- * and an installed CLI on PATH is `redrob.exe`; only the pre-signed engine
- * resource takes the `.bin` name.
- *
- * @param {string} baseName
- * @param {{ platform?: string, targetTriple?: string | null }} [options]
- * @returns {string[]}
- */
-export function sidecarFileNames(baseName, options = {}) {
-  const { platform = process.platform, targetTriple = null } = options;
-  const extensions = platform === "win32" ? [".exe", ".bin"] : [""];
-  return extensions
-    .flatMap((ext) => [targetTriple ? `${baseName}-${targetTriple}${ext}` : null, `${baseName}${ext}`])
-    .filter(Boolean);
 }
 
 /** First configured GitHub token, with the env name that supplied it. */

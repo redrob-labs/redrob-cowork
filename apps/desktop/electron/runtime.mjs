@@ -21,7 +21,7 @@ import {
   summarizeSystemCaSources,
   systemPlatformCertificateLoader,
 } from "./system-ca.mjs";
-import { REDROB_CODE_BINARY_BASE, sidecarFileNames } from "../scripts/redrob-code-release.mjs";
+import { REDROB_CODE_BINARY_BASE, sidecarFileNames } from "./sidecar-names.mjs";
 
 const __runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 

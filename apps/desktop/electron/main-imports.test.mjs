@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const electronDir = dirname(fileURLToPath(import.meta.url));
@@ -35,4 +35,39 @@ test("every relative import in the Electron main process resolves", () => {
   }
 
   assert.deepEqual(missing, []);
+});
+
+/**
+ * Existing on disk is not enough: `electron-builder.base.yml` packs
+ * `electron/**` and `server/**` into app.asar and nothing else, so a main
+ * process import that reaches OUT of `electron/` -- `../scripts/...`,
+ * `../resources/...` -- resolves during development and then throws
+ * ERR_MODULE_NOT_FOUND on the user's machine at boot, before any window opens.
+ * That is exactly how `runtime.mjs` shipped a broken macOS build once.
+ *
+ * Shared build/runtime rules therefore live under `electron/` and are
+ * re-exported by `scripts/`, never the other way round.
+ */
+test("no Electron main-process module imports outside the packaged asar tree", () => {
+  const sources = readdirSync(electronDir).filter(
+    (name) => name.endsWith(".mjs") && !name.endsWith(".test.mjs"),
+  );
+
+  const escaping = [];
+  for (const source of sources) {
+    const code = readFileSync(join(electronDir, source), "utf8");
+    const specifiers = [
+      ...code.matchAll(/(?:^|\n)\s*(?:import|export)[^\n;]*?from\s+"(\.[^"]+)"/g),
+      ...code.matchAll(/\bimport\(\s*"(\.[^"]+)"\s*\)/g),
+    ].map((match) => match[1]);
+
+    for (const specifier of specifiers) {
+      const resolved = resolve(electronDir, specifier);
+      if (resolved !== electronDir && !resolved.startsWith(electronDir + sep)) {
+        escaping.push(`${source} imports ${specifier}, which is outside electron/ and not packed into app.asar`);
+      }
+    }
+  }
+
+  assert.deepEqual(escaping, []);
 });
