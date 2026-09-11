@@ -598,13 +598,26 @@ if (mode === "--sort") {
     if (!existsSync(file)) continue;
     const content = readFileSync(file, "utf-8");
 
-    // Extract preamble (header comment) and body
-    const exportMatch = content.match(/^([\s\S]*?)(export default \{)([\s\S]*?)(\} as const;\s*)$/);
+    // Extract preamble, the object declaration, the body, and everything after
+    // the closing brace.
+    //
+    // This used to look for `export default {` ... `} as const;` anchored at
+    // end-of-file. The bundles stopped having that shape when they gained
+    // `EnglishLogicalKey`: they are now `const en = { ... } as const;` (or
+    // `satisfies Record<EnglishLogicalKey, string>` for a locale) followed by a
+    // type helper and a separate `export default en;`. The old pattern silently
+    // never matched, so `--sort` reported "could not parse" for every file and
+    // did nothing -- and the old write-back would have dropped that type helper
+    // and the default export, which is worse than not sorting. Capturing the
+    // epilogue and putting it back verbatim is what makes the rewrite safe.
+    const exportMatch = content.match(
+      /^([\s\S]*?)(const \w+(?::\s*[^=]+)? = \{\n)([\s\S]*?)(\n\} (?:as const|satisfies [^;]+);[\s\S]*)$/,
+    );
     if (!exportMatch) {
       console.log(`  ${basename(file, ".ts")}: ⚠ could not parse, skipped`);
       continue;
     }
-    const [, preamble, , body] = exportMatch;
+    const [, preamble, declaration, body, epilogue] = exportMatch;
 
     // Eval the body as a JS object to get all key-value pairs
     let obj;
@@ -626,7 +639,7 @@ if (mode === "--sort") {
     const lines = sortedKeys.map((key) =>
       `  ${JSON.stringify(key)}: ${JSON.stringify(obj[key])},`
     );
-    writeFileSync(file, `${preamble}export default {\n${lines.join("\n")}\n} as const;\n`);
+    writeFileSync(file, `${preamble}${declaration}${lines.join("\n")}${epilogue}`);
     const locale = basename(file, ".ts");
     console.log(`  ${locale}: ${sortedKeys.length} keys sorted`);
   }
