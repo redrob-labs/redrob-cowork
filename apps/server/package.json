@@ -52,6 +52,7 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@opencode-ai/sdk": "^1.18.15",
     "@redrob/enterprise-mcp-client": "workspace:*",
+    "@redrob/paths": "workspace:*",
     "better-sqlite3": "^13.0.2",
     "drizzle-orm": "^0.45.2",
     "jsonc-parser": "^3.2.1",
@@ -62,7 +63,6 @@
   },
   "devDependencies": {
     "@redrob/headless-threads": "workspace:*",
-    "@redrob/paths": "workspace:*",
     "@redrob/types": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@types/minimatch": "^5.1.2",

@@ -1,12 +1,18 @@
 import { randomUUID } from "node:crypto";
-import {
-  MEMORY_SCOPE_LOCAL,
-  type Memory,
-  type MemoryContext,
-  type MemoryDraft,
-} from "@redrob/types/memory";
+import type { Memory, MemoryContext, MemoryDraft } from "@redrob/types/memory";
 import type { ServerConfig } from "./types.js";
 import { createWorkspaceKvStore, isRecord } from "./workspace-kv-store.js";
+
+/**
+ * Kept here rather than in `@redrob/types` because the packaged desktop app runs
+ * `server/dist` on plain Node: that package resolves its production export
+ * condition to TypeScript source, so a *value* imported from it survives
+ * compilation as a runtime import Node cannot load, and the app dies with
+ * "Redrob Work server did not finish starting". The store is the only consumer,
+ * so the constant belongs with it while the shared package keeps the types,
+ * which are erased at emit.
+ */
+export const MEMORY_SCOPE_LOCAL = "local";
 
 /**
  * The memory bank replaced an organization-scoped hosted store, so it is global

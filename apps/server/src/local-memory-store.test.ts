@@ -2,8 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { MEMORY_SCOPE_LOCAL } from "@redrob/types/memory";
-import { deleteMemory, listMemories, localMemoryStoreInternals, saveMemory } from "./local-memory-store.js";
+import { MEMORY_SCOPE_LOCAL, deleteMemory, listMemories, localMemoryStoreInternals, saveMemory } from "./local-memory-store.js";
 import type { ServerConfig } from "./types.js";
 
 const roots: string[] = [];

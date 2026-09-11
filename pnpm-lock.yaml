@@ -368,6 +368,9 @@ importers:
       '@redrob/enterprise-mcp-client':
         specifier: workspace:*
         version: link:../../packages/enterprise-mcp-client
+      '@redrob/paths':
+        specifier: workspace:*
+        version: link:../../packages/paths
       better-sqlite3:
         specifier: ^13.0.2
         version: 13.0.2
@@ -393,9 +396,6 @@ importers:
       '@redrob/headless-threads':
         specifier: workspace:*
         version: link:../../packages/headless-threads
-      '@redrob/paths':
-        specifier: workspace:*
-        version: link:../../packages/paths
       '@redrob/types':
         specifier: workspace:*
         version: link:../../packages/types
