@@ -17,6 +17,25 @@ type LanguageStepProps = {
 };
 
 /**
+ * Name of a language in whatever language the UI is currently showing. The
+ * static `LANGUAGE_OPTIONS[].label` is always the English exonym, which is why
+ * a Korean UI used to label 한국어 as "Korean".
+ *
+ * Written as a switch over literal keys rather than a template literal so
+ * `scripts/i18n-audit.mjs` can still see every key statically.
+ */
+function localizedName(value: string): string {
+  switch (value) {
+    case "en":
+      return t("language.name_en");
+    case "ko":
+      return t("language.name_ko");
+    default:
+      return value;
+  }
+}
+
+/**
  * First onboarding step: pick the UI language. The choice is applied
  * immediately and persistently via `setLocale` from `@/i18n` (which writes the
  * `redrob.language` localStorage key and notifies subscribers), so this and the
@@ -57,9 +76,15 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
                   <div className="text-[15px] font-medium text-foreground">
                     {option.nativeName}
                   </div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">
-                    {option.label}
-                  </div>
+                  {/* Sub-label names the language in the language the UI is
+                      currently showing, so a Korean UI reads "영어" rather than
+                      the English exonym. Suppressed when it would just repeat
+                      the native name above it. */}
+                  {localizedName(option.value) === option.nativeName ? null : (
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      {localizedName(option.value)}
+                    </div>
+                  )}
                 </div>
                 <span
                   className={`flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors ${

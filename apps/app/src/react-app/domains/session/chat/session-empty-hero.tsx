@@ -13,10 +13,10 @@ import { NewTaskComposer, type NewTaskComposerContext } from "./new-task-compose
  */
 const SUGGESTIONS = [
   {
-    id: "week",
-    titleKey: "hero.suggestion_week_title",
-    descriptionKey: "hero.suggestion_week_description",
-    promptKey: "hero.suggestion_week_prompt",
+    id: "research",
+    titleKey: "hero.suggestion_research_title",
+    descriptionKey: "hero.suggestion_research_description",
+    promptKey: "hero.suggestion_research_prompt",
   },
   {
     id: "spreadsheet",

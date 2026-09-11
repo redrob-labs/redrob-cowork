@@ -162,7 +162,7 @@ export const roadmapSections: RoadmapSection[] = [
     items: [
       {
         title: "Desktop policies",
-        description: "Control custom providers, OpenCode models, workspaces, settings, extensions, built-in tools, and onboarding by organization, team, or member.",
+        description: "Control custom providers, Redrob Code models, workspaces, settings, extensions, built-in tools, and onboarding by organization, team, or member.",
         status: "live",
       },
       {

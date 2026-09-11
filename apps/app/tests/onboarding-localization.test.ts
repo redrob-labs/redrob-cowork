@@ -49,6 +49,7 @@ describe("onboarding localization", () => {
       "onboarding-brand-mark.tsx",
       "onboarding-wizard-shell.tsx",
       "redrob-key-step.tsx",
+      "tutorial-step.tsx",
       "welcome-page.tsx",
     ]);
   });

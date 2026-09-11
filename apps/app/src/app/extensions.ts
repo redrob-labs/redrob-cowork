@@ -275,7 +275,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     icon: { src: "/ext-ollama.svg" },
     composer: { prompt: "Use the Ollama extension to " },
     setup: {
-      instructions: "Run Ollama locally, choose or pull a model, then add it as an OpenCode provider.",
+      instructions: "Run Ollama locally, choose or pull a model, then add it as a Redrob Code provider.",
       primaryCta: "Add Ollama model",
       secondaryCta: "Pull model",
     },

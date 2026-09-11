@@ -20,6 +20,8 @@ type WelcomePageProps = {
   onManualFolderChange?: (value: string) => void;
   onUseManualFolder?: () => void;
   showManualFolder?: boolean;
+  /** Optional explicit folder picker; omitted off desktop. */
+  onChooseFolder?: () => void;
 };
 
 export function WelcomePage({
@@ -31,6 +33,7 @@ export function WelcomePage({
   onManualFolderChange,
   onUseManualFolder,
   showManualFolder,
+  onChooseFolder,
 }: WelcomePageProps) {
   const { markRouteReady } = useBootState();
 
@@ -76,6 +79,25 @@ export function WelcomePage({
                       ? t("welcome.creating_workspace")
                       : (getStartedLabel || t("welcome.get_started"))}
                   </Button>
+
+                  {/* Says what pressing the button will do, so the workspace
+                      folder is never a surprise. */}
+                  <p className="text-center text-xs text-muted-foreground">
+                    {t("welcome.default_folder_hint")}
+                  </p>
+
+                  {onChooseFolder ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-9 w-full text-xs font-medium text-muted-foreground"
+                      onClick={onChooseFolder}
+                      disabled={busy}
+                      data-testid="welcome-choose-folder"
+                    >
+                      {t("welcome.choose_folder")}
+                    </Button>
+                  ) : null}
 
                   {error ? (
                     <p className="text-center text-xs text-destructive">{error}</p>

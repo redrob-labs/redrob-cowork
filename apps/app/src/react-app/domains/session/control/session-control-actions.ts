@@ -171,7 +171,7 @@ export function useSessionControlActions(input: UseSessionControlActionsInput) {
       const title = stringArg(args, "title");
       if (!sessionId) return { ok: false, error: "sessionId is required" };
       if (!title) return { ok: false, error: "title is required" };
-      if (!opencodeClient) return { ok: false, error: "OpenCode client is not connected" };
+      if (!opencodeClient) return { ok: false, error: "Redrob Code client is not connected" };
 
       const targetWorkspace = findSessionWorkspace(workspaces, sessionsByWorkspaceId, sessionId);
       await opencodeClient.session.update({
@@ -282,7 +282,7 @@ export function useSessionControlActions(input: UseSessionControlActionsInput) {
       const sessionId = stringArg(args, "sessionId");
       const archived = booleanArg(args, "archived");
       if (!sessionId) return { ok: false, error: "sessionId is required" };
-      if (!opencodeClient) return { ok: false, error: "OpenCode client is not connected" };
+      if (!opencodeClient) return { ok: false, error: "Redrob Code client is not connected" };
       const targetWorkspace = findSessionWorkspace(workspaces, sessionsByWorkspaceId, sessionId);
       await setSessionArchived(opencodeClient, sessionId, archived, targetWorkspace?.path || selectedWorkspaceRoot || undefined);
       await refreshRouteState();

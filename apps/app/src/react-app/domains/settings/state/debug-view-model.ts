@@ -749,14 +749,14 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
       await bootFullEngineStack();
       setOpencodeServiceStatus({
         tone: "success",
-        message: t("settings.restart_succeeded_template", { service: "OpenCode" }),
+        message: t("settings.restart_succeeded_template", { service: "Redrob Code" }),
       });
-      pushDeveloperLog("Restarted OpenCode via engine_start");
+      pushDeveloperLog("Restarted Redrob Code via engine_start");
     } catch (error) {
       const message = error instanceof Error ? error.message : safeStringify(error);
       setOpencodeServiceStatus({
         tone: "error",
-        message: `${t("settings.restart_failed_template", { service: "OpenCode" })} ${message}`,
+        message: `${t("settings.restart_failed_template", { service: "Redrob Code" })} ${message}`,
       });
       setServiceRestartError(message);
     } finally {
@@ -815,7 +815,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
     }
     try {
       await navigator.clipboard.writeText(text);
-      setOpencodeLogStatus(t("settings.copied_service_logs", { service: "OpenCode" }));
+      setOpencodeLogStatus(t("settings.copied_service_logs", { service: "Redrob Code" }));
     } catch (error) {
       setOpencodeLogStatus(error instanceof Error ? error.message : safeStringify(error));
     }

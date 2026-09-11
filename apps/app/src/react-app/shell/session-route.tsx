@@ -229,7 +229,7 @@ function describeTaskCreateError(error: unknown) {
     lower.includes("internal_error") ||
     lower.includes("unexpected server error")
   ) {
-    return "OpenCode is unavailable for this workspace. Retry once it restarts, or restart Redrob Work if the problem continues.";
+    return "Redrob Code is unavailable for this workspace. Retry once it restarts, or restart Redrob Work if the problem continues.";
   }
   return message;
 }
@@ -1420,7 +1420,7 @@ export function SessionRoute() {
       const message = describeTaskCreateError(error);
       setRouteError(message);
       setErrorsByWorkspaceId((current) => ({ ...current, [workspaceId]: message }));
-      toast.error("OpenCode unavailable", {
+      toast.error("Redrob Code unavailable", {
         id: taskCreateUnavailableToastId(workspaceId),
         description: message,
         action: {
@@ -1536,7 +1536,7 @@ export function SessionRoute() {
       sideEffect: "mutation",
       disabled: !opencodeClient,
       execute: async () => {
-        if (!opencodeClient) return { ok: false, error: "OpenCode client is not connected." };
+        if (!opencodeClient) return { ok: false, error: "Redrob Code client is not connected." };
 
         const providerList = await ensureProviderListQuery(getReactQueryClient(), {
           client: opencodeClient,

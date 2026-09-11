@@ -123,6 +123,10 @@ describe("supported locales", () => {
       "UI",
       "Connect",
       "Code",
+      // The default workspace directory really is named "Redrob Work" on disk,
+      // so onboarding copy naming it is a path the user meets in Finder and
+      // Explorer, not product prose.
+      "폴더",
     ];
     const componentUse = new RegExp(
       `Redrob Work(?: (?:${COMPONENT_SUFFIXES.join("|")})|/OpenCode|\\.app\\.migrate-bak)`,
@@ -182,8 +186,10 @@ describe("supported locales", () => {
       /OpenCode/g,
       // Literal CLI command example shown verbatim in copy. Must run before
       // the generic interpolation-placeholder strip below, since that strip
-      // would otherwise delete "{server}" and break this exact match.
-      /\bopencode mcp auth \{server\}/g,
+      // would otherwise delete "{server}" and break this exact match. The
+      // engine's binary is `redrob` (see electron/sidecar-names.mjs), so the
+      // command shown to users is `redrob mcp auth`, not `opencode mcp auth`.
+      /\bredrob mcp auth \{server\}/g,
       // Interpolation placeholders like {count}, {server}, {resetWord}.
       /\{[a-zA-Z][a-zA-Z0-9]*\}/g,
       // Technical acronyms / protocol and format names.
@@ -193,7 +199,7 @@ describe("supported locales", () => {
       // strip would otherwise consume "opencode" and leave a stray "-wakatime".
       /opencode-wakatime/g,
       // Third-party product / proper nouns that stay in Latin script.
-      /\b(Docker|Slack|GitHub|Linear|Notion|Sentry|Stripe|Context7|OpenAI|ChatGPT|macOS|Finder|Exa|Chromium|Bun|Claude Code|Claude Cowork|Claude|Gemini|Perplexity|Google|Bing|DuckDuckGo|LinkedIn|YouTube|Reddit|X|AppImage|Mac|Electron|Tauri|Ollama|Realtime|microsandbox|opencode)\b/g,
+      /\b(Docker|Slack|GitHub|Linear|Notion|Sentry|Stripe|Context7|Anthropic|OpenAI|ChatGPT|macOS|Finder|Exa|Chromium|Bun|Claude Code|Claude Cowork|Claude|Gemini|Perplexity|Google|Bing|DuckDuckGo|LinkedIn|YouTube|Reddit|X|AppImage|Mac|Electron|Tauri|Ollama|Realtime|microsandbox|opencode)\b/g,
       // Example folder path shown as a literal placeholder.
       /\/workspace\/my-project/g,
       // The stdio wrapper's literal command name, matched before the generic

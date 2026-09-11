@@ -377,7 +377,7 @@ export function addOpencodeCacheHint(message: string) {
   ];
 
   if (cacheSignals.some((signal) => lower.includes(signal)) && lower.includes("enoent")) {
-    return `${message}\n\nOpenCode cache looks corrupted. Use Repair cache in Settings to rebuild it.`;
+    return `${message}\n\nRedrob Code cache looks corrupted. Use Repair cache in Settings to rebuild it.`;
   }
 
   return message;

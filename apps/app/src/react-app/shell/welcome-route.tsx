@@ -4,6 +4,8 @@ import { useNavigate } from "react-router";
 
 import { t } from "../../i18n";
 import {
+  getDesktopHomeDir,
+  joinDesktopPath,
   pickDirectory,
   resolveWorkspaceListSelectedId,
   workspaceSetRuntimeActive,
@@ -20,6 +22,7 @@ import { RedrobKeyStep } from "../domains/onboarding/redrob-key-step";
 import { LanguageStep } from "../domains/onboarding/language-step";
 import { EngineDownloadStep } from "../domains/onboarding/engine-download-step";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
+import { TutorialStep } from "../domains/onboarding/tutorial-step";
 import { REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
 import { connectRedrobKey } from "../domains/onboarding/redrob-key-connect";
 import {
@@ -57,6 +60,13 @@ function focusPromptSoon() {
  */
 type WelcomeStage = "language" | "engine" | "main";
 
+/**
+ * Folder created under the user's home directory when they press "Get started"
+ * without choosing a location. Deliberately a plain, recognisable name: the
+ * tutorial step tells the user where it is and Settings can add more folders.
+ */
+const DEFAULT_WORKSPACE_FOLDER_NAME = "Redrob Work";
+
 type WelcomeState = {
   stage: WelcomeStage;
   modalOpen: boolean;
@@ -70,6 +80,8 @@ type WelcomeState = {
   /** The code the console gave us, once there is one to show. */
   redrobConnectPrompt: RedrobDeviceConnectPrompt | null;
   attributionStep: boolean;
+  /** Last step: explains the workspace folder the app just created. */
+  tutorialStep: boolean;
   pendingRoute: string | null;
   pendingWorkspaceId: string | null;
   pendingSessionId: string | null;
@@ -89,7 +101,8 @@ type WelcomeAction =
   | { type: "redrob-connect:start" }
   | { type: "redrob-connect:prompt"; prompt: RedrobDeviceConnectPrompt }
   | { type: "redrob-connect:error"; error: string | null }
-  | { type: "attribution-step"; route: string };
+  | { type: "attribution-step"; route: string }
+  | { type: "tutorial-step" };
 
 const initialWelcomeState: WelcomeState = {
   stage: "language",
@@ -102,6 +115,7 @@ const initialWelcomeState: WelcomeState = {
   redrobConnectBusy: false,
   redrobConnectPrompt: null,
   attributionStep: false,
+  tutorialStep: false,
   pendingRoute: null,
   pendingWorkspaceId: null,
   pendingSessionId: null,
@@ -161,6 +175,8 @@ function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeStat
         attributionStep: true,
         pendingRoute: action.route,
       };
+    case "tutorial-step":
+      return { ...state, attributionStep: false, tutorialStep: true };
   }
 }
 
@@ -170,6 +186,8 @@ export function WelcomeRoute() {
   const platform = usePlatform();
   const [state, dispatch] = useReducer(welcomeReducer, initialWelcomeState);
   const [manualFolder, setManualFolder] = useState("");
+  /** Folder of the workspace just created, shown on the tutorial step. */
+  const [createdFolder, setCreatedFolder] = useState<string | null>(null);
   // If user already completed onboarding, redirect away immediately.
   useEffect(() => {
     if (local.prefs.hasCompletedOnboarding) {
@@ -185,6 +203,7 @@ export function WelcomeRoute() {
     async (_preset: string, folder: string | null, options?: CreateWorkspaceOptions) => {
       if (!folder) return;
       const projectLabel = options?.projectLabel?.trim() ?? "";
+      setCreatedFolder(folder);
       dispatch({ type: "create:start" });
       try {
         const workspaceName = folderNameFromPath(folder);
@@ -278,9 +297,8 @@ export function WelcomeRoute() {
     [],
   );
 
-  const handleGetStarted = useCallback(async () => {
+  const handleChooseFolder = useCallback(async () => {
     if (!isDesktopRuntime()) {
-      // Non-desktop: fall back to the modal for remote workspace creation.
       dispatch({ type: "open" });
       return;
     }
@@ -289,6 +307,32 @@ export function WelcomeRoute() {
     if (!folder) return;
     await handleCreateWorkspace("starter", folder);
   }, [handleCreateWorkspace]);
+
+  /**
+   * "Get started" must not open a native folder dialog as its first act: a
+   * first-run user has been told nothing about workspaces yet and cannot know
+   * what folder is being asked for, so the dialog reads as a dead end. Create a
+   * default workspace under the home folder -- the same thing chat-first
+   * creation already does -- and let the user move or add folders afterwards.
+   * Choosing a folder explicitly stays available via `handleChooseFolder`.
+   */
+  const handleGetStarted = useCallback(async () => {
+    if (!isDesktopRuntime()) {
+      // Non-desktop: fall back to the modal for remote workspace creation.
+      dispatch({ type: "open" });
+      return;
+    }
+    const home = await getDesktopHomeDir().catch(() => "");
+    const folder = home
+      ? await joinDesktopPath(home, DEFAULT_WORKSPACE_FOLDER_NAME).catch(() => "")
+      : "";
+    if (!folder) {
+      // No usable home directory: ask rather than fail silently.
+      await handleChooseFolder();
+      return;
+    }
+    await handleCreateWorkspace("starter", folder);
+  }, [handleChooseFolder, handleCreateWorkspace]);
 
   const handleUseManualFolder = useCallback(async () => {
     const folder = manualFolder.trim();
@@ -442,15 +486,15 @@ export function WelcomeRoute() {
         ai_prompt: prompt || null,
         ai_prompt_length: prompt.length,
       });
-      finishOnboarding();
+      dispatch({ type: "tutorial-step" });
     },
-    [finishOnboarding],
+    [],
   );
 
   const handleAttributionSkip = useCallback(() => {
     captureAnalyticsEvent("attribution_survey_skipped");
-    finishOnboarding();
-  }, [finishOnboarding]);
+    dispatch({ type: "tutorial-step" });
+  }, []);
 
   // Leading onboarding steps run before the existing workspace-creation flow.
   // Language is always the first thing shown; engine download follows; then
@@ -472,6 +516,7 @@ export function WelcomeRoute() {
     <>
       <WelcomePage
         onGetStarted={handleGetStarted}
+        onChooseFolder={isDesktopRuntime() ? handleChooseFolder : undefined}
         busy={state.createBusy}
         error={state.createError}
         manualFolder={manualFolder}
@@ -517,6 +562,9 @@ export function WelcomeRoute() {
           onSubmit={handleAttributionSubmit}
           onSkip={handleAttributionSkip}
         />
+      ) : null}
+      {state.tutorialStep ? (
+        <TutorialStep workspacePath={createdFolder} onStart={finishOnboarding} />
       ) : null}
     </>
   );

@@ -324,6 +324,20 @@ html {
   font-size: var(--redrob-font-size, 16px);
 }
 
+/*
+ * Korean has no inter-word breaking rule a browser can infer, so the default
+ * `word-break: normal` splits mid-word -- "환영합니다" wraps as "환영" / "합니다".
+ * `keep-all` keeps each word whole and breaks at spaces instead. Scoped to the
+ * document language, which setLocale() writes to <html lang>, so English text
+ * keeps its normal breaking. `overflow-wrap: anywhere` is the escape hatch for
+ * a single token longer than its container (a long path or URL), which
+ * `keep-all` alone would let overflow.
+ */
+html[lang="ko"] {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
