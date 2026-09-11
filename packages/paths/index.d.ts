@@ -13,10 +13,12 @@ export declare function normalizeWorkspaceRootPath(value: unknown, opts?: PathOp
 export declare function redrobConfigDir(opts?: PathOptions): string;
 export declare function redrobServerConfigPath(opts?: PathOptions): string;
 export declare function redrobEnvStorePath(opts?: PathOptions): string;
-export declare function globalOpencodeConfigDir(opts?: PathOptions): string;
-export declare function resolveGlobalOpencodeConfigPath(opts?: PathOptions): string;
-export declare function workspaceOpencodeConfigCandidates(workspaceRoot: string): string[];
-export declare function resolveWorkspaceOpencodeConfigPath(workspaceRoot: string): string;
+export declare function globalEngineConfigDir(opts?: PathOptions): string;
+export declare function resolveGlobalEngineConfigPath(opts?: PathOptions): string;
+export declare function workspaceEngineConfigCandidates(workspaceRoot: string): string[];
+export declare function resolveWorkspaceEngineConfigPath(workspaceRoot: string): string;
+export declare function legacyWorkspaceConfigCandidates(workspaceRoot: string): string[];
+export declare function legacyGlobalConfigCandidates(opts?: PathOptions): string[];
 export declare function desktopBootstrapPath(opts?: PathOptions): string;
 export declare function legacyDesktopBootstrapPath(opts?: PathOptions): string;
 export declare function expandHomePath(value: string, opts?: PathOptions): string;

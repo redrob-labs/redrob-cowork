@@ -125,7 +125,7 @@ export function useEngineReload(input: UseEngineReloadInput) {
     // Marking is enough: the reload coordinator auto-reloads once idle.
     reloadCoordinator.markReloadRequired("config", {
       type: "config",
-      name: "opencode.json",
+      name: "redrob.jsonc",
       action: "updated",
     });
   }, [reloadCoordinator, reloadCoordinator.canReloadWorkspaceEngine]);

@@ -19,7 +19,7 @@ describe("OpenCode config path resolution", () => {
     try {
       const opencodeConfigDir = join(root, "dev-opencode-config");
       await mkdir(opencodeConfigDir, { recursive: true });
-      const expected = join(opencodeConfigDir, "opencode.json");
+      const expected = join(opencodeConfigDir, "redrob.json");
       await writeFile(expected, "{}", "utf8");
       process.env.OPENCODE_CONFIG_DIR = opencodeConfigDir;
       process.env.XDG_CONFIG_HOME = join(root, "xdg");

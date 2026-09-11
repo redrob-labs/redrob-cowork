@@ -435,7 +435,11 @@ describe("RedrobWorkOfficeAttachments", () => {
 
     const packageJson = JSON.parse(await readFile(join(PACKAGE_ROOT, "package.json"), "utf8"));
     if (!isRecord(packageJson) || !isRecord(packageJson.scripts) || typeof packageJson.scripts.build !== "string") throw new Error("Expected package build script");
-    expect(packageJson.scripts.build).toContain("redrob-office-attachments.ts");
+    // The plugin bundle list moved out of `scripts.build` (now just
+    // `node ../../scripts/build-server.mjs`) and into that script, so assert
+    // against the file that actually names the entrypoints.
+    const buildScript = await readFile(join(PACKAGE_ROOT, "..", "..", "scripts", "build-server.mjs"), "utf8");
+    expect(buildScript).toContain("redrob-office-attachments.ts");
   });
 
   test("module exposes only the plugin factory", async () => {

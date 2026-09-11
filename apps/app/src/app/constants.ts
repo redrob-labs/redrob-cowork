@@ -33,7 +33,7 @@ export type McpDirectoryInfo = {
   id?: string;
   /** Display name shown in the UI. */
   name: string;
-  /** Safe server name for opencode.jsonc (alphanumeric, - and _ only). Auto-derived from name if omitted. */
+  /** Safe server name for redrob.jsonc (alphanumeric, - and _ only). Auto-derived from name if omitted. */
   serverName?: string;
   description: string;
   url?: string;

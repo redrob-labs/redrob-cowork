@@ -1125,7 +1125,7 @@ export function createConnectionsStore(options: {
     }
   }
 
-  // Server-only path. Local fallback would rewrite opencode.jsonc whole and
+  // Server-only path. Local fallback would rewrite redrob.jsonc whole and
   // clobber inline comments — settings-route.tsx already gates the prop so
   // this never gets called when the server is unavailable. Reload UX comes
   // from the existing reload-required popup; no extra banner here.

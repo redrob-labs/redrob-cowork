@@ -5,15 +5,17 @@ import path from "node:path";
 
 import {
   desktopBootstrapPath,
-  globalOpencodeConfigDir,
+  globalEngineConfigDir,
+  legacyGlobalConfigCandidates,
+  legacyWorkspaceConfigCandidates,
   legacyDesktopBootstrapPath,
   MAX_CONFIG_ROOT_LENGTH,
   normalizeWorkspaceRootPath,
   redrobEnvStorePath,
   redrobServerConfigPath,
-  resolveGlobalOpencodeConfigPath,
-  resolveWorkspaceOpencodeConfigPath,
-  workspaceOpencodeConfigCandidates,
+  resolveGlobalEngineConfigPath,
+  resolveWorkspaceEngineConfigPath,
+  workspaceEngineConfigCandidates,
 } from "../index.mjs";
 
 async function withTempDir(callback) {
@@ -151,71 +153,131 @@ describe("redrob env store and desktop bootstrap paths", () => {
   });
 });
 
-describe("global OpenCode config paths", () => {
-  test("accepts safe OPENCODE_CONFIG_DIR as the config directory", async () => {
+describe("global engine config paths", () => {
+  /**
+   * These paths must track Redrob Code, not upstream OpenCode. The engine reads
+   * `${XDG_CONFIG_HOME:-$HOME/.config}/redrob/redrob.json(c)` and honours
+   * REDROB_CONFIG_DIR; it never reads `opencode.json(c)`. Anything here drifting
+   * back to the upstream names means user config silently stops being loaded.
+   */
+  test("accepts a safe REDROB_CONFIG_DIR as the config directory", async () => {
     await withTempDir(async (root) => {
-      const opencodeConfigDir = path.join(root, "explicit-opencode");
-      await mkdir(opencodeConfigDir, { recursive: true });
-      const json = path.join(opencodeConfigDir, "opencode.json");
+      const configDir = path.join(root, "explicit-redrob");
+      await mkdir(configDir, { recursive: true });
+      const json = path.join(configDir, "redrob.json");
       await writeFile(json, "{}", "utf8");
 
       const opts = {
-        env: { OPENCODE_CONFIG_DIR: opencodeConfigDir, XDG_CONFIG_HOME: path.join(root, "xdg") },
+        env: { REDROB_CONFIG_DIR: configDir, XDG_CONFIG_HOME: path.join(root, "xdg") },
         homeDir: path.join(root, "home"),
         platform: "linux",
       };
-      expect(globalOpencodeConfigDir(opts)).toBe(opencodeConfigDir);
-      expect(resolveGlobalOpencodeConfigPath(opts)).toBe(json);
+      expect(globalEngineConfigDir(opts)).toBe(configDir);
+      expect(resolveGlobalEngineConfigPath(opts)).toBe(json);
     });
   });
 
-  test("prefers opencode.jsonc over opencode.json and falls back to jsonc", async () => {
+  test("still honours OPENCODE_CONFIG_DIR as a legacy fallback", () => {
+    const opts = {
+      env: { OPENCODE_CONFIG_DIR: "/tmp/legacy-dir", XDG_CONFIG_HOME: "/tmp/xdg" },
+      homeDir: "/home/ada",
+      platform: "linux",
+    };
+    expect(globalEngineConfigDir(opts)).toBe("/tmp/legacy-dir");
+  });
+
+  test("REDROB_CONFIG_DIR wins over OPENCODE_CONFIG_DIR", () => {
+    const opts = {
+      env: { REDROB_CONFIG_DIR: "/tmp/current", OPENCODE_CONFIG_DIR: "/tmp/legacy", XDG_CONFIG_HOME: "/tmp/xdg" },
+      homeDir: "/home/ada",
+      platform: "linux",
+    };
+    expect(globalEngineConfigDir(opts)).toBe("/tmp/current");
+  });
+
+  test("defaults to the engine's XDG directory, not opencode's", () => {
+    const opts = { env: { XDG_CONFIG_HOME: "/tmp/xdg" }, homeDir: "/home/ada", platform: "linux" };
+    expect(globalEngineConfigDir(opts)).toBe("/tmp/xdg/redrob");
+  });
+
+  test("prefers redrob.jsonc over redrob.json and falls back to jsonc", async () => {
     await withTempDir(async (root) => {
-      const dir = path.join(root, "xdg", "opencode");
+      const dir = path.join(root, "xdg", "redrob");
       await mkdir(dir, { recursive: true });
       const opts = { env: { XDG_CONFIG_HOME: path.join(root, "xdg") }, homeDir: path.join(root, "home"), platform: "linux" };
-      const jsonc = path.join(dir, "opencode.jsonc");
-      const json = path.join(dir, "opencode.json");
+      const jsonc = path.join(dir, "redrob.jsonc");
+      const json = path.join(dir, "redrob.json");
 
-      expect(resolveGlobalOpencodeConfigPath(opts)).toBe(jsonc);
+      expect(resolveGlobalEngineConfigPath(opts)).toBe(jsonc);
       await writeFile(json, "{}", "utf8");
-      expect(resolveGlobalOpencodeConfigPath(opts)).toBe(json);
+      expect(resolveGlobalEngineConfigPath(opts)).toBe(json);
       await writeFile(jsonc, "{}", "utf8");
-      expect(resolveGlobalOpencodeConfigPath(opts)).toBe(jsonc);
+      expect(resolveGlobalEngineConfigPath(opts)).toBe(jsonc);
     });
   });
 
-  test("rejects relative OPENCODE_CONFIG_DIR", () => {
+  test("rejects a relative REDROB_CONFIG_DIR", () => {
     const opts = {
-      env: { OPENCODE_CONFIG_DIR: "relative/opencode", XDG_CONFIG_HOME: "/tmp/xdg" },
+      env: { REDROB_CONFIG_DIR: "relative/redrob", XDG_CONFIG_HOME: "/tmp/xdg" },
       homeDir: "/home/ada",
       platform: "linux",
     };
-    expect(globalOpencodeConfigDir(opts)).toBe("/tmp/xdg/opencode");
+    expect(globalEngineConfigDir(opts)).toBe("/tmp/xdg/redrob");
   });
 
-  test("rejects over-long OPENCODE_CONFIG_DIR", () => {
+  test("rejects an over-long REDROB_CONFIG_DIR", () => {
     const opts = {
-      env: { OPENCODE_CONFIG_DIR: `/${"a".repeat(MAX_CONFIG_ROOT_LENGTH)}`, XDG_CONFIG_HOME: "/tmp/xdg" },
+      env: { REDROB_CONFIG_DIR: `/${"a".repeat(MAX_CONFIG_ROOT_LENGTH)}`, XDG_CONFIG_HOME: "/tmp/xdg" },
       homeDir: "/home/ada",
       platform: "linux",
     };
-    expect(globalOpencodeConfigDir(opts)).toBe("/tmp/xdg/opencode");
+    expect(globalEngineConfigDir(opts)).toBe("/tmp/xdg/redrob");
   });
 
-  test("rejects forbidden control characters in OPENCODE_CONFIG_DIR", () => {
+  test("rejects forbidden control characters in REDROB_CONFIG_DIR", () => {
     const opts = {
-      env: { OPENCODE_CONFIG_DIR: "/tmp/opencode\n", XDG_CONFIG_HOME: "/tmp/xdg" },
+      env: { REDROB_CONFIG_DIR: "/tmp/redrob\n", XDG_CONFIG_HOME: "/tmp/xdg" },
       homeDir: "/home/ada",
       platform: "linux",
     };
-    expect(globalOpencodeConfigDir(opts)).toBe("/tmp/xdg/opencode");
+    expect(globalEngineConfigDir(opts)).toBe("/tmp/xdg/redrob");
+  });
+
+  test("names the legacy global files without making them a write target", () => {
+    const opts = { env: { XDG_CONFIG_HOME: "/tmp/xdg" }, homeDir: "/home/ada", platform: "linux" };
+    expect(legacyGlobalConfigCandidates(opts)).toEqual([
+      "/tmp/xdg/opencode/opencode.jsonc",
+      "/tmp/xdg/opencode/opencode.json",
+    ]);
+    expect(resolveGlobalEngineConfigPath(opts)).toBe("/tmp/xdg/redrob/redrob.jsonc");
   });
 });
 
-describe("workspace OpenCode config paths", () => {
-  test("returns the four server candidates in order", () => {
-    expect(workspaceOpencodeConfigCandidates("/repo/workspace")).toEqual([
+describe("workspace engine config paths", () => {
+  test("offers only the workspace-root files the engine loads", () => {
+    // `.opencode/redrob.json` is Redrob Work's own managed runtime config, so it
+    // is deliberately absent here: listing it would point the user-config editor
+    // at a file the app owns.
+    expect(workspaceEngineConfigCandidates("/repo/workspace")).toEqual([
+      "/repo/workspace/redrob.jsonc",
+      "/repo/workspace/redrob.json",
+    ]);
+  });
+
+  test("resolves the first existing candidate and defaults to jsonc", async () => {
+    await withTempDir(async (root) => {
+      const jsonc = path.join(root, "redrob.jsonc");
+      const json = path.join(root, "redrob.json");
+      expect(resolveWorkspaceEngineConfigPath(root)).toBe(jsonc);
+      await writeFile(json, "{}", "utf8");
+      expect(resolveWorkspaceEngineConfigPath(root)).toBe(json);
+      await writeFile(jsonc, "{}", "utf8");
+      expect(resolveWorkspaceEngineConfigPath(root)).toBe(jsonc);
+    });
+  });
+
+  test("names the legacy workspace files the engine never read", () => {
+    expect(legacyWorkspaceConfigCandidates("/repo/workspace")).toEqual([
       "/repo/workspace/opencode.jsonc",
       "/repo/workspace/opencode.json",
       "/repo/workspace/.opencode/opencode.jsonc",
@@ -223,15 +285,11 @@ describe("workspace OpenCode config paths", () => {
     ]);
   });
 
-  test("resolves the first existing workspace candidate", async () => {
-    await withTempDir(async (root) => {
-      await mkdir(path.join(root, ".opencode"), { recursive: true });
-      const hiddenJsonc = path.join(root, ".opencode", "opencode.jsonc");
-      const hiddenJson = path.join(root, ".opencode", "opencode.json");
-      await writeFile(hiddenJson, "{}", "utf8");
-      expect(resolveWorkspaceOpencodeConfigPath(root)).toBe(hiddenJson);
-      await writeFile(hiddenJsonc, "{}", "utf8");
-      expect(resolveWorkspaceOpencodeConfigPath(root)).toBe(hiddenJsonc);
-    });
+  test("no engine-visible candidate uses an upstream opencode filename", () => {
+    const offenders = [
+      ...workspaceEngineConfigCandidates("/repo/workspace"),
+      resolveGlobalEngineConfigPath({ env: { XDG_CONFIG_HOME: "/tmp/xdg" }, homeDir: "/home/ada", platform: "linux" }),
+    ].filter((candidate) => /opencode\.jsonc?$/.test(candidate));
+    expect(offenders).toEqual([]);
   });
 });

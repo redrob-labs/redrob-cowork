@@ -659,7 +659,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           setConfigActionStatus(t("settings.config_updated"));
           reloadCoordinator.markReloadRequired("config", {
             type: "config",
-            name: "opencode.json",
+            name: "redrob.jsonc",
             action: "updated",
           });
         },
@@ -1032,7 +1032,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           modelVariant: null,
         }));
       }
-      reloadCoordinator.markReloadRequired("config", { type: "config", name: "opencode.json", action: "updated" });
+      reloadCoordinator.markReloadRequired("config", { type: "config", name: "redrob.jsonc", action: "updated" });
       try {
         await reloadEngineOrRestartDesktop(client, workspaceId);
       } catch {
@@ -1470,7 +1470,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       });
       reloadCoordinator.markReloadRequired("config", {
         type: "config",
-        name: "opencode.json",
+        name: "redrob.jsonc",
         action: "updated",
       });
     } catch {

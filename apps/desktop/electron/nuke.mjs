@@ -7,7 +7,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   desktopBootstrapPath as resolveDesktopBootstrapPath,
-  globalOpencodeConfigDir,
+  globalEngineConfigDir,
+  legacyGlobalConfigCandidates,
   legacyDesktopBootstrapPath as resolveLegacyDesktopBootstrapPath,
   redrobEnvStorePath,
   redrobServerConfigPath as resolveRedrobServerConfigPath,
@@ -186,7 +187,13 @@ function opencodeDataDirs(env, homedir, platform, paths) {
 }
 
 function opencodeConfigDirs(env, homedir, platform, paths) {
-  return [globalOpencodeConfigDir({ env, homeDir: homedir, platform })];
+  // Both directories: the engine's current one and the upstream-named one
+  // earlier versions wrote. A reset that left the legacy directory behind would
+  // silently restore stale settings the moment a legacy-aware path read it.
+  const current = globalEngineConfigDir({ env, homeDir: homedir, platform });
+  const legacy = legacyGlobalConfigCandidates({ env, homeDir: homedir, platform })
+    .map((file) => paths.dirname(file));
+  return [...new Set([current, ...legacy])];
 }
 
 function opencodeCacheDirs(env, homedir, platform) {

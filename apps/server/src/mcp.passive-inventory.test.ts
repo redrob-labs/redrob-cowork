@@ -15,13 +15,13 @@ describe("passive MCP layer inspection", () => {
     const opencodeConfigDir = join(root, "explicit-opencode-config");
     const homeDir = join(root, "home");
     try {
-      await mkdir(join(xdgConfigHome, "opencode"), { recursive: true });
+      await mkdir(join(xdgConfigHome, "redrob"), { recursive: true });
       await mkdir(opencodeConfigDir, { recursive: true });
-      await mkdir(join(homeDir, ".config", "opencode"), { recursive: true });
-      const xdgJson = join(xdgConfigHome, "opencode", "opencode.json");
-      const xdgJsonc = join(xdgConfigHome, "opencode", "opencode.jsonc");
-      const homeJsonc = join(homeDir, ".config", "opencode", "opencode.jsonc");
-      const explicitJson = join(opencodeConfigDir, "opencode.json");
+      await mkdir(join(homeDir, ".config", "redrob"), { recursive: true });
+      const xdgJson = join(xdgConfigHome, "redrob", "redrob.json");
+      const xdgJsonc = join(xdgConfigHome, "redrob", "redrob.jsonc");
+      const homeJsonc = join(homeDir, ".config", "redrob", "redrob.jsonc");
+      const explicitJson = join(opencodeConfigDir, "redrob.json");
       await writeFile(xdgJson, "{}", "utf8");
       await writeFile(homeJsonc, "{}", "utf8");
       await writeFile(explicitJson, "{}", "utf8");
@@ -45,7 +45,7 @@ describe("passive MCP layer inspection", () => {
 
   test("reports the bounded selected sources and ordered collisions without claiming complete resolution", async () => {
     const root = await mkdtemp(join(tmpdir(), "redrob-passive-mcp-layers-"));
-    const globalConfigPath = join(root, "global-opencode.jsonc");
+    const globalConfigPath = join(root, "global-redrob.jsonc");
     try {
       await writeFile(globalConfigPath, JSON.stringify({
         mcp: {
@@ -54,7 +54,7 @@ describe("passive MCP layer inspection", () => {
         },
         permission: { "global-only_*": "deny" },
       }), "utf8");
-      await writeFile(join(root, "opencode.jsonc"), JSON.stringify({
+      await writeFile(join(root, "redrob.jsonc"), JSON.stringify({
         mcp: {
           shared: { type: "remote", url: "https://project.example/mcp" },
           "project-only": { type: "remote", url: "https://project-only.example/mcp" },
@@ -103,7 +103,7 @@ describe("passive MCP layer inspection", () => {
 
   test("evaluates ordered current permissions for exact flat MCP tool IDs", async () => {
     const root = await mkdtemp(join(tmpdir(), "redrob-passive-mcp-policy-"));
-    const globalConfigPath = join(root, "global-opencode.jsonc");
+    const globalConfigPath = join(root, "global-redrob.jsonc");
     try {
       await writeFile(globalConfigPath, JSON.stringify({
         permission: {
@@ -117,7 +117,7 @@ describe("passive MCP layer inspection", () => {
           },
         },
       }), "utf8");
-      await writeFile(join(root, "opencode.jsonc"), JSON.stringify({
+      await writeFile(join(root, "redrob.jsonc"), JSON.stringify({
         // Current permission rules outrank the deprecated top-level tools map
         // even when the legacy value comes from a later project layer.
         tools: {
@@ -168,10 +168,10 @@ describe("passive MCP layer inspection", () => {
 
   test("does not hide a tool for a resource-scoped permission rule", async () => {
     const root = await mkdtemp(join(tmpdir(), "redrob-passive-mcp-resource-policy-"));
-    const globalConfigPath = join(root, "global-opencode.jsonc");
+    const globalConfigPath = join(root, "global-redrob.jsonc");
     try {
       await writeFile(globalConfigPath, "{}", "utf8");
-      await writeFile(join(root, "opencode.jsonc"), JSON.stringify({
+      await writeFile(join(root, "redrob.jsonc"), JSON.stringify({
         permission: {
           "redrob-cloud_search_capabilities": {
             "restricted-resource": "deny",
@@ -207,9 +207,9 @@ describe("passive MCP layer inspection", () => {
 
   test("marks malformed static MCP layers invalid and omits unsafe entries", async () => {
     const root = await mkdtemp(join(tmpdir(), "redrob-passive-mcp-invalid-"));
-    const globalConfigPath = join(root, "missing-global-opencode.jsonc");
+    const globalConfigPath = join(root, "missing-global-redrob.jsonc");
     try {
-      await writeFile(join(root, "opencode.jsonc"), JSON.stringify({
+      await writeFile(join(root, "redrob.jsonc"), JSON.stringify({
         mcp: {
           valid: { type: "remote", url: "https://valid.example/mcp" },
           invalid: null,
@@ -232,9 +232,9 @@ describe("passive MCP layer inspection", () => {
 
   test("marks non-regular and oversized static layers unreadable without dropping runtime entries", async () => {
     const root = await mkdtemp(join(tmpdir(), "redrob-passive-mcp-bounded-"));
-    const globalConfigPath = join(root, "global-opencode.jsonc");
+    const globalConfigPath = join(root, "global-redrob.jsonc");
     try {
-      await mkdir(join(root, "opencode.jsonc"));
+      await mkdir(join(root, "redrob.jsonc"));
       await writeFile(globalConfigPath, JSON.stringify({
         mcp: {
           oversized: { type: "remote", url: "https://oversized.example/mcp" },
@@ -275,7 +275,7 @@ describe("passive MCP layer inspection", () => {
       controller.abort(new Error("diagnostics deadline exceeded"));
 
       await expect(inspectMcpLayersFromRuntimeSnapshot(root, {}, {
-        globalConfigPath: join(root, "global-opencode.jsonc"),
+        globalConfigPath: join(root, "global-redrob.jsonc"),
         signal: controller.signal,
       })).rejects.toThrow("diagnostics deadline exceeded");
     } finally {

@@ -552,7 +552,7 @@ export function createExtensionsStore(options: {
       mutateState((current) => ({
         ...current,
         pluginConfig: null,
-        pluginConfigPath: `opencode.json (${isRemoteWorkspace ? "remote" : "redrob"} server)`,
+        pluginConfigPath: `redrob.jsonc (${isRemoteWorkspace ? "remote" : "redrob"} server)`,
       }));
 
       try {

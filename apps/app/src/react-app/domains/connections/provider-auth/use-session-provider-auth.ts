@@ -109,7 +109,7 @@ export function useSessionProviderAuth(input: UseSessionProviderAuthInput) {
         markOpencodeConfigReloadRequired: () => {
           markReloadRequired("config", {
             type: "config",
-            name: "opencode.json",
+            name: "redrob.jsonc",
             action: "updated",
           });
         },

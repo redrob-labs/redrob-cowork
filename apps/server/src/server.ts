@@ -2,7 +2,7 @@ import { readFile, writeFile, rm, stat } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
-import { resolveGlobalOpencodeConfigPath } from "@redrob/paths";
+import { resolveGlobalEngineConfigPath } from "@redrob/paths";
 import type { ApprovalRequest, Capabilities, ServerConfig, WorkspaceInfo, Actor, ReloadReason, ReloadTrigger, TokenScope } from "./types.js";
 import { ApprovalService } from "./approvals.js";
 import {
@@ -45,6 +45,7 @@ import { ReloadEventStore } from "./events.js";
 import { computeReloadFingerprint } from "./reload-fingerprint.js";
 import { startReloadWatchers } from "./reload-watcher.js";
 import { opencodeConfigPath, redrobConfigPath, projectCommandsDir, projectSkillsDir } from "./workspace-files.js";
+import { migrateLegacyGlobalConfig } from "./engine-config-migrate.js";
 import { ensureDir, exists, hashToken, shortId } from "./utils.js";
 import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles, readRawOpencodeConfig } from "./workspace-init.js";
 import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./validators.js";
@@ -958,6 +959,18 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   const tokens = new TokenService(config);
   const env = new EnvService();
   const logger = createServerLogger(config);
+  try {
+    const migratedFrom = await migrateLegacyGlobalConfig();
+    if (migratedFrom) {
+      logger.log("info", "Migrated global engine config off a legacy filename the engine does not read.", {
+        from: migratedFrom,
+      });
+    }
+  } catch (error) {
+    logger.log("warn", "Failed to migrate the legacy global engine config.", {
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  }
   try {
     await reconcileLocalManagedMcpRuntimeEntries(config);
   } catch (error) {
@@ -3879,7 +3892,7 @@ function normalizeOpencodeScope(value: string | null | undefined): "project" | "
 }
 
 export function resolveOpencodeConfigFilePath(scope: "project" | "global", workspaceRoot: string): string {
-  if (scope === "global") return resolveGlobalOpencodeConfigPath();
+  if (scope === "global") return resolveGlobalEngineConfigPath();
   return opencodeConfigPath(workspaceRoot);
 }
 

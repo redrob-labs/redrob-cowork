@@ -17,7 +17,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { globalOpencodeConfigDir, workspaceOpencodeConfigCandidates } from "@redrob/paths";
+import { globalEngineConfigDir, workspaceEngineConfigCandidates } from "@redrob/paths";
 
 import { configureFakeMediaForTests, installMediaPermissionHandlers } from "./media-permissions.mjs";
 import { registerMigrationIpc } from "./migration.mjs";
@@ -1068,7 +1068,7 @@ function flushPendingDeepLinks() {
 }
 
 function globalOpencodeRoot() {
-  return globalOpencodeConfigDir();
+  return globalEngineConfigDir();
 }
 
 function execResult(ok, stdout = "", stderr = "", status = ok ? 0 : 1) {
@@ -1290,7 +1290,7 @@ function resolveOpencodeConfigPath(scope, projectDir) {
     if (!String(projectDir ?? "").trim()) {
       throw new Error("projectDir is required");
     }
-    return workspaceOpencodeConfigCandidates(projectDir);
+    return workspaceEngineConfigCandidates(projectDir);
   } else if (scope === "global") {
     const root = globalOpencodeRoot();
     return [path.join(root, "opencode.jsonc"), path.join(root, "opencode.json")];

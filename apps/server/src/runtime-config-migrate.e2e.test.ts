@@ -83,10 +83,10 @@ afterEach(async () => {
 });
 
 describe("runtime-config migrate route", () => {
-  test("lifts MCP entries from project opencode.jsonc into the runtime store", async () => {
+  test("lifts MCP entries from project redrob.jsonc into the runtime store", async () => {
     const workspaceRoot = await createTempRoot("redrob-runtime-migrate-");
     await writeFile(
-      join(workspaceRoot, "opencode.jsonc"),
+      join(workspaceRoot, "redrob.jsonc"),
       JSON.stringify({
         $schema: "https://opencode.ai/config.json",
         mcp: {
@@ -111,7 +111,7 @@ describe("runtime-config migrate route", () => {
     const runtime = await readRuntimeOpencodeConfig(config, "ws_1");
     expect(runtime.mcp?.["nova-mail"]?.url).toBe("https://example.com/mcp/mail");
 
-    const parsed = asRecord(JSON.parse(await readFile(join(workspaceRoot, "opencode.jsonc"), "utf8")));
+    const parsed = asRecord(JSON.parse(await readFile(join(workspaceRoot, "redrob.jsonc"), "utf8")));
     expect(parsed.mcp).toBeUndefined();
   });
 });

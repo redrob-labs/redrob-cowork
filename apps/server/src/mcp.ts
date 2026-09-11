@@ -1,5 +1,5 @@
 import { minimatch } from "minimatch";
-import { resolveGlobalOpencodeConfigPath } from "@redrob/paths";
+import { resolveGlobalEngineConfigPath } from "@redrob/paths";
 import type { McpItem, ServerConfig } from "./types.js";
 import { sanitizeDiagnosticString } from "./diagnostic-sanitizer.js";
 import { readJsoncFile } from "./jsonc.js";
@@ -39,7 +39,7 @@ export function resolveGlobalOpenCodeConfigPath(input?: {
   xdgConfigHome?: string;
   homeDir?: string;
 }): string {
-  return resolveGlobalOpencodeConfigPath({
+  return resolveGlobalEngineConfigPath({
     env: {
       ...process.env,
       ...(input?.opencodeConfigDir !== undefined ? { OPENCODE_CONFIG_DIR: input.opencodeConfigDir } : {}),

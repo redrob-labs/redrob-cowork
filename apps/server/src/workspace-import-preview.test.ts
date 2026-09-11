@@ -135,7 +135,7 @@ async function waitForPendingApproval(baseUrl: string): Promise<string> {
 describe("workspace import preview", () => {
   test("summarizes workspace import changes without writing files", async () => {
     const workspace = await makeWorkspace();
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["old-plugin"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["old-plugin"] }\n', "utf8");
     await mkdir(join(workspace, ".opencode", "skills", "demo"), { recursive: true });
     await writeFile(join(workspace, ".opencode", "skills", "demo", "SKILL.md"), "old skill\n", "utf8");
     await mkdir(join(workspace, ".opencode", "commands"), { recursive: true });
@@ -180,7 +180,7 @@ describe("workspace import preview", () => {
       unchanged: 0,
     });
     expect(preview.changes.map((change) => [change.kind, change.action, change.path])).toEqual([
-      ["opencode", "update", "opencode.jsonc"],
+      ["opencode", "update", "redrob.jsonc"],
       ["redrob", "create", ".opencode/redrob.json"],
       ["skill", "update", ".opencode/skills/demo/SKILL.md"],
       ["skill", "create", ".opencode/skills/new-skill/SKILL.md"],
@@ -196,7 +196,7 @@ describe("workspace import preview", () => {
 
   test("marks identical config as unchanged and excludes it from approval paths", async () => {
     const workspace = await makeWorkspace();
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
 
     const preview = await buildWorkspaceImportPreview(workspace, {
       opencode: { plugin: ["demo"] },
@@ -250,7 +250,7 @@ describe("workspace import preview", () => {
 
   test("uses replace action for config replacement", async () => {
     const workspace = await makeWorkspace();
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
 
     const preview = await buildWorkspaceImportPreview(workspace, {
       mode: { opencode: "replace" },
@@ -260,7 +260,7 @@ describe("workspace import preview", () => {
     expect(preview.changes[0]).toMatchObject({
       kind: "opencode",
       action: "replace",
-      path: "opencode.jsonc",
+      path: "redrob.jsonc",
     });
     expect(summarizeWorkspaceImportPreview(preview)).toBe("Import workspace config (update 1)");
     expect(summarizeWorkspaceImportApplied(preview)).toBe("Imported workspace config (update 1)");
@@ -307,7 +307,7 @@ describe("workspace import preview", () => {
     const workspace = await makeWorkspace();
     const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
     process.env.REDROB_DATA_DIR = dataDir;
@@ -357,7 +357,7 @@ describe("workspace import preview", () => {
     const workspace = await makeWorkspace();
     const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["demo"] }\n', "utf8");
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
     process.env.REDROB_DATA_DIR = dataDir;
@@ -423,7 +423,7 @@ describe("workspace import preview", () => {
       expect(body.code).toBe("workspace_import_preview_required");
       expect(typeof body.preview.fingerprint).toBe("string");
       expect(body.preview.summary.create).toBe(1);
-      expect(await pathExists(join(workspace, "opencode.jsonc"))).toBe(false);
+      expect(await pathExists(join(workspace, "redrob.jsonc"))).toBe(false);
       expect(await pathExists(auditLogPath("workspace"))).toBe(false);
     } finally {
       server.stop(true);
@@ -467,7 +467,7 @@ describe("workspace import preview", () => {
       expect(response.status).toBe(200);
       const body = await response.json() as { preview: { summary: { create: number } } };
       expect(body.preview.summary.create).toBe(3);
-      expect(await readFile(join(workspace, "opencode.jsonc"), "utf8")).toContain('"plugin"');
+      expect(await readFile(join(workspace, "redrob.jsonc"), "utf8")).toContain('"plugin"');
       expect(await readFile(join(workspace, ".opencode", "skills", "demo", "SKILL.md"), "utf8")).toContain("Demo skill");
       expect(await readFile(join(workspace, ".opencode", "agents", "demo.md"), "utf8")).toBe("Demo agent\n");
       expect(await readFile(auditLogPath("workspace"), "utf8")).toContain("Imported workspace config");
@@ -605,7 +605,7 @@ describe("workspace import preview", () => {
     const workspace = await makeWorkspace();
     const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
     process.env.REDROB_DATA_DIR = dataDir;
@@ -629,7 +629,7 @@ describe("workspace import preview", () => {
       expect(previewResponse.status).toBe(200);
       const preview = await previewResponse.json() as { fingerprint: string };
 
-      await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["changed-after-preview"] }\n', "utf8");
+      await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["changed-after-preview"] }\n', "utf8");
 
       const importResponse = await fetch(`${baseUrl}/workspace/workspace/import`, {
         method: "POST",
@@ -643,7 +643,7 @@ describe("workspace import preview", () => {
       };
       expect(rejected.code).toBe("workspace_import_preview_stale");
       expect(rejected.preview.fingerprint).not.toBe(preview.fingerprint);
-      expect(await readFile(join(workspace, "opencode.jsonc"), "utf8")).toContain("changed-after-preview");
+      expect(await readFile(join(workspace, "redrob.jsonc"), "utf8")).toContain("changed-after-preview");
       expect(await pathExists(auditLogPath("workspace"))).toBe(false);
     } finally {
       server.stop(true);
@@ -659,7 +659,7 @@ describe("workspace import preview", () => {
     const workspace = await makeWorkspace();
     const dataDir = await mkdtemp(join(tmpdir(), "redrob-import-preview-data-"));
     tempDirs.push(dataDir);
-    await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
+    await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["old"] }\n', "utf8");
 
     const originalDataDir = process.env.REDROB_DATA_DIR;
     process.env.REDROB_DATA_DIR = dataDir;
@@ -685,7 +685,7 @@ describe("workspace import preview", () => {
       });
 
       const approvalId = await waitForPendingApproval(baseUrl);
-      await writeFile(join(workspace, "opencode.jsonc"), '{ "plugin": ["changed-during-approval"] }\n', "utf8");
+      await writeFile(join(workspace, "redrob.jsonc"), '{ "plugin": ["changed-during-approval"] }\n', "utf8");
       const approvalResponse = await fetch(`${baseUrl}/approvals/${approvalId}`, {
         method: "POST",
         headers: {
@@ -704,7 +704,7 @@ describe("workspace import preview", () => {
       };
       expect(rejected.code).toBe("workspace_import_preview_stale");
       expect(rejected.preview.fingerprint).not.toBe(preview.fingerprint);
-      expect(await readFile(join(workspace, "opencode.jsonc"), "utf8")).toContain("changed-during-approval");
+      expect(await readFile(join(workspace, "redrob.jsonc"), "utf8")).toContain("changed-during-approval");
       expect(await pathExists(auditLogPath("workspace"))).toBe(false);
     } finally {
       server.stop(true);

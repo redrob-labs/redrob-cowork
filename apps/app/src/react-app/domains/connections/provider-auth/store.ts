@@ -283,7 +283,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
         content,
       ) as { ok: boolean; stderr?: string; stdout?: string };
       if (!result.ok) {
-        throw new Error(result.stderr || result.stdout || "Failed to write opencode.jsonc");
+        throw new Error(result.stderr || result.stdout || "Failed to write redrob.jsonc");
       }
       return true;
     }
@@ -295,7 +295,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     if (isLocalWorkspace && isDesktopRuntime() && root) {
       const result = await writeOpencodeConfig("project", root, content) as { ok: boolean; stderr?: string; stdout?: string };
       if (!result.ok) {
-        throw new Error(result.stderr || result.stdout || "Failed to write opencode.jsonc");
+        throw new Error(result.stderr || result.stdout || "Failed to write redrob.jsonc");
       }
       return true;
     }
@@ -307,7 +307,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
    * Upsert/delete cloud-managed provider entries in the workspace's runtime
    * opencode config (server-side SQLite merged into OPENCODE_CONFIG). Record
    * values upsert, explicit `null` deletes — per-key on the server, so there
-   * is no read-modify-write race and no edit of the user's opencode.jsonc.
+   * is no read-modify-write race and no edit of the user's redrob.jsonc.
    */
   const patchRuntimeProviders = async (update: Record<string, unknown>) => {
     const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
@@ -447,7 +447,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
     // Prefer runtime OPENCODE_CONFIG injection (server SQLite) so the built-in
     // opencode and other built-in/env-backed providers can be disabled without editing
-    // the user's opencode.jsonc. Fall back to project config only when the
+    // the user's redrob.jsonc. Fall back to project config only when the
     // managed runtime endpoint is unavailable.
     const c = options.client();
     const redrobSnapshot = options.redrobServer.getSnapshot();
@@ -502,7 +502,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
   /**
    * Remove a provider block (and its `disabled_providers` entry) from a raw
-   * opencode.jsonc. Inlined from the deleted cloud-provider-config module: the
+   * redrob.jsonc. Inlined from the deleted cloud-provider-config module: the
    * orphan sweep below still needs it to clear `lpr_*` blocks left behind by
    * installs that had organization-managed providers.
    */
@@ -529,7 +529,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
   };
 
   // Sweep all cloud-managed provider entries (keys matching /^lpr_/) from
-  // both the runtime config and opencode.jsonc, regardless of
+  // both the runtime config and redrob.jsonc, regardless of
   // importedCloudProviders state. Returns the list of provider IDs that were
   // removed so callers can also clear their auth credentials.
   const sweepOrphanCloudProvidersFromConfig = async (): Promise<string[]> => {

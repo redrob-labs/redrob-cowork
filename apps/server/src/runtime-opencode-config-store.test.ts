@@ -107,7 +107,7 @@ describe("runtime OpenCode config store", () => {
 
   test("stores MCP changes in the Redrob Work runtime DB without rewriting workspace files", async () => {
     await withWorkspace(async ({ root, config }) => {
-      const opencodePath = join(root, "opencode.jsonc");
+      const opencodePath = join(root, "redrob.jsonc");
       const opencode = '{\n  "mcp": {\n    "project": { "type": "remote", "url": "https://project.example/mcp" }\n  }\n}\n';
       await writeFile(opencodePath, opencode, "utf8");
 
@@ -126,7 +126,7 @@ describe("runtime OpenCode config store", () => {
 
   test("stores plugin changes in the Redrob Work runtime DB without rewriting workspace files", async () => {
     await withWorkspace(async ({ root, config }) => {
-      const opencodePath = join(root, "opencode.jsonc");
+      const opencodePath = join(root, "redrob.jsonc");
       const opencode = '{\n  "plugin": ["project-plugin"]\n}\n';
       await writeFile(opencodePath, opencode, "utf8");
 
@@ -153,7 +153,7 @@ describe("runtime OpenCode config store", () => {
 
   test("malformed user opencode config does not block runtime config reads", async () => {
     await withWorkspace(async ({ root, config }) => {
-      await writeFile(join(root, "opencode.jsonc"), '{ "mcp": {\n}\n}\n}\n', "utf8");
+      await writeFile(join(root, "redrob.jsonc"), '{ "mcp": {\n}\n}\n}\n', "utf8");
       await addMcp(config, WORKSPACE_ID, "runtime", { type: "remote", url: "https://runtime.example/mcp", enabled: true });
       await addPlugin(config, WORKSPACE_ID, "runtime-plugin");
 
@@ -308,7 +308,7 @@ describe("runtime OpenCode config store", () => {
 
   test("explicitly migrates safe Redrob Work-managed keys from user opencode config", async () => {
     await withWorkspace(async ({ root, config }) => {
-      const opencodePath = join(root, "opencode.jsonc");
+      const opencodePath = join(root, "redrob.jsonc");
       await writeFile(opencodePath, JSON.stringify({
         $schema: "https://opencode.ai/config.json",
         default_agent: "redrob",

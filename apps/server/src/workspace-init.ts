@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { ensureDir, exists } from "./utils.js";
 import { ApiError } from "./errors.js";
 import { opencodeConfigPath } from "./workspace-files.js";
+import { migrateLegacyWorkspaceConfig } from "./engine-config-migrate.js";
 import { readJsoncFile } from "./jsonc.js";
 import type { ReloadReason, WorkspaceInfo } from "./types.js";
 
@@ -59,6 +60,9 @@ export function defaultWorkspaceRedrobConfig(workspaceRoot: string, preset: stri
 }
 
 async function ensureOpencodeConfig(workspaceRoot: string): Promise<boolean> {
+  // Older installs wrote user config to `opencode.jsonc`, which the engine never
+  // read. Copy it across before anything reads the engine-visible path.
+  await migrateLegacyWorkspaceConfig(workspaceRoot).catch(() => null);
   const path = opencodeConfigPath(workspaceRoot);
   if (await exists(path)) {
     await readJsoncFile<Record<string, unknown>>(path, {}, { allowInvalid: true });

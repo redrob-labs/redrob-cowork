@@ -207,6 +207,12 @@ describe("supported locales", () => {
       /redrob-ui-mcp/g,
       // ollama.com/library and other bare-domain mentions used as literal examples.
       /ollama\.com\/library/g,
+      // The engine's global config directory, written as a literal path in copy.
+      // Must run BEFORE the generic "config" word strip below, which would
+      // otherwise turn "~/.config/redrob" into "~/./redrob" and leave the
+      // "redrob" fragment stranded (the lowercase-redrob rule further down only
+      // matches when a separator follows, and here the path ends at a space).
+      /~\/\.config\/redrob/g,
       // Technical file/format suffixes and DB/JSON/config words that appear as
       // part of an otherwise-Korean sentence describing a technical artifact.
       /\b(DB|JSON|config|json|jsonc|sha256|sha512|sha|zip|exe|yml|latest-mac)\b/g,

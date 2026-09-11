@@ -13,7 +13,7 @@ import {
   normalizeWorkspaceRootPath,
   redrobEnvStorePath,
   redrobServerConfigPath,
-  resolveWorkspaceOpencodeConfigPath,
+  resolveWorkspaceEngineConfigPath,
 } from "@redrob/paths";
 import {
   dedupeCertificates,
@@ -1569,6 +1569,12 @@ export function createRuntimeManager({
       env.XDG_DATA_HOME = devPaths.xdgDataHome;
       env.XDG_CACHE_HOME = devPaths.xdgCacheHome;
       env.XDG_STATE_HOME = devPaths.xdgStateHome;
+      // The engine reads REDROB_CONFIG_DIR / REDROB_TEST_HOME; the OPENCODE_
+      // names are upstream's and are kept only so an older sidecar still
+      // isolates. Setting the OPENCODE_ names alone meant dev mode was not
+      // actually isolating the current engine's config at all.
+      env.REDROB_CONFIG_DIR = devPaths.opencodeConfigDir;
+      env.REDROB_TEST_HOME = devPaths.homeDir;
       env.OPENCODE_CONFIG_DIR = devPaths.opencodeConfigDir;
       env.OPENCODE_TEST_HOME = devPaths.homeDir;
     }
@@ -1843,12 +1849,12 @@ export function createRuntimeManager({
   }
 
   async function ensureOpencodeConfig(projectDir) {
-    const configPath = resolveWorkspaceOpencodeConfigPath(projectDir);
+    const configPath = resolveWorkspaceEngineConfigPath(projectDir);
     if (await fileExists(configPath)) return;
     await mkdir(path.dirname(configPath), { recursive: true });
     await writeFile(
       configPath,
-      `${JSON.stringify({ $schema: "https://opencode.ai/config.json" }, null, 2)}\n`,
+      `${JSON.stringify({ $schema: "https://code.redrob.ai/config.json" }, null, 2)}\n`,
       "utf8",
     );
   }
