@@ -1,4 +1,5 @@
 import { applyEdits, modify, parse, printParseErrorCode } from "jsonc-parser";
+import { t } from "../i18n";
 import type { McpServerConfig, McpServerEntry } from "./types";
 import { readOpencodeConfig, writeOpencodeConfig } from "./lib/desktop";
 
@@ -21,13 +22,13 @@ export function getMcpIdentityKey(entry: McpIdentity): string {
 export function validateMcpServerName(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) {
-    throw new Error("server_name is required");
+    throw new Error(t("mcp.server_name_required"));
   }
   if (trimmed.startsWith("-")) {
-    throw new Error("server_name must not start with '-'");
+    throw new Error(t("mcp.server_name_invalid_prefix"));
   }
   if (!/^[A-Za-z0-9_-]+$/.test(trimmed)) {
-    throw new Error("server_name must be alphanumeric with '-' or '_'");
+    throw new Error(t("mcp.server_name_invalid_characters"));
   }
   return trimmed;
 }
@@ -47,7 +48,7 @@ export async function removeMcpFromConfig(
     const details = parseErrors
       .map((entry) => printParseErrorCode(entry.error))
       .join(", ");
-    throw new Error(`Failed to parse opencode config: ${details}`);
+    throw new Error(t("mcp.failed_parse_opencode_config", { details }));
   }
 
   const mcpSection = existingConfig?.["mcp"] as Record<string, unknown> | undefined;
@@ -61,7 +62,7 @@ export async function removeMcpFromConfig(
     updated.endsWith("\n") ? updated : `${updated}\n`,
   ) as { ok: boolean; stderr?: string; stdout?: string };
   if (!writeResult.ok) {
-    throw new Error(writeResult.stderr || writeResult.stdout || "Failed to write redrob.jsonc");
+    throw new Error(writeResult.stderr || writeResult.stdout || t("config.failed_write_redrob_jsonc"));
   }
 }
 

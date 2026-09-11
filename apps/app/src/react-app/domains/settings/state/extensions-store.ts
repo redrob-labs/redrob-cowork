@@ -1139,7 +1139,7 @@ export function createExtensionsStore(options: {
         });
         options.markReloadRequired?.("skills", { type: "skill", name: trimmed, action: "updated" });
         await refreshSkills({ force: true });
-        setStateField("skillsStatus", "Saved.");
+        setStateField("skillsStatus", t("extensions.saved"));
       } catch (error) {
         const message = error instanceof Error ? error.message : t("skills.unknown_error");
         options.setError(addOpencodeCacheHint(message));
@@ -1180,7 +1180,7 @@ export function createExtensionsStore(options: {
       if (!result.ok) {
         setStateField("skillsStatus", result.stderr || result.stdout || t("skills.unknown_error"));
       } else {
-        setStateField("skillsStatus", result.stdout || "Saved.");
+        setStateField("skillsStatus", result.stdout || t("extensions.saved"));
         options.markReloadRequired?.("skills", { type: "skill", name: trimmed, action: "updated" });
       }
       await refreshSkills({ force: true });

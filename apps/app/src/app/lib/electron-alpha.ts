@@ -1,4 +1,5 @@
 import { desktopFetch } from "./desktop";
+import { t } from "../../i18n";
 
 export type ElectronAlphaArtifact = {
   arch: "arm64" | "x64";
@@ -45,13 +46,13 @@ export function parseElectronLatestMacYml(
   const sha512 = parseYamlScalar(raw, "sha512");
 
   if (!version) {
-    throw new Error("latest-mac.yml is missing version.");
+    throw new Error(t("settings.electron_alpha_metadata_missing_version"));
   }
   if (!path) {
-    throw new Error("latest-mac.yml is missing artifact path/url.");
+    throw new Error(t("settings.electron_alpha_metadata_missing_artifact_path"));
   }
   if (!sha512) {
-    throw new Error("latest-mac.yml is missing sha512.");
+    throw new Error(t("settings.electron_alpha_metadata_missing_sha512"));
   }
 
   return {
@@ -73,7 +74,10 @@ export async function resolveElectronAlphaArtifact(
   });
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch latest-mac.yml (${response.status} ${response.statusText}).`,
+      t("settings.electron_alpha_metadata_fetch_failed", {
+        status: response.status,
+        statusText: response.statusText,
+      }),
     );
   }
   return parseElectronLatestMacYml(await response.text(), arch);

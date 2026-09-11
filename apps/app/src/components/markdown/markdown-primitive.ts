@@ -15,6 +15,7 @@ import {
 import { bundledLanguages, codeToHtml } from "shiki";
 
 import { faviconUrlForHref } from "@/lib/favicon";
+import { currentLocale, t } from "@/i18n";
 
 import { markdownMath } from "./markdown-math";
 
@@ -108,7 +109,8 @@ function createEmojiAliases() {
 const emojiAliases = createEmojiAliases();
 
 function codeCopyButton() {
-  return `<button type="button" data-redrob-code-copy="" class="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 bg-background/95 text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Copy code block" title="Copy code block">${CODE_COPY_ICON}${CODE_COPIED_ICON}<span data-redrob-code-copy-label="" class="sr-only" aria-live="polite">Copy code block</span></button>`;
+  const label = escapeAttribute(t("message.copy_code_block"));
+  return `<button type="button" data-redrob-code-copy="" class="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 bg-background/95 text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="${label}" title="${label}">${CODE_COPY_ICON}${CODE_COPIED_ICON}<span data-redrob-code-copy-label="" class="sr-only" aria-live="polite">${label}</span></button>`;
 }
 
 function chatCodeBlockContainer(html: string, shiki: boolean) {
@@ -153,13 +155,13 @@ export function syncMarkdownImagePreviews(root: HTMLElement) {
 
 export function setCodeCopyButtonState(button: HTMLButtonElement, copied: boolean) {
   const label = button.querySelector("[data-redrob-code-copy-label]");
-  if (label) label.textContent = copied ? "Code block copied" : "Copy code block";
+  if (label) label.textContent = copied ? t("message.code_block_copied") : t("message.copy_code_block");
 
   button.querySelector("[data-redrob-code-copy-icon]")?.toggleAttribute("hidden", copied);
   button.querySelector("[data-redrob-code-copy-check-icon]")?.toggleAttribute("hidden", !copied);
 
-  button.title = copied ? "Copied" : "Copy code block";
-  button.setAttribute("aria-label", copied ? "Code block copied" : "Copy code block");
+  button.title = copied ? t("message.copied") : t("message.copy_code_block");
+  button.setAttribute("aria-label", copied ? t("message.code_block_copied") : t("message.copy_code_block"));
 }
 
 function sanitizeMarkdownHtml(value: string) {
@@ -252,7 +254,8 @@ function renderLink(profile: MarkdownProfile, href: string, title: string | null
       const fileIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-muted-foreground"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/></svg>`;
       const chevron = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-muted-foreground"><path d="m6 9 6 6 6-6"/></svg>`;
 
-      return `<span class="inline-flex items-stretch overflow-hidden rounded-md border border-border/60 bg-muted/40 text-xs font-medium text-foreground align-middle"><a href="${safe}" data-redrob-link-href="${originalHref}"${titleAttr} target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-1 px-1.5 py-0.5 no-underline transition-colors hover:bg-muted">${fileIcon}${text}</a><button type="button" data-redrob-link-chevron="${originalHref}" class="inline-flex items-center border-l border-border/60 px-1 transition-colors hover:bg-muted" aria-label="Open with">${chevron}</button></span>`;
+      const openWithLabel = escapeAttribute(t("message.open_with"));
+      return `<span class="inline-flex items-stretch overflow-hidden rounded-md border border-border/60 bg-muted/40 text-xs font-medium text-foreground align-middle"><a href="${safe}" data-redrob-link-href="${originalHref}"${titleAttr} target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-1 px-1.5 py-0.5 no-underline transition-colors hover:bg-muted">${fileIcon}${text}</a><button type="button" data-redrob-link-chevron="${originalHref}" class="inline-flex items-center border-l border-border/60 px-1 transition-colors hover:bg-muted" aria-label="${openWithLabel}">${chevron}</button></span>`;
     }
 
     const favicon = faviconUrlForHref(href);
@@ -271,7 +274,8 @@ function renderImage(profile: MarkdownProfile, href: string, title: string | nul
   const titleAttr = title ? ` title="${escapeAttribute(title)}"` : "";
 
   if (profile.imagePresentation === "chat") {
-    return `<button type="button" data-redrob-image-preview="" class="my-4 inline-block max-w-full cursor-zoom-in align-top text-left transition-opacity hover:opacity-90" aria-label="Expand ${escapeAttribute(text)}"><img src="${safe}" alt="${escapeAttribute(text)}"${titleAttr} loading="lazy" decoding="async" class="block h-auto w-auto rounded-lg border border-border/70 object-contain" style="max-height: ${MARKDOWN_IMAGE_PREVIEW_MAX_HEIGHT}px; max-width: ${MARKDOWN_IMAGE_PREVIEW_MAX_WIDTH}px"></button>`;
+    const expandLabel = escapeAttribute(t("message.expand_item", { text }));
+    return `<button type="button" data-redrob-image-preview="" class="my-4 inline-block max-w-full cursor-zoom-in align-top text-left transition-opacity hover:opacity-90" aria-label="${expandLabel}"><img src="${safe}" alt="${escapeAttribute(text)}"${titleAttr} loading="lazy" decoding="async" class="block h-auto w-auto rounded-lg border border-border/70 object-contain" style="max-height: ${MARKDOWN_IMAGE_PREVIEW_MAX_HEIGHT}px; max-width: ${MARKDOWN_IMAGE_PREVIEW_MAX_WIDTH}px"></button>`;
   }
 
   return `<img src="${safe}" alt="${escapeAttribute(text)}"${titleAttr} loading="lazy" decoding="async" class="my-4 max-w-full rounded-[18px] border border-dls-border/70">`;
@@ -411,11 +415,16 @@ function createMarkdownParsers(presentation: MarkdownPresentation) {
   return { markdownParser, highlightedMarkdownParser };
 }
 
-const chatParsers = createMarkdownParsers("chat");
-const surfaceParsers = createMarkdownParsers("surface");
+const parserCache = new Map<string, ReturnType<typeof createMarkdownParsers>>();
 
 function parsersForPresentation(presentation: MarkdownPresentation) {
-  return presentation === "surface" ? surfaceParsers : chatParsers;
+  const cacheKey = `${currentLocale()}:${presentation}`;
+  const cached = parserCache.get(cacheKey);
+  if (cached) return cached;
+
+  const parsers = createMarkdownParsers(presentation);
+  parserCache.set(cacheKey, parsers);
+  return parsers;
 }
 
 export function renderMarkdownHtml(text: string, presentation: MarkdownPresentation = "chat") {

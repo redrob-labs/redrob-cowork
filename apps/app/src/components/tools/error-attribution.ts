@@ -1,6 +1,8 @@
+import { t } from "@/i18n"
+
 export type ToolErrorAttribution = {
   label: string
-  confidence: "Confirmed" | "Inferred"
+  confidence: string
   description: string
 }
 
@@ -52,7 +54,7 @@ function numberValue(record: Record<string, unknown> | null, key: string): numbe
 }
 
 function confirmed(label: string, description: string): ToolErrorAttribution {
-  return { label, confidence: "Confirmed", description }
+  return { label, confidence: t("tools.error_attribution_confirmed"), description }
 }
 
 export function attributeChatToolError(errorText: string): ToolErrorAttribution | null {
@@ -73,8 +75,8 @@ export function attributeChatToolError(errorText: string): ToolErrorAttribution 
     || category === "lifecycle_deadline"
   ) {
     return confirmed(
-      "Redrob Work timeout",
-      "Redrob Work created this deadline. The external operation may still have completed, so verify its state before retrying.",
+      t("tools.error_attribution_redrob_work_timeout"),
+      t("tools.error_attribution_redrob_work_timeout_description"),
     )
   }
 
@@ -83,13 +85,16 @@ export function attributeChatToolError(errorText: string): ToolErrorAttribution 
     || code === "MCP_URL_BLOCKED"
     || code === "MCP_FETCH_FORBIDDEN_PORT"
   ) {
-    return confirmed("Blocked by Redrob Work", "Redrob Work blocked the request before it was sent.")
+    return confirmed(
+      t("tools.error_attribution_blocked_by_redrob_work"),
+      t("tools.error_attribution_blocked_by_redrob_work_description"),
+    )
   }
 
   if (httpStatus !== undefined && (httpStatus < 200 || httpStatus >= 300)) {
     return confirmed(
-      `Remote MCP · HTTP ${httpStatus}`,
-      `The remote MCP returned HTTP ${httpStatus}.`,
+      t("tools.error_attribution_remote_mcp_http", { status: httpStatus }),
+      t("tools.error_attribution_remote_mcp_http_description", { status: httpStatus }),
     )
   }
 
@@ -100,18 +105,18 @@ export function attributeChatToolError(errorText: string): ToolErrorAttribution 
     || providerCode !== undefined
   ) {
     return confirmed(
-      "Provider error",
+      t("tools.error_attribution_provider_error"),
       providerStatus === undefined
-        ? "The remote MCP responded, but the downstream provider or tool rejected the operation."
-        : `The remote MCP responded, but the downstream provider returned status ${providerStatus}.`,
+        ? t("tools.error_attribution_provider_error_description")
+        : t("tools.error_attribution_provider_status_description", { status: providerStatus }),
     )
   }
 
   if (/\b(?:timed out|timeout|deadline exceeded)\b/i.test(errorText)) {
     return {
-      label: "Timeout · source unclear",
-      confidence: "Inferred",
-      description: "A timeout was reported, but the client did not receive structured evidence identifying which boundary created it.",
+      label: t("tools.error_attribution_timeout_source_unclear"),
+      confidence: t("tools.error_attribution_inferred"),
+      description: t("tools.error_attribution_timeout_source_unclear_description"),
     }
   }
 

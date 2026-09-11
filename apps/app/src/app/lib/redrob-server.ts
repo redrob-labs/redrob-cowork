@@ -1,6 +1,7 @@
 import type { Message, Part, Session, Todo } from "@opencode-ai/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 import { normalizeBaseUrl } from "@redrob/types/url";
+import { t } from "../../i18n";
 import { desktopFetch } from "./desktop";
 import { isDesktopRuntime } from "./runtime-env";
 import type { ExecResult, OpencodeConfigFile, WorkspaceInfo, WorkspaceList } from "./desktop";
@@ -895,7 +896,7 @@ async function fetchWithTimeout(
       } catch {
         // ignore
       }
-      reject(new Error("Request timed out."));
+      reject(new Error(t("app.request_timed_out")));
     }, timeoutMs);
   });
 
@@ -904,7 +905,7 @@ async function fetchWithTimeout(
   } catch (error) {
     const name = (error && typeof error === "object" && "name" in error ? (error as any).name : "") as string;
     if (name === "AbortError") {
-      throw new Error("Request timed out.");
+      throw new Error(t("app.request_timed_out"));
     }
     throw error;
   } finally {
@@ -1598,7 +1599,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         throw new RedrobServerError(
           result.status,
           "request_failed",
-          message || "Shared folder upload failed",
+          message || t("app.shared_folder_upload_failed"),
         );
       }
 

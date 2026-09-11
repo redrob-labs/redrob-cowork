@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export const FILE_URL_RE = /^file:\/\//i;
 export const HTTP_URL_RE = /^https?:\/\//i;
 
@@ -28,7 +30,7 @@ export function createPastedTextChip(text: string): PastedTextChip {
   const lines = text.split(/\r?\n/).length;
   return {
     id,
-    label: `${id.slice(-4)} · ${lines} lines`,
+    label: t("composer.pasted_text_lines", { id: id.slice(-4), count: lines }),
     text,
     lines,
   };

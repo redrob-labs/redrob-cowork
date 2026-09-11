@@ -259,7 +259,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     }
 
     if (hasRedrobTarget) {
-      throw new Error("Redrob Work server config API is unavailable for this workspace.");
+      throw new Error(t("provider_auth.server_config_api_unavailable"));
     }
 
     if (isLocalWorkspace && isDesktopRuntime() && root) {
@@ -283,19 +283,19 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
         content,
       ) as { ok: boolean; stderr?: string; stdout?: string };
       if (!result.ok) {
-        throw new Error(result.stderr || result.stdout || "Failed to write redrob.jsonc");
+        throw new Error(result.stderr || result.stdout || t("config.failed_write_redrob_jsonc"));
       }
       return true;
     }
 
     if (hasRedrobTarget) {
-      throw new Error("Redrob Work server config API is unavailable for this workspace.");
+      throw new Error(t("provider_auth.server_config_api_unavailable"));
     }
 
     if (isLocalWorkspace && isDesktopRuntime() && root) {
       const result = await writeOpencodeConfig("project", root, content) as { ok: boolean; stderr?: string; stdout?: string };
       if (!result.ok) {
-        throw new Error(result.stderr || result.stdout || "Failed to write redrob.jsonc");
+        throw new Error(result.stderr || result.stdout || t("config.failed_write_redrob_jsonc"));
       }
       return true;
     }
@@ -313,7 +313,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     const { redrobClient, redrobWorkspaceId, canUseRedrobServer } =
       await resolveRedrobConfigTarget("write");
     if (!canUseRedrobServer || !redrobClient || !redrobWorkspaceId) {
-      throw new Error("Redrob Work server unavailable. Connect to manage cloud providers.");
+      throw new Error(t("provider_auth.server_unavailable_manage_cloud_providers"));
     }
     await redrobClient.patchConfig(redrobWorkspaceId, {
       opencode: { provider: update },
@@ -488,7 +488,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
     );
 
     if (!updatedConfig) {
-      throw new Error("Could not update disabled providers for this workspace.");
+      throw new Error(t("provider_auth.update_disabled_providers_failed"));
     }
 
     options.setDisabledProviders(nextDisabled);
@@ -1112,7 +1112,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       if (Array.isArray(updated?.connected) && updated.connected.includes(resolved)) {
         // Provider is still connected (e.g. via env var). Just remove
         // stored credentials; do NOT add to disabled_providers.
-        return `Removed stored credentials for ${resolved}${t("providers.still_connected_suffix")}`;
+        return `${t("provider_auth.removed_stored_credentials", { provider: resolved })}${t("providers.still_connected_suffix")}`;
       }
       removeProviderFromState(resolved);
       return `${t("providers.disconnected_prefix")} ${resolved}`;

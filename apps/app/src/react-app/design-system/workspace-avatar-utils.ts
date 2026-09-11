@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 /** Strong solid markers for dark sidebars — hashed per workspace, no gradients. */
 export const WORKSPACE_AVATAR_COLORS = [
   "#E23B4C",
@@ -59,7 +61,7 @@ export async function readWorkspaceAvatarImage(file: File): Promise<string> {
     canvas.width = size;
     canvas.height = size;
     const context = canvas.getContext("2d");
-    if (!context) throw new Error("Could not prepare avatar image");
+    if (!context) throw new Error(t("workspace.avatar_prepare_error"));
 
     const minSide = Math.min(image.width, image.height);
     const sourceX = (image.width - minSide) / 2;
@@ -75,7 +77,7 @@ function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Could not read image"));
+    image.onerror = () => reject(new Error(t("workspace.avatar_read_error")));
     image.src = src;
   });
 }

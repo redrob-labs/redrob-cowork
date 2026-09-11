@@ -5,6 +5,7 @@
 // this hook next.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Client, ModelOption } from "@/app/types";
+import { currentLocale, t } from "@/i18n";
 import { mergeModelOptions } from "@/react-app/domains/connections/provider-auth/assigned-model-options";
 import {
   getConnectedProviderItems,
@@ -45,6 +46,7 @@ export function useModelPicker(input: UseModelPickerInput) {
   // "Recently added" in the model picker even after they've been
   // marked as seen in localStorage.
   const [recentProviderIds, setRecentProviderIds] = useState<Set<string>>(new Set());
+  const locale = currentLocale();
   const providerListQuery = useProviderListQuery({
     client,
     baseUrl,
@@ -127,8 +129,8 @@ export function useModelPicker(input: UseModelPickerInput) {
           modelID: id,
           title: model.name || id,
           description: provider.name,
-          behaviorTitle: "Reasoning",
-          behaviorLabel: "Default",
+          behaviorTitle: t("model_picker.reasoning"),
+          behaviorLabel: t("model_picker.default"),
           behaviorDescription: "",
           behaviorValue: null,
           isFree: false,
@@ -137,7 +139,7 @@ export function useModelPicker(input: UseModelPickerInput) {
       }
     }
     return mergeModelOptions(next, fallbackOptions);
-  }, [fallbackOptions, providerListQuery.data, recentProviderIds]);
+  }, [fallbackOptions, locale, providerListQuery.data, recentProviderIds]);
 
   // Nothing filters the list any more: there is no organization policy.
   const options = modelOptions;

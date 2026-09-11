@@ -213,14 +213,14 @@ function sessionErrorFromProperties(properties: unknown) {
 
 function permissionNotificationDetail(permission: PermissionRequest | PermissionV2Request) {
   if ("action" in permission) {
-    return `A session is waiting for permission to ${permission.action.replace(/[._-]/g, " ")}.`;
+    return t("notifications.session_waiting_for_action_permission", { action: permission.action.replace(/[._-]/g, " ") });
   }
-  return `A session is waiting for ${permission.permission} permission.`;
+  return t("notifications.session_waiting_for_permission", { permission: permission.permission });
 }
 
 function questionNotificationText(question: QuestionRequest) {
   const prompt = question.questions.find((item) => item.question.trim())?.question.trim();
-  return prompt ? `Question: ${prompt}` : undefined;
+  return prompt ? t("notifications.session_question", { prompt }) : undefined;
 }
 
 function latestAssistantMessageId(messages: UIMessage[]) {

@@ -113,13 +113,17 @@ describe("supported locales", () => {
     // "Redrob Work" stays in Latin script only where it names a technical
     // component the user also meets in logs, paths, and config. Anywhere else
     // the product is 레드롭 워크, so the bundle cannot drift back to a mix.
+    //
+    // "브라우저" is deliberately NOT here. The in-app browser is a product
+    // surface the user looks at, not a token they read in a log line, and
+    // allowing it is what let "Redrob Work 브라우저는 ... 레드롭 워크에서
+    // 지원하는" ship with both forms in one sentence.
     const COMPONENT_SUFFIXES = [
       "서버",
       "워커",
       "호스트",
       "토큰",
       "런타임",
-      "브라우저",
       "UI",
       "Connect",
       "Code",
@@ -142,6 +146,17 @@ describe("supported locales", () => {
     // And the localized name is actually in use, so the rule is not vacuous.
     expect(Object.values(ko).filter((value) => value.includes("레드롭 워크")).length)
       .toBeGreaterThan(50);
+  });
+
+  test("no single Korean string mixes 레드롭 워크 with Latin Redrob Work", () => {
+    // The rule above checks each Latin occurrence on its own, so a value could
+    // satisfy it and still switch scripts mid-sentence -- which is exactly what
+    // a user noticed: "Redrob Work 브라우저는 ... 레드롭 워크에서 지원하는".
+    // Within one string, pick one form.
+    const offenders = Object.entries(ko)
+      .filter(([, value]) => value.includes("레드롭 워크") && value.includes("Redrob Work"))
+      .map(([key]) => key);
+    expect(offenders).toEqual([]);
   });
 
   test("a Korean particle after a placeholder uses the dual form", () => {
@@ -192,14 +207,33 @@ describe("supported locales", () => {
       /\bredrob mcp auth \{server\}/g,
       // Interpolation placeholders like {count}, {server}, {resetWord}.
       /\{[a-zA-Z][a-zA-Z0-9]*\}/g,
+      // Anything the copy itself marks up as code with backticks. This is the
+      // author's own signal that the span is a literal -- a path, a field name,
+      // a URL scheme -- rather than prose, so honour it instead of growing a
+      // word list. Runs early: the spans inside are exempt from every rule
+      // below, which is the point.
+      /`[^`]+`/g,
       // Technical acronyms / protocol and format names.
-      /\b(MCP|API|OAuth|URL|URLs|CLI|JSON|PID|LAN|mDNS|SDK|CSV|SSH|HTTP|HTTPS|ID|IDs|PATH|AI|UI|OS|LLM|ms)\b/g,
+      /\b(MCP|API|OAuth|URL|URLs|CLI|JSON|PID|LAN|mDNS|SDK|CSV|SSH|HTTP|HTTPS|ID|IDs|PATH|AI|UI|OS|LLM|ms|HTML|PDF)\b/g,
+      // Field names quoted verbatim from a config file or an API contract, so
+      // the message names the thing the user has to go and fix. Kept as an
+      // explicit list rather than allowing bare "name"/"version" everywhere.
+      /\b(server_name|workspaceId|eval)\b/g,
+      // The support address, matched as a whole so the generic word rules do
+      // not tear "team" and "io" out of it and report them as leftover English.
+      /team@redrob\.io/g,
+      // Subscription tier names for a third-party account, which the user has
+      // to recognize verbatim on the provider's own site.
+      /ChatGPT (Pro|Plus)(\/(Pro|Plus))?/g,
+      // The local Ollama endpoint, shown as a literal address. Matched whole so
+      // no "localhost" fragment is left behind.
+      /https?:\/\/localhost:\d+/g,
       // Example npm package name quoted verbatim as a plugin example. Must
       // run before the generic lowercase "opencode" strip below, since that
       // strip would otherwise consume "opencode" and leave a stray "-wakatime".
       /opencode-wakatime/g,
       // Third-party product / proper nouns that stay in Latin script.
-      /\b(Docker|Slack|GitHub|Linear|Notion|Sentry|Stripe|Context7|Anthropic|OpenAI|ChatGPT|macOS|Finder|Exa|Chromium|Bun|Claude Code|Claude Cowork|Claude|Gemini|Perplexity|Google|Bing|DuckDuckGo|LinkedIn|YouTube|Reddit|X|AppImage|Mac|Electron|Tauri|Ollama|Realtime|microsandbox|opencode)\b/g,
+      /\b(Docker Desktop|Docker|Slack|GitHub|Linear|Notion|Sentry|Stripe|Context7|Anthropic|OpenAI|ChatGPT|macOS|Finder|Exa|Chromium|Bun|Claude Code|Claude Cowork|Claude|Gemini|Perplexity|Google|Bing|DuckDuckGo|LinkedIn|YouTube|Reddit|X|AppImage|Mac|Electron|Tauri|Ollama|Realtime|microsandbox|opencode)\b/g,
       // Example folder path shown as a literal placeholder.
       /\/workspace\/my-project/g,
       // The stdio wrapper's literal command name, matched before the generic

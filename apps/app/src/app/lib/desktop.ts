@@ -1,4 +1,5 @@
 import { nativeDeepLinkEvent } from "./deep-link-bridge";
+import { t } from "../../i18n";
 
 export type * from "./desktop-types";
 export type {
@@ -224,7 +225,7 @@ async function invokeElectronHelper<C extends DesktopCommandName>(
 ): Promise<DesktopCommandResult<C>> {
   const invokeDesktop = window.__REDROB_ELECTRON__?.invokeDesktop;
   if (!invokeDesktop) {
-    throw new Error(`Electron desktop helper is unavailable: ${command}`);
+    throw new Error(t("app.electron_desktop_helper_unavailable", { command }));
   }
   return (await invokeDesktop(command, ...args)) as DesktopCommandResult<C>;
 }
@@ -273,7 +274,7 @@ export const desktopBridge = new Proxy(electronBridge, {
     const fn = async (...args: unknown[]) => {
       const invokeDesktop = window.__REDROB_ELECTRON__?.invokeDesktop;
       if (!invokeDesktop) {
-        throw new Error(`Electron desktop helper is unavailable: ${prop}`);
+        throw new Error(t("app.electron_desktop_helper_unavailable", { command: prop }));
       }
       // The Proxy is the one dynamic point in the bridge: `prop` is whatever
       // property was accessed, already constrained by the DesktopBridge
@@ -382,10 +383,10 @@ export function assertDesktopWebUrl(url: string): string {
   try {
     parsed = new URL(url);
   } catch {
-    throw new Error("Only valid web links can be opened externally.");
+    throw new Error(t("app.only_valid_web_links_external"));
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    throw new Error(`External URL protocol "${parsed.protocol}" is not allowed.`);
+    throw new Error(t("app.external_url_protocol_not_allowed", { protocol: parsed.protocol }));
   }
   return parsed.toString();
 }
@@ -396,7 +397,7 @@ export async function openDesktopUrl(url: string): Promise<void> {
   if (openExternal) {
     const result = await openExternal(safeUrl);
     if (result && result.ok === false) {
-      throw new Error(result.error ?? "Failed to open browser");
+      throw new Error(result.error ?? t("app.failed_to_open_browser"));
     }
     return;
   }
@@ -442,7 +443,7 @@ export async function getBrandIconState(): Promise<BrandIconState | null> {
 export async function evalRelaunchDesktopApp(): Promise<EvalRelaunchResult> {
   const relaunch = typeof window !== "undefined" ? window.__REDROB_ELECTRON__?.dev?.evalRelaunch : undefined;
   if (!relaunch) {
-    throw new Error("Electron eval relaunch helper is unavailable.");
+    throw new Error(t("app.electron_eval_relaunch_helper_unavailable"));
   }
   return relaunch();
 }

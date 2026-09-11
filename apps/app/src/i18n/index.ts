@@ -15,11 +15,34 @@ export const LANGUAGES: Language[] = ["en", "ko"];
 
 /**
  * Language options for UI - single source of truth
+ *
+ * `label` is the ENGLISH name and exists for English-facing surfaces only. Never
+ * render it directly in a localized view -- a Korean user reading "Korean" in the
+ * language picker is the bug that came from doing so. Use
+ * `localizedLanguageName()` for anything the user reads, and `nativeName` when
+ * you specifically want the language's own name.
  */
 export const LANGUAGE_OPTIONS = [
   { value: "en" as Language, label: "English", nativeName: "English" },
   { value: "ko" as Language, label: "Korean", nativeName: "한국어" },
 ] as const;
+
+/**
+ * Name of a language in whatever language the UI is currently showing.
+ *
+ * Written as a switch over literal keys rather than a template literal so
+ * `scripts/i18n-audit.mjs` can see every key statically.
+ */
+export const localizedLanguageName = (value: string): string => {
+  switch (value) {
+    case "en":
+      return t("language.name_en");
+    case "ko":
+      return t("language.name_ko");
+    default:
+      return value;
+  }
+};
 
 const PLURAL_SUFFIX_EMPTY_LANGUAGES = new Set<Language>(["ko"]);
 

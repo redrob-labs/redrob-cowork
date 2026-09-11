@@ -95,6 +95,30 @@ import {
   type ConversationHistoryDirection,
 } from "./conversation-tab-history";
 import { useWorkbenchStore, type WorkbenchSessionTab } from "./workbench-store";
+import { toast } from "@/components/ui/sonner";
+import { useNotificationStore } from "../../../kernel/notification-store";
+
+/**
+ * Keys the "reset notifications" action clears.
+ *
+ * `redrob.seenProviderIds` is the live one -- new-providers-listener.tsx filters
+ * provider notices through it, so leaving it behind is why resetting appeared to
+ * do nothing. The other two are from earlier builds and are removed so an old
+ * install ends up in the same state as a new one.
+ */
+const RESET_NOTIFICATION_STORAGE_KEYS = [
+  "redrob.seenProviderIds",
+  "redrob.acknowledgedProviders",
+  "redrob.orgOnboardingSeen",
+] as const;
+
+/** Empties the notification centre. Returns how many entries were dropped. */
+function clearAllNotifications(): number {
+  const store = useNotificationStore.getState();
+  const count = store.notifications.length;
+  store.clearAll();
+  return count;
+}
 
 const STARTUP_SKELETON_ROWS = [
   { id: "intro", titleWidth: "42%", bodyWidth: "88%" },
@@ -1181,12 +1205,25 @@ export function SessionPage(props: SessionPageProps) {
                   size="sm"
                   className="hidden lg:inline-flex"
                   onClick={() => {
-                    try {
-                      window.localStorage.removeItem("redrob.acknowledgedProviders");
-                      window.localStorage.removeItem("redrob.orgOnboardingSeen");
-                    } catch {}
+                    // This used to remove only `redrob.acknowledgedProviders` and
+                    // `redrob.orgOnboardingSeen`, which nothing reads any more, so
+                    // pressing it was a no-op -- and silent either way, so it could
+                    // not even be told apart from a broken button. Reset what the
+                    // label promises: the notification centre and the key that
+                    // suppresses already-seen provider notices.
+                    let cleared = 0;
+                    cleared += clearAllNotifications();
+                    for (const key of RESET_NOTIFICATION_STORAGE_KEYS) {
+                      try {
+                        if (window.localStorage.getItem(key) !== null) cleared += 1;
+                        window.localStorage.removeItem(key);
+                      } catch {
+                        // Private mode or a full quota: nothing to reset here.
+                      }
+                    }
+                    toast.success(t("session.reset_notifications_done", { count: cleared }));
                   }}
-                  title={t("session.reset_onboarding_hint")}
+                  title={t("session.reset_notifications_hint")}
                 >{t("session.reset_notifications")}</Button>
               ) : null}
             </div>
@@ -1358,7 +1395,7 @@ export function SessionPage(props: SessionPageProps) {
                             size="sm"
                             onClick={() => props.sidebar.onCreateTaskInWorkspace(props.selectedWorkspaceId)}
                           >
-                            Retry
+                            {t("common.retry")}
                           </Button>
                           <Button
                             variant="outline"
@@ -1380,9 +1417,58 @@ export function SessionPage(props: SessionPageProps) {
                       </div>
                     </div>
                   ) : props.selectedSessionId ? (
-                    <div className="px-6 py-16 text-center text-sm text-dls-secondary">
-                      {t("session.loading_detail")}
-                    </div>
+                    props.sessionLoadingById(props.selectedSessionId) ? (
+                      <div className="px-6 py-16 text-center text-sm text-dls-secondary">
+                        {t("session.loading_detail")}
+                      </div>
+                    ) : (
+                      /*
+                       * Nothing is loading, and the chat surface still cannot
+                       * mount -- it is missing a client, endpoint, token or
+                       * runtime workspace id. This branch used to render
+                       * "loading the latest messages" unconditionally, so a
+                       * desktop connection gap looked like a request that never
+                       * finished and the user waited forever. Say what is
+                       * actually wrong and offer the same recovery actions the
+                       * workspace-error branch above does.
+                       */
+                      <div className="px-6 py-16">
+                        <div className="mx-auto max-w-lg rounded-2xl border border-dls-border bg-dls-card px-5 py-6 text-left shadow-[var(--dls-card-shadow)]">
+                          <div className="text-sm font-medium text-dls-text">
+                            {t("session.surface_unavailable_title")}
+                          </div>
+                          <p className="mt-2 text-sm leading-6 text-dls-secondary">
+                            {t("session.surface_unavailable_body")}
+                          </p>
+                          {props.selectedWorkspaceId ? (
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  void Promise.resolve(
+                                    props.sidebar.onTestWorkspaceConnection(props.selectedWorkspaceId),
+                                  )
+                                }
+                              >
+                                {t("workspace_list.test_connection")}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  void Promise.resolve(
+                                    props.sidebar.onRecoverWorkspace(props.selectedWorkspaceId),
+                                  )
+                                }
+                              >
+                                {t("workspace_list.recover")}
+                              </Button>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    )
                   ) : (
                     <div className="flex flex-1 items-center justify-center py-16">
                       <SessionEmptyHero

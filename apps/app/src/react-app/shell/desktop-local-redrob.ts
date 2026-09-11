@@ -11,6 +11,7 @@ import {
   type RedrobServerSettings,
 } from "../../app/lib/redrob-server";
 import { safeStringify } from "../../app/utils";
+import { t } from "../../i18n";
 import { recordInspectorEvent } from "../../app/lib/app-inspector";
 import type { BootPhaseId } from "./boot-state";
 
@@ -124,7 +125,7 @@ export function shouldAttemptDesktopLocalReconnect(input: DesktopLocalReconnectI
 function describeError(error: unknown) {
   if (error instanceof Error) return error.message;
   const serialized = safeStringify(error);
-  return serialized && serialized !== "{}" ? serialized : "Unknown error";
+  return serialized && serialized !== "{}" ? serialized : t("app.unknown_error");
 }
 
 export async function ensureDesktopLocalRedrobConnection(
@@ -171,7 +172,7 @@ export async function ensureDesktopLocalRedrobConnection(
     // of failing on the first empty answer.
     const info = await waitForReadyLocalRedrobServerInfo();
     if (!isReadyLocalRedrobServerInfo(info) || !info.baseUrl) {
-      throw new Error("Redrob Work server did not become ready after activation.");
+      throw new Error(t("workspace.redrob_work_server_activation_not_ready"));
     }
 
     const previousSettings = readRedrobServerSettings();

@@ -1,5 +1,7 @@
 import { parse } from "jsonc-parser";
 
+import { t } from "../../i18n";
+
 import type { OpencodeConfigFile } from "../lib/desktop";
 
 type PluginListValue = string | string[] | null | undefined;
@@ -75,7 +77,7 @@ export function loadPluginsFromConfig(
     onList(next);
   } catch (e) {
     onList([]);
-    onError(e instanceof Error ? e.message : "Failed to parse redrob.jsonc");
+    onError(e instanceof Error ? e.message : t("plugins.failed_parse_redrob_jsonc"));
   }
 }
 

@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export const SESSION_NUMBER_SHORTCUT_LIMIT = 9;
 
 export type SessionNumberShortcutOs = "macos" | "windows" | "linux";
@@ -93,14 +95,16 @@ export function sessionNumberShortcutLabel(os: SessionNumberShortcutOs, digit: n
 }
 
 export function sessionNumberShortcutDescription(os: SessionNumberShortcutOs, digit: number) {
-  return `Open this session with ${sessionNumberShortcutLabel(os, digit)}`;
+  return t("session.number_shortcut_description", {
+    shortcut: sessionNumberShortcutLabel(os, digit),
+  });
 }
 
 export function sessionNumberShortcutHelp(os: SessionNumberShortcutOs) {
   const modifier = os === "macos" ? "Command" : "Ctrl";
   return {
-    title: "Open a visible session by number",
-    detail: `Hold ${modifier} to reveal shortcuts beside the first nine visible sessions, then press 1–9.`,
+    title: t("session.number_shortcut_title"),
+    detail: t("session.number_shortcut_detail", { modifier }),
     meta: os === "macos" ? "⌘1–⌘9" : "Ctrl+1–9",
     searchText: "keyboard shortcut visible session number jump open command control 1 2 3 4 5 6 7 8 9",
   };

@@ -5,6 +5,7 @@ import { CheckIcon } from "lucide-react";
 import {
   LANGUAGE_OPTIONS,
   currentLocale,
+  localizedLanguageName,
   setLocale,
   subscribeToLocale,
   t,
@@ -16,24 +17,6 @@ type LanguageStepProps = {
   onContinue: () => void;
 };
 
-/**
- * Name of a language in whatever language the UI is currently showing. The
- * static `LANGUAGE_OPTIONS[].label` is always the English exonym, which is why
- * a Korean UI used to label 한국어 as "Korean".
- *
- * Written as a switch over literal keys rather than a template literal so
- * `scripts/i18n-audit.mjs` can still see every key statically.
- */
-function localizedName(value: string): string {
-  switch (value) {
-    case "en":
-      return t("language.name_en");
-    case "ko":
-      return t("language.name_ko");
-    default:
-      return value;
-  }
-}
 
 /**
  * First onboarding step: pick the UI language. The choice is applied
@@ -42,7 +25,7 @@ function localizedName(value: string): string {
  * rest of the app re-render into the chosen language right away. No new locale
  * store is introduced — the active language is read through the same
  * `useSyncExternalStore(subscribeToLocale, ...)` pattern as
- * shell/bottom-left-controls.tsx.
+ * shell/app-root.tsx.
  */
 export function LanguageStep({ onContinue }: LanguageStepProps) {
   const language = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
@@ -80,9 +63,9 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
                       currently showing, so a Korean UI reads "영어" rather than
                       the English exonym. Suppressed when it would just repeat
                       the native name above it. */}
-                  {localizedName(option.value) === option.nativeName ? null : (
+                  {localizedLanguageName(option.value) === option.nativeName ? null : (
                     <div className="mt-0.5 text-xs text-muted-foreground">
-                      {localizedName(option.value)}
+                      {localizedLanguageName(option.value)}
                     </div>
                   )}
                 </div>

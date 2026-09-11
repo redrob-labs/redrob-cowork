@@ -1,6 +1,7 @@
 import { isReasoningUIPart, isToolUIPart, type DynamicToolUIPart, type FileUIPart, type ToolUIPart, type UIMessage } from "ai"
 import type { ThreadStatus } from "@/lib/messages"
 import { isAggregatableToolPart } from "@/lib/tool-aggregate"
+import { t } from "@/i18n"
 
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 const PPTX_MIME = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
@@ -41,10 +42,10 @@ export function getFileTitle(part: Pick<FileUIPart, "filename" | "url">) {
   }
 
   if (part.url.startsWith("data:")) {
-    return "Attached file"
+    return t("message.attached_file")
   }
 
-  return part.url || "File"
+  return part.url || t("message.file")
 }
 
 function extensionBadge(filename: string | undefined) {

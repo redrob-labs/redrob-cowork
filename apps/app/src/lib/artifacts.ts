@@ -8,6 +8,7 @@ import {
   isWriteToolPart,
 } from "@/lib/build-in-tools";
 import { useOpenTargets } from "@/lib/target-provider";
+import { t } from "@/i18n";
 import { filePathFromFileUrl, isCollectibleArtifactTarget, isOpenableFileTarget, type OpenTarget, type OpenTargetPreview } from "@/react-app/domains/session/artifacts/open-target";
 
 export type ArtifactType = "website" | "markdown" | "sheet" | "slides" | "document" | "image" | "video" | "audio" | "pdf" | "html" | "text" | "unknown";
@@ -116,23 +117,21 @@ function getFileExtension(filename: string) {
   return filename.split(".").pop()?.toLowerCase();
 }
 
-const ARTIFACT_TYPE_LABELS: Record<ArtifactType, string> = {
-  website: "Website",
-  markdown: "Markdown",
-  sheet: "Spreadsheet",
-  slides: "Slides",
-  document: "Document",
-  image: "Image",
-  video: "Video",
-  audio: "Audio",
-  pdf: "PDF",
-  html: "HTML",
-  text: "Text",
-  unknown: "File",
-};
-
 export function getArtifactTypeLabel(type: ArtifactType) {
-  return ARTIFACT_TYPE_LABELS[type];
+  switch (type) {
+    case "website": return t("artifact.type_website");
+    case "markdown": return t("artifact.type_markdown");
+    case "sheet": return t("artifact.type_spreadsheet");
+    case "slides": return t("artifact.type_slides");
+    case "document": return t("artifact.type_document");
+    case "image": return t("artifact.type_image");
+    case "video": return t("artifact.type_video");
+    case "audio": return t("artifact.type_audio");
+    case "pdf": return t("artifact.type_pdf");
+    case "html": return t("artifact.type_html");
+    case "text": return t("artifact.type_text");
+    case "unknown": return t("artifact.type_file");
+  }
 }
 
 export function canPreviewArtifact(artifact: ArtifactItem) {

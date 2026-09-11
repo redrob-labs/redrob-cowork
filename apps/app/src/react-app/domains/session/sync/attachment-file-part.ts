@@ -1,6 +1,7 @@
 import type { FilePartInput, TextPartInput } from "@opencode-ai/sdk/v2/client";
 
 import type { ComposerAttachment } from "../../../../app/types";
+import { t } from "@/i18n";
 import { compressImageFile } from "./image-compression";
 import { joinWorkspaceRelativePath, toFileUrl } from "./prompt-file-parts";
 
@@ -281,8 +282,8 @@ export function workspaceInboxPath(inboxRelativePath: string) {
 }
 
 function uploadErrorMessage(filename: string, error: unknown) {
-  const detail = error instanceof Error ? error.message : String(error || "Unknown upload error");
-  return `Failed to copy attachment "${filename}" into this worker workspace: ${detail}`;
+  const detail = error instanceof Error ? error.message : String(error || t("composer.unknown_upload_error"));
+  return t("composer.attachment_copy_failed", { filename, detail });
 }
 
 function attachmentPathNotePart(uploaded: UploadedChatAttachment[]): TextPartInput {
@@ -337,12 +338,12 @@ export async function composerAttachmentsToWorkspaceFileParts(input: {
 
   const workspaceRoot = input.workspaceRoot.trim();
   if (!workspaceRoot) {
-    throw new Error("Workspace path is unavailable; attachments could not be copied for tool access.");
+    throw new Error(t("composer.workspace_path_unavailable"));
   }
 
   const workspaceId = input.endpoint.workspaceId.trim();
   if (!workspaceId) {
-    throw new Error("Workspace endpoint is unavailable; attachments could not be copied for tool access.");
+    throw new Error(t("composer.workspace_endpoint_unavailable"));
   }
 
   const uploaded: UploadedChatAttachment[] = [];
@@ -367,13 +368,17 @@ export async function composerAttachmentsToWorkspaceFileParts(input: {
     }
 
     if (result.ok === false) {
-      throw new Error(`Failed to copy attachment "${metadata.filename}" into this worker workspace: upload was rejected`);
+      throw new Error(t("composer.attachment_copy_rejected", { filename: metadata.filename }));
     }
     if (!result.path.trim()) {
-      throw new Error(`Failed to copy attachment "${metadata.filename}" into this worker workspace: upload did not return a path`);
+      throw new Error(t("composer.attachment_copy_no_path", { filename: metadata.filename }));
     }
     if (result.bytes !== file.size) {
-      throw new Error(`Failed to copy attachment "${metadata.filename}" into this worker workspace: expected ${file.size} bytes, wrote ${result.bytes}`);
+      throw new Error(t("composer.attachment_copy_byte_mismatch", {
+        filename: metadata.filename,
+        expected: file.size,
+        actual: result.bytes,
+      }));
     }
 
     const workspacePath = workspaceInboxPath(result.path);

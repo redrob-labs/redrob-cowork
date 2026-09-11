@@ -276,7 +276,7 @@ export function createSessionActionsStore(options: {
     const heading = (() => {
       if (status === 401 || status === 403) return t("app.error_auth_failed");
       if (status === 429) return t("app.error_rate_limit");
-      if (provider) return `Provider error (${provider})`;
+      if (provider) return t("session.error_provider", { provider });
       return fallback;
     })();
 
@@ -358,7 +358,7 @@ export function createSessionActionsStore(options: {
     const withTimeout = async <T,>(promise: Promise<T>, ms: number, label: string) => {
       let timeoutId: ReturnType<typeof setTimeout> | null = null;
       const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error(`Timed out waiting for ${label}`)), ms);
+        timeoutId = setTimeout(() => reject(new Error(t("session.error_timed_out_waiting_for", { label }))), ms);
       });
       try {
         return await Promise.race([promise, timeoutPromise]);
@@ -378,7 +378,7 @@ export function createSessionActionsStore(options: {
         mark("health:error", {
           error: healthErr instanceof Error ? healthErr.message : safeStringify(healthErr),
         });
-        throw new Error("Connection lost");
+        throw new Error(t("session.error_connection_lost"));
       }
 
       let rawResult: Awaited<ReturnType<typeof c.session.create>>;

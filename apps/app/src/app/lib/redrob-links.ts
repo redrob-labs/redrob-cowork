@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 import { normalizeRedrobServerUrl } from "./redrob-server";
 
 export type RemoteWorkspaceDefaults = {
@@ -47,7 +49,7 @@ export function parseRemoteConnectDeepLink(rawUrl: string): RemoteWorkspaceDefau
 
   const workerName = url.searchParams.get("workerName")?.trim() ?? "";
   const workerId = url.searchParams.get("workerId")?.trim() ?? "";
-  const displayName = workerName || (workerId ? `Worker ${workerId.slice(0, 8)}` : "");
+  const displayName = workerName || (workerId ? t("connect.worker_label", { id: workerId.slice(0, 8) }) : "");
   const autoConnectRaw =
     url.searchParams.get("autoConnect") ??
     url.searchParams.get("bypassModal") ??

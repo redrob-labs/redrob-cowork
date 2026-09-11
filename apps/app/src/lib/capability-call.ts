@@ -127,8 +127,9 @@ function verbPhrase(action: string, tense: "present" | "past"): string {
   if (mapped) {
     return [mapped, ...words.slice(1)].join(" ")
   }
-  const prefix = tense === "past" ? "Used" : "Using"
-  return `${prefix} ${humanize(action)}`
+  return tense === "past"
+    ? t("activity.capability_used_action", { action: humanize(action) })
+    : t("activity.capability_using_action", { action: humanize(action) })
 }
 
 /**
@@ -147,8 +148,12 @@ export function getCapabilityCallSentence(
   if (toolName.endsWith("search_capabilities")) {
     return {
       service: null,
-      present: `Searching your connections for${quoted || " capabilities"}`,
-      past: `Searched your connections for${quoted || " capabilities"}`,
+      present: query
+        ? t("activity.searching_connections_query", { query })
+        : t("activity.searching_connections_capabilities"),
+      past: query
+        ? t("activity.searched_connections_query", { query })
+        : t("activity.searched_connections_capabilities"),
     }
   }
 
@@ -183,17 +188,24 @@ export function getCapabilityCallSentence(
     // the output ({ kind: "skill", plugin: "Plan My Day", … }).
     if (name?.startsWith("plugin:")) {
       const output = parseRecord("output" in part ? part.output : undefined)
-      const kind = typeof output?.kind === "string" ? output.kind : "plugin"
+      const rawKind = typeof output?.kind === "string" ? output.kind : "plugin"
+      const kind = rawKind === "skill"
+        ? t("activity.capability_kind_skill")
+        : rawKind === "plugin"
+          ? t("activity.capability_kind_plugin")
+          : rawKind
       const pluginName = typeof output?.plugin === "string"
         ? output.plugin
         : typeof output?.name === "string"
           ? humanize(output.name)
           : null
-      const label = pluginName ? `${kind} “${pluginName}”` : `a ${kind} capability`
+      const label = pluginName
+        ? t("activity.named_capability_kind", { kind, plugin: pluginName })
+        : t("activity.capability_kind", { kind })
       return {
         service: pluginName,
-        present: `Using ${label}`,
-        past: `Used ${label}`,
+        present: t("activity.using_label", { label }),
+        past: t("activity.used_label", { label }),
       }
     }
 
@@ -218,8 +230,12 @@ export function getCapabilityCallSentence(
 
     return {
       service: null,
-      present: `Running a capability${quoted ? ` for${quoted}` : ""}`,
-      past: `Ran a capability${quoted ? ` for${quoted}` : ""}`,
+      present: query
+        ? t("activity.running_capability_query", { query })
+        : t("activity.running_capability"),
+      past: query
+        ? t("activity.ran_capability_query", { query })
+        : t("activity.ran_capability"),
     }
   }
 

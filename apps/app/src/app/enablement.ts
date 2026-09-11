@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { EnablementCondition, EnablementResult } from "./extensions";
 import type { McpStatusMap } from "./types";
 
@@ -76,5 +77,5 @@ export function evaluateEnablement(
  * generate a default single-condition enablement: mcp-connected.
  */
 export function defaultMcpEnablement(serverName: string): EnablementCondition[] {
-  return [{ type: "mcp-connected", ref: serverName, label: "MCP server connected" }];
+  return [{ type: "mcp-connected", ref: serverName, label: t("extensions.enablement_mcp_server_connected") }];
 }

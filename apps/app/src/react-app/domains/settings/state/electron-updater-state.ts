@@ -41,7 +41,11 @@ export type ElectronUpdaterEnvState = {
   updateEnv: { supported?: boolean; reason?: string | null } | null;
 };
 
-export const ELECTRON_UPDATER_UNSUPPORTED_REASON = "Electron updater bridge is unavailable.";
+export const ELECTRON_UPDATER_UNSUPPORTED_REASON = "settings.electron_updater_bridge_unavailable";
+
+function electronUpdaterUnsupportedReason() {
+  return t("settings.electron_updater_bridge_unavailable");
+}
 
 export function unsupportedElectronUpdaterEnvState(): ElectronUpdaterEnvState {
   return {
@@ -135,7 +139,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
     appVersion: null,
     updateEnv: isElectronRuntime()
       ? null
-      : { supported: false, reason: ELECTRON_UPDATER_UNSUPPORTED_REASON },
+      : { supported: false, reason: electronUpdaterUnsupportedReason() },
   });
   const { appVersion, updateEnv } = envState;
   const autoCheckKeyRef = useRef<string | null>(null);
@@ -145,12 +149,12 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
   const downloadedReleaseChannelRef = useRef<ReleaseChannel | null>(null);
   useEffect(() => {
     if (!isElectronRuntime()) {
-      dispatchEnvState({ type: "unsupported", reason: ELECTRON_UPDATER_UNSUPPORTED_REASON });
+      dispatchEnvState({ type: "unsupported", reason: electronUpdaterUnsupportedReason() });
       return;
     }
     const bridge = electronUpdaterBridge();
     if (!bridge?.getChannel) {
-      dispatchEnvState({ type: "unsupported", reason: ELECTRON_UPDATER_UNSUPPORTED_REASON });
+      dispatchEnvState({ type: "unsupported", reason: electronUpdaterUnsupportedReason() });
       return;
     }
     let cancelled = false;
@@ -170,7 +174,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       })
       .catch(() => {
         if (!cancelled) {
-          dispatchEnvState({ type: "unsupported", reason: ELECTRON_UPDATER_UNSUPPORTED_REASON });
+          dispatchEnvState({ type: "unsupported", reason: electronUpdaterUnsupportedReason() });
         }
       });
     return () => {
@@ -184,7 +188,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       releaseChannelRequestRef.current === releaseChannelRequestId;
     const bridge = electronUpdaterBridge();
     if (!bridge?.download) {
-      const message = "Electron updater downloads are available only in the Electron desktop app.";
+      const message = t("settings.electron_updater_downloads_desktop_only");
       setUpdateStatus({ state: "error", message, failedAction: "download" });
       setError(message);
       return;
@@ -224,7 +228,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       if (!result?.ok) {
         setUpdateStatus({
           state: "error",
-          message: result?.reason ?? "Update download failed.",
+          message: result?.reason ?? t("settings.update_download_failed"),
           failedAction: "download",
         });
         return;
@@ -262,7 +266,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
     const requestedReleaseChannel = channelOverride ?? releaseChannel;
     const bridge = electronUpdaterBridge();
     if (!bridge?.check) {
-      const message = "Electron update checks are available only in the Electron desktop app.";
+      const message = t("settings.electron_update_checks_desktop_only");
       setUpdateStatus({ state: "error", message, failedAction: "check" });
       setError(message);
       return;
@@ -280,7 +284,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       if (result.reason === "unavailable") {
         setUpdateStatus({
           state: "idle",
-          message: "Auto-updates are available in packaged builds only.",
+          message: t("settings.auto_updates_packaged_only"),
         });
         return;
       }
@@ -357,7 +361,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
       releaseChannelRequestRef.current === releaseChannelRequestId;
     const bridge = electronUpdaterBridge();
     if (!bridge?.installAndRestart) {
-      const message = "Electron update install is available only in the Electron desktop app.";
+      const message = t("settings.electron_update_install_desktop_only");
       setUpdateStatus({ state: "error", message, failedAction: "install" });
       setError(message);
       return;
@@ -376,7 +380,7 @@ export function useElectronUpdaterState(options: UseElectronUpdaterStateOptions)
         }
         setUpdateStatus({
           state: "error",
-          message: result?.reason ?? "Update install failed.",
+          message: result?.reason ?? t("settings.update_install_failed"),
           failedAction: "install",
         });
       }

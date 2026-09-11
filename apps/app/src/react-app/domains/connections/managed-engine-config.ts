@@ -1,6 +1,7 @@
 import { unwrap } from "@/app/lib/opencode";
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
 import type { Client } from "@/app/types";
+import { t } from "@/i18n";
 
 type WorkspaceType = "local" | "remote" | string;
 
@@ -65,7 +66,7 @@ export async function updateManagedDisabledProviders(
   }
 
   const client = options.opencodeClient;
-  if (!client) throw new Error("Redrob Code client is not connected.");
+  if (!client) throw new Error(t("providers.redrob_code_client_not_connected"));
   const currentConfig = options.currentConfig ?? unwrap(await client.config.get());
   await client.config.update({
     config: configWithDisabledProviders(

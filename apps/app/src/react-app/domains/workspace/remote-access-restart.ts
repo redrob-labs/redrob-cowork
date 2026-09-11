@@ -80,16 +80,16 @@ export function useRemoteAccessRestart(options: UseRemoteAccessRestartOptions) {
 function statusForPhase(phase: RemoteAccessRestartPhase, enabled: boolean) {
   switch (phase) {
     case "restarting":
-      return "Restarting worker…";
+      return t("workspace.remote_access_restarting");
     case "reconnecting":
-      return "Reconnecting to worker…";
+      return t("workspace.remote_access_reconnecting");
     case "failed":
       return enabled
-        ? "Remote access may still be on. Check connection details or retry."
-        : "Remote access is still off. You can retry when ready.";
+        ? t("workspace.remote_access_enable_failed")
+        : t("workspace.remote_access_disable_failed");
     default:
       return enabled
-        ? "Remote access is currently enabled."
-        : "Remote access is currently disabled.";
+        ? t("workspace.remote_access_enabled")
+        : t("workspace.remote_access_disabled");
   }
 }

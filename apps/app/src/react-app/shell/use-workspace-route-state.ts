@@ -97,7 +97,10 @@ const ROUTE_WORKSPACE_ACTIVATION_SETTLE_MS = 750;
 function withRouteRefreshTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = window.setTimeout(
-      () => reject(new Error(`${label} did not respond within ${ROUTE_REFRESH_STEP_TIMEOUT_MS / 1000}s`)),
+      () => reject(new Error(t("workspace.route_refresh_timeout", {
+        label,
+        seconds: ROUTE_REFRESH_STEP_TIMEOUT_MS / 1000,
+      }))),
       ROUTE_REFRESH_STEP_TIMEOUT_MS,
     );
     promise.then(
@@ -279,7 +282,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
         const endpoint = endpointForWorkspace(workspace);
         if (!endpoint) {
           if (workspace.workspaceType === "remote") {
-            const message = "Remote worker URL is missing. Edit connection and add a server URL.";
+            const message = t("workspace.remote_worker_url_missing");
             setErrorsByWorkspaceId((current) => ({ ...current, [workspace.id]: message }));
             setWorkspaceConnectionOverrides((current) => ({
               ...current,
@@ -380,7 +383,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
             const connectionState = await diagnoseRemoteWorkspaceTaskLoadFailure(workspace, message);
             setErrorsByWorkspaceId((current) => ({
               ...current,
-              [workspace.id]: connectionState.message ?? "Remote worker connection failed.",
+              [workspace.id]: connectionState.message ?? t("workspace.remote_worker_connection_failed"),
             }));
             setWorkspaceConnectionOverrides((current) => {
               return {
@@ -441,7 +444,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
     try {
       if (isDesktopRuntime()) {
         try {
-          desktopList = await withRouteRefreshTimeout(workspaceBootstrap(), "Desktop workspace bootstrap") as WorkspaceList;
+          desktopList = await withRouteRefreshTimeout(workspaceBootstrap(), t("workspace.desktop_workspace_bootstrap")) as WorkspaceList;
           desktopWorkspaces = (desktopList.workspaces ?? []).map(mapDesktopWorkspace);
         } catch (error) {
           const message = describeRouteError(error);
@@ -458,7 +461,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
 
       const { normalizedBaseUrl, resolvedToken, resolvedHostToken, hostInfo } = await withRouteRefreshTimeout(
         resolveRedrobConnection(),
-        "Redrob Work server connection",
+        t("workspace.redrob_work_server_connection"),
       );
       if (!attempt.isCurrent()) return;
       if (!normalizedBaseUrl || !resolvedToken) {
@@ -522,7 +525,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
         hostToken: resolvedHostToken || undefined,
       });
       const workspaceListState = await refreshRouteWorkspaceListState({
-        load: () => withRouteRefreshTimeout(redrobClient.listWorkspaces(), "Workspace list"),
+        load: () => withRouteRefreshTimeout(redrobClient.listWorkspaces(), t("workspace.workspace_list_operation")),
         desktopWorkspaces,
         previousWorkspaces: workspacesRef.current,
         orderIds: workspaceOrderIdsRef.current,
@@ -532,7 +535,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
       if (!workspaceListState.usable || workspaceListState.error) {
         const message = workspaceListState.error
           ? describeRouteError(workspaceListState.error)
-          : "Workspace list response did not include items.";
+          : t("workspace.workspace_list_missing_items");
         console.warn("[session-route] workspace list degraded", workspaceListState.error ?? message);
         recordInspectorEvent("route.workspace_list.degraded", {
           route: "session",
@@ -1022,7 +1025,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
             setModernRouteSessionResolution({
               key: modernRouteSessionLoadKey,
               status: "error",
-              message: "The server returned a different session.",
+              message: t("session.server_returned_different_session"),
             });
             return;
           }
@@ -1068,13 +1071,13 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
   const routeNotFoundMessage = (() => {
     if (loading) return null;
     if (routeWorkspaceId && !selectedWorkspace) {
-      return "Workspace was not found. Select a new workspace from the sidebar.";
+      return t("workspace.route_workspace_not_found");
     }
     if (selectedSessionId && !selectedSessionKnown && activeModernRouteSessionResolution?.status === "not-found") {
-      return "Session was not found. Select a new session from the sidebar.";
+      return t("session.route_session_not_found");
     }
     if (selectedSessionId && !selectedSessionKnown && activeModernRouteSessionResolution?.status === "error") {
-      return `Session could not be loaded. ${activeModernRouteSessionResolution.message}`;
+      return t("session.route_session_load_failed", { message: activeModernRouteSessionResolution.message });
     }
     return null;
   })();
@@ -1134,7 +1137,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
       if (!result.ok) {
         setErrorsByWorkspaceId((current) => ({
           ...current,
-          [workspaceId]: result.state.message ?? "Remote worker connection failed.",
+          [workspaceId]: result.state.message ?? t("workspace.remote_worker_connection_failed"),
         }));
         if (remoteWorkspaceCheckRunRef.current[workspaceId] === runId) {
           delete remoteWorkspaceCheckRunRef.current[workspaceId];

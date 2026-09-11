@@ -8,6 +8,7 @@
  * (e.g. `shellAsync`) that may not be present in older SDK versions.
  */
 import type { Session } from "@opencode-ai/sdk/v2/client";
+import { t } from "../../i18n";
 import type { Client, ModelRef } from "../types";
 import { unwrap } from "./opencode";
 
@@ -259,5 +260,5 @@ function assertNoClientError(result: unknown): void {
       : typeof maybe.error === "string"
         ? maybe.error
         : JSON.stringify(maybe.error);
-  throw new Error(message || "Unknown error");
+  throw new Error(message || t("app.unknown_error"));
 }

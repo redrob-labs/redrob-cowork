@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { t } from "@/i18n";
 import { isCollectibleArtifactTarget, type OpenTarget, type OpenTargetPreview } from "../artifacts/open-target";
 
 export const PERSISTED_PANEL_TAB_STORE_KEY = "redrob:panel-tabs:v1";
@@ -185,7 +186,9 @@ function mergePersistedSessions(
       .map(({ id }): PanelTab => ({
         id,
         type: "browser",
-        label: "New tab",
+        get label() {
+          return t("panel_tabs.new_tab");
+        },
         url: "",
         favicon: null,
         status: "ready",

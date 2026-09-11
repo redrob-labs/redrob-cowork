@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 
+import { t } from "../../../../i18n";
 import { safeStringify } from "../../../../app/utils";
 import { normalizeErrorText } from "../../../../lib/error-text";
 
@@ -45,11 +46,11 @@ function firstNumberValue(records: unknown[], keys: string[]) {
 }
 
 function defaultErrorMessage(name: string | null, fallback: string) {
-  if (name === "ProviderAuthError") return "Provider authentication failed";
-  if (name === "MessageOutputLengthError") return "The model reached its output limit before finishing";
-  if (name === "StructuredOutputError") return "The model could not produce valid structured output";
-  if (name === "ContextOverflowError") return "The conversation is too large for the model context window";
-  if (name === "MessageAbortedError") return "The message was interrupted";
+  if (name === "ProviderAuthError") return t("session.error_provider_auth_failed");
+  if (name === "MessageOutputLengthError") return t("session.error_model_output_limit");
+  if (name === "StructuredOutputError") return t("session.error_invalid_structured_output");
+  if (name === "ContextOverflowError") return t("session.error_context_window_overflow");
+  if (name === "MessageAbortedError") return t("session.error_message_interrupted");
   return fallback;
 }
 
@@ -73,17 +74,17 @@ function sessionErrorKind(name: string | null, message: string | null, code: str
 }
 
 function errorTitle(kind: OpencodeSessionErrorKind, fallback: string) {
-  if (kind === "aborted") return "Task interrupted";
-  if (kind === "provider-timeout") return "Provider did not respond in time";
+  if (kind === "aborted") return t("session.error_task_interrupted");
+  if (kind === "provider-timeout") return t("session.error_provider_timeout");
   return fallback;
 }
 
 function errorDescription(kind: OpencodeSessionErrorKind) {
   if (kind === "aborted") {
-    return "Redrob Code stopped before the task finished. Output and files already produced are kept.";
+    return t("session.error_task_interrupted_description");
   }
   if (kind === "provider-timeout") {
-    return "The provider connection timed out before a response began. Output and files already produced are kept.";
+    return t("session.error_provider_timeout_description");
   }
   return null;
 }
@@ -96,12 +97,12 @@ function errorRecoveryPrompt(kind: OpencodeSessionErrorKind) {
 
 function withAttachmentRecoveryHint(text: string) {
   if (!text.includes("file part media type") || !text.includes("not supported")) return text;
-  return `${text}\nAn attached file in this conversation uses a format the model can't read. Revert the conversation to before the attachment was sent, or start a new session.`;
+  return `${text}\n${t("session.error_unreadable_attachment_hint")}`;
 }
 
 function withOpenAiTokenRefreshHint(text: string) {
   if (!/Token refresh failed:\s*401/i.test(text)) return text;
-  return "OpenAI couldn’t renew the ChatGPT sign-in for this worker. Retry once. If it happens again, reconnect OpenAI under Connect providers → OpenAI → ChatGPT Pro/Plus.";
+  return t("session.error_chatgpt_sign_in_renewal_hint");
 }
 
 function normalizeSessionError(text: string) {
@@ -177,7 +178,7 @@ function technicalErrorDetails(error: unknown, fallback: string, fields: ReturnT
   return normalizeErrorText(serialized && serialized !== "{}" ? serialized : fallback, { cap: 1_500 }).display;
 }
 
-export function presentOpencodeSessionError(error: unknown, fallback = "Session failed"): OpencodeSessionErrorPresentation {
+export function presentOpencodeSessionError(error: unknown, fallback = t("session.error_failed")): OpencodeSessionErrorPresentation {
   const fields = sessionErrorFields(error, fallback);
   const kind = sessionErrorKind(fields.name, fields.message, fields.code);
   const fallbackTitle = normalizeSessionError(fields.message ?? defaultErrorMessage(fields.name, fallback));
@@ -190,7 +191,7 @@ export function presentOpencodeSessionError(error: unknown, fallback = "Session 
   };
 }
 
-export function describeOpencodeSessionError(error: unknown, fallback = "Session failed") {
+export function describeOpencodeSessionError(error: unknown, fallback = t("session.error_failed")) {
   const presentation = presentOpencodeSessionError(error, fallback);
   return presentation.description
     ? `${presentation.title}\n${presentation.description}`

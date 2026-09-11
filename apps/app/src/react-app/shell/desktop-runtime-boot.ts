@@ -1,6 +1,8 @@
 /** @jsxImportSource react */
 import { useEffect } from "react";
 
+import { t } from "../../i18n";
+
 import {
   engineInfo,
   engineStart,
@@ -112,13 +114,13 @@ export function useDesktopRuntimeBoot() {
         };
 
         const startServerWithoutDesktopWorkspace = async () => {
-          setPhase("starting-engine", "Starting Redrob Work server");
+          setPhase("starting-engine", t("boot.starting_redrob_work_server"));
           const serverInfo = await redrobServerRestart().catch((error) => {
             console.warn("[desktop-boot] redrobServerRestart failed:", error);
             return null;
           });
           if (!isRedrobServerInfoLike(serverInfo) || !isRedrobServerReady(serverInfo)) {
-            setError("Redrob Work server did not finish starting. Please restart Redrob Work.");
+            setError(t("boot.redrob_work_server_start_timeout"));
             return;
           }
           publishRedrobServerInfo(serverInfo);
@@ -149,7 +151,7 @@ export function useDesktopRuntimeBoot() {
         }
 
         if (isElectronRuntime()) {
-          setPhase("starting-engine", "Starting your workspace");
+          setPhase("starting-engine", t("boot.starting_workspace"));
           const boot = (await runtimeBootstrap().catch((error) => ({
             ok: false,
             error: error instanceof Error ? error.message : safeStringify(error),
@@ -162,12 +164,12 @@ export function useDesktopRuntimeBoot() {
           };
 
           if (boot.ok === false) {
-            setError(boot.error || "Failed to start Redrob Work runtime");
+            setError(boot.error || t("boot.redrob_work_runtime_start_failed"));
             return;
           }
 
           if (!boot.skipped && !isRedrobServerReady(boot.redrobServer)) {
-            setError("Redrob Work server did not finish starting. Please restart Redrob Work.");
+            setError(t("boot.redrob_work_server_start_timeout"));
             return;
           }
 
@@ -234,7 +236,7 @@ export function useDesktopRuntimeBoot() {
           return paths;
         };
 
-        setPhase("starting-engine", "Starting your workspace");
+        setPhase("starting-engine", t("boot.starting_workspace"));
         let engineStartResult = await engineStart(workspaceRoot, {
           runtime: "direct",
           workspacePaths: workspacePathsFor(workspaceRoot),
@@ -254,7 +256,7 @@ export function useDesktopRuntimeBoot() {
               selectedWorkspaceId: workspace.id,
               fallbackWorkspaceId: fallback.id,
             });
-            setPhase("starting-engine", "Starting another workspace");
+            setPhase("starting-engine", t("boot.starting_another_workspace"));
             engineStartResult = await engineStart(fallbackRoot, {
               runtime: "direct",
               workspacePaths: workspacePathsFor(fallbackRoot).filter((path) => path !== workspaceRoot),
@@ -268,7 +270,7 @@ export function useDesktopRuntimeBoot() {
               void workspaceSetRuntimeActive(fallback.id).catch(() => undefined);
             }
           } else {
-            setError("Failed to start the selected workspace.");
+            setError(t("boot.selected_workspace_start_failed"));
           }
         }
 

@@ -22,7 +22,6 @@ import {
   type RedrobControlAction,
 } from "./control/control-provider";
 import { RedrobContextPublisher } from "./redrob-context-publisher";
-import { BottomLeftControls } from "./bottom-left-controls";
 import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
@@ -155,7 +154,6 @@ export function AppRoot() {
               <Route path="/" element={<Navigate to="/session" replace />} />
               <Route path="*" element={<Navigate to="/session" replace />} />
             </Routes>
-          <BottomLeftControls />
           <LoadingOverlay />
         </RedrobControlProvider>
         </AppMenuProvider>
