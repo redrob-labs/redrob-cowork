@@ -16,6 +16,7 @@ import {
   useIsEnvironmentVariableChangesPending,
   type EnvironmentEditorDraft,
 } from "@/react-app/domains/settings/pages/environment-variable-provider"
+import { t } from "@/i18n"
 
 interface EnvVarRequestToolProps {
   part: EnvVarRequestToolPart
@@ -50,7 +51,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
   }, [key])
 
   if (!key) {
-    return <Tool toolPart={part} title="Requested environment variable" />
+    return <Tool toolPart={part} title={t("tools.env_requested")} />
   }
 
   const save = () => {
@@ -101,7 +102,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
 
           {!canModify ? (
             <p className="rounded-lg border border-warning-muted/40 bg-warning-soft/20 px-3 py-2 text-xs text-warning-ink">
-              Environment variables can only be edited from a local desktop workspace.
+              {t("tools.env_desktop_only")}
             </p>
           ) : null}
           {applyError ? (
@@ -123,13 +124,13 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
             ) : null}
             {helpUrl ? (
               <Button size="sm" variant="ghost" render={<a href={helpUrl} target="_blank" rel="noreferrer" />}>
-                Open setup guide
+                {t("tools.open_setup_guide")}
                 <ExternalLink className="size-3.5" />
               </Button>
             ) : null}
             {followUpPrompt && saved ? (
               <Button size="sm" variant="ghost" onClick={() => setPrompt(followUpPrompt)}>
-                Continue setup
+                {t("tools.continue_setup")}
               </Button>
             ) : null}
           </div>

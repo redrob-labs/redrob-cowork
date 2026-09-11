@@ -15,7 +15,15 @@ import ko from "../src/i18n/locales/ko";
  * The onboarding suite covers the same ground for the first-run wizard with a
  * stricter, closed exception list; this one covers the rest of the app.
  */
-const RENDERER_DIR = join(import.meta.dir, "..", "src", "react-app");
+/**
+ * Every renderer source, not just `react-app/`.
+ *
+ * This used to be `src/react-app`, which left 80 of the app's 211 `.tsx` files
+ * unguarded -- only 5 of them called `t()` at all. That blind spot is where
+ * `Try one of these:` sat in the new-session strip: English forever, in a file
+ * no guard was reading.
+ */
+const RENDERER_DIR = join(import.meta.dir, "..", "src");
 
 /** Attributes whose value the user reads or hears. */
 const USER_FACING_ATTRIBUTES = ["placeholder", "title", "aria-label", "alt"];
@@ -30,7 +38,6 @@ const ALLOWED_LITERALS = new Set([
   "Redrob Code",
   "Claude Desktop, Codex, Cursor",
   "OpenCode",
-  "OpenCode Plugins",
   "opencode-wakatime",
   "redrob://...",
   "https://github.com/slackapi/slack-mcp-plugin",
@@ -46,9 +53,24 @@ const ALLOWED_LITERALS = new Set([
  * harder to read, not easier.
  */
 const DEVELOPER_ONLY = new Set([
-  "domains/session/surface/debug-panel.tsx",
-  "shell/dev-profiler.tsx",
-  "shell/react-render-watchdog-overlay.tsx",
+  "react-app/domains/session/surface/debug-panel.tsx",
+  "react-app/shell/dev-profiler.tsx",
+  "react-app/shell/react-render-watchdog-overlay.tsx",
+]);
+
+/**
+ * Bare JavaScript/TypeScript keywords. A self-closing tag followed by
+ * `return <Other />` puts one of these between a ">" and a "<", which the JSX
+ * text heuristic below cannot tell from a text node. None of them is ever copy.
+ */
+const CODE_KEYWORDS = new Set([
+  "return",
+  "default",
+  "typeof",
+  "await",
+  "yield",
+  "export",
+  "function",
 ]);
 
 const sources: { name: string; code: string }[] = [];
@@ -108,8 +130,16 @@ describe("renderer localization", () => {
       // ">", never with "=>", so skipping the arrow keeps generic type
       // annotations out of the scan.
       for (const match of source.code.matchAll(/(?<!=)>\s*([A-Za-z][A-Za-z ,.'?!\-:/]{6,}?)\s*</g)) {
-        if (!ALLOWED_LITERALS.has(match[1])) {
-          violations.push(`${source.name}: text "${match[1]}"`);
+        const text = match[1];
+        // `/>` followed by `return <Other />` reads as a text node to the
+        // heuristic above, and a TypeScript optional property (`foo?: Bar`)
+        // does too. Neither can be prose, and both recur often enough that an
+        // allow-list entry per occurrence would rot. Trimmed, because the
+        // capture class includes spaces and so keeps a trailing one.
+        if (CODE_KEYWORDS.has(text.trim())) continue;
+        if (text.includes("?:")) continue;
+        if (!ALLOWED_LITERALS.has(text)) {
+          violations.push(`${source.name}: text "${text}"`);
         }
       }
 

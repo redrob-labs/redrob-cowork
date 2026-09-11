@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/hover-card"
 import { cn } from "@/lib/utils"
 import { createContext, useContext } from "react"
+import { t } from "@/i18n"
 
 const SourceContext = createContext<{
   href: string
@@ -65,7 +66,7 @@ export function SourceTrigger({
                   src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(
                     href
                   )}`}
-                  alt="favicon"
+                  alt=""
                   width={14}
                   height={14}
                   className="size-3.5 rounded-full"
@@ -100,7 +101,7 @@ export function SourceContent({
             src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(
               href
             )}`}
-            alt="favicon"
+            alt=""
             className="size-4 rounded-full"
             width={16}
             height={16}
@@ -111,7 +112,7 @@ export function SourceContent({
         </div>
         <div className="line-clamp-2 text-sm font-medium">{title}</div>
         <div className="text-muted-foreground line-clamp-2 text-sm">
-          {description ? description : <span className="text-muted-foreground">No description available</span>}
+          {description ? description : <span className="text-muted-foreground">{t("source.no_description")}</span>}
         </div>
       </a>
     </HoverCardContent>

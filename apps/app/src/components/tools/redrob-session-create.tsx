@@ -8,6 +8,7 @@ import { useMessageList } from "@/components/chat/message-list-provider"
 import { Button } from "@/components/ui/button"
 import { Tool } from "@/components/ui/tool"
 import { workspaceSessionRoute } from "@/react-app/shell/workspace-routes"
+import { t } from "@/i18n"
 
 type CreatedSession = {
   sessionId: string
@@ -95,12 +96,12 @@ export function RedrobWorkSessionCreateTool({ part }: { part: DynamicToolUIPart 
   const { workspaceId: currentWorkspaceId } = useMessageList()
 
   if (part.state !== "output-available") {
-    return <Tool toolPart={part} title="Creating new chats" />
+    return <Tool toolPart={part} title={t("tools.creating_chats")} />
   }
 
   const result = parseRedrobWorkSessionCreateResult(part.output)
   if (!result) {
-    return <Tool toolPart={part} title="Created new chats" />
+    return <Tool toolPart={part} title={t("tools.created_chats")} />
   }
 
   const allCreated = result.ok && result.created.length > 0 && result.failures.length === 0
@@ -158,7 +159,7 @@ export function RedrobWorkSessionCreateTool({ part }: { part: DynamicToolUIPart 
               data-open-created-session={session.sessionId}
               onClick={() => openSession(session)}
             >
-              Open chat
+              {t("tools.open_chat")}
             </Button>
           </div>
         ))}

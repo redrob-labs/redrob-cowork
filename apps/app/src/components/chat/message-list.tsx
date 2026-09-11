@@ -167,7 +167,7 @@ class ToolMessage extends React.Component<ToolMessageProps, { failed: boolean }>
   render() {
     if (this.state.failed) {
       return (
-        <div className="text-xs text-muted-foreground">Tool step unavailable</div>
+        <div className="text-xs text-muted-foreground">{t("message.tool_step_unavailable")}</div>
       )
     }
     return <ToolMessageInner part={this.props.part} />
@@ -340,13 +340,13 @@ function FileMessage({ part, tone }: FileMessageProps) {
             {downloadUrl ? (
               <DropdownMenuItem onClick={handleDownload}>
                 <Download />
-                Download
+                {t("message.download")}
               </DropdownMenuItem>
             ) : null}
             {canReveal ? (
               <DropdownMenuItem onClick={handleReveal}>
                 <FolderOpen />
-                Reveal in Finder
+                {t("workspace_list.reveal_finder")}
               </DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>
@@ -387,7 +387,7 @@ function CopyMessageButton({ messages }: CopyMessageButtonProps) {
       <Button
         variant="ghost"
         size="icon"
-        aria-label="Copy message"
+        aria-label={t("message.copy")}
         onClick={() => void onCopy()}
       >
         {copied ? <Check /> : <Copy />}
@@ -657,7 +657,7 @@ const UserMessage = React.memo(
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="Edit message"
+                          aria-label={t("message.edit")}
                           onClick={() => onEditUserMessage(message.id, messageText)}
                         >
                           <Pencil />
@@ -668,7 +668,7 @@ const UserMessage = React.memo(
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label="Branch in new chat"
+                        aria-label={t("message.branch_new_chat")}
                         onClick={() => onForkAtMessage(message.id)}
                       >
                         <Split className="rotate-90" />
@@ -693,7 +693,7 @@ const UserMessage = React.memo(
             {messageText ? (
               <ContextMenuItem onClick={() => onEditUserMessage(message.id, messageText)}>
                 <Pencil className="size-4" />
-                Edit message
+                {t("message.edit")}
               </ContextMenuItem>
             ) : null}
             {messageText ? (
@@ -704,7 +704,7 @@ const UserMessage = React.memo(
             ) : null}
             <ContextMenuItem onClick={() => onForkAtMessage(message.id)}>
               <Split className="size-4 rotate-90" />
-              Branch in new chat
+              {t("message.branch_new_chat")}
             </ContextMenuItem>
             <ContextMenuItem onClick={() => onRevertToUserMessage(message.id)}>
               <Undo2 className="size-4" />
@@ -1163,7 +1163,7 @@ function MessageGroup({
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Branch in new chat"
+                    aria-label={t("message.branch_new_chat")}
                     onClick={() => onForkAtMessage(lastRealItem.message.id)}
                   >
                     <Split className="rotate-90" />

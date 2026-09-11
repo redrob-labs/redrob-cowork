@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/command";
 import { openModelPickerEvent, openProviderAuthEvent } from "@/react-app/shell/new-providers-listener";
 import { newProvidersEvent } from "@/app/lib/provider-events";
+import { t } from "@/i18n"
 
 function getProviderDisplayName(providerId: string) {
   return providerId
@@ -294,7 +295,7 @@ export function ModelSelect({
             <PopoverTrigger
               type="button"
               disabled={disabled}
-              aria-label="Change model"
+              aria-label={t("session.change_model")}
               aria-keyshortcuts="Meta+Alt+/"
               className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12 disabled:pointer-events-none disabled:opacity-60"
             />
@@ -308,7 +309,7 @@ export function ModelSelect({
           <ChevronDown className="h-3 w-3" />
         </TooltipTrigger>
         <TooltipContent>
-          Change model
+          {t("session.change_model")}
         </TooltipContent>
       </Tooltip>
       <PopoverContent
@@ -321,10 +322,10 @@ export function ModelSelect({
           <CommandHeader>
             <CommandInput
               ref={searchInputRef}
-              placeholder="Search models..."
+              placeholder={t("settings.search_models")}
             />
           </CommandHeader>
-          <CommandEmpty>No models found.</CommandEmpty>
+          <CommandEmpty>{t("model_select.none_found")}</CommandEmpty>
           <CommandList>
             {(group: ModelSelectGroup) => (
               <CommandGroup
@@ -381,7 +382,7 @@ export function ModelSelect({
               className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               onClick={handleConnectProvider}
             >
-              Connect more providers
+              {t("model_select.connect_more")}
             </button>
           </div>
           {/* Link to full model picker */}
@@ -396,7 +397,7 @@ export function ModelSelect({
               }}
             >
               <Settings2 className="size-3.5" />
-              All models
+              {t("model_picker.all_models")}
             </button>
           </div>
         </Command>
@@ -408,7 +409,7 @@ export function ModelSelect({
           >
             <div className="border-b border-border px-3 py-2">
               <span className="block truncate text-sm font-medium">{thinkingFor.title}</span>
-              <span className="block truncate text-xs text-muted-foreground">Thinking</span>
+              <span className="block truncate text-xs text-muted-foreground">{t("session.assistant_thinking")}</span>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto p-1">
               {thinkingOptions.map((option) => {

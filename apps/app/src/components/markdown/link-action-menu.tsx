@@ -7,6 +7,7 @@ import { getDesktopApplicationsForFile, openDesktopWithApp } from "@/app/lib/des
 import type { OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
 import { usePlatform } from "@/react-app/kernel/platform";
 import type { OpenTargetOptions } from "@/lib/target-provider";
+import { t } from "@/i18n"
 
 const SUPPORTED_PANEL_PREVIEWS = new Set(["markdown", "sheet", "slides", "image", "pdf", "html", "text"]);
 
@@ -102,7 +103,7 @@ export function LinkActionMenu({ target, anchorRect, onOpenTarget, onClose }: Li
           className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/10"
         >
           <ExternalLink className="size-4 shrink-0" />
-          Open with default app
+          {t("link_menu.open_default_app")}
         </button>
       ) : null}
       {canOpenInPanel ? (
@@ -112,7 +113,7 @@ export function LinkActionMenu({ target, anchorRect, onOpenTarget, onClose }: Li
           className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/10"
         >
           <Eye className="size-4 shrink-0" />
-          Open in panel
+          {t("link_menu.open_in_panel")}
         </button>
       ) : null}
       {canOpenExternally ? (
@@ -122,7 +123,7 @@ export function LinkActionMenu({ target, anchorRect, onOpenTarget, onClose }: Li
           className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/10"
         >
           <FolderOpen className="size-4 shrink-0" />
-          Show in folder
+          {t("artifact.show_in_folder")}
         </button>
       ) : null}
       {canOpenExternally && apps && apps.length > 0 ? (

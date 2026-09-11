@@ -16,6 +16,7 @@ import { normalizeErrorText } from "@/lib/error-text"
 import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import { cn } from "@/lib/utils"
+import { t } from "@/i18n"
 
 type CapabilityCallLineProps = {
   part: DynamicToolUIPart
@@ -172,7 +173,7 @@ export function CapabilityCallLine({
                   aria-hidden="true"
                   className={cn("size-3 shrink-0 transition-transform duration-150", detailsOpen && "rotate-90")}
                 />
-                <span className="shrink-0">Technical details</span>
+                <span className="shrink-0">{t("mcp.technical_details")}</span>
                 <span className="min-w-0 truncate text-muted-foreground/60">
                   capability name · arguments · schema digest
                 </span>

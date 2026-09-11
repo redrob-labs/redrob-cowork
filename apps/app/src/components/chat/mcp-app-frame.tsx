@@ -21,6 +21,7 @@ import {
   type McpAppDiagnostic,
   type McpAppDiagnosticStage,
 } from "./mcp-app-diagnostics"
+import { t } from "@/i18n"
 
 const MIN_HEIGHT = 160
 const MAX_HEIGHT = 800
@@ -530,7 +531,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         <p>Interactive view unavailable. The normal tool result is still available. {error.message}</p>
         <details className="mt-1">
           <summary className="cursor-pointer select-none">Technical details ({error.code})</summary>
-          <p className="mt-1">Copy these details when reporting the rendering problem.</p>
+          <p className="mt-1">{t("mcp_app.copy_details_hint")}</p>
           <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-[11px] text-foreground">{details}</pre>
           <button
             type="button"
