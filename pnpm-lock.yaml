@@ -82,6 +82,7 @@ overrides:
 
 patchedDependencies:
   '@modelcontextprotocol/sdk': b9b29e6a319e94ea968476aa440eb8586b5da9db6b8011ce749c384d186f8a10
+  electron-updater@6.8.3: b64cfc2ebc5db6343744e6230baad3ab999ef3b55ceb3a84aa4bf1ae84680a9b
 
 importers:
 
@@ -318,7 +319,7 @@ importers:
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(better-sqlite3@13.0.2)(bun-types@1.3.14)
       electron-updater:
         specifier: ^6.3.9
-        version: 6.8.3
+        version: 6.8.3(patch_hash=b64cfc2ebc5db6343744e6230baad3ab999ef3b55ceb3a84aa4bf1ae84680a9b)
       jsonc-parser:
         specifier: ^3.2.1
         version: 3.3.1
@@ -8434,7 +8435,7 @@ snapshots:
 
   electron-to-chromium@1.5.267: {}
 
-  electron-updater@6.8.3:
+  electron-updater@6.8.3(patch_hash=b64cfc2ebc5db6343744e6230baad3ab999ef3b55ceb3a84aa4bf1ae84680a9b):
     dependencies:
       builder-util-runtime: 9.7.0
       fs-extra: 10.1.0

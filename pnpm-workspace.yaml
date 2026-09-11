@@ -116,3 +116,4 @@ allowBuilds:
   sharp: true
 patchedDependencies:
   '@modelcontextprotocol/sdk': patches/@modelcontextprotocol__sdk.patch
+  electron-updater@6.8.3: patches/electron-updater@6.8.3.patch
