@@ -3,6 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router";
 import { toast } from "@/components/ui/sonner";
 
+// Shared with the session route so both bound their refresh steps the same way.
+import { withRouteRefreshTimeout } from "./use-workspace-route-state";
+
 import {
   SUGGESTED_PLUGINS,
   filterRedrobWorkExtensionCatalogForPlatform,
@@ -1087,7 +1090,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     try {
       if (isDesktopRuntime()) {
         try {
-          desktopList = await workspaceBootstrap() as WorkspaceList;
+          desktopList = await withRouteRefreshTimeout(workspaceBootstrap(), t("workspace.desktop_workspace_bootstrap")) as WorkspaceList;
           desktopWorkspaces = (desktopList.workspaces ?? []).map(mapDesktopWorkspace);
         } catch (error) {
           const message = describeRouteError(error);
@@ -1100,7 +1103,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           desktopWorkspaces = workspacesRef.current;
         }
       }
-      const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await resolveRedrobConnection();
+      const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await withRouteRefreshTimeout(
+        resolveRedrobConnection(),
+        t("workspace.redrob_work_server_connection"),
+      );
 
       if (!normalizedBaseUrl || !resolvedToken) {
         setRedrobClient(null);
@@ -1122,7 +1128,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         token: resolvedToken,
         hostToken: resolvedHostToken || undefined,
       });
-      const list = await client.listWorkspaces();
+      const list = await withRouteRefreshTimeout(client.listWorkspaces(), t("workspace.workspace_list_operation"));
       const serverWorkspaceIds = new Set(list.items.map((workspace) => workspace.id));
       const nextWorkspaces = mergeRouteWorkspaces(list.items, desktopWorkspaces);
       const routeWorkspaceServerClientResolver = createWorkspaceServerClientResolver({
@@ -1139,7 +1145,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             return { workspaceId: workspace.id, sessions: [], error: null as string | null };
           }
           try {
-            const response = await endpoint.client.listSessions(endpoint.workspaceId, { limit: 200 });
+            const response = await withRouteRefreshTimeout(
+              endpoint.client.listSessions(endpoint.workspaceId, { limit: 200 }),
+              t("session.session_list_operation"),
+            );
             const workspaceRoot = normalizeDirectoryPath(workspace.path ?? "");
             const items = workspaceRoot && !endpoint.isRemote
               ? (response.items ?? []).filter((session) =>

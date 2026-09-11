@@ -94,7 +94,7 @@ type ModernRouteSessionResolution =
 const ROUTE_REFRESH_STEP_TIMEOUT_MS = 15_000;
 const ROUTE_WORKSPACE_ACTIVATION_SETTLE_MS = 750;
 
-function withRouteRefreshTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+export function withRouteRefreshTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = window.setTimeout(
       () => reject(new Error(t("workspace.route_refresh_timeout", {
@@ -1016,9 +1016,17 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         if (cancelled) return;
         try {
-          const response = await selectedWorkspaceEndpoint.client.getSession(
-            selectedWorkspaceEndpoint.workspaceId,
-            selectedSessionId,
+          // Bounded for the same reason the route refresh steps are: an
+          // unresponsive server or a dead desktop bridge otherwise leaves this
+          // await pending forever, and the session pane has nothing to render
+          // but a loading state. A rejection here is retried by the loop and
+          // then surfaces as a real error, which the user can act on.
+          const response = await withRouteRefreshTimeout(
+            selectedWorkspaceEndpoint.client.getSession(
+              selectedWorkspaceEndpoint.workspaceId,
+              selectedSessionId,
+            ),
+            t("session.session_load_operation"),
           );
           if (cancelled) return;
           if (response.item.id !== selectedSessionId) {

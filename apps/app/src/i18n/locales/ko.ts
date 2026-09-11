@@ -2042,6 +2042,8 @@ const ko = {
   "session.route_session_load_failed": "세션을 불러오지 못했습니다. {message} 연결을 확인하고 다시 시도해 주세요.",
   "session.route_session_not_found": "세션을 찾을 수 없습니다. 사이드바에서 다른 세션을 선택해 주세요.",
   "session.server_returned_different_session": "서버가 요청한 세션과 다른 세션을 반환했습니다. 다시 시도해 주세요.",
+  "session.session_list_operation": "작업 목록 조회",
+  "session.session_load_operation": "작업 불러오기",
   "settings.auto_updates_packaged_only": "자동 업데이트는 패키징된 빌드에서만 사용할 수 있습니다.",
   "settings.electron_alpha_metadata_fetch_failed": "latest-mac.yml을 가져오지 못했습니다({status} {statusText}).",
   "settings.electron_alpha_metadata_missing_artifact_path": "`latest-mac.yml`에 아티팩트 `path`/`url`이 없습니다.",

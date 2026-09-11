@@ -2051,6 +2051,8 @@ const en = {
   "session.route_session_load_failed": "Session could not be loaded. {message}",
   "session.route_session_not_found": "Session was not found. Select a new session from the sidebar.",
   "session.server_returned_different_session": "The server returned a different session.",
+  "session.session_list_operation": "Session list",
+  "session.session_load_operation": "Session load",
   "settings.auto_updates_packaged_only": "Auto-updates are available in packaged builds only.",
   "settings.electron_alpha_metadata_fetch_failed": "Failed to fetch latest-mac.yml ({status} {statusText}).",
   "settings.electron_alpha_metadata_missing_artifact_path": "`latest-mac.yml` is missing artifact `path`/`url`.",
