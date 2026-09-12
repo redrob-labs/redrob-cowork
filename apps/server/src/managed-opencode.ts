@@ -209,6 +209,11 @@ async function startManagedOpencodeServer(
     cwd: options.cwd,
     env,
     stdio: ["ignore", "pipe", "pipe"],
+    // The engine is a console-subsystem PE on Windows, so without this the user
+    // gets a console window flashing up behind the app on every engine start and
+    // every pool rollover. Every other child spawn in the desktop already sets
+    // it; this one -- the only spawn of the engine itself -- did not.
+    windowsHide: true,
   });
 
   const processLifecycle = createManagedProcessClose(child);

@@ -17,7 +17,11 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { globalEngineConfigDir, workspaceEngineConfigCandidates } from "@redrob/paths";
+import {
+  globalEngineConfigCandidates,
+  globalEngineConfigDir,
+  workspaceEngineConfigCandidates,
+} from "@redrob/paths";
 
 import { configureFakeMediaForTests, installMediaPermissionHandlers } from "./media-permissions.mjs";
 import { registerMigrationIpc } from "./migration.mjs";
@@ -1292,8 +1296,12 @@ function resolveOpencodeConfigPath(scope, projectDir) {
     }
     return workspaceEngineConfigCandidates(projectDir);
   } else if (scope === "global") {
-    const root = globalOpencodeRoot();
-    return [path.join(root, "opencode.jsonc"), path.join(root, "opencode.json")];
+    // The engine reads `redrob.jsonc` / `redrob.json`, never `opencode.*`. The
+    // project scope was moved onto that contract and this branch was missed, so
+    // anything a user set through the global editor was written to a filename
+    // the engine does not load -- inert, and in a directory the legacy
+    // migration does not scan either, so nothing would ever pick it up.
+    return globalEngineConfigCandidates();
   } else {
     throw new Error("scope must be 'project' or 'global'");
   }

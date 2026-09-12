@@ -470,11 +470,11 @@ export function CommandPalette(props: CommandPaletteProps) {
           {mode === "sessions"
             ? t("session.palette_title_sessions")
             : mode === "accessible-items"
-              ? "Accessible items"
+              ? t("palette.accessible_items")
               : mode === "agents"
                 ? t("session.cmd_agents_title")
                 : mode === "groups"
-                  ? "Move to Group"
+                  ? t("palette.move_to_group")
                   : t("session.palette_title_actions")
           }
         </CommandDialogTitle>
@@ -492,18 +492,18 @@ export function CommandPalette(props: CommandPaletteProps) {
                 mode === "sessions"
                   ? t("session.palette_placeholder_sessions")
                   : mode === "accessible-items"
-                    ? "Search servers and artifacts..."
+                    ? t("session.palette_placeholder_accessible_items")
                     : mode === "agents"
                       ? t("session.palette_placeholder_agents")
                       : mode === "groups"
-                        ? "Search groups..."
+                        ? t("session.palette_placeholder_groups")
                         : t("session.palette_placeholder_actions")
               }
               onKeyDown={handleBackspace}
             />
           </CommandHeader>
           <CommandPanel>
-            <CommandEmpty>{mode === "accessible-items" ? "No accessible items found for this session." : mode === "groups" ? "No groups found for this workspace." : t("session.palette_no_matches")}</CommandEmpty>
+            <CommandEmpty>{mode === "accessible-items" ? t("session.palette_no_accessible_items") : mode === "groups" ? t("session.palette_no_groups_in_workspace") : t("session.palette_no_matches")}</CommandEmpty>
             <CommandList>
               {(item: PaletteItem) => (
                 <CommandItem

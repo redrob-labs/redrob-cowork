@@ -50,7 +50,7 @@ function failureInstruction(part: DynamicToolUIPart): string {
       : null
     const message = detailMessage ?? (typeof record.message === "string" ? record.message : null)
     const summary = [code?.replace(/_/g, " "), message].filter(Boolean).join(" — ")
-    if (summary) return `The provider rejected the call: ${summary}.`
+    if (summary) return t("mcp.call_provider_rejected", { summary })
   }
 
   const firstLine = errorText?.split("\n")[0]?.trim()
@@ -59,7 +59,7 @@ function failureInstruction(part: DynamicToolUIPart): string {
     const normalizedFirstLine = normalizeErrorText(errorText, { cap: 500 }).display.split("\n")[0]?.trim()
     if (normalizedFirstLine && !normalizedFirstLine.startsWith("<")) return normalizedFirstLine
   }
-  return "The call failed. Full error is under Technical details."
+  return t("mcp.call_failed_see_technical_details")
 }
 
 function TechnicalDetailsPanel({ part }: { part: DynamicToolUIPart }) {

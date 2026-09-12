@@ -896,11 +896,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const installOpenAiImageExtension = useCallback(async (apiKey: string) => {
     const resolvedApiKey = apiKey.trim();
     if (!redrobClient) {
-      setImageExtensionError("Redrob Work server is not connected.");
+      setImageExtensionError(t("settings.server_not_connected"));
       return;
     }
     if (!resolvedApiKey) {
-      setImageExtensionError("OpenAI API key is required.");
+      setImageExtensionError(t("settings.openai_api_key_required"));
       return;
     }
 
@@ -924,15 +924,15 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     const apiKey = input.apiKey.trim();
     const prompt = input.prompt.trim();
     if (!client || !workspaceId) {
-      setImageGenerationError("Redrob Work server is not connected for this workspace.");
+      setImageGenerationError(t("settings.server_not_connected_workspace"));
       return;
     }
     if (!apiKey) {
-      setImageGenerationError("OpenAI API key is required.");
+      setImageGenerationError(t("settings.openai_api_key_required"));
       return;
     }
     if (!prompt) {
-      setImageGenerationError("Prompt is required.");
+      setImageGenerationError(t("settings.prompt_required"));
       return;
     }
 
@@ -969,7 +969,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const saveVoiceApiKey = useCallback(async (apiKey: string) => {
     const resolvedApiKey = apiKey.trim();
     if (!redrobClient || !resolvedApiKey) {
-      setVoiceError("OpenAI API key is required.");
+      setVoiceError(t("settings.openai_api_key_required"));
       return;
     }
     setVoiceBusy(true);
@@ -988,7 +988,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
 
   const testVoiceSession = useCallback(async () => {
     if (!redrobClient) {
-      setVoiceError("Redrob Work server is not connected.");
+      setVoiceError(t("settings.server_not_connected"));
       return;
     }
     setVoiceBusy(true);
@@ -1009,11 +1009,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     const workspaceId = runtimeWorkspaceId?.trim() ?? "";
     const modelId = input.modelId.trim();
     if (!client || !workspaceId) {
-      setLocalProviderError("Redrob Work server is not connected for this workspace.");
+      setLocalProviderError(t("settings.server_not_connected_workspace"));
       return;
     }
     if (!modelId) {
-      setLocalProviderError("Model ID is required.");
+      setLocalProviderError(t("settings.model_id_required"));
       return;
     }
 
@@ -1168,7 +1168,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
               return {
                 workspaceId: workspace.id,
                 sessions: [],
-                error: connectionState.message ?? "Remote worker connection failed.",
+                error: connectionState.message ?? t("workspace.remote_worker_connection_failed"),
                 connectionState,
               };
             }
@@ -1373,7 +1373,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       if (!result.ok) {
         setErrorsByWorkspaceId((current) => ({
           ...current,
-          [workspaceId]: result.state.message ?? "Remote worker connection failed.",
+          [workspaceId]: result.state.message ?? t("workspace.remote_worker_connection_failed"),
         }));
         if (remoteWorkspaceCheckRunRef.current[workspaceId] === runId) {
           delete remoteWorkspaceCheckRunRef.current[workspaceId];
@@ -1674,7 +1674,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   );
   const routeRedrobStatus = redrobClient ? "connected" : "disconnected";
   const notFoundRouteError = !loading && routeWorkspaceId && !selectedWorkspace
-    ? "Workspace was not found. Select a new workspace from the sidebar."
+    ? t("workspace.route_workspace_not_found")
     : null;
   useEffect(() => {
     if (notFoundRouteError) {
@@ -1765,7 +1765,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     setRenameWorkspaceBusy(true);
     try {
       if (!redrobClient) {
-        toast.error("Redrob Work server is unavailable. Reconnect the server before renaming workspaces.");
+        toast.error(t("workspace.server_unavailable_rename"));
         return;
       }
       await redrobClient.updateWorkspaceDisplayName(renameWorkspaceId, trimmed);
@@ -1802,13 +1802,12 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       }
       return;
     }
-    throw new Error("Redrob Work server is unavailable. Reconnect the server before exporting workspace config.");
+    throw new Error(t("workspace.server_unavailable_export"));
   }, [workspaceServerClientResolver, workspaces]);
 
   const handleForgetWorkspace = useCallback(async (workspaceId: string) => {
     if (typeof window !== "undefined") {
-      const message = t("workspace_list.remove_confirm") || "Remove this workspace from the sidebar?";
-      if (!window.confirm(message)) return;
+      if (!window.confirm(t("workspace_list.remove_confirm"))) return;
     }
     if (redrobClient) {
       await redrobClient.deleteWorkspace(workspaceId).catch(() => undefined);
@@ -2012,6 +2011,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           <AdvancedView
             busy={busy}
             clientConnected={Boolean(opencodeClient)}
+            engineExpected={Boolean(selectedWorkspaceId) && routeStateRef.current.selectedWorkspaceType !== "remote"}
             opencodeConnectStatus={null}
             redrobServerStatus={redrobServerSnapshot.redrobServerStatus}
             developerMode={developerMode}
@@ -2021,11 +2021,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
               return next;
             })}
             opencodeDevModeEnabled={false}
-            openDebugDeepLink={async () => ({ ok: false, message: "Debug deep links are not wired into the React settings route yet." })}
+            openDebugDeepLink={async () => ({ ok: false, message: t("settings.debug_deeplink_not_wired") })}
             canMigrateRuntimeConfig={Boolean(redrobClient && selectedWorkspaceId)}
             migrateRuntimeConfig={async () => {
               if (!redrobClient || !selectedWorkspaceId) {
-                throw new Error("Select a workspace before migrating legacy runtime config.");
+                throw new Error(t("settings.migrate_select_workspace"));
               }
               const result = await redrobClient.migrateRuntimeConfig(selectedWorkspaceId);
               if (result.migrated) {
@@ -2036,7 +2036,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             }}
             getRuntimeConfigStatus={async () => {
               if (!redrobClient || !selectedWorkspaceId) {
-                throw new Error("Select a workspace to inspect runtime config.");
+                throw new Error(t("settings.runtime_config_select_workspace"));
               }
               return redrobClient.getRuntimeConfigStatus(selectedWorkspaceId);
             }}

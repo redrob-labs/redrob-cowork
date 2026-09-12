@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { pathToFileURL } from "node:url";
 import {
   desktopBootstrapPath,
+  legacyWorkspaceConfigCandidates,
   normalizeWorkspaceRootPath,
   redrobEnvStorePath,
   redrobServerConfigPath,
@@ -1749,8 +1750,12 @@ export function createRuntimeManager({
       };
     }
 
-    const versionResult = spawnSync(resolved.path, ["--version"], { encoding: "utf8" });
-    const helpResult = spawnSync(resolved.path, ["serve", "--help"], { encoding: "utf8" });
+    // Bounded and hidden. These run on the onboarding engine step, so an engine
+    // that starts but never answers would otherwise hang that screen with no
+    // timeout at all, and on Windows each probe flashed a console window.
+    const probeOptions = { encoding: "utf8", timeout: 15_000, windowsHide: true };
+    const versionResult = spawnSync(resolved.path, ["--version"], probeOptions);
+    const helpResult = spawnSync(resolved.path, ["serve", "--help"], probeOptions);
     const notes = [`Using ${resolved.source}: ${resolved.path}`];
     if (versionResult.status !== 0) {
       notes.push("Redrob Code version probe failed.");
@@ -1851,6 +1856,20 @@ export function createRuntimeManager({
   async function ensureOpencodeConfig(projectDir) {
     const configPath = resolveWorkspaceEngineConfigPath(projectDir);
     if (await fileExists(configPath)) return;
+
+    // Do NOT seed over a legacy config. The server migrates
+    // `opencode.json(c)` -> `redrob.jsonc` only when no engine-visible config
+    // exists yet (migrateLegacyWorkspaceConfig -> `if (await anyExists(targets))
+    // return null;`), and this runs FIRST -- engineStart seeds the workspace
+    // root before the embedded server boots. Writing a stub containing nothing
+    // but `$schema` therefore satisfied that guard and the migration was skipped
+    // forever, silently dropping every MCP server and plugin the user had in the
+    // old file. The migration is one-way and never retried, so the loss was
+    // permanent.
+    for (const legacy of legacyWorkspaceConfigCandidates(projectDir)) {
+      if (await fileExists(legacy)) return;
+    }
+
     await mkdir(path.dirname(configPath), { recursive: true });
     await writeFile(
       configPath,

@@ -87,7 +87,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
               ) : null}
             </div>
             <p className="text-xs leading-5 text-dls-secondary">
-              {description || "Paste the token here. Redrob Work stores it locally and does not send the secret back into chat."}
+              {description || t("tools.env_paste_token_hint")}
             </p>
           </div>
 
@@ -137,8 +137,8 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
 
           <p className={cn("text-[11px] leading-4 text-dls-tertiary", saved && pendingChanges ? "text-warning-ink" : "")}>
             {saved && pendingChanges
-              ? "Saved locally. Apply changes so local agents can read the latest value."
-              : "The token is written through the same local Environment Variables store used by Settings."}
+              ? t("tools.env_saved_apply_hint")
+              : t("tools.env_store_note")}
           </p>
         </div>
       </div>

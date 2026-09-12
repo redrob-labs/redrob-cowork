@@ -114,10 +114,10 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
     queryKey: ["artifact-panel", workspaceId, target.id, target.updatedAt ?? null] as const,
     queryFn: async () => {
       if (target.kind === "url") {
-        throw new Error("URLs open in browser tabs.");
+        throw new Error(t("artifact.url_opens_in_browser_tab"));
       }
       else if (target.exists === false) {
-        throw new Error("File not found in this workspace.");
+        throw new Error(t("artifact.file_not_found"));
       }
 
       if (isTextContent(target)) {
@@ -170,7 +170,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
   const { mutate, mutateAsync, isPending: isSaving } = useMutation({
     mutationFn: async (input: SaveArtifactInput) => {
       if (target.kind !== "file") {
-        throw new Error("Cannot save non-file artifact.");
+        throw new Error(t("artifact.cannot_save_non_file"));
       }
 
       if (input.kind === "text") {
@@ -197,7 +197,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
         failedDraftRef.current = input.data;
       }
 
-      toast.error(cause instanceof Error ? cause.message : "Could not save changes.");
+      toast.error(cause instanceof Error ? cause.message : t("artifact.save_failed"));
     },
   });
 
@@ -227,7 +227,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
       try {
         await openDesktopPath(externalPath);
       } catch (cause) {
-        toast.error(cause instanceof Error ? cause.message : "Could not open this file.");
+        toast.error(cause instanceof Error ? cause.message : t("artifact.open_failed"));
       }
 
       return;
@@ -241,7 +241,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
     try {
       await revealDesktopItemInDir(externalPath);
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "Could not show this file in your file manager.");
+      toast.error(cause instanceof Error ? cause.message : t("artifact.reveal_failed"));
     }
   };
 

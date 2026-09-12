@@ -81,6 +81,64 @@ const ALLOWED = new Set<string>([
   // supply a typed File and validate the workspace id first.
   "workspaceId is required",
   "file is required",
+  // Model-facing text found by extending this guard to .tsx: MCP tool and
+  // UI-control-action descriptions, their argument descriptions, prompts and
+  // preview args handed to the model, dev-gated eval-hook fixtures, and the
+  // {ok:false,error} results those hooks and control actions return. All of it
+  // is schema or model input rather than copy: translating a tool description
+  // changes which tool the model picks, and a localized eval fixture makes a
+  // deterministic test locale-dependent.
+  "Base64 encoded PCM16 mono audio.",
+  "Built-in browser is not available.",
+  "Close the Voice Mode right-side panel.",
+  "Connect the Voice Mode panel to OpenAI Realtime and start listening.",
+  "Create a deterministic markdown artifact and open it in the preview panel.",
+  "Create a workspace at the given folder path without showing the file picker dialog, optionally labeling its project for analytics.",
+  "Create many markdown artifacts and open them in the right-side artifact tab strip.",
+  "Create or select a Redrob Work built-in browser tab, navigate it to a URL, and return the CDP handle for browser automation.",
+  "Deterministic eval hook: add a transcript to Voice Mode and place it in the composer.",
+  "Deterministic eval hook: send PCM16 audio through the active OpenAI Realtime input buffer.",
+  "Dev-only eval hook that displays the selected session activity spinner.",
+  "Dev-only eval hook that renders a deterministic transcript with capability calls, aggregated tools, thinking, links, and file chips.",
+  "Dev-only eval hook that renders deterministic LaTeX math in the active conversation.",
+  "Dev-only eval hook that renders deterministic Markdown in the active conversation.",
+  "Dev-only eval hook that selects a missing model and returns an available model to recover with.",
+  "Disconnect the active Voice Mode Realtime session.",
+  "Focus a session already visible in either split-screen pane, or reuse its existing tab without opening a duplicate.",
+  "Help me outline the next Redrob Work task.",
+  "No available connected model found for eval recovery.",
+  "No session is selected.",
+  "Open the Redrob Work feedback surface from the status menu.",
+  "Open the documentation from the status menu.",
+  "Open the in-app command palette so the next choice is visible.",
+  "Open the provider connection modal, optionally pre-filtered to a specific provider.",
+  "Open the sticky Voice Mode right-side panel.",
+  "Realtime channel is not open.",
+  "Redrob Code client is not connected.",
+  "Replace the current session draft and type the supplied text visibly.",
+  "Return the Voice Mode runtime state for tests and agents.",
+  "Return the current notification center entries.",
+  "Return the last messages from the current session transcript as readable text, including the session ID, title, and message count.",
+  "Return the latest visible message in the current session transcript.",
+  "Save this to my memory bank: draft a crisp, self-contained memory of the key fact worth keeping from our conversation, show it to me to confirm or edit, then save it. Do not include any secrets, credentials, tokens, or personal data.",
+  "Scroll the visible session transcript to the first messages.",
+  "Scroll the visible session transcript to the newest messages and composer area.",
+  "Send a deterministic text command through the active OpenAI Realtime voice session.",
+  "Send the currently visible composer draft to the active session.",
+  "Session id from the Redrob Work context resources or conversation tabs.",
+  "Show the LaTeX math proof message.",
+  "Show the Markdown primitive proof message.",
+  "Stop the current streaming session run.",
+  "Summarize the current Redrob Work session and put the next step in the composer.",
+  "Text command to send through the Realtime model.",
+  "The link could not be opened.",
+  "The user declined the MCP App tool call.",
+  "Toggle the microphone track without closing the Realtime session.",
+  "Transcript text to inject.",
+  "Use the status menu in the sidebar footer.",
+  "What did we decide about pricing?",
+  "Workspace client is not ready.",
+  "Write a small valid PDF and open it as an artifact tab to verify inline PDF rendering.",
   // The English name of a language, which exists for English-facing surfaces.
   // Localized display goes through `localizedLanguageName()` instead.
   "English",
@@ -122,7 +180,8 @@ const walk = (dir: string) => {
       walk(path);
       continue;
     }
-    if (!path.endsWith(".ts") || path.endsWith(".d.ts")) continue;
+    if (!path.endsWith(".ts") && !path.endsWith(".tsx")) continue;
+    if (path.endsWith(".d.ts")) continue;
     const raw = readFileSync(path, "utf8");
     // Only text modules: a file that imports the translator produces display text.
     if (!IMPORTS_T.test(raw)) continue;

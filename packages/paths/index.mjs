@@ -164,13 +164,24 @@ export function globalEngineConfigDir(opts) {
   return paths.join(configRoot, "redrob");
 }
 
-/** Global config file to read or write. Prefers JSONC, which the engine ranks higher. */
-export function resolveGlobalEngineConfigPath(opts) {
+/**
+ * Global config files the engine will load, preferred first.
+ *
+ * The mirror of `workspaceEngineConfigCandidates` for the global scope. Exposed
+ * because a caller that wants "the file to edit, creating it if absent" must not
+ * hand-build `opencode.jsonc` -- that name is not read by the engine, and a
+ * config editor that wrote it produced settings that silently did nothing.
+ */
+export function globalEngineConfigCandidates(opts) {
   const platform = optionPlatform(opts);
   const paths = pathApi(platform);
   const base = globalEngineConfigDir(opts);
-  const jsonc = paths.join(base, "redrob.jsonc");
-  const json = paths.join(base, "redrob.json");
+  return [paths.join(base, "redrob.jsonc"), paths.join(base, "redrob.json")];
+}
+
+/** Global config file to read or write. Prefers JSONC, which the engine ranks higher. */
+export function resolveGlobalEngineConfigPath(opts) {
+  const [jsonc, json] = globalEngineConfigCandidates(opts);
   if (existsSync(jsonc)) return jsonc;
   if (existsSync(json)) return json;
   return jsonc;

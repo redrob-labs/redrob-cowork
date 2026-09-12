@@ -78,7 +78,7 @@ export function ClaudePluginImportModal(props: ClaudePluginImportModalProps) {
   const handlePreview = async () => {
     const url = state.url.trim();
     if (!url) {
-      dispatch({ error: "Enter a GitHub repository URL." });
+      dispatch({ error: t("plugins.enter_github_url") });
       return;
     }
     dispatch({ previewing: true, error: null, preview: null, previewedUrl: null });

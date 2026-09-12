@@ -29,11 +29,17 @@ const AUTO_RELOAD_COOLDOWN_MS = 5000;
 const RELOAD_DEDUPE_KEY = "engine-reload";
 const RELOAD_ERROR_DEDUPE_KEY = "engine-reload-error";
 
+/**
+ * Body for the pending-changes entry. `description` is the reason-derived
+ * `system.reload_body_*` copy `reloadCopy` already picked: it says what changed,
+ * in the user's language, and covers every trigger type plus the mixed and
+ * unknown cases. Only a trigger that names one item is worth saying differently.
+ */
 function describeTrigger(
   description: string,
   trigger: ReloadTrigger | null,
 ): string {
-  if (!trigger) {
+  if (!trigger?.name) {
     return description;
   }
 
@@ -42,46 +48,31 @@ function describeTrigger(
       ? "was removed"
       : trigger.action === "added"
         ? "was added"
-        : trigger. action === "updated"
+        : trigger.action === "updated"
           ? "was updated"
           : "changed";
 
   if (trigger.type === "skill") {
-    return trigger.name
-      ? `Skill '${trigger.name}' ${verb}. Reload to use it.`
-      : "Skills changed. Reload to apply.";
+    return `Skill '${trigger.name}' ${verb}. Reload to use it.`;
   }
   if (trigger.type === "plugin") {
-    return trigger.name
-      ? `Plugin '${trigger.name}' ${verb}. Reload to activate.`
-      : "Plugins changed. Reload to apply.";
+    return `Plugin '${trigger.name}' ${verb}. Reload to activate.`;
   }
   if (trigger.type === "mcp") {
-    return trigger.name
-      ? `MCP '${trigger.name}' ${verb}. Reload to connect.`
-      : "MCP config changed. Reload to apply.";
-  }
-  if (trigger.type === "config") {
-    return trigger.name
-      ? `Config '${trigger.name}' ${verb}. Reload to apply.`
-      : "Config changed. Reload to apply.";
+    return `MCP '${trigger.name}' ${verb}. Reload to connect.`;
   }
   if (trigger.type === "agent") {
-    return trigger.name
-      ? `Agent '${trigger.name}' ${verb}. Reload to use it.`
-      : "Agents changed. Reload to apply.";
+    return `Agent '${trigger.name}' ${verb}. Reload to use it.`;
   }
   if (trigger.type === "command") {
-    return trigger.name
-      ? `Command '${trigger.name}' ${verb}. Reload to use it.`
-      : "Commands changed. Reload to apply.";
+    return `Command '${trigger.name}' ${verb}. Reload to use it.`;
   }
-  return "Config changed. Reload to apply.";
+  return `Config '${trigger.name}' ${verb}. Reload to apply.`;
 }
 
 /** Past-tense copy for the "reload happened automatically" receipt. */
 function describeApplied(trigger: ReloadTrigger | null): string {
-  if (!trigger) return "Latest configuration changes are now active.";
+  if (!trigger) return t("notifications.reload_applied_body");
 
   const label =
     trigger.type === "skill"

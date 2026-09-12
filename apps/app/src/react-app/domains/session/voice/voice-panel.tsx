@@ -43,6 +43,14 @@ type VoicePanelProps = {
   onClose: () => void;
 };
 
+/**
+ * MODEL INPUT, not copy — stays English.
+ *
+ * This is the fallback command actually sent through the Realtime session when
+ * a tool call arrives without `text`, and the `previewArgs` sample the model
+ * reads from `redrob_list_actions`. The textarea placeholder that shows the
+ * same sentence to a human is `voice.command_placeholder` instead.
+ */
 const DEFAULT_TEXT_COMMAND = "Summarize the current Redrob Work session and put the next step in the composer.";
 const VOICE_SUGGESTIONS = [
   "Read the latest message in this session",
@@ -56,16 +64,25 @@ const TOOL_LABELS: Record<string, string> = {
   redrob_execute_action: "Running UI action",
 };
 
-const initialVoiceRuntimeSnapshot: VoiceRuntimeSnapshot = {
-  status: "idle",
-  statusText: "Ready for voice control.",
-  micMuted: false,
-  micDiagnostics: "Microphone has not started yet.",
-  realtimeDiagnostics: "Realtime is not connected.",
-  entries: [],
-  latestUserTranscript: "",
-  assistantPreview: "",
-};
+/**
+ * Built on FIRST READ, never at module scope.
+ *
+ * `t()` resolves against the locale loaded when it runs, and the locale loads
+ * after this module is imported. A top-level `const` here would freeze the
+ * English copy permanently, with nothing failing to compile.
+ */
+function createVoiceRuntimeSnapshot(): VoiceRuntimeSnapshot {
+  return {
+    status: "idle",
+    statusText: t("voice.status_ready"),
+    micMuted: false,
+    micDiagnostics: t("voice.mic_not_started"),
+    realtimeDiagnostics: t("voice.realtime_not_connected"),
+    entries: [],
+    latestUserTranscript: "",
+    assistantPreview: "",
+  };
+}
 
 const voiceRealtime = {
   peer: null as RTCPeerConnection | null,
@@ -78,10 +95,11 @@ const voiceRealtime = {
   micMuted: false,
 };
 
-let voiceRuntimeSnapshot: VoiceRuntimeSnapshot = initialVoiceRuntimeSnapshot;
+let voiceRuntimeSnapshot: VoiceRuntimeSnapshot | null = null;
 const voiceRuntimeListeners = new Set<() => void>();
 
-function getVoiceRuntimeSnapshot() {
+function getVoiceRuntimeSnapshot(): VoiceRuntimeSnapshot {
+  if (!voiceRuntimeSnapshot) voiceRuntimeSnapshot = createVoiceRuntimeSnapshot();
   return voiceRuntimeSnapshot;
 }
 
@@ -93,7 +111,7 @@ function subscribeVoiceRuntime(listener: () => void) {
 }
 
 function setVoiceRuntimeSnapshot(update: (current: VoiceRuntimeSnapshot) => VoiceRuntimeSnapshot) {
-  voiceRuntimeSnapshot = update(voiceRuntimeSnapshot);
+  voiceRuntimeSnapshot = update(getVoiceRuntimeSnapshot());
   voiceRuntimeListeners.forEach((listener) => listener());
 }
 
@@ -222,11 +240,11 @@ function waitForDataChannelOpen(channel: RTCDataChannel) {
     };
     const timeout = window.setTimeout(() => {
       cleanup();
-      reject(new Error("Realtime data channel did not open in time."));
+      reject(new Error(t("voice.realtime_channel_timeout")));
     }, 10_000);
     const handleOpen = () => { cleanup(); resolve(); };
-    const handleClose = () => { cleanup(); reject(new Error("Realtime data channel closed before opening.")); };
-    const handleError = () => { cleanup(); reject(new Error("Realtime data channel failed.")); };
+    const handleClose = () => { cleanup(); reject(new Error(t("voice.realtime_channel_closed_early"))); };
+    const handleError = () => { cleanup(); reject(new Error(t("voice.realtime_channel_failed"))); };
     channel.addEventListener("open", handleOpen);
     channel.addEventListener("close", handleClose);
     channel.addEventListener("error", handleError);
@@ -234,10 +252,18 @@ function waitForDataChannelOpen(channel: RTCDataChannel) {
 }
 
 function describeAudioTrack(track: MediaStreamTrack | undefined) {
-  if (!track) return "No microphone track is attached.";
-  const muted = track.muted ? "muted by the system" : "not muted by the system";
-  const enabled = track.enabled ? "enabled" : "disabled";
-  return `Microphone track is ${track.readyState}, ${enabled}, and ${muted}.`;
+  if (!track) return t("voice.mic_no_track");
+  // One complete sentence per state, not assembled from fragments: word order
+  // and particles differ per language, so a composed sentence cannot translate.
+  const state = track.readyState;
+  if (track.enabled) {
+    return track.muted
+      ? t("voice.mic_track_enabled_muted", { state })
+      : t("voice.mic_track_enabled_unmuted", { state });
+  }
+  return track.muted
+    ? t("voice.mic_track_disabled_muted", { state })
+    : t("voice.mic_track_disabled_unmuted", { state });
 }
 
 function setMicDiagnostics(stream: MediaStream | null) {
@@ -255,13 +281,13 @@ async function requestMacMicrophoneAccess() {
   const result = await ask();
   if (result.platform !== "darwin") return true;
   const status = result.after ?? result.before ?? result.status ?? "unknown";
-  setVoiceRuntimeSnapshot((current) => ({ ...current, micDiagnostics: `macOS microphone permission is ${status}.` }));
+  setVoiceRuntimeSnapshot((current) => ({ ...current, micDiagnostics: t("voice.mic_macos_permission", { status }) }));
   return result.granted;
 }
 
 async function executeRedrobWorkTool(name: string, args: Record<string, unknown>) {
   const control = window.__redrobControl;
-  if (!control) return { ok: false, error: "Redrob Work control surface is not available." };
+  if (!control) return { ok: false, error: t("voice.control_surface_unavailable") };
 
   if (name === "redrob_snapshot") return { ok: true, snapshot: control.snapshot() };
   if (name === "redrob_list_actions") return { ok: true, actions: control.listActions() };
@@ -392,12 +418,12 @@ export function VoicePanel(props: VoicePanelProps) {
       ...current,
       status: nextStatus,
       statusText: text ?? (
-        nextStatus === "connecting" ? "Connecting to OpenAI Realtime..." :
-          nextStatus === "listening" ? "Listening. Ask Redrob Work to act." :
-            nextStatus === "speaking" ? "Redrob Work is speaking..." :
-              nextStatus === "muted" ? "Connected, microphone muted." :
-                nextStatus === "error" ? "Voice Mode needs attention." :
-                  "Ready for voice control."
+        nextStatus === "connecting" ? t("voice.status_connecting") :
+          nextStatus === "listening" ? t("voice.status_listening") :
+            nextStatus === "speaking" ? t("voice.status_speaking") :
+              nextStatus === "muted" ? t("voice.status_muted") :
+                nextStatus === "error" ? t("voice.status_error") :
+                  t("voice.status_ready")
       ),
     }));
   }, []);
@@ -418,12 +444,12 @@ export function VoicePanel(props: VoicePanelProps) {
     setVoiceRuntimeSnapshot((current) => ({
       ...current,
       micMuted: false,
-      micDiagnostics: "Microphone has not started yet.",
-      realtimeDiagnostics: "Realtime is not connected.",
+      micDiagnostics: t("voice.mic_not_started"),
+      realtimeDiagnostics: t("voice.realtime_not_connected"),
       assistantPreview: "",
     }));
     setRuntimeStatus("idle");
-    if (!silent) addEntry("system", "Voice session stopped.");
+    if (!silent) addEntry("system", t("voice.session_stopped"));
     recordInspectorEvent("voice.disconnected", { sessionId: props.sessionId });
   }, [addEntry, props.sessionId, setRuntimeStatus]);
 
@@ -460,7 +486,7 @@ export function VoicePanel(props: VoicePanelProps) {
     const type = readString(event, "type");
 
     if (type === "input_audio_buffer.speech_started") {
-      setRuntimeStatus("listening", "Hearing you...");
+      setRuntimeStatus("listening", t("voice.status_hearing"));
       return;
     }
     if (type === "response.created") {
@@ -521,7 +547,7 @@ export function VoicePanel(props: VoicePanelProps) {
     if (type === "error") {
       voiceRealtime.responseInProgress = false;
       const error = readRecord(event, "error");
-      const message = typeof error.message === "string" ? error.message : "Realtime returned an error.";
+      const message = typeof error.message === "string" ? error.message : t("voice.realtime_error");
       addEntry("system", message, { error: true });
       setRuntimeStatus("error", message);
     }
@@ -529,20 +555,20 @@ export function VoicePanel(props: VoicePanelProps) {
 
   const connectRealtime = useCallback(async (audioInput = true) => {
     const client = props.client;
-    if (!client) throw new Error("Redrob Work host connection is not ready.");
-    if (audioInput && !navigator.mediaDevices?.getUserMedia) throw new Error("Microphone capture is unavailable in this runtime.");
+    if (!client) throw new Error(t("voice.host_not_ready"));
+    if (audioInput && !navigator.mediaDevices?.getUserMedia) throw new Error(t("voice.mic_capture_unavailable"));
 
     disconnectRealtime(true);
-    setRuntimeStatus("connecting", "Minting Realtime session...");
+    setRuntimeStatus("connecting", t("voice.status_minting_session"));
     const sessionContext = await loadVoiceSessionContext(client, props.workspaceId, props.sessionId);
     const realtimeSession = await client.createVoiceRealtimeSession({ sessionContext });
 
     const peer = new RTCPeerConnection();
     voiceRealtime.peer = peer;
     if (audioInput) {
-      setRuntimeStatus("connecting", "Requesting microphone...");
+      setRuntimeStatus("connecting", t("voice.status_requesting_microphone"));
       const macPermissionGranted = await requestMacMicrophoneAccess();
-      if (!macPermissionGranted) throw new Error("macOS denied microphone access. Enable Redrob Work in System Settings > Privacy & Security > Microphone, then restart Redrob Work.");
+      if (!macPermissionGranted) throw new Error(t("voice.macos_permission_denied"));
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
@@ -555,7 +581,7 @@ export function VoicePanel(props: VoicePanelProps) {
         peer.addTrack(track, stream);
       }
     } else {
-      setVoiceRuntimeSnapshot((current) => ({ ...current, micDiagnostics: "Voice command is using typed or injected audio, not the microphone." }));
+      setVoiceRuntimeSnapshot((current) => ({ ...current, micDiagnostics: t("voice.mic_typed_audio") }));
       peer.addTransceiver("audio", { direction: "recvonly" });
     }
 
@@ -577,9 +603,9 @@ export function VoicePanel(props: VoicePanelProps) {
 
     const offer = await peer.createOffer();
     await peer.setLocalDescription(offer);
-    if (!offer.sdp) throw new Error("Realtime offer did not include SDP.");
+    if (!offer.sdp) throw new Error(t("voice.realtime_no_sdp"));
 
-    setRuntimeStatus("connecting", "Opening voice channel...");
+    setRuntimeStatus("connecting", t("voice.status_opening_channel"));
     const sdpResponse = await desktopFetch("https://api.openai.com/v1/realtime/calls", {
       method: "POST",
       headers: { Authorization: `Bearer ${realtimeSession.clientSecret}`, "Content-Type": "application/sdp" },
@@ -591,8 +617,8 @@ export function VoicePanel(props: VoicePanelProps) {
     }
     await peer.setRemoteDescription({ type: "answer", sdp: await sdpResponse.text() });
     await waitForDataChannelOpen(channel);
-    setRealtimeDiagnostics("Realtime data channel is open.");
-    setRuntimeStatus("listening", audioInput ? undefined : "Connected. Send a typed voice command.");
+    setRealtimeDiagnostics(t("voice.realtime_channel_open"));
+    setRuntimeStatus("listening", audioInput ? undefined : t("voice.status_typed_connected"));
     addEntry("system", `Realtime connected with ${realtimeSession.model} and ${realtimeSession.tools.length} Redrob Work tools.`);
     recordInspectorEvent("voice.connected", { sessionId: props.sessionId, model: realtimeSession.model });
   }, [addEntry, disconnectRealtime, handleRealtimeMessage, props.client, props.sessionId, props.workspaceId, setRuntimeStatus]);
@@ -629,7 +655,7 @@ export function VoicePanel(props: VoicePanelProps) {
 
   const sendTextCommand = useCallback(async (text: string) => {
     const value = text.trim();
-    if (!value) return { ok: false, error: "Text command required." };
+    if (!value) return { ok: false, error: t("voice.text_command_required") };
     if (!voiceRealtime.channel || voiceRealtime.channel.readyState !== "open") {
       try {
         await connectRealtime(false);
@@ -660,7 +686,7 @@ export function VoicePanel(props: VoicePanelProps) {
     }
     const channel = voiceRealtime.channel;
     if (!channel || channel.readyState !== "open") return { ok: false, error: "Realtime channel is not open." };
-    addEntry("system", "Injected deterministic audio into the Realtime input buffer.");
+    addEntry("system", t("voice.injected_audio"));
     channel.send(JSON.stringify({ type: "input_audio_buffer.append", audio }));
     channel.send(JSON.stringify({ type: "input_audio_buffer.commit" }));
     requestRealtimeResponse(channel);
@@ -915,7 +941,7 @@ export function VoicePanel(props: VoicePanelProps) {
                     setTextCommand("");
                     void sendTextCommand(text);
                   }}
-                  placeholder={DEFAULT_TEXT_COMMAND}
+                  placeholder={t("voice.command_placeholder")}
                   rows={3}
                 />
                 <InputGroupAddon align="block-end" className="justify-between border-t border-border">

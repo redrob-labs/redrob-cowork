@@ -25,17 +25,17 @@ export function TerminalDock({ workspaceRoot, isRemoteWorkspace, onClose }: Term
   useEffect(() => {
     if (!containerRef.current) return;
     if (!isElectronRuntime()) {
-      setStatus("Terminal is available in the desktop app.");
+      setStatus(t("terminal.desktop_only"));
       return;
     }
     if (isRemoteWorkspace) {
-      setStatus("Remote workspace terminals are not wired yet.");
+      setStatus(t("terminal.remote_not_supported"));
       return;
     }
 
     const bridge = window.__REDROB_ELECTRON__?.terminal;
     if (!bridge?.create || !bridge.write || !bridge.resize || !bridge.kill || !bridge.onData || !bridge.onExit) {
-      setStatus("Terminal bridge is unavailable.");
+      setStatus(t("terminal.bridge_unavailable"));
       return;
     }
     const createTerminal = bridge.create;
@@ -104,7 +104,7 @@ export function TerminalDock({ workspaceRoot, isRemoteWorkspace, onClose }: Term
       setStatus(workspaceRoot);
       fitAndResize();
     }).catch((error) => {
-      setStatus(error instanceof Error ? error.message : "Could not start terminal.");
+      setStatus(error instanceof Error ? error.message : t("terminal.start_failed"));
     });
 
     return () => {

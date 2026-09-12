@@ -24,14 +24,14 @@ export function LoadingOverlay() {
 
   const runRecovery = async (action: (() => Promise<RecoveryActionResult>) | undefined) => {
     if (!action) return;
-    setActionState("Preparing verified recovery…");
+    setActionState(t("boot.recovery_preparing"));
     try {
       const result = await action();
       setActionState(result.ok
-        ? result.message ?? "Recovery is ready."
-        : result.reason ?? "Recovery could not be started. Please retry.");
+        ? result.message ?? t("boot.recovery_ready")
+        : result.reason ?? t("boot.recovery_failed"));
     } catch {
-      setActionState("Recovery could not be started. Please retry.");
+      setActionState(t("boot.recovery_failed"));
     }
   };
 
@@ -68,7 +68,7 @@ export function LoadingOverlay() {
           <>
             <OwDotTicker size="md" />
             <div className="text-[12px] leading-5 text-dls-secondary">
-              {message || "Preparing workspace"}
+              {message || t("session.preparing_workspace")}
             </div>
           </>
         )}

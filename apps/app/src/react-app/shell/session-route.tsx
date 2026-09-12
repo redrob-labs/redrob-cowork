@@ -217,7 +217,7 @@ function describeTaskCreateError(error: unknown) {
     : null;
   const code = typeof directCode === "string" ? directCode : serializedCode;
   if (code === "opencode_unconfigured") {
-    return "Choose a model for this workspace, then try again.";
+    return t("session.task_create_choose_model");
   }
   const lower = message.toLowerCase();
   if (
@@ -229,7 +229,7 @@ function describeTaskCreateError(error: unknown) {
     lower.includes("internal_error") ||
     lower.includes("unexpected server error")
   ) {
-    return "Redrob Code is unavailable for this workspace. Retry once it restarts, or restart Redrob Work if the problem continues.";
+    return t("session.task_create_redrob_code_unavailable");
   }
   return message;
 }
@@ -286,7 +286,7 @@ async function draftToParts(
   const attachmentFileById = new Map<string, FilePartInput>();
   if (draft.attachments.length > 0) {
     if (!endpoint) {
-      throw new Error("Workspace endpoint is unavailable; attachments could not be copied for tool access.");
+      throw new Error(t("composer.workspace_endpoint_unavailable"));
     }
     const uploaded = await composerAttachmentsToWorkspaceFileParts({
       attachments: draft.attachments,
@@ -955,7 +955,7 @@ export function SessionRoute() {
         const sessionModelSelection = getSessionModelSelection(targetSessionId);
         const sendModel = sessionModelSelection?.model ?? local.prefs.defaultModel;
         const sendVariant = sessionModelSelection ? sessionModelSelection.variant : modelVariantValue;
-        if (!sessionModelSelection && selectedModelUnavailable) throw new Error("Selected model is unavailable. Choose another model before sending.");
+        if (!sessionModelSelection && selectedModelUnavailable) throw new Error(t("composer.selected_model_unavailable"));
 
         await sendWithRevertRollback({
           revertMessageId: draft.revertMessageId,
@@ -1268,7 +1268,7 @@ export function SessionRoute() {
     setRenameWorkspaceBusy(true);
     try {
       if (!client) {
-        toast.error("Redrob Work server is unavailable. Reconnect the server before renaming workspaces.");
+        toast.error(t("workspace.server_unavailable_rename"));
         return;
       }
       await client.updateWorkspaceDisplayName(renameWorkspaceId, trimmed);
@@ -1317,7 +1317,7 @@ export function SessionRoute() {
         downloadWorkspaceJson(workspaceExportFilename(workspace), payload);
         return;
       }
-      throw new Error("Redrob Work server is unavailable. Reconnect the server before exporting workspace config.");
+      throw new Error(t("workspace.server_unavailable_export"));
     },
     [endpointForWorkspace, workspaces],
   );
@@ -1325,10 +1325,7 @@ export function SessionRoute() {
   const handleForgetWorkspace = useCallback(
     async (workspaceId: string) => {
       if (typeof window !== "undefined") {
-        const message =
-          t("workspace_list.remove_confirm") ||
-          "Remove this workspace from the sidebar?";
-        if (!window.confirm(message)) return;
+        if (!window.confirm(t("workspace_list.remove_confirm"))) return;
       }
       // Remove from both stores so the next refresh can't resurrect the row
       // from whichever list wins the merge.
@@ -1913,7 +1910,7 @@ export function SessionRoute() {
           .catch(() => null);
       }
       if (!list) {
-        throw new Error("Redrob Work server is unavailable. Start or reconnect the server before creating a workspace.");
+        throw new Error(t("workspace.server_unavailable_create"));
       }
       const createdId = resolveWorkspaceListSelectedId(list) || list.workspaces[list.workspaces.length - 1]?.id || "";
       let targetWorkspaceId = createdId;

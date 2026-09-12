@@ -220,12 +220,12 @@ export function SessionSearchDialog(props: SessionSearchDialogProps) {
   const trimmedQuery = query.trim();
   const searching = Boolean(deepQuery) && progress !== null && !progress.done;
   const emptyText = !trimmedQuery
-    ? "No sessions yet."
+    ? t("session.search_no_sessions")
     : trimmedQuery.length < MIN_QUERY_LENGTH
-      ? "Keep typing to search message content…"
+      ? t("session.search_keep_typing")
       : searching
-        ? "Searching messages…"
-        : "No sessions or messages match your search.";
+        ? t("session.search_searching")
+        : t("session.search_no_matches");
 
   const statusText = !trimmedQuery
     ? "Recent sessions"

@@ -124,20 +124,20 @@ export function secureMcpAppHtml(app: RedrobMcpAppResource): string {
   if (html?.index !== undefined) {
     const prefix = app.html.slice(0, html.index).replace(/^\uFEFF/, "")
     if (!/^\s*(?:<!doctype\s+html\s*>)?\s*$/i.test(prefix)) {
-      throw new Error("The MCP App document contains executable markup before its HTML root.")
+      throw new Error(t("mcp_app.document_markup_before_html_root"))
     }
     const htmlEnd = html.index + html[0].length
     const head = /<head(?:\s[^>]*)?>/i.exec(app.html)
     if (head?.index !== undefined) {
       if (head.index < htmlEnd || app.html.slice(htmlEnd, head.index).trim()) {
-        throw new Error("The MCP App document contains markup before its policy-bearing head.")
+        throw new Error(t("mcp_app.document_markup_before_head"))
       }
       const headEnd = head.index + head[0].length
       return `${app.html.slice(0, headEnd)}${meta}${app.html.slice(headEnd)}`
     }
     const body = /<body(?:\s[^>]*)?>/i.exec(app.html)
     if (body?.index !== undefined && (body.index < htmlEnd || app.html.slice(htmlEnd, body.index).trim())) {
-      throw new Error("The MCP App document contains markup before its policy-bearing head.")
+      throw new Error(t("mcp_app.document_markup_before_head"))
     }
     return `${app.html.slice(0, htmlEnd)}<head>${meta}</head>${app.html.slice(htmlEnd)}`
   }
@@ -240,7 +240,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
             code: "MCP_APP_RESOURCE_RESOLUTION_FAILED",
             ...(cause instanceof RedrobServerError ? { causeCode: cause.code } : {}),
             stage: "resource-resolution",
-            message: safeMcpAppDiagnosticMessage(cause, "The interactive view resource could not be resolved."),
+            message: safeMcpAppDiagnosticMessage(cause, t("mcp_app.resource_resolution_failed")),
             toolName: part.toolName,
             elapsedMs: Math.round(performance.now() - startedAt),
             checkpoints: ["resolve-started"],
@@ -292,7 +292,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         "MCP_APP_SANDBOX_ORIGIN_INVALID",
         "sandbox-proxy",
         null,
-        "The sandbox resolved to the same origin as the Redrob Work host.",
+        t("mcp_app.sandbox_origin_invalid"),
         sandbox.expectedOrigin,
       )
       return
@@ -314,6 +314,8 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         await openDesktopUrl(url)
         return {}
       } catch (cause) {
+        // Console-only: the app is told `isError` and renders its own copy, so
+        // this line exists to be matched against the log, never read on screen.
         console.error("[Redrob Work MCP App] MCP_APP_OPEN_LINK_BLOCKED", {
           toolName: part.toolName,
           message: safeMcpAppDiagnosticMessage(cause, "The link could not be opened."),
@@ -331,7 +333,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         "MCP_APP_SANDBOX_PROXY_TIMEOUT",
         "sandbox-proxy",
         null,
-        "The sandbox proxy did not report that it was ready within 5 seconds.",
+        t("mcp_app.sandbox_proxy_timeout"),
         sandbox.expectedOrigin,
       )
     }, SANDBOX_READY_TIMEOUT_MS)
@@ -366,7 +368,10 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         return mcpToolResult(await redrobServerClient.callMcpAppTool(workspaceId, request))
       } catch (cause) {
         if (!(cause instanceof RedrobServerError) || cause.code !== "tool_requires_approval") throw cause
-        const approved = window.confirm(`Allow this MCP App to call ${name} on ${app.serverName}?`)
+        const approved = window.confirm(t("mcp_app.confirm_tool_call", { tool: name, server: app.serverName }))
+        // Thrown back across the bridge as the tool call's error payload, which
+        // the sandboxed app receives and reports in its own words. It is not
+        // host copy, so it stays in the protocol's language.
         if (!approved) throw new Error("The user declined the MCP App tool call.")
         return mcpToolResult(await redrobServerClient.callMcpAppTool(workspaceId, { ...request, approved: true }))
       }
@@ -387,7 +392,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
           "MCP_APP_TOOL_RESULT_DELIVERY_FAILED",
           "tool-result-delivery",
           cause,
-          "The tool result could not be delivered to the initialized view.",
+          t("mcp_app.tool_result_delivery_failed"),
           sandbox.expectedOrigin,
         )
       })
@@ -396,8 +401,8 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
       if (initialized || initializeTimer !== undefined) return
       initializeTimer = window.setTimeout(() => {
         const message = sandboxDocument
-          ? "The HTML document loaded, but the MCP App did not send ui/notifications/initialized within 10 seconds."
-          : "The sandbox accepted the resource, but the MCP App did not complete initialization within 10 seconds."
+          ? t("mcp_app.initialize_timeout_document_loaded")
+          : t("mcp_app.initialize_timeout_resource_accepted")
         fail(
           "MCP_APP_INITIALIZE_TIMEOUT",
           "app-initialization",
@@ -440,7 +445,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
           code,
           code === "MCP_APP_DOCUMENT_RUNTIME_ERROR" ? "app-initialization" : "resource-delivery",
           typeof params.message === "string" ? params.message : null,
-          "The sandbox could not load the MCP App resource.",
+          t("mcp_app.sandbox_resource_failed"),
           sandbox.expectedOrigin,
         )
       }
@@ -474,7 +479,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
               "MCP_APP_RESOURCE_ACCEPT_TIMEOUT",
               "resource-delivery",
               null,
-              "The sandbox proxy did not acknowledge the MCP App resource after two delivery attempts.",
+              t("mcp_app.resource_accept_timeout"),
               sandbox.expectedOrigin,
             )
           }, RESOURCE_ACCEPT_TIMEOUT_MS)
@@ -483,7 +488,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
             "MCP_APP_RESOURCE_DELIVERY_FAILED",
             "resource-delivery",
             cause,
-            "The host could not deliver the MCP App HTML to the sandbox.",
+            t("mcp_app.resource_delivery_failed"),
             sandbox.expectedOrigin,
           )
         }
@@ -498,7 +503,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
             "MCP_APP_RESOURCE_DELIVERY_FAILED",
             "resource-delivery",
             cause,
-            "The host could not deliver the MCP App HTML to the sandbox.",
+            t("mcp_app.resource_delivery_failed"),
             sandbox.expectedOrigin,
           )
         })
@@ -528,9 +533,9 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
     const details = formatMcpAppDiagnostic(error)
     return (
       <div className="mt-2 text-xs text-muted-foreground" role="status">
-        <p>Interactive view unavailable. The normal tool result is still available. {error.message}</p>
+        <p>{t("mcp_app.interactive_view_unavailable")} {error.message}</p>
         <details className="mt-1">
-          <summary className="cursor-pointer select-none">Technical details ({error.code})</summary>
+          <summary className="cursor-pointer select-none">{t("mcp.technical_details")} ({error.code})</summary>
           <p className="mt-1">{t("mcp_app.copy_details_hint")}</p>
           <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-[11px] text-foreground">{details}</pre>
           <button
@@ -543,7 +548,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
                 .catch(() => setDetailsCopied(false))
             }}
           >
-            {detailsCopied ? "Copied" : "Copy details"}
+            {detailsCopied ? t("message.copied") : t("mcp_app.copy_details")}
           </button>
         </details>
       </div>
@@ -560,7 +565,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
     >
       <iframe
         ref={iframeRef}
-        title={`${part.toolName} interactive view`}
+        title={t("mcp_app.interactive_view_title", { tool: part.toolName })}
         sandbox="allow-scripts allow-same-origin"
         referrerPolicy="no-referrer"
         className="block w-full border-0 bg-transparent"

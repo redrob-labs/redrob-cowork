@@ -70,7 +70,7 @@ export function parseRedrobWorkSessionCreateResult(output: unknown): RedrobWorkS
     if (!item || !title) return []
     return [{
       title,
-      error: stringValue(item.error) ?? "Session creation failed.",
+      error: stringValue(item.error) ?? t("tools.session_create_failed"),
     }]
   })
 
@@ -131,7 +131,7 @@ export function RedrobWorkSessionCreateTool({ part }: { part: DynamicToolUIPart 
           <p className="mt-0.5 text-xs text-dls-secondary">
             {result.created.length > 0
               ? <>{result.workspace ? `In ${result.workspace}. ` : ""}Open any chat without leaving this result behind.</>
-              : "Review the errors below and try again."}
+              : t("tools.session_create_review_errors")}
           </p>
         </div>
       </div>

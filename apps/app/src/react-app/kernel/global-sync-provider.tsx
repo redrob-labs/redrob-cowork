@@ -265,7 +265,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
         await globalSDK.client.global.health(),
       ) as GlobalHealthResponse;
       if (!health?.healthy) {
-        setField("error", "Server reported unhealthy status.");
+        setField("error", t("app.server_reported_unhealthy"));
         return;
       }
       const previousVersion = latestStateRef.current.serverVersion;

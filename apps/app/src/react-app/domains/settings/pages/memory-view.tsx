@@ -32,6 +32,8 @@ const UNDO_TOAST_DURATION_MS = 5000;
 
 // Secondary cross-tool utility (Claude Code / external harnesses): on desktop the agent is
 // already primed by the injected `## Memory Bank` prompt, so this is not the first-run path.
+// Deliberately NOT localized: this is copied to the clipboard to be PASTED INTO AN AGENT, so it
+// is model input rather than UI copy, and translating it would change what the model does.
 const COPY_SAVE_PROMPT =
   "Save this to my memory bank: draft a crisp, self-contained memory of the key fact worth keeping from our conversation, show it to me to confirm or edit, then save it. Do not include any secrets, credentials, tokens, or personal data.";
 

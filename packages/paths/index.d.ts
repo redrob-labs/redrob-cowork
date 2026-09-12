@@ -14,6 +14,7 @@ export declare function redrobConfigDir(opts?: PathOptions): string;
 export declare function redrobServerConfigPath(opts?: PathOptions): string;
 export declare function redrobEnvStorePath(opts?: PathOptions): string;
 export declare function globalEngineConfigDir(opts?: PathOptions): string;
+export declare function globalEngineConfigCandidates(opts?: PathOptions): string[];
 export declare function resolveGlobalEngineConfigPath(opts?: PathOptions): string;
 export declare function workspaceEngineConfigCandidates(workspaceRoot: string): string[];
 export declare function resolveWorkspaceEngineConfigPath(workspaceRoot: string): string;

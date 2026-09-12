@@ -89,6 +89,13 @@ import { consumeComposerAutoSend } from "./composer-auto-send";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
+/**
+ * Sample argument for the `composer.set_text` control action, used as its
+ * `previewArgs` and as the fallback when a caller omits `text`. It is input
+ * handed to the control layer, never copy the app renders, so it stays English
+ * -- and a `t()` call here would resolve at module init, before the locale is
+ * known, freezing the value in whatever language loaded first.
+ */
 const DEFAULT_COMPOSER_CONTROL_TEXT = "Help me outline the next Redrob Work task.";
 const SESSION_SURFACE_SELECTOR = "[data-session-surface-id]";
 const MARKDOWN_PRIMITIVE_EVAL_TEXT = `# Markdown proof heading
@@ -527,7 +534,7 @@ function parseSessionError(thrown: unknown): SessionError {
   if (/ProviderModelNotFoundError/i.test(raw) || /model.*not found/i.test(raw)) {
     return { message: raw, kind: "model-not-found" };
   }
-  return { message: raw || "Failed to send prompt." };
+  return { message: raw || t("session.error_send_prompt_failed") };
 }
 
 function SessionErrorCard({ error, onDismiss, onChangeModel, onOpenModelPicker }: {
@@ -1117,7 +1124,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     try {
       await navigator.clipboard.writeText(transcriptToText(renderedMessages));
     } catch (nextError) {
-      setError({ message: nextError instanceof Error ? nextError.message : "Failed to copy transcript." });
+      setError({ message: nextError instanceof Error ? nextError.message : t("session.error_copy_transcript_failed") });
     }
   };
 
@@ -1343,7 +1350,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   const handleAttachFiles = (files: File[]) => {
     if (!props.attachmentsEnabled) {
-      toast.warning(props.attachmentsDisabledReason ?? "Attachments are unavailable.");
+      toast.warning(props.attachmentsDisabledReason ?? t("composer.attachments_unavailable"));
       return;
     }
     // Any file type and size is accepted: model-readable formats become file
@@ -1767,7 +1774,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
       {model.transitionState === "switching" && showDelayedLoading ? (
         <div className="flex justify-center px-6 pt-4">
           <div className="rounded-full border border-dls-border bg-dls-hover/80 px-3 py-1 text-xs text-dls-secondary">
-            {model.renderSource === "cache" ? "Switching session from cache..." : "Switching session..."}
+            {model.renderSource === "cache" ? t("session.switching_from_cache") : t("session.switching")}
           </div>
         </div>
       ) : null}
@@ -1814,7 +1821,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
             {showDelayedLoading && pendingSessionLoad ? (
               <div className="px-6 py-16">
                 <div className="mx-auto max-w-sm rounded-3xl border border-dls-border bg-dls-hover/60 px-8 py-10 text-center">
-                  <div className="text-sm text-dls-secondary">Opening session…</div>
+                  <div className="text-sm text-dls-secondary">{t("session.opening")}</div>
                 </div>
               </div>
             ) : (snapshotQuery.isError || error) && !snapshot && renderedMessages.length === 0 ? (
@@ -1828,7 +1835,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
                   />
                 ) : (
                   <div className="mx-auto max-w-xl rounded-3xl border border-destructive-muted/40 bg-destructive-soft/20 px-6 py-5 text-sm text-destructive-ink">
-                    {snapshotQuery.error instanceof Error ? snapshotQuery.error.message : "Failed to load session."}
+                    {snapshotQuery.error instanceof Error ? snapshotQuery.error.message : t("session.error_load_failed")}
                   </div>
                 )}
               </div>

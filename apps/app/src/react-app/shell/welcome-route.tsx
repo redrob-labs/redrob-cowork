@@ -231,7 +231,7 @@ export function WelcomeRoute() {
           list = null;
         }
         if (!list) {
-          throw new Error("Redrob Work server is unavailable. Start or reconnect the server before creating a workspace.");
+          throw new Error(t("workspace.server_unavailable_create"));
         }
         const createdId =
           resolveWorkspaceListSelectedId(list) ||
@@ -288,7 +288,7 @@ export function WelcomeRoute() {
       } catch (error) {
         dispatch({
           type: "create:error",
-          error: error instanceof Error ? error.message : "Failed to create workspace.",
+          error: error instanceof Error ? error.message : t("workspace.create_failed"),
         });
       } finally {
         dispatch({ type: "create:finish" });

@@ -144,8 +144,8 @@ export function ShareWorkspaceAccessPanel(
       <div className={warningBannerClass}>
         <span className="leading-relaxed">
           {props.remoteAccess
-            ? "These credentials grant live access to this workspace. Sharing this workspace remotely may allow anyone with access to your network to control your worker."
-            : "Share with trusted people only. These credentials grant live access to this workspace."}
+            ? t("workspace.share_credentials_remote_warning")
+            : t("workspace.share_credentials_trusted_warning")}
         </span>
       </div>
 
@@ -179,8 +179,8 @@ export function ShareWorkspaceAccessPanel(
             <div className="text-[13px] text-dls-secondary">
               {props.remoteAccess.status?.trim() ||
                 (props.remoteAccess.enabled
-                  ? "Remote access is currently enabled."
-                  : "Remote access is currently disabled.")}
+                  ? t("workspace.remote_access_enabled")
+                  : t("workspace.remote_access_disabled"))}
             </div>
             <button
               type="button"

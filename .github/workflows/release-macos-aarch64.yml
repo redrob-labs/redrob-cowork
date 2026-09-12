@@ -633,6 +633,44 @@ jobs:
             ${{ matrix.electron_args }} \
             --publish never
 
+      # The engine reaches the app through an electron-builder `extraResources`
+      # filter that names files exactly. A filter naming a file that is not
+      # staged drops it SILENTLY and the pack still succeeds, so the installer
+      # ships with no engine and the app reports it cannot connect. That has
+      # already happened once (a48e8cb, "ship the Windows engine the app can
+      # actually find"). afterPack throws only when the sidecars directory is
+      # present but incomplete -- a MISSING directory is a clean pass -- so the
+      # unpacked tree is the only place this can be asserted.
+      #
+      # cdn.yml carries an equivalent check, but THIS is the workflow that builds
+      # the installers users download, so it needs its own.
+      - name: Verify the engine is packaged
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ matrix.os_type }}" in
+            windows) unpacked=apps/desktop/dist-electron/win-unpacked; engine=redrob.bin ;;
+            linux)   unpacked=apps/desktop/dist-electron/linux-unpacked; engine=redrob ;;
+            *)       echo "macOS packs the engine inside the .app bundle; skipping"; exit 0 ;;
+          esac
+          dir="$unpacked/resources/sidecars"
+          if [ ! -d "$dir" ]; then
+            echo "The package carries no sidecars directory: $dir" >&2
+            exit 1
+          fi
+          if [ ! -f "$dir/$engine" ]; then
+            echo "The packaged app has no Redrob Code engine. sidecars contains:" >&2
+            ls -la "$dir" >&2
+            exit 1
+          fi
+          size=$(wc -c < "$dir/$engine")
+          # The real engine is >100MB; a stub or an LFS pointer is not.
+          if [ "$size" -lt 10000000 ]; then
+            echo "The packaged engine is implausibly small ($size bytes) -- likely a stub" >&2
+            exit 1
+          fi
+          echo "engine present: $dir/$engine ($size bytes)"
+
       # Belt-and-braces: a broken or skipped stamp would otherwise ship
       # 0.0.0-dev artifacts silently. Every packaged build must produce at
       # least one artifact carrying the release version (also holds for

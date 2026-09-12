@@ -24,11 +24,16 @@ import type { ModelOption, ModelRef } from "../../../../app/types";
 import { isRecommendedModel } from "../../../../app/defaults";
 import { ProviderIcon } from "../../../design-system/provider-icon";
 
-export const MODEL_PICKER_DEFAULT_SUBTITLE = "Select a model for this session.";
-export const MODEL_PICKER_UNAVAILABLE_SUBTITLE = "The model you were using is no longer available, please select a different model for this session.";
+// Translation KEYS, not display text. A module-level constant holding UI copy
+// would have to call `t()` in its initializer, which resolves before the user's
+// locale is known and freezes the English string for the process lifetime. The
+// key travels through the `subtitle` prop instead and is translated in
+// `resolveModelPickerSubtitle`, at render time.
+export const MODEL_PICKER_DEFAULT_SUBTITLE = "model_picker.session_subtitle";
+export const MODEL_PICKER_UNAVAILABLE_SUBTITLE = "model_picker.unavailable_subtitle";
 
 export function resolveModelPickerSubtitle(subtitle: string | undefined) {
-  return subtitle ?? MODEL_PICKER_DEFAULT_SUBTITLE;
+  return t(subtitle ?? MODEL_PICKER_DEFAULT_SUBTITLE);
 }
 
 export type ModelPickerModalProps = {
