@@ -649,27 +649,44 @@ jobs:
         run: |
           set -euo pipefail
           case "${{ matrix.os_type }}" in
-            windows) unpacked=apps/desktop/dist-electron/win-unpacked; engine=redrob.bin ;;
-            linux)   unpacked=apps/desktop/dist-electron/linux-unpacked; engine=redrob ;;
+            windows) engine=redrob.bin ;;
+            linux)   engine=redrob ;;
             *)       echo "macOS packs the engine inside the .app bundle; skipping"; exit 0 ;;
           esac
-          dir="$unpacked/resources/sidecars"
-          if [ ! -d "$dir" ]; then
-            echo "The package carries no sidecars directory: $dir" >&2
+
+          # electron-builder names the unpacked tree after the ARCH -- win-unpacked
+          # and linux-unpacked for x64, win-arm64-unpacked and
+          # linux-arm64-unpacked otherwise -- so glob rather than hard-coding it.
+          # Hard-coding the x64 names is what made this step's first run fail on
+          # both arm64 jobs while x64 passed.
+          shopt -s nullglob
+          trees=(apps/desktop/dist-electron/*unpacked)
+          if [ ${#trees[@]} -eq 0 ]; then
+            echo "No unpacked tree was produced under apps/desktop/dist-electron:" >&2
+            ls -la apps/desktop/dist-electron >&2 || true
             exit 1
           fi
-          if [ ! -f "$dir/$engine" ]; then
-            echo "The packaged app has no Redrob Code engine. sidecars contains:" >&2
-            ls -la "$dir" >&2
-            exit 1
-          fi
-          size=$(wc -c < "$dir/$engine")
-          # The real engine is >100MB; a stub or an LFS pointer is not.
-          if [ "$size" -lt 10000000 ]; then
-            echo "The packaged engine is implausibly small ($size bytes) -- likely a stub" >&2
-            exit 1
-          fi
-          echo "engine present: $dir/$engine ($size bytes)"
+
+          for tree in "${trees[@]}"; do
+            dir="$tree/resources/sidecars"
+            if [ ! -d "$dir" ]; then
+              echo "$tree carries no sidecars directory" >&2
+              ls -la "$tree/resources" >&2 || true
+              exit 1
+            fi
+            if [ ! -f "$dir/$engine" ]; then
+              echo "$tree has no Redrob Code engine. sidecars contains:" >&2
+              ls -la "$dir" >&2
+              exit 1
+            fi
+            size=$(wc -c < "$dir/$engine")
+            # The real engine is >100MB; a stub or an LFS pointer is not.
+            if [ "$size" -lt 10000000 ]; then
+              echo "$tree engine is implausibly small ($size bytes) -- likely a stub" >&2
+              exit 1
+            fi
+            echo "engine present: $dir/$engine ($size bytes)"
+          done
 
       # Belt-and-braces: a broken or skipped stamp would otherwise ship
       # 0.0.0-dev artifacts silently. Every packaged build must produce at
