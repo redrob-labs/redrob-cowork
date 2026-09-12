@@ -724,6 +724,45 @@ jobs:
             if ($accepted -notcontains $signature.Status.ToString()) {
               throw "$($installer.Name) signature is $($signature.Status) ($($signature.StatusMessage))"
             }
+            # NotTrusted is tolerated so a build can be produced before a real
+            # code-signing certificate exists -- but it is NOT a normal release.
+            # electron-updater only checks the publisher name once
+            # Get-AuthenticodeSignature reports Status 0 (Valid), so an untrusted
+            # installer is REFUSED by auto-update on every existing install, with
+            # an error naming publisherNames as though the name were wrong. Say so
+            # here, loudly and in the job summary, so it is never shipped by
+            # accident again.
+            if ($signature.Status.ToString() -ne "Valid") {
+              $subject = $signature.SignerCertificate.Subject
+              $issuer = $signature.SignerCertificate.Issuer
+              $selfSigned = if ($subject -eq $issuer) { "yes" } else { "no" }
+              # Built as an array rather than a here-string: a PowerShell
+              # here-string terminator must sit at column 0, which cannot happen
+              # inside a YAML block scalar.
+              $lines = @(
+                "AUTO-UPDATE WILL NOT WORK FOR THIS BUILD.",
+                "",
+                "  installer:   $($installer.Name)",
+                "  status:      $($signature.Status) - $($signature.StatusMessage)",
+                "  subject:     $subject",
+                "  issuer:      $issuer",
+                "  self-signed: $selfSigned",
+                "",
+                "electron-updater verifies the installer's Authenticode signature and only",
+                "proceeds when the status is Valid. Existing installs will refuse this update.",
+                "Users must install it manually, and Windows will show a SmartScreen warning.",
+                "",
+                "Fix: sign with a publicly trusted code-signing certificate -- configure the",
+                "Azure Artifact Signing secrets this workflow already supports, or a cloud CA."
+              )
+              $warning = $lines -join "`n"
+              Write-Host "::warning title=Untrusted Windows signature::$($installer.Name) is $($signature.Status); auto-update will refuse this build"
+              Write-Host $warning
+              if ($env:GITHUB_STEP_SUMMARY) {
+                $summary = @("### Untrusted Windows signature", "", '```') + $lines + @('```')
+                $summary -join "`n" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              }
+            }
           }
 
       # electron-builder may still emit latest*.yml for a custom distribution.

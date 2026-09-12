@@ -85,6 +85,22 @@ linux:
     - tar.gz
 win:
   icon: resources/icons/icon.ico
+  signtoolOptions:
+    # electron-builder defaults `signingHashAlgorithms` to ["sha1", "sha256"] and
+    # runs ONE SIGNING PASS PER ENTRY, so the default doubles every signature a
+    # cloud signing service bills us for. sha1 buys nothing back: Microsoft let
+    # the SHA-1 Trusted Root CA expire on 2021-05-09, so the chain a sha1
+    # Authenticode signature needs is no longer publicly trusted, and the only
+    # platform it ever served -- Windows 7 SP1 without the 2019 SHA-2 servicing
+    # update -- cannot run this Electron version anyway.
+    signingHashAlgorithms:
+      - sha256
+    # electron-builder signs every .exe in the package, including vendor binaries
+    # we ship but do not build (elevate.exe, Microsoft's OpenConsole.exe). Cloud
+    # signing services bill per signature, so this hook skips a vendor binary
+    # that already carries one and delegates everything else to the built-in
+    # signer. See build/sign-windows.cjs for the measurement and the tradeoff.
+    sign: build/sign-windows.cjs
   extraResources:
     - from: resources/icons/icon.png
       to: icons/icon.png
