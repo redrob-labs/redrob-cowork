@@ -1,53 +1,72 @@
 import { describe, expect, it } from "bun:test";
 
 /**
- * The onboarding bounce, pinned as a state invariant.
+ * The two guards around onboarding completion, which only work as a pair.
  *
- * Reported from Windows 11: after the engine step, choosing any of "Just look around", "Connect
- * Redrob" or the API-key path returned the user to the Get Started screen with their choice lost.
+ * Both were found by a user on Windows 11, one after the other, and the second was caused by the fix
+ * for the first:
  *
- * The mechanism was not platform-specific, only more visible there. use-workspace-route-state.ts
- * redirects to /welcome whenever a session route finds NO workspaces and onboarding NOT complete:
+ *   1. Choosing "Just look around", "Connect Redrob" or the API-key path returned the user to Get
+ *      Started. None of the three creates a workspace, and completion was written only at the
+ *      tutorial's Start button, so the flow sat in the state the session route redirects out of
+ *      (no workspaces AND onboarding not complete) and got bounced back.
  *
- *     if (workspaces.length > 0) return;
- *     if (local.prefs.hasCompletedOnboarding) return;
- *     navigate("/welcome", { replace: true });
+ *   2. Writing completion at the attribution step fixed that and then SKIPPED THE TUTORIAL, because
+ *      /welcome also had an effect redirecting away the moment `hasCompletedOnboarding` turned true.
+ *      Setting the flag mid-flow tripped it and unmounted the wizard.
  *
- * All three choices converge on the attribution step and none of them creates a workspace, while
- * completion used to be written in exactly one place -- finishOnboarding, reachable only from
- * TutorialStep's Start button. Everything between the choice and that button therefore satisfied both
- * clauses, and the redirect remounted WelcomeRoute, discarding the reducer state mid-flow.
- *
- * These tests encode the condition rather than the React wiring: they are what makes the regression
- * legible if someone later moves the completion write back to the tutorial.
+ * So completion must be written EARLY (or the flow bounces) and the away-redirect must read only the
+ * MOUNT-TIME value (or the flow unmounts). Encoding one without the other reintroduces the sibling bug,
+ * which is why both predicates live in one file.
  */
 
-/** The redirect in use-workspace-route-state.ts, as a pure predicate. */
+/** use-workspace-route-state.ts: the redirect INTO onboarding. */
 function bouncesToWelcome(input: { workspaceCount: number; hasCompletedOnboarding: boolean }): boolean {
   if (input.workspaceCount > 0) return false;
   if (input.hasCompletedOnboarding) return false;
   return true;
 }
 
-describe("onboarding completion suppresses the /welcome bounce", () => {
-  it("bounces a user who has no workspace and has not completed onboarding", () => {
-    // The state the three choices used to leave behind.
-    expect(bouncesToWelcome({ workspaceCount: 0, hasCompletedOnboarding: false })).toBe(true);
-  });
+/** welcome-route.tsx: the redirect OUT of onboarding, reading the mount-time value only. */
+function leavesWelcome(input: { completeOnMount: boolean; completeNow: boolean }): boolean {
+  return input.completeOnMount;
+}
 
-  it("does NOT bounce once the choice is recorded, even with no workspace", () => {
-    // "Just look around" deliberately creates no workspace, so completion is the only thing that can
-    // suppress the redirect. This is the case the fix turns from true to false.
+describe("onboarding runs to the tutorial without bouncing", () => {
+  it("does not bounce once the choice is recorded, with no workspace", () => {
+    // Bug 1: this is the case the early write turns from true to false.
     expect(bouncesToWelcome({ workspaceCount: 0, hasCompletedOnboarding: true })).toBe(false);
   });
 
-  it("does not bounce a user who created a workspace", () => {
-    // The keyed path via workspace creation was never affected, which is why the report named the
-    // three no-workspace choices specifically.
-    expect(bouncesToWelcome({ workspaceCount: 1, hasCompletedOnboarding: false })).toBe(false);
+  it("would still bounce if completion waited for the tutorial", () => {
+    // The pre-fix state, kept as the reason the early write exists.
+    expect(bouncesToWelcome({ workspaceCount: 0, hasCompletedOnboarding: false })).toBe(true);
   });
 
-  it("stays suppressed for a returning user", () => {
-    expect(bouncesToWelcome({ workspaceCount: 1, hasCompletedOnboarding: true })).toBe(false);
+  it("stays on /welcome after completion is recorded mid-flow", () => {
+    // Bug 2: the flag turns true while the wizard is showing the attribution step. Reading the live
+    // value here is what skipped the tutorial.
+    expect(leavesWelcome({ completeOnMount: false, completeNow: true })).toBe(false);
+  });
+
+  it("still bounces a returning user off /welcome", () => {
+    // The guard must keep doing its actual job: a user who finished onboarding earlier and lands on
+    // /welcome again goes straight to the session.
+    expect(leavesWelcome({ completeOnMount: true, completeNow: true })).toBe(true);
+  });
+
+  it("lets the whole flow reach the tutorial", () => {
+    // The full sequence for "Just look around": mounted incomplete, completion recorded at the
+    // attribution step, and neither redirect fires in between.
+    const completeOnMount = false;
+    let complete = false;
+
+    // ... engine step, Get Started, workspace created, one of the three choices picked ...
+    // attribution step appears and records completion:
+    complete = true;
+
+    expect(leavesWelcome({ completeOnMount, completeNow: complete })).toBe(false);
+    expect(bouncesToWelcome({ workspaceCount: 0, hasCompletedOnboarding: complete })).toBe(false);
+    // Nothing navigates, so the reducer survives to dispatch tutorial-step.
   });
 });

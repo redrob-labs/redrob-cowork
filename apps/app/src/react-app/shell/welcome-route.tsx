@@ -188,16 +188,41 @@ export function WelcomeRoute() {
   const [manualFolder, setManualFolder] = useState("");
   /** Folder of the workspace just created, shown on the tutorial step. */
   const [createdFolder, setCreatedFolder] = useState<string | null>(null);
-  // If user already completed onboarding, redirect away immediately.
+  // Whether onboarding was ALREADY complete when this route mounted.
+  //
+  // Read once, deliberately. This guard exists to bounce a RETURNING user who lands on /welcome, and
+  // it must not react to the flag being set during the flow that is running right now -- doing so
+  // unmounts the wizard mid-flow and throws away the step it was showing.
+  const wasCompleteOnMount = useRef(local.prefs.hasCompletedOnboarding);
+
+  // If the user already completed onboarding before arriving, redirect away immediately.
   useEffect(() => {
-    if (local.prefs.hasCompletedOnboarding) {
+    if (wasCompleteOnMount.current) {
       navigate("/session", { replace: true });
     }
-  }, [local.prefs.hasCompletedOnboarding, navigate]);
+  }, [navigate]);
 
   const markOnboardingComplete = useCallback(() => {
     local.setPrefs((prev) => ({ ...prev, hasCompletedOnboarding: true }));
   }, [local]);
+
+  // Record completion as soon as the user reaches the attribution step, NOT at the tutorial's Start
+  // button.
+  //
+  // Reported from Windows 11: choosing any of "Just look around", "Connect Redrob" or the API-key path
+  // put the user back on Get Started. All three converge on `attribution-step` and none of them creates
+  // a workspace, while completion was written only in finishOnboarding, reachable only from
+  // TutorialStep's Start button. That left a window in the state use-workspace-route-state.ts guards
+  // against -- no workspaces AND onboarding not complete -- whose effect runs
+  // navigate("/welcome", { replace: true }), remounting this route and discarding the reducer state.
+  //
+  // This pairs with the ref above and only works alongside it: an earlier attempt wrote completion here
+  // while the redirect still watched the live flag, which fixed the bounce and then skipped the tutorial
+  // instead, because setting the flag tripped the redirect the moment the attribution step appeared.
+  useEffect(() => {
+    if (!state.attributionStep) return;
+    markOnboardingComplete();
+  }, [markOnboardingComplete, state.attributionStep]);
 
   const handleCreateWorkspace = useCallback(
     async (_preset: string, folder: string | null, options?: CreateWorkspaceOptions) => {
