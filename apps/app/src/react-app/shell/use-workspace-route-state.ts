@@ -896,6 +896,32 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
     workspaces,
   ]);
 
+  // Removing the LAST workspace clears the onboarding-complete flag.
+  //
+  // Otherwise the two pieces of state disagree: the user has no workspace and no way back to
+  // onboarding, because the redirect below is suppressed by a flag from a run that no longer has
+  // anything to show for it. They land on a main screen with nothing in it, and the only way out is
+  // deleting files by hand -- which is how this was found.
+  //
+  // KEYED ON THE 1-OR-MORE -> 0 TRANSITION, not on "the list is empty". Onboarding itself runs with an
+  // empty list from start to finish -- "Just look around" never creates a workspace -- and completion
+  // is recorded partway through, at the attribution step. An effect that reset the flag whenever the
+  // list was empty would therefore undo that mid-flow and send the user back to the first screen,
+  // which is the exact bug the early write exists to fix.
+  //
+  // A failed refresh cannot trigger this: the error path only calls setWorkspaces when it has at least
+  // one workspace to show, so it never reports an empty list. The `loading` guard keeps the check on
+  // settled state as well.
+  const previousWorkspaceCount = useRef(workspaces.length);
+  useEffect(() => {
+    const hadWorkspaces = previousWorkspaceCount.current > 0;
+    previousWorkspaceCount.current = workspaces.length;
+    if (loading) return;
+    if (!hadWorkspaces || workspaces.length > 0) return;
+    if (!local.prefs.hasCompletedOnboarding) return;
+    local.setPrefs((previous) => ({ ...previous, hasCompletedOnboarding: false }));
+  }, [loading, local, workspaces.length]);
+
   // Redirect to /welcome when no workspaces exist and the user hasn't
   // completed onboarding. There is no sign-in state to defer to any more, so
   // onboarding completion is the only thing that suppresses this.

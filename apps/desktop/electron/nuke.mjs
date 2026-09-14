@@ -596,8 +596,38 @@ function containedPreservePaths(targetPath, preservePaths) {
   return preservePaths.filter((preservePath) => nativeSameOrInside(preservePath, targetPath));
 }
 
+/**
+ * Windows extended-length form of an absolute path, for the DELETE calls only.
+ *
+ * Node's fs goes through Win32, which caps a path at 260 characters unless it carries the `\\?\`
+ * prefix. A user's reset failed on
+ * `...\\redrob\\verify-tools\\ext-repro\\node_modules\\node-llama-cpp\\llama\\llama.cpp\\tools\\ui\\src\\lib\\components\\...`
+ * -- one .svelte file past the limit made the file unopenable, and every directory above it then failed
+ * as "not empty", all the way up to the target. The retry loop cannot help: ENOTEMPTY is retryable but
+ * the cause does not go away.
+ *
+ * DELIBERATELY NARROW. The prefix changes how Win32 parses a path -- it disables `.`/`..` resolution and
+ * forward-slash translation -- so handing it a relative or unnormalized path would aim a recursive
+ * delete somewhere other than intended. It is applied only when the path is already absolute, already
+ * backslash-only, and carries no relative segment; anything else is passed through untouched and simply
+ * keeps the old behaviour.
+ */
+function longPath(targetPath, platform = process.platform) {
+  if (platform !== "win32") return targetPath;
+  if (typeof targetPath !== "string" || targetPath.length === 0) return targetPath;
+  if (targetPath.startsWith("\\\\?\\")) return targetPath;
+  if (targetPath.includes("/")) return targetPath;
+  if (!path.win32.isAbsolute(targetPath)) return targetPath;
+  if (targetPath.split("\\").some((segment) => segment === "." || segment === "..")) return targetPath;
+  // A UNC path takes the \\?\UNC\server\share form rather than a drive letter.
+  if (targetPath.startsWith("\\\\")) return `\\\\?\\UNC\\${targetPath.slice(2)}`;
+  return `\\\\?\\${targetPath}`;
+}
+
 async function removeDirectoryContentsExcept(targetPath, preservePaths) {
-  const entries = await readdir(targetPath, { withFileTypes: true });
+  // The prefix is needed to LIST a deep directory as well, not only to delete it: without it readdir
+  // fails at the same 260-character boundary and the contents are never reached.
+  const entries = await readdir(longPath(targetPath), { withFileTypes: true });
   for (const entry of entries) {
     const childPath = path.join(targetPath, entry.name);
     const childPreservePaths = containedPreservePaths(childPath, preservePaths);
@@ -605,7 +635,7 @@ async function removeDirectoryContentsExcept(targetPath, preservePaths) {
       if (entry.isDirectory()) await removeDirectoryContentsExcept(childPath, childPreservePaths);
       continue;
     }
-    await rm(childPath, { recursive: true, force: true });
+    await rm(longPath(childPath), { recursive: true, force: true });
   }
 }
 
@@ -613,7 +643,7 @@ async function removePathPreservingPaths(targetPath, preservePaths) {
   if (preservePaths.some((preservePath) => nativeSameOrInside(targetPath, preservePath))) return;
   const contained = containedPreservePaths(targetPath, preservePaths);
   if (contained.length === 0) {
-    await rm(targetPath, { recursive: true, force: true });
+    await rm(longPath(targetPath), { recursive: true, force: true });
     return;
   }
   if (!existsSync(targetPath)) return;
