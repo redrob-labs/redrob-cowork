@@ -1239,7 +1239,7 @@ function buildOpencodeProxyUrl(baseUrl: string, path: string, search: string) {
 }
 
 function opencodeUnreachableError(error: unknown, path: string): ApiError {
-  return new ApiError(502, "opencode_unreachable", "OpenCode engine is unavailable", {
+  return new ApiError(502, "opencode_unreachable", "Redrob Code engine is unavailable", {
     path,
     cause: error instanceof Error ? error.message : String(error),
   });
@@ -1299,7 +1299,7 @@ export function createWorkspaceOpencodeClient(
     : resolveWorkspaceOpencodeConnection(config, workspace);
   const baseUrl = connection.baseUrl?.trim();
   if (!baseUrl) {
-    throw new ApiError(400, "opencode_unconfigured", "OpenCode base URL is missing for this workspace", {
+    throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace", {
       workspaceId: workspace.id,
       workspaceType: workspace.workspaceType,
     });
@@ -1321,15 +1321,15 @@ export function unwrapOpencodeResult<T, E>(result: OpencodeClientResult<T, E>, p
     return result.data;
   }
   if (result.error === undefined) {
-    throw new ApiError(502, "opencode_empty_response", "OpenCode returned an empty response", { path });
+    throw new ApiError(502, "opencode_empty_response", "Redrob Code returned an empty response", { path });
   }
   if (!result.response) {
-    throw new ApiError(502, "opencode_unreachable", "OpenCode request failed before a response was received", {
+    throw new ApiError(502, "opencode_unreachable", "Redrob Code request failed before a response was received", {
       body: result.error,
       path,
     });
   }
-  throw new ApiError(502, "opencode_request_failed", "OpenCode request failed", {
+  throw new ApiError(502, "opencode_request_failed", "Redrob Code request failed", {
     status: result.response.status,
     body: result.error,
     path,
@@ -1351,7 +1351,7 @@ export async function proxyOpencodeRequest(input: {
   const baseUrl = route?.target.baseUrl ??
     (workspace ? resolveWorkspaceOpencodeConnection(input.config, workspace).baseUrl?.trim() ?? "" : "");
   if (!baseUrl) {
-    throw new ApiError(400, "opencode_unconfigured", "OpenCode base URL is missing for this workspace");
+    throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace");
   }
 
   const headers = new Headers(input.request.headers);
@@ -1511,7 +1511,7 @@ async function proxyEngineAggregateRead(input: {
   }));
   const results = settled.flatMap((entry) => entry.status === "fulfilled" ? [entry.value] : []);
   const primary = results.find((entry) => entry.connection.role === "primary");
-  if (!primary) throw new ApiError(502, "opencode_unreachable", "No OpenCode engine is available");
+  if (!primary) throw new ApiError(502, "opencode_unreachable", "No Redrob Code engine is available");
   if (!primary.response.ok) return sanitizeProxyResponse(primary.response);
 
   if (input.kind === "status") {
@@ -1659,7 +1659,7 @@ async function proxyEngineEventStreams(input: {
   const primary = successful.find((entry) => entry.connection.role === "primary");
   if (!primary) {
     lease.release();
-    throw new ApiError(502, "opencode_unreachable", "The primary OpenCode event stream is unavailable");
+    throw new ApiError(502, "opencode_unreachable", "The primary Redrob Code event stream is unavailable");
   }
   if (!primary.response.ok || !primary.response.body) {
     lease.release();
@@ -2393,7 +2393,7 @@ function createRoutes(
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "config.runtime_migrate",
-      summary: "Migrate legacy runtime OpenCode config",
+      summary: "Migrate legacy runtime Redrob Code config",
       paths: [configPath],
     });
 
@@ -2433,7 +2433,7 @@ function createRoutes(
       actor: ctx.actor ?? { type: "remote" },
       action: "config.runtime_migrate",
       target: configPath,
-      summary: `Migrated runtime OpenCode config: ${keys.join(", ")}`,
+      summary: `Migrated runtime Redrob Code config: ${keys.join(", ")}`,
       timestamp: updatedAt,
     });
     emitReloadEvent(ctx.reloadEvents, workspace, "config", buildConfigTrigger(configPath));
@@ -2698,7 +2698,7 @@ function createRoutes(
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: scope === "global" ? "config.global.write" : "config.write",
-      summary: `Write ${scope} OpenCode config`,
+      summary: `Write ${scope} Redrob Code config`,
       paths: [configPath],
     });
 
@@ -2716,7 +2716,7 @@ function createRoutes(
       actor: ctx.actor ?? { type: "remote" },
       action: scope === "global" ? "config.global.write" : "config.write",
       target: configPath,
-      summary: `Updated ${scope} OpenCode config`,
+      summary: `Updated ${scope} Redrob Code config`,
       timestamp: Date.now(),
     });
 
@@ -4030,7 +4030,7 @@ function buildOpencodeReloadUrl(baseUrl: string, directory?: string | null): str
     }
     return url.toString();
   } catch {
-    throw new ApiError(400, "opencode_url_invalid", "OpenCode base URL is invalid");
+    throw new ApiError(400, "opencode_url_invalid", "Redrob Code base URL is invalid");
   }
 }
 
@@ -4109,7 +4109,7 @@ async function reloadOpencodeEngineInPlace(
   const connection = resolveWorkspaceOpencodeConnection(config, workspace);
   const baseUrl = connection.baseUrl?.trim() ?? "";
   if (!baseUrl) {
-    throw new ApiError(400, "opencode_unconfigured", "OpenCode base URL is missing for this workspace");
+    throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace");
   }
 
   const directory = resolveOpencodeDirectory(workspace);
@@ -4136,20 +4136,20 @@ async function reloadOpencodeEngineInPlace(
       throw new ApiError(
         504,
         "opencode_reload_timeout",
-        "OpenCode dispose did not complete in time; the reload stays pending",
+        "Redrob Code dispose did not complete in time; the reload stays pending",
         { baseUrl },
       );
     }
     throw new ApiError(
       503,
       "opencode_engine_unreachable",
-      "OpenCode engine is not reachable; a full engine restart is required",
+      "Redrob Code engine is not reachable; a full engine restart is required",
       { baseUrl, cause: error instanceof Error ? error.message : String(error) },
     );
   }
   if (!response.ok) {
     const body = parseOpencodeErrorBody(await response.text());
-    throw new ApiError(502, "opencode_reload_failed", "OpenCode reload failed", {
+    throw new ApiError(502, "opencode_reload_failed", "Redrob Code reload failed", {
       status: response.status,
       body,
     });
@@ -4434,7 +4434,7 @@ async function postMcpEntryWithRetry(
         name,
         status: response.status,
         registrationStatus: "failed",
-        message: "OpenCode rejected the MCP registration request",
+        message: "Redrob Code rejected the MCP registration request",
       };
       if (response.status < 500) return { name, status: "failed", source: "transport_failure", errorSummary: null, failure };
     } catch (error) {
@@ -4442,7 +4442,7 @@ async function postMcpEntryWithRetry(
       failure = {
         name,
         registrationStatus: "failed",
-        message: "OpenCode MCP registration request failed",
+        message: "Redrob Code MCP registration request failed",
       };
     }
   }
@@ -4454,7 +4454,7 @@ async function postMcpEntryWithRetry(
     failure: failure ?? {
       name,
       registrationStatus: "failed",
-      message: "OpenCode MCP registration request failed",
+      message: "Redrob Code MCP registration request failed",
     },
   };
 }
@@ -4554,7 +4554,7 @@ async function readBoundedEngineMcpRegistrationResponse(response: Response): Pro
     const parsedLength = Number(contentLength);
     if (Number.isFinite(parsedLength) && parsedLength > ENGINE_MCP_REGISTRATION_RESPONSE_MAX_BYTES) {
       await response.body?.cancel().catch(() => undefined);
-      throw new Error("OpenCode MCP registration response exceeded the size limit");
+      throw new Error("Redrob Code MCP registration response exceeded the size limit");
     }
   }
   if (!response.body) return "";
@@ -4570,7 +4570,7 @@ async function readBoundedEngineMcpRegistrationResponse(response: Response): Pro
       bytesRead += chunk.value.byteLength;
       if (bytesRead > ENGINE_MCP_REGISTRATION_RESPONSE_MAX_BYTES) {
         await reader.cancel().catch(() => undefined);
-        throw new Error("OpenCode MCP registration response exceeded the size limit");
+        throw new Error("Redrob Code MCP registration response exceeded the size limit");
       }
       chunks.push(decoder.decode(chunk.value, { stream: true }));
     }
@@ -5462,7 +5462,7 @@ async function materializeBlueprintSessions(config: ServerConfig, workspace: Wor
     const sessionId =
       result && typeof result === "object" && "id" in result && typeof result.id === "string" ? result.id.trim() : "";
     if (!sessionId) {
-      throw new ApiError(502, "opencode_failed", "OpenCode session did not return an id");
+      throw new ApiError(502, "opencode_failed", "Redrob Code session did not return an id");
     }
     seedOpencodeSessionMessages({
       sessionId,
