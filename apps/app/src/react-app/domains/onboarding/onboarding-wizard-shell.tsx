@@ -78,7 +78,7 @@ export function OnboardingWizardShell({
             <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-[32px] sm:leading-[38px]">
               {title}
             </h1>
-            <p className="text-[15px] leading-[23px] text-muted-foreground">
+            <p className="whitespace-pre-line text-[15px] leading-[23px] text-muted-foreground">
               {description}
             </p>
           </div>

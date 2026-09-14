@@ -45,7 +45,19 @@ export function TutorialStep({ workspacePath, onStart }: TutorialStepProps) {
   }, [markRouteReady]);
 
   return (
-    <Page className="min-h-dvh bg-muted dark:bg-background">
+    // fixed inset-0 z-50, matching RedrobKeyStep and AttributionStep.
+    //
+    // This step renders as an OVERLAY on top of WelcomePage, which welcome-route.tsx keeps mounted
+    // underneath the whole main-stage flow. Without the fixed positioning it landed in normal document
+    // flow, behind a full-height WelcomePage -- so reaching the tutorial looked like being sent back to
+    // Get Started. The user then created another workspace, went through the key step and the
+    // attribution survey again, and arrived back at an invisible tutorial: an endless loop with no
+    // error, reported as
+    // "Connect Redrob -> Approve Redrob -> How did you hear about us? -> Get started -> Create
+    // workspace -> Connect Redrob".
+    //
+    // Its two sibling steps in the same overlay stack were already fixed; this one was not.
+    <Page className="fixed inset-0 z-50 min-h-dvh overflow-y-auto bg-muted dark:bg-background">
       <PageTitlebarRegion />
 
       <ScrollArea className="relative z-10">

@@ -58,7 +58,7 @@ export function WelcomePage({
 
               <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10 sm:py-12">
                 <div className="flex flex-col gap-2.5 text-center">
-                  <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-[32px] sm:leading-[38px]">
+                  <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-balance break-keep text-foreground sm:text-[32px] sm:leading-[38px]">
                     {t("welcome.title")}
                   </h1>
                   <p className="text-[15px] leading-[23px] text-muted-foreground">
@@ -82,7 +82,7 @@ export function WelcomePage({
 
                   {/* Says what pressing the button will do, so the workspace
                       folder is never a surprise. */}
-                  <p className="text-center text-xs text-muted-foreground">
+                  <p className="whitespace-pre-line text-center text-xs text-muted-foreground">
                     {t("welcome.default_folder_hint")}
                   </p>
 
