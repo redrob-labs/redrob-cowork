@@ -25,4 +25,5 @@ export declare function legacyDesktopBootstrapPath(opts?: PathOptions): string;
 export declare function expandHomePath(value: string, opts?: PathOptions): string;
 export declare function redrobServerDataDir(opts?: PathOptions): string;
 export declare function opencodeDataDirs(opts?: PathOptions): string[];
+export declare function engineHomeDirs(opts?: PathOptions): string[];
 export declare function opencodeCacheDirs(opts?: PathOptions): string[];

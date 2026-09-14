@@ -5,6 +5,7 @@ import path from "node:path";
 
 import {
   desktopBootstrapPath,
+  engineHomeDirs,
   globalEngineConfigDir,
   legacyGlobalConfigCandidates,
   legacyWorkspaceConfigCandidates,
@@ -291,5 +292,60 @@ describe("workspace engine config paths", () => {
       resolveGlobalEngineConfigPath({ env: { XDG_CONFIG_HOME: "/tmp/xdg" }, homeDir: "/home/ada", platform: "linux" }),
     ].filter((candidate) => /opencode\.jsonc?$/.test(candidate));
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("engineHomeDirs", () => {
+  test("uses POSIX-shaped profile paths on Windows, not %APPDATA%", () => {
+    // redrob-code resolves these with xdg-basedir, which does not special-case Windows. This is the
+    // detail that made the reset gap easy to miss: the paths look like Linux paths on a Windows box.
+    const dirs = engineHomeDirs({
+      platform: "win32",
+      homeDir: "C:\\Users\\USER",
+      env: {},
+    });
+
+    expect(dirs).toContain("C:\\Users\\USER\\.local\\share\\redrob");
+    expect(dirs).toContain("C:\\Users\\USER\\.config\\redrob");
+    expect(dirs).toContain("C:\\Users\\USER\\.cache\\redrob");
+    expect(dirs).toContain("C:\\Users\\USER\\.local\\state\\redrob");
+    expect(dirs).toContain("C:\\Users\\USER\\.redrob");
+
+    // %APPDATA%-shaped paths belong to the DESKTOP app, not the engine. Asserting their absence keeps
+    // this function from drifting into covering the app's own directories, which are deleted by their
+    // own targets.
+    expect(dirs.some((dir) => dir.includes("AppData"))).toBe(false);
+  });
+
+  test("honours XDG overrides when they are set", () => {
+    const dirs = engineHomeDirs({
+      platform: "linux",
+      homeDir: "/home/user",
+      env: {
+        XDG_DATA_HOME: "/custom/data",
+        XDG_CONFIG_HOME: "/custom/config",
+        XDG_CACHE_HOME: "/custom/cache",
+        XDG_STATE_HOME: "/custom/state",
+      },
+    });
+
+    expect(dirs).toContain("/custom/data/redrob");
+    expect(dirs).toContain("/custom/config/redrob");
+    expect(dirs).toContain("/custom/cache/redrob");
+    expect(dirs).toContain("/custom/state/redrob");
+    // The install script's bin directory is not an xdg path, so it stays under the home directory.
+    expect(dirs).toContain("/home/user/.redrob");
+  });
+
+  test("names the engine, never the upstream product", () => {
+    // opencodeDataDirs and its siblings cover the `opencode`-named directories, and they are also read
+    // by the server to FIND the engine database. These two sets stay separate on purpose.
+    const dirs = engineHomeDirs({ platform: "linux", homeDir: "/home/user", env: {} });
+    expect(dirs.some((dir) => dir.includes("opencode"))).toBe(false);
+  });
+
+  test("returns no duplicates", () => {
+    const dirs = engineHomeDirs({ platform: "linux", homeDir: "/home/user", env: {} });
+    expect(new Set(dirs).size).toBe(dirs.length);
   });
 });

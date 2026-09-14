@@ -14,6 +14,7 @@ import {
   redrobServerConfigPath as resolveRedrobServerConfigPath,
   opencodeCacheDirs as resolveOpencodeCacheDirs,
   opencodeDataDirs as resolveOpencodeDataDirs,
+  engineHomeDirs as resolveEngineHomeDirs,
 } from "@redrob/paths";
 
 const BROWSER_SESSION_PARTITION = "persist:redrob-browser";
@@ -196,6 +197,20 @@ function opencodeConfigDirs(env, homedir, platform, paths) {
   return [...new Set([current, ...legacy])];
 }
 
+function engineHomeDirs(env, homedir, platform) {
+  // The engine's OWN directories, under its own name. On Windows these are POSIX-shaped paths under
+  // the user profile, because redrob-code resolves them with xdg-basedir and that package does not
+  // special-case Windows.
+  //
+  // The reset used to skip these entirely: its data, cache and state lists only ever named `opencode`
+  // directories. Inside the app that made no difference, since the desktop keeps its own config, runtime
+  // database and token store in the shared platform directory (%LOCALAPPDATA%\redrob on Windows) and
+  // that IS deleted. But an engine invoked outside the app -- a user-installed `redrob` CLI -- writes
+  // its auth store here, and a fresh start left it in place while reporting that it had removed
+  // everything.
+  return resolveEngineHomeDirs({ env, homeDir: homedir, platform });
+}
+
 function opencodeCacheDirs(env, homedir, platform) {
   return resolveOpencodeCacheDirs({ env, homeDir: homedir, platform });
 }
@@ -332,6 +347,7 @@ function resolveNukePlan(input) {
     ...opencodeConfigDirs(env, homedir, platform, paths),
     ...opencodeCacheDirs(env, homedir, platform),
     ...opencodeStateDirs(env, homedir, platform, paths),
+    ...engineHomeDirs(env, homedir, platform),
     orchestratorDataDir(env, homedir, paths),
     serverDataDir(env, homedir, paths),
     ...USERDATA_WORKSPACE_FILENAMES.map((filename) => paths.join(userDataPath, filename)),

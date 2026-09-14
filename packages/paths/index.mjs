@@ -311,6 +311,47 @@ export function opencodeDataDirs(opts) {
   return Array.from(new Set(dirs));
 }
 
+/**
+ * Directories the ENGINE itself owns, under its own name.
+ *
+ * redrob-code resolves these with xdg-basedir (packages/core/src/global.ts: `path.join(xdgData, "redrob")`
+ * and siblings). xdg-basedir does NOT special-case Windows, so on Windows these are POSIX-shaped paths
+ * under the user profile -- `%USERPROFILE%\.local\share\redrob` and friends, not `%APPDATA%`.
+ *
+ * These are DELIBERATELY separate from opencodeDataDirs and its siblings. Those are also read by
+ * apps/server/src/opencode-db.ts to FIND the engine database, so widening them would change discovery
+ * as well as deletion. This function exists for the reset path only.
+ *
+ * The desktop app does not point the engine at these in a normal run -- it only overrides XDG_* under
+ * REDROB_DEV_MODE -- so they are written by an engine invoked OUTSIDE the app: a user-installed
+ * `redrob` CLI. That is the case the reset used to miss, leaving a CLI-authored auth store behind after
+ * a fresh start claimed to have removed everything.
+ */
+export function engineHomeDirs(opts) {
+  const env = optionEnv(opts);
+  const platform = optionPlatform(opts);
+  const paths = pathApi(platform);
+  const homeDir = optionHomeDir(opts);
+  const dirs = [];
+
+  const xdgDataHome = envValue(env, "XDG_DATA_HOME");
+  dirs.push(xdgDataHome ? paths.join(xdgDataHome, "redrob") : paths.join(homeDir, ".local", "share", "redrob"));
+
+  const xdgConfigHome = envValue(env, "XDG_CONFIG_HOME");
+  dirs.push(xdgConfigHome ? paths.join(xdgConfigHome, "redrob") : paths.join(homeDir, ".config", "redrob"));
+
+  const xdgCacheHome = envValue(env, "XDG_CACHE_HOME");
+  dirs.push(xdgCacheHome ? paths.join(xdgCacheHome, "redrob") : paths.join(homeDir, ".cache", "redrob"));
+
+  const xdgStateHome = envValue(env, "XDG_STATE_HOME");
+  dirs.push(xdgStateHome ? paths.join(xdgStateHome, "redrob") : paths.join(homeDir, ".local", "state", "redrob"));
+
+  // The install script's bin directory, which is not an xdg path.
+  dirs.push(paths.join(homeDir, ".redrob"));
+
+  return Array.from(new Set(dirs));
+}
+
 export function opencodeCacheDirs(opts) {
   const env = optionEnv(opts);
   const platform = optionPlatform(opts);
