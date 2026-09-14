@@ -1200,3 +1200,38 @@ export function deriveWorkingFiles(items: ArtifactItem[]): string[] {
 
   return results;
 }
+/**
+ * Joins path segments for DISPLAY, using the separator the root itself already uses.
+ *
+ * The recovery page showed `C:\Users\USER\Redrob Work Chat/.opencode/redrob.json` -- a Windows root
+ * with POSIX separators glued on, because the path was built by string interpolation
+ * (`${root}/.opencode/redrob.json`). A user copying that out of the page gets something that is not
+ * a path on their system, and it reads as a bug in the product.
+ *
+ * `joinDesktopPath` in app/lib/desktop.ts is the real answer for paths we ACT on -- it round-trips to
+ * Electron's own path.join. But it is async, and a React render cannot await, which is how the
+ * interpolation ended up there. This is the synchronous display-only counterpart: it never touches
+ * the filesystem and makes no claim the path exists.
+ *
+ * The separator is inferred from the root rather than from the renderer's platform, because the root
+ * comes from the main process. A remote or WSL workspace root can be POSIX while the UI runs on
+ * Windows, so `navigator.platform` would produce exactly the mismatch this function exists to fix.
+ */
+export function joinDisplayPath(root: string, ...segments: string[]): string {
+  const trimmedRoot = root.trim();
+  if (!trimmedRoot) return "";
+
+  // A backslash and no forward slash means Windows. A UNC root (\\server\share) counts too.
+  // A drive letter with no separator yet ("C:") is Windows as well.
+  const looksWindows =
+    (trimmedRoot.includes("\\") && !trimmedRoot.includes("/")) || /^[A-Za-z]:$/.test(trimmedRoot);
+  const separator = looksWindows ? "\\" : "/";
+
+  const parts = segments
+    .flatMap((segment) => segment.split(/[/\\]+/))
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0);
+
+  const base = trimmedRoot.replace(/[/\\]+$/, "");
+  return [base, ...parts].join(separator);
+}

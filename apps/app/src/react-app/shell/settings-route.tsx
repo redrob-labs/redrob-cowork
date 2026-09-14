@@ -108,6 +108,7 @@ import {
   isDesktopRuntime,
   isElectronRuntime,
   isMacPlatform,
+  joinDisplayPath,
   normalizeDirectoryPath,
   resolveModelDisplayName,
   resolveProviderDisplayName,
@@ -2083,7 +2084,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         return (
           <RecoveryView
             anyActiveRuns={false}
-            workspaceConfigPath={selectedWorkspaceRoot ? `${selectedWorkspaceRoot}/.opencode/redrob.json` : ""}
+            workspaceConfigPath={
+              selectedWorkspaceRoot
+                ? joinDisplayPath(selectedWorkspaceRoot, ".redrob", "redrob.json")
+                : ""
+            }
             resetConfigBusy={resetConfigBusy}
             onResetAppConfigDefaults={() => {}}
             configActionStatus={configActionStatus}

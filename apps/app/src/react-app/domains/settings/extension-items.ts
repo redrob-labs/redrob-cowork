@@ -67,8 +67,12 @@ const REDROB_PROVIDED_SKILL_NAMES = new Set([
 export function isRedrobProvidedSkill(skill: Pick<SkillCard, "name" | "path">) {
   const normalizedName = skill.name.trim().toLowerCase();
   const normalizedPath = skill.path.replace(/\\/g, "/").toLowerCase();
-  return normalizedPath.includes("/.opencode/skills/") &&
-    REDROB_PROVIDED_SKILL_NAMES.has(normalizedName);
+  // Either config folder: `.redrob` is current, `.opencode` legacy. Matching only the legacy name
+  // meant a skill we ship under `.redrob/skills/` was not recognised as ours, so the UI offered to
+  // uninstall it as if it were the user's own.
+  const inConfigFolder =
+    normalizedPath.includes("/.redrob/skills/") || normalizedPath.includes("/.opencode/skills/");
+  return inConfigFolder && REDROB_PROVIDED_SKILL_NAMES.has(normalizedName);
 }
 
 export function isToggleControlledExtension(entry: McpDirectoryInfo) {
