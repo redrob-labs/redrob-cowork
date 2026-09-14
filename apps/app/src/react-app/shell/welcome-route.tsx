@@ -459,6 +459,28 @@ export function WelcomeRoute() {
     }
   }, [platform, state.pendingSessionId, state.pendingWorkspaceId]);
 
+  // Persist completion as soon as the user reaches the attribution step, NOT at the tutorial's Start
+  // button.
+  //
+  // Reported from Windows 11: after the engine step, choosing any of "Just look around", "Connect
+  // Redrob" or the API-key path put the user back on Get Started. All three converge on
+  // `attribution-step` and NONE of them creates a workspace, while completion was written in exactly
+  // one place -- finishOnboarding, reachable only from TutorialStep's Start button.
+  //
+  // That left a window in the precise state use-workspace-route-state.ts guards against: no
+  // workspaces AND onboarding not complete. Its effect runs navigate("/welcome", { replace: true }),
+  // which remounts this route and discards the reducer state that was showing the attribution step --
+  // so the user lands back on the first screen with their choice thrown away.
+  //
+  // Reaching this step means the user made a terminal onboarding choice, so recording it here removes
+  // the bounce condition rather than racing it. One effect covers all three paths; marking inside each
+  // handler would leave the next path added to this flow with the same bug. It also survives a reload
+  // or a crash before the tutorial.
+  useEffect(() => {
+    if (!state.attributionStep) return;
+    markOnboardingComplete();
+  }, [markOnboardingComplete, state.attributionStep]);
+
   const finishOnboarding = useCallback(() => {
     markOnboardingComplete();
     navigate(state.pendingRoute ?? "/session", { replace: true });
