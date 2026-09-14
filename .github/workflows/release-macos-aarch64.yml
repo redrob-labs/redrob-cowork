@@ -947,6 +947,20 @@ jobs:
 
     steps: *electron-build-steps
 
+  # THE NPM PACKAGE DOES NOT GATE THE DESKTOP RELEASE.
+  #
+  # This job used to require publish-npm to be success or skipped. publish-npm authenticates to npm
+  # through trusted publishing (--provenance + id-token, no secret), which needs the redrob-server
+  # package to name this repository as a trusted publisher on npmjs.com. Until that is configured the
+  # job fails with ENEEDAUTH on every version bump -- and it took the whole release with it.
+  #
+  # That is what happened to v0.0.10: all six Electron platforms built successfully, this job was
+  # skipped, and the tag ended up with no assets behind it. A user waiting on the fix in that release
+  # had no way to install it, because an unrelated npm package could not authenticate.
+  #
+  # The Electron artifacts do not depend on the npm package, so its result no longer blocks them. A
+  # failed publish-npm still shows as a red job in the run, which is the signal that npm trusted
+  # publishing needs configuring; it just no longer withholds the desktop release.
   publish-release:
     name: Publish Electron Assets + GitHub Release
     permissions:
@@ -965,7 +979,7 @@ jobs:
       needs.resolve-release.outputs.benchmark_only != 'true' &&
       (needs.resolve-release.outputs.build_electron != 'true' || needs.publish-electron-unix.result == 'success') &&
       (needs.resolve-release.outputs.build_electron != 'true' || needs.publish-electron-windows.result == 'success') &&
-      (needs.publish-npm.result == 'success' || needs.publish-npm.result == 'skipped')
+      needs.publish-npm.result != 'cancelled'
     runs-on: ubuntu-24.04
     env:
       RELEASE_TAG: ${{ needs.resolve-release.outputs.release_tag }}
