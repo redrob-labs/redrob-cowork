@@ -101,7 +101,10 @@ if (!existsSync(licensePath)) {
 //    machine-readable REUSE map. A rebrand sweep that replaces "Different AI"
 //    everywhere is the realistic way this breaks, and it breaks the license.
 const UPSTREAM_HOLDER = "Different AI";
-const FORK_HOLDER = "Redrob Work";
+// The person who holds copyright in this fork's changes. Matched as a substring,
+// so "Janghoon Lee (Redrob)" and a later "Janghoon Lee" both satisfy it — the
+// check is that the holder is still named, not how the line is punctuated.
+const FORK_HOLDER = "Janghoon Lee";
 
 const attributionFiles = [
   { path: "LICENSE", label: "LICENSE" },

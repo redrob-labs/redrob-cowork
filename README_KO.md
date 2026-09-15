@@ -81,8 +81,8 @@ README 번역: [English](./README.md), [한국어](./README_KO.md).
 
 레드롭 워크는 Different AI, Inc.의 [OpenWork](https://github.com/different-ai/openwork)를
 포크한 프로젝트이며 MIT 라이선스를 따릅니다. 상류의 저작권 표기는 [LICENSE](./LICENSE)에
-그대로 남겨 두었고, 이 포크에서 추가·수정한 부분의 저작권은 Redrob Work에 있으며 같은 MIT
-조건으로 배포합니다.
+그대로 남겨 두었고, 이 포크에서 추가·수정한 부분의 저작권은 이장훈(Janghoon Lee, Redrob)에게
+있으며 같은 MIT 조건으로 배포합니다.
 
 상류의 `/ee` 디렉터리는 OpenWork Enterprise Edition 라이선스를 따르며 프로덕션 사용에
 OpenWork 구독이 필요합니다. 이 포크는 그 트리를 포함하지 않고, 다시 들어오면
