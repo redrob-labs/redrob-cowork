@@ -13,7 +13,7 @@ function directoryKey(workspace: WorkspaceInfo): string {
 
 /**
  * Serialize target-directory instance disposal with prompt admission routed
- * through Redrob Work. Different directories intentionally use different queues.
+ * through Redrob Cowork. Different directories intentionally use different queues.
  */
 export async function withEngineDirectoryFence<T>(
   config: ServerConfig,

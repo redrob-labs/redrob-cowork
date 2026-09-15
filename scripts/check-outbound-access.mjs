@@ -67,7 +67,7 @@ function ignoredHostReason(host) {
   }
 
   // Standards/schema identifiers appear in manifests and XML/JSON metadata but
-  // are not fetched by Redrob Work at runtime.
+  // are not fetched by Redrob Cowork at runtime.
   if (
     value === "w3.org" ||
     value.endsWith(".w3.org") ||

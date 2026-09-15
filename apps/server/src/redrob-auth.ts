@@ -9,7 +9,7 @@ import { findManagedEngineWorkspace } from "./workspaces.js";
  *
  * The engine's auth store (`auth.json`, written only by its own
  * `PUT`/`DELETE /auth/:providerID`) is the single source of truth for the
- * console.redrob.ai credential. Redrob Work never persists that value: it
+ * console.redrob.ai credential. Redrob Cowork never persists that value: it
  * collects it during onboarding, hands it straight to the engine, and from then
  * on only *observes* whether the engine holds one.
  *

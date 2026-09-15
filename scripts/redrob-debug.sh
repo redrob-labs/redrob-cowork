@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # redrob-debug.sh — one-stop observability + lifecycle control for the
-# Redrob Work dev stack.
+# Redrob Cowork dev stack.
 #
 # Subcommands:
 #   snapshot        (default) processes, ports, health, orphans, sink preview
@@ -33,7 +33,7 @@
 # Explicitly NOT touched by `reset`:
 #   - ~/Library/Application Support/io.redrob.work.dev/** (tokens,
 #     workspaces registry, prefs). Use `reset-webview` for WebKit state.
-#   - /Applications/Redrob Work.app (prod build never targeted).
+#   - /Applications/Redrob Cowork.app (prod build never targeted).
 #
 set -euo pipefail
 

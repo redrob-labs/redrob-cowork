@@ -8,7 +8,7 @@ import { createWorkspaceKvStore, isRecord } from "./workspace-kv-store.js";
  * `server/dist` on plain Node: that package resolves its production export
  * condition to TypeScript source, so a *value* imported from it survives
  * compilation as a runtime import Node cannot load, and the app dies with
- * "Redrob Work server did not finish starting". The store is the only consumer,
+ * "Redrob Cowork server did not finish starting". The store is the only consumer,
  * so the constant belongs with it while the shared package keeps the types,
  * which are erased at emit.
  */

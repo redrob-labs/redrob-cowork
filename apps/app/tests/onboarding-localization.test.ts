@@ -28,7 +28,7 @@ const USER_FACING_ATTRIBUTES = ["placeholder", "title", "aria-label", "alt"];
  * Latin-script values that are not English prose: proper nouns, and the
  * literal example path shown inside the workspace-folder input.
  */
-const ALLOWED_LITERALS = new Set(["Redrob Work", "Redrob Code", "/workspace/my-project"]);
+const ALLOWED_LITERALS = new Set(["Redrob Cowork", "Redrob Code", "/workspace/my-project"]);
 
 const sources = readdirSync(ONBOARDING_DIR)
   .filter((name) => name.endsWith(".tsx"))

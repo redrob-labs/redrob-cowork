@@ -161,7 +161,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     get description() { return t("extensions.builtin_browser_description"); },
     source: { format: "redrob-builtin", origin: "builtin", trusted: true },
     icon: { src: "/redrob-mark.svg" },
-    composer: { prompt: "Use the Redrob Work Browser extension to " },
+    composer: { prompt: "Use the Redrob Cowork Browser extension to " },
     setup: {
       get instructions() { return t("extensions.builtin_browser_setup"); },
     },
@@ -181,7 +181,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     contributions: [
       { type: "settings-panel", ref: "redrob.browser.settings", location: "settings-detail" },
       { type: "session-side-panel", ref: "redrob.browser.panel", location: "session-right-pane" },
-      { type: "composer-prompt", prompt: "Use the Redrob Work Browser extension to ", location: "composer" },
+      { type: "composer-prompt", prompt: "Use the Redrob Cowork Browser extension to ", location: "composer" },
     ],
     enablement: [
       { type: "toggle-enabled", ref: "redrob-browser", get label() { return t("extensions.enablement_enabled"); } },

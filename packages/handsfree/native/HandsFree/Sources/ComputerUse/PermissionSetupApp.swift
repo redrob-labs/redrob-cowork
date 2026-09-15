@@ -66,7 +66,7 @@ private final class PermissionSetupWindow: NSWindow {
             backing: .buffered,
             defer: false
         )
-        title = "Redrob Work Computer Use"
+        title = "Redrob Cowork Computer Use"
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         isMovableByWindowBackground = true

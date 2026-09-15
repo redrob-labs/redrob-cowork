@@ -35,7 +35,7 @@ export REDROB_CODE_BIN=/usr/local/bin/redrob
 mkdir -p "$REDROB_WORKSPACE" "$REDROB_DATA_DIR" "$REDROB_SIDECAR_DIR"
 mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 
-printf '%s\n' "Starting Redrob Work micro-sandbox"
+printf '%s\n' "Starting Redrob Cowork micro-sandbox"
 printf '%s\n' "- workspace: $REDROB_WORKSPACE"
 printf '%s\n' "- home: $HOME"
 printf '%s\n' "- redrob url: http://$REDROB_CONNECT_HOST:$REDROB_PORT"

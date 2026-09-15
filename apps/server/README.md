@@ -1,6 +1,6 @@
-# Redrob Work Server
+# Redrob Cowork Server
 
-Filesystem-backed API for Redrob Work remote clients. This package provides the Redrob Work server layer described in `apps/app/pr/redrob-server.md` and is intentionally independent from the desktop app.
+Filesystem-backed API for Redrob Cowork remote clients. This package provides the Redrob Cowork server layer described in `apps/app/pr/redrob-server.md` and is intentionally independent from the desktop app.
 
 ## Quick start
 

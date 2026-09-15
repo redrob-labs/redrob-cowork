@@ -13,7 +13,7 @@ scripts/migration/03-post-migration-cleanup.mjs  # delete src-tauri, flip defaul
 
 | Step | When | What user-visible effect |
 | ---- | ---- | ------------------------ |
-| 01   | Ready to ship the migration | Tauri users see "Redrob Work is moving" prompt on next update |
+| 01   | Ready to ship the migration | Tauri users see "Redrob Cowork is moving" prompt on next update |
 | 02   | Right after the workflow finishes | Dogfood validation — no user effect |
 | 03   | After 1-2 weeks of stable Electron telemetry | Dev repo is Electron-only; no user effect |
 
@@ -35,7 +35,7 @@ The next release is intentionally **non-destructive**:
   `migration-snapshot.v1.json`; it does not quit, replace, or delete Tauri.
 - The install handoff requires a pasted Electron artifact URL plus two explicit
   confirmations. On macOS the native handoff keeps the previous bundle at
-  `Redrob Work.app.migrate-bak` for rollback.
+  `Redrob Cowork.app.migrate-bak` for rollback.
 
 Use this safe-prep release to test migration data capture and preview downloads
 before enabling any user-facing migration prompt.
@@ -58,7 +58,7 @@ until the explicit migration release is cut and validated.
 
 ```bash
 node scripts/migration/01-cut-migration-release.mjs --version 0.12.0 \
-  --mac-url 'https://github.com/redrob-labs/redrob-work/releases/download/v0.12.0/Redrob Work-darwin-arm64-0.12.0-mac.zip' \
+  --mac-url 'https://github.com/redrob-labs/redrob-work/releases/download/v0.12.0/Redrob Cowork-darwin-arm64-0.12.0-mac.zip' \
   --dry-run         # inspect planned changes first
 ```
 
@@ -141,6 +141,6 @@ If the v0.12.0 migration release is bad:
   `latest.json`, and users who haven't clicked "Install now" yet will
   fall back to the non-migrating release.
 - Users mid-migration: the Rust `migrate_to_electron` command keeps
-  the previous `.app` at `Redrob Work.app.migrate-bak`. Instruct users
-  to `mv Redrob Work.app.migrate-bak Redrob Work.app` if the Electron
+  the previous `.app` at `Redrob Cowork.app.migrate-bak`. Instruct users
+  to `mv Redrob Cowork.app.migrate-bak Redrob Cowork.app` if the Electron
   launch fails.

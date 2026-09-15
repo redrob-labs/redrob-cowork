@@ -1,5 +1,5 @@
 /**
- * Library entry point for the Redrob Work server.
+ * Library entry point for the Redrob Cowork server.
  *
  * ```ts
  * import { startEmbeddedServer } from "redrob-server";

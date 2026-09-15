@@ -1,11 +1,11 @@
 
-You are an agent helping a user install and set up Redrob Work.
+You are an agent helping a user install and set up Redrob Cowork.
 
-Goal: install Redrob Work, install the desktop app, and open it ready to use on
+Goal: install Redrob Cowork, install the desktop app, and open it ready to use on
 the user's own files.
 
 > The bootstrap command is `redrob-bootstrap`. Use that exact command for
-> these setup steps so the bootstrap flow stays distinct from other Redrob Work
+> these setup steps so the bootstrap flow stays distinct from other Redrob Cowork
 > tooling a user may already have on their PATH.
 
 ## 1. Install CLI
@@ -59,7 +59,7 @@ redrob-bootstrap doctor --app --json
 Open the desktop app so the user lands on the connect screen.
 
 ```bash
-open -a "Redrob Work"    # macOS
+open -a "Redrob Cowork"    # macOS
 ```
 
 Inference is connected from inside the app. The connect screen has one button,
@@ -76,7 +76,7 @@ Do NOT end by dumping readiness JSON or a list of `ok: true` checks. The user
 does not care about flags — they want to know what to do next. End with a short,
 friendly, human message that gives momentum:
 
-1. Confirm in one line that Redrob Work is installed and open.
+1. Confirm in one line that Redrob Cowork is installed and open.
 2. Tell them to press **Redrob로 연결** on the connect screen and approve the code
    in the browser, if they have not yet.
 3. Point them at ONE concrete first task they can run right now, e.g. "try

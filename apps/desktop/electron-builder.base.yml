@@ -31,10 +31,13 @@ asarUnpack:
 npmRebuild: false
 afterPack: scripts/electron-after-pack.cjs
 afterSign: scripts/electron-after-sign.cjs
+# This fork's own repository. The previous value still named upstream
+# (different-ai/redrob), so the update metadata electron-builder writes described a
+# repository this app never published to.
 publish:
   - provider: github
-    owner: different-ai
-    repo: redrob
+    owner: redrob-labs
+    repo: redrob-cowork
     releaseType: release
 mac:
   icon: resources/icons/icon.icns
@@ -45,7 +48,7 @@ mac:
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    NSMicrophoneUsageDescription: Redrob Work uses the microphone when you start Voice Mode so you can speak commands to your agent.
+    NSMicrophoneUsageDescription: Redrob Cowork uses the microphone when you start Voice Mode so you can speak commands to your agent.
   extraResources:
     - from: resources/sidecars
       to: sidecars
@@ -59,7 +62,7 @@ mac:
     - from: resources/helpers
       to: helpers
       filter:
-        - "Redrob Work Computer Use.app/**"
+        - "Redrob Cowork Computer Use.app/**"
   target:
     - dmg
     - zip

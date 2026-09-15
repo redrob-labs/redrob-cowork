@@ -15,7 +15,7 @@ function filteredIds(platform: "darwin" | "linux" | "windows" | "web") {
     .flatMap((entry) => entry.id ? [entry.id] : []);
 }
 
-describe("Redrob Work extension catalog platform filter", () => {
+describe("Redrob Cowork extension catalog platform filter", () => {
   test("resolves browser runtime to web and desktop runtime to OS", () => {
     expect(resolveRedrobWorkExtensionCatalogPlatform("web", "macos")).toEqual("web");
     expect(resolveRedrobWorkExtensionCatalogPlatform("desktop", "macos")).toEqual("darwin");
@@ -27,7 +27,7 @@ describe("Redrob Work extension catalog platform filter", () => {
     expect(filteredIds("web")).toEqual(["redrob-voice", "ollama", "redrob"]);
   });
 
-  test("keeps Redrob Work Browser desktop-only and Computer Use mac-only", () => {
+  test("keeps Redrob Cowork Browser desktop-only and Computer Use mac-only", () => {
     expect(filteredIds("darwin")).toEqual(["redrob-browser", "computer-use", "redrob-voice", "ollama", "redrob"]);
     expect(filteredIds("linux")).toEqual(["redrob-browser", "redrob-voice", "ollama", "redrob"]);
   });

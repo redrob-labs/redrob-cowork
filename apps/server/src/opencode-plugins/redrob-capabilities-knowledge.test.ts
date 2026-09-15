@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { RedrobWorkCapabilitiesKnowledge } from "./redrob-capabilities-knowledge.js";
 
-describe("Redrob Work capabilities knowledge plugin", () => {
+describe("Redrob Cowork capabilities knowledge plugin", () => {
   test("injects local capability guidance without control-plane instructions", async () => {
     const plugin = await RedrobWorkCapabilitiesKnowledge();
     const output = { system: [] };
@@ -12,7 +12,7 @@ describe("Redrob Work capabilities knowledge plugin", () => {
     await plugin["experimental.chat.system.transform"]({}, output);
 
     const knowledge = output.system.join("\n");
-    expect(knowledge).toContain("Redrob Work documentation tools answer product questions. Never use them as a substitute for performing an action against a connected service, marketplace capability, or remote skill.");
+    expect(knowledge).toContain("Redrob Cowork documentation tools answer product questions. Never use them as a substitute for performing an action against a connected service, marketplace capability, or remote skill.");
     expect(knowledge).toContain("Settings > Library");
     expect(knowledge).toContain("Settings > Debug");
     expect(knowledge).toContain("REDROB_API_KEY");
@@ -22,10 +22,10 @@ describe("Redrob Work capabilities knowledge plugin", () => {
     // Nothing may steer the agent at a control plane that no longer exists.
     expect(knowledge).not.toContain("api.redrob.io/mcp/agent");
     expect(knowledge).not.toContain("app.redrob.io");
-    expect(knowledge).not.toContain("Redrob Work Cloud");
-    expect(knowledge).not.toContain("Redrob Work Connect");
+    expect(knowledge).not.toContain("Redrob Cowork Cloud");
+    expect(knowledge).not.toContain("Redrob Cowork Connect");
     expect(knowledge).not.toContain("Automations");
-    expect(knowledge).not.toContain("sign in to Redrob Work");
+    expect(knowledge).not.toContain("sign in to Redrob Cowork");
   });
 
   test("retrieves Slack connection guidance from bundled docs", async () => {
@@ -65,7 +65,7 @@ describe("Redrob Work capabilities knowledge plugin", () => {
     const search = await plugin.tool.redrob_docs_search.execute({ query: "cloud organization sso scim collections", limit: 10 });
 
     expect(search).not.toContain("\"cloud/");
-    expect(search).not.toContain("Redrob Work Cloud");
+    expect(search).not.toContain("Redrob Cowork Cloud");
   });
 });
 

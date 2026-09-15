@@ -64,12 +64,12 @@ ENV REDROB_SIDECAR_DIR=/data/sidecars
 # The workspace is mounted from the host/volume.
 ENV REDROB_WORKSPACE=/workspace
 
-# Redrob Work host contract surface.
+# Redrob Cowork host contract surface.
 EXPOSE 8787
 
 VOLUME ["/workspace", "/data"]
 
 # Defaults:
-# - Redrob Work server is published intentionally via --host 0.0.0.0
+# - Redrob Cowork server is published intentionally via --host 0.0.0.0
 # - The Redrob Code engine is managed by redrob-server and stays internal
 CMD ["/bin/sh", "-lc", "plugin_dir=\"$(npm root -g)/redrob-server/dist/opencode-plugins\"; test -d \"$plugin_dir\"; export REDROB_MANAGE_OPENCODE=1 REDROB_CODE_BIN=/usr/local/bin/redrob REDROB_EXTENSIONS_PLUGIN_DIR=\"$plugin_dir\"; exec redrob-server --workspace \"${REDROB_WORKSPACE:-/workspace}\" --host 0.0.0.0 --port \"${REDROB_PORT:-8787}\" --cors \"${REDROB_CORS_ORIGINS:-*}\" --approval \"${REDROB_APPROVAL_MODE:-manual}\""]

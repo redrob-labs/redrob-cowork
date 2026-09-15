@@ -11,7 +11,7 @@ This skill is a template + checklist for creating skills in a workspace.
 
 A skill is a folder under `.opencode/skills/<skill-name>/` or `.claude/skills/<skill-name>/` anchored by `SKILL.md`.
 
-## Redrob Work authoring contract
+## Redrob Cowork authoring contract
 
 Follow the runtime `Skill creation:` instruction for this workspace:
 

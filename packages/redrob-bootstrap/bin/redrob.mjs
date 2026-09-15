@@ -8,9 +8,9 @@ import { fileURLToPath } from "node:url"
 
 const VERSION = "0.1.0"
 // The installed command name. Keep it explicit so setup guides can distinguish
-// bootstrap actions from other Redrob Work commands a user may already have.
+// bootstrap actions from other Redrob Cowork commands a user may already have.
 const COMMAND_NAME = "redrob-bootstrap"
-const DEFAULT_REDROB_MARKETPLACE_NAME = "Redrob Work Marketplace"
+const DEFAULT_REDROB_MARKETPLACE_NAME = "Redrob Cowork Marketplace"
 const executableBasename = () => (process.platform === "win32" ? `${COMMAND_NAME}.cmd` : COMMAND_NAME)
 const here = dirname(fileURLToPath(import.meta.url))
 const selfPath = fileURLToPath(import.meta.url)
@@ -103,7 +103,7 @@ function defaultAppDir() {
   return process.env.REDROB_APP_DIR || (process.platform === "darwin"
     ? join(process.env.HOME || process.cwd(), "Applications")
     : process.platform === "win32"
-      ? join(process.env.LOCALAPPDATA || join(process.env.HOME || process.cwd(), "AppData", "Local"), "Redrob Work")
+      ? join(process.env.LOCALAPPDATA || join(process.env.HOME || process.cwd(), "AppData", "Local"), "Redrob Cowork")
       : join(process.env.HOME || process.cwd(), ".local", "share", "redrob"))
 }
 
@@ -175,7 +175,7 @@ function runInstall(args) {
   }
   writeFileSync(join(installDir, "install.json"), JSON.stringify(manifest, null, 2))
 
-  jsonOut({ ok: true, message: `Redrob Work CLI installed at ${executable}`, install: manifest }, json)
+  jsonOut({ ok: true, message: `Redrob Cowork CLI installed at ${executable}`, install: manifest }, json)
 }
 
 function sha256(buffer) {
@@ -239,12 +239,12 @@ function inferArtifactType(url) {
 
 function defaultInstalledName(type, manifest, artifact) {
   if (artifact.appName || manifest.appName) return artifact.appName || manifest.appName
-  if (type === "dmg") return "Redrob Work.app"
-  if (type === "appimage") return "Redrob Work.AppImage"
-  if (type === "exe") return "Redrob Work.exe"
-  if (type === "msi") return "Redrob Work.msi"
-  if (process.platform === "darwin") return "Redrob Work.app"
-  if (process.platform === "win32") return "Redrob Work.exe"
+  if (type === "dmg") return "Redrob Cowork.app"
+  if (type === "appimage") return "Redrob Cowork.AppImage"
+  if (type === "exe") return "Redrob Cowork.exe"
+  if (type === "msi") return "Redrob Cowork.msi"
+  if (process.platform === "darwin") return "Redrob Cowork.app"
+  if (process.platform === "win32") return "Redrob Cowork.exe"
   return "redrob"
 }
 
@@ -309,7 +309,7 @@ function installDmg(input) {
   try {
     execFileSync("hdiutil", ["attach", input.artifactPath, "-nobrowse", "-readonly", "-mountpoint", mountPoint], { stdio: "pipe" })
     mounted = true
-    const appName = input.appName || "Redrob Work.app"
+    const appName = input.appName || "Redrob Cowork.app"
     const sourceApp = join(mountPoint, appName)
     if (!existsSync(sourceApp)) {
       throw new Error(`app_not_found_in_dmg: ${appName}`)
@@ -374,7 +374,7 @@ async function runInstallApp(args) {
     const type = artifact.type || inferArtifactType(artifact.url)
     if (!type) throw new Error("unsupported_app_artifact_type: unknown")
 
-    const artifactPath = join(workDir, artifact.fileName || "Redrob Work.dmg")
+    const artifactPath = join(workDir, artifact.fileName || "Redrob Cowork.dmg")
     await downloadArtifact(artifact.url, artifactPath)
     const digest = sha256(readFileSync(artifactPath))
     if (artifact.sha256 && digest !== artifact.sha256) {
@@ -410,7 +410,7 @@ async function runInstallApp(args) {
     }
     mkdirSync(dirname(appPath), { recursive: true })
     writeFileSync(join(appDir, "redrob-app-install.json"), JSON.stringify(install, null, 2))
-    jsonOut({ ok: true, message: `Redrob Work app installed at ${appPath}`, install }, json)
+    jsonOut({ ok: true, message: `Redrob Cowork app installed at ${appPath}`, install }, json)
   } finally {
     rmSync(workDir, { recursive: true, force: true })
   }
@@ -455,9 +455,9 @@ async function runDoctor(args) {
   if (hasFlag(args.flags, "app") || args.flags.has("app-dir")) {
     const appManifest = join(appDir, "redrob-app-install.json")
     let appPath = process.platform === "darwin"
-      ? join(appDir, "Redrob Work.app")
+      ? join(appDir, "Redrob Cowork.app")
       : process.platform === "win32"
-        ? join(appDir, "Redrob Work.exe")
+        ? join(appDir, "Redrob Cowork.exe")
         : join(appDir, "redrob")
     if (existsSync(appManifest)) {
       try {
@@ -472,7 +472,7 @@ async function runDoctor(args) {
   }
 
   const ok = checks.every((check) => check.ok)
-  jsonOut({ ok, message: ok ? "Redrob Work doctor: ok" : "Redrob Work doctor: failed", version: VERSION, manifest, checks }, json)
+  jsonOut({ ok, message: ok ? "Redrob Cowork doctor: ok" : "Redrob Cowork doctor: failed", version: VERSION, manifest, checks }, json)
   if (!ok) process.exitCode = 1
 }
 

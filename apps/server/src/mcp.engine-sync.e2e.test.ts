@@ -529,7 +529,7 @@ describe("runtime MCP engine sync", () => {
     }
   });
 
-  test("scopes registration evidence to the concrete Redrob Work server instance", async () => {
+  test("scopes registration evidence to the concrete Redrob Cowork server instance", async () => {
     const workspaceRoot = await createWorkspaceRoot();
     const previousDb = process.env.REDROB_RUNTIME_DB;
     process.env.REDROB_RUNTIME_DB = join(workspaceRoot, "runtime.sqlite");

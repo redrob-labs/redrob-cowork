@@ -978,7 +978,7 @@ export function useWorkspaceRouteState(input: UseWorkspaceRouteStateInput) {
   const selectedWorkspaceRoot = selectedWorkspace?.path?.trim() || "";
   // Single source of truth for the selected workspace's server URL/token/id.
   // For remote workspaces this is the worker that owns the workspace; for
-  // local workspaces it's the user's local Redrob Work server.
+  // local workspaces it's the user's local Redrob Cowork server.
   const selectedWorkspaceEndpoint = useWorkspaceServerClient(selectedWorkspace, { baseUrl, token });
   const selectedWorkspaceServerToken = selectedWorkspaceEndpoint?.token ?? "";
   const opencodeBaseUrl = selectedWorkspaceEndpoint?.opencodeBaseUrl ?? "";

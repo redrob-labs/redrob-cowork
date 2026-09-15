@@ -41,7 +41,7 @@ describe("Electron distribution configs", () => {
     const config = await readConfig("electron-builder.yml");
     assert.equal(config.extends, "./electron-builder.base.yml");
     assert.equal(config.appId, "io.redrob.work");
-    assert.equal(config.productName, "Redrob Work");
+    assert.equal(config.productName, "Redrob Cowork");
     assert.equal(config.protocols[0].schemes[0], "redrob");
     assert.equal(config.artifactName, "redrob-${os}-${arch}-${version}.${ext}");
   });

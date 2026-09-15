@@ -67,7 +67,7 @@ describe("markdown safety and links", () => {
   });
 
   test("keeps chat file link actions separate from simple surface links", () => {
-    const markdown = `[Open docs](./docs/readme.md) and [Redrob Work](https://redrob.io)`;
+    const markdown = `[Open docs](./docs/readme.md) and [Redrob Cowork](https://redrob.io)`;
     const chatHtml = renderMarkdownHtml(markdown);
     expect(chatHtml).toContain("data-redrob-link-chevron");
     expect(chatHtml).toContain("data-redrob-link-href");

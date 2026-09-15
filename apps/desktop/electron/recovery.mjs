@@ -103,14 +103,20 @@ function validRecoveryArtifactIdentity(artifact) {
   } catch {
     return false;
   }
-  const prefix = `/work/${version}/`;
-  if (url.protocol !== "https:" || url.hostname !== "cdn.redrob.ai" || !url.pathname.startsWith(prefix)) return false;
+  // Recovery downloads come from this repository's own release for that exact version, and the guard
+  // is host AND path: a file served from anywhere else, or from another repository's releases, is not
+  // a build this app published.
+  const prefix = `/redrob-labs/redrob-cowork/releases/download/v${version}/`;
+  if (url.protocol !== "https:" || url.hostname !== "github.com" || !url.pathname.startsWith(prefix)) return false;
   const assetArch = artifact.platform === "linux" && artifact.arch === "x64" ? "x86_64" : artifact.arch;
   const platformSlug = artifact.platform === "darwin" ? "mac" : artifact.platform === "win32" ? "win" : "linux";
   const fileName = path.basename(url.pathname);
   const distributionSlug = artifact.distribution === "public" ? "" : `${artifact.distribution}-`;
   return fileName === `redrob-${distributionSlug}${platformSlug}-${assetArch}-${version}${installerExtension(artifact.platform)}`;
 }
+
+/** Where this app publishes its builds. Recovery reads a specific version from here. */
+const RELEASES_BASE_URL = "https://github.com/redrob-labs/redrob-cowork/releases";
 
 export function selectRecoveryArtifact(files, { version, platform, arch, distribution }) {
   const normalizedVersion = stableVersion(version);
@@ -124,10 +130,13 @@ export function selectRecoveryArtifact(files, { version, platform, arch, distrib
     && typeof file.sha512 === "string"
     && file.sha512.trim(),
   );
-  const baseUrl = `https://cdn.redrob.ai/work/${normalizedVersion}/`;
+  const baseUrl = `${RELEASES_BASE_URL}/download/v${normalizedVersion}/`;
   for (const selected of matching) {
     const url = new URL(selected.url, baseUrl);
-    if (url.origin !== "https://cdn.redrob.ai" || !url.pathname.startsWith(`/work/${normalizedVersion}/`)) {
+    if (
+      url.origin !== "https://github.com"
+      || !url.pathname.startsWith(`/redrob-labs/redrob-cowork/releases/download/v${normalizedVersion}/`)
+    ) {
       continue;
     }
     const artifact = {

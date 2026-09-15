@@ -6,7 +6,7 @@ import en from "../src/i18n/locales/en";
 import ko from "../src/i18n/locales/ko";
 
 /**
- * Redrob Work ships in English and Korean, so every string the user reads has
+ * Redrob Cowork ships in English and Korean, so every string the user reads has
  * to come from the dictionary. A component that renders its copy inline is
  * English forever, no matter how complete `ko.ts` is, and nothing about it
  * fails to compile. This guard reads every renderer source and reports the
@@ -34,16 +34,16 @@ const USER_FACING_ATTRIBUTES = ["placeholder", "title", "aria-label", "alt"];
  * Korean because translating it would break what it names.
  */
 const ALLOWED_LITERALS = new Set([
-  "Redrob Work",
+  "Redrob Cowork",
   "Redrob Code",
   "Claude Desktop, Codex, Cursor",
   "OpenCode",
   "opencode-wakatime",
   "redrob://...",
   "https://github.com/slackapi/slack-mcp-plugin",
-  "Redrob Work.app.migrate-bak",
+  "Redrob Cowork.app.migrate-bak",
   "alpha-macos-latest/latest-mac.yml",
-  "cdn.redrob.ai/work/latest/latest-mac.yml",
+  "github.com/redrob-labs/redrob-cowork/releases/latest/download/latest-mac.yml",
 ]);
 
 /**

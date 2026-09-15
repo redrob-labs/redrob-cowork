@@ -11,7 +11,7 @@ import {
 
 const connectedBuiltIn: McpDirectoryInfo = {
   id: "redrob-browser",
-  name: "Redrob Work Browser",
+  name: "Redrob Cowork Browser",
   serverName: "redrob-browser",
   description: "Connected by default.",
   oauth: false,
@@ -19,7 +19,7 @@ const connectedBuiltIn: McpDirectoryInfo = {
   extensionManifest: {
     schemaVersion: 1,
     id: "redrob-browser",
-    name: "Redrob Work Browser",
+    name: "Redrob Cowork Browser",
     description: "Connected by default.",
     source: { format: "redrob-builtin", origin: "builtin", trusted: true },
     resources: [],
@@ -62,7 +62,7 @@ const directNotionServer: McpServerEntry = {
 };
 
 describe("extension item projection", () => {
-  test("attributes only current Redrob Work-provided local skills", () => {
+  test("attributes only current Redrob Cowork-provided local skills", () => {
     expect(isRedrobProvidedSkill({
       name: "skill-creator",
       path: "/workspace/.opencode/skills/skill-creator/SKILL.md",
@@ -95,9 +95,9 @@ describe("extension item projection", () => {
       isBuiltInConnected: (entry) => entry.id === connectedBuiltIn.id,
     });
 
-    expect(result.installedMcpEntries.map((entry) => entry.name)).toEqual(["Redrob Work Browser"]);
-    expect(result.builtInItems.map((item) => item.name)).toEqual(["Redrob Work Browser", "Computer Use"]);
-    expect(result.quickConnectEntries.map((entry) => entry.name)).toEqual(["Redrob Work Browser", "Computer Use"]);
+    expect(result.installedMcpEntries.map((entry) => entry.name)).toEqual(["Redrob Cowork Browser"]);
+    expect(result.builtInItems.map((item) => item.name)).toEqual(["Redrob Cowork Browser", "Computer Use"]);
+    expect(result.quickConnectEntries.map((entry) => entry.name)).toEqual(["Redrob Cowork Browser", "Computer Use"]);
   });
 
   test("keeps configured direct MCPs alongside their quick-connect entry", () => {
@@ -119,7 +119,7 @@ describe("resolveExtensionInventoryGroup", () => {
   const baseItem = (overrides: Partial<ExtensionItem> = {}): ExtensionItem => ({
     id: "builtin:redrob-browser",
     source: "builtin",
-    name: "Redrob Work Browser",
+    name: "Redrob Cowork Browser",
     description: null,
     installState: "installed",
     setupState: "ready",

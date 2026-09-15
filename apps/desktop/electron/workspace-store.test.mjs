@@ -180,14 +180,14 @@ test("does not create a default workspace when desktop state is absent", async (
 
     const state = await store.readWorkspaceState();
     assert.equal(state.workspaces.length, 0);
-    await assert.rejects(readFile(path.join(userData, "redrob-dev-data", "home", "Redrob Work", ".opencode", "redrob.json"), "utf8"));
+    await assert.rejects(readFile(path.join(userData, "redrob-dev-data", "home", "Redrob Cowork", ".opencode", "redrob.json"), "utf8"));
   } finally {
     restoreEnv("REDROB_DEV_MODE", previousDevMode);
     restoreEnv("REDROB_SERVER_CONFIG", previousServerConfig);
   }
 });
 
-test("normalizes recovered remote Redrob Work entries before persisting", async () => {
+test("normalizes recovered remote Redrob Cowork entries before persisting", async () => {
   const root = await mkdtemp(path.join(tmpdir(), "redrob-workspace-store-"));
   const userData = path.join(root, "userData");
   const serverConfig = path.join(root, "server.json");

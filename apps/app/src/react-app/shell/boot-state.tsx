@@ -48,7 +48,7 @@ const DEFAULT_STATE: BootStateSnapshot = {
 const PHASE_MESSAGES: Record<BootPhaseId, string> = {
   idle: "",
   "bootstrapping-workspaces": "Loading your workspaces",
-  "starting-redrob-server": "Starting the Redrob Work server",
+  "starting-redrob-server": "Starting the Redrob Cowork server",
   "starting-engine": "Preparing workspace",
   "activating-workspace": "Activating your workspace",
   ready: "Ready",

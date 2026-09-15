@@ -51,7 +51,7 @@ type VoicePanelProps = {
  * reads from `redrob_list_actions`. The textarea placeholder that shows the
  * same sentence to a human is `voice.command_placeholder` instead.
  */
-const DEFAULT_TEXT_COMMAND = "Summarize the current Redrob Work session and put the next step in the composer.";
+const DEFAULT_TEXT_COMMAND = "Summarize the current Redrob Cowork session and put the next step in the composer.";
 const VOICE_SUGGESTIONS = [
   "Read the latest message in this session",
   "Put a concise next step in the composer",
@@ -59,7 +59,7 @@ const VOICE_SUGGESTIONS = [
   "Send the current composer prompt",
 ];
 const TOOL_LABELS: Record<string, string> = {
-  redrob_snapshot: "Checking Redrob Work",
+  redrob_snapshot: "Checking Redrob Cowork",
   redrob_list_actions: "Listing controls",
   redrob_execute_action: "Running UI action",
 };
@@ -153,7 +153,7 @@ function safeJson(value: unknown) {
 }
 
 function humanToolLabel(toolName?: string) {
-  if (!toolName) return "Redrob Work action";
+  if (!toolName) return "Redrob Cowork action";
   return TOOL_LABELS[toolName] ?? toolName.replace(/_/g, " ");
 }
 
@@ -298,7 +298,7 @@ async function executeRedrobWorkTool(name: string, args: Record<string, unknown>
     return control.execute(actionId, actionArgs);
   }
 
-  return { ok: false, error: `Unknown Redrob Work voice tool: ${name}` };
+  return { ok: false, error: `Unknown Redrob Cowork voice tool: ${name}` };
 }
 
 function VoiceOrb(props: { status: VoiceStatus; muted: boolean }) {
@@ -619,7 +619,7 @@ export function VoicePanel(props: VoicePanelProps) {
     await waitForDataChannelOpen(channel);
     setRealtimeDiagnostics(t("voice.realtime_channel_open"));
     setRuntimeStatus("listening", audioInput ? undefined : t("voice.status_typed_connected"));
-    addEntry("system", `Realtime connected with ${realtimeSession.model} and ${realtimeSession.tools.length} Redrob Work tools.`);
+    addEntry("system", `Realtime connected with ${realtimeSession.model} and ${realtimeSession.tools.length} Redrob Cowork tools.`);
     recordInspectorEvent("voice.connected", { sessionId: props.sessionId, model: realtimeSession.model });
   }, [addEntry, disconnectRealtime, handleRealtimeMessage, props.client, props.sessionId, props.workspaceId, setRuntimeStatus]);
 

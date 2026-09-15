@@ -1,4 +1,4 @@
-# Outbound network access for Redrob Work
+# Outbound network access for Redrob Cowork
 
 Status: maintainer pointer
 

@@ -145,7 +145,7 @@ async function startRedrobServer(input: { workspaceRoot: string; opencodeBaseUrl
   return { server, token: config.token };
 }
 
-test("drives two headless turns on a native Redrob Work thread", async () => {
+test("drives two headless turns on a native Redrob Cowork thread", async () => {
   const workspaceRoot = await createWorkspaceRoot();
   const engine = startMockOpencode();
   const redrob = await startRedrobServer({

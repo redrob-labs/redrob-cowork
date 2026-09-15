@@ -1,6 +1,6 @@
 # Workflow Artifacts as MCP Apps
 
-Redrob Work exposes Workflow results as portable, standards-based
+Redrob Cowork exposes Workflow results as portable, standards-based
 MCP Apps. A supporting MCP host can render an artifact inline; every other MCP
 client still receives a useful Markdown result.
 
@@ -83,7 +83,7 @@ state.
 
 ## Next interoperable slice
 
-The provider side is deliberately usable without an Redrob Work-specific host.
+The provider side is deliberately usable without an Redrob Cowork-specific host.
 The next slice is a generic MCP Apps host in the desktop conversation surface:
 negotiate the UI extension with upstream MCP servers, preserve tool/resource
 metadata and structured results through the runtime, sandbox `ui://` resources,

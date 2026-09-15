@@ -78,7 +78,7 @@ pnpm check:outbound-access              # 선언되지 않은 네트워크 호�
 |---|---|---|
 | `i18n Audit` | 풀 리퀘스트, 푸시 | 필수 |
 | `redrob-ui-mcp` | 풀 리퀘스트, 푸시 | 필수 |
-| `Redrob Work Tests` | 수동 실행만 | **일시 중지** |
+| `Redrob Cowork Tests` | 수동 실행만 | **일시 중지** |
 
 테스트 워크플로는 의도적으로 `workflow_dispatch`로만 잠겨 있고 필수 체크가
 **아닙니다**. 트렁크 자체에 기존 실패가 있습니다 — Ripgrep 타임아웃과

@@ -106,7 +106,7 @@ const SECRET_ENV_PATTERN = /(TOKEN|PASSWORD|USERNAME|AUTH|SECRET|KEY|CREDENTIAL)
  * Default binary name for the Redrob Code engine. Resolved through PATH when no
  * explicit `bin` is supplied. Never falls back to upstream `opencode`: that
  * binary reads different env names and emits a different readiness line, so
- * silently starting it would produce an engine Redrob Work cannot drive.
+ * silently starting it would produce an engine Redrob Cowork cannot drive.
  */
 export const REDROB_CODE_BIN_NAME = "redrob";
 
@@ -191,7 +191,7 @@ async function startManagedOpencodeServer(
     REDROB_SERVER_PASSWORD: password,
   };
   // The managed engine needs its own provider environment, but never the key
-  // that decrypts Redrob Work-owned OAuth credentials.
+  // that decrypts Redrob Cowork-owned OAuth credentials.
   delete env.REDROB_ENCRYPTION_KEY;
   const injectedEnv = Object.entries({
     ...(options.env ?? {}),

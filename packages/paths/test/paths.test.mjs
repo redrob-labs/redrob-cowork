@@ -256,7 +256,7 @@ describe("global engine config paths", () => {
 
 describe("workspace engine config paths", () => {
   test("offers only the workspace-root files the engine loads", () => {
-    // `.opencode/redrob.json` is Redrob Work's own managed runtime config, so it
+    // `.opencode/redrob.json` is Redrob Cowork's own managed runtime config, so it
     // is deliberately absent here: listing it would point the user-config editor
     // at a file the app owns.
     expect(workspaceEngineConfigCandidates("/repo/workspace")).toEqual([

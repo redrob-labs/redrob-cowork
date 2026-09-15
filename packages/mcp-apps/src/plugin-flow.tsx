@@ -32,7 +32,7 @@ const RECIPIENT_LABEL: Record<NonNullable<PluginFlowPayload["recipient"]>["kind"
 }
 
 mountMcpApp({
-  name: "Redrob Work Plugin Flow",
+  name: "Redrob Cowork Plugin Flow",
   waitingLabel: "Finishing up...",
   schema: pluginFlowPayloadSchema,
   render: (payload) => {

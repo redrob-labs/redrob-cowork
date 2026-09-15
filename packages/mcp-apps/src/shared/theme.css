@@ -1,6 +1,6 @@
 /**
  * A card is styled by whatever the host sends through the MCP Apps style
- * vocabulary; Redrob Work sends its semantic roles, so a card matches the chat
+ * vocabulary; Redrob Cowork sends its semantic roles, so a card matches the chat
  * around it. The fallbacks are for a host that sends nothing, and they are the
  * Redrob primitives rather than a nearby grey: White and Gray 1/2/3/7/9, Blue 6,
  * and the status hues at level 1 and 4. Values, not variables, because this

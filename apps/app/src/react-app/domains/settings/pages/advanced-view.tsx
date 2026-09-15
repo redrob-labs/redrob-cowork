@@ -24,7 +24,7 @@ export type AdvancedViewProps = {
    *
    * Without this the card cannot tell "the engine failed" from "the engine was
    * never started", and it reported both as 연결되지 않음. On a first launch with
-   * no local workspace the boot path deliberately starts only the Redrob Work
+   * no local workspace the boot path deliberately starts only the Redrob Cowork
    * server and never the engine, so 연결되지 않음 was the steady state of a
    * perfectly healthy install -- which is what a user reported as a bug.
    */

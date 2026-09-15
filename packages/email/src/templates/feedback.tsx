@@ -43,7 +43,7 @@ export function FeedbackEmail({
     ["Entrypoint", entrypoint],
     ["Deployment", deployment],
     ["App version", appVersion],
-    ["Redrob Work server", redrobServerVersion],
+    ["Redrob Cowork server", redrobServerVersion],
     ["Redrob Code", redrobCodeVersion],
     ["OS", osLabel],
     ["Platform", platform],
@@ -53,10 +53,10 @@ export function FeedbackEmail({
   return (
     <Html>
       <Head />
-      <Preview>{name} sent an Redrob Work {label} from {entrypoint || source || "unknown"}</Preview>
+      <Preview>{name} sent an Redrob Cowork {label} from {entrypoint || source || "unknown"}</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
-          <Text style={styles.eyebrow}>{isContact ? "Redrob Work contact" : "Redrob Work feedback"}</Text>
+          <Text style={styles.eyebrow}>{isContact ? "Redrob Cowork contact" : "Redrob Cowork feedback"}</Text>
           <Heading style={styles.heading}>{isContact ? "Contact message" : "Feedback"} from {name}</Heading>
           <Text style={styles.contact}>{email}</Text>
 

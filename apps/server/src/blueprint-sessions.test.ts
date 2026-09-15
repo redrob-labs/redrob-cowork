@@ -14,10 +14,10 @@ describe("blueprint sessions", () => {
         sessions: [
           {
             id: "welcome",
-            title: "Welcome to Redrob Work",
+            title: "Welcome to Redrob Cowork",
             openOnFirstLoad: true,
             messages: [
-              { role: "assistant", text: "Hi welcome to Redrob Work!" },
+              { role: "assistant", text: "Hi welcome to Redrob Cowork!" },
               { role: "user", text: "Help me get started." },
             ],
           },
@@ -28,10 +28,10 @@ describe("blueprint sessions", () => {
     expect(sessions).toEqual([
       {
         id: "welcome",
-        title: "Welcome to Redrob Work",
+        title: "Welcome to Redrob Cowork",
         openOnFirstLoad: true,
         messages: [
-          { role: "assistant", text: "Hi welcome to Redrob Work!" },
+          { role: "assistant", text: "Hi welcome to Redrob Cowork!" },
           { role: "user", text: "Help me get started." },
         ],
       },

@@ -1015,7 +1015,7 @@ export function DebugView(props: DebugViewProps) {
           <div className="rounded-xl border border-success-muted/25 bg-success-soft/10 px-3 py-2 text-[12px] leading-relaxed text-success-ink">
             {t("settings.electron_migration_safe_default_intro")}<strong>{t("settings.electron_migration_prepare_button")}</strong>
             {t("settings.electron_migration_safe_default_outro")}
-            <code className="font-mono">Redrob Work.app.migrate-bak</code>.
+            <code className="font-mono">Redrob Cowork.app.migrate-bak</code>.
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -1153,7 +1153,7 @@ export function DebugView(props: DebugViewProps) {
 
           <div className="text-[11px] text-dls-secondary">
             {t("settings.electron_alpha_updater_feed_alpha")} <span className="font-mono">alpha-macos-latest/latest-mac.yml</span>. {t("settings.electron_alpha_updater_feed_stable")}{" "}
-            <span className="font-mono">cdn.redrob.ai/work/latest/latest-mac.yml</span>.
+            <span className="font-mono">github.com/redrob-labs/redrob-cowork/releases/latest/download/latest-mac.yml</span>.
           </div>
 
           {props.electronAlphaUpdaterStatus ? (

@@ -245,7 +245,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
             elapsedMs: Math.round(performance.now() - startedAt),
             checkpoints: ["resolve-started"],
           }
-          console.error(`[Redrob Work MCP App] ${diagnostic.code}`, diagnostic)
+          console.error(`[Redrob Cowork MCP App] ${diagnostic.code}`, diagnostic)
           setError(diagnostic)
         }
       })
@@ -282,7 +282,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         checkpoints: [...checkpoints],
         ...(sandboxDocument ? { sandboxDocument } : {}),
       }
-      console.error(`[Redrob Work MCP App] ${code}`, diagnostic)
+      console.error(`[Redrob Cowork MCP App] ${code}`, diagnostic)
       setError(diagnostic)
     }
     checkpoint("resource-resolved")
@@ -299,7 +299,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
     }
     const bridge = new AppBridge(
       null,
-      { name: "Redrob Work", version: "1.0.0" },
+      { name: "Redrob Cowork", version: "1.0.0" },
       { serverTools: {} },
       {
         hostContext: {
@@ -316,7 +316,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
       } catch (cause) {
         // Console-only: the app is told `isError` and renders its own copy, so
         // this line exists to be matched against the log, never read on screen.
-        console.error("[Redrob Work MCP App] MCP_APP_OPEN_LINK_BLOCKED", {
+        console.error("[Redrob Cowork MCP App] MCP_APP_OPEN_LINK_BLOCKED", {
           toolName: part.toolName,
           message: safeMcpAppDiagnosticMessage(cause, "The link could not be opened."),
         })

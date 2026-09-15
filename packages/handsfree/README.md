@@ -1,7 +1,7 @@
-# Redrob Work Computer Use
+# Redrob Cowork Computer Use
 
-Native macOS computer-use runtime for Redrob Work.
-Packaged Redrob Work builds wrap this runtime in a bundled `Computer Use.app`
+Native macOS computer-use runtime for Redrob Cowork.
+Packaged Redrob Cowork builds wrap this runtime in a bundled `Computer Use.app`
 helper so macOS Accessibility and Screen Recording permissions belong to the
 helper app instead of a transient Node or Swift process.
 

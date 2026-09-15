@@ -81,7 +81,7 @@ describe("ensureWorkspaceFiles", () => {
 
   test("uses external resources plugin path in packaged Electron", () => {
     const previousResourcesPath = process.resourcesPath;
-    const resourcesPath = join("/Applications", "Redrob Work.app", "Contents", "Resources");
+    const resourcesPath = join("/Applications", "Redrob Cowork.app", "Contents", "Resources");
     process.resourcesPath = resourcesPath;
     try {
       const pluginPath = redrobPluginPath(
@@ -107,14 +107,14 @@ describe("ensureWorkspaceFiles", () => {
     });
   });
 
-  test("does not rewrite existing Redrob Work agents", async () => {
+  test("does not rewrite existing Redrob Cowork agents", async () => {
     await withWorkspace(async (root) => {
       await mkdir(join(root, ".opencode", "agents"), { recursive: true });
       await writeFile(join(root, ".opencode", "agents", "redrob.md"), "---\ndescription: Old\n---\n\nOld instructions\n", "utf8");
       const result = await ensureWorkspaceFiles(root, "starter");
       const agent = await readFile(join(root, ".opencode", "agents", "redrob.md"), "utf8");
       expect(agent).toContain("Old instructions");
-      expect(agent).not.toContain("Redrob Work Artifacts");
+      expect(agent).not.toContain("Redrob Cowork Artifacts");
       expect(result.reloadReasons).toEqual([]);
     });
   });
