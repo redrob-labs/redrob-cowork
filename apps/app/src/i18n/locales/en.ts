@@ -840,7 +840,7 @@ const en = {
   "onboarding.attribution_ai_assistant_desc": "ChatGPT, Claude, Gemini, Perplexity...",
   "onboarding.attribution_ai_assistant_label": "An AI assistant",
   "onboarding.attribution_ai_prompt_label": "What did you ask the AI?",
-  "onboarding.attribution_ai_prompt_placeholder": "e.g. \"best open source alternative to Claude Cowork\"",
+  "onboarding.attribution_ai_prompt_placeholder": "e.g. \"best open source AI agent desktop app\"",
   "onboarding.attribution_friend_desc": "Someone recommended it directly.",
   "onboarding.attribution_friend_label": "A friend or colleague",
   "onboarding.attribution_github_desc": "Repos, stars, awesome lists...",

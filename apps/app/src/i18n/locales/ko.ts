@@ -837,7 +837,7 @@ const ko = {
   "onboarding.attribution_ai_assistant_desc": "ChatGPT, Claude, Gemini, Perplexity 등…",
   "onboarding.attribution_ai_assistant_label": "AI 어시스턴트",
   "onboarding.attribution_ai_prompt_label": "AI에게 어떻게 물어보셨나요?",
-  "onboarding.attribution_ai_prompt_placeholder": "예: \"Claude Cowork를 대체할 오픈소스 대안\"",
+  "onboarding.attribution_ai_prompt_placeholder": "예: \"오픈소스 AI 에이전트 데스크톱 앱\"",
   "onboarding.attribution_friend_desc": "누군가 직접 추천해 주었습니다.",
   "onboarding.attribution_friend_label": "친구나 동료",
   "onboarding.attribution_github_desc": "저장소, 스타, 추천 목록 등…",
