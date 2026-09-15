@@ -43,10 +43,23 @@ function resolveAppVersion(app) {
   }
   return _cachedAppVersion;
 }
-const WORK_CDN_BASE_URL = "https://cdn.redrob.ai/work";
+/**
+ * Updates come from the GitHub Release, which is where the release workflow already puts every
+ * artefact the updater needs: `latest.yml`, `latest-mac.yml`, `latest-linux*.yml`, the installers and
+ * their blockmaps. The CDN used to hold a copy of the same files and is no longer involved in
+ * updating at all.
+ *
+ * The provider stays `generic` rather than becoming electron-updater's `github`: the alpha channel
+ * and the targeted-version feeds both need to read a manifest from a SPECIFIC tag's download base,
+ * which the generic provider does by URL and the github provider does not expose. Pointing generic at
+ * `releases/<...>/download` gives one mechanism for all three cases.
+ */
+const GITHUB_RELEASES_BASE_URL = "https://github.com/redrob-labs/redrob-cowork/releases";
 const ELECTRON_UPDATER_FEEDS = Object.freeze({
-  stable: `${WORK_CDN_BASE_URL}/latest`,
-  alpha: "https://github.com/redrob-labs/redrob-work/releases/download/alpha-macos-latest",
+  // `/releases/latest/download` resolves to the newest published release, so the stable feed needs no
+  // version in it and no promotion step to move an alias.
+  stable: `${GITHUB_RELEASES_BASE_URL}/latest/download`,
+  alpha: `${GITHUB_RELEASES_BASE_URL}/download/alpha-macos-latest`,
 });
 
 function normalizeElectronUpdaterChannel(value, manifestChannel = "latest") {
@@ -177,7 +190,7 @@ export function targetedStableUpdaterFeed(currentVersion, targetVersion, allowOl
       ? "Recovery target version must differ from the installed version."
       : "Target update version must be newer than the installed version.");
   }
-  return `${WORK_CDN_BASE_URL}/${normalizedTarget}`;
+  return `${GITHUB_RELEASES_BASE_URL}/download/v${normalizedTarget}`;
 }
 
 function updaterChannelState(app, channel, targetVersion = null, manifestChannel = "latest") {
@@ -386,7 +399,7 @@ export function registerUpdaterIpc({
   async function resolveRecoveryArtifact(version) {
     if (!electronNet?.fetch) return null;
     try {
-      const manifestUrl = `${WORK_CDN_BASE_URL}/${version}/${recoveryManifestName(platform, arch, distribution)}`;
+      const manifestUrl = `${GITHUB_RELEASES_BASE_URL}/download/v${version}/${recoveryManifestName(platform, arch, distribution)}`;
       const response = await electronNet.fetch(manifestUrl, { headers: { Accept: "text/yaml, text/plain, */*" } });
       if (!response.ok) return null;
       return selectRecoveryArtifact(parseRecoveryManifest(await response.text()), {

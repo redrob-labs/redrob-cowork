@@ -1032,16 +1032,41 @@ jobs:
             gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           fi
 
-      - name: Promote published assets to CDN without rebuilding
+      # Version-stamped assets are what the updater reads (through latest*.yml) and what
+      # a person gets from the releases page. A marketing page cannot link them: the
+      # name changes every release, and `releases/latest/download/<name>` needs an exact
+      # name. So the installers are uploaded a second time under version-less alias
+      # names, which is the one job the CDN mirror used to do.
+      - name: Upload stable download aliases
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.resolve-release.outputs.release_tag }}
           RELEASE_VERSION: ${{ needs.resolve-release.outputs.release_version }}
         run: |
           set -euo pipefail
-          gh workflow run promote-release-to-cdn.yml \
-            --repo "$GITHUB_REPOSITORY" \
-            --ref main \
-            -f version="$RELEASE_VERSION"
+          work="$(mktemp -d)"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$work" \
+            --pattern 'redrob-*' --clobber
+          aliases=()
+          for asset in "$work"/redrob-*; do
+            name="$(basename "$asset")"
+            case "$name" in
+              *.blockmap) continue ;;
+            esac
+            alias="${name/-$RELEASE_VERSION/}"
+            if [ "$alias" = "$name" ]; then
+              echo "Skipping $name: no version segment to strip" >&2
+              continue
+            fi
+            cp "$asset" "$work/$alias"
+            aliases+=("$work/$alias")
+          done
+          if [ ${#aliases[@]} -eq 0 ]; then
+            echo "No installers found to alias" >&2
+            exit 1
+          fi
+          printf 'Uploading %s stable aliases\n' "${#aliases[@]}"
+          gh release upload "$RELEASE_TAG" "${aliases[@]}" --repo "$GITHUB_REPOSITORY" --clobber
 
   prepare-npm:
     name: Prepare redrob-server npm package
