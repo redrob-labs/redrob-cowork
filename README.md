@@ -53,23 +53,24 @@ A hosted Redrob Cowork MCP gateway is planned: one URL that brings your skills, 
 
 Redrob Cowork registers the `redrob://` URL scheme (and `redrob-dev://` in development) so connect links and other deep links open the app directly.
 
-## Downloading builds from cdn.redrob.ai
+## Downloading builds from GitHub Releases
 
-Alongside the download page, the Linux desktop distributables are published to a
-CDN for anyone side-loading them. Each build goes to two keys, one by version and
-one stable alias that a download page can link without being edited on every
-release:
+Every build is published to this repository's [Releases](https://github.com/redrob-labs/redrob-cowork/releases),
+which is also where the app reads its updates from. There is no CDN mirror.
+
+Each installer is uploaded twice: once stamped with the version, and once under a
+version-less alias so a page can link it without being edited on every release.
 
 ```text
-https://cdn.redrob.ai/work/{version}/redrob-linux-x64-{version}.AppImage
-https://cdn.redrob.ai/work/{version}/redrob-linux-x64-{version}.tar.gz
-https://cdn.redrob.ai/work/latest/redrob-linux-x64.AppImage
-https://cdn.redrob.ai/work/latest/redrob-linux-x64.tar.gz
+https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-linux-x86_64-{version}.AppImage
+https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-linux-x64-{version}.tar.gz
+https://github.com/redrob-labs/redrob-cowork/releases/latest/download/redrob-linux-x86_64.AppImage
+https://github.com/redrob-labs/redrob-cowork/releases/latest/download/redrob-linux-x64.tar.gz
 ```
 
-Every object has a `.sha256` sidecar beside it in `sha256sum` format naming the
-file it describes, so a download can be checked in place with
-`sha256sum -c redrob-linux-x64.AppImage.sha256`.
+Checksums are the `sha512` digests inside the release's `latest*.yml` manifests,
+which is what the updater verifies against. GitHub does not publish a `.sha256`
+sidecar per asset, so there is no file to `sha256sum -c`.
 
 **These Linux artefacts are unsigned.** A plain GitHub runner has no Linux
 code-signing identity, so the AppImage and tarball are published as built; verify

@@ -1153,7 +1153,7 @@ export function DebugView(props: DebugViewProps) {
 
           <div className="text-[11px] text-dls-secondary">
             {t("settings.electron_alpha_updater_feed_alpha")} <span className="font-mono">alpha-macos-latest/latest-mac.yml</span>. {t("settings.electron_alpha_updater_feed_stable")}{" "}
-            <span className="font-mono">cdn.redrob.ai/work/latest/latest-mac.yml</span>.
+            <span className="font-mono">github.com/redrob-labs/redrob-cowork/releases/latest/download/latest-mac.yml</span>.
           </div>
 
           {props.electronAlphaUpdaterStatus ? (
