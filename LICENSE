@@ -1,4 +1,5 @@
 Copyright (c) 2026-present Different AI, Inc.
+Copyright (c) 2026-present Redrob Work
 
 This repository is a fork of OpenWork (https://github.com/different-ai/openwork).
 It ships the MIT-licensed portion of that work only: the upstream /ee directory,
@@ -6,10 +7,26 @@ which is licensed under the OpenWork Enterprise Edition License and requires an
 OpenWork subscription for production use, is deliberately not part of this tree.
 scripts/check-upstream-boundary.mjs enforces that.
 
+The upstream copyright notice above is retained as the MIT license requires, and
+is never replaced. Changes made in this fork are copyright Redrob Work and are
+released under the same MIT terms, so the whole tree stays MIT.
+
 Portions of this software are licensed as follows:
 
 * All third party components incorporated into this software are licensed under the original license provided by the owner of the applicable component.
 * All remaining content is available under the "MIT" license as defined below.
+
+A machine-readable version of this statement is in REUSE.toml (REUSE spec), with
+the license text in LICENSES/MIT.txt.
+
+Trademarks
+----------
+
+The MIT license below grants rights to the software; it grants no rights to
+trademarks. "Redrob", "Redrob Work", "레드롭 워크", and the Redrob logos and
+brand assets are not licensed under it. A fork may use the code freely but must
+use its own name and marks. The same applies in the other direction to
+"OpenWork" and Different AI's marks.
 
 MIT License
 

@@ -95,6 +95,50 @@ if (!existsSync(licensePath)) {
   }
 }
 
+// 3. Attribution must survive. MIT requires the upstream copyright notice to be
+//    retained in every copy, so the check is that upstream's holder is still
+//    named — in the human-readable LICENSE, in the SPDX license text, and in the
+//    machine-readable REUSE map. A rebrand sweep that replaces "Different AI"
+//    everywhere is the realistic way this breaks, and it breaks the license.
+const UPSTREAM_HOLDER = "Different AI";
+const FORK_HOLDER = "Redrob Work";
+
+const attributionFiles = [
+  { path: "LICENSE", label: "LICENSE" },
+  { path: "LICENSES/MIT.txt", label: "LICENSES/MIT.txt (SPDX license text)" },
+  { path: "REUSE.toml", label: "REUSE.toml (machine-readable map)" },
+];
+
+for (const { path, label } of attributionFiles) {
+  const full = join(REPO_ROOT, path);
+  if (!existsSync(full)) {
+    violations.push(`${label} is missing; attribution and the license map must ship with the code.`);
+    continue;
+  }
+  const text = readFileSync(full, "utf8");
+  if (!text.includes(UPSTREAM_HOLDER)) {
+    violations.push(
+      `${label} no longer names the upstream copyright holder "${UPSTREAM_HOLDER}". ` +
+        `MIT requires that notice be retained — add your line, never replace theirs.`,
+    );
+  }
+  if (!text.includes(FORK_HOLDER)) {
+    violations.push(`${label} does not name this fork's copyright holder "${FORK_HOLDER}".`);
+  }
+}
+
+// 4. The REUSE map must not annotate a tree this fork does not ship.
+const reusePath = join(REPO_ROOT, "REUSE.toml");
+if (existsSync(reusePath)) {
+  const reuse = readFileSync(reusePath, "utf8");
+  if (/LicenseRef-OpenWork-EE/.test(reuse) || /path\s*=\s*"ee\//.test(reuse)) {
+    violations.push(
+      "REUSE.toml still annotates upstream's ee/ tree, which this fork does not ship. " +
+        "Remove that annotation so scanners do not report an EE-licensed component.",
+    );
+  }
+}
+
 if (violations.length > 0) {
   process.stderr.write("Upstream boundary check failed.\n");
   for (const violation of violations) {

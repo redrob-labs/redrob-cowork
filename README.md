@@ -120,3 +120,19 @@ If a second instance cannot get the profile lock it now says so and exits, inste
 Redrob Work ships in English and Korean.
 
 README translations: [English](./README.md), [한국어](./README_KO.md).
+
+## License and attribution
+
+Redrob Work is a fork of [OpenWork](https://github.com/different-ai/openwork) by
+Different AI, Inc., and is MIT licensed. Upstream's copyright notice is retained
+in [LICENSE](./LICENSE); changes made in this fork are copyright Redrob Work and
+are released under the same MIT terms.
+
+Upstream's `/ee` directory is licensed under the OpenWork Enterprise Edition
+License, which requires an OpenWork subscription for production use. This fork
+does not ship it, and `pnpm check:upstream-boundary` fails the build if it ever
+reappears. See [docs/UPSTREAM.md](./docs/UPSTREAM.md) for how upstream changes
+are tracked.
+
+The MIT license covers the software, not the brand: the Redrob name and logos
+are not licensed under it.

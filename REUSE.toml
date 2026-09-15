@@ -1,0 +1,21 @@
+# Machine-readable licensing map (REUSE spec, https://reuse.software).
+#
+# Restored from upstream, with one change: upstream's `ee/**` annotation is gone
+# because this fork does not ship that tree. Upstream licenses it under the
+# OpenWork Enterprise Edition License, which requires an OpenWork subscription
+# for production use; the import deleted it and
+# scripts/check-upstream-boundary.mjs keeps it out.
+#
+# Both copyright holders are listed, upstream first: MIT requires that its
+# notice be retained in every copy, so the upstream line is never replaced —
+# only added to. Mirrors the human-readable statement in /LICENSE.
+version = 1
+
+[[annotations]]
+path = "**"
+precedence = "closest"
+SPDX-FileCopyrightText = [
+  "2026-present Different AI, Inc.",
+  "2026-present Redrob Work",
+]
+SPDX-License-Identifier = "MIT"
