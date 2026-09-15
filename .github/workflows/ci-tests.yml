@@ -79,6 +79,12 @@ jobs:
       - name: Check outbound access manifest
         run: pnpm check:outbound-access
 
+      # Upstream's /ee tree is Enterprise-Edition licensed and this fork does not
+      # ship it. A selective upstream merge is the operation that can silently
+      # bring it back, so the boundary is a build gate, not a convention.
+      - name: Check upstream licensing boundary
+        run: pnpm check:upstream-boundary
+
       # The packaged builds bundle the server plugins with `--target node`,
       # which resolves workspace packages through their published exports
       # rather than TypeScript paths. Typechecks and bun tests never take that

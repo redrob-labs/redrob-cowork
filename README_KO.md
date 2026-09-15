@@ -76,3 +76,21 @@ pnpm dev:worktree
 레드롭 워크는 영어와 한국어를 지원합니다.
 
 README 번역: [English](./README.md), [한국어](./README_KO.md).
+
+## 라이선스와 출처 표기
+
+레드롭 워크는 Different AI, Inc.의 [OpenWork](https://github.com/different-ai/openwork)를
+포크한 프로젝트이며 MIT 라이선스를 따릅니다. 상류의 저작권 표기는 [LICENSE](./LICENSE)에
+그대로 남겨 두었고, 이 포크에서 추가·수정한 부분의 저작권은 이장훈(레드롭)과 기여자들에게
+있으며 같은 MIT 조건으로 배포합니다. 기여자는 각자 자기 기여분의 저작권을 그대로 가집니다.
+
+저작권 표기 줄은 법적 식별자이므로 번역하지 않고 원문 그대로 씁니다:
+`Copyright (c) 2026-present Janghoon Lee (Redrob) and contributors`
+
+상류의 `/ee` 디렉터리는 OpenWork Enterprise Edition 라이선스를 따르며 프로덕션 사용에
+OpenWork 구독이 필요합니다. 이 포크는 그 트리를 포함하지 않고, 다시 들어오면
+`pnpm check:upstream-boundary`가 빌드를 실패시킵니다. 상류 변경을 추적하는 방법은
+[docs/UPSTREAM.md](./docs/UPSTREAM.md)에 있습니다.
+
+MIT 라이선스는 소프트웨어에 대한 권리이고 브랜드에는 적용되지 않습니다. 레드롭 이름과
+로고는 MIT로 허여되지 않습니다.
