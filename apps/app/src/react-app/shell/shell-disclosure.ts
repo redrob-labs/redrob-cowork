@@ -16,18 +16,8 @@ export type ShellConfig = {
   docsButton: boolean;
   /** Show the Feedback entry in the account menu. */
   feedbackButton: boolean;
-  /** Show the Cloud sign-in button when not signed in. */
-  cloudSignin: boolean;
-  /** Show the welcome/onboarding page for new users. */
-  welcomePage: boolean;
   /** Show starter task cards in empty sessions. */
   starterCards: boolean;
-  /** Show the model picker / model change UI. */
-  modelPicker: boolean;
-  /** Show the built-in browser panel. */
-  browser: boolean;
-  /** Show the "Add workspace" button. */
-  addWorkspace: boolean;
   /** Show the notification bell in the header. */
   notifications: boolean;
 };
@@ -38,14 +28,26 @@ export const DEFAULT_SHELL_CONFIG: ShellConfig = {
   sidebar: true,
   docsButton: true,
   feedbackButton: true,
-  cloudSignin: true,
-  welcomePage: true,
   starterCards: true,
-  modelPicker: true,
-  browser: true,
-  addWorkspace: true,
   notifications: true,
 };
+
+/**
+ * Flags that were declared here but that nothing ever read.
+ *
+ * `cloudSignin`, `welcomePage`, `modelPicker`, `browser` and `addWorkspace` had
+ * no consumer anywhere in the app, so setting any of them changed nothing on
+ * screen — a settings surface that silently does nothing is worse than no
+ * setting. Named rather than merely deleted so a stored value for one is dropped
+ * on read instead of lingering in the persisted overrides forever.
+ */
+export const REMOVED_SHELL_FLAGS = [
+  "cloudSignin",
+  "welcomePage",
+  "modelPicker",
+  "browser",
+  "addWorkspace",
+] as const;
 
 /**
  * How much of the UI this user has been shown.
@@ -104,6 +106,24 @@ export function resolveShellConfig(state: StoredShellState): ShellConfig {
   return { ...base, ...state.overrides };
 }
 
+/**
+ * Keep only keys that are still real flags.
+ *
+ * Persisted state outlives the code that wrote it, so an override for a flag we
+ * have since removed would otherwise sit in localStorage forever and get spread
+ * back over the resolved config. Filtering on read also hardens what was an
+ * unchecked cast: whatever is in storage, only known keys survive it.
+ */
+function knownOverrides(raw: unknown): Partial<ShellConfig> {
+  if (!raw || typeof raw !== "object") return {};
+  const source = raw as Record<string, unknown>;
+  const kept: Partial<ShellConfig> = {};
+  for (const key of Object.keys(DEFAULT_SHELL_CONFIG) as (keyof ShellConfig)[]) {
+    if (key in source) kept[key] = source[key] as never;
+  }
+  return kept;
+}
+
 export function migrateShellState(raw: unknown): StoredShellState {
   if (!raw || typeof raw !== "object") return FRESH_SHELL_STATE;
   const value = raw as Record<string, unknown>;
@@ -115,21 +135,19 @@ export function migrateShellState(raw: unknown): StoredShellState {
       // worse first run, but hiding a feature someone relies on is a bug report.
       level: value.level === "new" ? "new" : "experienced",
       sessions: typeof value.sessions === "number" ? value.sessions : 0,
-      overrides:
-        value.overrides && typeof value.overrides === "object"
-          ? (value.overrides as Partial<ShellConfig>)
-          : {},
+      overrides: knownOverrides(value.overrides),
     };
   }
 
   // v1 stored a whole ShellConfig. Whatever it holds is what this user has been
   // seeing, so carry it forward verbatim and mark them experienced rather than
   // hiding surfaces they already use.
-  const overrides: Partial<ShellConfig> = {};
-  for (const key of Object.keys(DEFAULT_SHELL_CONFIG) as (keyof ShellConfig)[]) {
-    if (key in value) overrides[key] = value[key] as never;
-  }
-  return { version: 2, level: "experienced", sessions: GRADUATE_AFTER_SESSIONS, overrides };
+  return {
+    version: 2,
+    level: "experienced",
+    sessions: GRADUATE_AFTER_SESSIONS,
+    overrides: knownOverrides(value),
+  };
 }
 
 /** Whether the next opened session should widen what this user sees. */

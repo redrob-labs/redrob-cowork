@@ -6,6 +6,7 @@ import {
   DEFAULT_SHELL_CONFIG,
   GRADUATE_AFTER_SESSIONS,
   migrateShellState,
+  REMOVED_SHELL_FLAGS,
   resolveShellConfig,
   type ShellConfig,
 } from "./shell-disclosure";
@@ -121,6 +122,56 @@ describe("graduation threshold", () => {
   test("the threshold is small enough to reach in ordinary use", () => {
     expect(GRADUATE_AFTER_SESSIONS).toBeGreaterThan(0);
     expect(GRADUATE_AFTER_SESSIONS).toBeLessThanOrEqual(10);
+  });
+});
+
+describe("the removed flags", () => {
+  // These were declared but nothing ever read them, so toggling one changed
+  // nothing on screen. A setting that silently does nothing is worse than no
+  // setting, and the danger in re-adding one is that it looks wired.
+  test("are gone from the config", () => {
+    for (const flag of REMOVED_SHELL_FLAGS) {
+      expect(Object.keys(DEFAULT_SHELL_CONFIG)).not.toContain(flag);
+    }
+  });
+
+  test("a stored value for one is dropped rather than kept forever", () => {
+    const migrated = migrateShellState({
+      version: 2,
+      level: "experienced",
+      sessions: 0,
+      overrides: { cloudSignin: false, modelPicker: false, notifications: false },
+    });
+    for (const flag of REMOVED_SHELL_FLAGS) {
+      expect(migrated.overrides).not.toHaveProperty(flag);
+    }
+    // A real flag stored alongside them still survives.
+    expect(migrated.overrides.notifications).toBe(false);
+  });
+
+  test("a v1 install carrying one migrates without it", () => {
+    const migrated = migrateShellState({ ...DEFAULT_SHELL_CONFIG, browser: false, sidebar: false });
+    expect(migrated.overrides).not.toHaveProperty("browser");
+    expect(migrated.overrides.sidebar).toBe(false);
+  });
+
+  test("unknown keys never reach the resolved config", () => {
+    const migrated = migrateShellState({
+      version: 2,
+      level: "experienced",
+      sessions: 0,
+      overrides: { somethingInvented: true },
+    });
+    expect(Object.keys(resolveShellConfig(migrated)).sort()).toEqual(
+      Object.keys(DEFAULT_SHELL_CONFIG).sort(),
+    );
+  });
+
+  test("every remaining flag has a consumer, which is why it stayed", () => {
+    // Guards the inverse mistake: trimming a flag that IS wired.
+    expect(Object.keys(DEFAULT_SHELL_CONFIG).sort()).toEqual(
+      ["appName", "docsButton", "feedbackButton", "notifications", "sidebar", "starterCards", "statusBar"],
+    );
   });
 });
 
