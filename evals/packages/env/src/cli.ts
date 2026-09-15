@@ -5,7 +5,7 @@ import { resolvePlace } from "./place.ts";
 import { acmeDemo, acmeDocs, soloWorkspace, supportOrg } from "./presets.ts";
 import type { Place } from "./place.ts";
 import type { WorldDefinition, WorldTopology } from "./topology.ts";
-import { fromSnapshot, parseUntrustedSnapshot, resumeWorld as attachWorld, startWorld } from "./world.ts";
+import { fromSnapshot, resumeWorld as attachWorld, startWorld } from "./world.ts";
 import type { ResumedWorld, WorldTeardownResult } from "./world.ts";
 
 const REPO_ROOT = fileURLToPath(new URL("../../../..", import.meta.url));
@@ -220,11 +220,15 @@ function snapshotSummary(text: string): {
   orgs: string[];
   apps: string[];
 } {
-  const parsed = parseUntrustedSnapshot(text);
+  const parsed = fromSnapshot(text);
+  const json: unknown = JSON.parse(text);
+  if (!isRecord(json) || typeof json.createdAt !== "string" || typeof json.place !== "string") {
+    throw new Error("Snapshot summary fields are missing.");
+  }
   return {
     name: parsed.name,
-    createdAt: parsed.createdAt,
-    place: parsed.place,
+    createdAt: json.createdAt,
+    place: json.place,
     orgs: Object.keys(parsed.topology.den.orgs),
     apps: Object.keys(parsed.topology.apps ?? {}),
   };

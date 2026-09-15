@@ -1,5 +1,5 @@
 config:
-  openworkDevMode: "0"
+  openworkDevMode: "1"
   denApiNodeOptions: --use-openssl-ca
   tenancy:
     mode: multi_org
