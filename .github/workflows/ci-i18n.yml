@@ -34,3 +34,11 @@ jobs:
       # request, and a rename of 1,710 occurrences is undone one file at a time.
       - name: Check the retired product name is gone
         run: node scripts/check-brand.mjs
+
+      # A release build was the first thing to ever read main.mjs, and it found
+      # an unclosed IPC handler that had been sitting on the trunk: the desktop
+      # tests import the modules they exercise, and none of them imports the
+      # entry point. Parsing every shipped .mjs costs milliseconds, so it runs
+      # on every pull request rather than at release time.
+      - name: Check shipped modules parse
+        run: node scripts/check-syntax.mjs
