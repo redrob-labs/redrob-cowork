@@ -80,6 +80,7 @@ import { ExtensionsView, type ExtensionsSection } from "@/react-app/domains/sett
 import { McpView } from "@/react-app/domains/settings/pages/mcp-view";
 import { RecoveryView } from "@/react-app/domains/settings/pages/recovery-view";
 import { UpdatesView } from "@/react-app/domains/settings/pages/updates-view";
+import { NukeDialog } from "@/react-app/domains/settings/modals/nuke-dialog";
 import { useDebugViewModel } from "@/react-app/domains/settings/state/debug-view-model";
 import { useElectronUpdaterState } from "@/react-app/domains/settings/state/electron-updater-state";
 import { useBootState } from "./boot-state";
@@ -2084,6 +2085,17 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         return (
           <RecoveryView
             anyActiveRuns={false}
+            onReplayOnboarding={() => {
+              // Clearing the flag is not enough on its own: the redirect that
+              // shows the tour only fires when there are no workspaces, so an
+              // existing user would flip the flag and see nothing. Navigate
+              // there directly, and leave every other piece of state alone --
+              // this is "show me that again", not a reset.
+              local.setPrefs((previous) => ({ ...previous, hasCompletedOnboarding: false }));
+              navigate("/welcome");
+            }}
+            onOpenResetAppData={debugViewProps.onOpenNukeDialog}
+            resetAppDataBusy={debugViewProps.nukePreviewBusy || debugViewProps.nukeConfigBusy}
             workspaceConfigPath={
               selectedWorkspaceRoot
                 ? joinDisplayPath(selectedWorkspaceRoot, ".redrob", "redrob.json")
@@ -2151,6 +2163,23 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         </SettingsShell>
       )}
 
+      {/*
+        One instance for every tab. It used to live inside DebugView, which
+        renders nothing without developer mode -- so the Recovery tab's reset
+        button would have set the dialog's state and shown no dialog.
+      */}
+      <NukeDialog
+        open={debugViewProps.nukeDialogOpen}
+        onClose={debugViewProps.onCloseNukeDialog}
+        manifestPreview={debugViewProps.nukeManifestPreview}
+        deleteBootstrap={debugViewProps.nukeDeleteBootstrap}
+        onSetDeleteBootstrap={debugViewProps.onSetNukeDeleteBootstrap}
+        confirmationText={debugViewProps.nukeConfirmationText}
+        onSetConfirmationText={debugViewProps.onSetNukeConfirmationText}
+        busy={debugViewProps.nukeConfigBusy}
+        previewBusy={debugViewProps.nukePreviewBusy}
+        onConfirm={debugViewProps.onConfirmNukeRedrobAndOpencodeConfig}
+      />
       <CommandPalette
         open={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}

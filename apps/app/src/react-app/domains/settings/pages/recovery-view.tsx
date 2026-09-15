@@ -31,6 +31,15 @@ export type RecoveryViewProps = {
   dockerCleanupBusy: boolean;
   dockerCleanupResult: string | null;
   onCleanupRedrobDockerContainers: () => void | Promise<void>;
+  /**
+   * Replays the first-run tour. Non-destructive: it clears the
+   * onboarding-complete flag and navigates to the welcome route, and touches
+   * nothing else.
+   */
+  onReplayOnboarding?: () => void;
+  /** Opens the wipe-everything confirmation. Omitted off-desktop. */
+  onOpenResetAppData?: () => void | Promise<void>;
+  resetAppDataBusy?: boolean;
 };
 
 export function RecoveryView(props: RecoveryViewProps) {
@@ -47,6 +56,58 @@ export function RecoveryView(props: RecoveryViewProps) {
           <AlertDescription>{t("settings.recovery_requires_desktop")}</AlertDescription>
         </Alert>
       )}
+      <LayoutSectionItem>
+        <LayoutSectionItemHeader>
+          <LayoutSectionItemTitle>{t("settings.replay_onboarding_title")}</LayoutSectionItemTitle>
+          <LayoutSectionItemDescription>{t("settings.replay_onboarding_desc")}</LayoutSectionItemDescription>
+          <LayoutSectionItemHeaderActions>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => props.onReplayOnboarding?.()}
+              disabled={!props.onReplayOnboarding}
+            >
+              {t("settings.replay_onboarding_button")}
+            </Button>
+          </LayoutSectionItemHeaderActions>
+        </LayoutSectionItemHeader>
+      </LayoutSectionItem>
+
+      {/*
+        The wipe. It lived only behind the developer-mode toggle, which is not
+        somewhere a user looks when they want to start over -- so it is here, with
+        its own confirmation and its list of what gets deleted, rather than
+        promoted to a casual button.
+      */}
+      <LayoutSectionItem>
+        <LayoutSectionItemHeader>
+          <LayoutSectionItemTitle>{t("settings.reset_app_data_title")}</LayoutSectionItemTitle>
+          <LayoutSectionItemDescription>{t("settings.reset_app_data_desc")}</LayoutSectionItemDescription>
+          <LayoutSectionItemHeaderActions>
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex" />}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => void props.onOpenResetAppData?.()}
+                  disabled={
+                    !props.onOpenResetAppData
+                    || !isDesktopRuntime()
+                    || props.resetAppDataBusy === true
+                    || props.anyActiveRuns
+                  }
+                >
+                  {props.resetAppDataBusy ? t("settings.nuke_previewing") : t("settings.reset_app_data_button")}
+                </Button>
+              </TooltipTrigger>
+              {props.anyActiveRuns && (
+                <TooltipContent>{t("settings.stop_runs_before_reset_config")}</TooltipContent>
+              )}
+            </Tooltip>
+          </LayoutSectionItemHeaderActions>
+        </LayoutSectionItemHeader>
+      </LayoutSectionItem>
+
       <LayoutSectionItem>
         <LayoutSectionItemHeader>
           <LayoutSectionItemTitle>{t("settings.workspace_config_title")}</LayoutSectionItemTitle>

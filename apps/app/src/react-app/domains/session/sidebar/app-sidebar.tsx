@@ -344,10 +344,10 @@ function SessionMenuContent({ variant, sessionId, workspaceId, isPinned, isArchi
             )}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        {ctx.onArchiveSession ? (
-          <DropdownMenuItem onClick={() => ctx.onArchiveSession?.(sessionId, !isArchived)}>
-            {isArchived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
-            {isArchived ? t("session_management.unarchive_session") : t("session_management.archive_session")}
+        {isArchived && ctx.onArchiveSession ? (
+          <DropdownMenuItem onClick={() => ctx.onArchiveSession?.(sessionId, false)}>
+            <ArchiveRestore className="size-4" />
+            {t("session_management.unarchive_session")}
           </DropdownMenuItem>
         ) : null}
         {ctx.onOpenDeleteSession ? (
@@ -429,10 +429,10 @@ function SessionMenuContent({ variant, sessionId, workspaceId, isPinned, isArchi
           )}
         </ContextMenuSubContent>
       </ContextMenuSub>
-      {ctx.onArchiveSession ? (
-        <ContextMenuItem onClick={() => ctx.onArchiveSession?.(sessionId, !isArchived)}>
-          {isArchived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
-          {isArchived ? t("session_management.unarchive_session") : t("session_management.archive_session")}
+      {isArchived && ctx.onArchiveSession ? (
+        <ContextMenuItem onClick={() => ctx.onArchiveSession?.(sessionId, false)}>
+          <ArchiveRestore className="size-4" />
+          {t("session_management.unarchive_session")}
         </ContextMenuItem>
       ) : null}
       {ctx.onOpenDeleteSession ? (
@@ -512,22 +512,46 @@ function SessionHoverQuickActions({
       >
         {isPinned ? <PinOff className="size-3.5" /> : <Pin className="size-3.5" />}
       </Button>
-      {ctx.onArchiveSession ? (
+      {isArchived && ctx.onArchiveSession ? (
+        // Archiving is gone, but sessions archived before it went are still in the
+        // list, and taking away the way back would strand them. So the restore
+        // direction stays, and only on those rows.
         <Button
           variant="ghost"
           size="icon"
           className="size-5 text-muted-foreground hover:bg-transparent hover:text-foreground"
-          aria-label={isArchived ? t("session_management.unarchive_session") : t("session_management.archive_session")}
+          aria-label={t("session_management.unarchive_session")}
           onClick={(event) => {
             event.stopPropagation();
-            ctx.onArchiveSession?.(sessionId, !isArchived);
+            ctx.onArchiveSession?.(sessionId, false);
           }}
         >
-          {isArchived ? <ArchiveRestore className="size-3.5" /> : <Archive className="size-3.5" />}
+          <ArchiveRestore className="size-3.5" />
+        </Button>
+      ) : null}
+      {ctx.onOpenDeleteSession ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-5 text-muted-foreground hover:bg-transparent hover:text-destructive"
+          aria-label={t("workspace_list.delete_session")}
+          onClick={(event) => {
+            event.stopPropagation();
+            // Opens the confirm dialog rather than deleting on the spot: this is
+            // a one-click control on a hover row, which is exactly where a
+            // mis-aimed pointer lands.
+            ctx.onOpenDeleteSession?.(sessionId);
+          }}
+        >
+          <Trash2 className="size-3.5" />
         </Button>
       ) : null}
       {relativeTime ? (
-        <span className="min-w-[1.25rem] text-right text-[11px] tabular-nums text-muted-foreground/80">
+        // shrink-0 and nowrap because this used to be clipped: the row reserves a
+        // fixed padding for these controls and the parent button hides overflow,
+        // so a flexible box left the time about 20px -- enough for "3h" and not
+        // for anything else.
+        <span className="shrink-0 whitespace-nowrap text-right text-[11px] tabular-nums text-muted-foreground/80">
           {relativeTime}
         </span>
       ) : null}
@@ -2287,7 +2311,7 @@ function SessionMenuItem({
     // Soft pill @ 11px radius from Paper; overlay tint adapts to theme
     // (light: --ow-light-hover ≈ black/5, dark: #FFFFFF17 ≈ white/9).
     // Nesting uses inline padding so each depth level steps 12px (not a binary nest).
-    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-7 group-hover/menu-sub-item:pe-18 group-has-data-popup-open/menu-sub-item:pe-18 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
+    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-7 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
   );
   const rowButtonStyle = {
     paddingInlineStart: sidebarRowPaddingInlineStart(visualDepth),
