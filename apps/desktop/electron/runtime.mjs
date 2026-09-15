@@ -1,5 +1,5 @@
 import { randomUUID, X509Certificate } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import net from "node:net";
@@ -1717,20 +1717,83 @@ export function createRuntimeManager({
       .sort();
   }
 
+  /**
+   * Run a program and collect its output.
+   *
+   * This used to be `spawnSync`, which blocked the main process for the whole
+   * command. The engine install runs through here with a 180s timeout, so a slow
+   * download froze the entire app -- and because the main process was blocked it
+   * could not receive an IPC message either, which is why the onboarding step had
+   * no way to offer a cancel. Spawning asynchronously keeps the process
+   * responsive and lets `options.signal` abort a command that is still running.
+   */
   async function runShellCommand(program, args, options = {}) {
-    const result = spawnSync(program, args, {
-      encoding: "utf8",
-      cwd: options.cwd,
-      env: options.env,
-      shell: false,
-      windowsHide: true,
-      timeout: options.timeoutMs,
+    return await new Promise((resolve) => {
+      let settled = false;
+      const finish = (status, stdout, stderr) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        options.signal?.removeEventListener("abort", onAbort);
+        resolve({ status, stdout, stderr });
+      };
+
+      let child;
+      try {
+        child = spawn(program, args, {
+          cwd: options.cwd,
+          env: options.env,
+          shell: false,
+          windowsHide: true,
+          // Own process group, so a cancel reaches the whole pipeline rather than
+          // just the shell: the install pipes curl into bash, and killing only the
+          // shell would leave the download running.
+          detached: process.platform !== "win32",
+        });
+      } catch (error) {
+        return finish(-1, "", error instanceof Error ? error.message : String(error));
+      }
+
+      let stdout = "";
+      let stderr = "";
+      child.stdout?.setEncoding("utf8");
+      child.stderr?.setEncoding("utf8");
+      child.stdout?.on("data", (chunk) => {
+        stdout += chunk;
+      });
+      child.stderr?.on("data", (chunk) => {
+        stderr += chunk;
+      });
+
+      const stop = (signal) => {
+        if (child.pid && process.platform !== "win32") {
+          // Negative pid targets the group we created with `detached`.
+          killProcessId(-child.pid, signal);
+        }
+        try {
+          child.kill(signal);
+        } catch {
+          // Already gone.
+        }
+      };
+
+      const timer = options.timeoutMs
+        ? setTimeout(() => {
+            stop("SIGKILL");
+            finish(-1, stdout, stderr || `Timed out after ${options.timeoutMs}ms.`);
+          }, options.timeoutMs)
+        : undefined;
+
+      const onAbort = () => {
+        stop("SIGTERM");
+        finish(-1, stdout, stderr || "Cancelled.");
+      };
+      if (options.signal?.aborted) return onAbort();
+      options.signal?.addEventListener("abort", onAbort, { once: true });
+
+      child.on("error", (error) => finish(-1, stdout, error?.message ?? String(error)));
+      child.on("close", (code) => finish(typeof code === "number" ? code : -1, stdout, stderr));
     });
-    return {
-      status: typeof result.status === "number" ? result.status : -1,
-      stdout: result.stdout ?? "",
-      stderr: result.stderr ?? "",
-    };
   }
 
   function engineDoctor(options = {}) {
@@ -2261,6 +2324,9 @@ export function createRuntimeManager({
     });
   }
 
+  /** In-flight engine install, so a cancel from the onboarding step can reach it. */
+  let engineInstallAbort = null;
+
   async function engineInstall() {
     if (!REDROB_ENGINE_INSTALL_URL) {
       return {
@@ -2282,16 +2348,37 @@ export function createRuntimeManager({
 
     const installDir = path.join(app.getPath("home"), ".redrob", "bin");
     const command = await pinnedRedrobCodeInstallCommand();
-    const result = await runShellCommand("bash", ["-lc", command], {
-      env: { ...(await buildChildEnv()), REDROB_INSTALL_DIR: installDir },
-      timeoutMs: 180_000,
-    });
-    return {
-      ok: result.status === 0,
-      status: result.status,
-      stdout: result.stdout,
-      stderr: result.stderr,
-    };
+    engineInstallAbort?.abort();
+    const controller = new AbortController();
+    engineInstallAbort = controller;
+    try {
+      const result = await runShellCommand("bash", ["-lc", command], {
+        env: { ...(await buildChildEnv()), REDROB_INSTALL_DIR: installDir },
+        timeoutMs: 180_000,
+        signal: controller.signal,
+      });
+      return {
+        ok: result.status === 0,
+        status: result.status,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        cancelled: controller.signal.aborted,
+      };
+    } finally {
+      if (engineInstallAbort === controller) engineInstallAbort = null;
+    }
+  }
+
+  /**
+   * Cancel an engine install that is still running.
+   *
+   * Reachable because the install no longer blocks the main process; while it was
+   * `spawnSync` this IPC could not have been delivered at all.
+   */
+  async function engineInstallCancel() {
+    const pending = Boolean(engineInstallAbort);
+    engineInstallAbort?.abort();
+    return { ok: true, pending };
   }
 
   async function opencodeMcpAuth(projectDir, serverName) {
@@ -2356,6 +2443,7 @@ export function createRuntimeManager({
     engineInfo,
     engineDoctor,
     engineInstall,
+    engineInstallCancel,
     redrobServerInfo,
     redrobServerRestart: (options) => withRuntimeLifecycle(() => redrobServerRestart(options)),
     opencodeMcpAuth,

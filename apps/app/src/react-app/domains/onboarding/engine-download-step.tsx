@@ -6,12 +6,14 @@ import {
   Loader2Icon,
   RotateCcwIcon,
   TriangleAlertIcon,
+  XIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   engineDoctor,
   engineInstall,
+  engineInstallCancel,
   type EngineDoctorResult,
 } from "../../../app/lib/desktop";
 import { isDesktopRuntime } from "../../../app/utils";
@@ -78,6 +80,12 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
     setErrorMessage(null);
     try {
       const result = await engineInstall();
+      // A cancel is not a failure: return to the prompt the user came from rather
+      // than showing them an error for something they asked for.
+      if (result.cancelled) {
+        setPhase("download");
+        return;
+      }
       if (!result.ok) {
         setErrorMessage(result.stderr.trim() || t("onboarding.engine_error_generic"));
         setPhase("error");
@@ -98,12 +106,22 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
     }
   }, [runDoctor]);
 
+  const handleCancel = useCallback(async () => {
+    try {
+      await engineInstallCancel();
+    } catch {
+      // The install already finished or the bridge is gone; the phase below still
+      // returns the user to a screen with controls, which is the point.
+    }
+    setPhase("download");
+  }, []);
+
   return (
     <OnboardingWizardShell
       step="engine"
       title={t("onboarding.engine_title")}
       description={t("onboarding.engine_subtitle")}
-      onBack={phase === "downloading" ? null : onBack}
+      onBack={onBack}
     >
       <div className="space-y-5">
         {phase === "checking" ? (
@@ -197,6 +215,20 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
           >
             <RotateCcwIcon className="mr-1.5 size-4" />
             {t("onboarding.engine_retry")}
+          </Button>
+        ) : null}
+
+        {phase === "downloading" ? (
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            className="h-12 w-full text-[15px] font-semibold"
+            onClick={() => void handleCancel()}
+            data-testid="onboarding-engine-cancel"
+          >
+            <XIcon className="mr-1.5 size-4" />
+            {t("onboarding.engine_cancel")}
           </Button>
         ) : null}
 

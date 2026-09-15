@@ -858,6 +858,7 @@ const en = {
   "onboarding.engine_download_cta": "Download engine",
   "onboarding.engine_download_hint": "The engine is not installed yet. Download it to run tasks locally.",
   "onboarding.engine_downloading": "Downloading the engine…",
+  "onboarding.engine_cancel": "Stop downloading",
   "onboarding.engine_error": "The engine could not be installed",
   "onboarding.engine_error_generic": "Something went wrong while installing the engine. Please try again.",
   "onboarding.engine_path": "Location: {path}",

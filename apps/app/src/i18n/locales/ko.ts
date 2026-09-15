@@ -855,6 +855,7 @@ const ko = {
   "onboarding.engine_download_cta": "엔진 다운로드",
   "onboarding.engine_download_hint": "엔진이 아직 설치되지 않았습니다. 다운로드하면 작업을 로컬에서 실행할 수 있습니다.",
   "onboarding.engine_downloading": "엔진을 다운로드하는 중…",
+  "onboarding.engine_cancel": "다운로드 중단",
   "onboarding.engine_error": "엔진을 설치할 수 없습니다",
   "onboarding.engine_error_generic": "엔진을 설치하는 중 문제가 발생했습니다. 다시 시도해 주세요.",
   "onboarding.engine_path": "위치: {path}",

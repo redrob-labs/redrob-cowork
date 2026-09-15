@@ -1670,6 +1670,9 @@ const desktopCommandHandlers = {
   "engineInstall": async (event, ...args) => {
       return runtimeManager.engineInstall();
   },
+  "engineInstallCancel": async (event, ...args) => {
+      return runtimeManager.engineInstallCancel();
+  },
   "appBuildInfo": async (event, ...args) => {
       return {
         version: app.getVersion(),

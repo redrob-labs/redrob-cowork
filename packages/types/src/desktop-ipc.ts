@@ -122,12 +122,15 @@ export type EngineDoctorResult = {
  * Result of the desktop guided engine install (runtime.mjs `engineInstall`).
  * `ok` is true only when the install shell command exited 0; `stderr` carries
  * the actionable message on failure (e.g. the win32 "not supported" note).
+ * `cancelled` distinguishes a user-requested abort from a real failure, so the
+ * onboarding step can return to the download prompt instead of showing an error.
  */
 export type EngineInstallResult = {
   ok: boolean;
   status: number;
   stdout: string;
   stderr: string;
+  cancelled?: boolean;
 };
 
 export type WorkspaceList = {
@@ -387,6 +390,7 @@ export type DesktopCommandMap = {
   engineInfo: { args: []; result: EngineInfo };
   engineDoctor: { args: [projectDir?: string]; result: EngineDoctorResult };
   engineInstall: { args: []; result: EngineInstallResult };
+  engineInstallCancel: { args: []; result: { ok: boolean; pending: boolean } };
 
   // App / bridge info
   appBuildInfo: { args: []; result: AppBuildInfo };
