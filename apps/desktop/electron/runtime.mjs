@@ -1,5 +1,6 @@
 import { randomUUID, X509Certificate } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
+import { describeMemoryHeadroom, readMemoryHeadroom } from "./memory-headroom.mjs";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import net from "node:net";
@@ -2324,6 +2325,17 @@ export function createRuntimeManager({
     });
   }
 
+  /**
+   * Report host memory headroom and what to say about it.
+   *
+   * Read on demand rather than polled: this exists so a caller about to start
+   * something heavy can warn first, and a stale reading would defeat that.
+   */
+  async function memoryHeadroom() {
+    const headroom = readMemoryHeadroom();
+    return { ...headroom, ...describeMemoryHeadroom(headroom) };
+  }
+
   /** In-flight engine install, so a cancel from the onboarding step can reach it. */
   let engineInstallAbort = null;
 
@@ -2444,6 +2456,7 @@ export function createRuntimeManager({
     engineDoctor,
     engineInstall,
     engineInstallCancel,
+    memoryHeadroom,
     redrobServerInfo,
     redrobServerRestart: (options) => withRuntimeLifecycle(() => redrobServerRestart(options)),
     opencodeMcpAuth,

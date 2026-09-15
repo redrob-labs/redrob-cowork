@@ -133,6 +133,22 @@ export type EngineInstallResult = {
   cancelled?: boolean;
 };
 
+/**
+ * Host memory headroom plus what to tell the user about it (runtime.mjs
+ * `memoryHeadroom`). Every non-ample reading carries a cause naming the real
+ * number and a remedy the user can act on; `canProceed` stays true even when
+ * critical, because refusing outright leaves someone with no way forward.
+ */
+export type MemoryHeadroom = {
+  totalBytes: number;
+  freeBytes: number;
+  posture: "ample" | "tight" | "critical";
+  cause: string;
+  remedy: string;
+  canProceed: boolean;
+  shouldWarn: boolean;
+};
+
 export type WorkspaceList = {
   selectedId?: string;
   watchedId?: string | null;
@@ -391,6 +407,7 @@ export type DesktopCommandMap = {
   engineDoctor: { args: [projectDir?: string]; result: EngineDoctorResult };
   engineInstall: { args: []; result: EngineInstallResult };
   engineInstallCancel: { args: []; result: { ok: boolean; pending: boolean } };
+  memoryHeadroom: { args: []; result: MemoryHeadroom };
 
   // App / bridge info
   appBuildInfo: { args: []; result: AppBuildInfo };
