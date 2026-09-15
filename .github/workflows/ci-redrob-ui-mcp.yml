@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - trunk
     tags:
       - "redrob-ui-mcp-v*"
   workflow_dispatch:
