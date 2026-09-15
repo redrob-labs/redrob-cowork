@@ -1,5 +1,7 @@
 # Redrob Work
 
+**English** · [한국어](./README_KO.md)
+
 Redrob Work (레드롭 워크) is a free, open-source desktop and MCP app for doing work with AI agents on your own files. It runs on macOS, Windows, and Linux, is built on the OpenCode engine, and ships in English and Korean.
 
 Add one Redrob Work MCP to Codex, Claude Code, Cursor, or another compatible agent and reuse the same skills, MCPs, and connected services across your tools, teammates, and machines. Create something once, share it with coworkers or friends, or keep it for yourself.
@@ -120,6 +122,12 @@ If a second instance cannot get the profile lock it now says so and exits, inste
 Redrob Work ships in English and Korean.
 
 README translations: [English](./README.md), [한국어](./README_KO.md).
+
+## Contributing
+
+Branch naming, the checks a pull request has to pass, and the two rules that
+exist because this is a fork: [CONTRIBUTING.md](./CONTRIBUTING.md)
+(한국어: [CONTRIBUTING_KO.md](./CONTRIBUTING_KO.md)).
 
 ## License and attribution
 

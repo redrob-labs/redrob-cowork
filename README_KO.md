@@ -1,5 +1,7 @@
 # Redrob Work (레드롭 워크)
 
+[English](./README.md) · **한국어**
+
 레드롭 워크(Redrob Work)는 자신의 파일에서 AI 에이전트로 작업하기 위한 무료 오픈소스 데스크톱 및 MCP 앱입니다. macOS, Windows, Linux에서 실행되며, OpenCode 엔진을 기반으로 하고, 영어와 한국어를 지원합니다.
 
 Codex, Claude Code, Cursor 또는 다른 호환 에이전트에 레드롭 워크 MCP 하나를 추가하면, 여러 도구와 팀원, 컴퓨터에서 동일한 스킬, MCP, 연결된 서비스를 재사용할 수 있습니다. 한 번 만들어서 동료나 친구와 공유하거나, 자신만을 위해 보관하세요.
@@ -76,6 +78,12 @@ pnpm dev:worktree
 레드롭 워크는 영어와 한국어를 지원합니다.
 
 README 번역: [English](./README.md), [한국어](./README_KO.md).
+
+## 기여하기
+
+브랜치 이름 규칙, 풀 리퀘스트가 통과해야 하는 검사, 그리고 이 저장소가 포크이기
+때문에 있는 두 가지 규칙: [CONTRIBUTING_KO.md](./CONTRIBUTING_KO.md)
+(English: [CONTRIBUTING.md](./CONTRIBUTING.md)).
 
 ## 라이선스와 출처 표기
 
