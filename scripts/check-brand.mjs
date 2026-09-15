@@ -39,6 +39,17 @@ const RETIRED = [
  */
 const EXEMPT_PREFIXES = [".agents/", "changelog/", "prds/"];
 
+/**
+ * This file names the retired strings in order to search for them, so it
+ * necessarily contains them. Exempted by exact path rather than by hiding the
+ * needles behind string concatenation, which would make the rule unreadable.
+ *
+ * Found by CI, not by the local run: `git ls-files` only sees tracked files, so
+ * while this script was still untracked it excluded itself by accident and
+ * passed. A self-referential guard has to be verified in its committed state.
+ */
+const EXEMPT_FILES = new Set(["scripts/check-brand.mjs"]);
+
 const files = execFileSync("git", ["ls-files"], {
   cwd: REPO_ROOT,
   encoding: "utf8",
@@ -46,7 +57,8 @@ const files = execFileSync("git", ["ls-files"], {
 })
   .split("\n")
   .filter(Boolean)
-  .filter((path) => !EXEMPT_PREFIXES.some((prefix) => path.startsWith(prefix)));
+  .filter((path) => !EXEMPT_PREFIXES.some((prefix) => path.startsWith(prefix)))
+  .filter((path) => !EXEMPT_FILES.has(path));
 
 const violations = [];
 

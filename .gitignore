@@ -67,3 +67,6 @@ transcript-analysis
 
 # Warden local run logs
 .warden/logs/
+
+# Scratch commit-message files used by tooling; never part of the tree.
+.commit-msg.txt
