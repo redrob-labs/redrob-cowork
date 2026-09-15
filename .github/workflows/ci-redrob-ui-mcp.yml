@@ -1,12 +1,13 @@
 name: redrob-ui-mcp
 
 on:
+  # No branch filter: these are required checks, so a filter that misses the
+  # target branch would leave a pull request waiting on a check that never runs.
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
+      - trunk
     tags:
       - "redrob-ui-mcp-v*"
   workflow_dispatch:
