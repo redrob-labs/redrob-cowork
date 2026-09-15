@@ -56,12 +56,12 @@ function isRedrobServerReady(info?: BootRedrobServerInfo) {
 /**
  * On desktop (Tauri) startup:
  *   1) bootstrap the workspace list
- *   2) if a local workspace is selected, restart the embedded Redrob Work server
+ *   2) if a local workspace is selected, restart the embedded Redrob Cowork server
  *   3) start the OpenCode engine pointed at the workspace
- *   4) activate the workspace on the running Redrob Work server
+ *   4) activate the workspace on the running Redrob Cowork server
  *   5) notify React routes that fresh desktop runtime info is available. Electron
  *      routes read live runtime info directly instead of persisting ephemeral
- *      localhost ports/tokens into Redrob Work settings.
+ *      localhost ports/tokens into Redrob Cowork settings.
  *
  * Safe to call multiple times — gated by a `didBoot` ref so it runs once per mount.
  */

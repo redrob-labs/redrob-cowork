@@ -108,7 +108,7 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
               <div className="space-y-4">
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">{t("architecture.install_correct_build")}</h1>
                 <p className="max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
-                  Your application is running the {info.appArchLabel} version of Redrob Work, but this {platformLabel(info.platform)} system is {info.systemArchLabel}. This may cause unpredictable issues.
+                  Your application is running the {info.appArchLabel} version of Redrob Cowork, but this {platformLabel(info.platform)} system is {info.systemArchLabel}. This may cause unpredictable issues.
                 </p>
               </div>
 
@@ -144,7 +144,7 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
                 <div className="text-lg font-semibold text-white">{t("architecture.why_stopped")}</div>
                 <p>{t("architecture.explanation")}</p>
                 <p>
-                  After installing the correct {info.systemArchLabel} build, quit this copy and launch Redrob Work again. Your workspaces and settings are kept in the same app data folder.
+                  After installing the correct {info.systemArchLabel} build, quit this copy and launch Redrob Cowork again. Your workspaces and settings are kept in the same app data folder.
                 </p>
                 <div className="rounded-2xl bg-white/[0.06] p-4 font-mono text-xs text-white/55">
                   v{info.version} · {platformLabel(info.platform)} · {info.systemArch}

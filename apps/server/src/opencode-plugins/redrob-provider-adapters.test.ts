@@ -3,7 +3,7 @@ import { redrobFeatureContributionSchema } from "@redrob/types/redrob-provider";
 
 import { buildRedrobProviderContributions } from "./redrob-provider-adapters.js";
 
-describe("Redrob Work provider adapters", () => {
+describe("Redrob Cowork provider adapters", () => {
   test("normalizes sessions and extensions into semantic contributions", () => {
     const contributions = buildRedrobProviderContributions();
 

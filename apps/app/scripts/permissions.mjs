@@ -28,7 +28,7 @@ try {
 
   // Create a session that asks for tool permission.
   const session = await client.session.create({
-    title: "Redrob Work permission test",
+    title: "Redrob Cowork permission test",
     permission: [
       {
         permission: "bash",

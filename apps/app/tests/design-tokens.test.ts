@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 /**
- * Redrob Work and the Redrob Console draw from one token system. Console main is
+ * Redrob Cowork and the Redrob Console draw from one token system. Console main is
  * the source of truth (`apps/web/src/app/globals.css` there), and this app
  * transcribes its primitive layer and re-points the semantic roles its component
  * library already speaks onto that layer.
@@ -374,9 +374,9 @@ describe("Redrob branding surfaces", () => {
     expect(INDEX_HTML).toContain('content="#141719" media="(prefers-color-scheme: dark)"');
   });
 
-  test("the installable app is Redrob Work, on the brand page colour", () => {
-    expect(MANIFEST.name).toBe("Redrob Work");
-    expect(MANIFEST.short_name).toBe("Redrob Work");
+  test("the installable app is Redrob Cowork, on the brand page colour", () => {
+    expect(MANIFEST.name).toBe("Redrob Cowork");
+    expect(MANIFEST.short_name).toBe("Redrob Cowork");
     expect(MANIFEST.theme_color).toBe("#f8f9fb");
     expect(MANIFEST.background_color).toBe("#f8f9fb");
     for (const icon of MANIFEST.icons) {

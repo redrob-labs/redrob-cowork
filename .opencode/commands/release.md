@@ -1,8 +1,8 @@
 ---
-description: Run the Redrob Work release flow
+description: Run the Redrob Cowork release flow
 ---
 
-You are running the Redrob Work release flow in this repo.
+You are running the Redrob Cowork release flow in this repo.
 
 Arguments: `$ARGUMENTS`
 - If empty, default to a patch release.

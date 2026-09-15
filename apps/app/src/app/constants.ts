@@ -40,7 +40,7 @@ export type McpDirectoryInfo = {
   type?: "remote" | "local";
   command?: string[];
   oauth: boolean;
-  /** Route OAuth through the local Redrob Work gateway instead of delegating it to OpenCode. */
+  /** Route OAuth through the local Redrob Cowork gateway instead of delegating it to OpenCode. */
   managedOAuth?: boolean;
   /** Identifies MCP entries owned by the app instead of workspace configuration. */
   managedBy?: "redrob-connect";
@@ -57,9 +57,9 @@ export type McpDirectoryInfo = {
   iconSrc?: string;
   /** Prompt inserted from the composer extension picker. */
   composerPrompt?: string;
-  /** Whether Redrob Work should show this extension as enabled before user setup. */
+  /** Whether Redrob Cowork should show this extension as enabled before user setup. */
   defaultEnabled?: boolean;
-  /** Whether Redrob Work should hide this extension from the default catalog view. */
+  /** Whether Redrob Cowork should hide this extension from the default catalog view. */
   defaultHidden?: boolean;
   /** Whether this extension is still in preview. */
   preview?: boolean;

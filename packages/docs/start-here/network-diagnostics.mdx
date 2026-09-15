@@ -1,9 +1,9 @@
 ---
 title: "Network diagnostics"
-description: "Diagnose DNS, TLS, proxy, catalog, and Den outbound issues in locked-down Redrob Work deployments."
+description: "Diagnose DNS, TLS, proxy, catalog, and Den outbound issues in locked-down Redrob Cowork deployments."
 ---
 
-Use this page when Redrob Work reaches the wrong server, cannot complete TLS, is blocked by a proxy, or needs proof that Den can reach an approved diagnostic origin. For non-network runtime, MCP, and stale-tool problems, use [Diagnostic prompts](/start-here/troubleshooting/diagnostic-prompts).
+Use this page when Redrob Cowork reaches the wrong server, cannot complete TLS, is blocked by a proxy, or needs proof that Den can reach an approved diagnostic origin. For non-network runtime, MCP, and stale-tool problems, use [Diagnostic prompts](/start-here/troubleshooting/diagnostic-prompts).
 
 ## Windows desktop network doctor
 
@@ -27,7 +27,7 @@ Use your Den web origin for `-WebUrl`. Use the separate Den API origin only if y
 
 | Verdict | What it usually means | First fix to check |
 | --- | --- | --- |
-| `LIKELY TLS INTERCEPTION` | The leaf issuer is an internal or proxy CA instead of the expected public issuer. | Allowlist the Redrob Work hosts through the proxy, or install the enterprise root in every Redrob Work trust surface that needs it. |
+| `LIKELY TLS INTERCEPTION` | The leaf issuer is an internal or proxy CA instead of the expected public issuer. | Allowlist the Redrob Cowork hosts through the proxy, or install the enterprise root in every Redrob Cowork trust surface that needs it. |
 | `LIKELY MISSING INTERMEDIATE OR UNTRUSTED ROOT` | The server may be serving a leaf without the intermediate, or the machine lacks the issuing root. | Fix the server `fullchain`/certificate bundle first, then verify client trust. |
 | `MISSING INTERMEDIATE CONFIRMED BY OPENSSL` | OpenSSL could not build the served chain. | Replace the server certificate bundle with a complete chain. |
 | `LIKELY DNS ISSUE` | The hostname does not resolve on that machine. | Check VPN state, split-horizon DNS, and whether the internal hostnames exist. |
@@ -37,7 +37,7 @@ Use your Den web origin for `-WebUrl`. Use the separate Den API origin only if y
 
 Settings → Debug includes a cloud catalog diagnostic that probes the managed `redrob-cloud` MCP entry and verifies that Cloud exposes exactly `search_capabilities` and `execute_capability`.
 
-For self-hosted Den origins, set `REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS` before Redrob Work launches:
+For self-hosted Den origins, set `REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS` before Redrob Cowork launches:
 
 ```bash
 REDROB_AGENT_DIAGNOSTICS_TRUSTED_ORIGINS=https://redrob.example.com

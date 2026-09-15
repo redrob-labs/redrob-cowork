@@ -1,5 +1,5 @@
 /**
- * Single entry point for embedding the Redrob Work server in-process.
+ * Single entry point for embedding the Redrob Cowork server in-process.
  *
  * Handles config resolution, managed OpenCode spawn, and server start
  * in one call -- mirrors what cli.ts does but returns a handle instead
@@ -144,7 +144,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
 
     if (errors.length === 1) throw errors[0];
     if (errors.length > 1) {
-      throw new AggregateError(errors, "Failed to stop embedded Redrob Work server");
+      throw new AggregateError(errors, "Failed to stop embedded Redrob Cowork server");
     }
   };
 
@@ -162,7 +162,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       } catch (cleanupError) {
         throw new AggregateError(
           [startupError, cleanupError],
-          "Embedded Redrob Work server startup failed and cleanup was incomplete",
+          "Embedded Redrob Cowork server startup failed and cleanup was incomplete",
         );
       }
       throw startupError;

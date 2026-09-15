@@ -1926,7 +1926,7 @@ export function SessionRoute() {
         await workspaceSetSelected(createdId).catch(() => undefined);
         await workspaceSetRuntimeActive(createdId).catch(() => undefined);
       }
-      // First workspace on a fresh install: the Redrob Work server was started
+      // First workspace on a fresh install: the Redrob Cowork server was started
       // engine-less (it only spawns OpenCode at boot when a workspace already
       // exists), so sessions would hang forever. This boots the engine when
       // it isn't running, same as the old /welcome flow did.
@@ -2026,7 +2026,7 @@ export function SessionRoute() {
         handleOpenCreateWorkspace();
         return;
       }
-      const folder = await joinDesktopPath(home, "Redrob Work Chat").catch(() => "");
+      const folder = await joinDesktopPath(home, "Redrob Cowork Chat").catch(() => "");
       if (!folder) {
         handleOpenCreateWorkspace();
         return;

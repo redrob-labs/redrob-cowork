@@ -21,7 +21,7 @@ const demoRoot = resolveDemoRoot();
 const appProfiles = {
   admin: {
     appIdentifier: "io.redrob.work.demo.admin",
-    appName: "Redrob Work Demo A",
+    appName: "Redrob Cowork Demo A",
     bootstrapName: "admin-bootstrap.json",
     cdpFlag: "--admin-cdp",
     cdpPort: "9923",
@@ -32,7 +32,7 @@ const appProfiles = {
   },
   consumer: {
     appIdentifier: "io.redrob.work.demo.consumer",
-    appName: "Redrob Work Demo B",
+    appName: "Redrob Cowork Demo B",
     bootstrapName: "consumer-bootstrap.json",
     cdpFlag: "--consumer-cdp",
     cdpPort: "9924",
@@ -532,10 +532,10 @@ async function main() {
   console.log(`Demo B CDP:    http://127.0.0.1:${consumerCdp}`);
   console.log(`Demo A folder: ${demoRun.admin.root}`);
   console.log(`  Electron:    ${demoRun.admin.userDataDir}`);
-  console.log(`  Redrob Work:    ${demoRun.admin.dataDir}`);
+  console.log(`  Redrob Cowork:    ${demoRun.admin.dataDir}`);
   console.log(`Demo B folder: ${demoRun.consumer.root}`);
   console.log(`  Electron:    ${demoRun.consumer.userDataDir}`);
-  console.log(`  Redrob Work:    ${demoRun.consumer.dataDir}`);
+  console.log(`  Redrob Cowork:    ${demoRun.consumer.dataDir}`);
   const denStartup =
     adminPort === appProfiles.admin.port && consumerPort === appProfiles.consumer.port
       ? "pnpm demo:den"

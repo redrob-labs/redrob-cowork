@@ -533,11 +533,11 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
       const env = await updaterEnvironmentCmd() as { appBundlePath?: string };
       const appBundlePath = env.appBundlePath?.trim();
       if (!appBundlePath) {
-        setElectronMigrationStatus("Could not resolve the current Redrob Work.app bundle path.");
+        setElectronMigrationStatus("Could not resolve the current Redrob Cowork.app bundle path.");
         return;
       }
       await revealDesktopItemInDir(`${appBundlePath}.migrate-bak`);
-      setElectronMigrationStatus("Requested Finder reveal for Redrob Work.app.migrate-bak. The backup exists after an install handoff completes.");
+      setElectronMigrationStatus("Requested Finder reveal for Redrob Cowork.app.migrate-bak. The backup exists after an install handoff completes.");
     } catch (error) {
       setElectronMigrationStatus(error instanceof Error ? error.message : safeStringify(error));
     }
@@ -775,7 +775,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
       });
       setRedrobServiceStatus({
         tone: "success",
-        message: t("settings.restart_succeeded_template", { service: "Redrob Work server" }),
+        message: t("settings.restart_succeeded_template", { service: "Redrob Cowork server" }),
       });
       pushDeveloperLog("Restarted redrob-server");
       await redrobServerStore.reconnectRedrobServer();
@@ -783,7 +783,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
       const message = error instanceof Error ? error.message : safeStringify(error);
       setRedrobServiceStatus({
         tone: "error",
-        message: `${t("settings.restart_failed_template", { service: "Redrob Work server" })} ${message}`,
+        message: `${t("settings.restart_failed_template", { service: "Redrob Cowork server" })} ${message}`,
       });
       setServiceRestartError(message);
     } finally {
@@ -848,7 +848,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
     }
     try {
       await navigator.clipboard.writeText(text);
-      setRedrobLogStatus(t("settings.copied_service_logs", { service: "Redrob Work server" }));
+      setRedrobLogStatus(t("settings.copied_service_logs", { service: "Redrob Cowork server" }));
     } catch (error) {
       setRedrobLogStatus(error instanceof Error ? error.message : safeStringify(error));
     }
@@ -880,7 +880,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
       if (!isDesktopRuntime()) return;
       const message =
         mode === "all"
-          ? "Reset ALL Redrob Work app data? Open sessions and workspaces will be removed."
+          ? "Reset ALL Redrob Cowork app data? Open sessions and workspaces will be removed."
           : "Reset onboarding state only?";
       if (typeof window !== "undefined" && !window.confirm(message)) {
         return;
@@ -892,7 +892,7 @@ export function useDebugViewModel(options: UseDebugViewModelOptions) {
           clearRedrobLocalStorageForReset(mode);
           setResetStatus(
             mode === "all"
-              ? "Reset Redrob Work state. Restart the app to see changes."
+              ? "Reset Redrob Cowork state. Restart the app to see changes."
               : "Reset onboarding state. Restart the app to see changes.",
           );
           pushDeveloperLog(`reset_redrob_state mode=${mode}`);

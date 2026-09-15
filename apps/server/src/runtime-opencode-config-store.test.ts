@@ -105,7 +105,7 @@ describe("runtime OpenCode config store", () => {
     });
   });
 
-  test("stores MCP changes in the Redrob Work runtime DB without rewriting workspace files", async () => {
+  test("stores MCP changes in the Redrob Cowork runtime DB without rewriting workspace files", async () => {
     await withWorkspace(async ({ root, config }) => {
       const opencodePath = join(root, "redrob.jsonc");
       const opencode = '{\n  "mcp": {\n    "project": { "type": "remote", "url": "https://project.example/mcp" }\n  }\n}\n';
@@ -124,7 +124,7 @@ describe("runtime OpenCode config store", () => {
     });
   });
 
-  test("stores plugin changes in the Redrob Work runtime DB without rewriting workspace files", async () => {
+  test("stores plugin changes in the Redrob Cowork runtime DB without rewriting workspace files", async () => {
     await withWorkspace(async ({ root, config }) => {
       const opencodePath = join(root, "redrob.jsonc");
       const opencode = '{\n  "plugin": ["project-plugin"]\n}\n';
@@ -165,7 +165,7 @@ describe("runtime OpenCode config store", () => {
     });
   });
 
-  test("stores Redrob Work-owned workspace config in the runtime DB without writing legacy files", async () => {
+  test("stores Redrob Cowork-owned workspace config in the runtime DB without writing legacy files", async () => {
     await withWorkspace(async ({ root, config }) => {
       const server = await startServer(config) as Served;
       try {
@@ -213,7 +213,7 @@ describe("runtime OpenCode config store", () => {
     });
   });
 
-  test("explicitly migrates legacy Redrob Work runtime config into the runtime DB", async () => {
+  test("explicitly migrates legacy Redrob Cowork runtime config into the runtime DB", async () => {
     await withWorkspace(async ({ root, config }) => {
       await mkdir(join(root, ".opencode"), { recursive: true });
       const redrobPath = join(root, ".opencode", "redrob.json");
@@ -284,7 +284,7 @@ describe("runtime OpenCode config store", () => {
     });
   });
 
-  test("runtime config status tolerates malformed legacy Redrob Work metadata", async () => {
+  test("runtime config status tolerates malformed legacy Redrob Cowork metadata", async () => {
     await withWorkspace(async ({ root, config }) => {
       await mkdir(join(root, ".opencode"), { recursive: true });
       await writeFile(join(root, ".opencode", "redrob.json"), "{ invalid\n", "utf8");
@@ -306,7 +306,7 @@ describe("runtime OpenCode config store", () => {
     });
   });
 
-  test("explicitly migrates safe Redrob Work-managed keys from user opencode config", async () => {
+  test("explicitly migrates safe Redrob Cowork-managed keys from user opencode config", async () => {
     await withWorkspace(async ({ root, config }) => {
       const opencodePath = join(root, "redrob.jsonc");
       await writeFile(opencodePath, JSON.stringify({

@@ -112,7 +112,7 @@ describe("deriveOpenTargets", () => {
     expect(deck ? isCollectibleArtifactTarget({ ...deck, exists: true }) : false).toBe(true);
   });
 
-  it("extracts artifact paths from Redrob Work extension call metadata", () => {
+  it("extracts artifact paths from Redrob Cowork extension call metadata", () => {
     const targets = deriveOpenTargets([
       toolMessage("msg_tool", "redrob_extension_call", {
         extensionId: "openai-image-generation",

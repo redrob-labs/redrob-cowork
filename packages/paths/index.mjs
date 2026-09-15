@@ -192,7 +192,7 @@ export function resolveGlobalEngineConfigPath(opts) {
  *
  * Deliberately only the workspace ROOT files. The engine also reads
  * `redrob.json(c)` inside `.opencode/` and `.redrob/`, but `.opencode/redrob.json`
- * is already Redrob Work's own managed runtime config (`redrobConfigPath` in
+ * is already Redrob Cowork's own managed runtime config (`redrobConfigPath` in
  * apps/server/src/workspace-files.ts), so listing those here would point the
  * user-config editor at a file the app owns. Root files load BEFORE the
  * directory files, so a Work-managed key still wins over a user key -- the
@@ -211,7 +211,7 @@ export function resolveWorkspaceEngineConfigPath(workspaceRoot) {
 }
 
 /**
- * Files earlier versions of Redrob Work wrote and the engine never read.
+ * Files earlier versions of Redrob Cowork wrote and the engine never read.
  *
  * The app used upstream OpenCode's filenames (`opencode.json(c)`) while the
  * engine had already moved to `redrob.json(c)`, so anything configured through

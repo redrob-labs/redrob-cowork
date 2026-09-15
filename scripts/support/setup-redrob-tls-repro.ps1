@@ -6,10 +6,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$Marker = "Redrob Work TLS Repro"
+$Marker = "Redrob Cowork TLS Repro"
 $ReproDir = Join-Path (Get-Location).Path "tls-repro"
 $StatePath = Join-Path $ReproDir "state.txt"
-$HostsMarker = "# Redrob Work TLS repro"
+$HostsMarker = "# Redrob Cowork TLS repro"
 $SslAppId = "{1f6c8f8b-6b57-4a0b-8a1c-8d7e3d8f0d31}"
 
 function Write-Step {
@@ -86,7 +86,7 @@ function Add-SslBinding {
 
 function Stop-ReproJobs {
     try {
-        $jobs = Get-Job -Name "Redrob WorkTlsRepro-*" -ErrorAction SilentlyContinue
+        $jobs = Get-Job -Name "Redrob CoworkTlsRepro-*" -ErrorAction SilentlyContinue
         foreach ($job in $jobs) {
             Write-Step ("Stopping PowerShell job {0} (Id {1})." -f $job.Name, $job.Id)
             Stop-Job -Job $job -ErrorAction SilentlyContinue
@@ -207,7 +207,7 @@ function Invoke-Cleanup {
     param([switch]$Quiet)
 
     if (-not $Quiet) {
-        Write-Step "Cleaning Redrob Work TLS repro artifacts..."
+        Write-Step "Cleaning Redrob Cowork TLS repro artifacts..."
     }
 
     $state = Read-State
@@ -245,7 +245,7 @@ function Start-ReproListenerJob {
         [string]$Label
     )
 
-    $jobName = "Redrob WorkTlsRepro-{0}" -f $Port
+    $jobName = "Redrob CoworkTlsRepro-{0}" -f $Port
     $existing = Get-Job -Name $jobName -ErrorAction SilentlyContinue
     foreach ($job in $existing) {
         Stop-Job -Job $job -ErrorAction SilentlyContinue
@@ -269,7 +269,7 @@ function Start-ReproListenerJob {
                 $bytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
                 $context.Response.StatusCode = 200
                 $context.Response.ContentType = "application/json"
-                $context.Response.Headers.Add("X-Redrob Work-TLS-Repro", $Label)
+                $context.Response.Headers.Add("X-Redrob Cowork-TLS-Repro", $Label)
                 $context.Response.ContentLength64 = $bytes.Length
                 $context.Response.OutputStream.Write($bytes, 0, $bytes.Length)
                 $context.Response.OutputStream.Close()
@@ -298,7 +298,7 @@ if ($Cleanup) {
     exit 0
 }
 
-Write-Step "Redrob Work TLS repro setup"
+Write-Step "Redrob Cowork TLS repro setup"
 Write-Step "Strategy: HTTP.sys/HttpListener with netsh sslcert bindings. Healthy uses root + installed intermediate; broken uses a different intermediate that is removed before serving."
 Write-Step "Risk: Windows chain caching can occasionally make the broken case validate until cache/session state is cleared; rerun -Cleanup or use a fresh VM if that happens."
 Write-Step ""
@@ -307,9 +307,9 @@ Invoke-Cleanup -Quiet
 New-Item -ItemType Directory -Path $ReproDir -Force | Out-Null
 
 $notAfter = (Get-Date).AddYears(1)
-$rootSubject = "CN=Redrob Work TLS Repro Root CA, O=$Marker"
-$healthyIntermediateSubject = "CN=Redrob Work TLS Repro Healthy Intermediate CA, O=$Marker"
-$brokenIntermediateSubject = "CN=Redrob Work TLS Repro Broken Intermediate CA, O=$Marker"
+$rootSubject = "CN=Redrob Cowork TLS Repro Root CA, O=$Marker"
+$healthyIntermediateSubject = "CN=Redrob Cowork TLS Repro Healthy Intermediate CA, O=$Marker"
+$brokenIntermediateSubject = "CN=Redrob Cowork TLS Repro Broken Intermediate CA, O=$Marker"
 $healthyLeafSubject = "CN=$Hostname, O=$Marker"
 $brokenLeafSubject = "CN=$Hostname, O=$Marker"
 $leafExtensions = @(
@@ -370,7 +370,7 @@ Write-Step ("   curl.exe -v {0}" -f $healthyUrl)
 Write-Step "2. curl broken (expect certificate/chain failure on a fresh VM; if it succeeds, Windows found a cached intermediate):"
 Write-Step ("   curl.exe -v {0}" -f $brokenUrl)
 Write-Step "3. Doctor against both local endpoints:"
-Write-Step ("   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\support\redrob-doctor.ps1 -WebUrl {0} -ApiUrl {1} -ExpectedIssuerMatch `"Redrob Work TLS Repro`"" -f $healthyUrl, $brokenUrl)
+Write-Step ("   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\support\redrob-doctor.ps1 -WebUrl {0} -ApiUrl {1} -ExpectedIssuerMatch `"Redrob Cowork TLS Repro`"" -f $healthyUrl, $brokenUrl)
 
 $nodeCommand = Get-Command node -ErrorAction SilentlyContinue
 if ($nodeCommand -ne $null) {

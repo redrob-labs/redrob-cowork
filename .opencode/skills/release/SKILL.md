@@ -1,6 +1,6 @@
 # Skill: release
 
-Cut a Redrob Work release. The "Release App" workflow
+Cut a Redrob Cowork release. The "Release App" workflow
 (`.github/workflows/release-macos-aarch64.yml`) builds, signs, and publishes
 the desktop app assets on the GitHub release. Full runbook:
 `docs/RELEASING.md`.

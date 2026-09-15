@@ -1,9 +1,9 @@
 ---
 title: "Air-gapped deployment"
-description: "Plan Redrob Work deployments that limit or remove public internet access."
+description: "Plan Redrob Cowork deployments that limit or remove public internet access."
 ---
 
-"Air-gapped" can mean several different things in Redrob Work planning. Use these terms precisely so the network design, installer path, and feature expectations stay aligned.
+"Air-gapped" can mean several different things in Redrob Cowork planning. Use these terms precisely so the network design, installer path, and feature expectations stay aligned.
 
 ## Deployment terms
 
@@ -11,14 +11,14 @@ description: "Plan Redrob Work deployments that limit or remove public internet 
 | --- | --- |
 | **Private-network / semi-air-gapped** | Employee desktops can reach the public internet and can also reach internal Den over VPN or private network. Den access is restricted to approved networks, but the desktop still has ordinary internet paths unless your endpoint policy blocks them. |
 | **Isolated Den** | Den has no unrestricted public internet access. Client laptops may still have internet access for installers, model catalogs, npm packages, providers, and links. |
-| **Fully air-gapped installer delivery** | Only the installer bytes are mounted or served from inside your network. This does **not** make the entire Redrob Work product fully air-gapped. It only removes the GitHub release-asset download path for the installer. |
-| **Fully isolated Redrob Work deployment** | Every dependency used by the enabled Redrob Work features is mirrored, provisioned, disabled, or replaced with an internally reachable service. This includes deployment artifacts, desktop runtime dependencies, model/provider catalogs, OAuth/provider endpoints, MCP servers, email, diagnostics, updates, and trust anchors. |
+| **Fully air-gapped installer delivery** | Only the installer bytes are mounted or served from inside your network. This does **not** make the entire Redrob Cowork product fully air-gapped. It only removes the GitHub release-asset download path for the installer. |
+| **Fully isolated Redrob Cowork deployment** | Every dependency used by the enabled Redrob Cowork features is mirrored, provisioned, disabled, or replaced with an internally reachable service. This includes deployment artifacts, desktop runtime dependencies, model/provider catalogs, OAuth/provider endpoints, MCP servers, email, diagnostics, updates, and trust anchors. |
 
 If desktops have internet access and Den is private, start with [Private network deployment](/start-here/private-network-deployment). If you need to inventory domains, use [Outbound network access](/start-here/outbound-network-access). If TLS inspection or private roots are involved, use [Certificate trust and proxies](/start-here/certificate-trust-and-proxies).
 
 ## Full isolation checklist
 
-Use this checklist only when the goal is a fully isolated Redrob Work deployment, not just private Den or internal installer delivery.
+Use this checklist only when the goal is a fully isolated Redrob Cowork deployment, not just private Den or internal installer delivery.
 
 ### Deployment artifacts
 
@@ -38,7 +38,7 @@ See [Installer delivery](/start-here/installer-delivery) for the exact filenames
 ### Desktop runtime dependencies
 
 - Allow `console.redrob.ai`. The Redrob Code engine fetches its model catalog from `https://console.redrob.ai/api/backend/v1/models` with your `REDROB_API_KEY`; there is no mirror override.
-- The packaged desktop can start the UI-control MCP with `npx -y redrob-ui-mcp`. In a fully isolated environment, provide an internal npm registry or npm mirror that can serve that package to `npx`. Redrob Work does not currently document a separate Redrob Work-specific registry override for this package; use standard npm configuration for the runtime account.
+- The packaged desktop can start the UI-control MCP with `npx -y redrob-ui-mcp`. In a fully isolated environment, provide an internal npm registry or npm mirror that can serve that package to `npx`. Redrob Cowork does not currently document a separate Redrob Cowork-specific registry override for this package; use standard npm configuration for the runtime account.
 - Disable, mirror, or manage desktop updates and GitHub release assets through your internal release process. Do not assume a built-in updater mirror setting unless it has been verified for the desktop release you ship.
 
 ### Feature dependencies

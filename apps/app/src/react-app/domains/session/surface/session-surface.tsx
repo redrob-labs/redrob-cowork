@@ -96,11 +96,11 @@ const IDLE_STATUS: SessionStatus = { type: "idle" };
  * -- and a `t()` call here would resolve at module init, before the locale is
  * known, freezing the value in whatever language loaded first.
  */
-const DEFAULT_COMPOSER_CONTROL_TEXT = "Help me outline the next Redrob Work task.";
+const DEFAULT_COMPOSER_CONTROL_TEXT = "Help me outline the next Redrob Cowork task.";
 const SESSION_SURFACE_SELECTOR = "[data-session-surface-id]";
 const MARKDOWN_PRIMITIVE_EVAL_TEXT = `# Markdown proof heading
 
-This shared renderer keeps **bold proof text**, inline \`renderMarkdownHtml\`, and [Redrob Work link](https://redrob.io) readable in one message.
+This shared renderer keeps **bold proof text**, inline \`renderMarkdownHtml\`, and [Redrob Cowork link](https://redrob.io) readable in one message.
 
 \`\`\`ts
 const pipeline = "shared markdown primitive";
@@ -262,7 +262,7 @@ function createChatTranscriptEvalMessages(sessionId: string) {
         },
         {
           type: "text",
-          text: "Your plan is drafted — details in [Redrob Work](https://redrob.io). Search token: chat-transcript-proof.",
+          text: "Your plan is drafted — details in [Redrob Cowork](https://redrob.io). Search token: chat-transcript-proof.",
         },
       ],
       // `completed` makes the finished turn fold behind a real
@@ -342,7 +342,7 @@ export type SessionSurfaceProps = {
 };
 
 function messageToReadableText(message: UIMessage) {
-  const header = message.role === "user" ? "You" : message.role === "assistant" ? "Redrob Work" : message.role;
+  const header = message.role === "user" ? "You" : message.role === "assistant" ? "Redrob Cowork" : message.role;
   const body = message.parts
     .flatMap((part) => {
       if (part.type === "text") return [part.text];

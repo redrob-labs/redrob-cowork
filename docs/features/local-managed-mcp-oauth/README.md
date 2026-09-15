@@ -1,20 +1,20 @@
 # Local managed MCP OAuth
 
-Redrob Work desktop can own OAuth for a custom remote MCP and expose its tools to
+Redrob Cowork desktop can own OAuth for a custom remote MCP and expose its tools to
 the bundled OpenCode engine through an authenticated loopback MCP gateway. This
 provides a compatibility path for providers whose OAuth flow works through
-Redrob Work's enterprise MCP client but not through OpenCode's direct MCP client.
+Redrob Cowork's enterprise MCP client but not through OpenCode's direct MCP client.
 
 ## User flow
 
-1. In a local desktop workspace, add a remote MCP and expand **Redrob Work-managed
+1. In a local desktop workspace, add a remote MCP and expand **Redrob Cowork-managed
    OAuth**.
 2. Optionally enter a pre-registered client ID, client secret, and scopes. If
    the provider supports dynamic client registration, those fields may remain
    empty.
-3. Redrob Work performs OAuth discovery, DCR when needed, PKCE authorization, the
+3. Redrob Cowork performs OAuth discovery, DCR when needed, PKCE authorization, the
    loopback callback, token exchange, and an authenticated `tools/list` check.
-4. OpenCode receives a remote MCP entry pointing at the Redrob Work loopback
+4. OpenCode receives a remote MCP entry pointing at the Redrob Cowork loopback
    gateway with `oauth: false`. It sees the provider tools but never receives
    the provider access token, refresh token, or OAuth client secret.
 
@@ -24,13 +24,13 @@ The managed path is opt-in per connection and is currently desktop-only.
 ## Persistence and lifecycle
 
 - Provider credentials, OAuth registrations, discovery state, and PKCE
-  transactions are encrypted with AES-256-GCM in Redrob Work's runtime storage.
-- Redrob Work Desktop keeps the encryption key behind the operating system's
+  transactions are encrypted with AES-256-GCM in Redrob Cowork's runtime storage.
+- Redrob Cowork Desktop keeps the encryption key behind the operating system's
   secure-storage service and persists only the protected key blob, separately
   from the encrypted vault. A standalone server must set
   `REDROB_ENCRYPTION_KEY`; there is no plaintext key-file fallback.
 - The gateway bearer is scoped to a workspace and connection, generated from a
-  process-only secret, and rotated on every Redrob Work server restart.
+  process-only secret, and rotated on every Redrob Cowork server restart.
 - Startup reconciliation rewrites managed runtime MCP entries with the current
   loopback port and bearer while keeping the encrypted provider credential.
 - Disconnect deletes the stored credential and disables the gateway entry.

@@ -55,7 +55,7 @@ try {
 
   let sessionId = "";
   await step("session.create", async () => {
-    const session = await client.session.create({ title: "Redrob Work mention-send" });
+    const session = await client.session.create({ title: "Redrob Cowork mention-send" });
     sessionId = session.id;
     assert.ok(sessionId);
     return { id: session.id };
@@ -88,7 +88,7 @@ try {
   await step("messages.initial", async () => messagesSummary("initial"));
 
   await step("prompt.invalidFilePart", async () => {
-    // Mirrors the bug in Redrob Work: sending a file mention with only {path}.
+    // Mirrors the bug in Redrob Cowork: sending a file mention with only {path}.
     try {
       await client.session.prompt({
         sessionID: sessionId,

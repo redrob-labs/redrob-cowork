@@ -65,7 +65,7 @@ type WelcomeStage = "language" | "engine" | "main";
  * without choosing a location. Deliberately a plain, recognisable name: the
  * tutorial step tells the user where it is and Settings can add more folders.
  */
-const DEFAULT_WORKSPACE_FOLDER_NAME = "Redrob Work";
+const DEFAULT_WORKSPACE_FOLDER_NAME = "Redrob Cowork";
 
 type WelcomeState = {
   stage: WelcomeStage;

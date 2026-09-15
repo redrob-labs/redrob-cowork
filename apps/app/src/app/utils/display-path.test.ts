@@ -5,12 +5,12 @@ import { joinDisplayPath } from "./index";
 describe("joinDisplayPath", () => {
   it("does not glue POSIX separators onto a Windows root", () => {
     // The exact string the recovery page showed a user:
-    //   C:\Users\USER\Redrob Work Chat/.redrob/redrob.json
+    //   C:\Users\USER\Redrob Cowork Chat/.redrob/redrob.json
     // A Windows root with forward slashes appended, because the path was interpolated. Copying that
     // out of the page gives you something that is not a path on your machine.
-    const shown = joinDisplayPath("C:\\Users\\USER\\Redrob Work Chat", ".redrob", "redrob.json");
+    const shown = joinDisplayPath("C:\\Users\\USER\\Redrob Cowork Chat", ".redrob", "redrob.json");
 
-    expect(shown).toBe("C:\\Users\\USER\\Redrob Work Chat\\.redrob\\redrob.json");
+    expect(shown).toBe("C:\\Users\\USER\\Redrob Cowork Chat\\.redrob\\redrob.json");
     expect(shown).not.toContain("/");
   });
 

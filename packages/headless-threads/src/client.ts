@@ -1,7 +1,7 @@
 /**
- * A function-driven client for native Redrob Work threads.
+ * A function-driven client for native Redrob Cowork threads.
  *
- * Every call goes to an Redrob Work server surface that already exists:
+ * Every call goes to an Redrob Cowork server surface that already exists:
  *
  * - `POST   /workspace/:id/sessions`                        create a thread
  * - `GET    /workspace/:id/sessions/:threadId/messages`     read messages
@@ -103,7 +103,7 @@ export function createHeadlessThreadClient(options: HeadlessThreadClientOptions)
       code: detail.success && detail.data.code !== undefined ? detail.data.code : "request_failed",
       message: detail.success && detail.data.message !== undefined
         ? detail.data.message
-        : `Redrob Work returned ${response.status} for ${method} ${path}`,
+        : `Redrob Cowork returned ${response.status} for ${method} ${path}`,
       method,
       path,
       status: response.status,
@@ -117,7 +117,7 @@ export function createHeadlessThreadClient(options: HeadlessThreadClientOptions)
     if (parsed.success) return parsed.data;
     throw new HeadlessThreadError({
       code: "invalid_response",
-      message: `Redrob Work returned an unexpected payload for ${method} ${path}`,
+      message: `Redrob Cowork returned an unexpected payload for ${method} ${path}`,
       method,
       path,
       status: response.status,

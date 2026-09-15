@@ -1,29 +1,29 @@
-# Control Redrob Work from any MCP client
+# Control Redrob Cowork from any MCP client
 
-Redrob Work exposes its UI as an MCP server so any MCP-capable app can read what's on screen and run actions — no DOM scraping, no coordinates, no accessibility hacks.
+Redrob Cowork exposes its UI as an MCP server so any MCP-capable app can read what's on screen and run actions — no DOM scraping, no coordinates, no accessibility hacks.
 
 ## Why this exists
 
 Apps like HandsFree let people control their computers hands-free using AI. But generic computer-use flows (screenshot → click coordinate) are slow, fragile, and need a vision model for every step.
 
-Redrob Work takes a different approach: the app itself tells you what actions are available, what the current state is, and lets you execute actions by name. The MCP server wraps that surface so any MCP client gets a first-class, semantic control experience out of the box.
+Redrob Cowork takes a different approach: the app itself tells you what actions are available, what the current state is, and lets you execute actions by name. The MCP server wraps that surface so any MCP client gets a first-class, semantic control experience out of the box.
 
 This means:
 
-- **HandsFree** can drive Redrob Work sessions, composer, navigation, and transcript without guessing pixels.
-- **OpenCode** can automate Redrob Work as part of a larger coding workflow.
-- **Claude Desktop, Codex, Cursor**, or any MCP-compatible tool can add Redrob Work control with a single config line.
+- **HandsFree** can drive Redrob Cowork sessions, composer, navigation, and transcript without guessing pixels.
+- **OpenCode** can automate Redrob Cowork as part of a larger coding workflow.
+- **Claude Desktop, Codex, Cursor**, or any MCP-compatible tool can add Redrob Cowork control with a single config line.
 - Your own app can do the same.
 
-> This is the only MCP surface Redrob Work exposes to external clients. There is no hosted endpoint: the desktop app and its `redrob-server` run locally, so a client must be able to spawn a local stdio process on the same machine.
+> This is the only MCP surface Redrob Cowork exposes to external clients. There is no hosted endpoint: the desktop app and its `redrob-server` run locally, so a client must be able to spawn a local stdio process on the same machine.
 
 ## Quick start with HandsFree
 
-HandsFree auto-discovers the Redrob Work MCP server when both apps are running on the same machine. No config needed.
+HandsFree auto-discovers the Redrob Cowork MCP server when both apps are running on the same machine. No config needed.
 
-1. Launch **Redrob Work** (desktop app).
+1. Launch **Redrob Cowork** (desktop app).
 2. Launch **HandsFree**.
-3. Open the HandsFree connector panel — you should see **Redrob Work** with a green "Connected" status and an action count.
+3. Open the HandsFree connector panel — you should see **Redrob Cowork** with a green "Connected" status and an action count.
 
 That's it. HandsFree can now list your sessions, read transcripts, type into the composer, send prompts, and navigate the app — all through MCP.
 
@@ -32,11 +32,11 @@ That's it. HandsFree can now list your sessions, read transcripts, type into the
 - `ui_snapshot` — see the current route, status, and available actions.
 - `ui_list_actions` — get every action the app currently exposes (session controls, composer, navigation, etc.).
 - `ui_execute_action` — run an action by ID, e.g. `session.create_task`, `composer.set_text`, `composer.send`.
-- `ui_status` — check if Redrob Work is running and the bridge is reachable.
+- `ui_status` — check if Redrob Cowork is running and the bridge is reachable.
 
 ### Cross-session memory
 
-Redrob Work's cross-session memory currently comes from saved session history exposed through the UI control surface. It is not a separate long-term memory database.
+Redrob Cowork's cross-session memory currently comes from saved session history exposed through the UI control surface. It is not a separate long-term memory database.
 
 For requests like `What did I say in the customer migration session?` or `Remind me what we decided in session ses_abc123`, an MCP client can:
 
@@ -45,11 +45,11 @@ For requests like `What did I say in the customer migration session?` or `Remind
 3. Run `session.read_transcript` to read recent messages from that session.
 4. Answer from the returned transcript, and say when the returned messages are insufficient.
 
-This may navigate Redrob Work away from the user's current session while the lookup runs. If multiple sessions match, ask which one to inspect.
+This may navigate Redrob Cowork away from the user's current session while the lookup runs. If multiple sessions match, ask which one to inspect.
 
-### Redrob Work agents
+### Redrob Cowork agents
 
-Inside Redrob Work, agents control the app through the semantic tools (`redrob_context`, `redrob_query`, `redrob_execute`) using affordance ids from context. External MCP clients can also use the hidden **Redrob Work UI Control** MCP via **Settings -> Extensions -> Show hidden**.
+Inside Redrob Cowork, agents control the app through the semantic tools (`redrob_context`, `redrob_query`, `redrob_execute`) using affordance ids from context. External MCP clients can also use the hidden **Redrob Cowork UI Control** MCP via **Settings -> Extensions -> Show hidden**.
 
 ## Install
 
@@ -84,7 +84,7 @@ Add the MCP server to your workspace or global `opencode.json`:
 Then use the tools in any session:
 
 ```
-> Use ui_snapshot to see what's on screen in Redrob Work, then list the available sessions.
+> Use ui_snapshot to see what's on screen in Redrob Cowork, then list the available sessions.
 ```
 
 ## Add to Claude Desktop or Codex
@@ -106,7 +106,7 @@ Restart the app. The four tools (`ui_status`, `ui_snapshot`, `ui_list_actions`, 
 
 ## Add to your own MCP client
 
-If you're building an app that speaks MCP, you can connect to the Redrob Work UI server the same way:
+If you're building an app that speaks MCP, you can connect to the Redrob Cowork UI server the same way:
 
 ```js
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -119,7 +119,7 @@ const transport = new StdioClientTransport({
 const client = new Client({ name: "my-app", version: "1.0.0" });
 await client.connect(transport);
 
-// Check if Redrob Work is running
+// Check if Redrob Cowork is running
 const status = await client.callTool({ name: "ui_status", arguments: {} });
 console.log(status);
 
@@ -138,21 +138,21 @@ await client.callTool({
 
 ### `ui_status`
 
-Check if Redrob Work is running and reachable. Returns connection status and app info.
+Check if Redrob Cowork is running and reachable. Returns connection status and app info.
 
 **No arguments.**
 
 Example response:
 
 ```
-Connected to Redrob Work
+Connected to Redrob Cowork
 Bridge: http://127.0.0.1:52431
 Version: 1
 ```
 
 ### `ui_snapshot`
 
-Get the current Redrob Work UI state: active route, narration, visible actions, and status. Call this before acting to understand what the user sees.
+Get the current Redrob Cowork UI state: active route, narration, visible actions, and status. Call this before acting to understand what the user sees.
 
 **No arguments.**
 
@@ -181,7 +181,7 @@ Returns the full list with labels, descriptions, and argument info.
 
 ### `ui_execute_action`
 
-Execute an Redrob Work UI action by its id.
+Execute an Redrob Cowork UI action by its id.
 
 | Argument | Type | Description |
 |----------|------|-------------|
@@ -208,7 +208,7 @@ Example — send the composer prompt:
 
 ## Available actions
 
-The exact list depends on the current Redrob Work route and state. Common actions include:
+The exact list depends on the current Redrob Cowork route and state. Common actions include:
 
 | Action | Description |
 |--------|-------------|
@@ -232,7 +232,7 @@ The exact list depends on the current Redrob Work route and state. Common action
 
 ## Requirements
 
-- **Redrob Work desktop** must be running. The MCP server connects to Redrob Work's local bridge which starts automatically when the desktop app launches.
+- **Redrob Cowork desktop** must be running. The MCP server connects to Redrob Cowork's local bridge which starts automatically when the desktop app launches.
 - **macOS** is the primary supported platform. The bridge uses Electron IPC and writes a discovery file to `~/Library/Application Support/io.redrob.work/`.
 - The MCP server runs as a **stdio** process — your MCP client spawns it and communicates over stdin/stdout.
 
@@ -240,14 +240,14 @@ The exact list depends on the current Redrob Work route and state. Common action
 
 ```
 ┌─────────────┐     MCP stdio      ┌──────────────────┐     HTTP localhost     ┌──────────────┐
-│  MCP client  │ ←────────────────→ │  redrob-ui-mcp │ ←───────────────────→ │  Redrob Work app │
+│  MCP client  │ ←────────────────→ │  redrob-ui-mcp │ ←───────────────────→ │  Redrob Cowork app │
 │  (HandsFree, │                    │  (Node.js)       │                       │  (Electron)   │
 │   OpenCode,  │                    │                  │                       │               │
 │   Codex)     │                    └──────────────────┘                       └──────────────┘
 └─────────────┘
 ```
 
-1. Redrob Work desktop starts a private localhost HTTP bridge on a random port, protected by a bearer token.
+1. Redrob Cowork desktop starts a private localhost HTTP bridge on a random port, protected by a bearer token.
 2. It writes a discovery file with the port and token so `redrob-ui-mcp` can find it.
 3. `redrob-ui-mcp` reads the discovery file, proxies MCP tool calls to the bridge, and returns structured results.
 4. The bridge calls `window.__redrobControl` inside the Electron renderer to snapshot state and execute actions.

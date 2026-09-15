@@ -70,13 +70,13 @@ try {
   let sessionB;
 
   await step("session.create A", async () => {
-    sessionA = await client.session.create({ title: "Redrob Work session A" });
+    sessionA = await client.session.create({ title: "Redrob Cowork session A" });
     assert.ok(sessionA?.id);
     return { id: sessionA.id };
   });
 
   await step("session.create B", async () => {
-    sessionB = await client.session.create({ title: "Redrob Work session B" });
+    sessionB = await client.session.create({ title: "Redrob Cowork session B" });
     assert.ok(sessionB?.id);
     return { id: sessionB.id };
   });

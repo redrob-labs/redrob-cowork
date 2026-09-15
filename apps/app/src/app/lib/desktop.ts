@@ -511,7 +511,7 @@ export function readDesktopDistributionInfo(): DesktopDistributionInfo {
     : window.__REDROB_ELECTRON__?.meta?.distribution;
   return distribution ?? {
     flavor: "public",
-    appName: "Redrob Work",
+    appName: "Redrob Cowork",
     appIdentifier: "io.redrob.work",
     protocolScheme: "redrob",
     requireSignin: false,

@@ -143,13 +143,13 @@ async function fetchRedrobWorkspaceList(hostUrl: string, token: string, hostToke
       throw new ApiError(
         502,
         "redrob_workspace_discovery_failed",
-        `Redrob Work workspace discovery failed (${response.status} ${response.statusText || "HTTP error"})`,
+        `Redrob Cowork workspace discovery failed (${response.status} ${response.statusText || "HTTP error"})`,
       );
     }
     return await response.json();
   } catch (error) {
     if (error instanceof ApiError) throw error;
-    throw new ApiError(502, "redrob_workspace_discovery_failed", "Redrob Work workspace discovery failed", {
+    throw new ApiError(502, "redrob_workspace_discovery_failed", "Redrob Cowork workspace discovery failed", {
       error: String(error),
     });
   } finally {
@@ -369,8 +369,8 @@ export function registerWorkspaceRoutes(options: RegisterWorkspaceRoutesOptions)
           400,
           "redrob_workspace_not_found",
           directory
-            ? `Redrob Work server has no workspace matching ${directory}.`
-            : "Redrob Work server returned no workspaces.",
+            ? `Redrob Cowork server has no workspace matching ${directory}.`
+            : "Redrob Cowork server returned no workspaces.",
         );
       }
     }
@@ -506,7 +506,7 @@ export function registerWorkspaceRoutes(options: RegisterWorkspaceRoutesOptions)
       actor: ctx.actor ?? { type: "host" },
       action: "workspace.delete",
       target: "workspace",
-      summary: "Deleted workspace from Redrob Work server",
+      summary: "Deleted workspace from Redrob Cowork server",
       timestamp: Date.now(),
     });
 

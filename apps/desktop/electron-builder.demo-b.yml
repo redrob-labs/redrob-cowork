@@ -1,6 +1,6 @@
 extends: electron-builder.yml
 appId: io.redrob.work.demo.consumer
-productName: Redrob Work Demo B
+productName: Redrob Cowork Demo B
 protocols: []
 directories:
   output: dist-electron-demo-b

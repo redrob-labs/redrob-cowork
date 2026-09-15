@@ -338,7 +338,7 @@ export async function buildWorkspaceImportPreview(
     changes.push({
       kind: "redrob",
       action: actionForTarget(existsBefore, !sameJson(before, after), input.modes.redrob),
-      label: "Redrob Work config",
+      label: "Redrob Cowork config",
       path: rel(workspaceRoot, path),
       absolutePath: path,
       beforeDigest: existsBefore ? jsonDigest(before) : textDigest(null),

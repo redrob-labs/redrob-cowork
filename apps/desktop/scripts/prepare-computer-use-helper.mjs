@@ -10,7 +10,7 @@ const packagePath = resolve(repoRoot, "packages", "handsfree", "native", "HandsF
 const iconPath = resolve(desktopRoot, "resources", "icons", "icon.icns");
 const productName = "HandsFreeComputerUse";
 const helperExecutableName = "ComputerUse";
-const helperAppName = "Redrob Work Computer Use.app";
+const helperAppName = "Redrob Cowork Computer Use.app";
 const bundleIdentifier = "io.redrob.work.computer-use";
 
 const readArg = (name) => {
@@ -89,7 +89,7 @@ function infoPlist() {
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>
-  <string>Redrob Work Computer Use</string>
+  <string>Redrob Cowork Computer Use</string>
   <key>CFBundleExecutable</key>
   <string>${helperExecutableName}</string>
   <key>CFBundleIdentifier</key>
@@ -99,7 +99,7 @@ function infoPlist() {
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Redrob Work Computer Use</string>
+  <string>Redrob Cowork Computer Use</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

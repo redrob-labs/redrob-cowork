@@ -45,7 +45,7 @@ mac:
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    NSMicrophoneUsageDescription: Redrob Work uses the microphone when you start Voice Mode so you can speak commands to your agent.
+    NSMicrophoneUsageDescription: Redrob Cowork uses the microphone when you start Voice Mode so you can speak commands to your agent.
   extraResources:
     - from: resources/sidecars
       to: sidecars
@@ -59,7 +59,7 @@ mac:
     - from: resources/helpers
       to: helpers
       filter:
-        - "Redrob Work Computer Use.app/**"
+        - "Redrob Cowork Computer Use.app/**"
   target:
     - dmg
     - zip

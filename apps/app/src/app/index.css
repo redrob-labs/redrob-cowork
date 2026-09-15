@@ -94,7 +94,7 @@
  * Role names the app and its component library (shadcn/ui on Base UI) already
  * speak, re-pointed onto the Redrob primitives in `styles/redrob-tokens.css`.
  * The role names, the values behind them, and the light/dark split are the
- * Console token system, so a screen in Redrob Work and a screen in the Console
+ * Console token system, so a screen in Redrob Cowork and a screen in the Console
  * are the same colour by construction rather than by resemblance. The
  * correspondence to the token proposal's names, in full:
  *

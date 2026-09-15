@@ -1,10 +1,10 @@
 ---
-title: "Control Redrob Work from VS Code"
+title: "Control Redrob Cowork from VS Code"
 sidebarTitle: "VS Code"
-description: "Add the local redrob-ui-mcp server to VS Code so Copilot agent mode can read Redrob Work's app context and run UI actions."
+description: "Add the local redrob-ui-mcp server to VS Code so Copilot agent mode can read Redrob Cowork's app context and run UI actions."
 ---
 
-`redrob-ui-mcp` is a local stdio MCP server that exposes the running Redrob Work
+`redrob-ui-mcp` is a local stdio MCP server that exposes the running Redrob Cowork
 desktop app: its current screen, its open sessions, and every UI action available
 right now. VS Code spawns it as a local MCP server, so there is no URL, no OAuth, and
 no account. Read the [overview](/model-context-protocol/overview) for the tool list
@@ -12,7 +12,7 @@ and how the bridge works.
 
 ## Setup
 
-1. Launch the Redrob Work desktop app. The local control bridge starts with it.
+1. Launch the Redrob Cowork desktop app. The local control bridge starts with it.
 
 2. Add the server:
 
@@ -43,13 +43,13 @@ Then run `MCP: List Servers` > `redrob-ui` > `Start Server`.
 
 ## What you can ask
 
-- "Use `ui_status` to check whether Redrob Work is reachable."
-- "List my Redrob Work sessions, then open the one about the customer migration."
-- "Type a summary request into the Redrob Work composer and send it."
+- "Use `ui_status` to check whether Redrob Cowork is reachable."
+- "List my Redrob Cowork sessions, then open the one about the customer migration."
+- "Type a summary request into the Redrob Cowork composer and send it."
 
 ## What's next
 
 - Read the [overview](/model-context-protocol/overview) for the full tool and action
   reference.
-- To give the Redrob Work agent its own access to a service, add that MCP server in
+- To give the Redrob Cowork agent its own access to a service, add that MCP server in
   the app: [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).

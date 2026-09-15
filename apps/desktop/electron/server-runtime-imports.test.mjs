@@ -1,4 +1,4 @@
-// Regression: the packaged app showed "Redrob Work server did not finish starting"
+// Regression: the packaged app showed "Redrob Cowork server did not finish starting"
 // on every platform in v0.0.3, because server/dist/local-memory-store.js imported
 // MEMORY_SCOPE_LOCAL -- a *value* -- from @redrob/types/memory. Two things made
 // that fatal, and each one alone is enough:

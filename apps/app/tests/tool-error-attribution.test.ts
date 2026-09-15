@@ -4,15 +4,15 @@ import { attributeChatToolError } from "../src/components/tools/error-attributio
 import { normalizeErrorText } from "../src/lib/error-text"
 
 describe("chat tool error attribution", () => {
-  test("identifies an Redrob Work-created capability deadline", () => {
+  test("identifies an Redrob Cowork-created capability deadline", () => {
     expect(attributeChatToolError("The capability call exceeded 180s. Retry once.")).toEqual({
-      label: "Redrob Work timeout",
+      label: "Redrob Cowork timeout",
       confidence: "Confirmed",
-      description: "Redrob Work created this deadline. The external operation may still have completed, so verify its state before retrying.",
+      description: "Redrob Cowork created this deadline. The external operation may still have completed, so verify its state before retrying.",
     })
   })
 
-  test("identifies a structured Redrob Work lifecycle deadline", () => {
+  test("identifies a structured Redrob Cowork lifecycle deadline", () => {
     expect(attributeChatToolError(JSON.stringify({
       error: "connection_failed",
       diagnostic: {
@@ -21,16 +21,16 @@ describe("chat tool error attribution", () => {
         phase: "MCP_TOOL_EXECUTION",
       },
     }))).toMatchObject({
-      label: "Redrob Work timeout",
+      label: "Redrob Cowork timeout",
       confidence: "Confirmed",
     })
   })
 
-  test("identifies an Redrob Work block before send", () => {
+  test("identifies an Redrob Cowork block before send", () => {
     expect(attributeChatToolError(JSON.stringify({
       diagnostic: { code: "MCP_URL_BLOCKED", category: "security_blocked" },
     }))).toMatchObject({
-      label: "Blocked by Redrob Work",
+      label: "Blocked by Redrob Cowork",
       confidence: "Confirmed",
     })
   })

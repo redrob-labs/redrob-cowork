@@ -1,4 +1,4 @@
-# Redrob Work Host (Docker)
+# Redrob Cowork Host (Docker)
 
 ## Pre-baked Micro-Sandbox Image
 
@@ -38,7 +38,7 @@ Useful overrides:
 
 ## Production container
 
-This is a minimal packaging template to run the Redrob Work Host contract in a single container.
+This is a minimal packaging template to run the Redrob Cowork Host contract in a single container.
 
 It runs:
 
@@ -72,9 +72,9 @@ Optional:
 Persistence:
 
 - Workspace is mounted at `/workspace`
-- Host data dir is mounted at `/data` (Redrob Code caches + Redrob Work server config/tokens)
+- Host data dir is mounted at `/data` (Redrob Code caches + Redrob Cowork server config/tokens)
 
 ### Notes
 
-- The Redrob Code engine is not exposed directly; access it via the Redrob Work proxy (`/opencode/*`).
+- The Redrob Code engine is not exposed directly; access it via the Redrob Cowork proxy (`/opencode/*`).
 - For PaaS, replace `./workspace:/workspace` with a volume or a checkout strategy (git clone on boot).

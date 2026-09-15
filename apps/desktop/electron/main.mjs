@@ -1183,7 +1183,7 @@ function showShutdownScreen() {
   <body>
     <main>
       <div class="spinner" aria-hidden="true"></div>
-      <div class="title">Stopping Redrob Work services</div>
+      <div class="title">Stopping Redrob Cowork services</div>
       <div class="body">Closing local workers and background services...</div>
     </main>
   </body>
@@ -1206,13 +1206,13 @@ async function disposeRuntimeBeforeQuit() {
 
 function assertRedrobServerReady(info) {
   if (!info?.running) {
-    throw new Error("Redrob Work server did not stay running after startup.");
+    throw new Error("Redrob Cowork server did not stay running after startup.");
   }
   if (!info.baseUrl) {
-    throw new Error("Redrob Work server did not report a base URL after startup.");
+    throw new Error("Redrob Cowork server did not report a base URL after startup.");
   }
   if (!info.ownerToken && !info.clientToken) {
-    throw new Error("Redrob Work server did not report an access token after startup.");
+    throw new Error("Redrob Cowork server did not report an access token after startup.");
   }
   return info;
 }
@@ -2440,7 +2440,7 @@ const { ensureAutoUpdater } = registerUpdaterIpc({
 
 if (!app.requestSingleInstanceLock()) {
   if (isDevMode && !app.isPackaged) {
-    console.error(`[redrob] Another Redrob Work dev instance already holds this profile directory:
+    console.error(`[redrob] Another Redrob Cowork dev instance already holds this profile directory:
   ${app.getPath("userData")}
 The second process is exiting so its CDP port is released.
 Run this worktree with an isolated profile: REDROB_DEV_PROFILE=auto pnpm dev

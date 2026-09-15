@@ -109,14 +109,14 @@ describe("supported locales", () => {
     expect(offenders).toEqual([]);
   });
 
-  test("Korean prose names the product 레드롭 워크", () => {
-    // "Redrob Work" stays in Latin script only where it names a technical
+  test("Korean prose names the product 레드롭 코워크", () => {
+    // "Redrob Cowork" stays in Latin script only where it names a technical
     // component the user also meets in logs, paths, and config. Anywhere else
-    // the product is 레드롭 워크, so the bundle cannot drift back to a mix.
+    // the product is 레드롭 코워크, so the bundle cannot drift back to a mix.
     //
     // "브라우저" is deliberately NOT here. The in-app browser is a product
     // surface the user looks at, not a token they read in a log line, and
-    // allowing it is what let "Redrob Work 브라우저는 ... 레드롭 워크에서
+    // allowing it is what let "Redrob Cowork 브라우저는 ... 레드롭 코워크에서
     // 지원하는" ship with both forms in one sentence.
     const COMPONENT_SUFFIXES = [
       "서버",
@@ -127,34 +127,34 @@ describe("supported locales", () => {
       "UI",
       "Connect",
       "Code",
-      // The default workspace directory really is named "Redrob Work" on disk,
+      // The default workspace directory really is named "Redrob Cowork" on disk,
       // so onboarding copy naming it is a path the user meets in Finder and
       // Explorer, not product prose.
       "폴더",
     ];
     const componentUse = new RegExp(
-      `Redrob Work(?: (?:${COMPONENT_SUFFIXES.join("|")})|/OpenCode|\\.app\\.migrate-bak)`,
+      `Redrob Cowork(?: (?:${COMPONENT_SUFFIXES.join("|")})|/OpenCode|\\.app\\.migrate-bak)`,
       "g",
     );
 
     const offenders: string[] = [];
     for (const [key, value] of Object.entries(ko)) {
-      if (value.replace(componentUse, " ").includes("Redrob Work")) offenders.push(key);
+      if (value.replace(componentUse, " ").includes("Redrob Cowork")) offenders.push(key);
     }
     expect(offenders).toEqual([]);
 
     // And the localized name is actually in use, so the rule is not vacuous.
-    expect(Object.values(ko).filter((value) => value.includes("레드롭 워크")).length)
+    expect(Object.values(ko).filter((value) => value.includes("레드롭 코워크")).length)
       .toBeGreaterThan(50);
   });
 
-  test("no single Korean string mixes 레드롭 워크 with Latin Redrob Work", () => {
+  test("no single Korean string mixes 레드롭 코워크 with Latin Redrob Cowork", () => {
     // The rule above checks each Latin occurrence on its own, so a value could
     // satisfy it and still switch scripts mid-sentence -- which is exactly what
-    // a user noticed: "Redrob Work 브라우저는 ... 레드롭 워크에서 지원하는".
+    // a user noticed: "Redrob Cowork 브라우저는 ... 레드롭 코워크에서 지원하는".
     // Within one string, pick one form.
     const offenders = Object.entries(ko)
-      .filter(([, value]) => value.includes("레드롭 워크") && value.includes("Redrob Work"))
+      .filter(([, value]) => value.includes("레드롭 코워크") && value.includes("Redrob Cowork"))
       .map(([key]) => key);
     expect(offenders).toEqual([]);
   });
@@ -186,9 +186,9 @@ describe("supported locales", () => {
     // strings outside i18n dictionaries (a separate guard covers those).
     const allowedTokens = [
       // Brand / product identifiers kept as-is in Korean copy. There is no
-      // hosted "Redrob Work Cloud" product, so that suffix is deliberately
+      // hosted "Redrob Cowork Cloud" product, so that suffix is deliberately
       // absent: `no-hosted-cloud-product-copy.test.ts` keeps it out entirely.
-      /Redrob Work( Connect| UI Control)?/g,
+      /Redrob Cowork( Connect| UI Control)?/g,
       /Redrob Code/g,
       /**
        * Korean attaches its particles straight onto the brand name, with no space, which the

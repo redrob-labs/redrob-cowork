@@ -911,7 +911,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     try {
       await redrobClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: resolvedApiKey }]);
       setUserEnvKeys((current) => Array.from(new Set([...current, "OPENAI_API_KEY"])));
-      setImageExtensionStatus("Saved OPENAI_API_KEY. Agents can use Redrob Work extension actions for image generation.");
+      setImageExtensionStatus("Saved OPENAI_API_KEY. Agents can use Redrob Cowork extension actions for image generation.");
     } catch (error) {
       setImageExtensionError(describeRouteError(error));
     } finally {
@@ -997,7 +997,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     setVoiceError(null);
     try {
       const session = await redrobClient.createVoiceRealtimeSession();
-      setVoiceStatus(`Realtime ready with ${session.model} (${session.tools.length} Redrob Work tools).`);
+      setVoiceStatus(`Realtime ready with ${session.model} (${session.tools.length} Redrob Cowork tools).`);
     } catch (error) {
       setVoiceError(describeRouteError(error));
     } finally {

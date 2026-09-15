@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 180
 
     env:
-      ALPHA_RELEASE_NAME: Redrob Work Alpha (macOS arm64)
+      ALPHA_RELEASE_NAME: Redrob Cowork Alpha (macOS arm64)
       # Apple signing + notarization are required so alpha bundles install
       # and launch without Gatekeeper friction. Alpha builds are served
       # from GitHub Releases like stable, just from a different tag.
@@ -194,7 +194,7 @@ jobs:
             gh release create "$CHANNEL_TAG" \
               --repo "$GITHUB_REPOSITORY" \
               --title "$ALPHA_RELEASE_NAME" \
-              --notes "Rolling alpha channel for Redrob Work macOS arm64 builds. Each publish adds versioned updater assets and advances the channel manifest." \
+              --notes "Rolling alpha channel for Redrob Cowork macOS arm64 builds. Each publish adds versioned updater assets and advances the channel manifest." \
               --target "$GITHUB_SHA" \
               --prerelease
           fi

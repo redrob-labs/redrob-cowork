@@ -255,7 +255,7 @@ async function connectGateway(runtimeConfig: Record<string, unknown>): Promise<C
   return client;
 }
 
-describe("Redrob Work-managed local MCP OAuth gateway", () => {
+describe("Redrob Cowork-managed local MCP OAuth gateway", () => {
   test("leaves ordinary MCP fallbacks usable when no managed vault exists", async () => {
     const workspaceRoot = await mkdtemp(join(tmpdir(), "redrob-local-managed-mcp-fallback-"));
     roots.push(workspaceRoot);
@@ -308,7 +308,7 @@ describe("Redrob Work-managed local MCP OAuth gateway", () => {
       expect(created.status).toBe(502);
       expect(await created.json()).toMatchObject({
         code: "managed_mcp_connection_failed",
-        message: "Redrob Work could not connect to this MCP server. Check its OAuth settings and availability, then try again.",
+        message: "Redrob Cowork could not connect to this MCP server. Check its OAuth settings and availability, then try again.",
       });
 
       const status = await fetch(
@@ -352,7 +352,7 @@ describe("Redrob Work-managed local MCP OAuth gateway", () => {
       const server = await startServer(config);
       stops.push(() => server.stop());
       const redrobBaseUrl = `http://127.0.0.1:${server.port}`;
-      const expectedMessage = "Redrob Work could not connect to this MCP server. Check its OAuth settings and availability, then try again.";
+      const expectedMessage = "Redrob Cowork could not connect to this MCP server. Check its OAuth settings and availability, then try again.";
 
       const registrationProvider = startHandshakeFailureProvider("oauth-client-registration");
       await createLocalManagedMcpConnection(config, {
@@ -584,8 +584,8 @@ describe("Redrob Work-managed local MCP OAuth gateway", () => {
 
       const firstClient = await connectGateway(firstRuntimeConfig!);
       expect((await firstClient.listTools()).tools.map((tool) => tool.name)).toContain("mock_echo");
-      expect(await firstClient.callTool({ name: "mock_echo", arguments: { text: "through Redrob Work" } }))
-        .toMatchObject({ content: [{ type: "text", text: "through Redrob Work" }] });
+      expect(await firstClient.callTool({ name: "mock_echo", arguments: { text: "through Redrob Cowork" } }))
+        .toMatchObject({ content: [{ type: "text", text: "through Redrob Cowork" }] });
       await expect(firstClient.callTool({ name: "mock_provider_error", arguments: {} })).rejects.toThrow();
       const providerErrorStatus = await fetch(`${redrobBaseUrl}/workspace/ws_managed/mcp/mock-oauth/managed`, {
         headers: clientHeaders(config.token),

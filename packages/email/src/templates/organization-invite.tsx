@@ -23,16 +23,16 @@ export function OrganizationInviteEmail({
   return (
     <Html>
       <Head />
-      <Preview>{invitedByName} invited you to join {organizationName} on Redrob Work</Preview>
+      <Preview>{invitedByName} invited you to join {organizationName} on Redrob Cowork</Preview>
       <Body style={styles.body}>
         <Container style={styles.frame}>
           <Section style={styles.brand}>
-            <Img src={LOGO_URL} width="31" height="24" alt="Redrob Work" style={styles.brandLogo} />
-            <span style={styles.brandName}>Redrob Work</span>
+            <Img src={LOGO_URL} width="31" height="24" alt="Redrob Cowork" style={styles.brandLogo} />
+            <span style={styles.brandName}>Redrob Cowork</span>
           </Section>
           <Section style={styles.card}>
             <Text style={styles.eyebrow}>Invitation</Text>
-            <Heading style={styles.heading}>Join {organizationName} on Redrob Work</Heading>
+            <Heading style={styles.heading}>Join {organizationName} on Redrob Cowork</Heading>
             <Text style={styles.text}>
               {inviter} invited you to join the <span style={styles.strong}>{organizationName}</span> workspace as {articleFor(role)} {role}.
             </Text>
@@ -42,9 +42,9 @@ export function OrganizationInviteEmail({
             <Text style={styles.link}>{inviteLink}</Text>
           </Section>
           <Text style={styles.footer}>
-            You received this email because someone invited you to an Redrob Work workspace.
+            You received this email because someone invited you to an Redrob Cowork workspace.
             <br />
-            Redrob Work · redrob.io
+            Redrob Cowork · redrob.io
           </Text>
         </Container>
       </Body>

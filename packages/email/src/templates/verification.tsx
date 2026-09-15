@@ -8,12 +8,12 @@ export function VerificationEmail({ verificationCode }: VerificationEmailProps) 
   return (
     <Html>
       <Head />
-      <Preview>Your Redrob Work verification code is {verificationCode}</Preview>
+      <Preview>Your Redrob Cowork verification code is {verificationCode}</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
-          <Text style={styles.eyebrow}>Redrob Work</Text>
+          <Text style={styles.eyebrow}>Redrob Cowork</Text>
           <Heading style={styles.heading}>Verify your email</Heading>
-          <Text style={styles.text}>Enter this code to finish signing in to Redrob Work.</Text>
+          <Text style={styles.text}>Enter this code to finish signing in to Redrob Cowork.</Text>
           <Section style={styles.codeBox}>
             <Text style={styles.code}>{verificationCode}</Text>
           </Section>

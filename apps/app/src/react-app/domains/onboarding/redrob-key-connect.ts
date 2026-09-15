@@ -3,7 +3,7 @@ import type { RedrobServerClient } from "../../../app/lib/redrob-server";
 /**
  * Redrob Key operations, all of them against Redrob Code's auth store.
  *
- * Redrob Work does not own this credential and keeps no copy of it. Onboarding
+ * Redrob Cowork does not own this credential and keeps no copy of it. Onboarding
  * collects the value and hands it to the engine through one narrow authenticated
  * Work server route; everything after that reads the engine's own answer.
  *

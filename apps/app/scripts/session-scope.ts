@@ -17,8 +17,8 @@ const {
   toSessionTransportDirectory,
 } = await import("../src/app/lib/session-scope.ts");
 
-const starterRoot = "/Users/test/Redrob Work/starter";
-const otherRoot = "/Users/test/Redrob Work/second";
+const starterRoot = "/Users/test/Redrob Cowork/starter";
+const otherRoot = "/Users/test/Redrob Cowork/second";
 
 const results = {
   ok: true,
@@ -99,7 +99,7 @@ try {
       },
     });
 
-    const winRoot = String.raw`C:\Users\Test\Redrob Work\starter`;
+    const winRoot = String.raw`C:\Users\Test\Redrob Cowork\starter`;
     const transport = toSessionTransportDirectory(winRoot);
 
     assert.equal(transport, winRoot);
@@ -110,8 +110,8 @@ try {
     assert.equal(toSessionTransportDirectory(uncRoot), String.raw`\\server\share\starter`);
     assert.equal(describeDirectoryScope(uncRoot).normalized, "//server/share/starter");
 
-    const verbatimDriveRoot = String.raw`\\?\C:\Users\Test\Redrob Work\starter`;
-    assert.equal(toSessionTransportDirectory(verbatimDriveRoot), String.raw`C:\Users\Test\Redrob Work\starter`);
+    const verbatimDriveRoot = String.raw`\\?\C:\Users\Test\Redrob Cowork\starter`;
+    assert.equal(toSessionTransportDirectory(verbatimDriveRoot), String.raw`C:\Users\Test\Redrob Cowork\starter`);
     assert.equal(describeDirectoryScope(verbatimDriveRoot).normalized, "c:/users/test/redrob/starter");
   });
 
@@ -126,8 +126,8 @@ try {
     });
 
     const unixPaths = [
-      "/Users/test/Redrob Work/starter",
-      "/Users/test/Redrob Work/starter/",
+      "/Users/test/Redrob Cowork/starter",
+      "/Users/test/Redrob Cowork/starter/",
       "/home/user/projects/my-app",
       "/tmp/sandbox",
       "/private/tmp/sandbox",
@@ -153,11 +153,11 @@ try {
 
     // Use escaped strings — Bun's parser chokes on String.raw inside array literals.
     const windowsPaths = [
-      "C:\\Users\\Test\\Redrob Work\\starter",
-      "C:\\Users\\Test\\Redrob Work\\starter\\",
+      "C:\\Users\\Test\\Redrob Cowork\\starter",
+      "C:\\Users\\Test\\Redrob Cowork\\starter\\",
       "D:\\projects\\my-app",
       "\\\\server\\share\\starter",
-      "\\\\?\\C:\\Users\\Test\\Redrob Work\\starter",
+      "\\\\?\\C:\\Users\\Test\\Redrob Cowork\\starter",
       "\\\\?\\UNC\\server\\share\\starter",
     ];
 
@@ -181,7 +181,7 @@ try {
     });
 
     const samples = [
-      "/Users/test/Redrob Work/starter",
+      "/Users/test/Redrob Cowork/starter",
       "/home/user/projects/my-app",
     ];
     for (const raw of samples) {
@@ -200,7 +200,7 @@ try {
     });
 
     const winSamples = [
-      "C:\\Users\\Test\\Redrob Work\\starter",
+      "C:\\Users\\Test\\Redrob Cowork\\starter",
       "\\\\server\\share\\starter",
     ];
     for (const raw of winSamples) {

@@ -988,7 +988,7 @@ const ARTIFACT_OUTPUT_SKIP_TOOLS = new Set(["webfetch"]);
 // Patterns that indicate a path is a truncated system/absolute path rather than a workspace-relative path
 const TRUNCATED_SYSTEM_PATH_PATTERNS = [
   /com\.[^/]+\.(redrob|opencode)/i, // macOS app bundle identifiers
-  /\.redrob\.dev\//i, // Redrob Work dev paths
+  /\.redrob\.dev\//i, // Redrob Cowork dev paths
   /Application Support\//i, // macOS Application Support
   /AppData[/\\]/i, // Windows AppData
   /\.local\/share\//i, // Linux XDG data
@@ -1203,7 +1203,7 @@ export function deriveWorkingFiles(items: ArtifactItem[]): string[] {
 /**
  * Joins path segments for DISPLAY, using the separator the root itself already uses.
  *
- * The recovery page showed `C:\Users\USER\Redrob Work Chat/.opencode/redrob.json` -- a Windows root
+ * The recovery page showed `C:\Users\USER\Redrob Cowork Chat/.opencode/redrob.json` -- a Windows root
  * with POSIX separators glued on, because the path was built by string interpolation
  * (`${root}/.opencode/redrob.json`). A user copying that out of the page gets something that is not
  * a path on their system, and it reads as a bug in the product.

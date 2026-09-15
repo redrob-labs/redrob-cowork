@@ -401,7 +401,7 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
 
     expect(output.system[0]).toBe(REDROB_EXTENSION_DISCOVERY_INSTRUCTION);
     expect(output.system.join("\n")).toContain(REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION);
-    expect(output.system.join("\n")).not.toContain("Redrob Work Cloud");
+    expect(output.system.join("\n")).not.toContain("Redrob Cowork Cloud");
     expect(output.system.join("\n")).not.toContain("redrob-cloud_search_capabilities");
   });
   test("reads a transcript by session id without opening the UI", async () => {
@@ -429,7 +429,7 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
     ]);
   });
 
-  test("creates and starts multiple sessions through the Redrob Work backend", async () => {
+  test("creates and starts multiple sessions through the Redrob Cowork backend", async () => {
     const fake = startFakeRedrobWorkServer();
     const plugin = await RedrobWorkExtensionsPreview({ directory: "/tmp/archive" });
 

@@ -47,7 +47,7 @@ export async function callExperimentalExtensionAction(config: ServerConfig, env:
   }
   const registered = REDROB_EXPERIMENTAL_EXTENSION_ACTIONS.find((item) => item.extensionId === extensionId && item.action === action);
   if (!registered) {
-    throw new ApiError(404, "extension_action_not_found", "Redrob Work extension action not found");
+    throw new ApiError(404, "extension_action_not_found", "Redrob Cowork extension action not found");
   }
 
   if (extensionId === GOOGLE_WORKSPACE_EXTENSION_ID) {

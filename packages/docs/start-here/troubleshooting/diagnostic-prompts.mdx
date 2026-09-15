@@ -1,9 +1,9 @@
 ---
 title: "Diagnostic prompts"
-description: "Paste-able prompts that let your agent debug Redrob Work issues on its own."
+description: "Paste-able prompts that let your agent debug Redrob Cowork issues on its own."
 ---
 
-When something in Redrob Work looks wrong, the fastest debugger is usually the agent
+When something in Redrob Cowork looks wrong, the fastest debugger is usually the agent
 itself: it can read its own configuration, probe the local server, and verify fixes
 in-band. This page collects paste-able diagnostic prompts. Copy the whole block for your
 situation into a chat and let the agent work through it.
@@ -15,7 +15,7 @@ If the symptom is DNS, TCP 443, TLS chain, or proxy reachability, start with
 [Network diagnostics](/start-here/network-diagnostics) instead.
 
 <Note>
-Everything below is local. Redrob Work is a desktop app plus a local `redrob-server`
+Everything below is local. Redrob Cowork is a desktop app plus a local `redrob-server`
 running the Redrob Code engine as a sidecar. There is no account and no remote control
 plane to check, so every probe stays on your machine.
 </Note>
@@ -31,7 +31,7 @@ plane to check, so every probe stays on your machine.
 
 **What is usually wrong**
 
-Redrob Work writes a generated `runtime-opencode-config.json` and passes it to the
+Redrob Cowork writes a generated `runtime-opencode-config.json` and passes it to the
 engine as `OPENCODE_CONFIG`. A task holds the tool set it started with, so a connection
 added or repaired after the task began is not visible to it. Less often the generated
 config never reached the engine, or a tool-deny policy is filtering the tool out.
@@ -71,7 +71,7 @@ Replace <server-name> with the connection name shown in Settings > Library.
    - its exact status and non-secret error
    - whether this workspace is the primary managed workspace or a secondary one
 
-Important: `mcp list` starts a fresh process. Do not claim it attaches to the engine already running inside Redrob Work. Describe it only as a fresh-process probe using the same binary and generated config.
+Important: `mcp list` starts a fresh process. Do not claim it attaches to the engine already running inside Redrob Cowork. Describe it only as a fresh-process probe using the same binary and generated config.
 
 ## Phase 4 - Classify the result
 
@@ -84,7 +84,7 @@ Important: `mcp list` starts a fresh process. Do not claim it attaches to the en
 Finish with a concise redacted report.
 ````
 
-**Then verify inside Redrob Work**
+**Then verify inside Redrob Cowork**
 
 1. Open `Settings` > `Library` and click `Refresh`.
 2. Find the connection and expand it. Keep its status and non-secret error: `Ready`,
@@ -112,7 +112,7 @@ Finish with a concise redacted report.
 
 **What is usually wrong**
 
-The Redrob Code engine owns the Redrob Key. Redrob Work hands the key to the engine and
+The Redrob Code engine owns the Redrob Key. Redrob Cowork hands the key to the engine and
 keeps no copy of it, so the engine's own auth store is the only source of truth. A key
 that was never accepted, was rotated in the console, or was saved while the engine was
 unreachable produces exactly this symptom. The engine also fetches the model catalog
@@ -145,7 +145,7 @@ Diagnose why no models are available in this workspace. Gather evidence only: do
 Finish with a short report naming the single most likely boundary.
 ````
 
-**Then verify inside Redrob Work**
+**Then verify inside Redrob Cowork**
 
 1. Reissue a key at [console.redrob.ai](https://console.redrob.ai) if the engine reports
    no credential, and paste it on the connect screen.

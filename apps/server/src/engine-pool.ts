@@ -41,7 +41,7 @@ export type EngineSpawnTemplate = {
   cwd: string;
   runtimeConfigPath: string;
   env: Record<string, string | undefined>;
-  /** Ports a standby must avoid (the Redrob Work server, and the live engine). */
+  /** Ports a standby must avoid (the Redrob Cowork server, and the live engine). */
   reservedPorts: () => number[];
   /** Readiness budget for a standby spawn. Defaults to the managed-engine default. */
   spawnTimeoutMs?: number;

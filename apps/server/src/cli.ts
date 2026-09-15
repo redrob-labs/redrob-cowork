@@ -157,7 +157,7 @@ if (managedOpencode) {
 }
 
 const url = `http://${config.host}:${server.port}`;
-logger.log("info", `Redrob Work server listening on ${url}`);
+logger.log("info", `Redrob Cowork server listening on ${url}`);
 
 if (config.tokenSource === "generated") {
   logger.log("info", `Client token: ${config.token}`);

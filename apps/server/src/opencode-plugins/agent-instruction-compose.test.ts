@@ -25,9 +25,9 @@ describe("agent instruction compose primitives", () => {
       createInstructionSection("ui", "use redrob_ui_*"),
     );
     const withoutUi = deleteInstructionSection(base, "ui");
-    const expanded = expandInstructionSection(withoutUi, "browser", (body) => `${body}\nnever use browser_* on Redrob Work`);
+    const expanded = expandInstructionSection(withoutUi, "browser", (body) => `${body}\nnever use browser_* on Redrob Cowork`);
     expect(composeAgentInstructions(expanded)).toEqual([
-      "use redrob_execute browser.open_url\nnever use browser_* on Redrob Work",
+      "use redrob_execute browser.open_url\nnever use browser_* on Redrob Cowork",
     ]);
   });
 

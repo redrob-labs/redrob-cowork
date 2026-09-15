@@ -1,14 +1,14 @@
 /**
  * The Headless Threads contract.
  *
- * A "thread" is a native Redrob Work session: the same workspace, the same
+ * A "thread" is a native Redrob Cowork session: the same workspace, the same
  * managed OpenCode engine, the same session id, the same persisted messages
  * and tool activity the desktop UI shows. Nothing here introduces a second
  * chat engine, a second session store, or a second model gateway — the types
- * below only describe the session surface Redrob Work already serves.
+ * below only describe the session surface Redrob Cowork already serves.
  */
 
-/** Model selection, in Redrob Work's server casing (`providerId`/`modelId`). */
+/** Model selection, in Redrob Cowork's server casing (`providerId`/`modelId`). */
 export interface HeadlessThreadModel {
   providerId: string;
   modelId: string;
@@ -74,7 +74,7 @@ export interface CreateThreadInput {
 
 export interface HeadlessThread {
   /**
-   * The native OpenCode session id. It is the same id the Redrob Work UI uses,
+   * The native OpenCode session id. It is the same id the Redrob Cowork UI uses,
    * so a headless thread can be opened in the app afterwards.
    */
   id: string;
@@ -194,10 +194,10 @@ export type HeadlessFetch = (
 ) => Promise<Response>;
 
 export interface HeadlessThreadClientOptions {
-  /** Redrob Work server base URL, e.g. `http://127.0.0.1:8787`. */
+  /** Redrob Cowork server base URL, e.g. `http://127.0.0.1:8787`. */
   baseUrl: string;
   workspaceId: string;
-  /** A collaborator-scoped Redrob Work client token. */
+  /** A collaborator-scoped Redrob Cowork client token. */
   token: string;
   /** Host credential for server-to-server execution through the Cloud worker proxy. */
   hostToken?: string;

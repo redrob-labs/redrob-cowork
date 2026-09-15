@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * There is no hosted "Redrob Work Cloud" control-plane product. The name is a
+ * There is no hosted "Redrob Cowork Cloud" control-plane product. The name is a
  * leftover from the fork's Cloud/Enterprise tiers, and copy that still promises
  * it describes something a user cannot buy, install, or reach.
  *
@@ -34,7 +34,7 @@ const GUARDED_COPY_SURFACES = [
  */
 const HISTORICAL_RECORD = "packages/docs/changelog.mdx";
 
-const BANNED = ["Redrob Work Cloud", "OpenWork Cloud", "레드롭 워크 클라우드"];
+const BANNED = ["Redrob Cowork Cloud", "OpenWork Cloud", "레드롭 코워크 클라우드"];
 
 describe("no hosted Cloud product copy", () => {
   test("every guarded copy surface exists", () => {

@@ -28,3 +28,9 @@ jobs:
 
       - name: Run i18n audit
         run: node scripts/i18n-audit.mjs --ci
+
+      # Same family as the i18n audit: a string that says the wrong thing to a
+      # user. Runs here because this job is a required check on every pull
+      # request, and a rename of 1,710 occurrences is undone one file at a time.
+      - name: Check the retired product name is gone
+        run: node scripts/check-brand.mjs

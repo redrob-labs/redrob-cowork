@@ -29,7 +29,7 @@ on:
         required: false
         type: string
       release_name:
-        description: "Release title (defaults to Redrob Work <tag>)"
+        description: "Release title (defaults to Redrob Cowork <tag>)"
         required: false
         type: string
       release_body:
@@ -220,14 +220,14 @@ jobs:
           if [ -n "$RELEASE_NAME_INPUT" ]; then
             RELEASE_NAME="$RELEASE_NAME_INPUT"
           else
-            RELEASE_NAME="Redrob Work $TAG"
+            RELEASE_NAME="Redrob Cowork $TAG"
           fi
 
           RELEASE_BODY_INPUT="${INPUT_RELEASE_BODY:-}"
           if [ -n "$RELEASE_BODY_INPUT" ]; then
             RELEASE_BODY="$RELEASE_BODY_INPUT"
           else
-            printf -v RELEASE_BODY '%s\n\nRedrob Work %s desktop release.\n\n%s' \
+            printf -v RELEASE_BODY '%s\n\nRedrob Cowork %s desktop release.\n\n%s' \
               "## What's new" \
               "$TAG" \
               "- Artifacts use the redrob-* naming convention."

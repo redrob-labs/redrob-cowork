@@ -9,17 +9,17 @@ export type DownloadLinkEmailProps = {
 
 export function DownloadLinkEmail({ organizationName, downloadUrl }: DownloadLinkEmailProps) {
   const intro = organizationName
-    ? `Here's your link to download the Redrob Work desktop app for ${organizationName}.`
-    : "Here's your link to download the Redrob Work desktop app."
+    ? `Here's your link to download the Redrob Cowork desktop app for ${organizationName}.`
+    : "Here's your link to download the Redrob Cowork desktop app."
 
   return (
     <Html>
       <Head />
-      <Preview>Your Redrob Work download link</Preview>
+      <Preview>Your Redrob Cowork download link</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
-          <Text style={styles.eyebrow}>Redrob Work desktop</Text>
-          <Heading style={styles.heading}>Download Redrob Work</Heading>
+          <Text style={styles.eyebrow}>Redrob Cowork desktop</Text>
+          <Heading style={styles.heading}>Download Redrob Cowork</Heading>
           <Text style={styles.text}>{intro}</Text>
 
           <Section style={styles.capabilitiesBox}>
@@ -30,7 +30,7 @@ export function DownloadLinkEmail({ organizationName, downloadUrl }: DownloadLin
             ))}
           </Section>
 
-          <Button href={downloadUrl} style={styles.button}>Download Redrob Work</Button>
+          <Button href={downloadUrl} style={styles.button}>Download Redrob Cowork</Button>
           <Text style={styles.footer}>Signing in inside the app syncs your team&apos;s shared skills.</Text>
         </Container>
       </Body>

@@ -78,7 +78,7 @@ enforces that, and its allowlist is where a legitimate technical token goes.
 |---|---|---|
 | `i18n Audit` | pull request, push | required |
 | `redrob-ui-mcp` | pull request, push | required |
-| `Redrob Work Tests` | manual dispatch only | **paused** |
+| `Redrob Cowork Tests` | manual dispatch only | **paused** |
 
 The test workflow is deliberately paused (`workflow_dispatch` only) and is
 therefore **not** a required check. It has pre-existing failures on the trunk

@@ -1,6 +1,6 @@
 # @redrob/ui
 
-Shared UI primitives for Redrob Work apps.
+Shared UI primitives for Redrob Cowork apps.
 
 This package ships one entrypoint: `@redrob/ui/react`, used by `apps/app`.
 (A Solid flavor existed during the Solid-to-React migration and was removed
@@ -10,7 +10,7 @@ Exports resolve to `src/` directly, so consumers need no build step.
 
 ## Paper components
 
-The first shared components live under the `paper` namespace and wrap Paper Design shaders with Redrob Work-specific defaults and deterministic seed support.
+The first shared components live under the `paper` namespace and wrap Paper Design shaders with Redrob Cowork-specific defaults and deterministic seed support.
 
 Current components:
 
@@ -23,14 +23,14 @@ Both accept a `seed` prop. Pass a TypeID-like string such as `om_01kmhbscaze02vp
 
 Explicit props still work and override the seeded values, so the merge order is:
 
-1. Redrob Work defaults
+1. Redrob Cowork defaults
 2. Seed-derived values from `seed`
 3. Explicit props passed by the caller
 
 ## Roadmap component
 
 `RedrobWorkRoadmap` is the shared visual roadmap used by the landing and docs
-routes. Its typed sections are exported as `roadmapSections` so other Redrob Work
+routes. Its typed sections are exported as `roadmapSections` so other Redrob Cowork
 surfaces can reuse the same source of truth.
 
 ## Layout convention

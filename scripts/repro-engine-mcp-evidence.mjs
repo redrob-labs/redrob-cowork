@@ -156,7 +156,7 @@ async function ensureOrganization(denApiUrl, sessionToken) {
 }
 async function bootstrapDen(denApiUrl) {
   const email = `engine-mcp-evidence-${runTag}@acme.test`;
-  const password = `Redrob Work-${runTag}-Evidence!`;
+  const password = `Redrob Cowork-${runTag}-Evidence!`;
   log(`Signing up Den admin ${email}`);
   const signUp = await denAuthFetch(denApiUrl, "/api/auth/sign-up/email", {
     method: "POST",
@@ -260,7 +260,7 @@ function startDelayProxy(targetBase, port) {
 async function waitForServerListening(child, logStream) {
   let stdout = "";
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("Timed out waiting for Redrob Work server listening log")), 90_000);
+    const timeout = setTimeout(() => reject(new Error("Timed out waiting for Redrob Cowork server listening log")), 90_000);
     const finish = (value) => {
       clearTimeout(timeout);
       resolve(value);
@@ -273,11 +273,11 @@ async function waitForServerListening(child, logStream) {
       const text = chunk.toString();
       stdout += text;
       writeLog(logStream, text);
-      if (stdout.includes("Redrob Work server listening")) finish();
+      if (stdout.includes("Redrob Cowork server listening")) finish();
     });
     child.stderr.on("data", (chunk) => writeLog(logStream, chunk));
     child.once("error", fail);
-    child.once("exit", (code, signal) => fail(new Error(`Redrob Work server exited before listening (code ${code}, signal ${signal})`)));
+    child.once("exit", (code, signal) => fail(new Error(`Redrob Cowork server exited before listening (code ${code}, signal ${signal})`)));
   });
 }
 
@@ -290,7 +290,7 @@ async function startRedrobServer(paths, serverPort, opencodeBin) {
   const logStream = createWriteStream(serverLog, { flags: "a" });
   logStreams.add(logStream);
   const args = ["apps/server/src/cli.ts", "--host", "127.0.0.1", "--port", String(serverPort), "--token", SERVER_TOKEN, "--workspace", paths.workspaceRoot];
-  log(`Starting Redrob Work server on 127.0.0.1:${serverPort}`);
+  log(`Starting Redrob Cowork server on 127.0.0.1:${serverPort}`);
   const child = spawn("bun", args, {
     cwd: REPO_ROOT,
     env: {
@@ -311,7 +311,7 @@ async function startRedrobServer(paths, serverPort, opencodeBin) {
     logStream.end();
     throw error;
   }
-  log(`Redrob Work server log: ${serverLog}`);
+  log(`Redrob Cowork server log: ${serverLog}`);
   return { baseUrl: `http://127.0.0.1:${serverPort}` };
 }
 

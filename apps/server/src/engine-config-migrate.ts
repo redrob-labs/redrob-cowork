@@ -11,7 +11,7 @@ import {
 /**
  * One-way migration off the config filenames the engine never read.
  *
- * Redrob Work used to write user config to upstream OpenCode's filenames --
+ * Redrob Cowork used to write user config to upstream OpenCode's filenames --
  * `opencode.jsonc` at the workspace root, `~/.config/opencode/opencode.jsonc`
  * globally -- while the engine had already moved to `redrob.json(c)` under
  * `~/.config/redrob`. Nothing loaded those files, so MCP servers and plugins

@@ -1,26 +1,26 @@
 ---
 title: "Connect your services"
-description: "Give the Redrob Work agent access to the systems you work in, one MCP server at a time"
+description: "Give the Redrob Cowork agent access to the systems you work in, one MCP server at a time"
 ---
 
 <Info>
-**Everything here is local.** Redrob Work has no account, no organization, and no
+**Everything here is local.** Redrob Cowork has no account, no organization, and no
 service catalog. You connect a service by adding its MCP server to a workspace, and
 the credentials stay in your own `redrob-server` store.
 </Info>
 
-The Redrob Work agent reaches other systems through MCP servers you add yourself.
+The Redrob Cowork agent reaches other systems through MCP servers you add yourself.
 Slack, Notion, Linear, GitHub, an internal API, a local script: if it speaks MCP, the
 agent can use it.
 
 ## Add a connection
 
-1. Open the Redrob Work desktop app.
+1. Open the Redrob Cowork desktop app.
 2. Go to `Settings` > `Library`.
 3. Expand `Advanced settings` and click `Add workspace MCP`.
 4. Enter a name and the server URL, and say whether the server needs OAuth.
 5. If it does, finish the provider's approval page in your browser. It redirects back
-   to Redrob Work and the connection moves to ready.
+   to Redrob Cowork and the connection moves to ready.
 
 The step-by-step version with screenshots is
 [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server). For a worked
@@ -45,14 +45,14 @@ action to take.
 - A **skill** is written instructions the agent loads when a task matches. Skills are
   files in your workspace, under `.opencode/skills/<name>/SKILL.md`.
 - A **plugin** bundles skills, commands, agents, and MCP servers so they travel
-  together. Redrob Work installs Anthropic-compatible plugin bundles from public
+  together. Redrob Cowork installs Anthropic-compatible plugin bundles from public
   GitHub repositories.
 - The **Library** (`Settings` > `Library`) is the single list of what this workspace
   has: skills, commands, agents, MCP connections, and plugins.
 
 ## What is not here
 
-Redrob Work does not host a shared service catalog, and it does not publish a remote
-MCP endpoint for other clients. If you want another MCP client to drive Redrob Work
+Redrob Cowork does not host a shared service catalog, and it does not publish a remote
+MCP endpoint for other clients. If you want another MCP client to drive Redrob Cowork
 itself, that runs the other direction over a local stdio server: see
-[Control Redrob Work from any MCP client](/model-context-protocol/overview).
+[Control Redrob Cowork from any MCP client](/model-context-protocol/overview).

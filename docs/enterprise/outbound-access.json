@@ -6,14 +6,14 @@
       "components": ["server"],
       "purpose": "Google Workspace OAuth authorization page opened when a user connects Google Workspace.",
       "requirement": "opt-in",
-      "blockedEffect": "Users cannot complete Google Workspace sign-in from Redrob Work.",
+      "blockedEffect": "Users cannot complete Google Workspace sign-in from Redrob Cowork.",
       "override": null
     },
     {
       "host": "api.github.com",
       "kind": "fetched",
       "components": ["server"],
-      "purpose": "GitHub API calls for importing and previewing GitHub-hosted Claude Code/Redrob Work plugins.",
+      "purpose": "GitHub API calls for importing and previewing GitHub-hosted Claude Code/Redrob Cowork plugins.",
       "requirement": "opt-in",
       "blockedEffect": "GitHub plugin import cannot inspect repositories, branches, or plugin manifests.",
       "override": "REDROB_GITHUB_API_BASE"
@@ -40,9 +40,9 @@
       "host": "api.redrob.io",
       "kind": "fetched",
       "components": ["desktop", "installer", "server"],
-      "purpose": "Hosted Redrob Work public API and Redrob Work Connect MCP endpoint used by hosted install flows.",
+      "purpose": "Hosted Redrob Cowork public API and Redrob Cowork Connect MCP endpoint used by hosted install flows.",
       "requirement": "required-for-cloud",
-      "blockedEffect": "Hosted install checks, Redrob Work Connect, or legacy hosted API configurations cannot reach the hosted Redrob Work API.",
+      "blockedEffect": "Hosted install checks, Redrob Cowork Connect, or legacy hosted API configurations cannot reach the hosted Redrob Cowork API.",
       "override": "installer apiUrl / self-hosted Den API origin"
     },
     {
@@ -69,7 +69,7 @@
       "components": ["server"],
       "purpose": "Source-code comment pointing maintainers to the Claude Code plugin format reference.",
       "requirement": "optional",
-      "blockedEffect": "No runtime effect; it is not opened or fetched by Redrob Work.",
+      "blockedEffect": "No runtime effect; it is not opened or fetched by Redrob Cowork.",
       "override": null
     },
     {
@@ -87,7 +87,7 @@
       "components": ["den"],
       "purpose": "Container registry for self-hosted Den API, web, inference images, and Helm chart pulls.",
       "requirement": "required",
-      "blockedEffect": "A self-hosted Den deployment cannot pull Redrob Work images or the Helm chart from GitHub Container Registry.",
+      "blockedEffect": "A self-hosted Den deployment cannot pull Redrob Cowork images or the Helm chart from GitHub Container Registry.",
       "override": "container registry mirror / Helm image.repository values"
     },
     {
@@ -114,7 +114,7 @@
       "components": ["renderer"],
       "purpose": "Sample link in the deterministic demo transcript used to exercise link rendering.",
       "requirement": "optional",
-      "blockedEffect": "Clicking that sample Linear link fails; Redrob Work functionality is unaffected.",
+      "blockedEffect": "Clicking that sample Linear link fails; Redrob Cowork functionality is unaffected.",
       "override": null
     },
     {
@@ -193,9 +193,9 @@
       "host": "release-assets.githubusercontent.com",
       "kind": "redirect-target",
       "components": ["desktop", "installer"],
-      "purpose": "Current GitHub release-asset download target reached after github.com redirects installer and updater downloads. Verified live against a real Redrob Work release asset.",
+      "purpose": "Current GitHub release-asset download target reached after github.com redirects installer and updater downloads. Verified live against a real Redrob Cowork release asset.",
       "requirement": "required-in-practice",
-      "blockedEffect": "Redrob Work downloads start from github.com and then fail partway through when the redirect target is blocked.",
+      "blockedEffect": "Redrob Cowork downloads start from github.com and then fail partway through when the redirect target is blocked.",
       "override": null
     },
     {
@@ -204,7 +204,7 @@
       "components": ["desktop", "installer"],
       "purpose": "Legacy GitHub release-asset download target. GitHub has migrated to release-assets.githubusercontent.com, but allow both so older clients and any staged rollback keep working.",
       "requirement": "required-in-practice",
-      "blockedEffect": "Redrob Work downloads start from github.com and then fail partway through if GitHub serves this legacy redirect target and it is blocked.",
+      "blockedEffect": "Redrob Cowork downloads start from github.com and then fail partway through if GitHub serves this legacy redirect target and it is blocked.",
       "override": null
     },
     {
@@ -238,7 +238,7 @@
       "host": "redrob.io",
       "kind": "link-only",
       "components": ["desktop", "renderer"],
-      "purpose": "Documentation, feedback, support, and sample Redrob Work links.",
+      "purpose": "Documentation, feedback, support, and sample Redrob Cowork links.",
       "requirement": "optional",
       "blockedEffect": "Documentation or feedback links do not open; core app networking is unaffected.",
       "override": "VITE_REDROB_FEEDBACK_URL for the feedback link only"
@@ -258,14 +258,14 @@
       "components": ["desktop", "renderer"],
       "purpose": "npx package resolution for redrob-ui-mcp and development-only MCP helper commands.",
       "requirement": "required-in-practice",
-      "blockedEffect": "The Redrob Work UI-control MCP is silently unavailable when npx cannot download redrob-ui-mcp.",
+      "blockedEffect": "The Redrob Cowork UI-control MCP is silently unavailable when npx cannot download redrob-ui-mcp.",
       "override": "npm registry configuration used by npx"
     },
     {
       "host": "schemas.agentskills.io",
       "kind": "schema-string",
       "components": ["server"],
-      "purpose": "Skill index $schema identifier used for validation; Redrob Work does not fetch the schema URL.",
+      "purpose": "Skill index $schema identifier used for validation; Redrob Cowork does not fetch the schema URL.",
       "requirement": "optional",
       "blockedEffect": "No runtime network effect.",
       "override": null

@@ -24,7 +24,7 @@ export type RedrobWorkEngineMcpStatusSource = {
 };
 
 export const REDROB_EXTENSION_DISCOVERY_INSTRUCTION =
-  "If the user asks for something you cannot do with obvious built-in tools, check Redrob Work extensions before saying the capability is unavailable. Use redrob_query with id extension.actions to inspect available extension actions, then redrob_execute with id extension.call for the matching action.";
+  "If the user asks for something you cannot do with obvious built-in tools, check Redrob Cowork extensions before saying the capability is unavailable. Use redrob_query with id extension.actions to inspect available extension actions, then redrob_execute with id extension.call for the matching action.";
 
 export const REDROB_LOCAL_SKILL_AUTHORING_INSTRUCTION =
   "Skill creation: Local. Create or update a workspace-local skill only when the user requests one. Keep one skill in .opencode/skills/<skill-name>/SKILL.md, validate it, and re-read it after writing.";

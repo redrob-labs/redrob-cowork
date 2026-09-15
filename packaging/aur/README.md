@@ -1,13 +1,13 @@
 # Arch Linux package
 
-Use this directory to build and install the Redrob Work package locally on Arch Linux without Docker.
+Use this directory to build and install the Redrob Cowork package locally on Arch Linux without Docker.
 
 ## What this packaging does
 
 - Targets `x86_64` and `aarch64` Arch Linux.
 - Downloads the published Electron GitHub release asset for the current architecture.
 - Installs the Electron bundle under `/opt/redrob`.
-- Adds `/usr/bin/redrob`, a desktop entry, and the Redrob Work icon.
+- Adds `/usr/bin/redrob`, a desktop entry, and the Redrob Cowork icon.
 
 ## Prerequisites
 
