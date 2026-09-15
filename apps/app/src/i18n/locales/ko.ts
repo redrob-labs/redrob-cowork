@@ -16,7 +16,9 @@ import type { EnglishLogicalKey } from "./en";
 
 const ko = {
   "account.mcp_connected": "MCP 서버 {count}개",
+  "account.mcp_connected_hint": "MCP 서버는 에이전트에 도구를 더해줍니다. 설정의 연결에서 관리합니다.",
   "account.providers_connected": "모델 제공업체 {count}개",
+  "account.providers_connected_hint": "연결된 모델 제공업체입니다. 설정의 제공업체에서 추가하거나 제거합니다.",
   "activity.agent_label": "{agent} 에이전트",
   "activity.agent_named": "에이전트: {description}",
   "activity.agent_task": "{agent} 작업",
@@ -1915,6 +1917,7 @@ const ko = {
   "status.connecting": "연결 중",
   "status.creating_task": "새 작업 생성 중",
   "status.developer_mode": "개발자 모드",
+  "status.developer_mode_hint": "추가 진단 정보가 표시되는 중입니다. 의도한 것이 아니면 설정에서 끕니다.",
   "status.disconnected_hint": "다시 연결하려면 설정을 여세요",
   "status.disconnected_label": "연결 끊김",
   "status.docs": "문서",

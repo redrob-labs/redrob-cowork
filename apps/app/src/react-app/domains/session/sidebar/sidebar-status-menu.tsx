@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { t } from "@/i18n";
 import { usePlatform } from "../../../kernel/platform";
@@ -26,9 +27,23 @@ const INITIALIZING_MS = 15_000;
 
 type StatusDotVariant = "connected" | "loading" | "partial" | "disconnected";
 
-function StatusDot({ variant }: { variant: StatusDotVariant }) {
+/**
+ * What each dot colour means, in words.
+ *
+ * The dot was a bare coloured span: no title, no accessible name, no role. A
+ * sighted user got a colour with no key to it and a screen reader got nothing at
+ * all. `label` is passed in where the surrounding control does not already carry
+ * the same text, so the colour is never the only thing carrying the meaning.
+ */
+function StatusDot({ variant, label }: { variant: StatusDotVariant; label?: string }) {
   return (
-    <span className="relative flex size-2 shrink-0 items-center justify-center">
+    <span
+      className="relative flex size-2 shrink-0 items-center justify-center"
+      role={label ? "img" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+      title={label}
+    >
       {variant === "loading" ? (
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-warning/35" />
       ) : null}
@@ -214,7 +229,9 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
           <div className="mx-1 mb-1 flex flex-col gap-2 rounded-lg bg-muted/50 p-2">
             <div data-testid="runtime-status" className="flex items-start gap-2">
               <span className="mt-1">
-                <StatusDot variant={runtimeStatus.variant} />
+                {/* Named here: unlike the trigger, nothing adjacent repeats the
+                    label, so without it the colour is the only signal. */}
+                <StatusDot variant={runtimeStatus.variant} label={runtimeStatus.label} />
               </span>
               <div className="min-w-0">
                 <div className="text-[11.5px] font-medium text-foreground">{runtimeStatus.label}</div>
@@ -227,10 +244,39 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
             </div>
             {props.showConnectionStatus && props.developerMode ? (
               <div className="text-[10.5px] leading-tight text-muted-foreground">
-                {t("account.providers_connected", { count: props.providerConnectedIds.length })}
+                {/* Each fact gets its own tooltip. The counts were labelled but
+                    unexplained: "2 MCP servers" says nothing about what an MCP
+                    server is or where to change them, and a reader who does not
+                    already know cannot find out by hovering. */}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<span className="underline decoration-dotted underline-offset-2" />}
+                    data-testid="providers-connected-count"
+                  >
+                    {t("account.providers_connected", { count: props.providerConnectedIds.length })}
+                  </TooltipTrigger>
+                  <TooltipContent>{t("account.providers_connected_hint")}</TooltipContent>
+                </Tooltip>
                 {" · "}
-                {t("account.mcp_connected", { count: props.mcpConnectedCount })}
-                {` · ${t("status.developer_mode")}`}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<span className="underline decoration-dotted underline-offset-2" />}
+                    data-testid="mcp-connected-count"
+                  >
+                    {t("account.mcp_connected", { count: props.mcpConnectedCount })}
+                  </TooltipTrigger>
+                  <TooltipContent>{t("account.mcp_connected_hint")}</TooltipContent>
+                </Tooltip>
+                {" · "}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<span className="underline decoration-dotted underline-offset-2" />}
+                    data-testid="developer-mode-marker"
+                  >
+                    {t("status.developer_mode")}
+                  </TooltipTrigger>
+                  <TooltipContent>{t("status.developer_mode_hint")}</TooltipContent>
+                </Tooltip>
               </div>
             ) : null}
           </div>

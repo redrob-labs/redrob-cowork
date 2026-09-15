@@ -6,8 +6,10 @@
 const en = {
   "account.mcp_connected_one": "{count} MCP server",
   "account.mcp_connected_other": "{count} MCP servers",
+  "account.mcp_connected_hint": "MCP servers give the agent extra tools. Manage them in Settings, under Connections.",
   "account.providers_connected_one": "{count} model provider",
   "account.providers_connected_other": "{count} model providers",
+  "account.providers_connected_hint": "Model providers you have connected. Add or remove them in Settings, under Providers.",
   "activity.agent_label": "{agent} agent",
   "activity.agent_named": "Agent: {description}",
   "activity.agent_task": "{agent} task",
@@ -1922,6 +1924,7 @@ const en = {
   "status.connecting": "Connecting",
   "status.creating_task": "Creating new task",
   "status.developer_mode": "Developer mode",
+  "status.developer_mode_hint": "Extra diagnostics are showing. Turn it off in Settings if you did not mean to enable it.",
   "status.disconnected_hint": "Open settings to reconnect",
   "status.disconnected_label": "Disconnected",
   "status.docs": "Docs",
