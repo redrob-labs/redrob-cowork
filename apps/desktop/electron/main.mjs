@@ -1673,6 +1673,7 @@ const desktopCommandHandlers = {
   },
   "engineInstallCancel": async (event, ...args) => {
       return runtimeManager.engineInstallCancel();
+  },
   "memoryHeadroom": async (event, ...args) => {
       return runtimeManager.memoryHeadroom();
   },
