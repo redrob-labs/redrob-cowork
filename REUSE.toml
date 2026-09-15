@@ -16,6 +16,6 @@ path = "**"
 precedence = "closest"
 SPDX-FileCopyrightText = [
   "2026-present Different AI, Inc.",
-  "2026-present Janghoon Lee (Redrob)",
+  "2026-present Janghoon Lee (Redrob) and contributors",
 ]
 SPDX-License-Identifier = "MIT"

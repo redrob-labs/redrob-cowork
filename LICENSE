@@ -1,5 +1,5 @@
 Copyright (c) 2026-present Different AI, Inc.
-Copyright (c) 2026-present Janghoon Lee (Redrob)
+Copyright (c) 2026-present Janghoon Lee (Redrob) and contributors
 
 This repository is a fork of OpenWork (https://github.com/different-ai/openwork).
 It ships the MIT-licensed portion of that work only: the upstream /ee directory,
@@ -9,7 +9,9 @@ scripts/check-upstream-boundary.mjs enforces that.
 
 The upstream copyright notice above is retained as the MIT license requires, and
 is never replaced. Changes made in this fork are copyright Janghoon Lee (Redrob)
-and are released under the same MIT terms, so the whole tree stays MIT.
+and contributors, and are released under the same MIT terms, so the whole tree
+stays MIT. Each contributor keeps copyright in their own contribution; the notice
+names them collectively rather than assigning anything.
 
 Portions of this software are licensed as follows:
 
@@ -31,7 +33,7 @@ use its own name and marks. The same applies in the other direction to
 MIT License
 
 Copyright (c) 2026 Different AI
-Copyright (c) 2026-present Janghoon Lee (Redrob)
+Copyright (c) 2026-present Janghoon Lee (Redrob) and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

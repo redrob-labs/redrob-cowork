@@ -126,7 +126,7 @@ README translations: [English](./README.md), [한국어](./README_KO.md).
 Redrob Work is a fork of [OpenWork](https://github.com/different-ai/openwork) by
 Different AI, Inc., and is MIT licensed. Upstream's copyright notice is retained
 in [LICENSE](./LICENSE); changes made in this fork are copyright Janghoon Lee
-(Redrob) and are released under the same MIT terms.
+(Redrob) and contributors, and are released under the same MIT terms.
 
 Upstream's `/ee` directory is licensed under the OpenWork Enterprise Edition
 License, which requires an OpenWork subscription for production use. This fork
