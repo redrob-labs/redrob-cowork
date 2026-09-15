@@ -160,7 +160,12 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     get name() { return t("extensions.builtin_browser_name"); },
     get description() { return t("extensions.builtin_browser_description"); },
     source: { format: "redrob-builtin", origin: "builtin", trusted: true },
-    icon: { src: "/redrob-mark.svg" },
+    // A globe, not the Redrob mark. Every built-in carried the brand mark, which
+    // says nothing about what the entry does and left the browser
+    // indistinguishable from computer-use in the catalogue. The catalogue renders
+    // this field as an <img>, so it is an asset rather than the lucide Globe the
+    // running browser's own tab UI uses.
+    icon: { src: "/ext-browser-globe.svg" },
     composer: { prompt: "Use the Redrob Cowork Browser extension to " },
     setup: {
       get instructions() { return t("extensions.builtin_browser_setup"); },

@@ -7,7 +7,11 @@ import type { ModelBehaviorOption, ModelOption, ModelRef } from "@/app/types";
 import { getModelBehaviorSummary } from "@/app/lib/model-behavior";
 import { matchesModelQuery } from "@/app/lib/model-search";
 import { inferModelVendor } from "@/app/lib/model-vendor";
-import { formatModelPriceRange } from "@/app/lib/redrob-pricing";
+import {
+  formatModelPriceRange,
+  formatPriceTier,
+  formatTokenCount,
+} from "@/app/lib/redrob-pricing";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { ProviderIcon } from "@/react-app/design-system/provider-icon";
 import {
@@ -75,8 +79,10 @@ function useModelOptions(
   }, [client, refetch]);
 
   return React.useMemo(() => {
+    // No provider filter here on purpose: filterProviderList already decided
+    // which providers this app offers, and a second, different rule in the
+    // picker is how the two drift apart.
     const options = getConnectedProviderItems(data)
-      .filter((provider) => isRedrobOnlyProviderId(provider.id))
       .flatMap((provider) =>
         Object.entries(provider.models).map(([id, model]) => {
           const summary = getModelBehaviorSummary(provider.id, model, null, provider.name);
@@ -95,9 +101,7 @@ function useModelOptions(
         }),
       );
 
-    return mergeModelOptions(options, fallbackOptions).filter((option) =>
-      isRedrobOnlyProviderId(option.providerID),
-    );
+    return mergeModelOptions(options, fallbackOptions);
   }, [data, fallbackOptions]);
 }
 
@@ -314,9 +318,14 @@ export function ModelSelect({
     const vendor = inferModelVendor(option.modelID);
     // Published console rate, input / output per million tokens. Absent when the
     // catalog is unreachable or the model is not a Redrob one — never a zero.
-    const price = isRedrobOnlyProviderId(option.providerID)
-      ? formatModelPriceRange(pricing?.byModelId[option.modelID])
-      : null;
+    const modelPricing = isRedrobOnlyProviderId(option.providerID)
+      ? pricing?.byModelId[option.modelID]
+      : undefined;
+    const price = formatModelPriceRange(modelPricing);
+    // The rate alone does not say whether it is expensive; the tier does, in a
+    // shape that survives a glance in a dense list.
+    const tier = formatPriceTier(modelPricing);
+    const context = formatTokenCount(modelPricing?.capabilities.maxContextTokens);
     return (
       <CommandItem
         className="gap-2"
@@ -338,6 +347,19 @@ export function ModelSelect({
             {modelRowSubtitle(option)}
           </span>
         </span>
+        {context ? (
+          <span className="shrink-0 text-[10px] text-muted-foreground">
+            {t("pricing.context_window", { tokens: context })}
+          </span>
+        ) : null}
+        {tier ? (
+          <span
+            className="shrink-0 font-mono text-[10px] text-muted-foreground"
+            title={t("pricing.tier_hint")}
+          >
+            {tier}
+          </span>
+        ) : null}
         {price ? (
           <span
             className="shrink-0 font-mono text-[10px] text-muted-foreground"

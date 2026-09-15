@@ -53,7 +53,7 @@ import {
 import {
   REDROB_PROVIDER_ID,
   buildRedrobProviderConfig,
-  isRedrobOnlyProviderId,
+  isProviderExposed,
 } from "../../settings/redrob-provider";
 
 type ProviderReturnFocusTarget = "none" | "composer";
@@ -788,13 +788,21 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
 
     const availableProvidersById = new Map((availableProviders ?? []).map((provider) => [provider.id, provider]));
     for (const [id, providerMethods] of Object.entries(merged)) {
-      // Redrob-only allowlist: drop every other provider so the connect modal
-      // offers only Redrob and startProviderAuth can never resolve another id.
-      if (!isRedrobOnlyProviderId(id)) {
+      // Offer a provider only when this app can actually complete its
+      // credential; isProviderExposed carries the reasoning. Applied here as
+      // well as in the list filter so startProviderAuth can never resolve an id
+      // the modal should not have shown.
+      const provider = availableProvidersById.get(id);
+      const exposed = isProviderExposed({
+        id,
+        env: Array.isArray(provider?.env) ? provider.env : [],
+        hasOAuth: providerMethods.some((method) => method.type === "oauth"),
+        connected: options.providerConnectedIds().includes(id),
+      });
+      if (!exposed) {
         delete merged[id];
         continue;
       }
-      const provider = availableProvidersById.get(id);
       const normalizedId = id.trim().toLowerCase();
       const normalizedName = provider?.name?.trim().toLowerCase() ?? "";
       const isOpenAiProvider = normalizedId === "openai" || normalizedName === "openai";

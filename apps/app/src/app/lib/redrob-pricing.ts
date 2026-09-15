@@ -155,3 +155,44 @@ export function formatPriceMultiplier(pricing: RedrobModelPricing | undefined): 
   const rounded = Math.round(worst * 10) / 10;
   return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)}x`;
 }
+
+/**
+ * Cheap or expensive, as a glanceable tier rather than a number to interpret.
+ *
+ * A rate of `$5 / $25` per million tokens tells a reader nothing unless they
+ * already know what a token costs, and the multiplier ("8.3x") only helps once
+ * they know what the baseline is. The tier says the same thing in a shape that
+ * survives a glance: one `$` is the `auto` baseline or cheaper, and each further
+ * `$` is another order of expense above it.
+ *
+ * Thresholds are deliberately coarse -- 2x and 6x -- because the honest claim is
+ * "about the same / noticeably more / a lot more", not a precise ranking. Returns
+ * `null` when the multiplier is unknown, so a missing catalogue entry renders
+ * nothing instead of a misleading `$`.
+ */
+export function priceTier(pricing: RedrobModelPricing | undefined): 1 | 2 | 3 | null {
+  const worst = Math.max(pricing?.inputMultiplier ?? 0, pricing?.outputMultiplier ?? 0);
+  if (!worst) return null;
+  if (worst < 2) return 1;
+  if (worst < 6) return 2;
+  return 3;
+}
+
+/** `$` / `$$` / `$$$` for the tier above, or `null` when it is unknown. */
+export function formatPriceTier(pricing: RedrobModelPricing | undefined): string | null {
+  const tier = priceTier(pricing);
+  return tier === null ? null : "$".repeat(tier);
+}
+
+/**
+ * The reasoning levels a model actually offers, e.g. `low · medium · high`.
+ *
+ * The rows used to collapse this to the word "reasoning", which answers whether
+ * the feature exists but not what the user can pick, and the levels were already
+ * in the catalogue response being thrown away.
+ */
+export function formatThinkingLevels(pricing: RedrobModelPricing | undefined): string | null {
+  const levels = pricing?.capabilities.thinkingLevels ?? [];
+  if (levels.length === 0) return null;
+  return levels.join(" · ");
+}
