@@ -1177,6 +1177,11 @@ jobs:
       needs.prepare-npm.result == 'success' &&
       needs.prepare-npm.outputs.publish_server == 'true'
     runs-on: ubuntu-latest
+    # The desktop app is the product; this npm package is a side artifact for
+    # remote clients. A release that shipped six signed installers must not be
+    # reported as failed because npm auth is not configured, which is the same
+    # reasoning the AUR job already runs on.
+    continue-on-error: true
     permissions:
       actions: read
       contents: read
@@ -1188,6 +1193,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          # Writes the .npmrc that makes NODE_AUTH_TOKEN mean anything. Without
+          # it a token in the environment is simply ignored.
+          registry-url: https://registry.npmjs.org
 
       - name: Download npm package
         uses: actions/download-artifact@v4
@@ -1195,8 +1203,45 @@ jobs:
           name: redrob-server-npm-${{ env.RELEASE_VERSION }}
           path: ${{ runner.temp }}/redrob-server-npm
 
+      # Two ways to authenticate, and the repository may have neither yet.
+      #
+      # Trusted publishing (OIDC) is the one worth having: no stored secret, and
+      # `id-token: write` above is already what it needs. npm will not let you
+      # configure it for a package that does not exist yet, though, and
+      # redrob-server has never been published -- so the FIRST publish has to be
+      # a token, after which the trusted publisher can be set on npmjs.com and
+      # NPM_TOKEN deleted.
+      #
+      # Neither configured is a legitimate state: say exactly what is missing and
+      # stop, rather than failing a release over an auxiliary package.
       - name: Publish redrob-server
-        run: npm publish "$RUNNER_TEMP/redrob-server-npm" --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -uo pipefail
+          PACKAGE_DIR="$RUNNER_TEMP/redrob-server-npm"
+
+          # Attempt the publish either way: with a token when one is set, and
+          # tokenless otherwise, which is exactly what a configured trusted
+          # publisher needs. Deciding in advance that no auth exists would skip
+          # the OIDC path too, since the exchange happens inside npm publish and
+          # nothing observable says beforehand that it will succeed.
+          if npm publish "$PACKAGE_DIR" --access public --provenance; then
+            exit 0
+          fi
+
+          {
+            echo "npm publish failed. If the reason above is ENEEDAUTH or E403, this"
+            echo "repository can authenticate to npm neither way. Fix it with either:"
+            echo
+            echo "  * an NPM_TOKEN secret -- an npm granular access token with write"
+            echo "    access to redrob-server; or"
+            echo "  * trusted publishing, configured on the package's npmjs.com settings"
+            echo "    page against this repository and this workflow file, which needs no"
+            echo "    stored secret. npm requires the package to exist first, so this is"
+            echo "    the second step, not the first."
+          } >&2
+          exit 1
 
   aur-publish:
     name: Publish AUR
