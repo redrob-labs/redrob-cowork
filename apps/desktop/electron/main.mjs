@@ -132,7 +132,7 @@ if (BLANK_SLATE_LAUNCH.enabled || process.env.REDROB_ELECTRON_USE_MOCK_KEYCHAIN 
 }
 // Downloads come straight from the newest GitHub Release; there is no CDN mirror any more.
 const RELEASE_DOWNLOAD_BASE_URL = "https://github.com/redrob-labs/redrob-cowork/releases/latest/download";
-const RELEASE_PAGE_URL = "https://console.redrob.ai/work";
+const RELEASE_PAGE_URL = "https://console.redrob.ai/cowork";
 const DOCS_PAGE_URL = "https://redrob.io/docs";
 const applicationMenu = createApplicationMenu({
   appName: APP_NAME,
