@@ -22,6 +22,15 @@ import { t } from "@/i18n";
 import { modelEquals, resolveProviderDisplayName } from "../../../../app/utils";
 import type { ModelOption, ModelRef } from "../../../../app/types";
 import { isRecommendedModel } from "../../../../app/defaults";
+import { matchesModelQuery } from "../../../../app/lib/model-search";
+import { inferModelVendor } from "../../../../app/lib/model-vendor";
+import {
+  formatModelPriceRange,
+  formatPriceMultiplier,
+  formatTokenCount,
+  type RedrobPricing,
+} from "../../../../app/lib/redrob-pricing";
+import { useRedrobPricingQuery } from "../../../infra/redrob-pricing-query";
 import { ProviderIcon } from "../../../design-system/provider-icon";
 
 // Translation KEYS, not display text. A module-level constant holding UI copy
@@ -101,18 +110,15 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     return () => cancelAnimationFrame(frame);
   }, [props.open]);
 
-  // Filter by search
+  // Filter by search. Token matching, so "Redrob Auto" (provider then model, the
+  // order the row is read in) and "anthropic opus" both resolve.
   const filteredOptions = useMemo(() => {
-    const q = props.query.trim().toLowerCase();
-    if (!q) return props.options;
-    return props.options.filter(
-      (o) =>
-        o.title.toLowerCase().includes(q) ||
-        o.providerID.toLowerCase().includes(q) ||
-        o.modelID.toLowerCase().includes(q) ||
-        (o.description ?? "").toLowerCase().includes(q),
-    );
+    if (!props.query.trim()) return props.options;
+    return props.options.filter((o) => matchesModelQuery(o, props.query));
   }, [props.options, props.query]);
+
+  // Published prices and capabilities, so a row can say what a model costs.
+  const { data: pricing } = useRedrobPricingQuery({ enabled: props.open });
 
   // Group by provider
   const providerGroups = useMemo<ProviderGroup[]>(() => {
@@ -264,6 +270,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                   onToggleExpand={() => toggleProvider(group.id)}
                   onToggleProvider={props.onToggleProvider}
                   onSelect={handleSelect}
+                  pricing={pricing}
                 />
               ))
             )}
@@ -293,6 +300,7 @@ function ProviderAccordion({
   onToggleExpand,
   onToggleProvider,
   onSelect,
+  pricing,
 }: {
   group: ProviderGroup;
   expanded: boolean;
@@ -301,6 +309,7 @@ function ProviderAccordion({
   onToggleExpand: () => void;
   onToggleProvider?: (providerId: string, enabled: boolean) => void;
   onSelect: (opt: ModelOption) => void;
+  pricing?: RedrobPricing;
 }) {
   const totalModels = group.recommended.length + group.other.length;
   const Chevron = expanded ? ChevronDown : ChevronRight;
@@ -357,7 +366,7 @@ function ProviderAccordion({
             <>
               <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">{t("model_picker.recommended")}</div>
               {group.recommended.map((opt) => (
-                <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} recommended />
+                <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} pricing={pricing} recommended />
               ))}
             </>
           ) : null}
@@ -367,7 +376,7 @@ function ProviderAccordion({
                 <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">{t("model_picker.all_models")}</div>
               ) : null}
               {group.other.map((opt) => (
-                <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} />
+                <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} pricing={pricing} />
               ))}
             </>
           ) : null}
@@ -382,27 +391,65 @@ function ProviderAccordion({
 /* ------------------------------------------------------------------ */
 
 function DefaultModelRow({
-  opt, current, onSelect, recommended,
+  opt, current, onSelect, recommended, pricing,
 }: {
   opt: ModelOption; current: ModelRef; onSelect: (opt: ModelOption) => void; recommended?: boolean;
+  pricing?: RedrobPricing;
 }) {
   const active = modelEquals(current, { providerID: opt.providerID, modelID: opt.modelID });
+  // A router provider lists every vendor's model under its own name, so the row
+  // states the vendor the model actually comes from.
+  const vendor = inferModelVendor(opt.modelID);
+  // Published console facts. Every one is optional: a catalog that omits a field
+  // renders no chip for it rather than a zero or a guess.
+  const modelPricing = pricing?.byModelId[opt.modelID];
+  const price = formatModelPriceRange(modelPricing);
+  const multiplier = formatPriceMultiplier(modelPricing);
+  const context = formatTokenCount(modelPricing?.capabilities.maxContextTokens);
+  const reasoning = (modelPricing?.capabilities.thinkingLevels.length ?? 0) > 0;
+  const dataShare = modelPricing?.capabilities.requiresProviderDataShare === true;
 
   return (
     <button
       type="button"
       className={[
-        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors",
+        "flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left transition-colors",
         active ? "bg-success-soft/50" : "hover:bg-dls-hover",
       ].join(" ")}
       onClick={() => onSelect(opt)}
     >
-      {recommended ? <Star size={12} className="shrink-0 text-warning" /> : <div className="w-3 shrink-0" />}
-      <div className="min-w-0 flex-1">
-        <span className={["text-[12px]", active ? "font-medium text-dls-text" : "text-dls-text"].join(" ")}>{opt.title}</span>
-        <span className="ml-2 font-mono text-[10px] text-dls-secondary/60">{opt.modelID}</span>
-      </div>
-      {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}
+      <span className="flex w-full items-center gap-2">
+        {recommended ? <Star size={12} className="shrink-0 text-warning" /> : <span className="w-3 shrink-0" />}
+        {vendor ? (
+          <ProviderIcon
+            providerId={vendor.id}
+            providerName={vendor.name}
+            size={12}
+            className="shrink-0 opacity-70"
+          />
+        ) : null}
+        <span className="min-w-0 flex-1">
+          <span className={["text-[12px]", active ? "font-medium text-dls-text" : "text-dls-text"].join(" ")}>{opt.title}</span>
+          {vendor ? (
+            <span className="ml-2 text-[10px] text-dls-secondary">{vendor.name}</span>
+          ) : null}
+          <span className="ml-2 font-mono text-[10px] text-dls-secondary/60">{opt.modelID}</span>
+        </span>
+        {price ? (
+          <span className="shrink-0 font-mono text-[10px] text-dls-secondary" title={t("pricing.per_million_hint")}>
+            {price}
+          </span>
+        ) : null}
+        {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}
+      </span>
+      {price || context || reasoning || dataShare ? (
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 ps-5 text-[10px] text-dls-secondary">
+          {multiplier ? <span>{t("pricing.multiplier_hint", { multiplier })}</span> : null}
+          {context ? <span>{t("pricing.context_window", { tokens: context })}</span> : null}
+          {reasoning ? <span>{t("pricing.reasoning_supported")}</span> : null}
+          {dataShare ? <span className="text-warning-ink">{t("pricing.data_share_required")}</span> : null}
+        </span>
+      ) : null}
     </button>
   );
 }
