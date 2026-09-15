@@ -1,10 +1,15 @@
 Copyright (c) 2026-present Different AI, Inc.
 
+This repository is a fork of OpenWork (https://github.com/different-ai/openwork).
+It ships the MIT-licensed portion of that work only: the upstream /ee directory,
+which is licensed under the OpenWork Enterprise Edition License and requires an
+OpenWork subscription for production use, is deliberately not part of this tree.
+scripts/check-upstream-boundary.mjs enforces that.
+
 Portions of this software are licensed as follows:
 
-* All content that resides under the /ee directory of this repository is licensed under the license defined in "ee/LICENSE" (Fair Source License).
-* All third party components incorporated into the OpenWork Software are licensed under the original license provided by the owner of the applicable component.
-* Content outside of the above mentioned directories or restrictions above is available under the "MIT" license as defined below.
+* All third party components incorporated into this software are licensed under the original license provided by the owner of the applicable component.
+* All remaining content is available under the "MIT" license as defined below.
 
 MIT License
 

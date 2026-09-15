@@ -1,0 +1,18 @@
+{
+  "$comment": "Machine-readable record of where this fork was cut from and what it deliberately does not ship. Read by scripts/upstream-sync.mjs and enforced by scripts/check-upstream-boundary.mjs. The base was MEASURED, not assumed: the import commit's tree differs from this upstream commit by 42 files, all under the excluded prefixes below.",
+  "remote": "https://github.com/different-ai/openwork.git",
+  "remoteName": "upstream",
+  "defaultBranch": "dev",
+  "$defaultBranchComment": "Upstream's default branch is 'dev', not 'main' — measured from the remote's HEAD, not assumed.",
+  "base": "9ba56f2b23d9c28ddbd14f61d24bea0241e43993",
+  "baseDate": "2026-08-24T09:36:25Z",
+  "baseSubject": "fix(den-api): clear stale login session cookie (#4034)",
+  "importCommit": "6776b1d23470f51e59f91c77c31244ecf4c20506",
+  "excludedPrefixes": [
+    "ee/",
+    "packaging/helm/openwork-ee/",
+    "evals/"
+  ],
+  "excludedReason": "Upstream licenses everything under /ee under the OpenWork Enterprise Edition License, which permits production use only with a valid OpenWork subscription. This fork ships MIT-licensed content only, so /ee and its packaging chart stay out of the tree permanently. /evals is upstream's own benchmark harness and depends on the EE stack.",
+  "lastSyncedUpstream": null
+}
