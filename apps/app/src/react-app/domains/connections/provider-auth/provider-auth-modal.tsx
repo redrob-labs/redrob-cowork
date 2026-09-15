@@ -27,7 +27,7 @@ import { toast } from "@/components/ui/sonner";
 import { openDesktopUrl } from "@/app/lib/desktop";
 import { isDesktopRuntime } from "@/app/utils";
 import { compareProviders } from "@/app/utils/providers";
-import { isRedrobOnlyProviderId } from "@/react-app/domains/settings/redrob-provider";
+import { isProviderExposed } from "@/react-app/domains/settings/redrob-provider";
 import { Button } from "@/components/ui/button";
 import { ProviderIcon } from "../../../design-system/provider-icon";
 import { TextInput } from "../../../design-system/text-input";
@@ -171,9 +171,15 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
           return !isOpenAiHeadlessMethod(method);
         });
         if (entryMethods.length === 0) return [];
-        // Redrob-only allowlist (single source of truth): defence in depth so
-        // the modal never lists a provider the store filter didn't already drop.
-        if (!isRedrobOnlyProviderId(id)) return [];
+        // Defence in depth: the store already dropped anything this app cannot
+        // complete a credential for, and this repeats the same test so a stale
+        // list can never offer a connection that dead-ends.
+        if (!isProviderExposed({
+          id,
+          env: Array.isArray(provider?.env) ? provider.env : [],
+          hasOAuth: entryMethods.some((method) => method.type === "oauth"),
+          connected: connected.has(id),
+        })) return [];
         return [{
           id,
           name: formatProviderName(id, provider?.name),

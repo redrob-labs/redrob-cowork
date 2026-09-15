@@ -60,8 +60,11 @@ function installProviderAuthFetch() {
 }
 
 function createTestStore(workerType: "local" | "remote") {
-  // Redrob is the only allowlisted provider; OpenAI is present in the engine
-  // list to prove the allowlist drops it from the connect surface.
+  // Four shapes, one per branch of the exposure rule: OpenAI declares a single
+  // secret and offers OAuth, Redrob is the engine-owned provider, OpenCode needs
+  // no secret at all, and Bedrock declares three environment variables because
+  // one field cannot configure it -- which is exactly the case the connect modal
+  // has no form for.
   const providers: ProviderListItem[] = [
     {
       id: "openai",
@@ -74,6 +77,20 @@ function createTestStore(workerType: "local" | "remote") {
       id: REDROB_PROVIDER_ID,
       name: REDROB_PROVIDER_NAME,
       env: [REDROB_API_KEY_ENV],
+      source: "env",
+      models: {},
+    },
+    {
+      id: "opencode",
+      name: "OpenCode",
+      env: [],
+      source: "env",
+      models: {},
+    },
+    {
+      id: "amazon-bedrock",
+      name: "Amazon Bedrock",
+      env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"],
       source: "env",
       models: {},
     },
@@ -117,8 +134,8 @@ afterEach(() => {
   Object.defineProperty(globalThis, "fetch", { configurable: true, value: originalFetch });
 });
 
-describe("Redrob-only provider auth methods", () => {
-  test("desktop local workers offer only the Redrob API key and drop OpenAI", async () => {
+describe("provider auth methods follow what this app can complete", () => {
+  test("desktop local workers offer Redrob, OpenAI and OpenCode, and drop Bedrock", async () => {
     installWindow({
       origin: "http://localhost:3000",
       electronInfo: { baseUrl: "http://localhost:8787", ownerToken: "owner-token" },
@@ -132,11 +149,18 @@ describe("Redrob-only provider auth methods", () => {
     expect(methods[REDROB_PROVIDER_ID]).toEqual([
       { type: "api", label: "API key" },
     ]);
-    expect(methods.openai).toBeUndefined();
-    expect(Object.keys(methods)).toEqual([REDROB_PROVIDER_ID]);
+    // A single declared secret is a form this app has, so OpenAI is offered --
+    // with the browser sign-in flow a desktop worker can actually complete, and
+    // the headless device flow filtered out.
+    expect(methods.openai?.some((method) => method.type === "api")).toBe(true);
+    expect(methods.openai?.some((method) => method.label === "Sign in with ChatGPT")).toBe(true);
+    expect(methods.openai?.some((method) => method.label === "Headless device flow")).toBe(false);
+    // Bedrock needs three values and the modal collects one, so offering it
+    // would advertise a connection the user cannot finish.
+    expect(methods["amazon-bedrock"]).toBeUndefined();
   });
 
-  test("desktop remote workers still expose only the Redrob API key", async () => {
+  test("desktop remote workers get the headless OpenAI flow instead", async () => {
     installWindow({
       origin: "http://localhost:3000",
       electronInfo: { baseUrl: "http://localhost:8787", ownerToken: "owner-token" },
@@ -150,10 +174,12 @@ describe("Redrob-only provider auth methods", () => {
     expect(methods[REDROB_PROVIDER_ID]).toEqual([
       { type: "api", label: "API key" },
     ]);
-    expect(methods.openai).toBeUndefined();
+    expect(methods.openai?.some((method) => method.label === "Headless device flow")).toBe(true);
+    expect(methods.openai?.some((method) => method.label === "Sign in with ChatGPT")).toBe(false);
+    expect(methods["amazon-bedrock"]).toBeUndefined();
   });
 
-  test("browser workers offer the Redrob API key without OAuth", async () => {
+  test("browser workers keep the API keys and lose every OpenAI OAuth flow", async () => {
     installWindow({ origin: "https://self-hosted.example" });
     installProviderAuthFetch();
     const store = createTestStore("local");
@@ -164,6 +190,9 @@ describe("Redrob-only provider auth methods", () => {
     expect(methods[REDROB_PROVIDER_ID]).toEqual([
       { type: "api", label: "API key" },
     ]);
-    expect(methods.openai).toBeUndefined();
+    // Off-desktop neither ChatGPT sign-in flow can complete, so only the key is
+    // left -- but the provider itself stays offered.
+    expect(methods.openai).toEqual([{ type: "api", label: "API key" }]);
+    expect(methods["amazon-bedrock"]).toBeUndefined();
   });
 });

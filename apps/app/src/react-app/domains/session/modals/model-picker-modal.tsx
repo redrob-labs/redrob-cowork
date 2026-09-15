@@ -27,6 +27,8 @@ import { inferModelVendor } from "../../../../app/lib/model-vendor";
 import {
   formatModelPriceRange,
   formatPriceMultiplier,
+  formatPriceTier,
+  formatThinkingLevels,
   formatTokenCount,
   type RedrobPricing,
 } from "../../../../app/lib/redrob-pricing";
@@ -407,6 +409,9 @@ function DefaultModelRow({
   const multiplier = formatPriceMultiplier(modelPricing);
   const context = formatTokenCount(modelPricing?.capabilities.maxContextTokens);
   const reasoning = (modelPricing?.capabilities.thinkingLevels.length ?? 0) > 0;
+  const thinkingLevels = formatThinkingLevels(modelPricing);
+  const tier = formatPriceTier(modelPricing);
+  const fastMode = modelPricing?.capabilities.fastMode === true;
   const dataShare = modelPricing?.capabilities.requiresProviderDataShare === true;
 
   return (
@@ -442,11 +447,22 @@ function DefaultModelRow({
         ) : null}
         {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}
       </span>
-      {price || context || reasoning || dataShare ? (
+      {price || context || reasoning || fastMode || dataShare ? (
         <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 ps-5 text-[10px] text-dls-secondary">
+          {tier ? <span title={t("pricing.tier_hint")}>{tier}</span> : null}
           {multiplier ? <span>{t("pricing.multiplier_hint", { multiplier })}</span> : null}
           {context ? <span>{t("pricing.context_window", { tokens: context })}</span> : null}
-          {reasoning ? <span>{t("pricing.reasoning_supported")}</span> : null}
+          {/* The levels themselves, not just that the feature exists: which ones
+              a model offers is what the reader is choosing between, and the
+              catalogue was already sending them. */}
+          {reasoning ? (
+            <span>
+              {thinkingLevels
+                ? t("pricing.reasoning_levels", { levels: thinkingLevels })
+                : t("pricing.reasoning_supported")}
+            </span>
+          ) : null}
+          {fastMode ? <span>{t("pricing.fast_mode")}</span> : null}
           {dataShare ? <span className="text-warning-ink">{t("pricing.data_share_required")}</span> : null}
         </span>
       ) : null}

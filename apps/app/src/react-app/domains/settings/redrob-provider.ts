@@ -41,19 +41,71 @@ export const REDROB_CONSOLE_URL = "https://console.redrob.ai";
 export const REDROB_CONSOLE_BILLING_URL = "https://console.redrob.ai/billing";
 
 /**
- * Single source-of-truth allowlist of inference provider ids the app exposes.
- * Redrob is currently the only usable provider: the connect modal, the model
- * picker, and every provider list filter through this so no other provider can
- * be selected or connected. Relaxing this later is a one-line change (add ids
- * here); the engine keeps its full capability, we only gate the app layer.
+ * Which inference providers the app offers, and why it is not simply "all of
+ * them".
+ *
+ * The app used to expose exactly one provider, Redrob. The engine never had that
+ * restriction — it carries the whole models.dev catalogue, 75-odd providers — so
+ * the gate was the app's alone, and lifting it is what the user asked for.
+ *
+ * Lifting it to literally everything, though, would fill the connect list with
+ * entries that cannot be completed HERE. The modal collects one secret: an API
+ * key, or an OAuth round trip. Amazon Bedrock wants an access key, a secret and
+ * a region; Azure wants a resource name beside its key; Vertex wants a service
+ * account. Those declare several environment variables precisely because one
+ * field is not enough, and offering them would mean advertising a connection the
+ * user cannot finish — worse than not listing them, because the failure only
+ * shows up after they have gone looking for credentials.
+ *
+ * So the rule is about what the connect flow can actually complete, and it reads
+ * the provider's own declaration rather than a list of names that would go stale
+ * as upstream adds providers:
+ *
+ *   - Redrob is always exposed; the engine owns its credential outright.
+ *   - An already-connected provider is always exposed. Something completed it,
+ *     and hiding a working provider would be a regression.
+ *   - Zero declared env vars means no secret is needed here at all — a local
+ *     runtime such as Ollama, which the engine finds by itself.
+ *   - Exactly one declared env var is a single secret, which is what the API-key
+ *     field collects.
+ *   - Two or more is multi-field configuration the modal has no form for.
+ *
+ * A provider that offers OAuth is exposed regardless of its env count, since the
+ * OAuth path does not use the key field. `disabled_providers` still hides
+ * anything per install, independently of this.
  */
 export const REDROB_ONLY_PROVIDER_IDS: readonly string[] = [REDROB_PROVIDER_ID];
 
-/** True when `id` is an allowlisted provider id (case-insensitive, trimmed). */
+/** True when `id` is the Redrob provider itself (case-insensitive, trimmed). */
 export function isRedrobOnlyProviderId(id: string): boolean {
   const normalized = id.trim().toLowerCase();
   if (!normalized) return false;
   return REDROB_ONLY_PROVIDER_IDS.some((allowed) => allowed.toLowerCase() === normalized);
+}
+
+/** What the exposure rule needs to know about one provider. */
+export type ProviderExposureFacts = {
+  id: string;
+  /** Environment variables the provider declares, as the engine reports them. */
+  env?: readonly string[];
+  /** Whether the engine advertises an OAuth method for it. */
+  hasOAuth?: boolean;
+  /** Whether it is already connected. */
+  connected?: boolean;
+};
+
+/**
+ * Whether the app should offer this provider. See the comment above
+ * REDROB_ONLY_PROVIDER_IDS for why this is a capability test and not a name
+ * list.
+ */
+export function isProviderExposed(facts: ProviderExposureFacts): boolean {
+  const id = facts.id.trim();
+  if (!id) return false;
+  if (isRedrobOnlyProviderId(id)) return true;
+  if (facts.connected) return true;
+  if (facts.hasOAuth) return true;
+  return (facts.env?.length ?? 0) <= 1;
 }
 
 /**

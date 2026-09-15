@@ -88,9 +88,20 @@ export function AiSettingsView(props: AiSettingsViewProps) {
                   onClick={() => void props.onOpenProviderAuth()}
                   disabled={props.busy || props.providerAuthBusy}
                 >
+                  {/*
+                    The label has to answer to what is directly above it. This
+                    button opens the provider picker, which adds a provider and
+                    re-authenticates an existing one — but sitting under a row
+                    that already reads "Connected", the word "Connect" looked
+                    like the app had failed to notice its own state. So it says
+                    "Connect" only while nothing is connected, and "Manage"
+                    once something is.
+                  */}
                   {props.providerAuthBusy
                     ? t("settings.loading_providers")
-                    : t("settings.connect_provider")}
+                    : props.connectedProviders.length > 0
+                      ? t("settings.manage_providers")
+                      : t("settings.connect_provider")}
                 </Button>
               </LayoutSectionItemHeaderActions>
             ) : null}
