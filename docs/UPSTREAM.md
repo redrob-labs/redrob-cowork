@@ -73,14 +73,31 @@ node scripts/check-upstream-boundary.mjs
 Record the upstream commit you synced to in `upstream-base.json`
 (`lastSyncedUpstream`) so the next report starts from there.
 
-## Open decision: grafting
+## How this repository got a merge base
 
-A one-time `git merge --allow-unrelated-histories` against `upstream/dev` would
-create a real merge base and make every later sync an ordinary three-way merge.
-It has a cost that matters for a **public** repository: the merge makes
-upstream's entire history reachable from our refs, so pushing it republishes
-every historical `/ee` file — EE-licensed content — from this repository.
+The graft question is settled, and not by a merge commit. This repository
+(`redrob-labs/redrob-cowork`) is a **real GitHub fork of upstream**, and the
+fork's history was **reparented** rather than grafted:
 
-Until that is decided, syncing stays file-level: the base blob needed for a
-correct three-way merge is available from the fetched (unpushed) upstream
-objects, so merge quality does not depend on the graft.
+1. A commit was created carrying the exact tree of the original squashed import
+   (`6776b1d`), with the measured upstream base `9ba56f2b2` as its parent. Its
+   diff is 42 files, all under excluded prefixes plus one lockfile.
+2. The fork's 159 later commits were replayed onto it with
+   `git rebase --onto`. Because step 1's tree is byte-identical to the import
+   tree, every commit applied to an identical base — **zero conflicts**.
+3. The result was verified two ways: `git diff` against the pre-migration branch
+   is **empty** (the tree is unchanged), and `git merge-base` against
+   `upstream/dev` now resolves to `9ba56f2b2`.
+
+So upstream syncs are ordinary three-way merges from here on, and the history
+states its own provenance instead of starting from an orphan squash.
+
+Being a fork rather than an independent repository is what makes the licensing
+picture honest: GitHub shows "forked from different-ai/openwork", upstream's
+history — including its `/ee` tree — lives in upstream's own network where it was
+already published, and this fork's working tree still ships none of it.
+Two consequences worth knowing: a GitHub fork of a public repository cannot be
+made private, and detaching it from the upstream network needs GitHub support.
+
+The pre-migration history is preserved in `redrob-labs/redrob-work`, which was
+not modified.

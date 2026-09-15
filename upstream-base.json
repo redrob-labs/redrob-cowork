@@ -1,5 +1,5 @@
 {
-  "$comment": "Machine-readable record of where this fork was cut from and what it deliberately does not ship. Read by scripts/upstream-sync.mjs and enforced by scripts/check-upstream-boundary.mjs. The base was MEASURED, not assumed: the import commit's tree differs from this upstream commit by 42 files, all under the excluded prefixes below.",
+  "$comment": "Machine-readable record of where this fork was cut from and what it deliberately does not ship. Read by scripts/upstream-sync.mjs and enforced by scripts/check-upstream-boundary.mjs. The base was MEASURED, not assumed: the import commit's tree differs from this upstream commit by 42 files, all under the excluded prefixes below. This repository's history was REPARENTED onto that base (see docs/UPSTREAM.md), so `git merge-base HEAD upstream/dev` resolves and upstream syncs are ordinary three-way merges.",
   "remote": "https://github.com/different-ai/openwork.git",
   "remoteName": "upstream",
   "defaultBranch": "dev",
