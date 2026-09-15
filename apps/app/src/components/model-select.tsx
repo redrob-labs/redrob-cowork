@@ -7,6 +7,8 @@ import type { ModelBehaviorOption, ModelOption, ModelRef } from "@/app/types";
 import { getModelBehaviorSummary } from "@/app/lib/model-behavior";
 import { matchesModelQuery } from "@/app/lib/model-search";
 import { inferModelVendor } from "@/app/lib/model-vendor";
+import { formatModelPriceRange } from "@/app/lib/redrob-pricing";
+import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { ProviderIcon } from "@/react-app/design-system/provider-icon";
 import {
   Popover,
@@ -227,6 +229,7 @@ export function ModelSelect({
   const [thinkingFor, setThinkingFor] = React.useState<ModelOption | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const catalogOptions = useModelOptions(open, fallbackOptions);
+  const { data: pricing } = useRedrobPricingQuery({ enabled: open });
   const modelOptions = React.useMemo(
     () => overlaySelectedBehavior(catalogOptions, value, {
       value: behaviorValue,
@@ -309,6 +312,11 @@ export function ModelSelect({
     const option = item.option;
     const hasThinking = Boolean(onBehaviorChange) && thinkingOptionsFor(option).length > 0;
     const vendor = inferModelVendor(option.modelID);
+    // Published console rate, input / output per million tokens. Absent when the
+    // catalog is unreachable or the model is not a Redrob one — never a zero.
+    const price = isRedrobOnlyProviderId(option.providerID)
+      ? formatModelPriceRange(pricing?.byModelId[option.modelID])
+      : null;
     return (
       <CommandItem
         className="gap-2"
@@ -330,6 +338,14 @@ export function ModelSelect({
             {modelRowSubtitle(option)}
           </span>
         </span>
+        {price ? (
+          <span
+            className="shrink-0 font-mono text-[10px] text-muted-foreground"
+            title={t("pricing.per_million_hint")}
+          >
+            {price}
+          </span>
+        ) : null}
         {hasThinking ? (
           <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
         ) : null}
