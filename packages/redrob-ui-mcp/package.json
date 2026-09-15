@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redrob-labs/redrob-work.git",
+    "url": "git+https://github.com/redrob-labs/redrob-cowork.git",
     "directory": "packages/redrob-ui-mcp"
   },
   "publishConfig": {

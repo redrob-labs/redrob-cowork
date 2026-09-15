@@ -27,10 +27,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redrob-labs/redrob-work.git",
+    "url": "git+https://github.com/redrob-labs/redrob-cowork.git",
     "directory": "apps/server"
   },
-  "homepage": "https://github.com/redrob-labs/redrob-work/tree/dev/apps/server",
+  "homepage": "https://github.com/redrob-labs/redrob-cowork/tree/main/apps/server",
   "bugs": {
     "url": "https://github.com/redrob-labs/redrob-work/issues"
   },
