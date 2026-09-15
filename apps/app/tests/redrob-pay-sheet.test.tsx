@@ -23,7 +23,7 @@ import { presentOpencodeSessionError } from "../src/react-app/domains/session/sy
 
 /**
  * The pay sheet's contract: a user can see that the workspace is out of credit and start a payment
- * from inside Redrob Work, and Redrob Work never says a payment happened.
+ * from inside Redrob Cowork, and Redrob Cowork never says a payment happened.
  *
  * The second half is the part worth guarding. Work has no authenticated way to read a balance, so
  * every status line it can show is enumerated here and checked for a success claim.

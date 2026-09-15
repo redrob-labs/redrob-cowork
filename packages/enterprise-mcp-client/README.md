@@ -1,6 +1,6 @@
 # `@redrob/enterprise-mcp-client`
 
-Reference implementation for server-side remote MCP consumption in Redrob Work.
+Reference implementation for server-side remote MCP consumption in Redrob Cowork.
 
 The package owns the provider-neutral MCP/OAuth lifecycle. A composition root
 supplies networking, persistence, tenancy/authorization, diagnostics, and the
@@ -93,7 +93,7 @@ package.
 ## Runtime boundary
 
 The package covers Den's outbound server-side remote MCP client only. It does
-not change local/direct engine MCP, the incoming Redrob Work Connect meta-MCP,
+not change local/direct engine MCP, the incoming Redrob Cowork Connect meta-MCP,
 desktop UI, or provider-specific tenant administration.
 
 Den uses this package as its only remote MCP OAuth runtime. New connections use

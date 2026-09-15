@@ -1,36 +1,36 @@
 ---
 title: "Migrate from Claude Cowork"
-description: "Move your files, skills, plugins, MCP servers, and team setup to Redrob Work."
+description: "Move your files, skills, plugins, MCP servers, and team setup to Redrob Cowork."
 ---
 
-You do not need to rebuild your setup to move from Claude Cowork to Redrob Work. Start with one real task, bring over the capabilities it needs, and keep Cowork available until that task works end to end.
+You do not need to rebuild your setup to move from Claude Cowork to Redrob Cowork. Start with one real task, bring over the capabilities it needs, and keep Cowork available until that task works end to end.
 
 ## What carries over
 
-| From Claude Cowork | In Redrob Work | What to do |
+| From Claude Cowork | In Redrob Cowork | What to do |
 | --- | --- | --- |
-| Local files and folders | Workspace files | Open the same folder or repository as an Redrob Work workspace. |
+| Local files and folders | Workspace files | Open the same folder or repository as an Redrob Cowork workspace. |
 | `SKILL.md` skills | Skills | Copy the skill folder into your workspace or install it as a plugin. |
-| Claude-compatible plugins | Plugins | Import the plugin from its public GitHub repository; Redrob Work normalizes its skills, commands, agents, and MCP dependencies. |
+| Claude-compatible plugins | Plugins | Import the plugin from its public GitHub repository; Redrob Cowork normalizes its skills, commands, agents, and MCP dependencies. |
 | MCP servers | Workspace MCP connections | Add the server URL to the workspace and sign in again. |
 | Claude models | Anthropic provider | Add your own Anthropic API key. |
-| Scheduled tasks | Not available | Redrob Work has no scheduler. Trigger the work from chat, or drive it from outside with your own cron plus an MCP client. |
+| Scheduled tasks | Not available | Redrob Cowork has no scheduler. Trigger the work from chat, or drive it from outside with your own cron plus an MCP client. |
 
 <Note>
   Conversation history does not transfer automatically. Keep any important instructions in workspace files or skills rather than relying on an old thread.
 </Note>
 
-## 1. Install Redrob Work and open the same work
+## 1. Install Redrob Cowork and open the same work
 
-1. [Download Redrob Work](https://redrob.io/download) for macOS, Windows, or Linux.
+1. [Download Redrob Cowork](https://redrob.io/download) for macOS, Windows, or Linux.
 2. Create a workspace from the folder or repository you used with Cowork.
-3. Ask Redrob Work to summarize the workspace before changing anything. This confirms it can read the files you expect.
+3. Ask Redrob Cowork to summarize the workspace before changing anything. This confirms it can read the files you expect.
 
-Your files stay where they already are. Redrob Work does not require you to upload a duplicate copy before you can work with them.
+Your files stay where they already are. Redrob Cowork does not require you to upload a duplicate copy before you can work with them.
 
 ## 2. Choose your models
 
-Redrob Work is model-agnostic. You can keep using Anthropic models, add another provider, or let your organization provision models centrally.
+Redrob Cowork is model-agnostic. You can keep using Anthropic models, add another provider, or let your organization provision models centrally.
 
 - To keep using Claude, follow [Add an Anthropic API key](/start-here/connect-your-stack/add-anthropic-api-key).
 - To use ChatGPT, follow [Sign in with ChatGPT](/start-here/connect-your-stack/sign-in-with-chatgpt).
@@ -41,7 +41,7 @@ Your Claude subscription and Anthropic API billing may be separate. Confirm API 
 
 ## 3. Bring over skills and plugins
 
-Redrob Work uses the same `SKILL.md` format. Copy a skill directory into the workspace, or import the plugin that contains it.
+Redrob Cowork uses the same `SKILL.md` format. Copy a skill directory into the workspace, or import the plugin that contains it.
 
 After importing each skill:
 
@@ -49,11 +49,11 @@ After importing each skill:
 2. Run the smallest task that should trigger it.
 3. Confirm the output before importing the next skill.
 
-See [Connections, skills, and plugins](/start-here/do-work-with-it/skills-plugins-and-mcp) for how Redrob Work organizes these pieces. For handing them to teammates, see [Share and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
+See [Connections, skills, and plugins](/start-here/do-work-with-it/skills-plugins-and-mcp) for how Redrob Cowork organizes these pieces. For handing them to teammates, see [Share and copy a skill](/start-here/do-work-with-it/publish-and-copy-a-skill).
 
 ## 4. Reconnect apps and MCP servers
 
-Credentials do not move between products. Reconnect each service so Redrob Work receives its own authorized access.
+Credentials do not move between products. Reconnect each service so Redrob Cowork receives its own authorized access.
 
 - For the vocabulary and the general flow, read [Connect your services](/start-here/connect-your-stack/connect-services).
 - For each remote or local MCP server, use [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).
@@ -63,10 +63,10 @@ Test read-only actions first. Then test actions that modify data, such as sendin
 
 ## 5. Replace schedules and move browser tasks
 
-Redrob Work does not run work on a schedule. For every recurring Cowork task, decide
+Redrob Cowork does not run work on a schedule. For every recurring Cowork task, decide
 whether it becomes a skill you trigger from chat, or a job you drive from outside the
 app. For the second option, your own scheduler can start an MCP client that calls
-Redrob Work through [redrob-ui-mcp](/model-context-protocol/overview).
+Redrob Cowork through [redrob-ui-mcp](/model-context-protocol/overview).
 
 For browser-driven work, follow
 [Control the browser](/start-here/do-work-with-it/control-the-browser) and verify the
@@ -91,6 +91,6 @@ There is no central place to assign a setup, so make the setup itself portable.
 - [ ] Every recurring Cowork task has a replacement: a skill, or an external trigger.
 - [ ] Shared skills live in a repository or plugin bundle, not in one person's folder.
 - [ ] Important Cowork instructions are saved in files or skills.
-- [ ] Cowork remains available until the representative workflow passes in Redrob Work.
+- [ ] Cowork remains available until the representative workflow passes in Redrob Cowork.
 
-Once the checklist passes, make Redrob Work the default for that workflow and migrate the next one.
+Once the checklist passes, make Redrob Cowork the default for that workflow and migrate the next one.

@@ -1,4 +1,4 @@
-# Redrob Work Bootstrap CLI
+# Redrob Cowork Bootstrap CLI
 
 Script-installable `redrob-bootstrap` command for agent-first install.
 

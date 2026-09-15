@@ -71,7 +71,7 @@ type AttributionStepProps = {
 /**
  * Self-reported attribution survey shown once during onboarding.
  * When the user picks "AI assistant" we ask which prompt led them
- * here: first-party data on how answer engines describe Redrob Work.
+ * here: first-party data on how answer engines describe Redrob Cowork.
  */
 export function AttributionStep({ onSubmit, onSkip }: AttributionStepProps) {
   const [aiSelected, setAiSelected] = useState(false);

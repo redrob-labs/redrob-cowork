@@ -98,7 +98,7 @@ test("signs a vendor binary that arrives UNSIGNED", () => {
 
 test("never skips our own executable, signed or not", () => {
   const root = mkdtempSync(join(tmpdir(), "sign-hook-"));
-  const ours = join(root, "Redrob Work.exe");
+  const ours = join(root, "Redrob Cowork.exe");
   writePe(ours, { certSize: 16080 });
   assert.equal(hook.isAlreadySignedVendorBinary(ours), false);
 
@@ -119,7 +119,7 @@ test("a same-named file outside the vendor directory is still signed", () => {
 
 test("delegates to electron-builder's own signer for everything else", async () => {
   const root = mkdtempSync(join(tmpdir(), "sign-hook-"));
-  const ours = join(root, "Redrob Work.exe");
+  const ours = join(root, "Redrob Cowork.exe");
   writePe(ours, { certSize: 0 });
 
   let delegated = 0;
@@ -170,7 +170,7 @@ test("the hook counts what it signs and what it skips", async () => {
 
   const vendor = vendorPath(root, "elevate");
   writePe(vendor, { certSize: 9000 });
-  const ours = join(root, "Redrob Work.exe");
+  const ours = join(root, "Redrob Cowork.exe");
   writePe(ours, { certSize: 0 });
 
   const packager = {

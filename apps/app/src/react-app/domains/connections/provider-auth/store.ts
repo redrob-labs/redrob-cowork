@@ -515,7 +515,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       ? raw
       : '{\n  "$schema": "https://opencode.ai/config.json"\n}\n';
     updated = updated.replace(
-      new RegExp(`(^[ \t]*)// Redrob Work Cloud import:.*\\n\\1(?="${escapeRegExp(providerId)}":)`, "m"),
+      new RegExp(`(^[ \t]*)// Redrob Cowork Cloud import:.*\\n\\1(?="${escapeRegExp(providerId)}":)`, "m"),
       "$1",
     );
     updated = applyEdits(updated, modify(updated, ["provider", providerId], undefined, {
@@ -890,7 +890,7 @@ export function createProviderAuthStore(options: CreateProviderAuthStoreOptions)
       const shouldUseServerReload = !(
         isDesktopRuntime() && options.selectedWorkspaceDisplay().workspaceType === "local"
       );
-      // Prefer the Redrob Work server engine reload: it disposes the engine AND
+      // Prefer the Redrob Cowork server engine reload: it disposes the engine AND
       // re-registers runtime-DB MCPs, so non-primary workspaces and pending
       // changes are picked up instead of silently dropping (toggles "turn
       // off").

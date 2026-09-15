@@ -128,7 +128,7 @@ export type SidebarStatusMenuProps = {
  *
  * This was the account menu. With no control plane there is no account to show,
  * so the avatar, the sign-in and handoff-paste flows, the log-out action, the
- * "Redrob Work Connect" status row and the Redrob Models upsell are all gone.
+ * "Redrob Cowork Connect" status row and the Redrob Models upsell are all gone.
  */
 export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
   const platform = usePlatform();
@@ -150,7 +150,7 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
 
   const docsControlAction = useMemo<RedrobControlAction>(() => ({
     id: "status.docs.open",
-    label: "Open Redrob Work docs",
+    label: "Open Redrob Cowork docs",
     description: "Open the documentation from the status menu.",
     sideEffect: "external",
     targetRef: triggerRef,
@@ -161,7 +161,7 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
   const feedbackControlAction = useMemo<RedrobControlAction>(() => ({
     id: "status.feedback.open",
     label: "Send feedback",
-    description: "Open the Redrob Work feedback surface from the status menu.",
+    description: "Open the Redrob Cowork feedback surface from the status menu.",
     sideEffect: "external",
     disabled: !props.onSendFeedback,
     targetRef: triggerRef,

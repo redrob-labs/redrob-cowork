@@ -23,7 +23,7 @@ export type ShellConfig = {
 };
 
 export const DEFAULT_SHELL_CONFIG: ShellConfig = {
-  appName: "Redrob Work",
+  appName: "Redrob Cowork",
   statusBar: true,
   sidebar: true,
   docsButton: true,

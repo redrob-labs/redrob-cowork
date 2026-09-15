@@ -4,23 +4,23 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
 /**
- * Redrob Work Capabilities Knowledge Plugin
+ * Redrob Cowork Capabilities Knowledge Plugin
  *
- * Injects knowledge about Redrob Work's capabilities into the agent's system
+ * Injects knowledge about Redrob Cowork's capabilities into the agent's system
  * prompt so it can proactively help users with:
  * - Adding AI providers (including local models via Ollama)
  * - Fixing authorized folders
  * - Enabling computer use
  * - Connecting MCP extensions
- * - Finding Redrob Work docs before falling back to code
+ * - Finding Redrob Cowork docs before falling back to code
  * - Voice mode, browser, skills
  */
 
-const REDROB_CAPABILITIES_KNOWLEDGE = `You are running inside Redrob Work.
+const REDROB_CAPABILITIES_KNOWLEDGE = `You are running inside Redrob Cowork.
 
-CRITICAL: To navigate or control the Redrob Work app (open settings, add providers, etc.), use redrob_context then redrob_execute, NOT browser tools. For example, to open settings: redrob_execute({id:"settings.panel.open", args:{panel:"general"}}).
+CRITICAL: To navigate or control the Redrob Cowork app (open settings, add providers, etc.), use redrob_context then redrob_execute, NOT browser tools. For example, to open settings: redrob_execute({id:"settings.panel.open", args:{panel:"general"}}).
 
-For Redrob Work product questions, use redrob_docs_search and redrob_docs_read as the first source of truth. Redrob Work documentation tools answer product questions. Never use them as a substitute for performing an action against a connected service, marketplace capability, or remote skill. Read and summarize relevant docs before answering. Cite the docs path when it helps the user verify or continue. If the docs are missing, ambiguous, or appear stale, inspect the implementation code as a last resort and say that you are inferring from code.
+For Redrob Cowork product questions, use redrob_docs_search and redrob_docs_read as the first source of truth. Redrob Cowork documentation tools answer product questions. Never use them as a substitute for performing an action against a connected service, marketplace capability, or remote skill. Read and summarize relevant docs before answering. Cite the docs path when it helps the user verify or continue. If the docs are missing, ambiguous, or appear stale, inspect the implementation code as a last resort and say that you are inferring from code.
 
 Important docs to know:
 - General docs navigation: packages/docs/docs.json
@@ -36,7 +36,7 @@ Here is what you can help users with:
 - **Custom provider scripts**: Users can add custom OpenAI-compatible endpoints in Settings > AI Providers by adding a provider with a custom base URL.
 
 ## Fixing Authorized Folders
-- Go to Settings > Permissions to manage which folders Redrob Work can access.
+- Go to Settings > Permissions to manage which folders Redrob Cowork can access.
 - When the agent gets a "permission denied" or "not authorized" error for a file path, the user needs to add that folder (or a parent folder) to the authorized folders list.
 - The agent can navigate there: use the UI control action \`settings.panel.open\` with \`{panel: "permissions"}\`.
 
@@ -50,7 +50,7 @@ Here is what you can help users with:
 - Only name services whose MCP is actually configured for this workspace — do not assume Gmail, Calendar, Drive, or other connectors are available.
 
 ## Voice Mode
-- Available as a side panel in sessions when the Redrob Work Voice extension is enabled.
+- Available as a side panel in sessions when the Redrob Cowork Voice extension is enabled.
 - Uses OpenAI Realtime for real-time voice interaction.
 - The voice model can control the UI on the user's behalf (same actions the agent has access to).
 
@@ -60,9 +60,9 @@ Here is what you can help users with:
 - The browser panel is visible on the right side of the session view.
 
 ## Cross-chat Session Memory
-- Two sources of cross-chat memory: (1) the local Memory Bank the user can explicitly save facts to (see the "Memory Bank" section of the system prompt); and (2) saved Redrob Work session history, exposed through Redrob Work UI actions below.
+- Two sources of cross-chat memory: (1) the local Memory Bank the user can explicitly save facts to (see the "Memory Bank" section of the system prompt); and (2) saved Redrob Cowork session history, exposed through Redrob Cowork UI actions below.
 - To save or recall a durable fact the user wants remembered across sessions, use the Memory Bank capability rather than writing a file.
-- If the user asks what they said, what happened, or what was decided in another Redrob Work session, use the UI control actions: list sessions, open the matching session, then read the transcript.
+- If the user asks what they said, what happened, or what was decided in another Redrob Cowork session, use the UI control actions: list sessions, open the matching session, then read the transcript.
 - Match sessions by ID, title, workspace, or topic words. Ask a short clarifying question if multiple sessions match.
 - Answer only from the returned transcript. If the returned transcript is limited or missing older context, say that directly instead of guessing.
 
@@ -72,15 +72,15 @@ Here is what you can help users with:
 - When a user asks to create a skill, follow the runtime \`Skill creation:\` instruction.
 
 ## Creating Plugins
-- Plugins extend Redrob Work/OpenCode with custom tools.
+- Plugins extend Redrob Cowork/OpenCode with custom tools.
 - Create a file in \`.opencode/plugins/my-plugin.ts\` and add it to the \`plugin\` array in \`opencode.json\`.
 - Plugins are async factory functions returning a hooks object with \`tool\` definitions.
 - See the \`create-plugin\` skill for the full API reference.
 
-When users ask "what can I do?" or "what can Redrob Work do?", summarize these capabilities. When they ask how to do something specific, read the relevant docs first with redrob_docs_search/redrob_docs_read, then give direct steps. If docs do not answer it, inspect code as a last resort and clearly label that as code-derived guidance.`;
+When users ask "what can I do?" or "what can Redrob Cowork do?", summarize these capabilities. When they ask how to do something specific, read the relevant docs first with redrob_docs_search/redrob_docs_read, then give direct steps. If docs do not answer it, inspect code as a last resort and clearly label that as code-derived guidance.`;
 
 const docsSearchArgsSchema = z.object({
-  query: z.string().min(1).describe("Redrob Work docs search query, for example 'connect slack mcp'."),
+  query: z.string().min(1).describe("Redrob Cowork docs search query, for example 'connect slack mcp'."),
   limit: z.number().int().min(1).max(10).optional().describe("Maximum number of matching docs to return."),
 });
 
@@ -200,7 +200,7 @@ export const RedrobWorkCapabilitiesKnowledge = async () => ({
   },
   tool: {
     redrob_docs_search: {
-      description: "Search the bundled Redrob Work documentation. Use this first for Redrob Work product questions before inspecting implementation code.",
+      description: "Search the bundled Redrob Cowork documentation. Use this first for Redrob Cowork product questions before inspecting implementation code.",
       args: docsSearchArgsSchema.shape,
       async execute(rawArgs: unknown) {
         const args = docsSearchArgsSchema.parse(rawArgs);
@@ -220,7 +220,7 @@ export const RedrobWorkCapabilitiesKnowledge = async () => ({
       },
     },
     redrob_docs_read: {
-      description: "Read a bundled Redrob Work documentation page by docs-relative path returned from redrob_docs_search.",
+      description: "Read a bundled Redrob Cowork documentation page by docs-relative path returned from redrob_docs_search.",
       args: docsReadArgsSchema.shape,
       async execute(rawArgs: unknown) {
         const args = docsReadArgsSchema.parse(rawArgs);
@@ -228,7 +228,7 @@ export const RedrobWorkCapabilitiesKnowledge = async () => ({
         if (normalized.split("/").includes("..")) throw new Error("Invalid docs path");
         const docs = await loadDocs();
         const entry = docs.find((doc) => doc.path === normalized);
-        if (!entry) throw new Error(`Redrob Work docs page not found: ${normalized}`);
+        if (!entry) throw new Error(`Redrob Cowork docs page not found: ${normalized}`);
         return JSON.stringify(entry, null, 2);
       },
     },

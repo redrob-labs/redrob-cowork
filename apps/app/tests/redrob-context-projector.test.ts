@@ -39,7 +39,7 @@ const baseInput: ContextProjectorInput = {
   availableAffordances: [],
 };
 
-describe("Redrob Work context projector", () => {
+describe("Redrob Cowork context projector", () => {
   test("projects the focused split session and its panel state", () => {
     const context = buildRedrobContext(baseInput);
 
@@ -106,7 +106,7 @@ function contextForRoute(route: string) {
         tabs: [{
           id: "browser-one",
           type: "browser",
-          label: "Redrob Work docs",
+          label: "Redrob Cowork docs",
           url: "https://docs.redrob.so",
           favicon: null,
           status: "ready",
@@ -120,7 +120,7 @@ function contextForRoute(route: string) {
   });
 }
 
-describe("Redrob Work context projector", () => {
+describe("Redrob Cowork context projector", () => {
   test("represents all open tabs and both visible split sessions", () => {
     const context = contextForRoute("/workspace/workspace-a/session/session-a");
 

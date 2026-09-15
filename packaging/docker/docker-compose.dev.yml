@@ -95,7 +95,7 @@ services:
 
         echo ""
         echo "============================================"
-        echo "  Redrob Work server"
+        echo "  Redrob Cowork server"
         echo "  Server:     http://localhost:${REDROB_PORT:-8787}"
         echo "  Health:     http://localhost:${REDROB_PORT:-8787}/health"
         echo "  Token:      $$REDROB_TOKEN"
@@ -159,7 +159,7 @@ services:
 
         echo ""
         echo "============================================"
-        echo "  Redrob Work web UI"
+        echo "  Redrob Cowork web UI"
         echo "  URL:   http://localhost:${WEB_PORT:-5173}"
           echo "  Token: $${VITE_REDROB_TOKEN:-<see redrob-server logs>}"
         echo "============================================"

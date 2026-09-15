@@ -79,7 +79,7 @@ function serverError(status: number, code: string, message: string) {
 }
 
 describe("resolveRemoteWorkspaceConnectionTarget", () => {
-  test("builds a host-scoped Redrob Work target from saved worker credentials", () => {
+  test("builds a host-scoped Redrob Cowork target from saved worker credentials", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
         redrobHostUrl: "https://worker.example.com",
@@ -130,7 +130,7 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
     expect(target.state.message).toContain("URL is invalid");
   });
 
-  test("does not run Redrob Work probes against non-Redrob Work remote workspaces", () => {
+  test("does not run Redrob Cowork probes against non-Redrob Cowork remote workspaces", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
         remoteType: "opencode",
@@ -143,10 +143,10 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
     expect(target.ok).toBe(false);
     if (target.ok) return;
     expect(target.state.status).toBe("error");
-    expect(target.state.message).toContain("Redrob Work remote workers");
+    expect(target.state.message).toContain("Redrob Cowork remote workers");
   });
 
-  test("does not run Redrob Work probes against stale Redrob Work fields on non-Redrob Work remotes", () => {
+  test("does not run Redrob Cowork probes against stale Redrob Cowork fields on non-Redrob Cowork remotes", () => {
     const target = resolveRemoteWorkspaceConnectionTarget(
       workspace({
         remoteType: "opencode",
@@ -158,7 +158,7 @@ describe("resolveRemoteWorkspaceConnectionTarget", () => {
 
     expect(target.ok).toBe(false);
     if (target.ok) return;
-    expect(target.state.message).toContain("Redrob Work remote workers");
+    expect(target.state.message).toContain("Redrob Cowork remote workers");
   });
 });
 
@@ -185,7 +185,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Token is missing");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -200,11 +200,11 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("unhealthy response");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
-  test("uses fallback Redrob Work tokens saved on older workspace records", async () => {
+  test("uses fallback Redrob Cowork tokens saved on older workspace records", async () => {
     const result = await testRemoteWorkspaceConnection(
       workspace({
         redrobToken: "",
@@ -234,7 +234,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Token was rejected by worker.example.com");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -251,7 +251,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Workspace ws_remote was not found");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -299,7 +299,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Token was rejected by worker.example.com");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -316,7 +316,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("is not authorized");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 
@@ -333,7 +333,7 @@ describe("testRemoteWorkspaceConnection", () => {
     expect(result.ok).toBe(false);
     expect(result.state.status).toBe("error");
     expect(result.state.message).toContain("Cannot reach worker.example.com");
-    expect(result.state.message).toContain("Upgrade the Redrob Work host");
+    expect(result.state.message).toContain("Upgrade the Redrob Cowork host");
     expect(result.state.message).toContain("team@redrob.io");
   });
 

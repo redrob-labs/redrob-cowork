@@ -1,5 +1,5 @@
 /**
- * Product analytics for the Redrob Work desktop app (PostHog, zero-dependency).
+ * Product analytics for the Redrob Cowork desktop app (PostHog, zero-dependency).
  *
  * Principles (mirrors `den-telemetry.ts`):
  * - Never send message content, file paths, code, or prompts. Only event

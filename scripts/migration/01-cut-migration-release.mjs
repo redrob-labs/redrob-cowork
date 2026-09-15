@@ -6,11 +6,11 @@
 // Usage:
 //   node scripts/migration/01-cut-migration-release.mjs \
 //     --version 0.12.0 \
-//     --mac-url   'https://.../Redrob Work-darwin-arm64-0.12.0-mac.zip' \
+//     --mac-url   'https://.../Redrob Cowork-darwin-arm64-0.12.0-mac.zip' \
 //     --mac-arm64-url 'https://.../redrob-mac-arm64-0.12.0.zip' \
 //     --mac-x64-url   'https://.../redrob-mac-x64-0.12.0.zip' \
-//     --win-url   'https://.../Redrob Work-Setup-0.12.0.exe'  (optional) \
-//     --linux-url 'https://.../Redrob Work-0.12.0.AppImage'   (optional) \
+//     --win-url   'https://.../Redrob Cowork-Setup-0.12.0.exe'  (optional) \
+//     --linux-url 'https://.../Redrob Cowork-0.12.0.AppImage'   (optional) \
 //     --dry-run
 
 import { spawnSync } from "node:child_process";

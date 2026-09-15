@@ -21,7 +21,7 @@ import {
  * provider, a fresh user could open an empty connect modal.
  *
  * This drives the real store's `openProviderAuthModal()` through a local
- * Redrob Work server endpoint and asserts it PATCHes the workspace config with
+ * Redrob Cowork server endpoint and asserts it PATCHes the workspace config with
  * exactly `buildRedrobProviderConfig()` (base URL + the canonical `auto`
  * model, with no retired language extras). It exercises the real builder, so
  * the test fails if the wiring is removed.

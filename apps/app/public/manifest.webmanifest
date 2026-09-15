@@ -1,6 +1,6 @@
 {
-  "name": "Redrob Work",
-  "short_name": "Redrob Work",
+  "name": "Redrob Cowork",
+  "short_name": "Redrob Cowork",
   "description": "Local-first agent workspace",
   "start_url": "/",
   "display": "standalone",

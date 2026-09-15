@@ -55,25 +55,25 @@ const connectSkillsEnvelopeSchema = z.object({
 }).passthrough();
 
 const sessionSearchArgsSchema = z.object({
-  query: z.string().trim().min(1).describe("Text to search for across Redrob Work session titles and message transcripts."),
-  workspaceId: z.string().trim().optional().describe("Optional Redrob Work workspace id/name to limit the search."),
+  query: z.string().trim().min(1).describe("Text to search for across Redrob Cowork session titles and message transcripts."),
+  workspaceId: z.string().trim().optional().describe("Optional Redrob Cowork workspace id/name to limit the search."),
   limit: z.number().int().positive().max(20).optional().describe("Maximum matching sessions to return. Defaults to 10, max 20."),
   scanLimit: z.number().int().positive().max(500).optional().describe("Maximum newest sessions to scan across matching workspaces. Defaults to 100, max 500."),
   messageLimit: z.number().int().positive().max(1000).optional().describe("Maximum recent messages to load per scanned session. Defaults to 400, max 1000."),
 });
 
 const sessionReadArgsSchema = z.object({
-  sessionId: z.string().trim().min(1).describe("Redrob Work/OpenCode session ID returned by session.search."),
-  workspaceId: z.string().trim().optional().describe("Optional Redrob Work workspace id/name. Omit to resolve the session across all workspaces."),
+  sessionId: z.string().trim().min(1).describe("Redrob Cowork/OpenCode session ID returned by session.search."),
+  workspaceId: z.string().trim().optional().describe("Optional Redrob Cowork workspace id/name. Omit to resolve the session across all workspaces."),
   count: z.number().int().positive().max(100).optional().describe("Number of recent transcript messages to return. Defaults to 30, max 100."),
 });
 
 const sessionCreateArgsSchema = z.object({
   sessions: z.array(z.object({
-    title: z.string().trim().min(1).max(120).describe("Short title shown in the Redrob Work session list."),
+    title: z.string().trim().min(1).max(120).describe("Short title shown in the Redrob Cowork session list."),
     prompt: z.string().trim().min(1).max(100_000).describe("Self-contained task to start in the new session."),
   })).min(1).describe("One entry per new session to create and start."),
-  workspaceId: z.string().trim().optional().describe("Optional Redrob Work workspace id/name. Defaults to the workspace containing the current session."),
+  workspaceId: z.string().trim().optional().describe("Optional Redrob Cowork workspace id/name. Defaults to the workspace containing the current session."),
 });
 
 const workspaceSchema = z.object({
@@ -132,18 +132,18 @@ const sessionMessagesEnvelopeSchema = z.object({
 }).passthrough();
 
 const REDROB_AGENT_SURFACE_INSTRUCTION =
-  `## Redrob Work app context
-Use redrob_context when the request depends on the current Redrob Work screen, open tabs, split view, focused pane, sidebar, side panel, settings panel, or available app actions.
-Each affordance declares its effects and executor. Use redrob_query only for side-effect-free affordances whose executor is Redrob Work. Use redrob_execute for Redrob Work commands without activating the desktop window. If executor names another tool, call that exact tool instead.
+  `## Redrob Cowork app context
+Use redrob_context when the request depends on the current Redrob Cowork screen, open tabs, split view, focused pane, sidebar, side panel, settings panel, or available app actions.
+Each affordance declares its effects and executor. Use redrob_query only for side-effect-free affordances whose executor is Redrob Cowork. Use redrob_execute for Redrob Cowork commands without activating the desktop window. If executor names another tool, call that exact tool instead.
 Reading another session does not require opening it. Prefer session.search then session.read for transcript questions; use session.create for new chats and a UI command only when the user asks to navigate.
-To open settings or navigate the app, use redrob_execute with ids from redrob_context such as settings.panel.open — never browser_* tools for the Redrob Work app itself.`;
+To open settings or navigate the app, use redrob_execute with ids from redrob_context such as settings.panel.open — never browser_* tools for the Redrob Cowork app itself.`;
 
 const REDROB_BROWSER_INSTRUCTION =
-  `Do NOT use browser_navigate, browser_click, or browser_snapshot to interact with the Redrob Work app itself. Those are for browsing external websites.
+  `Do NOT use browser_navigate, browser_click, or browser_snapshot to interact with the Redrob Cowork app itself. Those are for browsing external websites.
 
 ## Built-in Browser (external websites)
-For web browsing tasks, ALWAYS start with redrob_execute id browser.open_url. It creates/selects a built-in Redrob Work browser tab and returns browser_url plus target_id. Use that exact browser_url and target_id for every later browser_snapshot, browser_click, browser_fill, browser_eval, and browser_screenshot call.
-Do not call browser_navigate without a target_id returned by browser.open_url. Do not use browser_* tools on the Redrob Work app target (avoid targets with title "Redrob Work" or URLs containing ":5173/#/").`;
+For web browsing tasks, ALWAYS start with redrob_execute id browser.open_url. It creates/selects a built-in Redrob Cowork browser tab and returns browser_url plus target_id. Use that exact browser_url and target_id for every later browser_snapshot, browser_click, browser_fill, browser_eval, and browser_screenshot call.
+Do not call browser_navigate without a target_id returned by browser.open_url. Do not use browser_* tools on the Redrob Cowork app target (avoid targets with title "Redrob Cowork" or URLs containing ":5173/#/").`;
 
 // ── UI control bridge discovery ──
 
@@ -331,7 +331,7 @@ async function discoverUiBridge(): Promise<UiBridge | null> {
 
 async function uiBridgeRequest(path: string, options: { method?: string; body?: unknown } = {}): Promise<unknown> {
   const bridge = await discoverUiBridge();
-  if (!bridge) return { ok: false, error: "Redrob Work UI bridge not available. The desktop app may not be running." };
+  if (!bridge) return { ok: false, error: "Redrob Cowork UI bridge not available. The desktop app may not be running." };
   try {
     const response = await fetch(`${bridge.baseUrl}${path}`, {
       method: options.method || "GET",
@@ -357,7 +357,7 @@ async function serverGet(path: string): Promise<unknown> {
     headers: { Authorization: `Bearer ${token}` },
   });
   const payload = await parseResponse(response);
-  if (!response.ok) throw new Error(errorMessage(payload, "Redrob Work server request failed"));
+  if (!response.ok) throw new Error(errorMessage(payload, "Redrob Cowork server request failed"));
   return payload;
 }
 
@@ -451,7 +451,7 @@ async function queryRedrobAffordance(rawArgs: unknown): Promise<unknown> {
   });
   return isRecord(result) && typeof result.ok === "boolean"
     ? result
-    : unavailableAffordance(request.id, "Redrob Work UI query returned an invalid response.");
+    : unavailableAffordance(request.id, "Redrob Cowork UI query returned an invalid response.");
 }
 
 async function executeRedrobAffordance(
@@ -491,7 +491,7 @@ async function executeRedrobAffordance(
   });
   return isRecord(result) && typeof result.ok === "boolean"
     ? result
-    : unavailableAffordance(request.id, "Redrob Work UI command returned an invalid response.");
+    : unavailableAffordance(request.id, "Redrob Cowork UI command returned an invalid response.");
 }
 
 function collapseWhitespace(value: string): string {
@@ -648,7 +648,7 @@ async function searchRedrobWorkSessions(rawArgs: unknown): Promise<object> {
   const queryLower = args.query.trim().toLowerCase();
   const workspaces = filterWorkspaces(await listRedrobWorkWorkspaces(), args.workspaceId);
   if (!workspaces.length) {
-    return { ok: false, error: args.workspaceId ? `No workspace matched ${args.workspaceId}` : "No Redrob Work workspaces are available" };
+    return { ok: false, error: args.workspaceId ? `No workspace matched ${args.workspaceId}` : "No Redrob Cowork workspaces are available" };
   }
 
   const sessions: Array<{ workspace: RedrobWorkWorkspace; session: SessionInfo }> = [];
@@ -703,7 +703,7 @@ async function readRedrobWorkSession(rawArgs: unknown): Promise<object> {
   const count = args.count ?? 30;
   const workspaces = filterWorkspaces(await listRedrobWorkWorkspaces(), args.workspaceId);
   if (!workspaces.length) {
-    return { ok: false, error: args.workspaceId ? `No workspace matched ${args.workspaceId}` : "No Redrob Work workspaces are available" };
+    return { ok: false, error: args.workspaceId ? `No workspace matched ${args.workspaceId}` : "No Redrob Cowork workspaces are available" };
   }
 
   for (const workspace of workspaces) {
@@ -734,7 +734,7 @@ async function readRedrobWorkSession(rawArgs: unknown): Promise<object> {
     }
   }
 
-  return { ok: false, error: `Session ${args.sessionId} was not found in matching Redrob Work workspaces` };
+  return { ok: false, error: `Session ${args.sessionId} was not found in matching Redrob Cowork workspaces` };
 }
 
 function serverUrl(): string {
@@ -749,7 +749,7 @@ function requireRedrobWorkServer(): { url: string; token: string } {
   const url = serverUrl();
   const token = serverToken();
   if (!url || !token) {
-    throw new Error("Redrob Work extension tools are only available when OpenCode is launched by Redrob Work.");
+    throw new Error("Redrob Cowork extension tools are only available when OpenCode is launched by Redrob Cowork.");
   }
   return { url, token };
 }
@@ -785,7 +785,7 @@ function normalizeDirPath(path: string): string {
 
 async function resolveContextWorkspace(workspaceId: string | undefined, context: OpenCodeContext): Promise<RedrobWorkWorkspace> {
   const workspaces = await listRedrobWorkWorkspaces();
-  if (!workspaces.length) throw new Error("No Redrob Work workspaces are available");
+  if (!workspaces.length) throw new Error("No Redrob Cowork workspaces are available");
   if (workspaceId) {
     const match = filterWorkspaces(workspaces, workspaceId).at(0);
     if (!match) throw new Error(`No workspace matched ${workspaceId}`);
@@ -807,7 +807,7 @@ async function resolveContextWorkspace(workspaceId: string | undefined, context:
   }
   const only = workspaces.at(0);
   if (workspaces.length === 1 && only) return only;
-  throw new Error(`Multiple Redrob Work workspaces match; pass workspaceId. Available: ${workspaces.map((workspace) => workspaceLabel(workspace)).join(", ")}`);
+  throw new Error(`Multiple Redrob Cowork workspaces match; pass workspaceId. Available: ${workspaces.map((workspace) => workspaceLabel(workspace)).join(", ")}`);
 }
 
 async function createRedrobWorkSessions(rawArgs: unknown, context: OpenCodeContext): Promise<object> {
@@ -857,7 +857,7 @@ async function postJson(path: string, body: ExtensionActionPayload | Record<stri
   });
   const payload = await parseResponse(response);
   if (!response.ok) {
-    throw new Error(errorMessage(payload, "Redrob Work extension call failed"));
+    throw new Error(errorMessage(payload, "Redrob Cowork extension call failed"));
   }
   return payload;
 }
@@ -882,7 +882,7 @@ export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown) => {
     // OpenCode 1.17.x keeps the text projection of an MCP result but drops
     // structuredContent and result _meta before persisting the completed tool
     // part. Preserve those standard fields in the existing metadata channel
-    // so Redrob Work can host the UI without replaying the tool call.
+    // so Redrob Cowork can host the UI without replaying the tool call.
     preserveMcpResult(output);
   },
   "experimental.chat.system.transform": async (input: unknown, output: { system: string[] }) => {
@@ -911,7 +911,7 @@ export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown) => {
   },
   tool: {
     redrob_context: {
-      description: "Read one semantic snapshot of Redrob Work: current screen, retained conversation tabs, split view and focused pane, sidebar and side panel state, settings panel, provider contributions, remote skill guidance, and available affordances with explicit effects and executors.",
+      description: "Read one semantic snapshot of Redrob Cowork: current screen, retained conversation tabs, split view and focused pane, sidebar and side panel state, settings panel, provider contributions, remote skill guidance, and available affordances with explicit effects and executors.",
       args: {},
       async execute() {
         return JSON.stringify(
@@ -922,14 +922,14 @@ export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown) => {
       },
     },
     redrob_query: {
-      description: "Run a side-effect-free Redrob Work affordance whose executor is Redrob Work. Use the exact id and arguments from redrob_context. This reads backend or app state without navigation or window focus.",
+      description: "Run a side-effect-free Redrob Cowork affordance whose executor is Redrob Cowork. Use the exact id and arguments from redrob_context. This reads backend or app state without navigation or window focus.",
       args: redrobAffordanceRequestSchema.shape,
       async execute(rawArgs: unknown) {
         return JSON.stringify(await queryRedrobAffordance(rawArgs), null, 2);
       },
     },
     redrob_execute: {
-      description: "Execute an Redrob Work command whose executor is Redrob Work without activating the desktop window. Use the exact id and arguments from redrob_context, and pass expectedRevision for UI commands to prevent stale writes. If the descriptor names another executor tool, call that tool instead.",
+      description: "Execute an Redrob Cowork command whose executor is Redrob Cowork without activating the desktop window. Use the exact id and arguments from redrob_context, and pass expectedRevision for UI commands to prevent stale writes. If the descriptor names another executor tool, call that tool instead.",
       args: redrobAffordanceRequestSchema.shape,
       async execute(rawArgs: unknown, context: OpenCodeContext) {
         const mergedContext = { ...factoryContext, ...normalizeOpenCodeContext(context) };

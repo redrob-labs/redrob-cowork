@@ -86,8 +86,8 @@ test("updates both the live window icon and Windows taskbar identity", async () 
     image,
     appId: "io.redrob.work",
     appIconPath: "C:\\Users\\Admin\\brand-icon.ico",
-    relaunchCommand: "C:\\Program Files\\Redrob Work\\Redrob Work.exe",
-    relaunchDisplayName: "Redrob Work",
+    relaunchCommand: "C:\\Program Files\\Redrob Cowork\\Redrob Cowork.exe",
+    relaunchDisplayName: "Redrob Cowork",
   }, async () => calls.push(["waitForRefresh"]));
 
   assert.deepEqual(calls, [
@@ -96,8 +96,8 @@ test("updates both the live window icon and Windows taskbar identity", async () 
     ["setAppDetails", {
       appIconPath: "C:\\Users\\Admin\\brand-icon.ico",
       appIconIndex: 0,
-      relaunchCommand: "C:\\Program Files\\Redrob Work\\Redrob Work.exe",
-      relaunchDisplayName: "Redrob Work",
+      relaunchCommand: "C:\\Program Files\\Redrob Cowork\\Redrob Cowork.exe",
+      relaunchDisplayName: "Redrob Cowork",
     }],
     ["setAppDetails", { appId: "io.redrob.work" }],
     ["setIcon", image],
@@ -130,8 +130,8 @@ test("does not refresh the taskbar button before the boot window is shown", asyn
     image: { id: "company-icon" },
     appId: "io.redrob.work.brand.1234",
     appIconPath: "C:\\brand.ico",
-    relaunchCommand: "C:\\Redrob Work.exe",
-    relaunchDisplayName: "Redrob Work",
+    relaunchCommand: "C:\\Redrob Cowork.exe",
+    relaunchDisplayName: "Redrob Cowork",
   }, async () => calls.push("wait"));
 
   assert.deepEqual(calls, ["details", "details", "icon"]);
@@ -148,8 +148,8 @@ test("restores a visible taskbar button when refresh staging fails", async () =>
     image: { id: "company-icon" },
     appId: "io.redrob.work.brand.1234",
     appIconPath: "C:\\brand.ico",
-    relaunchCommand: "C:\\Redrob Work.exe",
-    relaunchDisplayName: "Redrob Work",
+    relaunchCommand: "C:\\Redrob Cowork.exe",
+    relaunchDisplayName: "Redrob Cowork",
   }, async () => {
     calls.push("wait");
     throw new Error("refresh failed");
@@ -160,16 +160,16 @@ test("restores a visible taskbar button when refresh staging fails", async () =>
 
 test("builds a per-user Start Menu shortcut with the branded Windows identity", () => {
   assert.equal(windowsBrandShortcutFileName('Agent: Blue/West'), "Agent- Blue-West.lnk");
-  assert.equal(windowsInstalledShortcutFileName("Redrob Work"), "Redrob Work.lnk");
+  assert.equal(windowsInstalledShortcutFileName("Redrob Cowork"), "Redrob Cowork.lnk");
   assert.deepEqual(windowsBrandShortcutDetails({
-    target: "C:\\Program Files\\Redrob Work\\Redrob Work.exe",
+    target: "C:\\Program Files\\Redrob Cowork\\Redrob Cowork.exe",
     appId: "io.redrob.work.brand.1234",
     appIconPath: "C:\\Users\\Admin\\brand-icon.ico",
-    appName: "Redrob Work",
+    appName: "Redrob Cowork",
   }), {
-    target: "C:\\Program Files\\Redrob Work\\Redrob Work.exe",
-    cwd: "C:\\Program Files\\Redrob Work",
-    description: "Redrob Work organization desktop",
+    target: "C:\\Program Files\\Redrob Cowork\\Redrob Cowork.exe",
+    cwd: "C:\\Program Files\\Redrob Cowork",
+    description: "Redrob Cowork organization desktop",
     icon: "C:\\Users\\Admin\\brand-icon.ico",
     iconIndex: 0,
     appUserModelId: "io.redrob.work.brand.1234",
@@ -179,10 +179,10 @@ test("builds a per-user Start Menu shortcut with the branded Windows identity", 
 test("anchors a packaged shortcut target to the active Windows user profile", () => {
   assert.equal(windowsInstalledExecutablePath({
     packaged: true,
-    execPath: "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Programs\\@redrobdesktop\\Redrob Work.exe",
+    execPath: "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Programs\\@redrobdesktop\\Redrob Cowork.exe",
     resourcesPath: "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Programs\\@redrobdesktop\\resources",
     shortcutPath: "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Northwind.lnk",
-  }), "C:\\Users\\Administrator\\AppData\\Local\\Programs\\@redrobdesktop\\Redrob Work.exe");
+  }), "C:\\Users\\Administrator\\AppData\\Local\\Programs\\@redrobdesktop\\Redrob Cowork.exe");
 });
 
 test("creates a branded shortcut after callers remove stale Windows metadata", () => {
@@ -194,7 +194,7 @@ test("creates a branded shortcut after callers remove stale Windows metadata", (
       return true;
     },
   };
-  const shortcutPath = "C:\\Users\\Admin\\Redrob Work Organization.lnk";
+  const shortcutPath = "C:\\Users\\Admin\\Redrob Cowork Organization.lnk";
 
   const created = writeWindowsBrandShortcut(shellApi, shortcutPath, details, false);
   assert.equal(created, true);

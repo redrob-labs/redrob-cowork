@@ -73,10 +73,10 @@ describe("validateMcpName", () => {
 });
 
 describe("validateUserMcpName", () => {
-  test("reserves the Redrob Work Connect runtime name", () => {
-    expect(() => validateUserMcpName("redrob-cloud")).toThrow("reserved for Redrob Work Connect");
-    expect(() => validateUserMcpName("REDROB-CLOUD")).toThrow("reserved for Redrob Work Connect");
-    expect(() => validateUserMcpName("redrob-connect-1234")).toThrow("reserved for Redrob Work Connect");
+  test("reserves the Redrob Cowork Connect runtime name", () => {
+    expect(() => validateUserMcpName("redrob-cloud")).toThrow("reserved for Redrob Cowork Connect");
+    expect(() => validateUserMcpName("REDROB-CLOUD")).toThrow("reserved for Redrob Cowork Connect");
+    expect(() => validateUserMcpName("redrob-connect-1234")).toThrow("reserved for Redrob Cowork Connect");
   });
 
   test("allows ordinary workspace MCP names", () => {

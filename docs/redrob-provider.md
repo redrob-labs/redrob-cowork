@@ -1,6 +1,6 @@
 # Redrob inference provider
 
-Redrob Work ships a built-in [Redrob](https://console.redrob.ai) inference
+Redrob Cowork ships a built-in [Redrob](https://console.redrob.ai) inference
 provider. Redrob exposes an OpenAI-compatible API, so it is wired through the
 same `@ai-sdk/openai-compatible` driver used by the other OpenAI-compatible
 providers in the app.

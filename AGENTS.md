@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Redrob Work (레드롭 워크) is a free, open-source desktop and MCP app (macOS,
+Redrob Cowork (레드롭 코워크) is a free, open-source desktop and MCP app (macOS,
 Windows, Linux) for doing work with AI agents on your own files. It is built on
 the OpenCode engine, ships in English and Korean, and uses Redrob as its only
 inference provider (console.redrob.ai, model `auto`), connected by pasting
@@ -10,8 +10,8 @@ a `REDROB_API_KEY`. Files stay local. This repo holds one surface:
   files, skills, browser automation, Anthropic-compatible plugins, and a local
   `redrob-server` that any MCP client can talk to.
 
-The app consumes Redrob Work server surfaces (self-hosted or hosted) rather than
-inventing parallel behavior. Anything OpenCode can do is available in Redrob Work,
+The app consumes Redrob Cowork server surfaces (self-hosted or hosted) rather than
+inventing parallel behavior. Anything OpenCode can do is available in Redrob Cowork,
 even before a dedicated UI exists.
 
 ## Verification (every change)

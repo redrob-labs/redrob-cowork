@@ -7,7 +7,7 @@ describe("resolveDesktopDistribution", () => {
   it("always resolves the local-first public distribution", () => {
     assert.equal(resolveDesktopDistribution(), PUBLIC_DESKTOP_DISTRIBUTION);
     assert.equal(PUBLIC_DESKTOP_DISTRIBUTION.flavor, "public");
-    assert.equal(PUBLIC_DESKTOP_DISTRIBUTION.appName, "Redrob Work");
+    assert.equal(PUBLIC_DESKTOP_DISTRIBUTION.appName, "Redrob Cowork");
     assert.equal(PUBLIC_DESKTOP_DISTRIBUTION.appIdentifier, "io.redrob.work");
     assert.equal(PUBLIC_DESKTOP_DISTRIBUTION.protocolScheme, "redrob");
   });

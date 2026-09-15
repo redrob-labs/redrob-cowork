@@ -26,7 +26,7 @@ import {
 } from "./redrob-pay";
 
 /**
- * The pay sheet: what Redrob Work says about money.
+ * The pay sheet: what Redrob Cowork says about money.
  *
  * It explains the two things the user needs before leaving the app, the amount and the status, and
  * then hands off. The payment itself happens on the console's own checkout, in the system browser,

@@ -108,7 +108,7 @@ jobs:
 
           git log --no-merges --format='%h %s' "$PREV".."$TAG" | head -400 > /tmp/commits.txt
           cat > /tmp/changelog_prompt.txt <<PROMPT_EOF
-          Document Redrob Work release $TAG in the changelog. Use these facts exactly; do not invent or recompute any of them.
+          Document Redrob Cowork release $TAG in the changelog. Use these facts exactly; do not invent or recompute any of them.
 
           - version: $TAG
           - previous version: $PREV

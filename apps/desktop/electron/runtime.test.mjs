@@ -53,7 +53,7 @@ describe("workspace root preparation", () => {
     try {
       const manager = createRuntimeManager({
         app: {
-          getPath: (name) => name === "exe" ? path.join(root, "Redrob Work.exe") : root,
+          getPath: (name) => name === "exe" ? path.join(root, "Redrob Cowork.exe") : root,
           isPackaged: false,
         },
         desktopRoot: path.dirname(fileURLToPath(import.meta.url)),
@@ -174,8 +174,8 @@ describe("commandMatchesPackagedSidecar", () => {
   it("matches packaged redrob sidecars with platform suffixes", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
-        "/Applications/Redrob Work.app/Contents/Resources/sidecars/redrob-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174 --cors *",
-        ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
+        "/Applications/Redrob Cowork.app/Contents/Resources/sidecars/redrob-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174 --cors *",
+        ["/Applications/Redrob Cowork.app/Contents/Resources/sidecars"],
       ),
       true,
     );
@@ -185,7 +185,7 @@ describe("commandMatchesPackagedSidecar", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
         "/usr/local/bin/redrob serve --hostname 127.0.0.1 --port 49174",
-        ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
+        ["/Applications/Redrob Cowork.app/Contents/Resources/sidecars"],
       ),
       false,
     );
@@ -194,8 +194,8 @@ describe("commandMatchesPackagedSidecar", () => {
   it("no longer reaps upstream opencode sidecars", () => {
     assert.equal(
       commandMatchesPackagedSidecar(
-        "/Applications/Redrob Work.app/Contents/Resources/sidecars/opencode-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174",
-        ["/Applications/Redrob Work.app/Contents/Resources/sidecars"],
+        "/Applications/Redrob Cowork.app/Contents/Resources/sidecars/opencode-aarch64-apple-darwin serve --hostname 127.0.0.1 --port 49174",
+        ["/Applications/Redrob Cowork.app/Contents/Resources/sidecars"],
       ),
       false,
     );
@@ -337,7 +337,7 @@ describe("resolveRedrobServerConfigPath", () => {
   });
 });
 
-describe("Redrob Work server credential persistence", () => {
+describe("Redrob Cowork server credential persistence", () => {
   it("deterministically migrates legacy workspace credentials into one server bundle", () => {
     const migrated = migrateRedrobServerTokenStore({
       version: 1,

@@ -1,6 +1,6 @@
 export const PUBLIC_DESKTOP_DISTRIBUTION = Object.freeze({
   flavor: "public",
-  appName: "Redrob Work",
+  appName: "Redrob Cowork",
   appIdentifier: "io.redrob.work",
   protocolScheme: "redrob",
 });

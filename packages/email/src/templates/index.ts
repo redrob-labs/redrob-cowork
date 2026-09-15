@@ -22,11 +22,11 @@ export type EmailTemplateProps = {
 export type EmailTemplate = keyof EmailTemplateProps
 
 export const emailSubjects: { [Template in EmailTemplate]: (props: EmailTemplateProps[Template]) => string } = {
-  verification: ({ verificationCode }) => `Your Redrob Work verification code is ${verificationCode}`,
-  passwordReset: () => "Reset your Redrob Work password",
-  organizationInvite: ({ organizationName }) => `You're invited to join ${organizationName} on Redrob Work`,
-  downloadLink: () => "Your Redrob Work download link",
-  feedback: ({ name, source }) => `Redrob Work feedback from ${name}${source ? ` (${source})` : ""}`,
+  verification: ({ verificationCode }) => `Your Redrob Cowork verification code is ${verificationCode}`,
+  passwordReset: () => "Reset your Redrob Cowork password",
+  organizationInvite: ({ organizationName }) => `You're invited to join ${organizationName} on Redrob Cowork`,
+  downloadLink: () => "Your Redrob Cowork download link",
+  feedback: ({ name, source }) => `Redrob Cowork feedback from ${name}${source ? ` (${source})` : ""}`,
 }
 
 export const emailReplyTo: { [Template in EmailTemplate]: (props: EmailTemplateProps[Template]) => string | undefined } = {

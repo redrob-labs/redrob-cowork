@@ -4,7 +4,7 @@ import { ApiError } from "./errors.js";
 import { externalFetch } from "./server-fetch.js";
 
 /**
- * Connecting Redrob Work to a console workspace without anyone handling the key.
+ * Connecting Redrob Cowork to a console workspace without anyone handling the key.
  *
  * The console implements RFC 8628's device authorization grant. Work asks it for a code, sends the
  * user to the console to approve that code, and polls until the console hands back a workspace API

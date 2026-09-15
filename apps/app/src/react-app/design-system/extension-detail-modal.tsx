@@ -42,7 +42,7 @@ export type ExtensionDetailModalProps = {
   iconSlug?: string;
   iconSrc?: string;
   taxonomy?: ExtensionTaxonomy;
-  /** Show the local stdio wrapper setup used by the Redrob Work UI MCP. */
+  /** Show the local stdio wrapper setup used by the Redrob Cowork UI MCP. */
   uiControl?: boolean;
   connected?: boolean;
   connectedLabel?: string;

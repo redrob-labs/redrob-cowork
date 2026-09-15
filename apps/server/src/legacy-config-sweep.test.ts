@@ -73,7 +73,7 @@ afterEach(async () => {
 });
 
 describe("legacy OpenCode config sweep", () => {
-  test("removes only Redrob Work-managed legacy keys and preserves user content", async () => {
+  test("removes only Redrob Cowork-managed legacy keys and preserves user content", async () => {
     const root = await createRoot();
     const config = configFor(root);
     const original = `{
@@ -141,7 +141,7 @@ describe("legacy OpenCode config sweep", () => {
     expect(await readFile(legacySweepStatePath(config), "utf8")).toBe(stateAfterFirstRun);
   });
 
-  test("leaves files without Redrob Work-managed keys untouched", async () => {
+  test("leaves files without Redrob Cowork-managed keys untouched", async () => {
     const root = await createRoot();
     const config = configFor(root);
     const original = `{

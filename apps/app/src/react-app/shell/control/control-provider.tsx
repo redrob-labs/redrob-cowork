@@ -329,7 +329,7 @@ export function RedrobControlProvider({ children }: { children: ReactNode }) {
       resources: [{
         ref: `screen:${route}`,
         kind: "screen",
-        title: "Redrob Work",
+        title: "Redrob Cowork",
         provider: { id: "redrob-ui", kind: "builtin" },
         state: { kind: "other", route },
       }],
@@ -530,7 +530,7 @@ export function RedrobControlProvider({ children }: { children: ReactNode }) {
       return {
         ok: false,
         id: request.id,
-        error: `Redrob Work context changed from revision ${request.expectedRevision} to ${revision}.`,
+        error: `Redrob Cowork context changed from revision ${request.expectedRevision} to ${revision}.`,
         code: "conflict",
         revision,
       };
@@ -799,8 +799,8 @@ export function RedrobRouteControlActions() {
     },
     {
       id: "help.capabilities",
-      label: "What can Redrob Work do?",
-      description: "List the main capabilities of Redrob Work.",
+      label: "What can Redrob Cowork do?",
+      description: "List the main capabilities of Redrob Cowork.",
       kind: "query",
       effects: { data: "read", ui: "none", external: false },
       sideEffect: "none",
@@ -809,7 +809,7 @@ export function RedrobRouteControlActions() {
           { id: "browse", label: "Browse the web", description: "Control a browser to navigate, scrape, and automate web tasks." },
           { id: "providers", label: "AI model providers", description: "Connect Anthropic, OpenAI, Google, OpenRouter, Ollama, or other LLM providers." },
           { id: "extensions", label: "Library", description: "Skills, connections, and tools your agent can use." },
-          { id: "voice", label: "Voice mode", description: "Talk to Redrob Work with real-time voice using OpenAI Realtime." },
+          { id: "voice", label: "Voice mode", description: "Talk to Redrob Cowork with real-time voice using OpenAI Realtime." },
           { id: "files", label: "File management", description: "Read, write, and organize files in your workspace." },
           { id: "code", label: "Write and run code", description: "Generate, edit, and execute code with full tool access." },
           { id: "computer-use", label: "Computer use", description: "Control your computer with screenshots and mouse/keyboard actions." },
@@ -817,7 +817,7 @@ export function RedrobRouteControlActions() {
           ...(isDesktopRuntime()
             ? [{ id: "automations", label: "Automations", description: "Schedule recurring tasks and background agents." }]
             : []),
-          { id: "sharing", label: "Share sessions", description: "Share a workspace with collaborators over your own Redrob Work worker, using a URL and password you control." },
+          { id: "sharing", label: "Share sessions", description: "Share a workspace with collaborators over your own Redrob Cowork worker, using a URL and password you control." },
         ],
         hint: "Use settings.panel.open for settings such as AI providers, and route.extensions.skills to browse Library.",
       }),

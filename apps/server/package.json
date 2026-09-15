@@ -1,7 +1,7 @@
 {
   "name": "redrob-server",
   "version": "0.0.0-dev",
-  "description": "Filesystem-backed API for Redrob Work remote clients",
+  "description": "Filesystem-backed API for Redrob Cowork remote clients",
   "type": "module",
   "bin": {
     "redrob-server": "bin/redrob-server.mjs"

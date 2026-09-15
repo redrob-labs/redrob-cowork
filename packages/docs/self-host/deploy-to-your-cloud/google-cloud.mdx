@@ -1,6 +1,6 @@
 ---
 title: "Deploy on Google Cloud"
-description: "Run Redrob Work on GKE Autopilot with Cloud SQL for MySQL."
+description: "Run Redrob Cowork on GKE Autopilot with Cloud SQL for MySQL."
 ---
 
 The recommended Google Cloud path is Helm on a regional GKE Autopilot cluster with Cloud SQL for MySQL. Use GKE Ingress, a reserved global IP address, Google-managed certificates, and explicit backend health checks for Den web and Den API.
@@ -12,7 +12,7 @@ The recommended Google Cloud path is Helm on a regional GKE Autopilot cluster wi
 - Cloud SQL for MySQL, encryption, backups, and failover
 - Cloud DNS and Google-managed certificates when you use those services
 
-The Redrob Work chart manages Deployments, Services, ConfigMaps, Secret references, probes, the Ingress, and the database migration Job. GKE `BackendConfig` and `ManagedCertificate` resources are applied alongside the chart.
+The Redrob Cowork chart manages Deployments, Services, ConfigMaps, Secret references, probes, the Ingress, and the database migration Job. GKE `BackendConfig` and `ManagedCertificate` resources are applied alongside the chart.
 
 ## Google Cloud checklist
 

@@ -32,7 +32,7 @@ function restoreResourcesPath(previous: string | undefined) {
 describe("redrobPluginPath", () => {
   test("prefers REDROB_EXTENSIONS_PLUGIN_DIR", () => {
     withPluginDir("/opt/redrob/opencode-plugins", () => {
-      const resourcesPath = join("/Applications", "Redrob Work.app", "Contents", "Resources");
+      const resourcesPath = join("/Applications", "Redrob Cowork.app", "Contents", "Resources");
       const previousResourcesPath = process.resourcesPath;
       process.resourcesPath = resourcesPath;
       try {
@@ -47,7 +47,7 @@ describe("redrobPluginPath", () => {
   test("uses external resources plugin path in packaged Electron when env is unset", () => {
     withPluginDir(undefined, () => {
       const previousResourcesPath = process.resourcesPath;
-      const resourcesPath = join("/Applications", "Redrob Work.app", "Contents", "Resources");
+      const resourcesPath = join("/Applications", "Redrob Cowork.app", "Contents", "Resources");
       process.resourcesPath = resourcesPath;
       try {
         const pluginPath = redrobPluginPath(

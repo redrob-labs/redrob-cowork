@@ -20,7 +20,7 @@ function reply(id: string, role: string, text?: string, parentID?: string): Mess
 }
 
 /**
- * A stand-in for the Redrob Work server's session routes. `beats` scripts what
+ * A stand-in for the Redrob Cowork server's session routes. `beats` scripts what
  * successive snapshot reads observe, so a wait can be tested without a clock
  * or an engine.
  */
@@ -95,7 +95,7 @@ function createClient(double: ReturnType<typeof createRedrobDouble>, clock = cre
 }
 
 describe("createThread", () => {
-  test("sends the title, prompt, and model in Redrob Work's casing", async () => {
+  test("sends the title, prompt, and model in Redrob Cowork's casing", async () => {
     const double = createRedrobDouble();
     const thread = await createClient(double).createThread({
       title: "Refund policy",

@@ -2,7 +2,7 @@
   "name": "@redrob/handsfree",
   "private": true,
   "version": "0.1.0",
-  "description": "macOS semantic AX and background computer-use runtime for Redrob Work",
+  "description": "macOS semantic AX and background computer-use runtime for Redrob Cowork",
   "license": "MIT",
   "type": "module",
   "bin": {

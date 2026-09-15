@@ -29,6 +29,7 @@
     "test:fs-engine": "pnpm --filter @redrob/app test:fs-engine",
     "check:outbound-access": "node scripts/check-outbound-access.mjs",
     "check:upstream-boundary": "node scripts/check-upstream-boundary.mjs",
+    "check:brand": "node scripts/check-brand.mjs",
     "upstream:report": "node scripts/upstream-sync.mjs report",
     "upstream:fetch": "node scripts/upstream-sync.mjs setup && node scripts/upstream-sync.mjs fetch",
     "test:e2e": "pnpm --filter @redrob/app test:e2e",

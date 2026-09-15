@@ -623,7 +623,7 @@ export function createWorkspaceStore({ app }) {
         cache: "no-store",
       });
       if (!response.ok) {
-        throw new Error(`Redrob Work workspace discovery failed (${response.status} ${response.statusText || "HTTP error"})`);
+        throw new Error(`Redrob Cowork workspace discovery failed (${response.status} ${response.statusText || "HTTP error"})`);
       }
       return await response.json();
     } finally {
@@ -718,7 +718,7 @@ export function createWorkspaceStore({ app }) {
       const recoveredWorkspaces = await recoverWorkspacesFromKnownState();
       if (recoveredWorkspaces.length > 0) {
         const selectedWorkspace = recoveredWorkspaces[0];
-        console.info("[migration] recovered desktop workspaces from persisted Redrob Work state", {
+        console.info("[migration] recovered desktop workspaces from persisted Redrob Cowork state", {
           count: recoveredWorkspaces.length,
           selectedWorkspaceId: selectedWorkspace.id,
         });
@@ -754,7 +754,7 @@ export function createWorkspaceStore({ app }) {
       }
       return nextWorkspace;
     });
-    // Older desktop state can contain multiple Redrob Work remote entries that
+    // Older desktop state can contain multiple Redrob Cowork remote entries that
     // normalize to the same rem_<workspaceId> after stripping worker mounts.
     // Collapse them here so React never receives duplicate workspace keys.
     const workspaceIndexById = new Map();
@@ -889,8 +889,8 @@ export function createWorkspaceStore({ app }) {
       if (!discovered?.id) {
         throw new Error(
           directory
-            ? `Redrob Work server has no workspace matching ${directory}.`
-            : "Redrob Work server returned no workspaces.",
+            ? `Redrob Cowork server has no workspace matching ${directory}.`
+            : "Redrob Cowork server returned no workspaces.",
         );
       }
       resolvedRedrobWorkspaceId = String(discovered.id).trim();
@@ -964,8 +964,8 @@ export function createWorkspaceStore({ app }) {
           if (!discovered?.id) {
             throw new Error(
               directory
-                ? `Redrob Work server has no workspace matching ${directory}.`
-                : "Redrob Work server returned no workspaces.",
+                ? `Redrob Cowork server has no workspace matching ${directory}.`
+                : "Redrob Cowork server returned no workspaces.",
             );
           }
           remoteWorkspaceId = String(discovered.id).trim();

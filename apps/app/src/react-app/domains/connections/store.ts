@@ -543,7 +543,7 @@ export function createConnectionsStore(options: {
         ...globalServers.filter((entry) => !projectNames.has(entry.name)),
         ...projectServers,
       ];
-      // Runtime-DB MCPs (source "config.remote") only exist on the Redrob Work
+      // Runtime-DB MCPs (source "config.remote") only exist on the Redrob Cowork
       // server. Keep the last-known entries instead of silently dropping them
       // while the server is briefly unreachable (startup race) — otherwise
       // enabled MCPs like redrob-ui render as "off".
@@ -822,11 +822,11 @@ export function createConnectionsStore(options: {
       }
 
       if (canUseRedrobServer && redrobClient && redrobWorkspaceId) {
-        // The Redrob Work server is the source of truth for workspace-scoped MCP
+        // The Redrob Cowork server is the source of truth for workspace-scoped MCP
         // config in the React port. Avoid also calling the OpenCode SDK's MCP
         // hot-add endpoint here: when the SDK client is rooted at the aggregate
         // `/opencode` route it can resolve to an internal `local_*` workspace
-        // id that the Redrob Work server does not expose, producing a confusing
+        // id that the Redrob Cowork server does not expose, producing a confusing
         // `workspace_not_found` after the config write already succeeded.
         setStateField("mcpStatuses", filterConfiguredStatuses(snapshot.mcpStatuses, snapshot.mcpServers));
       } else {

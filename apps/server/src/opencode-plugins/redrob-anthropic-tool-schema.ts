@@ -1,5 +1,5 @@
 /**
- * Redrob Work Anthropic Tool Schema Plugin
+ * Redrob Cowork Anthropic Tool Schema Plugin
  *
  * The Anthropic Messages API rejects tool input schemas that use `anyOf`,
  * `oneOf`, or `allOf` at the top level:

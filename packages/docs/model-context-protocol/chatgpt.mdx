@@ -1,17 +1,17 @@
 ---
-title: "ChatGPT and Redrob Work"
+title: "ChatGPT and Redrob Cowork"
 sidebarTitle: "ChatGPT"
-description: "ChatGPT connectors accept remote MCP servers only, and Redrob Work ships a local stdio server, so there is no supported connection today."
+description: "ChatGPT connectors accept remote MCP servers only, and Redrob Cowork ships a local stdio server, so there is no supported connection today."
 ---
 
-There is no supported way to connect ChatGPT to Redrob Work right now.
+There is no supported way to connect ChatGPT to Redrob Cowork right now.
 
-ChatGPT connectors accept remote MCP servers reached over HTTPS. Redrob Work exposes
+ChatGPT connectors accept remote MCP servers reached over HTTPS. Redrob Cowork exposes
 its app surface through `redrob-ui-mcp`, which speaks MCP over stdio and talks to a
 bridge bound to `127.0.0.1` on your own machine. ChatGPT cannot spawn a local process
 and cannot reach loopback, so the two do not meet.
 
-Redrob Work no longer publishes a hosted MCP endpoint. The retired hosted gateway at
+Redrob Cowork no longer publishes a hosted MCP endpoint. The retired hosted gateway at
 `api.redrob.io/mcp/agent` is gone along with the accounts and organizations it
 depended on.
 
@@ -20,8 +20,8 @@ depended on.
 - **Use a client that supports local MCP servers.** OpenCode, Claude Code, Codex,
   Claude Desktop, Cursor Desktop, VS Code, Windsurf, Zed, and Gemini CLI can all
   spawn `redrob-ui-mcp`. See the [overview](/model-context-protocol/overview).
-- **Work in Redrob Work directly.** The desktop app runs its own agent on the Redrob
+- **Work in Redrob Cowork directly.** The desktop app runs its own agent on the Redrob
   Code engine against your local files. Connect a model with the Redrob Key from
   [console.redrob.ai](https://console.redrob.ai) and start a session.
-- **Give the Redrob Work agent the tools instead.** Add the MCP servers you care
+- **Give the Redrob Cowork agent the tools instead.** Add the MCP servers you care
   about inside the app: [Add an MCP server](/start-here/connect-your-stack/add-an-mcp-server).

@@ -4,7 +4,7 @@ import { sessionErrorPresentationFromUIMessage } from "../session/sync/session-e
 import { REDROB_CONSOLE_BILLING_URL } from "../settings/redrob-provider";
 
 /**
- * Paying for inference from inside Redrob Work, without Redrob Work handling money.
+ * Paying for inference from inside Redrob Cowork, without Redrob Cowork handling money.
  *
  * The console owns billing end to end: the checkout page, the amount, and which methods Stripe
  * offers. This module is only what the app needs to be honest about it, and it is deliberately
@@ -12,7 +12,7 @@ import { REDROB_CONSOLE_BILLING_URL } from "../settings/redrob-provider";
  *
  * Two facts shape everything here.
  *
- * Redrob Work cannot read a balance. The workspace key belongs to Redrob Code's auth store
+ * Redrob Cowork cannot read a balance. The workspace key belongs to Redrob Code's auth store
  * (`apps/server/src/redrob-auth.ts`), the engine never hands it back, and the console exposes no
  * billing status endpoint that Work's own authenticated surface could call. So there is no balance
  * query to write, and writing one against a guessed contract would put a number on screen that

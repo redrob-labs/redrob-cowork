@@ -27,8 +27,8 @@ const MANAGED_VERSION_MARKER = "X-Redrob-Version";
 // Entries written before the rebrand used key names containing a space, which
 // the desktop-entry spec does not allow. Read them so an upgrade still
 // recognizes its own installed entry instead of treating it as third-party.
-const LEGACY_OWNERSHIP_MARKER = "X-Redrob Work-Managed";
-const LEGACY_MANAGED_VERSION_MARKER = "X-Redrob Work-Version";
+const LEGACY_OWNERSHIP_MARKER = "X-Redrob Cowork-Managed";
+const LEGACY_MANAGED_VERSION_MARKER = "X-Redrob Cowork-Version";
 const ICON_SIZES = [16, 24, 32, 48, 64, 96, 128, 256, 512];
 
 function defaultCommandRunner(command, args) {
@@ -199,7 +199,7 @@ export function buildRedrobDesktopEntry({
 Type=Application
 Version=1.0
 Name=${cleanDesktopValue(appName)}
-Comment=Run agents, skills, and MCP with Redrob Work
+Comment=Run agents, skills, and MCP with Redrob Cowork
 Exec=${quoteDesktopExec(appImagePath)} %U
 TryExec=${cleanDesktopValue(appImagePath)}
 Icon=${REDROB_DESKTOP_NAME}
@@ -432,7 +432,7 @@ export function createLinuxDesktopIntegration({
       return {
         ok: false,
         status: before,
-        error: "The canonical Redrob Work launcher is externally managed and will not be overwritten.",
+        error: "The canonical Redrob Cowork launcher is externally managed and will not be overwritten.",
       };
     }
 
@@ -486,7 +486,7 @@ export function createLinuxDesktopIntegration({
         status: before,
         error: before.ownership === "external"
           ? "Remove this AppImage with the tool that manages it."
-          : "Redrob Work does not own a desktop integration to remove.",
+          : "Redrob Cowork does not own a desktop integration to remove.",
       };
     }
 
@@ -543,7 +543,7 @@ export function createLinuxDesktopIntegration({
       return status;
     }
 
-    // The user already accepted this integration, so drift in the files Redrob Work
+    // The user already accepted this integration, so drift in the files Redrob Cowork
     // owns is maintenance rather than a new decision. A self-update lands under a
     // new versioned filename and a moved AppImage changes its path; both stale the
     // launcher. Repair silently instead of prompting after every release.
@@ -559,9 +559,9 @@ export function createLinuxDesktopIntegration({
 
     const { response, checkboxChecked } = await dialog.showMessageBox(window, {
       type: "question",
-      title: "Add Redrob Work to your applications?",
-      message: "Add Redrob Work to your application launcher and register browser sign-in callbacks?",
-      detail: `The launcher will use this AppImage in its current location:\n${appImagePath}\n\nIf you move or update it later, Redrob Work repairs the launcher automatically. You can change or remove this in Settings → Preferences → AppImage desktop integration.`,
+      title: "Add Redrob Cowork to your applications?",
+      message: "Add Redrob Cowork to your application launcher and register browser sign-in callbacks?",
+      detail: `The launcher will use this AppImage in its current location:\n${appImagePath}\n\nIf you move or update it later, Redrob Cowork repairs the launcher automatically. You can change or remove this in Settings → Preferences → AppImage desktop integration.`,
       buttons: ["Not now", "Integrate"],
       defaultId: 1,
       cancelId: 0,
@@ -579,7 +579,7 @@ export function createLinuxDesktopIntegration({
       await dialog.showMessageBox(window, {
         type: "warning",
         title: "Desktop integration failed",
-        message: "Redrob Work could not complete desktop integration.",
+        message: "Redrob Cowork could not complete desktop integration.",
         detail: result.error ?? "Unknown error",
         buttons: ["OK"],
       });

@@ -1,5 +1,5 @@
 /**
- * Release-channel concept for Redrob Work desktop builds.
+ * Release-channel concept for Redrob Cowork desktop builds.
  *
  * There are two channels users can opt into:
  *

@@ -151,7 +151,7 @@ export const RedrobWorkDownloads = () => {
         </div>
       ) : null}
 
-      <div className="mb-5 overflow-x-auto border-b border-gray-200 dark:border-white/10" role="tablist" aria-label="Redrob Work download channels">
+      <div className="mb-5 overflow-x-auto border-b border-gray-200 dark:border-white/10" role="tablist" aria-label="Redrob Cowork download channels">
         <div className="flex min-w-max gap-1">
           <button
             id="downloads-channel-stable"

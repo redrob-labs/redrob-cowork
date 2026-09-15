@@ -239,7 +239,7 @@ function serverDataDir(env, homedir, paths) {
   return paths.join(homedir, ".redrob", "redrob-server");
 }
 
-/** Workspace-local state Redrob Work owns; the rest of the workspace folder is the user's. */
+/** Workspace-local state Redrob Cowork owns; the rest of the workspace folder is the user's. */
 function workspaceRedrobStatePaths(workspacePaths, paths) {
   const output = [];
   for (const workspacePath of workspacePaths) {

@@ -224,19 +224,19 @@ const REDROB_VOICE_REALTIME_TOOLS = [
   {
     type: "function",
     name: "redrob_snapshot",
-    description: "Read the current Redrob Work UI control snapshot: route, status, narration, and visible action metadata.",
+    description: "Read the current Redrob Cowork UI control snapshot: route, status, narration, and visible action metadata.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     type: "function",
     name: "redrob_list_actions",
-    description: "List semantic Redrob Work UI actions. Call this before redrob_execute_action when you do not know the exact action id.",
+    description: "List semantic Redrob Cowork UI actions. Call this before redrob_execute_action when you do not know the exact action id.",
     parameters: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     type: "function",
     name: "redrob_execute_action",
-    description: "Execute a semantic Redrob Work UI action by id. Prefer this over screen coordinates or DOM guessing.",
+    description: "Execute a semantic Redrob Cowork UI action by id. Prefer this over screen coordinates or DOM guessing.",
     parameters: {
       type: "object",
       properties: {
@@ -548,8 +548,8 @@ ${trimmedContext}`
     : "";
   return `# Role and Objective
 
-You are Redrob Work Voice Mode, a voice-first control layer inside Redrob Work.
-Help the user control Redrob Work by using the semantic Redrob Work UI tools.
+You are Redrob Cowork Voice Mode, a voice-first control layer inside Redrob Cowork.
+Help the user control Redrob Cowork by using the semantic Redrob Cowork UI tools.
 
 # Tool Policy
 
@@ -564,7 +564,7 @@ Help the user control Redrob Work by using the semantic Redrob Work UI tools.
 
 - Be concise, calm, and direct.
 - If audio is unclear, ask the user to repeat it instead of guessing.
-- Ignore background speech that is not addressed to Redrob Work.
+- Ignore background speech that is not addressed to Redrob Cowork.
 - Summarize tool results briefly and offer the next useful step.${contextSection}`;
 }
 
@@ -974,7 +974,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   try {
     await reconcileLocalManagedMcpRuntimeEntries(config);
   } catch (error) {
-    logger.log("warn", "Failed to reconcile Redrob Work-managed MCP connections during startup.", {
+    logger.log("warn", "Failed to reconcile Redrob Cowork-managed MCP connections during startup.", {
       error: error instanceof Error ? error.message : "unknown",
     });
   }
@@ -1206,7 +1206,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     try {
       await reconcileLocalManagedMcpRuntimeEntries(config);
     } catch (error) {
-      logger.log("warn", "Failed to update Redrob Work-managed MCP loopback routes after binding the server port.", {
+      logger.log("warn", "Failed to update Redrob Cowork-managed MCP loopback routes after binding the server port.", {
         error: error instanceof Error ? error.message : "unknown",
       });
     }
@@ -3131,7 +3131,7 @@ function createRoutes(
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "mcp.add",
-      summary: `Add Redrob Work-managed MCP ${name}`,
+      summary: `Add Redrob Cowork-managed MCP ${name}`,
       paths: [redrobConfigPath(workspace.path)],
     });
     await createLocalManagedMcpConnection(config, {
@@ -3161,7 +3161,7 @@ function createRoutes(
         throw new ApiError(
           502,
           "managed_mcp_connection_failed",
-          `Redrob Work could not start sign-in with this MCP server. Check the server URL, OAuth settings, and network connection, then try again.${cause ? ` (${cause})` : ""}`,
+          `Redrob Cowork could not start sign-in with this MCP server. Check the server URL, OAuth settings, and network connection, then try again.${cause ? ` (${cause})` : ""}`,
           cause ? { cause } : undefined,
         );
       }
@@ -3173,7 +3173,7 @@ function createRoutes(
       actor: ctx.actor ?? { type: "remote" },
       action: "mcp.add",
       target: redrobConfigPath(workspace.path),
-      summary: `Added Redrob Work-managed MCP ${name}`,
+      summary: `Added Redrob Cowork-managed MCP ${name}`,
       timestamp: Date.now(),
     });
     emitReloadEvent(ctx.reloadEvents, workspace, "mcp", { type: "mcp", name, action: "added" });
@@ -3206,7 +3206,7 @@ function createRoutes(
       await syncRuntimeMcpToOpencodeEngine(config, workspace, [connection.name], undefined, engineMcpServerState).catch(() => undefined);
     }
     return new Response(
-      `<!doctype html><meta charset="utf-8"><title>Connected</title><main style="font:16px system-ui;padding:40px;max-width:560px"><h1>Connected</h1><p>${connection.name} is ready in Redrob Work. You can close this window.</p><script>setTimeout(()=>window.close(),1200)</script></main>`,
+      `<!doctype html><meta charset="utf-8"><title>Connected</title><main style="font:16px system-ui;padding:40px;max-width:560px"><h1>Connected</h1><p>${connection.name} is ready in Redrob Cowork. You can close this window.</p><script>setTimeout(()=>window.close(),1200)</script></main>`,
       { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } },
     );
   });
@@ -3222,7 +3222,7 @@ function createRoutes(
   addRoute(routes, "DELETE", "/mcp/managed/:workspaceId/:name", "none", managedGatewayHandler);
 
   // Portable export of installed skills and MCP servers (including
-  // Redrob Work-managed runtime MCPs that only live in the runtime DB), so
+  // Redrob Cowork-managed runtime MCPs that only live in the runtime DB), so
   // agents can package them into marketplace plugins. Read-only; MCP
   // secrets (headers/environment) are always redacted.
   addRoute(routes, "POST", "/workspace/:id/extensions/export", "client", async (ctx) => {
@@ -3394,7 +3394,7 @@ function createRoutes(
         actor: ctx.actor ?? { type: "remote" },
         action: "mcp.auth.remove",
         target: redrobConfigPath(workspace.path),
-        summary: `Logged out Redrob Work-managed MCP ${name}`,
+        summary: `Logged out Redrob Cowork-managed MCP ${name}`,
         timestamp: Date.now(),
       });
       return jsonResponse({ ok: true });
@@ -4695,7 +4695,7 @@ type EngineMcpServerState = {
 const ENGINE_MCP_REGISTRATION_MAX_AGE_MS = 15 * 60_000;
 // Registration status is point-in-time evidence from a dynamic POST /mcp,
 // not a durable statement about a later engine process. Scope it to one
-// Redrob Work server generation and expire it even when the endpoint is stable.
+// Redrob Cowork server generation and expire it even when the endpoint is stable.
 const engineMcpServerStateByConfig = new WeakMap<ServerConfig, EngineMcpServerState>();
 const trustedOpencodeProcessByConfig = new WeakMap<ServerConfig, TrustedOpencodeProcessIdentity>();
 let nextEngineMcpServerGeneration = 0;
@@ -4723,7 +4723,7 @@ function clearEngineMcpServerEvidence(state: EngineMcpServerState): void {
 
 /**
  * Bind diagnostics evidence to one OpenCode process generation owned by this
- * Redrob Work server. The opaque identity is hashed immediately and never
+ * Redrob Cowork server. The opaque identity is hashed immediately and never
  * reported. External engines without a trusted per-boot identity still hot
  * sync normally, but their cached registration result cannot authorize a
  * credentialed diagnostics probe.

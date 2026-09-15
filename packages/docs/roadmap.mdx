@@ -1,9 +1,9 @@
 ---
 title: "Roadmap"
-description: "The roadmap for the Redrob Work desktop app, the local server, the Redrob Code engine, and the MCP surfaces around them."
+description: "The roadmap for the Redrob Cowork desktop app, the local server, the Redrob Code engine, and the MCP surfaces around them."
 ---
 
-Redrob Work is a desktop app plus a local `redrob-server`, running the Redrob Code
+Redrob Cowork is a desktop app plus a local `redrob-server`, running the Redrob Code
 engine as a sidecar. Everything happens on your own machine, against your own files.
 There is no account, no organization, and no hosted control plane, and none is planned.
 
@@ -35,7 +35,7 @@ Last updated: August 2026
 | Isolated sandbox workspaces | Run work in a separate Docker or microsandbox environment, with platform limits today. | Partial |
 | Better organization for long-running work | Make active, waiting, and completed work easier to understand and return to. | Building |
 
-## Redrob Work as an MCP surface
+## Redrob Cowork as an MCP surface
 
 The app is an MCP client for the servers you add, and it exposes its own UI as a local
 MCP server so other agents can drive it.
@@ -50,7 +50,7 @@ MCP server so other agents can drive it.
 
 ## MCP spec compliance
 
-Redrob Work implements the [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+Redrob Cowork implements the [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
 as an MCP client, so the desktop app can connect to a compliant server or an enterprise
 MCP gateway. Items marked Building or Next track the 2026-07-28 MCP specification
 release.
@@ -66,13 +66,13 @@ release.
 | Issuer-bound credentials (SEP-2352) | Key stored client credentials to the issuing authorization server and re-register automatically when a server's authorization server changes. | Building |
 | Authorization hardening (SEP-2468, SEP-2207) | Validate the `iss` parameter on authorization responses (RFC 9207) and adopt clarified refresh-token scope semantics. | Next |
 
-> Following the spec is what makes Redrob Work drop-in compatible with enterprise MCP
+> Following the spec is what makes Redrob Cowork drop-in compatible with enterprise MCP
 > gateways: paste the gateway URL, sign in with your identity provider, and every
 > downstream system it fronts becomes available.
 
 ## Deploying it across a fleet
 
-Redrob Work installs per machine, so a rollout is an installer and configuration
+Redrob Cowork installs per machine, so a rollout is an installer and configuration
 problem, not a hosted service problem.
 
 | Capability | What it does | Status |
@@ -86,7 +86,7 @@ See [Self-host](/start-here/self-host) for what that involves today.
 
 ## Not on the roadmap
 
-These existed in an earlier hosted version of Redrob Work and are not coming back:
+These existed in an earlier hosted version of Redrob Cowork and are not coming back:
 
 - Accounts, sign-in, organizations, teams, and roles.
 - A hosted control plane for distributing skills, connections, or policies.

@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a problem in Redrob Work
+description: Report a problem in Redrob Cowork
 title: "[Bug]: "
 labels:
   - bug
@@ -49,10 +49,10 @@ body:
     attributes:
       label: OW version & Desktop info (optional) 
       description: |
-        Include OS and Redrob Work version if possible.
-        Redrob Work version: Settings > General.
+        Include OS and Redrob Cowork version if possible.
+        Redrob Cowork version: Settings > General.
       placeholder: |
-        - Redrob Work version: [e.g. 0.1.166]
+        - Redrob Cowork version: [e.g. 0.1.166]
         - OS: [e.g. macOS Tahoe 26.2]
     validations:
       required: false

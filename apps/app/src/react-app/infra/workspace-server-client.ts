@@ -70,10 +70,10 @@ export function createWorkspaceServerClientCacheKey(
 }
 
 /**
- * Workspace-scoped Redrob Work server client resolver.
+ * Workspace-scoped Redrob Cowork server client resolver.
  *
  * The returned endpoint includes the correctly mounted workspace URLs and a
- * memoized Redrob Work server client. The cache is intentionally per resolver so
+ * memoized Redrob Cowork server client. The cache is intentionally per resolver so
  * React routes/stores do not share mutable clients across workspace contexts.
  */
 export function createWorkspaceServerClientResolver(

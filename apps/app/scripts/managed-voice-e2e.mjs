@@ -206,7 +206,7 @@ async function waitForServerHealthy(baseUrl) {
     }
     await new Promise((resolvePoll) => setTimeout(resolvePoll, 250));
   }
-  throw new Error(`Timed out waiting for Redrob Work server health: ${lastError}`);
+  throw new Error(`Timed out waiting for Redrob Cowork server health: ${lastError}`);
 }
 
 await rm(outDir, { recursive: true, force: true });

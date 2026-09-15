@@ -3,11 +3,11 @@
 /**
  * redrob-ui-mcp
  *
- * MCP server that exposes Redrob Work's semantic app context and UI control
+ * MCP server that exposes Redrob Cowork's semantic app context and UI control
  * surface as an MCP resource and tools.
- * Speaks MCP stdio and proxies to the Redrob Work desktop bridge HTTP API.
+ * Speaks MCP stdio and proxies to the Redrob Cowork desktop bridge HTTP API.
  *
- * Requires Redrob Work desktop running with the local UI control bridge active.
+ * Requires Redrob Cowork desktop running with the local UI control bridge active.
  *
  * Usage:
  *   npx redrob-ui-mcp
@@ -81,8 +81,8 @@ async function bridgeRequest(path, options = {}) {
   if (!bridge) {
     return {
       ok: false,
-      error: "Redrob Work is not running. Launch the Redrob Work desktop app first.",
-      hint: "The MCP server connects to a running Redrob Work instance via its local bridge.",
+      error: "Redrob Cowork is not running. Launch the Redrob Cowork desktop app first.",
+      hint: "The MCP server connects to a running Redrob Cowork instance via its local bridge.",
     };
   }
   const url = `${bridge.baseUrl}${path}`;
@@ -180,7 +180,7 @@ server.resource(
 // ── ui.context ──
 server.tool(
   "ui_context",
-  "Read Redrob Work's semantic app context: current screen, all open conversation tabs, split-screen layout, focused pane, sidebar, side panel, settings, and currently available queries and commands. Reads app state without focusing the window.",
+  "Read Redrob Cowork's semantic app context: current screen, all open conversation tabs, split-screen layout, focused pane, sidebar, side panel, settings, and currently available queries and commands. Reads app state without focusing the window.",
   {},
   async () => {
     const result = await bridgeRequest("/context");
@@ -194,7 +194,7 @@ server.tool(
 // ── ui.snapshot ──
 server.tool(
   "ui_snapshot",
-  "Get a snapshot of the current Redrob Work UI state: active route, narration, visible actions, and status. Use this before taking action to understand what the user sees.",
+  "Get a snapshot of the current Redrob Cowork UI state: active route, narration, visible actions, and status. Use this before taking action to understand what the user sees.",
   {},
   async () => {
     const result = await bridgeRequest("/snapshot");
@@ -214,14 +214,14 @@ server.tool(
         lines.push(`  ${action.id} — ${action.label || action.description || ""}${args}`);
       }
     }
-    return { content: [{ type: "text", text: lines.join("\n") || "Redrob Work is reachable, but it did not return visible UI state." }] };
+    return { content: [{ type: "text", text: lines.join("\n") || "Redrob Cowork is reachable, but it did not return visible UI state." }] };
   }
 );
 
 // ── ui.list_actions ──
 server.tool(
   "ui_list_actions",
-  "List all UI control actions currently available in Redrob Work: session navigation, composer control, transcript access, and more. Each action has an id you can pass to ui_execute_action.",
+  "List all UI control actions currently available in Redrob Cowork: session navigation, composer control, transcript access, and more. Each action has an id you can pass to ui_execute_action.",
   {},
   async () => {
     const result = await bridgeRequest("/actions");
@@ -229,7 +229,7 @@ server.tool(
       return { content: [{ type: "text", text: `Error: ${result.error}` }], isError: true };
     }
     if (!Array.isArray(result.actions) || result.actions.length === 0) {
-      return { content: [{ type: "text", text: "No actions available. Is Redrob Work on the main screen?" }] };
+      return { content: [{ type: "text", text: "No actions available. Is Redrob Cowork on the main screen?" }] };
     }
     const text = result.actions.map(formatActionLine).join("\n\n");
     return { content: [{ type: "text", text: `${result.actions.length} actions:\n\n${text}` }] };
@@ -239,7 +239,7 @@ server.tool(
 // ── ui.execute_action ──
 server.tool(
   "ui_execute_action",
-  "Execute an Redrob Work UI action by its id without activating the desktop window. Use ui_list_actions first to see available actions and their required arguments.",
+  "Execute an Redrob Cowork UI action by its id without activating the desktop window. Use ui_list_actions first to see available actions and their required arguments.",
   {
     actionId: z.string().describe("The action id from ui_list_actions, e.g. 'session.create_task' or 'composer.set_text'"),
     args: z.record(z.unknown()).optional().describe("JSON arguments for the action, if required"),
@@ -259,7 +259,7 @@ server.tool(
 // ── ui.query ──
 server.tool(
   "ui_query",
-  "Run a side-effect-free Redrob Work query by id. Use ui_context to inspect currently available queries. Queries never focus or navigate the app.",
+  "Run a side-effect-free Redrob Cowork query by id. Use ui_context to inspect currently available queries. Queries never focus or navigate the app.",
   {
     id: z.string().describe("Query id from ui_context, such as 'session.list_sessions' or 'notifications.list'"),
     args: z.record(z.unknown()).optional().describe("JSON arguments for the query, if required"),
@@ -279,7 +279,7 @@ server.tool(
 // ── ui.command ──
 server.tool(
   "ui_command",
-  "Execute a semantic Redrob Work command by id while Redrob Work remains in the background. Use ui_context first and pass its revision to prevent acting on stale UI state.",
+  "Execute a semantic Redrob Cowork command by id while Redrob Cowork remains in the background. Use ui_context first and pass its revision to prevent acting on stale UI state.",
   {
     id: z.string().describe("Command id from ui_context"),
     args: z.record(z.unknown()).optional().describe("JSON arguments for the command, if required"),
@@ -301,20 +301,20 @@ server.tool(
 // ── ui.status ──
 server.tool(
   "ui_status",
-  "Check if Redrob Work is running and the bridge is reachable. Returns connection status and app info.",
+  "Check if Redrob Cowork is running and the bridge is reachable. Returns connection status and app info.",
   {},
   async () => {
     const bridge = await discoverBridge();
     if (!bridge) {
-      return { content: [{ type: "text", text: "Redrob Work is not running.\nLaunch the Redrob Work desktop app to enable UI control." }], isError: true };
+      return { content: [{ type: "text", text: "Redrob Cowork is not running.\nLaunch the Redrob Cowork desktop app to enable UI control." }], isError: true };
     }
     try {
       const response = await fetch(`${bridge.baseUrl}/health`, { signal: AbortSignal.timeout(3000) });
       const data = await response.json();
-      return { content: [{ type: "text", text: `Connected to ${data.app || "Redrob Work"}\nBridge: ${bridge.baseUrl}\nVersion: ${data.version ?? "?"}` }] };
+      return { content: [{ type: "text", text: `Connected to ${data.app || "Redrob Cowork"}\nBridge: ${bridge.baseUrl}\nVersion: ${data.version ?? "?"}` }] };
     } catch (error) {
       clearBridgeCache();
-      return { content: [{ type: "text", text: `Bridge file found but not reachable: ${error.message}\nRedrob Work may have quit. Relaunch it.` }], isError: true };
+      return { content: [{ type: "text", text: `Bridge file found but not reachable: ${error.message}\nRedrob Cowork may have quit. Relaunch it.` }], isError: true };
     }
   }
 );

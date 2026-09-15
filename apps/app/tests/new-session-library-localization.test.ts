@@ -48,7 +48,7 @@ const GUARDED_STORES = [
  * format names, literal commands, and config identifiers shown verbatim.
  */
 const ALLOWED_LITERALS = new Set([
-  "Redrob Work",
+  "Redrob Cowork",
   "Redrob Code",
   "OpenCode",
   "MCP",

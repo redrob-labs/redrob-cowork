@@ -1,6 +1,6 @@
-# Microsandbox Redrob Work Rust Example
+# Microsandbox Redrob Cowork Rust Example
 
-Small standalone Rust example that starts the Redrob Work micro-sandbox image with the `microsandbox` SDK, publishes the Redrob Work server on a host port, persists `/workspace` and `/data` with host bind mounts, verifies `/health`, checks that `/workspaces` is `401` without a token and `200` with the client token, then keeps the sandbox alive until `Ctrl+C` while streaming the sandbox logs to your terminal.
+Small standalone Rust example that starts the Redrob Cowork micro-sandbox image with the `microsandbox` SDK, publishes the Redrob Cowork server on a host port, persists `/workspace` and `/data` with host bind mounts, verifies `/health`, checks that `/workspaces` is `401` without a token and `200` with the client token, then keeps the sandbox alive until `Ctrl+C` while streaming the sandbox logs to your terminal.
 
 ## Run
 
@@ -57,7 +57,7 @@ By default, the example creates and reuses two host directories under `examples/
 - `/workspace`
 - `/data`
 
-That keeps Redrob Work and OpenCode state around across sandbox restarts, while using normal host filesystem semantics instead of managed microsandbox named volumes.
+That keeps Redrob Cowork and OpenCode state around across sandbox restarts, while using normal host filesystem semantics instead of managed microsandbox named volumes.
 
 If you want a clean reset, either:
 

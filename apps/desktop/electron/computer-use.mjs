@@ -11,7 +11,7 @@ import { app, shell } from "electron";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const COMPUTER_USE_HELPER_APP_NAME = "Redrob Work Computer Use.app";
+const COMPUTER_USE_HELPER_APP_NAME = "Redrob Cowork Computer Use.app";
 const COMPUTER_USE_HELPER_EXECUTABLE = "ComputerUse";
 
 function computerUseHelperExecutablePath() {
@@ -41,7 +41,7 @@ function getComputerUseMcpCommand() {
   if (helperExecutable) return [helperExecutable, "mcp"];
 
   if (app.isPackaged) {
-    throw new Error("Redrob Work Computer Use is missing from this Redrob Work build.");
+    throw new Error("Redrob Cowork Computer Use is missing from this Redrob Cowork build.");
   }
 
   if (process.env.REDROB_DEV_MODE === "1") {

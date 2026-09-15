@@ -30,7 +30,7 @@ export const REDROB_OPUS_MODEL_NAME = "Claude Opus 5";
 export const REDROB_CONSOLE_URL = "https://console.redrob.ai";
 
 /**
- * Console-hosted payment page. Redrob Work links here and stops: the console
+ * Console-hosted payment page. Redrob Cowork links here and stops: the console
  * owns the checkout, the amount, and which payment methods Stripe offers, so
  * this app never collects, forwards, or proxies card data.
  *

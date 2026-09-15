@@ -129,7 +129,7 @@ export function buildRedrobContext(
   const resources: RedrobResourceDescriptor[] = [{
     ref: `screen:${input.route}`,
     kind: "screen",
-    title: screen.kind === "settings" ? `${screen.panel} settings` : "Redrob Work",
+    title: screen.kind === "settings" ? `${screen.panel} settings` : "Redrob Cowork",
     provider,
     state: { kind: screen.kind, route: input.route },
   }];

@@ -1,4 +1,4 @@
-name: Redrob Work Tests
+name: Redrob Cowork Tests
 
 # Paused during local-dev. Restore pull_request/push on `main` to re-enable.
 on:
@@ -115,6 +115,6 @@ jobs:
         run: |
           echo "redrob-tests result: $RESULT"
           if [ "$RESULT" != "success" ]; then
-            echo "One or more Redrob Work Tests matrix legs did not succeed; blocking merge." >&2
+            echo "One or more Redrob Cowork Tests matrix legs did not succeed; blocking merge." >&2
             exit 1
           fi

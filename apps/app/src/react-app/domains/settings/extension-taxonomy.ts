@@ -33,7 +33,7 @@ export const extensionInventoryFilters: ExtensionInventoryFilter[] = [
   ...EXTENSION_TAXONOMIES,
 ];
 
-/** Built-ins ship with Redrob Work and run here, so they are apps. Accounts arrive as org connections. */
+/** Built-ins ship with Redrob Cowork and run here, so they are apps. Accounts arrive as org connections. */
 export function taxonomyForDirectoryEntry(entry: McpDirectoryInfo): ExtensionTaxonomy {
   if (isBuiltInRedrobWorkExtension(entry) || entry.kind === "ui-control") return "app";
   return "mcp";

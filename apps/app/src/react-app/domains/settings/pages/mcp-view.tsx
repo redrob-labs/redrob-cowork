@@ -133,7 +133,7 @@ export type McpViewProps = {
   mcpLastUpdatedAt: number | null;
   mcpStatuses: McpStatusMap;
   mcpConnectingName: string | null;
-  /** False when secure storage for Redrob Work-managed sign-ins is unavailable on this device. */
+  /** False when secure storage for Redrob Cowork-managed sign-ins is unavailable on this device. */
   managedOAuthAvailable?: boolean;
   selectedMcp: string | null;
   setSelectedMcp: (name: string | null) => void;
