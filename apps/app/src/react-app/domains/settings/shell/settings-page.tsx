@@ -1,24 +1,7 @@
 /** @jsxImportSource react */
+import { useState } from "react";
 import type * as React from "react";
-import {
-  ArrowLeft,
-  BrainCircuit,
-  Bug,
-  Cable,
-  ChevronDown,
-  Cog,
-  FolderLock,
-  Info,
-  Paintbrush,
-  Puzzle,
-  RefreshCcw,
-  ShieldCheck,
-  SlidersHorizontal,
-  Sparkles,
-  Terminal,
-  Wrench,
-  Zap,
-} from "lucide-react";
+import { ArrowLeft, ChevronDown, Cog, Search } from "lucide-react";
 
 import {
   Sidebar,
@@ -57,128 +40,26 @@ import {
 } from "./panel";
 import { useFeatureFlagsPreferences } from "../state/feature-flags-preferences";
 import { SidebarDestination } from "../../session/sidebar/sidebar-destination";
+import {
+  getGlobalSettingsTabs,
+  getSettingsTabDescription,
+  getSettingsTabIcon,
+  getSettingsTabLabel,
+  getWorkspaceSettingsTabs,
+  isSettingsTabActive,
+  isSettingsTabBeta,
+} from "./settings-tabs";
+import { filterSettingsTabs, matchesSettingsTab } from "./settings-search";
 
-export function getSettingsTabIcon(tab: SettingsTab) {
-  switch (tab) {
-    case "ai":
-      return Zap;
-    case "preferences":
-      return SlidersHorizontal;
-    case "permissions":
-      return FolderLock;
-    case "skills":
-      return Sparkles;
-    case "memory":
-      return BrainCircuit;
-    case "extensions":
-      return Puzzle;
-    case "environment":
-      return Terminal;
-    case "advanced":
-      return Wrench;
-    case "appearance":
-      return Paintbrush;
-    case "updates":
-      return RefreshCcw;
-    case "recovery":
-      return ShieldCheck;
-    case "debug":
-      return Bug;
-    default:
-      return Cog;
-  }
-}
-
-export function getSettingsTabLabel(tab: SettingsTab) {
-  switch (tab) {
-    case "ai":
-      return t("settings.tab_ai");
-    case "preferences":
-      return t("settings.tab_preferences");
-    case "permissions":
-      return t("settings.tab_permissions");
-    case "skills":
-      return t("settings.tab_skills");
-    case "memory":
-      return t("memory.tab_label");
-    case "extensions":
-      return t("settings.tab_extensions");
-    case "environment":
-      return t("settings.tab_environment");
-    case "advanced":
-      return t("settings.tab_advanced");
-    case "appearance":
-      return t("settings.tab_appearance");
-    case "updates":
-      return t("settings.tab_updates");
-    case "recovery":
-      return t("settings.tab_recovery");
-    case "debug":
-      return t("settings.tab_debug");
-    case "general":
-      return t("settings.tab_general");
-    default:
-      return t("settings.tab_general");
-  }
-}
-
-export function getSettingsTabDescription(tab: SettingsTab) {
-  switch (tab) {
-    case "ai":
-      return t("settings.tab_description_ai");
-    case "preferences":
-      return t("settings.tab_description_preferences");
-    case "permissions":
-      return t("settings.tab_description_permissions");
-    case "skills":
-      return t("settings.tab_description_skills");
-    case "memory":
-      return t("memory.tab_description");
-    case "extensions":
-      return t("settings.tab_description_extensions");
-    case "environment":
-      return t("settings.tab_description_environment");
-    case "advanced":
-      return t("settings.tab_description_advanced");
-    case "appearance":
-      return t("settings.tab_description_appearance");
-    case "updates":
-      return t("settings.tab_description_updates");
-    case "recovery":
-      return t("settings.tab_description_recovery");
-    case "debug":
-      return t("settings.tab_description_debug");
-    case "general":
-      return t("settings.tab_description_general_overview");
-    default:
-      return t("settings.tab_description_general");
-  }
-}
-
-export function getWorkspaceSettingsTabs(): SettingsTab[] {
-  return ["preferences", "permissions", "extensions", "advanced"];
-}
-
-export function getGlobalSettingsTabs(
-  developerMode: boolean,
-  capabilities: Pick<PlatformCapabilities, "autoUpdate" | "localRuntimeControl">,
-  memoryEnabled: boolean,
-): SettingsTab[] {
-  const tabs: SettingsTab[] = ["ai", "appearance", "environment"];
-  if (memoryEnabled) tabs.push("memory");
-  if (capabilities.autoUpdate) tabs.push("updates");
-  if (capabilities.localRuntimeControl) tabs.push("recovery");
-  if (developerMode) tabs.push("debug");
-  return tabs;
-}
-
-export function isSettingsTabBeta(_tab: SettingsTab) {
-  return false;
-}
-
-export function isSettingsTabActive(activeTab: SettingsTab, tab: SettingsTab) {
-  return activeTab === tab;
-}
+export {
+  getSettingsTabDescription,
+  getSettingsTabIcon,
+  getSettingsTabLabel,
+  getGlobalSettingsTabs,
+  getWorkspaceSettingsTabs,
+  isSettingsTabActive,
+  isSettingsTabBeta,
+} from "./settings-tabs";
 
 export function SettingsBetaBadge({ className }: { className?: string }) {
   return (
@@ -234,8 +115,15 @@ type SettingsSidebarProps = Pick<SettingsPageProps, "activeTab" | "onSelectTab" 
 export function SettingsSidebar(props: SettingsSidebarProps) {
   const platform = usePlatform();
   const { memoryEnabled } = useFeatureFlagsPreferences();
-  const workspaceTabs = getWorkspaceSettingsTabs();
-  const globalTabs = getGlobalSettingsTabs(props.developerMode, platform.capabilities, memoryEnabled);
+  const [query, setQuery] = useState("");
+  const searching = query.trim().length > 0;
+  const workspaceTabs = filterSettingsTabs(getWorkspaceSettingsTabs(), query);
+  const globalTabs = filterSettingsTabs(
+    getGlobalSettingsTabs(props.developerMode, platform.capabilities, memoryEnabled),
+    query,
+  );
+  const showGeneral = matchesSettingsTab("general", query);
+  const noMatches = !showGeneral && workspaceTabs.length === 0 && globalTabs.length === 0;
 
   return (
     <Sidebar collapsible="icon" className="mac:**:data-[sidebar=sidebar]:bg-transparent">
@@ -272,9 +160,26 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
+        {/* Hidden when the rail is collapsed to icons: a text field has nothing
+            to show at icon width. */}
+        <div className="relative px-1 pt-1 group-data-[collapsible=icon]:hidden">
+          <Search
+            size={13}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.currentTarget.value)}
+            placeholder={t("settings.search_settings")}
+            aria-label={t("settings.search_settings")}
+            className="h-7 w-full rounded-md border border-sidebar-border bg-sidebar-accent/40 pl-7 pr-2 text-xs text-sidebar-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-sidebar-ring"
+          />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         {/* Top-level hub entry */}
+        {showGeneral ? (
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -293,7 +198,9 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        ) : null}
 
+        {workspaceTabs.length > 0 ? (
         <SidebarGroup>
           <SidebarGroupLabel>{t("settings.group_workspace")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -314,7 +221,9 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        ) : null}
 
+        {globalTabs.length > 0 ? (
         <SidebarGroup>
           <SidebarGroupLabel>{t("settings.group_global")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -335,6 +244,13 @@ export function SettingsSidebar(props: SettingsSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        ) : null}
+
+        {searching && noMatches ? (
+          <div className="px-3 py-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
+            {t("settings.search_no_results")}
+          </div>
+        ) : null}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

@@ -24,6 +24,7 @@ import {
   type ComposerSlashCommandOption,
 } from "./slash-command";
 import { FILE_URL_RE, HTTP_URL_RE, type PastedTextChip } from "./pasted-text";
+import { dragEventHasFiles } from "./drag-files";
 
 type MentionItem = {
   id: string;
@@ -1042,9 +1043,39 @@ export function ReactSessionComposer(props: ComposerProps) {
       }}
     >
       <div className={props.flush ? "" : "max-w-[800px] mx-auto"}>
-        {/* Main composer panel */}
+        {/* Main composer panel — also the drop target. The whole panel accepts a
+            drag, not just the text area: a file dropped on the action row or the
+            padding is the same intent, and a highlight that only lights up over
+            the caret line reads as "drop not supported here". */}
         <div
-          className={`relative overflow-visible rounded-[18px] border border-dls-border bg-dls-surface transition-all ${panelRoundedClass}`}
+          className={`relative overflow-visible rounded-[18px] border bg-dls-surface transition-all ${panelRoundedClass} ${
+            dropzoneActive ? "border-dls-accent" : "border-dls-border"
+          }`}
+          data-dropzone-active={dropzoneActive ? "true" : undefined}
+          onDragEnter={(event) => {
+            if (!dragEventHasFiles(event.dataTransfer)) return;
+            event.preventDefault();
+            if (!dropzoneActive) setDropzoneActive(true);
+          }}
+          onDragOver={(event) => {
+            if (!dragEventHasFiles(event.dataTransfer)) return;
+            // Required: without preventDefault the browser refuses the drop.
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+            if (!dropzoneActive) setDropzoneActive(true);
+          }}
+          onDragLeave={(event) => {
+            const nextTarget = event.relatedTarget;
+            if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
+            setDropzoneActive(false);
+          }}
+          onDrop={(event) => {
+            setDropzoneActive(false);
+            const files = Array.from(event.dataTransfer?.files ?? []);
+            if (!files.length) return;
+            event.preventDefault();
+            void addAttachments(files);
+          }}
         >
           {props.topAccessory ? <div className="relative z-10">{props.topAccessory}</div> : null}
 
@@ -1143,22 +1174,15 @@ export function ReactSessionComposer(props: ComposerProps) {
                 }
               }}
               onDragOver={(event) => {
-                if (event.dataTransfer?.files?.length) {
-                  event.preventDefault();
-                  if (!dropzoneActive) setDropzoneActive(true);
-                }
-              }}
-              onDragLeave={(event) => {
-                const nextTarget = event.relatedTarget;
-                if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
-                setDropzoneActive(false);
+                // The panel owns the drop zone; the editor only has to stop the
+                // browser from treating a file drag as a text-insert target.
+                if (dragEventHasFiles(event.dataTransfer)) event.preventDefault();
               }}
               onDrop={(event) => {
-                const files = Array.from(event.dataTransfer?.files ?? []);
-                setDropzoneActive(false);
-                if (!files.length) return;
-                event.preventDefault();
-                void addAttachments(files);
+                // Let the panel handler run: it reads the files and clears the
+                // highlight. Preventing default here only stops Lexical from
+                // inserting the file name as text.
+                if (dragEventHasFiles(event.dataTransfer)) event.preventDefault();
               }}
             />
 

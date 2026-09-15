@@ -5,6 +5,8 @@ import { Check, ChevronDown, ChevronRight, Settings2 } from "lucide-react";
 
 import type { ModelBehaviorOption, ModelOption, ModelRef } from "@/app/types";
 import { getModelBehaviorSummary } from "@/app/lib/model-behavior";
+import { matchesModelQuery } from "@/app/lib/model-search";
+import { inferModelVendor } from "@/app/lib/model-vendor";
 import { ProviderIcon } from "@/react-app/design-system/provider-icon";
 import {
   Popover,
@@ -138,6 +140,27 @@ function isSameModel(a: ModelRef, b: ModelRef) {
   return a.providerID === b.providerID && a.modelID === b.modelID;
 }
 
+/**
+ * Secondary line for a model row. A router provider reports every model under
+ * its own id, so showing only the provider name repeats the group label and
+ * hides who actually made the model. The vendor is named first when the model
+ * id identifies one.
+ */
+function modelRowSubtitle(option: ModelOption): string {
+  const providerLabel = option.description ?? getProviderDisplayName(option.providerID);
+  const vendor = inferModelVendor(option.modelID);
+  if (!vendor) return providerLabel;
+  if (vendor.name.toLowerCase() === providerLabel.toLowerCase()) return providerLabel;
+  return `${vendor.name} · ${providerLabel}`;
+}
+
+/** Match a picker row against the search query. Groups always pass through. */
+function filterModelItem(item: unknown, query: string): boolean {
+  const option = (item as ModelSelectItem | undefined)?.option;
+  if (!option) return true;
+  return matchesModelQuery(option, query);
+}
+
 function thinkingOptionsFor(option: ModelOption): ModelBehaviorOption[] {
   return (option.behaviorOptions ?? []).filter((item) => item.value != null);
 }
@@ -245,6 +268,11 @@ export function ModelSelect({
   );
 
   const groups = React.useMemo(() => groupByProvider(modelOptions), [modelOptions]);
+  // One provider means the group label repeats on every row and buys nothing,
+  // so the list renders flat. Grouping returns as soon as a second provider is
+  // connected.
+  const flatItems = React.useMemo(() => groups.flatMap((group) => group.items), [groups]);
+  const flatten = groups.length <= 1;
 
   const applyModel = (option: ModelOption, behavior?: string | null) => {
     onChange({ providerID: option.providerID, modelID: option.modelID }, behavior);
@@ -276,6 +304,38 @@ export function ModelSelect({
     setSearch("");
     window.dispatchEvent(new Event(openProviderAuthEvent));
   }, [onOpenChange]);
+
+  const renderItem = (item: ModelSelectItem) => {
+    const option = item.option;
+    const hasThinking = Boolean(onBehaviorChange) && thinkingOptionsFor(option).length > 0;
+    const vendor = inferModelVendor(option.modelID);
+    return (
+      <CommandItem
+        className="gap-2"
+        key={item.id}
+        value={`${option.providerID}:${option.modelID} ${option.title} ${option.description ?? ""}`}
+        onClick={() => handleSelect(option)}
+        data-checked={isSameModel(value, option)}
+        data-open={thinkingFor ? isSameModel(thinkingFor, option) : undefined}
+      >
+        <ProviderIcon
+          providerId={vendor?.id ?? option.providerID}
+          providerName={vendor?.name ?? option.description}
+          className="size-3.5 opacity-70"
+          size={14}
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-foreground">{option.title}</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            {modelRowSubtitle(option)}
+          </span>
+        </span>
+        {hasThinking ? (
+          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+        ) : null}
+      </CommandItem>
+    );
+  };
 
   return (
     <Popover
@@ -318,7 +378,12 @@ export function ModelSelect({
         initialFocus={false}
       >
         <div className="flex h-full w-72 min-w-72 flex-col overflow-hidden rounded-3xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
-        <Command items={groups} value={search} onValueChange={setSearch}>
+        <Command
+          items={flatten ? flatItems : groups}
+          filter={filterModelItem}
+          value={search}
+          onValueChange={setSearch}
+        >
           <CommandHeader>
             <CommandInput
               ref={searchInputRef}
@@ -327,52 +392,16 @@ export function ModelSelect({
           </CommandHeader>
           <CommandEmpty>{t("model_select.none_found")}</CommandEmpty>
           <CommandList>
-            {(group: ModelSelectGroup) => (
-              <CommandGroup
-                key={group.value}
-                items={group.items}
-              >
-                <CommandGroupLabel>
-                  {group.value}
-                </CommandGroupLabel>
-                <CommandCollection>
-                  {(item: ModelSelectItem) => {
-                    const option = item.option;
-                    const hasThinking =
-                      Boolean(onBehaviorChange) && thinkingOptionsFor(option).length > 0;
-                    return (
-                      <CommandItem
-                        className="gap-2"
-                        key={item.id}
-                        value={`${option.providerID}:${option.modelID} ${option.title} ${option.description ?? ""}`}
-                        onClick={() => handleSelect(option)}
-                        data-checked={isSameModel(value, option)}
-                        data-open={thinkingFor ? isSameModel(thinkingFor, option) : undefined}
-                      >
-                        <ProviderIcon
-                          providerId={option.providerID}
-                          providerName={option.description}
-                          className="size-3.5 opacity-70"
-                          size={14}
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-foreground">
-                            {option.title}
-                          </span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {option.description ??
-                              getProviderDisplayName(option.providerID)}
-                          </span>
-                        </span>
-                        {hasThinking ? (
-                          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-                        ) : null}
-                      </CommandItem>
-                    );
-                  }}
-                </CommandCollection>
-              </CommandGroup>
-            )}
+            {flatten
+              ? (item: ModelSelectItem) => renderItem(item)
+              : (group: ModelSelectGroup) => (
+                  <CommandGroup key={group.value} items={group.items}>
+                    <CommandGroupLabel>{group.value}</CommandGroupLabel>
+                    <CommandCollection>
+                      {(item: ModelSelectItem) => renderItem(item)}
+                    </CommandCollection>
+                  </CommandGroup>
+                )}
           </CommandList>
           {/* Always offered: with no organization policy, adding a provider is
               never restricted. */}

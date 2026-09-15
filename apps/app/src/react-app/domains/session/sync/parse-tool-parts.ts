@@ -3,6 +3,7 @@ import type { ToolPart } from "@opencode-ai/sdk/v2/client";
 
 import { safeStringify } from "@/app/utils";
 import { normalizeErrorText } from "@/lib/error-text";
+import { extractToolResultFacts } from "@/lib/tool-result-summary";
 
 export const STRUCTURED_OUTPUT_TOOL = "StructuredOutput";
 
@@ -27,9 +28,20 @@ function toolCallProviderMetadata(part: ToolPart): ProviderMetadata {
       ? stateMetadata.redrobMcpApp
       : null;
   const mcpResult = persistedMcpResult;
+  // Summary scalars only (exit code, match count, diff stats). The rest of the
+  // engine's metadata — full stdout, file previews, whole diffs — is
+  // deliberately not copied into UI state.
+  const resultFacts = extractToolResultFacts(part.tool, stateMetadata);
   return {
     opencode: { partId: part.id },
-    ...(mcpResult ? { redrob: { mcpResult } } : {}),
+    ...(mcpResult || resultFacts
+      ? {
+          redrob: {
+            ...(mcpResult ? { mcpResult } : {}),
+            ...(resultFacts ? { resultFacts } : {}),
+          },
+        }
+      : {}),
   };
 }
 

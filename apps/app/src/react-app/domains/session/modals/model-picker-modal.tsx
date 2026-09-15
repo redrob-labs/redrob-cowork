@@ -22,6 +22,8 @@ import { t } from "@/i18n";
 import { modelEquals, resolveProviderDisplayName } from "../../../../app/utils";
 import type { ModelOption, ModelRef } from "../../../../app/types";
 import { isRecommendedModel } from "../../../../app/defaults";
+import { matchesModelQuery } from "../../../../app/lib/model-search";
+import { inferModelVendor } from "../../../../app/lib/model-vendor";
 import { ProviderIcon } from "../../../design-system/provider-icon";
 
 // Translation KEYS, not display text. A module-level constant holding UI copy
@@ -101,17 +103,11 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     return () => cancelAnimationFrame(frame);
   }, [props.open]);
 
-  // Filter by search
+  // Filter by search. Token matching, so "Redrob Auto" (provider then model, the
+  // order the row is read in) and "anthropic opus" both resolve.
   const filteredOptions = useMemo(() => {
-    const q = props.query.trim().toLowerCase();
-    if (!q) return props.options;
-    return props.options.filter(
-      (o) =>
-        o.title.toLowerCase().includes(q) ||
-        o.providerID.toLowerCase().includes(q) ||
-        o.modelID.toLowerCase().includes(q) ||
-        (o.description ?? "").toLowerCase().includes(q),
-    );
+    if (!props.query.trim()) return props.options;
+    return props.options.filter((o) => matchesModelQuery(o, props.query));
   }, [props.options, props.query]);
 
   // Group by provider
@@ -387,6 +383,9 @@ function DefaultModelRow({
   opt: ModelOption; current: ModelRef; onSelect: (opt: ModelOption) => void; recommended?: boolean;
 }) {
   const active = modelEquals(current, { providerID: opt.providerID, modelID: opt.modelID });
+  // A router provider lists every vendor's model under its own name, so the row
+  // states the vendor the model actually comes from.
+  const vendor = inferModelVendor(opt.modelID);
 
   return (
     <button
@@ -398,8 +397,19 @@ function DefaultModelRow({
       onClick={() => onSelect(opt)}
     >
       {recommended ? <Star size={12} className="shrink-0 text-warning" /> : <div className="w-3 shrink-0" />}
+      {vendor ? (
+        <ProviderIcon
+          providerId={vendor.id}
+          providerName={vendor.name}
+          size={12}
+          className="shrink-0 opacity-70"
+        />
+      ) : null}
       <div className="min-w-0 flex-1">
         <span className={["text-[12px]", active ? "font-medium text-dls-text" : "text-dls-text"].join(" ")}>{opt.title}</span>
+        {vendor ? (
+          <span className="ml-2 text-[10px] text-dls-secondary">{vendor.name}</span>
+        ) : null}
         <span className="ml-2 font-mono text-[10px] text-dls-secondary/60">{opt.modelID}</span>
       </div>
       {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}

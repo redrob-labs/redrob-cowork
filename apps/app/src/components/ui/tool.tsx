@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { attributeChatToolError } from "@/components/tools/error-attribution"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
+import { formatToolResultSummary, readToolResultFacts } from "@/lib/tool-result-summary"
 import { cn } from "@/lib/utils"
 import {
   Bot,
@@ -144,6 +145,9 @@ const Tool = ({
       ? toolPart.errorText
       : null
   const inputDiff = getInputDiff(input)
+  const resultSummary = formatToolResultSummary(
+    readToolResultFacts(toolPart.callProviderMetadata),
+  )
   const Icon = toolIcon(toolPart)
   const [copied, setCopied] = useState(false)
 
@@ -177,6 +181,14 @@ const Tool = ({
             <ChevronDown className="absolute size-4 opacity-0 transition-opacity group-hover:opacity-100 group-data-panel-open:rotate-180" />
           </span>
           <span className="min-w-0 truncate">{label}</span>
+          {resultSummary ? (
+            <span
+              className="shrink-0 text-xs text-muted-foreground/80"
+              data-testid="tool-result-summary"
+            >
+              {resultSummary}
+            </span>
+          ) : null}
           {isError && !errorAttribution ? (
             <span className="text-destructive shrink-0 text-xs">failed</span>
           ) : null}
