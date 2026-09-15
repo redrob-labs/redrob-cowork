@@ -1926,6 +1926,7 @@ const en = {
   "status.disconnected_label": "Disconnected",
   "status.docs": "Docs",
   "status.feedback": "Feedback",
+  "status.reveal_advanced": "Show advanced features",
   "status.limited_hint": "Reconnect to restore full Redrob Work features",
   "status.limited_mode": "Limited Mode",
   "status.loading_session": "Loading session",

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BookOpen,
   MessageCircleMore,
+  SparklesIcon,
   MoreHorizontal,
   Settings,
 } from "lucide-react";
@@ -116,7 +117,7 @@ export type SidebarStatusMenuProps = {
  */
 export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
   const platform = usePlatform();
-  const { config: shellConfig } = useShellConfig();
+  const { config: shellConfig, hasHiddenFeatures, revealAdvanced } = useShellConfig();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [initializing, setInitializing] = useState(
     () => Date.now() - BOOT_STARTED_AT < INITIALIZING_MS,
@@ -251,6 +252,14 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
           <DropdownMenuItem onClick={props.onSendFeedback}>
             <MessageCircleMore className="size-3.5" />
             {t("status.feedback")}
+          </DropdownMenuItem>
+        ) : null}
+        {/* Progressive disclosure has held something back. Offer it rather than
+            making the user wait out the session count to find it. */}
+        {hasHiddenFeatures ? (
+          <DropdownMenuItem onClick={revealAdvanced} data-testid="reveal-advanced-features">
+            <SparklesIcon className="size-3.5" />
+            {t("status.reveal_advanced")}
           </DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>

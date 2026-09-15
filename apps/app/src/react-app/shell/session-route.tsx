@@ -422,7 +422,7 @@ export function SessionRoute() {
   const navigate = useNavigate();
   const location = useLocation();
   const platform = usePlatform();
-  const { config: shellConfig } = useShellConfig();
+  const { config: shellConfig, recordSessionOpened } = useShellConfig();
   const local = useLocal();
   const reloadCoordinator = useReloadCoordinator();
   const [redrobServerHostInfoState, setRedrobServerHostInfoState] = useState<RedrobServerInfo | null>(null);
@@ -432,6 +432,13 @@ export function SessionRoute() {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("redrob.developerMode") === "1";
   });
+
+  // Progressive disclosure: a first-run user starts without the status menu and
+  // the notification bell, and they appear once the user has opened a few
+  // sessions. Counted once per mount rather than per render.
+  useEffect(() => {
+    recordSessionOpened();
+  }, [recordSessionOpened]);
   const {
     navigateToWorkspaceSession,
     routeWorkspaceId,

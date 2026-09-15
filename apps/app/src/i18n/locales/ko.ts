@@ -1919,6 +1919,7 @@ const ko = {
   "status.disconnected_label": "연결 끊김",
   "status.docs": "문서",
   "status.feedback": "피드백",
+  "status.reveal_advanced": "고급 기능 표시",
   "status.limited_hint": "전체 레드롭 워크 기능을 복원하려면 다시 연결하세요",
   "status.limited_mode": "제한 모드",
   "status.loading_session": "세션 로딩 중",
