@@ -14,7 +14,7 @@ import {
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
 import { EffortSelect } from "@/components/effort-select";
-import { formatMessageCost } from "@/components/chat/message-usage";
+import { ContextMeter } from "@/components/chat/context-meter";
 import { ModelSelect } from "@/components/model-select";
 import { LexicalPromptEditor, syncAttachmentChipStatus, type LexicalPromptEditorHandle } from "./editor";
 import { listRunningAppsForMention } from "./app-mentions";
@@ -1580,36 +1580,6 @@ export function ReactSessionComposer(props: ComposerProps) {
         usedPercent={props.contextUsedPercent ?? null}
         sessionCost={props.sessionCostUsd}
       />
-    </div>
-  );
-}
-
-/** Context fill and what the session has cost, as one quiet line. */
-function ContextMeter(props: { usedPercent: number | null; sessionCost?: number }) {
-  const cost = formatMessageCost(props.sessionCost);
-  if (props.usedPercent === null && !cost) return null;
-  // Amber past 75% and red past 90%: past that the next long turn is what triggers a summarisation, and
-  // a reader who is about to paste a large file should be able to see it coming.
-  const tone =
-    props.usedPercent === null
-      ? "text-gray-10"
-      : props.usedPercent >= 90
-        ? "text-destructive-ink"
-        : props.usedPercent >= 75
-          ? "text-warning-ink"
-          : "text-gray-10";
-  return (
-    <div className="flex items-center justify-end gap-2 px-3 pb-1 pt-1 text-[11px] tabular-nums">
-      {props.usedPercent === null ? null : (
-        <span className={tone} title={t("usage.context_hint")}>
-          {t("usage.context_used").replace("{percent}", String(props.usedPercent))}
-        </span>
-      )}
-      {cost ? (
-        <span className="font-mono text-gray-10" title={t("usage.session_cost_hint")}>
-          {cost}
-        </span>
-      ) : null}
     </div>
   );
 }

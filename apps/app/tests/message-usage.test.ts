@@ -122,7 +122,8 @@ describe("wiring", () => {
     expect(read("../src/components/chat/message-list.tsx")).toContain("<MessageCost");
     const composer = read("../src/react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain("<ContextMeter");
-    expect(composer).toContain("usage.context_used");
+    // The meter itself lives in its own module now, so the string it renders is asserted there.
+    expect(read("../src/components/chat/context-meter.tsx")).toContain("usage.context_used");
   });
 
   it("takes the window from the console catalogue, not the engine", () => {
