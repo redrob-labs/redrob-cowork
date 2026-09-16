@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   Pencil,
   RotateCcw,
+  Scissors,
   Split,
   Undo2,
 } from "lucide-react"
@@ -118,6 +119,7 @@ import { collectLatestAssistantToolParts } from "@/lib/latest-assistant-tool-par
 import { getActiveToolLabel } from "@/lib/tool-activity"
 import { faviconUrlForHref } from "@/lib/favicon"
 import { cn } from "@/lib/utils"
+import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 
@@ -1218,10 +1220,51 @@ export function shouldShowMessageListLoading(status: ThreadStatus, messageCount:
   return status === "streaming" || (status === "submitted" && messageCount > 0)
 }
 
+/**
+ * One line where a context summary used to be pasted.
+ *
+ * Collapsed by default and expandable, not hidden: the summary is what the model is now working from, so
+ * a reader who wants to know what it kept has to be able to look. Deleting it would hide a fact about
+ * the conversation; leaving it expanded buries the conversation itself.
+ */
+function CompactionNotice({ messages }: { messages: UIMessage[] }) {
+  const [open, setOpen] = React.useState(false)
+  const summary = getMessagesText(messages).trim()
+  return (
+    <div className="mx-auto w-full max-w-3xl px-2 md:px-8">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start text-xs text-muted-foreground transition-colors hover:bg-foreground/5"
+      >
+        <Scissors size={13} className="shrink-0" />
+        <span className="min-w-0 flex-1 truncate">{t("compaction.collapsed")}</span>
+        {summary ? (
+          <span className="shrink-0 underline decoration-border underline-offset-2">
+            {open ? t("compaction.hide") : t("compaction.show")}
+          </span>
+        ) : null}
+      </button>
+      {open && summary ? (
+        <div className="mt-1 whitespace-pre-wrap rounded-md border border-border bg-muted/30 px-3 py-2 text-xs leading-5 text-muted-foreground">
+          {summary}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export function MessageList({ messages, status, retryStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
+  /*
+    Which rows a context compaction owns. The engine's summary arrives as real messages - a marked user
+    message and the assistant turn after it - and rendering them as ordinary turns pasted a wall of
+    machine-written recap into the conversation. They collapse to one expandable line instead.
+  */
+  const compacted = React.useMemo(() => collapsedCompactionIndexes(messages), [messages]);
   const error = useSessionErrorMessage();
   const hasSessionErrorMessage = React.useMemo(() => messages.some(isSessionErrorMessage), [messages])
   /**
@@ -1243,6 +1286,15 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
 
       {items.map((item) => {
         if (isMessageGroup(item)) {
+          // The whole run is the summary, so the group collapses rather than each message in it.
+          if (item.messages.length > 0 && item.messages.every((entry) => compacted.has(entry.index))) {
+            return (
+              <CompactionNotice
+                key={item.messages[0]?.message.id ?? "compaction-summary"}
+                messages={item.messages.map((entry) => entry.message)}
+              />
+            )
+          }
           return (
             <MessageGroup
               key={item.messages[0]?.message.id ?? "empty-assistant-group"}
@@ -1252,6 +1304,9 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
             />
           )
         }
+
+        // The marker itself carries no text a reader wants; the notice below the summary says it happened.
+        if (compacted.has(item.index)) return null
 
         const isLastMessage = item.index === messages.length - 1
         const isLastStep =
