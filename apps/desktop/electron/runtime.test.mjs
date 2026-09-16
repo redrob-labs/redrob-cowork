@@ -85,12 +85,14 @@ describe("bundled Redrob Code runtime", () => {
     const constantsPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json");
     const constants = JSON.parse(await readFile(constantsPath, "utf8"));
 
-    // The engine's own release tag, `v`-prefixed as GitHub publishes it. redrob.4 is the
-    // first release whose model catalogue actually decodes: the console publishes an explicit
-    // `null` maxOutputTokens for the models it has no reply cap for, and up to redrob.3 that
-    // one null rejected the whole listing, so the engine fell back to six built-in ids while
-    // the console was serving 323. An older pin ships that six-model engine.
-    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.4");
+    // The engine's own release tag, `v`-prefixed as GitHub publishes it. redrob.5 is the first
+    // release that finds the key THIS APP writes. Both of the app's connect paths -- pasting a key
+    // and "Connect Redrob", which is a device authorization that never shows anyone a key -- end at
+    // the engine's `PUT /auth/redrob`, which writes auth.json. Up to redrob.4 the catalogue read only
+    // the environment and the SQL Credential store, so a user who connected through the app had a key
+    // the catalogue could not see: it took the keyless branch and listed six built-in ids while the
+    // console served 323. An older pin ships that six-model engine to every app user.
+    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.5");
     // The upstream OpenCode pin must be gone: a stale reader would resolve an
     // OpenCode version that no longer describes the shipped engine.
     assert.equal(constants.opencodeVersion, undefined);
