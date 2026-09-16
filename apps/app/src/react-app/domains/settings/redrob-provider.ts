@@ -95,9 +95,52 @@ export type ProviderExposureFacts = {
 };
 
 /**
+ * Environment variables that are NOT a credential.
+ *
+ * Counting raw env vars conflated "needs a second secret" with "accepts an optional override": a
+ * provider declaring `<X>_API_KEY` plus `<X>_BASE_URL` needs exactly one secret, yet a naive count
+ * of two hid it. That is what dropped Anthropic, OpenAI and OpenRouter from the connect list while
+ * leaving single-variable providers like Cloudflare visible -- the opposite of useful.
+ *
+ * Matched on the variable's SUFFIX rather than a list of names, so a vendor this app has never heard
+ * of is judged by the same rule.
+ */
+const NON_SECRET_ENV_SUFFIXES = [
+  "BASE_URL",
+  "API_BASE",
+  "API_URL",
+  "ENDPOINT",
+  "HOST",
+  "REGION",
+  "PROJECT",
+  "PROJECT_ID",
+  "ORG",
+  "ORG_ID",
+  "ORGANIZATION",
+  "ACCOUNT_ID",
+  "DEPLOYMENT",
+  "RESOURCE_NAME",
+  "VERSION",
+  "MODEL",
+] as const;
+
+/** The env vars that actually carry a secret the connect modal has to collect. */
+export function secretEnvVars(env: readonly string[] | undefined): string[] {
+  return (env ?? []).flatMap((name) => {
+    const normalized = name.trim().toUpperCase();
+    if (!normalized) return [];
+    const isOverride = NON_SECRET_ENV_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
+    return isOverride ? [] : [normalized];
+  });
+}
+
+/**
  * Whether the app should offer this provider. See the comment above
  * REDROB_ONLY_PROVIDER_IDS for why this is a capability test and not a name
  * list.
+ *
+ * The modal collects ONE secret, so a provider needing two or more is still withheld -- but the
+ * count is of secrets, not of declared variables.
  */
 export function isProviderExposed(facts: ProviderExposureFacts): boolean {
   const id = facts.id.trim();
@@ -105,7 +148,7 @@ export function isProviderExposed(facts: ProviderExposureFacts): boolean {
   if (isRedrobOnlyProviderId(id)) return true;
   if (facts.connected) return true;
   if (facts.hasOAuth) return true;
-  return (facts.env?.length ?? 0) <= 1;
+  return secretEnvVars(facts.env).length <= 1;
 }
 
 /**
@@ -118,19 +161,27 @@ export function isProviderExposed(facts: ProviderExposureFacts): boolean {
  * language fields that the old `redrob-ai` alias accepted, so `auto` is a plain
  * OpenAI-compatible model.
  */
+/**
+ * Build the OpenCode provider config for Redrob. Uses the same ProviderConfig
+ * shape as `buildLocalProviderConfig` so the engine resolves it as a standard
+ * OpenAI-compatible provider. The API key is supplied at runtime through the
+ * `REDROB_API_KEY` environment variable and is never embedded here.
+ *
+ * No per-model request extras are sent: the console API rejects the retired
+ * language fields that the old `redrob-ai` alias accepted, so `auto` is a plain
+ * OpenAI-compatible model.
+ *
+ * And NO `models` map. Declaring one here pinned the picker to the two ids this file happened to
+ * name, so a console serving hundreds still showed a handful -- the app was capping its own
+ * catalogue. With the key present the engine fetches `GET /models` and lists what the console
+ * actually serves; with no key it falls back to its own built-in list. Either way that decision
+ * belongs to the engine, which is the side that knows whether the listing arrived.
+ */
 export function buildRedrobProviderConfig(): ProviderConfig {
   return {
     npm: "@ai-sdk/openai-compatible",
     name: REDROB_PROVIDER_NAME,
     env: [REDROB_API_KEY_ENV],
     options: { baseURL: REDROB_BASE_URL },
-    models: {
-      [REDROB_MODEL_ID]: {
-        name: REDROB_MODEL_NAME,
-      },
-      [REDROB_OPUS_MODEL_ID]: {
-        name: REDROB_OPUS_MODEL_NAME,
-      },
-    },
   };
 }

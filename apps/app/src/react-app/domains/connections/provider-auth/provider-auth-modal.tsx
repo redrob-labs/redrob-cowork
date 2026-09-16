@@ -242,8 +242,26 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
     return oauthInstructions;
   }, [oauthInstructions]);
 
-  const methodLabel = (method: ProviderAuthMethod) =>
-    method.label || (method.type === "oauth" ? t("provider_auth.method_oauth") : t("provider_auth.method_api_key"));
+  /*
+    The engine supplies these labels ("Connect Redrob", "Paste an API key from console.redrob.ai",
+    "Login with GitHub Copilot") and it has no locale, so in Korean they came through in English. The
+    generic shapes are translated here; a vendor-specific label with no translation is shown as the
+    engine wrote it rather than mangled, since it names a real product screen the user will see.
+  */
+  const methodLabel = (method: ProviderAuthMethod) => {
+    const raw = method.label?.trim() ?? "";
+    if (!raw) {
+      return method.type === "oauth" ? t("provider_auth.method_oauth") : t("provider_auth.method_api_key");
+    }
+    const normalized = raw.toLowerCase();
+    if (normalized === "connect redrob") return t("provider_auth.method_connect_redrob");
+    if (normalized.startsWith("paste an api key")) return t("provider_auth.method_paste_api_key");
+    if (normalized === "api key") return t("provider_auth.method_api_key");
+    if (normalized.startsWith("login with ")) {
+      return t("provider_auth.method_login_with", { vendor: raw.slice("login with ".length) });
+    }
+    return raw;
+  };
 
   const actionDisabled = props.loading || props.submitting;
 
@@ -653,10 +671,19 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
         if (!open) handleClose();
       }}
     >
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden sm:max-w-lg">
+      {/*
+        max-w-2xl, not max-w-lg: this lists every connectable provider with its id and its auth
+        methods, and at lg the rows wrapped hard enough that a provider name and its badge fought for
+        the same line. The height cap and internal scroll are unchanged, so nothing new overflows.
+      */}
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("provider_auth.title")}</DialogTitle>
-          <DialogDescription>{t("provider_auth.enter_redrob_key")}</DialogDescription>
+          {/*
+            This modal connects ANY provider, so a Redrob-specific line was wrong at the top of it --
+            it told a user reading about Azure to enter a Redrob key.
+          */}
+          <DialogDescription>{t("provider_auth.connect_any_provider")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4">
@@ -738,20 +765,29 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                               {entry.id}
                             </div>
 
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {entry.methods.map((method) => (
-                                <span
-                                  key={`${entry.id}-${method.type}-${method.methodIndex ?? method.label}`}
-                                  className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
-                                    method.type === "oauth"
-                                      ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
-                                      : "bg-gray-3/40 text-gray-11 border-gray-6/40"
-                                  }`}
-                                >
-                                  {methodLabel(method)}
-                                </span>
-                              ))}
-                            </div>
+                            {/*
+                              Only for a provider that is NOT connected yet. These chips are the ways
+                              IN, so on a connected row they read as an instruction to do something
+                              already done -- which is why a connected Redrob still showed "Connect
+                              Redrob" and "Paste an API key". A connected row shows the badge above
+                              and nothing else; reconnecting is reached by opening the row.
+                            */}
+                            {entry.connected ? null : (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {entry.methods.map((method) => (
+                                  <span
+                                    key={`${entry.id}-${method.type}-${method.methodIndex ?? method.label}`}
+                                    className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
+                                      method.type === "oauth"
+                                        ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
+                                        : "bg-gray-3/40 text-gray-11 border-gray-6/40"
+                                    }`}
+                                  >
+                                    {methodLabel(method)}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </button>
                       </div>

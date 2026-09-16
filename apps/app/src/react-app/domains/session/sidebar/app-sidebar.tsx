@@ -478,16 +478,14 @@ type SessionHoverQuickActionsProps = {
   sessionId: string;
   isPinned: boolean;
   isArchived: boolean;
-  relativeTime: string | null;
 };
 
-/** Pin → Archive → relative time — same trailing slot as status dots (Paper hover). */
+/** Pin → Restore (archived rows only) → Delete. The relative time is a sibling, not a member. */
 function SessionHoverQuickActions({
   className,
   sessionId,
   isPinned,
   isArchived,
-  relativeTime,
 }: SessionHoverQuickActionsProps) {
   const ctx = useSidebarContext();
   const store = useSessionManagementStore;
@@ -496,7 +494,10 @@ function SessionHoverQuickActions({
     <div
       data-session-hover-actions
       className={cn(
-        "absolute right-2 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 opacity-0 pointer-events-none transition-opacity group-hover/menu-sub-item:opacity-100 group-hover/menu-sub-item:pointer-events-auto group-has-data-popup-open/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:pointer-events-auto max-lg:opacity-100 max-lg:pointer-events-auto pointer-coarse:opacity-100 pointer-coarse:pointer-events-auto",
+        // right-14, not right-2: the relative time is anchored at right-2 as its own
+        // element, so these buttons start to its left instead of dividing one strip
+        // with it. Sharing that strip is what clipped the time to ~20px.
+        "absolute right-14 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 opacity-0 pointer-events-none transition-opacity group-hover/menu-sub-item:opacity-100 group-hover/menu-sub-item:pointer-events-auto group-has-data-popup-open/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:pointer-events-auto max-lg:opacity-100 max-lg:pointer-events-auto pointer-coarse:opacity-100 pointer-coarse:pointer-events-auto",
         className,
       )}
     >
@@ -545,15 +546,6 @@ function SessionHoverQuickActions({
         >
           <Trash2 className="size-3.5" />
         </Button>
-      ) : null}
-      {relativeTime ? (
-        // shrink-0 and nowrap because this used to be clipped: the row reserves a
-        // fixed padding for these controls and the parent button hides overflow,
-        // so a flexible box left the time about 20px -- enough for "3h" and not
-        // for anything else.
-        <span className="shrink-0 whitespace-nowrap text-right text-[11px] tabular-nums text-muted-foreground/80">
-          {relativeTime}
-        </span>
       ) : null}
     </div>
   );
@@ -2331,11 +2323,20 @@ function SessionMenuItem({
         isActiveWork={resolvedActiveWork}
         isUnread={isUnread}
       />
+      {relativeTime ? (
+        // Its own right-anchored element, shown only while the row is hovered (the
+        // outcome indicator owns that corner otherwise). It used to be the last child
+        // of the hover-action group, dividing one strip with three buttons, which left
+        // it about 20px -- enough for "3h" and not for "15h". Widening the row's
+        // padding could not fix that; the strip was the problem.
+        <span className="pointer-events-none absolute right-2 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/80 opacity-0 transition-opacity group-hover/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100">
+          {relativeTime}
+        </span>
+      ) : null}
       <SessionHoverQuickActions
         sessionId={session.id}
         isPinned={isPinned}
         isArchived={isArchived}
-        relativeTime={relativeTime}
       />
     </>
   );

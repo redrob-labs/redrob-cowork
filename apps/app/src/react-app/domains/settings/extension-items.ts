@@ -85,8 +85,24 @@ function setupStateFromEnablement(enablement: { active: boolean; results: Enable
   return enablement.results.some((result) => result.met) ? "partial" : "needs_setup";
 }
 
+/**
+ * The Redrob provider is not an extension a user installs or removes -- it is the engine's own
+ * provider, connected from Settings, and it is present in every install. Listing it in the Library
+ * beside skills and MCP servers implied it was optional and left a "Connect Redrob" card sitting in
+ * READY TO USE after it was already connected.
+ *
+ * Excluded by provider id rather than by display name, so renaming the card cannot resurrect it.
+ */
+const LIBRARY_EXCLUDED_BUILTIN_IDS = new Set(["redrob"]);
+
+const isLibraryListedBuiltIn = (entry: { id?: string | null }) =>
+  !LIBRARY_EXCLUDED_BUILTIN_IDS.has((entry.id ?? "").trim().toLowerCase());
+
 export function buildExtensionItems(input: ExtensionItemBuildInput) {
-  const builtInItems = input.quickConnect.filter(isBuiltInRedrobWorkExtension).map((entry): ExtensionItem => {
+  const builtInItems = input.quickConnect
+    .filter(isBuiltInRedrobWorkExtension)
+    .filter(isLibraryListedBuiltIn)
+    .map((entry): ExtensionItem => {
     const enablement = entry.extensionManifest?.enablement
       ? evaluateEnablement(entry.extensionManifest.enablement, input.enablementContext)
       : null;
