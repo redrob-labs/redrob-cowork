@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   MoreHorizontal,
   Pencil,
+  RotateCcw,
   Split,
   Undo2,
 } from "lucide-react"
@@ -938,7 +939,7 @@ function MessageGroup({
   messages,
   isStreaming,
 }: AssistantMessageGroupProps) {
-  const { onRevertToUserMessage, onForkAtMessage, showThinking } = useMessageList()
+  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
   // client-side messages (e.g. session errors) don't exist on the server and
@@ -1159,6 +1160,23 @@ function MessageGroup({
             <CopyMessageButton messages={renderableItems.map((item) => item.message)} />
             {lastRealItem ? (
               <>
+                <MessageAction tooltip={t("message.retry")}>
+                  {/*
+                    Retry is edit-and-resend with the text unchanged, because that is the only shape
+                    this engine has: `revert` with no partID snaps the boundary back to the preceding
+                    user message, and the next prompt hard-deletes from there forward. So there is no
+                    way to re-run an assistant turn while keeping the user message as a separate row -
+                    the user message is re-sent, and the old answer is replaced rather than appended.
+                  */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("message.retry")}
+                    onClick={() => onRetryMessage(lastRealItem.message.id)}
+                  >
+                    <RotateCcw />
+                  </Button>
+                </MessageAction>
                 <MessageAction tooltip="Branch in new chat">
                   <Button
                     variant="ghost"

@@ -16,6 +16,8 @@ interface MessageListContextValue {
   onRevertToUserMessage: (messageId: string) => void
   onForkAtMessage: (messageId: string) => void
   onEditUserMessage: (messageId: string, text: string) => void
+  /** Re-run a turn: rewind to its user message and send that same text again. */
+  onRetryMessage: (messageId: string) => void
 }
 
 const MessageListContext = React.createContext<MessageListContextValue | null>(null)
@@ -30,6 +32,8 @@ interface MessageListProviderProps {
   onRevertToUserMessage: (messageId: string) => void
   onForkAtMessage: (messageId: string) => void
   onEditUserMessage: (messageId: string, text: string) => void
+  /** Re-run a turn: rewind to its user message and send that same text again. */
+  onRetryMessage: (messageId: string) => void
   displaySuggestions: boolean
   providerConnectedCount: number
   dispatchAction: (action: DispatchAction) => void
@@ -56,6 +60,7 @@ export function MessageListProvider({
   onRevertToUserMessage,
   onForkAtMessage,
   onEditUserMessage,
+  onRetryMessage,
 }: MessageListProviderProps) {
   const value = React.useMemo(
     () => ({
@@ -71,6 +76,7 @@ export function MessageListProvider({
       onRevertToUserMessage,
       onForkAtMessage,
       onEditUserMessage,
+      onRetryMessage,
     }),
     [
       workspaceId,
@@ -85,6 +91,7 @@ export function MessageListProvider({
       onRevertToUserMessage,
       onForkAtMessage,
       onEditUserMessage,
+      onRetryMessage,
     ],
   )
 

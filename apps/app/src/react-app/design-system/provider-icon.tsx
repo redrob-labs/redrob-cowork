@@ -1,7 +1,8 @@
 /** @jsxImportSource react */
 import { useEffect, useState } from "react";
 
-import { providerLogoCandidates } from "./provider-logo-src";
+import { needsDarkModeLift, providerLogoCandidates } from "./provider-logo-src";
+import { cn } from "@/lib/utils";
 
 export type ProviderIconProps = {
   providerId?: string | null;
@@ -53,6 +54,15 @@ export function ProviderIcon(props: ProviderIconProps) {
   }, [normalizedId, props.baseUrl]);
 
   const logoUrl = candidates[candidateIndex];
+  /*
+    Whether the mark now on screen is one of the black-brand ones. Read from the id rather than from
+    `logoUrl`, and false once the CDN candidate has been exhausted: the next candidate is a full-colour
+    favicon, which must not be inverted.
+  */
+  const liftOnDark =
+    needsDarkModeLift(props.providerId) &&
+    typeof logoUrl === "string" &&
+    logoUrl.startsWith("https://cdn.simpleicons.org/");
 
   const fallbackLetters = (() => {
     if (normalizedId === "openrouter") return "OR";
@@ -145,7 +155,15 @@ export function ProviderIcon(props: ProviderIconProps) {
           loading="lazy"
           width={size}
           height={size}
-          className="object-contain"
+          /*
+            `dark:invert` only for the marks whose brand colour is black. An `<img>` is outside
+            `currentColor`, so the inline marks' trick is unavailable here and the CDN serves each mark
+            in its own brand colour - correct for the coloured vendors, invisible for GitHub and X on a
+            dark background. Inverting #181717 gives #E8E8E8 and #000000 gives #FFFFFF, which is what
+            both vendors' own dark-mode guidance uses. It is applied per mark rather than to every logo
+            because inverting a coloured mark would turn it into its complement.
+          */
+          className={cn('object-contain', liftOnDark && 'dark:invert')}
           style={{ width: `${size}px`, height: `${size}px` }}
           onError={() => setCandidateIndex((index) => index + 1)}
         />

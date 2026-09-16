@@ -211,6 +211,51 @@ function vendorOf(id: string): string {
 }
 
 /**
+ * Marks whose BRAND colour is at or near black, so they vanish on a dark background.
+ *
+ * Simple Icons' CDN serves each mark in its own brand colour, which is right for the 17 coloured
+ * vendors and wrong for these six: GitHub is #181717, X is #000000, and an `<img>` cannot be recoloured
+ * by `currentColor` the way the inline marks are. On the provider connect page in dark mode they were
+ * black on near-black and simply not there.
+ *
+ * The set was computed rather than guessed: every slug this file can actually put on the CDN path was
+ * checked against Simple Icons' own colour data and scored by relative luminance. These six are the
+ * ones below 60; the next darkest, Meta at #0467DF, is 90.6 and reads fine. `anthropic` is on the list
+ * even though `ProviderIcon` currently intercepts it with an inline `currentColor` mark, so removing
+ * that inline mark cannot silently reintroduce the bug.
+ *
+ * Keyed by SLUG, not by provider id, because several ids share one slug.
+ */
+export const DARK_BRAND_MARKS = new Set([
+  'anthropic',
+  'github',
+  'moonshotai',
+  'ollama',
+  'vercel',
+  'x',
+]);
+
+/** The Simple Icons slug this provider id resolves to, or null when it never reaches that CDN. */
+export function simpleIconSlug(providerId?: string | null): string | null {
+  const id = vendorOf(providerId?.trim().toLowerCase() ?? '');
+  if (!id) return null;
+  const slug = SIMPLE_ICON_SLUGS[id] ?? id;
+  if (SIMPLE_ICON_MISSES.has(slug) || !/^[a-z0-9]+$/.test(slug)) return null;
+  return slug;
+}
+
+/**
+ * Whether this provider's mark needs lightening on a dark background.
+ *
+ * Only the Simple Icons path can be affected. A favicon is a full-colour bitmap that carries its own
+ * background, and the monogram fallback is themed already, so neither is touched.
+ */
+export function needsDarkModeLift(providerId?: string | null): boolean {
+  const slug = simpleIconSlug(providerId);
+  return slug !== null && DARK_BRAND_MARKS.has(slug);
+}
+
+/**
  * Ordered logo URLs for a provider. An id that already looks like a domain
  * ("302.ai") or a configured base URL both resolve through the favicon step,
  * which is what gives long-tail and custom providers a real mark.
@@ -223,8 +268,8 @@ export function providerLogoCandidates(input: {
   const candidates: string[] = [];
 
   if (id) {
-    const slug = SIMPLE_ICON_SLUGS[id] ?? id;
-    if (!SIMPLE_ICON_MISSES.has(slug) && /^[a-z0-9]+$/.test(slug)) {
+    const slug = simpleIconSlug(id);
+    if (slug) {
       candidates.push(`https://cdn.simpleicons.org/${slug}`);
     }
 
