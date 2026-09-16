@@ -69,6 +69,8 @@ type ComposerProps = {
   modelVariantLabel: string;
   /** 0-100 fill of the model context, or undefined when it cannot be known yet. */
   contextUsedPercent?: number | null;
+  onCompactSession?: () => void;
+  compactingSession?: boolean;
   modelVariant: string | null;
   modelBehaviorOptions?: { value: string | null; label: string }[];
   onModelVariantChange: (value: string | null) => void;
@@ -1573,7 +1575,11 @@ export function ReactSessionComposer(props: ComposerProps) {
           each request carries the whole conversation, so that turn's own input already includes every
           earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
         */}
-        <ContextMeter usedPercent={props.contextUsedPercent ?? null} />
+        <ContextMeter
+          compacting={props.compactingSession}
+          onCompact={props.onCompactSession}
+          usedPercent={props.contextUsedPercent ?? null}
+        />
 
       </div>
     </div>

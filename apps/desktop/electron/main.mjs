@@ -2126,6 +2126,32 @@ const desktopCommandHandlers = {
   "__setApplicationMenuVisible": async (event, ...args) => {
       return applicationMenu.setVisible(args[0]);
   },
+  /*
+    Hide the window's own title bar.
+    
+    The setting existed in Appearance and did nothing at all: the toggle wrote localStorage and no code
+    ever read it, so there was no path from the switch to the window.
+    
+    Electron cannot change a window's frame after construction - `frame` and `titleBarStyle` are
+    construction options - so this PERSISTS the choice where the main process reads it at startup and
+    reports that a restart is needed. Pretending to apply it live, or hiding the MENU bar instead and
+    calling that a title bar, would both be worse than saying which it is.
+    
+    macOS is already `hiddenInset` from `createMainWindow`, so there the switch has nothing to do and
+    says so rather than claiming success.
+  */
+  "__setTitleBarHidden": async (_event, ...args) => {
+      const hidden = args[0] === true;
+      if (process.platform === "darwin") {
+        return { applied: false, reason: "macos-always-hidden" };
+      }
+      try {
+        await writeTitleBarPreference(hidden);
+        return { applied: true, hidden, needsRestart: true };
+      } catch (error) {
+        return { applied: false, reason: String(error) };
+      }
+  },
 };
 
 if (isDevMode) {
@@ -2213,6 +2239,36 @@ async function handleDesktopInvoke(event, command, ...args) {
 }
 
 
+/**
+ * The hide-title-bar preference, in a file the MAIN process can read before any window exists.
+ *
+ * It has to live here rather than in localStorage: `frame` and `titleBarStyle` are BrowserWindow
+ * construction options, so the value is needed before the renderer that owns localStorage is running.
+ * That is why the setting did nothing - the switch wrote a key in the renderer and the process that
+ * creates the window had no way to see it.
+ *
+ * Read defensively. A missing file, bad JSON, or an unreadable directory all mean "not hidden", which is
+ * the shape the app shipped with; failing to start over a cosmetic preference would be the worse bug.
+ */
+function titleBarPreferencePath() {
+  return path.join(app.getPath("userData"), "window-appearance.json");
+}
+
+async function readTitleBarPreference() {
+  try {
+    const raw = await readFile(titleBarPreferencePath(), "utf8");
+    return JSON.parse(raw)?.hideTitleBar === true;
+  } catch {
+    return false;
+  }
+}
+
+async function writeTitleBarPreference(hidden) {
+  const file = titleBarPreferencePath();
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, `${JSON.stringify({ hideTitleBar: hidden === true }, null, 2)}\n`, "utf8");
+}
+
 async function createMainWindow() {
   if (mainWindow) return mainWindow;
 
@@ -2225,6 +2281,30 @@ async function createMainWindow() {
       vibrancy: macosVibrancyForCurrentTheme(),
       visualEffectState: "active",
     });
+  } else if (await readTitleBarPreference()) {
+    /*
+      Windows and Linux differ here, and getting it wrong is visible.
+
+      `titleBarOverlay` is WINDOWS-ONLY. Setting `titleBarStyle: "hidden"` on Linux drops the frame but
+      ignores the overlay, so no strip is reserved and the bare minimise/maximise/close controls land on
+      top of the app's own right-hand rail - verified on xfwm4, where the close button sat exactly over the
+      browser-panel icon. So Windows gets the overlay, which reserves that strip and keeps the controls
+      reachable, and Linux gets `frame: false`.
+
+      Losing the controls entirely is acceptable on Linux and only there: this setting exists for tiling
+      window managers - its own description says so - and a tiling WM owns close, move and resize itself.
+      On Windows, where the user's only handle on the window is those three buttons, removing them would be
+      a trap rather than a preference, which is why that branch keeps them.
+    */
+    Object.assign(
+      windowAppearanceOptions,
+      process.platform === "win32"
+        ? {
+            titleBarStyle: "hidden",
+            titleBarOverlay: { color: "#00000000", symbolColor: "#9ca3af", height: 40 },
+          }
+        : { frame: false },
+    );
   }
 
   const bootSidecar = await readBrandIconSidecar();

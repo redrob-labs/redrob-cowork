@@ -75,7 +75,7 @@ function CredentialField(props: CredentialFieldProps) {
           onClick={() => props.onCopy(props.field.value, props.fieldKey)}
           disabled={!props.field.value}
           className={pillSecondaryClass}
-          title="Copy"
+          title={t("common.copy")}
         >
           {props.copiedKey === props.fieldKey ? (
             <Check size={14} className="text-success-ink" />

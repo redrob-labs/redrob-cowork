@@ -460,6 +460,16 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const [autoCompactContext, setAutoCompactContext] = useState(true);
   const [autoCompactContextBusy, setAutoCompactContextBusy] = useState(false);
   const [autoCompactContextLoaded, setAutoCompactContextLoaded] = useState(false);
+  /*
+    How full the context may get before it is summarised, as a percentage of the model's window.
+
+    A percentage rather than the engine's older `reserved` token count, because a token budget does not
+    scale: 20,000 tokens is most of a small window and 2% of a 1,000,000-token one, which left the trigger
+    at 98% - late enough that the turn crossing it is also the turn that fails. 70 is the engine's default
+    and is what an unset config means, so the two halves agree instead of disagreeing the way `auto` did.
+  */
+  const [compactThreshold, setCompactThreshold] = useState(70);
+  const [compactThresholdBusy, setCompactThresholdBusy] = useState(false);
   const [localProviderBusy, setLocalProviderBusy] = useState(false);
   const [localProviderStatus, setLocalProviderStatus] = useState<string | null>(null);
   const [localProviderError, setLocalProviderError] = useState<string | null>(null);
@@ -1468,6 +1478,18 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         const config = await redrobClient.getConfig(workspaceId);
         if (cancelled) return;
         const compaction = config.opencode?.compaction;
+        /*
+          Read the stored threshold alongside `auto`. An absent value is not zero and must not display as
+          zero - it means the engine's own default, which is 70, so the slider shows what will actually
+          happen rather than an empty box the user has to guess at.
+        */
+        const storedThreshold =
+          compaction && typeof compaction === "object" && "threshold" in compaction
+            ? (compaction as { threshold?: number }).threshold
+            : undefined;
+        if (typeof storedThreshold === "number" && Number.isFinite(storedThreshold)) {
+          setCompactThreshold(Math.min(100, Math.max(1, Math.round(storedThreshold))));
+        }
         const auto = compaction && typeof compaction === "object" && "auto" in compaction
           ? (compaction as { auto?: boolean }).auto
           : undefined;
@@ -1515,6 +1537,41 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       setAutoCompactContextBusy(false);
     }
   }, [autoCompactContext, autoCompactContextBusy, redrobClient, reloadCoordinator, selectedWorkspaceId]);
+
+  /*
+    Persist the threshold. Same shape as the toggle above, including the optimistic set and the revert on
+    failure: the slider must not sit at a value the engine never received.
+
+    Clamped here as well as in the engine. The engine clamps because a config file can be hand-edited; this
+    clamps because a controlled slider should never send a value it would not display back.
+  */
+  const changeCompactThreshold = useCallback(
+    async (percent: number) => {
+      if (compactThresholdBusy) return;
+      const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() || selectedWorkspaceId;
+      if (!redrobClient || !workspaceId) return;
+      const next = Math.min(100, Math.max(1, Math.round(percent)));
+      const previous = compactThreshold;
+      if (next === previous) return;
+      setCompactThreshold(next);
+      setCompactThresholdBusy(true);
+      try {
+        await redrobClient.patchConfig(workspaceId, {
+          opencode: { compaction: { threshold: next } },
+        });
+        reloadCoordinator.markReloadRequired("config", {
+          type: "config",
+          name: "redrob.jsonc",
+          action: "updated",
+        });
+      } catch {
+        setCompactThreshold(previous);
+      } finally {
+        setCompactThresholdBusy(false);
+      }
+    },
+    [compactThreshold, compactThresholdBusy, redrobClient, reloadCoordinator, selectedWorkspaceId],
+  );
 
   useEffect(() => {
     redrobServerStore.start();
@@ -1936,6 +1993,9 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             }}
             autoCompactContext={autoCompactContext}
             autoCompactContextBusy={autoCompactContextBusy}
+            compactThreshold={compactThreshold}
+            compactThresholdBusy={compactThresholdBusy}
+            onCompactThresholdChange={(percent) => void changeCompactThreshold(percent)}
             onToggleAutoCompactContext={toggleAutoCompactContext}
             analyticsEnabled={local.prefs.analyticsEnabled}
             onToggleAnalytics={() => {
@@ -2078,7 +2138,37 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             language={currentLocale() as Language}
             setLanguage={setLocale}
             hideTitlebar={hideTitlebar}
-            toggleHideTitlebar={() => setHideTitlebar((current) => !current)}
+            toggleHideTitlebar={() => {
+              /*
+                The switch reaches the window now.
+
+                It used to write localStorage and nothing read it - no code anywhere consumed
+                `redrob.hideTitlebar`, so the setting was a switch wired to nothing. `frame` and
+                `titleBarStyle` are BrowserWindow CONSTRUCTION options, so the main process persists the
+                choice and applies it at startup; a restart is what makes it visible, and the toast says
+                so rather than leaving the user to wonder whether the toggle worked.
+
+                macOS reports `macos-always-hidden`: its title bar is already `hiddenInset`, so there is
+                nothing to change and claiming otherwise would be the same lie in a new place.
+              */
+              const next = !hideTitlebar;
+              setHideTitlebar(next);
+              void Promise.resolve(
+                globalThis.window?.__REDROB_ELECTRON__?.invokeDesktop?.("__setTitleBarHidden", next),
+              )
+                .then((result) => {
+                  const outcome = result as { applied?: boolean; reason?: string } | undefined;
+                  if (outcome?.applied) {
+                    toast.info(t("settings.hide_titlebar_restart"));
+                  } else if (outcome?.reason === "macos-always-hidden") {
+                    toast.info(t("settings.hide_titlebar_macos"));
+                  }
+                })
+                .catch(() => {
+                  // A desktop bridge that is not there is the browser build, where there is no title bar
+                  // to hide. The stored preference is harmless and the next desktop launch reads it.
+                });
+            }}
           />
         );
       case "updates":
