@@ -494,10 +494,10 @@ function SessionHoverQuickActions({
     <div
       data-session-hover-actions
       className={cn(
-        // right-14, not right-2: the relative time is anchored at right-2 as its own
-        // element, so these buttons start to its left instead of dividing one strip
-        // with it. Sharing that strip is what clipped the time to ~20px.
-        "absolute right-14 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 opacity-0 pointer-events-none transition-opacity group-hover/menu-sub-item:opacity-100 group-hover/menu-sub-item:pointer-events-auto group-has-data-popup-open/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:pointer-events-auto max-lg:opacity-100 max-lg:pointer-events-auto pointer-coarse:opacity-100 pointer-coarse:pointer-events-auto",
+        // right-2, the same slot the relative time uses, because the two SWAP rather than share.
+        // Showing both at once cost the title ~80px of a 235px sidebar and clipped it mid-word, which
+        // is what a user reported after the first attempt anchored them side by side.
+        "absolute right-2 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 opacity-0 pointer-events-none transition-opacity group-hover/menu-sub-item:opacity-100 group-hover/menu-sub-item:pointer-events-auto group-has-data-popup-open/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:pointer-events-auto max-lg:opacity-100 max-lg:pointer-events-auto pointer-coarse:opacity-100 pointer-coarse:pointer-events-auto",
         className,
       )}
     >
@@ -2329,7 +2329,7 @@ function SessionMenuItem({
         // of the hover-action group, dividing one strip with three buttons, which left
         // it about 20px -- enough for "3h" and not for "15h". Widening the row's
         // padding could not fix that; the strip was the problem.
-        <span className="pointer-events-none absolute right-2 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/80 opacity-0 transition-opacity group-hover/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100">
+        <span className="pointer-events-none absolute right-2 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/80 opacity-100 transition-opacity group-hover/menu-sub-item:opacity-0 group-has-data-popup-open/menu-sub-item:opacity-0 max-lg:opacity-0 pointer-coarse:opacity-0">
           {relativeTime}
         </span>
       ) : null}
@@ -2376,6 +2376,13 @@ function SessionMenuItem({
               >
                 {leading}
                 <SessionTitle intent={titleIntent} title={displayTitle} tooltip={itemTitle} />
+                {/*
+                  Space for whatever is occupying the right slot, so the title truncates BEFORE it
+                  rather than running under it. The time and the hover actions swap, so this reserves
+                  the wider of the two: two icon buttons. A shared row cost the title ~80px of a 235px
+                  sidebar and clipped it mid-word.
+                */}
+                <span aria-hidden className="w-11 shrink-0" />
                 <SessionNumberShortcutSlot digit={shortcutDigit} />
                 <span className="flex size-6 shrink-0 items-center justify-center">
                   <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-data-open/session-collapsible:rotate-90 hover:text-foreground" />
