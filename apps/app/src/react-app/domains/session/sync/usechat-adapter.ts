@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+import { messageUsageMetadata } from "@/components/chat/message-usage";
 import type { UIMessage } from "ai";
 import type { FilePart, Part, ToolPart } from "@opencode-ai/sdk/v2/client";
 
@@ -125,11 +126,23 @@ export function snapshotToUIMessages(snapshot: RedrobSessionSnapshot): UIMessage
     const created = message.info.time?.created;
     const time = message.info.time;
     const completed = time && "completed" in time ? time.completed : undefined;
+    // Same usage the live path reads. Without it a reload silently loses the per-message cost and the
+    // context gauge that were on screen a moment earlier.
+    const usage = messageUsageMetadata(message.info as { cost?: unknown; tokens?: unknown });
     const uiMessage = {
       id: message.info.id,
       role: message.info.role,
-      ...(typeof created === "number"
-        ? { metadata: { opencode: { created, ...(typeof completed === "number" ? { completed } : {}) } } }
+      ...(typeof created === "number" || usage
+        ? {
+            metadata: {
+              opencode: {
+                ...(typeof created === "number"
+                  ? { created, ...(typeof completed === "number" ? { completed } : {}) }
+                  : {}),
+                ...(usage ?? {}),
+              },
+            },
+          }
         : {}),
       parts: message.parts.flatMap<UIMessage["parts"][number]>((part) => {
         if (part.type === "text") {

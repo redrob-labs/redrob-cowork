@@ -79,6 +79,8 @@ import {
 } from "./composer-state-store";
 import { MessageList } from "@/components/chat/message-list";
 import { getMessagesText } from "@/components/chat/utils";
+import { contextUsagePercent, latestUsage, totalSessionCost } from "@/components/chat/message-usage";
+import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { MessageListProvider, type DispatchAction } from "@/components/chat/message-list-provider";
 import { OpenTargetProvider, type OpenTargetOptions } from "@/lib/target-provider";
 import type { ThreadStatus } from "@/lib/messages";
@@ -1692,6 +1694,27 @@ export function SessionSurface(props: SessionSurfaceProps) {
    * there is no user message before it there is nothing to re-send and the click is a no-op rather than
    * a revert that would delete the turn and put nothing back.
    */
+  /*
+    Context fill and session cost for the line under the composer.
+
+    The window comes from the console's published catalogue rather than the engine: the engine reports one
+    flat context for every Redrob model, and the console is the thing that actually knows - it publishes
+    `maxContextTokens` per model. The usage comes from the last turn that reported any, because each
+    request carries the whole conversation and summing turns would multiply the transcript by their count.
+  */
+  const { data: pricingForUsage } = useRedrobPricingQuery({ enabled: true });
+  const contextLimitTokens =
+    pricingForUsage?.byModelId[sessionModel.selectedModel.modelID]?.capabilities.maxContextTokens;
+  const contextUsedPercent = useMemo(
+    () =>
+      contextUsagePercent({
+        usage: latestUsage(renderedMessages),
+        contextLimitTokens,
+      }),
+    [renderedMessages, contextLimitTokens],
+  );
+  const sessionCostUsd = useMemo(() => totalSessionCost(renderedMessages), [renderedMessages]);
+
   const handleRetryMessage = useCallback((messageId: string) => {
     const index = renderedMessages.findIndex((message) => message.id === messageId);
     if (index < 0) return;
@@ -1979,6 +2002,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
         attachmentsEnabled={props.attachmentsEnabled}
         attachmentsDisabledReason={props.attachmentsDisabledReason}
         modelVariantLabel={sessionModel.modelVariantLabel}
+        contextUsedPercent={contextUsedPercent}
+        sessionCostUsd={sessionCostUsd}
         modelVariant={sessionModel.modelVariant}
         modelBehaviorOptions={sessionModel.modelBehaviorOptions}
         onModelVariantChange={handleModelVariantChange}

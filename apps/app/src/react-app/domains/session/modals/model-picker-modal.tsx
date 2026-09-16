@@ -217,12 +217,18 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
 
         This lists several hundred models against each other, which is a comparison, and a comparison
         needs columns. At `max-w-lg` there was room for a name and nothing else, so every fact went onto
-        its own line and one row grew to 8 lines - 323 of those is not a list anyone reads. The viewport
-        cap follows the one existing precedent for a genuinely large surface in this app, the image
-        lightbox: `min(94vw, ...)` so it never exceeds the window, and `p-0` because a table supplies its
-        own edges. Below `lg` the primitive turns this into a full-width bottom sheet regardless.
+        its own line and one row grew to 8 lines - 323 of those is not a list anyone reads.
+
+        The `lg:` copy is the one that does the work, and leaving it out is why the first attempt at this
+        stayed narrow: `DialogContent` caps itself at `lg:max-w-md`, and a `sm:` override does not beat a
+        `lg:` rule at large widths - both apply and the later breakpoint wins. Tailwind-merge cannot
+        collapse them either, because they are different variants. So all three are written.
+
+        `p-0` because a table supplies its own edges, and the viewport cap follows the one existing
+        precedent for a genuinely large surface in this app, the image lightbox. Below `lg` the primitive
+        turns this into a full-width bottom sheet regardless.
       */}
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,80rem)] flex-col overflow-hidden p-0 sm:max-w-[min(94vw,80rem)]">
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,80rem)] flex-col overflow-hidden p-0 sm:max-w-[min(94vw,80rem)] lg:w-[min(94vw,80rem)] lg:max-w-[min(94vw,80rem)]">
         <DialogHeader className="shrink-0 border-b border-border px-5 py-4">
           <DialogTitle>{t("models.title")}</DialogTitle>
           <DialogDescription>{resolveModelPickerSubtitle(props.subtitle)}</DialogDescription>
@@ -320,7 +326,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                   ) : null}
                 </div>
               ) : (
-                <table className="w-full caption-bottom border-separate border-spacing-0 text-sm">
+                <table className="w-full min-w-full table-fixed caption-bottom border-separate border-spacing-0 text-sm">
                   <thead className="sticky top-0 z-10 bg-popover">
                     <tr>
                       <SortHeader
@@ -328,19 +334,22 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                         sortKey="model"
                         sort={sort}
                         onSort={setSort}
-                        className="min-w-[16rem]"
+                        // The one elastic column: ids run long, and the others are short and fixed.
+                        className="w-auto"
                       />
                       <SortHeader
                         label={t("model_table.col_vendor")}
                         sortKey="vendor"
                         sort={sort}
                         onSort={setSort}
+                        className="w-[10rem]"
                       />
                       <SortHeader
                         label={t("model_table.col_price")}
                         sortKey="price"
                         sort={sort}
                         onSort={setSort}
+                        className="w-[7rem]"
                       />
                       <SortHeader
                         label={t("model_table.col_context")}
@@ -348,8 +357,9 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                         sort={sort}
                         onSort={setSort}
                         numeric
+                        className="w-[7rem]"
                       />
-                      <th className="border-b border-border px-3 py-2 text-start text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                      <th className="w-[9rem] border-b border-border px-3 py-2 text-start text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                         {t("model_table.col_capabilities")}
                       </th>
                       <SortHeader
@@ -358,6 +368,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                         sort={sort}
                         onSort={setSort}
                         numeric
+                        className="w-[8rem]"
                       />
                     </tr>
                   </thead>
@@ -527,7 +538,7 @@ function ModelTableRow({
         pinned && "bg-foreground/[0.03]",
       )}
     >
-      <td className="max-w-[22rem] px-3 py-1.5">
+      <td className="px-3 py-1.5">
         <span className="flex min-w-0 items-center gap-2">
           {selected ? (
             <Check size={13} className="shrink-0 text-[var(--dls-accent)]" />

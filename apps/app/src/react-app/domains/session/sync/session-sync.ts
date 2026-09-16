@@ -1,3 +1,4 @@
+import { messageUsageMetadata, type MessageUsageTokens } from "@/components/chat/message-usage";
 import type { UIMessage } from "ai";
 import type { FilePart, Part, PermissionRequest, PermissionV2Request, QuestionRequest, Session, SessionStatus, Todo } from "@opencode-ai/sdk/v2/client";
 
@@ -888,8 +889,22 @@ function applyEvent(entry: SyncEntry, workspaceId: string, event: OpencodeEvent)
   }
 
   if (event.type === "message.updated") {
+    /*
+      `cost` and `tokens` are read here now.
+
+      The engine computes both per assistant message and the SDK type carries them, and this inline type
+      did not even NAME them - so they were structurally unreachable and the app had nothing to render a
+      per-message cost or a context gauge from. Nothing else was missing.
+    */
     const props = (event.properties ?? {}) as {
-      info?: { id?: string; role?: UIMessage["role"] | string; sessionID?: string; time?: { created?: number; completed?: number } };
+      info?: {
+        id?: string;
+        role?: UIMessage["role"] | string;
+        sessionID?: string;
+        time?: { created?: number; completed?: number };
+        cost?: number;
+        tokens?: MessageUsageTokens;
+      };
     };
     const info = props.info;
     if (!info?.id || !info.sessionID || (info.role !== "user" && info.role !== "assistant" && info.role !== "system")) {
@@ -899,11 +914,21 @@ function applyEvent(entry: SyncEntry, workspaceId: string, event: OpencodeEvent)
     if (!isTrackedSession(entry, info.sessionID)) return;
     const created = info.time?.created;
     const completed = info.time?.completed;
+    const usage = messageUsageMetadata(info);
     const next = {
       id: info.id,
       role: info.role,
-      ...(typeof created === "number"
-        ? { metadata: { opencode: { created, ...(typeof completed === "number" ? { completed } : {}) } } }
+      ...(typeof created === "number" || usage
+        ? {
+            metadata: {
+              opencode: {
+                ...(typeof created === "number"
+                  ? { created, ...(typeof completed === "number" ? { completed } : {}) }
+                  : {}),
+                ...(usage ?? {}),
+              },
+            },
+          }
         : {}),
       parts: [],
     } satisfies UIMessage;

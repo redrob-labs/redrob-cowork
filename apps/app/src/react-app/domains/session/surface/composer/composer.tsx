@@ -14,6 +14,7 @@ import {
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
 import { EffortSelect } from "@/components/effort-select";
+import { formatMessageCost } from "@/components/chat/message-usage";
 import { ModelSelect } from "@/components/model-select";
 import { LexicalPromptEditor, syncAttachmentChipStatus, type LexicalPromptEditorHandle } from "./editor";
 import { listRunningAppsForMention } from "./app-mentions";
@@ -66,6 +67,10 @@ type ComposerProps = {
   attachmentsUploading?: boolean;
   attachmentsDisabledReason: string | null;
   modelVariantLabel: string;
+  /** 0-100 fill of the model context, or undefined when it cannot be known yet. */
+  contextUsedPercent?: number | null;
+  /** What this session has cost so far, in USD. */
+  sessionCostUsd?: number;
   modelVariant: string | null;
   modelBehaviorOptions?: { value: string | null; label: string }[];
   onModelVariantChange: (value: string | null) => void;
@@ -1563,6 +1568,48 @@ export function ReactSessionComposer(props: ComposerProps) {
         </div>
 
       </div>
+      {/*
+        How full the model's context is, under the composer.
+
+        Read from the LAST turn that reported usage, not summed across the session: each request carries
+        the whole conversation, so that turn's own input count already includes every earlier one, and
+        adding turns together would multiply the transcript by the number of turns in it. Shows nothing
+        when either half is unknown rather than a made-up percentage.
+      */}
+      <ContextMeter
+        usedPercent={props.contextUsedPercent ?? null}
+        sessionCost={props.sessionCostUsd}
+      />
+    </div>
+  );
+}
+
+/** Context fill and what the session has cost, as one quiet line. */
+function ContextMeter(props: { usedPercent: number | null; sessionCost?: number }) {
+  const cost = formatMessageCost(props.sessionCost);
+  if (props.usedPercent === null && !cost) return null;
+  // Amber past 75% and red past 90%: past that the next long turn is what triggers a summarisation, and
+  // a reader who is about to paste a large file should be able to see it coming.
+  const tone =
+    props.usedPercent === null
+      ? "text-gray-10"
+      : props.usedPercent >= 90
+        ? "text-destructive-ink"
+        : props.usedPercent >= 75
+          ? "text-warning-ink"
+          : "text-gray-10";
+  return (
+    <div className="flex items-center justify-end gap-2 px-3 pb-1 pt-1 text-[11px] tabular-nums">
+      {props.usedPercent === null ? null : (
+        <span className={tone} title={t("usage.context_hint")}>
+          {t("usage.context_used").replace("{percent}", String(props.usedPercent))}
+        </span>
+      )}
+      {cost ? (
+        <span className="font-mono text-gray-10" title={t("usage.session_cost_hint")}>
+          {cost}
+        </span>
+      ) : null}
     </div>
   );
 }

@@ -120,6 +120,7 @@ import { getActiveToolLabel } from "@/lib/tool-activity"
 import { faviconUrlForHref } from "@/lib/favicon"
 import { cn } from "@/lib/utils"
 import { collapsedCompactionIndexes } from "./compaction-collapse"
+import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 
@@ -1203,6 +1204,15 @@ function MessageGroup({
             ) : null}
           </MessageActions>
           <MessageTimestamp message={lastItem.message} />
+          {/*
+            What this turn cost, beside its timestamp.
+
+            The engine has computed it per assistant message all along and the app was dropping it before
+            anything could read it. Rendered from the LAST message of the group, which is the one that
+            carries the finished turn's usage; a turn that reports none shows nothing rather than $0.00,
+            because a zero here would read as free.
+          */}
+          <MessageCost messages={renderableItems.map((item) => item.message)} />
           {/* <MessageSources messages={items.map((item) => item.message)} /> */}
         </div>
       )}
@@ -1252,6 +1262,24 @@ function CompactionNotice({ messages }: { messages: UIMessage[] }) {
         </div>
       ) : null}
     </div>
+  )
+}
+
+/** The turn's cost, or nothing when the engine reported none. */
+function MessageCost({ messages }: { messages: UIMessage[] }) {
+  const cost = React.useMemo(() => {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const usage = readMessageUsage(messages[index] ?? {})
+      if (usage?.cost !== undefined) return usage.cost
+    }
+    return undefined
+  }, [messages])
+  const text = formatMessageCost(cost)
+  if (!text) return null
+  return (
+    <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground" title={t("usage.turn_cost")}>
+      {text}
+    </span>
   )
 }
 
