@@ -91,9 +91,39 @@ export function resolveModelPickerEmptyState(input: {
   return { messageKey: "models.no_models_available", showConnectProvider: true };
 }
 
+/**
+ * Whether a provider's models are showing.
+ *
+ * The accordion exists to keep a long list of providers scannable, and it earns that only when there
+ * is more than one provider to scan. With a single provider it is a lid over the entire contents of
+ * the dialog: the user opens "Models", sees one collapsed row, and has to click it to reach the only
+ * thing the dialog is for. So a lone group is always open and its header is not a control.
+ *
+ * A search is the same argument: the user has already said what they are looking for, and matches
+ * hidden behind a closed group are matches they cannot see.
+ */
+export function isProviderGroupExpanded(input: {
+  groupId: string;
+  expandedIds: ReadonlySet<string>;
+  groupCount: number;
+  query: string;
+}): boolean {
+  if (input.groupCount <= 1) return true;
+  if (input.query.trim()) return true;
+  return input.expandedIds.has(input.groupId);
+}
+
 export function ModelPickerModal(props: ModelPickerModalProps) {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [expandedProviders, setExpandedProviders] = useState<Set<string>>(new Set());
+
+  const isExpanded = (groupId: string) =>
+    isProviderGroupExpanded({
+      groupId,
+      expandedIds: expandedProviders,
+      groupCount: providerGroups.length,
+      query: props.query,
+    });
 
   const disabledSet = useMemo(
     () => new Set(props.disabledProviders ?? []),
@@ -268,7 +298,8 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                 <ProviderAccordion
                   key={group.id}
                   group={group}
-                  expanded={expandedProviders.has(group.id)}
+                  expanded={isExpanded(group.id)}
+                  collapsible={providerGroups.length > 1 && !props.query.trim()}
                   current={props.current}
                   canToggleProvider={!!props.onToggleProvider}
                   onToggleExpand={() => toggleProvider(group.id)}
@@ -299,6 +330,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
 function ProviderAccordion({
   group,
   expanded,
+  collapsible,
   current,
   canToggleProvider,
   onToggleExpand,
@@ -308,6 +340,8 @@ function ProviderAccordion({
 }: {
   group: ProviderGroup;
   expanded: boolean;
+  /** False when the group cannot be closed, so its header must not look like a control. */
+  collapsible: boolean;
   current: ModelRef;
   canToggleProvider: boolean;
   onToggleExpand: () => void;
@@ -324,10 +358,20 @@ function ProviderAccordion({
       <div className="flex items-center gap-1">
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-dls-hover"
-          onClick={onToggleExpand}
+          className={`flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
+            collapsible ? "hover:bg-dls-hover" : "cursor-default"
+          }`}
+          onClick={collapsible ? onToggleExpand : undefined}
+          aria-expanded={collapsible ? expanded : undefined}
+          disabled={!collapsible}
         >
-          <Chevron size={14} className="shrink-0 text-dls-secondary" />
+          {collapsible ? (
+            <Chevron size={14} className="shrink-0 text-dls-secondary" />
+          ) : (
+            // No affordance where there is no action. A chevron on a group that cannot close is an
+            // invitation to click something that does nothing.
+            <span aria-hidden className="w-3.5 shrink-0" />
+          )}
           <ProviderIcon providerId={group.id} size={18} className="shrink-0 text-dls-text" />
           <div className="min-w-0 flex-1">
             <span className="text-[13px] font-medium text-dls-text">{group.name}</span>

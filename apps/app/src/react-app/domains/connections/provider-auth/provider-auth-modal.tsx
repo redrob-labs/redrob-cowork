@@ -688,20 +688,36 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
 
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           {errorMessage ? (
-            <div className="rounded-xl border border-destructive-muted/30 bg-destructive-soft/40 px-3 py-2 text-xs text-destructive-ink">
+            <div className="mx-3.5 rounded-xl border border-destructive-muted/30 bg-destructive-soft/40 px-3 py-2 text-xs text-destructive-ink">
               {errorMessage}
             </div>
           ) : props.loading ? (
-            <div className="rounded-xl border border-gray-6 bg-gray-1/60 px-4 py-3 text-sm text-gray-10 animate-pulse">
+            <div className="mx-3.5 rounded-xl border border-gray-6 bg-gray-1/60 px-4 py-3 text-sm text-gray-10 animate-pulse">
               {t("provider_auth.loading_providers")}
             </div>
           ) : null}
 
+          {/*
+           * Pulled left and right by exactly the row padding.
+           *
+           * Every row carries `px-3.5` so its hover background can be a full-width block rather than
+           * a floating pill. That padding also pushed the row's CONTENT 14px inside the dialog's own
+           * 24px gutter, so the provider names started 14px right of the title and description above
+           * them and the list read as a second, indented column.
+           *
+           * Negative margin of the same 14px puts row content back on the dialog's gutter while the
+           * hover block keeps its full-bleed look, now bleeding into the gutter instead of insetting
+           * the text. It fits: the bleed is 14px and the gutter is 24px, so nothing reaches the edge.
+           *
+           * Children that are NOT rows carry `mx-3.5` to undo it, since a search field or a hint line
+           * has no hover block to bleed and would otherwise stick out past the title.
+           *
+          */}
           {!props.loading ? (
-            <div className="-mr-1 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+            <div className="-mx-3.5 min-h-0 flex-1 space-y-2 overflow-y-auto">
               {resolvedView === "list" ? (
                 <div className="space-y-3" role="presentation" onKeyDown={handleListKeyDown}>
-                  <div className="relative flex items-center mb-1">
+                  <div className="relative mx-3.5 flex items-center mb-1">
                     <Search size={16} className="absolute left-3 text-gray-9" />
                     <input
                       ref={searchInputRef}
@@ -724,10 +740,10 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     filteredEntries.map((entry, index) => (
                       <div key={entry.id}>
                         {index === 0 && entry.connected ? (
-                          <div className="px-1 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">{t("provider_auth.connected")}</div>
+                          <div className="px-3.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">{t("provider_auth.connected")}</div>
                         ) : null}
                         {index === connectedCount && !entry.connected ? (
-                          <div className="px-1 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
+                          <div className="px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
                             {connectedCount ? t("provider_auth.all_providers") : t("provider_auth.providers")}
                           </div>
                         ) : null}
@@ -798,12 +814,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     </div>
                   )}
 
-                  <div className="text-[11px] text-gray-9">{t("provider_auth.keyboard_hint")}</div>
+                  <div className="mx-3.5 text-[11px] text-gray-9">{t("provider_auth.keyboard_hint")}</div>
                 </div>
               ) : null}
 
               {resolvedView === "method" && selectedEntry ? (
-                <div className="rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
+                <div className="mx-3.5 rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
@@ -877,7 +893,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               ) : null}
 
               {resolvedView === "oauth-code" && selectedEntry && oauthSession ? (
-                <div className="rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
+                <div className="mx-3.5 rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
@@ -930,7 +946,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               ) : null}
 
               {resolvedView === "oauth-auto" && selectedEntry && oauthSession ? (
-                <div className="rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
+                <div className="mx-3.5 rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
