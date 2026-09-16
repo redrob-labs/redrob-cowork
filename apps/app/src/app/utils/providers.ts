@@ -26,6 +26,7 @@ export const compareProviders = (
 export const filterProviderList = (
   value: ProviderListResponse,
   disabledProviders: string[],
+  authMethods?: Record<string, readonly { type: string }[]>,
 ): ProviderListResponse => {
   const disabled = new Set(disabledProviders.flatMap((id) => {
     const trimmed = id.trim();
@@ -39,6 +40,11 @@ export const filterProviderList = (
   // `connected` and `default` carry ids only, so the facts come from `all`,
   // which is the same response's catalogue entry for that id.
   const connectedIds = new Set(value.connected.map((id) => id.trim()));
+  // OAuth was part of the rule from the start and was never actually supplied here, so a provider
+  // reachable ONLY by OAuth was judged on its env vars and silently withheld. Passed in rather than
+  // fetched, because this stays a pure function.
+  const hasOAuth = (id: string) =>
+    (authMethods?.[id.trim()] ?? []).some((method) => method.type === "oauth");
   const factsById = new Map(
     value.all.map((provider) => [
       provider.id.trim(),
@@ -46,6 +52,7 @@ export const filterProviderList = (
         id: provider.id,
         env: Array.isArray(provider.env) ? provider.env : [],
         connected: connectedIds.has(provider.id.trim()),
+        hasOAuth: hasOAuth(provider.id),
       },
     ]),
   );
@@ -55,7 +62,11 @@ export const filterProviderList = (
     // An id that is connected but absent from the catalogue still counts as
     // connected: the engine resolved it somehow, and hiding a working provider
     // would be a regression.
-    const facts = factsById.get(trimmed) ?? { id, connected: connectedIds.has(trimmed) };
+    const facts = factsById.get(trimmed) ?? {
+      id,
+      connected: connectedIds.has(trimmed),
+      hasOAuth: hasOAuth(trimmed),
+    };
     return isProviderExposed(facts);
   };
   return {

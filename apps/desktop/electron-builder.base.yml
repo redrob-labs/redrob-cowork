@@ -120,3 +120,11 @@ win:
     - nsis
 nsis:
   include: build/installer.nsh
+  # electron-builder defaults to a one-click installer that starts writing the
+  # moment it opens, with no destination and no confirmation. Redrob Office ships
+  # the assisted installer, and an app that installs itself before the user has
+  # agreed to anything reads as malware rather than as a shortcut.
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  # Per-user by default, so no UAC prompt is needed for the common case.
+  perMachine: false

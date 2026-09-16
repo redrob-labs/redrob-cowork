@@ -234,14 +234,14 @@ describe("Redrob provider registration", () => {
       opencode?: { provider?: Record<string, unknown> };
     };
     const seeded = payload.opencode?.provider?.[REDROB_PROVIDER_ID];
-    // The seeded entry must equal the real builder output (base URL + auto model).
+    // The seeded entry must equal the real builder output (driver, env and base URL).
     expect(seeded).toEqual(buildRedrobProviderConfig());
     const seededConfig = seeded as ReturnType<typeof buildRedrobProviderConfig>;
     expect(seededConfig.options?.baseURL).toBe(REDROB_BASE_URL);
-    expect(Object.keys(seededConfig.models ?? {})).toEqual([REDROB_MODEL_ID, REDROB_OPUS_MODEL_ID]);
+    // No models map is seeded: naming ids here capped the picker at those ids regardless of what
+    // the console served. The engine lists what it can actually reach.
+    expect(seededConfig.models).toBeUndefined();
     expect(REDROB_MODEL_ID).toBe("auto");
-    // Retired language extras must not reach the console API.
-    expect(seededConfig.models?.[REDROB_MODEL_ID]?.options).toBeUndefined();
 
     store.dispose();
   });

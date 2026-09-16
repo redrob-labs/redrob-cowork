@@ -117,7 +117,7 @@ type ModelSelectGroup = {
   items: ModelSelectItem[];
 };
 
-function groupByProvider(modelOptions: ModelOption[]): ModelSelectGroup[] {
+function groupByProvider(modelOptions: ModelOption[], selected?: ModelRef): ModelSelectGroup[] {
   const groups = new Map<string, ModelSelectItem[]>();
 
   for (const option of modelOptions) {
@@ -139,9 +139,23 @@ function groupByProvider(modelOptions: ModelOption[]): ModelSelectGroup[] {
   return [...groups.entries()]
     .map(([providerLabel, options]) => ({
       value: providerLabel,
-      items: [...options].sort((a, b) => a.option.title.localeCompare(b.option.title)),
+      items: [...options].sort((a, b) => {
+        // The model in use leads its group. Alphabetical order alone buried the current
+        // selection somewhere in the middle of the list, so the one row a reader wants to
+        // confirm was the hardest one to find.
+        const aSelected = selected ? isSameModel(selected, a.option) : false;
+        const bSelected = selected ? isSameModel(selected, b.option) : false;
+        if (aSelected !== bSelected) return aSelected ? -1 : 1;
+        return a.option.title.localeCompare(b.option.title);
+      }),
     }))
-    .sort((a, b) => a.value.localeCompare(b.value));
+    .sort((a, b) => {
+      // And the group holding it leads the list, for the same reason.
+      const aHasSelected = selected ? a.items.some((item) => isSameModel(selected, item.option)) : false;
+      const bHasSelected = selected ? b.items.some((item) => isSameModel(selected, item.option)) : false;
+      if (aHasSelected !== bHasSelected) return aHasSelected ? -1 : 1;
+      return a.value.localeCompare(b.value);
+    });
 }
 
 function isSameModel(a: ModelRef, b: ModelRef) {
@@ -276,7 +290,7 @@ export function ModelSelect({
     }),
   );
 
-  const groups = React.useMemo(() => groupByProvider(modelOptions), [modelOptions]);
+  const groups = React.useMemo(() => groupByProvider(modelOptions, value), [modelOptions, value]);
   // One provider means the group label repeats on every row and buys nothing,
   // so the list renders flat. Grouping returns as soon as a second provider is
   // connected.

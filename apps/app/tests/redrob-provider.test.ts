@@ -24,16 +24,17 @@ describe("Redrob provider config", () => {
     expect(config.options?.apiKey).toBeUndefined();
   });
 
-  test("routes the canonical auto model with no retired request extras", () => {
+  test("declares no models, so the engine's own listing decides the catalogue", () => {
     const config = buildRedrobProviderConfig();
-    const model = config.models?.[REDROB_MODEL_ID];
     expect(REDROB_MODEL_ID).toBe("auto");
-    expect(model).toBeDefined();
-    // The console API rejects the retired language fields, so `auto` must carry
-    // no per-model options at all.
-    expect(model?.options).toBeUndefined();
-    expect(config.models?.[REDROB_OPUS_MODEL_ID]?.name).toBe("Claude Opus 5");
-    expect(config.models?.[REDROB_OPUS_MODEL_ID]?.options).toBeUndefined();
-    expect(Object.keys(config.models ?? {})).toEqual(["auto", "claude-opus-5"]);
+    // This used to name `auto` and `claude-opus-5`, which capped the picker at those two ids no
+    // matter how many the console served -- the app was shortening its own catalogue. The engine
+    // fetches GET /models with the key and falls back to its own list without one, and it is the
+    // side that knows which of those happened.
+    expect(config.models).toBeUndefined();
+    expect(config.npm).toBe("@ai-sdk/openai-compatible");
+    expect(config.env).toEqual([REDROB_API_KEY_ENV]);
+    // No per-model options anywhere: the console rejects the retired language fields.
+    expect(config.options).toEqual({ baseURL: REDROB_BASE_URL });
   });
 });
