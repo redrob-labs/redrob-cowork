@@ -20,7 +20,17 @@ export type ProviderIconProps = {
 
 export function ProviderIcon(props: ProviderIconProps) {
   const size = props.size ?? 16;
-  const normalizedId = props.providerId?.trim().toLowerCase() ?? "";
+  const rawId = props.providerId?.trim().toLowerCase() ?? "";
+  /**
+   * The vendor part, because 315 of the catalogue's 323 ids are `vendor/model`.
+   *
+   * `hasProviderFamily` compared the WHOLE id against a family name, so `anthropic/claude-opus-4` was
+   * not "anthropic" by equality and only matched at all when the display NAME happened to contain the
+   * word. Comparing the vendor makes the inline marks work for the long tail the same way they work
+   * for the eight curated ids.
+   */
+  const slash = rawId.indexOf("/");
+  const normalizedId = slash > 0 ? rawId.slice(0, slash) : rawId;
   const normalizedName = props.providerName?.trim().toLowerCase() ?? "";
   const hasProviderFamily = (family: string) =>
     normalizedId === family || normalizedName.includes(family);
