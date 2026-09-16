@@ -143,7 +143,18 @@ jobs:
         if: steps.guard.outputs.stable == 'true' && steps.dedupe.outputs.documented == 'false'
         env:
           REDROB_API_KEY: ${{ secrets.REDROB_API_KEY }}
-        run: redrob run --agent changelog "$(cat /tmp/changelog_prompt.txt)"
+        run: |
+          set -euo pipefail
+          # GitHub substitutes an empty string for a secret that does not exist, so a missing
+          # REDROB_API_KEY reaches the engine as "no key" rather than as a configuration error. The
+          # engine then runs keyless: it cannot reach the console, degrades to its built-in model
+          # list, and the failure surfaces as a confusing model or auth error inside the agent run
+          # instead of pointing at the secret. Fail here, where the cause is nameable.
+          if [ -z "${REDROB_API_KEY:-}" ]; then
+            echo "::error::REDROB_API_KEY is not set. This job runs the Redrob Code engine against the console, which needs a console API key. Add REDROB_API_KEY as a repository secret (Settings > Secrets and variables > Actions) or as a redrob-labs organization secret shared with this repository." >&2
+            exit 1
+          fi
+          redrob run --agent changelog "$(cat /tmp/changelog_prompt.txt)"
 
       - name: Discard engine runtime churn
         if: steps.guard.outputs.stable == 'true' && steps.dedupe.outputs.documented == 'false'

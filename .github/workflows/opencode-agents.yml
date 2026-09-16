@@ -47,6 +47,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ inputs.number }}
         run: |
+          # An absent secret arrives as an empty string, so without this the engine runs keyless and
+          # the failure surfaces as a confusing model or auth error inside the agent run rather than
+          # as the missing configuration it is.
+          if [ -z "${REDROB_API_KEY:-}" ]; then
+            echo "::error::REDROB_API_KEY is not set. This job runs the Redrob Code engine against the console, which needs a console API key. Add REDROB_API_KEY as a repository secret (Settings > Secrets and variables > Actions) or as a redrob-labs organization secret shared with this repository." >&2
+            exit 1
+          fi
           cat > /tmp/issue_prompt.txt <<'PROMPT_EOF'
           The following issue was just opened, triage it:
           PROMPT_EOF
@@ -102,6 +109,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ inputs.number }}
         run: |
+          # An absent secret arrives as an empty string, so without this the engine runs keyless and
+          # the failure surfaces as a confusing model or auth error inside the agent run rather than
+          # as the missing configuration it is.
+          if [ -z "${REDROB_API_KEY:-}" ]; then
+            echo "::error::REDROB_API_KEY is not set. This job runs the Redrob Code engine against the console, which needs a console API key. Add REDROB_API_KEY as a repository secret (Settings > Secrets and variables > Actions) or as a redrob-labs organization secret shared with this repository." >&2
+            exit 1
+          fi
           redrob run --agent duplicate-pr "$(cat pr_info.txt)" > /tmp/comment_output.txt
 
           {
