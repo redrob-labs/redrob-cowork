@@ -497,6 +497,24 @@ function toUIPart(part: Part): UIMessage["parts"][number] | null {
     };
   }
   if (part.type === "step-start") return { type: "step-start" };
+  /*
+    The compaction marker, kept rather than dropped.
+
+    The engine records a compaction as a `compaction` part on a user message, and the summary the
+    compaction agent wrote lands as the assistant turn after it. This mapper returned null for the
+    marker, so the app could not tell that message apart from anything else - which is why a summary
+    nobody asked to read was pasted into the transcript in full. Carried through as a data part, the
+    renderer can collapse the pair to one line instead.
+
+    `data-*` is the AI SDK's own escape hatch for a part the app understands and the model does not, so
+    nothing downstream tries to render it as prose.
+  */
+  if (part.type === "compaction") {
+    return {
+      type: "data-compaction",
+      data: { auto: (part as { auto?: boolean }).auto === true },
+    } as UIMessage["parts"][number];
+  }
   return null;
 }
 
