@@ -1030,7 +1030,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   ) : (
                     <FileText size={14} className="mt-0.5 shrink-0 text-gray-9" />
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="truncate text-xs font-semibold">@{item.label}</div>
                     <div className="truncate text-xs text-gray-10">
                       {item.kind === "agent"
@@ -1294,7 +1294,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                               {t("composer.configure")}
                             </button>
                           </div>
-                          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+                          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-2">
                           {toolMenuSection === "agents" ? (
                             <div className="grid gap-1">
                               <button
@@ -1337,7 +1337,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                                     onClick={() => applyCommandSelection(command)}
                                   >
                                     <Terminal size={14} className="mt-0.5 shrink-0 text-gray-9" />
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 flex-1">
                                       <div className="truncate text-xs font-semibold text-gray-11">/{command.name}</div>
                                       {command.description ? <div className="truncate text-xs text-gray-10">{command.description}</div> : null}
                                     </div>

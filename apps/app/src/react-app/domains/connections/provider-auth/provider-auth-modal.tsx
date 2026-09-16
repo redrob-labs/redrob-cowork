@@ -672,11 +672,15 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
       }}
     >
       {/*
-        max-w-2xl, not max-w-lg: this lists every connectable provider with its id and its auth
-        methods, and at lg the rows wrapped hard enough that a provider name and its badge fought for
-        the same line. The height cap and internal scroll are unchanged, so nothing new overflows.
+        Wide, and the `lg:` copy is the one that does the work.
+
+        This lists every connectable provider with its id, its auth methods and its status - four facts
+        per row, which is a table. At `max-w-2xl` each row stacked them onto three lines and the list read
+        as a pile of cards; the rows are one line each now and need the width to hold the columns.
+        `DialogContent` caps itself at `lg:max-w-md`, and a `sm:` override does not beat a `lg:` rule at
+        large widths - both apply and the later breakpoint wins - so all three are written.
       */}
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden sm:max-w-2xl">
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,58rem)] flex-col overflow-hidden sm:max-w-[min(94vw,58rem)] lg:w-[min(94vw,58rem)] lg:max-w-[min(94vw,58rem)]">
         <DialogHeader>
           <DialogTitle>{t("provider_auth.title")}</DialogTitle>
           {/*
@@ -749,7 +753,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                         ) : null}
                         <button
                           type="button"
-                          className={`w-full group flex items-start gap-3.5 rounded-xl px-3.5 py-3 text-left transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
+                          className={`w-full group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-left transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                             index === activeEntryIndex ? "bg-gray-3/60" : "hover:bg-gray-3/30"
                           }`}
                           disabled={actionDisabled}
@@ -760,24 +764,21 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                             <ProviderIcon providerId={entry.id} size={20} className="text-gray-12" />
                           </div>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="min-w-0 flex items-center gap-2">
-                                <div className="text-[14px] font-medium text-gray-12 truncate tracking-tight">
-                                  {entry.name}
-                                </div>
-                              </div>
-                              <div className="flex items-center justify-end shrink-0">
-                                {entry.connected ? (
-                                  <div className="flex items-center gap-1 text-[11px] font-medium text-success-ink bg-success-soft/20 border border-success-muted/30 px-1.5 py-0.5 rounded-md">
-                                    <CheckCircle2 size={12} strokeWidth={2.5} />{t("provider_auth.connected")}</div>
-                                ) : (
-                                  <div className="text-[12px] font-medium text-gray-9 group-hover:text-gray-12 transition-colors flex items-center gap-0.5 opacity-80 group-hover:opacity-100">{t("provider_auth.connect")}<ChevronRight size={14} className="opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
-                                  </div>
-                                )}
-                              </div>
+                          {/*
+                            One line, four columns.
+
+                            This was a stacked block: name and status on line one, the id on line two, the
+                            method chips on line three. Three lines times forty providers is a pile of
+                            cards rather than a list you can scan, and the eye could not compare the same
+                            field down the column because the fields were not in columns. The name column
+                            takes the slack; the id, the methods and the status are sized to their content.
+                          */}
+                          <div className="flex min-w-0 flex-1 items-center gap-4">
+                            <div className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-tight text-gray-12">
+                              {entry.name}
                             </div>
-                            <div className="text-[11px] text-gray-9 font-mono truncate mt-0.5 opacity-60 group-hover:opacity-80 transition-opacity">
+
+                            <div className="hidden w-[13rem] shrink-0 truncate font-mono text-[11px] text-gray-9 opacity-60 transition-opacity group-hover:opacity-80 sm:block">
                               {entry.id}
                             </div>
 
@@ -785,25 +786,42 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                               Only for a provider that is NOT connected yet. These chips are the ways
                               IN, so on a connected row they read as an instruction to do something
                               already done -- which is why a connected Redrob still showed "Connect
-                              Redrob" and "Paste an API key". A connected row shows the badge above
-                              and nothing else; reconnecting is reached by opening the row.
+                              Redrob" and "Paste an API key". A connected row shows the badge and
+                              nothing else; reconnecting is reached by opening the row.
                             */}
-                            {entry.connected ? null : (
-                              <div className="mt-2 flex flex-wrap gap-1.5">
-                                {entry.methods.map((method) => (
-                                  <span
-                                    key={`${entry.id}-${method.type}-${method.methodIndex ?? method.label}`}
-                                    className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${
-                                      method.type === "oauth"
-                                        ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
-                                        : "bg-gray-3/40 text-gray-11 border-gray-6/40"
-                                    }`}
-                                  >
-                                    {methodLabel(method)}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                            <div className="hidden w-[17rem] shrink-0 flex-wrap items-center gap-1.5 md:flex">
+                              {entry.connected
+                                ? null
+                                : entry.methods.map((method) => (
+                                    <span
+                                      key={`${entry.id}-${method.type}-${method.methodIndex ?? method.label}`}
+                                      className={`truncate rounded-md border px-2 py-0.5 text-[10px] font-medium ${
+                                        method.type === "oauth"
+                                          ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
+                                          : "bg-gray-3/40 text-gray-11 border-gray-6/40"
+                                      }`}
+                                    >
+                                      {methodLabel(method)}
+                                    </span>
+                                  ))}
+                            </div>
+
+                            <div className="flex w-[6.5rem] shrink-0 items-center justify-end">
+                              {entry.connected ? (
+                                <div className="flex items-center gap-1 rounded-md border border-success-muted/30 bg-success-soft/20 px-1.5 py-0.5 text-[11px] font-medium text-success-ink">
+                                  <CheckCircle2 size={12} strokeWidth={2.5} />
+                                  {t("provider_auth.connected")}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-0.5 text-[12px] font-medium text-gray-9 opacity-80 transition-colors group-hover:text-gray-12 group-hover:opacity-100">
+                                  {t("provider_auth.connect")}
+                                  <ChevronRight
+                                    size={14}
+                                    className="-ml-2 opacity-0 transition-all duration-200 group-hover:ml-0 group-hover:opacity-100"
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </button>
                       </div>
