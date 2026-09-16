@@ -78,6 +78,39 @@ const rows = [
 ];
 
 describe("buildModelRow", () => {
+  /*
+    Found by looking at the rendered table, not by reading code: every VENDOR cell said "—" and the
+    vendor filter had no options at all. `inferModelVendor` strips the id's provider segment and matches
+    the MODEL name against a hand-kept table of ten vendors - right for a bare `claude-opus-5`, useless
+    for the 315 catalogue ids that ARE `vendor/model`.
+  */
+  it("reads the vendor off the id, including the hyphenated ones", () => {
+    const cases: Array<[string, string, string]> = [
+      ["bytedance-seed/seed-2.0-mini", "bytedance-seed", "Bytedance Seed"],
+      ["baidu/ernie-4.5-vl-424b-a47b", "baidu", "Baidu"],
+      ["arcee-ai/trinity-large-thinking", "arcee-ai", "Arcee Ai"],
+      ["amazon/nova-2-lite-v1", "amazon", "Amazon"],
+      ["cognitivecomputations/dolphin-3.0", "cognitivecomputations", "Cognitivecomputations"],
+    ];
+    for (const [id, vendorId, vendorName] of cases) {
+      const row = buildModelRow(option(id), pricing);
+      expect(row.vendorId).toBe(vendorId);
+      expect(row.vendorName).toBe(vendorName);
+    }
+  });
+
+  it("prefers the known display name when the model name table recognises it", () => {
+    // `openai/gpt-5-nano` resolves through the prefix table too, and "OpenAI" is better than "Openai".
+    expect(buildModelRow(option("openai/gpt-5-nano"), pricing).vendorName).toBe("OpenAI");
+    expect(buildModelRow(option("anthropic/claude-opus-4"), pricing).vendorName).toBe("Anthropic");
+  });
+
+  it("still resolves a curated bare id, which has no prefix to read", () => {
+    const row = buildModelRow(option("claude-sonnet-5"), pricing);
+    expect(row.vendorId).toBe("anthropic");
+    expect(row.vendorName).toBe("Anthropic");
+  });
+
   it("reads the facts a column needs off the published catalogue", () => {
     const opus = rows[1]!;
     expect(opus.priceBand).toBe("frontier");
