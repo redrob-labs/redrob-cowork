@@ -46,8 +46,19 @@ const DETAIL_CAP = 240;
  */
 const PROVIDER_PATTERN = /(?:^|\n)\s*Provider:\s*(\S+)/i;
 
-/** Out of credit, in the wordings an OpenAI-compatible gateway uses for it. */
-const INSUFFICIENT_PATTERN = /insufficient[\s_-]+(?:credit|credits|balance|funds)/i;
+/**
+ * Out of credit, in the wordings an OpenAI-compatible gateway uses for it.
+ *
+ * `quota` is in the list because that is the word this console actually sends. Its refusal is
+ * `{"type":"insufficient_quota","message":"This workspace is out of credit (balance $-0.64)..."}`, and the
+ * pattern named credit / credits / balance / funds but not quota - so the one wording that reaches users
+ * in practice fell through to a raw JSON blob with no top-up offered.
+ *
+ * `out of credit` is matched separately, because the message says that in prose without ever putting
+ * "insufficient" next to it.
+ */
+const INSUFFICIENT_PATTERN =
+  /insufficient[\s_-]+(?:credit|credits|balance|funds|quota)|\bout of (?:credit|credits|balance|funds)\b/i;
 
 /**
  * HTTP 402. Matched only where the number is labelled as a status or paired with the reason phrase,

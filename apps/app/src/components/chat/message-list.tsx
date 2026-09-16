@@ -422,7 +422,7 @@ const AssistantMessage = React.memo(
 
     return (
       <Message
-        className="mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-2 md:px-10"
+        className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4"
         data-message-id={message.id}
         data-message-role={message.role}
       >
@@ -608,7 +608,7 @@ const UserMessage = React.memo(
 
     return (
       <Message
-        className="mx-auto flex w-full max-w-3xl flex-col items-end gap-2 px-2 md:px-10"
+        className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-end gap-2 px-2 md:px-4"
         data-message-id={message.id}
         data-message-role={message.role}
       >
@@ -765,7 +765,7 @@ const MessageComponent = React.memo(
 MessageComponent.displayName = "MessageComponent"
 
 const LoadingMessage = React.memo(({ label }: { label?: string }) => (
-  <Message className="mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-2 md:px-10">
+  <Message className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4">
     <div className="group flex w-full flex-col gap-0">
       <div className="flex items-center gap-1.5 px-1 py-1 text-sm text-muted-foreground">
         <div style={{ width: 20, height: 20, borderRadius: "50%", overflow: "hidden" }}>
@@ -794,7 +794,7 @@ interface ErrorMessageProps {
 
 function ErrorMessage({ error }: ErrorMessageProps) {
   return (
-    <Message className="not-prose mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-0 md:px-10">
+    <Message className="not-prose mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-0 md:px-4">
       <div className="group flex w-full flex-col items-start gap-0">
         <div className="text-foreground flex min-w-0 flex-1 flex-row items-start gap-2 rounded-lg border-2 border-destructive-muted bg-destructive-soft/40 px-2 py-1">
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-destructive" />
@@ -838,7 +838,7 @@ const RetryMessage = React.memo(({ status }: RetryMessageProps) => {
   const action = status.action
 
   return (
-    <Message className="not-prose mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-0 md:px-10">
+    <Message className="not-prose mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-0 md:px-4">
       <div className="group flex w-full flex-col items-start gap-0">
         <div className="text-foreground flex min-w-0 flex-1 flex-col gap-2 rounded-lg border-2 border-warning-muted bg-warning-soft/40 px-3 py-2">
           <div className="flex items-start gap-2">
@@ -892,7 +892,7 @@ function CompletedStepRun({ label, children }: { label: string; children: React.
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="flex w-full flex-col gap-2">
-      <div className="mx-auto flex w-full max-w-3xl px-2 md:px-10">
+      <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] px-2 md:px-4">
         <CollapsibleTrigger
           className="group flex cursor-pointer items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           aria-label={open ? `${label}. Hide steps` : `${label}. Show steps`}
@@ -1060,7 +1060,7 @@ function MessageGroup({
     ? proseReasoning.map((reasoning) => (
       <Message
         key={`folded-reasoning-${reasoning.key}`}
-        className="mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-2 md:px-10"
+        className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4"
       >
         <ReasoningBlock text={reasoning.text} isStreaming={reasoning.isStreaming} />
       </Message>
@@ -1093,7 +1093,7 @@ function MessageGroup({
       if (!run) return
       nodes.push(
         <div key={`aggregate-${run.key}`}>
-          <Message className="mx-auto flex w-full max-w-3xl flex-col items-start gap-2 px-2 md:px-10">
+          <Message className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4">
             <ToolAggregateGroup parts={run.parts} className="w-full" />
           </Message>
         </div>
@@ -1146,7 +1146,7 @@ function MessageGroup({
       {mcpAppParts.map((part) => (
         <Message
           key={`mcp-app-${part.toolCallId}`}
-          className="mx-auto flex w-full max-w-3xl flex-col px-2 empty:hidden md:px-10"
+          className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col px-2 empty:hidden md:px-4"
         >
           <McpAppFrame part={part} />
         </Message>
@@ -1157,8 +1157,18 @@ function MessageGroup({
         messages={items.map((item) => item.message)}
         includeTargetFallbacks={false}
       />
+      {/*
+        What THIS turn cost, on the turn itself and always visible.
+
+        It was in the hover row beside the timestamp, which meant a figure nobody saw, and a single
+        session total under the composer was standing in for it - the wrong number in the wrong place,
+        since a running total says nothing about which turn was expensive. Read from the last message of
+        the group, which carries the finished turn's usage; a turn that reports none renders nothing
+        rather than $0.00, because a zero here would read as free.
+      */}
+      {!isStreaming && <MessageCost messages={renderableItems.map((item) => item.message)} />}
       {lastTextMessage && !isStreaming && (
-        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center gap-2 px-2 opacity-0 transition-opacity duration-150 group-hover/message-group:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100 md:px-8">
+        <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-wrap items-center gap-2 px-2 opacity-0 transition-opacity duration-150 group-hover/message-group:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100 md:px-4">
           <MessageActions className="flex gap-0">
             <CopyMessageButton messages={renderableItems.map((item) => item.message)} />
             {lastRealItem ? (
@@ -1204,15 +1214,6 @@ function MessageGroup({
             ) : null}
           </MessageActions>
           <MessageTimestamp message={lastItem.message} />
-          {/*
-            What this turn cost, beside its timestamp.
-
-            The engine has computed it per assistant message all along and the app was dropping it before
-            anything could read it. Rendered from the LAST message of the group, which is the one that
-            carries the finished turn's usage; a turn that reports none shows nothing rather than $0.00,
-            because a zero here would read as free.
-          */}
-          <MessageCost messages={renderableItems.map((item) => item.message)} />
           {/* <MessageSources messages={items.map((item) => item.message)} /> */}
         </div>
       )}
@@ -1241,7 +1242,7 @@ function CompactionNotice({ messages }: { messages: UIMessage[] }) {
   const [open, setOpen] = React.useState(false)
   const summary = getMessagesText(messages).trim()
   return (
-    <div className="mx-auto w-full max-w-3xl px-2 md:px-8">
+    <div className="mx-auto w-full max-w-[var(--ow-chat-column)] px-2 md:px-4">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -1277,9 +1278,14 @@ function MessageCost({ messages }: { messages: UIMessage[] }) {
   const text = formatMessageCost(cost)
   if (!text) return null
   return (
-    <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground" title={t("usage.turn_cost")}>
-      {text}
-    </span>
+    <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] justify-end px-2 md:px-4">
+      <span
+        className="font-mono text-[11px] tabular-nums text-muted-foreground/80"
+        title={t("usage.turn_cost")}
+      >
+        {text}
+      </span>
+    </div>
   )
 }
 
@@ -1310,7 +1316,7 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
-      {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-3xl shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
+      {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
 
       {items.map((item) => {
         if (isMessageGroup(item)) {

@@ -90,17 +90,26 @@ describe("dark-mode provider marks", () => {
 describe("sidebar session row right cluster", () => {
   const source = read("react-app/domains/session/sidebar/app-sidebar.tsx");
 
-  it("reserves the measured width at rest", () => {
-    expect(source).toContain("pe-12 group-hover/menu-sub-item:pe-24");
+  it("reserves the measured width at rest, and keeps it in step with the inset", () => {
+    // The pair moves together. The inset was 8px, which put the stamp flush against the sidebar's own
+    // edge; widening it without widening the reserve would put the title back under the cluster, which
+    // is the defect this pair already had once.
+    expect(source).toContain("pe-14 group-hover/menu-sub-item:pe-24");
     expect(source).not.toContain("pe-7 group-hover/menu-sub-item:pe-24");
+    expect(source).not.toContain("pe-12 group-hover/menu-sub-item:pe-24");
+  });
+
+  it("keeps the timestamp clear of the panel edge", () => {
+    // 16px, plus the group's own 8px margin, is 24px of air. At 8px it read as pushed out of the panel.
+    expect(source).toContain("absolute right-4 top-1/2 z-10 flex");
   });
 
   it("puts the dot and the timestamp in one flex row so they cannot overlap", () => {
     const cluster = source.slice(source.indexOf("const trailing = ("));
     const opening = cluster.slice(0, cluster.indexOf("<SessionHoverQuickActions"));
     expect(opening).toContain("flex -translate-y-1/2 items-center gap-1");
-    // The dot must no longer carry its own right anchor.
-    expect(opening).not.toContain("absolute right-3");
+    // The dot must no longer carry a right anchor of its own, separate from the stamp's.
+    expect(opening).not.toContain("absolute right-3 top-1/2 -translate-y-1/2 opacity-100");
   });
 
   it("does not reserve the swap cluster twice on a row with children", () => {

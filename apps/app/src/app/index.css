@@ -134,6 +134,14 @@
  * rather than arriving with a colour change.
  */
 :root {
+  /*
+   * One column for the conversation and the composer.
+   *
+   * The transcript was max-w-3xl (768px) with md:px-10, and the composer was max-w-[800px] with an inner
+   * px-4 - two different columns with two different insets, so the text a reader types was not under the
+   * text they had just read. One variable, used by both, is what keeps them from drifting again.
+   */
+  --ow-chat-column: 800px;
   color-scheme: light;
   --background: var(--rr-gray-1);
   --background-secondary: var(--rr-gray-2);

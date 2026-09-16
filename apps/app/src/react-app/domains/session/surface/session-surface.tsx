@@ -79,7 +79,7 @@ import {
 } from "./composer-state-store";
 import { MessageList } from "@/components/chat/message-list";
 import { getMessagesText } from "@/components/chat/utils";
-import { contextUsagePercent, latestUsage, totalSessionCost } from "@/components/chat/message-usage";
+import { contextUsagePercent, latestUsage } from "@/components/chat/message-usage";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { MessageListProvider, type DispatchAction } from "@/components/chat/message-list-provider";
 import { OpenTargetProvider, type OpenTargetOptions } from "@/lib/target-provider";
@@ -1713,7 +1713,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
       }),
     [renderedMessages, contextLimitTokens],
   );
-  const sessionCostUsd = useMemo(() => totalSessionCost(renderedMessages), [renderedMessages]);
 
   const handleRetryMessage = useCallback((messageId: string) => {
     const index = renderedMessages.findIndex((message) => message.id === messageId);
@@ -2003,7 +2002,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
         attachmentsDisabledReason={props.attachmentsDisabledReason}
         modelVariantLabel={sessionModel.modelVariantLabel}
         contextUsedPercent={contextUsedPercent}
-        sessionCostUsd={sessionCostUsd}
         modelVariant={sessionModel.modelVariant}
         modelBehaviorOptions={sessionModel.modelBehaviorOptions}
         onModelVariantChange={handleModelVariantChange}
