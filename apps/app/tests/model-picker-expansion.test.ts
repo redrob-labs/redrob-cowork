@@ -1,56 +1,62 @@
 import { describe, expect, it } from "bun:test";
-
-import { isProviderGroupExpanded } from "@/react-app/domains/session/modals/model-picker-modal";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 /**
- * When the model picker's provider accordion is allowed to hide anything.
+ * The model picker does not hide the only thing it has.
  *
- * It exists to keep a long list of providers scannable, and it earns that only when there is more than
- * one provider. With a single provider - which is the shipping configuration, since the console brokers
- * every model under one provider id - a collapsed group is a lid over the entire contents of the
- * dialog: the user opens "Models", sees one closed row, and has to click it to reach the only thing the
- * dialog is for.
+ * This file used to pin `isProviderGroupExpanded`, a rule about when the provider ACCORDION was allowed
+ * to hide models. That accordion is gone: it existed to keep a long provider list scannable, but the
+ * shipping configuration has exactly one provider - the console brokers every model under one id - so it
+ * was a lid over the whole dialog, and the rule was a patch on a structure that should not have been
+ * there. The picker is now one table.
  *
- * A live search is the same argument from the other side: the user has already said what they want, and
- * a match hidden behind a closed group is a match they cannot see.
+ * What survives is the invariant the rule was protecting, stated against the structure that replaced it:
+ * nothing between the reader and the models, no collapsed container, and the router pinned where it can
+ * be seen rather than sorted in among several hundred alternatives.
  */
+const source = readFileSync(
+  fileURLToPath(new URL("../src/react-app/domains/session/modals/model-picker-modal.tsx", import.meta.url)),
+  "utf8",
+);
+
 describe("the model picker does not hide the only thing it has", () => {
-  const none = new Set<string>();
-
-  it("keeps a lone provider open, whatever the collapse state says", () => {
-    expect(
-      isProviderGroupExpanded({ groupId: "redrob", expandedIds: none, groupCount: 1, query: "" }),
-    ).toBe(true);
+  it("has no collapsible provider container left to hide them", () => {
+    expect(source).not.toContain("isProviderGroupExpanded");
+    expect(source).not.toContain("ProviderAccordion");
+    expect(source).not.toContain("expandedProviders");
+    expect(source).not.toContain("ChevronRight");
   });
 
-  it("opens every group while a search is running", () => {
-    expect(
-      isProviderGroupExpanded({ groupId: "openai", expandedIds: none, groupCount: 4, query: "opus" }),
-    ).toBe(true);
+  it("renders a table rather than nested lists", () => {
+    expect(source).toContain("<table");
+    expect(source).toContain("<thead");
+    expect(source).toContain("<tbody");
   });
 
-  it("treats a whitespace-only query as no search", () => {
-    // Otherwise a stray space would silently expand everything and the accordion would look broken.
-    expect(
-      isProviderGroupExpanded({ groupId: "openai", expandedIds: none, groupCount: 4, query: "   " }),
-    ).toBe(false);
+  it("renders the pinned rows above the sorted ones", () => {
+    // The order of these two blocks in the source IS the pin: `auto` is not sorted into `rest`.
+    expect(source.indexOf("{auto.map(")).toBeGreaterThan(-1);
+    expect(source.indexOf("{rest.map(")).toBeGreaterThan(source.indexOf("{auto.map("));
   });
 
-  it("honours the user's own toggle when there are several providers and no search", () => {
-    const expanded = new Set(["anthropic"]);
-    expect(
-      isProviderGroupExpanded({ groupId: "anthropic", expandedIds: expanded, groupCount: 4, query: "" }),
-    ).toBe(true);
-    expect(
-      isProviderGroupExpanded({ groupId: "openai", expandedIds: expanded, groupCount: 4, query: "" }),
-    ).toBe(false);
+  it("is wide enough for columns, and does not pad them away", () => {
+    // Comments stripped: this file explains the old width while replacing it, and a rule that reads its
+    // own commentary would fail on the sentence describing the fix.
+    const code = source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .filter((line) => !/^\s*\/\//.test(line))
+      .join("\n");
+    // `max-w-lg` left room for a name and nothing else, which is why every fact went onto its own line.
+    expect(code).not.toContain("max-w-lg");
+    expect(code).toContain("max-w-[min(94vw,80rem)]");
+    expect(code).toContain(" p-0 ");
   });
 
-  it("keeps a zero-group case open rather than falling through to closed", () => {
-    // Defensive: an empty list renders the empty state, but the predicate must not claim "collapsed"
-    // for a group that does not exist.
-    expect(
-      isProviderGroupExpanded({ groupId: "redrob", expandedIds: none, groupCount: 0, query: "" }),
-    ).toBe(true);
+  it("offers a filter rail and sortable headers", () => {
+    expect(source).toContain("SortHeader");
+    expect(source).toContain("aria-sort");
+    expect(source).toContain("FacetCheck");
   });
 });

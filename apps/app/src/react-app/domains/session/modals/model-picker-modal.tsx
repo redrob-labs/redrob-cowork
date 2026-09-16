@@ -1,12 +1,16 @@
-/** @jsxImportSource react */
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Check, ChevronDown, ChevronRight, Search, Star } from "lucide-react";
+  ArrowDown,
+  ArrowUp,
+  Braces,
+  Check,
+  FileText,
+  Image as ImageIcon,
+  Mic,
+  Search,
+  Sparkles,
+  Wrench,
+} from "lucide-react";
 
 import {
   Dialog,
@@ -19,23 +23,33 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
-import { modelEquals, resolveProviderDisplayName } from "../../../../app/utils";
+import { cn } from "@/lib/utils";
+import { modelEquals } from "../../../../app/utils";
 import type { ModelOption, ModelRef } from "../../../../app/types";
-import { isRecommendedModel } from "../../../../app/defaults";
-import { matchesModelQuery } from "../../../../app/lib/model-search";
-import { inferModelVendor } from "../../../../app/lib/model-vendor";
 import {
   formatModelPriceRange,
-  formatPriceMultiplier,
-  estimatedCostFor,
-  formatPriceTier,
-  formatThinkingLevels,
-  formatUsdAmount,
   formatTokenCount,
-  type RedrobPricing,
+  formatUsdAmount,
+  type RedrobPriceBand,
 } from "../../../../app/lib/redrob-pricing";
 import { useRedrobPricingQuery } from "../../../infra/redrob-pricing-query";
 import { ProviderIcon } from "../../../design-system/provider-icon";
+import {
+  CAPABILITY_FLAGS,
+  DEFAULT_MODEL_SORT,
+  EMPTY_FILTERS,
+  bandFacets,
+  buildModelRows,
+  nextSort,
+  orderedRows,
+  vendorFacets,
+  visibleRows,
+  type ModelCapabilityFlag,
+  type ModelFilters,
+  type ModelRow,
+  type ModelSort,
+  type ModelSortKey,
+} from "./model-table";
 
 // Translation KEYS, not display text. A module-level constant holding UI copy
 // would have to call `t()` in its initializer, which resolves before the user's
@@ -65,21 +79,19 @@ export type ModelPickerModalProps = {
   onClose: (options?: { restorePromptFocus?: boolean }) => void;
 };
 
-type ProviderGroup = {
-  id: string;
-  name: string;
-  isNew: boolean;
-  isDisabled: boolean;
-  hasCurrent: boolean;
-  recommended: ModelOption[];
-  other: ModelOption[];
-};
-
 export type ModelPickerEmptyState = {
   messageKey: string;
   showConnectProvider: boolean;
 };
 
+/**
+ * Kept as a row count rather than a provider-group count.
+ *
+ * The picker no longer groups by provider - it is one table - so "how many groups are showing" is not a
+ * question it can ask. The distinction the state itself makes is unchanged and is the one that matters:
+ * a query that matched nothing is the reader's search to fix, an empty catalogue is a provider to
+ * connect, and offering "connect a provider" to someone whose search simply missed is a dead end.
+ */
 export function resolveModelPickerEmptyState(input: {
   providerGroupCount: number;
   query: string;
@@ -91,161 +103,103 @@ export function resolveModelPickerEmptyState(input: {
   return { messageKey: "models.no_models_available", showConnectProvider: true };
 }
 
-/**
- * Whether a provider's models are showing.
- *
- * The accordion exists to keep a long list of providers scannable, and it earns that only when there
- * is more than one provider to scan. With a single provider it is a lid over the entire contents of
- * the dialog: the user opens "Models", sees one collapsed row, and has to click it to reach the only
- * thing the dialog is for. So a lone group is always open and its header is not a control.
- *
- * A search is the same argument: the user has already said what they are looking for, and matches
- * hidden behind a closed group are matches they cannot see.
- */
-export function isProviderGroupExpanded(input: {
-  groupId: string;
-  expandedIds: ReadonlySet<string>;
-  groupCount: number;
-  query: string;
-}): boolean {
-  if (input.groupCount <= 1) return true;
-  if (input.query.trim()) return true;
-  return input.expandedIds.has(input.groupId);
-}
+const CAPABILITY_ICONS: Record<ModelCapabilityFlag, typeof Wrench> = {
+  tools: Wrench,
+  reasoning: Sparkles,
+  imageInput: ImageIcon,
+  fileInput: FileText,
+  audioInput: Mic,
+  structuredOutputs: Braces,
+};
+
+const CAPABILITY_LABEL_KEYS: Record<ModelCapabilityFlag, string> = {
+  tools: "model_table.cap_tools",
+  reasoning: "model_table.cap_reasoning",
+  imageInput: "model_table.cap_image",
+  fileInput: "model_table.cap_file",
+  audioInput: "model_table.cap_audio",
+  structuredOutputs: "model_table.cap_structured",
+};
+
+const BAND_LABEL_KEYS: Record<RedrobPriceBand, string> = {
+  budget: "model_table.band_budget",
+  standard: "model_table.band_standard",
+  premium: "model_table.band_premium",
+  frontier: "model_table.band_frontier",
+};
 
 export function ModelPickerModal(props: ModelPickerModalProps) {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const [expandedProviders, setExpandedProviders] = useState<Set<string>>(new Set());
-
-  const isExpanded = (groupId: string) =>
-    isProviderGroupExpanded({
-      groupId,
-      expandedIds: expandedProviders,
-      groupCount: providerGroups.length,
-      query: props.query,
-    });
+  const [sort, setSort] = useState<ModelSort>(DEFAULT_MODEL_SORT);
+  const [filters, setFilters] = useState<ModelFilters>(EMPTY_FILTERS);
 
   const disabledSet = useMemo(
     () => new Set(props.disabledProviders ?? []),
     [props.disabledProviders],
   );
 
-  // Reset on open
   useEffect(() => {
-    if (props.open) {
-      props.setQuery("");
-    }
+    if (!props.open) return;
+    props.setQuery("");
+    setSort(DEFAULT_MODEL_SORT);
+    setFilters(EMPTY_FILTERS);
   }, [props.open]);
 
-  // Focus search
   useEffect(() => {
     if (!props.open) return;
     const frame = requestAnimationFrame(() => searchInputRef.current?.focus());
     return () => cancelAnimationFrame(frame);
   }, [props.open]);
 
-  // Filter by search. Token matching, so "Redrob Auto" (provider then model, the
-  // order the row is read in) and "anthropic opus" both resolve.
-  const filteredOptions = useMemo(() => {
-    if (!props.query.trim()) return props.options;
-    return props.options.filter((o) => matchesModelQuery(o, props.query));
-  }, [props.options, props.query]);
-
-  // Published prices and capabilities, so a row can say what a model costs.
   const { data: pricing } = useRedrobPricingQuery({ enabled: props.open });
 
-  // Group by provider
-  const providerGroups = useMemo<ProviderGroup[]>(() => {
-    const map = new Map<string, ProviderGroup>();
-    for (const opt of filteredOptions) {
-      let group = map.get(opt.providerID);
-      if (!group) {
-        group = {
-          id: opt.providerID,
-          name: opt.description ?? resolveProviderDisplayName(opt.providerID),
-          isNew: !!opt.isRecommended,
-          isDisabled: disabledSet.has(opt.providerID),
-          hasCurrent: false,
-          recommended: [],
-          other: [],
-        };
-        map.set(opt.providerID, group);
-      }
-      if (isRecommendedModel(opt.modelID)) {
-        group.recommended.push(opt);
-      } else {
-        group.other.push(opt);
-      }
-      if (modelEquals(props.current, { providerID: opt.providerID, modelID: opt.modelID })) {
-        group.hasCurrent = true;
-      }
-    }
-    const groups = [...map.values()];
-    for (const group of groups) {
-      group.recommended.sort((a, b) => a.title.localeCompare(b.title));
-      group.other.sort((a, b) => a.title.localeCompare(b.title));
-    }
-    return groups.sort((a, b) => {
-      if (a.isDisabled !== b.isDisabled) return a.isDisabled ? 1 : -1;
-      if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
-      if (a.hasCurrent !== b.hasCurrent) return a.hasCurrent ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-  }, [filteredOptions, props.current, disabledSet]);
-
-  // Auto-expand on search
-  useEffect(() => {
-    if (props.query.trim()) {
-      setExpandedProviders(new Set(providerGroups.map((g) => g.id)));
-    }
-  }, [props.query, providerGroups]);
-
-  // Expand current, organization-provided, and Redrob Cowork groups once they appear
-  // (options often load async).
-  const autoExpandedRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    if (!props.open) {
-      autoExpandedRef.current = new Set();
-      return;
-    }
-    const toExpand: string[] = [];
-    const queueExpand = (id: string) => {
-      if (!autoExpandedRef.current.has(id) && !toExpand.includes(id)) toExpand.push(id);
-    };
-    const current = providerGroups.find((group) => group.hasCurrent);
-    if (current) queueExpand(current.id);
-    if (toExpand.length === 0) return;
-    for (const id of toExpand) autoExpandedRef.current.add(id);
-    setExpandedProviders((prev) => {
-      const next = new Set(prev);
-      for (const id of toExpand) next.add(id);
-      return next;
-    });
-  }, [props.open, providerGroups]);
-
-  const toggleProvider = useCallback((id: string) => {
-    setExpandedProviders((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const handleSelect = useCallback(
-    (opt: ModelOption) => props.onSelect({ providerID: opt.providerID, modelID: opt.modelID }),
-    [props.onSelect],
+  const rows = useMemo(
+    () =>
+      buildModelRows(props.options, pricing).map((row) =>
+        disabledSet.has(row.providerId) ? { ...row, disabled: true } : row,
+      ),
+    [props.options, pricing, disabledSet],
   );
 
+  // Facets come from the WHOLE set, not from what is currently showing: a rail whose options vanish as
+  // you tick them cannot be un-ticked back to where you were.
+  const vendors = useMemo(() => vendorFacets(rows), [rows]);
+  const bands = useMemo(() => bandFacets(rows), [rows]);
+
+  const shown = useMemo(() => visibleRows(rows, filters, props.query), [rows, filters, props.query]);
+  const { auto, rest } = useMemo(() => orderedRows(shown, sort), [shown, sort]);
+
   const emptyState = resolveModelPickerEmptyState({
-    providerGroupCount: providerGroups.length,
+    providerGroupCount: shown.length,
     query: props.query,
   });
 
-  // Escape
+  const handleSelect = useCallback(
+    (row: ModelRow) => {
+      if (row.disabled) return;
+      props.onSelect({ providerID: row.providerId, modelID: row.modelId });
+      props.onClose({ restorePromptFocus: true });
+    },
+    [props.onSelect, props.onClose],
+  );
+
+  const toggleIn = <T,>(set: ReadonlySet<T>, value: T): Set<T> => {
+    const next = new Set(set);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    return next;
+  };
+
+  const filterCount = filters.vendors.size + filters.bands.size + filters.capabilities.size;
+
   useEffect(() => {
     if (!props.open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); props.onClose(); }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        props.onClose();
+      }
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
@@ -258,300 +212,366 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
         if (!open) props.onClose();
       }}
     >
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden sm:max-w-lg">
-        <DialogHeader>
+      {/*
+        Wide, and the padding is off.
+
+        This lists several hundred models against each other, which is a comparison, and a comparison
+        needs columns. At `max-w-lg` there was room for a name and nothing else, so every fact went onto
+        its own line and one row grew to 8 lines - 323 of those is not a list anyone reads. The viewport
+        cap follows the one existing precedent for a genuinely large surface in this app, the image
+        lightbox: `min(94vw, ...)` so it never exceeds the window, and `p-0` because a table supplies its
+        own edges. Below `lg` the primitive turns this into a full-width bottom sheet regardless.
+      */}
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,80rem)] flex-col overflow-hidden p-0 sm:max-w-[min(94vw,80rem)]">
+        <DialogHeader className="shrink-0 border-b border-border px-5 py-4">
           <DialogTitle>{t("models.title")}</DialogTitle>
-          <DialogDescription>
-            {resolveModelPickerSubtitle(props.subtitle)}
-          </DialogDescription>
+          <DialogDescription>{resolveModelPickerSubtitle(props.subtitle)}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          {/* Search */}
-          <div className="relative mb-4 shrink-0">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-dls-secondary" />
-            <input
-              ref={searchInputRef}
-              type="text"
-              className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface pl-9 pr-3 text-sm text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.2)]"
-              placeholder={t("models.search_placeholder")}
-              value={props.query}
-              onChange={(e) => props.setQuery(e.target.value)}
-            />
-          </div>
+        <div className="flex min-h-0 flex-1">
+          {/* Filter rail. Hidden on narrow viewports, where the sheet has no room for two panes. */}
+          <aside className="hidden w-52 shrink-0 flex-col overflow-y-auto border-e border-border px-3 py-3 lg:flex">
+            <div className="flex items-center justify-between pb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                {t("model_table.filters")}
+              </span>
+              {filterCount > 0 ? (
+                <button
+                  type="button"
+                  className="text-[11px] text-muted-foreground underline decoration-border underline-offset-2 hover:text-foreground"
+                  onClick={() => setFilters(EMPTY_FILTERS)}
+                >
+                  {t("model_table.clear")}
+                </button>
+              ) : null}
+            </div>
 
-          {/* Content */}
-          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 -mr-1">
-            {emptyState ? (
-              <div className="space-y-3 rounded-2xl border border-dls-border bg-dls-hover/30 px-4 py-6 text-center">
-                <div className="text-sm text-dls-secondary">
-                  {t(emptyState.messageKey)}
-                </div>
-                {emptyState.showConnectProvider ? (
-                  <Button variant="outline" onClick={props.onOpenSettings}>
-                    {t("models.connect_provider")}
-                  </Button>
-                ) : null}
-              </div>
-            ) : (
-              providerGroups.map((group) => (
-                <ProviderAccordion
-                  key={group.id}
-                  group={group}
-                  expanded={isExpanded(group.id)}
-                  collapsible={providerGroups.length > 1 && !props.query.trim()}
-                  current={props.current}
-                  canToggleProvider={!!props.onToggleProvider}
-                  onToggleExpand={() => toggleProvider(group.id)}
-                  onToggleProvider={props.onToggleProvider}
-                  onSelect={handleSelect}
-                  pricing={pricing}
+            <FacetGroup title={t("model_table.price_band")}>
+              {bands.map(({ band, count }) => (
+                <FacetCheck
+                  key={band}
+                  checked={filters.bands.has(band)}
+                  label={t(BAND_LABEL_KEYS[band])}
+                  count={count}
+                  onToggle={() =>
+                    setFilters((prev) => ({ ...prev, bands: toggleIn(prev.bands, band) }))
+                  }
                 />
-              ))
-            )}
+              ))}
+            </FacetGroup>
+
+            <FacetGroup title={t("model_table.capabilities")}>
+              {CAPABILITY_FLAGS.map((flag) => (
+                <FacetCheck
+                  key={flag}
+                  checked={filters.capabilities.has(flag)}
+                  label={t(CAPABILITY_LABEL_KEYS[flag])}
+                  onToggle={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      capabilities: toggleIn(prev.capabilities, flag),
+                    }))
+                  }
+                />
+              ))}
+            </FacetGroup>
+
+            <FacetGroup title={t("model_table.vendor")}>
+              {vendors.map((vendor) => (
+                <FacetCheck
+                  key={vendor.id}
+                  checked={filters.vendors.has(vendor.id)}
+                  label={vendor.name}
+                  count={vendor.count}
+                  onToggle={() =>
+                    setFilters((prev) => ({ ...prev, vendors: toggleIn(prev.vendors, vendor.id) }))
+                  }
+                />
+              ))}
+            </FacetGroup>
+          </aside>
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="shrink-0 border-b border-border px-4 py-3">
+              <div className="relative">
+                <Search
+                  size={15}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.2)]"
+                  placeholder={t("models.search_placeholder")}
+                  value={props.query}
+                  onChange={(event) => props.setQuery(event.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-auto">
+              {emptyState ? (
+                <div className="space-y-3 px-4 py-10 text-center">
+                  <div className="text-sm text-muted-foreground">{t(emptyState.messageKey)}</div>
+                  {emptyState.showConnectProvider ? (
+                    <Button variant="outline" onClick={props.onOpenSettings}>
+                      {t("models.connect_provider")}
+                    </Button>
+                  ) : null}
+                </div>
+              ) : (
+                <table className="w-full caption-bottom border-separate border-spacing-0 text-sm">
+                  <thead className="sticky top-0 z-10 bg-popover">
+                    <tr>
+                      <SortHeader
+                        label={t("model_table.col_model")}
+                        sortKey="model"
+                        sort={sort}
+                        onSort={setSort}
+                        className="min-w-[16rem]"
+                      />
+                      <SortHeader
+                        label={t("model_table.col_vendor")}
+                        sortKey="vendor"
+                        sort={sort}
+                        onSort={setSort}
+                      />
+                      <SortHeader
+                        label={t("model_table.col_price")}
+                        sortKey="price"
+                        sort={sort}
+                        onSort={setSort}
+                      />
+                      <SortHeader
+                        label={t("model_table.col_context")}
+                        sortKey="context"
+                        sort={sort}
+                        onSort={setSort}
+                        numeric
+                      />
+                      <th className="border-b border-border px-3 py-2 text-start text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                        {t("model_table.col_capabilities")}
+                      </th>
+                      <SortHeader
+                        label={t("model_table.col_cost")}
+                        sortKey="cost"
+                        sort={sort}
+                        onSort={setSort}
+                        numeric
+                      />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/*
+                      `auto` above the sort, not inside it. It is the default and the recommendation, and
+                      in the old list it led only because "Auto" starts with an A - any other order
+                      buried the router among 322 alternatives.
+                    */}
+                    {auto.map((row) => (
+                      <ModelTableRow
+                        key={row.key}
+                        row={row}
+                        pinned
+                        selected={modelEquals(props.current, {
+                          providerID: row.providerId,
+                          modelID: row.modelId,
+                        })}
+                        pricingLabel={formatModelPriceRange(pricing?.byModelId[row.modelId])}
+                        onSelect={handleSelect}
+                      />
+                    ))}
+                    {rest.map((row) => (
+                      <ModelTableRow
+                        key={row.key}
+                        row={row}
+                        selected={modelEquals(props.current, {
+                          providerID: row.providerId,
+                          modelID: row.modelId,
+                        })}
+                        pricingLabel={formatModelPriceRange(pricing?.byModelId[row.modelId])}
+                        onSelect={handleSelect}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <DialogFooter className="shrink-0">
-          <DialogClose render={<Button variant="outline" />}>
-            {t("models.done")}
-          </DialogClose>
+        <DialogFooter className="shrink-0 border-t border-border px-5 py-3">
+          <span className="me-auto self-center text-xs text-muted-foreground">
+            {t("model_table.count").replace("{shown}", String(shown.length)).replace("{total}", String(rows.length))}
+          </span>
+          <DialogClose render={<Button variant="outline" />}>{t("models.done")}</DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Provider accordion                                                 */
-/* ------------------------------------------------------------------ */
-
-function ProviderAccordion({
-  group,
-  expanded,
-  collapsible,
-  current,
-  canToggleProvider,
-  onToggleExpand,
-  onToggleProvider,
-  onSelect,
-  pricing,
-}: {
-  group: ProviderGroup;
-  expanded: boolean;
-  /** False when the group cannot be closed, so its header must not look like a control. */
-  collapsible: boolean;
-  current: ModelRef;
-  canToggleProvider: boolean;
-  onToggleExpand: () => void;
-  onToggleProvider?: (providerId: string, enabled: boolean) => void;
-  onSelect: (opt: ModelOption) => void;
-  pricing?: RedrobPricing;
-}) {
-  const totalModels = group.recommended.length + group.other.length;
-  const Chevron = expanded ? ChevronDown : ChevronRight;
-
+function FacetGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className={group.isDisabled ? "opacity-50" : ""}>
-      {/* Provider header */}
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          className={`flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-            collapsible ? "hover:bg-dls-hover" : "cursor-default"
-          }`}
-          onClick={collapsible ? onToggleExpand : undefined}
-          aria-expanded={collapsible ? expanded : undefined}
-          disabled={!collapsible}
-        >
-          {collapsible ? (
-            <Chevron size={14} className="shrink-0 text-dls-secondary" />
-          ) : (
-            // No affordance where there is no action. A chevron on a group that cannot close is an
-            // invitation to click something that does nothing.
-            <span aria-hidden className="w-3.5 shrink-0" />
-          )}
-          <ProviderIcon providerId={group.id} size={18} className="shrink-0 text-dls-text" />
-          <div className="min-w-0 flex-1">
-            <span className="text-[13px] font-medium text-dls-text">{group.name}</span>
-            {" "}
-            <span className="ml-2 text-[11px] text-dls-secondary">
-              {totalModels} model{totalModels === 1 ? "" : "s"}
-            </span>
-          </div>
-          {" "}
-          <span className="flex shrink-0 items-center gap-1.5">
-            {group.isNew ? (
-              <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">New</span>
-            ) : null}
-            {group.hasCurrent ? (
-              <span className="rounded-md bg-success-soft px-1.5 py-0.5 text-[10px] font-medium text-success-ink">{t("model_picker.current")}</span>
-            ) : null}
-          </span>
-        </button>
-        {canToggleProvider ? (
-          <button
-            type="button"
-            className={[
-              "mr-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors",
-              group.isDisabled
-                ? "border border-dls-border text-dls-secondary hover:bg-dls-hover hover:text-dls-text"
-                : "bg-success-soft/70 text-success-ink hover:bg-success-soft",
-            ].join(" ")}
-            onClick={(e) => { e.stopPropagation(); onToggleProvider?.(group.id, group.isDisabled); }}
-            title={group.isDisabled ? "Enable this provider" : "Disable this provider"}
-          >
-            {group.isDisabled ? "Enable" : "Enabled"}
-          </button>
-        ) : null}
-      </div>
-
-      {/* Models */}
-      {expanded && !group.isDisabled ? (
-        <div className="ml-9 space-y-0.5 pb-2 pt-0.5">
-          {group.recommended.length > 0 ? (
-            <>
-              <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">{t("model_picker.recommended")}</div>
-              {group.recommended.map((opt) => (
-                <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} pricing={pricing} recommended />
-              ))}
-            </>
-          ) : null}
-          {group.other.length > 0 ? (
-            <>
-              {group.recommended.length > 0 ? (
-                <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-dls-secondary">{t("model_picker.all_models")}</div>
-              ) : null}
-              {group.other.map((opt) => (
-                <DefaultModelRow key={opt.modelID} opt={opt} current={current} onSelect={onSelect} pricing={pricing} />
-              ))}
-            </>
-          ) : null}
-        </div>
-      ) : null}
+    <div className="pb-3">
+      <div className="pb-1 text-[11px] font-medium text-muted-foreground">{title}</div>
+      <div className="flex flex-col">{children}</div>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Default tab: model row (click to select as default)                */
-/* ------------------------------------------------------------------ */
-
-function DefaultModelRow({
-  opt, current, onSelect, recommended, pricing,
+function FacetCheck({
+  checked,
+  label,
+  count,
+  onToggle,
 }: {
-  opt: ModelOption; current: ModelRef; onSelect: (opt: ModelOption) => void; recommended?: boolean;
-  pricing?: RedrobPricing;
+  checked: boolean;
+  label: string;
+  count?: number;
+  onToggle: () => void;
 }) {
-  const active = modelEquals(current, { providerID: opt.providerID, modelID: opt.modelID });
-  // A router provider lists every vendor's model under its own name, so the row
-  // states the vendor the model actually comes from.
-  const vendor = inferModelVendor(opt.modelID);
-  // Published console facts. Every one is optional: a catalog that omits a field
-  // renders no chip for it rather than a zero or a guess.
-  const modelPricing = pricing?.byModelId[opt.modelID];
-  const price = formatModelPriceRange(modelPricing);
-  const multiplier = formatPriceMultiplier(modelPricing);
-  const context = formatTokenCount(modelPricing?.capabilities.maxContextTokens);
-  const reasoning = (modelPricing?.capabilities.thinkingLevels.length ?? 0) > 0;
-  const thinkingLevels = formatThinkingLevels(modelPricing);
-  const tier = formatPriceTier(modelPricing);
-  // Four strengths at most: the console publishes up to eleven, and a row that
-  // lists everything stops distinguishing anything.
-  const strengths = (modelPricing?.strengths ?? []).slice(0, 4);
-  const estimates = (pricing?.costProfiles ?? []).flatMap((profile) => {
-    const estimate = estimatedCostFor(modelPricing, profile.id);
-    const amount = formatUsdAmount(estimate?.costUsd);
-    if (!amount) return [];
-    return [{
-      profile: profile.id,
-      text: t("pricing.per_profile", { label: profile.label, amount }),
-      title: profile.description
-        ? t("pricing.per_profile_hint", {
-            description: profile.description,
-            requests: String(estimate?.requestsPerDollar ?? ""),
-          })
-        : t("pricing.per_request_hint"),
-    }];
-  });
-  const fastMode = modelPricing?.capabilities.fastMode === true;
-  const dataShare = modelPricing?.capabilities.requiresProviderDataShare === true;
-
   return (
     <button
       type="button"
-      className={[
-        "flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left transition-colors",
-        active ? "bg-success-soft/50" : "hover:bg-dls-hover",
-      ].join(" ")}
-      onClick={() => onSelect(opt)}
+      onClick={onToggle}
+      aria-pressed={checked}
+      className="flex items-center gap-2 rounded-md px-1.5 py-1 text-start text-[13px] text-foreground/90 hover:bg-foreground/5"
     >
-      <span className="flex w-full items-center gap-2">
-        {recommended ? <Star size={12} className="shrink-0 text-warning" /> : <span className="w-3 shrink-0" />}
-        {vendor ? (
-          <ProviderIcon
-            providerId={vendor.id}
-            providerName={vendor.name}
-            size={12}
-            className="shrink-0 opacity-70"
-          />
-        ) : null}
-        <span className="min-w-0 flex-1">
-          <span className={["text-[12px]", active ? "font-medium text-dls-text" : "text-dls-text"].join(" ")}>{opt.title}</span>
-          {vendor ? (
-            <span className="ml-2 text-[10px] text-dls-secondary">{vendor.name}</span>
-          ) : null}
-          <span className="ml-2 font-mono text-[10px] text-dls-secondary/60">{opt.modelID}</span>
-        </span>
-        {price ? (
-          <span className="shrink-0 font-mono text-[10px] text-dls-secondary" title={t("pricing.per_million_hint")}>
-            {price}
-          </span>
-        ) : null}
-        {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}
+      <span
+        className={cn(
+          "flex size-3.5 shrink-0 items-center justify-center rounded border",
+          checked ? "border-transparent bg-[var(--dls-accent)] text-[var(--dls-accent-fg)]" : "border-border",
+        )}
+      >
+        {checked ? <Check size={11} strokeWidth={3} /> : null}
       </span>
-      {price || context || reasoning || fastMode || dataShare || strengths.length > 0 ? (
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 ps-5 text-[10px] text-dls-secondary">
-          {tier ? <span title={t("pricing.tier_hint")}>{tier}</span> : null}
-          {/* Dollars for a real request, per profile the console defines: a short
-              question, a coding turn, a long document. This is the answer to "is
-              it cheap?" that a rate per million tokens never gave. */}
-          {estimates.map((estimate) => (
-            <span key={estimate.profile} title={estimate.title}>
-              {estimate.text}
-            </span>
-          ))}
-          {context ? <span>{t("pricing.context_window", { tokens: context })}</span> : null}
-          {/* The levels themselves, not just that the feature exists: which ones
-              a model offers is what the reader is choosing between, and the
-              catalogue was already sending them. */}
-          {reasoning ? (
-            <span>
-              {thinkingLevels
-                ? t("pricing.reasoning_levels", { levels: thinkingLevels })
-                : t("pricing.reasoning_supported")}
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {count === undefined ? null : (
+        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{count}</span>
+      )}
+    </button>
+  );
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+  numeric,
+  className,
+}: {
+  label: string;
+  sortKey: ModelSortKey;
+  sort: ModelSort;
+  onSort: (sort: ModelSort) => void;
+  numeric?: boolean;
+  className?: string;
+}) {
+  const active = sort.key === sortKey;
+  const Arrow = sort.direction === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <th
+      scope="col"
+      aria-sort={active ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}
+      className={cn("border-b border-border p-0", className)}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(nextSort(sort, sortKey))}
+        className={cn(
+          "flex w-full items-center gap-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors hover:text-foreground",
+          numeric ? "justify-end" : "justify-start",
+          active ? "text-foreground" : "text-muted-foreground",
+        )}
+      >
+        <span>{label}</span>
+        {active ? <Arrow size={12} /> : null}
+      </button>
+    </th>
+  );
+}
+
+/**
+ * One line per model, and one line only.
+ *
+ * Every fact is a cell, so the eye compares down a column instead of reading 8 lines per model. The id
+ * is NOT repeated beside the name: it was printed twice per row, and the name is derived from it. A
+ * long id truncates rather than wrapping, because wrapping is what split `anthropic/claude-opus-` from
+ * its `4`.
+ */
+function ModelTableRow({
+  row,
+  selected,
+  pinned,
+  pricingLabel,
+  onSelect,
+}: {
+  row: ModelRow;
+  selected: boolean;
+  pinned?: boolean;
+  pricingLabel: string | null;
+  onSelect: (row: ModelRow) => void;
+}) {
+  const cost = formatUsdAmount(row.turnCostUsd ?? undefined);
+  const context = formatTokenCount(row.contextTokens ?? undefined);
+  return (
+    <tr
+      onClick={() => onSelect(row)}
+      aria-selected={selected}
+      aria-disabled={row.disabled || undefined}
+      className={cn(
+        "cursor-pointer border-b border-border/60 transition-colors",
+        selected ? "bg-[rgba(var(--dls-accent-rgb),0.10)]" : "hover:bg-foreground/[0.04]",
+        row.disabled && "cursor-not-allowed opacity-50",
+        pinned && "bg-foreground/[0.03]",
+      )}
+    >
+      <td className="max-w-[22rem] px-3 py-1.5">
+        <span className="flex min-w-0 items-center gap-2">
+          {selected ? (
+            <Check size={13} className="shrink-0 text-[var(--dls-accent)]" />
+          ) : (
+            <span aria-hidden className="w-[13px] shrink-0" />
+          )}
+          <ProviderIcon providerId={row.modelId} size={14} className="shrink-0" />
+          <span className="min-w-0 truncate font-medium text-foreground" title={row.modelId}>
+            {row.title}
+          </span>
+          {pinned ? (
+            <span className="shrink-0 rounded bg-[var(--dls-accent)] px-1.5 py-px text-[10px] font-medium text-[var(--dls-accent-fg)]">
+              {t("model_table.recommended")}
             </span>
           ) : null}
-          {fastMode ? <span>{t("pricing.fast_mode")}</span> : null}
-          {dataShare ? <span className="text-warning-ink">{t("pricing.data_share_required")}</span> : null}
         </span>
-      ) : null}
-      {/* The console's own words for what the model is good at. Rendered as
-          published: paraphrasing another service's claim about its own models in
-          the client is how the two end up disagreeing. */}
-      {strengths.length > 0 ? (
-        <span className="flex flex-wrap items-center gap-1 ps-5">
-          {strengths.map((strength) => (
-            <span
-              key={strength}
-              className="rounded-full border border-dls-border px-1.5 py-px text-[10px] text-dls-secondary"
-            >
-              {strength}
-            </span>
-          ))}
+      </td>
+      <td className="whitespace-nowrap px-3 py-1.5 text-muted-foreground">
+        {row.vendorName || row.vendorId || "—"}
+      </td>
+      <td className="whitespace-nowrap px-3 py-1.5 text-muted-foreground" title={pricingLabel ?? undefined}>
+        {row.priceBand ? t(BAND_LABEL_KEYS[row.priceBand]) : "—"}
+      </td>
+      <td className="whitespace-nowrap px-3 py-1.5 text-end tabular-nums text-muted-foreground">
+        {context ?? "—"}
+      </td>
+      <td className="px-3 py-1.5">
+        <span className="flex items-center gap-1.5">
+          {CAPABILITY_FLAGS.filter((flag) => row.capabilities.has(flag)).map((flag) => {
+            const Icon = CAPABILITY_ICONS[flag];
+            return (
+              <Icon
+                key={flag}
+                size={13}
+                className="shrink-0 text-muted-foreground"
+                aria-label={t(CAPABILITY_LABEL_KEYS[flag])}
+              />
+            );
+          })}
         </span>
-      ) : null}
-    </button>
+      </td>
+      <td className="whitespace-nowrap px-3 py-1.5 text-end tabular-nums text-muted-foreground">
+        {cost ?? "—"}
+      </td>
+    </tr>
   );
 }

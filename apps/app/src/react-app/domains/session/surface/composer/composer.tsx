@@ -13,6 +13,7 @@ import {
   slugifyLibraryItemName,
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
+import { EffortSelect } from "@/components/effort-select";
 import { ModelSelect } from "@/components/model-select";
 import { LexicalPromptEditor, syncAttachmentChipStatus, type LexicalPromptEditorHandle } from "./editor";
 import { listRunningAppsForMention } from "./app-mentions";
@@ -289,18 +290,34 @@ export function ReactSessionComposer(props: ComposerProps) {
     if (escapeTimerRef.current) clearTimeout(escapeTimerRef.current);
   }, []);
 
+  /**
+   * Put the caret back in the editor.
+   *
+   * Sending left the composer unfocused, so the next thing typed went nowhere and every message cost a
+   * click to get back. The editor is a contenteditable inside this root, and the draft being cleared on
+   * send re-renders it, so the focus call has to land after that render - hence the frame. This is the
+   * same lookup the cross-app FOCUS_PROMPT_EVENT handler does; it existed and simply was not called on
+   * the one path a person uses constantly.
+   */
+  const focusEditor = useCallback(() => {
+    requestAnimationFrame(() => {
+      const editable = rootRef.current?.querySelector<HTMLElement>("[contenteditable='true']");
+      editable?.focus();
+    });
+  }, []);
+
   // Editor submit (Enter). While idle this sends normally; while busy
   // Enter queues until the agent finishes, and Cmd/Ctrl+Enter steers.
   const handleEditorSubmit = useCallback((options: { queue: boolean }) => {
     const hasContent = props.draft.trim().length > 0 || props.attachments.length > 0;
     if (!hasContent) return;
     if (props.busy) {
-      if (options.queue) void props.onSteer();
-      else void props.onQueue();
+      if (options.queue) void Promise.resolve(props.onSteer()).finally(focusEditor);
+      else void Promise.resolve(props.onQueue()).finally(focusEditor);
       return;
     }
-    void props.onSend();
-  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue]);
+    void Promise.resolve(props.onSend()).finally(focusEditor);
+  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue, focusEditor]);
 
   const slashCommandQuery = getSlashCommandQuery(props.draft);
   const slashOpenNext = slashCommandQuery !== null;
@@ -1474,6 +1491,21 @@ export function ReactSessionComposer(props: ComposerProps) {
                     if (!props.steering) props.onModelVariantChange(value);
                   }}
                 />
+                {/*
+                  Effort as its own button, beside the model button rather than inside it. The level was
+                  previously a read-only chip on the model control and could only be CHANGED by clicking a
+                  model and walking into a submenu, which is why the interaction was unreadable.
+                  `EffortSelect` renders nothing when the selected model publishes no levels.
+                */}
+                <EffortSelect
+                  options={props.modelBehaviorOptions ?? []}
+                  value={props.modelVariant ?? null}
+                  label={props.modelVariantLabel}
+                  disabled={props.steering}
+                  onChange={(value) => {
+                    if (!props.steering) props.onModelVariantChange(value);
+                  }}
+                />
                 {props.modelUnavailable ? (
                   <span className="max-w-[20rem] truncate text-xs font-medium text-destructive-ink">
                     {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
@@ -1501,7 +1533,9 @@ export function ReactSessionComposer(props: ComposerProps) {
                       ? props.onStop
                       : !canSend
                         ? undefined
-                        : props.onSend
+                        : // Clicking the button takes focus out of the editor, so it is restored on the
+                          // same path Enter uses. Without this, sending by click always cost a click back.
+                          () => void Promise.resolve(props.onSend()).finally(focusEditor)
                   }
                   disabled={props.disabled || (!props.busy && !canSend)}
                   aria-label={props.busy ? t("composer.stop") : t("composer.run_task")}
