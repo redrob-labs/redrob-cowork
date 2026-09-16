@@ -410,7 +410,12 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border px-5 py-3">
+        {/*
+          `mx-0 mb-0` because `DialogFooter` carries `-mx-6 -mb-6` to escape the dialog's own `p-6`, and
+          this dialog is `p-0`. Left alone it hung 24px past the left edge and clipped its own first
+          character - visible on screen as "howing 61 of 61".
+        */}
+        <DialogFooter className="mx-0 mb-0 shrink-0 border-t border-border px-5 py-3">
           <span className="me-auto self-center text-xs text-muted-foreground">
             {t("model_table.count").replace("{shown}", String(shown.length)).replace("{total}", String(rows.length))}
           </span>

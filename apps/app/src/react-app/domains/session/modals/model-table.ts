@@ -96,10 +96,44 @@ export function isAutoOption(option: Pick<ModelOption, "modelID">): boolean {
   return option.modelID === AUTO_MODEL_ID;
 }
 
+/**
+ * The vendor a model id names, and how to show it.
+ *
+ * Read from the id's OWN prefix, because 315 of the catalogue's 323 ids are literally `vendor/model` -
+ * the vendor is right there. `inferModelVendor` throws that prefix away and matches the model NAME
+ * against a hand-kept table of ten vendors, which is the right tool for a bare id like `claude-opus-5`
+ * and useless for `bytedance-seed/seed-1.6` or `baidu/ernie-4.5-vl`: it returns null, and the column
+ * said "—" for most of the catalogue. Verified on screen before this was changed - every row read "—"
+ * and the vendor filter had no options at all.
+ *
+ * So the prefix is the id, and `inferModelVendor` is consulted only for a nicer display NAME when it
+ * happens to recognise the model. A hyphenated vendor is title-cased per segment, which is what makes
+ * `bytedance-seed` read as "Bytedance Seed" rather than as its slug.
+ */
+function vendorOfModel(option: ModelOption): { id: string; name: string } {
+  const id = option.modelID.trim().toLowerCase();
+  const slash = id.indexOf("/");
+  const prefix = slash > 0 ? id.slice(0, slash) : "";
+  const known = inferModelVendor(option.modelID);
+  if (prefix) {
+    return { id: prefix, name: known?.name ?? titleCaseVendor(prefix) };
+  }
+  // No prefix: a curated bare id like `claude-sonnet-5`, where the name table is the only signal.
+  return known ? { id: known.id, name: known.name } : { id: "", name: "" };
+}
+
+function titleCaseVendor(slug: string): string {
+  return slug
+    .split(/[-_.]/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function buildModelRow(option: ModelOption, pricing?: RedrobPricing): ModelRow {
   const entry = pricing?.byModelId[option.modelID];
   const caps = entry?.capabilities;
-  const vendor = inferModelVendor(option.modelID);
+  const vendor = vendorOfModel(option);
   const flags = new Set<ModelCapabilityFlag>();
   if (caps?.tools) flags.add("tools");
   if (caps?.imageInput) flags.add("imageInput");
@@ -116,8 +150,8 @@ export function buildModelRow(option: ModelOption, pricing?: RedrobPricing): Mod
     modelId: option.modelID,
     providerId: option.providerID,
     title: option.title,
-    vendorId: vendor?.id ?? "",
-    vendorName: vendor?.name ?? "",
+    vendorId: vendor.id,
+    vendorName: vendor.name,
     isAuto: isAutoOption(option),
     priceBand: entry?.priceBand ?? null,
     priceRank: priceTier(entry),
