@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import * as React from "react"
 import { X } from "lucide-react"
 
@@ -49,7 +50,7 @@ export function ImageAttachmentBadge({
             onRemove()
           }}
           aria-label={`Remove ${alt}`}
-          title="Remove"
+          title={t("common.remove")}
         >
           <X className="size-3" />
         </button>

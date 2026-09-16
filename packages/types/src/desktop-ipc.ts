@@ -531,6 +531,18 @@ export type DesktopCommandMap = {
   __setZoomFactor: { args: [factor: number]; result: boolean };
   __setNativeTheme: { args: [theme: string]; result: unknown };
   __setApplicationMenuVisible: { args: [visible: boolean]; result: unknown };
+  /**
+   * Persist the hide-title-bar preference where the MAIN process reads it at startup.
+   *
+   * `applied: false` is a real answer, not a failure: on macOS the title bar is already `hiddenInset`, so
+   * there is nothing to change and `reason: "macos-always-hidden"` says which case it is. `needsRestart`
+   * is always true where it applies, because `frame` and `titleBarStyle` are BrowserWindow construction
+   * options and cannot be changed on a live window.
+   */
+  __setTitleBarHidden: {
+    args: [hidden: boolean];
+    result: { applied: boolean; hidden?: boolean; needsRestart?: boolean; reason?: string };
+  };
 };
 
 export type DesktopCommandName = keyof DesktopCommandMap;

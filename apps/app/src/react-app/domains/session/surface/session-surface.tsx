@@ -1738,8 +1738,25 @@ export function SessionSurface(props: SessionSurfaceProps) {
     void sendDraft(buildDraft(text, []));
   }, [buildDraft, props.sessionId, renderedMessages, replaceComposerDraft, sendDraft]);
 
-  const handleRestoreRevertedSession = useCallback(() => {
-    if (!props.onRestoreRevertedSession || restoringRevertedMessages) return;
+  /*
+    Summarise the conversation now, on demand.
+
+    Sent as the `/compact` draft rather than reaching for the compaction action directly. That command
+    already routes to `compactCurrentSession` in the actions store - the composer has recognised
+    `/^\/compact/` since before this button existed - so the only thing missing was a way to invoke it
+    without knowing the command's name. Reusing the recognised path means the button cannot drift from
+    what typing the command does, which is the same reason the retry button re-sends a draft instead of
+    calling a second regenerate path.
+
+    No revert boundary: compaction rewrites history behind the latest turn rather than replacing a turn.
+  */
+  const handleCompactSession = useCallback(() => {
+    if (sending) return;
+    replaceComposerDraft(props.sessionId, "/compact", null);
+    void sendDraft(buildDraft("/compact", []));
+  }, [buildDraft, props.sessionId, replaceComposerDraft, sendDraft, sending]);
+
+  const handleRestoreRevertedSession = useCallback(() => {    if (!props.onRestoreRevertedSession || restoringRevertedMessages) return;
     setRestoringRevertedMessages(true);
     void props.onRestoreRevertedSession(props.sessionId)
       .finally(() => setRestoringRevertedMessages(false));
@@ -2002,6 +2019,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
         attachmentsDisabledReason={props.attachmentsDisabledReason}
         modelVariantLabel={sessionModel.modelVariantLabel}
         contextUsedPercent={contextUsedPercent}
+        onCompactSession={handleCompactSession}
+        compactingSession={sending}
         modelVariant={sessionModel.modelVariant}
         modelBehaviorOptions={sessionModel.modelBehaviorOptions}
         onModelVariantChange={handleModelVariantChange}

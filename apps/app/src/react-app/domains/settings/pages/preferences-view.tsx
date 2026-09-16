@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "@/i18n";
 import {
   DESKTOP_NOTIFICATION_PREFERENCE_VALUES,
@@ -36,6 +37,9 @@ export type PreferencesViewProps = {
   autoCompactContext: boolean;
   autoCompactContextBusy: boolean;
   onToggleAutoCompactContext: () => void;
+  compactThreshold: number;
+  compactThresholdBusy: boolean;
+  onCompactThresholdChange: (percent: number) => void;
   analyticsEnabled: boolean;
   onToggleAnalytics: () => void;
   desktopNotifications: DesktopNotificationPreference;
@@ -101,6 +105,56 @@ export function PreferencesView(props: PreferencesViewProps) {
                 disabled={props.busy || props.autoCompactContextBusy}
                 onCheckedChange={props.onToggleAutoCompactContext}
               />
+            </LayoutSectionItemHeaderActions>
+          </LayoutSectionItemHeader>
+        </LayoutSectionItem>
+
+        {/*
+          When compaction fires.
+
+          Only meaningful while auto-compaction is on, so it is disabled rather than hidden when the switch
+          above is off - hiding it would make the toggle look like the whole of the feature, which is how
+          the engine and the app came to disagree about the default in the first place.
+
+          The tooltip carries the explanation because the number alone does not have one: "70%" tells the
+          user nothing about what is summarised, what is kept, or why a lower number is not simply safer.
+        */}
+        <LayoutSectionItem>
+          <LayoutSectionItemHeader>
+            <LayoutSectionItemTitle>
+              <Tooltip>
+                {/* Base UI takes a `render` element, not Radix's `asChild`. */}
+                <TooltipTrigger
+                  render={
+                    <span className="cursor-help underline decoration-dotted decoration-muted-foreground/50 underline-offset-4" />
+                  }
+                >
+                  {t("settings.compact_threshold")}
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">{t("settings.compact_threshold_tooltip")}</TooltipContent>
+              </Tooltip>
+            </LayoutSectionItemTitle>
+            <LayoutSectionItemDescription>
+              {t("settings.compact_threshold_desc", { percent: String(props.compactThreshold) })}
+            </LayoutSectionItemDescription>
+            <LayoutSectionItemHeaderActions>
+              <div className="flex items-center gap-3">
+                <input
+                  aria-label={t("settings.compact_threshold")}
+                  className="h-1.5 w-40 cursor-pointer appearance-none rounded-full bg-dls-border accent-dls-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={props.busy || props.compactThresholdBusy || !props.autoCompactContext}
+                  max={95}
+                  min={40}
+                  onChange={(event) => props.onCompactThresholdChange(Number(event.target.value))}
+                  step={5}
+                  type="range"
+                  value={props.compactThreshold}
+                />
+                {/* Tabular so the row does not shift width as the number changes under the drag. */}
+                <span className="w-10 text-right text-xs tabular-nums text-muted-foreground">
+                  {props.compactThreshold}%
+                </span>
+              </div>
             </LayoutSectionItemHeaderActions>
           </LayoutSectionItemHeader>
         </LayoutSectionItem>

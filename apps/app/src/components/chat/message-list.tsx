@@ -657,7 +657,7 @@ const UserMessage = React.memo(
                     <MessageTimestamp message={message} className="mr-1.5" />
                     <CopyMessageButton messages={[message]} />
                     {messageText ? (
-                      <MessageAction tooltip="Edit message">
+                      <MessageAction tooltip={t("message.edit")}>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -668,7 +668,7 @@ const UserMessage = React.memo(
                         </Button>
                       </MessageAction>
                     ) : null}
-                    <MessageAction tooltip="Branch in new chat">
+                    <MessageAction tooltip={t("message.branch_new_chat")}>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -678,11 +678,11 @@ const UserMessage = React.memo(
                         <Split className="rotate-90" />
                       </Button>
                     </MessageAction>
-                    <MessageAction tooltip="Revert">
+                    <MessageAction tooltip={t("message.revert")}>
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label="Revert"
+                        aria-label={t("message.revert")}
                         onClick={() => onRevertToUserMessage(message.id)}
                       >
                         <Undo2 />
@@ -1190,7 +1190,7 @@ function MessageGroup({
                     <RotateCcw />
                   </Button>
                 </MessageAction>
-                <MessageAction tooltip="Branch in new chat">
+                <MessageAction tooltip={t("message.branch_new_chat")}>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -1200,11 +1200,11 @@ function MessageGroup({
                     <Split className="rotate-90" />
                   </Button>
                 </MessageAction>
-                <MessageAction tooltip="Revert">
+                <MessageAction tooltip={t("message.revert")}>
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Revert"
+                    aria-label={t("message.revert")}
                     onClick={() => onRevertToUserMessage(lastRealItem.message.id)}
                   >
                     <Undo2 />
