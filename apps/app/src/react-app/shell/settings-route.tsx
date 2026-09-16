@@ -1447,6 +1447,18 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   }, [refreshRouteState]);
 
   // Load auto-compaction state from OpenCode config on workspace change.
+  //
+  // The toggle used to read `auto !== false`, so an UNSET value displayed as ON. The engine reads the
+  // same field as `auto !== true` (packages/redrob/src/session/overflow.ts), i.e. unset means OFF and
+  // compaction never fires. The two defaults were opposite, and the visible one was the wrong one: a
+  // conversation grew until the provider refused it with a size error, while the setting said the app
+  // was already handling that.
+  //
+  // So the display now states what the engine will actually do, and an unset value is written ON once
+  // rather than being displayed ON forever. That write is the app declaring its own default - long
+  // conversations are the normal case in a desktop workspace, and summarising one is a better outcome
+  // than a request that fails at the provider's limit. It happens only when the field is absent, so a
+  // user who has deliberately turned it off keeps it off.
   useEffect(() => {
     if (!redrobClient || !selectedWorkspaceId) return;
     const workspaceId = routeStateRef.current.runtimeWorkspaceId?.trim() || selectedWorkspaceId;
@@ -1459,7 +1471,20 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         const auto = compaction && typeof compaction === "object" && "auto" in compaction
           ? (compaction as { auto?: boolean }).auto
           : undefined;
-        setAutoCompactContext(auto !== false);
+        if (auto === undefined) {
+          setAutoCompactContext(true);
+          setAutoCompactContextLoaded(true);
+          try {
+            await redrobClient.patchConfig(workspaceId, {
+              opencode: { compaction: { auto: true } },
+            });
+          } catch {
+            // A workspace whose config cannot be written still reads correctly next time; the toggle
+            // stays usable, and failing loudly here would block the settings page over a default.
+          }
+          return;
+        }
+        setAutoCompactContext(auto === true);
         setAutoCompactContextLoaded(true);
       } catch {
         if (!cancelled) setAutoCompactContextLoaded(true);

@@ -78,6 +78,7 @@ import {
   useComposerStateStore,
 } from "./composer-state-store";
 import { MessageList } from "@/components/chat/message-list";
+import { getMessagesText } from "@/components/chat/utils";
 import { MessageListProvider, type DispatchAction } from "@/components/chat/message-list-provider";
 import { OpenTargetProvider, type OpenTargetOptions } from "@/lib/target-provider";
 import type { ThreadStatus } from "@/lib/messages";
@@ -1677,6 +1678,44 @@ export function SessionSurface(props: SessionSurfaceProps) {
     void typeComposerText(text, messageId);
   }, [typeComposerText]);
 
+  /**
+   * Re-run a turn.
+   *
+   * This engine has no regenerate endpoint, and it cannot have one in the shape people expect: a revert
+   * with no partID snaps the boundary back to the PRECEDING USER MESSAGE, and the next prompt deletes
+   * everything from that boundary forward before running. So retry is definitionally edit-and-resend
+   * with the text unchanged, and it reuses the same path - seed the composer with the original text and
+   * the boundary, then send - so the abort / revert / prompt / unrevert-on-failure sequence that edit
+   * already gets is not written a second time here.
+   *
+   * The clicked id can be an assistant message, so the user turn is resolved by walking backwards. If
+   * there is no user message before it there is nothing to re-send and the click is a no-op rather than
+   * a revert that would delete the turn and put nothing back.
+   */
+  const handleRetryMessage = useCallback((messageId: string) => {
+    const index = renderedMessages.findIndex((message) => message.id === messageId);
+    if (index < 0) return;
+    let boundary: UIMessage | undefined;
+    for (let cursor = index; cursor >= 0; cursor -= 1) {
+      const candidate = renderedMessages[cursor];
+      if (candidate?.role === "user") {
+        boundary = candidate;
+        break;
+      }
+    }
+    if (!boundary) return;
+    const text = getMessagesText([boundary]).trim();
+    if (!text) return;
+    /*
+      Seed first, then send: `buildDraft` reads the revert boundary out of the composer store rather
+      than taking it as an argument, so the store has to know it before the draft is built. Sending
+      directly rather than going through `handleSend` avoids waiting for the local draft state to catch
+      up with the store, which would be a race on a click.
+    */
+    replaceComposerDraft(props.sessionId, text, boundary.id);
+    void sendDraft(buildDraft(text, []));
+  }, [buildDraft, props.sessionId, renderedMessages, replaceComposerDraft, sendDraft]);
+
   const handleRestoreRevertedSession = useCallback(() => {
     if (!props.onRestoreRevertedSession || restoringRevertedMessages) return;
     setRestoringRevertedMessages(true);
@@ -1874,6 +1913,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
                       onRevertToUserMessage={handleRevertToUserMessage}
                       onForkAtMessage={handleForkAtMessage}
                       onEditUserMessage={handleEditUserMessage}
+                      onRetryMessage={handleRetryMessage}
                     >
                       <MessageList
                         messages={renderedMessages}

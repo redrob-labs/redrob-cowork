@@ -740,6 +740,7 @@ const ko = {
   "memory.tab_label": "메모리",
   "memory.undo": "실행 취소",
   "message.attached_file": "첨부 파일",
+  "message.retry": "이 답변 다시 생성",
   "message.branch_new_chat": "새 대화로 분기",
   "message.code_block_copied": "코드 블록을 복사했습니다",
   "message.copied": "복사됨",

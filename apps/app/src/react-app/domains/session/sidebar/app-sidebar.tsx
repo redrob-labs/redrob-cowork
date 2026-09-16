@@ -2303,7 +2303,13 @@ function SessionMenuItem({
     // Soft pill @ 11px radius from Paper; overlay tint adapts to theme
     // (light: --ow-light-hover ≈ black/5, dark: #FFFFFF17 ≈ white/9).
     // Nesting uses inline padding so each depth level steps 12px (not a binary nest).
-    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-7 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
+    //
+    // `pe-12` at rest, measured against what actually sits in that corner: the cluster is inset 8px
+    // (`right-2`) and holds an 8px outcome dot, a 4px gap and a stamp that is about 26px wide at its
+    // widest ("15h" at 11px tabular-nums), which is 46px. The old `pe-7` reserved 28px, so a two-digit
+    // stamp on an unread row overhung the title box. `pe-24` on hover is unchanged: the action cluster
+    // is 2-3 icon buttons at 20px plus gaps plus the same 8px inset, which fits inside 96px.
+    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-12 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
   );
   const rowButtonStyle = {
     paddingInlineStart: sidebarRowPaddingInlineStart(visualDepth),
@@ -2317,22 +2323,28 @@ function SessionMenuItem({
 
   const trailing = (
     <>
-      <SessionOutcomeIndicator
-        className="absolute right-3 top-1/2 -translate-y-1/2 opacity-100 group-hover/menu-sub-item:opacity-0 pointer-events-none select-none"
-        status={sessionActivityStatus}
-        isActiveWork={resolvedActiveWork}
-        isUnread={isUnread}
-      />
-      {relativeTime ? (
-        // Its own right-anchored element, shown only while the row is hovered (the
-        // outcome indicator owns that corner otherwise). It used to be the last child
-        // of the hover-action group, dividing one strip with three buttons, which left
-        // it about 20px -- enough for "3h" and not for "15h". Widening the row's
-        // padding could not fix that; the strip was the problem.
-        <span className="pointer-events-none absolute right-2 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/80 opacity-100 transition-opacity group-hover/menu-sub-item:opacity-0 group-has-data-popup-open/menu-sub-item:opacity-0 max-lg:opacity-0 pointer-coarse:opacity-0">
-          {relativeTime}
-        </span>
-      ) : null}
+      {/*
+        One right-hand cluster at rest, not two elements racing for the same corner.
+        The outcome dot was anchored at `right-3` and the timestamp at `right-2`, both visible at rest
+        and both absolutely positioned, so on an unread row the 8px dot sat on top of the stamp's text -
+        which is what "the timestamp overlaps the title area" actually was. In one flex row they cannot
+        collide, and the row's `pe-*` reserve now has a single width to reserve for.
+      */}
+      <span className="pointer-events-none absolute right-2 top-1/2 z-10 flex -translate-y-1/2 items-center gap-1 opacity-100 transition-opacity group-hover/menu-sub-item:opacity-0 group-has-data-popup-open/menu-sub-item:opacity-0 max-lg:opacity-0 pointer-coarse:opacity-0">
+        <SessionOutcomeIndicator
+          className="select-none"
+          status={sessionActivityStatus}
+          isActiveWork={resolvedActiveWork}
+          isUnread={isUnread}
+        />
+        {relativeTime ? (
+          // Its own element rather than the last child of the hover-action group, which used to divide
+          // one strip with three buttons and left it about 20px -- enough for "3h" and not for "15h".
+          <span className="whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/80">
+            {relativeTime}
+          </span>
+        ) : null}
+      </span>
       <SessionHoverQuickActions
         sessionId={session.id}
         isPinned={isPinned}
@@ -2378,11 +2390,13 @@ function SessionMenuItem({
                 <SessionTitle intent={titleIntent} title={displayTitle} tooltip={itemTitle} />
                 {/*
                   Space for whatever is occupying the right slot, so the title truncates BEFORE it
-                  rather than running under it. The time and the hover actions swap, so this reserves
-                  the wider of the two: two icon buttons. A shared row cost the title ~80px of a 235px
-                  sidebar and clipped it mid-word.
+                  rather than running under it. The time and the hover actions swap, so the row's own
+                  `pe-*` reserves the wider of the two; this spacer only keeps the chevron clear of that
+                  cluster. It was `w-11` when the row reserved 28px at rest - 72px in total - and the
+                  rest reserve is now 48px, so it narrows to 24px to hold that same total rather than
+                  taking a second 44px out of the title.
                 */}
-                <span aria-hidden className="w-11 shrink-0" />
+                <span aria-hidden className="w-6 shrink-0" />
                 <SessionNumberShortcutSlot digit={shortcutDigit} />
                 <span className="flex size-6 shrink-0 items-center justify-center">
                   <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-data-open/session-collapsible:rotate-90 hover:text-foreground" />

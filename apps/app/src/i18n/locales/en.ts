@@ -741,6 +741,7 @@ const en = {
   "memory.tab_label": "Memory",
   "memory.undo": "Undo",
   "message.attached_file": "Attached file",
+  "message.retry": "Retry this turn",
   "message.branch_new_chat": "Branch in new chat",
   "message.code_block_copied": "Code block copied",
   "message.copied": "Copied",

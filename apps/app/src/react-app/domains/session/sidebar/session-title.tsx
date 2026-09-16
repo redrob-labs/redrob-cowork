@@ -93,9 +93,19 @@ export function SessionTitle({ intent, title, tooltip }: SessionTitleProps) {
   return (
     <span
       ref={viewportRef}
+      /*
+        Two masks, and the one that was missing is the one a reader sees almost all the time.
+        `ow-session-title-moving` applies only once the marquee is running, which needs 450ms of hover,
+        so at rest a title longer than the row was chopped mid-glyph with no ellipsis and no fade: the
+        text is an atomic inline-block, so `truncate` cannot put an ellipsis on it either. A CJK title
+        of 19 glyphs is about 270px against a viewport of roughly 180px, which is arithmetic rather
+        than a bug in the reserve - the cut is unavoidable, so what matters is that it reads as a cut.
+        `ow-fade-truncate` is the sidebar's existing answer for exactly this, already used on the
+        workspace and section labels in this same tree.
+      */
       className={cn(
         "min-w-0 flex-1 overflow-hidden whitespace-nowrap",
-        state.moving && "ow-session-title-moving",
+        state.moving ? "ow-session-title-moving" : state.overflowing && "ow-fade-truncate",
       )}
       data-session-title-slot
       data-session-title-moving={state.moving ? "true" : undefined}
