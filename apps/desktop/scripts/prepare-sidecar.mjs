@@ -20,15 +20,12 @@ import { tmpdir } from "os";
 import { fileURLToPath } from "url";
 
 import {
-  downloadRedrobCodeCdnArchive,
-  normalizeCdnBaseUrl,
-  redrobCodeCdnArchiveName,
-  redrobCodeCdnBinaryName,
-} from "./redrob-code-cdn.mjs";
-import {
+  downloadRedrobCodeArchive,
+  normalizeGithubRepo,
   normalizeReleaseVersion,
   packagedSidecarMetadataNames,
   packagedSidecarNames,
+  redrobCodeArchiveName,
   redrobCodeBinaryName,
 } from "./redrob-code-release.mjs";
 
@@ -210,15 +207,15 @@ if (!normalizedEngineVersion) {
   process.exit(1);
 }
 
-// The public Code CDN needs no credentials, so it is the primary source and an
-// only remote source. REDROB_CODE_CDN_VERSION=latest follows the CDN's own
-// stable alias; by default the pinned constants.json version is fetched from
-// its own prefix so a build stays reproducible.
-const cdnArchive = archiveOverride ?? (
-  resolvedTargetTriple ? redrobCodeCdnArchiveName(resolvedTargetTriple) : null
+// redrob-labs/redrob-code is public, so its release assets need no credential and
+// are the primary and only remote source. REDROB_CODE_RELEASE_VERSION=latest
+// follows GitHub's own stable alias; by default the pinned constants.json version
+// is fetched from its own tag so a build stays reproducible.
+const releaseAsset = archiveOverride ?? (
+  resolvedTargetTriple ? redrobCodeArchiveName(resolvedTargetTriple) : null
 );
-const cdnBaseUrl = normalizeCdnBaseUrl(process.env.REDROB_CODE_CDN_BASE_URL);
-const cdnVersion = process.env.REDROB_CODE_CDN_VERSION?.trim() || normalizedEngineVersion;
+const releaseRepo = normalizeGithubRepo(process.env.REDROB_CODE_REPO);
+const releaseVersion = process.env.REDROB_CODE_RELEASE_VERSION?.trim() || normalizedEngineVersion;
 
 const shouldDownloadEngine =
   !engineCandidatePath ||
@@ -240,9 +237,9 @@ if (shouldDownloadEngine) {
     installEngineBinary(localBin);
     console.log(`Redrob Code sidecar copied from REDROB_CODE_BIN (${localBin}).`);
   } else {
-    if (!cdnArchive) {
+    if (!releaseAsset) {
       console.error(
-        `No Code CDN archive configured for target ${resolvedTargetTriple ?? "unknown"}. Set REDROB_CODE_ASSET to a CDN archive name to override.`,
+        `No Redrob Code release asset configured for target ${resolvedTargetTriple ?? "unknown"}. Set REDROB_CODE_ASSET to a release asset name to override.`,
       );
       process.exit(1);
     }
@@ -258,20 +255,20 @@ if (shouldDownloadEngine) {
     const errorMessage = (error) => (error instanceof Error ? error.message : String(error));
     let downloadedArchive = null;
 
-    if (cdnArchive) {
-      const archivePath = join(tmpdir(), `redrob-code-${stamp}-${cdnArchive}`);
+    if (releaseAsset) {
+      const archivePath = join(tmpdir(), `redrob-code-${stamp}-${releaseAsset}`);
       try {
-        const result = await downloadRedrobCodeCdnArchive({
-          baseUrl: cdnBaseUrl,
-          version: cdnVersion,
-          archiveName: cdnArchive,
+        const result = await downloadRedrobCodeArchive({
+          repo: releaseRepo,
+          version: releaseVersion,
+          archiveName: releaseAsset,
           destPath: archivePath,
           writeArchive: (path, bytes) => writeFile(path, bytes),
         });
         console.log(
-          `Downloaded ${cdnArchive} (${result.bytes} bytes) from ${result.archiveUrl}; sha256 ${result.sha256} matches the published sidecar.`,
+          `Downloaded ${releaseAsset} (${result.bytes} bytes) from ${result.assetUrl}; sha256 ${result.sha256} matches the release manifest.`,
         );
-        downloadedArchive = { name: cdnArchive, path: archivePath };
+        downloadedArchive = { name: releaseAsset, path: archivePath };
       } catch (error) {
         failures.push(errorMessage(error));
       }
@@ -318,10 +315,11 @@ if (shouldDownloadEngine) {
       process.exit(1);
     }
 
-    // The CDN archives ship the binary as `redrob-code`; the release archives
-    // ship it as `redrob`. Look for both rather than assuming one layout.
+    // The release archives ship a flat `redrob` at the archive root. Named
+    // explicitly rather than relying on the fallback list, so a layout change
+    // fails loudly instead of picking up whatever else looks like an engine.
     const extractedBinary = findEngineBinary(extractDir, [
-      redrobCodeCdnBinaryName({ isWindows: isWindowsTarget }),
+      redrobCodeBinaryName({ isWindows: isWindowsTarget }),
     ]);
     if (!extractedBinary) {
       console.error("Redrob Code binary not found after extraction.");

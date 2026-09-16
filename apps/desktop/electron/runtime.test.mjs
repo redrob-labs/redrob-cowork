@@ -85,7 +85,9 @@ describe("bundled Redrob Code runtime", () => {
     const constantsPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json");
     const constants = JSON.parse(await readFile(constantsPath, "utf8"));
 
-    assert.equal(constants.redrobCodeVersion, "v0.0.12");
+    // The engine's own release tag, `v`-prefixed as GitHub publishes it. The old
+    // v0.0.12 pin named a CDN prefix that no longer has a build behind it.
+    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.2");
     // The upstream OpenCode pin must be gone: a stale reader would resolve an
     // OpenCode version that no longer describes the shipped engine.
     assert.equal(constants.opencodeVersion, undefined);
