@@ -442,7 +442,16 @@ export function ModelSelect({
         align="start"
         initialFocus={false}
       >
-        <div className="flex h-full w-72 min-w-72 flex-col overflow-hidden rounded-3xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
+        {/*
+          Wider than the 288px it was.
+
+          Each row carries a model name, its vendor, a context figure, a price band and a per-request
+          estimate, and at 288px the name itself truncated to a stub - `aion-la...` - which is the one
+          field the row exists to show. 26rem fits the name and keeps the popover a popover; the full
+          table is a click away behind "All models". Capped at the viewport so a narrow window still
+          gets a usable menu rather than one hanging off the edge.
+        */}
+        <div className="flex h-full w-[min(92vw,26rem)] min-w-0 flex-col overflow-hidden rounded-3xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
         <Command
           items={flatten ? flatItems : groups}
           filter={filterModelItem}

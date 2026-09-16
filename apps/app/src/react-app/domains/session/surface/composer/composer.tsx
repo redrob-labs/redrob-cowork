@@ -69,8 +69,6 @@ type ComposerProps = {
   modelVariantLabel: string;
   /** 0-100 fill of the model context, or undefined when it cannot be known yet. */
   contextUsedPercent?: number | null;
-  /** What this session has cost so far, in USD. */
-  sessionCostUsd?: number;
   modelVariant: string | null;
   modelBehaviorOptions?: { value: string | null; label: string }[];
   onModelVariantChange: (value: string | null) => void;
@@ -1032,7 +1030,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   ) : (
                     <FileText size={14} className="mt-0.5 shrink-0 text-gray-9" />
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="truncate text-xs font-semibold">@{item.label}</div>
                     <div className="truncate text-xs text-gray-10">
                       {item.kind === "agent"
@@ -1064,7 +1062,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         imeComposingRef.current = false;
       }}
     >
-      <div className={props.flush ? "" : "max-w-[800px] mx-auto"}>
+      <div className={props.flush ? "" : "mx-auto max-w-[var(--ow-chat-column)]"}>
         {/* Main composer panel — also the drop target. The whole panel accepts a
             drag, not just the text area: a file dropped on the action row or the
             padding is the same intent, and a highlight that only lights up over
@@ -1296,7 +1294,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                               {t("composer.configure")}
                             </button>
                           </div>
-                          <div className="min-h-0 flex-1 overflow-y-auto p-2">
+                          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-2">
                           {toolMenuSection === "agents" ? (
                             <div className="grid gap-1">
                               <button
@@ -1339,7 +1337,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                                     onClick={() => applyCommandSelection(command)}
                                   >
                                     <Terminal size={14} className="mt-0.5 shrink-0 text-gray-9" />
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 flex-1">
                                       <div className="truncate text-xs font-semibold text-gray-11">/{command.name}</div>
                                       {command.description ? <div className="truncate text-xs text-gray-10">{command.description}</div> : null}
                                     </div>
@@ -1567,19 +1565,17 @@ export function ReactSessionComposer(props: ComposerProps) {
           </div>
         </div>
 
-      </div>
-      {/*
-        How full the model's context is, under the composer.
+        {/*
+          How full the model's context is, directly under the composer and inside its column.
 
-        Read from the LAST turn that reported usage, not summed across the session: each request carries
-        the whole conversation, so that turn's own input count already includes every earlier one, and
-        adding turns together would multiply the transcript by the number of turns in it. Shows nothing
-        when either half is unknown rather than a made-up percentage.
-      */}
-      <ContextMeter
-        usedPercent={props.contextUsedPercent ?? null}
-        sessionCost={props.sessionCostUsd}
-      />
+          It used to sit outside the centred wrapper, which put it against the right edge of the WINDOW
+          rather than under the box it describes. Read from the LAST turn that reported usage, not summed:
+          each request carries the whole conversation, so that turn's own input already includes every
+          earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
+        */}
+        <ContextMeter usedPercent={props.contextUsedPercent ?? null} />
+
+      </div>
     </div>
   );
 }

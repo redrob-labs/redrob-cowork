@@ -497,7 +497,7 @@ function SessionHoverQuickActions({
         // right-2, the same slot the relative time uses, because the two SWAP rather than share.
         // Showing both at once cost the title ~80px of a 235px sidebar and clipped it mid-word, which
         // is what a user reported after the first attempt anchored them side by side.
-        "absolute right-2 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 opacity-0 pointer-events-none transition-opacity group-hover/menu-sub-item:opacity-100 group-hover/menu-sub-item:pointer-events-auto group-has-data-popup-open/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:pointer-events-auto max-lg:opacity-100 max-lg:pointer-events-auto pointer-coarse:opacity-100 pointer-coarse:pointer-events-auto",
+        "absolute right-3 top-1/2 z-10 flex -translate-y-1/2 items-center gap-0.5 opacity-0 pointer-events-none transition-opacity group-hover/menu-sub-item:opacity-100 group-hover/menu-sub-item:pointer-events-auto group-has-data-popup-open/menu-sub-item:opacity-100 group-has-data-popup-open/menu-sub-item:pointer-events-auto max-lg:opacity-100 max-lg:pointer-events-auto pointer-coarse:opacity-100 pointer-coarse:pointer-events-auto",
         className,
       )}
     >
@@ -2304,12 +2304,18 @@ function SessionMenuItem({
     // (light: --ow-light-hover ≈ black/5, dark: #FFFFFF17 ≈ white/9).
     // Nesting uses inline padding so each depth level steps 12px (not a binary nest).
     //
-    // `pe-12` at rest, measured against what actually sits in that corner: the cluster is inset 8px
-    // (`right-2`) and holds an 8px outcome dot, a 4px gap and a stamp that is about 26px wide at its
-    // widest ("15h" at 11px tabular-nums), which is 46px. The old `pe-7` reserved 28px, so a two-digit
-    // stamp on an unread row overhung the title box. `pe-24` on hover is unchanged: the action cluster
-    // is 2-3 icon buttons at 20px plus gaps plus the same 8px inset, which fits inside 96px.
-    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-12 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
+    // `pe-14` at rest, measured against what actually sits in that corner: the cluster is inset 16px
+    // (`right-4`) and holds an 8px outcome dot, a 4px gap and a stamp about 26px wide at its widest
+    // ("15h" at 11px tabular-nums), which is 54px.
+    //
+    // The inset was 8px and the stamp then sat flush against the sidebar's own edge, which reads as the
+    // text having been pushed out of the panel rather than placed in it. 16px plus the group's own 8px
+    // margin puts it 24px clear of the panel edge. The reserve has to move with the inset - leaving it
+    // at 12 would put the title back under the cluster, which is the defect this pair already had once.
+    //
+    // `pe-24` on hover is unchanged: the action cluster is 2-3 icon buttons at 20px plus gaps plus its
+    // own 12px inset, which still fits inside 96px.
+    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-14 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
   );
   const rowButtonStyle = {
     paddingInlineStart: sidebarRowPaddingInlineStart(visualDepth),
@@ -2330,7 +2336,7 @@ function SessionMenuItem({
         which is what "the timestamp overlaps the title area" actually was. In one flex row they cannot
         collide, and the row's `pe-*` reserve now has a single width to reserve for.
       */}
-      <span className="pointer-events-none absolute right-2 top-1/2 z-10 flex -translate-y-1/2 items-center gap-1 opacity-100 transition-opacity group-hover/menu-sub-item:opacity-0 group-has-data-popup-open/menu-sub-item:opacity-0 max-lg:opacity-0 pointer-coarse:opacity-0">
+      <span className="pointer-events-none absolute right-4 top-1/2 z-10 flex -translate-y-1/2 items-center gap-1 opacity-100 transition-opacity group-hover/menu-sub-item:opacity-0 group-has-data-popup-open/menu-sub-item:opacity-0 max-lg:opacity-0 pointer-coarse:opacity-0">
         <SessionOutcomeIndicator
           className="select-none"
           status={sessionActivityStatus}

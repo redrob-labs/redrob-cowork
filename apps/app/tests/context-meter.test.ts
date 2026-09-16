@@ -15,9 +15,16 @@ const source = readFileSync(
 );
 
 describe("context meter", () => {
-  it("renders nothing when it knows neither half", () => {
+  it("renders nothing when it has no reading", () => {
     // A gauge with no reading is worse than no gauge: it looks like 0%.
-    expect(source).toContain("if (props.usedPercent === null && !cost) return null");
+    expect(source).toContain("if (props.usedPercent === null) return null");
+  });
+
+  it("shows context only - cost belongs on the turn that incurred it", () => {
+    // A single running total here said nothing about WHICH turn was expensive, and sitting under the
+    // composer it read as the cost of the message about to be sent.
+    expect(source).not.toContain("sessionCost");
+    expect(source).not.toContain("formatMessageCost");
   });
 
   it("warns before the ceiling rather than at it", () => {
@@ -27,8 +34,19 @@ describe("context meter", () => {
     expect(source).toContain("props.usedPercent >= 75");
   });
 
-  it("omits the percentage rather than guessing when the window is unknown", () => {
-    expect(source).toContain("{props.usedPercent === null ? null : (");
+  it("sits inside the composer's own column, not against the window edge", () => {
+    // Outside the centred wrapper it pinned itself to the far right of the SCREEN rather than under the
+    // box it describes.
+    const composer = readFileSync(
+      fileURLToPath(
+        new URL("../src/react-app/domains/session/surface/composer/composer.tsx", import.meta.url),
+      ),
+      "utf8",
+    );
+    const column = composer.indexOf("mx-auto max-w-[var(--ow-chat-column)]");
+    const meter = composer.indexOf("<ContextMeter");
+    expect(column).toBeGreaterThan(-1);
+    expect(meter).toBeGreaterThan(column);
   });
 
   it("is its own module, so it can be mounted and looked at", () => {
