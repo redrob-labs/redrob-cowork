@@ -8,9 +8,11 @@ import { getModelBehaviorSummary } from "@/app/lib/model-behavior";
 import { matchesModelQuery } from "@/app/lib/model-search";
 import { inferModelVendor } from "@/app/lib/model-vendor";
 import {
+  estimatedCostFor,
   formatModelPriceRange,
   formatPriceTier,
   formatTokenCount,
+  formatUsdAmount,
 } from "@/app/lib/redrob-pricing";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { ProviderIcon } from "@/react-app/design-system/provider-icon";
@@ -322,9 +324,13 @@ export function ModelSelect({
       ? pricing?.byModelId[option.modelID]
       : undefined;
     const price = formatModelPriceRange(modelPricing);
-    // The rate alone does not say whether it is expensive; the tier does, in a
-    // shape that survives a glance in a dense list.
+    // The rate alone does not say whether it is expensive; the band does, and
+    // the console publishes it.
     const tier = formatPriceTier(modelPricing);
+    // What one short question costs, in dollars. A rate per million tokens is
+    // not a number anyone converts in their head, which is the whole complaint
+    // this answers.
+    const chatCost = formatUsdAmount(estimatedCostFor(modelPricing, "chat")?.costUsd);
     const context = formatTokenCount(modelPricing?.capabilities.maxContextTokens);
     return (
       <CommandItem
@@ -360,7 +366,14 @@ export function ModelSelect({
             {tier}
           </span>
         ) : null}
-        {price ? (
+        {chatCost ? (
+          <span
+            className="shrink-0 font-mono text-[10px] text-muted-foreground"
+            title={t("pricing.per_request_hint")}
+          >
+            {t("pricing.per_request", { amount: chatCost })}
+          </span>
+        ) : price ? (
           <span
             className="shrink-0 font-mono text-[10px] text-muted-foreground"
             title={t("pricing.per_million_hint")}

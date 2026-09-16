@@ -27,8 +27,10 @@ import { inferModelVendor } from "../../../../app/lib/model-vendor";
 import {
   formatModelPriceRange,
   formatPriceMultiplier,
+  estimatedCostFor,
   formatPriceTier,
   formatThinkingLevels,
+  formatUsdAmount,
   formatTokenCount,
   type RedrobPricing,
 } from "../../../../app/lib/redrob-pricing";
@@ -411,6 +413,24 @@ function DefaultModelRow({
   const reasoning = (modelPricing?.capabilities.thinkingLevels.length ?? 0) > 0;
   const thinkingLevels = formatThinkingLevels(modelPricing);
   const tier = formatPriceTier(modelPricing);
+  // Four strengths at most: the console publishes up to eleven, and a row that
+  // lists everything stops distinguishing anything.
+  const strengths = (modelPricing?.strengths ?? []).slice(0, 4);
+  const estimates = (pricing?.costProfiles ?? []).flatMap((profile) => {
+    const estimate = estimatedCostFor(modelPricing, profile.id);
+    const amount = formatUsdAmount(estimate?.costUsd);
+    if (!amount) return [];
+    return [{
+      profile: profile.id,
+      text: t("pricing.per_profile", { label: profile.label, amount }),
+      title: profile.description
+        ? t("pricing.per_profile_hint", {
+            description: profile.description,
+            requests: String(estimate?.requestsPerDollar ?? ""),
+          })
+        : t("pricing.per_request_hint"),
+    }];
+  });
   const fastMode = modelPricing?.capabilities.fastMode === true;
   const dataShare = modelPricing?.capabilities.requiresProviderDataShare === true;
 
@@ -447,10 +467,17 @@ function DefaultModelRow({
         ) : null}
         {active ? <Check size={14} className="shrink-0 text-success-ink" /> : null}
       </span>
-      {price || context || reasoning || fastMode || dataShare ? (
+      {price || context || reasoning || fastMode || dataShare || strengths.length > 0 ? (
         <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 ps-5 text-[10px] text-dls-secondary">
           {tier ? <span title={t("pricing.tier_hint")}>{tier}</span> : null}
-          {multiplier ? <span>{t("pricing.multiplier_hint", { multiplier })}</span> : null}
+          {/* Dollars for a real request, per profile the console defines: a short
+              question, a coding turn, a long document. This is the answer to "is
+              it cheap?" that a rate per million tokens never gave. */}
+          {estimates.map((estimate) => (
+            <span key={estimate.profile} title={estimate.title}>
+              {estimate.text}
+            </span>
+          ))}
           {context ? <span>{t("pricing.context_window", { tokens: context })}</span> : null}
           {/* The levels themselves, not just that the feature exists: which ones
               a model offers is what the reader is choosing between, and the
@@ -464,6 +491,21 @@ function DefaultModelRow({
           ) : null}
           {fastMode ? <span>{t("pricing.fast_mode")}</span> : null}
           {dataShare ? <span className="text-warning-ink">{t("pricing.data_share_required")}</span> : null}
+        </span>
+      ) : null}
+      {/* The console's own words for what the model is good at. Rendered as
+          published: paraphrasing another service's claim about its own models in
+          the client is how the two end up disagreeing. */}
+      {strengths.length > 0 ? (
+        <span className="flex flex-wrap items-center gap-1 ps-5">
+          {strengths.map((strength) => (
+            <span
+              key={strength}
+              className="rounded-full border border-dls-border px-1.5 py-px text-[10px] text-dls-secondary"
+            >
+              {strength}
+            </span>
+          ))}
         </span>
       ) : null}
     </button>
