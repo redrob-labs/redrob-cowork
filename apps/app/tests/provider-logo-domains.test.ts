@@ -25,6 +25,27 @@ describe("provider logos never ask for a hostname we invented", () => {
       })
       .filter((value): value is string => value !== null);
 
+  it("resolves the long tail's vendor/model ids, which is most of the catalogue", () => {
+    // 315 of the catalogue's 323 ids carry a slash. Every lookup was fed the whole id and none could
+    // match one: the Simple Icons gate accepts [a-z0-9]+ and a slash fails it, the domain map is keyed
+    // on bare vendor names, and the slug heuristic knows only hyphens. So the majority of the catalogue
+    // showed no brand mark at all.
+    expect(hostsFor("anthropic/claude-opus-4")).toContain("anthropic.com");
+    expect(hostsFor("mistralai/mistral-large")).toContain("mistral.ai");
+    expect(hostsFor("deepseek/deepseek-chat")).toContain("deepseek.com");
+    expect(hostsFor("openai/gpt-5-nano")).toContain("openai.com");
+  });
+
+  it("ignores a variant suffix, which names the same vendor", () => {
+    expect(hostsFor("anthropic/claude-opus-4:beta")).toContain("anthropic.com");
+    expect(hostsFor("anthropic:free")).toContain("anthropic.com");
+  });
+
+  it("leaves a slashless id exactly as it was", () => {
+    expect(hostsFor("azure")).toContain("azure.microsoft.com");
+    expect(hostsFor("github-copilot")).toContain("github.com");
+  });
+
   it("gives the hyphenated ids their real domains", () => {
     expect(hostsFor("cloudflare-ai-gateway")).toContain("cloudflare.com");
     expect(hostsFor("cloudflare-workers-ai")).toContain("cloudflare.com");

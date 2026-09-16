@@ -102,6 +102,39 @@ const PROVIDER_DOMAINS: Record<string, string> = {
   morph: "morphllm.com",
   inference: "inference.net",
   chutes: "chutes.ai",
+  /**
+   * The vendors that actually appear in the catalogue, counted from the live listing rather than
+   * guessed: 48 of them across the 315 `vendor/model` ids. Listed here because the vendor is now what
+   * a logo lookup is given, and a vendor with no entry and no Simple Icons slug falls to a monogram.
+   *
+   * Ordered by how many models each one serves, so the ones a reader meets most are the ones covered.
+   */
+  qwen: "qwen.ai",
+  "z-ai": "z.ai",
+  "meta-llama": "llama.com",
+  minimax: "minimaxi.com",
+  tencent: "cloud.tencent.com",
+  "bytedance-seed": "seed.bytedance.com",
+  bytedance: "bytedance.com",
+  "x-ai": "x.ai",
+  amazon: "aws.amazon.com",
+  nvidia: "nvidia.com",
+  "aion-labs": "aionlabs.ai",
+  sakana: "sakana.ai",
+  inclusionai: "inclusionai.github.io",
+  nousresearch: "nousresearch.com",
+  "ibm-granite": "ibm.com",
+  "inference-net": "inference.net",
+  inception: "inceptionlabs.ai",
+  poolside: "poolside.ai",
+  microsoft: "microsoft.com",
+  rekaai: "reka.ai",
+  stepfun: "stepfun.com",
+  xiaomi: "xiaomi.com",
+  thinkingmachines: "thinkingmachines.ai",
+  relace: "relace.ai",
+  perceptron: "perceptron.inc",
+  mistralai: "mistral.ai",
 };
 
 /**
@@ -155,6 +188,29 @@ function faviconUrl(domain: string) {
 }
 
 /**
+ * The vendor part of an id, which is what a logo lookup can actually answer.
+ *
+ * 315 of the catalogue's 323 ids are `vendor/model` - `anthropic/claude-opus-4`,
+ * `mistralai/mistral-large`, `qwen/qwen3-32b`. Every lookup below was fed the WHOLE id, and none of
+ * them can match one: the Simple Icons gate accepts `[a-z0-9]+` and a slash fails it, the domain map
+ * is keyed on bare vendor names, and `domainFromSlug` splits on hyphens and has no notion of a slash.
+ * So the entire long tail - the great majority of the catalogue - fell through to a monogram or worse.
+ *
+ * Taking the part before the first slash fixes all of them at once, because that part IS the vendor
+ * and the vendors are exactly what the tables below already know. An id with no slash is returned
+ * unchanged, so nothing that worked before changes.
+ *
+ * A trailing variant suffix is dropped too: `anthropic/claude-opus-4:beta` and `:free` are the same
+ * vendor as the model without them.
+ */
+function vendorOf(id: string): string {
+  const slash = id.indexOf('/');
+  const head = slash > 0 ? id.slice(0, slash) : id;
+  const colon = head.indexOf(':');
+  return colon > 0 ? head.slice(0, colon) : head;
+}
+
+/**
  * Ordered logo URLs for a provider. An id that already looks like a domain
  * ("302.ai") or a configured base URL both resolve through the favicon step,
  * which is what gives long-tail and custom providers a real mark.
@@ -163,7 +219,7 @@ export function providerLogoCandidates(input: {
   providerId?: string | null;
   baseUrl?: string | null;
 }): string[] {
-  const id = input.providerId?.trim().toLowerCase() ?? "";
+  const id = vendorOf(input.providerId?.trim().toLowerCase() ?? '');
   const candidates: string[] = [];
 
   if (id) {
