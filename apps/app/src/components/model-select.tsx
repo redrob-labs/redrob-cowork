@@ -16,6 +16,7 @@ import {
 } from "@/app/lib/redrob-pricing";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { ProviderIcon } from "@/react-app/design-system/provider-icon";
+import { REDROB_MODEL_ID as AUTO_MODEL_ID } from "@/react-app/domains/settings/redrob-provider";
 import {
   Popover,
   PopoverContent,
@@ -140,7 +141,13 @@ function groupByProvider(modelOptions: ModelOption[], selected?: ModelRef): Mode
     .map(([providerLabel, options]) => ({
       value: providerLabel,
       items: [...options].sort((a, b) => {
-        // The model in use leads its group. Alphabetical order alone buried the current
+        // `auto` leads, unconditionally. It is the router and the app default, and it used to lead only
+        // when it happened to be the current selection - pick anything else and the recommended choice
+        // dropped into alphabetical position among several hundred alternatives.
+        const aAuto = a.option.modelID === AUTO_MODEL_ID;
+        const bAuto = b.option.modelID === AUTO_MODEL_ID;
+        if (aAuto !== bAuto) return aAuto ? -1 : 1;
+        // Then the model in use. Alphabetical order alone buried the current
         // selection somewhere in the middle of the list, so the one row a reader wants to
         // confirm was the hardest one to find.
         const aSelected = selected ? isSameModel(selected, a.option) : false;
@@ -150,7 +157,10 @@ function groupByProvider(modelOptions: ModelOption[], selected?: ModelRef): Mode
       }),
     }))
     .sort((a, b) => {
-      // And the group holding it leads the list, for the same reason.
+      // The group holding `auto` leads, then the group holding the current model, for the same reason.
+      const aHasAuto = a.items.some((item) => item.option.modelID === AUTO_MODEL_ID);
+      const bHasAuto = b.items.some((item) => item.option.modelID === AUTO_MODEL_ID);
+      if (aHasAuto !== bHasAuto) return aHasAuto ? -1 : 1;
       const aHasSelected = selected ? a.items.some((item) => isSameModel(selected, item.option)) : false;
       const bHasSelected = selected ? b.items.some((item) => isSameModel(selected, item.option)) : false;
       if (aHasSelected !== bHasSelected) return aHasSelected ? -1 : 1;
@@ -246,7 +256,6 @@ export function ModelSelect({
   onBehaviorChange,
 }: ModelSelectProps) {
   const [search, setSearch] = React.useState("");
-  const [thinkingFor, setThinkingFor] = React.useState<ModelOption | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const catalogOptions = useModelOptions(open, fallbackOptions);
   const { data: pricing } = useRedrobPricingQuery({ enabled: open });
@@ -276,12 +285,8 @@ export function ModelSelect({
       return;
     }
 
-    if (thinkingFor) {
-      return;
-    }
-
     focusSearchInput();
-  }, [focusSearchInput, open, thinkingFor]);
+  }, [focusSearchInput, open]);
 
   const selectedOption = modelOptions?.find((option) =>
     isSameModel(value, {
@@ -303,24 +308,20 @@ export function ModelSelect({
       onBehaviorChange?.(behavior);
     }
     setSearch("");
-    setThinkingFor(null);
     onOpenChange(false);
   };
 
+  /**
+   * Picking a model picks the model.
+   *
+   * It used to open the effort submenu instead whenever the model had variants, so choosing a model was
+   * two clicks across two panes and was not committed until an effort level was also chosen. People read
+   * the first click as the selection - it looks like one - and could not tell what the second pane was
+   * for. Effort is now its own control beside the model button, so this path has one job.
+   */
   const handleSelect = (option: ModelOption) => {
-    const thinking = thinkingOptionsFor(option);
-    if (thinking.length > 0 && onBehaviorChange) {
-      setThinkingFor(option);
-      return;
-    }
     applyModel(option);
   };
-
-  const thinkingOptions = thinkingFor ? thinkingOptionsFor(thinkingFor) : [];
-  const thinkingValue =
-    thinkingFor && isSameModel(value, thinkingFor)
-      ? (behaviorValue ?? thinkingFor.behaviorValue)
-      : (thinkingFor?.behaviorValue ?? null);
 
   const handleConnectProvider = React.useCallback(() => {
     onOpenChange(false);
@@ -330,7 +331,6 @@ export function ModelSelect({
 
   const renderItem = (item: ModelSelectItem) => {
     const option = item.option;
-    const hasThinking = Boolean(onBehaviorChange) && thinkingOptionsFor(option).length > 0;
     const vendor = inferModelVendor(option.modelID);
     // Published console rate, input / output per million tokens. Absent when the
     // catalog is unreachable or the model is not a Redrob one — never a zero.
@@ -353,7 +353,6 @@ export function ModelSelect({
         value={`${option.providerID}:${option.modelID} ${option.title} ${option.description ?? ""}`}
         onClick={() => handleSelect(option)}
         data-checked={isSameModel(value, option)}
-        data-open={thinkingFor ? isSameModel(thinkingFor, option) : undefined}
       >
         <ProviderIcon
           providerId={vendor?.id ?? option.providerID}
@@ -395,9 +394,6 @@ export function ModelSelect({
             {price}
           </span>
         ) : null}
-        {hasThinking ? (
-          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-        ) : null}
       </CommandItem>
     );
   };
@@ -410,7 +406,6 @@ export function ModelSelect({
 
         if (!nextOpen) {
           setSearch("");
-          setThinkingFor(null);
         }
       }}
     >
@@ -432,21 +427,10 @@ export function ModelSelect({
               : (selectedOption?.title ?? value.modelID ?? "Select model")}
           </span>
           {/*
-            The reasoning effort in use, on the trigger.
-
-            It was reachable but invisible: `behaviorLabel` has always been accepted as a prop and was
-            never rendered, so the level could only be seen by reopening the popover and walking into a
-            model's submenu. A setting that changes what every request costs and how long it takes has
-            to be readable without opening anything.
-
-            Only when there IS a level. Most models publish none, and an empty chip beside every model
-            name would be noise on the majority to serve the minority.
+            No effort chip here any more. Effort is its own button beside this one - `EffortSelect` -
+            so this control shows the model and nothing else. Two settings on one button, one of them
+            read-only, is what made the interaction unreadable.
           */}
-          {!hideValue && behaviorLabel ? (
-            <span className="shrink-0 rounded bg-gray-3 px-1.5 py-0.5 text-[10px] font-medium text-gray-11">
-              {behaviorLabel}
-            </span>
-          ) : null}
           <ChevronDown className="h-3 w-3" />
         </TooltipTrigger>
         <TooltipContent>
@@ -512,34 +496,6 @@ export function ModelSelect({
           </div>
         </Command>
         </div>
-        {thinkingFor ? (
-          <div
-            data-slot="model-thinking-submenu"
-            className="flex h-full w-44 min-w-44 flex-col overflow-hidden rounded-3xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10"
-          >
-            <div className="border-b border-border px-3 py-2">
-              <span className="block truncate text-sm font-medium">{thinkingFor.title}</span>
-              <span className="block truncate text-xs text-muted-foreground">{t("session.assistant_thinking")}</span>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto p-1">
-              {thinkingOptions.map((option) => {
-                const selected = option.value === thinkingValue
-                  || (thinkingValue == null && option.value === thinkingOptions[0]?.value);
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                    onClick={() => applyModel(thinkingFor, option.value)}
-                  >
-                    <span className="min-w-0 flex-1 truncate text-foreground">{option.label}</span>
-                    {selected ? <Check className="size-3.5 shrink-0 text-muted-foreground" /> : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
       </PopoverContent>
     </Popover>
   );

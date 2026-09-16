@@ -29,9 +29,17 @@ describe("composer model controls", () => {
     expect(modelSelect).toContain("disabled={props.steering}");
     expect(modelSelect).not.toContain("disabled={props.busy}");
     expect(modelSelect).toContain("behaviorOptions={props.modelBehaviorOptions}");
-    expect(modelSelectSource).toContain("setThinkingFor(option)");
+    /*
+      The effort submenu used to be pinned here, and that assertion was pinning the defect: clicking a
+      MODEL opened the submenu instead of selecting the model, so choosing a model was two clicks in two
+      panes and was not committed until a level was also chosen. Effort is now its own control, so what
+      is pinned is that the hijack cannot come back and that the separate control is mounted.
+    */
+    expect(modelSelectSource).not.toContain("setThinkingFor");
+    expect(modelSelectSource).not.toContain('data-slot="model-thinking-submenu"');
+    expect(modelSelectSource).toContain("const handleSelect = (option: ModelOption) => {\n    applyModel(option);");
+    expect(composerSource).toContain("<EffortSelect");
     expect(modelSelectSource).not.toContain("setThinkingOpen(true)");
-    expect(modelSelectSource).toContain('data-slot="model-thinking-submenu"');
     expect(modelSelectSource).not.toContain("onMouseEnter");
   });
 
