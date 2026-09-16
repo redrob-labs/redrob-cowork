@@ -19,6 +19,20 @@ const SIMPLE_ICON_SLUGS: Record<string, string> = {
   vercel: "vercel",
   llama: "meta",
   meta: "meta",
+  // The hyphenated ids. Two reasons they are here rather than left to the favicon step: the Simple
+  // Icons gate below only accepts `[a-z0-9]+`, so a hyphenated id can never reach it on its own, and
+  // these are all products of a company Simple Icons already carries. That yields the real monochrome
+  // mark instead of a favicon bitmap -- and a favicon miss is not even visible as a miss, because the
+  // service answers an unknown host with HTTP 200 and a generic globe.
+  "cloudflare-ai-gateway": "cloudflare",
+  "cloudflare-workers-ai": "cloudflare",
+  "github-copilot": "github",
+  "snowflake-cortex": "snowflake",
+  "google-generative-ai": "googlegemini",
+  "azure-openai": "microsoftazure",
+  digitalocean: "digitalocean",
+  gitlab: "gitlab",
+  openrouter: "openrouter",
 };
 
 /** Simple Icons has no icon for these, so skip straight to the favicon step. */
