@@ -85,10 +85,12 @@ describe("bundled Redrob Code runtime", () => {
     const constantsPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json");
     const constants = JSON.parse(await readFile(constantsPath, "utf8"));
 
-    // The engine's own release tag, `v`-prefixed as GitHub publishes it. redrob.3 is the
-    // first release carrying the console's published modalities and thinking levels, so an
-    // older pin ships an engine that rewrites an image into an error string.
-    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.3");
+    // The engine's own release tag, `v`-prefixed as GitHub publishes it. redrob.4 is the
+    // first release whose model catalogue actually decodes: the console publishes an explicit
+    // `null` maxOutputTokens for the models it has no reply cap for, and up to redrob.3 that
+    // one null rejected the whole listing, so the engine fell back to six built-in ids while
+    // the console was serving 323. An older pin ships that six-model engine.
+    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.4");
     // The upstream OpenCode pin must be gone: a stale reader would resolve an
     // OpenCode version that no longer describes the shipped engine.
     assert.equal(constants.opencodeVersion, undefined);
