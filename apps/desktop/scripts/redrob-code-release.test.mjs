@@ -3,35 +3,35 @@ import { describe, it } from "node:test";
 
 import {
   downloadRedrobCodeArchive,
-  GITHUB_TOKEN_ENV_NAMES,
-  missingGithubTokenMessage,
   normalizeGithubRepo,
   normalizeReleaseVersion,
   packagedSidecarNames,
+  parseSha256Sums,
   redrobCodeArchiveName,
   redrobCodeBinaryName,
   REDROB_CODE_REPO,
-  releaseAssetApiUrl,
-  releaseTagApiUrl,
-  selectGithubToken,
-  selectReleaseAssetId,
+  releaseDownloadUrl,
+  releaseSha256SumsUrl,
   sidecarFileNames,
 } from "./redrob-code-release.mjs";
 
-const RELEASE = {
-  tag_name: "v0.0.1",
-  assets: [
-    { id: 11, name: "redrob-darwin-arm64.zip" },
-    { id: 22, name: "redrob-linux-x64-baseline.tar.gz" },
-  ],
-};
+const ASSET = "redrob-linux-x64-baseline.zip";
+const BYTES = new Uint8Array([1, 2, 3]);
+/** sha256 of BYTES, so the happy path verifies against a real digest. */
+const DIGEST = "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81";
+/** A manifest shaped like a real release's: many assets, one line each. */
+const SUMS = [`${"b".repeat(64)}  redrob-darwin-arm64.zip`, `${DIGEST}  ${ASSET}`, `${"d".repeat(64)}  SHA256SUMS.txt`].join(
+  "\n",
+);
 
 describe("Redrob Code archive naming", () => {
   it("maps every desktop target triple to a published archive", () => {
     assert.equal(redrobCodeArchiveName("aarch64-apple-darwin"), "redrob-darwin-arm64.zip");
     assert.equal(redrobCodeArchiveName("x86_64-apple-darwin"), "redrob-darwin-x64-baseline.zip");
-    assert.equal(redrobCodeArchiveName("x86_64-unknown-linux-gnu"), "redrob-linux-x64-baseline.tar.gz");
-    assert.equal(redrobCodeArchiveName("aarch64-unknown-linux-gnu"), "redrob-linux-arm64.tar.gz");
+    // Every platform ships a .zip: the engine's release workflow publishes no
+    // tarballs, so the .tar.gz names this used to expect could never resolve.
+    assert.equal(redrobCodeArchiveName("x86_64-unknown-linux-gnu"), "redrob-linux-x64-baseline.zip");
+    assert.equal(redrobCodeArchiveName("aarch64-unknown-linux-gnu"), "redrob-linux-arm64.zip");
     assert.equal(redrobCodeArchiveName("x86_64-pc-windows-msvc"), "redrob-windows-x64-baseline.zip");
     assert.equal(redrobCodeArchiveName("aarch64-pc-windows-msvc"), "redrob-windows-arm64.zip");
   });
@@ -110,134 +110,149 @@ describe("Redrob Code archive naming", () => {
   });
 });
 
-describe("private release token selection", () => {
-  it("prefers REDROB_GITHUB_TOKEN, then GH_TOKEN, then GITHUB_TOKEN", () => {
-    assert.deepEqual(GITHUB_TOKEN_ENV_NAMES, ["REDROB_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"]);
-    assert.deepEqual(
-      selectGithubToken({ REDROB_GITHUB_TOKEN: "a", GH_TOKEN: "b", GITHUB_TOKEN: "c" }),
-      { token: "a", source: "REDROB_GITHUB_TOKEN" },
+describe("public release download URLs", () => {
+  it("addresses a pinned tag, and the floating alias only for `latest`", () => {
+    // GitHub spells the two forms differently, and the alias resolves only for an
+    // exact asset name -- which is why the engine publishes version-less names.
+    assert.equal(
+      releaseDownloadUrl(REDROB_CODE_REPO, "v1.18.31-redrob.2", "redrob-linux-x64-baseline.zip"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v1.18.31-redrob.2/redrob-linux-x64-baseline.zip",
     );
-    assert.deepEqual(selectGithubToken({ GH_TOKEN: "b", GITHUB_TOKEN: "c" }), {
-      token: "b",
-      source: "GH_TOKEN",
-    });
-    assert.deepEqual(selectGithubToken({ GITHUB_TOKEN: "c" }), { token: "c", source: "GITHUB_TOKEN" });
+    assert.equal(
+      releaseDownloadUrl(REDROB_CODE_REPO, "1.18.31-redrob.2", "redrob-linux-x64-baseline.zip"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v1.18.31-redrob.2/redrob-linux-x64-baseline.zip",
+    );
+    assert.equal(
+      releaseDownloadUrl(REDROB_CODE_REPO, "latest", "redrob-linux-x64-baseline.zip"),
+      "https://github.com/redrob-labs/redrob-code/releases/latest/download/redrob-linux-x64-baseline.zip",
+    );
   });
 
-  it("ignores blank tokens and reports none configured", () => {
-    assert.equal(selectGithubToken({ REDROB_GITHUB_TOKEN: "   ", GH_TOKEN: "" }), null);
-    assert.equal(selectGithubToken({}), null);
+  it("reads the digest manifest from the same release as the asset", () => {
+    assert.equal(
+      releaseSha256SumsUrl(REDROB_CODE_REPO, "v1.18.31-redrob.2"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v1.18.31-redrob.2/SHA256SUMS",
+    );
+  });
+
+  it("carries no Authorization header, because the repository is public", async () => {
+    const calls = [];
+    await downloadRedrobCodeArchive({
+      version: "v0.0.1",
+      archiveName: ASSET,
+      destPath: "/tmp/redrob-code.zip",
+      fetchImpl: (url, init) => {
+        calls.push({ url, init });
+        if (url.endsWith("/SHA256SUMS")) {
+          return Promise.resolve({ ok: true, status: 200, text: async () => SUMS });
+        }
+        return Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer });
+      },
+      writeArchive: async () => {},
+    });
+    assert.equal(calls.length, 2);
+    for (const call of calls) {
+      assert.equal(call.init?.headers, undefined);
+    }
   });
 });
 
-describe("private release asset resolution", () => {
-  it("addresses the release by tag and the asset by id", () => {
-    assert.equal(
-      releaseTagApiUrl(REDROB_CODE_REPO, "0.0.1"),
-      "https://api.github.com/repos/redrob-labs/redrob-code/releases/tags/v0.0.1",
-    );
-    assert.equal(
-      releaseAssetApiUrl(REDROB_CODE_REPO, 22),
-      "https://api.github.com/repos/redrob-labs/redrob-code/releases/assets/22",
-    );
-    assert.equal(selectReleaseAssetId(RELEASE, "redrob-linux-x64-baseline.tar.gz"), 22);
-    assert.equal(selectReleaseAssetId(RELEASE, "redrob-linux-arm64.tar.gz"), null);
-    assert.equal(selectReleaseAssetId({}, "redrob-linux-arm64.tar.gz"), null);
+describe("release asset digest verification", () => {
+  it("selects the asset's own line out of a manifest covering the whole release", () => {
+    // Unlike a per-asset sidecar, SHA256SUMS lists every asset, so the right line
+    // has to be chosen rather than assumed to be the only one.
+    assert.equal(parseSha256Sums(SUMS, ASSET), DIGEST);
+    assert.equal(parseSha256Sums(SUMS, "redrob-darwin-arm64.zip"), `${"b".repeat(64)}`);
   });
 
-  it("fails with an actionable message when no token is available", async () => {
-    let attempted = false;
-    await assert.rejects(
-      () => downloadRedrobCodeArchive({
-        version: "v0.0.1",
-        archiveName: "redrob-linux-x64-baseline.tar.gz",
-        destPath: "/tmp/unused.tar.gz",
-        env: {},
-        fetchImpl: () => {
-          attempted = true;
-          throw new Error("must not reach the network without a token");
-        },
-        writeArchive: async () => {},
-      }),
-      (error) => {
-        assert.equal(error.message, missingGithubTokenMessage());
-        assert.match(error.message, /private repository/);
-        assert.match(error.message, /REDROB_GITHUB_TOKEN, GH_TOKEN, GITHUB_TOKEN/);
-        assert.match(error.message, /REDROB_CODE_BIN/);
-        return true;
-      },
-    );
-    assert.equal(attempted, false);
+  it("refuses a manifest that does not list the asset instead of skipping the check", () => {
+    assert.throws(() => parseSha256Sums(SUMS, "redrob-linux-arm64.zip"), /does not list redrob-linux-arm64\.zip/);
+    assert.throws(() => parseSha256Sums("", ASSET), /manifest is empty/);
+    assert.throws(() => parseSha256Sums("not a digest line", ASSET), /not in sha256sum format/);
   });
 
-  it("downloads by asset id with an octet-stream Accept and a bearer token", async () => {
-    const calls = [];
+  it("writes the archive only after the digest matches", async () => {
     const written = [];
     const result = await downloadRedrobCodeArchive({
       version: "v0.0.1",
-      archiveName: "redrob-linux-x64-baseline.tar.gz",
-      destPath: "/tmp/redrob-code.tar.gz",
-      env: { GH_TOKEN: "token-from-gh" },
-      fetchImpl: (url, init) => {
-        calls.push({ url, headers: init.headers });
-        if (url.endsWith("/releases/tags/v0.0.1")) {
-          return Promise.resolve({ ok: true, status: 200, json: async () => RELEASE });
-        }
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer,
-        });
-      },
+      archiveName: ASSET,
+      destPath: "/tmp/redrob-code.zip",
+      fetchImpl: (url) =>
+        url.endsWith("/SHA256SUMS")
+          ? Promise.resolve({ ok: true, status: 200, text: async () => SUMS })
+          : Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer }),
       writeArchive: async (path, bytes) => {
         written.push({ path, bytes: Array.from(bytes) });
       },
     });
-
-    assert.equal(calls.length, 2);
-    assert.equal(calls[0].url, "https://api.github.com/repos/redrob-labs/redrob-code/releases/tags/v0.0.1");
-    assert.equal(calls[0].headers.Accept, "application/vnd.github+json");
-    assert.equal(calls[0].headers.Authorization, "Bearer token-from-gh");
-    assert.equal(calls[1].url, "https://api.github.com/repos/redrob-labs/redrob-code/releases/assets/22");
-    assert.equal(calls[1].headers.Accept, "application/octet-stream");
-    assert.equal(calls[1].headers.Authorization, "Bearer token-from-gh");
-    assert.deepEqual(written, [{ path: "/tmp/redrob-code.tar.gz", bytes: [1, 2, 3] }]);
-    assert.deepEqual(result, {
-      assetId: 22,
-      assetUrl: "https://api.github.com/repos/redrob-labs/redrob-code/releases/assets/22",
-      bytes: 3,
-      tokenSource: "GH_TOKEN",
-      version: "0.0.1",
-    });
-  });
-
-  it("reports the missing asset rather than downloading a wrong archive", async () => {
-    await assert.rejects(
-      () => downloadRedrobCodeArchive({
-        version: "0.0.1",
-        archiveName: "redrob-linux-arm64.tar.gz",
-        destPath: "/tmp/unused.tar.gz",
-        env: { REDROB_GITHUB_TOKEN: "token" },
-        fetchImpl: () => Promise.resolve({ ok: true, status: 200, json: async () => RELEASE }),
-        writeArchive: async () => {
-          throw new Error("must not write an archive that was never downloaded");
-        },
-      }),
-      /redrob-linux-arm64\.tar\.gz is not attached to Redrob Code release v0\.0\.1/,
+    assert.deepEqual(written, [{ path: "/tmp/redrob-code.zip", bytes: [1, 2, 3] }]);
+    assert.equal(result.sha256, DIGEST);
+    assert.equal(result.version, "0.0.1");
+    assert.equal(
+      result.assetUrl,
+      `https://github.com/redrob-labs/redrob-code/releases/download/v0.0.1/${ASSET}`,
     );
   });
 
-  it("surfaces the private-release 404 with the token source", async () => {
+  it("leaves nothing on disk when the digest disagrees", async () => {
     await assert.rejects(
       () => downloadRedrobCodeArchive({
-        version: "0.0.1",
-        archiveName: "redrob-linux-x64-baseline.tar.gz",
-        destPath: "/tmp/unused.tar.gz",
-        env: { GITHUB_TOKEN: "token" },
+        version: "v0.0.1",
+        archiveName: ASSET,
+        destPath: "/tmp/unused.zip",
+        fetchImpl: (url) =>
+          url.endsWith("/SHA256SUMS")
+            ? Promise.resolve({ ok: true, status: 200, text: async () => `${"c".repeat(64)}  ${ASSET}` })
+            : Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer }),
+        writeArchive: async () => {
+          throw new Error("must not write an archive that failed verification");
+        },
+      }),
+      /failed sha256 verification/,
+    );
+  });
+
+  it("refuses a floating pin, so a build cannot become unreproducible by accident", async () => {
+    let reached = false;
+    await assert.rejects(
+      () => downloadRedrobCodeArchive({
+        version: "latest",
+        archiveName: ASSET,
+        destPath: "/tmp/unused.zip",
+        fetchImpl: () => {
+          reached = true;
+          throw new Error("must not reach the network for an unpinned version");
+        },
+        writeArchive: async () => {},
+      }),
+      /A pinned Redrob Code version is required/,
+    );
+    assert.equal(reached, false);
+  });
+
+  it("surfaces a missing manifest and a missing asset as distinct failures", async () => {
+    await assert.rejects(
+      () => downloadRedrobCodeArchive({
+        version: "v0.0.1",
+        archiveName: ASSET,
+        destPath: "/tmp/unused.zip",
         fetchImpl: () => Promise.resolve({ ok: false, status: 404 }),
         writeArchive: async () => {},
       }),
-      /HTTP 404 using GITHUB_TOKEN/,
+      /SHA256SUMS manifest for Redrob Code v0\.0\.1 could not be read .*HTTP 404/,
+    );
+    await assert.rejects(
+      () => downloadRedrobCodeArchive({
+        version: "v0.0.1",
+        archiveName: ASSET,
+        destPath: "/tmp/unused.zip",
+        fetchImpl: (url) =>
+          url.endsWith("/SHA256SUMS")
+            ? Promise.resolve({ ok: true, status: 200, text: async () => SUMS })
+            : Promise.resolve({ ok: false, status: 404 }),
+        writeArchive: async () => {},
+      }),
+      /Failed to download redrob-linux-x64-baseline\.zip .*HTTP 404/,
     );
   });
 });
