@@ -69,6 +69,15 @@ const DEFAULT_WORKSPACE_FOLDER_NAME = "Redrob Cowork";
 
 type WelcomeState = {
   stage: WelcomeStage;
+  /**
+   * True when the current stage was reached by pressing Back.
+   *
+   * A stage with nothing left to do should not be shown, and the engine stage skips itself when the
+   * engine is already installed. But that skip must not fight the Back button: without this flag,
+   * pressing Back from the engine stage onto language and then Continue would land on engine, be
+   * skipped forward again, and the user could never reach the language stage at all.
+   */
+  stageFromBack: boolean;
   modalOpen: boolean;
   createBusy: boolean;
   createError: string | null;
@@ -88,7 +97,7 @@ type WelcomeState = {
 };
 
 type WelcomeAction =
-  | { type: "stage"; stage: WelcomeStage }
+  | { type: "stage"; stage: WelcomeStage; fromBack?: boolean }
   | { type: "open" }
   | { type: "close" }
   | { type: "create:start" }
@@ -106,6 +115,7 @@ type WelcomeAction =
 
 const initialWelcomeState: WelcomeState = {
   stage: "language",
+  stageFromBack: false,
   modalOpen: false,
   createBusy: false,
   createError: null,
@@ -124,7 +134,7 @@ const initialWelcomeState: WelcomeState = {
 function welcomeReducer(state: WelcomeState, action: WelcomeAction): WelcomeState {
   switch (action.type) {
     case "stage":
-      return { ...state, stage: action.stage };
+      return { ...state, stage: action.stage, stageFromBack: action.fromBack === true };
     case "open":
       return { ...state, modalOpen: true };
     case "close":
@@ -553,7 +563,11 @@ export function WelcomeRoute() {
   if (state.stage === "engine") {
     return (
       <EngineDownloadStep
-        onBack={() => dispatch({ type: "stage", stage: "language" })}
+        // Nothing to do here when the engine is already installed, so the step does not ask for a
+        // click to confirm that. It still SHOWS on a Back press, or the language stage would be
+        // unreachable.
+        autoContinueWhenPresent={!state.stageFromBack}
+        onBack={() => dispatch({ type: "stage", stage: "language", fromBack: true })}
         onContinue={() => dispatch({ type: "stage", stage: "main" })}
       />
     );
