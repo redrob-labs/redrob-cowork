@@ -724,10 +724,10 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     filteredEntries.map((entry, index) => (
                       <div key={entry.id}>
                         {index === 0 && entry.connected ? (
-                          <div className="px-1 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">{t("provider_auth.connected")}</div>
+                          <div className="px-3.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">{t("provider_auth.connected")}</div>
                         ) : null}
                         {index === connectedCount && !entry.connected ? (
-                          <div className="px-1 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
+                          <div className="px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
                             {connectedCount ? t("provider_auth.all_providers") : t("provider_auth.providers")}
                           </div>
                         ) : null}

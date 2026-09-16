@@ -64,15 +64,68 @@ const PROVIDER_DOMAINS: Record<string, string> = {
   opencode: "opencode.ai",
   redrob: "redrob.io",
   abacus: "abacus.ai",
+  // Hyphenated ids, which the slug heuristic below deliberately refuses to guess at. Without these
+  // they reached the favicon service as invented hostnames ("cloudflare-ai.gateway",
+  // "github.copilot") and came back as a generic globe.
+  "cloudflare-ai-gateway": "cloudflare.com",
+  "cloudflare-workers-ai": "cloudflare.com",
+  "github-copilot": "github.com",
+  "snowflake-cortex": "snowflake.com",
+  "google-generative-ai": "ai.google",
+  "azure-openai": "azure.microsoft.com",
+  poe: "poe.com",
+  digitalocean: "digitalocean.com",
+  gitlab: "gitlab.com",
+  vercel: "vercel.com",
+  cerebras: "cerebras.ai",
+  nebius: "nebius.com",
+  venice: "venice.ai",
+  requesty: "requesty.ai",
+  llama: "llama.com",
+  upstage: "upstage.ai",
+  zhipuai: "z.ai",
+  moonshotai: "moonshot.ai",
+  morph: "morphllm.com",
+  inference: "inference.net",
+  chutes: "chutes.ai",
 };
 
 /**
- * Long-tail catalog ids are slugified domains ("abliteration-ai", "302ai"),
- * so unslugging them recovers a real favicon instead of a monogram.
+ * The suffixes `domainFromSlug` is allowed to read as a TLD.
+ *
+ * It has to be a list. The old rule accepted ANY trailing word, so `cloudflare-ai-gateway` unslugged
+ * to `cloudflare-ai.gateway` and `github-copilot` to `github.copilot` -- hostnames that do not exist.
+ * That is not a harmless miss, because of the next paragraph.
+ */
+const KNOWN_TLDS = new Set([
+  "ai",
+  "app",
+  "cloud",
+  "co",
+  "com",
+  "dev",
+  "io",
+  "net",
+  "org",
+  "run",
+  "sh",
+  "tech",
+  "xyz",
+]);
+
+/**
+ * Long-tail catalog ids that really are slugified domains ("abliteration-ai", "302ai"), unslugged so
+ * they recover a real favicon instead of a monogram.
+ *
+ * Only a suffix in `KNOWN_TLDS` counts. This matters more than it looks: the favicon service answers
+ * an unresolvable domain with HTTP 200 and a GENERIC GLOBE, not an error, so a guessed hostname does
+ * not fall through to the next candidate or to the monogram -- it renders as a wrong icon that looks
+ * deliberate. A guess we cannot stand behind is therefore worse than no guess, and no guess reaches
+ * the monogram, which at least says which provider it is.
  */
 function domainFromSlug(id: string): string | undefined {
   const dashed = id.match(/^(.+)-([a-z]{2,})$/);
-  if (dashed) return `${dashed[1]}.${dashed[2]}`;
+  if (dashed && KNOWN_TLDS.has(dashed[2]!)) return `${dashed[1]}.${dashed[2]}`;
   const numeric = id.match(/^(\d+)(ai|com)$/);
   if (numeric) return `${numeric[1]}.${numeric[2]}`;
   return undefined;

@@ -431,6 +431,22 @@ export function ModelSelect({
               ? "Select model"
               : (selectedOption?.title ?? value.modelID ?? "Select model")}
           </span>
+          {/*
+            The reasoning effort in use, on the trigger.
+
+            It was reachable but invisible: `behaviorLabel` has always been accepted as a prop and was
+            never rendered, so the level could only be seen by reopening the popover and walking into a
+            model's submenu. A setting that changes what every request costs and how long it takes has
+            to be readable without opening anything.
+
+            Only when there IS a level. Most models publish none, and an empty chip beside every model
+            name would be noise on the majority to serve the minority.
+          */}
+          {!hideValue && behaviorLabel ? (
+            <span className="shrink-0 rounded bg-gray-3 px-1.5 py-0.5 text-[10px] font-medium text-gray-11">
+              {behaviorLabel}
+            </span>
+          ) : null}
           <ChevronDown className="h-3 w-3" />
         </TooltipTrigger>
         <TooltipContent>
