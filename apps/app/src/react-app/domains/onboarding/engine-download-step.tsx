@@ -23,6 +23,16 @@ import { OnboardingWizardShell } from "./onboarding-wizard-shell";
 type EngineDownloadStepProps = {
   onBack: () => void;
   onContinue: () => void;
+  /**
+   * Skip this step outright when the engine is already installed and healthy.
+   *
+   * The step's whole purpose is to acquire a binary. When the binary is already there it has nothing
+   * to do, and showing it anyway asked the user to read "The engine is already installed." and press
+   * Continue on every single run of onboarding, which is a dead step in a first-run flow they may see
+   * repeatedly. False when the user pressed Back into this step, because then the step IS what they
+   * asked for.
+   */
+  autoContinueWhenPresent?: boolean;
 };
 
 type EnginePhase =
@@ -41,7 +51,11 @@ type EnginePhase =
  * runtimes engine acquisition is unavailable, so we show a note and still allow
  * Continue (the wizard must not hard-block).
  */
-export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepProps) {
+export function EngineDownloadStep({
+  onBack,
+  onContinue,
+  autoContinueWhenPresent = false,
+}: EngineDownloadStepProps) {
   const desktop = isDesktopRuntime();
   const [phase, setPhase] = useState<EnginePhase>(desktop ? "checking" : "unavailable");
   const [doctor, setDoctor] = useState<EngineDoctorResult | null>(null);
@@ -65,6 +79,12 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
       const result = await runDoctor();
       if (cancelled) return;
       if (result && result.found && result.supportsServe) {
+        // Nothing to acquire. Leave without drawing a screen whose only content is that there was
+        // nothing to do; `checking` stays on screen for the moment the doctor call takes.
+        if (autoContinueWhenPresent) {
+          onContinue();
+          return;
+        }
         setPhase("present");
       } else {
         setPhase("download");
@@ -73,7 +93,7 @@ export function EngineDownloadStep({ onBack, onContinue }: EngineDownloadStepPro
     return () => {
       cancelled = true;
     };
-  }, [desktop, runDoctor]);
+  }, [autoContinueWhenPresent, desktop, onContinue, runDoctor]);
 
   const handleInstall = useCallback(async () => {
     setPhase("downloading");
