@@ -6,6 +6,7 @@ import type { SessionStatus } from "@opencode-ai/sdk/v2/client";
 import { Check, Minimize2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { parseFanOutCommand, type FanOutCommand } from "@/react-app/domains/session/model-fanout";
+import { compactSession } from "@/app/lib/opencode-session";
 
 import { captureAnalyticsEvent } from "@/app/lib/analytics";
 import { createClient, unwrap } from "@/app/lib/opencode";
@@ -743,6 +744,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
   // silent-reauth self-heal below discards its result if it lands stale.
   const mcpListGenerationRef = useRef(0);
   const [steering, setSteering] = useState(false);
+  const [compacting, setCompacting] = useState(false);
   const [verifiedOpenTargets, setVerifiedOpenTargets] = useState<OpenTarget[]>([]);
   const [sending, setSending] = useState(false);
   // Shared with promote-to-send so a manual send-now cannot race the idle drain.
@@ -1786,11 +1788,34 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
     No revert boundary: compaction rewrites history behind the latest turn rather than replacing a turn.
   */
+  /**
+   * Summarise now, without going through the composer.
+   *
+   * This used to write `/compact` into the draft and send it. Two things were wrong with that. The user
+   * watched their composer fill with text they did not type, which reads like the app typing on their
+   * behalf and leaves them to wonder whether it also sent it. And it depended on something recognising
+   * the command afterwards, which is a longer chain than the action needs.
+   *
+   * `compactSession` calls the engine's `session.summarize` and falls back to its `compact` command only
+   * if that method is missing, so the button reaches the same engine work by the shortest path and the
+   * composer is never touched.
+   */
   const handleCompactSession = useCallback(() => {
-    if (sending) return;
-    replaceComposerDraft(props.sessionId, "/compact", null);
-    void sendDraft(buildDraft("/compact", []));
-  }, [buildDraft, props.sessionId, replaceComposerDraft, sendDraft, sending]);
+    if (sending || compacting) return;
+    const model = sessionModel.selectedModel;
+    if (!model?.providerID || !model.modelID) {
+      toast.error(t("app.error_compact_no_model"));
+      return;
+    }
+    setCompacting(true);
+    void compactSession(opencodeClient, props.sessionId, model, { directory: props.workspaceRoot })
+      .catch((error: unknown) => {
+        toast.error(t("app.error_compact_failed"), {
+          description: error instanceof Error ? error.message : undefined,
+        });
+      })
+      .finally(() => setCompacting(false));
+  }, [compacting, opencodeClient, props.sessionId, props.workspaceRoot, sending, sessionModel.selectedModel]);
 
   const handleRestoreRevertedSession = useCallback(() => {    if (!props.onRestoreRevertedSession || restoringRevertedMessages) return;
     setRestoringRevertedMessages(true);
@@ -2066,7 +2091,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
         modelVariantLabel={sessionModel.modelVariantLabel}
         contextUsedPercent={contextUsedPercent}
         onCompactSession={handleCompactSession}
-        compactingSession={sending}
+        compactingSession={compacting}
         modelVariant={sessionModel.modelVariant}
         modelBehaviorOptions={sessionModel.modelBehaviorOptions}
         onModelVariantChange={handleModelVariantChange}

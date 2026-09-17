@@ -129,14 +129,17 @@ describe("the chat column", () => {
     expect(surface).toContain("max-w-[var(--ow-chat-column)]");
   });
 
-  test("it reuses the recognized /compact path", () => {
+  test("it summarises directly, without typing into the composer", () => {
     /*
-      The composer has matched the compact command since before this button existed and routes it to
-      `compactCurrentSession`. Sending the same draft means the button cannot drift from what typing the
-      command does - the same reason the retry button re-sends a draft instead of calling a second path.
+      This asserted the button sent a `/compact` DRAFT. Two things were wrong with that and both were
+      visible to the user: the composer filled with text they had not typed, and the action then depended
+      on something downstream recognising the command. `compactSession` calls the engine's
+      `session.summarize` and only falls back to the command when that method is missing, which is the
+      same engine work by a shorter path.
     */
     const surface = read("src/react-app/domains/session/surface/session-surface.tsx");
-    expect(surface).toContain('buildDraft("/compact", [])');
+    expect(surface).toContain("compactSession(opencodeClient, props.sessionId, model");
+    expect(surface).not.toContain('buildDraft("/compact", [])');
     expect(surface).toContain("onCompactSession={handleCompactSession}");
   });
 });

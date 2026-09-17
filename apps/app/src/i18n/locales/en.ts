@@ -112,6 +112,8 @@ const en = {
   "app.error_compact_empty": "Nothing to compact yet.",
   "app.error_compact_no_session": "Select a session with messages before running /compact.",
   "app.error_compact_no_session_id": "Select a session before compacting.",
+  "app.error_compact_no_model": "Pick a model before summarising, since the summary is written by one.",
+  "app.error_compact_failed": "The summary could not be created.",
   "app.error_connect_first": "Connect to this worker before applying runtime changes.",
   "app.error_not_connected": "Not connected to a server",
   "app.error_rate_limit": "Rate limit exceeded",

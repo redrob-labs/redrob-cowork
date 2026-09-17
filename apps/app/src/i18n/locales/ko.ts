@@ -113,6 +113,8 @@ const ko = {
   "app.error_compact_empty": "아직 압축할 내용이 없습니다.",
   "app.error_compact_no_session": "/compact를 실행하기 전에 메시지가 있는 세션을 선택하세요.",
   "app.error_compact_no_session_id": "압축하기 전에 세션을 선택하세요.",
+  "app.error_compact_no_model": "요약문은 모델이 작성하므로 먼저 모델을 선택하세요.",
+  "app.error_compact_failed": "요약을 만들지 못했습니다.",
   "app.error_connect_first": "런타임 변경을 적용하기 전에 이 워커에 연결하세요.",
   "app.error_not_connected": "서버에 연결되어 있지 않습니다",
   "app.error_rate_limit": "요청 한도를 초과했습니다",
