@@ -22,7 +22,23 @@ export type MessageUsage = {
   /** USD for this turn, as the engine computed it. */
   cost?: number;
   tokens?: MessageUsageTokens;
+  /**
+   * Which model actually answered, when the gateway said so.
+   *
+   * The model a session is SET to is `auto` against Redrob's router, so the picker cannot answer "what
+   * produced this reply". The gateway names the routed model on the same block as the cost, and the
+   * engine now carries both onto the assistant message, so they arrive together and are read together.
+   *
+   * `upstreamProvider` is the vendor that served it, which is not always the model's own vendor: a
+   * pinned vendor that fails falls through to a fallback. Absent for any provider that is not this
+   * gateway, which is why both are optional and neither is ever synthesised from the requested model.
+   */
+  routedModel?: string;
+  upstreamProvider?: string;
 };
+
+const text = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim().length > 0 ? value : undefined;
 
 const finite = (value: unknown): number | undefined =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
@@ -36,8 +52,12 @@ const finite = (value: unknown): number | undefined =>
 export function messageUsageMetadata(info: {
   cost?: unknown;
   tokens?: unknown;
+  routedModel?: unknown;
+  upstreamProvider?: unknown;
 }): MessageUsage | undefined {
   const cost = finite(info.cost);
+  const routedModel = text(info.routedModel);
+  const upstreamProvider = text(info.upstreamProvider);
   const raw = (info.tokens ?? undefined) as MessageUsageTokens | undefined;
   const tokens = raw
     ? {
@@ -55,8 +75,14 @@ export function messageUsageMetadata(info: {
       tokens.output !== undefined ||
       tokens.reasoning !== undefined ||
       tokens.cache !== undefined);
-  if (cost === undefined && !hasTokens) return undefined;
-  return { ...(cost === undefined ? {} : { cost }), ...(hasTokens ? { tokens } : {}) };
+  if (cost === undefined && !hasTokens && routedModel === undefined && upstreamProvider === undefined)
+    return undefined;
+  return {
+    ...(cost === undefined ? {} : { cost }),
+    ...(hasTokens ? { tokens } : {}),
+    ...(routedModel === undefined ? {} : { routedModel }),
+    ...(upstreamProvider === undefined ? {} : { upstreamProvider }),
+  };
 }
 
 /** The usage a rendered message carries, read back out of its metadata. */
@@ -67,8 +93,16 @@ export function readMessageUsage(message: {
   if (!opencode) return undefined;
   const cost = finite(opencode.cost);
   const tokens = opencode.tokens;
-  if (cost === undefined && !tokens) return undefined;
-  return { ...(cost === undefined ? {} : { cost }), ...(tokens ? { tokens } : {}) };
+  const routedModel = text(opencode.routedModel);
+  const upstreamProvider = text(opencode.upstreamProvider);
+  if (cost === undefined && !tokens && routedModel === undefined && upstreamProvider === undefined)
+    return undefined;
+  return {
+    ...(cost === undefined ? {} : { cost }),
+    ...(tokens ? { tokens } : {}),
+    ...(routedModel === undefined ? {} : { routedModel }),
+    ...(upstreamProvider === undefined ? {} : { upstreamProvider }),
+  };
 }
 
 /**

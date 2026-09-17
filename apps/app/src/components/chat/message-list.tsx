@@ -121,6 +121,7 @@ import { faviconUrlForHref } from "@/lib/favicon"
 import { cn } from "@/lib/utils"
 import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { formatMessageCost, readMessageUsage } from "./message-usage"
+import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 
@@ -409,9 +410,40 @@ type AssistantMessageProps = {
   hideReasoning?: boolean
 }
 
+/**
+ * The choices a reply offered, as chips that fill the composer.
+ *
+ * Filling the composer rather than sending is the same restraint the task suggestions and the env-var
+ * card already show: the user still presses send, so a mis-tap costs nothing and the text can be edited
+ * first. That matters more here than there, because these choices are written by the model.
+ */
+function AnswerOptionChips({
+  options,
+  onPick,
+}: {
+  options: string[]
+  onPick: (prompt: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 pt-1" role="group" aria-label={t("answer_options.label")}>
+      {options.map((option, index) => (
+        <button
+          className="rounded-full border border-border/70 bg-background/40 px-3 py-1 text-sm text-foreground transition-colors hover:bg-dls-hover hover:text-foreground"
+          key={`option-${index}-${option}`}
+          onClick={() => onPick(option)}
+          title={t("answer_options.hint")}
+          type="button"
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 const AssistantMessage = React.memo(
   ({ message, isStreaming, hideReasoning }: AssistantMessageProps) => {
-    const { showThinking, highlightQuery } = useMessageList()
+    const { showThinking, highlightQuery, setPrompt } = useMessageList()
     const assistantRenderGroups = React.useMemo(
       () => {
         const groups = getAssistantRenderGroups(message.parts, showThinking)
@@ -429,16 +461,32 @@ const AssistantMessage = React.memo(
         <div className="group flex w-full flex-col gap-0 space-y-2">
           {assistantRenderGroups.map((group, index) => {
             if (group.kind === "text") {
+              /*
+                The options marker is taken off the text and rendered as chips instead.
+                Parsed here rather than in the sync layer because it is a presentation concern: the stored
+                message keeps what the model actually said, so a client that does not render chips still
+                shows a readable line, and nothing has to be migrated if the format changes.
+                While the marker is still streaming in, the raw text is shown and no chips appear. Chips
+                that pop in and then rewrite themselves under a reader's cursor are worse than late ones.
+              */
+              const streamingMarker = isStreaming && hasIncompleteOptionsMarker(group.text)
+              const parsed = streamingMarker
+                ? { body: group.text, options: [] as string[] }
+                : parseAnswerOptions(group.text)
               return (
-                <MessageContent
-                  key={`text-${index}`}
-                  className="text-foreground prose w-full min-w-0 flex-1 rounded-lg bg-transparent p-0"
-                  markdown
-                  isStreaming={isStreaming}
-                  highlightQuery={highlightQuery}
-                >
-                  {group.text}
-                </MessageContent>
+                <React.Fragment key={`text-${index}`}>
+                  <MessageContent
+                    className="text-foreground prose w-full min-w-0 flex-1 rounded-lg bg-transparent p-0"
+                    markdown
+                    isStreaming={isStreaming}
+                    highlightQuery={highlightQuery}
+                  >
+                    {parsed.body}
+                  </MessageContent>
+                  {parsed.options.length > 0 ? (
+                    <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
+                  ) : null}
+                </React.Fragment>
               )
             }
 
@@ -1266,25 +1314,49 @@ function CompactionNotice({ messages }: { messages: UIMessage[] }) {
   )
 }
 
-/** The turn's cost, or nothing when the engine reported none. */
+/**
+ * The turn's cost and what served it, or nothing when the engine reported neither.
+ *
+ * The routed model sits beside the cost because they answer one question together. A session set to
+ * `auto` shows `auto` in the picker, so a reader looking at a figure could not tell what produced it or
+ * why it cost that: the two facts are only useful next to each other. Both come off the same gateway
+ * block, so a turn that has one usually has the other.
+ *
+ * Read from the newest message that reports each, independently. A turn can report a cost with no routed
+ * model, against a provider that is not this gateway, and showing the cost is still right there.
+ */
 function MessageCost({ messages }: { messages: UIMessage[] }) {
-  const cost = React.useMemo(() => {
+  const { cost, routedModel } = React.useMemo(() => {
+    let cost: number | undefined
+    let routedModel: string | undefined
     for (let index = messages.length - 1; index >= 0; index -= 1) {
       const usage = readMessageUsage(messages[index] ?? {})
-      if (usage?.cost !== undefined) return usage.cost
+      if (cost === undefined && usage?.cost !== undefined) cost = usage.cost
+      if (routedModel === undefined && usage?.routedModel !== undefined) routedModel = usage.routedModel
+      if (cost !== undefined && routedModel !== undefined) break
     }
-    return undefined
+    return { cost, routedModel }
   }, [messages])
   const text = formatMessageCost(cost)
-  if (!text) return null
+  if (!text && !routedModel) return null
   return (
-    <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] justify-end px-2 md:px-4">
-      <span
-        className="font-mono text-[11px] tabular-nums text-muted-foreground/80"
-        title={t("usage.turn_cost")}
-      >
-        {text}
-      </span>
+    <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] items-center justify-end gap-2 px-2 md:px-4">
+      {routedModel ? (
+        <span
+          className="max-w-[50%] truncate font-mono text-[11px] text-muted-foreground/80"
+          title={t("usage.routed_model")}
+        >
+          {routedModel}
+        </span>
+      ) : null}
+      {text ? (
+        <span
+          className="font-mono text-[11px] tabular-nums text-muted-foreground/80"
+          title={t("usage.turn_cost")}
+        >
+          {text}
+        </span>
+      ) : null}
     </div>
   )
 }

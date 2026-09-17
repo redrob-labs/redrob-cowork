@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { SessionStatus } from "@opencode-ai/sdk/v2/client";
 import { Check, Minimize2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { parseFanOutCommand, type FanOutCommand } from "@/react-app/domains/session/model-fanout";
 
 import { captureAnalyticsEvent } from "@/app/lib/analytics";
 import { createClient, unwrap } from "@/app/lib/opencode";
@@ -299,6 +300,13 @@ export type SessionSurfaceProps = {
   onModelClick: (sessionId?: string) => void;
   modelPickerOpen: boolean;
   modelUnavailable?: boolean;
+  /**
+   * Runs one prompt on several models, each in its own session, and resolves with how many started.
+   *
+   * Optional: a surface rendered without it simply does not offer `/compare` and `/shuffle`, rather than
+   * the composer needing to know whether the route supports them.
+   */
+  onFanOut?: (command: FanOutCommand) => Promise<number>;
   modelUnavailableMessage?: string | null;
   selectedModel: ModelRef;
   /** providerID → modelID → provider model, for per-session variant options. */
@@ -1172,6 +1180,30 @@ export function SessionSurface(props: SessionSurfaceProps) {
     const originalDraft = draft;
     const text = originalDraft.trim();
     if (!text && attachments.length === 0) return;
+    /*
+      Fan-out commands are taken here, in the live send path, and not in the actions store: that store
+      recognises `/compact` but nothing constructs it, so an interception added there would never run.
+      This is the handler the send button and the Enter key both reach.
+
+      Handled before the draft is turned into a message because these commands do not answer in this
+      session at all - they open one session per model. The composer is cleared only when at least one
+      session actually started, so a failure leaves the user's text where they can retry it.
+    */
+    const fanOut = parseFanOutCommand(text);
+    if (fanOut) {
+      if (!fanOut.prompt) {
+        toast.error(t("fanout.needs_prompt"));
+        return;
+      }
+      const started = (await props.onFanOut?.(fanOut)) ?? 0;
+      if (started > 0) {
+        clearComposer();
+        attachments.forEach(revokeAttachmentPreview);
+      } else {
+        toast.error(t("fanout.none_started"));
+      }
+      return;
+    }
     const nextDraft = buildDraft(text, attachments);
     const sentAttachments = attachments;
     if (sentAttachments.length) setAttachmentsUploading(true);
@@ -1194,7 +1226,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     } finally {
       setAttachmentsUploading(false);
     }
-  }, [attachments, buildDraft, clearComposer, draft, props.sessionId, sendDraft]);
+  }, [attachments, buildDraft, clearComposer, draft, props.onFanOut, props.sessionId, sendDraft]);
 
   // One-step run from the empty-state hero: the route seeds this session's
   // draft and marks it for auto-send. Fire the same send path as the send

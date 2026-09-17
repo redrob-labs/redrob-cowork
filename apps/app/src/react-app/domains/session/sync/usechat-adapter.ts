@@ -127,8 +127,17 @@ export function snapshotToUIMessages(snapshot: RedrobSessionSnapshot): UIMessage
     const time = message.info.time;
     const completed = time && "completed" in time ? time.completed : undefined;
     // Same usage the live path reads. Without it a reload silently loses the per-message cost and the
-    // context gauge that were on screen a moment earlier.
-    const usage = messageUsageMetadata(message.info as { cost?: unknown; tokens?: unknown });
+    // context gauge that were on screen a moment earlier. The cast names every field the builder reads:
+    // narrowing it to cost and tokens is how the routing fields would go missing on reload only, which is
+    // the same one-path-has-it defect the cost figure itself had on the streaming side.
+    const usage = messageUsageMetadata(
+      message.info as {
+        cost?: unknown;
+        tokens?: unknown;
+        routedModel?: unknown;
+        upstreamProvider?: unknown;
+      },
+    );
     const uiMessage = {
       id: message.info.id,
       role: message.info.role,
