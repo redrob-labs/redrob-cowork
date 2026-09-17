@@ -163,7 +163,7 @@ export function SessionSearchDialog(props: SessionSearchDialogProps) {
           session,
         }));
       return recent.length > 0
-        ? [{ value: "Recent sessions", kind: "recent", items: recent }]
+        ? [{ value: t("search.recent_sessions"), kind: "recent", items: recent }]
         : [];
     }
 
@@ -228,7 +228,7 @@ export function SessionSearchDialog(props: SessionSearchDialogProps) {
         : t("session.search_no_matches");
 
   const statusText = !trimmedQuery
-    ? "Recent sessions"
+    ? t("search.recent_sessions")
     : searching
       ? `Searching messages… ${progress.scanned}/${progress.total}`
       : `${resultCount.toLocaleString()} ${resultCount === 1 ? "result" : "results"}`;

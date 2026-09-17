@@ -1,5 +1,6 @@
 "use client"
 
+import { t } from "@/i18n";
 import {
   Collapsible,
   CollapsibleContent,
@@ -212,8 +213,8 @@ const Tool = ({
               size="icon-xs"
               className="absolute right-2 top-2"
               data-testid="tool-result-copy-action"
-              title={copied ? "Copied" : "Copy tool result"}
-              aria-label={copied ? "Tool result copied" : "Copy tool result"}
+              title={copied ? t("common.copied") : t("tool.copy_result")}
+              aria-label={copied ? t("common.copied") : t("tool.copy_result")}
               onClick={() => void handleCopyResult()}
             >
               {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}

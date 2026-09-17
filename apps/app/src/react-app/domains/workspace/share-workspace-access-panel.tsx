@@ -65,7 +65,7 @@ function CredentialField(props: CredentialFieldProps) {
             onClick={() => props.onToggleReveal(props.fieldKey)}
             disabled={!props.field.value}
             className={pillSecondaryClass}
-            title={revealed ? "Hide password" : "Reveal password"}
+            title={revealed ? t("workspace.hide_password") : t("workspace.reveal_password")}
           >
             {revealed ? <EyeOff size={14} /> : <Eye size={14} />}
           </button>

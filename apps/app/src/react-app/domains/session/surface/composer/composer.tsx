@@ -659,7 +659,7 @@ export function ReactSessionComposer(props: ComposerProps) {
       );
     }
     return (
-      <div className="grid gap-1">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
         {servers.map((server) => {
           const status = mcpEntryStatus(server, props.mcpStatuses);
           const statusLabel = toolMenuMcpStatusLabel(status);
@@ -955,7 +955,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               onMouseDown={(event) => event.preventDefault()}
           >
             {slashFiltered.length > 0 ? (
-              <div className="grid gap-1">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
                 {slashFiltered.map((command, index) => (
                   <button
                     key={command.id}
@@ -1010,7 +1010,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               className="max-h-64 overflow-y-auto p-2"
               onMouseDown={(event) => event.preventDefault()}
           >
-            <div className="grid gap-1">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
               {mentionFiltered.map((item, index) => (
                 <button
                   key={item.id}
@@ -1064,7 +1064,18 @@ export function ReactSessionComposer(props: ComposerProps) {
         imeComposingRef.current = false;
       }}
     >
-      <div className={props.flush ? "" : "mx-auto max-w-[var(--ow-chat-column)]"}>
+      {/*
+        The composer takes the SAME inset as the transcript, not just the same max width.
+
+        Both already read `--ow-chat-column`, which is why this looked done. It was not: every transcript row
+        adds `px-2 md:px-4` INSIDE that column, and the composer added nothing, so the panel sat 16px wider
+        on each side than the text above it. Matching the width without matching the padding is what produced
+        the mismatch a screenshot showed as two curves that do not line up.
+
+        Same breakpoints as the rows, so the two move together at every width instead of agreeing only on a
+        wide window.
+      */}
+      <div className={props.flush ? "" : "mx-auto max-w-[var(--ow-chat-column)] px-2 md:px-4"}>
         {/* Main composer panel — also the drop target. The whole panel accepts a
             drag, not just the text area: a file dropped on the action row or the
             padding is the same intent, and a highlight that only lights up over
@@ -1298,7 +1309,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           </div>
                           <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-2">
                           {toolMenuSection === "agents" ? (
-                            <div className="grid gap-1">
+                            <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
                               <button
                                 type="button"
                                 className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-gray-2/70 ${props.selectedAgent === null ? "bg-gray-2 text-gray-12" : "text-gray-11"}`}
@@ -1330,7 +1341,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           ) : null}
                           {toolMenuSection === "commands" ? (
                             toolCommandItems.length > 0 ? (
-                              <div className="grid gap-1">
+                              <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
                                 {toolCommandItems.map((command) => (
                                   <button
                                     key={command.id}
@@ -1354,7 +1365,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           ) : null}
                           {toolMenuSection === "skills" ? (
                             skillMenuItems.length > 0 ? (
-                              <div className="grid gap-1">
+                              <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
                                 {skillMenuItems.map((skill) => (
                                   <button
                                     key={`${skill.origin ?? "local"}:${skill.path || skill.name}`}
