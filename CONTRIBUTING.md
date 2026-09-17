@@ -55,17 +55,23 @@ develop ──●─●────●──────●───────
 Rebase your branch on `develop` before asking for review. Keep the branch focused: a
 reviewer should be able to state what the branch does in one sentence.
 
-### What is not configured yet
+### What protection is on, and what it cannot cover
 
-Stated plainly, because a guide that describes protection the repository does not have is
-worse than one that admits the gap:
+Both `develop` and `main` are protected: everything lands through a pull request, force pushes and
+deletions are blocked, and two checks are required.
 
-- **Neither branch is protected.** No required checks, no review requirement, and force
-  push and deletion are not blocked. Do not read "protected" anywhere in this document as
-  a fact about the current settings.
-- **The test workflow does not run on pull requests** (below), so it cannot be required
-  even once protection is turned on. Fix that first, or protection will only ever gate
-  two lint-shaped checks.
+| | Setting |
+|---|---|
+| Required checks | `i18n-audit`, `Syntax & dry-run publish` |
+| Required reviews | 0 -- a single maintainer may self-merge |
+| Strict (branch up to date) | off -- a stale base does not block a merge |
+| Admin enforcement | off |
+
+**The test suite is not among the required checks and cannot be.** `Redrob Cowork Tests` is
+`workflow_dispatch` only, so it never reports on a pull request; requiring a check that never runs
+leaves every pull request waiting forever. Run the suite locally (above). If you fix the two
+pre-existing trunk failures, re-enable the workflow on `pull_request` and add it to the required list
+in the same change -- that, not more protection, is what would make these gates mean something.
 
 The Korean guide is [CONTRIBUTING.ko.md](./CONTRIBUTING.ko.md), and it is the only one. An
 older `CONTRIBUTING_KO.md` described the single-trunk flow this document replaced; it was
