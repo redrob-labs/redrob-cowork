@@ -41,7 +41,8 @@ develop ──●─●────●──────●───────
   나열하며 실패하고, `allow_unpromoted: true` 가 이미 `main`에 올라간 핫픽스를 위한 예외입니다.
 - **작업 브랜치** 는 `<type>/<짧은-슬러그>` 로 이름 짓습니다. 예를 들어
   `fix/composer-drop-zone`, `feat/reasoning-effort`, `chore/bump-electron`,
-  `docs/upstream-sync`. 종류는 `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`.
+  `docs/upstream-sync`. 종류는 `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`,
+  그리고 이 문서가 설명하면서 이름은 붙이지 않았던 두 브랜치를 위한 `hotfix`, `release`.
 - **핫픽스** 는 `develop`이 아니라 `main`에서 자릅니다. 그래야 아직 릴리스되지 않은 작업을 함께
   끌고 가지 않습니다. `main`에 머지하고 릴리스한 뒤, **반드시 `main`을 `develop`으로 되돌려
   머지합니다.** 그러지 않으면 다음 릴리스에서 그 수정이 사라집니다. 이 단계가 빠지는 단계이고,

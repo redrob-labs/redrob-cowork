@@ -39,7 +39,7 @@ jobs:
 
           # ALLOWED_TYPES is this repository's own list. Keep it in step with the branch table in the
           # contributing or branching document; the document is the explanation, this is the gate.
-          ALLOWED_TYPES='feat fix chore docs test refactor perf sync'
+          ALLOWED_TYPES='feat fix chore docs test refactor perf sync hotfix release'
 
           # `develop` and `main` reach here through a promotion or a back-merge pull request, which are
           # branches in their own right and are not named after a type.

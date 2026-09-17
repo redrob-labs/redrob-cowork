@@ -42,7 +42,8 @@ develop ──●─●────●──────●───────
   override a hotfix already on `main` legitimately needs.
 - **Working branches** are named `<type>/<short-slug>`, e.g. `fix/composer-drop-zone`,
   `feat/reasoning-effort`, `chore/bump-electron`, `docs/upstream-sync`.
-  Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`.
+  Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, plus `hotfix` and
+  `release` for the two branches this document already describes but never named.
 - **Hotfixes** branch from `main`, not `develop`, so the fix does not drag unreleased work
   with it. Merge into `main`, release, **then merge `main` back into `develop`** or the fix
   is lost at the next release. This is the step that gets skipped; the sibling engine
