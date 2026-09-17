@@ -77,7 +77,7 @@ pnpm dev:worktree
 
 레드롭 코워크는 영어와 한국어를 지원합니다.
 
-README 번역: [English](./README.md), [한국어](./README_KO.md).
+README 번역: [English](./README.md), [한국어](./README.ko.md).
 
 ## 기여하기
 
