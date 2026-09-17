@@ -1,9 +1,9 @@
 # Handoff: redrob-work
 
-Current state of `main` as of 2026-08-29, checked against the tree at `14a4bdd`.
+Current state of `main` as of 2026-09-17, checked against the tree at `8cde784`.
 
-Where a number below was re-measured in this change it says so. Everything else is
-carried forward from the 2026-08-28 measurement at `d274cb6` and has not been re-run.
+Where a number below was re-measured it says so. A number carried forward from an earlier
+measurement is marked as such and has not been re-run.
 
 ## What this repo is
 
@@ -28,7 +28,7 @@ dashboard. Everything a user can do happens in this app.
 `constants.json` at the repo root is the single pin:
 
 ```json
-{ "redrobCodeVersion": "v0.0.12" }
+{ "redrobCodeVersion": "v1.18.31-redrob.9" }
 ```
 
 Everything reads that one value:
@@ -81,40 +81,66 @@ allowing missing Korean keys but rejecting Korean keys English lacks.
 
 ## Current main
 
-`14a4bdd`, `chore(desktop): pin the sole-GUI Redrob Code engine v0.0.3 (#11)`
+`8cde784`, `Summarise when the button is pressed, instead of typing into the composer (#36)`.
+Released: **`v0.1.12`**, 30 assets, four `latest*.yml`, all six platform builds green. The
+Windows download was verified by downloading it: 200, 199,558,792 bytes.
 
 Recent landings:
 
 | PR | What |
 | --- | --- |
-| #11 (`14a4bdd`) | Pinned the sole-GUI Redrob Code engine to `v0.0.3` in `constants.json`, with `runtime.test.mjs` asserting the value |
-| #10 (`1cfcb08`) | Made Redrob Code own the Redrob Key: host-token `/redrob-auth` routes, engine `PUT /auth/redrob`, legacy-key migration, and `REDROB_API_KEY` reserved again in the env store |
-| #8 (`d274cb6`) | AGENTS.md only: Kiro is the worker, Cursor Cloud the commander |
-| #7 (`ef9b7d6`) | Paused automatic GitHub Actions for local-dev |
-| #6 (`b99c9a1`) | Ran Redrob Cowork on Redrob Code: engine wiring, en/ko locales, plus `engine-directory-header.test.ts`, `redrob-code-spawn.test.ts`, `supported-locales.test.ts` |
+| #36 (`8cde784`) | The paraphrase and compare controls, the streaming variant panel, the summarise-directly button, and the context row that no longer takes its button with it |
+| #35 (`a455836`) | Engine pin to `v1.18.31-redrob.9` |
+| #34 (`5c8a079`) | Routed model beside the cost, answer chips |
+| #33 (`18e4664`) | Transcript on the composer's column, manual-summarise gate removed |
+| #32 (`899e346`) | Engine pin to `redrob.8`, the first that carries the billed cost |
 
-Before that: the cloud-removal series (`278f810`, `f7f70da`, `bcdc9fc`) deleting the Den wire
-types, connect links, automations and every cloud UI surface, then `auto` becoming the canonical
-Redrob model id and the engine reporting itself as Redrob Code everywhere the version surfaces.
+The engine's side of the same work: `redrob-code` #24 named `routedModel` and `upstreamProvider`
+through v1 and v2 `Assistant`, `getUsage` and the processor, and #25 added the compaction cost
+ceiling (`compaction.maxTurnInputCostUsd`, default `0.5`). The console's side: #105 through #108,
+merged and deployed, which put the billed cost in the streaming response and added model
+popularity to the usage page.
 
-**CI is paused.** All 14 workflows in `.github/workflows` are `workflow_dispatch` only
-(`aur-validate.yml` also declares `workflow_call`, which only another workflow can reach).
-Local runs are the only gate.
+**CI does not run the tests.** `ci-i18n.yml` and `ci-redrob-ui-mcp.yml` run on `pull_request`, so a
+PR gets exactly three checks. **`ci-tests.yml` is `workflow_dispatch` only**, which is why a green
+PR here says nothing about the app suite. Run it locally; that is the only gate.
+
+## Verifying in the running app, not in the suite
+
+Every defect in #36 passed a green suite. The suite is a floor, not a gate, and the two traps below
+are what made "tested" and "works" different words.
+
+```bash
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+cd apps/app && pnpm exec vite --port 5433 --host 127.0.0.1 --strictPort &
+cd ../.. && DISPLAY=:0 ELECTRON_DISABLE_SANDBOX=1 \
+  REDROB_ELECTRON_START_URL=http://127.0.0.1:5433 pnpm --filter @redrob/desktop exec electron . &
+```
+
+Vite HMR picks up edits, so a change is testable in the window that is already open.
+
+**Trap 1: the app starts its own engine.** Starting one by hand and pointing at its port proves
+nothing: the app spawns a per-workspace engine and talks to it at
+`/workspace/<ws>/opencode/...`. An engine change is therefore NOT verifiable this way, only an app
+change is. Engine work has to go through a release and the pin.
+
+**Trap 2: the pricing catalogue does not load in dev.** `GET /pricing` answers 200 with all 323
+rows, but sends no `access-control-allow-origin` for `http://127.0.0.1:5433`, so the renderer's
+fetch throws and the app falls back to an empty catalogue. Consequence: every price column reads
+`—` and the context percentage is unknown. That is a dev-origin artifact, not a product defect, and
+anything downstream of the catalogue cannot be judged in this window.
+
+The app's own request log is the fastest diagnostic there is. A feature that silently does nothing
+usually shows up as a request that was never made: #36's fork was invisible in the app and equally
+invisible in the log, and that absence is what identified the wrong client.
 
 ## Open related PRs, not on main
 
-- **#12, branch `cursor/server-test-fixes-5724`** (`b0674b1`,
-  `fix(server): clear the six reproducible redrob-server failures`). Reports 557 pass / 0 fail
-  on the server suite. Seven files: `env-file.ts`, `env-routes.e2e.test.ts`,
-  `mcp.authorization-link.e2e.test.ts`, `mcp.engine-sync.e2e.test.ts`, `serve-node.ts`,
-  `serve-node.test.ts`, `server.ts`. It makes `REDROB_MODELS_API_KEY` canonical for the voice
-  broker and keeps `REDROB_CLOUD_API_KEY` readable as a legacy alias, because that is the name
-  existing installs carry on disk. **This is not merged.** Do not describe the six failures as
-  fixed on `main`, and do not re-fix them here.
-- **This PR, branch `cursor/docs-handoff-5724`.** Deletes `packages/docs/cloud` (19 pages) and
-  the dead `snippets/redrob-connect-installer.jsx`, rewrites every page that pointed into that
-  tree, and rewrites this file. After it lands, `packages/docs/cloud` is gone and follow-up 2
-  from the previous handoff is closed.
+- **#12, branch `cursor/server-test-fixes-5724`** (`b0674b1`). Reports 557 pass / 0 fail on the
+  server suite. Makes `REDROB_MODELS_API_KEY` canonical for the voice broker while keeping
+  `REDROB_CLOUD_API_KEY` readable as a legacy alias, because that is the name existing installs
+  carry on disk. **Still not merged.** Do not describe the six server failures as fixed on `main`,
+  and do not re-fix them here.
 
 ## How to verify locally
 
@@ -124,75 +150,67 @@ Local runs are the only gate.
 pnpm install
 pnpm typecheck                          # only filters @redrob/app
 pnpm --filter redrob-server typecheck   # root typecheck does NOT cover the server
-pnpm --filter @redrob/app test          # 422 pass / 0 fail, 86 files, ~25s
+pnpm --filter @redrob/app test          # 859 pass / 0 fail, 135 files, ~26s  (2026-09-17)
 pnpm build:ui                           # exit 0, ~10s
 pnpm --filter @redrob/desktop test      # 220 tests: 216 pass / 0 fail / 4 skip
 pnpm --filter redrob-server test        # 530 pass / 5 skip / 6 fail on main; see #12
 pnpm check:outbound-access              # manifest covers 33 hosts, 28 scanned, no stale entries
 ```
 
-Those counts are the 2026-08-28 measurement and were **not** re-run for this change. A
-docs-only change does not need them: this one was proved with the docs-relevant checks below.
+The app count was re-measured on 2026-09-17. The others are the 2026-08-28 measurement and were
+not re-run.
+
+**Judge by the exit code, not by the pass count.** `pnpm test` prints `859 pass / 0 fail` and still
+exits 1 when a file fails to LOAD: a module-level throw is reported as `1 error` beside the
+summary, its tests are never counted, and grepping for `(fail)` finds nothing. That happened in
+this round and was briefly reported as green.
 
 ```bash
-pnpm --filter redrob-server typecheck                                            # exit 0
-cd apps/server && bun test src/opencode-plugins/redrob-capabilities-knowledge.test.ts
-# 7 pass / 0 fail, 26 expect() calls
+pnpm --filter @redrob/app test > /tmp/app.log 2>&1; echo "exit=$?"; tail -5 /tmp/app.log
 ```
 
-That test file is the docs search and index gate. It now also asserts the docs tree itself:
-`packages/docs/cloud` is absent, `packages/docs/self-host/deploy-to-your-cloud/overview.mdx`
-still exists, `docs.json` navigation contains no `cloud/` page and no redirect destination
-under `/cloud/`, every navigation page id resolves to a bundled `.mdx`, and a docs search for
-cloud org terms surfaces nothing. Restoring the deleted tree turns two of those assertions red,
-which is how the gate was confirmed to mean something.
-
-Navigation and internal links were checked directly against the tree: 51 navigation page ids,
-all resolving, and 0 broken internal `/...` links across all 51 remaining `.mdx` pages.
-
-Prose in this file was verified by reading the code it describes, not by running the app. Every
-claim above about `constants.json`, `/redrob-auth`, `env-file.ts`, the workflow triggers, the
-locale counts, and the `Do not` entries was checked by opening the file named. No runtime proof
-was gathered for them, and none is claimed.
-
-`pnpm typecheck` at the root is `pnpm --filter @redrob/app typecheck` and nothing else, so
-server and desktop are not covered by it. Typecheck the server explicitly.
+`pnpm typecheck` at the root is `pnpm --filter @redrob/app typecheck` and nothing else, so server
+and desktop are not covered by it. Typecheck the server explicitly.
 
 Clear `apps/server/dist` before running the server suite. A stale build leaves compiled copies of
 deleted tests that `bun test` also runs; regenerate with `pnpm --filter redrob-server build`.
-`apps/desktop/server/dist` carries the same hazard and currently holds a compiled tree.
+`apps/desktop/server/dist` carries the same hazard.
 
-The Windows-only failure counts that used to be recorded here (120 `EBUSY` server failures, 15
-desktop failures) do not reproduce on Linux.
+The Windows-only failure counts once recorded here (120 `EBUSY` server failures, 15 desktop
+failures) do not reproduce on Linux.
 
 ## Follow-ups that are still real, prioritized
 
-1. **`Settings > Debug` has no agent diagnostics panel.** `apps/server/src/agent-context-*` was
-   deleted because its schema required cloud catalog probes, organization connection rows and
-   cloud tool IDs as preconditions. If that local visibility is wanted, rebuild it around local
-   checks only: engine config, MCP inventory, runtime health. Nothing depends on it today, so
-   this is a want, not a break.
-2. **Orphaned i18n keys outside the removed namespaces.** The 812-key deletion was safe because
-   this repo constructs no `t()` keys dynamically. A further sweep would need to confirm each key
-   is unreachable first. Known stragglers: `extensions.disabled_by_organization` in
-   `apps/app/src/react-app/domains/settings/pages/mcp-view.tsx`, and
-   `settings.redrob_server_desc` in `en.ts`, which still calls the local server a "control
-   plane".
-3. **One surviving evidence script.** `packages/redrob-bootstrap/evals/agent-test-evidence-redrob-app-install.mjs`
-   is the only file in that directory; the other two required a live den-api and are gone. The
-   root `evals/` harness is gone with them.
-4. **`docs/enterprise/outbound-access.json` still lists the retired hosted origins.**
-   `packages/docs/start-here/outbound-network-access.mdx` now marks `app.redrob.io`,
-   `api.redrob.io`, and the `.software` pair as not required, but the machine-readable manifest
-   that `pnpm check:outbound-access` guards was left alone. Reconcile the two together, since the
-   script scans source for host literals and will complain if the manifest and the code disagree.
-5. **`packages/ui/src/react/roadmap.tsx` no longer says Cloud is the control plane.** The
-   central-management section now describes a Redrob Cowork server the team hosts, so the
-   component and `packages/docs/roadmap.mdx` agree again.
-6. **`packages/docs/changelog.mdx` still names Redrob Cowork Cloud in historical entries.** That
-   file is generated by `scripts/generate-changelog.mjs` from `changelog/release-tracker-*.md`,
-   so hand-editing it would be overwritten and would also falsify a dated record. Left as is on
-   purpose.
+1. **`routedModel` is stored but not rendered beside the cost.** The console sends it (measured on
+   the wire: the final stream chunk carries `routedModel`, `upstreamProvider`, `costUsd`) and the
+   engine stores it, so the break is in the engine-to-app hop or in the app's `readMessageUsage`.
+   Note that `usechat-adapter.ts` narrows its cast and must name every field, which is the shape of
+   the bug that once lost the cost for streaming callers only.
+2. **A 384k-token request was billed entirely at the short-context rate.** `384,023 x $3.15/M +
+   12 x $15.75/M = $1.209861` matches the logged charge exactly, so the long-context rate was not
+   applied past the model's 200k boundary, while the billing card says it is. Either the billing is
+   wrong or the card is; both are ours.
+3. **Fork sessions from early variant runs are still in the sidebar.** They predate the discard fix
+   in #36, which now deletes a run's forks. Existing ones need clearing by hand.
+4. **Popularity in the model picker needs a proxy.** The column was built and then removed on
+   request. It cannot be sourced honestly from the renderer: the renderer holds no API key by
+   design, so the console's account-scoped `request_logs` aggregate is out of reach from there. A
+   local per-send counter is the alternative, and it can only count from the day it ships. Doing
+   this properly means the main process or the engine proxying an API-key-authenticated call.
+5. **The resolved out-of-credit card still shows its call to action.** It is a transcript record of
+   a turn that failed, and it keeps telling the user to add credit after later turns have succeeded.
+6. **Steering is deferred.** `delivery` is already on the v2 HTTP API
+   (`packages/server/src/handlers/session.ts:148`); the app talks to v1, so bridging is an
+   architecture change and its own release.
+7. **`Settings > Debug` has no agent diagnostics panel.** `apps/server/src/agent-context-*` was
+   deleted because its schema required cloud catalog probes as preconditions. Nothing depends on it
+   today, so this is a want, not a break.
+8. **Orphaned i18n keys outside the removed namespaces.** Known stragglers:
+   `extensions.disabled_by_organization` in `mcp-view.tsx`, and `settings.redrob_server_desc` in
+   `en.ts`, which still calls the local server a "control plane".
+9. **`docs/enterprise/outbound-access.json` still lists the retired hosted origins.** The prose page
+   marks them as not required; the machine-readable manifest that `pnpm check:outbound-access`
+   guards was left alone. Reconcile the two together.
 
 ## Do not
 
@@ -221,6 +239,20 @@ desktop failures) do not reproduce on Linux.
   registry, the UI options list, the bundle barrel and the locales directory are all exactly
   `en, ko`.
 - **Do not accept `x-opencode-directory`.** Redrob Code reads only `x-redrob-directory`.
+- **Do not gate a control on a number it does not need.** The context row returned `null` when the
+  percentage was unknown and took the summarise button with it, which in dev is always. Whether a
+  reading can be computed has nothing to do with whether the action behind it is available, and the
+  same mistake had already been made once by hiding the button below 50% full.
+- **Do not construct a second engine client.** `session-route.tsx` uses the app's own
+  `opencodeClient`. A client built from the endpoint and token looks equivalent and is not: its fork
+  request never reached the server, with no error and no log line.
+- **Do not put layout classes on a row instead of the shared column.** `CHAT_COLUMN` and
+  `CHAT_COLUMN_OUTER` in `components/chat/chat-column.tsx` are the only place the inset lives, so a
+  row cannot lose it to an overriding component or apply it twice. Three separate alignment defects
+  came from copies of those classes.
+- **Do not translate `paraphrase` or `compare` in `ko.ts`.** Both name a specific action in this
+  product, and the translated forms read as an edit and as the retry button beside them. They are
+  registered in the residual-English guard's allow list for that reason.
 - **Do not use an HTTP header name containing a space.** `X-Redrob Cowork-Host-Token` was such a
   bug and every request that set it threw instead of authenticating. The code is correct now
   (`x-redrob-host-token` / `X-Redrob-Host-Token`); do not reintroduce the pattern when renaming.
