@@ -42,7 +42,8 @@ develop ──●─●────●──────●───────
   override a hotfix already on `main` legitimately needs.
 - **Working branches** are named `<type>/<short-slug>`, e.g. `fix/composer-drop-zone`,
   `feat/reasoning-effort`, `chore/bump-electron`, `docs/upstream-sync`.
-  Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`.
+  Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, plus `hotfix` and
+  `release` for the two branches this document already describes but never named.
 - **Hotfixes** branch from `main`, not `develop`, so the fix does not drag unreleased work
   with it. Merge into `main`, release, **then merge `main` back into `develop`** or the fix
   is lost at the next release. This is the step that gets skipped; the sibling engine
@@ -54,6 +55,15 @@ develop ──●─●────●──────●───────
 
 Rebase your branch on `develop` before asking for review. Keep the branch focused: a
 reviewer should be able to state what the branch does in one sentence.
+
+**The type list and the back-merge are enforced by
+[`.github/workflows/gitflow.yml`](./.github/workflows/gitflow.yml), not by trust.** It fails a pull
+request whose head branch is not `<type>/<slug>` carrying one of the types above, which is how a
+branch named after the tool that produced it gets caught instead of merged; `develop` and `main`
+themselves pass, since a promotion or back-merge branch is not named after a type. On every push to
+`main` the same workflow fails while `main` holds commits `develop` does not, which is the rule the
+hotfix bullet describes and the step that actually gets skipped. Neither job checks tests or
+behavior, and neither is in the required list above, so they report rather than block.
 
 ### What protection is on, and what it cannot cover
 

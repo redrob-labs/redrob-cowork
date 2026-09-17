@@ -32,6 +32,13 @@ against `main` is wrong unless it is a release promotion or a hotfix.
   `main`**, listing the unpromoted commits. `allow_unpromoted: true` is the override for a hotfix
   already on `main`.
 
+**Both of the rules above are now checked, not just written down.**
+`.github/workflows/gitflow.yml` fails a pull request whose head branch is not `<type>/<slug>` with
+one of `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `sync`, because a branch name says
+what the change is and not what tool produced it. On every push to `main` the same workflow fails
+while `main` holds commits `develop` does not, so the back-merge step above stops being the one that
+gets skipped. Neither job is a required check, so both report without blocking a merge.
+
 See CONTRIBUTING.md, or CONTRIBUTING.ko.md for the same in Korean.
 
 ## Verification (every change)
