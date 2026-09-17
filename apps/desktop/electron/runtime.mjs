@@ -1231,8 +1231,16 @@ async function repairIncompleteChains(options) {
 
   let timeoutId;
   const timeout = new Promise((resolve) => {
+    /*
+      Deliberately NOT unref'd. This timer is the only bound on a chain repair that is already in
+      flight, and an unref'd bound is not a bound: with nothing else pending the loop drains, the
+      process can end while the race is unresolved, and the timeout never fires. A socket that
+      accepts a connection and then says nothing produces exactly that, which is how it was found.
+
+      Holding the loop costs nothing here because the `finally` below clears the timer the moment
+      `run()` settles, so the hold lasts as long as the operation it bounds and no longer.
+    */
     timeoutId = setTimeout(() => resolve({ pems: [], timedOut: true }), totalTimeoutMs);
-    timeoutId.unref?.();
   });
   try {
     return await Promise.race([run(), timeout]);

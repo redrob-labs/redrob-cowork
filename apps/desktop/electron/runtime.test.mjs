@@ -92,7 +92,25 @@ describe("bundled Redrob Code runtime", () => {
     // the environment and the SQL Credential store, so a user who connected through the app had a key
     // the catalogue could not see: it took the keyless branch and listed six built-in ids while the
     // console served 323. An older pin ships that six-model engine to every app user.
-    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.5");
+    // Asserted as a FLOOR, not an equality. The reason above is a floor: redrob.5 is the first
+    // release that finds the key, so anything from redrob.5 up is correct and pinning higher is the
+    // normal case. Written as an equality this failed on every engine bump, and because
+    // ci-tests.yml is workflow_dispatch only it failed silently: the literal sat at redrob.5 while
+    // the pin moved through 6, 7, 8, 9 and 10 with nothing reporting it.
+    const pin = String(constants.redrobCodeVersion ?? "");
+    const parsed = /^v(\d+)\.(\d+)\.(\d+)-redrob\.(\d+)$/.exec(pin);
+    assert.ok(parsed, `pin ${pin} must look like v<upstream>-redrob.<iteration>`);
+    const upstream = [Number(parsed[1]), Number(parsed[2]), Number(parsed[3])];
+    const iteration = Number(parsed[4]);
+    const floor = [1, 18, 31];
+    const upstreamAtOrAboveFloor =
+      upstream[0] > floor[0] ||
+      (upstream[0] === floor[0] &&
+        (upstream[1] > floor[1] || (upstream[1] === floor[1] && upstream[2] >= floor[2])));
+    assert.ok(upstreamAtOrAboveFloor, `pin ${pin} is older than the v1.18.31 floor`);
+    if (upstream.join(".") === floor.join(".")) {
+      assert.ok(iteration >= 5, `pin ${pin} is below the redrob.5 floor described above`);
+    }
     // The upstream OpenCode pin must be gone: a stale reader would resolve an
     // OpenCode version that no longer describes the shipped engine.
     assert.equal(constants.opencodeVersion, undefined);
