@@ -1,6 +1,6 @@
 # Redrob Cowork
 
-**English** · [한국어](./README_KO.md)
+**English** · [한국어](./README.ko.md)
 
 Redrob Cowork is a free, open-source desktop and MCP app for doing work with AI agents on your own files. It runs on macOS, Windows, and Linux, is built on the OpenCode engine, and ships in English and Korean.
 
@@ -122,7 +122,7 @@ If a second instance cannot get the profile lock it now says so and exits, inste
 
 Redrob Cowork ships in English and Korean.
 
-README translations: [English](./README.md), [한국어](./README_KO.md).
+README translations: [English](./README.md), [한국어](./README.ko.md).
 
 ## Contributing
 
