@@ -904,7 +904,41 @@ jobs:
             echo "No Electron release assets found in apps/desktop/dist-electron" >&2
             exit 1
           fi
-          gh release upload "$RELEASE_TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          # One asset at a time, each pre-deleted, each retried.
+          #
+          # A single batched `--clobber` call failed three runs in a row on this leg, and the failures
+          # were not the same: HTTP 422 "ReleaseAsset.name already exists" once, HTTP 400 twice, both
+          # on the large archives and both minutes into the upload. Small blockmaps beside them
+          # succeeded, so it is not simply size: a 199MB Windows .exe uploads fine.
+          #
+          # Two things are wrong with the batched form. `--clobber` deletes then creates, and those are
+          # not one operation, so a retry that lands while GitHub still holds the old asset is refused.
+          # And a batch that fails halfway leaves some assets uploaded and some not, which is how a
+          # recovery run took the release from 14 assets down to 6: it deleted what it could not
+          # replace.
+          #
+          # Serial uploads make a failure affect one asset. The explicit delete first removes a partial
+          # asset an earlier attempt left behind, which `--clobber` alone does not always clear. The
+          # retry with backoff covers the transient case without hiding a real one, because the third
+          # failure still fails the job.
+          for asset in "${assets[@]}"; do
+            name="$(basename "$asset")"
+            gh release delete-asset "$RELEASE_TAG" "$name" --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
+            uploaded=false
+            for attempt in 1 2 3; do
+              if gh release upload "$RELEASE_TAG" "$asset" --repo "$GITHUB_REPOSITORY" --clobber; then
+                uploaded=true
+                break
+              fi
+              echo "::warning::upload of $name failed on attempt $attempt"
+              sleep "$((attempt * 20))"
+            done
+            if [ "$uploaded" != true ]; then
+              echo "::error::uploading $name failed three times" >&2
+              exit 1
+            fi
+            echo "uploaded $name"
+          done
 
       - name: Retain benchmark Electron assets
         if: env.BENCHMARK_ONLY == 'true'
@@ -1093,7 +1127,27 @@ jobs:
             exit 1
           fi
           printf 'Uploading %s stable aliases\n' "${#aliases[@]}"
-          gh release upload "$RELEASE_TAG" "${aliases[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          # Serial, pre-deleted, retried, for the same reason as the per-platform upload above: these
+          # are copies of the SAME large installers under unversioned names, so this step re-uploads
+          # every byte a second time and hits the same refusals.
+          for alias in "${aliases[@]}"; do
+            name="$(basename "$alias")"
+            gh release delete-asset "$RELEASE_TAG" "$name" --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
+            uploaded=false
+            for attempt in 1 2 3; do
+              if gh release upload "$RELEASE_TAG" "$alias" --repo "$GITHUB_REPOSITORY" --clobber; then
+                uploaded=true
+                break
+              fi
+              echo "::warning::upload of alias $name failed on attempt $attempt"
+              sleep "$((attempt * 20))"
+            done
+            if [ "$uploaded" != true ]; then
+              echo "::error::uploading alias $name failed three times" >&2
+              exit 1
+            fi
+            echo "uploaded alias $name"
+          done
 
   prepare-npm:
     name: Prepare redrob-server npm package
