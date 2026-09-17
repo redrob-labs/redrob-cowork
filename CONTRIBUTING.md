@@ -35,6 +35,11 @@ develop ──●─●────●──────●───────
   branch and opening a pull request both target it without you choosing anything.
 - **`main`** is released state. It moves by merging `develop` into it, and release tags
   are cut from it. Tag format `v<major>.<minor>.<patch>`.
+- **Releasing therefore has a promotion step.** The release workflow tags `origin/main`
+  HEAD, so a release cut before `develop` is merged into `main` ships the previous state
+  under the new version number. It refuses to do that: the fresh-release path fails while
+  `develop` is ahead of `main`, listing the commits, and `allow_unpromoted: true` is the
+  override a hotfix already on `main` legitimately needs.
 - **Working branches** are named `<type>/<short-slug>`, e.g. `fix/composer-drop-zone`,
   `feat/reasoning-effort`, `chore/bump-electron`, `docs/upstream-sync`.
   Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`.

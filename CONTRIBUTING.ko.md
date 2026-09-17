@@ -35,6 +35,10 @@ develop ──●─●────●──────●───────
   고르지 않아도 이쪽을 가리킵니다.
 - **`main`** 은 릴리스된 상태입니다. `develop`을 머지해서 움직이고, 릴리스 태그는 여기서
   자릅니다. 태그 형식은 `v<major>.<minor>.<patch>` 입니다.
+- **그래서 릴리스에는 승격 단계가 있습니다.** 릴리스 워크플로는 `origin/main` HEAD에 태그를
+  붙입니다. `develop`을 `main`에 머지하기 전에 릴리스를 자르면 새 버전 번호를 달고 이전 상태가
+  나갑니다. 그것을 막습니다. 새 릴리스 경로는 `develop`이 `main`보다 앞서 있으면 해당 커밋들을
+  나열하며 실패하고, `allow_unpromoted: true` 가 이미 `main`에 올라간 핫픽스를 위한 예외입니다.
 - **작업 브랜치** 는 `<type>/<짧은-슬러그>` 로 이름 짓습니다. 예를 들어
   `fix/composer-drop-zone`, `feat/reasoning-effort`, `chore/bump-electron`,
   `docs/upstream-sync`. 종류는 `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`.
