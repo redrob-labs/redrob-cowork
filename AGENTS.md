@@ -47,9 +47,9 @@ See CONTRIBUTING.md, or CONTRIBUTING.ko.md for the same in Korean.
   and still exits 1 when a file fails to LOAD: the failure is one `1 error` line beside the
   summary, that file's tests are never counted, and grepping for `(fail)` finds nothing. Capture
   the run and read `echo "exit=$?"`.
-- **CI does not run the test suite.** `ci-tests.yml` is `workflow_dispatch` only, so a pull
-  request gets three checks and none of them is the app suite. Green checks are not a green
-  suite; run it locally.
+- **CI now runs the test suite on every pull request.** `ci-tests.yml` was `workflow_dispatch` only
+  and that is how three desktop failures and a stale server expectation accumulated unseen. It is not
+  yet a required check, so read its result rather than assuming a merge was gated on it.
 - The proof path is the repo's own checks: `pnpm typecheck`, the unit suites
   (`pnpm --filter @redrob/app test`, `pnpm --filter redrob-server test`,
   `pnpm --filter @redrob/desktop test`), `pnpm build`, and the app-driving smoke

@@ -653,7 +653,7 @@ describe("release channel changes", () => {
       assert.deepEqual(await download(), { ok: true });
       assert.equal(
         downloadFeeds.at(-1)?.url,
-        "https://github.com/redrob-labs/redrob-work/releases/download/alpha-macos-latest",
+        "https://github.com/redrob-labs/redrob-cowork/releases/download/alpha-macos-latest",
       );
     } finally {
       await rm(tempDir, { recursive: true, force: true });
@@ -701,7 +701,7 @@ describe("release channel changes", () => {
       );
       assert.equal(
         feeds.at(-1)?.url,
-        "https://github.com/redrob-labs/redrob-work/releases/download/alpha-macos-latest",
+        "https://github.com/redrob-labs/redrob-cowork/releases/download/alpha-macos-latest",
       );
     } finally {
       await rm(tempDir, { recursive: true, force: true });

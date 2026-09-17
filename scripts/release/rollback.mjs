@@ -3,7 +3,10 @@ import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const REPO = "redrob-labs/redrob-work";
+// redrob-cowork, not redrob-work. The old name 404s: the repository was renamed and this constant
+// was left behind, so every gh call a rollback makes would have targeted a repository that does not
+// exist. A rollback path is the worst place to discover a wrong name.
+export const REPO = "redrob-labs/redrob-cowork";
 const MAX_BUFFER = 128 * 1024 * 1024;
 
 const log = (message) => console.log(`  ${message}`);

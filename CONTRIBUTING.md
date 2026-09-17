@@ -78,10 +78,9 @@ deletions are blocked, and two checks are required.
 | Admin enforcement | off |
 
 **The test suite is not among the required checks and cannot be.** `Redrob Cowork Tests` is
-`workflow_dispatch` only, so it never reports on a pull request; requiring a check that never runs
-leaves every pull request waiting forever. Run the suite locally (above). If you fix the two
-pre-existing trunk failures, re-enable the workflow on `pull_request` and add it to the required list
-in the same change -- that, not more protection, is what would make these gates mean something.
+now runs on every pull request. It was `workflow_dispatch` only, and staying that way is how three
+desktop failures and a stale server expectation accumulated unseen. All are fixed and all three
+suites pass, so the remaining step is adding its checks to the required list.
 
 The Korean guide is [CONTRIBUTING.ko.md](./CONTRIBUTING.ko.md), and it is the only one. An
 older `CONTRIBUTING_KO.md` described the single-trunk flow this document replaced; it was
@@ -124,14 +123,11 @@ enforces that, and its allowlist is where a legitimate technical token goes.
 |---|---|---|
 | `i18n Audit` | pull request, push | required |
 | `redrob-ui-mcp` | pull request, push | required |
-| `Redrob Cowork Tests` | manual dispatch only | **paused** |
+| `Redrob Cowork Tests` | pull request, push | not yet required |
 
-The test workflow is deliberately paused (`workflow_dispatch` only) and is
-therefore **not** a required check. It has pre-existing failures on the trunk
-itself — a Ripgrep timeout and a `util.flock` error — so requiring it would make
-every pull request red for reasons unrelated to the change under review. Run the
-suite locally (above) instead, and if you fix those two failures, re-enable the
-workflow on `pull_request` and make it required in the same change.
+The test workflow now runs on every pull request. It was paused for local-dev and stayed paused, which
+is why three desktop failures and a stale server expectation sat unreported: a suite that runs only on
+request is a suite nobody runs. It is not yet a REQUIRED check, and making it one is the next step.
 
 ## Reviews
 

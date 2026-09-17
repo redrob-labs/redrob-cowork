@@ -1825,6 +1825,13 @@ export function createRuntimeManager({
     // Bounded and hidden. These run on the onboarding engine step, so an engine
     // that starts but never answers would otherwise hang that screen with no
     // timeout at all, and on Windows each probe flashed a console window.
+    /*
+      Annotated because the object is built separately from the call. Without the annotation TypeScript
+      widens `encoding` to `string`, which matches none of spawnSync's eight overloads, and the error
+      only surfaced when ci-tests.yml started running on pull requests: it had been failing on develop
+      unreported for as long as the workflow was dispatch-only.
+    */
+    /** @type {import("node:child_process").SpawnSyncOptionsWithStringEncoding} */
     const probeOptions = { encoding: "utf8", timeout: 15_000, windowsHide: true };
     const versionResult = spawnSync(resolved.path, ["--version"], probeOptions);
     const helpResult = spawnSync(resolved.path, ["serve", "--help"], probeOptions);
