@@ -1,7 +1,19 @@
 name: Redrob Cowork Tests
 
-# Paused during local-dev. Restore pull_request/push on `main` to re-enable.
+# Runs on every pull request, and on a push to either long-lived branch.
+#
+# This was `workflow_dispatch` only, described as paused during local-dev, and it stayed that way long
+# enough to matter: a suite that runs only on request is a suite nobody runs. Three desktop failures and
+# a stale server expectation accumulated behind it, each invisible because no pull request ever reported
+# them. All four are fixed, so there is nothing left to pause for.
+#
+# No branch filter on `pull_request`. A filter that omits the default branch silently stops running,
+# which is what happened in a sibling repository when the default moved to `develop` and three workflows
+# kept filtering on `[main, master]`.
 on:
+  pull_request:
+  push:
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
