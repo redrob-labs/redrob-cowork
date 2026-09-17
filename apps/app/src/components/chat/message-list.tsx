@@ -121,6 +121,8 @@ import { faviconUrlForHref } from "@/lib/favicon"
 import { cn } from "@/lib/utils"
 import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { formatMessageCost, readMessageUsage } from "./message-usage"
+import { CHAT_COLUMN } from "./chat-column"
+import { AnotherAnswerButton } from "./another-answer-button"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
@@ -454,7 +456,7 @@ const AssistantMessage = React.memo(
 
     return (
       <Message
-        className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4"
+        className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}
         data-message-id={message.id}
         data-message-role={message.role}
       >
@@ -656,7 +658,7 @@ const UserMessage = React.memo(
 
     return (
       <Message
-        className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-end gap-2 px-2 md:px-4"
+        className={`${CHAT_COLUMN} flex flex-col items-end gap-2`}
         data-message-id={message.id}
         data-message-role={message.role}
       >
@@ -813,7 +815,7 @@ const MessageComponent = React.memo(
 MessageComponent.displayName = "MessageComponent"
 
 const LoadingMessage = React.memo(({ label }: { label?: string }) => (
-  <Message className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4">
+  <Message className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}>
     <div className="group flex w-full flex-col gap-0">
       <div className="flex items-center gap-1.5 px-1 py-1 text-sm text-muted-foreground">
         <div style={{ width: 20, height: 20, borderRadius: "50%", overflow: "hidden" }}>
@@ -940,7 +942,7 @@ function CompletedStepRun({ label, children }: { label: string; children: React.
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="flex w-full flex-col gap-2">
-      <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] px-2 md:px-4">
+      <div className={`${CHAT_COLUMN} flex`}>
         <CollapsibleTrigger
           className="group flex cursor-pointer items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
           aria-label={open ? `${label}. Hide steps` : `${label}. Show steps`}
@@ -1108,7 +1110,7 @@ function MessageGroup({
     ? proseReasoning.map((reasoning) => (
       <Message
         key={`folded-reasoning-${reasoning.key}`}
-        className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4"
+        className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}
       >
         <ReasoningBlock text={reasoning.text} isStreaming={reasoning.isStreaming} />
       </Message>
@@ -1141,7 +1143,7 @@ function MessageGroup({
       if (!run) return
       nodes.push(
         <div key={`aggregate-${run.key}`}>
-          <Message className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-2 md:px-4">
+          <Message className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}>
             <ToolAggregateGroup parts={run.parts} className="w-full" />
           </Message>
         </div>
@@ -1214,9 +1216,17 @@ function MessageGroup({
         the group, which carries the finished turn's usage; a turn that reports none renders nothing
         rather than $0.00, because a zero here would read as free.
       */}
-      {!isStreaming && <MessageCost messages={renderableItems.map((item) => item.message)} />}
       {lastTextMessage && !isStreaming && (
-        <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-wrap items-center gap-2 px-2 opacity-0 transition-opacity duration-150 group-hover/message-group:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100 md:px-4">
+        <div className={`${CHAT_COLUMN} flex flex-wrap items-center gap-2`}>
+          {/*
+            The row is always visible; only the ACTIONS fade in on hover.
+
+            Putting the whole row behind hover would have hidden the cost with it, and a cost that appears
+            only when the pointer is over the turn is a cost nobody reads - which is why it was on its own
+            always-visible line before. This keeps that property and still puts the three facts about one
+            turn on one row.
+          */}
+          <div className="flex flex-wrap items-center gap-2 opacity-0 transition-opacity duration-150 group-hover/message-group:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100">
           <MessageActions className="flex gap-0">
             <CopyMessageButton messages={renderableItems.map((item) => item.message)} />
             {lastRealItem ? (
@@ -1262,6 +1272,18 @@ function MessageGroup({
             ) : null}
           </MessageActions>
           <MessageTimestamp message={lastItem.message} />
+          </div>
+          {/*
+            The turn's facts belong on THIS row, not a line of their own.
+
+            The cost sat on a separate right-aligned line above the actions, which put three things that
+            describe one turn on two rows with a gap between them. `ms-auto` pushes them to the right end
+            of the same row, so it reads as "what you can do" on the left and "what it was" on the right.
+          */}
+          <MessageTurnFacts
+            className="ms-auto"
+            messages={renderableItems.map((item) => item.message)}
+          />
           {/* <MessageSources messages={items.map((item) => item.message)} /> */}
         </div>
       )}
@@ -1290,7 +1312,7 @@ function CompactionNotice({ messages }: { messages: UIMessage[] }) {
   const [open, setOpen] = React.useState(false)
   const summary = getMessagesText(messages).trim()
   return (
-    <div className="mx-auto w-full max-w-[var(--ow-chat-column)] px-2 md:px-4">
+    <div className={`${CHAT_COLUMN}`}>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -1325,7 +1347,8 @@ function CompactionNotice({ messages }: { messages: UIMessage[] }) {
  * Read from the newest message that reports each, independently. A turn can report a cost with no routed
  * model, against a provider that is not this gateway, and showing the cost is still right there.
  */
-function MessageCost({ messages }: { messages: UIMessage[] }) {
+function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; className?: string }) {
+  const { variantModels, onAnotherAnswer, variantBusy, variantCurrentModel, dispatchAction } = useMessageList()
   const { cost, routedModel } = React.useMemo(() => {
     let cost: number | undefined
     let routedModel: string | undefined
@@ -1338,9 +1361,40 @@ function MessageCost({ messages }: { messages: UIMessage[] }) {
     return { cost, routedModel }
   }, [messages])
   const text = formatMessageCost(cost)
-  if (!text && !routedModel) return null
+  if (!text && !routedModel && !onAnotherAnswer) return null
   return (
-    <div className="mx-auto flex w-full max-w-[var(--ow-chat-column)] items-center justify-end gap-2 px-2 md:px-4">
+    <div className={cn("flex items-center gap-2", className)}>
+      {onAnotherAnswer ? (
+        <>
+          {/*
+            Two intents, because they are two questions. "Rewrite" hands this answer to another model and
+            asks for the same content in different words. "Ask again" asks another model the QUESTION and
+            gets its own answer. One button could not have meant both, and re-asking is not a paraphrase.
+          */}
+          <AnotherAnswerButton
+            busy={variantBusy}
+            remembered={variantCurrentModel}
+            hint={t("variants.paraphrase_hint")}
+            label={t("variants.paraphrase")}
+            models={variantModels ?? []}
+            onConnectProvider={() =>
+              dispatchAction({ target: "settings", action: "open", section: "providers" })
+            }
+            onPick={(model) => onAnotherAnswer(model, "paraphrase")}
+          />
+          <AnotherAnswerButton
+            busy={variantBusy}
+            remembered={variantCurrentModel}
+            hint={t("variants.another_hint")}
+            label={t("variants.another_answer")}
+            models={variantModels ?? []}
+            onConnectProvider={() =>
+              dispatchAction({ target: "settings", action: "open", section: "providers" })
+            }
+            onPick={(model) => onAnotherAnswer(model, "compare")}
+          />
+        </>
+      ) : null}
       {routedModel ? (
         <span
           className="max-w-[50%] truncate font-mono text-[11px] text-muted-foreground/80"

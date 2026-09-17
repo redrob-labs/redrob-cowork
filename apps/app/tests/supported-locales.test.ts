@@ -275,6 +275,13 @@ describe("supported locales", () => {
       /redrob(-dev)?:\/\/\S*/g,
       /https?:\/\/\S+/g,
       /console\.redrob\.ai/g,
+      /*
+        Product terms kept in English in Korean copy, on the user's instruction: both name a specific
+        action in this app and translating either one made it read as a different feature. "다시 쓰기" was
+        read as an edit and "다시 묻기" as the retry button that already exists beside it.
+      */
+      /paraphrase/g,
+      /compare/g,
       // Literal slash-command names shown verbatim in copy.
       /\/compact\b/g,
       // Same reason: a command name is typed exactly as written, so translating it would break it.

@@ -106,11 +106,21 @@ import type { SessionSendResult } from "@/react-app/domains/session/surface/sess
 import { useModelPicker } from "@/react-app/domains/session/modals/use-model-picker";
 import { getSessionModelSelection, useSessionModelStore } from "@/react-app/domains/session/surface/session-model-store";
 import {
-  resolveCompareModels,
-  resolveShuffleModels,
+  compareSlots,
+  resolveParaphraseSlots,
   type FanOutCommand,
   type FanOutModel,
 } from "@/react-app/domains/session/model-fanout";
+import {
+  discardedSessions,
+  finishedAssistantText,
+  partialAssistantText,
+  buildParaphrasePrompt,
+  runSettled,
+  startingRun,
+  withVariant,
+  type VariantRun,
+} from "@/react-app/domains/session/variant-run";
 import { openModelPickerEvent, openProviderAuthEvent } from "@/react-app/shell/new-providers-listener";
 import { appMentionInstruction } from "@/react-app/domains/session/surface/composer/app-mentions";
 import { decodeComposerMentionValue } from "@/react-app/domains/session/surface/composer/mention-encoding";
@@ -445,6 +455,10 @@ export function SessionRoute() {
   useEffect(() => {
     recordSessionOpened();
   }, [recordSessionOpened]);
+  const [variantRun, setVariantRun] = useState<VariantRun | null>(null);
+  /** The run the poll belongs to, so a discarded run's poll stops instead of running to its deadline. */
+  const variantRunRef = useRef<VariantRun | null>(null);
+
   const {
     navigateToWorkspaceSession,
     routeWorkspaceId,
@@ -612,7 +626,26 @@ export function SessionRoute() {
 
 
   const workspaceSessionGroups = useMemo(
-    () => toSessionGroups(workspaces, sessionsByWorkspaceId, errorsByWorkspaceId, new Set(retryingWorkspaceIds)),
+    () => {
+      /*
+        The forks a variant run is using are hidden while the choice is open. They are real sessions, so
+        the server lists them and a refresh puts them in the sidebar, which is how three rows appeared for
+        one turn. A fork that exists for the length of one choice is not a session the user has to manage;
+        the one they keep stops being hidden the moment it becomes the session.
+      */
+      const running = new Set(
+        (variantRun?.variants ?? []).flatMap((variant) => (variant.sessionID ? [variant.sessionID] : [])),
+      );
+      const visible = running.size
+        ? Object.fromEntries(
+            Object.entries(sessionsByWorkspaceId).map(([id, list]) => [
+              id,
+              (list ?? []).filter((session) => !running.has(session.id)),
+            ]),
+          )
+        : sessionsByWorkspaceId;
+      return toSessionGroups(workspaces, visible, errorsByWorkspaceId, new Set(retryingWorkspaceIds));
+    },
     [errorsByWorkspaceId, retryingWorkspaceIds, sessionsByWorkspaceId, workspaces],
   );
   useSessionGroupSync({ workspaces, endpointForWorkspace });
@@ -936,34 +969,6 @@ export function SessionRoute() {
         cannot find is dropped by the resolver rather than guessed at, since running a different model
         than the one asked for would make the comparison quietly wrong.
       */
-      onFanOut: async (command: FanOutCommand): Promise<number> => {
-        const catalogue: FanOutModel[] = Object.entries(providerCatalog ?? {}).flatMap(
-          ([providerID, models]) =>
-            Object.keys(models ?? {}).map((modelID) => ({ providerID, modelID })),
-        );
-        const current = selectedSessionId ? getSessionModelSelection(selectedSessionId) : null;
-        const models =
-          command.kind === "compare"
-            ? resolveCompareModels(
-                command.modelIDs.flatMap((id) => {
-                  const wanted = id.includes("/") ? id.slice(id.indexOf("/") + 1) : id;
-                  const found = catalogue.find((entry) => entry.modelID === wanted);
-                  return found ? [found] : [];
-                }),
-              )
-            : resolveShuffleModels({
-                models: catalogue,
-                count: command.count,
-                exclude: current?.model
-                  ? { providerID: current.model.providerID, modelID: current.model.modelID }
-                  : null,
-              });
-        return await handleFanOutPrompt({
-          workspaceId: selectedWorkspaceId,
-          prompt: command.prompt,
-          models,
-        });
-      },
       modelPickerOpen: modelPicker.compactOpen,
       modelUnavailable: selectedModelUnavailable,
       modelUnavailableMessage,
@@ -1487,77 +1492,224 @@ export function SessionRoute() {
   }, [applyLastUsedModelToSession, endpointForWorkspace, loading, navigateToWorkspaceSession, refreshRouteState, rememberPendingCreatedSession, retryingWorkspaceIds, selectedWorkspaceId, workspaces]);
 
   /**
-   * Run one prompt on several models, each in its own session.
+   * Run one prompt several ways, each in a FORK of this session, and keep the answer the user picks.
    *
-   * This is both compare and shuffle: the two differ only in how the model list was chosen, which
-   * `model-fanout.ts` decides and tests. Sessions rather than several answers in one transcript, because
-   * a transcript is a conversation with ONE model and two models sharing it would each read the other's
-   * reply as their own earlier turn.
+   * Forks rather than replies in one transcript, because the engine gives a user message exactly one
+   * assistant message and that history is the next turn's input: two answers in one session would each
+   * read the other as their own earlier turn. Forks rather than fresh sessions, because a variant has to
+   * start from the SAME conversation to be an answer to this turn rather than to a blank one.
    *
-   * Prompts go straight through the workspace client rather than the focused-session machinery. That
-   * machinery is built around the session on screen, and driving it N times would mean navigating between
-   * sessions mid-send. Here the model is written into the session model store first so the session shows
-   * the right model when the user opens it, then the prompt is sent with that model named explicitly, so
-   * neither depends on which session happens to be focused.
-   *
-   * Navigation lands on the FIRST session only. Following each creation would drag the view through every
-   * one of them while their replies are still starting.
+   * Answers are polled. The app subscribes to events for the session on screen and these forks are
+   * deliberately not on screen, so polling is the honest way to watch them rather than pretending a second
+   * subscription exists. Nothing is added to the sidebar: a fork that exists for the length of one choice
+   * is not a session the user has to manage.
    */
-  const handleFanOutPrompt = useCallback(async (input: {
-    workspaceId: string
-    prompt: string
-    models: readonly FanOutModel[]
-  }): Promise<number> => {
-    const prompt = input.prompt.trim();
-    if (!prompt || input.models.length === 0) return 0;
-    const workspace = workspaces.find((item) => item.id === input.workspaceId);
+  const handleVariantRun = useCallback(async (
+    command:
+      | FanOutCommand
+      | { kind: "compare" | "paraphrase"; prompt: string; models: readonly FanOutModel[] },
+  ): Promise<number> => {
+    const workspaceId = selectedWorkspaceId;
+    const sessionId = selectedSessionId;
+    if (!workspaceId || !sessionId) return 0;
+    const workspace = workspaces.find((item) => item.id === workspaceId);
     if (!workspace || loading) return 0;
-    const endpoint = endpointForWorkspace(workspace);
-    if (!endpoint || !endpoint.token) return 0;
-    const directory = workspace.path?.trim() || undefined;
-    const workspaceClient = createClient(endpoint.opencodeBaseUrl, directory, {
-      token: endpoint.token,
-      mode: "redrob",
-    });
+    /*
+      The app's own configured client, not one built here.
 
-    const created: string[] = [];
-    for (const model of input.models) {
-      try {
-        const session = unwrap(await workspaceClient.session.create({ directory }));
-        useSessionModelStore.getState().setModel(session.id, model, model.variant ?? null);
-        setSessionsByWorkspaceId((current) => {
-          const next = {
-            ...current,
-            [input.workspaceId]: [session, ...(current[input.workspaceId] ?? [])],
-          };
-          sessionsByWorkspaceIdRef.current = next;
-          return next;
-        });
-        // Not awaited: each model answers at its own pace, and waiting for one before opening the next
-        // would make the slowest model decide when the comparison starts.
-        void workspaceClient.session.promptAsync({
-          sessionID: session.id,
-          model: { providerID: model.providerID, modelID: model.modelID },
-          variant: model.variant ?? undefined,
-          parts: [{ type: "text", text: prompt }],
-        });
-        created.push(session.id);
-      } catch (error) {
-        // One model failing is not the whole action failing: the rest still ran, and the count returned
-        // says how many did, so the caller reports what actually happened rather than a blanket success.
-        setRouteError(describeTaskCreateError(error));
+      A freshly constructed client looked equivalent and was not: the fork request never reached the
+      server at all, with no error and no log line, while the panel sat at "working" forever. Whatever that
+      client was missing, the client the rest of the session already uses has it - the app's own fork
+      button goes through this one.
+    */
+    const client = opencodeClient;
+    if (!client) return 0;
+
+    const catalogue: FanOutModel[] = Object.entries(providerCatalog ?? {}).flatMap(
+      ([providerID, models]) => Object.keys(models ?? {}).map((modelID) => ({ providerID, modelID })),
+    );
+    const current = getSessionModelSelection(sessionId)?.model ?? local.prefs.defaultModel;
+    const explicit = "models" in command ? command.models : null;
+    const slots = explicit
+      ? explicit.map((model, index) => ({ index, model, label: model.modelID }))
+      : command.kind === "compare"
+        ? compareSlots(
+            (command as { modelIDs: string[] }).modelIDs.flatMap((id: string) => {
+              const wanted = id.includes("/") ? id.slice(id.indexOf("/") + 1) : id;
+              const found = catalogue.find((entry) => entry.modelID === wanted);
+              return found ? [found] : [];
+            }),
+          )
+      : resolveParaphraseSlots({
+            model: current?.providerID && current.modelID
+              ? { providerID: current.providerID, modelID: current.modelID }
+              : null,
+            count: (command as { count?: number }).count,
+          });
+    if (slots.length === 0) return 0;
+
+    /*
+      What each variant is actually sent. Compare re-asks the question; paraphrase is handed the answer with
+      an instruction to rewrite it and keep every fact.
+    */
+    const requestText =
+      command.kind === "paraphrase" ? buildParaphrasePrompt(command.prompt) : command.prompt;
+    let run = startingRun({ kind: command.kind, prompt: command.prompt, slots });
+    variantRunRef.current = run;
+    setVariantRun(run);
+    const publish = (next: VariantRun) => {
+      run = next;
+      variantRunRef.current = next;
+      setVariantRun(next);
+    };
+
+    await Promise.all(
+      slots.map(async (slot) => {
+        try {
+          /*
+            Compare FORKS the session and re-asks the question, so each model answers it independently.
+            Paraphrase opens a FRESH session and hands over the answer to rewrite: a rewrite needs the text
+            and nothing else, and re-asking the question would produce a different answer, which is not a
+            paraphrase of the first one.
+          */
+          const target =
+            command.kind === "paraphrase"
+              ? (unwrap(await client.session.create({})) as { id: string })
+              : (unwrap(await client.session.fork({ sessionID: sessionId })) as { id: string });
+          publish(withVariant(run, slot.index, { sessionID: target.id, status: "running" }));
+          // Not awaited: each variant answers at its own pace, and the poll below is what notices.
+          void client.session.promptAsync({
+            sessionID: target.id,
+            model: { providerID: slot.model.providerID, modelID: slot.model.modelID },
+            variant: slot.model.variant ?? undefined,
+            parts: [{ type: "text", text: requestText }],
+          });
+        } catch (error) {
+          publish(
+            withVariant(run, slot.index, {
+              status: "failed",
+              error: error instanceof Error ? error.message : undefined,
+            }),
+          );
+        }
+      }),
+    );
+
+    /*
+     * Poll until every variant is settled, with a ceiling. A run that never finishes must still stop
+     * asking: the panel then shows what did arrive, which is more useful than a spinner with no end.
+     */
+    /*
+      The poll also stops when this run is no longer the current one. Without that check a discarded run
+      kept asking for its forks for the full five minutes, and once the user deleted those sessions the
+      log filled with 404s from a run nobody was looking at any more.
+    */
+    const deadline = Date.now() + 5 * 60_000;
+    while (!runSettled(run) && Date.now() < deadline && variantRunRef.current === run) {
+      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      for (const variant of run.variants) {
+        if (variant.status !== "running" || !variant.sessionID) continue;
+        try {
+          const messages = unwrap(
+            await client.session.messages({ sessionID: variant.sessionID, limit: 20 }),
+          ) as never[];
+          const text = finishedAssistantText(messages);
+          if (text) {
+            publish(withVariant(run, variant.index, { status: "done", text }));
+          } else {
+            /*
+              Show the answer as it is written. A column that says "working" for forty seconds and then
+              dumps a finished essay reads as broken, and the main transcript streams in the same window.
+              Only the "done" branch above makes a variant adoptable, so streaming text here cannot be
+              mistaken for a finished answer.
+            */
+            const partial = partialAssistantText(messages);
+            if (partial && partial !== run.variants[variant.index]?.text) {
+              publish(withVariant(run, variant.index, { text: partial }));
+            }
+          }
+        } catch {
+          // A single failed poll is not a failed variant; the next tick tries again until the deadline.
+        }
       }
     }
+    return slots.length;
+  }, [endpointForWorkspace, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
 
-    const first = created[0];
-    if (first) {
-      writeActiveWorkspaceId(input.workspaceId || null);
-      writeLastSessionFor(input.workspaceId, first);
-      navigateToWorkspaceSession(input.workspaceId, first);
+  /**
+   * Keep the chosen answer by continuing in its fork, and delete the rest.
+   *
+   * Navigating to the fork is what makes the answer the session's answer: the conversation proceeds from
+   * it. The discarded forks are removed after the navigation, and a failure to remove one is swallowed,
+   * because a fork left behind is untidy while a lost adoption is the user's work.
+   */
+  /**
+   * Throw a run away, including the forks it made.
+   *
+   * Clearing the panel alone left the forks on the server, and a refresh then put them back in the
+   * sidebar: three rows for one turn, which the user had to delete by hand. A fork that exists for the
+   * length of one choice must not outlive the choice.
+   */
+  const handleDiscardVariantRun = useCallback(async () => {
+    const run = variantRun;
+    setVariantRun(null);
+    variantRunRef.current = null;
+    if (!run) return;
+    const client = opencodeClient;
+    if (!client) return;
+    for (const variant of run.variants) {
+      if (!variant.sessionID) continue;
+      try {
+        await client.session.delete({ sessionID: variant.sessionID });
+      } catch {
+        // Untidy, not broken: the sidebar filter already hid it, and a refresh will show it again.
+      }
     }
     void refreshRouteState();
-    return created.length;
-  }, [endpointForWorkspace, loading, navigateToWorkspaceSession, refreshRouteState, workspaces]);
+  }, [endpointForWorkspace, refreshRouteState, selectedWorkspaceId, variantRun, workspaces]);
+
+  const handleAdoptVariant = useCallback(async (index: number) => {
+    const run = variantRun;
+    if (!run) return;
+    const chosen = run.variants.find((variant) => variant.index === index);
+    if (!chosen?.sessionID) return;
+    const workspaceId = selectedWorkspaceId;
+    setVariantRun(null);
+    variantRunRef.current = null;
+    writeLastSessionFor(workspaceId, chosen.sessionID);
+    rememberPendingCreatedSession(workspaceId, chosen.sessionID);
+    navigateToWorkspaceSession(workspaceId, chosen.sessionID);
+    if (opencodeClient) {
+      for (const sessionID of discardedSessions(run, index)) {
+        try {
+          await opencodeClient.session.delete({ sessionID });
+        } catch {
+          // Untidy, not broken.
+        }
+      }
+    }
+    void refreshRouteState();
+  }, [endpointForWorkspace, navigateToWorkspaceSession, refreshRouteState, rememberPendingCreatedSession, selectedWorkspaceId, variantRun, workspaces]);
+
+  /**
+   * Ask one more model to answer the turn already on screen.
+   *
+   * This is the control the user actually reaches for: call one model, then another, then keep whichever
+   * answered better. Picking the SAME model again is the paraphrase case of the same action, so there is
+   * one path rather than a compare feature and a shuffle feature.
+   *
+   * The prompt is the last user message in this session, so the new answer is an answer to the same
+   * question rather than to a fresh one. The fork is taken from the message BEFORE that, which is what
+   * makes it a second answer to the turn instead of a follow-up to the first answer.
+   */
+  const handleAnotherAnswer = useCallback(
+    (model: { providerID: string; modelID: string }, kind: "compare" | "paraphrase", text: string) => {
+      // Remembered so the same action is one click next time; the caret is how it gets changed.
+      local.setPrefs((previous) => ({ ...previous, variantModel: model }));
+      void handleVariantRun({ kind, prompt: text, models: [model] });
+    },
+    [handleVariantRun, local],
+  );
 
   // Latest session-list state for prev/next session tab navigation. The
   // `options` field is updated by `onSessionTabsChange` from SessionPage so we
@@ -2378,7 +2530,27 @@ export function SessionRoute() {
         onOpenSessionSearch: () => setSessionSearchOpen(true),
         onReorderWorkspaces: handleReorderWorkspaces,
       }}
-      surface={surfaceProps}
+      surface={
+        /*
+          The variant props are attached here rather than inside `surfaceProps`, because that memo is
+          built earlier in this component than the handlers are declared and reading them from it would
+          hit the temporal dead zone on first render.
+        */
+        surfaceProps
+          ? {
+              ...surfaceProps,
+              variantRun,
+              onVariantRun: handleVariantRun,
+              onAnotherAnswer: handleAnotherAnswer,
+              variantRemembered: local.prefs.variantModel ?? null,
+              variantModels: Object.entries(providerCatalog ?? {}).flatMap(([providerID, models]) =>
+                Object.keys(models ?? {}).map((modelID) => ({ providerID, modelID })),
+              ),
+              onAdoptVariant: handleAdoptVariant,
+              onDismissVariantRun: handleDiscardVariantRun,
+            }
+          : surfaceProps
+      }
       history={{
         canUndo: false,
         canRedo: false,

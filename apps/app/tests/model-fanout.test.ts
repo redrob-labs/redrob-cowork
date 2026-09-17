@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
-  DEFAULT_SHUFFLE_COUNT,
+  DEFAULT_PARAPHRASE_COUNT,
   MAX_FAN_OUT,
-  fanOutSessionTitle,
+  compareSlots,
   parseFanOutCommand,
   resolveCompareModels,
-  resolveShuffleModels,
+  resolveParaphraseSlots,
 } from "../src/react-app/domains/session/model-fanout";
 
 const model = (modelID: string, extra: { variant?: string | null; available?: boolean } = {}) => ({
@@ -15,147 +15,97 @@ const model = (modelID: string, extra: { variant?: string | null; available?: bo
 });
 
 describe("compare", () => {
-  test("runs each named model once", () => {
-    const picked = resolveCompareModels([model("a"), model("b")]);
-    expect(picked.map(m => m.modelID)).toEqual(["a", "b"]);
+  test("runs one variant per named model, labelled by model", () => {
+    const slots = compareSlots([model("gpt-5"), model("claude-sonnet-5")]);
+    expect(slots.map(s => s.label)).toEqual(["gpt-5", "claude-sonnet-5"]);
+    expect(slots.map(s => s.index)).toEqual([0, 1]);
   });
 
   test("keeps the same model at two variants, because that is a real comparison", () => {
     /*
-      Collapsing these would silently answer a different question than the one asked: thinking levels are
-      exactly the thing someone compares a model against itself on.
+      Collapsing these would answer a different question than the one asked: a thinking level is exactly
+      what someone compares a model against itself on.
     */
-    const picked = resolveCompareModels([
-      model("a", { variant: "low" }),
-      model("a", { variant: "high" }),
-    ]);
-    expect(picked).toHaveLength(2);
+    const slots = compareSlots([model("a", { variant: "low" }), model("a", { variant: "high" })]);
+    expect(slots).toHaveLength(2);
+    expect(slots.map(s => s.label)).toEqual(["a low", "a high"]);
   });
 
-  test("drops an exact duplicate", () => {
+  test("drops an exact duplicate and an unusable model", () => {
     expect(resolveCompareModels([model("a"), model("a"), model("b")])).toHaveLength(2);
+    expect(
+      resolveCompareModels([model("a"), model("b", { available: false }), model("c")]).map(
+        m => m.modelID
+      )
+    ).toEqual(["a", "c"]);
   });
 
-  test("drops a model that cannot currently run", () => {
-    // A session that opens and immediately errors is worse than not opening.
-    const picked = resolveCompareModels([model("a"), model("b", { available: false }), model("c")]);
-    expect(picked.map(m => m.modelID)).toEqual(["a", "c"]);
+  test("refuses a single model, since one variant is a normal turn wearing a panel", () => {
+    expect(compareSlots([model("a")])).toEqual([]);
+    expect(compareSlots([model("a"), model("b", { available: false })])).toEqual([]);
   });
 
-  test("refuses a single model, since one session is not a comparison", () => {
-    expect(resolveCompareModels([model("a")])).toEqual([]);
-    expect(resolveCompareModels([model("a"), model("b", { available: false })])).toEqual([]);
-  });
-
-  test("caps the fan-out rather than opening a wall of sessions", () => {
-    const many = ["a", "b", "c", "d", "e", "f", "g"].map(id => model(id));
-    expect(resolveCompareModels(many)).toHaveLength(MAX_FAN_OUT);
+  test("caps the run so the variants still fit side by side", () => {
+    const many = ["a", "b", "c", "d", "e", "f"].map(id => model(id));
+    expect(compareSlots(many)).toHaveLength(MAX_FAN_OUT);
   });
 });
 
-describe("shuffle", () => {
-  const pool = ["a", "b", "c", "d", "e"].map(id => model(id));
-
-  test("picks the default count when none is given", () => {
-    const picked = resolveShuffleModels({ models: pool, random: () => 0 });
-    expect(picked).toHaveLength(DEFAULT_SHUFFLE_COUNT);
+describe("paraphrase", () => {
+  test("runs the SAME model more than once", () => {
+    /*
+      The question is about the wording, not the model. Drawing another model in would answer a different
+      question and make the two results incomparable.
+    */
+    const slots = resolveParaphraseSlots({ model: model("gpt-5") });
+    expect(slots).toHaveLength(DEFAULT_PARAPHRASE_COUNT);
+    expect(new Set(slots.map(s => s.modelID ?? s.model.modelID))).toEqual(new Set(["gpt-5"]));
+    expect(slots.map(s => s.label)).toEqual(["1", "2"]);
   });
 
-  test("leaves the session's current model out of the draw", () => {
-    // Spending one of three slots on the answer the user already has is the one clearly wrong pick.
-    const picked = resolveShuffleModels({
-      models: pool,
-      exclude: model("a"),
-      count: 4,
-      random: () => 0,
-    });
-    expect(picked.map(m => m.modelID)).not.toContain("a");
-    expect(picked).toHaveLength(4);
+  test("never runs fewer than two, since one paraphrase is not a choice", () => {
+    expect(resolveParaphraseSlots({ model: model("a"), count: 1 })).toHaveLength(2);
   });
 
-  test("actually varies with the source of randomness", () => {
-    const first = resolveShuffleModels({ models: pool, count: 3, random: () => 0 });
-    const second = resolveShuffleModels({ models: pool, count: 3, random: () => 0.99 });
-    expect(first.map(m => m.modelID)).not.toEqual(second.map(m => m.modelID));
+  test("caps the count", () => {
+    expect(resolveParaphraseSlots({ model: model("a"), count: 99 })).toHaveLength(MAX_FAN_OUT);
   });
 
-  test("does not reorder the caller's list", () => {
-    const source = [...pool];
-    resolveShuffleModels({ models: source, count: 3, random: () => 0.5 });
-    expect(source.map(m => m.modelID)).toEqual(["a", "b", "c", "d", "e"]);
-  });
-
-  test("runs what there is when fewer models are available than asked for", () => {
-    const picked = resolveShuffleModels({ models: [model("a"), model("b")], count: 4 });
-    expect(picked).toHaveLength(2);
-  });
-
-  test("returns nothing when the pool is empty, so the caller can say so", () => {
-    expect(resolveShuffleModels({ models: [model("a", { available: false })] })).toEqual([]);
-  });
-
-  test("never exceeds the fan-out cap even when asked to", () => {
-    const many = ["a", "b", "c", "d", "e", "f", "g"].map(id => model(id));
-    expect(resolveShuffleModels({ models: many, count: 99 })).toHaveLength(MAX_FAN_OUT);
+  test("returns nothing without a usable model", () => {
+    expect(resolveParaphraseSlots({ model: null })).toEqual([]);
+    expect(resolveParaphraseSlots({ model: model("a", { available: false }) })).toEqual([]);
   });
 });
 
 describe("commands", () => {
-  test("shuffle takes an optional count and the rest as the prompt", () => {
+  test("shuffle is a paraphrase run and takes an optional count", () => {
     expect(parseFanOutCommand("/shuffle explain this regex")).toEqual({
-      kind: "shuffle",
-      count: DEFAULT_SHUFFLE_COUNT,
+      kind: "paraphrase",
+      count: DEFAULT_PARAPHRASE_COUNT,
       prompt: "explain this regex",
     });
-    expect(parseFanOutCommand("/shuffle 2 explain this regex")).toEqual({
-      kind: "shuffle",
-      count: 2,
-      prompt: "explain this regex",
-    });
-  });
-
-  test("shuffle clamps a silly count instead of opening that many sessions", () => {
-    expect(parseFanOutCommand("/shuffle 99 hello")).toMatchObject({ count: MAX_FAN_OUT });
-    expect(parseFanOutCommand("/shuffle 0 hello")).toMatchObject({ count: 1 });
+    expect(parseFanOutCommand("/shuffle 3 explain this regex")).toMatchObject({ count: 3 });
   });
 
   test("compare reads the leading model ids and leaves the prompt alone", () => {
-    expect(parseFanOutCommand("/compare gpt-5 claude-sonnet-4-5 write a haiku")).toEqual({
+    expect(parseFanOutCommand("/compare gpt-5 claude-sonnet-5 write a haiku")).toEqual({
       kind: "compare",
-      modelIDs: ["gpt-5", "claude-sonnet-4-5"],
+      modelIDs: ["gpt-5", "claude-sonnet-5"],
       prompt: "write a haiku",
     });
   });
 
   test("compare does not eat the first words of a prompt", () => {
-    /*
-      The permissive version of this bug is silent: a prompt starting with an ordinary word would lose it
-      to the model list and the user would never see why the question changed.
-    */
-    const parsed = parseFanOutCommand("/compare write a haiku about caches");
-    expect(parsed).toEqual({ kind: "compare", modelIDs: [], prompt: "write a haiku about caches" });
-  });
-
-  test("accepts a provider-prefixed id", () => {
-    expect(parseFanOutCommand("/compare redrob/gpt-5 anthropic/claude-opus hello")).toMatchObject({
-      modelIDs: ["redrob/gpt-5", "anthropic/claude-opus"],
-      prompt: "hello",
+    // The permissive version of this bug is silent: the question changes and the user never sees why.
+    expect(parseFanOutCommand("/compare write a haiku about caches")).toEqual({
+      kind: "compare",
+      modelIDs: [],
+      prompt: "write a haiku about caches",
     });
   });
 
   test("is not confused by ordinary text", () => {
     expect(parseFanOutCommand("compare these two files")).toBeNull();
     expect(parseFanOutCommand("/compactnow")).toBeNull();
-  });
-});
-
-describe("titles", () => {
-  test("name the model, because the prompt is identical in every session", () => {
-    expect(fanOutSessionTitle({ model: model("claude-sonnet"), index: 0, total: 3 })).toBe(
-      "claude-sonnet (1/3)"
-    );
-    expect(
-      fanOutSessionTitle({ model: model("gpt-5", { variant: "high" }), index: 2, total: 3 })
-    ).toBe("gpt-5 high (3/3)");
   });
 });

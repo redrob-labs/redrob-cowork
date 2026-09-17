@@ -33,6 +33,13 @@ export type LocalUIState = {
 export type LocalPreferences = {
   showThinking: boolean;
   modelVariant: string | null;
+  /**
+   * The model last used for a paraphrase or a re-ask, remembered so the action is one click.
+   *
+   * Picking a model every time is the friction that made the feature feel like work. The picker stays
+   * available for changing it, but the common case is doing the same thing again.
+   */
+  variantModel?: { providerID: string; modelID: string } | null;
   defaultModel: ModelRef | null;
   /**
    * Name of the opencode agent used for new prompts (null = the server's
