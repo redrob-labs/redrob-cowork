@@ -62,6 +62,11 @@ worse than one that admits the gap:
   even once protection is turned on. Fix that first, or protection will only ever gate
   two lint-shaped checks.
 
+The Korean guide is [CONTRIBUTING.ko.md](./CONTRIBUTING.ko.md), and it is the only one. An
+older `CONTRIBUTING_KO.md` described the single-trunk flow this document replaced; it was
+deleted rather than left beside its successor, because two guides disagreeing about which
+branch to target is worse than either of them alone.
+
 ## Commits
 
 Conventional prefixes, imperative mood, lower case subject:
