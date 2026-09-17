@@ -13,13 +13,19 @@ import { t } from "@/i18n";
  * neither was verifiable while it lived inside a component with forty props.
  */
 export function ContextMeter(props: { usedPercent: number | null; onCompact?: () => void; compacting?: boolean }) {
-  if (props.usedPercent === null) return null;
+  /*
+    The BUTTON does not depend on the percentage. Returning null for the whole row when the fullness is
+    unknown hid the summarise control too, which is the same invisible-feature mistake the comment below
+    describes, made one line higher: whether we can compute a percentage has nothing to do with whether the
+    session can be summarised. The reading is what goes missing; the action stays.
+  */
+  if (props.usedPercent === null && !props.onCompact) return null;
   // Amber past 75% and red past 90%: past that the next long turn is what triggers a summarisation, and
   // a reader who is about to paste a large file should be able to see it coming.
   const tone =
-    props.usedPercent >= 90
+    (props.usedPercent ?? 0) >= 90
       ? "text-destructive-ink"
-      : props.usedPercent >= 75
+      : (props.usedPercent ?? 0) >= 75
         ? "text-warning-ink"
         : "text-gray-10";
   return (
@@ -52,9 +58,11 @@ export function ContextMeter(props: { usedPercent: number | null; onCompact?: ()
           {props.compacting === true ? t("usage.compacting") : t("usage.compact_now")}
         </button>
       ) : null}
-      <span className={tone} title={t("usage.context_hint")}>
-        {t("usage.context_used").replace("{percent}", String(props.usedPercent))}
-      </span>
+      {props.usedPercent === null ? null : (
+        <span className={tone} title={t("usage.context_hint")}>
+          {t("usage.context_used").replace("{percent}", String(props.usedPercent))}
+        </span>
+      )}
     </div>
   );
 }

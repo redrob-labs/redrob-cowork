@@ -6,6 +6,10 @@ import type { SessionStatus } from "@opencode-ai/sdk/v2/client";
 import { Check, Minimize2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { parseFanOutCommand, type FanOutCommand } from "@/react-app/domains/session/model-fanout";
+import type { VariantRun } from "@/react-app/domains/session/variant-run";
+import { VariantPanel } from "@/components/chat/variant-panel";
+import { CHAT_COLUMN, CHAT_COLUMN_OUTER, CHAT_SCROLL_GUTTER } from "@/components/chat/chat-column";
+import { compactSession } from "@/app/lib/opencode-session";
 
 import { captureAnalyticsEvent } from "@/app/lib/analytics";
 import { createClient, unwrap } from "@/app/lib/opencode";
@@ -301,12 +305,25 @@ export type SessionSurfaceProps = {
   modelPickerOpen: boolean;
   modelUnavailable?: boolean;
   /**
-   * Runs one prompt on several models, each in its own session, and resolves with how many started.
+   * Runs one prompt as several variants, each in a fork, and resolves with how many started.
    *
    * Optional: a surface rendered without it simply does not offer `/compare` and `/shuffle`, rather than
    * the composer needing to know whether the route supports them.
    */
-  onFanOut?: (command: FanOutCommand) => Promise<number>;
+  onVariantRun?: (command: FanOutCommand) => Promise<number>;
+  /** The run in flight, if any, rendered as a side-by-side panel above the composer. */
+  variantRun?: VariantRun | null;
+  onAdoptVariant?: (index: number) => void;
+  onDismissVariantRun?: () => void;
+  /** Models offered by the "another answer" control, and what to do when one is picked. */
+  variantModels?: readonly { providerID: string; modelID: string }[];
+  /** The model the last paraphrase or re-ask used, so the next one is a single click. */
+  variantRemembered?: { providerID: string; modelID: string } | null;
+  onAnotherAnswer?: (
+    model: { providerID: string; modelID: string },
+    kind: "compare" | "paraphrase",
+    text: string,
+  ) => void;
   modelUnavailableMessage?: string | null;
   selectedModel: ModelRef;
   /** providerID → modelID → provider model, for per-session variant options. */
@@ -556,7 +573,7 @@ function SessionErrorCard({ error, onDismiss, onChangeModel, onOpenModelPicker }
 }) {
   return (
     <div
-      className="mx-auto max-w-[var(--ow-chat-column)] px-3 py-3 sm:px-5"
+      className={`${CHAT_COLUMN} py-3`}
       data-testid="session-error-card"
       role="alert"
     >
@@ -743,6 +760,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
   // silent-reauth self-heal below discards its result if it lands stale.
   const mcpListGenerationRef = useRef(0);
   const [steering, setSteering] = useState(false);
+  const [compacting, setCompacting] = useState(false);
   const [verifiedOpenTargets, setVerifiedOpenTargets] = useState<OpenTarget[]>([]);
   const [sending, setSending] = useState(false);
   // Shared with promote-to-send so a manual send-now cannot race the idle drain.
@@ -1195,7 +1213,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
         toast.error(t("fanout.needs_prompt"));
         return;
       }
-      const started = (await props.onFanOut?.(fanOut)) ?? 0;
+      const started = (await props.onVariantRun?.(fanOut)) ?? 0;
       if (started > 0) {
         clearComposer();
         attachments.forEach(revokeAttachmentPreview);
@@ -1226,7 +1244,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     } finally {
       setAttachmentsUploading(false);
     }
-  }, [attachments, buildDraft, clearComposer, draft, props.onFanOut, props.sessionId, sendDraft]);
+  }, [attachments, buildDraft, clearComposer, draft, props.onVariantRun, props.sessionId, sendDraft]);
 
   // One-step run from the empty-state hero: the route seeds this session's
   // draft and marks it for auto-send. Fire the same send path as the send
@@ -1739,15 +1757,66 @@ export function SessionSurface(props: SessionSurfaceProps) {
     request carries the whole conversation and summing turns would multiply the transcript by their count.
   */
   const { data: pricingForUsage } = useRedrobPricingQuery({ enabled: true });
+  /*
+    The window belongs to the model that ANSWERED, not the one that was asked for.
+
+    Looked up by the requested model, this read `auto`, and the catalogue publishes 2,000,000 for that
+    alias - the largest window in the catalogue rather than the one the router actually used. A turn of
+    384,000 tokens then showed as 19% full when the model that served it has a 1,000,000-token window and
+    it was really 38%, and against a 200,000-token model the same turn is over the limit while the gauge
+    reads a fifth. The engine compacts on its OWN view of the window, so the two also disagreed.
+
+    `routedModel` arrives on each turn now, so the gauge can use it and fall back to the requested model
+    only when a provider does not report one.
+  */
+  /*
+    The question the turn on screen answered.
+
+    Resolved HERE, from the whole transcript, because the message list renders an assistant turn as its own
+    group and that group contains no user message: reading it there produced an empty prompt every time,
+    which silently hid the control that depends on it.
+  */
+  const lastUserPrompt = useMemo(() => {
+    for (let index = renderedMessages.length - 1; index >= 0; index -= 1) {
+      const message = renderedMessages[index];
+      if (message?.role !== "user") continue;
+      const text = (message.parts ?? [])
+        .flatMap((part) => (part.type === "text" && typeof part.text === "string" ? [part.text] : []))
+        .join("")
+        .trim();
+      if (text) return text;
+    }
+    return "";
+  }, [renderedMessages]);
+
+  /** The answer on screen, which is what a rewrite works from. */
+  const lastAssistantAnswer = useMemo(() => {
+    for (let index = renderedMessages.length - 1; index >= 0; index -= 1) {
+      const message = renderedMessages[index];
+      if (message?.role !== "assistant") continue;
+      const text = (message.parts ?? [])
+        .flatMap((part) => (part.type === "text" && typeof part.text === "string" ? [part.text] : []))
+        .join("")
+        .trim();
+      if (text) return text;
+    }
+    return "";
+  }, [renderedMessages]);
+
+  const latestTurnUsage = useMemo(() => latestUsage(renderedMessages), [renderedMessages]);
   const contextLimitTokens =
+    (latestTurnUsage?.routedModel
+      ? pricingForUsage?.byModelId[latestTurnUsage.routedModel.split("/").pop() ?? ""]?.capabilities
+          .maxContextTokens
+      : undefined) ??
     pricingForUsage?.byModelId[sessionModel.selectedModel.modelID]?.capabilities.maxContextTokens;
   const contextUsedPercent = useMemo(
     () =>
       contextUsagePercent({
-        usage: latestUsage(renderedMessages),
+        usage: latestTurnUsage,
         contextLimitTokens,
       }),
-    [renderedMessages, contextLimitTokens],
+    [latestTurnUsage, contextLimitTokens],
   );
 
   const handleRetryMessage = useCallback((messageId: string) => {
@@ -1786,11 +1855,34 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
     No revert boundary: compaction rewrites history behind the latest turn rather than replacing a turn.
   */
+  /**
+   * Summarise now, without going through the composer.
+   *
+   * This used to write `/compact` into the draft and send it. Two things were wrong with that. The user
+   * watched their composer fill with text they did not type, which reads like the app typing on their
+   * behalf and leaves them to wonder whether it also sent it. And it depended on something recognising
+   * the command afterwards, which is a longer chain than the action needs.
+   *
+   * `compactSession` calls the engine's `session.summarize` and falls back to its `compact` command only
+   * if that method is missing, so the button reaches the same engine work by the shortest path and the
+   * composer is never touched.
+   */
   const handleCompactSession = useCallback(() => {
-    if (sending) return;
-    replaceComposerDraft(props.sessionId, "/compact", null);
-    void sendDraft(buildDraft("/compact", []));
-  }, [buildDraft, props.sessionId, replaceComposerDraft, sendDraft, sending]);
+    if (sending || compacting) return;
+    const model = sessionModel.selectedModel;
+    if (!model?.providerID || !model.modelID) {
+      toast.error(t("app.error_compact_no_model"));
+      return;
+    }
+    setCompacting(true);
+    void compactSession(opencodeClient, props.sessionId, model, { directory: props.workspaceRoot })
+      .catch((error: unknown) => {
+        toast.error(t("app.error_compact_failed"), {
+          description: error instanceof Error ? error.message : undefined,
+        });
+      })
+      .finally(() => setCompacting(false));
+  }, [compacting, opencodeClient, props.sessionId, props.workspaceRoot, sending, sessionModel.selectedModel]);
 
   const handleRestoreRevertedSession = useCallback(() => {    if (!props.onRestoreRevertedSession || restoringRevertedMessages) return;
     setRestoringRevertedMessages(true);
@@ -1912,7 +2004,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
           onScroll={sessionScroll.handleScroll}
           // Extra top padding while the find bar is open so it never covers
           // the first message (short transcripts cannot scroll it clear).
-          className={`absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-y-contain touch-pan-y px-3 pb-4 sm:px-5 ${findOwned ? "pt-16" : "pt-4"}`}
+          className={`absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-y-contain touch-pan-y ${CHAT_COLUMN_OUTER} ${CHAT_SCROLL_GUTTER} pb-4 ${findOwned ? "pt-16" : "pt-4"}`}
         >
           {/* Chat column: tighter than the composer (800px) so messages
                keep a comfortable reading width and don't feel "too big". */}
@@ -1986,6 +2078,23 @@ export function SessionSurface(props: SessionSurfaceProps) {
                     onApplyChanges={props.onApplyEnvironmentChanges}
                   >
                     <MessageListProvider
+                      onAnotherAnswer={
+                        props.onAnotherAnswer
+                          ? (model, kind) =>
+                              props.onAnotherAnswer?.(
+                                model,
+                                kind,
+                                /*
+                                  A rewrite is handed the ANSWER; a re-ask is handed the QUESTION. Passing
+                                  the wrong one is the whole difference between the two features.
+                                */
+                                kind === "paraphrase" ? lastAssistantAnswer : lastUserPrompt,
+                              )
+                          : undefined
+                      }
+                      variantBusy={Boolean(props.variantRun)}
+                      variantCurrentModel={props.variantRemembered ?? null}
+                      variantModels={props.variantModels}
                       workspaceId={props.workspaceId}
                       sessionId={props.sessionId}
                       showThinking={showThinking}
@@ -2036,6 +2145,13 @@ export function SessionSurface(props: SessionSurfaceProps) {
             <span className="text-warning-ink/70">{t("session.add_provider_hint")}</span>
           </button>
         ) : null}
+        {props.variantRun ? (
+          <VariantPanel
+            onAdopt={(index) => props.onAdoptVariant?.(index)}
+            onDismiss={() => props.onDismissVariantRun?.()}
+            run={props.variantRun}
+          />
+        ) : null}
         <DevProfiler id="SessionComposer">
         <ReactSessionComposer
           draft={draft}
@@ -2066,7 +2182,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
         modelVariantLabel={sessionModel.modelVariantLabel}
         contextUsedPercent={contextUsedPercent}
         onCompactSession={handleCompactSession}
-        compactingSession={sending}
+        compactingSession={compacting}
         modelVariant={sessionModel.modelVariant}
         modelBehaviorOptions={sessionModel.modelBehaviorOptions}
         onModelVariantChange={handleModelVariantChange}

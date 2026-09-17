@@ -17,13 +17,32 @@ const read = (relative: string) =>
  */
 describe("chat column", () => {
   it("is one variable, used by the transcript and the composer", () => {
+    /*
+      Asserted through the shared container now. The literal classes moved into `chat-column.tsx` because
+      matching widths were not enough: the two columns sat inside wrappers with DIFFERENT outer padding,
+      which centring hides while the window is wider than the column and reveals as soon as it is not.
+    */
+    const column = read("../src/components/chat/chat-column.tsx");
     const list = read("../src/components/chat/message-list.tsx");
     const composer = read("../src/react-app/domains/session/surface/composer/composer.tsx");
+    expect(column).toContain("max-w-[var(--ow-chat-column)]");
     expect(list).not.toContain("max-w-3xl");
-    expect(list).toContain("max-w-[var(--ow-chat-column)]");
-    expect(composer).toContain("max-w-[var(--ow-chat-column)]");
+    expect(list).toContain("CHAT_COLUMN");
+    expect(composer).toContain("CHAT_COLUMN");
     expect(composer).not.toContain("max-w-[800px]");
     expect(read("../src/app/index.css")).toContain("--ow-chat-column:");
+  });
+
+  it("gives the containers on both sides the same outer padding", () => {
+    // The defect this catches is a reply starting a few pixels outside the box the user types into.
+    const column = read("../src/components/chat/chat-column.tsx");
+    const composer = read("../src/react-app/domains/session/surface/composer/composer.tsx");
+    const surface = read("../src/react-app/domains/session/surface/session-surface.tsx");
+    expect(column).toContain("CHAT_COLUMN_OUTER");
+    expect(composer).toContain("${CHAT_COLUMN_OUTER}");
+    expect(surface).toContain("${CHAT_COLUMN_OUTER}");
+    expect(composer).not.toContain("lg:px-8");
+    expect(surface).not.toContain("px-3 pb-4 sm:px-5");
   });
 
   it("uses the same inset on both sides of the column", () => {
@@ -44,17 +63,27 @@ describe("chat column", () => {
 describe("per-message cost", () => {
   const list = read("../src/components/chat/message-list.tsx");
 
-  it("is rendered per turn, outside the hover row", () => {
-    const hoverRow = list.indexOf("group-hover/message-group:opacity-100 max-lg:opacity-100");
-    const cost = list.indexOf("<MessageCost");
-    expect(cost).toBeGreaterThan(-1);
-    // Before the hover row in source order means it is a sibling of it, not a child.
-    expect(cost).toBeLessThan(hoverRow);
+  it("is on the same row as the actions, not a line of its own", () => {
+    /*
+      The cost, the routed model and the "another answer" control all describe one turn, so they sit at the
+      right end of the action row rather than on a separate line above it.
+    */
+    expect(list).toContain("<MessageTurnFacts");
+    expect(list).toContain('className="ms-auto"');
+    expect(list).not.toContain("<MessageCost");
   });
 
-  it("is not gated on hover", () => {
-    const block = list.slice(list.indexOf("<MessageCost") - 200, list.indexOf("<MessageCost"));
-    expect(block).not.toContain("opacity-0");
+  it("is not gated on hover, even though the actions are", () => {
+    /*
+      Only the actions fade in. Putting the whole row behind hover would hide the cost with them, and a
+      cost that appears only while the pointer is over the turn is a cost nobody reads - which is why it
+      was on its own always-visible line to begin with.
+    */
+    const facts = list.indexOf("<MessageTurnFacts");
+    const hoverWrapper = list.lastIndexOf("opacity-0", facts);
+    const closesBeforeFacts = list.slice(hoverWrapper, facts).includes("</div>");
+    expect(facts).toBeGreaterThan(-1);
+    expect(closesBeforeFacts).toBe(true);
   });
 
   it("no longer accumulates a session total anywhere", () => {

@@ -228,7 +228,12 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
         precedent for a genuinely large surface in this app, the image lightbox. Below `lg` the primitive
         turns this into a full-width bottom sheet regardless.
       */}
-      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,80rem)] flex-col overflow-hidden p-0 sm:max-w-[min(94vw,80rem)] lg:w-[min(94vw,80rem)] lg:max-w-[min(94vw,80rem)]">
+      {/*
+        `gap-0` because the primitive's default gap sits between the header and the body, and with `p-0`
+        that reads as an empty band under the title rather than as spacing: the header already carries its
+        own padding and a bottom border, so the gap separates two things that are separated.
+      */}
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,80rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(94vw,80rem)] lg:w-[min(94vw,80rem)] lg:max-w-[min(94vw,80rem)]">
         <DialogHeader className="shrink-0 border-b border-border px-5 py-4">
           <DialogTitle>{t("models.title")}</DialogTitle>
           <DialogDescription>{resolveModelPickerSubtitle(props.subtitle)}</DialogDescription>

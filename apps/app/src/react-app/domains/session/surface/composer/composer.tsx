@@ -1,6 +1,7 @@
 /** @jsxImportSource react */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { CHAT_COLUMN, CHAT_COLUMN_OUTER } from "@/components/chat/chat-column";
 import type { Agent } from "@opencode-ai/sdk/v2/client";
 import { AppWindowMac, ArrowUp, Check, ChevronDown, ChevronRight, FileText, Paperclip, Plus, RefreshCw, Settings, Square, Terminal, X, Zap } from "lucide-react";
 import fuzzysort from "fuzzysort";
@@ -1054,7 +1055,11 @@ export function ReactSessionComposer(props: ComposerProps) {
   return (
     <div
       ref={rootRef}
-      className={props.flush ? `relative ${toolMenuOpen ? "z-50" : "z-20"}` : `sticky bottom-0 ${toolMenuOpen ? "z-50" : "z-20"} bg-gradient-to-t from-dls-surface via-dls-surface/95 to-transparent px-4 pb-[max(0.5rem,calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px)))] max-lg:px-3 lg:px-8 ${props.compactTopSpacing ? "pt-0" : "pt-1"}`}
+      className={
+        props.flush
+          ? `relative ${toolMenuOpen ? "z-50" : "z-20"}`
+          : `sticky bottom-0 ${toolMenuOpen ? "z-50" : "z-20"} bg-gradient-to-t from-dls-surface via-dls-surface/95 to-transparent ${CHAT_COLUMN_OUTER} pb-[max(0.5rem,calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px)))] ${props.compactTopSpacing ? "pt-0" : "pt-1"}`
+      }
       style={{ contain: "layout style" }}
       onKeyDownCapture={handleKeyDownCapture}
       onCompositionStart={() => {
@@ -1075,7 +1080,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         Same breakpoints as the rows, so the two move together at every width instead of agreeing only on a
         wide window.
       */}
-      <div className={props.flush ? "" : "mx-auto max-w-[var(--ow-chat-column)] px-2 md:px-4"}>
+      <div className={props.flush ? "" : CHAT_COLUMN}>
         {/* Main composer panel — also the drop target. The whole panel accepts a
             drag, not just the text area: a file dropped on the action row or the
             padding is the same intent, and a highlight that only lights up over

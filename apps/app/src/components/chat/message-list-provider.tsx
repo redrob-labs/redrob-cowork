@@ -13,6 +13,16 @@ interface MessageListContextValue {
   providerConnectedCount: number
   dispatchAction: (action: DispatchAction) => void
   setPrompt: (prompt: string) => void
+  /**
+   * Asking another model to answer the same turn.
+   *
+   * Optional throughout: a surface that has not wired the variant run simply does not render the control,
+   * rather than the message list needing to know which surface it is inside.
+   */
+  variantModels?: readonly { providerID: string; modelID: string }[]
+  onAnotherAnswer?: (model: { providerID: string; modelID: string }, kind: "compare" | "paraphrase") => void
+  variantBusy?: boolean
+  variantCurrentModel?: { providerID: string; modelID: string } | null
   onRevertToUserMessage: (messageId: string) => void
   onForkAtMessage: (messageId: string) => void
   onEditUserMessage: (messageId: string, text: string) => void
@@ -38,6 +48,16 @@ interface MessageListProviderProps {
   providerConnectedCount: number
   dispatchAction: (action: DispatchAction) => void
   setPrompt: (prompt: string) => void
+  /**
+   * Asking another model to answer the same turn.
+   *
+   * Optional throughout: a surface that has not wired the variant run simply does not render the control,
+   * rather than the message list needing to know which surface it is inside.
+   */
+  variantModels?: readonly { providerID: string; modelID: string }[]
+  onAnotherAnswer?: (model: { providerID: string; modelID: string }, kind: "compare" | "paraphrase") => void
+  variantBusy?: boolean
+  variantCurrentModel?: { providerID: string; modelID: string } | null
 }
 
 export interface DispatchAction {
@@ -57,6 +77,10 @@ export function MessageListProvider({
   providerConnectedCount,
   dispatchAction,
   setPrompt,
+  variantModels,
+  onAnotherAnswer,
+  variantBusy,
+  variantCurrentModel,
   onRevertToUserMessage,
   onForkAtMessage,
   onEditUserMessage,
@@ -73,6 +97,10 @@ export function MessageListProvider({
       providerConnectedCount,
       dispatchAction,
       setPrompt,
+      variantModels,
+      onAnotherAnswer,
+      variantBusy,
+      variantCurrentModel,
       onRevertToUserMessage,
       onForkAtMessage,
       onEditUserMessage,

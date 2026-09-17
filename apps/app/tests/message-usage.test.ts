@@ -119,7 +119,7 @@ describe("wiring", () => {
   });
 
   it("renders the turn cost and the context line", () => {
-    expect(read("../src/components/chat/message-list.tsx")).toContain("<MessageCost");
+    expect(read("../src/components/chat/message-list.tsx")).toContain("<MessageTurnFacts");
     const composer = read("../src/react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain("<ContextMeter");
     // The meter itself lives in its own module now, so the string it renders is asserted there.

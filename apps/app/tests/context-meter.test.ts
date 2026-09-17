@@ -15,9 +15,15 @@ const source = readFileSync(
 );
 
 describe("context meter", () => {
-  it("renders nothing when it has no reading", () => {
-    // A gauge with no reading is worse than no gauge: it looks like 0%.
-    expect(source).toContain("if (props.usedPercent === null) return null");
+  it("hides the reading but not the summarise button when there is no reading", () => {
+    /*
+      A gauge with no reading is worse than no gauge, because it looks like 0%. But the row used to vanish
+      whole, taking the summarise button with it, and whether a percentage can be computed has nothing to do
+      with whether the session can be summarised. In the dev build the pricing fetch fails on CORS, the
+      percentage is unknown, and the only entry point to compaction disappeared with it.
+    */
+    expect(source).toContain("props.usedPercent === null && !props.onCompact");
+    expect(source).toContain("props.usedPercent === null ? null : (");
   });
 
   it("shows context only - cost belongs on the turn that incurred it", () => {
@@ -30,8 +36,8 @@ describe("context meter", () => {
   it("warns before the ceiling rather than at it", () => {
     // Past these the next long turn is what triggers a summarisation, and someone about to paste a large
     // file should be able to see it coming.
-    expect(source).toContain("props.usedPercent >= 90");
-    expect(source).toContain("props.usedPercent >= 75");
+    expect(source).toContain("(props.usedPercent ?? 0) >= 90");
+    expect(source).toContain("(props.usedPercent ?? 0) >= 75");
   });
 
   it("sits inside the composer's own column, not against the window edge", () => {
@@ -43,7 +49,8 @@ describe("context meter", () => {
       ),
       "utf8",
     );
-    const column = composer.indexOf("mx-auto max-w-[var(--ow-chat-column)]");
+    // The column is the shared container now, so the meter is located against that instead of a class.
+    const column = composer.indexOf("CHAT_COLUMN}");
     const meter = composer.indexOf("<ContextMeter");
     expect(column).toBeGreaterThan(-1);
     expect(meter).toBeGreaterThan(column);
