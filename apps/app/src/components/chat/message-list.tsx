@@ -387,7 +387,7 @@ function CopyMessageButton({ messages }: CopyMessageButtonProps) {
   }
 
   return (
-    <MessageAction tooltip={copied ? "Copied!" : "Copy"}>
+    <MessageAction tooltip={copied ? t("common.copied") : t("common.copy")}>
       <Button
         variant="ghost"
         size="icon"

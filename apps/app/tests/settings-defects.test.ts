@@ -120,6 +120,8 @@ describe("Korean tooltips", () => {
     "src/components/chat/message-list.tsx",
     "src/components/chat/image-attachment-badge.tsx",
     "src/react-app/domains/workspace/share-workspace-access-panel.tsx",
+    "src/components/ui/tool.tsx",
+    "src/react-app/shell/session-search-dialog.tsx",
   ];
 
   test("no user-facing tooltip or label is hardcoded English", () => {
@@ -128,12 +130,20 @@ describe("Korean tooltips", () => {
       ko.ts reported 46 missing keys; every one was an `_one`/`_other` plural pair that the resolver falls
       back to the bare key for, and Korean has no grammatical plural so it defines only the bare key. Real
       missing keys: zero. The English a Korean user saw came from strings that never reached `t()` at all.
+
+      The pattern below matches a string ANYWHERE in the prop value, not only when it is the whole value.
+      The first version anchored on `tooltip="` and so missed `tooltip={copied ? "Copied!" : "Copy"}`,
+      which is how three more English strings survived a sweep that reported itself clean. A conditional
+      label is exactly where a hardcoded string hides, because the attribute no longer looks like a string.
     */
     const offenders: string[] = [];
     for (const file of FILES) {
       const source = read(file);
-      for (const match of source.matchAll(/(?:tooltip|aria-label|title)="([A-Z][^"]*)"/g)) {
-        offenders.push(`${file}: ${match[1]}`);
+      for (const match of source.matchAll(
+        /(?:tooltip|aria-label|title|placeholder)=(?:"([A-Z][^"]*)"|\{[^}]*?"([A-Z][^"]{2,})"[^}]*\})/g,
+      )) {
+        const literal = match[1] ?? match[2];
+        if (literal) offenders.push(`${file}: ${literal}`);
       }
     }
     expect(offenders).toEqual([]);
