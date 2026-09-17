@@ -35,10 +35,13 @@ export function ContextMeter(props: { usedPercent: number | null; onCompact?: ()
         only way in was typing `/compact`, which a user has to know exists. This is that entry point, put
         beside the fullness reading because that number is what makes someone want it.
 
-        Shown only from 50% up. Below that there is little to summarise and the offer is noise; the button
-        appearing is itself a signal that the conversation is getting long.
+        Shown whenever a session can be summarised, NOT only past a threshold. It was gated at 50% on the
+        theory that offering it earlier is noise, and the result was a feature nobody could find: at 19%
+        full the button is absent, so "add manual compaction" came back as a request for something already
+        built. A quiet dotted-underline label costs a reader nothing; an invisible feature costs them the
+        whole feature.
       */}
-      {props.onCompact && props.usedPercent >= 50 ? (
+      {props.onCompact ? (
         <button
           className="rounded px-1.5 py-0.5 text-gray-10 underline decoration-dotted underline-offset-2 transition-colors hover:bg-dls-bg-hover hover:text-gray-12 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={props.compacting === true}

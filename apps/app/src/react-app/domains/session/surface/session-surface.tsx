@@ -547,7 +547,11 @@ function SessionErrorCard({ error, onDismiss, onChangeModel, onOpenModelPicker }
   onOpenModelPicker?: () => void;
 }) {
   return (
-    <div className="mx-auto max-w-[720px] px-3 py-3 sm:px-5" data-testid="session-error-card" role="alert">
+    <div
+      className="mx-auto max-w-[var(--ow-chat-column)] px-3 py-3 sm:px-5"
+      data-testid="session-error-card"
+      role="alert"
+    >
       <div className="rounded-2xl border border-destructive-muted/30 bg-destructive-soft/15 px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -1880,7 +1884,17 @@ export function SessionSurface(props: SessionSurfaceProps) {
         >
           {/* Chat column: tighter than the composer (800px) so messages
                keep a comfortable reading width and don't feel "too big". */}
-          <div ref={contentRef} className="mx-auto w-full max-w-[720px]">
+          {/*
+            The transcript's column is the SHARED one, not a number typed here.
+
+            This wrapper was `max-w-[720px]` while the composer read `--ow-chat-column` (800px), so the
+            two were 80px apart and every row sat 40px inside the composer's panel. Measured in the
+            running app: transcript content 712 to 1400, composer panel 674 to 1437. That is what the
+            variable exists to prevent, and a hardcoded width here is how it was defeated: the earlier
+            attempt at this unified the composer with the message-list rows, which are INSIDE this
+            wrapper, so it could not have helped.
+          */}
+          <div ref={contentRef} className="mx-auto w-full max-w-[var(--ow-chat-column)]">
             {revertMessageId ? (
               <RevertedMessagesBanner
                 hiddenCount={revertedMessageCount}
