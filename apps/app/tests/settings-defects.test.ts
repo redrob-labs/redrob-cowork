@@ -99,8 +99,34 @@ describe("manual compaction", () => {
     expect(meter).toContain("props.onCompact");
   });
 
-  test("it is offered only once there is something to summarize", () => {
-    expect(read("src/components/chat/context-meter.tsx")).toContain("props.usedPercent >= 50");
+  test("it is offered at any fullness, since a gate is what hid the feature", () => {
+    /*
+      This asserted `props.usedPercent >= 50`, and that gate is why "add manual compaction" came back as
+      a request for something already built: at 19% full the button is absent, so the feature does not
+      exist as far as a reader is concerned. The only condition now is having something to call.
+    */
+    const meter = read("src/components/chat/context-meter.tsx");
+    expect(meter).not.toContain("props.usedPercent >= 50");
+    expect(meter).toContain("{props.onCompact ? (");
+  });
+});
+
+describe("the chat column", () => {
+  test("the transcript and the composer read the same variable", () => {
+    /*
+      Measured in the running app before this: transcript content 712 to 1400, composer panel 674 to
+      1437, because the surface wrapped the transcript in a hardcoded `max-w-[720px]` while the composer
+      read `--ow-chat-column` at 800px. Two numbers cannot stay equal, which is the whole reason the
+      variable exists, so the assertion is that no width is typed here at all.
+    */
+    const surface = read("src/react-app/domains/session/surface/session-surface.tsx");
+    /*
+      Matched inside a className, not anywhere in the file. The comment above the wrapper names the old
+      width to say why it is gone, and a guard that cannot tell a class from the note explaining the
+      class is a guard that pushes the explanation out of the file.
+    */
+    expect(surface).not.toMatch(/className="[^"]*max-w-\[720px\]/);
+    expect(surface).toContain("max-w-[var(--ow-chat-column)]");
   });
 
   test("it reuses the recognized /compact path", () => {
