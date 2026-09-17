@@ -463,7 +463,11 @@ describe("workspace session read APIs", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
       code: "opencode_unconfigured",
-      message: "OpenCode base URL is missing for this workspace",
+      // "Redrob Code", not "OpenCode": the engine was renamed and this message came with it. The code
+      // is right and the expectation was stale, which nothing reported because ci-tests.yml is
+      // workflow_dispatch only. The sibling assertion above still says "OpenCode returned invalid
+      // session list" and still passes, so the rename was partial and this was the half that moved.
+      message: "Redrob Code base URL is missing for this workspace",
       details: {
         workspaceId: "ws_1",
         workspaceType: "local",
