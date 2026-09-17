@@ -20,6 +20,11 @@ on:
           - minor
           - major
         default: patch
+      allow_unpromoted:
+        description: "Release main even though develop is ahead of it. For a hotfix already on main."
+        required: false
+        type: boolean
+        default: false
       version:
         description: "Explicit version for a fresh release (X.Y.Z, overrides bump)"
         required: false
@@ -140,6 +145,7 @@ jobs:
           INPUT_TAG: ${{ github.event.inputs.tag }}
           INPUT_VERSION: ${{ github.event.inputs.version }}
           INPUT_BUMP: ${{ github.event.inputs.bump }}
+          INPUT_ALLOW_UNPROMOTED: ${{ github.event.inputs.allow_unpromoted }}
         run: |
           set -euo pipefail
 
@@ -175,6 +181,27 @@ jobs:
               exit 1
             fi
             git fetch origin main
+            # Refuse to release a `main` that `develop` has moved past.
+            #
+            # This job tags `origin/main` HEAD. That was unambiguous while `main` was the trunk and
+            # every merge landed there. `develop` is now the default branch and receives every pull
+            # request, so `main` holds whatever was last PROMOTED -- and a release cut without that
+            # promotion ships the previous state while reporting the new version number, which is
+            # the worst shape this failure can take: it succeeds.
+            #
+            # Merge `develop` into `main` first. Set allow_unpromoted to release `main` as it stands,
+            # which is what a hotfix already merged into `main` legitimately wants.
+            if git fetch origin develop 2>/dev/null; then
+              UNPROMOTED="$(git rev-list --count origin/main..origin/develop)"
+              if [ "$UNPROMOTED" -gt 0 ] && [ "${INPUT_ALLOW_UNPROMOTED:-false}" != "true" ]; then
+                echo "::error::develop is $UNPROMOTED commit(s) ahead of main; promote develop into main before releasing, or dispatch with allow_unpromoted=true" >&2
+                git log --oneline origin/main..origin/develop >&2
+                exit 1
+              fi
+              if [ "$UNPROMOTED" -gt 0 ]; then
+                echo "::warning::releasing main with $UNPROMOTED unpromoted commit(s) on develop, as requested"
+              fi
+            fi
             SHA="$(git rev-parse origin/main)"
             # Push the tag with GITHUB_TOKEN. Such a push does not retrigger
             # this workflow, so the dispatch run that created the tag stays

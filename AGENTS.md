@@ -14,8 +14,42 @@ The app consumes Redrob Cowork server surfaces (self-hosted or hosted) rather th
 inventing parallel behavior. Anything OpenCode can do is available in Redrob Cowork,
 even before a dedicated UI exists.
 
+## Branches
+
+Gitflow. **`develop` is the default branch and the base of every pull request.** Opening one
+against `main` is wrong unless it is a release promotion or a hotfix.
+
+- **`develop`** integrates. Cut working branches from it, `<type>/<slug>`.
+- **`main`** is released state. It moves by merging `develop` into it, and release tags are cut
+  from it.
+- **Hotfix**: branch from `main`, merge into `main`, release, **then merge `main` back into
+  `develop`**. Skipping that last step is how the sibling engine repository spent a month with a
+  lockfile its own default branch could not install from.
+- Both branches are protected: pull requests only, force pushes and deletions blocked, zero
+  required reviews, admin enforcement off. Required checks are `i18n-audit` and
+  `Syntax & dry-run publish`.
+- The release workflow tags `origin/main` HEAD and **refuses to run while `develop` is ahead of
+  `main`**, listing the unpromoted commits. `allow_unpromoted: true` is the override for a hotfix
+  already on `main`.
+
+**Both of the rules above are now checked, not just written down.**
+`.github/workflows/gitflow.yml` fails a pull request whose head branch is not `<type>/<slug>` with
+one of `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `sync`, because a branch name says
+what the change is and not what tool produced it. On every push to `main` the same workflow fails
+while `main` holds commits `develop` does not, so the back-merge step above stops being the one that
+gets skipped. Neither job is a required check, so both report without blocking a merge.
+
+See CONTRIBUTING.md, or CONTRIBUTING.ko.md for the same in Korean.
+
 ## Verification (every change)
 
+- **Judge by the exit code, never by the pass count.** `pnpm test` prints `859 pass / 0 fail`
+  and still exits 1 when a file fails to LOAD: the failure is one `1 error` line beside the
+  summary, that file's tests are never counted, and grepping for `(fail)` finds nothing. Capture
+  the run and read `echo "exit=$?"`.
+- **CI does not run the test suite.** `ci-tests.yml` is `workflow_dispatch` only, so a pull
+  request gets three checks and none of them is the app suite. Green checks are not a green
+  suite; run it locally.
 - The proof path is the repo's own checks: `pnpm typecheck`, the unit suites
   (`pnpm --filter @redrob/app test`, `pnpm --filter redrob-server test`,
   `pnpm --filter @redrob/desktop test`), `pnpm build`, and the app-driving smoke
