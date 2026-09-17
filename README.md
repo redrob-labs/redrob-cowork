@@ -2,7 +2,7 @@
 
 **English** · [한국어](./README_KO.md)
 
-Redrob Cowork (레드롭 코워크) is a free, open-source desktop and MCP app for doing work with AI agents on your own files. It runs on macOS, Windows, and Linux, is built on the OpenCode engine, and ships in English and Korean.
+Redrob Cowork is a free, open-source desktop and MCP app for doing work with AI agents on your own files. It runs on macOS, Windows, and Linux, is built on the OpenCode engine, and ships in English and Korean.
 
 Add one Redrob Cowork MCP to Codex, Claude Code, Cursor, or another compatible agent and reuse the same skills, MCPs, and connected services across your tools, teammates, and machines. Create something once, share it with coworkers or friends, or keep it for yourself.
 
@@ -78,7 +78,7 @@ them with the checksum above rather than expecting a signature.
 
 `.github/workflows/cdn.yml` builds the distributable on `ubuntu-latest` and runs
 `scripts/cdn.mjs`, which uploads only when the bucket and credentials are set and
-otherwise prints which variable is missing and exits 0 — an unprovisioned CDN
+otherwise prints which variable is missing and exits 0: an unprovisioned CDN
 never fails the build, and there is no GitHub Releases fallback. In CI the target
 comes from the org variable `REDROB_CDN_BUCKET` and the org secrets
 `REDROB_CDN_ACCESS_KEY_ID` / `REDROB_CDN_SECRET_ACCESS_KEY`, mapped to the
