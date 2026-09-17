@@ -105,6 +105,12 @@ import { useSessionFindStore } from "@/react-app/domains/session/surface/find-st
 import type { SessionSendResult } from "@/react-app/domains/session/surface/session-surface";
 import { useModelPicker } from "@/react-app/domains/session/modals/use-model-picker";
 import { getSessionModelSelection, useSessionModelStore } from "@/react-app/domains/session/surface/session-model-store";
+import {
+  resolveCompareModels,
+  resolveShuffleModels,
+  type FanOutCommand,
+  type FanOutModel,
+} from "@/react-app/domains/session/model-fanout";
 import { openModelPickerEvent, openProviderAuthEvent } from "@/react-app/shell/new-providers-listener";
 import { appMentionInstruction } from "@/react-app/domains/session/surface/composer/app-mentions";
 import { decodeComposerMentionValue } from "@/react-app/domains/session/surface/composer/mention-encoding";
@@ -924,6 +930,40 @@ export function SessionRoute() {
         modelPicker.setOpen(true);
       },
       providerCatalog,
+      /*
+        `/compare` and `/shuffle`, resolved against the catalogue the picker already shows so the two
+        cannot disagree about which models exist. Compare matches the ids the user typed; anything it
+        cannot find is dropped by the resolver rather than guessed at, since running a different model
+        than the one asked for would make the comparison quietly wrong.
+      */
+      onFanOut: async (command: FanOutCommand): Promise<number> => {
+        const catalogue: FanOutModel[] = Object.entries(providerCatalog ?? {}).flatMap(
+          ([providerID, models]) =>
+            Object.keys(models ?? {}).map((modelID) => ({ providerID, modelID })),
+        );
+        const current = selectedSessionId ? getSessionModelSelection(selectedSessionId) : null;
+        const models =
+          command.kind === "compare"
+            ? resolveCompareModels(
+                command.modelIDs.flatMap((id) => {
+                  const wanted = id.includes("/") ? id.slice(id.indexOf("/") + 1) : id;
+                  const found = catalogue.find((entry) => entry.modelID === wanted);
+                  return found ? [found] : [];
+                }),
+              )
+            : resolveShuffleModels({
+                models: catalogue,
+                count: command.count,
+                exclude: current?.model
+                  ? { providerID: current.model.providerID, modelID: current.model.modelID }
+                  : null,
+              });
+        return await handleFanOutPrompt({
+          workspaceId: selectedWorkspaceId,
+          prompt: command.prompt,
+          models,
+        });
+      },
       modelPickerOpen: modelPicker.compactOpen,
       modelUnavailable: selectedModelUnavailable,
       modelUnavailableMessage,
@@ -1445,6 +1485,79 @@ export function SessionRoute() {
       return null;
     }
   }, [applyLastUsedModelToSession, endpointForWorkspace, loading, navigateToWorkspaceSession, refreshRouteState, rememberPendingCreatedSession, retryingWorkspaceIds, selectedWorkspaceId, workspaces]);
+
+  /**
+   * Run one prompt on several models, each in its own session.
+   *
+   * This is both compare and shuffle: the two differ only in how the model list was chosen, which
+   * `model-fanout.ts` decides and tests. Sessions rather than several answers in one transcript, because
+   * a transcript is a conversation with ONE model and two models sharing it would each read the other's
+   * reply as their own earlier turn.
+   *
+   * Prompts go straight through the workspace client rather than the focused-session machinery. That
+   * machinery is built around the session on screen, and driving it N times would mean navigating between
+   * sessions mid-send. Here the model is written into the session model store first so the session shows
+   * the right model when the user opens it, then the prompt is sent with that model named explicitly, so
+   * neither depends on which session happens to be focused.
+   *
+   * Navigation lands on the FIRST session only. Following each creation would drag the view through every
+   * one of them while their replies are still starting.
+   */
+  const handleFanOutPrompt = useCallback(async (input: {
+    workspaceId: string
+    prompt: string
+    models: readonly FanOutModel[]
+  }): Promise<number> => {
+    const prompt = input.prompt.trim();
+    if (!prompt || input.models.length === 0) return 0;
+    const workspace = workspaces.find((item) => item.id === input.workspaceId);
+    if (!workspace || loading) return 0;
+    const endpoint = endpointForWorkspace(workspace);
+    if (!endpoint || !endpoint.token) return 0;
+    const directory = workspace.path?.trim() || undefined;
+    const workspaceClient = createClient(endpoint.opencodeBaseUrl, directory, {
+      token: endpoint.token,
+      mode: "redrob",
+    });
+
+    const created: string[] = [];
+    for (const model of input.models) {
+      try {
+        const session = unwrap(await workspaceClient.session.create({ directory }));
+        useSessionModelStore.getState().setModel(session.id, model, model.variant ?? null);
+        setSessionsByWorkspaceId((current) => {
+          const next = {
+            ...current,
+            [input.workspaceId]: [session, ...(current[input.workspaceId] ?? [])],
+          };
+          sessionsByWorkspaceIdRef.current = next;
+          return next;
+        });
+        // Not awaited: each model answers at its own pace, and waiting for one before opening the next
+        // would make the slowest model decide when the comparison starts.
+        void workspaceClient.session.promptAsync({
+          sessionID: session.id,
+          model: { providerID: model.providerID, modelID: model.modelID },
+          variant: model.variant ?? undefined,
+          parts: [{ type: "text", text: prompt }],
+        });
+        created.push(session.id);
+      } catch (error) {
+        // One model failing is not the whole action failing: the rest still ran, and the count returned
+        // says how many did, so the caller reports what actually happened rather than a blanket success.
+        setRouteError(describeTaskCreateError(error));
+      }
+    }
+
+    const first = created[0];
+    if (first) {
+      writeActiveWorkspaceId(input.workspaceId || null);
+      writeLastSessionFor(input.workspaceId, first);
+      navigateToWorkspaceSession(input.workspaceId, first);
+    }
+    void refreshRouteState();
+    return created.length;
+  }, [endpointForWorkspace, loading, navigateToWorkspaceSession, refreshRouteState, workspaces]);
 
   // Latest session-list state for prev/next session tab navigation. The
   // `options` field is updated by `onSessionTabsChange` from SessionPage so we

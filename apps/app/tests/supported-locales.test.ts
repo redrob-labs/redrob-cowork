@@ -277,6 +277,9 @@ describe("supported locales", () => {
       /console\.redrob\.ai/g,
       // Literal slash-command names shown verbatim in copy.
       /\/compact\b/g,
+      // Same reason: a command name is typed exactly as written, so translating it would break it.
+      /\/shuffle\b/g,
+      /\/compare\b/g,
       /\/command\b/g,
       /ssh -L \S+ user@host/g,
       /npx -y @modelcontextprotocol\/\S+/g,

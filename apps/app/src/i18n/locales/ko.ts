@@ -795,6 +795,8 @@ const ko = {
   "compaction.show": "요약 보기",
   "compaction.hide": "접기",
   "usage.turn_cost": "이 턴의 비용",
+  "fanout.needs_prompt": "물어볼 내용을 함께 적으세요. 예: /shuffle 이 정규식 설명해줘",
+  "fanout.none_started": "세션이 열리지 않았습니다. 실제로 있는 모델을 두 개 이상 지정하거나 먼저 프로바이더를 연결하세요",
   "answer_options.label": "제안된 답변",
   "answer_options.hint": "입력창에 넣습니다. 보내기는 직접 누르세요",
   "usage.routed_model": "실제로 답한 모델. 자동 라우팅일 때는 선택창에 표시된 것과 다릅니다",
