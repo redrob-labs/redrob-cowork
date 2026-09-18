@@ -115,12 +115,12 @@ describe("public release download URLs", () => {
     // GitHub spells the two forms differently, and the alias resolves only for an
     // exact asset name -- which is why the engine publishes version-less names.
     assert.equal(
-      releaseDownloadUrl(REDROB_CODE_REPO, "v1.18.31-redrob.2", "redrob-linux-x64-baseline.zip"),
-      "https://github.com/redrob-labs/redrob-code/releases/download/v1.18.31-redrob.2/redrob-linux-x64-baseline.zip",
+      releaseDownloadUrl(REDROB_CODE_REPO, "v0.1.0", "redrob-linux-x64-baseline.zip"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v0.1.0/redrob-linux-x64-baseline.zip",
     );
     assert.equal(
-      releaseDownloadUrl(REDROB_CODE_REPO, "1.18.31-redrob.2", "redrob-linux-x64-baseline.zip"),
-      "https://github.com/redrob-labs/redrob-code/releases/download/v1.18.31-redrob.2/redrob-linux-x64-baseline.zip",
+      releaseDownloadUrl(REDROB_CODE_REPO, "0.1.0", "redrob-linux-x64-baseline.zip"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v0.1.0/redrob-linux-x64-baseline.zip",
     );
     assert.equal(
       releaseDownloadUrl(REDROB_CODE_REPO, "latest", "redrob-linux-x64-baseline.zip"),
@@ -130,8 +130,8 @@ describe("public release download URLs", () => {
 
   it("reads the digest manifest from the same release as the asset", () => {
     assert.equal(
-      releaseSha256SumsUrl(REDROB_CODE_REPO, "v1.18.31-redrob.2"),
-      "https://github.com/redrob-labs/redrob-code/releases/download/v1.18.31-redrob.2/SHA256SUMS",
+      releaseSha256SumsUrl(REDROB_CODE_REPO, "v0.1.0"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v0.1.0/SHA256SUMS",
     );
   });
 
