@@ -70,3 +70,6 @@ transcript-analysis
 
 # Scratch commit-message files used by tooling; never part of the tree.
 .commit-msg.txt
+
+# Agent scratch/task state. Not part of the product and not reviewed.
+.agents/
