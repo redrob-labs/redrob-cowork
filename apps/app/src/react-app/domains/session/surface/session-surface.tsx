@@ -82,7 +82,7 @@ import {
   getComposerRevertMessageId,
   useComposerStateStore,
 } from "./composer-state-store";
-import { MessageList } from "@/components/chat/message-list";
+import { MessageList, type BlockedStatus } from "@/components/chat/message-list";
 import { getMessagesText } from "@/components/chat/utils";
 import { contextUsagePercent, latestUsage } from "@/components/chat/message-usage";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
@@ -2113,6 +2113,17 @@ export function SessionSurface(props: SessionSurfaceProps) {
                         messages={renderedMessages}
                         status={status}
                         retryStatus={liveStatus.type === "retry" ? liveStatus : null}
+                        /*
+                          Compared structurally and cast, because the published SDK's `SessionStatus` does
+                          not carry the `blocked` variant yet -- `liveStatus.type` narrows to the three it
+                          knows, so the comparison needs widening to compile. Removable once the SDK is
+                          bumped; the runtime behaviour is the same either way.
+                        */
+                        blockedStatus={
+                          (liveStatus as { type: string }).type === "blocked"
+                            ? (liveStatus as unknown as BlockedStatus)
+                            : null
+                        }
                       />
                     </MessageListProvider>
                   </EnvironmentVariableProvider>
