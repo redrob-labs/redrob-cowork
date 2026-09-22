@@ -25,7 +25,7 @@
         "@lexical/react": "^0.35.0",
         "@modelcontextprotocol/ext-apps": "^1.7.5",
         "@modelcontextprotocol/sdk": "^1.29.0",
-        "@opencode-ai/sdk": "^1.18.15",
+        "@redrob-labs/sdk": "^1.18.15",
         "@paper-design/shaders-react": "0.0.72",
         "@radix-ui/colors": "^3.0.0",
         "@radix-ui/react-use-controllable-state": "^1.2.2",
@@ -85,7 +85,7 @@
       "version": "0.0.0-dev",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.29.0",
-        "@opencode-ai/sdk": "^1.18.15",
+        "@redrob-labs/sdk": "^1.18.15",
         "@redrob/enterprise-mcp-client": "workspace:*",
         "@redrob/paths": "workspace:*",
         "@sentry/electron": "^7.16.0",
@@ -118,7 +118,7 @@
       },
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.29.0",
-        "@opencode-ai/sdk": "^1.18.15",
+        "@redrob-labs/sdk": "^1.18.15",
         "@redrob/enterprise-mcp-client": "workspace:*",
         "@redrob/paths": "workspace:*",
         "better-sqlite3": "^13.0.2",
@@ -895,7 +895,7 @@
 
     "@open-draft/until": ["@open-draft/until@2.1.0", "", {}, "sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg=="],
 
-    "@opencode-ai/sdk": ["@opencode-ai/sdk@1.18.18", "", { "dependencies": { "cross-spawn": "7.0.6" } }, "sha512-zJlwXskIR47V1dkPJqeKBgq7nejG1uU8lJaGIGqbX3MWRCT8vKn0fEotbxuPCKnTdmWsDyNGNg9q1qIliDSMDA=="],
+    "@redrob-labs/sdk": ["@redrob-labs/sdk@1.18.18", "", { "dependencies": { "cross-spawn": "7.0.6" } }, "sha512-zJlwXskIR47V1dkPJqeKBgq7nejG1uU8lJaGIGqbX3MWRCT8vKn0fEotbxuPCKnTdmWsDyNGNg9q1qIliDSMDA=="],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 

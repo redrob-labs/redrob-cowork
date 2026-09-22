@@ -1,4 +1,4 @@
-import type { ProviderListResponse } from "@opencode-ai/sdk/v2/client";
+import type { ProviderListResponse } from "@redrob-labs/sdk/v2/client";
 import { isProviderExposed } from "@/react-app/domains/settings/redrob-provider";
 
 const PINNED_PROVIDER_ORDER = ["opencode", "openai", "anthropic"] as const;

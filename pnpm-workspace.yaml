@@ -1,6 +1,6 @@
 minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
-  - "@opencode-ai/sdk"
+  - "@redrob-labs/sdk"
   - "acorn"
   - "dompurify"
   - "enhanced-resolve"

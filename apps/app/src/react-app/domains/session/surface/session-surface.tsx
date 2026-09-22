@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { useQuery } from "@tanstack/react-query";
-import type { SessionStatus } from "@opencode-ai/sdk/v2/client";
+import type { SessionStatus } from "@redrob-labs/sdk/v2/client";
 import { Check, Minimize2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { parseFanOutCommand, type FanOutCommand } from "@/react-app/domains/session/model-fanout";
@@ -342,7 +342,7 @@ export type SessionSurfaceProps = {
   onModelVariantChange: (value: string | null) => void;
   agentLabel: string;
   selectedAgent: string | null;
-  listAgents: () => Promise<import("@opencode-ai/sdk/v2/client").Agent[]>;
+  listAgents: () => Promise<import("@redrob-labs/sdk/v2/client").Agent[]>;
   onSelectAgent: (agent: string | null) => void;
   listCommands: () => Promise<import("@/app/types").SlashCommandOption[]>;
   recentFiles: string[];
@@ -2113,17 +2113,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
                         messages={renderedMessages}
                         status={status}
                         retryStatus={liveStatus.type === "retry" ? liveStatus : null}
-                        /*
-                          Compared structurally and cast, because the published SDK's `SessionStatus` does
-                          not carry the `blocked` variant yet -- `liveStatus.type` narrows to the three it
-                          knows, so the comparison needs widening to compile. Removable once the SDK is
-                          bumped; the runtime behaviour is the same either way.
-                        */
-                        blockedStatus={
-                          (liveStatus as { type: string }).type === "blocked"
-                            ? (liveStatus as unknown as BlockedStatus)
-                            : null
-                        }
+                        blockedStatus={liveStatus.type === "blocked" ? liveStatus : null}
                       />
                     </MessageListProvider>
                   </EnvironmentVariableProvider>

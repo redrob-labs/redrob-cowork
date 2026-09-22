@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { CHAT_COLUMN, CHAT_COLUMN_OUTER } from "@/components/chat/chat-column";
-import type { Agent } from "@opencode-ai/sdk/v2/client";
+import type { Agent } from "@redrob-labs/sdk/v2/client";
 import { AppWindowMac, ArrowUp, Check, ChevronDown, ChevronRight, FileText, Paperclip, Plus, RefreshCw, Settings, Square, Terminal, X, Zap } from "lucide-react";
 import fuzzysort from "fuzzysort";
 import { toast } from "@/components/ui/sonner";

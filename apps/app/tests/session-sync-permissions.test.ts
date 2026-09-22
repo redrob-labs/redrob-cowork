@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { UIMessage } from "ai";
-import type { PermissionRequest, PermissionV2Request, QuestionRequest } from "@opencode-ai/sdk/v2/client";
+import type { PermissionRequest, PermissionV2Request, QuestionRequest } from "@redrob-labs/sdk/v2/client";
 
 import type { RedrobSessionSnapshot } from "../src/app/lib/redrob-server";
 import { getReactQueryClient } from "../src/react-app/infra/query-client";

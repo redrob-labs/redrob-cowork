@@ -13,7 +13,7 @@ import type {
   FilePartInput,
   ProviderListResponse,
   TextPartInput,
-} from "@opencode-ai/sdk/v2/client";
+} from "@redrob-labs/sdk/v2/client";
 
 import { captureAnalyticsEvent, markTaskRunStart } from "@/app/lib/analytics";
 import { buildDiagnosticsBundleJson } from "@/app/lib/diagnostics-bundle";

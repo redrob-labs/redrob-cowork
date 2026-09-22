@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import { useRef, useState } from "react";
-import type { Agent } from "@opencode-ai/sdk/v2/client";
+import type { Agent } from "@redrob-labs/sdk/v2/client";
 
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
 import type { ComposerAttachment, McpServerEntry, McpStatusMap, ModelOption, ModelRef, SkillCard, SlashCommandOption } from "@/app/types";

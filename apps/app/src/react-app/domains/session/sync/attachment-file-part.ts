@@ -1,4 +1,4 @@
-import type { FilePartInput, TextPartInput } from "@opencode-ai/sdk/v2/client";
+import type { FilePartInput, TextPartInput } from "@redrob-labs/sdk/v2/client";
 
 import type { ComposerAttachment } from "../../../../app/types";
 import { t } from "@/i18n";

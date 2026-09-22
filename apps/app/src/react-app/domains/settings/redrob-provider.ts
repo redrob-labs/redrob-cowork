@@ -1,4 +1,4 @@
-import type { ProviderConfig } from "@opencode-ai/sdk/v2/client";
+import type { ProviderConfig } from "@redrob-labs/sdk/v2/client";
 
 /**
  * Single source of truth for the built-in Redrob inference provider

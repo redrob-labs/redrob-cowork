@@ -6,8 +6,8 @@ async function unusedSessionMethod() {
   throw new Error("SDK mock method should not be called");
 }
 
-mock.module("@opencode-ai/sdk/v2/client", () => ({
-  createOpencodeClient: (options: { fetch?: typeof globalThis.fetch }) => {
+mock.module("@redrob-labs/sdk/v2/client", () => ({
+  createRedrobClient: (options: { fetch?: typeof globalThis.fetch }) => {
     capturedFetch = options.fetch ?? null;
     return {
       session: {

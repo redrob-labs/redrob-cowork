@@ -9,7 +9,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
+import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 
 import { desktopFetch } from "../../app/lib/desktop";
 import { isWebDeployment } from "../../app/lib/redrob-deployment";
@@ -76,7 +76,7 @@ export function buildRedrobHealthHeaders(url: string): Record<string, string> | 
 async function checkHealth(url: string): Promise<boolean> {
   if (!url) return false;
   const headers = buildRedrobHealthHeaders(url);
-  const client = createOpencodeClient({
+  const client = createRedrobClient({
     baseUrl: url,
     headers,
     signal: AbortSignal.timeout(3000),

@@ -7,7 +7,7 @@ import type {
   SessionMessagesResponse2 as SessionMessagesArrayResponse,
   SessionStatusResponse,
   SessionTodoResponse,
-} from "@opencode-ai/sdk/v2/client";
+} from "@redrob-labs/sdk/v2/client";
 
 import { ApiError } from "./errors.js";
 
