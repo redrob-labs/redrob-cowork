@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "@openai/codex-sdk": "0.155.1",
     "@redrob-labs/sdk": "^0.4.1",
     "@redrob/enterprise-mcp-client": "workspace:*",
     "@redrob/paths": "workspace:*",
