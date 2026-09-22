@@ -1,4 +1,4 @@
-import type { Part, Session } from "@opencode-ai/sdk/v2/client";
+import type { Part, Session } from "@redrob-labs/sdk/v2/client";
 import { t } from "../../i18n";
 import type {
   ArtifactItem,
@@ -544,6 +544,13 @@ export function normalizeSessionStatus(status: unknown) {
   const record = status as Record<string, unknown>;
   if (record.type === "busy") return "running";
   if (record.type === "retry") return "retry";
+  /*
+    A blocked turn has ENDED, so it normalises to idle for anything asking "is this session working?" --
+    which is what this function answers. The distinction is not lost: the surface reads `liveStatus.type`
+    directly to draw the card, and reporting `blocked` here would make callers that only know three states
+    treat a finished session as still running.
+  */
+  if (record.type === "blocked") return "idle";
   if (record.type === "idle") return "idle";
   return "idle";
 }

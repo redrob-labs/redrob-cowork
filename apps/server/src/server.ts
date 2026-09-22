@@ -1,7 +1,7 @@
 import { readFile, writeFile, rm, stat } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
-import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
+import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { resolveGlobalEngineConfigPath } from "@redrob/paths";
 import type { ApprovalRequest, Capabilities, ServerConfig, WorkspaceInfo, Actor, ReloadReason, ReloadTrigger, TokenScope } from "./types.js";
 import { ApprovalService } from "./approvals.js";
@@ -1308,7 +1308,7 @@ export function createWorkspaceOpencodeClient(
   const baseFetch = directory ? createOpencodeDirectoryFetch(directory) : globalThis.fetch;
   const clientFetch = directory ? baseFetch : undefined;
 
-  return createOpencodeClient({
+  return createRedrobClient({
     baseUrl,
     ...(directory ? { directory } : {}),
     ...(clientFetch ? { fetch: clientFetch } : {}),

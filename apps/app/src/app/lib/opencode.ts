@@ -1,4 +1,4 @@
-import { createOpencodeClient, type Message, type Part, type Session, type Todo } from "@opencode-ai/sdk/v2/client";
+import { createRedrobClient, type Message, type Part, type Session, type Todo } from "@redrob-labs/sdk/v2/client";
 
 import { t } from "../../i18n";
 
@@ -383,7 +383,7 @@ export function createClient(baseUrl: string, directory?: string, auth?: Opencod
         const timeoutMs = requestIsStreaming(input, init) ? 0 : DEFAULT_OPENCODE_REQUEST_TIMEOUT_MS;
         return fetchWithTimeout(globalThis.fetch, input, init, timeoutMs);
       };
-  const client = createOpencodeClient({
+  const client = createRedrobClient({
     baseUrl,
     headers: Object.keys(headers).length ? headers : undefined,
     fetch: fetchImpl,

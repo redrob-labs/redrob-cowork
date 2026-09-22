@@ -85,14 +85,33 @@ describe("bundled Redrob Code runtime", () => {
     const constantsPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json");
     const constants = JSON.parse(await readFile(constantsPath, "utf8"));
 
-    // The engine's own release tag, `v`-prefixed as GitHub publishes it. redrob.5 is the first
-    // release that finds the key THIS APP writes. Both of the app's connect paths -- pasting a key
-    // and "Connect Redrob", which is a device authorization that never shows anyone a key -- end at
-    // the engine's `PUT /auth/redrob`, which writes auth.json. Up to redrob.4 the catalogue read only
-    // the environment and the SQL Credential store, so a user who connected through the app had a key
-    // the catalogue could not see: it took the keyless branch and listed six built-in ids while the
-    // console served 323. An older pin ships that six-model engine to every app user.
-    assert.equal(constants.redrobCodeVersion, "v1.18.31-redrob.5");
+    // The engine's own release tag, `v`-prefixed as GitHub publishes it.
+    //
+    // Asserted as a FLOOR, not an equality, and the floor is now 0.1.0 because the engine reset its
+    // version line. `1.18.31-redrob.N` was upstream's number with a suffix, which is a semver
+    // PRERELEASE and therefore sorts below the plain version it precedes; every tag in that line was
+    // deleted along with the thousand upstream tags this fork had inherited.
+    //
+    // The reason the old floor existed is unchanged and is now satisfied by construction. `redrob.5`
+    // was the first engine release whose catalogue could see the key THIS APP writes: both connect
+    // paths -- pasting a key, and "Connect Redrob", a device authorization that never shows anyone a
+    // key -- end at the engine's `PUT /auth/redrob`, which writes auth.json, and up to `redrob.4` the
+    // catalogue read only the environment and the SQL Credential store. A user who connected through
+    // the app had a key the catalogue could not see, so it took the keyless branch and listed six
+    // built-in ids while the console served over three hundred. 0.1.0 is cut from a tree containing
+    // all of that, so anything at or above it has the fix.
+    //
+    // A prerelease pin is refused outright: it would mean a return to the retired line, and this
+    // guard existing as an equality is what let the pin drift through 6, 7, 8, 9 and 10 while the
+    // literal sat at 5 and `ci-tests.yml` being workflow_dispatch only kept it quiet.
+    const pin = String(constants.redrobCodeVersion ?? "");
+    const parsed = /^v(\d+)\.(\d+)\.(\d+)$/.exec(pin);
+    assert.ok(parsed, `pin ${pin} must be a plain v<major>.<minor>.<patch> release tag`);
+    const [major, minor, patch] = parsed.slice(1, 4).map(Number);
+    const floor = [0, 1, 0];
+    const atOrAboveFloor =
+      major > floor[0] || (major === floor[0] && (minor > floor[1] || (minor === floor[1] && patch >= floor[2])));
+    assert.ok(atOrAboveFloor, `pin ${pin} is older than the v0.1.0 floor described above`);
     // The upstream OpenCode pin must be gone: a stale reader would resolve an
     // OpenCode version that no longer describes the shipped engine.
     assert.equal(constants.opencodeVersion, undefined);

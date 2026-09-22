@@ -6,7 +6,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
-import type { Agent } from "@opencode-ai/sdk/v2/client";
+import type { Agent } from "@redrob-labs/sdk/v2/client";
 
 import { t } from "@/i18n";
 import {

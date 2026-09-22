@@ -25,7 +25,7 @@ import {
   type FileUIPart,
   type UIMessage,
 } from "ai"
-import type { SessionStatus } from "@opencode-ai/sdk/v2/client"
+import type { SessionStatus } from "@redrob-labs/sdk/v2/client"
 import { openDesktopUrl, revealDesktopItemInDir } from "@/app/lib/desktop"
 import { isElectronRuntime } from "@/app/lib/runtime-env"
 import { SYNTHETIC_SESSION_ERROR_MESSAGE_PREFIX } from "@/app/types"
@@ -258,6 +258,15 @@ const ToolMessageInner = ({ part }: ToolMessageProps) => {
 const isEmptyMessage = (message: UIMessage): boolean => message.parts.length === 0
 
 type RetryStatus = Extract<SessionStatus, { type: "retry" }>
+
+/**
+ * The `blocked` session status, extracted from the SDK like its sibling above.
+ *
+ * It was declared structurally while no published package carried the variant. `@redrob-labs/sdk`
+ * does, so the duplicate shape and the two casts that went with it are gone -- a hand-written copy of
+ * a generated type is a second place for it to drift.
+ */
+export type BlockedStatus = Extract<SessionStatus, { type: "blocked" }>
 
 function isSessionErrorMessage(message: UIMessage) {
   return message.id.startsWith(SYNTHETIC_SESSION_ERROR_MESSAGE_PREFIX)
@@ -872,6 +881,41 @@ function RetryActionButton(props: { link: string; label: string }) {
   )
 }
 
+/**
+ * A refusal the user can fix, with the page that fixes it.
+ *
+ * Deliberately not `RetryMessage`: that one shows a spinner and "Retrying in Ns", which is true while a
+ * retry is pending and a lie otherwise. The console's 402s are the case this exists for -- it answers 402
+ * rather than 429 so clients STOP, and a key over its monthly cap or a workspace out of credit is fixed
+ * by a person, not by waiting.
+ *
+ * Destructive colouring rather than the retry card's warning tone, because nothing is in flight: the turn
+ * ended. The action block is the same shape, so both cards offer one button in one place.
+ */
+const BlockedMessage = React.memo(({ status }: { status: BlockedStatus }) => {
+  const action = status.action
+
+  return (
+    <Message className="not-prose mx-auto flex w-full max-w-[var(--ow-chat-column)] flex-col items-start gap-2 px-0 md:px-4">
+      <div className="group flex w-full flex-col items-start gap-0">
+        <div className="text-foreground flex min-w-0 flex-1 flex-col gap-2 rounded-lg border-2 border-destructive-muted bg-destructive-soft/40 px-3 py-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={16} className="mt-0.5 shrink-0 text-destructive" />
+            <p className="whitespace-pre-wrap text-sm font-medium text-foreground">{status.message}</p>
+          </div>
+          {action ? (
+            <div className="ml-6 space-y-1 border-t border-destructive-muted pt-2">
+              <p className="text-xs font-medium text-foreground">{action.title}</p>
+              <p className="text-xs text-muted-foreground">{action.message}</p>
+              {action.link ? <RetryActionButton link={action.link} label={action.label} /> : null}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </Message>
+  )
+})
+
 const RetryMessage = React.memo(({ status }: RetryMessageProps) => {
   const [seconds, setSeconds] = React.useState(() => retryDelaySeconds(status))
 
@@ -1295,6 +1339,7 @@ interface MessageListProps {
   messages: UIMessage[]
   status: ThreadStatus
   retryStatus?: RetryStatus | null
+  blockedStatus?: BlockedStatus | null
 }
 
 export function shouldShowMessageListLoading(status: ThreadStatus, messageCount: number) {
@@ -1415,7 +1460,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
   )
 }
 
-export function MessageList({ messages, status, retryStatus }: MessageListProps) {
+export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
@@ -1487,6 +1532,7 @@ export function MessageList({ messages, status, retryStatus }: MessageListProps)
 
       {showLoading && <LoadingMessage label={liveActionLabel ?? undefined} />}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}
+      {blockedStatus ? <BlockedMessage status={blockedStatus} /> : null}
       {error && !hasSessionErrorMessage ? <ErrorMessage error={error} /> : null}
       {/*
         Keyed by what the console said, so a later refusal replaces this one instead of leaving the

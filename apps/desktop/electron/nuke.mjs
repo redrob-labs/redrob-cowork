@@ -299,9 +299,35 @@ function defaultProfileDeletePaths(input) {
   return resolveNukePlan({ ...input, env, scopeToProfile: false }).manifest.deletePaths;
 }
 
-function profileScopedDeletePaths(deletePaths, sharedPaths, profileRoot, paths, platform) {
+/**
+ * An isolated profile also OWNS a data directory it was explicitly pointed at.
+ *
+ * Without this, the scoping swallowed such a directory whole. The shared production set includes the
+ * `.redrob` parent itself, so a dev profile launched with `REDROB_DATA_DIR` set to a sibling like
+ * `.redrob/redrob-orchestrator-dev` had its own data scoped out: every candidate inside it overlapped
+ * a shared path, and the profile could not clear the state it alone wrote.
+ *
+ * The root is honoured only when it is neither a shared path itself nor a parent of one. That is what
+ * keeps the protection intact: an inherited `XDG_CONFIG_HOME` of `/Users/alice/.config` still yields
+ * `/Users/alice/.config/redrob`, which IS a shared path, so it is still refused. Being named by an
+ * environment variable is not the licence; being named, and distinct from production, is.
+ */
+function ownedProfileRoot(env, sharedPaths, paths, platform) {
+  const explicit = envValue(env, "REDROB_DATA_DIR");
+  if (!explicit) return null;
+  /*
+    Refused when the root IS a shared path or CONTAINS one. Being a child of one is the case that has
+    to be allowed: the shared set includes the `.redrob` parent, so a dev sibling inside it is a child
+    by construction, and rejecting children rejects the only shape this ever takes.
+  */
+  const clashes = sharedPaths.some((sharedPath) => sameOrInside(sharedPath, explicit, paths, platform));
+  return clashes ? null : explicit;
+}
+
+function profileScopedDeletePaths(deletePaths, sharedPaths, profileRoot, paths, platform, ownedRoot) {
   return deletePaths.filter((targetPath) => {
     if (sameOrInside(targetPath, profileRoot, paths, platform)) return true;
+    if (ownedRoot && sameOrInside(targetPath, ownedRoot, paths, platform)) return true;
     return !sharedPaths.some(
       (sharedPath) =>
         sameOrInside(targetPath, sharedPath, paths, platform) ||
@@ -376,9 +402,12 @@ function resolveNukePlan(input) {
   );
   const scopeToProfile = input.scopeToProfile !== false && isIsolatedProfile(input.env ?? {});
   const sharedPaths = scopeToProfile ? defaultProfileDeletePaths(input) : [];
+  const ownedRoot = scopeToProfile
+    ? ownedProfileRoot(input.env ?? {}, sharedPaths, paths, platform)
+    : null;
   const scopeDeletePaths = (candidates) =>
     scopeToProfile
-      ? profileScopedDeletePaths(candidates, sharedPaths, userDataPath, paths, platform)
+      ? profileScopedDeletePaths(candidates, sharedPaths, userDataPath, paths, platform, ownedRoot)
       : candidates;
   const manifest = {
     deletePaths: uniquePaths(scopeDeletePaths(filteredDeletePaths), paths, platform),

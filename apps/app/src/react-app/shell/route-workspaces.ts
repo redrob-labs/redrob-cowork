@@ -3,7 +3,7 @@
 // settings-route was missing the remote-workspace clobber fix in
 // mergeRouteWorkspaces and used older session-status logic. One copy now.
 
-import type { Session } from "@opencode-ai/sdk/v2/client";
+import type { Session } from "@redrob-labs/sdk/v2/client";
 
 import type { RedrobWorkspaceInfo } from "@/app/lib/redrob-server";
 import type { WorkspaceInfo } from "@/app/lib/desktop-types";
