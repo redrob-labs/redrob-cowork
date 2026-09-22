@@ -17,6 +17,8 @@
  * satisfy it would mean writing a protocol shim, and that belongs behind a real
  * backend seam rather than inside a spawn hook.
  */
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { Codex, type ThreadEvent, type ThreadItem } from "@openai/codex-sdk";
 
 /** Where a turn's text and cost land, normalized off the SDK's event union. */
@@ -40,13 +42,100 @@ export type CodexTurnResult = {
   items: ThreadItem[];
 };
 
+/**
+ * Where the user's own `codex` might be, beyond PATH.
+ *
+ * PATH is checked first and is the normal answer. These are the fallbacks for a GUI
+ * process, whose PATH is frequently not the user's shell PATH — an Electron app
+ * launched from Finder or a desktop launcher inherits a minimal environment, so a
+ * `codex` the user installed via npm, Homebrew or the official installer is often
+ * invisible to `which` from inside the app even though it works in their terminal.
+ * Getting this wrong looks to the user like "your app cannot find Codex" when Codex
+ * is plainly installed.
+ */
+function candidatePaths(home: string): string[] {
+  const exe = process.platform === "win32" ? "codex.exe" : "codex";
+  const roots = [
+    // Official standalone installer.
+    join(home, ".codex", "bin"),
+    // npm -g, both common prefixes.
+    join(home, ".npm-global", "bin"),
+    join(home, ".local", "bin"),
+    // Homebrew, Apple silicon then Intel.
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+    "/usr/bin",
+  ];
+  if (process.platform === "win32") {
+    roots.push(join(home, "AppData", "Roaming", "npm"), join(home, "AppData", "Local", "Programs", "codex"));
+  }
+  return roots.map((root) => join(root, exe));
+}
+
+/**
+ * Find the `codex` the USER installed, or null.
+ *
+ * Returns null rather than throwing or guessing: "not installed" is a state the UI
+ * has to render differently from "installed but not signed in", and collapsing the
+ * two strands the user because the remedy differs.
+ */
+export function discoverCodexBinary(
+  env: NodeJS.ProcessEnv = process.env,
+  exists: (path: string) => boolean = (path) => existsSync(path),
+): string | null {
+  const explicit = env.REDROB_CODEX_PATH?.trim();
+  if (explicit && exists(explicit)) return explicit;
+
+  const pathEntries = (env.PATH ?? env.Path ?? "").split(process.platform === "win32" ? ";" : ":");
+  const exe = process.platform === "win32" ? "codex.exe" : "codex";
+  for (const entry of pathEntries) {
+    if (!entry) continue;
+    const candidate = join(entry, exe);
+    if (exists(candidate)) return candidate;
+  }
+
+  const home = env.HOME ?? env.USERPROFILE ?? "";
+  if (home) {
+    for (const candidate of candidatePaths(home)) {
+      if (exists(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
+/**
+ * The three states a settings UI must distinguish. One "unavailable" is not enough:
+ * the remedy for each is different, and for `signed-out` the remedy is the vendor's
+ * own login, which we may point at but must never present as our own.
+ */
+export type CodexAvailability =
+  | { state: "not-installed" }
+  | { state: "signed-out"; binary: string }
+  | { state: "ready"; binary: string };
+
 export type CodexRuntimeOptions = {
   /**
-   * Absolute path to the `codex` binary. Omit to resolve it from PATH.
-   * Also the seam the tests use: they point this at a fake binary that speaks
-   * the same JSONL, mirroring `writeFakeEngineBin` in `engine-pool.test.ts`.
+   * Absolute path to the `codex` binary to drive. REQUIRED, and that is the point.
+   *
+   * Omitting it does NOT fall back to PATH. `@openai/codex-sdk` pins
+   * `@openai/codex` to an exact version and resolves the executable out of its own
+   * bundled platform packages (`@openai/codex-linux-x64` and friends) unless
+   * `codexPathOverride` is set — so the default drives a SECOND copy of Codex that
+   * we downloaded as an npm dependency, not the one the user installed and signed
+   * in to.
+   *
+   * That default is wrong for us twice over: it re-creates the duplicate-engine
+   * problem this work exists to remove, and it makes "use the runtime you already
+   * have" untrue. Auth would still have appeared to work, because the credential
+   * lives under CODEX_HOME rather than beside the binary — which is exactly what
+   * would have let this ship quietly.
+   *
+   * `discoverCodexBinary` finds the user's install; the caller decides what to do
+   * when there is none. Also the seam the tests use: they point this at a fake
+   * binary that speaks the same JSONL, mirroring `writeFakeEngineBin` in
+   * `engine-pool.test.ts`.
    */
-  codexPath?: string;
+  codexPath: string;
   /** Directory the agent may read and (with workspace-write) modify. */
   workingDirectory: string;
   /**
