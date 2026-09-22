@@ -22,6 +22,7 @@ import {
   buildCodexEnv,
   collectTurn,
   CodexRuntime,
+  discoverCodexBinary,
   isCodexAuthError,
 } from "./codex-runtime.js";
 import type { ThreadEvent } from "@openai/codex-sdk";
@@ -160,6 +161,49 @@ describe("isCodexAuthError", () => {
     // `codex login`, which would be a dead end and hide the real error.
     expect(isCodexAuthError("sandbox denied write to /etc/hosts")).toBe(false);
     expect(isCodexAuthError("model gpt-5.6-terra is not available")).toBe(false);
+  });
+});
+
+describe("discoverCodexBinary", () => {
+  // The regression these guard: the SDK resolves its OWN bundled @openai/codex
+  // binary when no path is given, so without discovery the adapter drives a second
+  // copy we downloaded rather than the one the user signed in to. Auth would still
+  // have worked -- the credential lives under CODEX_HOME, not beside the binary --
+  // which is precisely how that would have shipped unnoticed.
+  const unix = process.platform !== "win32";
+
+  test("prefers an explicit override", () => {
+    const found = discoverCodexBinary(
+      { REDROB_CODEX_PATH: "/opt/custom/codex", PATH: "/usr/bin" },
+      (p) => p === "/opt/custom/codex",
+    );
+    expect(found).toBe("/opt/custom/codex");
+  });
+
+  test("ignores an override that does not exist, rather than returning a dead path", () => {
+    const found = discoverCodexBinary({ REDROB_CODEX_PATH: "/nope/codex", PATH: "" }, () => false);
+    expect(found).toBeNull();
+  });
+
+  test.if(unix)("finds it on PATH", () => {
+    const found = discoverCodexBinary({ PATH: "/empty:/usr/local/bin" }, (p) => p === "/usr/local/bin/codex");
+    expect(found).toBe("/usr/local/bin/codex");
+  });
+
+  test.if(unix)("falls back to known install locations when PATH is minimal", () => {
+    // An Electron app launched from Finder or a desktop launcher does NOT inherit
+    // the user's shell PATH, so a codex that works in their terminal is invisible
+    // to a PATH-only lookup. Without this fallback the app reports "Codex not
+    // found" to a user who plainly has it installed.
+    const found = discoverCodexBinary(
+      { PATH: "/usr/bin", HOME: "/home/someone" },
+      (p) => p === "/home/someone/.codex/bin/codex",
+    );
+    expect(found).toBe("/home/someone/.codex/bin/codex");
+  });
+
+  test("returns null when nothing is installed", () => {
+    expect(discoverCodexBinary({ PATH: "/usr/bin", HOME: "/home/someone" }, () => false)).toBeNull();
   });
 });
 
