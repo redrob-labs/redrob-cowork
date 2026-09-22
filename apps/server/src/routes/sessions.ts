@@ -1,5 +1,5 @@
 import { realpath } from "node:fs/promises";
-import type { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
+import type { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { ApiError } from "../errors.js";
 import { buildSession, buildSessionList, buildSessionMessages, buildSessionSnapshot } from "../session-read-model.js";
 import {
@@ -19,7 +19,7 @@ type ParseOptionalBoolean = (value: string | null, name: string) => boolean | un
 type ParseOptionalPositiveInteger = (value: string | null, name: string) => number | undefined;
 type ParseOptionalNonNegativeInteger = (value: string | null, name: string) => number | undefined;
 type ReadJsonBody = (request: Request) => Promise<Record<string, unknown>>;
-type WorkspaceOpencodeClient = ReturnType<typeof createOpencodeClient>;
+type WorkspaceOpencodeClient = ReturnType<typeof createRedrobClient>;
 type OpencodeClientResult<T, E> =
   | { data: T | undefined; error: undefined; response: Response }
   | { data: undefined; error: E; response?: Response };

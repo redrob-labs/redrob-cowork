@@ -1,5 +1,5 @@
 import type { DynamicToolUIPart, JSONValue, ProviderMetadata, TextUIPart } from "ai";
-import type { ToolPart } from "@opencode-ai/sdk/v2/client";
+import type { ToolPart } from "@redrob-labs/sdk/v2/client";
 
 import { safeStringify } from "@/app/utils";
 import { normalizeErrorText } from "@/lib/error-text";

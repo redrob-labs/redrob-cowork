@@ -1,6 +1,6 @@
 import { messageUsageMetadata, type MessageUsageTokens } from "@/components/chat/message-usage";
 import type { UIMessage } from "ai";
-import type { FilePart, Part, PermissionRequest, PermissionV2Request, QuestionRequest, Session, SessionStatus, Todo } from "@opencode-ai/sdk/v2/client";
+import type { FilePart, Part, PermissionRequest, PermissionV2Request, QuestionRequest, Session, SessionStatus, Todo } from "@redrob-labs/sdk/v2/client";
 
 import { getReactQueryClient } from "../../../infra/query-client";
 import { captureAnalyticsEvent, takeTaskRunStart } from "@/app/lib/analytics";

@@ -9,14 +9,14 @@ import {
   type ReactNode,
 } from "react";
 import {
-  createOpencodeClient,
+  createRedrobClient,
   type Event,
-} from "@opencode-ai/sdk/v2/client";
+} from "@redrob-labs/sdk/v2/client";
 
 import { usePlatform } from "./platform";
 import { useServer } from "./server-provider";
 
-type OpencodeClient = ReturnType<typeof createOpencodeClient>;
+type OpencodeClient = ReturnType<typeof createRedrobClient>;
 
 type Listener = (payload: Event) => void;
 
@@ -128,7 +128,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
       : undefined;
 
   const [client, setClient] = useState<OpencodeClient>(() =>
-    createOpencodeClient({
+    createRedrobClient({
       baseUrl: server.url,
       headers,
       fetch: platform.fetch,
@@ -138,7 +138,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
 
   useEffect(() => {
     setClient(
-      createOpencodeClient({
+      createRedrobClient({
         baseUrl: server.url,
         headers,
         fetch: platform.fetch,
@@ -153,7 +153,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
     if (!baseUrl || !isHealthy) return;
 
     const abort = new AbortController();
-    const eventClient = createOpencodeClient({
+    const eventClient = createRedrobClient({
       baseUrl,
       headers,
       signal: abort.signal,

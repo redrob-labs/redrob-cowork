@@ -21,7 +21,7 @@ import type {
   ProviderListResponse,
   Session,
   VcsInfo,
-} from "@opencode-ai/sdk/v2/client";
+} from "@redrob-labs/sdk/v2/client";
 
 import { t } from "../../i18n";
 import { unwrap } from "../../app/lib/opencode";

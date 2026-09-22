@@ -1,4 +1,4 @@
-import type { Message, Part, Session, Todo } from "@opencode-ai/sdk/v2/client";
+import type { Message, Part, Session, Todo } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 import { normalizeBaseUrl } from "@redrob/types/url";
 import { t } from "../../i18n";

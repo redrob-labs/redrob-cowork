@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@opencode-ai/sdk": "^1.18.15",
+    "@redrob-labs/sdk": "^0.4.1",
     "@redrob/enterprise-mcp-client": "workspace:*",
     "@redrob/paths": "workspace:*",
     "better-sqlite3": "^13.0.2",

@@ -25,7 +25,7 @@ import {
   type FileUIPart,
   type UIMessage,
 } from "ai"
-import type { SessionStatus } from "@opencode-ai/sdk/v2/client"
+import type { SessionStatus } from "@redrob-labs/sdk/v2/client"
 import { openDesktopUrl, revealDesktopItemInDir } from "@/app/lib/desktop"
 import { isElectronRuntime } from "@/app/lib/runtime-env"
 import { SYNTHETIC_SESSION_ERROR_MESSAGE_PREFIX } from "@/app/types"
@@ -260,25 +260,13 @@ const isEmptyMessage = (message: UIMessage): boolean => message.parts.length ===
 type RetryStatus = Extract<SessionStatus, { type: "retry" }>
 
 /**
- * The `blocked` session status, declared structurally rather than extracted from `SessionStatus`.
+ * The `blocked` session status, extracted from the SDK like its sibling above.
  *
- * The published SDK this app depends on does not carry the variant yet, so `Extract<…, {type:"blocked"}>`
- * would resolve to `never` and the card would be dead code. Declared here it renders as soon as a server
- * sends it, and can be swapped for the extracted type once the SDK is bumped. `normalizeSessionStatus`
- * reads the same field the same way, for the same reason.
+ * It was declared structurally while no published package carried the variant. `@redrob-labs/sdk`
+ * does, so the duplicate shape and the two casts that went with it are gone -- a hand-written copy of
+ * a generated type is a second place for it to drift.
  */
-export type BlockedStatus = {
-  type: "blocked"
-  message: string
-  action?: {
-    reason: string
-    provider: string
-    title: string
-    message: string
-    label: string
-    link?: string
-  }
-}
+export type BlockedStatus = Extract<SessionStatus, { type: "blocked" }>
 
 function isSessionErrorMessage(message: UIMessage) {
   return message.id.startsWith(SYNTHETIC_SESSION_ERROR_MESSAGE_PREFIX)

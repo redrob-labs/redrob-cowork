@@ -5,7 +5,7 @@ declare const expect: (value: unknown) => {
   toEqual: (expected: unknown) => void;
 };
 
-import type { ProviderListResponse } from "@opencode-ai/sdk/v2/client";
+import type { ProviderListResponse } from "@redrob-labs/sdk/v2/client";
 
 import { filterProviderList } from "./providers";
 import { DEFAULT_MODEL } from "../constants";

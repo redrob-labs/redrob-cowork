@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { messageUsageMetadata } from "@/components/chat/message-usage";
 import type { UIMessage } from "ai";
-import type { FilePart, Part, ToolPart } from "@opencode-ai/sdk/v2/client";
+import type { FilePart, Part, ToolPart } from "@redrob-labs/sdk/v2/client";
 
 import type { RedrobSessionSnapshot } from "../../../../app/lib/redrob-server";
 import { SYNTHETIC_SESSION_ERROR_MESSAGE_PREFIX } from "../../../../app/types";

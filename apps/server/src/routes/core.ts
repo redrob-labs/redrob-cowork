@@ -1,6 +1,6 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
+import type { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService } from "../env-file.js";
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
@@ -21,7 +21,7 @@ type JsonResponse = (data: unknown, status?: number) => Response;
 type ReadJsonBody = (request: Request) => Promise<Record<string, unknown>>;
 type ParseOptionalBoolean = (value: string | null, name: string) => boolean | undefined;
 type FetchRuntimeControl = (path: string, init?: { method?: string; body?: unknown }) => Promise<unknown>;
-type WorkspaceOpencodeClient = ReturnType<typeof createOpencodeClient>;
+type WorkspaceOpencodeClient = ReturnType<typeof createRedrobClient>;
 
 interface RegisterCoreRoutesOptions {
   routes: Route[];

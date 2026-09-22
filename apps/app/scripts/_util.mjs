@@ -4,7 +4,7 @@ import { once } from "node:events";
 import net from "node:net";
 import { realpathSync, statSync } from "node:fs";
 
-import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
+import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 
 function resolveBasicAuthHeader() {
   const password = process.env.REDROB_SERVER_PASSWORD?.trim() ?? "";
@@ -24,7 +24,7 @@ export function makeClient({ baseUrl, directory }) {
     const trimmed = directory.trim();
     headers["x-redrob-directory"] = /[^\x00-\x7F]/.test(trimmed) ? encodeURIComponent(trimmed) : trimmed;
   }
-  return createOpencodeClient({
+  return createRedrobClient({
     baseUrl,
     headers: Object.keys(headers).length ? headers : undefined,
     responseStyle: "data",
