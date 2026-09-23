@@ -77,6 +77,52 @@ export function buildHarnessProviderConfig(input: {
 }
 
 /**
+ * The shim running in THIS process, if any.
+ *
+ * A module-level registry rather than a parameter threaded through
+ * `writeRedrobRuntimeConfigFile`, which has three call sites and is also used by tests.
+ * It models something real: there is at most one shim per server process, and the
+ * runtime-config writer needs to know its URL without every caller having to carry it.
+ *
+ * Explicit setter and getter so a test can install and clear it, and so "no shim" is a
+ * state you can assert rather than an accident of import order.
+ */
+let activeShim: { baseUrl: string; codexAvailable: boolean; claudeAvailable: boolean } | null = null;
+
+export function setActiveHarnessShim(
+  shim: { baseUrl: string; codexAvailable: boolean; claudeAvailable: boolean } | null,
+): void {
+  // Refuse a non-local URL here rather than letting the engine drop it silently: the
+  // engine's own gate rejects it without telling the app that sent it, so the symptom
+  // would be a provider that simply never appears.
+  if (shim && !isLocalProviderUrl(shim.baseUrl)) {
+    throw new Error(`harness shim URL must be local, got ${shim.baseUrl}`);
+  }
+  activeShim = shim;
+}
+
+export function activeHarnessShim(): typeof activeShim {
+  return activeShim;
+}
+
+/**
+ * Provider entries for the shim running in this process, or an empty object.
+ *
+ * This is what the runtime-config writer calls. Empty when no shim is running, so a
+ * server started without one produces exactly the config it produced before — the
+ * feature is additive and cannot change an existing install's behaviour by being present
+ * in the build.
+ */
+export function activeHarnessProviders(): Record<string, ProviderConfig> {
+  if (!activeShim) return {};
+  return buildHarnessProviderConfig({
+    shimBaseUrl: activeShim.baseUrl,
+    codexAvailable: activeShim.codexAvailable,
+    claudeAvailable: activeShim.claudeAvailable,
+  });
+}
+
+/**
  * Whether a URL would pass the engine's local-provider gate.
  *
  * Mirrored here so a misconfiguration is caught where it is introduced rather than

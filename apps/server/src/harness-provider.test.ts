@@ -7,10 +7,12 @@
  */
 import { describe, expect, test } from "bun:test";
 import {
+  activeHarnessProviders,
   buildHarnessProviderConfig,
   CLAUDE_CODE_PROVIDER_ID,
   CODEX_PROVIDER_ID,
   isLocalProviderUrl,
+  setActiveHarnessShim,
 } from "./harness-provider.js";
 
 const shimBaseUrl = "http://127.0.0.1:41234/v1";
@@ -60,6 +62,31 @@ describe("buildHarnessProviderConfig", () => {
     // The only claim Anthropic's trademark guidelines permit without written permission.
     const providers = buildHarnessProviderConfig({ shimBaseUrl, codexAvailable: false, claudeAvailable: true });
     expect(providers[CLAUDE_CODE_PROVIDER_ID]?.name).toBe("Claude Code (your Claude plan)");
+  });
+});
+
+describe("the active shim registry", () => {
+  test("produces no providers when no shim is running", () => {
+    // Additive by design: a server started without a shim writes exactly the config it
+    // wrote before, so shipping this cannot change an existing install's behaviour.
+    setActiveHarnessShim(null);
+    expect(activeHarnessProviders()).toEqual({});
+  });
+
+  test("produces providers for the registered shim", () => {
+    setActiveHarnessShim({ baseUrl: shimBaseUrl, codexAvailable: true, claudeAvailable: false });
+    expect(Object.keys(activeHarnessProviders())).toEqual([CODEX_PROVIDER_ID]);
+    setActiveHarnessShim(null);
+  });
+
+  test("REFUSES a non-local shim URL instead of letting the engine drop it", () => {
+    // The engine's own gate rejects a non-local provider URL without telling the app that
+    // sent it, so the symptom would be a provider that simply never appears. Failing here
+    // names the actual problem.
+    expect(() =>
+      setActiveHarnessShim({ baseUrl: "https://evil.example.com/v1", codexAvailable: true, claudeAvailable: true }),
+    ).toThrow(/must be local/);
+    expect(activeHarnessProviders()).toEqual({});
   });
 });
 

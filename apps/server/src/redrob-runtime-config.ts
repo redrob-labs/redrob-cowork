@@ -35,6 +35,7 @@ import {
   runtimePluginList,
   type RuntimeOpencodeConfig,
 } from "./runtime-opencode-config-store.js";
+import { activeHarnessProviders } from "./harness-provider.js";
 
 const REDROB_AGENT_PROMPT = `You are Redrob Cowork.
 
@@ -99,7 +100,9 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
   runtimeConfig: RuntimeOpencodeConfig,
 ): Record<string, unknown> {
   const disabledProviders = runtimeDisabledProviderList(runtimeConfig);
-  const provider = runtimeProviderMap(runtimeConfig);
+  // Workspace-configured providers win over the harness entries: a user who pinned a
+  // provider by hand must not have it replaced by an auto-detected runtime.
+  const provider = { ...activeHarnessProviders(), ...runtimeProviderMap(runtimeConfig) };
   return {
     ...runtimeConfig,
     default_agent: runtimeConfig.default_agent ?? "redrob",
