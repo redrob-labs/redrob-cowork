@@ -21,6 +21,11 @@ import { WelcomePage } from "../domains/onboarding/welcome-page";
 import { RedrobKeyStep } from "../domains/onboarding/redrob-key-step";
 import { LanguageStep } from "../domains/onboarding/language-step";
 import { EngineDownloadStep } from "../domains/onboarding/engine-download-step";
+import { ConnectStep } from "../domains/onboarding/connect-step";
+import {
+  copyOnboardingCommand,
+  fetchHarnessAvailability,
+} from "../domains/onboarding/harness-availability-client";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
 import { TutorialStep } from "../domains/onboarding/tutorial-step";
 import { REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
@@ -58,7 +63,7 @@ function focusPromptSoon() {
  * user reaches "main" the existing WelcomePage -> create -> redrob-key ->
  * attribution flow runs unchanged. Language is always shown first.
  */
-type WelcomeStage = "language" | "engine" | "main";
+type WelcomeStage = "language" | "engine" | "connect" | "main";
 
 /**
  * Folder created under the user's home directory when they press "Get started"
@@ -568,7 +573,22 @@ export function WelcomeRoute() {
         // unreachable.
         autoContinueWhenPresent={!state.stageFromBack}
         onBack={() => dispatch({ type: "stage", stage: "language", fromBack: true })}
-        onContinue={() => dispatch({ type: "stage", stage: "main" })}
+        onContinue={() => dispatch({ type: "stage", stage: "connect" })}
+      />
+    );
+  }
+  if (state.stage === "connect") {
+    // After the engine, not before: the engine download is what makes the Redrob choice
+    // usable, so offering the three options first would let a user pick Redrob and then
+    // wait, which reads as the choice having failed.
+    return (
+      <ConnectStep
+        fetchAvailability={fetchHarnessAvailability}
+        copyCommand={copyOnboardingCommand}
+        onConnectRedrob={() => dispatch({ type: "stage", stage: "main" })}
+        onDone={() => dispatch({ type: "stage", stage: "main" })}
+        onBack={() => dispatch({ type: "stage", stage: "engine", fromBack: true })}
+        redrobConnected={false}
       />
     );
   }
