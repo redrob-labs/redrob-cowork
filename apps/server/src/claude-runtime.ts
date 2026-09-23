@@ -58,6 +58,12 @@ export type ClaudeRuntimeOptions = {
   model?: string;
   /** Continue an existing conversation instead of starting one. */
   resumeSessionId?: string;
+  /**
+   * Ask the CLI for partial message events, so text can be forwarded as it arrives.
+   * Off by default: it multiplies the stream's line count, which is waste for a caller
+   * that only wants the finished turn.
+   */
+  streamPartials?: boolean;
 };
 
 /** Same three states the Codex adapter reports, for one settings UI across runtimes. */
@@ -152,6 +158,11 @@ export function buildClaudeArgs(options: ClaudeRuntimeOptions, prompt: string): 
     "--add-dir",
     options.workingDirectory,
   ];
+  // Partial messages are what make incremental delivery possible: without them the first
+  // text arrives only when the assistant message completes, so a streaming caller can
+  // emit one chunk at the end and nothing before it. Requested only when a caller
+  // actually wants deltas, because it multiplies the line count on the stream.
+  if (options.streamPartials) args.push("--include-partial-messages");
   if (options.allowEdits) {
     args.push("--tools", "Read,Glob,Grep,Edit,Write");
   } else {
@@ -175,6 +186,52 @@ export function buildClaudeArgs(options: ClaudeRuntimeOptions, prompt: string): 
 export function isClaudeAuthError(message: string): boolean {
   return /\b(authentication_failed|not logged in|unauthorized|401|claude login|oauth_org_not_allowed|account_on_hold)\b/i
     .test(message);
+}
+
+/**
+ * The assistant text carried by one stream-json line, or null.
+ *
+ * Used for LIVE forwarding while the turn runs, separately from `collectClaudeTurn`,
+ * which folds the whole stream at the end. Two passes rather than one on purpose: the
+ * fold is cheap, well tested and must stay correct for buffered callers, and making it
+ * incremental-only would mean a streaming bug could silently change what a buffered
+ * caller sees.
+ *
+ * With `--include-partial-messages` the deltas arrive as `stream_event` frames; without
+ * it, text appears only when the assistant message completes. Both are handled so a
+ * caller that forgot the flag still gets text, just later.
+ */
+export function textDeltaOf(line: string): string | null {
+  const trimmed = line.trim();
+  if (!trimmed) return null;
+  let message: Record<string, unknown>;
+  try {
+    message = JSON.parse(trimmed) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+
+  if (message.type === "stream_event") {
+    const event = message.event as { delta?: { type?: unknown; text?: unknown } } | undefined;
+    if (event?.delta?.type === "text_delta" && typeof event.delta.text === "string") return event.delta.text;
+    return null;
+  }
+  if (message.type === "assistant") {
+    const inner = message.message as { content?: unknown } | undefined;
+    const content = Array.isArray(inner?.content) ? inner.content : [];
+    const text = content
+      .filter(
+        (block): block is { type: "text"; text: string } =>
+          typeof block === "object" &&
+          block !== null &&
+          (block as { type?: unknown }).type === "text" &&
+          typeof (block as { text?: unknown }).text === "string",
+      )
+      .map((block) => block.text)
+      .join("");
+    return text || null;
+  }
+  return null;
 }
 
 /**
@@ -334,9 +391,14 @@ export class ClaudeRuntime {
     return this.sessionId;
   }
 
-  async send(prompt: string, signal?: AbortSignal): Promise<HarnessTurnResult> {
+  async send(prompt: string, signal?: AbortSignal, onText?: (delta: string) => void): Promise<HarnessTurnResult> {
     const args = buildClaudeArgs(
-      { ...this.options, resumeSessionId: this.sessionId ?? undefined },
+      {
+        ...this.options,
+        resumeSessionId: this.sessionId ?? undefined,
+        // Only pay for partial frames when someone is listening for them.
+        streamPartials: this.options.streamPartials ?? Boolean(onText),
+      },
       prompt,
     );
     const child = spawn(this.options.claudePath, args, {
@@ -349,8 +411,21 @@ export class ClaudeRuntime {
 
     let stdout = "";
     let stderr = "";
+    // A chunk boundary can land mid-line, so hold the tail until a newline arrives.
+    // Forwarding a half-line would emit broken JSON to the delta extractor and, worse,
+    // split a word in the user's visible output.
+    let pending = "";
     child.stdout?.on("data", (chunk) => {
-      stdout += String(chunk);
+      const text = String(chunk);
+      stdout += text;
+      if (!onText) return;
+      pending += text;
+      const lines = pending.split("\n");
+      pending = lines.pop() ?? "";
+      for (const line of lines) {
+        const delta = textDeltaOf(line);
+        if (delta) onText(delta);
+      }
     });
     child.stderr?.on("data", (chunk) => {
       stderr += String(chunk);

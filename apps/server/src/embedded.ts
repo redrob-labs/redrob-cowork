@@ -33,6 +33,10 @@ import {
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
 import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
+import { startHarnessShim, type HarnessShim } from "./harness-shim.js";
+import { setActiveHarnessShim } from "./harness-provider.js";
+import { discoverCodexBinary } from "./codex-runtime.js";
+import { discoverClaudeBinary } from "./claude-runtime.js";
 import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
 import type { ServeResult } from "./serve-node.js";
 import type { LocalManagedMcpVaultKeyProvider, ServerConfig } from "./types.js";
@@ -77,6 +81,7 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
   let engineSpawnTemplate: EngineSpawnTemplate | null = null;
   let enginePool: EnginePool | null = null;
   let stopRuntimeConfigFileRefresh: (() => void) | null = null;
+  let harnessShim: HarnessShim | null = null;
   let server: ServeResult | null = null;
   let stopPromise: Promise<void> | null = null;
 
@@ -142,6 +147,21 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       }
     }
 
+    // Close the harness shim and clear the registry. Clearing matters as much as closing:
+    // the registry is module-level, so a stale entry left behind would make the NEXT
+    // embedded server write a runtime config pointing at a dead port, and the engine would
+    // then advertise providers whose every request fails.
+    const shim = harnessShim;
+    harnessShim = null;
+    setActiveHarnessShim(null);
+    if (shim) {
+      try {
+        await shim.close();
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+
     if (errors.length === 1) throw errors[0];
     if (errors.length > 1) {
       throw new AggregateError(errors, "Failed to stop embedded Redrob Cowork server");
@@ -189,6 +209,30 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       // Reap engines recorded by servers that died without cleanup. Best
       // effort: a failed reap must never block startup.
       await reapOrphanEngineInstances(config).catch(() => undefined);
+      // Start the harness shim BEFORE the runtime config is written: the config is what
+      // tells the engine which providers exist, so starting it afterwards would hand the
+      // engine a config with no harness providers and only correct itself on the next
+      // write. Best effort — neither runtime installed, or a shim that cannot bind, must
+      // not stop the app, and the config is then byte-identical to what this server wrote
+      // before.
+      const shimCwd = options.opencodeCwd
+        || process.env.REDROB_MANAGED_OPENCODE_CWD?.trim()
+        || workspace.path;
+      try {
+        const shim = await startHarnessShim({ workingDirectory: shimCwd });
+        const codexAvailable = discoverCodexBinary() !== null;
+        const claudeAvailable = discoverClaudeBinary() !== null;
+        if (codexAvailable || claudeAvailable) {
+          harnessShim = shim;
+          setActiveHarnessShim({ baseUrl: shim.baseUrl, codexAvailable, claudeAvailable });
+        } else {
+          // Nothing to serve: do not hold a listener and do not advertise providers.
+          await shim.close();
+        }
+      } catch {
+        // Providers are simply absent. Swallowed rather than logged here because this path
+        // runs inside Electron, where an unhandled startup rejection takes the app with it.
+      }
       // Server-managed config file: the engine re-reads it from disk on every
       // instance rebuild, and keepRedrobRuntimeConfigFileFresh synchronizes it
       // on every runtime-DB write — so disposes always pick up current state.
