@@ -225,6 +225,16 @@ function agentMessageText(item: ThreadItem): string | null {
 export async function collectTurn(
   events: AsyncIterable<ThreadEvent>,
   threadId: () => string | null,
+  /**
+   * Called with each piece of assistant text as it arrives.
+   *
+   * Optional so the buffered callers are unchanged. It exists so a streaming caller can
+   * forward text as the harness produces it instead of after the turn ends — without it,
+   * a shim can only emit one chunk at the end, which is SSE framing without streaming
+   * latency and reads to the user as the model thinking for ten seconds then answering
+   * instantly.
+   */
+  onText?: (delta: string) => void,
 ): Promise<CodexTurnResult> {
   const chunks: string[] = [];
   const items: ThreadItem[] = [];
@@ -240,8 +250,10 @@ export async function collectTurn(
     switch (event.type) {
       case "item.completed": {
         const text = agentMessageText(event.item);
-        if (text !== null) chunks.push(text);
-        else items.push(event.item);
+        if (text !== null) {
+          chunks.push(text);
+          onText?.(text);
+        } else items.push(event.item);
         break;
       }
       case "turn.completed": {
@@ -301,7 +313,7 @@ export class CodexRuntime {
     return this.threadId;
   }
 
-  async send(prompt: string, signal?: AbortSignal): Promise<CodexTurnResult> {
+  async send(prompt: string, signal?: AbortSignal, onText?: (delta: string) => void): Promise<CodexTurnResult> {
     const threadOptions = {
       workingDirectory: this.options.workingDirectory,
       sandboxMode: this.options.sandboxMode ?? ("read-only" as const),
@@ -315,7 +327,7 @@ export class CodexRuntime {
       : this.codex.startThread(threadOptions);
 
     const { events } = await thread.runStreamed(prompt, { signal });
-    const result = await collectTurn(events, () => thread.id);
+    const result = await collectTurn(events, () => thread.id, onText);
     // Remember the id even on failure: a turn that failed mid-way still created
     // a thread, and dropping the id would start a fresh conversation on retry
     // and lose the context the user already paid for.

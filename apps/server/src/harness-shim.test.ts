@@ -192,6 +192,45 @@ for (const line of lines) console.log(JSON.stringify(line));
     return path;
   }
 
+  /** Emits three separate assistant messages, so chunking is observable. */
+  function fakeCodexMultiPart(): string {
+    const path = join(dir, "codex-multi");
+    writeFileSync(
+      path,
+      `#!/usr/bin/env bun
+await new Response(Bun.stdin.stream()).text().catch(() => "");
+const lines = [
+  { type: "thread.started", thread_id: "thr_1" },
+  { type: "turn.started" },
+  { type: "item.completed", item: { id: "i1", type: "agent_message", text: "one " } },
+  { type: "item.completed", item: { id: "i2", type: "agent_message", text: "two " } },
+  { type: "item.completed", item: { id: "i3", type: "agent_message", text: "three" } },
+  { type: "turn.completed", usage: { input_tokens: 1, cached_input_tokens: 0, cache_write_input_tokens: 0, output_tokens: 3, reasoning_output_tokens: 0 } },
+];
+for (const line of lines) console.log(JSON.stringify(line));
+`,
+      "utf8",
+    );
+    chmodSync(path, 0o755);
+    return path;
+  }
+
+  /** Fails after the stream has opened. */
+  function fakeCodexFailing(): string {
+    const path = join(dir, "codex-fail");
+    writeFileSync(
+      path,
+      `#!/usr/bin/env bun
+await new Response(Bun.stdin.stream()).text().catch(() => "");
+console.log(JSON.stringify({ type: "turn.started" }));
+console.log(JSON.stringify({ type: "turn.failed", error: { message: "upstream exploded" } }));
+`,
+      "utf8",
+    );
+    chmodSync(path, 0o755);
+    return path;
+  }
+
   async function start(): Promise<HarnessShim> {
     shim = await startHarnessShim({
       workingDirectory: dir,
@@ -234,6 +273,51 @@ for (const line of lines) console.log(JSON.stringify(line));
     const text = await response.text();
     expect(text).toContain("shim answer");
     // Without the terminator an OpenAI client hangs waiting for more.
+    expect(text.trimEnd().endsWith("data: [DONE]")).toBe(true);
+  });
+
+  test("forwards each piece of text as its own chunk, not one at the end", async () => {
+    // The regression this guards: an earlier version awaited the whole turn and then sent a
+    // single chunk. That is correct SSE framing with none of the latency benefit, and reads
+    // to the user as the model thinking for ten seconds then answering instantly.
+    shim = await startHarnessShim({
+      workingDirectory: dir,
+      codexPath: fakeCodexMultiPart(),
+      claudePath: null,
+    });
+    const response = await fetch(`${shim.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model: "codex/gpt-5.6", messages: [{ role: "user", content: "hi" }], stream: true }),
+    });
+
+    const text = await response.text();
+    const contentChunks = text
+      .split("\n")
+      .filter((line) => line.startsWith("data: ") && !line.includes("[DONE]"))
+      .map((line) => JSON.parse(line.slice(6)) as { choices: Array<{ delta: { content?: string } }> })
+      .filter((frame) => typeof frame.choices[0]?.delta.content === "string");
+
+    expect(contentChunks).toHaveLength(3);
+    expect(contentChunks.map((frame) => frame.choices[0]!.delta.content).join("")).toBe("one two three");
+  });
+
+  test("reports a mid-stream failure as an error frame, not a silent end", async () => {
+    // Headers are already out by then, so the only way to report is in the stream. Ending
+    // silently would look like a short but successful answer.
+    shim = await startHarnessShim({
+      workingDirectory: dir,
+      codexPath: fakeCodexFailing(),
+      claudePath: null,
+    });
+    const response = await fetch(`${shim.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model: "codex/gpt-5.6", messages: [{ role: "user", content: "hi" }], stream: true }),
+    });
+
+    const text = await response.text();
+    expect(text).toContain('"type":"api_error"');
     expect(text.trimEnd().endsWith("data: [DONE]")).toBe(true);
   });
 

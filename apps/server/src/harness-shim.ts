@@ -291,6 +291,53 @@ export async function startHarnessShim(options: ShimOptions): Promise<HarnessShi
     }
 
     const id = `chatcmpl-${Date.now().toString(36)}`;
+
+    // Streaming path: open the SSE response BEFORE the turn starts and forward each delta
+    // as the harness produces it. The earlier version awaited the whole turn and then sent
+    // one chunk, which was correct SSE framing with none of the latency benefit -- it read
+    // to the user as the model thinking for ten seconds and then answering instantly.
+    if (plan.stream) {
+      response.writeHead(200, {
+        "content-type": "text/event-stream",
+        "cache-control": "no-cache",
+        connection: "keep-alive",
+      });
+      const send = (delta: string) => {
+        response.write(`data: ${JSON.stringify(toChunk(delta, plan.model, id, false))}\n\n`);
+      };
+
+      let streamed: HarnessTurnResult;
+      try {
+        if (plan.kind === "codex") {
+          const runtime = new CodexRuntime({ codexPath: plan.binary, workingDirectory: options.workingDirectory });
+          streamed = fromCodex(await runtime.send(plan.prompt, undefined, send));
+        } else {
+          const runtime = new ClaudeRuntime({ claudePath: plan.binary, workingDirectory: options.workingDirectory });
+          streamed = await runtime.send(plan.prompt, undefined, send);
+        }
+      } catch (error) {
+        // Headers are already out, so the only way to report this is in the stream. An
+        // OpenAI client reads an `error` frame; ending silently would look like a short
+        // but successful answer.
+        response.write(
+          `data: ${JSON.stringify({ error: { message: error instanceof Error ? error.message : String(error), type: "api_error", code: null, param: null } })}\n\n`,
+        );
+        response.write("data: [DONE]\n\n");
+        response.end();
+        return;
+      }
+
+      if (streamed.status === "failed") {
+        response.write(
+          `data: ${JSON.stringify({ error: { message: streamed.error ?? "harness turn failed", type: "api_error", code: null, param: null } })}\n\n`,
+        );
+      }
+      response.write(`data: ${JSON.stringify(toChunk("", plan.model, id, true))}\n\n`);
+      response.write("data: [DONE]\n\n");
+      response.end();
+      return;
+    }
+
     let result: HarnessTurnResult;
     try {
       if (plan.kind === "codex") {
@@ -324,20 +371,11 @@ export async function startHarnessShim(options: ShimOptions): Promise<HarnessShi
       return;
     }
 
-    // Streaming is emitted as one content chunk plus a terminator. The harnesses do
-    // stream incrementally, but this shim awaits the whole turn before replying, so
-    // pretending to stream token-by-token would be a lie about latency. The SSE FRAMING
-    // is what callers need in order to work at all; incremental delivery is a later
-    // change inside the adapters, not here.
-    response.writeHead(200, {
-      "content-type": "text/event-stream",
-      "cache-control": "no-cache",
-      connection: "keep-alive",
-    });
-    response.write(`data: ${JSON.stringify(toChunk(result.text, plan.model, id, false))}\n\n`);
-    response.write(`data: ${JSON.stringify(toChunk("", plan.model, id, true))}\n\n`);
-    response.write("data: [DONE]\n\n");
-    response.end();
+    // Unreachable: the streaming branch returns above. Kept as a guard so a future edit
+    // that removes the early return fails loudly rather than answering a stream request
+    // with a JSON body.
+    response.writeHead(500, { "content-type": "application/json" });
+    response.end(JSON.stringify(errorBody(500, "streaming path not taken", "api_error", null).body));
   };
 
   const server: Server = createServer((request, response) => {
