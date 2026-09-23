@@ -128,6 +128,7 @@ import {
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, listMemories, saveMemory } from "./local-memory-store.js";
+import { readHarnessAvailability } from "./harness-availability.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -2100,6 +2101,13 @@ function createRoutes(
 
   addRoute(routes, "GET", "/memory", "client", async () => {
     return jsonResponse({ memories: await listMemories(config) });
+  });
+
+  // What local AI runtimes this machine has, for the onboarding choice screen. Reports
+  // installed / signed-in state only -- never a credential, and the signed-in answer comes
+  // from asking the runtime rather than reading its credential store.
+  addRoute(routes, "GET", "/harness/availability", "client", async () => {
+    return jsonResponse(await readHarnessAvailability());
   });
 
   addRoute(routes, "POST", "/memory", "client", async (ctx) => {
