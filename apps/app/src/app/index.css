@@ -8,7 +8,6 @@
  * tests/design-system-collisions.test.ts.
  */
 @import "@redrob-labs/ui/tokens.css";
-@import "../styles/redrob-tokens.css";
 @import "../styles/fonts.css";
 @import "../styles/tailwind-theme.css";
 
@@ -96,51 +95,51 @@
 }
 
 /**
- * Semantic tokens - light.
+ * Semantic roles.
  *
- * Role names the app and its component library (shadcn/ui on Base UI) already
- * speak, re-pointed onto the Redrob primitives in `styles/redrob-tokens.css`.
- * The role names, the values behind them, and the light/dark split are the
- * Console token system, so a screen in Redrob Cowork and a screen in the Console
- * are the same colour by construction rather than by resemblance. The
- * correspondence to the token proposal's names, in full:
+ * The role names the app and its component library (shadcn/ui on Base UI) speak,
+ * pointed at the Redrob Group Design System 2026 (`@redrob-labs/ui/tokens.css`,
+ * imported above). The design system themes its own semantic tokens on
+ * `[data-theme]`, so a role that aliases one of them follows the theme without a
+ * dark twin. They are declared on every `[data-theme]` element as well as on
+ * `:root` because a custom property resolves `var()` where it is declared: a
+ * subtree that switches theme (an inverted menu, the overlay window) has to
+ * resolve them again or it keeps the page's values.
  *
- *   proposal                   here                       light        dark
- *   ─────────────────────────  ─────────────────────────  ───────────  ───────────
- *   background                 background                 Gray 1       Gray 9
- *   background-secondary       background-secondary       Gray 2       Redrob Black
- *   surface / surface-elevated card / popover             White        Gray 8/9 mix
- *   surface-hover              accent                     Gray 2       Gray 8/9 mix
- *   surface-active             accent-active              Gray 3       Gray 8
- *   border-subtle              border-subtle              Gray 2       Gray 8/9 mix
- *   border                     border                     Gray 3       Gray 8
- *   border-strong              border-strong              Gray 4       Gray 7
- *   -                          input                      Gray 6       Gray 6
- *   text-primary               foreground                 Gray 9       Gray 1
- *   text-secondary             muted-foreground           Gray 7       Gray 5
- *   text-muted                 subtle-foreground          Gray 6       Gray 6
- *   text-disabled              disabled-foreground        Gray 5       Gray 7
- *   accent                     primary / ring             Blue 6       Blue 5
- *   accent-hover               primary-hover              Blue 7       Blue 4
- *   accent-muted               primary-muted              Blue 3       Blue 9
- *   accent-soft                primary-soft               Blue 1       Blue 10
- *   on-accent                  primary-foreground         White        Redrob Black
- *   -                          primary-ink                Blue 6       Blue 4
- *   success / warning / error  success / warning / destructive  (four roles each)
- *   overlay                    overlay                    Black 45%    Black 65%
+ *   role                        design system token        light         dark
+ *   ──────────────────────────  ─────────────────────────  ────────────  ────────────
+ *   background                  surface-base               White         Redrob Black
+ *   card / popover / sidebar    surface-raised             Gray 1        Gray 9
+ *   background-secondary        surface-sunken             Gray 2        #1c1f26
+ *   accent / secondary / muted  surface-sunken             Gray 2        #1c1f26
+ *   app-border-subtle           surface-sunken             Gray 2        #1c1f26
+ *   border / accent-active      border-subtle              Gray 3        Gray 8
+ *   input                       border-strong              Gray 6        Gray 6
+ *   foreground                  ink-primary                Redrob Black  Gray 1
+ *   muted-foreground            ink-secondary              Gray 7        Gray 5
+ *   subtle-foreground           ink-muted                  #686e78       #838a97
+ *   primary / primary-hover     action-primary(-hover)     Blue 6 / 7    Blue 6 / 5
+ *   primary-foreground          ink-on-brand               White         White
+ *   primary-ink                 ink-brand                  Blue 7        Blue 4
+ *   primary-soft                surface-brand-subtle       Blue 1        Blue 10
+ *   primary-muted               border-ai                  Blue 3        Blue 8
+ *   ring                        focus-ring                 Blue 6        Blue 4
+ *   success / warning /         status-success / -warning  level 4       level 3
+ *     destructive / info, -ink    / -danger / -info
+ *   overlay                     overlay-scrim
+ *   material                    surface-material           translucent, solid under reduced transparency
+ *   shadow-soft / card /        shadow-sm / md / lg
+ *     elevated
  *
- * `input` and `primary-ink` are roles the proposal does not name and a contrast
- * minimum needs; both are commented where Console declares them. The `--dls-*`
- * aliases below are this app's own vocabulary for the same roles, kept because
- * `.ow-*` classes and the MCP Apps style bridge read them by name, and now
- * pointed at the semantic layer instead of carrying literal colours of their own.
+ * Roles the design system does not name - the ink on a status fill, the status
+ * strips and their edges, disabled text, the tooltip, the categorical spectrum -
+ * pick a design-system primitive per theme in the two blocks that follow.
  *
- * The type scale, spacing and control heights are unchanged, the same call
- * Console made: those steps differ from Tailwind's at every level, so adopting
- * them re-flows every screen at once and wants reviewing against live layouts
- * rather than arriving with a colour change.
+ * The `--dls-*` aliases are this app's own vocabulary for the same roles, kept
+ * because the `.ow-*` classes and the MCP Apps style bridge read them by name.
  */
-:root {
+:root,
+[data-theme] {
   /*
    * One column for the conversation and the composer.
    *
@@ -149,138 +148,78 @@
    * text they had just read. One variable, used by both, is what keeps them from drifting again.
    */
   --ow-chat-column: 800px;
-  color-scheme: light;
-  --background: var(--rr-gray-1);
-  --background-secondary: var(--rr-gray-2);
-  --foreground: var(--rr-gray-9);
-  --card: var(--rr-white);
-  --card-foreground: var(--rr-gray-9);
-  --popover: var(--rr-white);
-  --popover-foreground: var(--rr-gray-9);
-  --popover-border: var(--rr-gray-3);
 
-  /* Text. Four steps, and only the first two are for body copy: Gray 6 on the
-     page is 3.62:1, which clears 3:1 for large text, icons and non-text UI and
-     does not clear 4.5:1 for a sentence. Disabled text is exempt from the
-     minimum, which is the only reason Gray 5 is here. */
-  --muted-foreground: var(--rr-gray-7);
-  --subtle-foreground: var(--rr-gray-6);
-  --disabled-foreground: var(--rr-gray-5);
+  --background: var(--surface-base);
+  --background-secondary: var(--surface-sunken);
+  --foreground: var(--ink-primary);
+  --card: var(--surface-raised);
+  --card-foreground: var(--ink-primary);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--ink-primary);
+  --popover-border: var(--border-subtle);
+  /* A floating surface over content. Translucent by design; the design system
+     asks for a solid fallback wherever transparency is reduced, below. */
+  --material: var(--surface-material);
+
+  /* Text. `ink-muted` clears 4.5:1 on every ground in both themes, which the
+     Gray 6 it replaces did not; `disabled-foreground` is exempt from the
+     minimum and stays a step quieter, per theme below. */
+  --muted-foreground: var(--ink-secondary);
+  --subtle-foreground: var(--ink-muted);
 
   /* Interactive surfaces. `accent` is the shadcn role for the surface a hover or
      an open menu item paints; the brand accent colour is `primary`. */
-  --accent: var(--rr-gray-2);
-  --accent-foreground: var(--rr-gray-9);
-  --accent-active: var(--rr-gray-3);
-  --secondary: var(--rr-gray-2);
-  --secondary-foreground: var(--rr-gray-9);
-  --muted: var(--rr-gray-2);
+  --accent: var(--surface-sunken);
+  --accent-foreground: var(--ink-primary);
+  --accent-active: var(--border-subtle);
+  --secondary: var(--surface-sunken);
+  --secondary-foreground: var(--ink-primary);
+  --muted: var(--surface-sunken);
 
-  /* Brand. Blue 6 with White reads 5.6:1, so a primary button carries
-     body-size text. `primary-ink` is brand-coloured text rather than a fill;
-     light needs no step away from the accent, dark does. */
-  --primary: var(--rr-blue-6);
-  --primary-foreground: var(--rr-white);
-  --primary-hover: var(--rr-blue-7);
-  --primary-muted: var(--rr-blue-3);
-  --primary-soft: var(--rr-blue-1);
-  --primary-ink: var(--rr-blue-6);
+  /* Brand. Blue 6 in both themes, with White on it at 5.6:1. */
+  --primary: var(--action-primary);
+  --primary-foreground: var(--ink-on-brand);
+  --primary-hover: var(--action-primary-hover);
+  --primary-muted: var(--border-ai);
+  --primary-soft: var(--surface-brand-subtle);
+  --primary-ink: var(--ink-brand);
 
-  --app-border-subtle: var(--rr-gray-2);
-  --border: var(--rr-gray-3);
-  --app-border-strong: var(--rr-gray-4);
-  /* The boundary of a control. WCAG 1.4.11 asks 3:1 of it, and every step up to
-     Gray 5 is under 3:1 on a White surface; Gray 6 is 3.8:1 there and 3.6:1 on
-     the page, so control boundaries take it and `border-strong` keeps Gray 4 for
-     the decorative emphasis it was drawn for. */
-  --input: var(--rr-gray-6);
-  /* The focus ring is the brand blue rather than a gray: 5.6:1 against the page
-     where the Gray 8 it replaces was drawn at half opacity. */
-  --ring: var(--rr-blue-6);
+  /* Borders. `border` is the design system's resting edge and `input` its
+     control outline, which clears 3:1 on every ground (WCAG 1.4.11). The app's
+     quieter divider and its decorative emphasis carry the `app-` prefix because
+     the design system means something else by `border-subtle`/`border-strong`. */
+  --app-border-subtle: var(--surface-sunken);
+  --border: var(--border-subtle);
+  --input: var(--border-strong);
+  --ring: var(--focus-ring);
 
   /**
-   * Status. The brand document defines no product status colours, so these come
-   * from the accent spectrum: level 4 on light, level 3 on dark. Four roles
-   * each, because a status appears as all four and one value cannot be all four:
-   * the solid fill, the ink on that fill, the tinted strip behind a message, and
-   * the readable text or icon. Green 4 as ink is 4.42:1 on the page, so
-   * `success-ink` steps to Green 5; Orange 4 and Red 4 clear 4.5:1 as ink.
+   * Status. The design system names the fill and the readable ink once
+   * (`status-*`); the ink on a fill, the tinted strip behind a message and that
+   * strip's edge come from the accent spectrum per theme below. An edge, never a
+   * surface under text: a chip that needs its own fill inside a soft panel takes
+   * the solid role with its `-foreground`.
    */
-  --success: var(--rr-green-4);
-  --success-foreground: var(--rr-white);
-  --success-soft: var(--rr-green-1);
-  --success-ink: var(--rr-green-5);
-  --warning: var(--rr-orange-4);
-  --warning-foreground: var(--rr-white);
-  --warning-soft: var(--rr-orange-1);
-  --warning-ink: var(--rr-orange-4);
-  --destructive: var(--rr-red-4);
-  --destructive-foreground: var(--rr-white);
-  --destructive-soft: var(--rr-red-1);
-  --destructive-ink: var(--rr-red-4);
+  --success: var(--status-success);
+  --success-ink: var(--status-success);
+  --warning: var(--status-warning);
+  --warning-ink: var(--status-warning);
+  --destructive: var(--status-danger);
+  --destructive-ink: var(--status-danger);
+  --info: var(--status-info);
+  --info-ink: var(--status-info);
 
-  /**
-   * The fifth status role, and the step the four above turned out to be missing:
-   * the edge of a `-soft` strip.
-   *
-   * Every status message in this app was written as a Radix triple, a tint at
-   * step 2 or 3, a boundary at step 6 or 7, and its ink at step 11. `-soft` is
-   * the tint and `-ink` is the ink; nothing named the boundary. Drawing it with
-   * `-soft` erases it and drawing it with the solid fill turns a quiet notice
-   * into a bordered alarm, so the pair each of those lines was carrying, fill
-   * against border, needs a step of its own. It is the shape `--primary-muted`
-   * already has one layer up: soft, muted, fill, in one direction on light and
-   * the other on dark.
-   *
-   * An edge, never a surface under text. The spectrum's level 4 is a mid tone, so
-   * on dark `--success-ink` on `--success-muted` is 2.8:1; a chip that needs its
-   * own fill inside a soft panel takes the solid role with its `-foreground`.
-   */
-  --success-muted: var(--rr-green-2);
-  --warning-muted: var(--rr-orange-2);
-  --destructive-muted: var(--rr-red-2);
+  --overlay: var(--overlay-scrim);
 
-  --overlay: color-mix(in srgb, var(--rr-black) 45%, transparent);
-  /* A tooltip stays dark in both palettes so it reads as an overlay rather than
-     as another panel. */
-  --tooltip: var(--rr-gray-9);
-  --tooltip-foreground: var(--rr-gray-1);
-
-  /* The sidebar is a surface, like a card, separated from the page behind it. */
-  --sidebar: var(--rr-white);
-  --sidebar-foreground: var(--rr-gray-9);
-  --sidebar-primary: var(--rr-blue-6);
-  --sidebar-primary-foreground: var(--rr-white);
-  --sidebar-accent: var(--rr-gray-2);
-  --sidebar-accent-foreground: var(--rr-gray-9);
-  --sidebar-border: var(--rr-gray-3);
-  --sidebar-ring: var(--rr-blue-6);
-
-  /**
-   * Graphics. The accent spectrum's own use, which the brand document scopes to
-   * category distinction and point colour rather than product chrome: an artifact
-   * icon, an extension kind, a chart series. Console declares these nine and Work
-   * did not, which is why the categorical colours in this app were Radix steps and
-   * the chart series read the primitive layer directly.
-   *
-   * Held to 3:1 against the surface, because a category is needed to read the
-   * screen. Level 4 on light, except teal, yellow and lime, whose mid step cannot
-   * read on white; level 3 on dark clears 3:1 for all nine.
-   *
-   * A soft categorical chip takes a low alpha of these with `text-foreground` on
-   * it. The five-level spectrum has no equivalent of Radix's step 11, so a hue at
-   * 15% cannot also supply an ink that clears 4.5:1 on itself: the wash carries the
-   * category and the label stays body copy.
-   */
-  --spectrum-teal: var(--rr-teal-5);
-  --spectrum-sky: var(--rr-sky-4);
-  --spectrum-violet: var(--rr-violet-4);
-  --spectrum-pink: var(--rr-pink-4);
-  --spectrum-red: var(--rr-red-4);
-  --spectrum-orange: var(--rr-orange-4);
-  --spectrum-yellow: var(--rr-yellow-5);
-  --spectrum-lime: var(--rr-lime-5);
-  --spectrum-green: var(--rr-green-4);
+  /* The sidebar is a raised surface, like a card, beside the page. */
+  --sidebar: var(--surface-raised);
+  --sidebar-foreground: var(--ink-primary);
+  --sidebar-primary: var(--action-primary);
+  --sidebar-primary-foreground: var(--ink-on-brand);
+  --sidebar-accent: var(--surface-sunken);
+  --sidebar-accent-foreground: var(--ink-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--focus-ring);
 
   /* Chart series, drawn from the spectrum and ordered so neighbouring hues are
      not neighbouring indices. */
@@ -290,14 +229,10 @@
   --chart-4: var(--spectrum-orange);
   --chart-5: var(--spectrum-violet);
 
-  /* Elevation. Three steps, tinted with Gray 8 rather than pure black on light. */
-  --shadow-soft: 0 1px 2px color-mix(in srgb, var(--rr-gray-8) 5%, transparent);
-  --shadow-card:
-    0 1px 2px color-mix(in srgb, var(--rr-gray-8) 5%, transparent),
-    0 4px 16px color-mix(in srgb, var(--rr-gray-8) 7%, transparent);
-  --shadow-elevated:
-    0 2px 4px color-mix(in srgb, var(--rr-gray-8) 6%, transparent),
-    0 12px 32px color-mix(in srgb, var(--rr-gray-8) 12%, transparent);
+  /* Elevation: resting, floating, and modal. */
+  --shadow-soft: var(--shadow-sm);
+  --shadow-card: var(--shadow-md);
+  --shadow-elevated: var(--shadow-lg);
 
   --radius: 0.45rem;
   --dls-surface: var(--card);
@@ -310,10 +245,10 @@
   --dls-accent: var(--primary);
   --dls-accent-hover: var(--primary-hover);
   --dls-accent-fg: var(--primary-foreground);
-  /* Channel triplets for the `rgb(... / <alpha>)` shimmer and ticker keyframes
-     below, which need components rather than a colour: Blue 6 and Gray 7. */
+  /* Channel triplets for the `rgb(... / <alpha>)` shimmer and ticker keyframes,
+     which need components rather than a colour. The accent is Blue 6 in both
+     themes; the secondary ink differs, per theme below. */
   --dls-accent-rgb: 43 82 255;
-  --dls-secondary-rgb: 87 96 113;
   --dls-text-primary: var(--foreground);
   --dls-text-secondary: var(--muted-foreground);
   --dls-hover: var(--accent);
@@ -322,6 +257,61 @@
   --dls-radius-lg: 24px;
   --dls-shell-shadow: var(--shadow-elevated);
   --dls-card-shadow: var(--shadow-card);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  [data-theme] {
+    --material: var(--surface-raised);
+  }
+}
+
+/**
+ * Light choices for the roles the design system does not name. Level 1 is the
+ * strip, level 2 its edge, and White the ink on a fill. Graphics take level 4,
+ * except teal, yellow and lime, whose level 4 cannot hold 3:1 on White.
+ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --disabled-foreground: var(--gray-5);
+  --app-border-strong: var(--gray-4);
+
+  --success-foreground: var(--redrob-white);
+  --success-soft: var(--accent-green-1);
+  --success-muted: var(--accent-green-2);
+  --warning-foreground: var(--redrob-white);
+  --warning-soft: var(--accent-orange-1);
+  --warning-muted: var(--accent-orange-2);
+  --destructive-foreground: var(--redrob-white);
+  --destructive-soft: var(--accent-red-1);
+  --destructive-muted: var(--accent-red-2);
+  --info-foreground: var(--redrob-white);
+  --info-soft: var(--accent-sky-1);
+  --info-muted: var(--accent-sky-2);
+
+  /* A tooltip stays dark in both palettes so it reads as an overlay rather than
+     as another panel. */
+  --tooltip: var(--gray-9);
+  --tooltip-foreground: var(--gray-1);
+
+  /**
+   * Graphics. The accent spectrum's own use, which the brand scopes to category
+   * distinction and point colour rather than product chrome: an artifact icon, an
+   * extension kind, a chart series. Held to 3:1 against the surface.
+   */
+  --spectrum-teal: var(--accent-teal-5);
+  --spectrum-sky: var(--accent-sky-4);
+  --spectrum-violet: var(--accent-violet-4);
+  --spectrum-pink: var(--accent-pink-4);
+  --spectrum-red: var(--accent-red-4);
+  --spectrum-orange: var(--accent-orange-4);
+  --spectrum-yellow: var(--accent-yellow-5);
+  --spectrum-lime: var(--accent-lime-5);
+  --spectrum-green: var(--accent-green-4);
+
+  /* Gray 7, matching --muted-foreground. */
+  --dls-secondary-rgb: 87 96 113;
 }
 
 html,
@@ -712,120 +702,43 @@ select:disabled {
 }
 
 /**
- * Semantic tokens - dark. Only aliases are re-pointed; no new primitive is
- * invented here. Gray 9 is the dark background per the brand document, which
- * leaves Redrob Black as the deeper recessed layer beneath it. The scale has
- * nothing between Gray 9 and Gray 8, so a raised surface would jump twelve steps
- * of lightness at once; Console's answer, kept here, is to mix them for the
- * panel surface.
+ * Dark choices for the roles the design system does not name. The status fill is
+ * level 3 here, so its ink is Redrob Black (Red 3 with White is 3.2:1), the strip
+ * is level 5 and its edge level 4, one step in from the fill the way it is on
+ * light. Graphics take level 3, which clears 3:1 for all nine hues.
  */
-.dark,
 [data-theme="dark"] {
   color-scheme: dark;
-  --background: var(--rr-gray-9);
-  --background-secondary: var(--rr-black);
-  --foreground: var(--rr-gray-1);
-  --card: color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9));
-  --card-foreground: var(--rr-gray-1);
-  --popover: color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9));
-  --popover-foreground: var(--rr-gray-1);
-  --popover-border: var(--rr-gray-8);
+  --disabled-foreground: var(--gray-7);
+  --app-border-strong: var(--gray-7);
 
-  --muted-foreground: var(--rr-gray-5);
-  /* Gray 6 clears 4.5:1 on Gray 9, unlike on light, but the token keeps one
-     meaning on both sides so its use stays the same. */
-  --subtle-foreground: var(--rr-gray-6);
-  --disabled-foreground: var(--rr-gray-7);
+  --success-foreground: var(--redrob-black);
+  --success-soft: var(--accent-green-5);
+  --success-muted: var(--accent-green-4);
+  --warning-foreground: var(--redrob-black);
+  --warning-soft: var(--accent-orange-5);
+  --warning-muted: var(--accent-orange-4);
+  --destructive-foreground: var(--redrob-black);
+  --destructive-soft: var(--accent-red-5);
+  --destructive-muted: var(--accent-red-4);
+  --info-foreground: var(--redrob-black);
+  --info-soft: var(--accent-sky-5);
+  --info-muted: var(--accent-sky-4);
 
-  --accent: color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9));
-  --accent-foreground: var(--rr-gray-1);
-  --accent-active: var(--rr-gray-8);
-  --secondary: var(--rr-gray-8);
-  --secondary-foreground: var(--rr-gray-1);
-  --muted: var(--rr-gray-8);
+  --tooltip: var(--redrob-black);
+  --tooltip-foreground: var(--gray-1);
 
-  /* Blue 6 does not carry enough contrast against Gray 9, so dark steps one tint
-     lighter and pairs it with Redrob Black ink: Blue 5 is 5.5:1 with Black and
-     only 3.6:1 with White. Brand-coloured text steps once more, to Blue 4, which
-     is 7.4:1 on a raised panel where Blue 5 is 4.47:1. */
-  --primary: var(--rr-blue-5);
-  --primary-foreground: var(--rr-black);
-  --primary-hover: var(--rr-blue-4);
-  --primary-muted: var(--rr-blue-9);
-  --primary-soft: var(--rr-blue-10);
-  --primary-ink: var(--rr-blue-4);
+  --spectrum-teal: var(--accent-teal-3);
+  --spectrum-sky: var(--accent-sky-3);
+  --spectrum-violet: var(--accent-violet-3);
+  --spectrum-pink: var(--accent-pink-3);
+  --spectrum-red: var(--accent-red-3);
+  --spectrum-orange: var(--accent-orange-3);
+  --spectrum-yellow: var(--accent-yellow-3);
+  --spectrum-lime: var(--accent-lime-3);
+  --spectrum-green: var(--accent-green-3);
 
-  --app-border-subtle: color-mix(in srgb, var(--rr-gray-8) 55%, var(--rr-gray-9));
-  --border: var(--rr-gray-8);
-  --app-border-strong: var(--rr-gray-7);
-  /* Gray 7 is 2.5:1 against a raised panel, so a control boundary takes Gray 6
-     here for the same reason it does on light. It is the one step that is the
-     same value in both themes. */
-  --input: var(--rr-gray-6);
-  --ring: var(--rr-blue-5);
-
-  /* Level 3 on dark, and Redrob Black as the ink on a fill: Red 3 with White is
-     3.2:1. */
-  --success: var(--rr-green-3);
-  --success-foreground: var(--rr-black);
-  --success-soft: var(--rr-green-5);
-  --success-ink: var(--rr-green-3);
-  --warning: var(--rr-orange-3);
-  --warning-foreground: var(--rr-black);
-  --warning-soft: var(--rr-orange-5);
-  --warning-ink: var(--rr-orange-3);
-  --destructive: var(--rr-red-3);
-  --destructive-foreground: var(--rr-black);
-  --destructive-soft: var(--rr-red-5);
-  --destructive-ink: var(--rr-red-3);
-
-  /* The edge of a `-soft` strip, one step in from the fill the way it is on
-     light. Soft is level 5 here and the fill is level 3, so the boundary is 4. */
-  --success-muted: var(--rr-green-4);
-  --warning-muted: var(--rr-orange-4);
-  --destructive-muted: var(--rr-red-4);
-
-  --overlay: color-mix(in srgb, var(--rr-black) 65%, transparent);
-  --tooltip: var(--rr-black);
-  --tooltip-foreground: var(--rr-gray-1);
-
-  --sidebar: var(--rr-black);
-  --sidebar-foreground: var(--rr-gray-1);
-  --sidebar-primary: var(--rr-blue-5);
-  --sidebar-primary-foreground: var(--rr-black);
-  --sidebar-accent: var(--rr-gray-8);
-  --sidebar-accent-foreground: var(--rr-gray-1);
-  --sidebar-border: var(--rr-gray-8);
-  --sidebar-ring: var(--rr-blue-5);
-
-  --spectrum-teal: var(--rr-teal-3);
-  --spectrum-sky: var(--rr-sky-3);
-  --spectrum-violet: var(--rr-violet-3);
-  --spectrum-pink: var(--rr-pink-3);
-  --spectrum-red: var(--rr-red-3);
-  --spectrum-orange: var(--rr-orange-3);
-  --spectrum-yellow: var(--rr-yellow-3);
-  --spectrum-lime: var(--rr-lime-3);
-  --spectrum-green: var(--rr-green-3);
-
-  --chart-1: var(--spectrum-sky);
-  --chart-2: var(--spectrum-pink);
-  --chart-3: var(--spectrum-lime);
-  --chart-4: var(--spectrum-orange);
-  --chart-5: var(--spectrum-violet);
-
-  /* A shadow has to be darker than the surface to read at all on dark. */
-  --shadow-soft: 0 1px 2px color-mix(in srgb, var(--rr-black) 30%, transparent);
-  --shadow-card:
-    0 1px 2px color-mix(in srgb, var(--rr-black) 25%, transparent),
-    0 4px 16px color-mix(in srgb, var(--rr-black) 35%, transparent);
-  --shadow-elevated:
-    0 2px 4px color-mix(in srgb, var(--rr-black) 30%, transparent),
-    0 12px 32px color-mix(in srgb, var(--rr-black) 50%, transparent);
-
-  /* Blue 5 and Gray 5 as channel triplets, for the keyframes that need
-     components rather than a colour. */
-  --dls-accent-rgb: 80 127 255;
+  /* Gray 5, matching --muted-foreground. */
   --dls-secondary-rgb: 170 176 187;
 }
 
@@ -921,6 +834,16 @@ select:disabled {
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
   --color-overlay: var(--overlay);
+  --color-material: var(--material);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-ink: var(--info-ink);
+  --color-info-muted: var(--info-muted);
+  /* Generated content and agent surfaces, so machine output is never mistaken
+     for a person's. The design system's own tokens, bound as utilities. */
+  --color-surface-ai: var(--surface-ai);
+  --color-border-ai: var(--border-ai);
   --color-tooltip: var(--tooltip);
   --color-tooltip-foreground: var(--tooltip-foreground);
   --radius-sm: calc(var(--radius) * 0.6);

@@ -4,16 +4,17 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
 /**
- * Redrob Cowork and the Redrob Console draw from one token system. Console main is
- * the source of truth (`apps/web/src/app/globals.css` there), and this app
- * transcribes its primitive layer and re-points the semantic roles its component
- * library already speaks onto that layer.
+ * Redrob Cowork draws its colour from the Redrob Group Design System 2026
+ * (`@redrob-labs/ui`). The design system's `tokens.css` is the primitive and
+ * semantic layer; this app declares no colour value of its own and points the
+ * role names its component library already speaks at that layer.
  *
- * These assertions are the part a screenshot cannot decide: that the brand HEX
- * values are the confirmed ones, that each semantic role sits on the step the
- * shared mapping gives it, that no role has quietly drifted back onto a Radix
- * ramp, and that the product typeface is the one Pretendard face rather than a
- * name with nothing behind it.
+ * These assertions are the part a screenshot cannot decide: that the package
+ * carries the brand's confirmed values, that each role reads the token the
+ * mapping gives it, that every token a role reads is one the design system
+ * actually declares (an undeclared custom property fails silently), that no
+ * role has drifted back onto a Radix ramp, and that the product typeface is the
+ * one Pretendard face rather than a name with nothing behind it.
  */
 const APP_ROOT = join(import.meta.dir, "..");
 
@@ -26,13 +27,20 @@ function readText(path: string): string {
   return readFileSync(path, "utf8").replace(/\r\n/g, "\n");
 }
 
-const PRIMITIVES = readText(join(APP_ROOT, "src/styles/redrob-tokens.css"));
 const TOKENS = readText(join(APP_ROOT, "src/app/index.css"));
 const FONTS = readText(join(APP_ROOT, "src/styles/fonts.css"));
 /** Resolves through the app's own dependency graph, the way Vite does. */
 const appRequire = createRequire(join(APP_ROOT, "package.json"));
 /** The Redrob Group Design System 2026, the package the app imports its tokens from. */
 const DESIGN_SYSTEM_TOKENS = readText(appRequire.resolve("@redrob-labs/ui/tokens.css"));
+/** The same tokens with every `var()` chain resolved per theme, as the package publishes them. */
+const DESIGN_SYSTEM_RESOLVED = new Map(
+  (
+    JSON.parse(readText(appRequire.resolve("@redrob-labs/ui/tokens.json"))) as {
+      tokens: Array<{ name: string; light: string; dark: string }>;
+    }
+  ).tokens.map((token) => [`--${token.name}`, token]),
+);
 const INDEX_HTML = readText(join(APP_ROOT, "index.html"));
 const MANIFEST = JSON.parse(readText(join(APP_ROOT, "public/manifest.webmanifest"))) as {
   name: string;
@@ -42,39 +50,39 @@ const MANIFEST = JSON.parse(readText(join(APP_ROOT, "public/manifest.webmanifest
   icons: Array<{ src: string }>;
 };
 
-/** The brand's confirmed values, as Console declares them. */
+/** The brand's confirmed values, as the design system declares them. */
 const BRAND_PRIMITIVES: Record<string, string> = {
-  "--rr-blue": "#2b52ff",
-  "--rr-black": "#0a0b0c",
-  "--rr-white": "#ffffff",
-  "--rr-blue-1": "#eff4ff",
-  "--rr-blue-4": "#8aafff",
-  "--rr-blue-5": "#507fff",
-  "--rr-blue-6": "#2b52ff",
-  "--rr-blue-7": "#1733d5",
-  "--rr-blue-9": "#061460",
-  "--rr-blue-10": "#030c34",
-  "--rr-gray-1": "#f8f9fb",
-  "--rr-gray-2": "#eff1f4",
-  "--rr-gray-3": "#dfe2e8",
-  "--rr-gray-4": "#cbcfd7",
-  "--rr-gray-5": "#aab0bb",
-  "--rr-gray-6": "#7c8390",
-  "--rr-gray-7": "#576071",
-  "--rr-gray-8": "#292e37",
-  "--rr-gray-9": "#141719",
-  "--rr-green-4": "#00864a",
-  "--rr-green-5": "#004829",
-  "--rr-orange-4": "#ae5100",
-  "--rr-red-4": "#a31310",
+  "--redrob-black": "#0a0b0c",
+  "--redrob-white": "#ffffff",
+  "--blue-1": "#eef4ff",
+  "--blue-3": "#bad2ff",
+  "--blue-4": "#8aafff",
+  "--blue-5": "#507fff",
+  "--blue-6": "#2b52ff",
+  "--blue-7": "#1733d5",
+  "--blue-8": "#09209c",
+  "--blue-10": "#030c34",
+  "--gray-1": "#f8f9fb",
+  "--gray-2": "#eff1f4",
+  "--gray-3": "#dfe2e8",
+  "--gray-4": "#cbcfd7",
+  "--gray-5": "#aab0bb",
+  "--gray-6": "#7c8390",
+  "--gray-7": "#576071",
+  "--gray-8": "#292e37",
+  "--gray-9": "#141719",
+  "--accent-green-4": "#00864a",
+  "--accent-orange-4": "#ae5100",
+  "--accent-red-4": "#a31310",
+  "--accent-sky-4": "#0e51b6",
 };
 
-/** Every step the brand scale defines, so a partial transcription is caught. */
+/** Every primitive step the roles below rely on, so a renamed or dropped step is caught. */
 const REQUIRED_PRIMITIVE_STEPS = [
-  ...Array.from({ length: 10 }, (_, index) => `--rr-blue-${index + 1}`),
-  ...Array.from({ length: 9 }, (_, index) => `--rr-gray-${index + 1}`),
+  ...Array.from({ length: 10 }, (_, index) => `--blue-${index + 1}`),
+  ...Array.from({ length: 9 }, (_, index) => `--gray-${index + 1}`),
   ...["teal", "sky", "violet", "pink", "red", "orange", "yellow", "lime", "green"].flatMap((hue) =>
-    Array.from({ length: 5 }, (_, index) => `--rr-${hue}-${index + 1}`),
+    Array.from({ length: 5 }, (_, index) => `--accent-${hue}-${index + 1}`),
   ),
 ];
 
@@ -95,116 +103,193 @@ function declaration(source: string, name: string): string | null {
   return match ? match[1].trim() : null;
 }
 
-const LIGHT = block(TOKENS, ":root");
-const DARK = block(TOKENS, `.dark,\n[data-theme="dark"]`);
+/** Roles that alias a design-system token and so follow the theme by themselves. */
+const ROLES = block(TOKENS, ":root,\n[data-theme]");
+/** Per-theme choices for the roles the design system does not name. */
+const LIGHT_ONLY = block(TOKENS, ':root,\n[data-theme="light"]');
+const DARK_ONLY = block(TOKENS, '[data-theme="dark"]');
+/** What a light and a dark element each see: the shared roles plus that theme's choices. */
+const LIGHT = `${ROLES}\n${LIGHT_ONLY}`;
+const DARK = `${ROLES}\n${DARK_ONLY}`;
 
-/** The shared mapping: role, light step, dark step. */
-const SEMANTIC_MAPPING: Array<[string, string, string]> = [
-  ["--background", "--rr-gray-1", "--rr-gray-9"],
-  ["--background-secondary", "--rr-gray-2", "--rr-black"],
-  ["--foreground", "--rr-gray-9", "--rr-gray-1"],
-  ["--muted-foreground", "--rr-gray-7", "--rr-gray-5"],
-  ["--subtle-foreground", "--rr-gray-6", "--rr-gray-6"],
-  ["--disabled-foreground", "--rr-gray-5", "--rr-gray-7"],
-  ["--accent-active", "--rr-gray-3", "--rr-gray-8"],
-  ["--secondary", "--rr-gray-2", "--rr-gray-8"],
-  ["--muted", "--rr-gray-2", "--rr-gray-8"],
-  ["--primary", "--rr-blue-6", "--rr-blue-5"],
-  ["--primary-foreground", "--rr-white", "--rr-black"],
-  ["--primary-hover", "--rr-blue-7", "--rr-blue-4"],
-  ["--primary-muted", "--rr-blue-3", "--rr-blue-9"],
-  ["--primary-soft", "--rr-blue-1", "--rr-blue-10"],
-  ["--primary-ink", "--rr-blue-6", "--rr-blue-4"],
-  ["--border", "--rr-gray-3", "--rr-gray-8"],
-  // `--app-` because the design system declares `--border-strong` itself, as the
-  // control outline (Gray 6); see design-system-collisions.test.ts.
-  ["--app-border-strong", "--rr-gray-4", "--rr-gray-7"],
-  ["--input", "--rr-gray-6", "--rr-gray-6"],
-  ["--ring", "--rr-blue-6", "--rr-blue-5"],
-  ["--success", "--rr-green-4", "--rr-green-3"],
-  ["--success-ink", "--rr-green-5", "--rr-green-3"],
-  ["--success-muted", "--rr-green-2", "--rr-green-4"],
-  ["--warning", "--rr-orange-4", "--rr-orange-3"],
-  ["--warning-muted", "--rr-orange-2", "--rr-orange-4"],
-  ["--destructive", "--rr-red-4", "--rr-red-3"],
-  ["--destructive-muted", "--rr-red-2", "--rr-red-4"],
-  ["--tooltip", "--rr-gray-9", "--rr-black"],
-  ["--sidebar", "--rr-white", "--rr-black"],
-  ["--sidebar-primary", "--rr-blue-6", "--rr-blue-5"],
-  ["--spectrum-teal", "--rr-teal-5", "--rr-teal-3"],
-  ["--spectrum-sky", "--rr-sky-4", "--rr-sky-3"],
-  ["--spectrum-violet", "--rr-violet-4", "--rr-violet-3"],
-  ["--spectrum-pink", "--rr-pink-4", "--rr-pink-3"],
-  ["--spectrum-red", "--rr-red-4", "--rr-red-3"],
-  ["--spectrum-orange", "--rr-orange-4", "--rr-orange-3"],
-  ["--spectrum-yellow", "--rr-yellow-5", "--rr-yellow-3"],
-  ["--spectrum-lime", "--rr-lime-5", "--rr-lime-3"],
-  ["--spectrum-green", "--rr-green-4", "--rr-green-3"],
+/** Role and the design-system token it aliases, in both themes. */
+const ROLE_ALIASES: Array<[string, string]> = [
+  ["--background", "--surface-base"],
+  ["--background-secondary", "--surface-sunken"],
+  ["--foreground", "--ink-primary"],
+  ["--card", "--surface-raised"],
+  ["--popover", "--surface-raised"],
+  ["--material", "--surface-material"],
+  ["--muted-foreground", "--ink-secondary"],
+  ["--subtle-foreground", "--ink-muted"],
+  ["--accent", "--surface-sunken"],
+  ["--accent-active", "--border-subtle"],
+  ["--secondary", "--surface-sunken"],
+  ["--muted", "--surface-sunken"],
+  ["--primary", "--action-primary"],
+  ["--primary-foreground", "--ink-on-brand"],
+  ["--primary-hover", "--action-primary-hover"],
+  ["--primary-muted", "--border-ai"],
+  ["--primary-soft", "--surface-brand-subtle"],
+  ["--primary-ink", "--ink-brand"],
+  // `--app-` because the design system means something else by `--border-subtle`;
+  // see design-system-collisions.test.ts.
+  ["--app-border-subtle", "--surface-sunken"],
+  ["--border", "--border-subtle"],
+  ["--input", "--border-strong"],
+  ["--ring", "--focus-ring"],
+  ["--success", "--status-success"],
+  ["--success-ink", "--status-success"],
+  ["--warning", "--status-warning"],
+  ["--warning-ink", "--status-warning"],
+  ["--destructive", "--status-danger"],
+  ["--destructive-ink", "--status-danger"],
+  ["--info", "--status-info"],
+  ["--info-ink", "--status-info"],
+  ["--overlay", "--overlay-scrim"],
+  ["--sidebar", "--surface-raised"],
+  ["--sidebar-primary", "--action-primary"],
+  ["--sidebar-border", "--border-subtle"],
+  ["--sidebar-ring", "--focus-ring"],
+  ["--shadow-soft", "--shadow-sm"],
+  ["--shadow-card", "--shadow-md"],
+  ["--shadow-elevated", "--shadow-lg"],
+];
+
+/** Role, light primitive, dark primitive: the roles the design system leaves to the app. */
+const THEMED_CHOICES: Array<[string, string, string]> = [
+  ["--disabled-foreground", "--gray-5", "--gray-7"],
+  // Decorative emphasis, not a control boundary; `--input` is the boundary.
+  ["--app-border-strong", "--gray-4", "--gray-7"],
+  ["--success-foreground", "--redrob-white", "--redrob-black"],
+  ["--success-soft", "--accent-green-1", "--accent-green-5"],
+  ["--success-muted", "--accent-green-2", "--accent-green-4"],
+  ["--warning-foreground", "--redrob-white", "--redrob-black"],
+  ["--warning-soft", "--accent-orange-1", "--accent-orange-5"],
+  ["--warning-muted", "--accent-orange-2", "--accent-orange-4"],
+  ["--destructive-foreground", "--redrob-white", "--redrob-black"],
+  ["--destructive-soft", "--accent-red-1", "--accent-red-5"],
+  ["--destructive-muted", "--accent-red-2", "--accent-red-4"],
+  ["--info-foreground", "--redrob-white", "--redrob-black"],
+  ["--info-soft", "--accent-sky-1", "--accent-sky-5"],
+  ["--info-muted", "--accent-sky-2", "--accent-sky-4"],
+  ["--tooltip", "--gray-9", "--redrob-black"],
+  ["--spectrum-teal", "--accent-teal-5", "--accent-teal-3"],
+  ["--spectrum-sky", "--accent-sky-4", "--accent-sky-3"],
+  ["--spectrum-violet", "--accent-violet-4", "--accent-violet-3"],
+  ["--spectrum-pink", "--accent-pink-4", "--accent-pink-3"],
+  ["--spectrum-red", "--accent-red-4", "--accent-red-3"],
+  ["--spectrum-orange", "--accent-orange-4", "--accent-orange-3"],
+  ["--spectrum-yellow", "--accent-yellow-5", "--accent-yellow-3"],
+  ["--spectrum-lime", "--accent-lime-5", "--accent-lime-3"],
+  ["--spectrum-green", "--accent-green-4", "--accent-green-3"],
 ];
 
 /** Roles product code reads that must exist in both themes or in neither. */
-const THEMED_ROLES = SEMANTIC_MAPPING.map(([role]) => role);
+const THEMED_ROLES = THEMED_CHOICES.map(([role]) => role);
+
+/** `#rrggbb` to the `r g b` channel triplet the keyframes take. */
+function channels(hex: string): string {
+  const value = hex.replace("#", "");
+  return [0, 2, 4].map((offset) => Number.parseInt(value.slice(offset, offset + 2), 16)).join(" ");
+}
 
 describe("Redrob design tokens", () => {
-  test("the primitive layer carries the brand's confirmed HEX values", () => {
+  test("the design system carries the brand's confirmed HEX values", () => {
     const wrong: string[] = [];
     for (const [name, hex] of Object.entries(BRAND_PRIMITIVES)) {
-      const value = declaration(PRIMITIVES, name);
+      const value = declaration(DESIGN_SYSTEM_TOKENS, name);
       if (value !== hex) wrong.push(`${name}: ${value ?? "missing"} (expected ${hex})`);
     }
     expect(wrong).toEqual([]);
   });
 
-  test("every step of the brand scale is transcribed", () => {
-    const missing = REQUIRED_PRIMITIVE_STEPS.filter((name) => declaration(PRIMITIVES, name) === null);
+  test("every primitive step the roles rely on is declared by the design system", () => {
+    const missing = REQUIRED_PRIMITIVE_STEPS.filter((name) => declaration(DESIGN_SYSTEM_TOKENS, name) === null);
     expect(missing).toEqual([]);
   });
 
-  test("the primitive layer is theme-independent", () => {
-    // Primitives are declared once, on :root. A `--rr-*` under a dark selector
-    // would mean two values for one brand step.
-    expect(PRIMITIVES).not.toMatch(/\[data-theme="dark"\]|\.dark\b/);
+  test("the app declares no primitive layer of its own", () => {
+    // `styles/redrob-tokens.css` was a transcription of the brand ramps. The
+    // design system is that layer now, and a second copy is how values drift.
+    expect(existsSync(join(APP_ROOT, "src/styles/redrob-tokens.css"))).toBe(false);
+    const sources = walkFiles(join(APP_ROOT, "src"))
+      .filter((file) => /\.(css|tsx?)$/.test(file))
+      .filter((file) => readText(file).includes("--rr-"))
+      .map((file) => file.slice(APP_ROOT.length + 1));
+    expect(sources).toEqual([]);
   });
 
-  test("each semantic role sits on the step the shared mapping gives it", () => {
+  test("each role aliases the design-system token the mapping gives it", () => {
     const wrong: string[] = [];
-    for (const [role, light, dark] of SEMANTIC_MAPPING) {
-      const lightValue = declaration(LIGHT, role);
-      const darkValue = declaration(DARK, role);
+    for (const [role, token] of ROLE_ALIASES) {
+      const value = declaration(ROLES, role);
+      if (value !== `var(${token})`) wrong.push(`${role}: ${value ?? "missing"} (expected ${token})`);
+      // An alias is declared once, where every themed element resolves it.
+      if (declaration(LIGHT_ONLY, role) || declaration(DARK_ONLY, role)) wrong.push(`${role}: has a per-theme twin`);
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  test("each per-theme role sits on the primitive the mapping gives it", () => {
+    const wrong: string[] = [];
+    for (const [role, light, dark] of THEMED_CHOICES) {
+      const lightValue = declaration(LIGHT_ONLY, role);
+      const darkValue = declaration(DARK_ONLY, role);
       if (lightValue !== `var(${light})`) wrong.push(`light ${role}: ${lightValue ?? "missing"} (expected ${light})`);
       if (darkValue !== `var(${dark})`) wrong.push(`dark ${role}: ${darkValue ?? "missing"} (expected ${dark})`);
     }
     expect(wrong).toEqual([]);
   });
 
-  test("the raised dark surfaces mix Gray 8 into Gray 9 rather than inventing a step", () => {
-    for (const role of ["--card", "--popover", "--accent"]) {
-      expect(declaration(DARK, role)).toBe("color-mix(in srgb, var(--rr-gray-8) 45%, var(--rr-gray-9))");
-    }
-    // A subtle border is one step lighter than the panel it separates, so it is
-    // the same mix at 55% on dark and Gray 2 on light.
-    expect(declaration(DARK, "--app-border-subtle")).toBe(
-      "color-mix(in srgb, var(--rr-gray-8) 55%, var(--rr-gray-9))",
+  test("every token a role reads is one the design system declares or a role the app declares", () => {
+    // An undeclared custom property fails silently: the declaration that reads it
+    // is dropped and the element falls back to inheritance, with no warning.
+    const appRoles = new Set(
+      [...`${ROLES}\n${LIGHT_ONLY}\n${DARK_ONLY}`.matchAll(/^\s*(--[\w-]+):/gm)].map((match) => match[1]),
     );
-    expect(declaration(LIGHT, "--app-border-subtle")).toBe("var(--rr-gray-2)");
+    const unknown = [...`${ROLES}\n${LIGHT_ONLY}\n${DARK_ONLY}`.matchAll(/var\((--[\w-]+)\)/g)]
+      .map((match) => match[1])
+      .filter((name) => !DESIGN_SYSTEM_RESOLVED.has(name) && !appRoles.has(name));
+    expect([...new Set(unknown)]).toEqual([]);
   });
 
-  test("a card sits above the page: White on Gray 1 in light", () => {
-    expect(declaration(LIGHT, "--card")).toBe("var(--rr-white)");
-    expect(declaration(LIGHT, "--popover")).toBe("var(--rr-white)");
-    expect(declaration(LIGHT, "--background")).toBe("var(--rr-gray-1)");
+  test("the page is the design system's: White and Redrob Black, with raised surfaces above it", () => {
+    expect(DESIGN_SYSTEM_RESOLVED.get("--surface-base")).toMatchObject({ light: "#ffffff", dark: "#0a0b0c" });
+    expect(DESIGN_SYSTEM_RESOLVED.get("--surface-raised")).toMatchObject({ light: "#f8f9fb", dark: "#141719" });
+    expect(declaration(ROLES, "--background")).toBe("var(--surface-base)");
+    expect(declaration(ROLES, "--card")).toBe("var(--surface-raised)");
+  });
+
+  test("a subtree can switch theme because the roles resolve on every themed element", () => {
+    // Menus and the overlay window set `data-theme="dark"` on themselves. The
+    // design system re-declares its tokens there; the roles have to re-resolve
+    // there too, which is what the `[data-theme]` half of the selector does.
+    expect(TOKENS).toContain(":root,\n[data-theme] {");
+    expect(TOKENS).not.toMatch(/^\.dark,/m);
+    const subtrees = walkFiles(join(APP_ROOT, "src"))
+      .filter((file) => file.endsWith(".tsx"))
+      .filter((file) => /className=(?:\{cn\(\s*)?["'`]dark\s/.test(readText(file)))
+      .map((file) => file.slice(APP_ROOT.length + 1));
+    expect(subtrees).toEqual([]);
+  });
+
+  test("floating material falls back to a solid surface where transparency is reduced", () => {
+    const reduced = /@media \(prefers-reduced-transparency: reduce\) \{([\s\S]*?)\n\}/.exec(TOKENS);
+    expect(reduced).not.toBeNull();
+    expect(declaration(reduced![1], "--material")).toBe("var(--surface-raised)");
   });
 
   test("every themed role is defined in both palettes", () => {
-    const lightOnly = THEMED_ROLES.filter((role) => declaration(LIGHT, role) && !declaration(DARK, role));
-    const darkOnly = THEMED_ROLES.filter((role) => declaration(DARK, role) && !declaration(LIGHT, role));
+    const lightOnly = THEMED_ROLES.filter((role) => declaration(LIGHT_ONLY, role) && !declaration(DARK_ONLY, role));
+    const darkOnly = THEMED_ROLES.filter((role) => declaration(DARK_ONLY, role) && !declaration(LIGHT_ONLY, role));
     expect({ lightOnly, darkOnly }).toEqual({ lightOnly: [], darkOnly: [] });
   });
 
-  test("a status is all four of fill, ink on that fill, soft strip, and readable text", () => {
+  test("a status is all five of fill, ink on that fill, soft strip, its edge, and readable text", () => {
     const incomplete: string[] = [];
-    for (const status of ["success", "warning", "destructive"]) {
-      for (const suffix of ["", "-foreground", "-soft", "-ink"]) {
+    for (const status of ["success", "warning", "destructive", "info"]) {
+      for (const suffix of ["", "-foreground", "-soft", "-muted", "-ink"]) {
         const role = `--${status}${suffix}`;
         if (!declaration(LIGHT, role)) incomplete.push(`light ${role}`);
         if (!declaration(DARK, role)) incomplete.push(`dark ${role}`);
@@ -213,29 +298,22 @@ describe("Redrob design tokens", () => {
     expect(incomplete).toEqual([]);
   });
 
-  test("no semantic role reads a Radix ramp", () => {
-    // The Radix ramps stay in colors.css for components that still name a
-    // numbered step. The token layer is not allowed to reach for them: two sets
-    // of values for one role is the drift this change removes.
-    const ramps =
-      "slate|mauve|sage|olive|sand|gray|blue|indigo|iris|violet|purple|plum|pink|crimson|ruby|red|tomato|orange|amber|yellow|lime|green|grass|jade|mint|teal|cyan|sky|bronze|gold|brown";
-    const offenders: string[] = [];
-    for (const [name, source] of [
-      ["light", LIGHT],
-      ["dark", DARK],
-    ] as const) {
-      for (const line of source.split("\n")) {
-        if (new RegExp(`var\\(--(?:${ramps})-a?\\d`).test(line)) offenders.push(`${name}: ${line.trim()}`);
-      }
-    }
+  test("no semantic role reads the Radix ramp", () => {
+    // The Radix gray stays in colors.css, as `--radix-gray-*`, for call sites that
+    // still name a numbered step. The role layer is not allowed to reach for it.
+    const offenders = `${ROLES}\n${LIGHT_ONLY}\n${DARK_ONLY}`
+      .split("\n")
+      .filter((line) => /var\(--radix-/.test(line))
+      .map((line) => line.trim());
     expect(offenders).toEqual([]);
   });
 
   test("the token layer decides colour, so no role carries a literal value", () => {
     const offenders: string[] = [];
     for (const [name, source] of [
-      ["light", LIGHT],
-      ["dark", DARK],
+      ["roles", ROLES],
+      ["light", LIGHT_ONLY],
+      ["dark", DARK_ONLY],
     ] as const) {
       for (const line of source.split("\n")) {
         if (/^\s*--/.test(line) && /#[0-9a-fA-F]{3,8}\b|\brgba?\(/.test(line)) offenders.push(`${name}: ${line.trim()}`);
@@ -271,13 +349,16 @@ describe("Redrob design tokens", () => {
     expect(wrong).toEqual([]);
   });
 
-  test("the accent channel triplets are the brand blue of each theme", () => {
-    // Blue 6 and Blue 5 as components, for the keyframes that need `rgb(... / a)`.
-    expect(declaration(LIGHT, "--dls-accent-rgb")).toBe("43 82 255");
-    expect(declaration(DARK, "--dls-accent-rgb")).toBe("80 127 255");
-    // Gray 7 and Gray 5, matching --muted-foreground in each theme.
-    expect(declaration(LIGHT, "--dls-secondary-rgb")).toBe("87 96 113");
-    expect(declaration(DARK, "--dls-secondary-rgb")).toBe("170 176 187");
+  test("the channel triplets are the tokens they stand in for, in each theme", () => {
+    // The keyframes need `rgb(... / a)` components rather than a colour, so these
+    // are the one place a value is written out. They are checked against the
+    // design system's resolved tokens so they cannot drift from the roles.
+    const primary = DESIGN_SYSTEM_RESOLVED.get("--action-primary");
+    const secondary = DESIGN_SYSTEM_RESOLVED.get("--ink-secondary");
+    expect(primary?.light).toBe(primary?.dark);
+    expect(declaration(ROLES, "--dls-accent-rgb")).toBe(channels(primary!.light));
+    expect(declaration(LIGHT_ONLY, "--dls-secondary-rgb")).toBe(channels(secondary!.light));
+    expect(declaration(DARK_ONLY, "--dls-secondary-rgb")).toBe(channels(secondary!.dark));
   });
 
   test("Tailwind utilities exist for the roles the token system adds", () => {
@@ -305,6 +386,13 @@ describe("Redrob design tokens", () => {
       "--color-destructive-muted",
       "--color-overlay",
       "--color-tooltip",
+      "--color-material",
+      "--color-info",
+      "--color-info-soft",
+      "--color-info-ink",
+      "--color-info-muted",
+      "--color-surface-ai",
+      "--color-border-ai",
     ].filter((name) => declaration(theme, name) === null);
     expect(missing).toEqual([]);
   });
@@ -386,15 +474,18 @@ describe("Redrob product typeface", () => {
 
 describe("Redrob branding surfaces", () => {
   test("the browser chrome colour is the page colour of each theme", () => {
-    expect(INDEX_HTML).toContain('content="#f8f9fb" media="(prefers-color-scheme: light)"');
-    expect(INDEX_HTML).toContain('content="#141719" media="(prefers-color-scheme: dark)"');
+    const page = DESIGN_SYSTEM_RESOLVED.get("--surface-base")!;
+    expect(INDEX_HTML).toContain(`content="${page.light}" media="(prefers-color-scheme: light)"`);
+    expect(INDEX_HTML).toContain(`content="${page.dark}" media="(prefers-color-scheme: dark)"`);
+    // The document paints the page role before React mounts, not a raised surface.
+    expect(INDEX_HTML).toContain('<body class="bg-background text-foreground mac:bg-transparent">');
   });
 
   test("the installable app is Redrob Cowork, on the brand page colour", () => {
     expect(MANIFEST.name).toBe("Redrob Cowork");
     expect(MANIFEST.short_name).toBe("Redrob Cowork");
-    expect(MANIFEST.theme_color).toBe("#f8f9fb");
-    expect(MANIFEST.background_color).toBe("#f8f9fb");
+    expect(MANIFEST.theme_color).toBe(DESIGN_SYSTEM_RESOLVED.get("--surface-base")!.light);
+    expect(MANIFEST.background_color).toBe(DESIGN_SYSTEM_RESOLVED.get("--surface-base")!.light);
     for (const icon of MANIFEST.icons) {
       expect(existsSync(join(APP_ROOT, "public", icon.src.replace(/^\//, "")))).toBe(true);
     }
@@ -409,24 +500,22 @@ describe("Redrob branding surfaces", () => {
     expect(mapping).toContain('"--color-text-danger": "--destructive-ink"');
     expect(mapping).toContain('"--color-border-success": "--success"');
     // No Radix step reaches a third-party card either.
-    expect(mapping).not.toMatch(/"--(?:green|amber|red|blue|slate)-a?\d+"/);
+    expect(mapping).not.toMatch(/"--(?:green|amber|red|blue|slate|gray|radix-gray)-a?\d+"/);
+    // Every source is a role the app declares, so a renamed role cannot leave a
+    // card reading a design-system token by accident.
+    for (const [, source] of mapping.matchAll(/:\s*"(--[\w-]+)"/g)) {
+      expect(TOKENS, `${source} is not declared`).toMatch(new RegExp(`^\\s*${source}:`, "m"));
+    }
   });
 
-  test("a card falls back to Redrob primitives when a host sends no theme", () => {
+  test("a card falls back to design-system values when a host sends no theme", () => {
     // The card stylesheet ships inside the card document, so its fallbacks are
     // values. They are still brand values, not a nearby grey.
     const cardTheme = readText(join(APP_ROOT, "..", "..", "packages/mcp-apps/src/shared/theme.css"));
-    const brandValues = new Set([
-      ...Object.values(BRAND_PRIMITIVES),
-      // Status levels 1 and 3, which the card uses for its tinted strips.
-      "#d6ffe1",
-      "#ffedda",
-      "#ffe8e1",
-      "#eff4ff",
-    ]);
+    const brandValues = new Set(stylesheetColours(DESIGN_SYSTEM_TOKENS));
     const offenders = [...cardTheme.matchAll(/#[0-9a-fA-F]{3,8}\b/g)]
       .map((match) => match[0])
-      .filter((hex) => !brandValues.has(hex));
+      .filter((hex) => !brandValues.has(sixDigits(hex)));
     expect(offenders).toEqual([]);
   });
 });
@@ -447,7 +536,7 @@ describe("Redrob branding surfaces", () => {
  * stylesheets are resolved to nothing on purpose: katex, shadcn and tw-animate-css
  * carry their own palettes and this is a check on ours.
  *
- * The rule: an emitted colour is a value `redrob-tokens.css` declares, or pure black,
+ * The rule: an emitted colour is a value the design system declares, or pure black,
  * or pure white, or a step of the Radix gray ramp, which is the one numbered ramp
  * `colors.css` still declares and the other half of this migration. That exception is
  * counted rather than waved through, so it can only shrink.
@@ -550,12 +639,9 @@ function stylesheetColours(css: string): string[] {
   return found;
 }
 
-const BRAND_VALUES = new Set([
-  ...[...PRIMITIVES.matchAll(/#([0-9a-fA-F]{3,8})\b/g)].map((match) => sixDigits(match[0])),
-  // Every colour the design system declares, in hex and rgba alike. The design
-  // system is the palette, so its values are declared values by definition.
-  ...stylesheetColours(DESIGN_SYSTEM_TOKENS),
-]);
+// Every colour the design system declares, in hex and rgba alike. The design
+// system is the palette, so its values are declared values by definition.
+const BRAND_VALUES = new Set(stylesheetColours(DESIGN_SYSTEM_TOKENS));
 const RADIX_GRAY = new Set(
   [...readText(join(APP_ROOT, "src/styles/colors.css")).matchAll(
     /--(?:radix-gray|black|white)-a?\d+:\s*([^;]+);/g,

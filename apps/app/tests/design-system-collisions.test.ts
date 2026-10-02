@@ -139,11 +139,21 @@ describe("the design system and the app keep separate vocabularies", () => {
     expect([...new Set(offenders)]).toEqual([]);
   });
 
-  test("a name Tailwind and the design system both own is never read back through var()", () => {
+  test("a name the app's @theme writes and the design system declares is never read back through var()", () => {
+    // Only the names the app's own `@theme` writes are ambiguous at runtime: a
+    // `var()` read sees the design system's value, not the one `@theme` wrote. A
+    // shared name the app never writes (`--shadow-*`) can only resolve to the
+    // design system's token, so aliasing it is the point rather than a hazard.
+    const written = new Set(
+      APP_DECLARATIONS.filter((entry) => entry.inTheme && TAILWIND_THEME_SHARED.has(entry.name)).map(
+        (entry) => entry.name,
+      ),
+    );
+    expect(written.has("--font-sans")).toBe(true);
     const offenders: string[] = [];
     for (const file of SOURCE_FILES) {
       const source = readFileSync(file, "utf8");
-      for (const name of TAILWIND_THEME_SHARED) {
+      for (const name of written) {
         const pattern = new RegExp(`var\\(\\s*${name}(?![\\w-])`, "g");
         const reads = [...source.matchAll(pattern)].length;
         if (reads > 0) offenders.push(`${relative(file)}: var(${name}) x${reads}`);
