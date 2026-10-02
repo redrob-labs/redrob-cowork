@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
 /**
@@ -15,11 +16,25 @@ import { dirname, join } from "node:path";
  * name with nothing behind it.
  */
 const APP_ROOT = join(import.meta.dir, "..");
-const PRIMITIVES = readFileSync(join(APP_ROOT, "src/styles/redrob-tokens.css"), "utf8");
-const TOKENS = readFileSync(join(APP_ROOT, "src/app/index.css"), "utf8");
-const FONTS = readFileSync(join(APP_ROOT, "src/styles/fonts.css"), "utf8");
-const INDEX_HTML = readFileSync(join(APP_ROOT, "index.html"), "utf8");
-const MANIFEST = JSON.parse(readFileSync(join(APP_ROOT, "public/manifest.webmanifest"), "utf8")) as {
+
+/**
+ * Source text with LF line endings. A Windows checkout with `core.autocrlf` hands
+ * these files over as CRLF, and the selectors and rules below are matched against
+ * `\n`, so without this the suite failed to load there rather than checking anything.
+ */
+function readText(path: string): string {
+  return readFileSync(path, "utf8").replace(/\r\n/g, "\n");
+}
+
+const PRIMITIVES = readText(join(APP_ROOT, "src/styles/redrob-tokens.css"));
+const TOKENS = readText(join(APP_ROOT, "src/app/index.css"));
+const FONTS = readText(join(APP_ROOT, "src/styles/fonts.css"));
+/** Resolves through the app's own dependency graph, the way Vite does. */
+const appRequire = createRequire(join(APP_ROOT, "package.json"));
+/** The Redrob Group Design System 2026, the package the app imports its tokens from. */
+const DESIGN_SYSTEM_TOKENS = readText(appRequire.resolve("@redrob-labs/ui/tokens.css"));
+const INDEX_HTML = readText(join(APP_ROOT, "index.html"));
+const MANIFEST = JSON.parse(readText(join(APP_ROOT, "public/manifest.webmanifest"))) as {
   name: string;
   short_name: string;
   background_color: string;
@@ -101,7 +116,9 @@ const SEMANTIC_MAPPING: Array<[string, string, string]> = [
   ["--primary-soft", "--rr-blue-1", "--rr-blue-10"],
   ["--primary-ink", "--rr-blue-6", "--rr-blue-4"],
   ["--border", "--rr-gray-3", "--rr-gray-8"],
-  ["--border-strong", "--rr-gray-4", "--rr-gray-7"],
+  // `--app-` because the design system declares `--border-strong` itself, as the
+  // control outline (Gray 6); see design-system-collisions.test.ts.
+  ["--app-border-strong", "--rr-gray-4", "--rr-gray-7"],
   ["--input", "--rr-gray-6", "--rr-gray-6"],
   ["--ring", "--rr-blue-6", "--rr-blue-5"],
   ["--success", "--rr-green-4", "--rr-green-3"],
@@ -166,10 +183,10 @@ describe("Redrob design tokens", () => {
     }
     // A subtle border is one step lighter than the panel it separates, so it is
     // the same mix at 55% on dark and Gray 2 on light.
-    expect(declaration(DARK, "--border-subtle")).toBe(
+    expect(declaration(DARK, "--app-border-subtle")).toBe(
       "color-mix(in srgb, var(--rr-gray-8) 55%, var(--rr-gray-9))",
     );
-    expect(declaration(LIGHT, "--border-subtle")).toBe("var(--rr-gray-2)");
+    expect(declaration(LIGHT, "--app-border-subtle")).toBe("var(--rr-gray-2)");
   });
 
   test("a card sits above the page: White on Gray 1 in light", () => {
@@ -304,10 +321,7 @@ describe("Redrob design tokens", () => {
   test("the terminal paints in brand primitives", () => {
     // xterm draws to a canvas, so it takes values rather than tokens. They still
     // have to be the brand's, and the stack has to be the mono token's.
-    const dock = readFileSync(
-      join(APP_ROOT, "src/react-app/domains/session/terminal/terminal-dock.tsx"),
-      "utf8",
-    );
+    const dock = readText(join(APP_ROOT, "src/react-app/domains/session/terminal/terminal-dock.tsx"));
     const theme = /theme: \{([\s\S]*?)\n      \}/.exec(dock);
     expect(theme).not.toBeNull();
     const allowed = new Set(["#0a0b0c", "#f8f9fb", "#ffffff", "#292e37"]);
@@ -331,13 +345,15 @@ describe("Redrob product typeface", () => {
     const sans = declaration(theme, "--font-sans");
     expect(sans).toContain('"Pretendard Variable"');
     expect(sans).toContain("Pretendard,");
-    expect(declaration(theme, "--font-heading")).toBe("var(--font-sans)");
+    // `--theme()` rather than `var()`: the design system declares its own
+    // `--font-sans`, so a runtime read would take whichever loaded last.
+    expect(declaration(theme, "--font-heading")).toBe("--theme(--font-sans)");
   });
 
   test("body copy takes the token rather than its own stack", () => {
     const bodyRule = /\nbody \{\n  margin: 0;([\s\S]*?)\n\}/.exec(TOKENS);
     expect(bodyRule).not.toBeNull();
-    expect(declaration(bodyRule![1], "font-family")).toBe("var(--font-sans)");
+    expect(declaration(bodyRule![1], "font-family")).toBe("--theme(--font-sans)");
   });
 
   test("the face behind the name ships with the app", () => {
@@ -362,7 +378,7 @@ describe("Redrob product typeface", () => {
     // nothing may import a font package and the only declared face is Pretendard.
     const imports = TOKENS.split("\n").filter((line) => line.startsWith("@import"));
     expect(imports.filter((line) => /fontsource|font/i.test(line) && !line.includes("styles/fonts.css"))).toEqual([]);
-    expect(readFileSync(join(APP_ROOT, "package.json"), "utf8").includes("fontsource")).toBe(false);
+    expect(readText(join(APP_ROOT, "package.json")).includes("fontsource")).toBe(false);
     const families = [...FONTS.matchAll(/font-family:\s*([^;]+);/g)].map((match) => match[1].trim());
     expect(families).toEqual(['"Pretendard Variable"']);
   });
@@ -385,7 +401,7 @@ describe("Redrob branding surfaces", () => {
   });
 
   test("MCP App cards read the host's semantic roles", () => {
-    const frame = readFileSync(join(APP_ROOT, "src/components/chat/mcp-app-frame.tsx"), "utf8");
+    const frame = readText(join(APP_ROOT, "src/components/chat/mcp-app-frame.tsx"));
     const sources = /const HOST_STYLE_SOURCES[^=]*=\s*\{([\s\S]*?)\n\}/.exec(frame);
     expect(sources).not.toBeNull();
     const mapping = sources![1];
@@ -399,10 +415,7 @@ describe("Redrob branding surfaces", () => {
   test("a card falls back to Redrob primitives when a host sends no theme", () => {
     // The card stylesheet ships inside the card document, so its fallbacks are
     // values. They are still brand values, not a nearby grey.
-    const cardTheme = readFileSync(
-      join(APP_ROOT, "..", "..", "packages/mcp-apps/src/shared/theme.css"),
-      "utf8",
-    );
+    const cardTheme = readText(join(APP_ROOT, "..", "..", "packages/mcp-apps/src/shared/theme.css"));
     const brandValues = new Set([
       ...Object.values(BRAND_PRIMITIVES),
       // Status levels 1 and 3, which the card uses for its tinted strips.
@@ -464,11 +477,17 @@ async function compileAppStylesheet(): Promise<string> {
         id === "tailwindcss"
           ? join(tailwindRoot, "index.css")
           : join(tailwindRoot, id.slice("tailwindcss/".length));
-      return { path, base: dirname(path), content: readFileSync(path, "utf8") };
+      return { path, base: dirname(path), content: readText(path) };
     }
     if (id.startsWith(".")) {
       const path = join(base, id);
-      return { path, base: dirname(path), content: readFileSync(path, "utf8") };
+      return { path, base: dirname(path), content: readText(path) };
+    }
+    // The design system is compiled for real rather than stubbed: its colours are
+    // the palette now, so they are read and held to `DESIGN_SYSTEM_VALUES` below.
+    if (id.startsWith("@redrob-labs/ui/")) {
+      const path = appRequire.resolve(id);
+      return { path, base: dirname(path), content: readText(path) };
     }
     // A vendor stylesheet, and its palette is not ours to police. Anything not on the
     // list is a new third-party import and fails here rather than passing silently.
@@ -479,7 +498,7 @@ async function compileAppStylesheet(): Promise<string> {
     return { path: id, base, content: "" };
   };
 
-  const compiler = await compile(readFileSync(join(appBase, "index.css"), "utf8"), {
+  const compiler = await compile(readText(join(appBase, "index.css")), {
     base: appBase,
     loadStylesheet,
     loadModule: async () => ({ module: {}, base: appBase }),
@@ -488,7 +507,7 @@ async function compileAppStylesheet(): Promise<string> {
   const candidates = new Set<string>();
   for (const file of walkFiles(join(APP_ROOT, "src"))) {
     if (!/\.(tsx?|html)$/.test(file)) continue;
-    for (const match of readFileSync(file, "utf8").matchAll(
+    for (const match of readText(file).matchAll(
       /[a-zA-Z0-9@!:_\-./[\]()%#*]+/g,
     )) {
       candidates.add(match[0]);
@@ -531,12 +550,15 @@ function stylesheetColours(css: string): string[] {
   return found;
 }
 
-const BRAND_VALUES = new Set(
-  [...PRIMITIVES.matchAll(/#([0-9a-fA-F]{3,8})\b/g)].map((match) => sixDigits(match[0])),
-);
+const BRAND_VALUES = new Set([
+  ...[...PRIMITIVES.matchAll(/#([0-9a-fA-F]{3,8})\b/g)].map((match) => sixDigits(match[0])),
+  // Every colour the design system declares, in hex and rgba alike. The design
+  // system is the palette, so its values are declared values by definition.
+  ...stylesheetColours(DESIGN_SYSTEM_TOKENS),
+]);
 const RADIX_GRAY = new Set(
-  [...readFileSync(join(APP_ROOT, "src/styles/colors.css"), "utf8").matchAll(
-    /--(?:gray|black|white)-a?\d+:\s*([^;]+);/g,
+  [...readText(join(APP_ROOT, "src/styles/colors.css")).matchAll(
+    /--(?:radix-gray|black|white)-a?\d+:\s*([^;]+);/g,
   )]
     .flatMap((match) => [
       ...match[1].matchAll(/#[0-9a-fA-F]{3,8}\b/g),
@@ -579,7 +601,7 @@ describe("the emitted stylesheet", () => {
     };
     const sources = walkFiles(join(APP_ROOT, "src"))
       .filter((file) => /\.tsx?$/.test(file))
-      .map((file) => readFileSync(file, "utf8"))
+      .map((file) => readText(file))
       .join("\n");
     for (const [hue, allowed] of Object.entries(budget)) {
       const pattern = new RegExp(
@@ -616,9 +638,9 @@ describe("the emitted stylesheet", () => {
    * even before anybody writes a class for it.
    */
   test("declares one numbered ramp and no more", () => {
-    const colours = readFileSync(join(APP_ROOT, "src/styles/colors.css"), "utf8");
+    const colours = readText(join(APP_ROOT, "src/styles/colors.css"));
     const ramps = new Set(
-      [...colours.matchAll(/^\s*--([a-z]+)-a?\d+:/gm)].map((match) => match[1]),
+      [...colours.matchAll(/^\s*--(?:radix-)?([a-z]+)-a?\d+:/gm)].map((match) => match[1]),
     );
     expect([...ramps].sort()).toEqual(["black", "gray", "white"]);
     expect(RADIX_GRAY.size).toBeLessThanOrEqual(58);
@@ -721,7 +743,7 @@ describe("the emitted stylesheet", () => {
     const offenders: string[] = [];
     for (const file of walkFiles(join(APP_ROOT, "src"))) {
       if (!/\.tsx?$/.test(file)) continue;
-      const source = readFileSync(file, "utf8");
+      const source = readText(file);
       for (const role of roles) {
         for (const match of source.matchAll(
           new RegExp(
@@ -755,7 +777,7 @@ describe("the emitted stylesheet", () => {
     const offenders: string[] = [];
     for (const file of walkFiles(join(APP_ROOT, "src"))) {
       if (!/\.tsx?$/.test(file)) continue;
-      for (const match of readFileSync(file, "utf8").matchAll(arbitrary)) {
+      for (const match of readText(file).matchAll(arbitrary)) {
         const value = match[0];
         if (!literal.test(value)) continue;
         // Pure black and pure white at an alpha are a scrim, not a palette choice.

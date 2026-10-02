@@ -45,6 +45,7 @@
     "@modelcontextprotocol/ext-apps": "^1.7.5",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@redrob-labs/sdk": "^0.4.1",
+    "@redrob-labs/ui": "1.0.2",
     "@redrob/install-config": "workspace:*",
     "@redrob/types": "workspace:*",
     "@redrob/ui": "workspace:*",

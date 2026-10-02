@@ -802,7 +802,7 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
           <CardTitle>{t("extension.discovery")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative overflow-hidden rounded-xl bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-xl)-1px)] before:border before:border-border">
+          <div className="relative overflow-hidden rounded-xl bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(--theme(--radius-xl)-1px)] before:border before:border-border">
             <Table className="text-xs">
               <TableBody>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">

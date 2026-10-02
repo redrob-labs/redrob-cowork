@@ -1,6 +1,13 @@
 @import "tailwindcss" source(none);
 
 @import "../styles/colors.css";
+/*
+ * The Redrob Group Design System 2026. Unlayered on purpose: its values are the
+ * source of truth for every name it declares, so they must win over Tailwind's
+ * `@layer theme` defaults. The app declares none of those names itself; see
+ * tests/design-system-collisions.test.ts.
+ */
+@import "@redrob-labs/ui/tokens.css";
 @import "../styles/redrob-tokens.css";
 @import "../styles/fonts.css";
 @import "../styles/tailwind-theme.css";
@@ -179,9 +186,9 @@
   --primary-soft: var(--rr-blue-1);
   --primary-ink: var(--rr-blue-6);
 
-  --border-subtle: var(--rr-gray-2);
+  --app-border-subtle: var(--rr-gray-2);
   --border: var(--rr-gray-3);
-  --border-strong: var(--rr-gray-4);
+  --app-border-strong: var(--rr-gray-4);
   /* The boundary of a control. WCAG 1.4.11 asks 3:1 of it, and every step up to
      Gray 5 is under 3:1 on a White surface; Gray 6 is 3.8:1 there and 3.6:1 on
      the page, so control boundaries take it and `border-strong` keeps Gray 4 for
@@ -348,7 +355,7 @@ html[lang="ko"] {
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: --theme(--font-sans);
   font-size: 13px;
   line-height: 1.5;
   color: var(--dls-text-primary);
@@ -748,9 +755,9 @@ select:disabled {
   --primary-soft: var(--rr-blue-10);
   --primary-ink: var(--rr-blue-4);
 
-  --border-subtle: color-mix(in srgb, var(--rr-gray-8) 55%, var(--rr-gray-9));
+  --app-border-subtle: color-mix(in srgb, var(--rr-gray-8) 55%, var(--rr-gray-9));
   --border: var(--rr-gray-8);
-  --border-strong: var(--rr-gray-7);
+  --app-border-strong: var(--rr-gray-7);
   /* Gray 7 is 2.5:1 against a raised panel, so a control boundary takes Gray 6
      here for the same reason it does on light. It is the one step that is the
      same value in both themes. */
@@ -830,11 +837,16 @@ select:disabled {
    * is a last resort while the face is in flight rather than an alternative.
    * `--font-heading` is a deliberate alias: there is no second display face, and
    * brand moments use the same family at a heavier weight.
+   *
+   * The design system declares `--font-sans`, `--font-mono` and the `--radius-*`
+   * steps under the same names, so the app never reads these through `var()`:
+   * `--theme()` inlines the Tailwind value at build time and the design system's
+   * variable stays the design system's.
    */
   --font-sans:
     "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, ui-sans-serif, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --font-heading: var(--font-sans);
+  --font-heading: --theme(--font-sans);
   /* Code only: editor surfaces, token values, terminal output, diffs. The
      brand's monospace is JetBrains Mono, which this app does not vendor, so the
      stack names it for machines that have it and falls through to the system
@@ -868,8 +880,8 @@ select:disabled {
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
-  --color-border-subtle: var(--border-subtle);
-  --color-border-strong: var(--border-strong);
+  --color-border-subtle: var(--app-border-subtle);
+  --color-border-strong: var(--app-border-strong);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-soft: var(--destructive-soft);

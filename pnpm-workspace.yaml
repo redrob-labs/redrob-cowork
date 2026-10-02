@@ -1,6 +1,7 @@
 minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - "@redrob-labs/sdk"
+  - "@redrob-labs/ui"
   - "acorn"
   - "dompurify"
   - "enhanced-resolve"
