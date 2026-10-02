@@ -28,7 +28,6 @@ function readText(path: string): string {
 }
 
 const TOKENS = readText(join(APP_ROOT, "src/app/index.css"));
-const FONTS = readText(join(APP_ROOT, "src/styles/fonts.css"));
 /** Resolves through the app's own dependency graph, the way Vite does. */
 const appRequire = createRequire(join(APP_ROOT, "package.json"));
 /** The Redrob Group Design System 2026, the package the app imports its tokens from. */
@@ -428,47 +427,126 @@ describe("Redrob design tokens", () => {
 });
 
 describe("Redrob product typeface", () => {
-  test("the sans stack names Pretendard first, and heading is an alias of it", () => {
+  /** The design system's own `--font-sans` stack, as `tokens.css` declares it. */
+  const DS_SANS = declaration(DESIGN_SYSTEM_TOKENS, "--font-sans");
+  /** Every `@font-face` the design system ships: family, weight, and the file it points at. */
+  const FACES = [...DESIGN_SYSTEM_TOKENS.matchAll(/@font-face \{([\s\S]*?)\}/g)].map((match) => ({
+    family: declaration(match[1], "font-family")?.replace(/"/g, ""),
+    weight: declaration(match[1], "font-weight"),
+    url: /url\("([^"]+)"\)/.exec(match[1])?.[1] ?? "",
+  }));
+  const tokensDir = dirname(appRequire.resolve("@redrob-labs/ui/tokens.css"));
+
+  test("the sans stack is the design system's, Pretendard first, written out", () => {
     const theme = block(TOKENS, "@theme inline");
     const sans = declaration(theme, "--font-sans");
-    expect(sans).toContain('"Pretendard Variable"');
-    expect(sans).toContain("Pretendard,");
-    // `--theme()` rather than `var()`: the design system declares its own
-    // `--font-sans`, so a runtime read would take whichever loaded last.
-    expect(declaration(theme, "--font-heading")).toBe("--theme(--font-sans)");
+    // Same families, same order; quoting is the only difference allowed.
+    const families = (stack: string | null) => (stack ?? "").split(",").map((part) => part.trim().replace(/["']/g, ""));
+    expect(families(sans)).toEqual(families(DS_SANS));
+    expect(families(sans)[0]).toBe("Pretendard");
   });
 
-  test("body copy takes the token rather than its own stack", () => {
-    const bodyRule = /\nbody \{\n  margin: 0;([\s\S]*?)\n\}/.exec(TOKENS);
-    expect(bodyRule).not.toBeNull();
-    expect(declaration(bodyRule![1], "font-family")).toBe("--theme(--font-sans)");
+  test("a heading inherits its family, so a Korean document keeps the Korean stack", () => {
+    const theme = block(TOKENS, "@theme inline");
+    expect(declaration(theme, "--font-heading")).toBe("inherit");
   });
 
-  test("the face behind the name ships with the app", () => {
-    const woff2 = join(APP_ROOT, "src/assets/fonts/PretendardVariable.woff2");
-    expect(existsSync(woff2)).toBe(true);
-    // A variable face, so one file covers every weight the UI asks for.
-    expect(statSync(woff2).size).toBeGreaterThan(1_000_000);
-    expect(readFileSync(woff2).subarray(0, 4).toString("latin1")).toBe("wOF2");
-    expect(FONTS).toContain('font-family: "Pretendard Variable"');
-    expect(FONTS).toContain("font-weight: 45 920");
-    expect(FONTS).toContain("../assets/fonts/PretendardVariable.woff2");
-    // OFL-1.1 requires the licence travel with the font.
+  test("the page's type comes from the design system's preflight, in the base layer", () => {
+    expect(TOKENS).toContain('@import "@redrob-labs/ui/preflight.css" layer(base);');
+    const preflight = readText(appRequire.resolve("@redrob-labs/ui/preflight.css"));
+    expect(preflight).toContain("font: var(--text-body);");
+    expect(preflight).toMatch(/:lang\(ko\) body[\s\S]*font-family: var\(--font-sans-kr\)/);
+    // No unlayered body rule of the app's sets a face or a size: either one would
+    // beat the preflight, and a `font-family` would undo its `:lang(ko)` stack.
+    for (const rule of TOKENS.matchAll(/^body \{([\s\S]*?)\n\}/gm)) {
+      expect(declaration(rule[1], "font-family")).toBeNull();
+      expect(declaration(rule[1], "font-size")).toBeNull();
+    }
+  });
+
+  test("macOS keeps its vibrant window: the page ground is transparent there", () => {
+    const base = TOKENS.slice(TOKENS.indexOf("@layer base {"));
+    const mac = /html\.redrob-electron\.redrob-platform-mac \{([\s\S]*?)\}/.exec(base);
+    expect(mac).not.toBeNull();
+    expect(declaration(mac![1], "background")).toBe("transparent");
+    expect(INDEX_HTML).toContain("mac:bg-transparent");
+  });
+
+  test("Pretendard and Wanted Sans ship in the package, as woff2, at the paths the rules name", () => {
+    const pretendard = FACES.filter((face) => face.family === "Pretendard");
+    expect(pretendard.map((face) => face.weight)).toEqual(["300", "400", "500", "600", "700", "800"]);
+    expect(FACES.some((face) => face.family === "Wanted Sans")).toBe(true);
+    for (const face of FACES) {
+      const file = join(tokensDir, face.url);
+      expect(existsSync(file), face.url).toBe(true);
+      expect(readFileSync(file).subarray(0, 4).toString("latin1"), face.url).toBe("wOF2");
+    }
+    // OFL-1.1 requires the licence travel with the font. The package ships the
+    // files without one, so the app keeps Pretendard's.
     expect(existsSync(join(APP_ROOT, "src/assets/fonts/LICENSE-Pretendard.txt"))).toBe(true);
   });
 
-  test("the face is vendored rather than fetched from a CDN at runtime", () => {
-    expect(FONTS).not.toMatch(/https?:\/\//);
+  test("every face resolves relatively, so the packaged app fetches nothing", () => {
+    expect(FACES.length).toBeGreaterThan(0);
+    for (const face of FACES) expect(face.url).toMatch(/^\.\.\/fonts\/[\w-]+\.woff2$/);
+    expect(DESIGN_SYSTEM_TOKENS).not.toMatch(/url\(["']?https?:/);
   });
 
   test("no typeface outside product typography is loaded", () => {
     // Geist, IBM Plex, Inter and Fraunces are not part of product typography, so
-    // nothing may import a font package and the only declared face is Pretendard.
+    // nothing may import a font package and the app declares no face of its own.
     const imports = TOKENS.split("\n").filter((line) => line.startsWith("@import"));
-    expect(imports.filter((line) => /fontsource|font/i.test(line) && !line.includes("styles/fonts.css"))).toEqual([]);
+    expect(imports.filter((line) => /fontsource|font/i.test(line))).toEqual([]);
     expect(readText(join(APP_ROOT, "package.json")).includes("fontsource")).toBe(false);
-    const families = [...FONTS.matchAll(/font-family:\s*([^;]+);/g)].map((match) => match[1].trim());
-    expect(families).toEqual(['"Pretendard Variable"']);
+    expect(TOKENS.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("@font-face");
+    expect(existsSync(join(APP_ROOT, "src/styles/fonts.css"))).toBe(false);
+  });
+
+  test("the type scale is the design system's, under Tailwind's size names", () => {
+    const theme = block(TOKENS, "@theme inline");
+    const rem = (px: number) => `${px / 16}rem`;
+    const scale: Array<[string, number, number]> = [
+      ["xs", 12, 18],
+      ["sm", 13, 20],
+      ["base", 15, 24],
+      ["lg", 17, 24],
+      ["xl", 21, 28],
+      ["2xl", 27, 34],
+      ["3xl", 36, 42],
+    ];
+    for (const [name, size, leading] of scale) {
+      expect(declaration(theme, `--text-${name}`), name).toBe(rem(size));
+      expect(declaration(theme, `--text-${name}--line-height`), name).toBe(rem(leading));
+    }
+    // The design system's sizes, read from its own shorthands, so the table above
+    // cannot drift from them.
+    for (const [step, size, leading] of [
+      ["meta", 12, 18],
+      ["body-sm", 13, 20],
+      ["body", 15, 24],
+      ["title-4", 17, 24],
+      ["title-3", 21, 28],
+      ["title-2", 27, 34],
+      ["title-1", 36, 42],
+    ] as const) {
+      expect(declaration(DESIGN_SYSTEM_TOKENS, `--text-${step}`)).toContain(`${size}px/${leading}px`);
+    }
+  });
+
+  test("the radius scale equals the design system's, name for name", () => {
+    const theme = block(TOKENS, "@theme inline");
+    for (const step of ["xs", "sm", "md", "lg", "xl", "2xl"]) {
+      expect(declaration(theme, `--radius-${step}`), step).toBe(declaration(DESIGN_SYSTEM_TOKENS, `--radius-${step}`));
+    }
+    expect(declaration(ROLES, "--radius")).toBe("var(--control-radius)");
+  });
+
+  test("Tailwind's motion defaults read the design system's motion tokens", () => {
+    const theme = block(TOKENS, "@theme inline");
+    expect(declaration(theme, "--default-transition-duration")).toBe("var(--duration-fast)");
+    expect(declaration(theme, "--default-transition-timing-function")).toBe("var(--easing-standard)");
+    expect(declaration(theme, "--ease-out")).toBe("var(--easing-entrance)");
+    expect(declaration(theme, "--ease-in")).toBe("var(--easing-exit)");
   });
 });
 
@@ -698,6 +776,18 @@ describe("the emitted stylesheet", () => {
         allowed,
       );
     }
+  });
+
+  test("emits the design system's preflight inside the base layer", async () => {
+    // Unlayered, the preflight's `body` and `html` rules would beat every utility,
+    // including `mac:bg-transparent`; in `base` a call-site class still wins.
+    const css = await compileAppStylesheet();
+    const korean = css.indexOf(":lang(ko) body");
+    expect(korean).toBeGreaterThan(-1);
+    const opened = css.lastIndexOf("@layer base", korean);
+    expect(opened).toBeGreaterThan(-1);
+    // No other layer opens between the base block and the rule.
+    expect(css.slice(opened, korean)).not.toMatch(/@layer (?!base)\w+/);
   });
 
   test("paints with nothing but declared values", async () => {

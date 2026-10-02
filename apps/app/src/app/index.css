@@ -8,7 +8,12 @@
  * tests/design-system-collisions.test.ts.
  */
 @import "@redrob-labs/ui/tokens.css";
-@import "../styles/fonts.css";
+/*
+ * The design system's page preflight, in Tailwind's base layer so a utility on
+ * <html> or <body> still wins over it (`mac:bg-transparent` keeps the vibrant
+ * macOS window translucent) and so it follows Tailwind's own preflight.
+ */
+@import "@redrob-labs/ui/preflight.css" layer(base);
 @import "../styles/tailwind-theme.css";
 
 @import "tw-animate-css";
@@ -234,7 +239,8 @@
   --shadow-card: var(--shadow-md);
   --shadow-elevated: var(--shadow-lg);
 
-  --radius: 0.45rem;
+  /* The design system's control radius, which shadcn's `--radius` stands for. */
+  --radius: var(--control-radius);
   --dls-surface: var(--card);
   --dls-sidebar: var(--sidebar);
   --dls-app-bg: var(--background);
@@ -343,15 +349,14 @@ html[lang="ko"] {
   overflow-wrap: anywhere;
 }
 
-body {
-  margin: 0;
-  font-family: --theme(--font-sans);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--dls-text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/*
+ * The page's type, ground and focus ring come from the design system's preflight
+ * (imported above into the base layer): `font: var(--text-body)` (15/24), the
+ * Korean-first stack under `:lang(ko)`, `color-scheme`, a 2px `:focus-visible`
+ * outline, and reduced motion. The app sets no body font here because an
+ * unlayered `font-family` would beat the `:lang(ko)` rule and put Hangul back in
+ * the Latin face. Smoothing is left to the platform, as the preflight asks.
+ */
 
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
@@ -744,22 +749,23 @@ select:disabled {
 
 @theme inline {
   /**
-   * Type. One family for Latin and Hangul, declared in `styles/fonts.css` and
-   * named the way Console names it: `Pretendard Variable` is the vendored
-   * variable face, bare `Pretendard` covers an OS install, and the system stack
-   * is a last resort while the face is in flight rather than an alternative.
-   * `--font-heading` is a deliberate alias: there is no second display face, and
-   * brand moments use the same family at a heavier weight.
+   * Type. The design system's stack, written out: Pretendard for Latin and
+   * Hangul, then Wanted Sans and Noto Sans Devanagari, then the system face. The
+   * faces are the design system's own `@font-face` rules in `tokens.css`, which
+   * ship as files in the package and resolve relatively, so the packaged app
+   * (`base: "./"`, loaded over `file:`) fetches nothing.
+   *
+   * `--font-heading` inherits rather than naming a stack: a title in a Korean
+   * document then takes the preflight's Korean-first stack from `body`, where a
+   * fixed Latin-first stack would override it on every dialog and card title.
    *
    * The design system declares `--font-sans`, `--font-mono` and the `--radius-*`
    * steps under the same names, so the app never reads these through `var()`:
    * `--theme()` inlines the Tailwind value at build time and the design system's
    * variable stays the design system's.
    */
-  --font-sans:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, ui-sans-serif, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-heading: --theme(--font-sans);
+  --font-sans: Pretendard, "Wanted Sans", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: inherit;
   /* Code only: editor surfaces, token values, terminal output, diffs. The
      brand's monospace is JetBrains Mono, which this app does not vendor, so the
      stack names it for machines that have it and falls through to the system
@@ -767,7 +773,42 @@ select:disabled {
   --font-mono:
     "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+  /**
+   * The design system's type scale under Tailwind's own size names, each with
+   * its leading. rem rather than px so the user's font-size setting
+   * (`--redrob-font-size` on <html>) still scales the whole UI. The design
+   * system's `--text-*` tokens are font shorthands, not sizes, so they are never
+   * bound into this namespace.
+   *
+   *   utility    design system step    size/leading
+   *   text-xs    meta                  12/18
+   *   text-sm    body-sm               13/20
+   *   text-base  body                  15/24
+   *   text-lg    title-4               17/24
+   *   text-xl    title-3               21/28
+   *   text-2xl   title-2               27/34
+   *   text-3xl   title-1               36/42
+   */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
   --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.0625rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.3125rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.6875rem;
+  --text-2xl--line-height: 2.125rem;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 2.625rem;
+  /* Motion. Tailwind's defaults read the design system's tokens at runtime. */
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--easing-standard);
+  --ease-in: var(--easing-exit);
+  --ease-out: var(--easing-entrance);
+  --ease-in-out: var(--easing-standard);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -846,13 +887,31 @@ select:disabled {
   --color-border-ai: var(--border-ai);
   --color-tooltip: var(--tooltip);
   --color-tooltip-foreground: var(--tooltip-foreground);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /* The design system's radius scale, equal value for equal name: tags 4,
+     inputs 6, controls 8, cards 12, modals 16, hero blocks 24. */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  /* The design system's scale stops at 24px below a pill. The two steps above
+     it are kept as names so existing call sites compile, at the top step. */
+  --radius-3xl: 24px;
+  --radius-4xl: 24px;
+}
+
+/* Type steps the design system weights rather than only sizes. */
+@utility text-label {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  font-weight: 600;
+}
+
+@utility text-caption {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 400;
 }
 
 @layer base {
@@ -867,6 +926,12 @@ select:disabled {
     @apply font-sans;
     height: 100%;
     height: 100dvh;
+  }
+  /* The preflight paints <html> with the page colour. On macOS the Electron
+     window is vibrant and the renderer owns no opaque ground, so the page stays
+     transparent there, as <body> does with `mac:bg-transparent`. */
+  html.redrob-electron.redrob-platform-mac {
+    background: transparent;
   }
   body {
     @apply bg-background text-foreground;

@@ -337,7 +337,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-header"
       data-sidebar="header"
       className={cn(
-        "flex flex-col gap-1 mx-2 my-2 px-0 [--radius:calc(0.45rem*0.8)]",
+        "flex flex-col gap-1 mx-2 my-2 px-0 [--radius:--theme(--radius-md)]",
         className
       )}
       {...props}
@@ -376,7 +376,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        "no-scrollbar flex min-h-0 flex-1 flex-col gap-px overflow-auto [--radius:calc(0.45rem*1.4)] group-data-[collapsible=icon]:overflow-hidden",
+        "no-scrollbar flex min-h-0 flex-1 flex-col gap-px overflow-auto [--radius:--theme(--radius-xl)] group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
       {...props}
