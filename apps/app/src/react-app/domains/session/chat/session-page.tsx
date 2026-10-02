@@ -1124,7 +1124,7 @@ export function SessionPage(props: SessionPageProps) {
               ) : null}
             </div>
 
-            <div className="flex items-center gap-1.5 text-gray-10 mac:titlebar-no-drag">
+            <div className="flex items-center gap-1.5 text-subtle-foreground mac:titlebar-no-drag">
               {!props.primarySlot && findButtonSessionId && !hasMainContentTakeover ? (
                 <Tooltip>
                   <TooltipTrigger
@@ -1132,7 +1132,7 @@ export function SessionPage(props: SessionPageProps) {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        className="hidden rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:inline-flex"
+                        className="hidden rounded-xl text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground lg:inline-flex"
                         aria-label={t("find.in_conversation")}
                         onClick={() => useSessionFindStore.getState().openFind({ sessionId: findButtonSessionId })}
                       >
@@ -1150,7 +1150,7 @@ export function SessionPage(props: SessionPageProps) {
                       variant="ghost"
                       size="icon-sm"
                       className={cn(
-                        "hidden rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:inline-flex",
+                        "hidden rounded-xl text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground lg:inline-flex",
                         sidePanelOpen && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
                       )}
                       aria-label={sidePanelOpen ? "Close side panel" : "Open side panel"}
@@ -1175,7 +1175,7 @@ export function SessionPage(props: SessionPageProps) {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      className="rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+                      className="rounded-xl text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
                       aria-label={t("session.more_actions")}
                     >
                       <MoreHorizontal size={18} />

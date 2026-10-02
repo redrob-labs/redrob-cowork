@@ -417,7 +417,7 @@ export function ModelSelect({
               disabled={disabled}
               aria-label={t("session.change_model")}
               aria-keyshortcuts="Meta+Alt+/"
-              className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12 disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             />
           }
         >

@@ -114,7 +114,7 @@ const statusDotVariants = cva("", {
       ready: "bg-success",
       warning: "bg-warning",
       error: "bg-destructive",
-      neutral: "bg-gray-8",
+      neutral: "bg-border-strong",
     },
   },
 });

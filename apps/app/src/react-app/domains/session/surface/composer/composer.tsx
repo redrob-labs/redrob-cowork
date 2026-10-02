@@ -652,7 +652,7 @@ export function ReactSessionComposer(props: ComposerProps) {
     const servers = props.mcpServers ?? [];
     if (servers.length === 0) {
       return (
-        <div className="px-3 py-2 text-xs text-gray-10">
+        <div className="px-3 py-2 text-xs text-subtle-foreground">
           {!mcpLoaded && mcpLoading
             ? t("composer.loading_commands")
             : t("composer.no_connections_mcps")}
@@ -667,17 +667,17 @@ export function ReactSessionComposer(props: ComposerProps) {
           return (
             <div
               key={server.id ?? server.name}
-              className="flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-gray-11"
+              className="flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-muted-foreground"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0 flex-1 truncate text-xs font-semibold text-gray-11">{server.name}</div>
+                  <div className="min-w-0 flex-1 truncate text-xs font-semibold text-muted-foreground">{server.name}</div>
                   {statusLabel ? (
-                    <span className="shrink-0 rounded-full bg-gray-3 px-2 py-0.5 text-[10px] font-medium text-gray-11">
+                    <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       {statusLabel}
                     </span>
                   ) : isLocalCapability(server.origin) ? (
-                    <span className="shrink-0 rounded-full bg-gray-3 px-2 py-0.5 text-[10px] font-medium text-gray-11">
+                    <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       {t("composer.source_local")}
                     </span>
                   ) : null}
@@ -964,7 +964,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                       menuItemRefs.current[index] = element;
                     }}
                     type="button"
-                    className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-gray-2/70 ${activeMenu === "slash" && slashFiltered[menuIndex]?.id === command.id ? "bg-gray-3 text-gray-12" : "text-gray-11"}`}
+                    className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-muted/70 ${activeMenu === "slash" && slashFiltered[menuIndex]?.id === command.id ? "bg-accent text-foreground" : "text-muted-foreground"}`}
                     onMouseEnter={() => setMenuIndex(index)}
                     onMouseDown={(event) => {
                       event.preventDefault();
@@ -975,7 +975,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                       if (event.detail === 0) applyCommandSelection(command, { replaceSkillDraft: true });
                     }}
                   >
-                    <Terminal size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                    <Terminal size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <div className="truncate text-xs font-semibold">/{command.name}</div>
@@ -985,13 +985,13 @@ export function ReactSessionComposer(props: ComposerProps) {
                           </span>
                         ) : null}
                       </div>
-                      {command.description ? <div className="truncate text-xs text-gray-10">{command.description}</div> : null}
+                      {command.description ? <div className="truncate text-xs text-subtle-foreground">{command.description}</div> : null}
                     </div>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="px-3 py-2 text-xs text-gray-10">
+              <div className="px-3 py-2 text-xs text-subtle-foreground">
                 {(!commandsLoaded && commandsLoading) || skillsLoading ? t("composer.loading_commands") : t("composer.no_commands")}
               </div>
             )}
@@ -1019,7 +1019,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                     menuItemRefs.current[index] = element;
                   }}
                   type="button"
-                  className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-gray-2/70 ${activeMenu === "mention" && mentionFiltered[menuIndex]?.id === item.id ? "bg-gray-3 text-gray-12" : "text-gray-11"}`}
+                  className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-muted/70 ${activeMenu === "mention" && mentionFiltered[menuIndex]?.id === item.id ? "bg-accent text-foreground" : "text-muted-foreground"}`}
                   onMouseEnter={() => setMenuIndex(index)}
                   onClick={() => {
                     props.onInsertMention(item.kind, item.value);
@@ -1027,15 +1027,15 @@ export function ReactSessionComposer(props: ComposerProps) {
                   }}
                 >
                   {item.kind === "agent" ? (
-                    <Zap size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                    <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                   ) : item.kind === "app" ? (
-                    <AppWindowMac size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                    <AppWindowMac size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                   ) : (
-                    <FileText size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                    <FileText size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-xs font-semibold">@{item.label}</div>
-                    <div className="truncate text-xs text-gray-10">
+                    <div className="truncate text-xs text-subtle-foreground">
                       {item.kind === "agent"
                         ? t("composer.agent_label")
                         : item.kind === "app"
@@ -1250,7 +1250,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 >
                   <button
                     type="button"
-                    className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${toolMenuOpen ? "bg-gray-3 text-gray-12" : "text-gray-10 hover:bg-gray-3"}`}
+                    className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${toolMenuOpen ? "bg-accent text-foreground" : "text-subtle-foreground hover:bg-accent"}`}
                     onClick={() => {
                       setMentionOpen(false);
                       setMentionItems([]);
@@ -1277,7 +1277,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                       }}
                     >
                       <div className="flex h-full min-h-0 min-w-0 w-full">
-                        <div className="flex h-full w-[168px] shrink-0 flex-col overflow-y-auto border-r border-dls-border bg-gray-2/30 p-2 sm:w-[192px]">
+                        <div className="flex h-full w-[168px] shrink-0 flex-col overflow-y-auto border-r border-dls-border bg-muted/30 p-2 sm:w-[192px]">
                           {([
                             ["agents", t("composer.agents_label")],
                             ["commands", t("dashboard.commands")],
@@ -1289,11 +1289,11 @@ export function ReactSessionComposer(props: ComposerProps) {
                             <button
                               key={section}
                               type="button"
-                              className={`mb-1 flex w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-gray-3 text-gray-12" : "text-gray-11 hover:bg-gray-2"}`}
+                              className={`mb-1 flex w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-muted"}`}
                               onClick={() => setToolMenuSection(section)}
                             >
                               <span className="truncate">{label}</span>
-                              <ChevronRight size={14} className="shrink-0 text-gray-9" />
+                              <ChevronRight size={14} className="shrink-0 text-subtle-foreground" />
                             </button>
                             );
                           })}
@@ -1302,7 +1302,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           <div className="mb-2 flex shrink-0 justify-end border-b border-dls-border px-3 pb-2 pt-2">
                             <button
                               type="button"
-                              className="inline-flex items-center gap-1.5 rounded-full border border-dls-border px-3 py-1.5 text-[12px] font-medium text-gray-11 transition-colors hover:bg-gray-2"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-dls-border px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-muted"
                               onClick={() => {
                                 setToolMenuOpen(false);
                                 openToolMenuSettings();
@@ -1317,12 +1317,12 @@ export function ReactSessionComposer(props: ComposerProps) {
                             <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
                               <button
                                 type="button"
-                                className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-gray-2/70 ${props.selectedAgent === null ? "bg-gray-2 text-gray-12" : "text-gray-11"}`}
+                                className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-muted/70 ${props.selectedAgent === null ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                                 onClick={() => applyAgentSelection(null)}
                               >
-                                <Zap size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                                <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                                 <div className="min-w-0 flex-1 truncate text-xs font-semibold">{t("composer.default_agent")}</div>
-                                {props.selectedAgent === null ? <Check size={14} className="mt-0.5 shrink-0 text-gray-10" /> : null}
+                                {props.selectedAgent === null ? <Check size={14} className="mt-0.5 shrink-0 text-subtle-foreground" /> : null}
                               </button>
                               {nonDefaultAgents.map((agent) => {
                                 const active = props.selectedAgent === agent.name;
@@ -1330,15 +1330,15 @@ export function ReactSessionComposer(props: ComposerProps) {
                                   <button
                                     key={agent.name}
                                     type="button"
-                                    className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-gray-2/70 ${active ? "bg-gray-2 text-gray-12" : "text-gray-11"}`}
+                                    className={`flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left transition-colors hover:bg-muted/70 ${active ? "bg-muted text-foreground" : "text-muted-foreground"}`}
                                     onClick={() => applyAgentSelection(agent.name)}
                                   >
-                                    <Zap size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                                    <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                                     <div className="min-w-0 flex-1">
                                       <div className="truncate text-xs font-semibold">{agent.name.charAt(0).toUpperCase() + agent.name.slice(1)}</div>
-                                      {agent.description ? <div className="truncate text-xs text-gray-10">{agent.description}</div> : null}
+                                      {agent.description ? <div className="truncate text-xs text-subtle-foreground">{agent.description}</div> : null}
                                     </div>
-                                    {active ? <Check size={14} className="mt-0.5 shrink-0 text-gray-10" /> : null}
+                                    {active ? <Check size={14} className="mt-0.5 shrink-0 text-subtle-foreground" /> : null}
                                   </button>
                                 );
                               })}
@@ -1351,19 +1351,19 @@ export function ReactSessionComposer(props: ComposerProps) {
                                   <button
                                     key={command.id}
                                     type="button"
-                                    className="flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left text-gray-11 transition-colors hover:bg-gray-2/70"
+                                    className="flex w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left text-muted-foreground transition-colors hover:bg-muted/70"
                                     onClick={() => applyCommandSelection(command)}
                                   >
-                                    <Terminal size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                                    <Terminal size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                                     <div className="min-w-0 flex-1">
-                                      <div className="truncate text-xs font-semibold text-gray-11">/{command.name}</div>
-                                      {command.description ? <div className="truncate text-xs text-gray-10">{command.description}</div> : null}
+                                      <div className="truncate text-xs font-semibold text-muted-foreground">/{command.name}</div>
+                                      {command.description ? <div className="truncate text-xs text-subtle-foreground">{command.description}</div> : null}
                                     </div>
                                   </button>
                                 ))}
                               </div>
                             ) : (
-                              <div className="px-3 py-2 text-xs text-gray-10">
+                              <div className="px-3 py-2 text-xs text-subtle-foreground">
                                 {!commandsLoaded && commandsLoading ? t("composer.loading_commands") : t("composer.no_commands")}
                               </div>
                             )
@@ -1375,24 +1375,24 @@ export function ReactSessionComposer(props: ComposerProps) {
                                   <button
                                     key={`${skill.origin ?? "local"}:${skill.path || skill.name}`}
                                     type="button"
-                                    className="flex min-w-0 w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left text-gray-11 transition-colors hover:bg-gray-2/70"
+                                    className="flex min-w-0 w-full items-start gap-3 rounded-[16px] px-3 py-2.5 text-left text-muted-foreground transition-colors hover:bg-muted/70"
                                     onClick={() => applySkillSelection(skill)}
                                   >
-                                    <Zap size={14} className="mt-0.5 shrink-0 text-gray-9" />
+                                    <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
                                     <div className="min-w-0 flex-1">
                                       <div className="flex items-center justify-between gap-3">
-                                        <div className="min-w-0 flex-1 truncate text-xs font-semibold text-gray-11">
+                                        <div className="min-w-0 flex-1 truncate text-xs font-semibold text-muted-foreground">
                                           /{skillMenuSlashCommandName(skill)}
                                         </div>
                                         {isLocalCapability(skill.origin) ? (
-                                          <span className="shrink-0 rounded-full bg-gray-3 px-2 py-0.5 text-[10px] font-medium text-gray-11">
+                                          <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                                             {t("composer.source_local")}
                                           </span>
                                         ) : null}
                                       </div>
-                                      {skill.description ? <div className="truncate text-xs text-gray-10">{skill.description}</div> : null}
+                                      {skill.description ? <div className="truncate text-xs text-subtle-foreground">{skill.description}</div> : null}
                                       {skill.origin === "redrob-connect" ? (
-                                        <div className="truncate text-[10px] text-gray-9">
+                                        <div className="truncate text-[10px] text-subtle-foreground">
                                           {[skill.marketplaceName, skill.pluginName].filter(Boolean).join(" · ")}
                                         </div>
                                       ) : null}
@@ -1401,7 +1401,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                                 ))}
                               </div>
                             ) : (
-                              <div className="px-3 py-2 text-xs text-gray-10">
+                              <div className="px-3 py-2 text-xs text-subtle-foreground">
                                 {(!skillsLoaded && skillsLoading) || (!commandsLoaded && commandsLoading) ? t("composer.loading_commands") : t("context_panel.no_skills")}
                               </div>
                             )
@@ -1416,7 +1416,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 </div>
                 <button
                   type="button"
-                  className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md text-gray-10 transition-colors hover:bg-gray-3 ${
+                  className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent ${
                     !props.attachmentsEnabled ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   onClick={() => {
@@ -1435,7 +1435,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 <div ref={agentMenuRef} className={showAgentPicker ? "relative" : "hidden"}>
                   <button
                     type="button"
-                    className="flex h-9 max-h-9 items-center gap-1 rounded-md px-1.5 text-[12px] font-medium text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12"
+                    className="flex h-9 max-h-9 items-center gap-1 rounded-md px-1.5 text-[12px] font-medium text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground"
                     onClick={() => setAgentMenuOpen((value) => !value)}
                     disabled={props.busy}
                     aria-expanded={agentMenuOpen}
@@ -1446,7 +1446,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   </button>
                   {agentMenuOpen ? (
                     <div className="absolute left-0 bottom-full z-40 mb-2 w-64 overflow-hidden rounded-[18px] border border-dls-border bg-dls-surface shadow-[var(--dls-shell-shadow)]">
-                      <div className="border-b border-dls-border px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-10">
+                      <div className="border-b border-dls-border px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-subtle-foreground">
                         {t("composer.agent_label")}
                       </div>
                       <div
@@ -1459,7 +1459,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                             agentItemRefs.current[0] = element;
                           }}
                           type="button"
-                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors ${!props.selectedAgent || agentMenuIndex === 0 ? "bg-gray-2 text-gray-12" : "text-gray-11 hover:bg-gray-2/70"}`}
+                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors ${!props.selectedAgent || agentMenuIndex === 0 ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/70"}`}
                           onMouseEnter={() => setAgentMenuIndex(0)}
                           onMouseDown={(event) => {
                             event.preventDefault();
@@ -1467,7 +1467,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           }}
                         >
                           <span>{t("composer.default_agent")}</span>
-                          {!props.selectedAgent ? <Check size={14} className="text-gray-10" /> : null}
+                          {!props.selectedAgent ? <Check size={14} className="text-subtle-foreground" /> : null}
                         </button>
                         {nonDefaultAgents.map((agent, index) => {
                           const active = props.selectedAgent === agent.name;
@@ -1478,7 +1478,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                                 agentItemRefs.current[index + 1] = element;
                               }}
                               type="button"
-                              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors ${active || agentMenuIndex === index + 1 ? "bg-gray-2 text-gray-12" : "text-gray-11 hover:bg-gray-2/70"}`}
+                              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors ${active || agentMenuIndex === index + 1 ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/70"}`}
                               onMouseEnter={() => setAgentMenuIndex(index + 1)}
                               onMouseDown={(event) => {
                                 event.preventDefault();
@@ -1486,7 +1486,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                               }}
                             >
                               <span className="truncate">{agent.name.charAt(0).toUpperCase() + agent.name.slice(1)}</span>
-                              {active ? <Check size={14} className="text-gray-10" /> : null}
+                              {active ? <Check size={14} className="text-subtle-foreground" /> : null}
                             </button>
                           );
                         })}
@@ -1543,7 +1543,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               */}
               <div className="ml-auto flex shrink-0 items-center gap-1.5">
                 {props.busy && escapeArmed ? (
-                  <span className="self-center pr-1 text-[12px] font-medium text-gray-10 max-lg:hidden">
+                  <span className="self-center pr-1 text-[12px] font-medium text-subtle-foreground max-lg:hidden">
                     {t("composer.escape_to_stop")}
                   </span>
                 ) : null}
@@ -1564,7 +1564,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                     props.busy
                       ? "bg-[var(--dls-accent)] text-[var(--dls-accent-fg)] hover:bg-[var(--dls-accent-hover)]"
                       : !canSend || props.disabled
-                        ? "bg-gray-4 text-gray-10"
+                        ? "bg-accent-active text-subtle-foreground"
                         : "bg-[var(--dls-accent)] text-[var(--dls-accent-fg)] hover:bg-[var(--dls-accent-hover)]"
                   }`}
                   title={props.busy ? t("composer.stop") : t("composer.run_task")}

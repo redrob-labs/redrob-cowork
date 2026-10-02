@@ -61,7 +61,7 @@ export function ResetModal(props: ResetModalProps) {
         </AlertDialogHeader>
 
           <div className="mt-6 space-y-4">
-            <div className="rounded-xl bg-gray-1/20 border border-gray-6 p-3 text-xs text-gray-11">
+            <div className="rounded-xl bg-background/20 border border-border p-3 text-xs text-muted-foreground">
               {props.mode === "onboarding"
                 ? t("settings.reset_onboarding_warning")
                 : t("settings.reset_app_data_warning")}

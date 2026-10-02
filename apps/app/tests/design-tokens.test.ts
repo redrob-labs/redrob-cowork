@@ -298,8 +298,7 @@ describe("Redrob design tokens", () => {
   });
 
   test("no semantic role reads the Radix ramp", () => {
-    // The Radix gray stays in colors.css, as `--radix-gray-*`, for call sites that
-    // still name a numbered step. The role layer is not allowed to reach for it.
+    // The Radix gray is retired; a role reading it would be reading nothing.
     const offenders = `${ROLES}\n${LIGHT_ONLY}\n${DARK_ONLY}`
       .split("\n")
       .filter((line) => /var\(--radix-/.test(line))
@@ -615,9 +614,8 @@ describe("Redrob branding surfaces", () => {
  * carry their own palettes and this is a check on ours.
  *
  * The rule: an emitted colour is a value the design system declares, or pure black,
- * or pure white, or a step of the Radix gray ramp, which is the one numbered ramp
- * `colors.css` still declares and the other half of this migration. That exception is
- * counted rather than waved through, so it can only shrink.
+ * or pure white. There is no exception: the Radix gray ramp, the last one this app
+ * borrowed, is retired and its call sites read the neutral roles.
  */
 const VENDOR_STYLESHEETS = ["katex", "shadcn", "tw-animate-css"];
 
@@ -720,24 +718,6 @@ function stylesheetColours(css: string): string[] {
 // Every colour the design system declares, in hex and rgba alike. The design
 // system is the palette, so its values are declared values by definition.
 const BRAND_VALUES = new Set(stylesheetColours(DESIGN_SYSTEM_TOKENS));
-const RADIX_GRAY = new Set(
-  [...readText(join(APP_ROOT, "src/styles/colors.css")).matchAll(
-    /--(?:radix-gray|black|white)-a?\d+:\s*([^;]+);/g,
-  )]
-    .flatMap((match) => [
-      ...match[1].matchAll(/#[0-9a-fA-F]{3,8}\b/g),
-      ...match[1].matchAll(/rgba?\(\s*\d+[\s,]+\d+[\s,]+\d+/g),
-    ])
-    .map((match) =>
-      match[0].startsWith("#")
-        ? sixDigits(match[0])
-        : (/(\d+)[\s,]+(\d+)[\s,]+(\d+)/.exec(match[0]) as RegExpExecArray)
-            .slice(1)
-            .map((part) => Number(part).toString(16).padStart(2, "0"))
-            .join(""),
-    ),
-);
-
 describe("the emitted stylesheet", () => {
   /**
    * The numbered ramps, counted so the number can only fall.
@@ -748,10 +728,9 @@ describe("the emitted stylesheet", () => {
    * chip by what it mentions. The status roles took the first group, `--primary` took
    * the second and the accent spectrum took the third.
    *
-   * `gray` is the exception and it is written as a ceiling rather than deleted, because
-   * the number is the point: it is the neutral ramp and moving it is the other half of
-   * this migration, with `--foreground`, `--muted-foreground`, `--border` and `--muted`
-   * declared and waiting.
+   * `gray` was the last, at 402 call sites, and is at zero too: its steps read the
+   * neutral roles now, by Radix's own step meanings (1-2 page, 3-5 component fills,
+   * 6-8 edges, 9-10 quiet ink, 11 secondary ink, 12 primary ink).
    */
   test("names no numbered ramp the palette has stopped offering", () => {
     const budget: Record<string, number> = {
@@ -760,8 +739,7 @@ describe("the emitted stylesheet", () => {
       rose: 0, slate: 0, zinc: 0, neutral: 0, stone: 0, bronze: 0, brown: 0,
       crimson: 0, gold: 0, grass: 0, iris: 0, jade: 0, mauve: 0, mint: 0, olive: 0,
       plum: 0, ruby: 0, sage: 0, sand: 0, tomato: 0,
-      // The neutral ramp, and the other half of this migration.
-      gray: 428,
+      gray: 0,
     };
     const sources = walkFiles(join(APP_ROOT, "src"))
       .filter((file) => /\.tsx?$/.test(file))
@@ -797,45 +775,40 @@ describe("the emitted stylesheet", () => {
     for (const colour of stylesheetColours(css)) {
       if (BRAND_VALUES.has(colour)) continue;
       if (colour === "000000" || colour === "ffffff") continue;
-      if (RADIX_GRAY.has(colour)) continue;
       offenders.set(colour, (offenders.get(colour) ?? 0) + 1);
     }
     expect(
       [...offenders].map(([colour, count]) => `#${colour} x${count}`),
-      "colours in the built stylesheet that no Redrob token and no gray step declares",
+      "colours in the built stylesheet that no design-system token declares",
     ).toEqual([]);
   });
 
   /**
-   * And the Radix exception, counted. Gray is the one numbered ramp left and it is 428
-   * call sites; every other ramp is deleted from `colors.css` rather than merely
-   * unbound, because an unreachable ramp still ships in every build. The number below
-   * is the gray ramp and nothing else, so a hue coming back shows up as a rise here
-   * even before anybody writes a class for it.
+   * No borrowed ramp ships at all. `styles/colors.css` held the Radix gray ramp and its
+   * black and white alpha scales, every step of it a colour in every build whether or
+   * not a class asked for it; it is deleted, not emptied, and the design system is the
+   * only place a numbered step is declared.
    */
-  test("declares one numbered ramp and no more", () => {
-    const colours = readText(join(APP_ROOT, "src/styles/colors.css"));
-    const ramps = new Set(
-      [...colours.matchAll(/^\s*--(?:radix-)?([a-z]+)-a?\d+:/gm)].map((match) => match[1]),
-    );
-    expect([...ramps].sort()).toEqual(["black", "gray", "white"]);
-    expect(RADIX_GRAY.size).toBeLessThanOrEqual(58);
+  test("declares no numbered ramp of its own", () => {
+    expect(existsSync(join(APP_ROOT, "src/styles/colors.css"))).toBe(false);
+    const offenders = walkFiles(join(APP_ROOT, "src"))
+      .filter((file) => file.endsWith(".css"))
+      .flatMap((file) =>
+        [...readText(file).matchAll(/^\s*(--(?:radix-)?[a-z]+-a?\d+):/gm)]
+          // Tailwind theme keys such as --text-2xl or --radius-2xl are sizes, and
+          // --chart-N is an ordered series of roles; neither is a ramp.
+          .filter((match) => !/^--(?:text|radius|spacing|shadow|blur|leading|tracking|chart|color-chart)-/.test(match[1]))
+          .map((match) => `${file.slice(APP_ROOT.length + 1)}: ${match[1]}`),
+      );
+    expect(offenders).toEqual([]);
   });
 
   /**
-   * And the safelist names one ramp too.
-   *
-   * `@source inline(...)` force-generates a utility whether or not a call site asks for
-   * it, and it named all thirty-one ramps at twelve steps across three properties: over
-   * a thousand utilities that existed because the line existed. The palette reset makes
-   * them resolve to nothing, so they stopped being emitted the moment the ramps went,
-   * but the line would generate them again the day a namespace came back. It names gray.
+   * And no safelist. `@source inline(...)` force-generates utilities whether or not a
+   * call site asks for them; the last one named the gray ramp, which is gone.
    */
-  test("safelists one numbered ramp and no more", () => {
-    const inlineSources = [...TOKENS.matchAll(/@source inline\("([^"]+)"\)/g)].map(
-      (match) => match[1],
-    );
-    expect(inlineSources).toEqual(['{bg,text,border}-gray-{1..12}']);
+  test("safelists nothing", () => {
+    expect([...TOKENS.matchAll(/@source inline\(/g)]).toEqual([]);
   });
 
   /**

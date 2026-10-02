@@ -1,6 +1,5 @@
 @import "tailwindcss" source(none);
 
-@import "../styles/colors.css";
 /*
  * The Redrob Group Design System 2026. Unlayered on purpose: its values are the
  * source of truth for every name it declares, so they must win over Tailwind's
@@ -24,7 +23,6 @@
 
 @source "../../index.html";
 @source "../";
-@source inline("{bg,text,border}-gray-{1..12}");
 
 @custom-variant dark (&:is(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 @custom-variant electron {

@@ -496,13 +496,13 @@ function TodoPanel(props: { todos: TodoItem[] }) {
     <div className="overflow-hidden border-b border-dls-border bg-transparent">
         <button
           type="button"
-          className="flex w-full items-center justify-between px-4 py-3 text-xs text-gray-9 transition-colors hover:bg-gray-2/50"
+          className="flex w-full items-center justify-between px-4 py-3 text-xs text-subtle-foreground transition-colors hover:bg-muted/50"
           onClick={() => setExpanded((current) => !current)}
         >
           <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-11">{label}</span>
+            <span className="font-medium text-muted-foreground">{label}</span>
           </div>
-          <Minimize2 size={12} className={`text-gray-8 transition-transform ${expanded ? "" : "rotate-180"}`} />
+          <Minimize2 size={12} className={`text-disabled-foreground transition-transform ${expanded ? "" : "rotate-180"}`} />
         </button>
         {expanded ? (
           <div className="max-h-60 space-y-2.5 overflow-auto border-t border-dls-border px-4 pb-3">
@@ -520,15 +520,15 @@ function TodoPanel(props: { todos: TodoItem[] }) {
                           : active
                             ? "border-warning-muted bg-warning-soft text-warning-ink"
                             : cancelled
-                              ? "border-gray-6 bg-gray-2 text-gray-8"
-                              : "border-gray-6 bg-gray-1 text-gray-8"
+                              ? "border-border bg-muted text-disabled-foreground"
+                              : "border-border bg-background text-disabled-foreground"
                       }`}
                     >
                       {done ? <Check size={10} /> : active ? <span className="size-1.5 rounded-full bg-warning" /> : null}
                     </div>
                   </div>
-                  <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-gray-9 line-through" : "text-gray-12"}`}>
-                    <span className="mr-1.5 text-gray-9">{index + 1}.</span>
+                  <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-subtle-foreground line-through" : "text-foreground"}`}>
+                    <span className="mr-1.5 text-subtle-foreground">{index + 1}.</span>
                     {todo.content}
                   </div>
                 </div>

@@ -75,7 +75,7 @@ export function SettingsShell(props: SettingsShellProps) {
             <Button
               variant="ghost"
               type="button"
-              className="flex size-8 shrink-0 items-center justify-center rounded-md text-gray-10 transition-colors hover:bg-gray-2/70 hover:text-dls-text"
+              className="flex size-8 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-muted/70 hover:text-dls-text"
               onClick={props.onClose}
               title={t("dashboard.close_settings")}
               aria-label={t("dashboard.close_settings")}
@@ -133,12 +133,12 @@ export function SettingsShell(props: SettingsShellProps) {
                   </span>
                 ) : null}
               </div>
-              <div className="flex items-center gap-1.5 text-gray-10 mac:titlebar-no-drag">
+              <div className="flex items-center gap-1.5 text-subtle-foreground mac:titlebar-no-drag">
                 <NotificationBell />
                 <Button
                   variant="ghost"
                   type="button"
-                  className="flex size-9 items-center justify-center rounded-md text-gray-10 transition-colors hover:bg-gray-2/70 hover:text-dls-text md:hidden"
+                  className="flex size-9 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-muted/70 hover:text-dls-text md:hidden"
                   onClick={props.onClose}
                   title={t("dashboard.close_settings")}
                   aria-label={t("dashboard.close_settings")}

@@ -30,13 +30,13 @@ export function VariantPanel({
     <div className={CHAT_COLUMN}>
       <div className="rounded-2xl border border-dls-border bg-dls-surface/60 p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-xs text-gray-11">
+          <span className="text-xs text-muted-foreground">
             {run.kind === "compare"
               ? t("variants.compare_title")
               : t("variants.paraphrase_title")}
           </span>
           <button
-            className="rounded px-1.5 py-0.5 text-xs text-gray-10 underline decoration-dotted underline-offset-2 hover:bg-dls-bg-hover hover:text-gray-12"
+            className="rounded px-1.5 py-0.5 text-xs text-subtle-foreground underline decoration-dotted underline-offset-2 hover:bg-dls-bg-hover hover:text-foreground"
             onClick={onDismiss}
             type="button"
           >
@@ -54,8 +54,8 @@ export function VariantPanel({
               key={variant.index}
             >
               <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="truncate font-mono text-[11px] text-gray-11">{variant.label}</span>
-                <span className="shrink-0 text-[11px] text-gray-10">
+                <span className="truncate font-mono text-[11px] text-muted-foreground">{variant.label}</span>
+                <span className="shrink-0 text-[11px] text-subtle-foreground">
                   {variant.status === "done"
                     ? ""
                     : variant.status === "failed"
@@ -79,7 +79,7 @@ export function VariantPanel({
           ))}
         </div>
 
-        <p className="mt-2 text-[11px] text-gray-10">
+        <p className="mt-2 text-[11px] text-subtle-foreground">
           {settled && !anyAnswer ? t("variants.none_finished") : t("variants.keep_hint")}
         </p>
       </div>

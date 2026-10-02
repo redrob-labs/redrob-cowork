@@ -140,7 +140,7 @@ function statusPill(
       }
     : {
         label: disconnectedLabel ?? t("status.disconnected_label"),
-        className: "border-gray-7/30 bg-gray-4/50 text-gray-11",
+        className: "border-border-strong/30 bg-accent-active/50 text-muted-foreground",
       };
 }
 
@@ -162,7 +162,7 @@ function auditStatusPill(status: "idle" | "loading" | "error"): {
   }
   return {
     label: t("settings.idle"),
-    className: "border-gray-7/30 bg-gray-4/50 text-gray-11",
+    className: "border-border-strong/30 bg-accent-active/50 text-muted-foreground",
   };
 }
 

@@ -155,17 +155,17 @@ export function QuestionPanel(props: QuestionPanelProps) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <div className="text-sm font-medium leading-5 text-gray-12">
+              <div className="text-sm font-medium leading-5 text-foreground">
                 {currentQuestion.header || t("common.question")}
               </div>
-              <div className="text-[11px] font-medium leading-4 text-gray-9">
+              <div className="text-[11px] font-medium leading-4 text-subtle-foreground">
                 {t("question_modal.question_counter", undefined, {
                   current: state.currentIndex + 1,
                   total: props.questions.length,
                 })}
               </div>
             </div>
-            <div className="mt-1 text-sm leading-6 text-gray-11">
+            <div className="mt-1 text-sm leading-6 text-muted-foreground">
               {currentQuestion.question}
             </div>
           </div>
@@ -186,10 +186,10 @@ export function QuestionPanel(props: QuestionPanelProps) {
                   className={`flex w-full items-start justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60
                         ${
                           isSelected
-                            ? "bg-primary/10 border-primary/30 text-gray-12 shadow-sm"
-                            : "bg-gray-1 border-gray-6 hover:border-gray-8 text-gray-11 hover:text-gray-12 hover:bg-gray-3"
+                            ? "bg-primary/10 border-primary/30 text-foreground shadow-sm"
+                            : "bg-background border-border hover:border-border-strong text-muted-foreground hover:text-foreground hover:bg-accent"
                         }
-                        ${isFocused ? "ring-2 ring-primary/20 border-primary/40 bg-gray-3" : ""}
+                        ${isFocused ? "ring-2 ring-primary/20 border-primary/40 bg-accent" : ""}
                       `}
                   onClick={() => {
                     dispatch({ type: "setFocusedOptionIndex", value: idx });
@@ -197,9 +197,9 @@ export function QuestionPanel(props: QuestionPanelProps) {
                   }}
                 >
                   <span className="min-w-0">
-                    <span className="block font-medium text-gray-12">{opt.label}</span>
+                    <span className="block font-medium text-foreground">{opt.label}</span>
                     {opt.description && opt.description !== opt.label ? (
-                      <span className="mt-1 block text-xs leading-5 text-gray-11">{opt.description}</span>
+                      <span className="mt-1 block text-xs leading-5 text-muted-foreground">{opt.description}</span>
                     ) : null}
                   </span>
                   {isSelected ? (

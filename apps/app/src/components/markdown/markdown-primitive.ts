@@ -116,7 +116,7 @@ function codeCopyButton() {
 function chatCodeBlockContainer(html: string, shiki: boolean) {
   const shikiAttribute = shiki ? ` data-redrob-shiki="true"` : "";
 
-  return `<div data-redrob-code-block=""${shikiAttribute} class="relative my-4 overflow-hidden rounded-[18px] border border-border/70 bg-gray-2/60 font-mono text-xs leading-6 text-foreground">${codeCopyButton()}${html}</div>`;
+  return `<div data-redrob-code-block=""${shikiAttribute} class="relative my-4 overflow-hidden rounded-[18px] border border-border/70 bg-muted/60 font-mono text-xs leading-6 text-foreground">${codeCopyButton()}${html}</div>`;
 }
 
 function chatCodeBlockHtml(text: string, lang: string | undefined) {
@@ -127,7 +127,7 @@ function chatCodeBlockHtml(text: string, lang: string | undefined) {
 }
 
 function surfaceCodeBlockHtml(text: string, lang: string | undefined) {
-  return `<pre class="my-4 overflow-x-auto rounded-[18px] border border-dls-border/70 bg-gray-1/80 px-4 py-3 text-xs leading-6 text-muted-foreground"><code${codeLanguageClass(lang)}>${escapeHtml(text)}</code></pre>`;
+  return `<pre class="my-4 overflow-x-auto rounded-[18px] border border-dls-border/70 bg-background/80 px-4 py-3 text-xs leading-6 text-muted-foreground"><code${codeLanguageClass(lang)}>${escapeHtml(text)}</code></pre>`;
 }
 
 function parseShikiLanguage(lang: string) {
@@ -212,12 +212,12 @@ function markdownProfileForPresentation(presentation: MarkdownPresentation): Mar
       listClassName: (ordered) => ordered ? "my-3 list-decimal pl-6" : "my-3 list-disc pl-6",
       blockquoteClassName: "my-4 rounded-r-lg border-l border-dls-border bg-dls-hover/40 pl-4 italic text-muted-foreground",
       codeBlockHtml: surfaceCodeBlockHtml,
-      codeSpanClassName: "rounded-md bg-gray-2/70 px-1.5 py-0.5 font-mono text-sm text-foreground",
+      codeSpanClassName: "rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-sm text-foreground",
       linkPresentation: "simple",
       imagePresentation: "simple",
       tableHeaderClassName: "border border-dls-border bg-dls-hover p-2 text-left",
       tableCellClassName: "border border-dls-border p-2 align-top",
-      shikiContainer: `<div data-redrob-shiki="true" class="my-4 overflow-x-auto rounded-[18px] border border-dls-border/70 bg-gray-1/80 p-4 text-xs leading-6">%s</div>`,
+      shikiContainer: `<div data-redrob-shiki="true" class="my-4 overflow-x-auto rounded-[18px] border border-dls-border/70 bg-background/80 p-4 text-xs leading-6">%s</div>`,
       shikiTheme: { kind: "single", theme: "github-light" },
     };
   }
@@ -232,7 +232,7 @@ function markdownProfileForPresentation(presentation: MarkdownPresentation): Mar
     listClassName: (ordered) => ordered ? "my-3 pl-6 list-decimal" : "my-3 pl-6 list-disc",
     blockquoteClassName: "my-4 rounded-r-lg border-l border-border bg-muted/40 pl-4 italic text-muted-foreground",
     codeBlockHtml: chatCodeBlockHtml,
-    codeSpanClassName: "rounded-md bg-gray-2/70 px-1.5 py-0.5 font-mono text-sm text-foreground",
+    codeSpanClassName: "rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-sm text-foreground",
     linkPresentation: "chat",
     imagePresentation: "chat",
     tableHeaderClassName: "border border-border p-2 bg-muted text-left",
@@ -350,7 +350,7 @@ function createMarkedOptions(profile: MarkdownProfile, isAsync: boolean) {
         return `<${tag}${alignAttribute(align)} class="${className}">${this.parser.parseInline(tokens)}</${tag}>`;
       },
       hr() {
-        return `<hr class="my-6 border-none h-px bg-gray-4">`;
+        return `<hr class="my-6 border-none h-px bg-accent-active">`;
       },
     },
   } satisfies ConstructorParameters<typeof Marked<string, string>>[0];

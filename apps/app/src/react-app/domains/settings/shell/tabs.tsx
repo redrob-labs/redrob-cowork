@@ -32,7 +32,7 @@ type TabsGroupTitleProps = {
 
 export function TabsGroupTitle(props: TabsGroupTitleProps) {
   return (
-    <div className={cn("mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-gray-8")}>
+    <div className={cn("mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-disabled-foreground")}>
       {props.children}
     </div>
   );
@@ -58,7 +58,7 @@ export function TabsTrigger(props: TabsTriggerProps) {
     <button
       type="button"
       className={cn(
-        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-medium transition-colors text-gray-10 hover:bg-dls-surface/50 hover:text-dls-text",
+        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-medium transition-colors text-subtle-foreground hover:bg-dls-surface/50 hover:text-dls-text",
         props.active &&
           "bg-dls-surface text-dls-text shadow-sm hover:bg-dls-surface hover:text-dls-text",
       )}

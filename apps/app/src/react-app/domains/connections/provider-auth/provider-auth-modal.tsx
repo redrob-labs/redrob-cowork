@@ -696,7 +696,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               {errorMessage}
             </div>
           ) : props.loading ? (
-            <div className="mx-3.5 rounded-xl border border-gray-6 bg-gray-1/60 px-4 py-3 text-sm text-gray-10 animate-pulse">
+            <div className="mx-3.5 rounded-xl border border-border bg-background/60 px-4 py-3 text-sm text-subtle-foreground animate-pulse">
               {t("provider_auth.loading_providers")}
             </div>
           ) : null}
@@ -722,7 +722,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               {resolvedView === "list" ? (
                 <div className="space-y-3" role="presentation" onKeyDown={handleListKeyDown}>
                   <div className="relative mx-3.5 flex items-center mb-1">
-                    <Search size={16} className="absolute left-3 text-gray-9" />
+                    <Search size={16} className="absolute left-3 text-subtle-foreground" />
                     <input
                       ref={searchInputRef}
                       type="text"
@@ -736,7 +736,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                       autoCapitalize="off"
                       spellCheck={false}
                       disabled={actionDisabled}
-                      className="w-full rounded-xl bg-gray-2 px-9 py-2.5 text-[13px] text-gray-12 placeholder:text-gray-9 border border-gray-6/60 focus:border-gray-8 focus:bg-gray-1 focus:outline-none transition-colors shadow-sm"
+                      className="w-full rounded-xl bg-muted px-9 py-2.5 text-[13px] text-foreground placeholder:text-subtle-foreground border border-border/60 focus:border-border-strong focus:bg-background focus:outline-none transition-colors shadow-sm"
                     />
                   </div>
 
@@ -744,24 +744,24 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     filteredEntries.map((entry, index) => (
                       <div key={entry.id}>
                         {index === 0 && entry.connected ? (
-                          <div className="px-3.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">{t("provider_auth.connected")}</div>
+                          <div className="px-3.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle-foreground">{t("provider_auth.connected")}</div>
                         ) : null}
                         {index === connectedCount && !entry.connected ? (
-                          <div className="px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-10">
+                          <div className="px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle-foreground">
                             {connectedCount ? t("provider_auth.all_providers") : t("provider_auth.providers")}
                           </div>
                         ) : null}
                         <button
                           type="button"
                           className={`w-full group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-left transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
-                            index === activeEntryIndex ? "bg-gray-3/60" : "hover:bg-gray-3/30"
+                            index === activeEntryIndex ? "bg-accent/60" : "hover:bg-accent/30"
                           }`}
                           disabled={actionDisabled}
                           onMouseEnter={() => setActiveEntryIndex(index)}
                           onClick={() => handleEntrySelect(entry)}
                         >
-                          <div className="flex size-9 shrink-0 items-center justify-center rounded-[11px] border border-gray-5/60 bg-gray-1 shadow-sm overflow-hidden">
-                            <ProviderIcon providerId={entry.id} size={20} className="text-gray-12" />
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background shadow-sm overflow-hidden">
+                            <ProviderIcon providerId={entry.id} size={20} className="text-foreground" />
                           </div>
 
                           {/*
@@ -774,11 +774,11 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                             takes the slack; the id, the methods and the status are sized to their content.
                           */}
                           <div className="flex min-w-0 flex-1 items-center gap-4">
-                            <div className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-tight text-gray-12">
+                            <div className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-tight text-foreground">
                               {entry.name}
                             </div>
 
-                            <div className="hidden w-[13rem] shrink-0 truncate font-mono text-[11px] text-gray-9 opacity-60 transition-opacity group-hover:opacity-80 sm:block">
+                            <div className="hidden w-[13rem] shrink-0 truncate font-mono text-[11px] text-subtle-foreground opacity-60 transition-opacity group-hover:opacity-80 sm:block">
                               {entry.id}
                             </div>
 
@@ -798,7 +798,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                                       className={`truncate rounded-md border px-2 py-0.5 text-[10px] font-medium ${
                                         method.type === "oauth"
                                           ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
-                                          : "bg-gray-3/40 text-gray-11 border-gray-6/40"
+                                          : "bg-accent/40 text-muted-foreground border-border/40"
                                       }`}
                                     >
                                       {methodLabel(method)}
@@ -813,7 +813,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                                   {t("provider_auth.connected")}
                                 </div>
                               ) : (
-                                <div className="flex items-center gap-0.5 text-[12px] font-medium text-gray-9 opacity-80 transition-colors group-hover:text-gray-12 group-hover:opacity-100">
+                                <div className="flex items-center gap-0.5 text-[12px] font-medium text-subtle-foreground opacity-80 transition-colors group-hover:text-foreground group-hover:opacity-100">
                                   {t("provider_auth.connect")}
                                   <ChevronRight
                                     size={14}
@@ -827,21 +827,21 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                       </div>
                     ))
                   ) : (
-                    <div className="text-sm text-gray-10 pt-2">
+                    <div className="text-sm text-subtle-foreground pt-2">
                       {entries.length ? t("provider_auth.no_match") : t("provider_auth.none_available")}
                     </div>
                   )}
 
-                  <div className="mx-3.5 text-[11px] text-gray-9">{t("provider_auth.keyboard_hint")}</div>
+                  <div className="mx-3.5 text-[11px] text-subtle-foreground">{t("provider_auth.keyboard_hint")}</div>
                 </div>
               ) : null}
 
               {resolvedView === "method" && selectedEntry ? (
-                <div className="mx-3.5 rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
+                <div className="mx-3.5 rounded-xl border border-border/40 bg-muted/50 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
-                      <div className="text-xs text-gray-10 mt-1">{t("provider_auth.choose_method")}</div>
+                      <div className="text-sm font-medium text-foreground">{selectedEntry.name}</div>
+                      <div className="text-xs text-subtle-foreground mt-1">{t("provider_auth.choose_method")}</div>
                     </div>
                     <Button variant="outline" onClick={handleBack} disabled={actionDisabled}>
                       {t("provider_auth.back")}
@@ -855,13 +855,13 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                         className={`w-full rounded-xl border px-4 py-3.5 text-left transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                           method.type === "oauth"
                             ? "border-primary-muted/40 bg-primary-soft/20 hover:bg-primary-soft/40 shadow-sm"
-                            : "border-gray-5/50 bg-gray-2 hover:bg-gray-3/50 shadow-sm"
+                            : "border-border/50 bg-muted hover:bg-accent/50 shadow-sm"
                         }`}
                         onClick={() => void handleMethodSelect(method)}
                         disabled={actionDisabled}
                       >
-                        <div className="text-sm font-medium text-gray-12">{methodLabel(method)}</div>
-                        <div className="mt-1 text-xs text-gray-10">{methodDescription(selectedEntry, method)}</div>
+                        <div className="text-sm font-medium text-foreground">{methodLabel(method)}</div>
+                        <div className="mt-1 text-xs text-subtle-foreground">{methodDescription(selectedEntry, method)}</div>
                       </button>
                     ))}
                   </div>
@@ -871,15 +871,15 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               {resolvedView === "api" && selectedEntry ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-[11px] border border-gray-5/60 bg-gray-1 shadow-sm overflow-hidden">
-                      <ProviderIcon providerId={selectedEntry.id} size={20} className="text-gray-12" />
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background shadow-sm overflow-hidden">
+                      <ProviderIcon providerId={selectedEntry.id} size={20} className="text-foreground" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-12 truncate">{selectedEntry.name}</div>
-                      <div className="text-[11px] text-gray-9 font-mono truncate">{selectedEntry.id}</div>
+                      <div className="text-sm font-medium text-foreground truncate">{selectedEntry.name}</div>
+                      <div className="text-[11px] text-subtle-foreground font-mono truncate">{selectedEntry.id}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-gray-10">{t("provider_auth.paste_api_key")}</div>
+                  <div className="text-xs text-subtle-foreground">{t("provider_auth.paste_api_key")}</div>
                   <TextInput
                     label={t("provider_auth.api_key_label")}
                     type="password"
@@ -895,12 +895,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     disabled={actionDisabled}
                   />
                   {selectedEntry.env.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-gray-9">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-subtle-foreground">
                       {t("provider_auth.env_vars_label")}
                       {selectedEntry.env.map((envVar) => (
                         <span
                           key={envVar}
-                          className="rounded-md bg-gray-3/40 px-1.5 py-0.5 font-mono text-[10px] text-gray-11"
+                          className="rounded-md bg-accent/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
                         >
                           {envVar}
                         </span>
@@ -911,19 +911,19 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               ) : null}
 
               {resolvedView === "oauth-code" && selectedEntry && oauthSession ? (
-                <div className="mx-3.5 rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
+                <div className="mx-3.5 rounded-xl border border-border/40 bg-muted/50 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
-                      <div className="text-xs text-gray-10 mt-1">{t("provider_auth.finish_oauth")}</div>
+                      <div className="text-sm font-medium text-foreground">{selectedEntry.name}</div>
+                      <div className="text-xs text-subtle-foreground mt-1">{t("provider_auth.finish_oauth")}</div>
                     </div>
                     <Button variant="outline" onClick={handleBack} disabled={actionDisabled}>
                       {t("provider_auth.back")}
                     </Button>
                   </div>
-                  <div className="text-xs text-gray-9">{t("provider_auth.complete_signin")}</div>
+                  <div className="text-xs text-subtle-foreground">{t("provider_auth.complete_signin")}</div>
                   {oauthInstructions ? (
-                    <div className="rounded-lg border border-gray-6/60 bg-gray-1/60 px-3 py-2 text-[11px] text-gray-9 font-mono break-all">
+                    <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2 text-[11px] text-subtle-foreground font-mono break-all">
                       {oauthInstructions}
                     </div>
                   ) : null}
@@ -964,31 +964,31 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               ) : null}
 
               {resolvedView === "oauth-auto" && selectedEntry && oauthSession ? (
-                <div className="mx-3.5 rounded-xl border border-gray-6/40 bg-gray-2/50 shadow-sm p-5 space-y-4">
+                <div className="mx-3.5 rounded-xl border border-border/40 bg-muted/50 shadow-sm p-5 space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-12">{selectedEntry.name}</div>
-                      <div className="text-xs text-gray-10 mt-1">{t("provider_auth.waiting_browser")}</div>
+                      <div className="text-sm font-medium text-foreground">{selectedEntry.name}</div>
+                      <div className="text-xs text-subtle-foreground mt-1">{t("provider_auth.waiting_browser")}</div>
                     </div>
                     <Button variant="outline" onClick={handleBack} disabled={actionDisabled}>
                       {t("provider_auth.back")}
                     </Button>
                   </div>
                   {isOpenAiHeadlessSession ? (
-                    <div className="space-y-2 text-xs text-gray-9">
+                    <div className="space-y-2 text-xs text-subtle-foreground">
                       <div>{t("provider_auth.device_signin")}</div>
                       <div>{t("provider_auth.device_auth_first_time")}</div>
                       <div>ChatGPT &gt; Account Settings &gt; Security &gt; Enable device code authorization</div>
                       <div>{t("provider_auth.copy_code_when_ready")}</div>
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-9">{t("provider_auth.browser_tab_opened")}</div>
+                    <div className="text-xs text-subtle-foreground">{t("provider_auth.browser_tab_opened")}</div>
                   )}
                   {oauthDisplayCode ? (
-                    <div className="rounded-xl border border-gray-6/70 bg-gray-2/40 p-3 flex items-center gap-3">
+                    <div className="rounded-xl border border-border/70 bg-muted/40 p-3 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[10px] uppercase tracking-wide text-gray-8">{t("provider_auth.confirmation_code")}</div>
-                        <div className="text-sm text-gray-12 font-mono break-all">{oauthDisplayCode}</div>
+                        <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("provider_auth.confirmation_code")}</div>
+                        <div className="text-sm text-foreground font-mono break-all">{oauthDisplayCode}</div>
                       </div>
                       <Button variant="outline" size="sm" className="shrink-0" onClick={() => void copyOauthDisplayCode()}>
                         {oauthCodeCopied ? t("provider_auth.copied") : t("provider_auth.copy")}
@@ -996,11 +996,11 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     </div>
                   ) : null}
                   {isOpenAiHeadlessSession && !oauthBrowserOpened ? (
-                    <div className="flex items-center gap-2 text-xs text-gray-9">
+                    <div className="flex items-center gap-2 text-xs text-subtle-foreground">
                       <span>{t("provider_auth.checks_start_hint")}</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-xs text-gray-9">
+                    <div className="flex items-center gap-2 text-xs text-subtle-foreground">
                       <Loader2 size={14} className={props.submitting || pollingBusy || oauthAutoBusy ? "animate-spin" : ""} />
                       <span>{t("provider_auth.checking_automatically")}</span>
                     </div>
@@ -1018,7 +1018,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                           : t("provider_auth.open_browser")
                         : t("provider_auth.open_browser_again")}
                     </Button>
-                    <div className="text-[11px] text-gray-9 text-right">{t("provider_auth.window_closes")}</div>
+                    <div className="text-[11px] text-subtle-foreground text-right">{t("provider_auth.window_closes")}</div>
                   </div>
                 </div>
               ) : null}
@@ -1027,7 +1027,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
         </div>
 
         <DialogFooter className="shrink-0 flex-col gap-3">
-          <div className="min-h-[16px] text-xs text-gray-10">
+          <div className="min-h-[16px] text-xs text-subtle-foreground">
             {props.submitting ? submittingLabel() : null}
           </div>
           {/* One action bar per view: Back returns to the list, Close dismisses,

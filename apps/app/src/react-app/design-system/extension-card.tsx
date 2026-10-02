@@ -138,7 +138,7 @@ function ExtensionBadges(props: {
         </span>
       )}
       {props.hidden ? (
-        <span className="shrink-0 rounded-md bg-gray-3 px-1.5 py-0.5 text-[10px] font-medium text-gray-11">
+        <span className="shrink-0 rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
           {t("extension.hidden")}
         </span>
       ) : null}

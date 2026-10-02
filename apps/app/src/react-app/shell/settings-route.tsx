@@ -1644,7 +1644,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const providerStatusLabel = providerConnectedIds.length > 0 ? t("status.connected") : t("status.disconnected_label");
   const providerStatusStyle = providerConnectedIds.length > 0
     ? "bg-success-soft/10 text-success-ink border-success-muted/20"
-    : "bg-gray-4/60 text-gray-11 border-gray-7/50";
+    : "bg-accent-active/60 text-muted-foreground border-border-strong/50";
   const providerSummary = providerConnectedIds.length > 0
     ? t("status.providers_connected", { count: providerConnectedIds.length })
     : t("settings.no_providers_connected");

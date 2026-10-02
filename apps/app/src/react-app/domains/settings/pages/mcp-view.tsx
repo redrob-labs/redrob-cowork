@@ -175,9 +175,9 @@ const statusDot = (status: ReactMcpStatus) => {
     case "needs_client_registration":
       return "bg-warning";
     case "disabled":
-      return "bg-gray-8";
+      return "bg-border-strong";
     case "disconnected":
-      return "bg-gray-7";
+      return "bg-border";
     default:
       return "bg-destructive";
   }
@@ -211,7 +211,7 @@ const statusBadgeStyle = (status: ReactMcpStatus) => {
       return "bg-warning-soft text-warning-ink";
     case "disabled":
     case "disconnected":
-      return "bg-gray-3 text-gray-11";
+      return "bg-accent text-muted-foreground";
     default:
       return "bg-destructive-soft text-destructive-ink";
   }
@@ -234,7 +234,7 @@ const serviceIcon = (name: string) => {
 
 const serviceColor = (name: string) => {
   const lower = name.toLowerCase();
-  if (lower.includes("notion")) return "text-gray-12";
+  if (lower.includes("notion")) return "text-foreground";
   if (lower.includes("linear")) return "text-spectrum-sky";
   if (lower.includes("sentry")) return "text-spectrum-violet";
   if (lower.includes("stripe")) return "text-spectrum-sky";
@@ -242,13 +242,13 @@ const serviceColor = (name: string) => {
   if (lower.includes("devtools")) {
     return "text-spectrum-orange";
   }
-  if (lower.includes("redrob")) return "text-gray-12";
+  if (lower.includes("redrob")) return "text-foreground";
   return "text-dls-secondary";
 };
 
 const serviceIconBg = (name: string) => {
   const lower = name.toLowerCase();
-  if (lower.includes("notion")) return "bg-gray-3 border-gray-6";
+  if (lower.includes("notion")) return "bg-accent border-border";
   if (lower.includes("linear")) return "bg-spectrum-sky/15 border-spectrum-sky/35";
   if (lower.includes("sentry")) return "bg-spectrum-violet/15 border-spectrum-violet/35";
   if (lower.includes("stripe")) return "bg-spectrum-sky/15 border-spectrum-sky/35";
@@ -256,7 +256,7 @@ const serviceIconBg = (name: string) => {
   if (lower.includes("devtools")) {
     return "bg-spectrum-orange/15 border-spectrum-orange/35";
   }
-  if (lower.includes("redrob")) return "bg-gray-3 border-gray-6";
+  if (lower.includes("redrob")) return "bg-accent border-border";
   return "bg-dls-hover border-dls-border";
 };
 
@@ -1173,7 +1173,7 @@ export function ExtensionStateTabs(props: {
       state: "ready",
       label: t("connect.group_ready"),
       count: props.readyCount,
-      countClassName: "bg-gray-3 text-gray-11",
+      countClassName: "bg-accent text-muted-foreground",
     },
     {
       state: "available",

@@ -169,7 +169,7 @@ export function ProviderIcon(props: ProviderIconProps) {
         />
       ) : (
         <div
-          className="flex h-full w-full items-center justify-center rounded bg-gray-3 text-[10px] font-bold tracking-tight text-gray-11"
+          className="flex h-full w-full items-center justify-center rounded bg-accent text-[10px] font-bold tracking-tight text-muted-foreground"
           style={{ fontSize: `${Math.max(8, size * 0.45)}px` }}
         >
           {fallbackLetters}

@@ -62,13 +62,13 @@ export function PluginsView(props: PluginsViewProps) {
   const scope = extensions.pluginScope;
   return (
     <section className="space-y-6 max-w-3xl w-full">
-      <div className="bg-gray-2/30 border border-gray-6/50 rounded-2xl p-5 space-y-4">
+      <div className="bg-muted/30 border border-border/50 rounded-2xl p-5 space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-12">
+            <div className="text-sm font-medium text-foreground">
               {t("plugins.title")}
             </div>
-            <div className="text-xs text-gray-10">{t("plugins.desc")}</div>
+            <div className="text-xs text-subtle-foreground">{t("plugins.desc")}</div>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -102,20 +102,20 @@ export function PluginsView(props: PluginsViewProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-1 text-xs text-gray-10">
+        <div className="flex flex-col gap-1 text-xs text-subtle-foreground">
           <div>{t("plugins.config_label")}</div>
-          <div className="text-gray-7 font-mono truncate">
+          <div className="text-disabled-foreground font-mono truncate">
             {extensions.pluginConfigPath() ??
               extensions.pluginConfig()?.path ??
               t("plugins.not_loaded_yet")}
           </div>
           {props.accessHint ? (
-            <div className="text-gray-9">{props.accessHint}</div>
+            <div className="text-subtle-foreground">{props.accessHint}</div>
           ) : null}
         </div>
 
         <div className="space-y-3">
-          <div className="text-xs font-medium text-gray-11 uppercase tracking-wider">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             {t("plugins.suggested_heading")}
           </div>
           <div className="grid gap-3">
@@ -131,18 +131,18 @@ export function PluginsView(props: PluginsViewProps) {
               return (
                 <div
                   key={plugin.packageName}
-                  className="rounded-2xl border border-gray-6/60 bg-gray-1/40 p-4 space-y-3"
+                  className="rounded-2xl border border-border/60 bg-background/40 p-4 space-y-3"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-12 font-mono">
+                      <div className="text-sm font-medium text-foreground font-mono">
                         {plugin.name}
                       </div>
-                      <div className="text-xs text-gray-10 mt-1">
+                      <div className="text-xs text-subtle-foreground mt-1">
                         {plugin.description}
                       </div>
                       {plugin.packageName !== plugin.name ? (
-                        <div className="text-xs text-gray-7 font-mono mt-1">
+                        <div className="text-xs text-disabled-foreground font-mono mt-1">
                           {plugin.packageName}
                         </div>
                       ) : null}
@@ -181,47 +181,47 @@ export function PluginsView(props: PluginsViewProps) {
                     {plugin.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] uppercase tracking-wide bg-gray-4/70 text-gray-11 px-2 py-0.5 rounded-full"
+                        className="text-[10px] uppercase tracking-wide bg-accent-active/70 text-muted-foreground px-2 py-0.5 rounded-full"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
                   {isGuided && isGuideOpen ? (
-                    <div className="rounded-xl border border-gray-6/70 bg-gray-1/60 p-4 space-y-3">
+                    <div className="rounded-xl border border-border/70 bg-background/60 p-4 space-y-3">
                       {(plugin.steps ?? []).map((step, idx) => (
                         <div
                           key={`${plugin.packageName}:step:${step.title}:${step.command ?? step.url ?? step.path ?? step.description}`}
                           className="space-y-1"
                         >
-                          <div className="text-xs font-medium text-gray-11">
+                          <div className="text-xs font-medium text-muted-foreground">
                             {idx + 1}. {step.title}
                           </div>
-                          <div className="text-xs text-gray-10">
+                          <div className="text-xs text-subtle-foreground">
                             {step.description}
                           </div>
                           {step.command ? (
-                            <div className="text-xs font-mono text-gray-12 bg-gray-2/60 border border-gray-6/70 rounded-lg px-3 py-2">
+                            <div className="text-xs font-mono text-foreground bg-muted/60 border border-border/70 rounded-lg px-3 py-2">
                               {step.command}
                             </div>
                           ) : null}
                           {step.note ? (
-                            <div className="text-xs text-gray-10">
+                            <div className="text-xs text-subtle-foreground">
                               {step.note}
                             </div>
                           ) : null}
                           {step.url ? (
-                            <div className="text-xs text-gray-10">
+                            <div className="text-xs text-subtle-foreground">
                               Open:{" "}
-                              <span className="font-mono text-gray-11">
+                              <span className="font-mono text-muted-foreground">
                                 {step.url}
                               </span>
                             </div>
                           ) : null}
                           {step.path ? (
-                            <div className="text-xs text-gray-10">
+                            <div className="text-xs text-subtle-foreground">
                               Path:{" "}
-                              <span className="font-mono text-gray-11">
+                              <span className="font-mono text-muted-foreground">
                                 {step.path}
                               </span>
                             </div>
@@ -237,7 +237,7 @@ export function PluginsView(props: PluginsViewProps) {
         </div>
 
         {extensions.pluginList().length === 0 ? (
-          <div className="rounded-xl border border-gray-6/60 bg-gray-1/40 p-4 text-sm text-gray-10">
+          <div className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm text-subtle-foreground">
             {t("plugins.empty")}
           </div>
         ) : (
@@ -245,15 +245,15 @@ export function PluginsView(props: PluginsViewProps) {
             {extensions.pluginList().map((plugin) => (
               <div
                 key={plugin.name}
-                className="flex items-center justify-between rounded-xl border border-gray-6/60 bg-gray-1/40 px-4 py-2.5"
+                className="flex items-center justify-between rounded-xl border border-border/60 bg-background/40 px-4 py-2.5"
               >
                 <div>
-                  <div className="text-sm text-gray-12 font-mono flex items-center gap-2">
-                    <Cpu size={14} className="text-gray-10" />
+                  <div className="text-sm text-foreground font-mono flex items-center gap-2">
+                    <Cpu size={14} className="text-subtle-foreground" />
                     {plugin.name}
                   </div>
                   {!plugin.removable ? (
-                    <div className="mt-1 text-xs text-gray-10">
+                    <div className="mt-1 text-xs text-subtle-foreground">
                       {plugin.source === "dir.global"
                         ? t("plugins.source_global_folder")
                         : t("plugins.source_workspace_folder")}
@@ -261,7 +261,7 @@ export function PluginsView(props: PluginsViewProps) {
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-[10px] uppercase tracking-wide text-gray-10">
+                  <div className="text-[10px] uppercase tracking-wide text-subtle-foreground">
                     {plugin.removable ? t("plugins.enabled") : t("settings.cap_read_only")}
                   </div>
                   {plugin.removable ? (
@@ -306,7 +306,7 @@ export function PluginsView(props: PluginsViewProps) {
             </Button>
           </div>
           {extensions.pluginStatus() ? (
-            <div className="text-xs text-gray-10">
+            <div className="text-xs text-subtle-foreground">
               {extensions.pluginStatus()}
             </div>
           ) : null}

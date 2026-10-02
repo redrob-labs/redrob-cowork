@@ -101,7 +101,7 @@ type SerializedComposerSkillNode = Spread<
 >;
 
 const MENTION_PILL_CLASS: Record<ComposerMentionKind, string> = {
-  file: "inline-flex items-center rounded-full border border-gray-6 bg-gray-3 px-2.5 py-1 text-xs font-medium text-gray-11",
+  file: "inline-flex items-center rounded-full border border-border bg-accent px-2.5 py-1 text-xs font-medium text-muted-foreground",
   agent: "inline-flex items-center rounded-full border border-spectrum-sky/35 bg-spectrum-sky/15 px-2.5 py-1 text-xs font-medium text-foreground",
   app: "inline-flex items-center rounded-full border border-spectrum-teal/35 bg-spectrum-teal/15 px-2.5 py-1 text-xs font-medium text-foreground",
 };
