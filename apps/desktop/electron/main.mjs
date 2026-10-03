@@ -2301,7 +2301,9 @@ async function createMainWindow() {
       process.platform === "win32"
         ? {
             titleBarStyle: "hidden",
-            titleBarOverlay: { color: "#00000000", symbolColor: "#9ca3af", height: 40 },
+            // Gray 5, the design system's neutral for icons on either ground; the
+            // overlay cannot read the renderer's tokens, so the value is written out.
+            titleBarOverlay: { color: "#00000000", symbolColor: "#aab0bb", height: 40 },
           }
         : { frame: false },
     );

@@ -1071,6 +1071,9 @@ export function AppSidebar(props: AppSidebarProps) {
     <SidebarContext.Provider value={contextValue}>
       <Sidebar
         collapsible="offcanvas"
+        // Redrob Cowork is the design system's Desk product: the rail carries
+        // the Desk wash (index.css, `[data-product]`).
+        data-product="desk"
         className="border-e-0 group-data-[side=left]:border-e-0 mac:**:data-[sidebar=sidebar]:bg-transparent"
       >
         <div className="hidden h-12 mac:block mac:titlebar-drag"/>
@@ -1106,7 +1109,7 @@ export function AppSidebar(props: AppSidebarProps) {
             </Button>
           </div>
         ) : null}
-        <SidebarHeader className="mb-0 mt-2">
+        <SidebarHeader className="mb-0 mt-2 border-b border-(--app-product-line) pb-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton

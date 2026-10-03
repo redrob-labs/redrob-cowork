@@ -269,6 +269,31 @@
   --dls-card-shadow: var(--shadow-card);
 }
 
+/**
+ * Product identity. Redrob Cowork is the design system's Desk product: its mark
+ * is Desk orange (#d87101) and its rail carries the Desk wash, the way the design
+ * system's AppShell does it - `.rr-shell[data-product] .rr-shell__side` - a
+ * gradient from the wash into the surface over the top 132px, at 55% on dark.
+ * Actions stay Redrob Blue; the product colour is identity, not interaction.
+ *
+ * The app's sidebar is its own component rather than the AppShell, so the same
+ * rule is written against its rail. `--app-product-*` because the design system
+ * scopes its own `--product-*` to `.rr-shell`.
+ */
+[data-product="desk"] {
+  --app-product-mark: var(--product-desk);
+  --app-product-wash: var(--product-desk-wash);
+  --app-product-line: var(--product-desk-line);
+}
+
+[data-theme="dark"] [data-product="desk"] {
+  --app-product-wash: color-mix(in srgb, var(--product-desk-wash) 55%, transparent);
+}
+
+[data-product] [data-sidebar="sidebar"] {
+  background-image: linear-gradient(180deg, var(--app-product-wash) 0, transparent 132px);
+}
+
 @media (prefers-reduced-transparency: reduce) {
   :root,
   [data-theme] {

@@ -1096,10 +1096,10 @@ export function SessionPage(props: SessionPageProps) {
           <ResizablePanelGroup
             orientation="horizontal"
             onLayoutChanged={sidePanelOpen ? commitBrowserPanelWidth : undefined}
-            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-xl"
+            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-(--card-radius)"
           >
             <ResizablePanel minSize={isMobile ? "0px" : "360px"} className="min-w-0">
-              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-dls-surface max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:lg:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
             <div className="flex min-w-0 items-center gap-3">
               {shellConfig.sidebar ? <SidebarTrigger className="mac:hidden" /> : null}
@@ -1511,7 +1511,7 @@ export function SessionPage(props: SessionPageProps) {
                   maxSize="70%"
                   className="min-h-0 overflow-hidden pl-2 lg:flex lg:flex-col"
                 >
-                  <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-dls-surface shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+                  <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-(--card-radius) border border-border bg-card shadow-card mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
                   {activeSidePanel === "extensions" && props.settingsSlot ? (
                     <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-background">
                       {props.settingsSlot}
