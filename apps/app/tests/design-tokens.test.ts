@@ -395,13 +395,18 @@ describe("Redrob design tokens", () => {
     expect(missing).toEqual([]);
   });
 
-  test("the primary button carries the ink its accent was drawn for", () => {
-    // White on Blue 6 and Redrob Black on Blue 5. A fixed `white` here would be
-    // 3.6:1 on the dark theme's lighter accent.
-    const button = /\.ow-button-primary \{([\s\S]*?)\n\}/.exec(TOKENS);
-    expect(button).not.toBeNull();
-    expect(declaration(button![1], "color")).toBe("var(--dls-accent-fg)");
-    expect(declaration(button![1], "background")).toBe("var(--dls-accent)");
+  test("the app's own component classes are retired for the design system's", () => {
+    // `.ow-soft-card`, `.ow-button-primary`, `.ow-status-pill`, `.ow-icon-tile` and
+    // `.ow-input` were a second component vocabulary: cards, buttons, pills and
+    // fields the design system now draws as `rr-card`, `rr-btn`, `rr-badge` and
+    // `rr-control`. Neither the rules nor a call site may come back.
+    const retired = /\bow-(?:soft-shell|soft-card(?:-quiet)?|button-(?:primary|secondary)|status-pill(?:-\w+)?|icon-tile(?:-muted)?|input)\b/;
+    expect(TOKENS).not.toMatch(retired);
+    const callers = walkFiles(join(APP_ROOT, "src"))
+      .filter((file) => /\.(tsx?|css)$/.test(file))
+      .filter((file) => retired.test(readText(file)))
+      .map((file) => file.slice(APP_ROOT.length + 1));
+    expect(callers).toEqual([]);
   });
 
   test("the terminal paints in brand primitives", () => {
