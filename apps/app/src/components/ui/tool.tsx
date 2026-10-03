@@ -17,11 +17,9 @@ import {
   ChevronDown,
   CircleAlert,
   Copy,
-  ExternalLink,
   FilePen,
   KeyRound,
   ListTodo,
-  LoaderCircle,
   MessageCircleQuestion,
   RefreshCcw,
   Search,
@@ -163,55 +161,68 @@ const Tool = ({
     }
   }, [resultText])
 
+  // The design system's AgentAction (`rr-action`): one thing the agent did, as a
+  // head that names it and says how it went, over a body with what went in and
+  // what came out. Base UI's Collapsible keeps the disclosure; the state reads
+  // the design system's running, done and failed tones.
+  const actionState = inFlight ? "running" : isError ? "error" : "done"
   return (
-    <Collapsible className={className} defaultOpen={defaultOpen}>
-      <div className="flex min-w-0 items-center gap-2" aria-live="polite">
-        <CollapsibleTrigger
-          className="group text-muted-foreground hover:text-foreground flex min-w-0 flex-1 cursor-pointer items-center justify-start gap-2 overflow-hidden text-start text-sm transition-colors"
+    <Collapsible className={cn("rr-action", className)} defaultOpen={defaultOpen}>
+      <CollapsibleTrigger className="rr-action__head group min-w-0 cursor-pointer">
+        <span className="rr-action__icon shrink-0" aria-hidden="true">
+          <Icon className="size-full" />
+        </span>
+        <span className="rr-action__summary min-w-0 text-foreground">{label}</span>
+        <span
+          className={cn("rr-action__state shrink-0", `rr-action__state--${actionState}`)}
+          aria-live="polite"
         >
-          <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
-            <span className="transition-opacity group-hover:opacity-0">
-              {inFlight ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : isError ? (
-                <CircleAlert className="text-destructive size-4" />
+          {actionState === "running" ? (
+            <>
+              <span className="rr-spinner" aria-hidden="true" />
+              <span>{t("tool.state_running")}</span>
+            </>
+          ) : actionState === "error" ? (
+            <>
+              <CircleAlert className="size-3.5" aria-hidden="true" />
+              {errorAttribution ? (
+                <span
+                  className="rr-badge rr-badge--outline rr-badge--neutral rr-badge--sm font-medium"
+                  title={`${errorAttribution.confidence}: ${errorAttribution.description}`}
+                  aria-label={`${t("tool.error_attribution")}: ${errorAttribution.label}. ${errorAttribution.confidence}.`}
+                >
+                  {errorAttribution.label}
+                </span>
               ) : (
-                <Icon className="size-3.5" />
+                <span>{t("tool.state_failed")}</span>
               )}
-            </span>
-            <ChevronDown className="absolute size-4 opacity-0 transition-opacity group-hover:opacity-100 group-data-panel-open:rotate-180" />
-          </span>
-          <span className="min-w-0 truncate">{label}</span>
-          {resultSummary ? (
-            <span
-              className="shrink-0 text-xs text-muted-foreground/80"
-              data-testid="tool-result-summary"
-            >
-              {resultSummary}
-            </span>
-          ) : null}
-          {isError && !errorAttribution ? (
-            <span className="text-destructive shrink-0 text-xs">failed</span>
-          ) : null}
-          {errorAttribution ? (
-            <span
-              className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 text-2xs font-medium leading-none text-muted-foreground transition-colors"
-              title={`${errorAttribution.confidence}: ${errorAttribution.description}`}
-              aria-label={`Error attribution: ${errorAttribution.label}. ${errorAttribution.confidence}.`}
-            >
-              {errorAttribution.label}
-            </span>
-          ) : null}
-        </CollapsibleTrigger>
-      </div>
-      <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden text-sm transition-[height] duration-150 ease-out data-starting-style:h-0 data-ending-style:h-0 [&[hidden]:not([hidden='until-found'])]:hidden">
-        <div className="bg-muted relative mt-2 flex flex-col gap-2 rounded-lg p-2 pr-10 text-xs">
+            </>
+          ) : (
+            <>
+              <Check className="size-3.5" aria-hidden="true" />
+              {resultSummary ? (
+                <span className="font-normal text-muted-foreground" data-testid="tool-result-summary">
+                  {resultSummary}
+                </span>
+              ) : (
+                <span>{t("tool.state_done")}</span>
+              )}
+            </>
+          )}
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className="rr-accordion__chevron size-3.5 shrink-0 group-data-panel-open:rotate-180"
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-150 ease-out data-starting-style:h-0 data-ending-style:h-0 [&[hidden]:not([hidden='until-found'])]:hidden">
+        <div className="rr-action__body relative flex flex-col gap-2 pe-10">
           {resultText !== null ? (
             <Button
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="absolute right-2 top-2"
+              className="absolute end-2 top-2"
               data-testid="tool-result-copy-action"
               title={copied ? t("common.copied") : t("tool.copy_result")}
               aria-label={copied ? t("common.copied") : t("tool.copy_result")}
@@ -224,7 +235,7 @@ const Tool = ({
             inputDiff !== null ? (
               <DiffLines diff={inputDiff} />
             ) : (
-              <pre className="whitespace-pre-wrap wrap-break-word">
+              <pre className="m-0 whitespace-pre-wrap wrap-break-word">
                 {formatValue(input)}
               </pre>
             )
@@ -233,18 +244,18 @@ const Tool = ({
             isDiffText(toolPart.output) ? (
               <DiffLines diff={toolPart.output} />
             ) : (
-              <pre className="max-h-60 overflow-auto whitespace-pre-wrap wrap-break-word opacity-80">
+              <pre className="m-0 max-h-60 overflow-auto whitespace-pre-wrap wrap-break-word text-foreground">
                 {formatValue(toolPart.output)}
               </pre>
             )
           ) : null}
           {isError && toolPart.errorText ? (
-            <pre className="text-destructive max-h-60 overflow-auto whitespace-pre-wrap wrap-break-word">
+            <pre className="m-0 max-h-60 overflow-auto whitespace-pre-wrap wrap-break-word text-destructive-ink">
               {toolPart.errorText}
             </pre>
           ) : null}
           {inFlight && !hasInput ? (
-            <span className="text-muted-foreground">Waiting for input…</span>
+            <span className="font-sans text-muted-foreground">{t("tool.waiting_for_input")}</span>
           ) : null}
         </div>
       </CollapsibleContent>

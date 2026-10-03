@@ -487,7 +487,11 @@ const AssistantMessage = React.memo(
               return (
                 <React.Fragment key={`text-${index}`}>
                   <MessageContent
-                    className="text-foreground prose w-full min-w-0 flex-1 rounded-lg bg-transparent p-0"
+                    // The design system's assistant bubble: generated text sits on
+                    // the AI surface with the AI edge, so machine output is never
+                    // mistaken for a person's.
+                    data-surface="ai"
+                    className="text-foreground prose w-full min-w-0 flex-1 rounded-lg border border-border-ai bg-surface-ai p-4"
                     markdown
                     isStreaming={isStreaming}
                     highlightQuery={highlightQuery}
@@ -682,7 +686,9 @@ const UserMessage = React.memo(
               >
                 {hasContent ? (
                   <MessageContent
-                    className="bg-muted text-foreground max-w-[85%] rounded-2xl px-4 py-2.5 leading-6 sm:max-w-[75%] !select-text not-prose"
+                    // The design system's user bubble: the sunken surface at the
+                    // card radius, 12/16 inset.
+                    className="bg-muted text-foreground max-w-[85%] rounded-lg px-4 py-3 leading-6 sm:max-w-[75%] !select-text not-prose"
                     style={{ userSelect: "text" }}
                   >
                     {inlineParts.map((part, index) => {
