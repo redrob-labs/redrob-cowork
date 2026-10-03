@@ -13,6 +13,12 @@
  * macOS window translucent) and so it follows Tailwind's own preflight.
  */
 @import "@redrob-labs/ui/preflight.css" layer(base);
+/*
+ * The design system's component classes (`rr-*`), in the components layer: a
+ * primitive in `components/ui` renders them, and a call site's own utility
+ * (`w-full`, `h-8`) still wins because utilities come after components.
+ */
+@import "@redrob-labs/ui/styles.css" layer(components);
 @import "../styles/tailwind-theme.css";
 
 @import "tw-animate-css";

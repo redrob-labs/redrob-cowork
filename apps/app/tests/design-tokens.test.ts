@@ -756,7 +756,12 @@ function stylesheetColours(css: string): string[] {
 
 // Every colour the design system declares, in hex and rgba alike. The design
 // system is the palette, so its values are declared values by definition.
-const BRAND_VALUES = new Set(stylesheetColours(DESIGN_SYSTEM_TOKENS));
+// The component stylesheet is the design system's too, and carries a handful of
+// literals of its own (a white pill on a product band, scrim alphas).
+const BRAND_VALUES = new Set([
+  ...stylesheetColours(DESIGN_SYSTEM_TOKENS),
+  ...stylesheetColours(readText(appRequire.resolve("@redrob-labs/ui/styles.css"))),
+]);
 describe("the emitted stylesheet", () => {
   /**
    * The numbered ramps, counted so the number can only fall.
