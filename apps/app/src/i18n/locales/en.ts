@@ -227,6 +227,7 @@ const en = {
   "common.beta": "Beta",
   "common.cancel": "Cancel",
   "common.close": "Close",
+  "common.dismiss": "Dismiss",
   "common.confirm": "Confirm",
   "common.default_parens": "(default)",
   "common.edit": "Edit",

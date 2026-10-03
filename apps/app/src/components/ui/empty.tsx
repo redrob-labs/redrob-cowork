@@ -2,12 +2,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * The design system's EmptyState (`rr-empty`, `rr-empty__icon`, `rr-empty__title`,
+ * `rr-empty__desc`, `rr-empty__actions`): nothing here, and what to do about it.
+ *
+ * The design system sets an empty state flush left at section padding. The app's
+ * empty states sit centred in a panel or a dialog, so the frame keeps the app's
+ * centring and the parts take the design system's type, icon well and spacing.
+ */
 const emptyVariants = cva(
-  "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-2xl p-12 text-center text-balance",
+  "rr-empty w-full min-w-0 flex-1 items-center justify-center text-center text-balance",
   {
     variants: {
       variant: {
-        default: "border border-border",
+        default: "rounded-lg border border-border",
         ghost: "",
       },
     },
@@ -43,12 +51,13 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const emptyMediaVariants = cva(
-  "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "mb-1 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground [&_svg:not([class*='size-'])]:size-5",
+        // The design system's icon well: a brand-tinted circle with brand ink.
+        icon: "rr-empty__icon",
       },
     },
     defaultVariants: {
@@ -76,10 +85,7 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="empty-title"
-      className={cn(
-        "font-heading text-base font-medium",
-        className
-      )}
+      className={cn("rr-empty__title font-heading", className)}
       {...props}
     />
   )
@@ -90,7 +96,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
     <div
       data-slot="empty-description"
       className={cn(
-        "text-sm text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+        "rr-empty__desc [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
       )}
       {...props}
@@ -103,7 +109,7 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="empty-content"
       className={cn(
-        "flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance",
+        "rr-empty__actions w-full max-w-sm min-w-0 flex-col items-center text-sm text-balance",
         className
       )}
       {...props}

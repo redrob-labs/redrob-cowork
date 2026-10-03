@@ -228,6 +228,7 @@ const ko = {
   "common.beta": "베타",
   "common.cancel": "취소",
   "common.close": "닫기",
+  "common.dismiss": "알림 닫기",
   "common.confirm": "확인",
   "common.default_parens": "(기본값)",
   "common.edit": "편집",
