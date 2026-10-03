@@ -120,7 +120,7 @@ export function ToolAggregateGroup({ parts, className }: ToolAggregateGroupProps
                     const file = getAggregateRowFile(part)
                     if (!file) {
                       return (
-                        <span className="min-w-0 truncate font-mono text-[11px]">
+                        <span className="min-w-0 truncate font-mono text-2xs">
                           {getAggregateRowLabel(part)}
                         </span>
                       )
@@ -139,7 +139,7 @@ export function ToolAggregateGroup({ parts, className }: ToolAggregateGroupProps
                   ) : null}
                 </div>
                 {reason ? (
-                  <div className="text-[11px] text-muted-foreground">failed — {reason}</div>
+                  <div className="text-2xs text-muted-foreground">failed — {reason}</div>
                 ) : null}
               </div>
             )

@@ -207,7 +207,7 @@ export function AddMcpModal(props: AddMcpModalProps) {
               </button>
             </div>
             {props.isRemoteWorkspace ? (
-              <div className="mt-2 text-[11px] text-dls-secondary">
+              <div className="mt-2 text-2xs text-dls-secondary">
                 {t("mcp.remote_workspace_url_hint")}
               </div>
             ) : null}
@@ -221,7 +221,7 @@ export function AddMcpModal(props: AddMcpModalProps) {
                 value={state.url}
                 onChange={(event) => dispatch({ url: event.currentTarget.value })}
               />
-              <div className="text-[11px] text-dls-secondary">
+              <div className="text-2xs text-dls-secondary">
                 {t("mcp.oauth_autodetect_hint")}
               </div>
               {!props.isRemoteWorkspace ? <div className="rounded-xl border border-dls-border bg-dls-hover/30">
@@ -235,7 +235,7 @@ export function AddMcpModal(props: AddMcpModalProps) {
                 </button>
                 {state.oauthExpanded ? (
                   <div className="space-y-3 border-t border-dls-border px-3 py-3">
-                    <div className="text-[11px] leading-relaxed text-dls-secondary">
+                    <div className="text-2xs leading-relaxed text-dls-secondary">
                       {t("mcp.oauth_advanced_hint")}
                     </div>
                     <TextInput
@@ -257,7 +257,7 @@ export function AddMcpModal(props: AddMcpModalProps) {
                       value={state.oauthScope}
                       onChange={(event) => dispatch({ oauthScope: event.currentTarget.value })}
                     />
-                    <div className="rounded-lg border border-warning-muted bg-warning-soft px-3 py-2 text-[11px] leading-relaxed text-warning-ink">
+                    <div className="rounded-lg border border-warning-muted bg-warning-soft px-3 py-2 text-2xs leading-relaxed text-warning-ink">
                       {t("mcp.oauth_secret_warning")}
                     </div>
                   </div>

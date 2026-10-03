@@ -139,7 +139,7 @@ function MessageTimestamp({ message, className }: { message: UIMessage; classNam
   return (
     <span
       className={cn(
-        "select-none whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/70",
+        "select-none whitespace-nowrap text-2xs tabular-nums text-muted-foreground/70",
         className
       )}
       title={new Date(created).toLocaleString()}
@@ -332,7 +332,7 @@ function FileMessage({ part, tone }: FileMessageProps) {
         <DescriptiveButtonContent className="gap-0">
           <DescriptiveButtonTitle className="truncate text-xs">{title}</DescriptiveButtonTitle>
           {badge ? (
-            <DescriptiveButtonDescription className="text-[10px]">
+            <DescriptiveButtonDescription className="text-2xs">
               {badge}
             </DescriptiveButtonDescription>
           ) : null}
@@ -624,7 +624,7 @@ function renderPlainTextWithLinks(text: string, highlightQuery: string | undefin
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            className="me-1 inline-block size-3.5 rounded-[3px] align-[-2px]"
+            className="me-1 inline-block size-3.5 rounded-xs align-[-2px]"
           />
         ) : null}
         {url}
@@ -682,7 +682,7 @@ const UserMessage = React.memo(
               >
                 {hasContent ? (
                   <MessageContent
-                    className="bg-muted text-foreground max-w-[85%] rounded-3xl px-4 py-2.5 leading-6 sm:max-w-[75%] !select-text not-prose"
+                    className="bg-muted text-foreground max-w-[85%] rounded-2xl px-4 py-2.5 leading-6 sm:max-w-[75%] !select-text not-prose"
                     style={{ userSelect: "text" }}
                   >
                     {inlineParts.map((part, index) => {
@@ -1442,7 +1442,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
       ) : null}
       {routedModel ? (
         <span
-          className="max-w-[50%] truncate font-mono text-[11px] text-muted-foreground/80"
+          className="max-w-[50%] truncate font-mono text-2xs text-muted-foreground/80"
           title={t("usage.routed_model")}
         >
           {routedModel}
@@ -1450,7 +1450,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
       ) : null}
       {text ? (
         <span
-          className="font-mono text-[11px] tabular-nums text-muted-foreground/80"
+          className="font-mono text-2xs tabular-nums text-muted-foreground/80"
           title={t("usage.turn_cost")}
         >
           {text}

@@ -771,14 +771,14 @@ export function McpAuthModal(props: McpAuthModalProps) {
                           : t("mcp.auth.reauth_action")}
                       </Button>
                     ) : (
-                      <div className="text-[11px] text-destructive-ink">
+                      <div className="text-2xs text-destructive-ink">
                         {t("mcp.auth.reauth_cli_hint", { server: serverName })}
                       </div>
                     )
                   ) : (
-                    <div className="text-[11px] text-destructive-ink">{t("mcp.auth.reauth_remote_hint")}</div>
+                    <div className="text-2xs text-destructive-ink">{t("mcp.auth.reauth_remote_hint")}</div>
                   )}
-                  {cliAuthResult ? <div className="text-[11px] text-destructive-ink">{cliAuthResult}</div> : null}
+                  {cliAuthResult ? <div className="text-2xs text-destructive-ink">{cliAuthResult}</div> : null}
                 </div>
               ) : null}
             </div>
@@ -790,10 +790,10 @@ export function McpAuthModal(props: McpAuthModalProps) {
               <div className="text-xs text-subtle-foreground">{t("mcp.auth.manual_finish_hint")}</div>
               <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/40 px-3 py-2">
                 <div className="min-w-0 flex-1">
-                  <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">
+                  <div className="text-2xs uppercase tracking-wide text-disabled-foreground">
                     {t("mcp.auth.authorization_link")}
                   </div>
-                  <div className="truncate font-mono text-[11px] text-muted-foreground">{authorizationUrl}</div>
+                  <div className="truncate font-mono text-2xs text-muted-foreground">{authorizationUrl}</div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => void handleCopyAuthorizationUrl()}>
                   {authUrlCopied ? t("mcp.auth.copied") : t("mcp.auth.copy_link")}
@@ -805,7 +805,7 @@ export function McpAuthModal(props: McpAuthModalProps) {
                 value={callbackInput}
                 onChange={(event) => setCallbackInput(event.currentTarget.value)}
               />
-              <div className="text-[11px] text-subtle-foreground">{t("mcp.auth.port_forward_hint")}</div>
+              <div className="text-2xs text-subtle-foreground">{t("mcp.auth.port_forward_hint")}</div>
               <div className="flex justify-end">
                 <Button
                   onClick={() => void handleManualComplete()}

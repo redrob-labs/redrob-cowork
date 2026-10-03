@@ -61,10 +61,10 @@ export function NukeDialog(props: NukeDialogProps) {
 
         <div className="space-y-4 overflow-y-auto pr-1 text-sm">
           <div className="rounded-xl border border-destructive-muted/30 bg-destructive-soft/10 p-3">
-            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-destructive-ink">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-destructive-ink">
               {t("settings.nuke_deleted_title")}
             </div>
-            <div className="max-h-40 overflow-auto rounded-lg bg-dls-sidebar/40 p-2 font-mono text-[11px] text-dls-text">
+            <div className="max-h-40 overflow-auto rounded-lg bg-dls-sidebar/40 p-2 font-mono text-2xs text-dls-text">
               {deletePaths.length ? (
                 <ul className="space-y-1">
                   {deletePaths.map((targetPath) => (
@@ -75,16 +75,16 @@ export function NukeDialog(props: NukeDialogProps) {
                 <div>{t("settings.nuke_deleted_empty")}</div>
               )}
             </div>
-            <div className="mt-2 text-[11px] text-dls-secondary">
+            <div className="mt-2 text-2xs text-dls-secondary">
               {t("settings.nuke_partitions", { partitions })}
             </div>
           </div>
 
           <div className="rounded-xl border border-dls-border bg-dls-sidebar/30 p-3">
-            <div className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-dls-secondary">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-dls-secondary">
               {t("settings.nuke_survives_title")}
             </div>
-            <ul className="list-disc space-y-1 pl-5 text-[12px] text-dls-secondary">
+            <ul className="list-disc space-y-1 pl-5 text-xs text-dls-secondary">
               {props.deleteBootstrap ? null : (
                 <li>
                   {t("settings.nuke_survives_bootstrap", {
@@ -106,10 +106,10 @@ export function NukeDialog(props: NukeDialogProps) {
               className="mt-0.5"
             />
             <span className="min-w-0">
-              <span className="block text-[13px] font-medium text-dls-text">
+              <span className="block text-sm font-medium text-dls-text">
                 {t("settings.nuke_bootstrap_delete_label")}
               </span>
-              <span className="mt-1 block break-all text-[11px] text-dls-secondary">
+              <span className="mt-1 block break-all text-2xs text-dls-secondary">
                 {t("settings.nuke_bootstrap_delete_desc", {
                   path: props.manifestPreview?.bootstrapPath ?? t("settings.nuke_no_bootstrap_path"),
                 })}
@@ -118,7 +118,7 @@ export function NukeDialog(props: NukeDialogProps) {
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-[13px] font-medium text-dls-text">
+            <span className="mb-1.5 block text-sm font-medium text-dls-text">
               {t("settings.nuke_confirmation_label")}
             </span>
             <input
@@ -127,9 +127,9 @@ export function NukeDialog(props: NukeDialogProps) {
               placeholder={t("settings.nuke_confirmation_placeholder")}
               onChange={(event) => props.onSetConfirmationText(event.currentTarget.value)}
               disabled={props.busy || props.previewBusy}
-              className="w-full rounded-xl border border-dls-border bg-dls-surface px-4 py-3 text-[14px] text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl border border-dls-border bg-dls-surface px-4 py-3 text-sm text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60"
             />
-            <span className="mt-1.5 block text-[11px] text-dls-secondary">
+            <span className="mt-1.5 block text-2xs text-dls-secondary">
               {t("settings.nuke_confirmation_hint")}
             </span>
           </label>

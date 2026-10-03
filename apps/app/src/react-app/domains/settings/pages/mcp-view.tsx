@@ -915,7 +915,7 @@ export function McpView(props: McpViewProps) {
               type="button"
               aria-pressed={selected}
               onClick={() => setInventoryFilter(f)}
-              className={`inline-flex h-[26px] items-center rounded-full border px-3 text-[12px] font-medium transition-colors ${
+              className={`inline-flex h-[26px] items-center rounded-full border px-3 text-xs font-medium transition-colors ${
                 selected
                   ? "border-foreground bg-foreground text-background"
                   : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
@@ -929,7 +929,7 @@ export function McpView(props: McpViewProps) {
           type="button"
           aria-pressed={showHidden}
           onClick={() => setShowHidden((current) => !current)}
-          className={`inline-flex h-[26px] items-center rounded-full border px-3 text-[12px] font-medium transition-colors ${
+          className={`inline-flex h-[26px] items-center rounded-full border px-3 text-xs font-medium transition-colors ${
             showHidden
               ? "border-foreground bg-foreground text-background"
               : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground"
@@ -1198,7 +1198,7 @@ export function ExtensionStateTabs(props: {
             type="button"
             role="tab"
             aria-selected={active}
-            className={`-mb-px inline-flex items-center gap-2 border-b-2 px-0.5 pb-2.5 text-[13px] font-medium transition-colors ${
+            className={`-mb-px inline-flex items-center gap-2 border-b-2 px-0.5 pb-2.5 text-sm font-medium transition-colors ${
               active
                 ? "border-foreground text-foreground"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -1207,7 +1207,7 @@ export function ExtensionStateTabs(props: {
           >
             <span>{tab.label}</span>
             {tab.count === null ? null : (
-              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${tab.countClassName}`}>
+              <span className={`rounded-full px-1.5 py-0.5 text-2xs font-semibold tabular-nums ${tab.countClassName}`}>
                 {tab.count}
               </span>
             )}
@@ -1397,11 +1397,11 @@ function McpQuickConnectSection(props: {
           ))}
         </div>
       ) : !hasCards ? (
-        <div className="rounded-[10px] border border-dashed border-dls-border bg-dls-surface px-6 py-12 text-center">
-          <p className="text-[15px] font-medium text-dls-text">
+        <div className="rounded-lg border border-dashed border-dls-border bg-dls-surface px-6 py-12 text-center">
+          <p className="text-base font-medium text-dls-text">
             {props.filtersActive ? t("extensions.empty_filtered_title") : t("extensions.empty_title")}
           </p>
-          <p className="mt-2 text-[13px] text-dls-secondary">
+          <p className="mt-2 text-sm text-dls-secondary">
             {props.filtersActive ? t("extensions.empty_filtered_hint") : t("extensions.empty_hint")}
           </p>
         </div>
@@ -1455,11 +1455,11 @@ function McpConfiguredServersSection(props: {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-[11px] font-semibold uppercase tracking-widest text-dls-secondary">
+        <h3 className="text-2xs font-semibold uppercase tracking-widest text-dls-secondary">
           {t("extensions.mcp_servers_section")}
         </h3>
         {props.lastUpdatedAt ? (
-          <span className="tabular-nums text-[11px] text-dls-secondary">
+          <span className="tabular-nums text-2xs text-dls-secondary">
             {t("mcp.last_synced")} {formatRelativeTime(props.lastUpdatedAt)}
           </span>
         ) : null}
@@ -1545,7 +1545,7 @@ function McpConfiguredServerRow(props: {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <div className={`size-2 rounded-full ${statusDot(props.status)}`} />
-            <span className="text-[11px] text-dls-secondary">{friendlyStatus(props.status)}</span>
+            <span className="text-2xs text-dls-secondary">{friendlyStatus(props.status)}</span>
           </div>
           <div className={`transition-transform ${props.selected ? "rotate-180" : ""}`}>
             <ChevronDown size={14} className="text-dls-secondary/40" />
@@ -1566,11 +1566,11 @@ function McpConfiguredServerDetails(props: Parameters<typeof McpConfiguredServer
         <span className="text-dls-text">{props.entry.config.type === "remote" ? t("mcp.type_cloud") : t("mcp.type_local")}</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="rounded-md border border-dls-border bg-dls-surface px-2 py-0.5 text-[10px] font-medium text-dls-text">
+        <span className="rounded-md border border-dls-border bg-dls-surface px-2 py-0.5 text-2xs font-medium text-dls-text">
           {t("mcp.cap_tools")}
         </span>
         {props.entry.config.type === "remote" ? (
-          <span className="rounded-md border border-dls-border bg-dls-surface px-2 py-0.5 text-[10px] font-medium text-dls-text">
+          <span className="rounded-md border border-dls-border bg-dls-surface px-2 py-0.5 text-2xs font-medium text-dls-text">
             {t("mcp.cap_signin")}
           </span>
         ) : null}
@@ -1585,12 +1585,12 @@ function McpConfiguredServerDetails(props: Parameters<typeof McpConfiguredServer
         </div>
       ) : null}
       <details className="group">
-        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[11px] text-dls-secondary transition-colors hover:text-dls-text">
+        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-2xs text-dls-secondary transition-colors hover:text-dls-text">
           <Code2 size={11} />
           {t("mcp.technical_details")}
           <ChevronDown size={10} className="transition-transform group-open:rotate-180" />
         </summary>
-        <div className="mt-1.5 break-all rounded-lg bg-dls-hover px-3 py-2 font-mono text-[11px] text-dls-secondary">
+        <div className="mt-1.5 break-all rounded-lg bg-dls-hover px-3 py-2 font-mono text-2xs text-dls-secondary">
           {props.entry.config.type === "remote" ? props.entry.config.url : props.entry.config.command?.join(" ")}
         </div>
       </details>
@@ -1644,7 +1644,7 @@ function McpConfiguredServerAuthActions(props: Parameters<typeof McpConfiguredSe
             {props.status === "reconnect_required" ? t("mcp.action_reconnect") : t("mcp.login_action")}
           </Button>
         </div>
-        <div className="text-[11px] text-dls-secondary/70">{t("mcp.login_hint")}</div>
+        <div className="text-2xs text-dls-secondary/70">{t("mcp.login_hint")}</div>
       </>
     );
   }
@@ -1661,7 +1661,7 @@ function McpConfiguredServerAuthActions(props: Parameters<typeof McpConfiguredSe
           {props.logoutBusy && props.logoutTarget === props.entry.name ? t("mcp.logout_working") : t("mcp.logout_action")}
         </Button>
       </div>
-      <div className="text-[11px] text-dls-secondary/70">{t("mcp.logout_hint")}</div>
+      <div className="text-2xs text-dls-secondary/70">{t("mcp.logout_hint")}</div>
     </>
   );
 }
@@ -1715,7 +1715,7 @@ function McpAdvancedConfigSection(props: {
           </div>
           <div className="flex flex-col gap-1 text-xs">
             <div className="text-dls-secondary">{t("mcp.config_file")}</div>
-            <div className="truncate font-mono text-[11px] text-dls-secondary/80">
+            <div className="truncate font-mono text-2xs text-dls-secondary/80">
               {props.activeConfig?.path ?? t("mcp.config_not_loaded")}
             </div>
           </div>
@@ -1739,7 +1739,7 @@ function McpAdvancedConfigSection(props: {
                 <ExternalLink size={11} />
               </a>
             </div>
-            {props.activeConfig && props.activeConfig.exists === false ? <div className="text-[11px] text-dls-secondary">{t("mcp.file_not_found")}</div> : null}
+            {props.activeConfig && props.activeConfig.exists === false ? <div className="text-2xs text-dls-secondary">{t("mcp.file_not_found")}</div> : null}
           </div>
           {props.configError ? <div className="text-xs text-destructive-ink">{props.configError}</div> : null}
         </div>

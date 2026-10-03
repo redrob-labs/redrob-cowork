@@ -32,7 +32,7 @@ export function ContextMeter(props: { usedPercent: number | null; onCompact?: ()
     // `px-2 md:px-4` rather than a flat `px-4`, matching every transcript row and the composer. A fixed
     // px-4 lines up on a wide window and is 8px out on a narrow one, which is the worst kind of
     // misalignment because it only appears at sizes nobody screenshots.
-    <div className="flex items-center justify-end gap-2 px-2 pb-1 pt-1 text-[11px] tabular-nums md:px-4">
+    <div className="flex items-center justify-end gap-2 px-2 pb-1 pt-1 text-2xs tabular-nums md:px-4">
       {/*
         Summarise now.
 

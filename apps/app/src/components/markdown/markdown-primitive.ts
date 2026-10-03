@@ -116,7 +116,7 @@ function codeCopyButton() {
 function chatCodeBlockContainer(html: string, shiki: boolean) {
   const shikiAttribute = shiki ? ` data-redrob-shiki="true"` : "";
 
-  return `<div data-redrob-code-block=""${shikiAttribute} class="relative my-4 overflow-hidden rounded-[18px] border border-border/70 bg-muted/60 font-mono text-xs leading-6 text-foreground">${codeCopyButton()}${html}</div>`;
+  return `<div data-redrob-code-block=""${shikiAttribute} class="relative my-4 overflow-hidden rounded-xl border border-border/70 bg-muted/60 font-mono text-xs leading-6 text-foreground">${codeCopyButton()}${html}</div>`;
 }
 
 function chatCodeBlockHtml(text: string, lang: string | undefined) {
@@ -127,7 +127,7 @@ function chatCodeBlockHtml(text: string, lang: string | undefined) {
 }
 
 function surfaceCodeBlockHtml(text: string, lang: string | undefined) {
-  return `<pre class="my-4 overflow-x-auto rounded-[18px] border border-dls-border/70 bg-background/80 px-4 py-3 text-xs leading-6 text-muted-foreground"><code${codeLanguageClass(lang)}>${escapeHtml(text)}</code></pre>`;
+  return `<pre class="my-4 overflow-x-auto rounded-xl border border-dls-border/70 bg-background/80 px-4 py-3 text-xs leading-6 text-muted-foreground"><code${codeLanguageClass(lang)}>${escapeHtml(text)}</code></pre>`;
 }
 
 function parseShikiLanguage(lang: string) {
@@ -217,7 +217,7 @@ function markdownProfileForPresentation(presentation: MarkdownPresentation): Mar
       imagePresentation: "simple",
       tableHeaderClassName: "border border-dls-border bg-dls-hover p-2 text-left",
       tableCellClassName: "border border-dls-border p-2 align-top",
-      shikiContainer: `<div data-redrob-shiki="true" class="my-4 overflow-x-auto rounded-[18px] border border-dls-border/70 bg-background/80 p-4 text-xs leading-6">%s</div>`,
+      shikiContainer: `<div data-redrob-shiki="true" class="my-4 overflow-x-auto rounded-xl border border-dls-border/70 bg-background/80 p-4 text-xs leading-6">%s</div>`,
       shikiTheme: { kind: "single", theme: "github-light" },
     };
   }
@@ -260,7 +260,7 @@ function renderLink(profile: MarkdownProfile, href: string, title: string | null
 
     const favicon = faviconUrlForHref(href);
     const faviconHtml = favicon
-      ? `<img src="${escapeAttribute(favicon)}" alt="" aria-hidden="true" loading="lazy" decoding="async" class="me-1 inline-block size-3.5 rounded-[3px] align-[-2px]" />`
+      ? `<img src="${escapeAttribute(favicon)}" alt="" aria-hidden="true" loading="lazy" decoding="async" class="me-1 inline-block size-3.5 rounded-xs align-[-2px]" />`
       : "";
 
     return `<a href="${safe}" data-redrob-link-href="${originalHref}"${titleAttr} target="_blank" rel="noreferrer noopener" class="text-primary-ink no-underline transition-colors hover:underline">${faviconHtml}${text}</a>`;
@@ -278,7 +278,7 @@ function renderImage(profile: MarkdownProfile, href: string, title: string | nul
     return `<button type="button" data-redrob-image-preview="" class="my-4 inline-block max-w-full cursor-zoom-in align-top text-left transition-opacity hover:opacity-90" aria-label="${expandLabel}"><img src="${safe}" alt="${escapeAttribute(text)}"${titleAttr} loading="lazy" decoding="async" class="block h-auto w-auto rounded-lg border border-border/70 object-contain" style="max-height: ${MARKDOWN_IMAGE_PREVIEW_MAX_HEIGHT}px; max-width: ${MARKDOWN_IMAGE_PREVIEW_MAX_WIDTH}px"></button>`;
   }
 
-  return `<img src="${safe}" alt="${escapeAttribute(text)}"${titleAttr} loading="lazy" decoding="async" class="my-4 max-w-full rounded-[18px] border border-dls-border/70">`;
+  return `<img src="${safe}" alt="${escapeAttribute(text)}"${titleAttr} loading="lazy" decoding="async" class="my-4 max-w-full rounded-xl border border-dls-border/70">`;
 }
 
 function createMarkedOptions(profile: MarkdownProfile, isAsync: boolean) {

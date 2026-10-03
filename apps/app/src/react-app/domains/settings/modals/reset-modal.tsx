@@ -74,7 +74,7 @@ export function ResetModal(props: ResetModalProps) {
             ) : null}
 
             <label className="block">
-              <span className="mb-1.5 block text-[13px] font-medium text-dls-text">
+              <span className="mb-1.5 block text-sm font-medium text-dls-text">
                 {t("settings.reset_confirmation_label")}
               </span>
               <input
@@ -83,7 +83,7 @@ export function ResetModal(props: ResetModalProps) {
                 value={props.text}
                 onChange={(event) => props.onTextChange(event.currentTarget.value)}
                 disabled={props.busy}
-                className="w-full rounded-xl border border-dls-border bg-dls-surface px-4 py-3 text-[14px] text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-xl border border-dls-border bg-dls-surface px-4 py-3 text-sm text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60"
               />
             </label>
           </div>

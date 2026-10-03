@@ -195,7 +195,7 @@ const Tool = ({
           ) : null}
           {errorAttribution ? (
             <span
-              className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground transition-colors"
+              className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 text-2xs font-medium leading-none text-muted-foreground transition-colors"
               title={`${errorAttribution.confidence}: ${errorAttribution.description}`}
               aria-label={`Error attribution: ${errorAttribution.label}. ${errorAttribution.confidence}.`}
             >

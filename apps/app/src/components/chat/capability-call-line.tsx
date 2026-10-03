@@ -65,7 +65,7 @@ function failureInstruction(part: DynamicToolUIPart): string {
 function TechnicalDetailsPanel({ part }: { part: DynamicToolUIPart }) {
   return (
     <div className="mt-2 flex flex-col gap-2 rounded-lg bg-muted p-2 text-xs">
-      <div className="font-mono text-[11px] text-muted-foreground">
+      <div className="font-mono text-2xs text-muted-foreground">
         {part.toolName} · {part.toolCallId}
       </div>
       {part.input !== undefined && part.input !== null ? (
@@ -153,12 +153,12 @@ export function CapabilityCallLine({
             {quote ? (
               <div className="flex min-w-0 gap-2.5 ps-0.5">
                 <span aria-hidden="true" className="w-0.5 shrink-0 rounded-full bg-border" />
-                <p className="min-w-0 text-[13px] leading-5 text-muted-foreground">“{quote}”</p>
+                <p className="min-w-0 text-sm leading-5 text-muted-foreground">“{quote}”</p>
               </div>
             ) : null}
             <div className="flex min-w-0 items-center gap-2">
               <CircleAlert aria-hidden="true" className="size-3.5 shrink-0 text-destructive" />
-              <p className="min-w-0 text-[13px] leading-5 text-destructive/90">
+              <p className="min-w-0 text-sm leading-5 text-destructive/90">
                 {failureInstruction(part)}
               </p>
             </div>

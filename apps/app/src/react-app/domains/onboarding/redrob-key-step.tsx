@@ -81,12 +81,12 @@ export function RedrobKeyStep({
           <OnboardingBrandMark />
         </div>
 
-        <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
+        <div className="rounded-2xl border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
           <div className="mb-8 space-y-2.5 text-center">
-            <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-[32px] sm:leading-[38px]">
+            <h1 className="text-2xl font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-3xl sm:leading-[38px]">
               {t("welcome.redrob_key_title")}
             </h1>
-            <p className="text-[15px] leading-[23px] text-muted-foreground">
+            <p className="text-base leading-[23px] text-muted-foreground">
               {t("welcome.redrob_key_subtitle")}
             </p>
           </div>
@@ -96,7 +96,7 @@ export function RedrobKeyStep({
               <Button
                 type="button"
                 size="lg"
-                className="h-12 w-full text-[15px] font-semibold"
+                className="h-12 w-full text-base font-semibold"
                 disabled={busy || connectBusy}
                 onClick={() => void onConnect()}
                 data-testid="redrob-connect"
@@ -180,7 +180,7 @@ export function RedrobKeyStep({
                   type="button"
                   variant={onConnect ? "outline" : "default"}
                   size="lg"
-                  className="h-12 w-full text-[15px] font-semibold"
+                  className="h-12 w-full text-base font-semibold"
                   disabled={!canSubmit}
                   onClick={() => void onSubmitKey(apiKey.trim())}
                   data-testid="redrob-submit-key"

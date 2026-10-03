@@ -49,7 +49,7 @@ function CredentialField(props: CredentialFieldProps) {
 
   return (
     <div>
-      <label className="mb-1.5 block text-[13px] font-medium text-dls-text">
+      <label className="mb-1.5 block text-sm font-medium text-dls-text">
         {displayFieldLabel(props.field)}
       </label>
       <div className="relative flex items-center gap-2">
@@ -57,7 +57,7 @@ function CredentialField(props: CredentialFieldProps) {
           type={isSecret && !revealed ? "password" : "text"}
           readOnly
           value={props.field.value || props.field.placeholder || ""}
-          className={`${inputClass} font-mono text-[12px]`}
+          className={`${inputClass} font-mono text-xs`}
         />
         {isSecret ? (
           <button
@@ -85,7 +85,7 @@ function CredentialField(props: CredentialFieldProps) {
         </button>
       </div>
       {props.field.hint?.trim() ? (
-        <p className="mt-1.5 text-[12px] text-dls-secondary">{props.field.hint}</p>
+        <p className="mt-1.5 text-xs text-dls-secondary">{props.field.hint}</p>
       ) : null}
     </div>
   );
@@ -153,8 +153,8 @@ export function ShareWorkspaceAccessPanel(
         <div className={surfaceCardClass}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-[18px] font-semibold tracking-[-0.3px] text-dls-text">{t("workspace.remote_access")}</h3>
-              <p className="mt-1 text-[14px] leading-relaxed text-dls-secondary">
+              <h3 className="text-lg font-semibold tracking-[-0.3px] text-dls-text">{t("workspace.remote_access")}</h3>
+              <p className="mt-1 text-sm leading-relaxed text-dls-secondary">
                 Off by default. Turn this on only when you want this worker
                 reachable from another machine.
               </p>
@@ -176,7 +176,7 @@ export function ShareWorkspaceAccessPanel(
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="text-[13px] text-dls-secondary">
+            <div className="text-sm text-dls-secondary">
               {props.remoteAccess.status?.trim() ||
                 (props.remoteAccess.enabled
                   ? t("workspace.remote_access_enabled")
@@ -208,7 +208,7 @@ export function ShareWorkspaceAccessPanel(
 
       {primaryAccessFields.length > 0 ? (
         <div className={surfaceCardClass}>
-          <div className="mb-4 text-[13px] font-medium text-dls-text">{t("workspace.connection_details")}</div>
+          <div className="mb-4 text-sm font-medium text-dls-text">{t("workspace.connection_details")}</div>
           <div className="space-y-4">
             {primaryAccessFields.map((field) => (
               <div key={field.label}>
@@ -226,7 +226,7 @@ export function ShareWorkspaceAccessPanel(
         </div>
       ) : (
         <div
-          className={`${softCardClass} text-[13px] leading-relaxed text-dls-secondary`}
+          className={`${softCardClass} text-sm leading-relaxed text-dls-secondary`}
         >
           Enable remote access and click Save to restart the worker and reveal
           the live connection details for this workspace.
@@ -251,7 +251,7 @@ export function ShareWorkspaceAccessPanel(
           </button>
           {props.collaboratorExpanded ? (
             <div className={`${softCardClass} mt-3`}>
-              <div className="mb-3 text-[12px] text-dls-secondary">{t("workspace.routine_access")}</div>
+              <div className="mb-3 text-xs text-dls-secondary">{t("workspace.routine_access")}</div>
               <CredentialField
                 field={collaboratorField}
                 fieldKey={`collaborator:${collaboratorField.label}`}
@@ -266,7 +266,7 @@ export function ShareWorkspaceAccessPanel(
       ) : null}
 
       {props.note?.trim() ? (
-        <div className="px-1 text-[12px] text-dls-secondary">{props.note}</div>
+        <div className="px-1 text-xs text-dls-secondary">{props.note}</div>
       ) : null}
     </div>
   );

@@ -167,7 +167,7 @@ function ShowMoreSessionsButton({
   return (
     <SidebarMenuSubItem>
       <SidebarMenuSubButton
-        className="h-8 text-[13px] text-muted-foreground"
+        className="h-8 text-sm text-muted-foreground"
         style={{ paddingInlineStart: sidebarRowPaddingInlineStart(0) }}
         onClick={onClick}
       >
@@ -673,7 +673,7 @@ function RemoteConnectionIssueCard(props: {
     <SidebarMenuSubItem>
       <div
         className={cn(
-          "w-full rounded-[15px] border border-destructive-muted/35 bg-destructive-soft/40 px-3 py-3 text-left",
+          "w-full rounded-xl border border-destructive-muted/35 bg-destructive-soft/40 px-3 py-3 text-left",
           isOffline && "border-warning-muted/35 bg-warning-soft/45",
         )}
       >
@@ -687,15 +687,15 @@ function RemoteConnectionIssueCard(props: {
             <AlertCircle size={14} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[12px] font-medium text-dls-text">
+            <div className="text-xs font-medium text-dls-text">
               {t("workspace_list.remote_worker_unavailable")}
             </div>
-            <div className="mt-1 text-[11px] leading-5 text-subtle-foreground">
+            <div className="mt-1 text-2xs leading-5 text-subtle-foreground">
               {t("workspace_list.remote_worker_unavailable_hint")}
             </div>
             <div
               className={cn(
-                "mt-2 rounded-lg border border-destructive-muted/25 bg-destructive-soft/40 px-2 py-1.5 text-[11px] leading-4 text-destructive-ink whitespace-pre-wrap wrap-anywhere",
+                "mt-2 rounded-lg border border-destructive-muted/25 bg-destructive-soft/40 px-2 py-1.5 text-2xs leading-4 text-destructive-ink whitespace-pre-wrap wrap-anywhere",
                 isOffline && "border-warning-muted/25 bg-warning-soft/40 text-warning-ink",
               )}
               title={props.message}
@@ -708,7 +708,7 @@ function RemoteConnectionIssueCard(props: {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-7 gap-1.5 rounded-lg px-2 text-[11px]"
+                  className="h-7 gap-1.5 rounded-lg px-2 text-2xs"
                   onClick={props.onRecover}
                   disabled={props.busy}
                 >
@@ -720,7 +720,7 @@ function RemoteConnectionIssueCard(props: {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-7 gap-1.5 rounded-lg px-2 text-[11px]"
+                className="h-7 gap-1.5 rounded-lg px-2 text-2xs"
                 onClick={props.onTest}
                 disabled={props.busy}
               >
@@ -776,13 +776,13 @@ function SidebarSplitPill({ workspaceSessionGroups, selectedWorkspaceId, selecte
 
   return (
     <div className="px-2 pb-1">
-      <div className="mb-1 flex h-8 items-center gap-1 px-1 text-[12px] font-normal text-muted-foreground">
+      <div className="mb-1 flex h-8 items-center gap-1 px-1 text-xs font-normal text-muted-foreground">
         <Columns2 className="size-3" />
         {t("session_management.split_view")}
       </div>
       <div
         data-session-tab-split-pill
-        className="flex items-stretch divide-x divide-sidebar-border overflow-hidden rounded-[11px] border border-sidebar-border"
+        className="flex items-stretch divide-x divide-sidebar-border overflow-hidden rounded-lg border border-sidebar-border"
       >
         {segments.map(({ sessionId, pane }) => {
           const title = titleFor(sessionId);
@@ -1130,7 +1130,7 @@ export function AppSidebar(props: AppSidebarProps) {
                 >
                   <Search className="size-4" />
                   <span className="flex-1 truncate">{t("workspace_list.search_sessions")}</span>
-                  <kbd className="ml-auto font-sans text-[11px] tracking-wide text-sidebar-foreground/50 max-lg:hidden pointer-coarse:hidden">
+                  <kbd className="ml-auto font-sans text-2xs tracking-wide text-sidebar-foreground/50 max-lg:hidden pointer-coarse:hidden">
                     {isMacPlatform() ? "⌘⇧F" : "Ctrl+Shift+F"}
                   </kbd>
                 </SidebarMenuButton>
@@ -1273,7 +1273,7 @@ function GlobalArchivedSessions({ entries }: { entries: GlobalArchivedSessionEnt
                 <span className={SIDEBAR_SECTION_LABEL}>
                   {t("session_management.archived_label")}
                 </span>
-                <span className="text-[10px] tabular-nums text-muted-foreground/70">{entries.length}</span>
+                <span className="text-2xs tabular-nums text-muted-foreground/70">{entries.length}</span>
                 <ChevronRight className="ml-auto size-3.5 text-muted-foreground transition-transform duration-200 group-data-open/archived:rotate-90" />
               </button>
             }
@@ -1750,7 +1750,7 @@ function SessionGroupActions({ group, groups, workspaceId, count }: {
         )}
         onMouseLeave={() => setExpanded(false)}
       >
-        <span data-session-group-count className="text-[10px] tabular-nums text-muted-foreground/70 group-hover/separator:hidden">
+        <span data-session-group-count className="text-2xs tabular-nums text-muted-foreground/70 group-hover/separator:hidden">
           {count}
         </span>
         {!expanded ? (
@@ -1915,7 +1915,7 @@ function SessionGroupSeparator({ label, count, expanded, onToggle, group, groups
       {group && groups && workspaceId ? (
         <SessionGroupActions group={group} groups={groups} workspaceId={workspaceId} count={count} />
       ) : (
-        <span className="ml-auto text-[10px] tabular-nums text-muted-foreground/70">{count}</span>
+        <span className="ml-auto text-2xs tabular-nums text-muted-foreground/70">{count}</span>
       )}
     </div>
   );
@@ -2223,7 +2223,7 @@ function SessionNumberShortcutSlot({ digit }: { digit: number | undefined }) {
     >
       <kbd
         data-session-shortcut-badge={digit}
-        className="inline-flex h-5 items-center justify-center rounded-md border border-sidebar-border/70 bg-sidebar-accent/80 px-1.5 font-sans text-[10px] font-medium leading-none tracking-tight text-sidebar-foreground/70 shadow-xs"
+        className="inline-flex h-5 items-center justify-center rounded-md border border-sidebar-border/70 bg-sidebar-accent/80 px-1.5 font-sans text-2xs font-medium leading-none tracking-tight text-sidebar-foreground/70 shadow-xs"
       >
         {label}
       </kbd>
@@ -2315,7 +2315,7 @@ function SessionMenuItem({
     //
     // `pe-24` on hover is unchanged: the action cluster is 2-3 icon buttons at 20px plus gaps plus its
     // own 12px inset, which still fits inside 96px.
-    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-14 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-[13px] text-sidebar-foreground/80 data-active:text-sidebar-foreground",
+    "relative h-8 rounded-md transition-[padding,background-color] duration-75 pe-14 group-hover/menu-sub-item:pe-24 group-has-data-popup-open/menu-sub-item:pe-24 group-hover/menu-sub-item:bg-black/[0.05] dark:group-hover/menu-sub-item:bg-white/[0.09] data-active:bg-black/[0.07] dark:data-active:bg-white/[0.12] text-sm text-sidebar-foreground/80 data-active:text-sidebar-foreground",
   );
   const rowButtonStyle = {
     paddingInlineStart: sidebarRowPaddingInlineStart(visualDepth),
@@ -2346,7 +2346,7 @@ function SessionMenuItem({
         {relativeTime ? (
           // Its own element rather than the last child of the hover-action group, which used to divide
           // one strip with three buttons and left it about 20px -- enough for "3h" and not for "15h".
-          <span className="whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/80">
+          <span className="whitespace-nowrap text-2xs tabular-nums text-muted-foreground/80">
             {relativeTime}
           </span>
         ) : null}

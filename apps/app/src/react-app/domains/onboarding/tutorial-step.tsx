@@ -68,12 +68,12 @@ export function TutorialStep({ workspacePath, onStart }: TutorialStepProps) {
                 <OnboardingBrandMark />
               </div>
 
-              <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10 sm:py-12">
+              <div className="rounded-2xl border border-border bg-background px-8 py-10 shadow-sm sm:px-10 sm:py-12">
                 <div className="flex flex-col gap-2.5 text-center">
-                  <h1 className="text-[26px] font-semibold leading-[32px] tracking-[-0.02em] text-foreground">
+                  <h1 className="text-2xl font-semibold leading-[32px] tracking-[-0.02em] text-foreground">
                     {t("tutorial.title")}
                   </h1>
-                  <p className="text-[15px] leading-[23px] text-muted-foreground">
+                  <p className="text-base leading-[23px] text-muted-foreground">
                     {t("tutorial.subtitle")}
                   </p>
                 </div>
@@ -84,12 +84,12 @@ export function TutorialStep({ workspacePath, onStart }: TutorialStepProps) {
                       key={card.id}
                       className="rounded-2xl border border-border bg-muted/40 px-4 py-3.5 text-left"
                     >
-                      <p className="text-[14px] font-semibold text-foreground">{t(card.titleKey)}</p>
-                      <p className="mt-1 text-[13px] leading-[20px] text-muted-foreground">
+                      <p className="text-sm font-semibold text-foreground">{t(card.titleKey)}</p>
+                      <p className="mt-1 text-sm leading-[20px] text-muted-foreground">
                         {t(card.bodyKey)}
                       </p>
                       {card.id === "folder" && workspacePath ? (
-                        <p className="mt-2 break-all rounded-md bg-background px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                        <p className="mt-2 break-all rounded-md bg-background px-2 py-1 font-mono text-2xs text-muted-foreground">
                           {workspacePath}
                         </p>
                       ) : null}
@@ -100,7 +100,7 @@ export function TutorialStep({ workspacePath, onStart }: TutorialStepProps) {
                 <Button
                   type="button"
                   size="lg"
-                  className="mt-8 h-12 w-full text-[15px] font-semibold"
+                  className="mt-8 h-12 w-full text-base font-semibold"
                   onClick={onStart}
                   data-testid="tutorial-start"
                 >

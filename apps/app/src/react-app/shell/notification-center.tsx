@@ -144,7 +144,7 @@ export function NotificationBell({ variant = "icon" }: { variant?: "icon" | "sid
               <Bell className="size-4" />
               <span className="flex-1 truncate">{t("notifications.title")}</span>
               {unreadCount > 0 ? (
-                <span className="ml-auto flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">
+                <span className="ml-auto flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-2xs font-semibold leading-4 text-primary-foreground">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               ) : null}
@@ -159,7 +159,7 @@ export function NotificationBell({ variant = "icon" }: { variant?: "icon" | "sid
             >
               <Bell size={17} />
               {unreadCount > 0 ? (
-                <span className="absolute right-0.5 top-0.5 flex min-w-3.5 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-3 text-primary-foreground">
+                <span className="absolute right-0.5 top-0.5 flex min-w-3.5 items-center justify-center rounded-full bg-primary px-1 text-2xs font-semibold leading-3 text-primary-foreground">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               ) : null}
@@ -239,7 +239,7 @@ function NotificationRow({
               </span>
             ) : null}
           </p>
-          <span className="flex shrink-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+          <span className="flex shrink-0 items-center gap-1.5 text-2xs text-muted-foreground">
             {formatTimeAgo(notification.updatedAt)}
             {unread ? <span className="size-1.5 rounded-full bg-primary" /> : null}
           </span>

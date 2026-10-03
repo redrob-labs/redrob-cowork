@@ -181,7 +181,7 @@ export function PluginsView(props: PluginsViewProps) {
                     {plugin.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] uppercase tracking-wide bg-accent-active/70 text-muted-foreground px-2 py-0.5 rounded-full"
+                        className="text-2xs uppercase tracking-wide bg-accent-active/70 text-muted-foreground px-2 py-0.5 rounded-full"
                       >
                         {tag}
                       </span>
@@ -261,7 +261,7 @@ export function PluginsView(props: PluginsViewProps) {
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-[10px] uppercase tracking-wide text-subtle-foreground">
+                  <div className="text-2xs uppercase tracking-wide text-subtle-foreground">
                     {plugin.removable ? t("plugins.enabled") : t("settings.cap_read_only")}
                   </div>
                   {plugin.removable ? (

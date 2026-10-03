@@ -779,6 +779,7 @@ select:disabled {
    * bound into this namespace.
    *
    *   utility    design system step    size/leading
+   *   text-2xs   caption               11/16
    *   text-xs    meta                  12/18
    *   text-sm    body-sm               13/20
    *   text-base  body                  15/24
@@ -786,7 +787,11 @@ select:disabled {
    *   text-xl    title-3               21/28
    *   text-2xl   title-2               27/34
    *   text-3xl   title-1               36/42
+   *   text-4xl   display-2             52/56
+   *   text-5xl   display-1             72/72
    */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.125rem;
   --text-sm: 0.8125rem;
@@ -801,6 +806,10 @@ select:disabled {
   --text-2xl--line-height: 2.125rem;
   --text-3xl: 2.25rem;
   --text-3xl--line-height: 2.625rem;
+  --text-4xl: 3.25rem;
+  --text-4xl--line-height: 3.5rem;
+  --text-5xl: 4.5rem;
+  --text-5xl--line-height: 4.5rem;
   /* Motion. Tailwind's defaults read the design system's tokens at runtime. */
   --default-transition-duration: var(--duration-fast);
   --default-transition-timing-function: var(--easing-standard);
@@ -893,24 +902,22 @@ select:disabled {
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-2xl: 24px;
-  /* The design system's scale stops at 24px below a pill. The two steps above
-     it are kept as names so existing call sites compile, at the top step. */
-  --radius-3xl: 24px;
-  --radius-4xl: 24px;
+  /* The design system's scale stops at 24px below a pill, so Tailwind's two
+     larger steps are removed rather than left to their own values. */
+  --radius-3xl: initial;
+  --radius-4xl: initial;
 }
 
-/* Type steps the design system weights rather than only sizes. */
+/* The one type step the design system weights rather than only sizes. Caption
+   is `text-2xs`: it is regular weight, so a size step carries all of it and a
+   call site's own `font-medium` is not fought by the utility. */
 @utility text-label {
   font-size: 0.8125rem;
   line-height: 1.125rem;
   font-weight: 600;
 }
 
-@utility text-caption {
-  font-size: 0.6875rem;
-  line-height: 1rem;
-  font-weight: 400;
-}
+
 
 @layer base {
   /* The focus ring is drawn at full opacity. At `ring/50` it was a half wash of

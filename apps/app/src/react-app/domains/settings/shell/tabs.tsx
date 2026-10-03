@@ -20,7 +20,7 @@ type TabsGroupProps = {
 
 export function TabsGroup(props: TabsGroupProps) {
   return (
-    <div className={cn("rounded-[24px] border border-dls-border bg-dls-sidebar p-3")}>
+    <div className={cn("rounded-2xl border border-dls-border bg-dls-sidebar p-3")}>
       {props.children}
     </div>
   );
@@ -32,7 +32,7 @@ type TabsGroupTitleProps = {
 
 export function TabsGroupTitle(props: TabsGroupTitleProps) {
   return (
-    <div className={cn("mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-disabled-foreground")}>
+    <div className={cn("mb-2 px-2 text-2xs font-medium uppercase tracking-[0.18em] text-disabled-foreground")}>
       {props.children}
     </div>
   );
@@ -58,7 +58,7 @@ export function TabsTrigger(props: TabsTriggerProps) {
     <button
       type="button"
       className={cn(
-        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-medium transition-colors text-subtle-foreground hover:bg-dls-surface/50 hover:text-dls-text",
+        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors text-subtle-foreground hover:bg-dls-surface/50 hover:text-dls-text",
         props.active &&
           "bg-dls-surface text-dls-text shadow-sm hover:bg-dls-surface hover:text-dls-text",
       )}
@@ -67,7 +67,7 @@ export function TabsTrigger(props: TabsTriggerProps) {
       <span className="flex min-w-0 items-center gap-2">
         <span>{props.children}</span>
         {props.beta ? (
-          <span className="shrink-0 rounded-full border border-warning-muted/40 bg-warning-soft/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-warning-ink">
+          <span className="shrink-0 rounded-full border border-warning-muted/40 bg-warning-soft/60 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-[0.08em] text-warning-ink">
             {t("common.beta")}
           </span>
         ) : null}

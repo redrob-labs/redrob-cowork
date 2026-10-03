@@ -538,7 +538,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         <details className="mt-1">
           <summary className="cursor-pointer select-none">{t("mcp.technical_details")} ({error.code})</summary>
           <p className="mt-1">{t("mcp_app.copy_details_hint")}</p>
-          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-[11px] text-foreground">{details}</pre>
+          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-2xs text-foreground">{details}</pre>
           <button
             type="button"
             className="mt-1 underline underline-offset-2"

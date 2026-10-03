@@ -1096,14 +1096,14 @@ export function SessionPage(props: SessionPageProps) {
           <ResizablePanelGroup
             orientation="horizontal"
             onLayoutChanged={sidePanelOpen ? commitBrowserPanelWidth : undefined}
-            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-[14px]"
+            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-xl"
           >
             <ResizablePanel minSize={isMobile ? "0px" : "360px"} className="min-w-0">
-              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-dls-surface max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-[14px] lg:border lg:border-border lg:shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:lg:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-dls-surface max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-xl lg:border lg:border-border lg:shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:lg:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
             <div className="flex min-w-0 items-center gap-3">
               {shellConfig.sidebar ? <SidebarTrigger className="mac:hidden" /> : null}
-              <h1 className="truncate text-[13px] font-medium text-dls-text">
+              <h1 className="truncate text-sm font-medium text-dls-text">
                 {props.primaryTitle
                   ? props.primaryTitle
                   : props.mainContentTitle
@@ -1113,12 +1113,12 @@ export function SessionPage(props: SessionPageProps) {
                   : selectedSessionTitle || t("session.default_title")}
               </h1>
               {props.developerMode ? (
-                <span className="hidden text-[12px] text-dls-secondary lg:inline">
+                <span className="hidden text-xs text-dls-secondary lg:inline">
                   {props.headerStatus}
                 </span>
               ) : null}
               {props.busyHint ? (
-                <span className="hidden text-[12px] text-dls-secondary lg:inline">
+                <span className="hidden text-xs text-dls-secondary lg:inline">
                   {props.busyHint}
                 </span>
               ) : null}
@@ -1272,7 +1272,7 @@ export function SessionPage(props: SessionPageProps) {
                   // loading pane reads as "something is wrong". Keep it to a
                   // quiet text shimmer.
                   <div className="px-6 py-16 text-center" role="status" aria-live="polite">
-                    <span className="ow-text-shimmer text-[12px] leading-5">
+                    <span className="ow-text-shimmer text-xs leading-5">
                       {t("session.loading_detail")}
                     </span>
                   </div>
@@ -1284,7 +1284,7 @@ export function SessionPage(props: SessionPageProps) {
                       aria-live="polite"
                     >
                       <OwDotTicker size="md" />
-                      <div className="text-[12px] leading-5 text-dls-secondary">
+                      <div className="text-xs leading-5 text-dls-secondary">
                         {t("session.loading_detail")}
                       </div>
                     </div>
@@ -1511,7 +1511,7 @@ export function SessionPage(props: SessionPageProps) {
                   maxSize="70%"
                   className="min-h-0 overflow-hidden pl-2 lg:flex lg:flex-col"
                 >
-                  <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[14px] border border-border bg-dls-surface shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+                  <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-dls-surface shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
                   {activeSidePanel === "extensions" && props.settingsSlot ? (
                     <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-background">
                       {props.settingsSlot}
@@ -1631,7 +1631,7 @@ export function SessionPage(props: SessionPageProps) {
             >
               <FileText size={15} />
               {artifactTargetCount > 0 ? (
-                <span className="absolute right-0 top-0 flex min-w-3.5 translate-x-1 -translate-y-1 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-3 text-primary-foreground">
+                <span className="absolute right-0 top-0 flex min-w-3.5 translate-x-1 -translate-y-1 items-center justify-center rounded-full bg-primary px-1 text-2xs font-semibold leading-3 text-primary-foreground">
                   {artifactTargetCount > 9 ? "9+" : artifactTargetCount}
                 </span>
               ) : null}

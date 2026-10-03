@@ -464,7 +464,7 @@ function messageHasVisibleAssistantOutput(message: UIMessage) {
 function AssistantWaitingCard({ label = t("session.assistant_thinking") }: { label?: string }) {
   return (
     <div className="flex justify-start" role="status" aria-live="polite">
-      <div className="inline-flex items-center gap-1.5 px-1 py-1 text-[12px] text-dls-secondary">
+      <div className="inline-flex items-center gap-1.5 px-1 py-1 text-xs text-dls-secondary">
         <div style={{ width: 20, height: 20, borderRadius: "50%", overflow: "hidden" }}>
           <PaperGrainGradient
             speed={12}
@@ -2036,7 +2036,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
             ) : null}
             {showDelayedLoading && pendingSessionLoad ? (
               <div className="px-6 py-16">
-                <div className="mx-auto max-w-sm rounded-3xl border border-dls-border bg-dls-hover/60 px-8 py-10 text-center">
+                <div className="mx-auto max-w-sm rounded-2xl border border-dls-border bg-dls-hover/60 px-8 py-10 text-center">
                   <div className="text-sm text-dls-secondary">{t("session.opening")}</div>
                 </div>
               </div>
@@ -2050,7 +2050,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
                     onOpenModelPicker={handleOpenModelPicker}
                   />
                 ) : (
-                  <div className="mx-auto max-w-xl rounded-3xl border border-destructive-muted/40 bg-destructive-soft/20 px-6 py-5 text-sm text-destructive-ink">
+                  <div className="mx-auto max-w-xl rounded-2xl border border-destructive-muted/40 bg-destructive-soft/20 px-6 py-5 text-sm text-destructive-ink">
                     {snapshotQuery.error instanceof Error ? snapshotQuery.error.message : t("session.error_load_failed")}
                   </div>
                 )}

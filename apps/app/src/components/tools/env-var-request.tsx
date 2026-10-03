@@ -80,7 +80,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-dls-primary">Add {label}</h3>
               {saved ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-success-muted/40 bg-success-soft/30 px-2 py-0.5 text-[11px] font-medium text-success-ink">
+                <span className="inline-flex items-center gap-1 rounded-full border border-success-muted/40 bg-success-soft/30 px-2 py-0.5 text-2xs font-medium text-success-ink">
                   <Check className="size-3" />
                   Saved
                 </span>
@@ -135,7 +135,7 @@ export function EnvVarRequestTool({ part }: EnvVarRequestToolProps) {
             ) : null}
           </div>
 
-          <p className={cn("text-[11px] leading-4 text-dls-tertiary", saved && pendingChanges ? "text-warning-ink" : "")}>
+          <p className={cn("text-2xs leading-4 text-dls-tertiary", saved && pendingChanges ? "text-warning-ink" : "")}>
             {saved && pendingChanges
               ? t("tools.env_saved_apply_hint")
               : t("tools.env_store_note")}

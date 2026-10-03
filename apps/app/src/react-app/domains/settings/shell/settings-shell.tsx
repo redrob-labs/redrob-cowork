@@ -118,17 +118,17 @@ export function SettingsShell(props: SettingsShellProps) {
               <div className="flex min-w-0 items-center gap-3">
                 <SidebarTrigger className="mac:titlebar-no-drag md:hidden" />
                 {props.headerLeadingSlot}
-                <div className="truncate text-[15px] font-semibold text-dls-text">{title}</div>
-                <span className="hidden truncate text-[13px] text-dls-secondary lg:inline">
+                <div className="truncate text-base font-semibold text-dls-text">{title}</div>
+                <span className="hidden truncate text-sm text-dls-secondary lg:inline">
                   {props.selectedWorkspaceName}
                 </span>
                 {props.developerMode && props.headerStatus ? (
-                  <span className="hidden text-[12px] text-dls-secondary lg:inline">
+                  <span className="hidden text-xs text-dls-secondary lg:inline">
                     {props.headerStatus}
                   </span>
                 ) : null}
                 {props.busyHint ? (
-                  <span className="hidden text-[12px] text-dls-secondary lg:inline">
+                  <span className="hidden text-xs text-dls-secondary lg:inline">
                     {props.busyHint}
                   </span>
                 ) : null}

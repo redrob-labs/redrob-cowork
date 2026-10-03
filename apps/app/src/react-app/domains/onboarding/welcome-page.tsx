@@ -56,12 +56,12 @@ export function WelcomePage({
                 <OnboardingBrandMark />
               </div>
 
-              <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10 sm:py-12">
+              <div className="rounded-2xl border border-border bg-background px-8 py-10 shadow-sm sm:px-10 sm:py-12">
                 <div className="flex flex-col gap-2.5 text-center">
-                  <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-balance break-keep text-foreground sm:text-[32px] sm:leading-[38px]">
+                  <h1 className="text-2xl font-semibold leading-[34px] tracking-[-0.02em] text-balance break-keep text-foreground sm:text-3xl sm:leading-[38px]">
                     {t("welcome.title")}
                   </h1>
-                  <p className="text-[15px] leading-[23px] text-muted-foreground">
+                  <p className="text-base leading-[23px] text-muted-foreground">
                     {t("welcome.subtitle")}
                   </p>
                 </div>
@@ -70,7 +70,7 @@ export function WelcomePage({
                   <Button
                     type="button"
                     size="lg"
-                    className="h-12 w-full text-[15px] font-semibold"
+                    className="h-12 w-full text-base font-semibold"
                     onClick={onGetStarted}
                     disabled={busy}
                     data-testid="welcome-get-started"

@@ -127,31 +127,31 @@ function ExtensionBadges(props: {
   return (
     <>
       {props.readiness === "ready" ? (
-        <span className="shrink-0 rounded-md bg-success-soft px-1.5 py-0.5 text-[10px] font-medium text-success-ink">
+        <span className="shrink-0 rounded-md bg-success-soft px-1.5 py-0.5 text-2xs font-medium text-success-ink">
           {props.connectedLabel}
         </span>
       ) : props.readiness === "partial" ? (
-        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("extension.partially_set_up")}</span>
+        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-2xs font-medium text-warning-ink">{t("extension.partially_set_up")}</span>
       ) : (
-        <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${taxonomyStyle[props.taxonomy]}`}>
+        <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-2xs font-medium ${taxonomyStyle[props.taxonomy]}`}>
           {extensionTaxonomyLabel(props.taxonomy)}
         </span>
       )}
       {props.hidden ? (
-        <span className="shrink-0 rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <span className="shrink-0 rounded-md bg-accent px-1.5 py-0.5 text-2xs font-medium text-muted-foreground">
           {t("extension.hidden")}
         </span>
       ) : null}
       {props.preview ? (
-        <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">{t("extension.preview")}</span>
+        <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-2xs font-medium text-primary-ink">{t("extension.preview")}</span>
       ) : null}
       {props.beta ? (
-        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">
+        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-2xs font-medium text-warning-ink">
           {t("common.beta")}
         </span>
       ) : null}
       {props.disabledReason ? (
-        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("extension.disabled")}</span>
+        <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-2xs font-medium text-warning-ink">{t("extension.disabled")}</span>
       ) : null}
     </>
   );
@@ -221,7 +221,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
   );
   const nextAction = !disabledReason && !connecting && nextActionLabel ? (
     <div
-      className="text-[11px] font-medium text-dls-text transition-colors group-hover:opacity-80"
+      className="text-2xs font-medium text-dls-text transition-colors group-hover:opacity-80"
       onClick={(event) => {
         if (!onNextAction) return;
         event.stopPropagation();
@@ -231,7 +231,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
       {nextActionLabel}
     </div>
   ) : !disabledReason && !connecting && actionLabel ? (
-    <div className="text-[11px] font-medium text-dls-text transition-colors group-hover:opacity-80">
+    <div className="text-2xs font-medium text-dls-text transition-colors group-hover:opacity-80">
       {actionLabel}
     </div>
   ) : null;
@@ -248,7 +248,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
       >
         {icon}
         <div className="flex w-44 shrink-0 items-center gap-1.5">
-          <h4 className="min-w-0 truncate text-[13px] font-medium text-dls-text">{name}</h4>
+          <h4 className="min-w-0 truncate text-sm font-medium text-dls-text">{name}</h4>
           {readiness === "ready" ? (
             <span className="size-1.5 shrink-0 rounded-full bg-success" />
           ) : readiness === "partial" ? (
@@ -256,7 +256,7 @@ export function ExtensionCard(props: ExtensionCardProps) {
           ) : null}
         </div>
         <div className="flex w-20 shrink-0 items-center">
-          <span className="rounded-md bg-dls-hover px-1.5 py-0.5 text-[10px] font-medium text-dls-secondary">
+          <span className="rounded-md bg-dls-hover px-1.5 py-0.5 text-2xs font-medium text-dls-secondary">
             {extensionTaxonomyLabel(taxonomy)}
           </span>
         </div>
@@ -264,15 +264,15 @@ export function ExtensionCard(props: ExtensionCardProps) {
           {disabledReason ?? description}
         </p>
         {preview ? (
-          <span className="shrink-0 rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">{t("extension.preview")}</span>
+          <span className="shrink-0 rounded-md bg-primary-soft px-1.5 py-0.5 text-2xs font-medium text-primary-ink">{t("extension.preview")}</span>
         ) : null}
         {beta ? (
-          <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">
+          <span className="shrink-0 rounded-md bg-warning-soft px-1.5 py-0.5 text-2xs font-medium text-warning-ink">
             {t("common.beta")}
           </span>
         ) : null}
         {meta ? (
-          <div className="hidden shrink-0 text-[11px] text-dls-secondary md:block">{meta}</div>
+          <div className="hidden shrink-0 text-2xs text-dls-secondary md:block">{meta}</div>
         ) : null}
         {!disabledReason && !connecting && nextActionLabel ? (
           <span
@@ -308,10 +308,10 @@ export function ExtensionCard(props: ExtensionCardProps) {
           </div>
           <p className="mt-0.5 line-clamp-2 text-xs text-dls-secondary">{description}</p>
           {meta ? (
-            <div className="mt-1 text-[11px] text-dls-secondary">{meta}</div>
+            <div className="mt-1 text-2xs text-dls-secondary">{meta}</div>
           ) : null}
           {disabledReason ? (
-            <div className="mt-2 text-[11px] font-medium text-warning-ink">
+            <div className="mt-2 text-2xs font-medium text-warning-ink">
               {disabledReason}
             </div>
           ) : null}

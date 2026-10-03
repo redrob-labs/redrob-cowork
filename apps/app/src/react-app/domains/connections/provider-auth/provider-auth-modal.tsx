@@ -736,7 +736,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                       autoCapitalize="off"
                       spellCheck={false}
                       disabled={actionDisabled}
-                      className="w-full rounded-xl bg-muted px-9 py-2.5 text-[13px] text-foreground placeholder:text-subtle-foreground border border-border/60 focus:border-border-strong focus:bg-background focus:outline-none transition-colors shadow-sm"
+                      className="w-full rounded-xl bg-muted px-9 py-2.5 text-sm text-foreground placeholder:text-subtle-foreground border border-border/60 focus:border-border-strong focus:bg-background focus:outline-none transition-colors shadow-sm"
                     />
                   </div>
 
@@ -744,10 +744,10 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     filteredEntries.map((entry, index) => (
                       <div key={entry.id}>
                         {index === 0 && entry.connected ? (
-                          <div className="px-3.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle-foreground">{t("provider_auth.connected")}</div>
+                          <div className="px-3.5 pb-1 pt-1 text-2xs font-semibold uppercase tracking-[0.08em] text-subtle-foreground">{t("provider_auth.connected")}</div>
                         ) : null}
                         {index === connectedCount && !entry.connected ? (
-                          <div className="px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle-foreground">
+                          <div className="px-3.5 pb-1 pt-2 text-2xs font-semibold uppercase tracking-[0.08em] text-subtle-foreground">
                             {connectedCount ? t("provider_auth.all_providers") : t("provider_auth.providers")}
                           </div>
                         ) : null}
@@ -760,7 +760,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                           onMouseEnter={() => setActiveEntryIndex(index)}
                           onClick={() => handleEntrySelect(entry)}
                         >
-                          <div className="flex size-9 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background shadow-sm overflow-hidden">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background shadow-sm overflow-hidden">
                             <ProviderIcon providerId={entry.id} size={20} className="text-foreground" />
                           </div>
 
@@ -774,11 +774,11 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                             takes the slack; the id, the methods and the status are sized to their content.
                           */}
                           <div className="flex min-w-0 flex-1 items-center gap-4">
-                            <div className="min-w-0 flex-1 truncate text-[14px] font-medium tracking-tight text-foreground">
+                            <div className="min-w-0 flex-1 truncate text-sm font-medium tracking-tight text-foreground">
                               {entry.name}
                             </div>
 
-                            <div className="hidden w-[13rem] shrink-0 truncate font-mono text-[11px] text-subtle-foreground opacity-60 transition-opacity group-hover:opacity-80 sm:block">
+                            <div className="hidden w-[13rem] shrink-0 truncate font-mono text-2xs text-subtle-foreground opacity-60 transition-opacity group-hover:opacity-80 sm:block">
                               {entry.id}
                             </div>
 
@@ -795,7 +795,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                                 : entry.methods.map((method) => (
                                     <span
                                       key={`${entry.id}-${method.type}-${method.methodIndex ?? method.label}`}
-                                      className={`truncate rounded-md border px-2 py-0.5 text-[10px] font-medium ${
+                                      className={`truncate rounded-md border px-2 py-0.5 text-2xs font-medium ${
                                         method.type === "oauth"
                                           ? "bg-primary-soft/30 text-primary-ink border-primary-muted/30"
                                           : "bg-accent/40 text-muted-foreground border-border/40"
@@ -808,12 +808,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
 
                             <div className="flex w-[6.5rem] shrink-0 items-center justify-end">
                               {entry.connected ? (
-                                <div className="flex items-center gap-1 rounded-md border border-success-muted/30 bg-success-soft/20 px-1.5 py-0.5 text-[11px] font-medium text-success-ink">
+                                <div className="flex items-center gap-1 rounded-md border border-success-muted/30 bg-success-soft/20 px-1.5 py-0.5 text-2xs font-medium text-success-ink">
                                   <CheckCircle2 size={12} strokeWidth={2.5} />
                                   {t("provider_auth.connected")}
                                 </div>
                               ) : (
-                                <div className="flex items-center gap-0.5 text-[12px] font-medium text-subtle-foreground opacity-80 transition-colors group-hover:text-foreground group-hover:opacity-100">
+                                <div className="flex items-center gap-0.5 text-xs font-medium text-subtle-foreground opacity-80 transition-colors group-hover:text-foreground group-hover:opacity-100">
                                   {t("provider_auth.connect")}
                                   <ChevronRight
                                     size={14}
@@ -832,7 +832,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     </div>
                   )}
 
-                  <div className="mx-3.5 text-[11px] text-subtle-foreground">{t("provider_auth.keyboard_hint")}</div>
+                  <div className="mx-3.5 text-2xs text-subtle-foreground">{t("provider_auth.keyboard_hint")}</div>
                 </div>
               ) : null}
 
@@ -871,12 +871,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
               {resolvedView === "api" && selectedEntry ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-[11px] border border-border/60 bg-background shadow-sm overflow-hidden">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background shadow-sm overflow-hidden">
                       <ProviderIcon providerId={selectedEntry.id} size={20} className="text-foreground" />
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-medium text-foreground truncate">{selectedEntry.name}</div>
-                      <div className="text-[11px] text-subtle-foreground font-mono truncate">{selectedEntry.id}</div>
+                      <div className="text-2xs text-subtle-foreground font-mono truncate">{selectedEntry.id}</div>
                     </div>
                   </div>
                   <div className="text-xs text-subtle-foreground">{t("provider_auth.paste_api_key")}</div>
@@ -895,12 +895,12 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                     disabled={actionDisabled}
                   />
                   {selectedEntry.env.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-subtle-foreground">
+                    <div className="flex flex-wrap items-center gap-1.5 text-2xs text-subtle-foreground">
                       {t("provider_auth.env_vars_label")}
                       {selectedEntry.env.map((envVar) => (
                         <span
                           key={envVar}
-                          className="rounded-md bg-accent/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                          className="rounded-md bg-accent/40 px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
                         >
                           {envVar}
                         </span>
@@ -923,7 +923,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   </div>
                   <div className="text-xs text-subtle-foreground">{t("provider_auth.complete_signin")}</div>
                   {oauthInstructions ? (
-                    <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2 text-[11px] text-subtle-foreground font-mono break-all">
+                    <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2 text-2xs text-subtle-foreground font-mono break-all">
                       {oauthInstructions}
                     </div>
                   ) : null}
@@ -987,7 +987,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                   {oauthDisplayCode ? (
                     <div className="rounded-xl border border-border/70 bg-muted/40 p-3 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("provider_auth.confirmation_code")}</div>
+                        <div className="text-2xs uppercase tracking-wide text-disabled-foreground">{t("provider_auth.confirmation_code")}</div>
                         <div className="text-sm text-foreground font-mono break-all">{oauthDisplayCode}</div>
                       </div>
                       <Button variant="outline" size="sm" className="shrink-0" onClick={() => void copyOauthDisplayCode()}>
@@ -1018,7 +1018,7 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                           : t("provider_auth.open_browser")
                         : t("provider_auth.open_browser_again")}
                     </Button>
-                    <div className="text-[11px] text-subtle-foreground text-right">{t("provider_auth.window_closes")}</div>
+                    <div className="text-2xs text-subtle-foreground text-right">{t("provider_auth.window_closes")}</div>
                   </div>
                 </div>
               ) : null}

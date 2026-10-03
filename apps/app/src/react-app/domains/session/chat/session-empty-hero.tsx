@@ -76,10 +76,10 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
   return (
     <div className="mx-auto w-full max-w-[640px] space-y-6 px-4 max-lg:px-4 sm:px-6">
       <div className="space-y-1.5 text-center">
-        <h2 className="text-[24px] font-semibold leading-[30px] tracking-[-0.02em] text-foreground">
+        <h2 className="text-2xl font-semibold leading-[30px] tracking-[-0.02em] text-foreground">
           {t("hero.title")}
         </h2>
-        <p className="text-[13px] text-muted-foreground">{t("hero.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("hero.subtitle")}</p>
       </div>
 
       <NewTaskComposer
@@ -98,10 +98,10 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
         >
           <Zap className="mt-0.5 size-4 shrink-0 text-primary-ink" />
           <div>
-            <div className="text-[13px] font-medium text-foreground">
+            <div className="text-sm font-medium text-foreground">
               {t("hero.connect_provider_title")}
             </div>
-            <div className="mt-0.5 text-[12px] text-muted-foreground">
+            <div className="mt-0.5 text-xs text-muted-foreground">
               {t("hero.connect_provider_description")}
             </div>
           </div>
@@ -116,8 +116,8 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
             className="rounded-xl border border-border bg-background p-3.5 text-left transition-colors hover:bg-accent"
             onClick={() => fillPrompt(suggestion.prompt)}
           >
-            <div className="truncate text-[13px] font-medium text-foreground">{suggestion.title}</div>
-            <div className="mt-0.5 line-clamp-2 text-[12px] leading-[17px] text-muted-foreground">
+            <div className="truncate text-sm font-medium text-foreground">{suggestion.title}</div>
+            <div className="mt-0.5 line-clamp-2 text-xs leading-[17px] text-muted-foreground">
               {suggestion.description}
             </div>
           </button>

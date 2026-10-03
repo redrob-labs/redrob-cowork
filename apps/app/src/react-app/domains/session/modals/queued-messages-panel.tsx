@@ -121,7 +121,7 @@ function QueuedAttachmentChip(props: { attachment: ComposerAttachment }) {
       title={props.attachment.name}
     >
       <FileText className="size-3.5 shrink-0 text-muted-foreground" />
-      <span className="truncate text-[11px] font-medium text-foreground">{props.attachment.name}</span>
+      <span className="truncate text-2xs font-medium text-foreground">{props.attachment.name}</span>
     </span>
   );
 }

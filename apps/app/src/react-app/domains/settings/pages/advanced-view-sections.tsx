@@ -54,7 +54,7 @@ function RuntimeStatusCard(props: RuntimeStatusCardProps) {
       </div>
       <SettingsStatusBadge className="inline-flex min-h-0 justify-start px-0 py-0" tone={props.tone} label={props.statusLabel} />
       {props.detailLines?.length ? (
-        <div className="space-y-1 border-t border-border/50 pt-2 text-[11px] text-subtle-foreground">
+        <div className="space-y-1 border-t border-border/50 pt-2 text-2xs text-subtle-foreground">
           {props.detailLines.map((line) => (
             <div key={line} className="truncate" title={line}>
               {line}
@@ -108,8 +108,8 @@ export function AdvancedRuntimeSection(props: AdvancedRuntimeSectionProps) {
 function DiagnosticRow(props: { label: string; value: string }) {
   return (
     <div className="grid gap-1 rounded-lg border border-border bg-muted/50 p-2 sm:grid-cols-[12rem_minmax(0,1fr)]">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-disabled-foreground">{props.label}</div>
-      <div className="min-w-0 break-all font-mono text-[11px] text-foreground">{props.value}</div>
+      <div className="text-2xs font-semibold uppercase tracking-wide text-disabled-foreground">{props.label}</div>
+      <div className="min-w-0 break-all font-mono text-2xs text-foreground">{props.value}</div>
     </div>
   );
 }
@@ -182,25 +182,25 @@ function RuntimeConfigSummary(props: { config: Record<string, unknown> }) {
   return (
     <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       <div className="rounded-lg border border-border bg-muted/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("settings.diag_default_agent")}</div>
-        <div className="mt-1 truncate font-mono text-[11px] text-foreground" title={defaultAgent}>{defaultAgent}</div>
+        <div className="text-2xs uppercase tracking-wide text-disabled-foreground">{t("settings.diag_default_agent")}</div>
+        <div className="mt-1 truncate font-mono text-2xs text-foreground" title={defaultAgent}>{defaultAgent}</div>
       </div>
       <div className="rounded-lg border border-border bg-muted/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("settings.diag_providers_models")}</div>
-        <div className="mt-1 font-mono text-[11px] text-foreground">{t("settings.diag_providers_models_value", { providers, models })}</div>
+        <div className="text-2xs uppercase tracking-wide text-disabled-foreground">{t("settings.diag_providers_models")}</div>
+        <div className="mt-1 font-mono text-2xs text-foreground">{t("settings.diag_providers_models_value", { providers, models })}</div>
       </div>
       <div className="rounded-lg border border-border bg-muted/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("settings.diag_agents_plugins")}</div>
-        <div className="mt-1 font-mono text-[11px] text-foreground">{t("settings.diag_agents_plugins_value", { agents, plugins })}</div>
+        <div className="text-2xs uppercase tracking-wide text-disabled-foreground">{t("settings.diag_agents_plugins")}</div>
+        <div className="mt-1 font-mono text-2xs text-foreground">{t("settings.diag_agents_plugins_value", { agents, plugins })}</div>
       </div>
       <div className="rounded-lg border border-border bg-muted/60 p-2">
-        <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("settings.diag_mcp_permissions")}</div>
-        <div className="mt-1 font-mono text-[11px] text-foreground">{t("settings.diag_mcp_permissions_value", { mcps, permissions })}</div>
+        <div className="text-2xs uppercase tracking-wide text-disabled-foreground">{t("settings.diag_mcp_permissions")}</div>
+        <div className="mt-1 font-mono text-2xs text-foreground">{t("settings.diag_mcp_permissions_value", { mcps, permissions })}</div>
       </div>
       {disabledProviders ? (
         <div className="rounded-lg border border-border bg-muted/60 p-2 sm:col-span-2 lg:col-span-4">
-          <div className="text-[10px] uppercase tracking-wide text-disabled-foreground">{t("settings.diag_disabled_providers")}</div>
-          <div className="mt-1 font-mono text-[11px] text-foreground">{disabledProviders}</div>
+          <div className="text-2xs uppercase tracking-wide text-disabled-foreground">{t("settings.diag_disabled_providers")}</div>
+          <div className="mt-1 font-mono text-2xs text-foreground">{disabledProviders}</div>
         </div>
       ) : null}
     </div>
@@ -220,15 +220,15 @@ function RuntimeConfigSourceBlock(props: {
     <div className="space-y-2 rounded-xl border border-border bg-background/70 p-3">
       <div>
         <div className="font-medium text-foreground">{props.title}</div>
-        <div className="text-[11px] text-subtle-foreground">{props.description}</div>
-        {props.path ? <div className="mt-1 break-all font-mono text-[11px] text-disabled-foreground">{props.path}</div> : null}
-        {props.exists !== undefined ? <div className="text-[11px] text-subtle-foreground">{props.exists ? t("settings.diag_found") : t("settings.diag_not_found")}</div> : null}
-        <div className="text-[11px] text-subtle-foreground">{t("settings.diag_keys_prefix", { keys: formatKeys(props.keys) })}</div>
+        <div className="text-2xs text-subtle-foreground">{props.description}</div>
+        {props.path ? <div className="mt-1 break-all font-mono text-2xs text-disabled-foreground">{props.path}</div> : null}
+        {props.exists !== undefined ? <div className="text-2xs text-subtle-foreground">{props.exists ? t("settings.diag_found") : t("settings.diag_not_found")}</div> : null}
+        <div className="text-2xs text-subtle-foreground">{t("settings.diag_keys_prefix", { keys: formatKeys(props.keys) })}</div>
       </div>
       <RuntimeConfigSummary config={safeConfig} />
       <details className="rounded-lg bg-accent p-2">
-        <summary className="cursor-pointer text-[11px] font-medium text-muted-foreground">{t("settings.diag_show_raw_json")}</summary>
-        <pre className="mt-2 max-h-56 overflow-auto font-mono text-[11px] text-muted-foreground">
+        <summary className="cursor-pointer text-2xs font-medium text-muted-foreground">{t("settings.diag_show_raw_json")}</summary>
+        <pre className="mt-2 max-h-56 overflow-auto font-mono text-2xs text-muted-foreground">
           {JSON.stringify(safeConfig, null, 2)}
         </pre>
       </details>
@@ -285,13 +285,13 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
           <div className="space-y-3 rounded-xl border border-border bg-background/60 p-3 text-xs text-subtle-foreground">
             <div className="space-y-2 rounded-xl border border-primary-muted/50 bg-primary-soft/40 p-3">
               <div className="font-medium text-foreground">{t("settings.desired_runtime_config_title")}</div>
-              <div className="text-[11px] text-subtle-foreground">
+              <div className="text-2xs text-subtle-foreground">
                 {t("settings.desired_runtime_config_desc")}
               </div>
               <RuntimeConfigSummary config={effectiveRuntimeConfig ?? {}} />
               <details className="rounded-lg bg-accent p-2">
-                <summary className="cursor-pointer text-[11px] font-medium text-muted-foreground">{t("settings.diag_show_desired_json")}</summary>
-                <pre className="mt-2 max-h-72 overflow-auto font-mono text-[11px] text-muted-foreground">
+                <summary className="cursor-pointer text-2xs font-medium text-muted-foreground">{t("settings.diag_show_desired_json")}</summary>
+                <pre className="mt-2 max-h-72 overflow-auto font-mono text-2xs text-muted-foreground">
                   {JSON.stringify(effectiveRuntimeConfig, null, 2)}
                 </pre>
               </details>
@@ -300,7 +300,7 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
               <div className="space-y-3">
                 <div>
                   <div className="font-medium text-foreground">{t("settings.opencode_source_breakdown_title")}</div>
-                  <div className="text-[11px] text-subtle-foreground">
+                  <div className="text-2xs text-subtle-foreground">
                     {t("settings.opencode_source_breakdown_desc")}
                   </div>
                 </div>
@@ -355,7 +355,7 @@ export function AdvancedRuntimeMigrationSection(props: AdvancedRuntimeMigrationS
             </div>
             <div>
               <div className="font-medium text-foreground">{t("settings.runtime_db_json_title")}</div>
-              <pre className="mt-1 max-h-48 overflow-auto rounded-lg bg-accent p-2 font-mono text-[11px] text-muted-foreground">
+              <pre className="mt-1 max-h-48 overflow-auto rounded-lg bg-accent p-2 font-mono text-2xs text-muted-foreground">
                 {JSON.stringify(runtimeConfig, null, 2)}
               </pre>
             </div>

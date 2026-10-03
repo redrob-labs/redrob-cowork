@@ -54,8 +54,8 @@ export function VariantPanel({
               key={variant.index}
             >
               <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="truncate font-mono text-[11px] text-muted-foreground">{variant.label}</span>
-                <span className="shrink-0 text-[11px] text-subtle-foreground">
+                <span className="truncate font-mono text-2xs text-muted-foreground">{variant.label}</span>
+                <span className="shrink-0 text-2xs text-subtle-foreground">
                   {variant.status === "done"
                     ? ""
                     : variant.status === "failed"
@@ -79,7 +79,7 @@ export function VariantPanel({
           ))}
         </div>
 
-        <p className="mt-2 text-[11px] text-subtle-foreground">
+        <p className="mt-2 text-2xs text-subtle-foreground">
           {settled && !anyAnswer ? t("variants.none_finished") : t("variants.keep_hint")}
         </p>
       </div>

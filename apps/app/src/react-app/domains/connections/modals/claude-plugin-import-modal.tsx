@@ -180,7 +180,7 @@ export function ClaudePluginImportModal(props: ClaudePluginImportModalProps) {
                 {state.preview.description ? (
                   <div className="mt-0.5 text-xs text-dls-secondary">{state.preview.description}</div>
                 ) : null}
-                <div className="mt-1 text-[11px] text-dls-secondary">
+                <div className="mt-1 text-2xs text-dls-secondary">
                   {state.preview.source.owner}/{state.preview.source.repo} @ {state.preview.source.ref}
                   {state.preview.source.dir ? ` · ${state.preview.source.dir}` : ""}
                 </div>
@@ -191,7 +191,7 @@ export function ClaudePluginImportModal(props: ClaudePluginImportModalProps) {
                 <div className="space-y-2">
                   {groups.map((group) => (
                     <div key={group.type}>
-                      <div className="text-[11px] font-medium uppercase tracking-wide text-dls-secondary">
+                      <div className="text-2xs font-medium uppercase tracking-wide text-dls-secondary">
                         {group.items.length === 1
                           ? `1 ${COMPONENT_LABELS[group.type]?.singular}`
                           : `${group.items.length} ${COMPONENT_LABELS[group.type]?.plural}`}

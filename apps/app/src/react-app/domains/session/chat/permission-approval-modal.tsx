@@ -274,41 +274,41 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
         </AlertDialogHeader>
 
         <div className="space-y-3 px-6 py-5">
-          <div className="rounded-[20px] border border-dls-border bg-dls-hover/45 p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+          <div className="rounded-2xl border border-dls-border bg-dls-hover/45 p-4">
+            <div className="text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
               {t("session.permission_label")}
             </div>
-            <div className="mt-2 font-mono text-[14px] leading-6 text-dls-text">
+            <div className="mt-2 font-mono text-sm leading-6 text-dls-text">
               {presentation.permissionLabel}
             </div>
             {presentation.note ? (
-              <p className="mt-2 text-[13px] leading-5 text-dls-secondary">
+              <p className="mt-2 text-sm leading-5 text-dls-secondary">
                 {presentation.note}
               </p>
             ) : null}
           </div>
 
-          <div className="rounded-[20px] border border-dls-border bg-dls-surface p-4">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+          <div className="rounded-2xl border border-dls-border bg-dls-surface p-4">
+            <div className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
               <HardDrive size={13} />
               {presentation.scopeLabel}
             </div>
-            <div className="mt-3 rounded-2xl border border-dls-border bg-dls-hover/55 px-3.5 py-3 font-mono text-[13px] leading-6 text-dls-text">
+            <div className="mt-3 rounded-2xl border border-dls-border bg-dls-hover/55 px-3.5 py-3 font-mono text-sm leading-6 text-dls-text">
               <span className="block break-all">{presentation.scopeValue}</span>
             </div>
           </div>
 
           {detailRows.length > 0 ? (
-            <div className="rounded-[20px] border border-dls-border bg-dls-surface p-4">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+            <div className="rounded-2xl border border-dls-border bg-dls-surface p-4">
+              <div className="text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
                 {t("session.permission_review_label")}
               </div>
               <div className="mt-3 space-y-3">
                 {detailRows.map((row) => (
                   <div key={row.label}>
-                    <div className="text-[12px] font-medium text-dls-secondary">{row.label}</div>
+                    <div className="text-xs font-medium text-dls-secondary">{row.label}</div>
                     <div
-                      className={`mt-1 rounded-xl border border-dls-border bg-dls-hover/55 px-3 py-2 font-mono text-[12px] leading-5 text-dls-text ${
+                      className={`mt-1 rounded-xl border border-dls-border bg-dls-hover/55 px-3 py-2 font-mono text-xs leading-5 text-dls-text ${
                         row.multiline ? "max-h-44 overflow-auto whitespace-pre-wrap" : "break-all"
                       }`}
                     >
@@ -321,12 +321,12 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
           ) : null}
 
           {hasMetadata ? (
-            <details className="group rounded-[18px] border border-dls-border bg-dls-surface px-4 py-3">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13px] font-medium text-dls-text">
+            <details className="group rounded-xl border border-dls-border bg-dls-surface px-4 py-3">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-dls-text">
                 <span>{t("session.details_label")}</span>
                 <ChevronRight size={15} className="text-dls-secondary transition-transform group-open:rotate-90" />
               </summary>
-              <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-dls-border bg-dls-hover/45 px-3 py-2.5 text-[12px] leading-5 text-dls-secondary">
+              <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-dls-border bg-dls-hover/45 px-3 py-2.5 text-xs leading-5 text-dls-secondary">
                 {stringifyMetadata(metadata, props.safeStringify)}
               </pre>
             </details>
@@ -334,7 +334,7 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
         </div>
 
         <AlertDialogFooter className="flex-col gap-4">
-          <p className="mb-4 text-[12px] leading-5 text-dls-secondary">
+          <p className="mb-4 text-xs leading-5 text-dls-secondary">
             {t("session.permission_decision_hint")}
           </p>
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-[1fr_auto_auto]">
@@ -386,10 +386,10 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
               <Icon size={16} strokeWidth={1.9} />
             </div>
             <div className="min-w-0">
-              <div className="text-[13px] font-medium leading-5 text-dls-text">{presentation.title}</div>
-              <div className="mt-0.5 text-[12px] leading-5 text-dls-secondary">{presentation.message}</div>
+              <div className="text-sm font-medium leading-5 text-dls-text">{presentation.title}</div>
+              <div className="mt-0.5 text-xs leading-5 text-dls-secondary">{presentation.message}</div>
               {presentation.note ? (
-                <div className="mt-1 text-[12px] leading-5 text-dls-secondary">{presentation.note}</div>
+                <div className="mt-1 text-xs leading-5 text-dls-secondary">{presentation.note}</div>
               ) : null}
             </div>
           </div>
@@ -431,18 +431,18 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
         <div className="border-t border-dls-border px-4 py-3">
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+              <div className="text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
                 {t("session.permission_label")}
               </div>
-              <div className="mt-1 font-mono text-[12px] leading-5 text-dls-text">
+              <div className="mt-1 font-mono text-xs leading-5 text-dls-text">
                 {presentation.permissionLabel}
               </div>
             </div>
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+              <div className="text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
                 {presentation.scopeLabel}
               </div>
-              <div className="mt-1 truncate rounded-lg border border-dls-border bg-dls-hover/55 px-2.5 py-1.5 font-mono text-[12px] leading-5 text-dls-text">
+              <div className="mt-1 truncate rounded-lg border border-dls-border bg-dls-hover/55 px-2.5 py-1.5 font-mono text-xs leading-5 text-dls-text">
                 {presentation.scopeValue}
               </div>
             </div>
@@ -450,11 +450,11 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
 
           {hasMetadata ? (
             <details className="group mt-3 rounded-xl border border-dls-border bg-dls-surface px-3 py-2">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[12px] font-medium text-dls-text">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-dls-text">
                 <span>{t("session.details_label")}</span>
                 <ChevronRight size={14} className="text-dls-secondary transition-transform group-open:rotate-90" />
               </summary>
-              <pre className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-dls-hover/45 px-3 py-2 text-[11px] leading-5 text-dls-secondary">
+              <pre className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-dls-hover/45 px-3 py-2 text-2xs leading-5 text-dls-secondary">
                 {stringifyMetadata(metadata, props.safeStringify)}
               </pre>
             </details>

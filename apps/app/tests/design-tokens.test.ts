@@ -505,6 +505,7 @@ describe("Redrob product typeface", () => {
     const theme = block(TOKENS, "@theme inline");
     const rem = (px: number) => `${px / 16}rem`;
     const scale: Array<[string, number, number]> = [
+      ["2xs", 11, 16],
       ["xs", 12, 18],
       ["sm", 13, 20],
       ["base", 15, 24],
@@ -512,6 +513,8 @@ describe("Redrob product typeface", () => {
       ["xl", 21, 28],
       ["2xl", 27, 34],
       ["3xl", 36, 42],
+      ["4xl", 52, 56],
+      ["5xl", 72, 72],
     ];
     for (const [name, size, leading] of scale) {
       expect(declaration(theme, `--text-${name}`), name).toBe(rem(size));
@@ -520,6 +523,7 @@ describe("Redrob product typeface", () => {
     // The design system's sizes, read from its own shorthands, so the table above
     // cannot drift from them.
     for (const [step, size, leading] of [
+      ["caption", 11, 16],
       ["meta", 12, 18],
       ["body-sm", 13, 20],
       ["body", 15, 24],
@@ -527,6 +531,8 @@ describe("Redrob product typeface", () => {
       ["title-3", 21, 28],
       ["title-2", 27, 34],
       ["title-1", 36, 42],
+      ["display-2", 52, 56],
+      ["display-1", 72, 72],
     ] as const) {
       expect(declaration(DESIGN_SYSTEM_TOKENS, `--text-${step}`)).toContain(`${size}px/${leading}px`);
     }
@@ -538,6 +544,39 @@ describe("Redrob product typeface", () => {
       expect(declaration(theme, `--radius-${step}`), step).toBe(declaration(DESIGN_SYSTEM_TOKENS, `--radius-${step}`));
     }
     expect(declaration(ROLES, "--radius")).toBe("var(--control-radius)");
+  });
+
+  /**
+   * Sizes are steps, not numbers. 483 arbitrary `text-[Npx]` and `rounded-[Npx]`
+   * values were each their own small scale, so a screen could not follow the
+   * design system's by construction. They are mapped onto its steps, and the two
+   * left are the 7px and 8px glyphs inside 16px command-palette keycaps, where the
+   * caption step would overflow the cap.
+   */
+  test("names a type size or a radius only by its step", () => {
+    const allowed = new Map([["src/react-app/shell/command-palette.tsx", ["text-[7px]", "text-[8px]"]]]);
+    const offenders: string[] = [];
+    for (const file of walkFiles(join(APP_ROOT, "src"))) {
+      if (!/\.(tsx?|html)$/.test(file)) continue;
+      const relativePath = file.slice(APP_ROOT.length + 1).replaceAll("\\", "/");
+      const found = [
+        ...readText(file).matchAll(/\btext-\[\d+(?:\.\d+)?(?:px|rem|em)\]|\brounded(?:-[a-z]{1,2})?-\[\d+(?:\.\d+)?(?:px|rem|em)\]/g),
+      ].map((match) => match[0]);
+      const permitted = allowed.get(relativePath) ?? [];
+      for (const value of found) if (!permitted.includes(value)) offenders.push(`${relativePath}: ${value}`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  test("radius stops at the design system's top step below a pill", () => {
+    const theme = block(TOKENS, "@theme inline");
+    expect(declaration(theme, "--radius-3xl")).toBe("initial");
+    expect(declaration(theme, "--radius-4xl")).toBe("initial");
+    const sources = walkFiles(join(APP_ROOT, "src"))
+      .filter((file) => /\.(tsx?|html)$/.test(file))
+      .filter((file) => /\brounded(?:-[a-z]{1,2})?-(?:3xl|4xl)\b|--radius-(?:3xl|4xl)\)/.test(readText(file)))
+      .map((file) => file.slice(APP_ROOT.length + 1));
+    expect(sources).toEqual([]);
   });
 
   test("Tailwind's motion defaults read the design system's motion tokens", () => {

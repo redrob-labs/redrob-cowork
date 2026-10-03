@@ -130,7 +130,7 @@ function SidePanelTab({ tab, active, onSelect, onClose }: SidePanelTabProps) {
         >
           {tab.type === "browser" ? (
             tab.favicon ? (
-              <img src={tab.favicon} alt="" className="size-3.5 shrink-0 rounded-[2px]" />
+              <img src={tab.favicon} alt="" className="size-3.5 shrink-0 rounded-xs" />
             ) : tab.status === "loading" ? (
               <Loader2 className="animate-spin" />
             ) : (
