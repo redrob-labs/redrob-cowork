@@ -1,32 +1,14 @@
 /** @jsxImportSource react */
-import type { ComponentProps } from "react";
+import { Input, type InputProps } from "@redrob-labs/ui";
 
-import { cn } from "@/lib/utils";
+/**
+ * One line of text with its label, hint and error: the design system's Input,
+ * rendered by the design system itself. It owns no focus or positioning
+ * behaviour, so there is nothing for Base UI to add; the label is wired to the
+ * control with `htmlFor` and the hint or error with `aria-describedby`.
+ */
+export type TextInputProps = InputProps;
 
-export type TextInputProps = ComponentProps<"input"> & {
-  label?: string;
-  hint?: string;
-};
-
-export function TextInput({ label, hint, className, ref, ...rest }: TextInputProps) {
-  return (
-    <label className="block">
-      {label ? (
-        <div className="mb-1 text-xs font-medium text-dls-secondary">
-          {label}
-        </div>
-      ) : null}
-      <input
-        ref={ref}
-        className={cn(
-          "w-full rounded-lg border border-dls-border bg-dls-surface px-3 py-2 text-sm text-dls-text shadow-sm placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.2)]",
-          className,
-        )}
-        {...rest}
-      />
-      {hint ? (
-        <div className="mt-1 text-xs text-dls-secondary">{hint}</div>
-      ) : null}
-    </label>
-  );
+export function TextInput(props: TextInputProps) {
+  return <Input {...props} />;
 }
