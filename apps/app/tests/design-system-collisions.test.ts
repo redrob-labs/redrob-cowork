@@ -150,14 +150,16 @@ describe("the design system and the app keep separate vocabularies", () => {
       ),
     );
     expect(written.has("--font-sans")).toBe(true);
+    // One pass per file with one pattern: this walks every source file, and a
+    // pattern per name made it slow enough to time out under the full suite.
+    const pattern = new RegExp(`var\\(\\s*(${[...written].join("|")})(?![\\w-])`, "g");
     const offenders: string[] = [];
     for (const file of SOURCE_FILES) {
-      const source = readFileSync(file, "utf8");
-      for (const name of written) {
-        const pattern = new RegExp(`var\\(\\s*${name}(?![\\w-])`, "g");
-        const reads = [...source.matchAll(pattern)].length;
-        if (reads > 0) offenders.push(`${relative(file)}: var(${name}) x${reads}`);
+      const counts = new Map<string, number>();
+      for (const match of readFileSync(file, "utf8").matchAll(pattern)) {
+        counts.set(match[1], (counts.get(match[1]) ?? 0) + 1);
       }
+      for (const [name, reads] of counts) offenders.push(`${relative(file)}: var(${name}) x${reads}`);
     }
     expect(offenders).toEqual([]);
   });
