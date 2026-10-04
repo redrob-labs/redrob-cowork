@@ -7,7 +7,7 @@
     "redrob-server": "bin/redrob-server.mjs"
   },
   "scripts": {
-    "dev": "REDROB_DEV_MODE=1 bun --conditions=development src/cli.ts",
+    "dev": "node ../../scripts/with-env.mjs REDROB_DEV_MODE=1 -- bun --conditions=development src/cli.ts",
     "test": "bun --conditions=development test src",
     "test:artifacts": "bun --conditions=development test src/artifact-files.e2e.test.ts src/workspace-init.test.ts src/server.normalizeWorkspaceRelativePath.test.ts",
     "build:enterprise-mcp-client": "pnpm --filter @redrob/enterprise-mcp-client build",
