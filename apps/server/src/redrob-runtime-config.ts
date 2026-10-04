@@ -36,6 +36,7 @@ import {
   type RuntimeOpencodeConfig,
 } from "./runtime-opencode-config-store.js";
 import { activeHarnessProviders } from "./harness-provider.js";
+import { deskAgents } from "./redrob-desk-agents.js";
 
 const REDROB_AGENT_PROMPT = `You are Redrob Cowork.
 
@@ -88,6 +89,18 @@ Manage: to show what is saved, discover and execute the list capability (getMemo
 
 Never persist secrets, credentials, API keys, tokens, or sensitive PII into a memory. This applies to both the content sentence and any cited snippets — redact secrets from a snippet before saving it.`;
 
+const REDROB_AGENT_PERMISSION = {
+  skill: {
+    // Redrob Cowork supplies its own current skill routing and no longer
+    // supports these engine or legacy workspace skills.
+    "customize-opencode": "deny",
+    "get-started": "deny",
+    "command-creator": "deny",
+    "agent-creator": "deny",
+    "plugin-creator": "deny",
+  },
+};
+
 export async function buildRedrobRuntimeConfigObject(
   config?: ServerConfig,
   workspaceId?: string,
@@ -112,18 +125,9 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
         mode: "primary",
         temperature: 0.2,
         prompt: REDROB_AGENT_PROMPT,
-        permission: {
-          skill: {
-            // Redrob Cowork supplies its own current skill routing and no longer
-            // supports these engine or legacy workspace skills.
-            "customize-opencode": "deny",
-            "get-started": "deny",
-            "command-creator": "deny",
-            "agent-creator": "deny",
-            "plugin-creator": "deny",
-          },
-        },
+        permission: REDROB_AGENT_PERMISSION,
       },
+      ...deskAgents({ prompt: REDROB_AGENT_PROMPT, permission: REDROB_AGENT_PERMISSION }),
     },
     plugin: [
       "opencode-chrome-devtools",

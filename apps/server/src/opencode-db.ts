@@ -50,8 +50,10 @@ type SeedMessage = {
 };
 
 const DEFAULT_AGENT = "redrob";
-const DEFAULT_PROVIDER = "openai";
-const DEFAULT_MODEL = "gpt-5.4";
+// Redrob is the only inference provider, and `auto` picks the model per message.
+// REDROB_PROVIDER_ID in redrob-auth.ts; not imported, to keep this module free of the server graph.
+const DEFAULT_PROVIDER = "redrob";
+const DEFAULT_MODEL = "auto";
 const REDROB_DEV_DATA_DIRS = ["redrob-dev-data", "opencode-dev"];
 
 function truthy(value: string | undefined): boolean {
