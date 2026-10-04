@@ -44,6 +44,8 @@ export type WorkspaceWire = {
   /** redrob-server only: credentials for the proxied opencode engine. */
   opencodeUsername?: string | null;
   opencodePassword?: string | null;
+  /** redrob-server only: "personal" marks the app-managed workspace for chats outside any project. */
+  kind?: "personal" | null;
   opencode?: {
     baseUrl?: string;
     directory?: string;

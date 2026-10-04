@@ -67,6 +67,8 @@ export function buildWorkspaceInfos(
       sandboxContainerName: workspace.sandboxContainerName,
       opencodeUsername: workspace.opencodeUsername,
       opencodePassword: workspace.opencodePassword,
+      // Read from server.json, so only the known value survives.
+      kind: workspace.kind === "personal" ? workspace.kind : undefined,
     };
   });
 }

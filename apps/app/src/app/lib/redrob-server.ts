@@ -1077,6 +1077,19 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: payload,
         timeoutMs: timeouts.activateWorkspace,
       }),
+    // Idempotent: returns the app-managed Personal workspace, creating it on first call.
+    ensurePersonalWorkspace: () =>
+      requestJson<{
+        activeId: string | null;
+        workspace: RedrobWorkspaceInfo;
+        workspaces: RedrobWorkspaceInfo[];
+        persisted: boolean;
+      }>(baseUrl, "/workspaces/personal", {
+        token,
+        hostToken,
+        method: "POST",
+        timeoutMs: timeouts.activateWorkspace,
+      }),
     createRemoteWorkspace: (payload: {
       baseUrl: string;
       redrobHostUrl?: string | null;
@@ -1124,6 +1137,12 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         baseUrl,
         `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}`,
         { token, hostToken, method: "DELETE", timeoutMs: timeouts.deleteSession },
+      ),
+    moveSession: (workspaceId: string, sessionId: string, targetWorkspaceId: string) =>
+      requestJson<{ ok: boolean; session: { id: string; workspaceId: string } }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/move`,
+        { token, hostToken, method: "POST", body: { targetWorkspaceId }, timeoutMs: timeouts.deleteSession },
       ),
     listSessions: (
       workspaceId: string,
