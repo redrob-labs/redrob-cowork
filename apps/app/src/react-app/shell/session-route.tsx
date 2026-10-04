@@ -148,6 +148,7 @@ import { buildCommandPaletteSessions } from "./command-palette-sessions";
 import { SessionSearchDialog } from "./session-search-dialog";
 import type { SessionMessageFetcher } from "@/react-app/domains/session/search/session-search";
 import { useBootState } from "./boot-state";
+import { useFrameStore } from "@/react-app/desk/store/frame-store";
 import {
   forgetWorkspaceMemory,
   readLastSessionFor,
@@ -444,10 +445,8 @@ export function SessionRoute() {
   const [redrobServerHostInfoState, setRedrobServerHostInfoState] = useState<RedrobServerInfo | null>(null);
   const [redrobServerSettingsVersion, setRedrobServerSettingsVersion] = useState(0);
 
-  const [developerMode, setDeveloperMode] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("redrob.developerMode") === "1";
-  });
+  const developerMode = useFrameStore((s) => s.developerMode);
+  const setDeveloperMode = useFrameStore((s) => s.setDeveloperMode);
 
   // Progressive disclosure: a first-run user starts without the status menu and
   // the notification bell, and they appear once the user has opened a few
@@ -2010,13 +2009,9 @@ export function SessionRoute() {
     searchText: "developer dev mode debug diagnostics toggle enable disable",
     action: () => {
       setCommandPaletteOpen(false);
-      setDeveloperMode((current) => {
-        const next = !current;
-        try { window.localStorage.setItem("redrob.developerMode", next ? "1" : "0"); } catch {}
-        return next;
-      });
+      setDeveloperMode(!developerMode);
     },
-  }), [developerMode]);
+  }), [developerMode, setDeveloperMode]);
 
   const buildCommandDiagnosticsBundle = useCallback(() => buildDiagnosticsBundleJson({
     anyActiveRuns: activeReloadBlockingSessions.length > 0,

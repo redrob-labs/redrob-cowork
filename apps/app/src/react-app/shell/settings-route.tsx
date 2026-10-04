@@ -84,6 +84,7 @@ import { NukeDialog } from "@/react-app/domains/settings/modals/nuke-dialog";
 import { useDebugViewModel } from "@/react-app/domains/settings/state/debug-view-model";
 import { useElectronUpdaterState } from "@/react-app/domains/settings/state/electron-updater-state";
 import { useBootState } from "./boot-state";
+import { useFrameStore } from "@/react-app/desk/store/frame-store";
 import { SettingsShell } from "@/react-app/domains/settings/shell/settings-shell";
 import { SettingsContent } from "@/react-app/domains/settings/shell/panel";
 import { createExtensionsStore, useExtensionsStoreSnapshot } from "@/react-app/domains/settings/state/extensions-store";
@@ -438,10 +439,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const [providerDefaults, setProviderDefaults] = useState<Record<string, string>>({});
   const [providerConnectedIds, setProviderConnectedIds] = useState<string[]>([]);
   const [disabledProviders, setDisabledProviders] = useState<string[]>([]);
-  const [developerMode, setDeveloperMode] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("redrob.developerMode") === "1";
-  });
+  const developerMode = useFrameStore((s) => s.developerMode);
+  const setDeveloperMode = useFrameStore((s) => s.setDeveloperMode);
   const [themeMode, setThemeModeState] = useState<ThemeMode>(getInitialThemeMode);
   const [hideTitlebar, setHideTitlebar] = useState(() => readStoredBoolean(SETTINGS_HIDE_TITLEBAR_KEY, false));
   const [updateAutoCheck, setUpdateAutoCheck] = useState(() =>
@@ -2102,11 +2101,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             opencodeConnectStatus={null}
             redrobServerStatus={redrobServerSnapshot.redrobServerStatus}
             developerMode={developerMode}
-            toggleDeveloperMode={() => setDeveloperMode((current) => {
-              const next = !current;
-              try { window.localStorage.setItem("redrob.developerMode", next ? "1" : "0"); } catch {}
-              return next;
-            })}
+            toggleDeveloperMode={() => setDeveloperMode(!developerMode)}
             opencodeDevModeEnabled={false}
             openDebugDeepLink={async () => ({ ok: false, message: t("settings.debug_deeplink_not_wired") })}
             canMigrateRuntimeConfig={Boolean(redrobClient && selectedWorkspaceId)}
