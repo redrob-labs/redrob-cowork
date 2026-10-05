@@ -79,6 +79,7 @@ import {
   type SidePanelTarget,
 } from "../../../desk/panel/route-side-panel";
 import { useFrameStore } from "../../../desk/store/frame-store";
+import { browserHeldResult } from "../../../desk/panel/desk-browser-state";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
 import { useBootOverlayVisible } from "../../../shell/boot-state";
@@ -589,6 +590,9 @@ export function SessionPage(props: SessionPageProps) {
       if (provider !== "auto" && provider !== "builtin") {
         return { ok: false, error: `Browser provider is not available yet: ${provider}` };
       }
+      // Take over in the Desk panel hands the browser to the person; Desk waits for it back.
+      const held = browserHeldResult(useFrameStore.getState().browser.desk);
+      if (held) return held;
       setCurrentSidePanel("panel");
       return window.__REDROB_ELECTRON__?.browser?.openUrl?.(url, provider);
     },
@@ -605,6 +609,8 @@ export function SessionPage(props: SessionPageProps) {
     previewArgs: { proxy: "env:DE" },
     disabled: !isElectronRuntime(),
     execute: async (args) => {
+      const held = browserHeldResult(useFrameStore.getState().browser.desk);
+      if (held) return held;
       const proxy = controlStringArg(args, "proxy") || "";
       const setProxy = window.__REDROB_ELECTRON__?.browser?.setProxy;
       if (!setProxy) return { ok: false, error: "Built-in browser is not available." };

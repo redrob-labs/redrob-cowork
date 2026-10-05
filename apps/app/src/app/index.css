@@ -598,6 +598,225 @@
 }
 
 /**
+ * The browser in the side panel (`desk/panel/desk-browser.tsx`): tabs on the sunken strip,
+ * Back, Forward and the one address field, the bar saying who has the tab, and the page.
+ * Electron lays the page over `.desk-browser__page--native` by its bounds.
+ */
+.desk-browser {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.desk-browser__tabs {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  overflow-x: auto;
+  padding: var(--space-2) var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-sunken);
+}
+
+.desk-browser__tab {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 190px;
+  height: 34px;
+  margin-bottom: -1px;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: --theme(--radius-md) --theme(--radius-md) 0 0;
+  background: transparent;
+  font: var(--text-meta);
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.desk-browser__tab[aria-selected="true"] {
+  border-color: var(--border-subtle);
+  background: var(--surface-base);
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-browser__tab:focus-visible,
+.desk-browser__pages button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.desk-browser__tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desk-browser__favicon {
+  flex: none;
+  border-radius: --theme(--radius-xs);
+}
+
+.desk-browser__live {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--action-primary);
+  box-shadow: 0 0 0 3px var(--surface-ai);
+  animation: desk-browser-live 1.6s var(--easing-standard) infinite;
+}
+
+@keyframes desk-browser-live {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.desk-browser__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-browser__address {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 6px;
+}
+
+.desk-browser__address label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: --theme(--radius-2xl);
+  background: var(--surface-base);
+  color: var(--ink-muted);
+}
+
+.desk-browser__address label:focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.desk-browser__address input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: var(--text-meta);
+  color: var(--ink-primary);
+}
+
+.desk-browser__agent {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--space-3);
+  padding: 10px var(--space-4);
+  border-bottom: 1px solid var(--border-ai);
+  background: var(--surface-ai);
+  font: var(--text-meta);
+}
+
+.desk-browser__page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.desk-browser__page--native {
+  overflow: hidden;
+  padding: 0;
+}
+
+.desk-browser__new,
+.desk-browser__read {
+  display: flex;
+  flex-direction: column;
+}
+
+.desk-browser__new {
+  gap: var(--space-5);
+}
+
+.desk-browser__read {
+  gap: 10px;
+}
+
+.desk-browser__lede,
+.desk-browser__none {
+  margin: 0;
+  font: var(--text-body);
+  color: var(--ink-secondary);
+}
+
+.desk-browser__none {
+  font: var(--text-meta);
+}
+
+.desk-browser__pages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.desk-browser__pages > li {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-browser__pages button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px var(--space-1);
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.desk-browser__pages button:hover b {
+  color: var(--ink-brand);
+}
+
+.desk-browser__pages b {
+  font: var(--text-body-strong);
+  font-weight: 600;
+}
+
+.desk-browser__pages span {
+  font: var(--text-meta);
+  color: var(--ink-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-browser__live {
+    animation: none;
+  }
+}
+
+/**
  * The account menu at the foot of the sidebar, the shortcuts list, the dialog layer and the
  * toast (`account-menu.tsx`, `desk-layer.tsx`, `desk-dialog.tsx`). Layout on design tokens;
  * the menu's trigger is reached by element order (its `div`, then its `button`), never by

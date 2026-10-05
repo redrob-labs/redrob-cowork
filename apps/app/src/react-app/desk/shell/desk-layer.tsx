@@ -6,6 +6,7 @@ import { Button, Textarea, Toast } from "@redrob-labs/ui";
 import { isMacPlatform } from "../../../app/utils";
 import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
+import { useDeskRunEvents } from "../run/use-desk-run-events";
 import { useFrameStore, type FrameModal, type FrameToast } from "../store/frame-store";
 import { APP_VERSION, versionLabel } from "./account-menu";
 import { DeskDialog } from "./desk-dialog";
@@ -230,6 +231,7 @@ export function DeskLayer() {
   const hideToast = useFrameStore((state) => state.hideToast);
   useNewChatShortcut();
   useToggleBrowserShortcut();
+  useDeskRunEvents();
 
   return (
     <DeskLayerView

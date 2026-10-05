@@ -34,13 +34,8 @@ import { useControlAction, type RedrobControlAction } from "../../../shell/contr
 import type { OpenTarget } from "../artifacts/open-target";
 import { useSidePanelTabs } from "./use-side-panel-tabs";
 import { handlePanelEscape, PanelEmpty } from "./panel-empty";
-import {
-  computeBounds,
-  getElectronBrowser,
-  getNativeMenuPoint,
-  hasNativeBrowserOccluder,
-  sameBounds,
-} from "./utils";
+import { getElectronBrowser, getNativeMenuPoint } from "./utils";
+import { useNativeBrowserBounds } from "./use-native-browser-bounds";
 import { t } from "@/i18n";
 
 type SidePanelProps = {
@@ -166,9 +161,7 @@ export function BrowserPanelContent({
   const urlFocusedRef = React.useRef(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
   const urlInputRef = React.useRef<HTMLInputElement>(null);
-  const shownRef = React.useRef(false);
-  const boundsFrameRef = React.useRef<number | null>(null);
-  const lastBoundsRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  useNativeBrowserBounds(contentRef, isAvailable);
 
   React.useEffect(() => {
     if (!urlFocusedRef.current) {
@@ -199,109 +192,6 @@ export function BrowserPanelContent({
       urlInputRef.current?.blur();
     }
   }, [navigate]);
-
-  React.useLayoutEffect(() => {
-    const browser = getElectronBrowser();
-    const content = contentRef.current;
-    if (!browser || !content || !isAvailable) {
-      return;
-    }
-
-    const bounds = computeBounds(content);
-    if (bounds.width < 1 || bounds.height < 1) {
-      return;
-    }
-
-    browser.setBounds?.(bounds);
-    lastBoundsRef.current = bounds;
-  });
-
-  React.useLayoutEffect(() => {
-    const browser = getElectronBrowser();
-    const content = contentRef.current;
-
-    if (!browser || !content || !isAvailable) {
-      browser?.hide?.();
-      shownRef.current = false;
-      lastBoundsRef.current = null;
-
-      if (boundsFrameRef.current != null) {
-        window.cancelAnimationFrame(boundsFrameRef.current);
-        boundsFrameRef.current = null;
-      }
-
-      return;
-    }
-
-    let disposed = false;
-
-    const resetNativeView = async () => {
-      await browser.hide?.();
-
-      if (disposed) {
-        return;
-      }
-
-      shownRef.current = false;
-      lastBoundsRef.current = null;
-      boundsFrameRef.current = window.requestAnimationFrame(watchBounds);
-    };
-
-    const syncBounds = () => {
-      const bounds = computeBounds(content);
-
-      if (bounds.width < 1 || bounds.height < 1 || hasNativeBrowserOccluder()) {
-        if (shownRef.current) {
-          browser.hide?.();
-          shownRef.current = false;
-          lastBoundsRef.current = null;
-        }
-
-        return;
-      }
-
-      if (!shownRef.current) {
-        browser.show?.(bounds);
-        shownRef.current = true;
-        lastBoundsRef.current = bounds;
-        return;
-      }
-
-      if (!sameBounds(lastBoundsRef.current, bounds)) {
-        browser.setBounds?.(bounds);
-        lastBoundsRef.current = bounds;
-      }
-    };
-
-    const watchBounds = () => {
-      syncBounds();
-      boundsFrameRef.current = window.requestAnimationFrame(watchBounds);
-    };
-
-    void resetNativeView();
-
-    const observer = new ResizeObserver(syncBounds);
-
-    observer.observe(content);
-    window.addEventListener("resize", syncBounds);
-    window.addEventListener("scroll", syncBounds, true);
-
-    return () => {
-      disposed = true;
-      observer.disconnect();
-      window.removeEventListener("resize", syncBounds);
-      window.removeEventListener("scroll", syncBounds, true);
-
-      if (boundsFrameRef.current != null) {
-        window.cancelAnimationFrame(boundsFrameRef.current);
-        boundsFrameRef.current = null;
-      }
-
-      browser.hide?.();
-      shownRef.current = false;
-      lastBoundsRef.current = null;
-    };
-  }, [isAvailable]);
 
   return (
     <>

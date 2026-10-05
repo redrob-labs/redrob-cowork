@@ -1,19 +1,13 @@
 /** @jsxImportSource react */
 import type { ReactNode } from "react";
-import { Button, EmptyState, IconButton, icons } from "@redrob-labs/ui";
+import { EmptyState, IconButton, icons } from "@redrob-labs/ui";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { t } from "../../../i18n";
-import {
-  useSessionPanelState,
-  type BrowserPanelTab,
-  type SessionPanelState,
-} from "../../domains/session/panel/panel-tab-store";
-import { BrowserPanelContent } from "../../domains/session/panel/side-panel";
+import type { BrowserPanelTab, SessionPanelState } from "../../domains/session/panel/panel-tab-store";
 import { getSidePanelSessionKey } from "../../domains/session/panel/side-panel-session";
-import { useSidePanelTabs } from "../../domains/session/panel/use-side-panel-tabs";
 import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
+import { DeskBrowser } from "./desk-browser";
 import { DeskPanelFiles } from "./desk-panel-files";
 
 const ICON = { width: 15, height: 15, "aria-hidden": true };
@@ -74,37 +68,19 @@ export function DeskSidePanelView(props: DeskSidePanelViewProps) {
 }
 
 /**
- * The app's built-in browser, as the old panel draws it: `BrowserPanelContent` reports its
- * bounds so Electron lays the native page over it, and hides that page when it unmounts
- * (the panel closing or switching to Files). Tabs are the session's, kept in sync with
- * Electron here because the old panel, which used to do it, is not mounted in the frame.
+ * The app's built-in browser, in the Desk's own chrome (`DeskBrowser`): it reports its page
+ * bounds so Electron lays the native page there, and hides that page when it unmounts (the
+ * panel closing or switching to Files). Outside the desktop app there is no browser to show.
  */
 function DeskPanelBrowser(props: { sessionKey: string }) {
-  const session = useSessionPanelState(props.sessionKey);
-  const { createTab } = useSidePanelTabs(props.sessionKey);
-  const tab = panelBrowserTab(session);
-  if (tab) {
-    return (
-      <TooltipProvider delay={1000}>
-        <BrowserPanelContent tab={tab} />
-      </TooltipProvider>
-    );
-  }
-  const available = Boolean(getElectronBrowser());
+  if (getElectronBrowser()) return <DeskBrowser sessionKey={props.sessionKey} />;
   return (
     <div className="desk-panel__empty">
       <EmptyState
         compact
         icon={icons.globe({ width: 20, height: 20, "aria-hidden": true })}
         title={t("desk.panel_browser_empty_title")}
-        description={available ? t("desk.panel_browser_empty_text") : t("desk.panel_browser_desktop_only")}
-        action={
-          available ? (
-            <Button size="sm" variant="secondary" onClick={() => createTab()}>
-              {t("desk.panel_new_tab")}
-            </Button>
-          ) : undefined
-        }
+        description={t("desk.panel_browser_desktop_only")}
       />
     </div>
   );

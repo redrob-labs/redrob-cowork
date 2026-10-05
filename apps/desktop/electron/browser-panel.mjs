@@ -201,7 +201,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
       label: getBrowserTabLabel(title, url),
       url,
       favicon: tab.favicon ?? null,
-      status: isLoading ? "loading" : "ready",
+      status: tab.failed ? "error" : isLoading ? "loading" : "ready",
       canGoBack: webContents.canGoBack(),
       canGoForward: webContents.canGoForward(),
     };
@@ -481,7 +481,7 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
         partition: BROWSER_SESSION_PARTITION,
       },
     });
-    const tab = { tabId, view, favicon: null };
+    const tab = { tabId, view, favicon: null, failed: false };
     browserTabs.set(tabId, tab);
     browserTabOrder.push(tabId);
     // Load about:blank immediately to preempt persistent-session restore.
@@ -535,7 +535,17 @@ export function createBrowserPanel({ getWindow, remoteDebugPort, onDeepLink }) {
       tab.favicon = Array.isArray(favicons) ? favicons[0] ?? null : null;
       sendBrowserState();
     });
-    view.webContents.on("did-start-loading", () => sendBrowserState());
+    view.webContents.on("did-start-loading", () => {
+      tab.failed = false;
+      sendBrowserState();
+    });
+    // A main-frame load that failed, so the panel names the site instead of a raw browser
+    // error. -3 is ERR_ABORTED: one navigation replaced by another, not a failure.
+    view.webContents.on("did-fail-load", (_event, errorCode, _description, _url, isMainFrame) => {
+      if (!isMainFrame || errorCode === -3) return;
+      tab.failed = true;
+      sendBrowserState();
+    });
     view.webContents.on("did-stop-loading", () => sendBrowserState());
     view.webContents.once("destroyed", () => {
       browserTabs.delete(tabId);
