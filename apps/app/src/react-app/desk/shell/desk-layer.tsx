@@ -1,7 +1,10 @@
 /** @jsxImportSource react */
 import { useEffect, useEffectEvent, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { Button, Textarea, Toast } from "@redrob-labs/ui";
+import { Button, Checkbox, Textarea, Toast } from "@redrob-labs/ui";
+
+import { buildDiagnosticsBundleJson } from "../../../app/lib/diagnostics-bundle";
+import { downloadTextAsFile } from "../../../app/lib/download";
 
 import { isMacPlatform } from "../../../app/utils";
 import { t } from "../../../i18n";
@@ -60,9 +63,10 @@ export function ShortcutsDialog(props: { mac: boolean; onClose: () => void }) {
 export const SUPPORT_EMAIL = "support@redrob.io";
 
 /** An email to support with the note and the app version, nothing from the person's chats. */
-export function feedbackMailto(text: string, version: string): string {
+export function feedbackMailto(text: string, version: string, attachment: string | null = null): string {
   const subject = encodeURIComponent(t("desk.feedback_subject"));
-  const body = encodeURIComponent(`${text.trim()}\n\n${versionLabel(version)}`);
+  const attach = attachment ? `\n\n${t("desk.feedback_attach_line", { name: attachment })}` : "";
+  const body = encodeURIComponent(`${text.trim()}${attach}\n\n${versionLabel(version)}`);
   return `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
 }
 
@@ -70,16 +74,37 @@ export function canSendFeedback(text: string): boolean {
   return text.trim().length > 0;
 }
 
-/** Hands the note to the email app, closes the dialog and says so. A blank note does nothing. */
-export function submitFeedback(
+/**
+ * Hands the note to the email app, closes the dialog and says so. A blank note does nothing.
+ * With diagnostics, the sanitized report is saved first and the email says to attach it: an
+ * email link cannot carry a file.
+ */
+export async function submitFeedback(
   text: string,
-  deps: { openLink: (url: string) => void; close: () => void; toast: (title: string, text?: string) => void },
-): boolean {
+  deps: {
+    openLink: (url: string) => void;
+    close: () => void;
+    toast: (title: string, text?: string) => void;
+    /** Saves the diagnostics file and returns its name, or null when it could not be made. */
+    saveDiagnostics?: () => Promise<string | null>;
+  },
+): Promise<boolean> {
   if (!canSendFeedback(text)) return false;
-  deps.openLink(feedbackMailto(text, APP_VERSION));
+  const attachment = deps.saveDiagnostics ? await deps.saveDiagnostics().catch(() => null) : null;
+  deps.openLink(feedbackMailto(text, APP_VERSION, attachment));
   deps.close();
-  deps.toast(t("desk.feedback_sent_title"), t("desk.feedback_sent_text"));
+  deps.toast(
+    t("desk.feedback_sent_title"),
+    attachment ? t("desk.feedback_sent_attach", { name: attachment }) : t("desk.feedback_sent_text"),
+  );
   return true;
+}
+
+/** The sanitized diagnostics report, saved to Downloads under a dated name. */
+export async function saveFeedbackDiagnostics(now = new Date()): Promise<string> {
+  const name = `redrob-diagnostics-${now.toISOString().replace(/[:.]/g, "-")}.json`;
+  downloadTextAsFile(name, await buildDiagnosticsBundleJson(), "application/json");
+  return name;
 }
 
 export type FeedbackDialogViewProps = {
@@ -87,6 +112,9 @@ export type FeedbackDialogViewProps = {
   onTextChange: (text: string) => void;
   onCancel: () => void;
   onSend: () => void;
+  /** Whether the diagnostics report goes with the note. */
+  diagnostics?: boolean;
+  onDiagnosticsChange?: (on: boolean) => void;
 };
 
 export function FeedbackDialogView(props: FeedbackDialogViewProps) {
@@ -115,6 +143,17 @@ export function FeedbackDialogView(props: FeedbackDialogViewProps) {
         value={props.text}
         onChange={(event) => props.onTextChange(event.target.value)}
       />
+      {props.onDiagnosticsChange ? (
+        <div className="mt-3">
+          <Checkbox
+            id="desk-feedback-diagnostics"
+            label={t("desk.feedback_diagnostics")}
+            hint={t("desk.feedback_diagnostics_hint")}
+            checked={props.diagnostics === true}
+            onChange={(event) => props.onDiagnosticsChange?.(event.currentTarget.checked)}
+          />
+        </div>
+      ) : null}
     </DeskDialog>
   );
 }
@@ -123,12 +162,23 @@ function FeedbackDialog(props: { onClose: () => void }) {
   const platform = usePlatform();
   const showToast = useFrameStore((state) => state.showToast);
   const [text, setText] = useState("");
+  // On by default: a report a person can act on needs what the app was doing.
+  const [diagnostics, setDiagnostics] = useState(true);
   return (
     <FeedbackDialogView
       text={text}
       onTextChange={setText}
       onCancel={props.onClose}
-      onSend={() => submitFeedback(text, { openLink: platform.openLink, close: props.onClose, toast: showToast })}
+      diagnostics={diagnostics}
+      onDiagnosticsChange={setDiagnostics}
+      onSend={() =>
+        void submitFeedback(text, {
+          openLink: platform.openLink,
+          close: props.onClose,
+          toast: showToast,
+          ...(diagnostics ? { saveDiagnostics: () => saveFeedbackDiagnostics() } : {}),
+        })
+      }
     />
   );
 }

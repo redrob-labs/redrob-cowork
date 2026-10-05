@@ -420,6 +420,8 @@ export type DesktopCommandMap = {
     result: { enabled: boolean };
   };
   desktopSentryClearSession: { args: []; result: { enabled: boolean } };
+  /** Crash reports by the person's consent, with an anonymous install id. */
+  desktopSentrySetConsent: { args: [input: { enabled: boolean }]; result: { enabled: boolean } };
   desktopIntegrationStatus: { args: []; result: DesktopIntegrationStatus };
   desktopIntegrationInstall: {
     args: [options?: { useExternalLauncher?: boolean }];

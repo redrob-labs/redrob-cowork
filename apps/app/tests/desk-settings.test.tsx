@@ -71,6 +71,7 @@ const PREFS: LocalPreferences = {
   featureFlags: { microsandboxCreateSandbox: true, continuousEngine: false, memory: false },
   hasCompletedOnboarding: true,
   analyticsEnabled: true,
+  crashReports: false,
   desktopNotifications: "off",
 };
 

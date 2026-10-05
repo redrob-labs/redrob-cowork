@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -51,6 +52,18 @@ function readBuildConfig(app) {
   return parseBuildConfig(resolve(__dirname, "..", ".electron-runtime", "redrob-sentry.json"));
 }
 
+/** What leaves for Sentry: an event while crash reports are on, nothing otherwise. */
+export function redrobSentryGate(event) {
+  return telemetryActive ? event : null;
+}
+
+/** Test seam: a stand-in for the Sentry SDK, as if it had been initialized. */
+export function installRedrobSentryForTests(fake) {
+  sentry = fake;
+  initialized = Boolean(fake);
+  telemetryActive = false;
+}
+
 export async function initRedrobSentry({ app, distribution, packageMetadata }) {
   const buildConfig = readBuildConfig(app);
   const dsn = buildConfig.dsn;
@@ -70,8 +83,8 @@ export async function initRedrobSentry({ app, distribution, packageMetadata }) {
       (integration) => !["BrowserWindowSession", "ElectronMinidump", "MainProcessSession", "SentryMinidump"].includes(integration.name),
     ),
     tracesSampler: () => telemetryActive ? sampleRate : 0,
-    beforeSend: (event) => telemetryActive ? event : null,
-    beforeSendTransaction: (event) => telemetryActive ? event : null,
+    beforeSend: redrobSentryGate,
+    beforeSendTransaction: redrobSentryGate,
     initialScope: {
       tags: {
         app: "desktop",
@@ -111,6 +124,44 @@ export function setRedrobSentrySession(input) {
     user_id: userId,
   });
   return true;
+}
+
+/**
+ * Crash reports by consent, with no account behind them. The person turns them on in
+ * onboarding or Settings; the only identity sent is a random id made for this install, so
+ * reports from one computer can be grouped without saying whose it is. Off by default.
+ */
+export function setRedrobSentryConsent(input) {
+  const enabled = input?.enabled === true;
+  if (!enabled) {
+    clearRedrobSentrySession();
+    return false;
+  }
+  const installId = normalizeIdentifier(input?.installId);
+  if (!initialized || !sentry || !installId) return false;
+  telemetryActive = true;
+  sentry.setUser({ id: installId });
+  sentry.setTag("consent", "crash-reports");
+  return true;
+}
+
+/** This install's random id, made once and kept in the app's data folder. */
+export function resolveRedrobInstallId(userDataPath) {
+  const path = resolve(userDataPath, "redrob-install-id");
+  try {
+    const existing = normalizeIdentifier(readFileSync(path, "utf8"));
+    if (existing) return existing;
+  } catch {
+    // Not made yet.
+  }
+  const created = randomUUID();
+  try {
+    mkdirSync(userDataPath, { recursive: true });
+    writeFileSync(path, created, "utf8");
+  } catch {
+    // An id that cannot be kept still groups this session's reports.
+  }
+  return created;
 }
 
 export function clearRedrobSentrySession() {

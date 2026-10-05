@@ -14,6 +14,7 @@ import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-wor
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
 import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/playbooks/start-chat";
+import { syncCrashReports } from "@/react-app/desk/settings/crash-reports";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
@@ -469,6 +470,11 @@ export function SessionRoute() {
   useEffect(() => {
     recordSessionOpened();
   }, [recordSessionOpened]);
+
+  // The desktop app sends crash reports only while the person's choice says so.
+  useEffect(() => {
+    void syncCrashReports(local.prefs.crashReports);
+  }, [local.prefs.crashReports]);
   const [variantRun, setVariantRun] = useState<VariantRun | null>(null);
   /** The run the poll belongs to, so a discarded run's poll stops instead of running to its deadline. */
   const variantRunRef = useRef<VariantRun | null>(null);

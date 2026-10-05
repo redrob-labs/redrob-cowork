@@ -17,6 +17,9 @@ export type TutorialStepProps = {
   /** Absolute path of the workspace that was just created, when known. */
   workspacePath?: string | null;
   onStart: () => void;
+  /** The crash-report choice, offered in the desktop app only. Off until ticked. */
+  crashReports?: boolean;
+  onCrashReports?: (on: boolean) => void;
 };
 
 const CARDS = [
@@ -37,7 +40,7 @@ const CARDS = [
   },
 ] as const;
 
-export function TutorialStep({ workspacePath, onStart }: TutorialStepProps) {
+export function TutorialStep({ workspacePath, onStart, crashReports, onCrashReports }: TutorialStepProps) {
   const { markRouteReady } = useBootState();
 
   useEffect(() => {
@@ -96,6 +99,24 @@ export function TutorialStep({ workspacePath, onStart }: TutorialStepProps) {
                     </div>
                   ))}
                 </div>
+
+                {onCrashReports ? (
+                  <label className="mt-6 flex items-start gap-3 rounded-2xl border border-border px-4 py-3.5 text-left">
+                    <input
+                      type="checkbox"
+                      className="mt-1 size-4"
+                      checked={crashReports === true}
+                      onChange={(event) => onCrashReports(event.currentTarget.checked)}
+                      data-testid="tutorial-crash-reports"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-foreground">{t("desk.settings_crash_reports")}</span>
+                      <span className="mt-1 block text-sm leading-[20px] text-muted-foreground">
+                        {t("desk.settings_crash_reports_text")}
+                      </span>
+                    </span>
+                  </label>
+                ) : null}
 
                 <Button
                   type="button"

@@ -67,6 +67,8 @@ import { createDesktopVaultKeyProvider } from "./secure-vault-key.mjs";
 import {
   clearRedrobSentrySession,
   initRedrobSentry,
+  resolveRedrobInstallId,
+  setRedrobSentryConsent,
   setRedrobSentrySession,
 } from "./sentry.mjs";
 import { installStdioErrorHandlers } from "./stdio-errors.mjs";
@@ -1709,6 +1711,15 @@ const desktopCommandHandlers = {
         enabled: setRedrobSentrySession({
           userId: input.userId,
           orgId: input.orgId,
+        }),
+      };
+  },
+  "desktopSentrySetConsent": async (event, ...args) => {
+      const enabled = args[0]?.enabled === true;
+      return {
+        enabled: setRedrobSentryConsent({
+          enabled,
+          installId: enabled ? resolveRedrobInstallId(app.getPath("userData")) : null,
         }),
       };
   },

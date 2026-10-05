@@ -233,10 +233,10 @@ describe("feedback dialog", () => {
     expect(canSendFeedback(" x ")).toBe(true);
   });
 
-  test("sending opens an email to support with the note, closes, and confirms with a toast", () => {
+  test("sending opens an email to support with the note, closes, and confirms with a toast", async () => {
     const calls: string[] = [];
     let link = "";
-    const sent = submitFeedback("  Please add dark mode  ", {
+    const sent = await submitFeedback("  Please add dark mode  ", {
       openLink: (url) => {
         link = url;
         calls.push("open");
@@ -253,21 +253,56 @@ describe("feedback dialog", () => {
     expect(url.searchParams.get("body")?.startsWith("Please add dark mode\n\n")).toBe(true);
   });
 
-  test("a blank note sends nothing", () => {
+  test("a blank note sends nothing", async () => {
     const calls: string[] = [];
     const deps = { openLink: () => calls.push("open"), close: () => calls.push("close"), toast: () => calls.push("toast") };
-    expect(submitFeedback("  ", deps)).toBe(false);
+    expect(await submitFeedback("  ", deps)).toBe(false);
     expect(calls).toEqual([]);
   });
 
-  test("the confirmation lands in the frame's toast", () => {
-    submitFeedback("Hello", { openLink: () => {}, close: () => {}, toast: useFrameStore.getState().showToast });
+  test("the confirmation lands in the frame's toast", async () => {
+    await submitFeedback("Hello", { openLink: () => {}, close: () => {}, toast: useFrameStore.getState().showToast });
     expect(useFrameStore.getState().toast).toMatchObject({ title: "Thanks for the note" });
   });
 
   test("the mailto carries the version line", () => {
     const body = new URL(feedbackMailto("Hi", "9.9.9")).searchParams.get("body");
     expect(body).toBe("Hi\n\nRedrob Cowork 9.9.9");
+  });
+
+  test("with diagnostics the report is saved first and the email says to attach it", async () => {
+    const calls: string[] = [];
+    let link = "";
+    await submitFeedback("It froze", {
+      openLink: (url) => {
+        link = url;
+        calls.push("open");
+      },
+      close: () => calls.push("close"),
+      toast: (title, text) => calls.push(`toast:${text}`),
+      saveDiagnostics: async () => {
+        calls.push("save");
+        return "redrob-diagnostics-1.json";
+      },
+    });
+    expect(calls).toEqual(["save", "open", "close", "toast:Attach redrob-diagnostics-1.json from your Downloads folder to the email before you send it."]);
+    expect(new URL(link).searchParams.get("body")).toContain("Diagnostics report attached: redrob-diagnostics-1.json");
+  });
+
+  test("a report that cannot be saved still sends the note", async () => {
+    let link = "";
+    expect(
+      await submitFeedback("Hi", { openLink: (url) => (link = url), close: () => {}, toast: () => {}, saveDiagnostics: async () => { throw new Error("no"); } }),
+    ).toBe(true);
+    expect(new URL(link).searchParams.get("body")).not.toContain("Diagnostics");
+  });
+
+  test("the dialog offers the diagnostics report, outside developer mode", () => {
+    const html = renderToStaticMarkup(
+      <FeedbackDialogView text="" onTextChange={() => {}} onCancel={() => {}} onSend={() => {}} diagnostics onDiagnosticsChange={() => {}} />,
+    );
+    expect(html).toContain("Include a diagnostics report");
+    expect(html).toMatch(/<input[^>]*checked/);
   });
 });
 

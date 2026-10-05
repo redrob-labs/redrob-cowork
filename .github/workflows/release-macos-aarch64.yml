@@ -25,6 +25,11 @@ on:
         required: false
         type: boolean
         default: false
+      allow_untrusted_windows:
+        description: "Ship a Windows installer whose signature is not trusted. Auto-update refuses it; for a test build only."
+        required: false
+        type: boolean
+        default: false
       version:
         description: "Explicit version for a fresh release (X.Y.Z, overrides bump)"
         required: false
@@ -735,6 +740,8 @@ jobs:
       - name: Verify Authenticode signature (PFX)
         if: matrix.os_type == 'windows' && steps.windows-signing.outputs.mode == 'pfx'
         shell: pwsh
+        env:
+          ALLOW_UNTRUSTED_WINDOWS: ${{ github.event.inputs.allow_untrusted_windows }}
         run: |
           $dist = Join-Path $env:GITHUB_WORKSPACE "apps\desktop\dist-electron"
           $installers = Get-ChildItem $dist -Filter "*.exe"
@@ -788,6 +795,11 @@ jobs:
               if ($env:GITHUB_STEP_SUMMARY) {
                 $summary = @("### Untrusted Windows signature", "", '```') + $lines + @('```')
                 $summary -join "`n" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              }
+              # A release users update into must be trusted. Only an explicit test-build dispatch
+              # may ship one that is not; a tag push never can.
+              if ($env:ALLOW_UNTRUSTED_WINDOWS -ne "true") {
+                throw "$($installer.Name) signature is $($signature.Status); refusing to release a Windows build auto-update would reject. Dispatch with allow_untrusted_windows=true for a test build only."
               }
             }
           }

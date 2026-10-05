@@ -39,6 +39,7 @@ import { requestFontZoom } from "../../shell/font-zoom";
 import { resolveRedrobConnection } from "../../shell/redrob-connection";
 import { PROJECTS_QUERY_KEY } from "../projects/desk-projects";
 import { deskKeepAwake, type KeepAwakeSync } from "../run/keep-awake";
+import { syncCrashReports } from "./crash-reports";
 import type { ChatMode } from "../services/types";
 import { REDROB_KEY_QUERY_KEY, useRedrobKeyConnected } from "../shell/account-menu";
 import { useDeskConnection } from "../shell/desk-connection";
@@ -178,6 +179,8 @@ export type GeneralValues = {
   textSize: TextSize;
   notify: boolean;
   keepAwake: boolean;
+  /** Shown in the desktop app only, where reports can be sent. */
+  crashReports?: boolean;
 };
 
 export type GeneralActions = {
@@ -187,6 +190,7 @@ export type GeneralActions = {
   onTextSize: (size: TextSize) => void;
   onNotify: (on: boolean) => void;
   onKeepAwake: (on: boolean) => void;
+  onCrashReports?: (on: boolean) => void;
 };
 
 export type GeneralDeps = {
@@ -305,6 +309,15 @@ export function GeneralView(props: { values: GeneralValues; actions: GeneralActi
             onChange={(event) => actions.onKeepAwake(event.currentTarget.checked)}
           />
         </Row>
+        {actions.onCrashReports && values.crashReports !== undefined ? (
+          <Row title={t("desk.settings_crash_reports")} description={t("desk.settings_crash_reports_text")}>
+            <Switch
+              aria-label={t("desk.settings_crash_reports")}
+              checked={values.crashReports}
+              onChange={(event) => actions.onCrashReports?.(event.currentTarget.checked)}
+            />
+          </Row>
+        ) : null}
       </Group>
     </>
   );
@@ -338,9 +351,14 @@ function GeneralSection() {
         textSize,
         notify: notifiesWhenDone(prefs.desktopNotifications),
         keepAwake: prefs.deskKeepAwake,
+        ...(isDesktopRuntime() ? { crashReports: prefs.crashReports } : {}),
       }}
       actions={{
         ...actions,
+        onCrashReports: (on) => {
+          setPrefs((previous) => ({ ...previous, crashReports: on }));
+          void syncCrashReports(on);
+        },
         onTextSize: (size) => {
           setTextSize(size);
           actions.onTextSize(size);

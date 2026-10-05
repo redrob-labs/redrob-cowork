@@ -85,6 +85,11 @@ export type LocalPreferences = {
    */
   analyticsEnabled: boolean;
   /**
+   * Crash reports from the desktop app, with an anonymous install id. Off until the person
+   * turns it on in onboarding or Settings. `desk/settings/crash-reports.ts` hands it to Electron.
+   */
+  crashReports: boolean;
+  /**
    * Native OS notifications from the desktop app. Off by default so upgrading
    * users are not surprised by system popups.
    */
@@ -117,6 +122,7 @@ const INITIAL_PREFS: LocalPreferences = {
   featureFlags: { microsandboxCreateSandbox: true, continuousEngine: false, memory: false },
   hasCompletedOnboarding: false,
   analyticsEnabled: true,
+  crashReports: false,
   desktopNotifications: DEFAULT_DESKTOP_NOTIFICATION_PREFERENCE,
 };
 
