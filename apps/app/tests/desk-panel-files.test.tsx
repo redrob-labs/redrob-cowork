@@ -63,6 +63,7 @@ async function realFiles(): Promise<DeskFile[]> {
     getSession: unused,
     listMemories: unused,
     saveMemory: unused,
+    updateMemory: unused,
     deleteMemory: unused,
     listMcp: unused,
     listArtifacts: async () => ({

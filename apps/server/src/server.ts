@@ -127,7 +127,7 @@ import {
   seedRedrobWorkspaceConfigIfEmpty,
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
-import { deleteMemory, listMemories, saveMemory } from "./local-memory-store.js";
+import { deleteMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { readHarnessAvailability } from "./harness-availability.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
@@ -2124,6 +2124,23 @@ function createRoutes(
       ...(typeof body.source === "string" ? { source: body.source } : {}),
     });
     return jsonResponse({ memory }, 201);
+  });
+
+  addRoute(routes, "PATCH", "/memory/:memoryId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    if (body.content !== undefined && (typeof body.content !== "string" || !body.content.trim())) {
+      throw new ApiError(400, "invalid_payload", "content must be a non-empty string");
+    }
+    const memory = await updateMemory(config, ctx.params.memoryId, {
+      ...(typeof body.content === "string" ? { content: body.content } : {}),
+      ...(Array.isArray(body.tags) ? { tags: body.tags.filter((tag): tag is string => typeof tag === "string") } : {}),
+    });
+    if (!memory) {
+      throw new ApiError(404, "not_found", "memory not found");
+    }
+    return jsonResponse({ memory });
   });
 
   addRoute(routes, "DELETE", "/memory/:memoryId", "client", async (ctx) => {

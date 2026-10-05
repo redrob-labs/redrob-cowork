@@ -185,6 +185,14 @@ function fakeClient() {
       memories = [...memories, memory];
       return memory;
     },
+    updateMemory: async (memoryId, payload) => {
+      calls.push(`updateMemory:${memoryId}:${payload.content ?? ""}`);
+      const current = memories.find((memory) => memory.id === memoryId);
+      if (!current) throw new Error("not found");
+      const memory: Memory = { ...current, ...(payload.content ? { content: payload.content } : {}), updatedAt: "2026-09-28T00:00:00.000Z" };
+      memories = memories.map((entry) => (entry.id === memoryId ? memory : entry));
+      return memory;
+    },
     deleteMemory: async (memoryId) => {
       calls.push(`deleteMemory:${memoryId}`);
       memories = memories.filter((memory) => memory.id !== memoryId);
@@ -249,22 +257,21 @@ describe("desk real services", () => {
     ]);
   });
 
-  test("notes add, edit and remove go through saveMemory/deleteMemory", async () => {
+  test("notes add, edit in place and remove go through the memory calls", async () => {
     const { client, calls } = fakeClient();
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
 
     const added = await services.notes.add({ text: "CFO signs off", scope: "project:seorin" });
     expect(added).toMatchObject({ preview: false, data: { id: "m3", scope: "project:seorin", how: "told" } });
 
+    // The note keeps its id, scope and date.
     const edited = await services.notes.edit("m2", "Filings by 16:00");
-    expect(edited.data).toMatchObject({ id: "m4", scope: "project:hanbit", text: "Filings by 16:00", how: "learned" });
+    expect(edited.data).toMatchObject({ id: "m2", scope: "project:hanbit", text: "Filings by 16:00", how: "learned", when: Date.parse("2026-09-22T00:00:00.000Z") });
 
     await services.notes.remove("m1");
     expect(calls).toEqual([
       "saveMemory:CFO signs off:desk-scope:project:seorin",
-      "listMemories",
-      "saveMemory:Filings by 16:00:desk-scope:project:hanbit",
-      "deleteMemory:m2",
+      "updateMemory:m2:Filings by 16:00",
       "deleteMemory:m1",
     ]);
   });

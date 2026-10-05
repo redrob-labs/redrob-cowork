@@ -79,6 +79,14 @@ function fakeBank() {
       memories = [...memories, saved];
       return saved;
     },
+    updateMemory: async (id, patch) => {
+      calls.push(`update:${id}:${patch.content ?? ""}`);
+      const current = memories.find((entry) => entry.id === id);
+      if (!current) throw new Error("not found");
+      const updated = { ...current, ...(patch.content ? { content: patch.content } : {}) };
+      memories = memories.map((entry) => (entry.id === id ? updated : entry));
+      return updated;
+    },
     deleteMemory: async (id) => {
       calls.push(`delete:${id}`);
       memories = memories.filter((entry) => entry.id !== id);
@@ -159,14 +167,14 @@ describe("memory scopes", () => {
 });
 
 describe("memory actions", () => {
-  test("edit saves the new note and deletes the old, then refreshes the count", async () => {
+  test("edit changes the note in place, then refreshes the count", async () => {
     const bank = fakeBank();
     const services = createRealDeskServices({ client: bank.client, workspaceId: "ws_1" });
     const note = (await services.notes.list()).data.find((entry) => entry.id === "m2");
     if (!note) throw new Error("no note");
     const { deps, toasts, invalidated } = recorder(services.notes);
     expect(await saveNoteEdit(deps, note, "  Filings by 16:00 ")).toBe(true);
-    expect(bank.calls.slice(-3)).toEqual(["list", "save:Filings by 16:00:desk-scope:project:ws_1", "delete:m2"]);
+    expect(bank.calls.slice(-2)).toEqual(["list", "update:m2:Filings by 16:00"]);
     expect(bank.contents()).toContain("Filings by 16:00");
     expect(bank.contents()).not.toContain("Filings by 17:00");
     expect(invalidated()).toBe(1);

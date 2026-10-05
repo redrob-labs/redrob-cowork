@@ -7,6 +7,7 @@ import { Alert, Button, EmptyState, MemoryList, SectionMark, Skeleton, Textarea,
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { createDeskServices } from "../services/real-services";
 import type { MemoryNote, Project } from "../services/types";
+import { memoryContext } from "../thread/memory-context";
 import { useDeskConnection } from "../shell/desk-connection";
 import { DeskDialog } from "../shell/desk-dialog";
 import { DeskShell } from "../shell/desk-shell";
@@ -42,6 +43,8 @@ export type MemoryViewProps = {
 /** The scope picker and the notes in the chosen scope. */
 export function MemoryView(props: MemoryViewProps) {
   const scopes = memoryScopes(props.notes, props.projects);
+  // What a chat reading All my work leaves out: the oldest notes past the budget.
+  const omitted = memoryContext([...props.notes], { memory: "all", projectId: null }).omitted;
   const sections = memorySections(props.notes, props.filter, props.projects);
   return (
     <div className="desk-settings">
@@ -65,6 +68,7 @@ export function MemoryView(props: MemoryViewProps) {
           </Alert>
         ) : null}
         <p className="desk-settings__lede">{t("desk.memory_how")}</p>
+        {omitted > 0 ? <p className="desk-settings__note">{t("desk.memory_omitted", { count: omitted })}</p> : null}
         {sections.length ? (
           sections.map((section) => (
             <section key={section.scope} className="desk-settings__group">

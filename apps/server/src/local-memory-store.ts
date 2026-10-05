@@ -128,6 +128,30 @@ export async function saveMemory(config: ServerConfig, draft: MemoryDraft): Prom
   return memory;
 }
 
+/**
+ * Changes a memory in place: the id and createdAt are kept, updatedAt moves. Returns null
+ * when no memory carried that id, so the route can answer 404.
+ */
+export async function updateMemory(
+  config: ServerConfig,
+  id: string,
+  patch: { content?: string; tags?: string[] | null },
+): Promise<Memory | null> {
+  const existing = await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? [];
+  const current = existing.find((memory) => memory.id === id);
+  if (!current) return null;
+  const content = patch.content === undefined ? current.content : patch.content.trim();
+  if (!content) throw new Error("A memory needs content.");
+  const updated: Memory = {
+    ...current,
+    content,
+    tags: patch.tags === undefined ? current.tags : readTags(patch.tags),
+    updatedAt: new Date().toISOString(),
+  };
+  await memoryStore.set(config, GLOBAL_MEMORY_KEY, existing.map((memory) => (memory.id === id ? updated : memory)));
+  return updated;
+}
+
 /** Returns false when no memory carried that id, so the route can answer 404. */
 export async function deleteMemory(config: ServerConfig, id: string): Promise<boolean> {
   const existing = await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? [];

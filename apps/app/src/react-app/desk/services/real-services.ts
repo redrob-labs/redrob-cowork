@@ -11,7 +11,7 @@ import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project }
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "deleteMemory" | "listArtifacts" | "listMcp"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp"
 >;
 
 export type RealDeskServicesDeps = {
@@ -35,7 +35,8 @@ function parseScope(value: string): MemoryNoteScope | null {
   return projectId ? `project:${projectId}` : null;
 }
 
-function toNote(memory: Memory): MemoryNote {
+/** A memory bank entry as a Desk note: its scope rides along as a tag. */
+export function toNote(memory: Memory): MemoryNote {
   const tag = memory.tags?.find((entry) => entry.startsWith(SCOPE_TAG));
   return {
     id: memory.id,
@@ -97,12 +98,6 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
   const { client, workspaceId } = deps;
   const fallback = deps.fallback ?? createFixtureDeskServices();
 
-  const findMemory = async (id: string) => {
-    const memory = (await client.listMemories()).find((entry) => entry.id === id);
-    if (!memory) throw new Error(`No memory note ${id}`);
-    return memory;
-  };
-
   return {
     ...fallback,
     chats: {
@@ -124,17 +119,8 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         await client.deleteMemory(id);
         return real(null);
       },
-      // No update endpoint: save the new text first, then drop the old note.
-      edit: async (id, text) => {
-        const previous = await findMemory(id);
-        const saved = await client.saveMemory({
-          content: text,
-          tags: scopeTags(toNote(previous).scope, previous.tags),
-          source: previous.source,
-        });
-        await client.deleteMemory(id);
-        return real(toNote(saved));
-      },
+      // In place: the note keeps its id, its tags and when it was made.
+      edit: async (id, text) => real(toNote(await client.updateMemory(id, { content: text }))),
     },
     files: {
       list: async (query) => {

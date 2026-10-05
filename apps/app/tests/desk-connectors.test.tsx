@@ -115,6 +115,7 @@ describe("real connectors.list", () => {
       getSession: unused,
       listMemories: unused,
       saveMemory: unused,
+      updateMemory: unused,
       deleteMemory: unused,
       listArtifacts: unused,
       listMcp: async (workspaceId) => {

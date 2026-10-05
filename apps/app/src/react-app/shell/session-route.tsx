@@ -14,6 +14,8 @@ import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
+import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
+import { toNote } from "@/react-app/desk/services/real-services";
 import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
 import { useDeskCrossCheck } from "@/react-app/desk/thread/use-desk-cross-check";
 import type {
@@ -1064,9 +1066,17 @@ export function SessionRoute() {
               runtimeKey: environmentRuntimeKey,
             });
             const deskChats = useDeskComposerStore.getState().chats;
-            // Inside the frame a chat with memory off says so in the system text.
+            // Inside the frame the chat's saved notes ride in the system text, or the memory
+            // rule when memory is off. A workspace other than Personal is a project.
+            const deskMemory = memoryFor(deskChats, targetSessionId, Boolean(selectedWorkspace && selectedWorkspace.kind !== "personal"));
+            const deskNotes = inDeskFrame && deskMemory !== "none" && client
+              ? memoryContext(
+                  await notesCacheFor(client, async () => (await client.listMemories()).map(toNote)).get().catch(() => []),
+                  { memory: deskMemory, projectId: selectedWorkspaceId || null },
+                ).text
+              : null;
             const system = inDeskFrame
-              ? deskSystemText(memoryFor(deskChats, targetSessionId, false), envSystemContext || undefined)
+              ? deskSystemText(deskMemory, envSystemContext || undefined, deskNotes)
               : envSystemContext;
             // A Run prompt's answer is what Cross-check reads, once it arrives.
             if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {

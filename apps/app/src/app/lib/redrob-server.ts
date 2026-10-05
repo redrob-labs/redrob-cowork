@@ -1052,6 +1052,16 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       });
       return response.memory;
     },
+    updateMemory: async (memoryId: string, payload: { content?: string; tags?: string[] }): Promise<Memory> => {
+      const response = await requestJson<{ memory: Memory }>(baseUrl, `/memory/${encodeURIComponent(memoryId)}`, {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: payload,
+        timeoutMs: timeouts.config,
+      });
+      return response.memory;
+    },
     deleteMemory: async (memoryId: string): Promise<void> => {
       await requestJson<unknown>(baseUrl, `/memory/${encodeURIComponent(memoryId)}`, {
         token,
