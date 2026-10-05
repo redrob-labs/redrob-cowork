@@ -1,14 +1,22 @@
 /** @jsxImportSource react */
-import { useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ModelGuide, icons } from "@redrob-labs/ui";
+import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, icons, type TableColumn } from "@redrob-labs/ui";
 
-import { currentLocale, subscribeToLocale, t } from "../../../i18n";
+import { t } from "../../../i18n";
 import type { ModelCatalog } from "../services/types";
+import { desktopFetchViaMain } from "../../../app/lib/desktop";
+import {
+  estimatedCostFor,
+  fetchRedrobPricing,
+  formatModelPriceRange,
+  formatTokenCount,
+  formatUsdAmount,
+  type RedrobModelPricing,
+  type RedrobPricing,
+} from "../../../app/lib/redrob-pricing";
+import { isDesktopRuntime } from "../../../app/lib/runtime-env";
+import { autoModel, guideGroups, guideModelCount, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
 import { DeskShell } from "../shell/desk-shell";
-import { useFrameStore } from "../store/frame-store";
-import { PreviewPage, PreviewState } from "./preview-note";
-import { previewKey, usePreviewServices } from "./preview";
 
 /** The header meta: the edition the rankings come from. */
 export function guideMeta(catalog: Pick<ModelCatalog, "source">): string {
@@ -52,26 +60,131 @@ export function GuideView(props: { catalog: ModelCatalog; locale: string; onUse:
   );
 }
 
-/** `/guide`: sample rankings from the Redrob Leaderboard. */
-export function GuideScreen() {
-  const { services, scope } = usePreviewServices();
-  const showToast = useFrameStore((state) => state.showToast);
-  const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const query = useQuery({ queryKey: previewKey(scope, "catalog"), queryFn: () => services.catalog.get(), staleTime: Infinity });
-  const catalog = query.data?.data;
+/** One band's models: what each is good at, how much it reads, and what it costs. */
+function bandColumns(input: { profileLabel: string | null; profileId: string | null }): Array<TableColumn<RedrobModelPricing>> {
+  return [
+    {
+      key: "label",
+      header: t("desk.guide_model"),
+      wrap: true,
+      render: (model) => <b>{modelLabel(model)}</b>,
+    },
+    {
+      key: "strengths",
+      header: t("desk.guide_good_at"),
+      grow: true,
+      wrap: true,
+      render: (model) => model.strengths.join(", "),
+    },
+    {
+      key: "context",
+      header: t("desk.guide_reads"),
+      align: "right",
+      render: (model) => <span className="desk-preview__figure">{formatTokenCount(model.capabilities.maxContextTokens) ?? ""}</span>,
+    },
+    {
+      key: "price",
+      header: t("desk.guide_price"),
+      align: "right",
+      render: (model) => <span className="desk-preview__figure">{formatModelPriceRange(model) ?? ""}</span>,
+    },
+    ...(input.profileId
+      ? [
+          {
+            key: "request",
+            header: input.profileLabel ?? t("desk.guide_per_request"),
+            align: "right" as const,
+            render: (model: RedrobModelPricing) => (
+              <span className="desk-preview__figure">{formatUsdAmount(estimatedCostFor(model, input.profileId ?? "")?.costUsd) ?? ""}</span>
+            ),
+          },
+        ]
+      : []),
+  ];
+}
+
+function bandLabel(band: GuideGroup["band"]): string {
+  switch (band) {
+    case "budget":
+      return t("desk.guide_band_budget");
+    case "standard":
+      return t("desk.guide_band_standard");
+    case "premium":
+      return t("desk.guide_band_premium");
+    case "frontier":
+      return t("desk.guide_band_frontier");
+    case "other":
+      return t("desk.guide_band_unbanded");
+  }
+}
+
+/** The guide on the console's published catalogue: Auto first, then every model by price band. */
+export function PricingGuideView(props: { pricing: RedrobPricing }) {
+  const groups = guideGroups(props.pricing);
+  if (!groups.length) return <EmptyState title={t("desk.guide_empty_title")} description={t("desk.guide_empty_text")} />;
+  const auto = autoModel(props.pricing);
+  const profile = guideProfile(props.pricing);
+  const autoCost = auto && profile ? formatUsdAmount(estimatedCostFor(auto, profile.id)?.costUsd) : null;
   return (
-    <DeskShell current="guide" title={t("desk.nav_guide")} meta={catalog ? guideMeta(catalog) : undefined} measure={false}>
-      <PreviewPage note={t("desk.preview_guide_note")} wide>
-        <PreviewState query={query}>
-          {(data) => (
-            <GuideView
-              catalog={data}
-              locale={locale}
-              onUse={() => showToast(t("desk.preview_guide_use_title"), t("desk.preview_guide_use_text"))}
-            />
-          )}
-        </PreviewState>
-      </PreviewPage>
+    <>
+      <ProtectionStatus
+        size="lg"
+        tone="safe"
+        icon={icons.sparkle({ width: 28, height: 28, "aria-hidden": true })}
+        title={t("desk.guide_auto_title")}
+      >
+        {t("desk.guide_auto_text")}
+        {autoCost && profile ? ` ${t("desk.guide_auto_cost", { cost: autoCost, profile: profile.label })}` : ""}
+      </ProtectionStatus>
+      <p className="desk-settings__lede">{t("desk.guide_lede")}</p>
+      {groups.map((group) => (
+        <section key={group.band} className="desk-settings__group">
+          <SectionMark label={bandLabel(group.band)} as="heading" level={2} trailing={group.models.length} />
+          <Table
+            caption={bandLabel(group.band)}
+            columns={bandColumns({ profileId: profile?.id ?? null, profileLabel: profile?.label ?? null })}
+            rows={group.models}
+          />
+        </section>
+      ))}
+      <p className="desk-settings__note">{t("desk.guide_price_note")}</p>
+    </>
+  );
+}
+
+/** Reads the catalogue through the desktop app where it can, which a browser origin cannot. */
+export function guideFetch(desktop: boolean): typeof fetch {
+  if (!desktop) return fetch;
+  return (input: RequestInfo | URL, init?: RequestInit) => desktopFetchViaMain(input, init);
+}
+
+export const GUIDE_QUERY_KEY = ["desk-guide", "pricing"];
+
+/** `/guide`: Auto and the models it chooses from, from the console's published prices. */
+export function GuideScreen() {
+  const query = useQuery({
+    queryKey: GUIDE_QUERY_KEY,
+    queryFn: () => fetchRedrobPricing(guideFetch(isDesktopRuntime())),
+    staleTime: 60 * 60 * 1000,
+    retry: 1,
+  });
+  const count = query.data ? guideModelCount(query.data) : undefined;
+  return (
+    <DeskShell
+      current="guide"
+      title={t("desk.nav_guide")}
+      meta={count === undefined ? undefined : t("desk.guide_meta", { count })}
+      measure={false}
+    >
+      <div className="desk-settings__main desk-preview--wide">
+        {query.isLoading ? (
+          <Skeleton variant="text" lines={6} />
+        ) : !query.data ? (
+          <EmptyState title={t("desk.guide_error_title")} description={t("desk.settings_try_again")} />
+        ) : (
+          <PricingGuideView pricing={query.data} />
+        )}
+      </div>
     </DeskShell>
   );
 }

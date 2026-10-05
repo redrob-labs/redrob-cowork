@@ -1,3 +1,5 @@
+import { parseRedrobPricing } from "../src/app/lib/redrob-pricing";
+import { GUIDE_QUERY_KEY } from "../src/react-app/desk/preview/desk-guide";
 import { afterEach, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -57,6 +59,12 @@ function readable(html: string): string {
 }
 
 /** A query cache holding the sample data each Preview screen reads. */
+/** A published catalogue with Auto and one model, for the guide. */
+const GUIDE_PRICING = parseRedrobPricing({
+  autoModelId: "auto",
+  models: [{ id: "auto", routed: true }, { id: "fast", label: "Fast one", priceBand: "budget" }],
+});
+
 async function seeded(): Promise<QueryClient> {
   const fixture = createFixtureDeskServices();
   const client = new QueryClient();
@@ -146,7 +154,6 @@ const SCREENS: ReadonlyArray<{ path: string; title: string; place: string; note:
   { path: runPath("renewal-sweep"), title: "Contract renewal sweep", place: "playbooks", note: "Preview: a sample run." },
   { path: "/scheduled", title: "Scheduled", place: "scheduled", note: "Preview: sample schedules." },
   { path: "/history", title: "History", place: "history", note: "Preview: sample history." },
-  { path: "/guide", title: "Model Guide", place: "guide", note: "Preview: sample rankings." },
 ];
 
 describe("the Preview routes", () => {
@@ -188,6 +195,7 @@ describe("the Preview routes", () => {
     expect(route("/playbooks", client)).toContain("미리 보기: 예시 플레이북입니다.");
     expect(route("/scheduled", client)).toContain("나를 기다리는 실행 (2)");
     expect(route("/history", client)).toContain("스스로 실행");
+    client.setQueryData(GUIDE_QUERY_KEY, GUIDE_PRICING);
     expect(route("/guide", client)).toContain("레드롭 오토");
   });
 });
@@ -436,15 +444,15 @@ describe("History", () => {
 });
 
 describe("Model Guide", () => {
-  test("renders the guide on the sample catalog and says the model is always Redrob Auto", async () => {
-    const html = route("/guide", await seeded());
-    expect(html).toContain("rr-guide");
-    expect(html).toContain("Lawyer");
-    expect(html).toContain("Review documents and contracts");
-    expect(html).toContain("Claude Opus 5.5");
-    expect(html).toContain("Redrob Leaderboard, September 2026. Updated monthly.");
-    expect(html).toContain("every message goes to Redrob Auto");
-    expect(html).toContain("How Redrob Auto uses this");
-    expect(html).not.toContain("Use this in the chat");
+  test("renders the published models, with no sample note and no sample rankings", async () => {
+    const client = await seeded();
+    client.setQueryData(GUIDE_QUERY_KEY, GUIDE_PRICING);
+    const html = route("/guide", client);
+    expect(html).toContain('<h1 class="rr-shell__title">Model Guide</h1>');
+    expect(html).toContain('href="/guide" aria-current="page"');
+    expect(html).toContain("Every message goes to Redrob Auto");
+    expect(html).toContain("Fast one");
+    expect(html).not.toContain("rr-alert");
+    expect(html).not.toContain("Claude Opus 5.5");
   });
 });

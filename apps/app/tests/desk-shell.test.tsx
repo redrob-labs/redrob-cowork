@@ -249,7 +249,6 @@ describe("Desk routes", () => {
       ["/run", "Playbook run", "playbooks", "Preview: a sample run."],
       ["/scheduled", "Scheduled", "scheduled", "Preview: sample schedules."],
       ["/history", "History", "history", "Preview: sample history."],
-      ["/guide", "Model Guide", "guide", "Preview: sample rankings."],
     ];
     for (const [path, title, place, note] of screens) {
       const html = withProviders(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, path);
