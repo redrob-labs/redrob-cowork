@@ -6,6 +6,7 @@ import { Button, Textarea, Toast } from "@redrob-labs/ui";
 import { isMacPlatform } from "../../../app/utils";
 import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
+import { kindsLabel, usePrivacyConfirmStore, type PrivacyConfirm } from "../privacy/privacy-send";
 import { ProjectDialog } from "../projects/project-dialog";
 import { useDeskRunEvents } from "../run/use-desk-run-events";
 import { isDeskSettingsPath } from "../settings/settings-sections";
@@ -244,9 +245,40 @@ export function DeskLayerView(props: DeskLayerViewProps) {
       {props.modal?.kind === "project" ? (
         <ProjectDialog key={props.modal.chatId ?? "new"} chatId={props.modal.chatId} onClose={props.onCloseModal} />
       ) : null}
+      <PrivacyConfirmDialog />
       <DeskToast toast={props.toast} onClose={props.onCloseToast} />
     </>
   );
+}
+
+/** Strict, before Send: how many details will be hidden, then Send or Edit. */
+export function PrivacyConfirmDialogView(props: { confirm: PrivacyConfirm; onAnswer: (send: boolean) => void }) {
+  return (
+    <DeskDialog
+      open
+      title={t("desk.privacy_confirm_title", { count: props.confirm.count })}
+      onClose={() => props.onAnswer(false)}
+      width={440}
+      footer={
+        <>
+          <Button variant="ghost" onClick={() => props.onAnswer(false)}>
+            {t("desk.privacy_confirm_edit")}
+          </Button>
+          <Button variant="primary" onClick={() => props.onAnswer(true)}>
+            {t("desk.privacy_confirm_send")}
+          </Button>
+        </>
+      }
+    >
+      <p>{t("desk.privacy_confirm_text", { kinds: kindsLabel(props.confirm.kinds) })}</p>
+    </DeskDialog>
+  );
+}
+
+function PrivacyConfirmDialog() {
+  const pending = usePrivacyConfirmStore((state) => state.pending);
+  const answer = usePrivacyConfirmStore((state) => state.answer);
+  return pending ? <PrivacyConfirmDialogView confirm={pending} onAnswer={answer} /> : null;
 }
 
 /** The frame's one layer over every screen: the open dialog and the toast. Mounted once. */

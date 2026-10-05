@@ -118,6 +118,8 @@ describe("real connectors.list", () => {
       updateMemory: unused,
       deleteMemory: unused,
       listArtifacts: unused,
+      getConfig: unused,
+      patchConfig: unused,
       listMcp: async (workspaceId) => {
         calls.push(workspaceId);
         return {

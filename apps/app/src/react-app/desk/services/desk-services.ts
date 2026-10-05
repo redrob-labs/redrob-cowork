@@ -9,6 +9,7 @@ import type {
   NewMemoryNote,
   NewSchedule,
   Playbook,
+  PrivacyLevel,
   PrivacyState,
   Project,
   ScheduleBoard,
@@ -41,7 +42,11 @@ export interface DeskServices {
   };
   history: { list(): Async<HistoryEntry[]> };
   connectors: { list(): Async<Connector[]> };
-  privacy: { get(): Async<PrivacyState>; setLocalModel(on: boolean): Async<PrivacyState> };
+  privacy: {
+    get(): Async<PrivacyState>;
+    setLevel(level: PrivacyLevel): Async<PrivacyState>;
+    setNames(names: string[]): Async<PrivacyState>;
+  };
   catalog: { get(): Async<ModelCatalog> };
   files: { list(options?: { projectId?: string }): Async<DeskFile[]> };
 }

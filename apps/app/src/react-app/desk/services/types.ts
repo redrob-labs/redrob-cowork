@@ -143,13 +143,17 @@ export type Connector = {
   server?: ConnectorServer;
 };
 
-export type PrivacyLevel = "off" | "standard" | "high";
+export type PrivacyLevel = "off" | "standard" | "high" | "strict";
 
 export type PrivacyState = {
   level: PrivacyLevel;
-  /** The admin who set the level for the team. */
-  setBy: string;
-  localModel: boolean;
+  /** Names Strict swaps for placeholders: people, clients, projects. */
+  names: string[];
+  /** Who set the level, when it came with a team file; null when the person set it. */
+  setBy: string | null;
+  /** Set by a team file: the level and names cannot be changed here. */
+  locked: boolean;
+  /** Private details swapped for placeholders on this computer this week. */
   detailsKeptThisWeek: number;
 };
 

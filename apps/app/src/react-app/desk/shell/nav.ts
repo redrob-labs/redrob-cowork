@@ -68,6 +68,8 @@ export function privacyLevelLabel(level: PrivacyLevel): string {
       return t("desk.privacy_standard");
     case "high":
       return t("desk.privacy_high");
+    case "strict":
+      return t("desk.privacy_strict");
   }
 }
 

@@ -21,6 +21,7 @@ import { t } from "../../../i18n";
 import { useLocal } from "../../kernel/local-provider";
 import { startDictation } from "../../domains/session/voice/voice-dictation";
 import { createDeskServices } from "../services/real-services";
+import { privacyLevelLabel } from "../shell/nav";
 import type { ChatMemory, ChatMode, PrivacyLevel } from "../services/types";
 import { useDeskConnection } from "../shell/desk-connection";
 import { useFrameStore } from "../store/frame-store";
@@ -215,13 +216,7 @@ function isChatMemory(value: string): value is ChatMemory {
   return value === "project" || value === "all" || value === "none";
 }
 
-const PRIVACY_N: Record<PrivacyLevel, number> = { off: 0, standard: 1, high: 2 };
-
-function privacyLabel(level: PrivacyLevel): string {
-  if (level === "high") return t("desk.privacy_high");
-  if (level === "standard") return t("desk.privacy_standard");
-  return t("desk.privacy_off");
-}
+const PRIVACY_N: Record<PrivacyLevel, number> = { off: 0, standard: 1, high: 2, strict: 3 };
 
 export type DeskStatusInput = {
   /** False on the web, where the check cannot run. */
@@ -272,7 +267,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.shieldCheck(STATUS_ICON),
       tone: privacyOn ? "safe" : "plain",
       name: t("desk.status_privacy"),
-      value: privacyOn ? privacyLabel(level) : t("desk.privacy_off"),
+      value: privacyOn ? privacyLevelLabel(level) : t("desk.privacy_off"),
       level: privacyOn ? { n: PRIVACY_N[level], of: levels.length } : undefined,
       panelLabel: t("desk.nav_privacy"),
       panel: (

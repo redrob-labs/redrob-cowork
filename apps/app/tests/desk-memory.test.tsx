@@ -69,6 +69,8 @@ function fakeBank() {
     getSession: unused,
     listArtifacts: unused,
     listMcp: unused,
+    getConfig: unused,
+    patchConfig: unused,
     listMemories: async () => {
       calls.push("list");
       return memories;

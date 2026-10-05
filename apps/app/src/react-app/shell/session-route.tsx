@@ -16,6 +16,9 @@ import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
 import { toNote } from "@/react-app/desk/services/real-services";
+import { createSendRedactor, previewRedaction, privacySettingsFor, usePrivacyConfirmStore } from "@/react-app/desk/privacy/privacy-send";
+import { DEFAULT_PRIVACY_LEVEL, usePrivacyMapStore } from "@/react-app/desk/privacy/privacy-store";
+import { restore } from "@/react-app/desk/privacy/redact";
 import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
 import { useDeskCrossCheck } from "@/react-app/desk/thread/use-desk-cross-check";
 import type {
@@ -1020,6 +1023,22 @@ export function SessionRoute() {
         const sendVariant = sessionModelSelection ? sessionModelSelection.variant : modelVariantValue;
         if (!sessionModelSelection && selectedModelUnavailable) throw new Error(t("composer.selected_model_unavailable"));
 
+        // Privacy protection: in the desktop app, what the person typed leaves with private
+        // details swapped for placeholders. Settings that cannot be read fall back to the
+        // default level rather than to sending as written.
+        const privacySettings = inDeskFrame && isDesktopRuntime() && client && selectedWorkspaceId
+          ? await privacySettingsFor(client, selectedWorkspaceId).catch(() => ({ level: DEFAULT_PRIVACY_LEVEL, names: [] }))
+          : null;
+        const previousPlaceholders = usePrivacyMapStore.getState().maps[targetSessionId] ?? {};
+        if (privacySettings?.level === "strict" && draft.mode !== "shell") {
+          const hidden = previewRedaction(text, privacySettings, previousPlaceholders);
+          if (hidden.length && !(await usePrivacyConfirmStore.getState().ask(hidden))) {
+            return { outcome: "cancelled", reason: "context_changed" };
+          }
+        }
+        const redactor = privacySettings ? createSendRedactor(privacySettings, previousPlaceholders) : null;
+        const sendable = (value: string) => (redactor ? redactor.text(value) : value);
+
         await sendWithRevertRollback({
           revertMessageId: draft.revertMessageId,
           abort: () => abortSessionSafe(opencodeClient, targetSessionId, selectedWorkspaceRoot || undefined, {
@@ -1052,7 +1071,7 @@ export function SessionRoute() {
               const result = await opencodeClient.session.command({
                 sessionID: targetSessionId,
                 command: draft.command.name,
-                arguments: draft.command.arguments,
+                arguments: sendable(draft.command.arguments),
               });
               if (result.error) {
                 throw new Error(serializeSDKError(result.error));
@@ -1060,7 +1079,8 @@ export function SessionRoute() {
               return;
             }
 
-            const parts = await draftToParts(draft, selectedWorkspaceRoot, targetSessionId, selectedWorkspaceEndpoint);
+            const draftParts = await draftToParts(draft, selectedWorkspaceRoot, targetSessionId, selectedWorkspaceEndpoint);
+            const parts = redactor ? redactor.parts(draftParts) : draftParts;
             const envSystemContext = await buildRedrobEnvSystemContext(client, {
               cacheKey: targetSessionId,
               runtimeKey: environmentRuntimeKey,
@@ -1069,19 +1089,25 @@ export function SessionRoute() {
             // Inside the frame the chat's saved notes ride in the system text, or the memory
             // rule when memory is off. A workspace other than Personal is a project.
             const deskMemory = memoryFor(deskChats, targetSessionId, Boolean(selectedWorkspace && selectedWorkspace.kind !== "personal"));
-            const deskNotes = inDeskFrame && deskMemory !== "none" && client
+            const notesContext = inDeskFrame && deskMemory !== "none" && client
               ? memoryContext(
                   await notesCacheFor(client, async () => (await client.listMemories()).map(toNote)).get().catch(() => []),
                   { memory: deskMemory, projectId: selectedWorkspaceId || null },
                 ).text
               : null;
-            const system = inDeskFrame
+            // Notes go out the same way the message does: private details as placeholders.
+            const deskNotes = notesContext ? sendable(notesContext) : null;
+            const deskSystem = inDeskFrame
               ? deskSystemText(deskMemory, envSystemContext || undefined, deskNotes)
               : envSystemContext;
+            const keepPlaceholders = redactor?.instruction();
+            const system = keepPlaceholders ? (deskSystem ? `${deskSystem}\n\n${keepPlaceholders}` : keepPlaceholders) : deskSystem;
+            // The map back to the real values stays on this computer, for showing the chat.
+            redactor?.commit(targetSessionId);
             // A Run prompt's answer is what Cross-check reads, once it arrives.
             if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {
               useCheckStore.getState().expect(targetSessionId, {
-                question: text,
+                question: sendable(text),
                 planned: isPlanRunPrompt(text),
                 ...(sendModel ? { model: { providerID: sendModel.providerID, modelID: sendModel.modelID } } : {}),
                 ...(sendVariant ? { variant: sendVariant } : {}),
@@ -1542,6 +1568,8 @@ export function SessionRoute() {
    * subscription exists. Nothing is added to the sidebar: a fork that exists for the length of one choice
    * is not a session the user has to manage.
    */
+  // The redrob-server client, named apart: the variant runner below shadows `client` with the engine one.
+  const deskServerClient = client;
   const handleVariantRun = useCallback(async (
     command:
       | FanOutCommand
@@ -1590,8 +1618,20 @@ export function SessionRoute() {
       What each variant is actually sent. Compare re-asks the question; paraphrase is handed the answer with
       an instruction to rewrite it and keep every fact.
     */
-    const requestText =
+    const writtenRequest =
       command.kind === "paraphrase" ? buildParaphrasePrompt(command.prompt) : command.prompt;
+    // The variants leave the way the chat does: private details as placeholders, read back
+    // with the real values.
+    const variantPrivacy = inDeskFrame && isDesktopRuntime() && deskServerClient
+      ? await privacySettingsFor(deskServerClient, workspaceId).catch(() => ({ level: DEFAULT_PRIVACY_LEVEL, names: [] }))
+      : null;
+    const variantRedactor = variantPrivacy
+      ? createSendRedactor(variantPrivacy, usePrivacyMapStore.getState().maps[sessionId] ?? {})
+      : null;
+    const requestText = variantRedactor ? variantRedactor.text(writtenRequest) : writtenRequest;
+    const keepPlaceholders = variantRedactor?.instruction() ?? undefined;
+    variantRedactor?.commit(sessionId);
+    const shown = (value: string) => restore(value, usePrivacyMapStore.getState().maps[sessionId] ?? {});
     let run = startingRun({ kind: command.kind, prompt: command.prompt, slots });
     variantRunRef.current = run;
     setVariantRun(run);
@@ -1621,6 +1661,7 @@ export function SessionRoute() {
             model: { providerID: slot.model.providerID, modelID: slot.model.modelID },
             variant: slot.model.variant ?? undefined,
             parts: [{ type: "text", text: requestText }],
+            ...(keepPlaceholders ? { system: keepPlaceholders } : {}),
           });
         } catch (error) {
           publish(
@@ -1653,7 +1694,7 @@ export function SessionRoute() {
           ) as never[];
           const text = finishedAssistantText(messages);
           if (text) {
-            publish(withVariant(run, variant.index, { status: "done", text }));
+            publish(withVariant(run, variant.index, { status: "done", text: shown(text) }));
           } else {
             /*
               Show the answer as it is written. A column that says "working" for forty seconds and then
@@ -1661,7 +1702,8 @@ export function SessionRoute() {
               Only the "done" branch above makes a variant adoptable, so streaming text here cannot be
               mistaken for a finished answer.
             */
-            const partial = partialAssistantText(messages);
+            const partialText = partialAssistantText(messages);
+            const partial = partialText ? shown(partialText) : partialText;
             if (partial && partial !== run.variants[variant.index]?.text) {
               publish(withVariant(run, variant.index, { text: partial }));
             }
@@ -1672,7 +1714,7 @@ export function SessionRoute() {
       }
     }
     return slots.length;
-  }, [endpointForWorkspace, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
+  }, [deskServerClient, endpointForWorkspace, inDeskFrame, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
 
   /**
    * Keep the chosen answer by continuing in its fork, and delete the rest.

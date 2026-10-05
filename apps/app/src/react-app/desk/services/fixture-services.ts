@@ -149,8 +149,12 @@ export function createFixtureDeskServices(
     connectors: { list: () => preview([...CONNECTORS]) },
     privacy: {
       get: () => preview({ ...privacy }),
-      setLocalModel: (on) => {
-        privacy = { ...privacy, localModel: on };
+      setLevel: (level) => {
+        privacy = { ...privacy, level };
+        return preview({ ...privacy });
+      },
+      setNames: (names) => {
+        privacy = { ...privacy, names: [...names] };
         return preview({ ...privacy });
       },
     },

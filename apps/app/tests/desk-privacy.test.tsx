@@ -5,18 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Routes } from "react-router";
 
 import { setLocale, type Language } from "../src/i18n";
-import {
-  LOCAL_MODEL_DOWNLOAD_GB,
-  PRIVACY_QUERY_KEY,
-  PrivacyView,
-  localModelRow,
-  privacyLevelMeta,
-  setLocalModel,
-} from "../src/react-app/desk/privacy/desk-privacy";
+import { PRIVACY_QUERY_KEY, PrivacyView, parseNames, privacyLevelMeta } from "../src/react-app/desk/privacy/desk-privacy";
 import { createFixtureDeskServices } from "../src/react-app/desk/services/fixture-services";
 import { PRIVACY } from "../src/react-app/desk/services/fixtures/privacy";
 import type { PrivacyState } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
+import { PrivacyConfirmDialogView } from "../src/react-app/desk/shell/desk-layer";
 
 function render(node: ReactNode, path = "/privacy", client = new QueryClient()) {
   return renderToStaticMarkup(
@@ -33,136 +27,74 @@ function readable(html: string): string {
 }
 
 function view(state: PrivacyState, desktop = true, preview = false) {
-  return render(<PrivacyView state={state} desktop={desktop} preview={preview} busy={false} onLocalModel={() => {}} />);
+  return render(<PrivacyView state={state} desktop={desktop} preview={preview} busy={false} onLevel={() => {}} onNames={() => {}} />);
 }
 
 afterEach(() => setLocale("en"));
 
-describe("localModelRow", () => {
-  test("off on the desktop offers Turn on, with the one-time download size", () => {
-    const row = localModelRow({ localModel: false }, true);
-    expect(row.action).toBe("turn-on");
-    expect(row.title).toBe("Off");
-    expect(row.description).toContain(`about ${LOCAL_MODEL_DOWNLOAD_GB} GB`);
-    expect(row.disabledReason).toBeNull();
-  });
-
-  test("on offers Turn off", () => {
-    const row = localModelRow({ localModel: true }, true);
-    expect(row.action).toBe("turn-off");
-    expect(row.title).toBe("On: an AI runs on this laptop");
-    expect(row.disabledReason).toBeNull();
-  });
-
-  test("on the web there is nothing to press, and it says why", () => {
-    const row = localModelRow({ localModel: false }, false);
-    expect(row.action).toBeNull();
-    expect(row.disabledReason).toBe("It runs on this laptop, so you can turn it on only in the desktop app.");
-  });
-
+describe("privacy helpers", () => {
   test("privacyLevelMeta names the level", () => {
     expect(privacyLevelMeta("high")).toBe("High");
     expect(privacyLevelMeta("standard")).toBe("Standard");
+    expect(privacyLevelMeta("strict")).toBe("Strict");
     expect(privacyLevelMeta("off")).toBe("Off");
   });
-});
 
-describe("setLocalModel", () => {
-  test("Turn on only changes the sample state and toasts; nothing is downloaded", async () => {
-    const fixture = createFixtureDeskServices();
-    const calls: boolean[] = [];
-    const toasts: Array<[string, string | undefined]> = [];
-    const originalFetch = globalThis.fetch;
-    let fetched = 0;
-    globalThis.fetch = Object.assign(
-      () => {
-        fetched += 1;
-        return Promise.reject(new Error("no network in this test"));
-      },
-      { preconnect: originalFetch.preconnect },
-    );
-    try {
-      const result = await setLocalModel(
-        {
-          privacy: {
-            setLocalModel: (on) => {
-              calls.push(on);
-              return fixture.privacy.setLocalModel(on);
-            },
-          },
-          showToast: (title, text) => toasts.push([title, text]),
-        },
-        true,
-      );
-      expect(calls).toEqual([true]);
-      expect(fetched).toBe(0);
-      expect(result.preview).toBe(true);
-      expect(result.data.localModel).toBe(true);
-      expect((await fixture.privacy.get()).data.localModel).toBe(true);
-      expect(toasts).toEqual([
-        ["Ready on this laptop", "Mark any chat Private to use it. This is a preview, so nothing was downloaded."],
-      ]);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+  test("the names box keeps one name per line, without blanks or repeats", () => {
+    expect(parseNames(" Kim Minjun \n\nSeorin\r\nSeorin\n")).toEqual(["Kim Minjun", "Seorin"]);
   });
 
-  test("Turn off changes the state without a toast", async () => {
+  test("the sample services change the level and the names", async () => {
     const fixture = createFixtureDeskServices();
-    await fixture.privacy.setLocalModel(true);
-    const toasts: string[] = [];
-    const result = await setLocalModel({ privacy: fixture.privacy, showToast: (title) => toasts.push(title) }, false);
-    expect(result.data.localModel).toBe(false);
-    expect(toasts).toEqual([]);
+    expect((await fixture.privacy.setLevel("strict")).data.level).toBe("strict");
+    expect((await fixture.privacy.setNames(["Kim Minjun"])).data.names).toEqual(["Kim Minjun"]);
   });
 });
 
 describe("PrivacyView", () => {
-  test("off: the preview note, the status, the levels and Turn on with the download size", () => {
+  test("on: the level, the count this week, the levels to choose and the names", () => {
     const html = view(PRIVACY);
-    expect(html).toContain("Preview");
-    expect(html).toContain("Nothing on this screen is running yet.");
+    expect(html).not.toContain("Nothing on this screen is running yet.");
     expect(html).toContain("Privacy protection is on: High");
     expect(html).toContain("Private details kept from AI this week: 214");
-    expect(html).toContain("Keep private work on this laptop");
-    expect(html).toContain("about 9 GB");
-    expect(html).toContain("Turn on");
-    expect(html).not.toContain("Turn off");
     expect(html).toContain("Your level");
-    expect(html).toContain("In this preview the level is fixed.");
-    expect(html).not.toContain("Park Hyunjin");
+    expect(html.match(/>Use</g)?.length).toBe(3);
+    expect(html).toContain("Names to keep private");
+    expect(html).toContain("Seorin Partners");
+    expect(html).toContain("Attached files and text in images are sent as they are");
+    expect(html).not.toContain("Keep private work on this laptop");
   });
 
-  test("sample data reads Off, with no level, no count and nothing to turn on", () => {
+  test("sample data reads Off, with no level, no count and nothing to change", () => {
     const html = view(PRIVACY, true, true);
     expect(html).toContain("Nothing on this screen is running yet.");
     expect(html).toContain("Privacy protection is off");
     expect(html).not.toContain("Privacy protection is on");
     expect(html).not.toContain("214");
     expect(html).not.toContain("Your level");
-    expect(html).not.toContain("Keep private work on this laptop");
-    expect(html).not.toContain("Turn on");
+    expect(html).not.toContain(">Use<");
+    expect(html).not.toContain("Names to keep private");
   });
 
-  test("on: Turn off, not Turn on", () => {
-    const html = view({ ...PRIVACY, localModel: true });
-    expect(html).toContain("On: an AI runs on this laptop");
-    expect(html).toContain("Turn off");
-    expect(html).not.toContain("Turn on");
+  test("set by a team file: the level and names cannot change here, and it says who set them", () => {
+    const html = view({ ...PRIVACY, locked: true, setBy: "Park Hyunjin" });
+    expect(html).toContain("Set by Park Hyunjin with a team file. It cannot be changed here.");
+    expect(html).not.toContain(">Use<");
+    expect(html).not.toContain("Save names");
+    expect(html).toMatch(/<textarea[^>]*disabled/);
   });
 
-  test("on the web: privacy is off here and Turn on is disabled with the reason", () => {
+  test("on the web: privacy is off here and nothing can be changed", () => {
     const html = view(PRIVACY, false);
     expect(html).toContain("Privacy protection is off here");
-    expect(html).toMatch(/<button[^>]*disabled[^>]*>(?:(?!<\/button>).)*Turn on/);
-    expect(html).toContain("you can turn it on only in the desktop app");
+    expect(html).not.toContain(">Use<");
   });
 
   test("uses the product words, in English and in Korean", () => {
     const locales: Language[] = ["en", "ko"];
     for (const locale of locales) {
       setLocale(locale);
-      for (const html of [view(PRIVACY), view({ ...PRIVACY, localModel: true }), view(PRIVACY, false)]) {
+      for (const html of [view(PRIVACY), view({ ...PRIVACY, locked: true, setBy: "Park" }), view(PRIVACY, false)]) {
         const text = readable(html);
         for (const banned of [/AI Firewall/i, /Ollama/i, /local LLM/i, /API key/i]) expect(text).not.toMatch(banned);
       }
@@ -172,9 +104,20 @@ describe("PrivacyView", () => {
   test("Korean has the screen's words in Korean", () => {
     setLocale("ko");
     const html = view(PRIVACY);
-    expect(html).toContain("비공개 작업을 이 노트북에 두기");
-    expect(html).toContain("약 9기가바이트");
-    expect(html).toContain("미리 보기");
+    expect(html).toContain("비공개로 둘 이름");
+    expect(html).toContain("이 컴퓨터가 먼저 읽습니다");
+  });
+});
+
+describe("Strict confirm", () => {
+  test("says how many details and which kinds, with Send and Edit", () => {
+    const html = renderToStaticMarkup(
+      <PrivacyConfirmDialogView confirm={{ count: 3, kinds: ["email", "name"], resolve: () => {} }} onAnswer={() => {}} />,
+    );
+    expect(html).toContain("3 private details will be hidden");
+    expect(html).toContain("email addresses, names");
+    expect(html).toContain(">Send<");
+    expect(html).toContain(">Edit<");
   });
 });
 
@@ -187,7 +130,6 @@ describe("/privacy route", () => {
     expect(html).toContain('<h1 class="rr-shell__title">Privacy protection</h1>');
     expect(html).toContain('href="/privacy" aria-current="page"');
     expect(html).toContain("Privacy protection is off");
-    expect(html).not.toContain("Keep private work on this laptop");
     expect(html).not.toContain("This part of Redrob Cowork is on its way.");
     expect(html).not.toContain("chat screen");
   });

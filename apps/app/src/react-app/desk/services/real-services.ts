@@ -6,12 +6,13 @@ import { connectorsFromMcp, type DeskMcpStatusMap } from "../connectors/connecto
 import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/desk-files";
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
+import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy, usePrivacyMapStore, type StoredPrivacy } from "../privacy/privacy-store";
 import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project } from "./types";
 
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig"
 >;
 
 export type RealDeskServicesDeps = {
@@ -98,6 +99,17 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
   const { client, workspaceId } = deps;
   const fallback = deps.fallback ?? createFixtureDeskServices();
 
+  const readPrivacy = async () => readStoredPrivacy((await client.getConfig(workspaceId)).redrob);
+  // A level set by a team file stays as it was set.
+  const writePrivacy = async (patch: Partial<Pick<StoredPrivacy, "level" | "names">>) => {
+    const current = await readPrivacy();
+    if (current.locked) throw new Error("Privacy is set by a team file");
+    const next: StoredPrivacy = { ...current, ...patch };
+    await client.patchConfig(workspaceId, { redrob: { [DESK_PRIVACY_CONFIG_KEY]: next } });
+    return next;
+  };
+  const withKept = (stored: StoredPrivacy) => ({ ...stored, detailsKeptThisWeek: usePrivacyMapStore.getState().keptThisWeek() });
+
   return {
     ...fallback,
     chats: {
@@ -130,6 +142,11 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         const projectName = workspace ? workspaceName(workspace) : projectId;
         return real(artifacts.items.map((item) => toFile(item, projectName)));
       },
+    },
+    privacy: {
+      get: async () => real(withKept(await readPrivacy())),
+      setLevel: async (level) => real(withKept(await writePrivacy({ level }))),
+      setNames: async (names) => real(withKept(await writePrivacy({ names }))),
     },
     connectors: {
       list: async () => {

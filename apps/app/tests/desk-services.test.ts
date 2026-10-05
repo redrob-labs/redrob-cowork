@@ -54,7 +54,7 @@ async function everyResult(services: DeskServices) {
     await services.history.list(),
     await services.connectors.list(),
     await services.privacy.get(),
-    await services.privacy.setLocalModel(true),
+    await services.privacy.setLevel("strict"),
     await services.catalog.get(),
     await services.files.list(),
   ];
@@ -162,6 +162,7 @@ function fakeClient() {
     { id: "m2", content: "Filings by 17:00", tags: ["desk-scope:project:hanbit"], source: "agent", scope: "local", createdAt: "2026-09-22T00:00:00.000Z", updatedAt: "2026-09-22T00:00:00.000Z", contexts: [] },
   ];
   let nextMemory = 3;
+  let redrob: Record<string, unknown> = {};
   const client: DeskServerClient = {
     listWorkspaces: async () => {
       calls.push("listWorkspaces");
@@ -200,6 +201,15 @@ function fakeClient() {
     listArtifacts: async (workspaceId) => {
       calls.push(`listArtifacts:${workspaceId}`);
       return { items: [{ id: "a1", path: "outbox/Exhibit index.xlsx", updatedAt: 9 }, { id: "a2", name: "Note.docx" }] };
+    },
+    getConfig: async (workspaceId) => {
+      calls.push(`getConfig:${workspaceId}`);
+      return { opencode: {}, redrob };
+    },
+    patchConfig: async (workspaceId, payload) => {
+      calls.push(`patchConfig:${workspaceId}`);
+      redrob = { ...redrob, ...payload.redrob };
+      return { updatedAt: 1 };
     },
     listMcp: async (workspaceId) => {
       calls.push(`listMcp:${workspaceId}`);
@@ -286,9 +296,28 @@ describe("desk real services", () => {
     expect((await services.playbooks.get("first-review")).preview).toBe(true);
     expect((await services.schedules.list()).preview).toBe(true);
     expect((await services.history.list()).preview).toBe(true);
-    expect((await services.privacy.get()).preview).toBe(true);
     expect((await services.catalog.get()).preview).toBe(true);
     expect(calls).toEqual([]);
+  });
+
+  test("privacy is the workspace's own: Standard until set, then what was set", async () => {
+    const { client, calls } = fakeClient();
+    const services = createRealDeskServices({ client, workspaceId: "ws_1" });
+    const first = await services.privacy.get();
+    expect(first.preview).toBe(false);
+    expect(first.data).toMatchObject({ level: "standard", names: [], setBy: null, locked: false });
+    await services.privacy.setLevel("strict");
+    await services.privacy.setNames(["Kim Minjun"]);
+    expect((await services.privacy.get()).data).toMatchObject({ level: "strict", names: ["Kim Minjun"] });
+    expect(calls.filter((call) => call.startsWith("patchConfig"))).toEqual(["patchConfig:ws_1", "patchConfig:ws_1"]);
+  });
+
+  test("a level set by a team file cannot be changed here", async () => {
+    const { client } = fakeClient();
+    const services = createRealDeskServices({ client, workspaceId: "ws_1" });
+    await client.patchConfig("ws_1", { redrob: { deskPrivacy: { level: "high", names: [], setBy: "Park", locked: true } } });
+    expect((await services.privacy.get()).data).toMatchObject({ level: "high", setBy: "Park", locked: true });
+    await expect(services.privacy.setLevel("off")).rejects.toThrow();
   });
 
   test("connectors are the configured servers, real once a client is known", async () => {

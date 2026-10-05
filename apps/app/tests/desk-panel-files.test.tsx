@@ -66,6 +66,8 @@ async function realFiles(): Promise<DeskFile[]> {
     updateMemory: unused,
     deleteMemory: unused,
     listMcp: unused,
+    getConfig: unused,
+    patchConfig: unused,
     listArtifacts: async () => ({
       items: [
         { id: "a1", path: "reports/q3/plan.md", updatedAt: NOW - 2 * HOUR },

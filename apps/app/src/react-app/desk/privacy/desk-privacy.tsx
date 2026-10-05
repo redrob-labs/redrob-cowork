@@ -1,13 +1,13 @@
 /** @jsxImportSource react */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Badge, Button, EmptyState, ProtectionStatus, Skeleton, icons } from "@redrob-labs/ui";
+import { Alert, Badge, Button, EmptyState, ProtectionStatus, Skeleton, Textarea, icons } from "@redrob-labs/ui";
 
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { t } from "../../../i18n";
-import type { DeskServices } from "../services/desk-services";
 import { createDeskServices } from "../services/real-services";
-import type { DeskResult, PrivacyLevel, PrivacyState } from "../services/types";
+import { clearPrivacySettings } from "./privacy-send";
+import type { PrivacyLevel, PrivacyState } from "../services/types";
 import { Group, Row } from "../settings/desk-settings";
 import { useDeskConnection } from "../shell/desk-connection";
 import { DeskShell } from "../shell/desk-shell";
@@ -16,9 +16,6 @@ import { useFrameStore } from "../store/frame-store";
 
 const BUTTON_ICON = { width: 14, height: 14, "aria-hidden": true };
 
-/** The one-time download of the model on this laptop, in gigabytes. */
-export const LOCAL_MODEL_DOWNLOAD_GB = 9;
-
 export const PRIVACY_QUERY_KEY = "desk-privacy";
 
 /** The header meta: the level, in words. */
@@ -26,56 +23,16 @@ export function privacyLevelMeta(level: PrivacyLevel): string {
   return privacyLevelLabel(level);
 }
 
-export type LocalModelRow = {
-  title: string;
-  description: string;
-  action: "turn-on" | "turn-off" | null;
-  /** Why the control is unavailable here; null when it can be used. */
-  disabledReason: string | null;
-};
-
-/** "Keep private work on this laptop": what the row says, and what its button does. */
-export function localModelRow(state: Pick<PrivacyState, "localModel">, desktop: boolean): LocalModelRow {
-  if (!desktop) {
-    return {
-      title: t("desk.privacy_off"),
-      description: t("desk.privacy_page_local_off_text", { gb: LOCAL_MODEL_DOWNLOAD_GB }),
-      action: null,
-      disabledReason: t("desk.privacy_page_local_web"),
-    };
-  }
-  if (state.localModel) {
-    return {
-      title: t("desk.privacy_page_local_on_title"),
-      description: t("desk.privacy_page_local_on_text"),
-      action: "turn-off",
-      disabledReason: null,
-    };
-  }
-  return {
-    title: t("desk.privacy_off"),
-    description: t("desk.privacy_page_local_off_text", { gb: LOCAL_MODEL_DOWNLOAD_GB }),
-    action: "turn-on",
-    disabledReason: null,
-  };
+/** The names box: one per line, blanks and repeats dropped. */
+export function parseNames(text: string): string[] {
+  return [...new Set(text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean))];
 }
 
-export type LocalModelDeps = {
-  privacy: Pick<DeskServices["privacy"], "setLocalModel">;
-  showToast: (title: string, text?: string) => void;
-};
-
-/** Turns the model on this laptop on or off. In this preview it only changes the sample state. */
-export async function setLocalModel(deps: LocalModelDeps, on: boolean): Promise<DeskResult<PrivacyState>> {
-  const result = await deps.privacy.setLocalModel(on);
-  if (on) deps.showToast(t("desk.privacy_page_ready_title"), t("desk.privacy_page_ready_text"));
-  return result;
-}
-
-const LEVELS: ReadonlyArray<{ id: "standard" | "high" | "strict"; label: () => string; detail: () => string }> = [
-  { id: "standard", label: () => t("desk.privacy_standard"), detail: () => t("desk.privacy_page_level_standard") },
-  { id: "high", label: () => t("desk.privacy_high"), detail: () => t("desk.privacy_page_level_high") },
-  { id: "strict", label: () => t("desk.privacy_strict"), detail: () => t("desk.privacy_page_level_strict") },
+const LEVELS: ReadonlyArray<{ id: PrivacyLevel; detail: () => string }> = [
+  { id: "off", detail: () => t("desk.privacy_page_level_off") },
+  { id: "standard", detail: () => t("desk.privacy_page_level_standard") },
+  { id: "high", detail: () => t("desk.privacy_page_level_high") },
+  { id: "strict", detail: () => t("desk.privacy_page_level_strict") },
 ];
 
 const STEPS: ReadonlyArray<{ id: string; title: () => string; text: () => string }> = [
@@ -116,20 +73,25 @@ function PrivacyStatus(props: { state: PrivacyState; desktop: boolean; preview: 
 export type PrivacyViewProps = {
   state: PrivacyState;
   desktop: boolean;
-  /** Sample data: shown as off, with nothing to turn on. */
+  /** Sample data: shown as off, with nothing to change. */
   preview: boolean;
   busy: boolean;
-  onLocalModel: (on: boolean) => void;
+  onLevel: (level: PrivacyLevel) => void;
+  onNames: (names: string[]) => void;
 };
 
-/** Privacy protection: the status, what it does, the levels (read-only) and the model on this laptop. */
+/** Privacy protection: the status, what Send does, the levels and the names Strict keeps private. */
 export function PrivacyView(props: PrivacyViewProps) {
-  const row = localModelRow(props.state, props.desktop);
+  const [names, setNames] = useState(props.state.names.join("\n"));
+  const editable = props.desktop && !props.preview && !props.state.locked;
+  const changed = parseNames(names).join("\n") !== props.state.names.join("\n");
   return (
     <div className="desk-settings__main">
-      <Alert tone="info" title={t("desk.privacy_page_preview_title")}>
-        {t("desk.privacy_page_preview_text")}
-      </Alert>
+      {props.preview ? (
+        <Alert tone="info" title={t("desk.privacy_page_preview_title")}>
+          {t("desk.privacy_page_preview_text")}
+        </Alert>
+      ) : null}
       <PrivacyStatus state={props.state} desktop={props.desktop} preview={props.preview} />
       <Group title={t("desk.privacy_page_send_title")}>
         {STEPS.map((step) => (
@@ -138,39 +100,49 @@ export function PrivacyView(props: PrivacyViewProps) {
       </Group>
       <Group title={t("desk.privacy_page_levels_title")}>
         {LEVELS.map((level) => (
-          <Row key={level.id} title={level.label()} description={level.detail()}>
+          <Row key={level.id} title={privacyLevelLabel(level.id)} description={level.detail()}>
             {!props.preview && level.id === props.state.level ? (
               <Badge tone="success" size="sm">
                 {t("desk.privacy_page_your_level")}
               </Badge>
+            ) : editable ? (
+              <Button size="sm" variant="ghost" loading={props.busy} onClick={() => props.onLevel(level.id)}>
+                {t("desk.privacy_page_use_level")}
+              </Button>
             ) : null}
           </Row>
         ))}
       </Group>
-      <p className="desk-settings__note">
-        {icons.lock(BUTTON_ICON)}
-        {t("desk.privacy_page_level_fixed")}
-      </p>
-      {props.preview ? null : <Group title={t("desk.privacy_page_local_title")}>
-        <Row title={row.title} description={row.disabledReason ? `${row.description} ${row.disabledReason}` : row.description}>
-          {row.action === "turn-off" ? (
-            <Button size="sm" variant="ghost" loading={props.busy} onClick={() => props.onLocalModel(false)}>
-              {t("desk.privacy_page_turn_off")}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="secondary"
-              iconLeft={icons.download(BUTTON_ICON)}
-              loading={props.busy}
-              disabled={row.action === null}
-              onClick={() => props.onLocalModel(true)}
-            >
-              {t("desk.privacy_page_turn_on")}
-            </Button>
-          )}
-        </Row>
-      </Group>}
+      {props.state.locked && !props.preview ? (
+        <p className="desk-settings__note">
+          {icons.lock(BUTTON_ICON)}
+          {props.state.setBy
+            ? t("desk.privacy_page_level_locked_by", { name: props.state.setBy })
+            : t("desk.privacy_page_level_locked")}
+        </p>
+      ) : null}
+      {props.preview ? null : (
+        <Group title={t("desk.privacy_page_names_title")}>
+          <Row title={t("desk.privacy_page_names_title")} description={t("desk.privacy_page_names_text")}>
+            <div className="flex w-full flex-col gap-2">
+              <Textarea
+                aria-label={t("desk.privacy_page_names_title")}
+                value={names}
+                disabled={!editable}
+                rows={4}
+                onChange={(event) => setNames(event.currentTarget.value)}
+              />
+              {editable ? (
+                <div>
+                  <Button size="sm" variant="secondary" disabled={!changed} loading={props.busy} onClick={() => props.onNames(parseNames(names))}>
+                    {t("desk.privacy_page_names_save")}
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </Row>
+        </Group>
+      )}
       <Group title={t("desk.privacy_page_where_title")}>
         <Row title={t("desk.privacy_page_where_desktop_title")} description={t("desk.privacy_page_where_desktop_text")} />
         <Row title={t("desk.privacy_page_where_miss_title")} description={t("desk.privacy_page_where_miss_text")} />
@@ -179,7 +151,7 @@ export function PrivacyView(props: PrivacyViewProps) {
   );
 }
 
-/** `/privacy`, inside the Desk frame. Sample data until privacy protection has a backend. */
+/** `/privacy`, inside the Desk frame. Settings live in the workspace; sample data without a server. */
 export function DeskPrivacyScreen(props: { desktop?: boolean }) {
   const client = useDeskConnection((state) => state.client);
   const workspaceId = useDeskConnection((state) => state.workspaceId);
@@ -188,22 +160,38 @@ export function DeskPrivacyScreen(props: { desktop?: boolean }) {
   const services = useMemo(() => createDeskServices({ client, workspaceId }), [client, workspaceId]);
   const desktop = props.desktop ?? isDesktopRuntime();
   const key = [PRIVACY_QUERY_KEY, workspaceId ?? "preview"];
-  const privacy = useQuery({ queryKey: key, queryFn: () => services.privacy.get(), staleTime: Infinity });
-  const toggle = useMutation({
-    mutationFn: (on: boolean) => setLocalModel({ privacy: services.privacy, showToast }, on),
-    onSuccess: (result) => queryClient.setQueryData(key, result),
+  const privacy = useQuery({ queryKey: key, queryFn: () => services.privacy.get(), staleTime: 30_000 });
+  const change = useMutation({
+    mutationFn: (patch: { level: PrivacyLevel } | { names: string[] }) =>
+      "level" in patch ? services.privacy.setLevel(patch.level) : services.privacy.setNames(patch.names),
+    onSuccess: (result, patch) => {
+      queryClient.setQueryData(key, result);
+      // The menu and the composer read the level too.
+      void queryClient.invalidateQueries({ queryKey: ["desk-nav"] });
+      void queryClient.invalidateQueries({ queryKey: ["desk-composer"] });
+      if ("names" in patch) showToast(t("desk.privacy_page_names_saved"));
+    },
     onError: () => showToast(t("desk.privacy_page_failed"), t("desk.settings_try_again"), "danger"),
   });
-  const state = privacy.data?.data;
+  const result = privacy.data;
+  const state = result?.data;
 
   return (
-    <DeskShell current="privacy" title={t("desk.nav_privacy")} meta={state && !privacy.data?.preview ? privacyLevelMeta(state.level) : undefined}>
+    <DeskShell current="privacy" title={t("desk.nav_privacy")} meta={result && !result.preview ? privacyLevelMeta(result.data.level) : undefined}>
       {privacy.isLoading ? (
         <Skeleton variant="text" lines={5} />
-      ) : !state ? (
+      ) : !result || !state ? (
         <EmptyState title={t("desk.privacy_page_error_title")} description={t("desk.settings_try_again")} />
       ) : (
-        <PrivacyView state={state} desktop={desktop} preview={privacy.data?.preview ?? true} busy={toggle.isPending} onLocalModel={(on) => toggle.mutate(on)} />
+        <PrivacyView
+          key={state.names.join("\n")}
+          state={state}
+          desktop={desktop}
+          preview={result.preview}
+          busy={change.isPending}
+          onLevel={(level) => change.mutate({ level })}
+          onNames={(names) => change.mutate({ names })}
+        />
       )}
     </DeskShell>
   );
