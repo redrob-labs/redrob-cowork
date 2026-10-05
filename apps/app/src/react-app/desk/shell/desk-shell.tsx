@@ -7,6 +7,7 @@ import { getInitialThemeMode, setThemeMode, subscribeToTheme } from "../../../ap
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import { useFrameStore } from "../store/frame-store";
+import { AccountMenu } from "./account-menu";
 import { DeskFrameContext } from "./desk-frame";
 import { buildDeskNav, type DeskNavId } from "./nav";
 import { useDeskNavData } from "./use-desk-nav-data";
@@ -40,7 +41,10 @@ export function panelToggleLabel(open: boolean): string {
   return open ? t("desk.panel_close") : t("desk.panel_open");
 }
 
-/** The frame around every Desk screen: the menu, the theme, and the side panel button last in the header. */
+/**
+ * The frame around every Desk screen: the menu, the theme, the account menu after any
+ * `aside` the screen brings, and the side panel button last in the header.
+ */
 export function DeskShell(props: DeskShellProps) {
   const panelOpen = useFrameStore((state) => state.panel.open);
   const togglePanel = useFrameStore((state) => state.togglePanel);
@@ -83,7 +87,12 @@ export function DeskShell(props: DeskShellProps) {
               }}
             />
           }
-          aside={props.aside}
+          aside={
+            <>
+              {props.aside}
+              <AccountMenu />
+            </>
+          }
           title={props.title}
           meta={props.meta}
           rail={props.rail}

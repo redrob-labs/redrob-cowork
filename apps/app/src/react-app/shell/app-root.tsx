@@ -28,6 +28,7 @@ import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
 import { DsStory } from "../desk/ds-story";
 import { DeskShell } from "../desk/shell/desk-shell";
+import { DeskLayer } from "../desk/shell/desk-layer";
 import { deskRoutes } from "../desk/shell/desk-routes";
 
 /**
@@ -138,6 +139,7 @@ export function AppRoot() {
               />
               {import.meta.env.DEV ? <Route path="/__ds" element={<DsStory />} /> : null}
             </Routes>
+          <DeskLayer />
           <LoadingOverlay />
         </RedrobControlProvider>
         </AppMenuProvider>
