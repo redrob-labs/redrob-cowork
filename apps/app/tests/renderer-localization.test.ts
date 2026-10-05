@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 import en from "../src/i18n/locales/en";
 import ko from "../src/i18n/locales/ko";
@@ -56,6 +56,8 @@ const DEVELOPER_ONLY = new Set([
   "react-app/domains/session/surface/debug-panel.tsx",
   "react-app/shell/dev-profiler.tsx",
   "react-app/shell/react-render-watchdog-overlay.tsx",
+  // The design-system gallery at #/__ds, routed only when import.meta.env.DEV.
+  "react-app/desk/ds-story.tsx",
 ]);
 
 /**
@@ -82,7 +84,8 @@ const walk = (dir: string) => {
       continue;
     }
     if (!path.endsWith(".tsx")) continue;
-    const name = relative(RENDERER_DIR, path);
+    // POSIX separators, so the allow-lists match on Windows too.
+    const name = relative(RENDERER_DIR, path).split(sep).join("/");
     if (DEVELOPER_ONLY.has(name)) continue;
     sources.push({
       name,

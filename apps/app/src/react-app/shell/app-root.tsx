@@ -26,6 +26,7 @@ import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
+import { DsStory } from "../desk/ds-story";
 
 /**
  * Dev-only eval hook that relaunches the Electron app. Lives inside
@@ -149,6 +150,7 @@ export function AppRoot() {
                   </DevProfiler>
                 }
               />
+              {import.meta.env.DEV ? <Route path="/__ds" element={<DsStory />} /> : null}
               {/* Default + fallback: land on the session view. Users open
                   settings deliberately via the sidebar or command palette. */}
               <Route path="/" element={<Navigate to="/session" replace />} />
