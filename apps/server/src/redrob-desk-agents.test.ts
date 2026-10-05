@@ -34,6 +34,14 @@ describe("desk agents in the engine config", () => {
     }
   });
 
+  test("the check never asks: its session is hidden, so a question would hang it", () => {
+    const permission = agent(DESK_CHECK_AGENT).permission;
+    if (!isRecord(permission)) throw new Error("check has no permission");
+    const values = Object.entries(permission).flatMap(([key, value]) => (key === "skill" ? [] : [value]));
+    expect(values).not.toContain("ask");
+    expect(permission).toMatchObject({ external_directory: "deny", doom_loop: "deny", webfetch: "allow" });
+  });
+
   test("plan and check change nothing; run can", () => {
     for (const name of [DESK_PLAN_AGENT, DESK_CHECK_AGENT]) {
       expect(agent(name).permission).toMatchObject({ edit: "deny", bash: "deny" });

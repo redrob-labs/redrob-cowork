@@ -1080,7 +1080,12 @@ export function SessionRoute() {
               : envSystemContext;
             // A Run prompt's answer is what Cross-check reads, once it arrives.
             if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {
-              useCheckStore.getState().expect(targetSessionId, { question: text, planned: isPlanRunPrompt(text) });
+              useCheckStore.getState().expect(targetSessionId, {
+                question: text,
+                planned: isPlanRunPrompt(text),
+                ...(sendModel ? { model: { providerID: sendModel.providerID, modelID: sendModel.modelID } } : {}),
+                ...(sendVariant ? { variant: sendVariant } : {}),
+              });
             }
             const result = await opencodeClient.session.promptAsync({
               sessionID: targetSessionId,

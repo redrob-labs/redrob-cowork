@@ -804,6 +804,7 @@ const ko = {
   "desk.thread_fact_reasoning": "추론",
   "desk.thread_fact_sources": "출처",
   "desk.thread_fact_title": "사실 확인",
+  "desk.thread_check_retry": "다시 확인",
   "desk.thread_kind_broke": "무너짐",
   "desk.thread_kind_changed": "바뀜",
   "desk.thread_kind_held": "유지됨",

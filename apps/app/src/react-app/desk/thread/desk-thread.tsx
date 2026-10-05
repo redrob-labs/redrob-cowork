@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import {
   AnswerReceipt,
   ApprovalStep,
+  Button,
   ChallengeReport,
   FactCheckReport,
   PlanDocument,
@@ -180,10 +181,16 @@ export function DeskBlocksView(props: { blocks: DeskBlocks; isLatest: boolean })
 /** Under a finished answer: the receipt, then what the checks found. */
 export function DeskAnswerFooter(props: { messageId: string; model?: string }) {
   const checks = useCheckStore((state) => state.answers[props.messageId]);
-  return <DeskAnswerFooterView checks={checks} model={props.model} />;
+  const retry = useCheckStore((state) => state.retryHandler);
+  return <DeskAnswerFooterView checks={checks} model={props.model} onRetry={retry ? () => retry(props.messageId) : undefined} />;
 }
 
-export function DeskAnswerFooterView(props: { checks: AnswerChecks | undefined; model?: string }) {
+/** A check that failed can run again, when the cross-check is mounted and knows what was asked. */
+export function canRetryChecks(checks: AnswerChecks | undefined): boolean {
+  return Boolean(checks?.request) && (checks?.fact === "failed" || checks?.challenge === "failed");
+}
+
+export function DeskAnswerFooterView(props: { checks: AnswerChecks | undefined; model?: string; onRetry?: () => void }) {
   const { checks } = props;
   const result = checks?.result;
   return (
@@ -197,6 +204,13 @@ export function DeskAnswerFooterView(props: { checks: AnswerChecks | undefined; 
           result,
         })}
       />
+      {props.onRetry && canRetryChecks(checks) ? (
+        <div>
+          <Button size="sm" variant="ghost" onClick={props.onRetry}>
+            {t("desk.thread_check_retry")}
+          </Button>
+        </div>
+      ) : null}
       {checks?.fact === "done" && result?.fact ? <FactCheckReport {...factReportProps(result.fact)} /> : null}
       {checks?.challenge === "done" && result?.challenge ? (
         <ChallengeReport {...challengeReportProps(result.challenge)} />

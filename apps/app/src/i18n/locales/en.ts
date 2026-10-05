@@ -816,6 +816,7 @@ const en = {
   "desk.thread_fact_reasoning": "Reasoning",
   "desk.thread_fact_sources": "Sources",
   "desk.thread_fact_title": "Fact check",
+  "desk.thread_check_retry": "Check again",
   "desk.thread_kind_broke": "Broke",
   "desk.thread_kind_changed": "Changed",
   "desk.thread_kind_held": "Held",

@@ -67,6 +67,15 @@ Leave out "fact" or "challenge" when you were not asked for it. Plain words, no 
 
 type Permission = Record<string, unknown>;
 
+/** What the check agent is refused rather than asked about. */
+export const CHECK_NEVER_ASKS = {
+  edit: "deny",
+  bash: "deny",
+  external_directory: "deny",
+  doom_loop: "deny",
+  webfetch: "allow",
+} as const;
+
 /** The three Desk agents, sharing the redrob agent's prompt and skill rules. */
 export function deskAgents(base: { prompt: string; permission: Permission }): Record<string, Record<string, unknown>> {
   return {
@@ -90,7 +99,9 @@ export function deskAgents(base: { prompt: string; permission: Permission }): Re
       hidden: true,
       temperature: 0,
       prompt: CHECK_PROMPT,
-      permission: { ...base.permission, edit: "deny", bash: "deny" },
+      // The check runs in a hidden session with no one to answer a question, so nothing may
+      // ask: the engine's ask-by-default keys are denied, and reading and the web stay open.
+      permission: { ...base.permission, ...CHECK_NEVER_ASKS },
     },
   };
 }

@@ -11,6 +11,7 @@ import {
   crossCheckPlan,
   DESK_CHECK_AGENT,
   parseCheckAnswer,
+  retryPlan,
   runCrossCheck,
   type CrossCheckDeps,
   type TranscriptMessage,
@@ -18,7 +19,7 @@ import {
 import { DESK_BLOCK_TAGS, hasDeskBlocks, parseDeskBlocks, type CheckResult } from "../src/react-app/desk/thread/desk-blocks";
 import { challengeReportProps, factReportProps } from "../src/react-app/desk/thread/desk-thread";
 import { deskSystemText, MEMORY_OFF_INSTRUCTION } from "../src/react-app/desk/thread/memory-off";
-import { toTranscript } from "../src/react-app/desk/thread/use-desk-cross-check";
+import { permissionAsk, toTranscript } from "../src/react-app/desk/thread/use-desk-cross-check";
 import {
   answersSummary,
   answersToPrompt,
@@ -210,17 +211,21 @@ describe("cross-check", () => {
     expect(checkMatters("")).toBe(false);
     expect(checkMatters("Sure, here is a haiku about rain.")).toBe(false);
     expect(checkMatters("x".repeat(700))).toBe(true);
-    expect(checkMatters("It costs $1,200 a month.")).toBe(true);
-    expect(checkMatters("The notice must reach them by October 31.")).toBe(true);
-    expect(checkMatters("Clause 14.2 requires registered mail.")).toBe(true);
-    expect(checkMatters("I wrote Notice.docx for you.")).toBe(true);
-    expect(checkMatters("Done.", "Draft an email to the client")).toBe(true);
-    expect(checkMatters("계약서 제14조에 따르면 등기우편이어야 합니다.")).toBe(true);
+    // A number, a year, a date, a rule or a file on its own is a quick answer: no second AI turn.
+    expect(checkMatters("It costs $1,200 a month.")).toBe(false);
+    expect(checkMatters("The notice must reach them by October 31, 2026.")).toBe(false);
+    expect(checkMatters("Clause 14.2 requires registered mail.")).toBe(false);
+    expect(checkMatters("I wrote Notice.docx for you.")).toBe(false);
+    // Money next to a rule, a long answer, or a question that sends, signs or pays: checked.
+    expect(checkMatters("Clause 14.2 sets a $5,000 penalty.")).toBe(true);
+    expect(checkMatters("계약서 제14조에 따르면 위약금은 500만 원입니다.")).toBe(true);
+    expect(checkMatters("Done.", "Draft the termination email citing clause 14")).toBe(true);
+    expect(checkMatters("Done.", "이 계약서에 서명해도 될까요?")).toBe(true);
   });
 
   test("levels: off skips, always runs, auto runs when it matters", () => {
     const quick = { question: "Hi", answer: "Hello." };
-    const matters = { question: "Hi", answer: "Clause 14.2 requires registered mail." };
+    const matters = { question: "Hi", answer: "Clause 14.2 sets a $5,000 penalty." };
     expect(crossCheckPlan({ factCheck: "off", challenge: "off" }, matters)).toEqual({ fact: false, challenge: false });
     expect(crossCheckPlan({ factCheck: "always", challenge: "always" }, quick)).toEqual({ fact: true, challenge: true });
     expect(crossCheckPlan(DEFAULT_CROSS_CHECK, quick)).toEqual({ fact: false, challenge: false });
@@ -243,6 +248,7 @@ describe("cross-check", () => {
 
     store.getState().start("m1", { planned: true, fact: true, challenge: false });
     expect(store.getState().answers.m1).toEqual({ planned: true, fact: "running", challenge: "off" });
+    expect(store.getState().take("s1")).toBeNull();
     store.getState().settle("m1", { fact: { claims: [], missed: [] } });
     expect(store.getState().answers.m1).toMatchObject({ fact: "done", challenge: "off" });
 
@@ -291,23 +297,86 @@ describe("cross-check", () => {
         calls.push(`create:${parentId}`);
         return "check-1";
       },
-      prompt: async (sessionId, _text, agent) => {
-        calls.push(`prompt:${sessionId}:${agent}`);
+      prompt: async (sessionId, _text, agent, model) => {
+        calls.push(`prompt:${sessionId}:${agent}:${model.model?.modelID ?? "default"}:${model.variant ?? "-"}`);
       },
       sleep: async () => {},
       start: store.getState().start,
       settle: store.getState().settle,
+      track: store.getState().track,
+      untrack: store.getState().untrack,
+      stopped: (id) => Boolean(store.getState().stopped[id]),
     };
-    await runCrossCheck(deps, { sessionId: "s1", question: "Can we end it by email?", planned: false, levels: DEFAULT_CROSS_CHECK });
-    expect(calls).toEqual(["messages:s1", "create:s1", "prompt:check-1:redrob-check", "messages:check-1", "messages:check-1"]);
-    expect(store.getState().answers.a1).toMatchObject({ fact: "done", challenge: "done" });
+    await runCrossCheck(deps, {
+      sessionId: "s1",
+      question: "Can we end it by email?",
+      planned: false,
+      levels: DEFAULT_CROSS_CHECK,
+      model: { providerID: "redrob", modelID: "picked" },
+      variant: "high",
+    });
+    // On the model the chat used, not the engine default.
+    expect(calls).toEqual(["messages:s1", "create:s1", "prompt:check-1:redrob-check:picked:high", "messages:check-1", "messages:check-1"]);
+    expect(store.getState().answers.a1).toMatchObject({ fact: "done", challenge: "done", request: { sessionId: "s1", model: { modelID: "picked" } } });
+    expect(store.getState().checking).toEqual({});
 
     const quiet = createCheckStore();
     await runCrossCheck(
       { ...deps, start: quiet.getState().start, settle: quiet.getState().settle, createCheckSession: async () => { throw new Error("not called"); } },
       { sessionId: "s1", question: "Q", planned: true, levels: { factCheck: "off", challenge: "off" } },
     );
-    expect(quiet.getState().answers.a1).toEqual({ planned: true, fact: "off", challenge: "off" });
+    expect(quiet.getState().answers.a1).toMatchObject({ planned: true, fact: "off", challenge: "off" });
+  });
+
+  test("a check that asked and was refused stops at once and reads as failed", async () => {
+    const store = createCheckStore();
+    let polls = 0;
+    await runCrossCheck(
+      {
+        messages: async (sessionId) => {
+          if (sessionId === "s1") return [{ id: "a1", role: "assistant", completed: true, text: "Clause 3 applies." }];
+          polls += 1;
+          // The ask arrives while the check works; the hook refuses it and marks it stopped.
+          if (polls === 1) store.getState().stop("check-1");
+          return [{ id: "c1", role: "assistant", completed: false, text: "" }];
+        },
+        createCheckSession: async () => "check-1",
+        prompt: async () => {
+          expect(store.getState().checking["check-1"]).toBe("a1");
+        },
+        sleep: async () => {},
+        start: store.getState().start,
+        settle: store.getState().settle,
+        track: store.getState().track,
+        untrack: store.getState().untrack,
+        stopped: (id) => Boolean(store.getState().stopped[id]),
+      },
+      { sessionId: "s1", question: "Q", planned: false, levels: { factCheck: "always", challenge: "off" } },
+    );
+    expect(polls).toBe(1);
+    expect(store.getState().answers.a1).toMatchObject({ fact: "failed", challenge: "off" });
+    expect(store.getState().checking).toEqual({});
+    expect(store.getState().stopped).toEqual({});
+  });
+
+  test("Retry runs again only the checks that failed, and keeps what was done", () => {
+    expect(retryPlan({ fact: "failed", challenge: "done" })).toEqual({ fact: true, challenge: false });
+    const store = createCheckStore();
+    const request = { sessionId: "s1", question: "Q", planned: false };
+    store.getState().start("a1", { planned: false, fact: true, challenge: true, request });
+    store.getState().settle("a1", { challenge: parseCheckAnswer(fence("redrob-check", CHECK))?.challenge });
+    expect(store.getState().answers.a1).toMatchObject({ fact: "failed", challenge: "done" });
+    store.getState().start("a1", { planned: false, fact: true, challenge: false, request });
+    expect(store.getState().answers.a1).toMatchObject({ fact: "running", challenge: "done" });
+    store.getState().settle("a1", { fact: parseCheckAnswer(fence("redrob-check", CHECK))?.fact });
+    expect(store.getState().answers.a1).toMatchObject({ fact: "done", challenge: "done" });
+    expect(store.getState().answers.a1?.result?.challenge).toBeDefined();
+  });
+
+  test("a permission ask is read from both event shapes", () => {
+    expect(permissionAsk({ type: "permission.asked", properties: { id: "per_1", sessionID: "check-1" } })).toEqual({ sessionId: "check-1", requestId: "per_1", v2: false });
+    expect(permissionAsk({ type: "permission.v2.asked", properties: { id: "per_2", sessionID: "check-1" } })).toEqual({ sessionId: "check-1", requestId: "per_2", v2: true });
+    expect(permissionAsk({ type: "session.idle", properties: { sessionID: "s1" } })).toBeNull();
   });
 
   test("a failing check settles as failed rather than throwing", async () => {
@@ -322,6 +391,9 @@ describe("cross-check", () => {
         sleep: async () => {},
         start: store.getState().start,
         settle: store.getState().settle,
+        track: store.getState().track,
+        untrack: store.getState().untrack,
+        stopped: () => false,
       },
       { sessionId: "s1", question: "Q", planned: false, levels: { factCheck: "always", challenge: "off" } },
     );
