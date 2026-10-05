@@ -9,6 +9,7 @@ import type {
   NewMemoryNote,
   NewSchedule,
   Playbook,
+  PlaybookDraft,
   PrivacyLevel,
   PrivacyState,
   Project,
@@ -31,7 +32,13 @@ export interface DeskServices {
     remove(id: string): Async<null>;
     edit(id: string, text: string): Async<MemoryNote>;
   };
-  playbooks: { list(): Async<Playbook[]>; get(id: string): Async<Playbook | null> };
+  playbooks: {
+    list(): Async<Playbook[]>;
+    get(id: string): Async<Playbook | null>;
+    /** Creates a playbook, or replaces the one with this id. */
+    save(input: PlaybookDraft): Async<Playbook>;
+    remove(id: string): Async<null>;
+  };
   schedules: {
     list(): Async<ScheduleBoard>;
     /** Answers a run waiting for a person; it leaves the waiting list either way. */

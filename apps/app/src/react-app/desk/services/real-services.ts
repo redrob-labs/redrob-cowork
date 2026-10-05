@@ -6,13 +6,14 @@ import { connectorsFromMcp, type DeskMcpStatusMap } from "../connectors/connecto
 import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/desk-files";
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
+import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
 import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy, usePrivacyMapStore, type StoredPrivacy } from "../privacy/privacy-store";
 import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project } from "./types";
 
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand"
 >;
 
 export type RealDeskServicesDeps = {
@@ -99,6 +100,18 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
   const { client, workspaceId } = deps;
   const fallback = deps.fallback ?? createFixtureDeskServices();
 
+  const listPlaybooks = async () => {
+    const [workspace, global] = await Promise.all([
+      client.listCommands(workspaceId, "workspace"),
+      // The person's own commands are optional: a failure leaves the workspace's.
+      client.listCommands(workspaceId, "global").catch(() => ({ items: [] })),
+    ]);
+    const seen = new Set<string>();
+    return [...workspace.items, ...global.items]
+      .filter((command) => !seen.has(command.name) && Boolean(seen.add(command.name)))
+      .map(playbookFromCommand);
+  };
+
   const readPrivacy = async () => readStoredPrivacy((await client.getConfig(workspaceId)).redrob);
   // A level set by a team file stays as it was set.
   const writePrivacy = async (patch: Partial<Pick<StoredPrivacy, "level" | "names">>) => {
@@ -141,6 +154,21 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         const workspace = workspaces.items.find((entry) => entry.id === projectId);
         const projectName = workspace ? workspaceName(workspace) : projectId;
         return real(artifacts.items.map((item) => toFile(item, projectName)));
+      },
+    },
+    // Playbooks are the workspace's commands, then the person's own across workspaces.
+    playbooks: {
+      list: async () => real(await listPlaybooks()),
+      get: async (id) => real((await listPlaybooks()).find((playbook) => playbook.id === id) ?? null),
+      save: async (input) => {
+        const name = input.id ?? playbookSlug(input.name);
+        const template = playbookTemplate(input);
+        await client.upsertCommand(workspaceId, { name, description: input.description.trim(), template });
+        return real(playbookFromCommand({ name, description: input.description, template, scope: "workspace" }));
+      },
+      remove: async (id) => {
+        await client.deleteCommand(workspaceId, id);
+        return real(null);
       },
     },
     privacy: {

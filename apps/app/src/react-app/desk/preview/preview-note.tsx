@@ -14,11 +14,11 @@ export function PreviewNote(props: { children: string }) {
   );
 }
 
-/** A Preview screen's column: the note first, always, then the screen. */
-export function PreviewPage(props: { note: string; wide?: boolean; children: ReactNode }) {
+/** A screen's column: the sample-data note first while the data is sample data, then the screen. */
+export function PreviewPage(props: { note: string; wide?: boolean; preview?: boolean; children: ReactNode }) {
   return (
     <div className={props.wide ? "desk-settings__main desk-preview--wide" : "desk-settings__main"}>
-      <PreviewNote>{props.note}</PreviewNote>
+      {props.preview === false ? null : <PreviewNote>{props.note}</PreviewNote>}
       {props.children}
     </div>
   );

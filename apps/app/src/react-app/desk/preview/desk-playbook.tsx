@@ -10,7 +10,9 @@ import type { Playbook } from "../services/types";
 import { Row } from "../settings/desk-settings";
 import { DeskDialog } from "../shell/desk-dialog";
 import { DeskShell } from "../shell/desk-shell";
+import { useDeskConnection } from "../shell/desk-connection";
 import { useFrameStore } from "../store/frame-store";
+import { useDeskStartStore, type PendingDeskChat } from "../playbooks/start-chat";
 import { PreviewPage, PreviewState } from "./preview-note";
 import {
   formatDay,
@@ -41,24 +43,29 @@ export function PlaybookView(props: PlaybookViewProps) {
         {icons.arrowLeft(ICON)}
         {t("desk.nav_playbooks")}
       </Link>
-      <div className="desk-preview__worth">
-        <p className="desk-preview__impact">
-          <b>{playbook.impact.figure}</b>
-          <span>{playbook.impact.label}</span>
-        </p>
-        <p className="desk-settings__description">
-          {playbook.highStakes ? (
-            <Badge tone="brand" size="sm">
-              {t("desk.preview_high_impact")}
-            </Badge>
-          ) : null}{" "}
-          {playbook.stake}
-        </p>
-      </div>
+      {playbook.impact.figure || playbook.stake ? (
+        <div className="desk-preview__worth">
+          {playbook.impact.figure ? (
+            <p className="desk-preview__impact">
+              <b>{playbook.impact.figure}</b>
+              <span>{playbook.impact.label}</span>
+            </p>
+          ) : null}
+          <p className="desk-settings__description">
+            {playbook.highStakes ? (
+              <Badge tone="brand" size="sm">
+                {t("desk.preview_high_impact")}
+              </Badge>
+            ) : null}{" "}
+            {playbook.stake}
+          </p>
+        </div>
+      ) : null}
+      {/* A playbook saved in Desk carries only what it does; the rest shows when there is something to say. */}
       <div className="desk-settings__rows">
-        <Row title={t("desk.preview_does")} description={playbook.summary} />
-        <Row title={t("desk.preview_gets")} description={playbook.gets} />
-        <Row title={t("desk.preview_needs")} description={playbook.needs} />
+        {playbook.summary ? <Row title={t("desk.preview_does")} description={playbook.summary} /> : null}
+        {playbook.gets ? <Row title={t("desk.preview_gets")} description={playbook.gets} /> : null}
+        {playbook.needs ? <Row title={t("desk.preview_needs")} description={playbook.needs} /> : null}
       </div>
       {playbook.sources.length ? (
         <section className="desk-settings__group">
@@ -94,9 +101,9 @@ export function PlaybookView(props: PlaybookViewProps) {
           approval: Boolean(step.approval),
           approvalLabel: step.approval,
         }))}
-        owner={playbook.owner}
-        runs={t("desk.preview_runs", { count: playbook.runCount })}
-        lastRun={formatDay(playbook.lastRunAt, props.locale)}
+        owner={playbook.owner || undefined}
+        runs={playbook.runCount ? t("desk.preview_runs", { count: playbook.runCount }) : undefined}
+        lastRun={playbook.lastRunAt ? formatDay(playbook.lastRunAt, props.locale) : undefined}
         runLabel={t("desk.preview_run_now")}
         onRun={props.onRun}
       />
@@ -160,15 +167,47 @@ export function ScheduleDialog(props: { open: boolean; playbook: Playbook; onClo
   );
 }
 
-/** `/playbook/:playbookId`. Run opens a sample run; Schedule changes only sample state. */
+/**
+ * Run with a saved prompt: a new chat in Plan, so the person sees the plan before anything
+ * runs. A sample playbook has no prompt and opens the sample run.
+ */
+export function runPlaybook(
+  deps: { workspaceId: string | null; request: (chat: PendingDeskChat) => void; navigate: (path: string) => void },
+  playbook: Pick<Playbook, "id" | "prompt">,
+) {
+  if (playbook.prompt && deps.workspaceId) {
+    deps.request({ workspaceId: deps.workspaceId, prompt: playbook.prompt, mode: "plan" });
+    deps.navigate("/chat");
+    return;
+  }
+  deps.navigate(runPath(playbook.id));
+}
+
+/** `/playbook/:playbookId`. Run starts a chat in Plan; sample playbooks open a sample run. */
 export function PlaybookScreen() {
   const { playbookId } = useParams<{ playbookId: string }>();
   const { services, scope } = usePreviewServices();
+  const workspaceId = useDeskConnection((state) => state.workspaceId);
+  const request = useDeskStartStore((state) => state.request);
+  const openModal = useFrameStore((state) => state.openModal);
+  const showToast = useFrameStore((state) => state.showToast);
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const [scheduling, setScheduling] = useState(false);
-  const query = useQuery({ queryKey: previewKey(scope, "playbooks"), queryFn: () => services.playbooks.list(), staleTime: Infinity });
+  const query = useQuery({ queryKey: previewKey(scope, "playbooks"), queryFn: () => services.playbooks.list(), staleTime: 30_000 });
   const playbook = query.data?.data.find((entry) => entry.id === playbookId);
+  const preview = query.data?.preview ?? true;
+  const remove = async (id: string) => {
+    try {
+      await services.playbooks.remove(id);
+      await queryClient.invalidateQueries({ queryKey: previewKey(scope, "playbooks") });
+      showToast(t("desk.playbook_deleted"));
+      navigate("/playbooks");
+    } catch {
+      showToast(t("desk.playbook_delete_failed"), t("desk.settings_try_again"), "danger");
+    }
+  };
 
   return (
     <DeskShell
@@ -177,20 +216,32 @@ export function PlaybookScreen() {
       meta={playbook?.team ? t("desk.preview_playbook_meta") : undefined}
       actions={
         playbook ? (
-          <Button size="sm" variant="secondary" iconLeft={icons.calendarClock(ICON)} onClick={() => setScheduling(true)}>
-            {t("desk.preview_schedule")}
-          </Button>
+          <>
+            {preview ? null : (
+              <>
+                <Button size="sm" variant="ghost" onClick={() => openModal({ kind: "playbook", playbookId: playbook.id })}>
+                  {t("desk.playbook_edit")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => void remove(playbook.id)}>
+                  {t("desk.playbook_delete")}
+                </Button>
+              </>
+            )}
+            <Button size="sm" variant="secondary" iconLeft={icons.calendarClock(ICON)} onClick={() => setScheduling(true)}>
+              {t("desk.preview_schedule")}
+            </Button>
+          </>
         ) : null
       }
     >
-      <PreviewPage note={t("desk.preview_playbooks_note")}>
+      <PreviewPage note={t("desk.preview_playbooks_note")} preview={preview}>
         <PreviewState query={query}>
           {() =>
             playbook ? (
               <PlaybookView
                 playbook={playbook}
                 locale={locale}
-                onRun={() => navigate(runPath(playbook.id))}
+                onRun={() => runPlaybook({ workspaceId, request, navigate }, playbook)}
                 onOpenLink={openExternal}
               />
             ) : (

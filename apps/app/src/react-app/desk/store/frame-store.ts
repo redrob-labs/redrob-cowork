@@ -4,7 +4,13 @@ import { systemTimers, type DeskTimers, type TimerHandle } from "../timers";
 
 export type PanelTab = "browser" | "files";
 export type BrowserDesk = "reading" | "you" | "done";
-export type FrameModal = null | { kind: "project"; chatId: string | null } | { kind: "feedback" } | { kind: "keys" };
+export type FrameModal =
+  | null
+  | { kind: "project"; chatId: string | null }
+  | { kind: "feedback" }
+  | { kind: "keys" }
+  /** A playbook to write: a new one, maybe from a prompt, or one to change. */
+  | { kind: "playbook"; playbookId?: string; prompt?: string };
 export type ToastTone = "success" | "danger";
 /** The one thing a toast offers, usually Undo. */
 export type ToastAction = { label: string; run: () => void };

@@ -11,6 +11,7 @@ import { PRIVACY } from "./fixtures/privacy";
 import { PROJECTS } from "./fixtures/projects";
 import { SCHEDULE_BOARD } from "./fixtures/schedules";
 import type { DeskResult, MemoryNote, Schedule, ScheduleBoard } from "./types";
+import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
 
 /** The prototype's pace: one step every 650ms. */
 export const SCRIPTED_STEP_MS = 650;
@@ -65,6 +66,7 @@ export function createFixtureDeskServices(
   // Per instance, so one screen's edits never leak into another test or story.
   let notes: MemoryNote[] = NOTES.map((note) => ({ ...note }));
   let privacy = { ...PRIVACY };
+  let playbooks = [...PLAYBOOKS];
   let nextNote = notes.length + 1;
 
   const editable = (id: string) => {
@@ -104,8 +106,22 @@ export function createFixtureDeskServices(
       },
     },
     playbooks: {
-      list: () => preview([...PLAYBOOKS]),
-      get: (id) => preview(PLAYBOOKS.find((playbook) => playbook.id === id) ?? null),
+      list: () => preview([...playbooks]),
+      get: (id) => preview(playbooks.find((playbook) => playbook.id === id) ?? null),
+      save: async (input) => {
+        const saved = playbookFromCommand({
+          name: input.id ?? playbookSlug(input.name, now()),
+          description: input.description,
+          template: playbookTemplate(input),
+          scope: "workspace",
+        });
+        playbooks = [saved, ...playbooks.filter((playbook) => playbook.id !== saved.id)];
+        return { data: saved, preview: true };
+      },
+      remove: async (id) => {
+        playbooks = playbooks.filter((playbook) => playbook.id !== id);
+        return { data: null, preview: true };
+      },
     },
     schedules: {
       list: () => preview(copyBoard(sampleBoard)),

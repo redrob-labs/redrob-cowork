@@ -72,7 +72,12 @@ export type Playbook = {
   lastRunAt: number;
   team: boolean;
   cadence: string;
+  /** What Run sends: the saved template. Sample playbooks have none. */
+  prompt?: string;
 };
+
+/** What the playbook dialog saves. Without an id it is a new playbook. */
+export type PlaybookDraft = { id?: string; name: string; description: string; steps: string[]; prompt: string };
 
 export type RunState = "done" | "blocked" | "stopped";
 

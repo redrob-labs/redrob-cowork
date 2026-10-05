@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   AlertTriangle,
+  BookmarkPlus,
   Check,
   ChevronRight,
   Copy,
@@ -131,6 +132,7 @@ import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blo
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
+import { useFrameStore } from "@/react-app/desk/store/frame-store"
 import { restore } from "@/react-app/desk/privacy/redact"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
@@ -680,6 +682,9 @@ const UserMessage = React.memo(
     // What the person wrote, with the real details where placeholders were sent.
     const placeholders = usePlaceholderMap(sessionId)
     const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
+    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    const inDeskFrame = useInDeskFrame()
+    const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
       () => message.parts.filter((part) => (part.type === "text" && Boolean(part.text)) || isFileUIPart(part)),
       [message.parts],
@@ -747,6 +752,18 @@ const UserMessage = React.memo(
                           onClick={() => onEditUserMessage(message.id, messageText)}
                         >
                           <Pencil />
+                        </Button>
+                      </MessageAction>
+                    ) : null}
+                    {inDeskFrame && messageText ? (
+                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("desk.playbook_save_from_message")}
+                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                        >
+                          <BookmarkPlus />
                         </Button>
                       </MessageAction>
                     ) : null}

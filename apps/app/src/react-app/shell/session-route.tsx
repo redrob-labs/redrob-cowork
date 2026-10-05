@@ -2,6 +2,7 @@
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -11,7 +12,8 @@ import { toast } from "@/components/ui/sonner";
 import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
-import { memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/playbooks/start-chat";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
@@ -2358,6 +2360,68 @@ export function SessionRoute() {
    * workspace under the user's home folder instead of asking where to put
    * it. Falls back to the create-workspace modal off desktop.
    */
+  // A new chat that sends its first prompt itself: the new chat screen, and a playbook's Run.
+  const createTaskWithPrompt = (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => {
+    void (async () => {
+      const workspace = workspaces.find((item) => item.id === workspaceId);
+      if (!workspace) return;
+      const endpoint = endpointForWorkspace(workspace);
+      if (!endpoint?.token) return;
+      const workspaceClient = createClient(
+        endpoint.opencodeBaseUrl,
+        workspace.path?.trim() || undefined,
+        { token: endpoint.token, mode: "redrob" },
+      );
+      try {
+        const session = unwrap(
+          await workspaceClient.session.create({ directory: workspace.path?.trim() || undefined }),
+        );
+        const firstTaskPrompt = prompt.trim();
+        if (firstTaskPrompt) {
+          const firstTaskAttachments = attachments ?? [];
+          // Attachment chips only survive in-memory (File objects), so the
+          // persisted fallback draft drops their tokens.
+          saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
+          // The composer reads its draft from the composer state store,
+          // not the persisted draft store — seed both.
+          useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
+          if (firstTaskAttachments.length) {
+            useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
+          }
+          // One-step run: the session surface sends the seeded draft itself.
+          markComposerAutoSend(session.id);
+          // Plan or Run and the memory picked on the new chat screen belong to this chat now.
+          useDeskComposerStore.getState().claimNewChat(session.id);
+        }
+        writeActiveWorkspaceId(workspaceId || null);
+        writeLastSessionFor(workspaceId, session.id);
+        rememberPendingCreatedSession(workspaceId, session.id);
+        applyLastUsedModelToSession(session.id);
+        setSessionsByWorkspaceId((current) => ({
+          ...current,
+          [workspaceId]: [session, ...(current[workspaceId] ?? [])],
+        }));
+        navigateToWorkspaceSession(workspaceId, session.id);
+        focusPromptSoon();
+      } catch {
+        // Fall back to normal task creation without prompt
+        void handleCreateTaskInWorkspace(workspaceId);
+      }
+    })();
+  };
+
+  // A playbook asked for a chat from its own screen: start it here, where chats are made.
+  const startPendingChat = useEffectEvent((pending: PendingDeskChat) => {
+    if (!workspaces.some((item) => item.id === pending.workspaceId)) return;
+    useDeskStartStore.getState().clear();
+    useDeskComposerStore.getState().setMode(NEW_CHAT_KEY, pending.mode);
+    createTaskWithPrompt(pending.workspaceId, pending.prompt);
+  });
+  const pendingDeskChat = useDeskStartStore((state) => state.pending);
+  useEffect(() => {
+    if (pendingDeskChat) startPendingChat(pendingDeskChat);
+  }, [pendingDeskChat, workspaces]);
+
   const handleChatFirstTask = useCallback((prompt: string, attachments?: ComposerAttachment[]) => {
     void (async () => {
       if (!isDesktopRuntime()) {
@@ -2575,54 +2639,7 @@ export function SessionRoute() {
             }
           });
         },
-        onCreateTaskWithPrompt: (workspaceId, prompt, attachments) => {
-          void (async () => {
-            const workspace = workspaces.find((item) => item.id === workspaceId);
-            if (!workspace) return;
-            const endpoint = endpointForWorkspace(workspace);
-            if (!endpoint?.token) return;
-            const workspaceClient = createClient(
-              endpoint.opencodeBaseUrl,
-              workspace.path?.trim() || undefined,
-              { token: endpoint.token, mode: "redrob" },
-            );
-            try {
-              const session = unwrap(
-                await workspaceClient.session.create({ directory: workspace.path?.trim() || undefined }),
-              );
-              const firstTaskPrompt = prompt.trim();
-              if (firstTaskPrompt) {
-                const firstTaskAttachments = attachments ?? [];
-                // Attachment chips only survive in-memory (File objects), so the
-                // persisted fallback draft drops their tokens.
-                saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
-                // The composer reads its draft from the composer state store,
-                // not the persisted draft store — seed both.
-                useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
-                if (firstTaskAttachments.length) {
-                  useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
-                }
-                // One-step run: the session surface sends the seeded draft itself.
-                markComposerAutoSend(session.id);
-                // Plan or Run and the memory picked on the new chat screen belong to this chat now.
-                useDeskComposerStore.getState().claimNewChat(session.id);
-              }
-              writeActiveWorkspaceId(workspaceId || null);
-              writeLastSessionFor(workspaceId, session.id);
-              rememberPendingCreatedSession(workspaceId, session.id);
-              applyLastUsedModelToSession(session.id);
-              setSessionsByWorkspaceId((current) => ({
-                ...current,
-                [workspaceId]: [session, ...(current[workspaceId] ?? [])],
-              }));
-              navigateToWorkspaceSession(workspaceId, session.id);
-              focusPromptSoon();
-            } catch {
-              // Fall back to normal task creation without prompt
-              void handleCreateTaskInWorkspace(workspaceId);
-            }
-          })();
-        },
+        onCreateTaskWithPrompt: createTaskWithPrompt,
         onOpenRenameWorkspace: handleOpenRenameWorkspace,
         onShareWorkspace: handleShareWorkspace,
         onRevealWorkspace: (id) => void handleRevealWorkspace(id),
