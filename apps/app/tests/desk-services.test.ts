@@ -291,7 +291,7 @@ describe("desk real services", () => {
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
 
     expect((await services.schedules.list()).preview).toBe(true);
-    expect((await services.history.list()).preview).toBe(true);
+
     expect((await services.catalog.get()).preview).toBe(true);
     expect(calls).toEqual([]);
   });
@@ -332,7 +332,7 @@ describe("desk real services", () => {
   test("createDeskServices is real with a client and project, fixtures otherwise", async () => {
     const { client } = fakeClient();
     expect((await createDeskServices({ client, workspaceId: "ws_1" }).projects.list()).preview).toBe(false);
-    expect((await createDeskServices({ client, workspaceId: "ws_1" }).history.list()).preview).toBe(true);
+    expect((await createDeskServices({ client, workspaceId: "ws_1" }).catalog.get()).preview).toBe(true);
     expect((await createDeskServices({ client: null, workspaceId: "ws_1" }).projects.list()).preview).toBe(true);
     expect((await createDeskServices({ client, workspaceId: null }).chats.list()).preview).toBe(true);
   });

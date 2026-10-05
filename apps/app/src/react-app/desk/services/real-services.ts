@@ -7,13 +7,15 @@ import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor }
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
 import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
+import { HISTORY_LIMIT, HISTORY_STEPS_LIMIT, historyEntryFrom } from "../history/history";
+import { useDeskComposerStore } from "../composer/composer-state";
 import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy, usePrivacyMapStore, type StoredPrivacy } from "../privacy/privacy-store";
 import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project } from "./types";
 
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand" | "getSessionSnapshot"
 >;
 
 export type RealDeskServicesDeps = {
@@ -154,6 +156,36 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         const workspace = workspaces.items.find((entry) => entry.id === projectId);
         const projectName = workspace ? workspaceName(workspace) : projectId;
         return real(artifacts.items.map((item) => toFile(item, projectName)));
+      },
+    },
+    // History is the chats of every project, newest first, with the steps of the latest.
+    history: {
+      list: async () => {
+        const { items: workspaces } = await client.listWorkspaces();
+        const lists = await Promise.all(
+          workspaces.map((workspace) =>
+            client
+              .listSessions(workspace.id, { roots: true, limit: HISTORY_LIMIT })
+              .then(({ items }) => items.map((session) => ({ session, projectId: workspace.id })))
+              // One project that cannot be read leaves the others.
+              .catch(() => []),
+          ),
+        );
+        const recent = lists
+          .flat()
+          .sort((a, b) => b.session.time.updated - a.session.time.updated)
+          .slice(0, HISTORY_LIMIT);
+        const chats = useDeskComposerStore.getState().chats;
+        const entries = await Promise.all(
+          recent.map(async ({ session, projectId }, index) => {
+            const snapshot =
+              index < HISTORY_STEPS_LIMIT
+                ? await client.getSessionSnapshot(projectId, session.id, { limit: 1 }).then(({ item }) => item).catch(() => null)
+                : null;
+            return historyEntryFrom({ session, projectId, mode: chats[session.id]?.mode ?? null, snapshot });
+          }),
+        );
+        return real(entries);
       },
     },
     // Playbooks are the workspace's commands, then the person's own across workspaces.
