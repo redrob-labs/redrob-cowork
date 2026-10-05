@@ -192,10 +192,11 @@ describe("Ctrl+Shift+B", () => {
   });
 
   test("works on the Desk screens, not on the ones outside the frame", () => {
-    for (const path of ["/chat", "/chat/abc", "/workspace/w/session/abc", "/projects", "/memory/you"]) {
+    for (const path of ["/chat", "/chat/abc", "/workspace/w/session/abc", "/projects", "/memory/you", "/settings/general", "/settings/plan"]) {
       expect(isDeskFramePath(path)).toBe(true);
     }
-    for (const path of ["/welcome", "/extensions", "/extensions/x", "/settings/general", "/workspace/w/extensions"]) {
+    // The developer settings keep their own sidebar, outside the frame.
+    for (const path of ["/welcome", "/extensions", "/extensions/x", "/settings/ai", "/workspace/w/settings/extensions", "/workspace/w/extensions"]) {
       expect(isDeskFramePath(path)).toBe(false);
     }
   });

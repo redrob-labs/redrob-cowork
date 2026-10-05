@@ -432,6 +432,11 @@ export async function revealWorkspaceFile(root: string, relativePath: string): P
   if (result?.trim()) throw new Error(result);
 }
 
+/** Holds off system sleep while a run is under way (the screen may still turn off); false lets it sleep. */
+export async function setDesktopKeepAwake(on: boolean): Promise<boolean> {
+  return invokeElectronHelper("__setKeepAwake", on);
+}
+
 export async function getDesktopFileIcon(target: string, size?: "small" | "normal" | "large"): Promise<string | null> {
   return invokeElectronHelper("__getFileIcon", target, size);
 }

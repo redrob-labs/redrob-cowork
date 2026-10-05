@@ -1130,9 +1130,245 @@
   padding: 0 var(--space-2);
 }
 
+/**
+ * Settings (`desk/settings/desk-settings.tsx`): the section list beside the section, each
+ * section a run of groups, each group rows of a title, a line about it and its control on
+ * the right, with a hairline under every row. Under 900px the list is a row above.
+ */
+.desk-settings {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: var(--space-10);
+  align-items: start;
+  padding: var(--space-2) 0 72px;
+}
+
+.desk-settings__nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.desk-settings__head {
+  margin: 0;
+  padding: 14px var(--space-3) 6px;
+  font: var(--text-meta);
+  color: var(--ink-muted);
+}
+
+.desk-settings__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: --theme(--radius-md);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.desk-settings__link:hover {
+  background: var(--surface-sunken);
+}
+
+.desk-settings__link[aria-current="page"] {
+  background: var(--surface-raised);
+  box-shadow: 0 0 0 1px var(--border-subtle);
+  font-weight: 600;
+}
+
+.desk-settings__link:focus-visible,
+.desk-settings__action:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.desk-settings__icon {
+  display: inline-flex;
+  color: var(--ink-muted);
+}
+
+.desk-settings__link[aria-current="page"] .desk-settings__icon {
+  color: var(--ink-brand);
+}
+
+.desk-settings__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-width: 0;
+  max-width: 760px;
+}
+
+.desk-settings__lede {
+  margin: 0;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--ink-secondary);
+}
+
+.desk-settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.desk-settings__rows {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.desk-settings__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-settings__text {
+  display: flex;
+  flex: 1 1 260px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.desk-settings__title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-settings__description {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+
+.desk-settings__where {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+
+.desk-settings__control {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 180px;
+}
+
+.desk-settings__radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+
+.desk-settings__folder {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--ink-secondary);
+}
+
+.desk-settings__row--folder .desk-settings__control {
+  min-width: 0;
+}
+
+.desk-settings__note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+
+.desk-settings__note svg {
+  flex: none;
+  color: var(--ink-muted);
+}
+
+.desk-settings__auto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+}
+
+.desk-settings__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--text-label);
+  color: var(--ink-brand);
+  text-decoration: none;
+}
+
+.desk-settings__action:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
   .desk-account__text {
     display: none;
+  }
+
+  .desk-settings {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .desk-settings__nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .desk-settings__head {
+    display: none;
+  }
+
+  .desk-settings__link {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .desk-settings__row {
+    flex-wrap: wrap;
+  }
+
+  .desk-settings__control {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .desk-settings__row--folder .desk-settings__control {
+    padding-left: 52px;
   }
 }
 

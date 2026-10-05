@@ -5,13 +5,15 @@ import { subscribeSessionSyncEvents } from "../../domains/session/sync/session-s
 import { getReactQueryClient } from "../../infra/query-client";
 import { useFrameStore } from "../store/frame-store";
 import { useDeskPages } from "./desk-pages";
+import { deskKeepAwake, runIsBusy } from "./keep-awake";
 import { DESK_FILES_QUERY_KEY, openChatIdFromPath, performRunEffects, runEffects } from "./run-effects";
 import { EMPTY_RUN_EVENTS, reduceRunEvent } from "./run-events";
 
 /**
  * Reads the engine's events as the session sync applies them, for every open workspace, and
  * moves the frame: a web step opens the browser, an answer marks the page done, a written
- * file refreshes Files. Mounted once, in `DeskLayer`.
+ * file refreshes Files. Whether any run is busy drives "Keep this computer awake during a
+ * run". Mounted once, in `DeskLayer`.
  */
 export function useDeskRunEvents() {
   const { pathname } = useLocation();
@@ -22,6 +24,7 @@ export function useDeskRunEvents() {
     return subscribeSessionSyncEvents((_workspaceId, event) => {
       const result = reduceRunEvent(state, event);
       state = result.state;
+      deskKeepAwake().setBusy(runIsBusy(state));
       for (const emitted of result.emitted) {
         const frame = useFrameStore.getState();
         const pages = useDeskPages.getState();

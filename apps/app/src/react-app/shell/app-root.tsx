@@ -31,6 +31,7 @@ import { SaveAsProjectAction } from "../desk/projects/project-dialog";
 import { DeskShell } from "../desk/shell/desk-shell";
 import { DeskLayer } from "../desk/shell/desk-layer";
 import { deskRoutes } from "../desk/shell/desk-routes";
+import { DeskSettingsGate } from "../desk/settings/desk-settings";
 
 /**
  * The working chat (the session page) inside the Desk frame, with the old sidebar left to
@@ -131,17 +132,25 @@ export function AppRoot() {
               <Route
                 path="/workspace/:workspaceId/settings/*"
                 element={
-                  <DevProfiler id="SettingsRoute">
-                    <SettingsRoute />
-                  </DevProfiler>
+                  <DeskSettingsGate
+                    developer={
+                      <DevProfiler id="SettingsRoute">
+                        <SettingsRoute />
+                      </DevProfiler>
+                    }
+                  />
                 }
               />
               <Route
                 path="/settings/*"
                 element={
-                  <DevProfiler id="SettingsRoute">
-                    <SettingsRoute />
-                  </DevProfiler>
+                  <DeskSettingsGate
+                    developer={
+                      <DevProfiler id="SettingsRoute">
+                        <SettingsRoute />
+                      </DevProfiler>
+                    }
+                  />
                 }
               />
               {import.meta.env.DEV ? <Route path="/__ds" element={<DsStory />} /> : null}

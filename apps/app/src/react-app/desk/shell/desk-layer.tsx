@@ -8,6 +8,7 @@ import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
 import { ProjectDialog } from "../projects/project-dialog";
 import { useDeskRunEvents } from "../run/use-desk-run-events";
+import { isDeskSettingsPath } from "../settings/settings-sections";
 import { useFrameStore, type FrameModal, type FrameToast } from "../store/frame-store";
 import { APP_VERSION, versionLabel } from "./account-menu";
 import { DeskDialog } from "./desk-dialog";
@@ -186,6 +187,7 @@ export function isToggleBrowserShortcut(event: ShortcutKey, mac: boolean): boole
 
 /** Whether this path is inside the Desk frame, where the side panel lives. */
 export function isDeskFramePath(pathname: string): boolean {
+  if (isDeskSettingsPath(pathname)) return true;
   return !/^\/(welcome|extensions|settings|__ds|workspace\/[^/]+\/(extensions|settings))(\/|$)/.test(pathname);
 }
 

@@ -39,6 +39,8 @@ type RedrobKeyStepProps = {
    */
   skipLabel?: string;
   skipDescription?: string;
+  /** Plainer words for the paste path, for Desk Settings, where no developer words appear. */
+  copy?: { getKey: string; label: string; placeholder: string };
 };
 
 /**
@@ -64,6 +66,7 @@ export function RedrobKeyStep({
   connectPrompt,
   skipLabel,
   skipDescription,
+  copy,
 }: RedrobKeyStepProps) {
   const [apiKey, setApiKey] = useState("");
   /** Opened by the user, and kept open, so a failed paste attempt does not fold away under them. */
@@ -156,7 +159,7 @@ export function RedrobKeyStep({
                   <ExternalLinkIcon className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
                   <div>
                     <div className="text-sm font-medium text-foreground">
-                      {t("welcome.redrob_key_get_cta")}
+                      {copy?.getKey ?? t("welcome.redrob_key_get_cta")}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       {REDROB_CONSOLE_URL}
@@ -165,12 +168,12 @@ export function RedrobKeyStep({
                 </button>
 
                 <label className="grid gap-2 text-xs font-medium text-muted-foreground">
-                  {t("welcome.redrob_key_label")}
+                  {copy?.label ?? t("welcome.redrob_key_label")}
                   <TextInput
                     type="password"
                     value={apiKey}
                     onChange={(event) => setApiKey(event.currentTarget.value)}
-                    placeholder={t("welcome.redrob_key_placeholder")}
+                    placeholder={copy?.placeholder ?? t("welcome.redrob_key_placeholder")}
                     disabled={busy || waiting}
                     autoFocus={!onConnect}
                   />

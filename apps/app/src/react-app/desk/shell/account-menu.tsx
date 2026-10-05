@@ -17,13 +17,16 @@ export const APP_VERSION = String(import.meta.env.VITE_REDROB_APP_VERSION ?? "")
 /** The settings screen the menu opens; `/settings/*` takes the tab after it. */
 export const SETTINGS_PATH = "/settings/general";
 
+/** Refetched after Settings changes the key, so the menu and Plan and usage say so at once. */
+export const REDROB_KEY_QUERY_KEY: readonly string[] = ["desk", "redrob-key"];
+
 /**
  * Whether Redrob Code holds the person's Redrob key: true or false once known, null while
  * the first answer is on its way. A server that cannot be reached counts as not connected.
  */
 export function useRedrobKeyConnected(): boolean | null {
   const status = useQuery({
-    queryKey: ["desk", "redrob-key"],
+    queryKey: REDROB_KEY_QUERY_KEY,
     queryFn: recheckRedrobKey,
     retry: false,
     staleTime: 30_000,

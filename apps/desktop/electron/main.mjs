@@ -46,6 +46,7 @@ import {
 import { applyDesktopBootstrapBrandIcon } from "./brand-icon-bootstrap.mjs";
 import { openExternalUrl } from "./open-external.mjs";
 import { resolveWorkspaceFile } from "./workspace-file-access.mjs";
+import { createKeepAwake } from "./keep-awake.mjs";
 import { resolveAppIdentifier, resolveUserDataPath } from "./dev-profile.mjs";
 import {
   createLinuxDesktopIntegration,
@@ -86,6 +87,7 @@ const {
   nativeTheme,
   net: electronNet,
   powerMonitor,
+  powerSaveBlocker,
   Notification: ElectronNotification,
   session,
   shell,
@@ -1554,6 +1556,8 @@ function engineDoctor(options = {}) {
   return runtimeManager.engineDoctor(options);
 }
 
+const keepAwake = createKeepAwake(powerSaveBlocker);
+
 /** A workspace file, resolved only under a local workspace or a folder its config authorizes. */
 async function authorizedWorkspaceFile(root, relativePath) {
   const workspacePaths = await workspaceStore.listLocalWorkspacePaths();
@@ -1985,6 +1989,9 @@ const desktopCommandHandlers = {
       shell.showItemInFolder(target);
       return undefined;
   },
+  // "Keep this computer awake during a run": the renderer says when a run is busy with the
+  // setting on, and when it is not. One hold at most; see keep-awake.mjs.
+  "__setKeepAwake": async (event, ...args) => keepAwake.set(args[0] === true),
   "__getFileIcon": async (event, ...args) => {
       const target = String(args[0] ?? "").trim();
       if (!target) return null;
