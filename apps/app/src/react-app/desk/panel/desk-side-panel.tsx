@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { EmptyState, IconButton, icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
-import type { BrowserPanelTab, SessionPanelState } from "../../domains/session/panel/panel-tab-store";
 import { getSidePanelSessionKey } from "../../domains/session/panel/side-panel-session";
 import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
@@ -21,16 +20,6 @@ export function panelSwitch(tab: PanelTab): { to: PanelTab; label: string; icon:
   return tab === "browser"
     ? { to: "files", label: t("desk.panel_show_files"), icon: icons.folderOpen(ICON) }
     : { to: "browser", label: t("desk.panel_show_browser"), icon: icons.globe(ICON) };
-}
-
-/**
- * The browser tab the panel shows: the session's active tab when it is a page, otherwise
- * its first page. Artifact tabs belong to the old panel and never show here.
- */
-export function panelBrowserTab(session: SessionPanelState): BrowserPanelTab | null {
-  const active = session.tabs.find((tab) => tab.id === session.activeTabId);
-  if (active?.type === "browser") return active;
-  return session.tabs.find((tab): tab is BrowserPanelTab => tab.type === "browser") ?? null;
 }
 
 export type DeskSidePanelViewProps = {

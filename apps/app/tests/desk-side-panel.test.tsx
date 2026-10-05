@@ -9,7 +9,6 @@ import { IconButton, type IconButtonProps } from "@redrob-labs/ui";
 
 import {
   DeskSidePanelView,
-  panelBrowserTab,
   panelSwitch,
   panelTitle,
 } from "../src/react-app/desk/panel/desk-side-panel";
@@ -21,7 +20,6 @@ import {
 import { isDeskFramePath, isToggleBrowserShortcut, type ShortcutKey } from "../src/react-app/desk/shell/desk-layer";
 import { DeskShellView, deskShellClassName } from "../src/react-app/desk/shell/desk-shell";
 import { createFrameStore, useFrameStore, type PanelTab } from "../src/react-app/desk/store/frame-store";
-import type { ArtifactPanelTab, BrowserPanelTab } from "../src/react-app/domains/session/panel/panel-tab-store";
 
 function render(node: ReactNode) {
   return renderToStaticMarkup(
@@ -62,17 +60,6 @@ function panelHeader(html: string): string {
   return html.slice(start, html.indexOf('<div class="desk-panel__body', start));
 }
 
-const browserTab = (id: string): BrowserPanelTab => ({
-  id,
-  type: "browser",
-  label: id,
-  url: `https://${id}.example`,
-  favicon: null,
-  status: "ready",
-  canGoBack: false,
-  canGoForward: false,
-});
-
 afterEach(() => useFrameStore.getState().closePanel());
 
 describe("the side panel header", () => {
@@ -107,18 +94,6 @@ describe("the side panel header", () => {
   test("the browser body is flush, Files keeps its padding", () => {
     expect(render(view("browser"))).toContain('class="desk-panel__body desk-panel__body--flush"');
     expect(render(view("files"))).toContain('class="desk-panel__body"');
-  });
-});
-
-describe("the browser tab the panel shows", () => {
-  test("is the active page, else the first page, else none", () => {
-    const a = browserTab("a");
-    const b = browserTab("b");
-    const artifact: ArtifactPanelTab = { id: "file:x.md", type: "artifact", label: "x.md", preview: "markdown" };
-    expect(panelBrowserTab({ tabs: [a, b], activeTabId: "b" })).toBe(b);
-    expect(panelBrowserTab({ tabs: [artifact, a], activeTabId: artifact.id })).toBe(a);
-    expect(panelBrowserTab({ tabs: [artifact], activeTabId: artifact.id })).toBeNull();
-    expect(panelBrowserTab({ tabs: [], activeTabId: null })).toBeNull();
   });
 });
 

@@ -9,6 +9,7 @@ import {
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
 import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
+import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
@@ -2355,6 +2356,8 @@ export function SessionRoute() {
       chatsVersion: deskChatsVersion,
     });
   }, [deskChatsVersion, opencodeClient, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
+  // The local server (not a remote workspace's) holds the Personal workspace.
+  useEffect(() => ensurePersonalWorkspaceOnce(client), [client]);
 
   useDeskCrossCheck({
     client: opencodeClient,
