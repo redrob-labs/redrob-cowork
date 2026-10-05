@@ -236,21 +236,21 @@ describe("Desk routes", () => {
     expect(leaf("/workspace/w1/session/abc")?.params).toMatchObject({ workspaceId: "w1", sessionId: "abc" });
   });
 
-  test("every screen still to come renders a placeholder inside the shell", () => {
-    const screens: Array<[string, string, string]> = [
-      ["/playbooks", "Playbooks", "playbooks"],
-      ["/playbook/notice", "Playbook", "playbooks"],
-      ["/run", "Playbook run", "playbooks"],
-      ["/scheduled", "Scheduled", "scheduled"],
-      ["/history", "History", "history"],
-      ["/guide", "Model Guide", "guide"],
+  test("the Preview screens render their own screen inside the shell, with no placeholder left", () => {
+    const screens: Array<[string, string, string, string]> = [
+      ["/playbooks", "Playbooks", "playbooks", "Preview: sample playbooks."],
+      ["/playbook/notice", "Playbook", "playbooks", "Preview: sample playbooks."],
+      ["/run", "Playbook run", "playbooks", "Preview: a sample run."],
+      ["/scheduled", "Scheduled", "scheduled", "Preview: sample schedules."],
+      ["/history", "History", "history", "Preview: sample history."],
+      ["/guide", "Model Guide", "guide", "Preview: sample rankings."],
     ];
-    for (const [path, title, place] of screens) {
+    for (const [path, title, place, note] of screens) {
       const html = withProviders(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, path);
       expect(html).toContain("rr-shell");
       expect(html).toContain(`<h1 class="rr-shell__title">${title}</h1>`);
-      expect(html).toContain("rr-empty");
-      expect(html).toContain("This part of Redrob Cowork is on its way.");
+      expect(html).toContain(note);
+      expect(html).not.toContain("on its way");
       expect(html).toContain(`href="/${place}" aria-current="page"`);
       expect(html).not.toContain("chat screen");
     }

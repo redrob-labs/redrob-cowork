@@ -125,7 +125,8 @@ export function ConnectorsView(props: ConnectorsViewProps) {
   );
 }
 
-function openExternal(url: string) {
+/** Opens a web page outside the app: the system browser on the desktop, a new tab on the web. */
+export function openExternal(url: string) {
   if (isDesktopRuntime()) {
     void openDesktopUrl(url);
     return;

@@ -7,6 +7,7 @@ import type {
   MemoryNote,
   ModelCatalog,
   NewMemoryNote,
+  NewSchedule,
   Playbook,
   PrivacyState,
   Project,
@@ -30,7 +31,14 @@ export interface DeskServices {
     edit(id: string, text: string): Async<MemoryNote>;
   };
   playbooks: { list(): Async<Playbook[]>; get(id: string): Async<Playbook | null> };
-  schedules: { list(): Async<ScheduleBoard> };
+  schedules: {
+    list(): Async<ScheduleBoard>;
+    /** Answers a run waiting for a person; it leaves the waiting list either way. */
+    answer(waitingId: string, approved: boolean): Async<ScheduleBoard>;
+    setEnabled(scheduleId: string, enabled: boolean): Async<ScheduleBoard>;
+    /** Puts a playbook on a schedule in a project, replacing the one it had there. */
+    save(schedule: NewSchedule): Async<ScheduleBoard>;
+  };
   history: { list(): Async<HistoryEntry[]> };
   connectors: { list(): Async<Connector[]> };
   privacy: { get(): Async<PrivacyState>; setLocalModel(on: boolean): Async<PrivacyState> };

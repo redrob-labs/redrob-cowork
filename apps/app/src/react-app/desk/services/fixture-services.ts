@@ -10,7 +10,7 @@ import { PLAYBOOKS } from "./fixtures/playbooks";
 import { PRIVACY } from "./fixtures/privacy";
 import { PROJECTS } from "./fixtures/projects";
 import { SCHEDULE_BOARD } from "./fixtures/schedules";
-import type { DeskResult, MemoryNote } from "./types";
+import type { DeskResult, MemoryNote, Schedule, ScheduleBoard } from "./types";
 
 /** The prototype's pace: one step every 650ms. */
 export const SCRIPTED_STEP_MS = 650;
@@ -42,6 +42,20 @@ export type FixtureDeskServices = DeskServices & {
 };
 
 const preview = <T>(data: T): Promise<DeskResult<T>> => Promise.resolve({ data, preview: true });
+
+const copyBoard = (board: ScheduleBoard): ScheduleBoard => ({
+  schedules: board.schedules.map((schedule) => ({ ...schedule })),
+  waiting: [...board.waiting],
+});
+
+// One board for every instance, unlike the notes: the menu's count of runs waiting and the
+// Scheduled screen each make their own services and must read the same runs.
+let sampleBoard = copyBoard(SCHEDULE_BOARD);
+
+/** Puts the shared sample schedules back as they started. For tests and stories. */
+export function resetSampleBoard() {
+  sampleBoard = copyBoard(SCHEDULE_BOARD);
+}
 
 /** Sample data behind the service interface. Every result carries `preview: true`. */
 export function createFixtureDeskServices(
@@ -93,7 +107,44 @@ export function createFixtureDeskServices(
       list: () => preview([...PLAYBOOKS]),
       get: (id) => preview(PLAYBOOKS.find((playbook) => playbook.id === id) ?? null),
     },
-    schedules: { list: () => preview(SCHEDULE_BOARD) },
+    schedules: {
+      list: () => preview(copyBoard(sampleBoard)),
+      answer: (waitingId, approved) => {
+        const run = sampleBoard.waiting.find((entry) => entry.id === waitingId);
+        if (!run) return Promise.reject(new Error(`No waiting run ${waitingId}`));
+        const lastRun: Schedule["lastRun"] = approved
+          ? { state: "done", at: now(), label: "Answered" }
+          : { state: "stopped", at: now(), label: "Not now" };
+        sampleBoard = {
+          waiting: sampleBoard.waiting.filter((entry) => entry.id !== waitingId),
+          schedules: sampleBoard.schedules.map((schedule) =>
+            schedule.playbookId === run.playbookId && schedule.projectId === run.projectId ? { ...schedule, lastRun } : schedule,
+          ),
+        };
+        return preview(copyBoard(sampleBoard));
+      },
+      setEnabled: (scheduleId, enabled) => {
+        sampleBoard = {
+          ...sampleBoard,
+          schedules: sampleBoard.schedules.map((schedule) => (schedule.id === scheduleId ? { ...schedule, enabled } : schedule)),
+        };
+        return preview(copyBoard(sampleBoard));
+      },
+      save: (input) => {
+        const same = (schedule: Schedule) => schedule.playbookId === input.playbookId && schedule.projectId === input.projectId;
+        const existing = sampleBoard.schedules.find(same);
+        const schedule: Schedule = existing
+          ? { ...existing, ...input, enabled: true }
+          : { id: `s${sampleBoard.schedules.length + 1}`, ...input, lastRun: null, enabled: true };
+        sampleBoard = {
+          ...sampleBoard,
+          schedules: existing
+            ? sampleBoard.schedules.map((entry) => (same(entry) ? schedule : entry))
+            : [...sampleBoard.schedules, schedule],
+        };
+        return preview(copyBoard(sampleBoard));
+      },
+    },
     history: { list: () => preview([...HISTORY]) },
     connectors: { list: () => preview([...CONNECTORS]) },
     privacy: {

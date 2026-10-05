@@ -5,8 +5,13 @@ import { Navigate, Route, useParams } from "react-router";
 import { DeskConnectorsScreen } from "../connectors/desk-connectors";
 import { DeskMemoryScreen } from "../memory/desk-memory";
 import { DeskPrivacyScreen } from "../privacy/desk-privacy";
+import { GuideScreen } from "../preview/desk-guide";
+import { HistoryScreen } from "../preview/desk-history";
+import { PlaybookScreen } from "../preview/desk-playbook";
+import { PlaybooksScreen } from "../preview/desk-playbooks";
+import { RunScreen } from "../preview/desk-run";
+import { ScheduledScreen } from "../preview/desk-scheduled";
 import { ProjectScreen, ProjectsScreen } from "../projects/desk-projects";
-import { DeskPlaceholder, type DeskPlaceholderScreen } from "./desk-placeholder";
 
 /** `/chat` or `/chat/<id>`. */
 export function chatPath(sessionId?: string | null): string {
@@ -19,15 +24,6 @@ export function RedirectToChat() {
   const { sessionId } = useParams<{ sessionId?: string }>();
   return <Navigate to={chatPath(sessionId)} replace />;
 }
-
-const PLACEHOLDER_ROUTES: ReadonlyArray<{ path: string; screen: DeskPlaceholderScreen }> = [
-  { path: "/playbooks", screen: "playbooks" },
-  { path: "/playbook/:playbookId", screen: "playbook" },
-  { path: "/run", screen: "run" },
-  { path: "/scheduled", screen: "scheduled" },
-  { path: "/history", screen: "history" },
-  { path: "/guide", screen: "guide" },
-];
 
 /**
  * The Desk routes, as `<Route>` elements for the app's `<Routes>`.
@@ -52,9 +48,13 @@ export function deskRoutes(chat: ReactNode) {
     // The Desk Memory screen is always on; the old memory flag only gates the settings tab.
     <Route key="memory" path="/memory" element={<DeskMemoryScreen />} />,
     <Route key="memory-scope" path="/memory/:scope" element={<DeskMemoryScreen />} />,
-    ...PLACEHOLDER_ROUTES.map(({ path, screen }) => (
-      <Route key={path} path={path} element={<DeskPlaceholder screen={screen} />} />
-    )),
+    // Preview screens on sample data: nothing on them sends a prompt or calls the server.
+    <Route key="playbooks" path="/playbooks" element={<PlaybooksScreen />} />,
+    <Route key="playbook" path="/playbook/:playbookId" element={<PlaybookScreen />} />,
+    <Route key="run" path="/run" element={<RunScreen />} />,
+    <Route key="scheduled" path="/scheduled" element={<ScheduledScreen />} />,
+    <Route key="history" path="/history" element={<HistoryScreen />} />,
+    <Route key="guide" path="/guide" element={<GuideScreen />} />,
     <Route key="root" path="/" element={<RedirectToChat />} />,
     <Route key="fallback" path="*" element={<RedirectToChat />} />,
   ];

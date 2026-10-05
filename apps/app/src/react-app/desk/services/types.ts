@@ -82,9 +82,12 @@ export type Schedule = {
   projectId: string;
   cadence: string;
   nextRunAt: number | null;
-  lastRun: { state: RunState; at: number; label: string };
+  /** Null until the schedule has run once. */
+  lastRun: { state: RunState; at: number; label: string } | null;
   enabled: boolean;
 };
+
+export type NewSchedule = Pick<Schedule, "playbookId" | "projectId" | "cadence" | "nextRunAt">;
 
 /** A scheduled run stopped at a step that asks a person first. */
 export type WaitingRun = {
