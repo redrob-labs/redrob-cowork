@@ -8,6 +8,7 @@ import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
 import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
 import { HISTORY_LIMIT, HISTORY_STEPS_LIMIT, historyEntryFrom } from "../history/history";
+import { boardFromState } from "../scheduled/schedules";
 import { useDeskComposerStore } from "../composer/composer-state";
 import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy, usePrivacyMapStore, type StoredPrivacy } from "../privacy/privacy-store";
 import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project } from "./types";
@@ -15,7 +16,7 @@ import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project }
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand" | "getSessionSnapshot"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand" | "getSessionSnapshot" | "listSchedules" | "addSchedule" | "updateSchedule" | "answerScheduleWaiting"
 >;
 
 export type RealDeskServicesDeps = {
@@ -156,6 +157,19 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         const workspace = workspaces.items.find((entry) => entry.id === projectId);
         const projectName = workspace ? workspaceName(workspace) : projectId;
         return real(artifacts.items.map((item) => toFile(item, projectName)));
+      },
+    },
+    // Schedules run in redrob-server while the app is open.
+    schedules: {
+      list: async () => real(boardFromState(await client.listSchedules(workspaceId), workspaceId)),
+      answer: async (waitingId, approved) =>
+        real(boardFromState(await client.answerScheduleWaiting(workspaceId, waitingId, approved), workspaceId)),
+      setEnabled: async (scheduleId, enabled) =>
+        real(boardFromState(await client.updateSchedule(workspaceId, scheduleId, { enabled }), workspaceId)),
+      save: async (input) => {
+        if (!input.rule) throw new Error("A schedule needs a time it can run at");
+        const state = await client.addSchedule(workspaceId, { playbookId: input.playbookId, label: input.cadence, rule: input.rule });
+        return real(boardFromState(state, workspaceId));
       },
     },
     // History is the chats of every project, newest first, with the steps of the latest.

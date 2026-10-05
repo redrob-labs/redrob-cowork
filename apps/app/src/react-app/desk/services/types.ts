@@ -2,6 +2,7 @@
  * Domain types for Redrob Desk screens. Every time is epoch milliseconds; the
  * screens format it. Every service result says whether it is sample data.
  */
+import type { RedrobScheduleRule } from "../../../app/lib/redrob-server";
 
 /** A service result. `preview` is true when the data comes from fixtures. */
 export type DeskResult<T> = { data: T; preview: boolean };
@@ -88,11 +89,12 @@ export type Schedule = {
   cadence: string;
   nextRunAt: number | null;
   /** Null until the schedule has run once. */
-  lastRun: { state: RunState; at: number; label: string } | null;
+  lastRun: { state: RunState | "running" | "failed"; at: number; label: string } | null;
   enabled: boolean;
 };
 
-export type NewSchedule = Pick<Schedule, "playbookId" | "projectId" | "cadence" | "nextRunAt">;
+/** A schedule to save. `rule` is what the server runs on; sample schedules have none. */
+export type NewSchedule = Pick<Schedule, "playbookId" | "projectId" | "cadence" | "nextRunAt"> & { rule?: RedrobScheduleRule };
 
 /** A scheduled run stopped at a step that asks a person first. */
 export type WaitingRun = {

@@ -112,13 +112,20 @@ export function PlaybookView(props: PlaybookViewProps) {
 }
 
 /** Schedule a playbook. Saving changes only the sample schedules. */
-export function ScheduleDialog(props: { open: boolean; playbook: Playbook; onClose: () => void; now?: Date }) {
+export function ScheduleDialog(props: { open: boolean; playbook: Playbook; onClose: () => void; now?: Date; real?: boolean }) {
   const { services, scope } = usePreviewServices();
+  const workspaceId = useDeskConnection((state) => state.workspaceId);
+  const projects = useQuery({ queryKey: [...previewKey(scope, "board"), "projects"], queryFn: () => services.projects.list(), enabled: Boolean(props.real), staleTime: 60_000 });
   const queryClient = useQueryClient();
   const showToast = useFrameStore((state) => state.showToast);
   const [now] = useState(() => props.now ?? new Date());
   const [value, setValue] = useState<ScheduleValue>(() => initialScheduleValue(props.playbook, now));
-  const project = projectForPlaybook(props.playbook.id);
+  // A real playbook runs in the open project; a sample one in its sample project.
+  const project = props.real
+    ? projects.data?.data.find((entry) => entry.id === workspaceId)
+    : projectForPlaybook(props.playbook.id);
+  // The server can run at a time; it cannot watch for a file arriving.
+  const canSave = Boolean(project) && (!props.real || value.mode !== "event");
 
   const save = async () => {
     if (!project) return;
@@ -139,7 +146,7 @@ export function ScheduleDialog(props: { open: boolean; playbook: Playbook; onClo
           <Button variant="ghost" onClick={props.onClose}>
             {t("desk.preview_cancel")}
           </Button>
-          <Button variant="primary" disabled={!project} onClick={() => void save()}>
+          <Button variant="primary" disabled={!canSave} onClick={() => void save()}>
             {t("desk.preview_schedule_save")}
           </Button>
         </>
@@ -155,7 +162,7 @@ export function ScheduleDialog(props: { open: boolean; playbook: Playbook; onClo
         modes={[
           ["once", t("desk.preview_schedule_mode_once")],
           ["repeat", t("desk.preview_schedule_mode_repeat")],
-          ["event", t("desk.preview_schedule_mode_event")],
+          ...(props.real ? [] : ([["event", t("desk.preview_schedule_mode_event")]] satisfies Array<[string, string]>)),
         ]}
         dateLabel={t("desk.preview_schedule_date")}
         repeatLabel={t("desk.preview_schedule_repeat")}
@@ -250,7 +257,7 @@ export function PlaybookScreen() {
           }
         </PreviewState>
       </PreviewPage>
-      {playbook && scheduling ? <ScheduleDialog open playbook={playbook} onClose={() => setScheduling(false)} /> : null}
+      {playbook && scheduling ? <ScheduleDialog open playbook={playbook} real={!preview} onClose={() => setScheduling(false)} /> : null}
     </DeskShell>
   );
 }

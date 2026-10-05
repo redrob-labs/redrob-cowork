@@ -290,7 +290,7 @@ describe("desk real services", () => {
     const { client, calls } = fakeClient();
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
 
-    expect((await services.schedules.list()).preview).toBe(true);
+
 
     expect((await services.catalog.get()).preview).toBe(true);
     expect(calls).toEqual([]);

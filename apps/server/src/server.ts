@@ -38,6 +38,17 @@ import {
 import { exportExtensions } from "./extensions-export.js";
 import { deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
+import {
+  addSchedule,
+  answerWaiting,
+  readRule,
+  readSchedules,
+  removeSchedule,
+  startScheduler,
+  updateSchedule,
+  type ScheduleEngine,
+} from "./desk-schedules.js";
+import { DESK_RUN_AGENT } from "./redrob-desk-agents.js";
 import { ApiError, formatError } from "./errors.js";
 import { readJsoncFile, updateJsoncTopLevel, writeJsoncFile } from "./jsonc.js";
 import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
@@ -1220,9 +1231,15 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   resetManagedProviderAuthCache();
   void syncManagedProviderAuth({ config, env, logger: toManagedProviderAuthLogger(logger) }).catch(() => undefined);
 
+  // Scheduled playbooks run while this server does; REDROB_DISABLE_SCHEDULER turns them off.
+  const stopScheduler = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startScheduler({ config, engine: createScheduleEngine(config), logger });
+
   return {
     ...server,
     stop: async () => {
+      stopScheduler();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
       reloadBaselineRefreshers.delete(config);
@@ -1315,6 +1332,47 @@ export function createWorkspaceOpencodeClient(
     ...(clientFetch ? { fetch: clientFetch } : {}),
     ...(connection.authHeader ? { headers: { Authorization: connection.authHeader } } : {}),
   });
+}
+
+/** The engine calls the scheduler makes, through the workspace's own engine client. */
+function createScheduleEngine(config: ServerConfig): ScheduleEngine {
+  return {
+    template: async (workspace, playbookId) => {
+      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === playbookId);
+      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === playbookId);
+      return own?.template ?? global?.template ?? null;
+    },
+    startRun: async (workspace, input) => {
+      const opencode = createWorkspaceOpencodeClient(config, workspace);
+      const session = unwrapOpencodeResult(await opencode.session.create({ title: input.title || "Scheduled run" }), "/session");
+      const result = await opencode.session.promptAsync({
+        sessionID: session.id,
+        agent: DESK_RUN_AGENT,
+        parts: [{ type: "text", text: input.prompt }],
+      });
+      if (result.error !== undefined) {
+        throw new ApiError(502, "opencode_request_failed", "Redrob Code did not start the scheduled run");
+      }
+      return session.id;
+    },
+    status: async (workspace) => {
+      const statuses = unwrapOpencodeResult(await createWorkspaceOpencodeClient(config, workspace).session.status(), "/session/status");
+      return Object.fromEntries(Object.entries(statuses).map(([sessionId, status]) => [sessionId, status.type]));
+    },
+    pendingPermissions: async (workspace) =>
+      unwrapOpencodeResult(await createWorkspaceOpencodeClient(config, workspace).permission.list(), "/permission").map((ask) => ({
+        id: ask.id,
+        sessionID: ask.sessionID,
+        permission: ask.permission,
+        patterns: ask.patterns,
+      })),
+    reply: async (workspace, requestId, reply) => {
+      const result = await createWorkspaceOpencodeClient(config, workspace).permission.reply({ requestID: requestId, reply });
+      if (result.error !== undefined) {
+        throw new ApiError(502, "opencode_request_failed", "Redrob Code did not take the answer");
+      }
+    },
+  };
 }
 
 export function unwrapOpencodeResult<T, E>(result: OpencodeClientResult<T, E>, path: string): NonNullable<T> {
@@ -3471,6 +3529,48 @@ function createRoutes(
     });
 
     return jsonResponse({ ok: true });
+  });
+
+  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await readSchedules(config, workspace.id));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/schedules", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const playbookId = typeof body.playbookId === "string" ? sanitizeCommandName(body.playbookId) : "";
+    if (!playbookId) throw new ApiError(400, "invalid_payload", "playbookId is required");
+    const label = typeof body.label === "string" ? body.label.trim().slice(0, 200) : "";
+    return jsonResponse(await addSchedule(config, workspace.id, { playbookId, label, rule: readRule(body.rule) }), 201);
+  });
+
+  addRoute(routes, "PATCH", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const enabled = typeof body.enabled === "boolean" ? body.enabled : undefined;
+    return jsonResponse(await updateSchedule(config, workspace.id, ctx.params.scheduleId, { enabled }));
+  });
+
+  addRoute(routes, "DELETE", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await removeSchedule(config, workspace.id, ctx.params.scheduleId));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/schedules/waiting/:waitingId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.approve !== "boolean") throw new ApiError(400, "invalid_payload", "approve must be true or false");
+    return jsonResponse(await answerWaiting(config, workspace, createScheduleEngine(config), ctx.params.waitingId, body.approve));
   });
 
   addRoute(routes, "GET", "/workspace/:id/commands", "client", async (ctx) => {

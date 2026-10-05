@@ -101,6 +101,42 @@ export type RedrobSessionMessage = {
   parts: Part[];
 };
 
+/** When a scheduled playbook runs (apps/server/src/desk-schedules.ts). */
+export type RedrobScheduleRule = {
+  mode: "once" | "repeat";
+  date?: string;
+  start?: string;
+  time: string;
+  zone: string;
+  freq?: "daily" | "weekdays" | "weekly" | "monthly";
+  days?: string[];
+  dom?: string;
+};
+
+export type RedrobScheduleRunState = "running" | "waiting" | "done" | "missed" | "failed";
+
+export type RedrobScheduleState = {
+  schedules: Array<{
+    id: string;
+    playbookId: string;
+    label: string;
+    rule: RedrobScheduleRule;
+    nextRunAt: number | null;
+    enabled: boolean;
+    lastRun: { state: RedrobScheduleRunState; at: number; sessionId?: string } | null;
+  }>;
+  runs: Array<{ id: string; scheduleId: string; sessionId: string | null; at: number; state: RedrobScheduleRunState }>;
+  waiting: Array<{
+    id: string;
+    scheduleId: string;
+    sessionId: string;
+    requestId: string;
+    permission: string;
+    patterns: string[];
+    askedAt: number;
+  }>;
+};
+
 export type RedrobSessionSnapshot = {
   session: Session;
   messages: RedrobSessionMessage[];
@@ -1305,6 +1341,32 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
           method: "POST",
           timeoutMs: timeouts.workspaceImport,
         },
+      ),
+    listSchedules: (workspaceId: string) =>
+      requestJson<RedrobScheduleState>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/schedules`, {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      }),
+    addSchedule: (workspaceId: string, payload: { playbookId: string; label: string; rule: RedrobScheduleRule }) =>
+      requestJson<RedrobScheduleState>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/schedules`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: payload,
+        timeoutMs: timeouts.config,
+      }),
+    updateSchedule: (workspaceId: string, scheduleId: string, payload: { enabled: boolean }) =>
+      requestJson<RedrobScheduleState>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/schedules/${encodeURIComponent(scheduleId)}`,
+        { token, hostToken, method: "PATCH", body: payload, timeoutMs: timeouts.config },
+      ),
+    answerScheduleWaiting: (workspaceId: string, waitingId: string, approve: boolean) =>
+      requestJson<RedrobScheduleState>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/schedules/waiting/${encodeURIComponent(waitingId)}`,
+        { token, hostToken, method: "POST", body: { approve }, timeoutMs: timeouts.config },
       ),
     getConfig: (workspaceId: string) =>
       requestJson<{ opencode: Record<string, unknown>; redrob: Record<string, unknown>; updatedAt?: number | null }>(

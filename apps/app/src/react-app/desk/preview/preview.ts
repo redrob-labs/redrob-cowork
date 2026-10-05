@@ -9,13 +9,14 @@ import { PLAYBOOKS } from "../services/fixtures/playbooks";
 import { PROJECTS } from "../services/fixtures/projects";
 import { createDeskServices } from "../services/real-services";
 import type { DeskResult, NewSchedule, Playbook, Project, ScheduleBoard } from "../services/types";
+import { ruleFromPicker } from "../scheduled/schedules";
 import { useDeskConnection } from "../shell/desk-connection";
 import type { DeskTimers } from "../timers";
 
 /*
- * The Preview screens: Playbooks, one playbook, a run, Scheduled, History and the Model
- * Guide. None has a backend yet, so they read the sample data behind the Desk services and
- * every action changes only that sample state. Nothing here sends a prompt or calls the server.
+ * Helpers for the Playbooks, Scheduled and History screens and the sample run. Each reads
+ * the Desk services, which are real where a server is connected and sample data otherwise;
+ * a result says which, and the screens show the sample note only for sample data.
  */
 
 export const PREVIEW_QUERY_KEY = "desk-preview";
@@ -90,6 +91,11 @@ export type BoardActionDeps = {
   showToast: (title: string, text?: string) => void;
 };
 
+/** A toast on sample data says nothing ran; on real data there is nothing to add. */
+function sampleNote(result: DeskResult<unknown>): string | undefined {
+  return result.preview ? t("desk.preview_toast_text") : undefined;
+}
+
 function keepBoard(deps: BoardActionDeps, result: DeskResult<ScheduleBoard>) {
   deps.queryClient.setQueryData(previewKey(deps.scope, "board"), result);
 }
@@ -99,21 +105,21 @@ export async function answerWaiting(deps: BoardActionDeps, waitingId: string, ap
   const result = await deps.schedules.answer(waitingId, approved);
   keepBoard(deps, result);
   void deps.queryClient.invalidateQueries({ queryKey: navWaitingKey(deps.scope) });
-  deps.showToast(approved ? t("desk.preview_answered_yes") : t("desk.preview_answered_no"), t("desk.preview_toast_text"));
+  deps.showToast(approved ? t("desk.preview_answered_yes") : t("desk.preview_answered_no"), sampleNote(result));
   return result;
 }
 
 export async function setScheduleEnabled(deps: BoardActionDeps, scheduleId: string, enabled: boolean) {
   const result = await deps.schedules.setEnabled(scheduleId, enabled);
   keepBoard(deps, result);
-  deps.showToast(enabled ? t("desk.preview_schedule_on") : t("desk.preview_schedule_paused"), t("desk.preview_toast_text"));
+  deps.showToast(enabled ? t("desk.preview_schedule_on") : t("desk.preview_schedule_paused"), sampleNote(result));
   return result;
 }
 
 export async function saveSchedule(deps: BoardActionDeps, schedule: NewSchedule) {
   const result = await deps.schedules.save(schedule);
   keepBoard(deps, result);
-  deps.showToast(t("desk.preview_schedule_saved"), t("desk.preview_toast_text"));
+  deps.showToast(t("desk.preview_schedule_saved"), sampleNote(result));
   return result;
 }
 
@@ -145,11 +151,13 @@ export function scheduleFromPicker(
   const next = value.mode === "event" ? null : nextScheduledRun(value, now);
   // The sentence ends with the next run, which the schedule row shows on its own.
   const sentence = describeSchedule(value, { where: project.name, now }).split(" Next run")[0] ?? "";
+  const rule = ruleFromPicker(value);
   return {
     playbookId,
     projectId: project.id,
     cadence: sentence.replace(/\.$/, ""),
     nextRunAt: next ? next.getTime() : null,
+    ...(rule ? { rule } : {}),
   };
 }
 

@@ -31,6 +31,11 @@ export function scheduledMeta(board: ScheduleBoard): string {
 export type ScheduledViewProps = {
   board: ScheduleBoard;
   locale: string;
+  /** Sample data names sample playbooks and projects; real data names the workspace's. */
+  playbookName?: (id: string) => string;
+  projectName?: (id: string) => string;
+  /** Real schedules run only while the app is open, and the screen says so. */
+  real?: boolean;
   onAnswer: (waitingId: string, approved: boolean) => void;
   onToggle: (scheduleId: string, enabled: boolean) => void;
 };
@@ -39,8 +44,11 @@ export type ScheduledViewProps = {
 export function ScheduledView(props: ScheduledViewProps) {
   const { board, locale } = props;
   const waiting = board.waiting.length;
+  const playbookName = props.playbookName ?? ((id: string) => samplePlaybook(id)?.name ?? "");
+  const projectName = props.projectName ?? sampleProjectName;
   return (
     <>
+      {props.real ? <p className="desk-settings__note">{t("desk.scheduled_only_open")}</p> : null}
       <section className="desk-settings__group">
         <SectionMark
           label={waiting ? t("desk.preview_waiting_count", { count: waiting }) : t("desk.preview_waiting")}
@@ -56,10 +64,10 @@ export function ScheduledView(props: ScheduledViewProps) {
                 return (
                   <li key={run.id} className="desk-preview__wait">
                     <p className="desk-preview__meta">
-                      {playbook ? previewIcon(playbook.icon, 14) : null}
-                      <span>{playbook?.name}</span>
+                      {previewIcon(playbook?.icon ?? "repeat", 14)}
+                      <span>{playbookName(run.playbookId)}</span>
                       <span aria-hidden="true">-</span>
-                      <span>{sampleProjectName(run.projectId)}</span>
+                      <span>{projectName(run.projectId)}</span>
                       <span aria-hidden="true">-</span>
                       <span>{t("desk.preview_asked", { when: formatWhen(run.askedAt, locale) })}</span>
                     </p>
@@ -99,7 +107,7 @@ export function ScheduledView(props: ScheduledViewProps) {
         />
         <ul className="desk-preview__list">
           {board.schedules.map((schedule) => {
-            const name = samplePlaybook(schedule.playbookId)?.name ?? "";
+            const name = playbookName(schedule.playbookId);
             return (
               <li key={schedule.id}>
                 <ScheduleRow
@@ -115,7 +123,7 @@ export function ScheduledView(props: ScheduledViewProps) {
                   switchLabel={t("desk.preview_schedule_switch", { name })}
                   onToggle={(event) => props.onToggle(schedule.id, event.target.checked)}
                 />
-                <p className="desk-preview__meta">{t("desk.preview_in_project", { name: sampleProjectName(schedule.projectId) })}</p>
+                <p className="desk-preview__meta">{t("desk.preview_in_project", { name: projectName(schedule.projectId) })}</p>
               </li>
             );
           })}
@@ -125,24 +133,35 @@ export function ScheduledView(props: ScheduledViewProps) {
   );
 }
 
-/** `/scheduled`. Answers and pauses change only the sample state, which the menu's count reads too. */
+/** `/scheduled`: the workspace's schedules and the runs waiting on an answer, real where a server is connected. */
 export function ScheduledScreen() {
   const { services, scope } = usePreviewServices();
   const queryClient = useQueryClient();
   const showToast = useFrameStore((state) => state.showToast);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const query = useQuery({ queryKey: previewKey(scope, "board"), queryFn: () => services.schedules.list(), staleTime: Infinity });
+  // Refreshed while open: the server moves runs along on its own.
+  const query = useQuery({ queryKey: previewKey(scope, "board"), queryFn: () => services.schedules.list(), staleTime: 15_000, refetchInterval: 30_000 });
+  const playbooks = useQuery({ queryKey: previewKey(scope, "playbooks"), queryFn: () => services.playbooks.list(), staleTime: 30_000 });
+  const projects = useQuery({ queryKey: [...previewKey(scope, "board"), "projects"], queryFn: () => services.projects.list(), staleTime: 60_000 });
   const deps: BoardActionDeps = { schedules: services.schedules, queryClient, scope, showToast };
   const board = query.data?.data;
+  const real = query.data ? !query.data.preview : false;
 
   return (
     <DeskShell current="scheduled" title={t("desk.nav_scheduled")} meta={board ? scheduledMeta(board) : undefined}>
-      <PreviewPage note={t("desk.preview_scheduled_note")}>
+      <PreviewPage note={t("desk.preview_scheduled_note")} preview={!real}>
         <PreviewState query={query}>
           {(data) => (
             <ScheduledView
               board={data}
               locale={locale}
+              real={real}
+              {...(real
+                ? {
+                    playbookName: (id: string) => playbooks.data?.data.find((entry) => entry.id === id)?.name ?? id,
+                    projectName: (id: string) => projects.data?.data.find((entry) => entry.id === id)?.name ?? "",
+                  }
+                : {})}
               onAnswer={(id, approved) => void answerWaiting(deps, id, approved)}
               onToggle={(id, enabled) => void setScheduleEnabled(deps, id, enabled)}
             />
