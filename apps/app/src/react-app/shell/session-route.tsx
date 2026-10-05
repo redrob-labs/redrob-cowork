@@ -10,7 +10,11 @@ import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
 import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
-import { modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { useCheckStore } from "@/react-app/desk/thread/check-store";
+import { deskSystemText } from "@/react-app/desk/thread/memory-off";
+import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
+import { useDeskCrossCheck } from "@/react-app/desk/thread/use-desk-cross-check";
 import type {
   AgentPartInput,
   FilePartInput,
@@ -1058,6 +1062,15 @@ export function SessionRoute() {
               cacheKey: targetSessionId,
               runtimeKey: environmentRuntimeKey,
             });
+            const deskChats = useDeskComposerStore.getState().chats;
+            // Inside the frame a chat with memory off says so in the system text.
+            const system = inDeskFrame
+              ? deskSystemText(memoryFor(deskChats, targetSessionId, false), envSystemContext || undefined)
+              : envSystemContext;
+            // A Run prompt's answer is what Cross-check reads, once it arrives.
+            if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {
+              useCheckStore.getState().expect(targetSessionId, { question: text, planned: isPlanRunPrompt(text) });
+            }
             const result = await opencodeClient.session.promptAsync({
               sessionID: targetSessionId,
               parts,
@@ -1068,7 +1081,7 @@ export function SessionRoute() {
                 selectedAgent,
               }) ?? undefined,
               ...(sendVariant ? { variant: sendVariant } : {}),
-              ...(envSystemContext ? { system: envSystemContext } : {}),
+              ...(system ? { system } : {}),
             });
             if (result.error) {
               throw new Error(serializeSDKError(result.error));
@@ -2341,6 +2354,12 @@ export function SessionRoute() {
       chatsVersion: deskChatsVersion,
     });
   }, [deskChatsVersion, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
+
+  useDeskCrossCheck({
+    client: opencodeClient,
+    directory: selectedWorkspaceRoot || undefined,
+    levels: local.prefs.deskCrossCheck,
+  });
 
   return (
     <WorkspaceProvider

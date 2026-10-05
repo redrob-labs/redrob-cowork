@@ -126,6 +126,10 @@ import { AnotherAnswerButton } from "./another-answer-button"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
+import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
+import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
+import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
 
@@ -453,8 +457,10 @@ function AnswerOptionChips({
 }
 
 const AssistantMessage = React.memo(
-  ({ message, isStreaming, hideReasoning }: AssistantMessageProps) => {
+  ({ message, isLastMessage, isStreaming, hideReasoning }: AssistantMessageProps) => {
     const { showThinking, highlightQuery, setPrompt } = useMessageList()
+    // Inside the Desk frame, Plan's and Cross-check's fenced blocks render as the design system's.
+    const inDeskFrame = useInDeskFrame()
     const assistantRenderGroups = React.useMemo(
       () => {
         const groups = getAssistantRenderGroups(message.parts, showThinking)
@@ -484,9 +490,12 @@ const AssistantMessage = React.memo(
               const parsed = streamingMarker
                 ? { body: group.text, options: [] as string[] }
                 : parseAnswerOptions(group.text)
+              const blocks = inDeskFrame ? parseDeskBlocks(parsed.body, { streaming: isStreaming }) : null
+              const deskBlocks = blocks && hasDeskBlocks(blocks) ? blocks : null
+              const body = deskBlocks ? deskBlocks.prose : parsed.body
               return (
                 <React.Fragment key={`text-${index}`}>
-                  <MessageContent
+                  {deskBlocks && !body ? null : <MessageContent
                     // The design system's assistant bubble: generated text sits on
                     // the AI surface with the AI edge, so machine output is never
                     // mistaken for a person's.
@@ -496,8 +505,9 @@ const AssistantMessage = React.memo(
                     isStreaming={isStreaming}
                     highlightQuery={highlightQuery}
                   >
-                    {parsed.body}
-                  </MessageContent>
+                    {body}
+                  </MessageContent>}
+                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -1043,6 +1053,7 @@ function MessageGroup({
   isStreaming,
 }: AssistantMessageGroupProps) {
   const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
+  const inDeskFrame = useInDeskFrame()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
   // client-side messages (e.g. session errors) don't exist on the server and
@@ -1095,6 +1106,22 @@ function MessageGroup({
   const renderableItems = getRenderableMessages(items)
   const lastTextMessage = getLastTextPart(lastItem.message)
   const mcpAppParts = collectMcpAppParts(items)
+  // Inside the Desk frame: notes the run saved to memory, and a receipt under a finished
+  // answer (not under Plan's questions or plan, which wait on the person).
+  const memoryNotes = inDeskFrame
+    ? items.flatMap((item) =>
+      item.message.role === "assistant"
+        ? item.message.parts.flatMap((part) => {
+          const text = memorySavedFrom(part)
+          return text ? [text] : []
+        })
+        : []
+    )
+    : []
+  const lastBlocks = inDeskFrame && lastTextMessage ? parseDeskBlocks(getMessagesText([lastTextMessage])) : null
+  const showDeskReceipt = Boolean(
+    inDeskFrame && lastTextMessage && lastRealItem && !isStreaming && !lastBlocks?.questions && !lastBlocks?.plan
+  )
 
   // Leading messages without prose (tool/reasoning steps) render inside a
   // height-capped scroll area so long runs stay compact; messages with text
@@ -1257,6 +1284,19 @@ function MessageGroup({
         messages={items.map((item) => item.message)}
         includeTargetFallbacks={false}
       />
+      {memoryNotes.map((text, index) => (
+        <div key={`memory-${index}`} className={CHAT_COLUMN}>
+          <DeskMemoryNote text={text} />
+        </div>
+      ))}
+      {showDeskReceipt && lastRealItem ? (
+        <div className={CHAT_COLUMN}>
+          <DeskAnswerFooter
+            messageId={lastRealItem.message.id}
+            model={renderableItems.map((item) => readMessageUsage(item.message)?.routedModel).findLast(Boolean)}
+          />
+        </div>
+      ) : null}
       {/*
         What THIS turn cost, on the turn itself and always visible.
 
@@ -1469,6 +1509,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
 export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
+  const inDeskFrame = useInDeskFrame()
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
   /*
     Which rows a context compaction owns. The engine's summary arrives as real messages - a marked user
@@ -1536,7 +1577,12 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
         )
       })}
 
-      {showLoading && <LoadingMessage label={liveActionLabel ?? undefined} />}
+      {showLoading && !inDeskFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
+      {showLoading && inDeskFrame ? (
+        <div className={CHAT_COLUMN}>
+          <DeskRunStatus label={liveActionLabel} />
+        </div>
+      ) : null}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}
       {blockedStatus ? <BlockedMessage status={blockedStatus} /> : null}
       {error && !hasSessionErrorMessage ? <ErrorMessage error={error} /> : null}

@@ -60,6 +60,7 @@ import { SessionFindBar } from "./find-bar";
 import { useSessionFindStore } from "./find-store";
 import { getSessionActivityStatusLabel, useSessionActivityStore, type SessionActivityStatus } from "@/react-app/domains/session/status/session-activity-store";
 import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permission-approval-modal";
+import { DeskThreadContext, textDraft, type DeskThread } from "@/react-app/desk/thread/desk-thread-context";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
 import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
@@ -1969,6 +1970,16 @@ export function SessionSurface(props: SessionSurfaceProps) {
   }), [props.sessionId, renderedMessages]);
   useControlAction(props.isControlTarget ? sessionReadTranscriptControlAction : null);
 
+  // The Desk thread's own controls (Plan's questions, Run this plan) reply through `sendDraft`,
+  // the composer's path, so busy state, errors and the transcript behave as for a typed reply.
+  const deskThread = useMemo<DeskThread>(() => ({
+    sessionId: props.sessionId,
+    busy: chatStreaming,
+    sendText: async (text) => {
+      await sendDraft(textDraft(text));
+    },
+  }), [chatStreaming, props.sessionId, sendDraft]);
+
   return (
     <DevProfiler id="SessionSurface">
     <div
@@ -2109,12 +2120,14 @@ export function SessionSurface(props: SessionSurfaceProps) {
                       onEditUserMessage={handleEditUserMessage}
                       onRetryMessage={handleRetryMessage}
                     >
+                      <DeskThreadContext value={deskThread}>
                       <MessageList
                         messages={renderedMessages}
                         status={status}
                         retryStatus={liveStatus.type === "retry" ? liveStatus : null}
                         blockedStatus={liveStatus.type === "blocked" ? liveStatus : null}
                       />
+                      </DeskThreadContext>
                     </MessageListProvider>
                   </EnvironmentVariableProvider>
                 </OpenTargetProvider>

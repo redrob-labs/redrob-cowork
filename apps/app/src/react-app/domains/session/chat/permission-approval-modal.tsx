@@ -14,6 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
 import type { PendingPermission } from "@/app/types";
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { useFrameStore } from "@/react-app/desk/store/frame-store";
+import { DeskApproval } from "@/react-app/desk/thread/desk-thread";
+import { approvalActions } from "@/react-app/desk/thread/thread-logic";
 
 type PermissionPresentation = {
   title: string;
@@ -371,12 +375,30 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
 
 export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
   const presentation = useMemo(() => describePermissionRequest(props.permission), [props.permission]);
+  const inDeskFrame = useInDeskFrame();
+  const developerMode = useFrameStore((state) => state.developerMode);
   const metadata =
     props.permission.metadata && typeof props.permission.metadata === "object"
       ? props.permission.metadata
       : {};
   const hasMetadata = Object.keys(metadata).length > 0;
   const Icon = presentation.isDoomLoop ? RefreshCcw : ShieldCheck;
+
+  // Inside the Desk frame the ask is the design system's ApprovalStep: Approve answers once,
+  // and widening it to the whole session is for Developer mode only.
+  if (inDeskFrame && props.respondPermission) {
+    return (
+      <div className="border-b border-border px-4 py-3" data-slot="permission-approval">
+        <DeskApproval
+          title={presentation.title}
+          description={presentation.note ? `${presentation.message} ${presentation.note}` : presentation.message}
+          detail={`${presentation.permissionLabel}: ${presentation.scopeValue}`}
+          busy={props.busy}
+          {...approvalActions(props.permission.id, props.respondPermission, developerMode)}
+        />
+      </div>
+    );
+  }
 
   return (
     // The design system's ApprovalStep (`rr-approval`): the agent has stopped and is
