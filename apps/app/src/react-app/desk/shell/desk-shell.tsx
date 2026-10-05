@@ -6,6 +6,7 @@ import { AppShell, IconButton, ThemeSwitch, icons, type AppShellProps } from "@r
 import { getInitialThemeMode, setThemeMode, subscribeToTheme } from "../../../app/theme";
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
+import { DeskSidePanel } from "../panel/desk-side-panel";
 import { useFrameStore } from "../store/frame-store";
 import { AccountMenu } from "./account-menu";
 import { DeskFrameContext } from "./desk-frame";
@@ -41,6 +42,12 @@ export function panelToggleLabel(open: boolean): string {
   return open ? t("desk.panel_close") : t("desk.panel_open");
 }
 
+export function deskShellClassName(fill: boolean, panelOpen: boolean): string {
+  return ["desk-shell", fill ? "desk-shell--fill" : null, panelOpen ? "desk-shell--panel" : null]
+    .filter(Boolean)
+    .join(" ");
+}
+
 /**
  * The frame around every Desk screen: the menu, the theme, the account menu after any
  * `aside` the screen brings, and the side panel button last in the header.
@@ -48,6 +55,17 @@ export function panelToggleLabel(open: boolean): string {
 export function DeskShell(props: DeskShellProps) {
   const panelOpen = useFrameStore((state) => state.panel.open);
   const togglePanel = useFrameStore((state) => state.togglePanel);
+  return <DeskShellView {...props} panelOpen={panelOpen} onTogglePanel={togglePanel} />;
+}
+
+export type DeskShellViewProps = DeskShellProps & { panelOpen: boolean; onTogglePanel: () => void };
+
+/**
+ * `DeskShell` with the panel state passed in. While the panel is open it sits to the right
+ * of the work and the screen's own rail steps aside for it.
+ */
+export function DeskShellView(props: DeskShellViewProps) {
+  const { panelOpen } = props;
   // The app's theme store stays the source of truth; the switch only reflects and sets it.
   const themeMode = useSyncExternalStore(subscribeToTheme, getInitialThemeMode, getInitialThemeMode);
   const root = useHref("/").replace(/\/$/, "");
@@ -61,10 +79,7 @@ export function DeskShell(props: DeskShellProps) {
 
   return (
     <DeskFrameContext value={true}>
-      <div
-        className={props.fill ? "desk-shell desk-shell--fill" : "desk-shell"}
-        onClickCapture={keepSkipLinkOnScreen}
-      >
+      <div className={deskShellClassName(Boolean(props.fill), panelOpen)} onClickCapture={keepSkipLinkOnScreen}>
         <AppShell
           mark={MARK_SRC}
           symbol={MARK_SRC}
@@ -95,7 +110,7 @@ export function DeskShell(props: DeskShellProps) {
           }
           title={props.title}
           meta={props.meta}
-          rail={props.rail}
+          rail={panelOpen ? undefined : props.rail}
           foot={props.foot}
           measure={props.measure}
           actions={
@@ -105,7 +120,7 @@ export function DeskShell(props: DeskShellProps) {
                 label={panelLabel}
                 variant={panelOpen ? "secondary" : "ghost"}
                 size="sm"
-                onClick={togglePanel}
+                onClick={props.onTogglePanel}
               >
                 {icons.panelRight({ width: 16, height: 16, "aria-hidden": true })}
               </IconButton>
@@ -114,6 +129,7 @@ export function DeskShell(props: DeskShellProps) {
         >
           {props.children}
         </AppShell>
+        {panelOpen ? <DeskSidePanel chatId={props.chatId ?? null} /> : null}
       </div>
     </DeskFrameContext>
   );

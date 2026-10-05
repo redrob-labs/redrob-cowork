@@ -71,6 +71,14 @@ import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
 import { useInDeskFrame } from "../../../desk/shell/desk-frame";
+import {
+  applyFramePanelCommand,
+  BROWSER_TARGET,
+  FILES_TARGET,
+  routeSidePanelRequest,
+  type SidePanelTarget,
+} from "../../../desk/panel/route-side-panel";
+import { useFrameStore } from "../../../desk/store/frame-store";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
 import { useBootOverlayVisible } from "../../../shell/boot-state";
@@ -370,7 +378,8 @@ export function SessionPage(props: SessionPageProps) {
   const artifactTargetCount = artifactFileTargets.length;
   const hasArtifactTargets = artifactTargetCount > 0;
   const hasBrowserTabs = sessionPanelState.tabs.some((tab) => tab.type === "browser");
-  const activeSidePanel = voiceSidePanelOpen ? "voice" : sessionSidePanel;
+  // In the Desk frame the old panel never shows, even if a stored state still names it.
+  const activeSidePanel = voiceSidePanelOpen ? "voice" : inDeskFrame && sessionSidePanel === "panel" ? null : sessionSidePanel;
   const sidePanelOpen = activeSidePanel !== null;
   const panelRailActive = activeSidePanel === "panel";
   const voiceRailActive = activeSidePanel === "voice";
@@ -415,20 +424,25 @@ export function SessionPage(props: SessionPageProps) {
   const browserPanelRef = usePanelRef();
   const preserveSidePanelOnPanelOpenRef = useRef(false);
 
-  const setCurrentSidePanel = useCallback((panel: SidePanelItem | null) => {
+  // Inside the Desk frame both of these hand "panel" requests to the frame's side panel.
+  const setCurrentSidePanel = useCallback((panel: SidePanelItem | null, target?: SidePanelTarget) => {
+    const command = routeSidePanelRequest(panel, inDeskFrame, target);
+    if (command) return applyFramePanelCommand(command, useFrameStore.getState());
     setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, panel === "voice" ? "voice" : null);
     if (panel === "voice") return;
     setSidePanelState(sidePanelSessionKey, panel);
-  }, [setSidePanelState, sidePanelSessionKey]);
+  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey]);
 
-  const toggleCurrentSidePanel = useCallback((panel: SidePanelItem) => {
+  const toggleCurrentSidePanel = useCallback((panel: SidePanelItem, target: SidePanelTarget = BROWSER_TARGET) => {
+    const command = routeSidePanelRequest(panel, inDeskFrame, { ...target, toggle: true });
+    if (command) return applyFramePanelCommand(command, useFrameStore.getState());
     if (panel === "voice") {
       toggleSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, "voice");
       return;
     }
     setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, null);
     toggleSidePanelState(sidePanelSessionKey, panel);
-  }, [setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
+  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
 
   // When the agent calls a built-in browser tool, the main process opens
   // the WebContentsView and sends panel-opened; when hide_browser is called
@@ -542,7 +556,7 @@ export function SessionPage(props: SessionPageProps) {
       preview: target.preview,
     });
     preserveSidePanelOnPanelOpenRef.current = true;
-    setCurrentSidePanel("panel");
+    setCurrentSidePanel("panel", { tab: "files", file: target.id });
   }, [activePanelTab?.id, browserUrlForTarget, downloadOpenTarget, openTab, props.selectedSessionId, props.selectedWorkspaceDisplay.workspaceType, props.selectedWorkspaceRoot, setCurrentSidePanel]);
   const closeRightPane = useCallback(() => {
     setCurrentSidePanel(null);
@@ -600,7 +614,7 @@ export function SessionPage(props: SessionPageProps) {
   useControlAction(setBrowserProxyControlAction);
   const openArtifactRailPane = useCallback(() => {
     if (!hasArtifactTargets) {
-      setCurrentSidePanel("panel");
+      setCurrentSidePanel("panel", FILES_TARGET);
       return;
     }
     if (!props.selectedSessionId) return;
@@ -628,14 +642,14 @@ export function SessionPage(props: SessionPageProps) {
     }
 
     if (panelRailActive && activeTab?.type === "artifact") {
-      toggleCurrentSidePanel("panel");
+      toggleCurrentSidePanel("panel", FILES_TARGET);
       return;
     }
     if (!panelRailActive) {
       preserveSidePanelOnPanelOpenRef.current = true;
     }
     if (!panelRailActive) {
-      toggleCurrentSidePanel("panel");
+      toggleCurrentSidePanel("panel", FILES_TARGET);
     }
   }, [artifactFileTargets, hasArtifactTargets, openTab, panelRailActive, props.selectedSessionId, selectTab, sessionPanelState, setCurrentSidePanel, toggleCurrentSidePanel]);
   const openVoiceRailPane = useCallback(() => {
@@ -1147,7 +1161,8 @@ export function SessionPage(props: SessionPageProps) {
                   <TooltipContent>Find in conversation (⌘F)</TooltipContent>
                 </Tooltip>
               ) : null}
-              <Tooltip>
+              {/* The Desk frame has its own side panel button. */}
+              {inDeskFrame ? null : <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
@@ -1172,7 +1187,7 @@ export function SessionPage(props: SessionPageProps) {
                   }
                 />
                 <TooltipContent>{sidePanelOpen ? "Close side panel" : "Open side panel"}</TooltipContent>
-              </Tooltip>
+              </Tooltip>}
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
@@ -1587,8 +1602,9 @@ export function SessionPage(props: SessionPageProps) {
               </Sheet>
             ) : null}
           </ResizablePanelGroup>
-          <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
-            {isElectronRuntime() ? (
+          {/* In the Desk frame the browser and the files are the frame's panel; only voice stays here. */}
+          {inDeskFrame && !voiceExtensionEnabled ? null : <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
+            {isElectronRuntime() && !inDeskFrame ? (
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -1621,7 +1637,7 @@ export function SessionPage(props: SessionPageProps) {
                 <Mic2 size={15} />
               </Button>
             ) : null}
-            <Button
+            {inDeskFrame ? null : <Button
               variant="ghost"
               size="icon-sm"
               className={cn(
@@ -1639,8 +1655,8 @@ export function SessionPage(props: SessionPageProps) {
                   {artifactTargetCount > 9 ? "9+" : artifactTargetCount}
                 </span>
               ) : null}
-            </Button>
-          </aside>
+            </Button>}
+          </aside>}
           </div>
         </SidebarInset>
         {showSidebar ? <SidebarTrigger className="hidden mac:absolute mac:left-[88px] top-[3px] z-50 mac:flex titlebar-no-drag" /> : null}

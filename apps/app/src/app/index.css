@@ -332,6 +332,113 @@
 }
 
 /**
+ * The side panel (`desk/panel/desk-side-panel.tsx`), beside the work while it is open:
+ * 440px, 400px under 1180px, and under 900px a full-height sheet over the work. Its
+ * header is the shell header's height, so the two hairlines meet. The browser is flush;
+ * Electron lays the page over the body by its bounds.
+ */
+.desk-shell--panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+}
+
+.desk-shell--panel > div {
+  min-width: 0;
+}
+
+.desk-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  animation: desk-panel-in var(--duration-base) var(--easing-entrance);
+}
+
+.desk-panel__top {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-height: 57px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-panel__title {
+  margin: 0;
+  font: var(--text-body-strong);
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-panel__actions {
+  display: flex;
+  gap: 2px;
+}
+
+.desk-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.desk-panel__body--flush {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.desk-panel__empty {
+  padding: var(--space-5);
+}
+
+@keyframes desk-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  .desk-shell--panel {
+    grid-template-columns: minmax(0, 1fr) 400px;
+  }
+}
+
+@media (max-width: 900px) {
+  .desk-shell--panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .desk-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    width: min(440px, 100%);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-panel {
+    animation: none;
+  }
+}
+
+/**
  * The account menu at the foot of the sidebar, the shortcuts list, the dialog layer and the
  * toast (`account-menu.tsx`, `desk-layer.tsx`, `desk-dialog.tsx`). Layout on design tokens;
  * the menu's trigger is reached by element order (its `div`, then its `button`), never by

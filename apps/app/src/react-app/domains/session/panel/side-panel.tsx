@@ -153,10 +153,11 @@ function SidePanelTab({ tab, active, onSelect, onClose }: SidePanelTabProps) {
 
 type BrowserPanelContentProps = {
   tab: BrowserPanelTab;
-  onClose: () => void;
+  /** Without it there is no close button: the Desk side panel closes from its own header. */
+  onClose?: () => void;
 };
 
-function BrowserPanelContent({
+export function BrowserPanelContent({
   tab,
   onClose,
 }: BrowserPanelContentProps) {
@@ -381,15 +382,17 @@ function BrowserPanelContent({
         ) : (
           <p className="px-2 text-sm text-muted-foreground">{t("panel.browser_desktop_only")}</p>
         )}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClose}
-          title={t("panel.close")}
-          aria-label={t("panel.close")}
-        >
-          <X />
-        </Button>
+        {onClose ? (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            title={t("panel.close")}
+            aria-label={t("panel.close")}
+          >
+            <X />
+          </Button>
+        ) : null}
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         {isAvailable ? <div ref={contentRef} className="h-full overflow-hidden" /> : null}

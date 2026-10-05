@@ -170,6 +170,39 @@ function useNewChatShortcut() {
   }, []);
 }
 
+export type ShortcutKey = Pick<KeyboardEvent, "key" | "code" | "ctrlKey" | "metaKey" | "shiftKey" | "altKey">;
+
+/**
+ * Ctrl+Shift+B (Cmd+Shift+B on a Mac). The physical key counts too, so it still works
+ * while a Korean layout turns B into ã… .
+ */
+export function isToggleBrowserShortcut(event: ShortcutKey, mac: boolean): boolean {
+  const mod = mac ? event.metaKey : event.ctrlKey;
+  if (!mod || !event.shiftKey || event.altKey) return false;
+  return event.code === "KeyB" || event.key.toLowerCase() === "b";
+}
+
+/** Whether this path is inside the Desk frame, where the side panel lives. */
+export function isDeskFramePath(pathname: string): boolean {
+  return !/^\/(welcome|extensions|settings|__ds|workspace\/[^/]+\/(extensions|settings))(\/|$)/.test(pathname);
+}
+
+/** Ctrl/Cmd+Shift+B opens or closes the browser in the side panel, on any Desk screen. */
+function useToggleBrowserShortcut() {
+  const { pathname } = useLocation();
+  const toggleBrowser = useFrameStore((state) => state.toggleBrowser);
+  const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (event.repeat || !isToggleBrowserShortcut(event, isMacPlatform()) || !isDeskFramePath(pathname)) return;
+    event.preventDefault();
+    toggleBrowser();
+  });
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => onKeyDown(event);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+}
+
 export type DeskLayerViewProps = {
   modal: FrameModal;
   toast: FrameToast;
@@ -196,6 +229,7 @@ export function DeskLayer() {
   const closeModal = useFrameStore((state) => state.closeModal);
   const hideToast = useFrameStore((state) => state.hideToast);
   useNewChatShortcut();
+  useToggleBrowserShortcut();
 
   return (
     <DeskLayerView
