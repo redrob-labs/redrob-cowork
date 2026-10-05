@@ -40,6 +40,7 @@ import { resolveRedrobConnection } from "../../shell/redrob-connection";
 import { PROJECTS_QUERY_KEY } from "../projects/desk-projects";
 import { deskKeepAwake, type KeepAwakeSync } from "../run/keep-awake";
 import { syncCrashReports } from "./crash-reports";
+import { TeamFileGroup } from "../team/team-file-group";
 import type { ChatMode } from "../services/types";
 import { REDROB_KEY_QUERY_KEY, useRedrobKeyConnected } from "../shell/account-menu";
 import { useDeskConnection } from "../shell/desk-connection";
@@ -593,7 +594,12 @@ function PlanSection() {
 function SectionBody(props: { section: DeskSettingsSection }) {
   switch (props.section) {
     case "general":
-      return <GeneralSection />;
+      return (
+        <>
+          <GeneralSection />
+          <TeamFileGroup />
+        </>
+      );
     case "folders":
       return <FoldersSection />;
     case "plan":

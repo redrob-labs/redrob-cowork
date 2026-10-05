@@ -17,8 +17,11 @@ export type DeskProjectClient = Pick<
 /** The calls the Connectors screen adds: turn one on or off, sign in through Redrob. */
 export type DeskConnectorClient = Pick<RedrobServerClient, "setMcpEnabled" | "connectManagedMcp">;
 
+/** The calls the team file adds: export the workspace, and import one. */
+export type DeskTeamClient = Pick<RedrobServerClient, "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace">;
+
 export type DeskConnection = {
-  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient) | null;
+  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient) | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;
   /** The server-side id of the workspace the chat route has open. */

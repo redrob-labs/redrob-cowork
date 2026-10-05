@@ -49,6 +49,8 @@ export function toNote(memory: Memory): MemoryNote {
     text: memory.content,
     when: Date.parse(memory.createdAt),
     how: memory.source === "agent" ? "learned" : "told",
+    // A note from a team file changes in the team file only.
+    ...(memory.tags?.includes("desk-locked") ? { locked: true } : {}),
   };
 }
 

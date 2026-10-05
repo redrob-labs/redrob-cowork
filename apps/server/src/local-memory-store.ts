@@ -128,6 +128,18 @@ export async function saveMemory(config: ServerConfig, draft: MemoryDraft): Prom
   return memory;
 }
 
+/** A note that came with a team file. It is read-only here: the team file is where it changes. */
+export const LOCKED_MEMORY_TAG = "desk-locked";
+
+export function isLockedMemory(memory: Pick<Memory, "tags">): boolean {
+  return memory.tags?.includes(LOCKED_MEMORY_TAG) ?? false;
+}
+
+/** The memory with this id, or null. */
+export async function findMemory(config: ServerConfig, id: string): Promise<Memory | null> {
+  return (await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? []).find((memory) => memory.id === id) ?? null;
+}
+
 /**
  * Changes a memory in place: the id and createdAt are kept, updatedAt moves. Returns null
  * when no memory carried that id, so the route can answer 404.

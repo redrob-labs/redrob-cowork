@@ -311,6 +311,13 @@ async function listProjectCommandNames(workspaceRoot: string): Promise<string[]>
 export async function buildWorkspaceImportPreview(
   workspaceRoot: string,
   payload: Record<string, unknown>,
+  options: {
+    /**
+     * The workspace's redrob config as it is stored now. It lives in the runtime database;
+     * `redrob.json` is only the legacy copy, so without this the "before" side can be empty.
+     */
+    readStoredRedrob?: () => Promise<Record<string, unknown>>;
+  } = {},
 ): Promise<WorkspaceImportPlan> {
   const input = normalizeWorkspaceImportPayload(workspaceRoot, payload);
   const changes: WorkspaceImportPlannedChange[] = [];
@@ -332,8 +339,10 @@ export async function buildWorkspaceImportPreview(
 
   if (input.redrob !== undefined) {
     const path = redrobConfigPath(workspaceRoot);
-    const existsBefore = await exists(path);
-    const before = await readRedrobConfig(path);
+    const stored = options.readStoredRedrob ? await options.readStoredRedrob() : {};
+    const fromStore = Object.keys(stored).length > 0;
+    const existsBefore = fromStore || (await exists(path));
+    const before = fromStore ? stored : await readRedrobConfig(path);
     const after = input.modes.redrob === "replace" ? input.redrob : { ...before, ...input.redrob };
     changes.push({
       kind: "redrob",

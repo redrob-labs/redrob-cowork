@@ -138,7 +138,7 @@ import {
   seedRedrobWorkspaceConfigIfEmpty,
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
-import { deleteMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
+import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { readHarnessAvailability } from "./harness-availability.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
@@ -2184,6 +2184,14 @@ function createRoutes(
     return jsonResponse({ memory }, 201);
   });
 
+  // A note from a team file changes in the team file, not here.
+  const refuseLockedMemory = async (memoryId: string) => {
+    const memory = await findMemory(config, memoryId);
+    if (memory && isLockedMemory(memory)) {
+      throw new ApiError(403, "memory_locked", "This note came with a team file and cannot be changed here");
+    }
+  };
+
   addRoute(routes, "PATCH", "/memory/:memoryId", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
@@ -2191,6 +2199,7 @@ function createRoutes(
     if (body.content !== undefined && (typeof body.content !== "string" || !body.content.trim())) {
       throw new ApiError(400, "invalid_payload", "content must be a non-empty string");
     }
+    await refuseLockedMemory(ctx.params.memoryId);
     const memory = await updateMemory(config, ctx.params.memoryId, {
       ...(typeof body.content === "string" ? { content: body.content } : {}),
       ...(Array.isArray(body.tags) ? { tags: body.tags.filter((tag): tag is string => typeof tag === "string") } : {}),
@@ -2204,6 +2213,7 @@ function createRoutes(
   addRoute(routes, "DELETE", "/memory/:memoryId", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
+    await refuseLockedMemory(ctx.params.memoryId);
     const removed = await deleteMemory(config, ctx.params.memoryId);
     if (!removed) {
       throw new ApiError(404, "not_found", "memory not found");
@@ -3666,7 +3676,7 @@ function createRoutes(
     requireClientScope(ctx, "viewer");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const preview = await buildWorkspaceImportPreview(workspace.path, body);
+    const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     return jsonResponse(publicWorkspaceImportPreview(preview));
   });
 
@@ -3676,7 +3686,7 @@ function createRoutes(
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
     const expectedFingerprint = parseWorkspaceImportPreviewFingerprint(body);
-    const preview = await buildWorkspaceImportPreview(workspace.path, body);
+    const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     if (expectedFingerprint && expectedFingerprint !== preview.fingerprint) {
       return jsonResponse(
         {
@@ -3709,7 +3719,7 @@ function createRoutes(
       summary: summarizeWorkspaceImportPreview(preview),
       paths: approvalPaths,
     });
-    const latestPreview = await buildWorkspaceImportPreview(workspace.path, body);
+    const latestPreview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     if (latestPreview.fingerprint !== expectedFingerprint) {
       return jsonResponse(
         {
