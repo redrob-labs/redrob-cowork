@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { currentLocale, subscribeToLocale } from "../../../i18n";
 import { connectedCount, mcpStatusReader } from "../connectors/connectors";
 import { createDeskServices } from "../services/real-services";
+import type { DeskResult } from "../services/types";
 import { useFrameStore } from "../store/frame-store";
 import { RECENT_CHAT_COUNT, type DeskNavInput } from "./nav";
 import { useDeskConnection } from "./desk-connection";
@@ -11,6 +12,11 @@ import { useDeskConnection } from "./desk-connection";
 export type DeskNavData = Omit<DeskNavInput, "current" | "chatId" | "toHref">;
 
 const NAV_STALE_MS = 30_000;
+
+/** A count from sample data would read as the person's own, so the menu shows none instead. */
+export function counted<T, R>(result: DeskResult<T>, read: (data: T) => R): R | null {
+  return result.preview ? null : read(result.data);
+}
 
 /**
  * What the Desk menu shows: recent chats, runs waiting, connectors connected, the
@@ -33,29 +39,29 @@ export function useDeskNavData(): DeskNavData {
 
   const chats = useQuery({
     queryKey: ["desk-nav", scope, "chats", chatsVersion],
-    queryFn: async () => (await services.chats.list()).data.slice(0, RECENT_CHAT_COUNT),
+    queryFn: async () => counted(await services.chats.list(), (data) => data.slice(0, RECENT_CHAT_COUNT)) ?? [],
     staleTime: NAV_STALE_MS,
     placeholderData: (previous) => previous,
   });
   const waiting = useQuery({
     queryKey: ["desk-nav", scope, "waiting"],
-    queryFn: async () => (await services.schedules.list()).data.waiting.length,
+    queryFn: async () => counted(await services.schedules.list(), (data) => data.waiting.length),
     staleTime: NAV_STALE_MS,
   });
   const connected = useQuery({
     // The count the Connectors screen shows: the tools your team built only in Developer mode.
     queryKey: ["desk-nav", scope, "connected", developerMode],
-    queryFn: async () => connectedCount((await services.connectors.list()).data, developerMode),
+    queryFn: async () => counted(await services.connectors.list(), (data) => connectedCount(data, developerMode)),
     staleTime: NAV_STALE_MS,
   });
   const privacy = useQuery({
     queryKey: ["desk-nav", scope, "privacy"],
-    queryFn: async () => (await services.privacy.get()).data.level,
+    queryFn: async () => counted(await services.privacy.get(), (data) => data.level),
     staleTime: NAV_STALE_MS,
   });
   const notes = useQuery({
     queryKey: ["desk-nav", scope, "notes"],
-    queryFn: async () => (await services.notes.list()).data.length,
+    queryFn: async () => counted(await services.notes.list(), (data) => data.length),
     staleTime: NAV_STALE_MS,
   });
 

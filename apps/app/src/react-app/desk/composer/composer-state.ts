@@ -1,4 +1,5 @@
-import { create } from "zustand";
+import { create, type StateCreator } from "zustand";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import type { CrossCheckLevel } from "@redrob-labs/ui";
 
 import type { ChatMemory, ChatMode } from "../services/types";
@@ -66,9 +67,15 @@ export type DeskComposerState = {
   claimNewChat(sessionId: string): void;
 };
 
-/** In memory for the app session: per-chat choices, not preferences. */
-export function createDeskComposerStore() {
-  return create<DeskComposerState>()((set) => {
+export const DESK_COMPOSER_STORE_KEY = "redrob.desk.composer.v1";
+
+/**
+ * Per-chat choices, not preferences. With a storage they outlive a restart, so a chat
+ * stays in Plan or Run and keeps its memory setting. The new chat screen's pending
+ * choice is never kept: it belongs to a chat that does not exist yet.
+ */
+export function createDeskComposerStore(options: { storage?: () => StateStorage } = {}) {
+  const initializer: StateCreator<DeskComposerState> = (set) => {
     const patch = (key: string, next: ChatSettings) =>
       set((state) => ({ chats: { ...state.chats, [key]: { ...state.chats[key], ...next } } }));
     return {
@@ -82,7 +89,18 @@ export function createDeskComposerStore() {
           return { chats: { ...rest, [sessionId]: { ...pending, ...rest[sessionId] } } };
         }),
     };
-  });
+  };
+  if (!options.storage) return create<DeskComposerState>()(initializer);
+  return create<DeskComposerState>()(
+    persist(initializer, {
+      name: DESK_COMPOSER_STORE_KEY,
+      storage: createJSONStorage(options.storage),
+      partialize: (state) => {
+        const { [NEW_CHAT_KEY]: _pending, ...chats } = state.chats;
+        return { chats };
+      },
+    }),
+  );
 }
 
-export const useDeskComposerStore = createDeskComposerStore();
+export const useDeskComposerStore = createDeskComposerStore({ storage: () => localStorage });

@@ -238,7 +238,8 @@ export type DeskStatusInput = {
 
 /** Privacy, Memory and Cross-check: what will happen to this message, before Send. */
 export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
-  const level = input.privacy?.level ?? "high";
+  // Sample data is not protection: only a real state can turn the chip on.
+  const level = input.privacy && !input.privacy.preview ? input.privacy.level : "off";
   const privacyOn = input.desktop && level !== "off";
   const levels = [
     { id: "standard", label: t("desk.privacy_standard"), n: 1 },
@@ -283,9 +284,8 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
           onLabel={t("desk.privacy_on_title")}
           running={input.privacy?.preview ? t("desk.privacy_sample") : t("desk.privacy_running")}
           lede={t("desk.privacy_lede")}
-          offTitle={t("desk.privacy_off_title")}
-          offText={t("desk.privacy_off_text")}
-          foot={input.privacy?.preview ? <span>{t("desk.privacy_preview")}</span> : undefined}
+          offTitle={input.desktop ? t("desk.privacy_page_off_title") : t("desk.privacy_off_title")}
+          offText={input.desktop ? t("desk.privacy_page_off_text") : t("desk.privacy_off_text")}
         />
       ),
     },

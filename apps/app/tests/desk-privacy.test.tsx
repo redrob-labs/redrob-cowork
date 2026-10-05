@@ -32,8 +32,8 @@ function readable(html: string): string {
   return [html.replace(/<[^>]*>/g, " "), ...labels].join(" ");
 }
 
-function view(state: PrivacyState, desktop = true) {
-  return render(<PrivacyView state={state} desktop={desktop} busy={false} onLocalModel={() => {}} />);
+function view(state: PrivacyState, desktop = true, preview = false) {
+  return render(<PrivacyView state={state} desktop={desktop} preview={preview} busy={false} onLocalModel={() => {}} />);
 }
 
 afterEach(() => setLocale("en"));
@@ -133,6 +133,17 @@ describe("PrivacyView", () => {
     expect(html).not.toContain("Park Hyunjin");
   });
 
+  test("sample data reads Off, with no level, no count and nothing to turn on", () => {
+    const html = view(PRIVACY, true, true);
+    expect(html).toContain("Nothing on this screen is running yet.");
+    expect(html).toContain("Privacy protection is off");
+    expect(html).not.toContain("Privacy protection is on");
+    expect(html).not.toContain("214");
+    expect(html).not.toContain("Your level");
+    expect(html).not.toContain("Keep private work on this laptop");
+    expect(html).not.toContain("Turn on");
+  });
+
   test("on: Turn off, not Turn on", () => {
     const html = view({ ...PRIVACY, localModel: true });
     expect(html).toContain("On: an AI runs on this laptop");
@@ -174,9 +185,9 @@ describe("/privacy route", () => {
     const html = render(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, "/privacy", client);
     expect(html).toContain("rr-shell");
     expect(html).toContain('<h1 class="rr-shell__title">Privacy protection</h1>');
-    expect(html).toContain("High");
     expect(html).toContain('href="/privacy" aria-current="page"');
-    expect(html).toContain("Keep private work on this laptop");
+    expect(html).toContain("Privacy protection is off");
+    expect(html).not.toContain("Keep private work on this laptop");
     expect(html).not.toContain("This part of Redrob Cowork is on its way.");
     expect(html).not.toContain("chat screen");
   });

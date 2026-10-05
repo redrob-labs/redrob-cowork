@@ -84,7 +84,7 @@ const STEPS: ReadonlyArray<{ id: string; title: () => string; text: () => string
   { id: "back", title: () => t("desk.privacy_page_step3_title"), text: () => t("desk.privacy_page_step3_text") },
 ];
 
-function PrivacyStatus(props: { state: PrivacyState; desktop: boolean }) {
+function PrivacyStatus(props: { state: PrivacyState; desktop: boolean; preview: boolean }) {
   if (!props.desktop) {
     return (
       <ProtectionStatus size="lg" tone="warn" icon={icons.shield({ width: 28, height: 28, "aria-hidden": true })} title={t("desk.privacy_off_title")}>
@@ -92,7 +92,8 @@ function PrivacyStatus(props: { state: PrivacyState; desktop: boolean }) {
       </ProtectionStatus>
     );
   }
-  if (props.state.level === "off") {
+  // Sample data never reads as protection.
+  if (props.preview || props.state.level === "off") {
     return (
       <ProtectionStatus size="lg" tone="warn" icon={icons.shield({ width: 28, height: 28, "aria-hidden": true })} title={t("desk.privacy_page_off_title")}>
         {t("desk.privacy_page_off_text")}
@@ -105,7 +106,7 @@ function PrivacyStatus(props: { state: PrivacyState; desktop: boolean }) {
       tone="safe"
       icon={icons.shieldCheck({ width: 28, height: 28, "aria-hidden": true })}
       title={`${t("desk.privacy_on_title")}: ${privacyLevelLabel(props.state.level)}`}
-      live={t("desk.privacy_sample")}
+      live={t("desk.privacy_running")}
     >
       {t("desk.privacy_page_kept", { count: props.state.detailsKeptThisWeek })}
     </ProtectionStatus>
@@ -115,6 +116,8 @@ function PrivacyStatus(props: { state: PrivacyState; desktop: boolean }) {
 export type PrivacyViewProps = {
   state: PrivacyState;
   desktop: boolean;
+  /** Sample data: shown as off, with nothing to turn on. */
+  preview: boolean;
   busy: boolean;
   onLocalModel: (on: boolean) => void;
 };
@@ -127,7 +130,7 @@ export function PrivacyView(props: PrivacyViewProps) {
       <Alert tone="info" title={t("desk.privacy_page_preview_title")}>
         {t("desk.privacy_page_preview_text")}
       </Alert>
-      <PrivacyStatus state={props.state} desktop={props.desktop} />
+      <PrivacyStatus state={props.state} desktop={props.desktop} preview={props.preview} />
       <Group title={t("desk.privacy_page_send_title")}>
         {STEPS.map((step) => (
           <Row key={step.id} title={step.title()} description={step.text()} />
@@ -136,7 +139,7 @@ export function PrivacyView(props: PrivacyViewProps) {
       <Group title={t("desk.privacy_page_levels_title")}>
         {LEVELS.map((level) => (
           <Row key={level.id} title={level.label()} description={level.detail()}>
-            {level.id === props.state.level ? (
+            {!props.preview && level.id === props.state.level ? (
               <Badge tone="success" size="sm">
                 {t("desk.privacy_page_your_level")}
               </Badge>
@@ -148,7 +151,7 @@ export function PrivacyView(props: PrivacyViewProps) {
         {icons.lock(BUTTON_ICON)}
         {t("desk.privacy_page_level_fixed")}
       </p>
-      <Group title={t("desk.privacy_page_local_title")}>
+      {props.preview ? null : <Group title={t("desk.privacy_page_local_title")}>
         <Row title={row.title} description={row.disabledReason ? `${row.description} ${row.disabledReason}` : row.description}>
           {row.action === "turn-off" ? (
             <Button size="sm" variant="ghost" loading={props.busy} onClick={() => props.onLocalModel(false)}>
@@ -167,7 +170,7 @@ export function PrivacyView(props: PrivacyViewProps) {
             </Button>
           )}
         </Row>
-      </Group>
+      </Group>}
       <Group title={t("desk.privacy_page_where_title")}>
         <Row title={t("desk.privacy_page_where_desktop_title")} description={t("desk.privacy_page_where_desktop_text")} />
         <Row title={t("desk.privacy_page_where_miss_title")} description={t("desk.privacy_page_where_miss_text")} />
@@ -194,13 +197,13 @@ export function DeskPrivacyScreen(props: { desktop?: boolean }) {
   const state = privacy.data?.data;
 
   return (
-    <DeskShell current="privacy" title={t("desk.nav_privacy")} meta={state ? privacyLevelMeta(state.level) : undefined}>
+    <DeskShell current="privacy" title={t("desk.nav_privacy")} meta={state && !privacy.data?.preview ? privacyLevelMeta(state.level) : undefined}>
       {privacy.isLoading ? (
         <Skeleton variant="text" lines={5} />
       ) : !state ? (
         <EmptyState title={t("desk.privacy_page_error_title")} description={t("desk.settings_try_again")} />
       ) : (
-        <PrivacyView state={state} desktop={desktop} busy={toggle.isPending} onLocalModel={(on) => toggle.mutate(on)} />
+        <PrivacyView state={state} desktop={desktop} preview={privacy.data?.preview ?? true} busy={toggle.isPending} onLocalModel={(on) => toggle.mutate(on)} />
       )}
     </DeskShell>
   );

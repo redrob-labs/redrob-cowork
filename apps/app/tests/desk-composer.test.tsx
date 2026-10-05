@@ -17,6 +17,7 @@ import {
   agentForMode,
   appendTranscript,
   createDeskComposerStore,
+  DESK_COMPOSER_STORE_KEY,
   memoryFor,
   modeFor,
   NEW_CHAT_KEY,
@@ -71,6 +72,27 @@ describe("Plan and Run", () => {
     expect(memoryFor(chats, "s9", false)).toBe("none");
     // The next new chat starts from the preference again.
     expect(modeFor(chats, NEW_CHAT_KEY, "run")).toBe("run");
+  });
+
+  test("a chat's choices outlive a restart, the new chat screen's pending one does not", () => {
+    const saved = new Map<string, string>();
+    const storage = () => ({
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => void saved.set(key, value),
+      removeItem: (key: string) => void saved.delete(key),
+    });
+    const first = createDeskComposerStore({ storage });
+    first.getState().setMode("s1", "plan");
+    first.getState().setMemory("s1", "none");
+    first.getState().setMode(NEW_CHAT_KEY, "plan");
+    expect(saved.get(DESK_COMPOSER_STORE_KEY)).toContain('"s1"');
+    expect(saved.get(DESK_COMPOSER_STORE_KEY)).not.toContain(`"${NEW_CHAT_KEY}"`);
+
+    // A synchronous storage hydrates as the store is made, as localStorage does.
+    const second = createDeskComposerStore({ storage });
+    expect(modeFor(second.getState().chats, "s1", "run")).toBe("plan");
+    expect(memoryFor(second.getState().chats, "s1", true)).toBe("none");
+    expect(second.getState().chats[NEW_CHAT_KEY]).toBeUndefined();
   });
 
   test("memory is per chat, and This project only inside a project", () => {
@@ -196,15 +218,24 @@ const status = (patch: Partial<DeskStatusInput> = {}): DeskStatusInput => ({
 });
 
 describe("the status line", () => {
-  test("privacy reads High, safe, with the preview note in its panel", () => {
-    const [privacy] = deskStatusItems(status());
+  test("privacy reads High, safe, only from a real state", () => {
+    const [privacy] = deskStatusItems(status({ privacy: { level: "high", preview: false } }));
     expect(privacy?.id).toBe("privacy");
     expect(privacy?.tone).toBe("safe");
     expect(privacy?.value).toBe(en["desk.privacy_high"]);
     expect(privacy?.level).toEqual({ n: 2, of: 3 });
     const panel = renderToStaticMarkup(<>{privacy?.panel}</>);
-    expect(panel).toContain(en["desk.privacy_preview"]);
     expect(panel).toContain(`${en["desk.privacy_on_title"]}: ${en["desk.privacy_high"]}`);
+  });
+
+  test("sample data or no state reads Off, never protected", () => {
+    for (const privacy of [{ level: "high" as const, preview: true }, null]) {
+      const [item] = deskStatusItems(status({ privacy }));
+      expect(item?.tone).toBe("plain");
+      expect(item?.value).toBe(en["desk.privacy_off"]);
+      expect(item?.level).toBeUndefined();
+      expect(renderToStaticMarkup(<>{item?.panel}</>)).toContain(en["desk.privacy_page_off_title"]);
+    }
   });
 
   test("privacy says off on the web", () => {

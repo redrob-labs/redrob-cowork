@@ -10,6 +10,7 @@ import { useInDeskFrame } from "../src/react-app/desk/shell/desk-frame";
 import { RedirectToChat, chatPath, deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 import { DeskShell, panelToggleLabel } from "../src/react-app/desk/shell/desk-shell";
 import { buildDeskNav, formatNavTime, type DeskNavInput } from "../src/react-app/desk/shell/nav";
+import { counted } from "../src/react-app/desk/shell/use-desk-nav-data";
 import { useFrameStore } from "../src/react-app/desk/store/frame-store";
 
 const NOW = at(28, 12, 0);
@@ -72,6 +73,11 @@ describe("buildDeskNav", () => {
     expect(meta.privacy).toBe("High");
     expect(meta.memory).toBe("22");
     expect(meta.chat).toBeUndefined();
+  });
+
+  test("a count from sample data is never shown as the person's own", () => {
+    expect(counted({ data: [1, 2, 3], preview: true }, (data) => data.length)).toBeNull();
+    expect(counted({ data: [1, 2, 3], preview: false }, (data) => data.length)).toBe(3);
   });
 
   test("a count still loading shows no meta rather than a wrong one", () => {

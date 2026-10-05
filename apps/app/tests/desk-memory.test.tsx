@@ -258,7 +258,7 @@ describe("MemoryView", () => {
 
   test("lists the notes with where they came from, the how-it-works line and the scope links", () => {
     const html = view(NOTES);
-    expect(html).toContain("Notes are kept by Redrob outside any AI, so every AI reads the same ones.");
+    expect(html).toContain("Notes are kept on this computer, outside any AI.");
     expect(html).toContain("Call me Jiwoo");
     expect(html).toContain("You told it in How I like drafts,");
     expect(html).toContain('href="/memory/you"');
@@ -291,7 +291,7 @@ describe("MemoryView", () => {
   test("Korean has the screen's words in Korean", () => {
     setLocale("ko");
     const html = view(NOTES);
-    expect(html).toContain("메모는 레드롭이 AI 밖에 따로 보관하므로");
+    expect(html).toContain("메모는 AI 밖, 이 컴퓨터에 보관됩니다");
     expect(html).toContain("잊기");
     expect(html).toContain("나에 관한 메모");
   });
