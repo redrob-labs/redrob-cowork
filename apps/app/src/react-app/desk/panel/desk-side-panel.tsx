@@ -14,6 +14,7 @@ import { getSidePanelSessionKey } from "../../domains/session/panel/side-panel-s
 import { useSidePanelTabs } from "../../domains/session/panel/use-side-panel-tabs";
 import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
+import { DeskPanelFiles } from "./desk-panel-files";
 
 const ICON = { width: 15, height: 15, "aria-hidden": true };
 
@@ -72,18 +73,6 @@ export function DeskSidePanelView(props: DeskSidePanelViewProps) {
   );
 }
 
-/** Until the Files list arrives (T10), the place where it will be. */
-export function DeskPanelFiles() {
-  return (
-    <EmptyState
-      compact
-      icon={icons.folderOpen({ width: 20, height: 20, "aria-hidden": true })}
-      title={t("desk.panel_files_empty_title")}
-      description={t("desk.panel_files_empty_text")}
-    />
-  );
-}
-
 /**
  * The app's built-in browser, as the old panel draws it: `BrowserPanelContent` reports its
  * bounds so Electron lays the native page over it, and hides that page when it unmounts
@@ -131,7 +120,7 @@ export function DeskSidePanel(props: { chatId: string | null }) {
   const closePanel = useFrameStore((state) => state.closePanel);
   return (
     <DeskSidePanelView tab={tab} onSwitch={openPanel} onClose={closePanel}>
-      {tab === "browser" ? <DeskPanelBrowser sessionKey={getSidePanelSessionKey(props.chatId)} /> : <DeskPanelFiles />}
+      {tab === "browser" ? <DeskPanelBrowser sessionKey={getSidePanelSessionKey(props.chatId)} /> : <DeskPanelFiles chatId={props.chatId} />}
     </DeskSidePanelView>
   );
 }

@@ -134,7 +134,8 @@ describe("DeskShell with the side panel", () => {
     const html = shell(true);
     expect(html).toContain('class="desk-shell desk-shell--panel"');
     expect(html).toContain('<aside class="desk-panel" aria-label="Files">');
-    expect(html).toContain("No files yet");
+    // Files load through a query, so the first render holds the list's place.
+    expect(html).toContain('<div class="desk-panel__body">');
     expect(html).not.toContain("Screen rail");
     expect(html).toContain('aria-label="Close the side panel"');
     // The panel follows the AppShell, so it is the column to the right of the work.

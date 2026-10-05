@@ -45,6 +45,7 @@ import {
 } from "./nuke.mjs";
 import { applyDesktopBootstrapBrandIcon } from "./brand-icon-bootstrap.mjs";
 import { openExternalUrl } from "./open-external.mjs";
+import { resolveWorkspaceFile } from "./workspace-file-access.mjs";
 import { resolveAppIdentifier, resolveUserDataPath } from "./dev-profile.mjs";
 import {
   createLinuxDesktopIntegration,
@@ -1553,6 +1554,16 @@ function engineDoctor(options = {}) {
   return runtimeManager.engineDoctor(options);
 }
 
+/** A workspace file, resolved only under a local workspace or a folder its config authorizes. */
+async function authorizedWorkspaceFile(root, relativePath) {
+  const workspacePaths = await workspaceStore.listLocalWorkspacePaths();
+  const configs = await Promise.all(
+    workspacePaths.map((workspacePath) => workspaceStore.readWorkspaceRedrobConfig(workspacePath).catch(() => null)),
+  );
+  const authorized = configs.flatMap((config) => (Array.isArray(config?.authorizedRoots) ? config.authorizedRoots : []));
+  return resolveWorkspaceFile({ root, relativePath, knownRoots: [...workspacePaths, ...authorized] });
+}
+
 function activeWindowFromEvent(event) {
   return BrowserWindow.fromWebContents(event.sender) ?? mainWindow ?? undefined;
 }
@@ -1958,6 +1969,21 @@ const desktopCommandHandlers = {
         return error && error.trim() ? error : undefined;
       }
       return `Could not find "${target}" on disk.`;
+  },
+  // The Desk side panel's Open and Show in folder: a workspace-relative file, only inside a
+  // local workspace (or a folder one authorizes). Never a path the renderer made up.
+  "__openWorkspaceFile": async (event, ...args) => {
+      const target = await authorizedWorkspaceFile(args[0], args[1]);
+      if (!target) return "This file is outside the folders Desk may use.";
+      if (!existsSync(target)) return "This file is no longer there.";
+      return shell.openPath(target);
+  },
+  "__revealWorkspaceFile": async (event, ...args) => {
+      const target = await authorizedWorkspaceFile(args[0], args[1]);
+      if (!target) return "This file is outside the folders Desk may use.";
+      if (!existsSync(target)) return "This file is no longer there.";
+      shell.showItemInFolder(target);
+      return undefined;
   },
   "__getFileIcon": async (event, ...args) => {
       const target = String(args[0] ?? "").trim();

@@ -2,6 +2,7 @@ import type { Session } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 
 import type { RedrobArtifactItem, RedrobServerClient, RedrobWorkspaceInfo } from "../../../app/lib/redrob-server";
+import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/desk-files";
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
 import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project } from "./types";
@@ -67,17 +68,19 @@ function toProject(workspace: RedrobWorkspaceInfo): Project {
   };
 }
 
+/** An artifact as a Desk file: its id is the one a chat answer naming it resolves to. */
 function toFile(item: RedrobArtifactItem, projectName: string): DeskFile {
-  const name = item.name ?? item.path?.split(/[\\/]/).pop() ?? item.id;
-  const sheet = /\.(xlsx|xls|csv)$/i.test(name);
+  const name = displayFileName(item.name ?? item.path ?? item.id);
+  const path = item.path ? `${DESK_OUTBOX}/${item.path}` : undefined;
   return {
-    id: item.id,
+    id: path ? deskFileIdFor(path) : item.id,
     name,
-    icon: sheet ? "fileSheet" : "fileText",
+    icon: fileIconFor(name),
     projectName,
     when: item.updatedAt ?? item.createdAt ?? 0,
     fromChat: null,
-    kind: sheet ? "sheet" : "file",
+    kind: fileKindFor(name),
+    ...(path ? { path } : {}),
   };
 }
 

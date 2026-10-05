@@ -518,6 +518,9 @@ export type DesktopCommandMap = {
   // Window / OS utilities (dunder commands)
   __openPath: { args: [target: string]; result: unknown };
   __revealItemInDir: { args: [target: string]; result: unknown };
+  /** A workspace-relative file under a local workspace root; refused outside the folders Desk may use. */
+  __openWorkspaceFile: { args: [root: string, relativePath: string]; result: string | undefined };
+  __revealWorkspaceFile: { args: [root: string, relativePath: string]; result: string | undefined };
   __getFileIcon: { args: [target: string, size?: "small" | "normal" | "large"]; result: string | null };
   __applyBrandAppName: { args: [appName: string | null]; result: { ok: true; appName: string } };
   __applyBrandIcon: { args: [url: string | null]; result: BrandIconApplyResult };

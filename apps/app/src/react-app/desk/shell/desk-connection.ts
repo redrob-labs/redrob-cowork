@@ -1,11 +1,17 @@
 import { create } from "zustand";
 
+import type { RedrobServerClient } from "../../../app/lib/redrob-server";
 import type { DeskServerClient } from "../services/real-services";
 
+/** The calls the Files panel uses to preview a file. */
+export type DeskFileClient = Pick<RedrobServerClient, "readWorkspaceFile" | "downloadWorkspaceFile">;
+
 export type DeskConnection = {
-  client: DeskServerClient | null;
+  client: (DeskServerClient & DeskFileClient) | null;
   /** The server-side id of the workspace the chat route has open. */
   workspaceId: string | null;
+  /** That workspace's folder on this computer; null for a remote workspace. Never shown. */
+  workspaceRoot: string | null;
   /** Changes when that workspace's chats are added or renamed, so the menu refetches. */
   chatsVersion: string;
 };
@@ -18,6 +24,7 @@ export type DeskConnection = {
 export const useDeskConnection = create<DeskConnection>()(() => ({
   client: null,
   workspaceId: null,
+  workspaceRoot: null,
   chatsVersion: "",
 }));
 
@@ -26,6 +33,7 @@ export function publishDeskConnection(next: DeskConnection) {
   if (
     current.client === next.client &&
     current.workspaceId === next.workspaceId &&
+    current.workspaceRoot === next.workspaceRoot &&
     current.chatsVersion === next.chatsVersion
   ) {
     return;

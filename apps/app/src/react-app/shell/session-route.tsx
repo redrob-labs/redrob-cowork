@@ -2326,9 +2326,10 @@ export function SessionRoute() {
     publishDeskConnection({
       client: selectedWorkspaceEndpoint?.client ?? null,
       workspaceId: selectedWorkspaceEndpoint?.workspaceId || null,
+      workspaceRoot: selectedWorkspace?.workspaceType === "remote" ? null : selectedWorkspaceRoot || null,
       chatsVersion: deskChatsVersion,
     });
-  }, [deskChatsVersion, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId]);
+  }, [deskChatsVersion, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
 
   return (
     <WorkspaceProvider

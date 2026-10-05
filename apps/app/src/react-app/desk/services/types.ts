@@ -174,5 +174,11 @@ export type DeskFile = {
   when: number;
   /** Title of the chat that wrote the file. */
   fromChat: string | null;
+  /** That chat's id, for a link back to it. */
+  chatId?: string;
   kind: DeskFileKind;
+  /** Workspace-relative, to read and open the file. Never shown. */
+  path?: string;
+  /** Sample text a fixture shows as its preview, in markdown. */
+  body?: string;
 };

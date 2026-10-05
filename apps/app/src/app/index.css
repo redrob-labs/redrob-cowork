@@ -439,6 +439,165 @@
 }
 
 /**
+ * Files in the side panel (`desk/panel/desk-panel-files.tsx`): this week's files as rows, and
+ * one file with its preview on the raised surface and its two actions.
+ */
+.desk-files,
+.desk-file {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.desk-files__lede,
+.desk-file__from,
+.desk-file__note,
+.desk-file__none {
+  margin: 0;
+  font: var(--text-meta);
+  color: var(--ink-secondary);
+}
+
+.desk-files__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.desk-files__list > li {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-file-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-2);
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.desk-file-row:hover {
+  background: var(--surface-sunken);
+}
+
+.desk-file-row:focus-visible,
+.desk-file__back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.desk-file__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--ink-secondary);
+}
+
+.desk-file-row__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.desk-file-row__text b {
+  overflow: hidden;
+  font: var(--text-body-strong);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desk-file-row__text span {
+  font: var(--text-meta);
+  color: var(--ink-secondary);
+}
+
+.desk-file-row__when {
+  flex: none;
+  font: var(--text-meta);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.desk-file__back {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: var(--text-meta);
+  font-weight: 600;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.desk-file__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.desk-file__head > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.desk-file__head b {
+  font: var(--text-body-strong);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.desk-file__head > div > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font: var(--text-meta);
+  color: var(--ink-muted);
+}
+
+.desk-file__preview {
+  max-height: 480px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: --theme(--radius-md);
+  background: var(--surface-raised);
+}
+
+.desk-file__none {
+  padding: var(--space-4);
+}
+
+.desk-file__from a {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-file__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/**
  * The account menu at the foot of the sidebar, the shortcuts list, the dialog layer and the
  * toast (`account-menu.tsx`, `desk-layer.tsx`, `desk-dialog.tsx`). Layout on design tokens;
  * the menu's trigger is reached by element order (its `div`, then its `button`), never by

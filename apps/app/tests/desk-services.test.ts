@@ -222,7 +222,15 @@ describe("desk real services", () => {
     expect(files).toMatchObject({
       preview: false,
       data: [
-        { id: "a1", name: "Exhibit index.xlsx", kind: "sheet", icon: "fileSheet", projectName: "Seorin MSA", when: 9 },
+        {
+          id: "file:.opencode/redrob/outbox/outbox/exhibit index.xlsx",
+          name: "Exhibit index.xlsx",
+          kind: "sheet",
+          icon: "fileSheet",
+          projectName: "Seorin MSA",
+          when: 9,
+          path: ".opencode/redrob/outbox/outbox/Exhibit index.xlsx",
+        },
         { id: "a2", name: "Note.docx", kind: "file", icon: "fileText" },
       ],
     });
