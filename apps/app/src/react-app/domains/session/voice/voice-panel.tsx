@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { publishInspectorSlice, recordInspectorEvent } from "@/app/lib/app-inspector";
 import { useControlAction, type RedrobControlAction } from "../../../shell/control/control-provider";
 import { t } from "@/i18n";
+import { waitForDataChannelOpen } from "./voice-dictation";
 
 type VoiceStatus = "idle" | "connecting" | "listening" | "muted" | "speaking" | "error";
 
@@ -227,28 +228,6 @@ async function loadVoiceSessionContext(client: RedrobServerClient, workspaceId: 
   } catch {
     return "";
   }
-}
-
-function waitForDataChannelOpen(channel: RTCDataChannel) {
-  if (channel.readyState === "open") return Promise.resolve();
-  return new Promise<void>((resolve, reject) => {
-    const cleanup = () => {
-      window.clearTimeout(timeout);
-      channel.removeEventListener("open", handleOpen);
-      channel.removeEventListener("close", handleClose);
-      channel.removeEventListener("error", handleError);
-    };
-    const timeout = window.setTimeout(() => {
-      cleanup();
-      reject(new Error(t("voice.realtime_channel_timeout")));
-    }, 10_000);
-    const handleOpen = () => { cleanup(); resolve(); };
-    const handleClose = () => { cleanup(); reject(new Error(t("voice.realtime_channel_closed_early"))); };
-    const handleError = () => { cleanup(); reject(new Error(t("voice.realtime_channel_failed"))); };
-    channel.addEventListener("open", handleOpen);
-    channel.addEventListener("close", handleClose);
-    channel.addEventListener("error", handleError);
-  });
 }
 
 function describeAudioTrack(track: MediaStreamTrack | undefined) {

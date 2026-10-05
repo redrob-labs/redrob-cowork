@@ -28,6 +28,9 @@ import {
 } from "./slash-command";
 import { FILE_URL_RE, HTTP_URL_RE, type PastedTextChip } from "./pasted-text";
 import { dragEventHasFiles } from "./drag-files";
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { DeskComposerStatus, DeskComposerTools } from "@/react-app/desk/composer/desk-composer";
+import { NEW_CHAT_KEY } from "@/react-app/desk/composer/composer-state";
 
 type MentionItem = {
   id: string;
@@ -332,7 +335,10 @@ export function ReactSessionComposer(props: ComposerProps) {
   const mentionOpenNext = Boolean(mentionMatch);
   const mentionQuery = mentionMatch?.[1] ?? "";
   const nonDefaultAgents = useMemo(() => agents.filter(isNonDefaultAgent), [agents]);
-  const showAgentPicker = props.selectedAgent !== null;
+  // Inside the Desk frame Plan or Run picks the agent, so the agent picker steps aside.
+  const inDeskFrame = useInDeskFrame();
+  const deskChatKey = props.sessionId ?? NEW_CHAT_KEY;
+  const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;
 
   useEffect(() => {
     setSlashOpen(slashOpenNext);
@@ -1052,6 +1058,43 @@ export function ReactSessionComposer(props: ComposerProps) {
     );
   };
 
+  const modelControls = (
+    <>
+      <ModelSelect
+        open={props.modelPickerOpen}
+        value={props.selectedModel}
+        onOpenChange={props.onModelPickerOpenChange}
+        onChange={(model, variant) => {
+          if (!props.steering) props.onModelChange(model, variant);
+        }}
+        disabled={props.steering}
+        sessionId={props.sessionId}
+        fallbackOptions={props.modelOptions}
+        behaviorValue={props.modelVariant}
+        behaviorLabel={props.modelVariantLabel}
+        behaviorOptions={props.modelBehaviorOptions}
+        onBehaviorChange={(value) => {
+          if (!props.steering) props.onModelVariantChange(value);
+        }}
+      />
+      {/*
+        Effort as its own button, beside the model button rather than inside it. The level was
+        previously a read-only chip on the model control and could only be CHANGED by clicking a
+        model and walking into a submenu, which is why the interaction was unreadable.
+        `EffortSelect` renders nothing when the selected model publishes no levels.
+      */}
+      <EffortSelect
+        options={props.modelBehaviorOptions ?? []}
+        value={props.modelVariant ?? null}
+        label={props.modelVariantLabel}
+        disabled={props.steering}
+        onChange={(value) => {
+          if (!props.steering) props.onModelVariantChange(value);
+        }}
+      />
+    </>
+  );
+
   return (
     <div
       ref={rootRef}
@@ -1151,7 +1194,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 previewUrl: attachment.previewUrl,
               }))}
               disabled={props.disabled}
-              placeholder={t("composer.placeholder")}
+              placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}
               onChange={props.onDraftChange}
               onSubmit={handleEditorSubmit}
               onExpandPastedText={handleExpandPastedText}
@@ -1495,38 +1538,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   ) : null}
                 </div>
 
-                <ModelSelect
-                  open={props.modelPickerOpen}
-                  value={props.selectedModel}
-                  onOpenChange={props.onModelPickerOpenChange}
-                  onChange={(model, variant) => {
-                    if (!props.steering) props.onModelChange(model, variant);
-                  }}
-                  disabled={props.steering}
-                  sessionId={props.sessionId}
-                  fallbackOptions={props.modelOptions}
-                  behaviorValue={props.modelVariant}
-                  behaviorLabel={props.modelVariantLabel}
-                  behaviorOptions={props.modelBehaviorOptions}
-                  onBehaviorChange={(value) => {
-                    if (!props.steering) props.onModelVariantChange(value);
-                  }}
-                />
-                {/*
-                  Effort as its own button, beside the model button rather than inside it. The level was
-                  previously a read-only chip on the model control and could only be CHANGED by clicking a
-                  model and walking into a submenu, which is why the interaction was unreadable.
-                  `EffortSelect` renders nothing when the selected model publishes no levels.
-                */}
-                <EffortSelect
-                  options={props.modelBehaviorOptions ?? []}
-                  value={props.modelVariant ?? null}
-                  label={props.modelVariantLabel}
-                  disabled={props.steering}
-                  onChange={(value) => {
-                    if (!props.steering) props.onModelVariantChange(value);
-                  }}
-                />
+                {inDeskFrame ? null : modelControls}
                 {props.modelUnavailable ? (
                   <span className="max-w-[20rem] truncate text-xs font-medium text-destructive-ink">
                     {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
@@ -1540,8 +1552,14 @@ export function ReactSessionComposer(props: ComposerProps) {
                 - Idle: send arrow.
                 - Busy: stop icon in that same slot (Enter still queues;
                   Cmd/Ctrl+Enter still steers).
+                Inside the Desk frame the mic, Plan or Run and the model sit before it.
               */}
               <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                {inDeskFrame ? (
+                  <DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
+                    {modelControls}
+                  </DeskComposerTools>
+                ) : null}
                 {props.busy && escapeArmed ? (
                   <span className="self-center pr-1 text-xs font-medium text-subtle-foreground max-lg:hidden">
                     {t("composer.escape_to_stop")}
@@ -1591,6 +1609,7 @@ export function ReactSessionComposer(props: ComposerProps) {
           each request carries the whole conversation, so that turn's own input already includes every
           earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
         */}
+        {inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}
         <ContextMeter
           compacting={props.compactingSession}
           onCompact={props.onCompactSession}

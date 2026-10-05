@@ -13,6 +13,8 @@ import {
 import { THINKING_PREF_KEY } from "../../app/constants";
 import { coerceReleaseChannel } from "../../app/lib/release-channels";
 import type { ModelRef, ReleaseChannel, SettingsTab, View } from "../../app/types";
+import { DEFAULT_CROSS_CHECK, DEFAULT_NEW_CHAT_MODE, type DeskCrossCheck } from "../desk/composer/composer-state";
+import type { ChatMode } from "../desk/services/types";
 import {
   DEFAULT_DESKTOP_NOTIFICATION_PREFERENCE,
   isDesktopNotificationPreference,
@@ -47,6 +49,10 @@ export type LocalPreferences = {
    * fall back to the default agent (#2101).
    */
   selectedAgent: string | null;
+  /** Plan or Run, what a new chat in the Desk starts in. */
+  deskNewChatMode: ChatMode;
+  /** Cross-check's two checks, each Off, When it matters or Always. */
+  deskCrossCheck: DeskCrossCheck;
   /**
    * Release channel the desktop app is subscribed to. Defaults to
    * "stable". Alpha is only honored on macOS; the updater helper falls
@@ -101,6 +107,8 @@ const INITIAL_PREFS: LocalPreferences = {
   modelVariant: null,
   defaultModel: null,
   selectedAgent: null,
+  deskNewChatMode: DEFAULT_NEW_CHAT_MODE,
+  deskCrossCheck: DEFAULT_CROSS_CHECK,
   releaseChannel: "stable",
   featureFlags: { microsandboxCreateSandbox: true, continuousEngine: false, memory: false },
   hasCompletedOnboarding: false,

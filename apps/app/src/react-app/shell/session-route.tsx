@@ -9,6 +9,8 @@ import {
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
 import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
 import type {
   AgentPartInput,
   FilePartInput,
@@ -513,6 +515,8 @@ export function SessionRoute() {
   // Agent selection is persisted in local prefs (like the model variant) so
   // it survives reloads instead of silently falling back to "build" (#2101).
   const selectedAgent = local.prefs.selectedAgent;
+  // Inside the Desk frame the chat's Plan or Run decides the agent a prompt goes to.
+  const inDeskFrame = useInDeskFrame();
   const setSelectedAgent = useCallback(
     (agent: string | null) => {
       local.setPrefs((previous) => ({ ...previous, selectedAgent: agent }));
@@ -1058,7 +1062,11 @@ export function SessionRoute() {
               sessionID: targetSessionId,
               parts,
               model: sendModel ?? undefined,
-              agent: selectedAgent ?? undefined,
+              agent: resolvePromptAgent({
+                inFrame: inDeskFrame,
+                mode: modeFor(useDeskComposerStore.getState().chats, targetSessionId, local.prefs.deskNewChatMode),
+                selectedAgent,
+              }) ?? undefined,
               ...(sendVariant ? { variant: sendVariant } : {}),
               ...(envSystemContext ? { system: envSystemContext } : {}),
             });
@@ -1191,6 +1199,7 @@ export function SessionRoute() {
     hasUsableModel,
     handleApplyEnvironmentChanges,
     environmentRuntimeKey,
+    inDeskFrame,
     local,
     listAgents,
     listSlashCommands,
@@ -2249,6 +2258,8 @@ export function SessionRoute() {
             }
             // One-step run: the session surface sends the seeded draft itself.
             markComposerAutoSend(session.id);
+            // Plan or Run and the memory picked on the new chat screen belong to this chat now.
+            useDeskComposerStore.getState().claimNewChat(session.id);
           }
           writeLastSessionFor(targetWorkspaceId, session.id);
           rememberPendingCreatedSession(targetWorkspaceId, session.id);
@@ -2513,6 +2524,8 @@ export function SessionRoute() {
                 }
                 // One-step run: the session surface sends the seeded draft itself.
                 markComposerAutoSend(session.id);
+                // Plan or Run and the memory picked on the new chat screen belong to this chat now.
+                useDeskComposerStore.getState().claimNewChat(session.id);
               }
               writeActiveWorkspaceId(workspaceId || null);
               writeLastSessionFor(workspaceId, session.id);

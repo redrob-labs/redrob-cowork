@@ -1,13 +1,14 @@
 import { create } from "zustand";
 
 import type { RedrobServerClient } from "../../../app/lib/redrob-server";
+import type { DictationClient } from "../../domains/session/voice/voice-dictation";
 import type { DeskServerClient } from "../services/real-services";
 
 /** The calls the Files panel uses to preview a file. */
 export type DeskFileClient = Pick<RedrobServerClient, "readWorkspaceFile" | "downloadWorkspaceFile">;
 
 export type DeskConnection = {
-  client: (DeskServerClient & DeskFileClient) | null;
+  client: (DeskServerClient & DeskFileClient & DictationClient) | null;
   /** The server-side id of the workspace the chat route has open. */
   workspaceId: string | null;
   /** That workspace's folder on this computer; null for a remote workspace. Never shown. */

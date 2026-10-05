@@ -927,6 +927,39 @@
   box-shadow: var(--shadow-md);
 }
 
+/**
+ * The composer inside the Desk frame (`desk/composer/desk-composer.tsx`): the new chat's
+ * one spoken line, the mic, Plan or Run and the model before Send, and the status line
+ * under the field. The line is the only serif on the screen.
+ */
+.desk-new {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.desk-new__line {
+  margin: 0;
+  font: var(--text-voice-2);
+  font-family: var(--font-serif);
+  color: var(--ink-primary);
+}
+
+.desk-composer-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.desk-composer-status {
+  margin-top: var(--space-2);
+  padding: 0 var(--space-2);
+}
+
 @media (max-width: 900px) {
   .desk-account__text {
     display: none;
