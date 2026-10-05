@@ -2,7 +2,9 @@ import { useMemo, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { currentLocale, subscribeToLocale } from "../../../i18n";
+import { connectedCount, mcpStatusReader } from "../connectors/connectors";
 import { createDeskServices } from "../services/real-services";
+import { useFrameStore } from "../store/frame-store";
 import { RECENT_CHAT_COUNT, type DeskNavInput } from "./nav";
 import { useDeskConnection } from "./desk-connection";
 
@@ -17,10 +19,16 @@ const NAV_STALE_MS = 30_000;
  */
 export function useDeskNavData(): DeskNavData {
   const client = useDeskConnection((state) => state.client);
+  const opencode = useDeskConnection((state) => state.opencode);
   const workspaceId = useDeskConnection((state) => state.workspaceId);
+  const workspaceRoot = useDeskConnection((state) => state.workspaceRoot);
   const chatsVersion = useDeskConnection((state) => state.chatsVersion);
+  const developerMode = useFrameStore((state) => state.developerMode);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const services = useMemo(() => createDeskServices({ client, workspaceId }), [client, workspaceId]);
+  const services = useMemo(
+    () => createDeskServices({ client, workspaceId, mcpStatus: mcpStatusReader(opencode, workspaceRoot) }),
+    [client, opencode, workspaceId, workspaceRoot],
+  );
   const scope = workspaceId ?? "preview";
 
   const chats = useQuery({
@@ -35,8 +43,9 @@ export function useDeskNavData(): DeskNavData {
     staleTime: NAV_STALE_MS,
   });
   const connected = useQuery({
-    queryKey: ["desk-nav", scope, "connected"],
-    queryFn: async () => (await services.connectors.list()).data.filter((entry) => entry.state === "connected").length,
+    // The count the Connectors screen shows: the tools your team built only in Developer mode.
+    queryKey: ["desk-nav", scope, "connected", developerMode],
+    queryFn: async () => connectedCount((await services.connectors.list()).data, developerMode),
     staleTime: NAV_STALE_MS,
   });
   const privacy = useQuery({

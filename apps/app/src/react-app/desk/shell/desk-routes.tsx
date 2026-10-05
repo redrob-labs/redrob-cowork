@@ -2,6 +2,8 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, useParams } from "react-router";
 
+import { DeskConnectorsScreen } from "../connectors/desk-connectors";
+import { DeskMemoryScreen } from "../memory/desk-memory";
 import { DeskPrivacyScreen } from "../privacy/desk-privacy";
 import { ProjectScreen, ProjectsScreen } from "../projects/desk-projects";
 import { DeskPlaceholder, type DeskPlaceholderScreen } from "./desk-placeholder";
@@ -25,9 +27,6 @@ const PLACEHOLDER_ROUTES: ReadonlyArray<{ path: string; screen: DeskPlaceholderS
   { path: "/scheduled", screen: "scheduled" },
   { path: "/history", screen: "history" },
   { path: "/guide", screen: "guide" },
-  { path: "/connectors", screen: "connectors" },
-  { path: "/memory", screen: "memory" },
-  { path: "/memory/:scope", screen: "memory" },
 ];
 
 /**
@@ -49,6 +48,10 @@ export function deskRoutes(chat: ReactNode) {
     <Route key="projects" path="/projects" element={<ProjectsScreen />} />,
     <Route key="project" path="/project/:projectId" element={<ProjectScreen />} />,
     <Route key="privacy" path="/privacy" element={<DeskPrivacyScreen />} />,
+    <Route key="connectors" path="/connectors" element={<DeskConnectorsScreen />} />,
+    // The Desk Memory screen is always on; the old memory flag only gates the settings tab.
+    <Route key="memory" path="/memory" element={<DeskMemoryScreen />} />,
+    <Route key="memory-scope" path="/memory/:scope" element={<DeskMemoryScreen />} />,
     ...PLACEHOLDER_ROUTES.map(({ path, screen }) => (
       <Route key={path} path={path} element={<DeskPlaceholder screen={screen} />} />
     )),

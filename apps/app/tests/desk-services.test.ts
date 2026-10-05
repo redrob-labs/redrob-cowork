@@ -193,6 +193,10 @@ function fakeClient() {
       calls.push(`listArtifacts:${workspaceId}`);
       return { items: [{ id: "a1", path: "outbox/Exhibit index.xlsx", updatedAt: 9 }, { id: "a2", name: "Note.docx" }] };
     },
+    listMcp: async (workspaceId) => {
+      calls.push(`listMcp:${workspaceId}`);
+      return { items: [{ name: "notion", config: { type: "remote", url: "https://mcp.notion.com/mcp" }, source: "config.project" }] };
+    },
   };
   return { client, calls };
 }
@@ -275,10 +279,22 @@ describe("desk real services", () => {
     expect((await services.playbooks.get("first-review")).preview).toBe(true);
     expect((await services.schedules.list()).preview).toBe(true);
     expect((await services.history.list()).preview).toBe(true);
-    expect((await services.connectors.list()).preview).toBe(true);
     expect((await services.privacy.get()).preview).toBe(true);
     expect((await services.catalog.get()).preview).toBe(true);
     expect(calls).toEqual([]);
+  });
+
+  test("connectors are the configured servers, real once a client is known", async () => {
+    const { client, calls } = fakeClient();
+    const services = createRealDeskServices({
+      client,
+      workspaceId: "ws_1",
+      mcpStatus: async () => ({ notion: { status: "connected" } }),
+    });
+    const connectors = await services.connectors.list();
+    expect(connectors.preview).toBe(false);
+    expect(connectors.data).toMatchObject([{ id: "notion", name: "Notion", state: "connected", custom: false }]);
+    expect(calls).toEqual(["listMcp:ws_1"]);
   });
 
   test("createDeskServices is real with a client and project, fixtures otherwise", async () => {

@@ -2,6 +2,7 @@ import type { Session } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 
 import type { RedrobArtifactItem, RedrobServerClient, RedrobWorkspaceInfo } from "../../../app/lib/redrob-server";
+import { connectorsFromMcp, type DeskMcpStatusMap } from "../connectors/connectors";
 import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/desk-files";
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
@@ -10,13 +11,15 @@ import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project }
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "deleteMemory" | "listArtifacts"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "deleteMemory" | "listArtifacts" | "listMcp"
 >;
 
 export type RealDeskServicesDeps = {
   client: DeskServerClient;
   /** The current project (a redrob-server workspace). */
   workspaceId: string;
+  /** The engine's live connector status. Without it every connector reads from its config alone. */
+  mcpStatus?: (() => Promise<DeskMcpStatusMap>) | null;
   /** Areas without a backend yet. Defaults to the fixture implementation. */
   fallback?: DeskServices;
 };
@@ -86,7 +89,8 @@ function toFile(item: RedrobArtifactItem, projectName: string): DeskFile {
 
 /**
  * Real data where redrob-server has it: projects (workspaces), chats
- * (sessions), memory notes and files (artifacts). Everything else comes from
+ * (sessions), memory notes, files (artifacts) and connectors (configured servers
+ * with the engine's status). Everything else comes from
  * `fallback`, so those results keep `preview: true`.
  */
 export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices {
@@ -141,6 +145,16 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         return real(artifacts.items.map((item) => toFile(item, projectName)));
       },
     },
+    connectors: {
+      list: async () => {
+        const [listed, statuses] = await Promise.all([
+          client.listMcp(workspaceId),
+          // A status that cannot be read leaves each connector to its config and sign-in.
+          deps.mcpStatus ? deps.mcpStatus().catch(() => ({})) : Promise.resolve({}),
+        ]);
+        return real(connectorsFromMcp(listed.items, statuses));
+      },
+    },
   };
 }
 
@@ -148,8 +162,14 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
 export function createDeskServices(input: {
   client: DeskServerClient | null;
   workspaceId: string | null;
+  mcpStatus?: (() => Promise<DeskMcpStatusMap>) | null;
 }): DeskServices {
   const fallback = createFixtureDeskServices();
   if (!input.client || !input.workspaceId) return fallback;
-  return createRealDeskServices({ client: input.client, workspaceId: input.workspaceId, fallback });
+  return createRealDeskServices({
+    client: input.client,
+    workspaceId: input.workspaceId,
+    mcpStatus: input.mcpStatus,
+    fallback,
+  });
 }

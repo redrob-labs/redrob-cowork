@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { RedrobServerClient } from "../../../app/lib/redrob-server";
+import type { Client } from "../../../app/types";
 import type { DictationClient } from "../../domains/session/voice/voice-dictation";
 import type { DeskServerClient } from "../services/real-services";
 
@@ -13,8 +14,13 @@ export type DeskProjectClient = Pick<
   "createManagedProject" | "moveSession" | "listAuthorizedFolders" | "setAuthorizedFolders"
 >;
 
+/** The calls the Connectors screen adds: turn one on or off, sign in through Redrob. */
+export type DeskConnectorClient = Pick<RedrobServerClient, "setMcpEnabled" | "connectManagedMcp">;
+
 export type DeskConnection = {
-  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient) | null;
+  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient) | null;
+  /** The engine client for that workspace: connector status and the sign-in flow. */
+  opencode: Client | null;
   /** The server-side id of the workspace the chat route has open. */
   workspaceId: string | null;
   /** That workspace's folder on this computer; null for a remote workspace. Never shown. */
@@ -30,6 +36,7 @@ export type DeskConnection = {
  */
 export const useDeskConnection = create<DeskConnection>()(() => ({
   client: null,
+  opencode: null,
   workspaceId: null,
   workspaceRoot: null,
   chatsVersion: "",
@@ -39,6 +46,7 @@ export function publishDeskConnection(next: DeskConnection) {
   const current = useDeskConnection.getState();
   if (
     current.client === next.client &&
+    current.opencode === next.opencode &&
     current.workspaceId === next.workspaceId &&
     current.workspaceRoot === next.workspaceRoot &&
     current.chatsVersion === next.chatsVersion

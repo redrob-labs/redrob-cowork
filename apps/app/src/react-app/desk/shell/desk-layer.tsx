@@ -134,9 +134,29 @@ function FeedbackDialog(props: { onClose: () => void }) {
 /** The confirmation at the bottom right. Keyed by the toast, so a new one replaces the old. */
 export function DeskToast(props: { toast: FrameToast; onClose: () => void }) {
   if (!props.toast) return null;
+  const { action } = props.toast;
   return (
     <div className="desk-toast" key={props.toast.id}>
-      <Toast tone={props.toast.tone ?? "success"} title={props.toast.title} onClose={props.onClose} closeLabel={t("desk.toast_close")}>
+      <Toast
+        tone={props.toast.tone ?? "success"}
+        title={props.toast.title}
+        onClose={props.onClose}
+        closeLabel={t("desk.toast_close")}
+        action={
+          action ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                action.run();
+                props.onClose();
+              }}
+            >
+              {action.label}
+            </Button>
+          ) : undefined
+        }
+      >
         {props.toast.text}
       </Toast>
     </div>

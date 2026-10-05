@@ -6,7 +6,9 @@ export type PanelTab = "browser" | "files";
 export type BrowserDesk = "reading" | "you" | "done";
 export type FrameModal = null | { kind: "project"; chatId: string | null } | { kind: "feedback" } | { kind: "keys" };
 export type ToastTone = "success" | "danger";
-export type FrameToast = { id: number; title: string; text?: string; tone?: ToastTone } | null;
+/** The one thing a toast offers, usually Undo. */
+export type ToastAction = { label: string; run: () => void };
+export type FrameToast = { id: number; title: string; text?: string; tone?: ToastTone; action?: ToastAction } | null;
 
 export type FrameState = {
   panel: { open: boolean; tab: PanelTab; file: string | null; lastTab: PanelTab };
@@ -29,7 +31,7 @@ export type FrameState = {
   openModal(modal: Exclude<FrameModal, null>): void;
   closeModal(): void;
   /** Replaces any toast and hides it after TOAST_MS. A confirmation unless `tone` says otherwise. */
-  showToast(title: string, text?: string, tone?: ToastTone): void;
+  showToast(title: string, text?: string, tone?: ToastTone, action?: ToastAction): void;
   hideToast(): void;
   setVoice(voice: boolean): void;
   setDeveloperMode(on: boolean): void;
@@ -93,7 +95,7 @@ export function createFrameStore(options: { timers?: DeskTimers; storage?: Stora
       setDesk: (desk) => set((state) => ({ browser: { ...state.browser, desk } })),
       openModal: (modal) => set({ modal }),
       closeModal: () => set({ modal: null }),
-      showToast: (title, text, tone) => {
+      showToast: (title, text, tone, action) => {
         clearToastTimer();
         toastId += 1;
         set({
@@ -102,6 +104,7 @@ export function createFrameStore(options: { timers?: DeskTimers; storage?: Stora
             title,
             ...(text === undefined ? {} : { text }),
             ...(tone === undefined ? {} : { tone }),
+            ...(action === undefined ? {} : { action }),
           },
         });
         toastTimer = timers.setTimeout(() => {

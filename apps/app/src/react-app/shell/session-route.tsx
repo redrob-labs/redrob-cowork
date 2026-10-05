@@ -2349,11 +2349,12 @@ export function SessionRoute() {
   useEffect(() => {
     publishDeskConnection({
       client: selectedWorkspaceEndpoint?.client ?? null,
+      opencode: opencodeClient ?? null,
       workspaceId: selectedWorkspaceEndpoint?.workspaceId || null,
       workspaceRoot: selectedWorkspace?.workspaceType === "remote" ? null : selectedWorkspaceRoot || null,
       chatsVersion: deskChatsVersion,
     });
-  }, [deskChatsVersion, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
+  }, [deskChatsVersion, opencodeClient, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
 
   useDeskCrossCheck({
     client: opencodeClient,

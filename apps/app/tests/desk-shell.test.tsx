@@ -244,9 +244,6 @@ describe("Desk routes", () => {
       ["/scheduled", "Scheduled", "scheduled"],
       ["/history", "History", "history"],
       ["/guide", "Model Guide", "guide"],
-      ["/connectors", "Connectors", "connectors"],
-      ["/memory", "Memory", "memory"],
-      ["/memory/you", "Memory", "memory"],
     ];
     for (const [path, title, place] of screens) {
       const html = withProviders(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, path);

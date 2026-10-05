@@ -1331,6 +1331,28 @@
   text-decoration: underline;
 }
 
+/* Memory: the scope picker reuses the settings list; each scope ends with its count. */
+.desk-memory__count {
+  margin-left: auto;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+
+/* Connectors: cards two to a row, one on a narrow window. */
+.desk-connectors__main {
+  max-width: 880px;
+}
+
+.desk-connectors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 @media (max-width: 900px) {
   .desk-account__text {
     display: none;

@@ -116,7 +116,16 @@ export type HistoryEntry = {
   steps?: HistoryStep[];
 };
 
-export type ConnectorState = "connected" | "needs-sign-in" | "off";
+export type ConnectorState = "connected" | "needs-sign-in" | "off" | "failed";
+
+/** The configured server behind a real connector. Never shown. */
+export type ConnectorServer = {
+  name: string;
+  /** Signed in through Redrob rather than by the engine. */
+  managed: boolean;
+  type: "remote" | "local";
+  url?: string;
+};
 
 export type Connector = {
   id: string;
@@ -126,6 +135,9 @@ export type Connector = {
   icon: string;
   does: string;
   state: ConnectorState;
+  /** Added by hand (a URL or a command): one of the tools your team built. */
+  custom?: boolean;
+  server?: ConnectorServer;
 };
 
 export type PrivacyLevel = "off" | "standard" | "high";
