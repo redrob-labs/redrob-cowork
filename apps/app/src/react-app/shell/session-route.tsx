@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
+import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import type {
   AgentPartInput,
   FilePartInput,
@@ -2315,6 +2316,19 @@ export function SessionRoute() {
     },
   }), [handleCreateWorkspace]);
   useControlAction(createWorkspaceControlAction);
+
+  // The Desk menu lists this workspace's recent chats through the same server connection.
+  const deskChatsVersion = useMemo(
+    () => (sessionsByWorkspaceId[selectedWorkspaceId] ?? []).map((session) => `${session.id}:${session.title}`).join("|"),
+    [sessionsByWorkspaceId, selectedWorkspaceId],
+  );
+  useEffect(() => {
+    publishDeskConnection({
+      client: selectedWorkspaceEndpoint?.client ?? null,
+      workspaceId: selectedWorkspaceEndpoint?.workspaceId || null,
+      chatsVersion: deskChatsVersion,
+    });
+  }, [deskChatsVersion, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId]);
 
   return (
     <WorkspaceProvider

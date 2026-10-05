@@ -294,6 +294,43 @@
   background-image: linear-gradient(180deg, var(--app-product-wash) 0, transparent 132px);
 }
 
+/**
+ * The Desk frame (`DeskShell`) fills the window. The page itself never scrolls (#root is
+ * overflow hidden), so the menu and the work column each scroll on their own. Layout only:
+ * the look is the design system's. `--fill` is for a screen that lays itself out edge to
+ * edge and scrolls inside, which is the session page today.
+ *
+ * Reached through AppShell's own ids (the skip link's target and the fold's
+ * `aria-controls`) and its element order, never its class names: those are the design
+ * system's vocabulary, which no app stylesheet defines (design-system-collisions.test.ts).
+ * The work column is the first `div` in `main`; the header before it is a `header`.
+ */
+.desk-shell,
+.desk-shell > div {
+  height: 100%;
+}
+
+.desk-shell #rr-shell-side,
+.desk-shell #rr-shell-main {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.desk-shell--fill #rr-shell-main {
+  overflow: hidden;
+}
+
+.desk-shell--fill #rr-shell-main > div:first-of-type {
+  min-height: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.desk-shell--fill #rr-shell-main > div:first-of-type > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 @media (prefers-reduced-transparency: reduce) {
   :root,
   [data-theme] {

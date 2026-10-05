@@ -70,6 +70,7 @@ import type { NewTaskComposerContext } from "./new-task-composer";
 import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
+import { useInDeskFrame } from "../../../desk/shell/desk-frame";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
 import { useBootOverlayVisible } from "../../../shell/boot-state";
@@ -332,6 +333,9 @@ function controlStringArg(args: unknown, key: string) {
 
 export function SessionPage(props: SessionPageProps) {
   const { config: shellConfig } = useShellConfig();
+  // Inside the Desk frame the shell owns the menu, so the session sidebar stays hidden.
+  const inDeskFrame = useInDeskFrame();
+  const showSidebar = shellConfig.sidebar && !inDeskFrame;
   const platform = usePlatform();
   const isMobile = useIsMobile();
   const bootOverlayVisible = useBootOverlayVisible();
@@ -1027,7 +1031,7 @@ export function SessionPage(props: SessionPageProps) {
           "relative min-h-0 flex-1 mac:bg-transparent",
           leftSidebarResizing &&
             "**:data-[slot=sidebar-container]:transition-none **:data-[slot=sidebar-gap]:transition-none",
-          !shellConfig.sidebar && "**:data-[slot=sidebar-container]:hidden **:data-[slot=sidebar-gap]:hidden",
+          !showSidebar && "**:data-[slot=sidebar-container]:hidden **:data-[slot=sidebar-gap]:hidden",
         )}
         style={sidebarProviderStyle}
       >
@@ -1102,7 +1106,7 @@ export function SessionPage(props: SessionPageProps) {
               <main className="flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
             <div className="flex min-w-0 items-center gap-3">
-              {shellConfig.sidebar ? <SidebarTrigger className="mac:hidden" /> : null}
+              {showSidebar ? <SidebarTrigger className="mac:hidden" /> : null}
               <h1 className="truncate text-sm font-medium text-dls-text">
                 {props.primaryTitle
                   ? props.primaryTitle
@@ -1639,7 +1643,7 @@ export function SessionPage(props: SessionPageProps) {
           </aside>
           </div>
         </SidebarInset>
-        {shellConfig.sidebar ? <SidebarTrigger className="hidden mac:absolute mac:left-[88px] top-[3px] z-50 mac:flex titlebar-no-drag" /> : null}
+        {showSidebar ? <SidebarTrigger className="hidden mac:absolute mac:left-[88px] top-[3px] z-50 mac:flex titlebar-no-drag" /> : null}
       </SidebarProvider>
 
       {props.providerAuthModal ? <ProviderAuthModal {...props.providerAuthModal} /> : null}
