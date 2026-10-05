@@ -245,7 +245,6 @@ describe("Desk routes", () => {
       ["/history", "History", "history"],
       ["/guide", "Model Guide", "guide"],
       ["/connectors", "Connectors", "connectors"],
-      ["/privacy", "Privacy protection", "privacy"],
       ["/memory", "Memory", "memory"],
       ["/memory/you", "Memory", "memory"],
     ];

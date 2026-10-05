@@ -97,7 +97,7 @@ type RowProps = {
   children?: ReactNode;
 };
 
-function Row(props: RowProps) {
+export function Row(props: RowProps) {
   return (
     <div className="desk-settings__row">
       <div className="desk-settings__text">
@@ -117,7 +117,7 @@ function Row(props: RowProps) {
   );
 }
 
-function Group(props: { title: string; children: ReactNode }) {
+export function Group(props: { title: string; children: ReactNode }) {
   return (
     <section className="desk-settings__group">
       <SectionMark label={props.title} as="heading" level={2} />
