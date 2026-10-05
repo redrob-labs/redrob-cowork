@@ -6,6 +6,7 @@ import { Button, Textarea, Toast } from "@redrob-labs/ui";
 import { isMacPlatform } from "../../../app/utils";
 import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
+import { ProjectDialog } from "../projects/project-dialog";
 import { useDeskRunEvents } from "../run/use-desk-run-events";
 import { useFrameStore, type FrameModal, type FrameToast } from "../store/frame-store";
 import { APP_VERSION, versionLabel } from "./account-menu";
@@ -134,7 +135,7 @@ export function DeskToast(props: { toast: FrameToast; onClose: () => void }) {
   if (!props.toast) return null;
   return (
     <div className="desk-toast" key={props.toast.id}>
-      <Toast tone="success" title={props.toast.title} onClose={props.onClose} closeLabel={t("desk.toast_close")}>
+      <Toast tone={props.toast.tone ?? "success"} title={props.toast.title} onClose={props.onClose} closeLabel={t("desk.toast_close")}>
         {props.toast.text}
       </Toast>
     </div>
@@ -218,6 +219,9 @@ export function DeskLayerView(props: DeskLayerViewProps) {
     <>
       {props.modal?.kind === "keys" ? <ShortcutsDialog mac={props.mac} onClose={props.onCloseModal} /> : null}
       {props.modal?.kind === "feedback" ? <FeedbackDialog onClose={props.onCloseModal} /> : null}
+      {props.modal?.kind === "project" ? (
+        <ProjectDialog key={props.modal.chatId ?? "new"} chatId={props.modal.chatId} onClose={props.onCloseModal} />
+      ) : null}
       <DeskToast toast={props.toast} onClose={props.onCloseToast} />
     </>
   );

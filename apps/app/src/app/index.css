@@ -928,6 +928,176 @@
 }
 
 /**
+ * Projects (`desk/projects/desk-projects.tsx`): the list of projects as rows, one project with
+ * its folder ask, its chats and its files, and the name form of the project dialog.
+ */
+.desk-projects,
+.desk-project-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.desk-project-form {
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.desk-projects__lede {
+  max-width: 640px;
+  margin: 0;
+  font: var(--text-body);
+  color: var(--ink-secondary);
+}
+
+.desk-projects__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.desk-projects__list > li {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-project-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-2);
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.desk-project-row--tight {
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+}
+
+.desk-project-row:hover {
+  background: var(--surface-sunken);
+}
+
+.desk-project-row:focus-visible,
+.desk-projects__back:focus-visible,
+.desk-projects__new:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.desk-project-row__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--ink-secondary);
+}
+
+.desk-project-row--tight .desk-project-row__icon {
+  width: 28px;
+  height: 28px;
+  background: none;
+}
+
+.desk-project-row__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.desk-project-row__text b {
+  overflow: hidden;
+  font: var(--text-body-strong);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desk-project-row__text span {
+  overflow: hidden;
+  font: var(--text-meta);
+  color: var(--ink-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desk-project-row__fig {
+  flex: none;
+  min-width: 72px;
+  font: var(--text-meta);
+  color: var(--ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.desk-project-row__when {
+  flex: none;
+  min-width: 56px;
+  font: var(--text-meta);
+  color: var(--ink-muted);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.desk-projects__back,
+.desk-projects__new {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--text-meta);
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+
+.desk-projects__new {
+  align-self: auto;
+  color: var(--ink-brand);
+}
+
+.desk-projects__back:hover,
+.desk-projects__new:hover {
+  text-decoration: underline;
+}
+
+.desk-projects__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.desk-projects__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.desk-projects__head h2 {
+  margin: 0;
+  font: var(--text-body-strong);
+  color: var(--ink-primary);
+}
+
+.desk-projects__files {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.desk-projects__files p {
+  margin: 0;
+  font: var(--text-meta);
+  color: var(--ink-secondary);
+}
+
+/**
  * The composer inside the Desk frame (`desk/composer/desk-composer.tsx`): the new chat's
  * one spoken line, the mic, Plan or Run and the model before Send, and the status line
  * under the field. The line is the only serif on the screen.

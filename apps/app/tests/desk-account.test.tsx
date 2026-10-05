@@ -200,8 +200,9 @@ describe("keyboard shortcuts dialog", () => {
     const feedback = layer({ kind: "feedback" });
     expect(feedback.match(/role="dialog"/g)?.length).toBe(1);
     expect(feedback).toContain("What works, and what gets in the way?");
-    // The project dialog is another task's; this layer leaves it alone.
-    expect(layer({ kind: "project", chatId: null })).not.toContain('role="dialog"');
+    const project = layer({ kind: "project", chatId: null });
+    expect(project.match(/role="dialog"/g)?.length).toBe(1);
+    expect(project).toContain("New project");
     expect(layer(null)).toBe("");
     // Mounted with the closed store, the layer itself renders nothing.
     expect(withProviders(<DeskLayer />)).toBe("");

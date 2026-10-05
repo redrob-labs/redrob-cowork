@@ -5,7 +5,8 @@ import { systemTimers, type DeskTimers, type TimerHandle } from "../timers";
 export type PanelTab = "browser" | "files";
 export type BrowserDesk = "reading" | "you" | "done";
 export type FrameModal = null | { kind: "project"; chatId: string | null } | { kind: "feedback" } | { kind: "keys" };
-export type FrameToast = { id: number; title: string; text?: string } | null;
+export type ToastTone = "success" | "danger";
+export type FrameToast = { id: number; title: string; text?: string; tone?: ToastTone } | null;
 
 export type FrameState = {
   panel: { open: boolean; tab: PanelTab; file: string | null; lastTab: PanelTab };
@@ -27,8 +28,8 @@ export type FrameState = {
   setDesk(desk: BrowserDesk): void;
   openModal(modal: Exclude<FrameModal, null>): void;
   closeModal(): void;
-  /** Replaces any toast and hides it after TOAST_MS. */
-  showToast(title: string, text?: string): void;
+  /** Replaces any toast and hides it after TOAST_MS. A confirmation unless `tone` says otherwise. */
+  showToast(title: string, text?: string, tone?: ToastTone): void;
   hideToast(): void;
   setVoice(voice: boolean): void;
   setDeveloperMode(on: boolean): void;
@@ -92,10 +93,17 @@ export function createFrameStore(options: { timers?: DeskTimers; storage?: Stora
       setDesk: (desk) => set((state) => ({ browser: { ...state.browser, desk } })),
       openModal: (modal) => set({ modal }),
       closeModal: () => set({ modal: null }),
-      showToast: (title, text) => {
+      showToast: (title, text, tone) => {
         clearToastTimer();
         toastId += 1;
-        set({ toast: text === undefined ? { id: toastId, title } : { id: toastId, title, text } });
+        set({
+          toast: {
+            id: toastId,
+            title,
+            ...(text === undefined ? {} : { text }),
+            ...(tone === undefined ? {} : { tone }),
+          },
+        });
         toastTimer = timers.setTimeout(() => {
           toastTimer = null;
           set({ toast: null });

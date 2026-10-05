@@ -7,8 +7,14 @@ import type { DeskServerClient } from "../services/real-services";
 /** The calls the Files panel uses to preview a file. */
 export type DeskFileClient = Pick<RedrobServerClient, "readWorkspaceFile" | "downloadWorkspaceFile">;
 
+/** The calls the Projects screens add: make a project, move a chat into it, its folders. */
+export type DeskProjectClient = Pick<
+  RedrobServerClient,
+  "createManagedProject" | "moveSession" | "listAuthorizedFolders" | "setAuthorizedFolders"
+>;
+
 export type DeskConnection = {
-  client: (DeskServerClient & DeskFileClient & DictationClient) | null;
+  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient) | null;
   /** The server-side id of the workspace the chat route has open. */
   workspaceId: string | null;
   /** That workspace's folder on this computer; null for a remote workspace. Never shown. */

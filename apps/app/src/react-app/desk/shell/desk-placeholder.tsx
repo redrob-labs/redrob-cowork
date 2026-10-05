@@ -7,8 +7,6 @@ import type { DeskNavId } from "./nav";
 
 /** Screens routed now whose content comes in a later task. */
 export type DeskPlaceholderScreen =
-  | "projects"
-  | "project"
   | "playbooks"
   | "playbook"
   | "run"
@@ -21,10 +19,6 @@ export type DeskPlaceholderScreen =
 
 function placeholderTitle(screen: DeskPlaceholderScreen): string {
   switch (screen) {
-    case "projects":
-      return t("desk.nav_projects");
-    case "project":
-      return t("desk.screen_project");
     case "playbooks":
       return t("desk.nav_playbooks");
     case "playbook":
@@ -46,11 +40,9 @@ function placeholderTitle(screen: DeskPlaceholderScreen): string {
   }
 }
 
-/** The menu place a screen belongs to: one project sits under Projects, a run under Playbooks. */
+/** The menu place a screen belongs to: one playbook and a run sit under Playbooks. */
 function placeholderPlace(screen: DeskPlaceholderScreen): DeskNavId {
   switch (screen) {
-    case "project":
-      return "projects";
     case "playbook":
     case "run":
       return "playbooks";

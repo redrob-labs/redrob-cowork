@@ -27,6 +27,7 @@ import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
 import { DsStory } from "../desk/ds-story";
+import { SaveAsProjectAction } from "../desk/projects/project-dialog";
 import { DeskShell } from "../desk/shell/desk-shell";
 import { DeskLayer } from "../desk/shell/desk-layer";
 import { deskRoutes } from "../desk/shell/desk-routes";
@@ -38,7 +39,13 @@ import { deskRoutes } from "../desk/shell/desk-routes";
 function ChatRoute() {
   const { sessionId } = useParams<{ sessionId?: string }>();
   return (
-    <DeskShell current={sessionId ? null : "chat"} chatId={sessionId ?? null} measure={false} fill>
+    <DeskShell
+      current={sessionId ? null : "chat"}
+      chatId={sessionId ?? null}
+      actions={<SaveAsProjectAction chatId={sessionId ?? null} />}
+      measure={false}
+      fill
+    >
       <DevProfiler id="SessionRoute">
         <SessionRoute />
       </DevProfiler>

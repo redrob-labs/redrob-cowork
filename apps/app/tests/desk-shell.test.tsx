@@ -238,8 +238,6 @@ describe("Desk routes", () => {
 
   test("every screen still to come renders a placeholder inside the shell", () => {
     const screens: Array<[string, string, string]> = [
-      ["/projects", "Projects", "projects"],
-      ["/project/seorin", "Project", "projects"],
       ["/playbooks", "Playbooks", "playbooks"],
       ["/playbook/notice", "Playbook", "playbooks"],
       ["/run", "Playbook run", "playbooks"],

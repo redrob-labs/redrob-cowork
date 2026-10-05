@@ -1077,6 +1077,20 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: payload,
         timeoutMs: timeouts.activateWorkspace,
       }),
+    // A project with a folder the server makes under its runtime storage. It does not become active.
+    createManagedProject: (name: string) =>
+      requestJson<{
+        activeId: string | null;
+        workspace: RedrobWorkspaceInfo;
+        workspaces: RedrobWorkspaceInfo[];
+        persisted: boolean;
+      }>(baseUrl, "/workspaces/local", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { name, managed: true, preset: "starter" },
+        timeoutMs: timeouts.activateWorkspace,
+      }),
     // Idempotent: returns the app-managed Personal workspace, creating it on first call.
     ensurePersonalWorkspace: () =>
       requestJson<{

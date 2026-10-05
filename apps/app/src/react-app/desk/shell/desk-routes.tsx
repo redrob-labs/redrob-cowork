@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, useParams } from "react-router";
 
+import { ProjectScreen, ProjectsScreen } from "../projects/desk-projects";
 import { DeskPlaceholder, type DeskPlaceholderScreen } from "./desk-placeholder";
 
 /** `/chat` or `/chat/<id>`. */
@@ -17,8 +18,6 @@ export function RedirectToChat() {
 }
 
 const PLACEHOLDER_ROUTES: ReadonlyArray<{ path: string; screen: DeskPlaceholderScreen }> = [
-  { path: "/projects", screen: "projects" },
-  { path: "/project/:projectId", screen: "project" },
   { path: "/playbooks", screen: "playbooks" },
   { path: "/playbook/:playbookId", screen: "playbook" },
   { path: "/run", screen: "run" },
@@ -47,6 +46,8 @@ export function deskRoutes(chat: ReactNode) {
     <Route key="workspace-session-id" path="/workspace/:workspaceId/session/:sessionId" element={chat} />,
     <Route key="session" path="/session" element={<RedirectToChat />} />,
     <Route key="session-id" path="/session/:sessionId" element={<RedirectToChat />} />,
+    <Route key="projects" path="/projects" element={<ProjectsScreen />} />,
+    <Route key="project" path="/project/:projectId" element={<ProjectScreen />} />,
     ...PLACEHOLDER_ROUTES.map(({ path, screen }) => (
       <Route key={path} path={path} element={<DeskPlaceholder screen={screen} />} />
     )),
