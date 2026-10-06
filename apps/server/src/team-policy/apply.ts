@@ -73,6 +73,29 @@ export async function teamPolicyLocksPrivacy(config: ServerConfig, workspaceId: 
 
 type Workspace = { id: string; path: string };
 
+export type TeamPolicyChangeListener = (config: ServerConfig, workspace: Workspace) => Promise<void> | void;
+const changeListeners = new Set<TeamPolicyChangeListener>();
+
+/**
+ * Observe a workspace starting, changing or stopping to follow a team policy, whatever caused it (a
+ * route, the scheduled check). Used to enforce what the policy controls outside this module, such as
+ * the connector allowlist. Listener failures are swallowed: the policy itself is already in force.
+ */
+export function onTeamPolicyChange(listener: TeamPolicyChangeListener): () => void {
+  changeListeners.add(listener);
+  return () => changeListeners.delete(listener);
+}
+
+async function notifyTeamPolicyChange(config: ServerConfig, workspace: Workspace): Promise<void> {
+  for (const listener of changeListeners) {
+    try {
+      await listener(config, workspace);
+    } catch {
+      // See onTeamPolicyChange.
+    }
+  }
+}
+
 export type ApplyOptions = {
   actor?: Actor;
   /** The account the device key belongs to. When given, a policy for any other account is refused. */
@@ -189,6 +212,7 @@ export async function applyTeamPolicy(
     }`,
     timestamp: now,
   });
+  await notifyTeamPolicyChange(config, workspace);
 
   return { status: "applied", state };
 }
@@ -229,6 +253,7 @@ export async function leaveTeamPolicy(
     summary: `Left the team${options.reason ? ` (${options.reason})` : ""}; its notes, playbooks and skills were removed`,
     timestamp: now,
   });
+  await notifyTeamPolicyChange(config, workspace);
   return next;
 }
 

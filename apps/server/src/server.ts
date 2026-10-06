@@ -145,9 +145,16 @@ import {
   applyTeamPolicy,
   describeTeamPolicyState,
   describeTeamPolicySync,
+  blockedConnectorNames,
   leaveTeamPolicy,
+  onTeamPolicyChange,
   readTeamPolicyState,
   readTeamPolicySync,
+  refuseBlockedConnector,
+  refuseBlockedConnectors,
+  connectorVerdict,
+  teamConnectorPolicy,
+  writeTeamConnectorsFile,
   startTeamPolicySync,
   syncTeamPolicy,
   teamPolicyLocksPrivacy,
@@ -1251,6 +1258,40 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     ? () => {}
     : startScheduler({ config, engine: createScheduleEngine(config), logger });
 
+  // The connector allowlist reaches the engine through team-connectors.json and the
+  // redrob-team-connectors plugin. Written before any engine starts, and again whenever a workspace
+  // starts, changes or stops following a policy; a change in what is allowed rebuilds that
+  // workspace's engine so the plugin re-reads it before any connector starts.
+  await writeTeamConnectorsFile(config).catch((error) => {
+    logger.log("warn", "Failed to write the team connector policy.", {
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  });
+  const appliedConnectorPolicies = new Map<string, string>();
+  for (const workspace of config.workspaces) {
+    const policy = await teamConnectorPolicy(config, workspace.id).catch(() => null);
+    appliedConnectorPolicies.set(workspace.id, JSON.stringify(policy));
+  }
+  const stopConnectorPolicyListener = onTeamPolicyChange(async (_config, changed) => {
+    await writeTeamConnectorsFile(config);
+    const policy = JSON.stringify(await teamConnectorPolicy(config, changed.id));
+    if (appliedConnectorPolicies.get(changed.id) === policy) return;
+    appliedConnectorPolicies.set(changed.id, policy);
+    const workspace = config.workspaces.find((item) => item.id === changed.id);
+    if (!workspace) return;
+    // In the background: the policy is already recorded, and a rebuild can take seconds.
+    void (async () => {
+      await syncRuntimeMcpToOpencodeEngine(config, workspace, undefined, undefined, engineMcpServerState);
+      await writeRedrobRuntimeConfigFile(config, workspace.id);
+      await reloadOpencodeEngine(config, workspace, engineMcpServerState);
+    })().catch((error) => {
+      logger.log("warn", "Failed to rebuild the engine after a team connector policy change.", {
+        workspaceId: workspace.id,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+    });
+  });
+
   // Joined workspaces follow their team's signed policy; see team-policy/sync.ts.
   const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
@@ -1261,6 +1302,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     stop: async () => {
       stopScheduler();
       stopTeamPolicySync();
+      stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
       reloadBaselineRefreshers.delete(config);
@@ -2972,6 +3014,7 @@ function createRoutes(
         requireClientScope(ctx, "owner");
       }
     }
+    if (opencode) await refuseBlockedConnectors(config, workspace.id, opencode.mcp);
 
     await requireApproval(ctx, {
       workspaceId: workspace.id,
@@ -3245,8 +3288,16 @@ function createRoutes(
     const items = await listMcp(config, workspace.id, workspace.path);
     const managedState = await listLocalManagedMcpConnectionsSafe(config, workspace.id);
     const managed = new Map(managedState.connections.map((connection) => [connection.name, connection]));
+    const teamPolicy = await teamConnectorPolicy(config, workspace.id);
+    const verdictFor = (item: (typeof items)[number]) => {
+      if (!teamPolicy) return null;
+      const verdict = connectorVerdict(teamPolicy, item.name, item.config, {
+        managedServerUrl: managed.get(item.name)?.serverUrl ?? null,
+      });
+      return verdict.allowed ? null : { blocked: true, reason: verdict.reason };
+    };
     return jsonResponse({
-      items: items.map((item) => ({ ...item, managedOAuth: managed.get(item.name) ?? null })),
+      items: items.map((item) => ({ ...item, managedOAuth: managed.get(item.name) ?? null, teamPolicy: verdictFor(item) })),
       engineSync: engineMcpSyncStateInState(config, engineMcpServerState, workspace),
       managedOAuthState: { available: managedState.available, recovery: managedState.recovery },
     });
@@ -3347,6 +3398,7 @@ function createRoutes(
     if ((await listMcp(config, workspace.id, workspace.path)).some((item) => item.name === name)) {
       throw new ApiError(409, "mcp_exists", `MCP ${name} already exists in this workspace`);
     }
+    await refuseBlockedConnector(config, workspace.id, name, { type: "remote", url: serverUrl }, { managedServerUrl: serverUrl });
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "mcp.add",
@@ -3477,6 +3529,7 @@ function createRoutes(
     if (!configPayload) {
       throw new ApiError(400, "invalid_payload", "MCP config is required");
     }
+    await refuseBlockedConnector(config, workspace.id, name, configPayload);
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "mcp.add",
@@ -3558,6 +3611,16 @@ function createRoutes(
       throw new ApiError(400, "invalid_payload", "enabled must be a boolean");
     }
     const enabled = body.enabled;
+    if (enabled) {
+      // Turning one on is adding it, as far as the allowlist is concerned. Turning one off is always fine.
+      const item = (await listMcp(config, workspace.id, workspace.path)).find((entry) => entry.name === name);
+      const managed = (await listLocalManagedMcpConnectionsSafe(config, workspace.id)).connections.find(
+        (connection) => connection.name === name,
+      );
+      await refuseBlockedConnector(config, workspace.id, name, item?.config ?? { type: "remote", url: managed?.serverUrl }, {
+        managedServerUrl: managed?.serverUrl ?? null,
+      });
+    }
     const action = enabled ? "mcp.enable" : "mcp.disable";
     const summary = `${enabled ? "Enable" : "Disable"} MCP ${name}`;
     await requireApproval(ctx, {
@@ -3815,6 +3878,10 @@ function createRoutes(
     if (touchesPrivacyLock(storedRedrob, redrobAfterImport(storedRedrob, body))) {
       await refuseTeamPolicyPrivacyChange(config, workspace.id);
       requireClientScope(ctx, "owner");
+    }
+    const importedOpencode = body.opencode as Record<string, unknown> | undefined;
+    if (importedOpencode && typeof importedOpencode === "object") {
+      await refuseBlockedConnectors(config, workspace.id, importedOpencode.mcp);
     }
     const expectedFingerprint = parseWorkspaceImportPreviewFingerprint(body);
     const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
@@ -4562,8 +4629,18 @@ async function runRuntimeMcpSyncToOpencodeEngine(
   }
 
   const runtimeConfig = await readRuntimeOpencodeConfig(config, workspace.id);
+  // A connector the team policy blocks is never hot-added, and is disconnected if it is running.
+  const teamBlocked = await blockedConnectorNames(config, workspace.id, runtimeMcpMap(runtimeConfig)).catch(
+    () => new Set<string>(),
+  );
+  for (const name of teamBlocked) {
+    if (!onlyNames || onlyNames.includes(name)) {
+      await disconnectMcpFromOpencodeEngine(config, workspace, name).catch(() => undefined);
+    }
+  }
   const entries = Object.entries(runtimeMcpMap(runtimeConfig)).filter(
     ([name]) => !name.startsWith(LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX)
+      && !teamBlocked.has(name)
       && (!onlyNames || onlyNames.includes(name)),
   );
   if (entries.length === 0) {

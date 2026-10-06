@@ -21,7 +21,9 @@ import {
   redrobAnthropicAdaptiveThinkingPluginPath,
   redrobAnthropicToolSchemaPluginPath,
   redrobOfficeAttachmentsPluginPath,
+  redrobTeamConnectorsPluginPath,
 } from "./redrob-extensions-plugin-path.js";
+import { blockedConnectorNames } from "./team-policy/connectors.js";
 import type { ServerConfig } from "./types.js";
 import { runtimeStorageDir } from "./runtime-db.js";
 import {
@@ -95,6 +97,17 @@ export async function buildRedrobRuntimeConfigObject(
   workspaceId?: string,
 ): Promise<Record<string, unknown>> {
   const runtimeConfig = config && workspaceId ? await readEffectiveRuntimeOpencodeConfig(config, workspaceId) : {};
+  // Connectors a team policy blocks never reach the engine from here. The engine plugin disables
+  // them again at load, which also covers the ones declared in the project's own config.
+  if (config && workspaceId && runtimeConfig.mcp) {
+    const blocked = await blockedConnectorNames(config, workspaceId, runtimeConfig.mcp).catch(() => new Set<string>());
+    if (blocked.size) {
+      return buildRedrobRuntimeConfigObjectFromSnapshot({
+        ...runtimeConfig,
+        mcp: Object.fromEntries(Object.entries(runtimeConfig.mcp).filter(([name]) => !blocked.has(name))),
+      });
+    }
+  }
   return buildRedrobRuntimeConfigObjectFromSnapshot(runtimeConfig);
 }
 
@@ -125,6 +138,8 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
       redrobOfficeAttachmentsPluginPath(),
       redrobAnthropicAdaptiveThinkingPluginPath(),
       redrobAnthropicToolSchemaPluginPath(),
+      // Enforces a team policy's connector allowlist on every MCP source; see the plugin.
+      redrobTeamConnectorsPluginPath(),
       ...runtimePluginList(runtimeConfig),
     ],
     ...(disabledProviders.length ? { disabled_providers: disabledProviders } : {}),

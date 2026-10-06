@@ -36,3 +36,4 @@ export const redrobCapabilitiesKnowledgePluginPath = () => redrobPluginPath("red
 export const redrobAnthropicAdaptiveThinkingPluginPath = () => redrobPluginPath("redrob-anthropic-adaptive-thinking");
 export const redrobAnthropicToolSchemaPluginPath = () => redrobPluginPath("redrob-anthropic-tool-schema");
 export const redrobOfficeAttachmentsPluginPath = () => redrobPluginPath("redrob-office-attachments");
+export const redrobTeamConnectorsPluginPath = () => redrobPluginPath("redrob-team-connectors");

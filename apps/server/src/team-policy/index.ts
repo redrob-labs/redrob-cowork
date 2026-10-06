@@ -3,6 +3,7 @@ export {
   applyTeamPolicy,
   describeTeamPolicyState,
   leaveTeamPolicy,
+  onTeamPolicyChange,
   readTeamPolicyState,
   teamPolicyLocksPrivacy,
   TEAM_POLICY_NOTE_TAG,
@@ -21,3 +22,12 @@ export {
   type TeamPolicySyncDeps,
   type TeamPolicySyncOutcome,
 } from "./sync.js";
+export {
+  blockedConnectorNames,
+  refuseBlockedConnector,
+  refuseBlockedConnectors,
+  teamConnectorPolicy,
+  teamConnectorsFilePath,
+  writeTeamConnectorsFile,
+} from "./connectors.js";
+export { connectorVerdict, startsProgram, type ConnectorPolicy } from "./connector-rules.js";
