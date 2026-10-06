@@ -21,6 +21,7 @@ import {
   redrobAnthropicAdaptiveThinkingPluginPath,
   redrobAnthropicToolSchemaPluginPath,
   redrobOfficeAttachmentsPluginPath,
+  redrobPrivacyGatePluginPath,
   redrobTeamConnectorsPluginPath,
 } from "./redrob-extensions-plugin-path.js";
 import { blockedConnectorNames } from "./team-policy/connectors.js";
@@ -140,6 +141,9 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
       redrobAnthropicToolSchemaPluginPath(),
       // Enforces a team policy's connector allowlist on every MCP source; see the plugin.
       redrobTeamConnectorsPluginPath(),
+      // Last of Redrob's own, after the office plugin has turned attachments into text: labels
+      // everything the model reads and restores what comes back. See the plugin.
+      redrobPrivacyGatePluginPath(),
       ...runtimePluginList(runtimeConfig),
     ],
     ...(disabledProviders.length ? { disabled_providers: disabledProviders } : {}),

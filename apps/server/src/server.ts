@@ -162,6 +162,7 @@ import {
   type TeamPolicySyncDeps,
 } from "./team-policy/index.js";
 import { readHarnessAvailability } from "./harness-availability.js";
+import { PrivacyGate } from "./privacy/gate.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -2917,6 +2918,35 @@ function createRoutes(
   const describeTeamPolicy = async (workspaceId: string) => ({
     ...describeTeamPolicyState(await readTeamPolicyState(config, workspaceId)),
     sync: describeTeamPolicySync(await readTeamPolicySync(config, workspaceId)),
+  });
+
+  /*
+   * The privacy gate's server half, called by the engine plugin redrob-privacy-gate for every model
+   * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
+   * the chats whose labels this resolves, so restoring them reveals nothing new.
+   */
+  const privacyGate = new PrivacyGate(config);
+  addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const directory = typeof body.directory === "string" && body.directory ? body.directory : null;
+    const sessionID = typeof body.sessionID === "string" ? body.sessionID : "";
+    switch (body.op) {
+      case "settings":
+        return jsonResponse({ level: (await privacyGate.rules(directory)).level });
+      case "label": {
+        if (!sessionID || !Array.isArray(body.texts) || body.texts.some((text) => typeof text !== "string")) {
+          throw new ApiError(400, "invalid_payload", "sessionID and texts (strings) are required");
+        }
+        return jsonResponse(await privacyGate.label({ sessionID, directory, texts: body.texts as string[] }));
+      }
+      case "restore": {
+        if (!sessionID) throw new ApiError(400, "invalid_payload", "sessionID is required");
+        return jsonResponse(privacyGate.restore({ sessionID, value: body.value }));
+      }
+      default:
+        throw new ApiError(400, "invalid_payload", "op must be settings, label or restore");
+    }
   });
 
   addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {
