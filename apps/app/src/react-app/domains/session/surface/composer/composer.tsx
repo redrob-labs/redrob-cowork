@@ -188,15 +188,24 @@ type ToolMenuLayout = {
   maxHeight: number;
 };
 
-function measureToolMenuLayout(trigger: HTMLElement): ToolMenuLayout {
+/**
+ * Where the "+" panel opens: above the trigger, inside the work column. It used to be held inside the
+ * window only, so with the Desk side panel open it ran across the panel. The column is the composer's
+ * `main`; without one (a bare test page) the window is the bound, as before.
+ */
+export function measureToolMenuLayout(trigger: HTMLElement): ToolMenuLayout {
   const rect = trigger.getBoundingClientRect();
   const gap = 12;
-  const width = Math.min(window.innerWidth - 40, 544);
-  const header = trigger.closest("main")?.querySelector("header");
+  const main = trigger.closest("main");
+  const column = main instanceof HTMLElement ? main.getBoundingClientRect() : null;
+  const minX = Math.max(0, column ? column.left : 0) + 16;
+  const maxX = Math.min(window.innerWidth, column ? column.right : window.innerWidth) - 16;
+  const width = Math.max(0, Math.min(maxX - minX, 544));
+  const header = main?.querySelector("header");
   const headerBottom = header instanceof HTMLElement ? header.getBoundingClientRect().bottom : 0;
   const ceiling = Math.max(headerBottom, 8);
   const maxHeight = Math.max(180, Math.min(520, rect.top - gap - ceiling));
-  const left = Math.min(Math.max(16, rect.left), Math.max(16, window.innerWidth - width - 16));
+  const left = Math.min(Math.max(minX, rect.left), Math.max(minX, maxX - width));
   const bottom = window.innerHeight - rect.top + gap;
   return { left, bottom, width, maxHeight };
 }
