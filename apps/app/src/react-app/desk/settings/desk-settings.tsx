@@ -65,6 +65,7 @@ import {
   type DeskSettingsSection,
   type TextSize,
 } from "./settings-sections";
+import { RouteReady } from "../shell/route-ready";
 
 const NAV_ICON = { width: 15, height: 15, "aria-hidden": true };
 const ROW_ICON = { width: 16, height: 16, "aria-hidden": true };
@@ -633,5 +634,10 @@ export function DeskSettingsGateView(props: { developer: ReactNode; developerMod
   const route = resolveSettingsSection(useParams()["*"], props.developerMode);
   if (route.kind === "developer") return props.developer;
   if (route.kind === "redirect") return <Navigate to={route.to} replace />;
-  return <DeskSettingsScreen section={route.section} />;
+  // The developer route marks itself ready once its data loads; the Desk screen has nothing to wait for.
+  return (
+    <RouteReady>
+      <DeskSettingsScreen section={route.section} />
+    </RouteReady>
+  );
 }
