@@ -13,13 +13,18 @@ import { DetectorIntegrityError, loadDetector, type DetectedEntity, type EntityD
  * nobody pays its memory (about 200 MB resident) or start-up for a level that does not use it.
  *
  * Trust: the directory comes from REDROB_PRIVACY_MODEL_DIR (the desktop app sets it to the model the
- * installer ships, C8). PINNED_MANIFEST_SHA256 pins that model's manifest, whose own hashes pin the
- * model and tokenizer files. Until a model ships it is null, and an unpinned model is loaded only in
- * dev mode, the same rule as the team-policy test keys.
+ * installer ships). PINNED_MANIFEST_SHA256 pins that model's manifest, whose own hashes pin the
+ * model and tokenizer files, so pointing the variable elsewhere loads nothing but the shipped model.
+ * While no pin is set, dev mode accepts an unpinned model (the measurement harness loads candidates
+ * directly and needs neither).
  */
 
-/** SHA-256 of the shipped model's manifest.json. Set when the installer ships a model (C8). */
-export const PINNED_MANIFEST_SHA256: string | null = null;
+/**
+ * SHA-256 of the manifest.json the installer ships (apps/desktop/resources/privacy-model), whose own
+ * hashes pin the model and tokenizer: 1T/veil-pii-ko-lite, weight-only int8 (model-evaluation.md).
+ * A test fails when the two drift apart.
+ */
+export const PINNED_MANIFEST_SHA256: string | null = "b96f3f3d3d2c638534ee76d8f0827f50f45ab3050435be7943569f4a7a2ca3b7";
 
 export type DetectorStatus =
   | { state: "ready"; model: string }

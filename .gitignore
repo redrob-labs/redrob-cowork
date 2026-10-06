@@ -73,3 +73,7 @@ transcript-analysis
 
 # Privacy model candidates downloaded by apps/server/scripts/privacy-model/prepare.py
 apps/server/.privacy-models/
+
+# Privacy model weights fetched by apps/desktop/scripts/prepare-privacy-model.mjs (manifest.json is tracked)
+apps/desktop/resources/privacy-model/*.onnx
+apps/desktop/resources/privacy-model/tokenizer.json

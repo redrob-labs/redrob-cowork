@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { createHash } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { DetectorSource } from "./detector-source.js";
+import { DetectorSource, PINNED_MANIFEST_SHA256 } from "./detector-source.js";
 import {
   decodeEntities,
   DetectorIntegrityError,
@@ -258,6 +258,26 @@ describe("the detector source", () => {
     await source.detect(a!, "김지원 계약");
     await source.detect(a!, "김지원 계약");
     expect(calls.runs).toBe(1);
+  });
+
+  test("the pin is the manifest the installer ships, and that manifest names the measured model", async () => {
+    const shipped = await readFile(join(import.meta.dir, "..", "..", "..", "desktop", "resources", "privacy-model", "manifest.json"));
+    expect(createHash("sha256").update(shipped).digest("hex")).toBe(PINNED_MANIFEST_SHA256!);
+    const manifest = JSON.parse(shipped.toString("utf8")) as DetectorManifest & { id: string; revision: string; license: string };
+    expect(manifest.id).toBe("1T/veil-pii-ko-lite");
+    expect(manifest.license).toBe("Apache-2.0");
+    expect(manifest.model.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(manifest.tokenizer.sha256).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  test("pointing REDROB_PRIVACY_MODEL_DIR at another model loads nothing, in dev mode too", async () => {
+    const { dir } = await modelDir();
+    for (const env of [{ REDROB_PRIVACY_MODEL_DIR: dir }, { REDROB_PRIVACY_MODEL_DIR: dir, REDROB_DEV_MODE: "1" }]) {
+      const source = DetectorSource.fromEnvironment(env);
+      expect(await source.get()).toBeNull();
+      expect((source.status() as { reason: string }).reason).toContain("integrity check");
+    }
+    expect(DetectorSource.fromEnvironment({}).status()).toEqual({ state: "absent", reason: "no privacy model is installed" });
   });
 });
 

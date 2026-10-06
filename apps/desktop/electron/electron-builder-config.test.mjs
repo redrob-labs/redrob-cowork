@@ -37,6 +37,20 @@ describe("Electron distribution configs", () => {
     });
   });
 
+  it("ships the pinned privacy model outside app.asar, and only this platform's onnxruntime binaries", async () => {
+    const config = await readConfig("electron-builder.base.yml");
+    const model = config.extraResources.find((entry) => entry.to === "privacy-model");
+    assert.equal(model.from, "resources/privacy-model");
+    assert.ok(model.filter.includes("manifest.json") && model.filter.includes("*.onnx") && model.filter.includes("tokenizer.json"));
+    const drop = config.files.indexOf("!node_modules/onnxruntime-node/bin/**");
+    const keep = config.files.indexOf("node_modules/onnxruntime-node/bin/napi-v6/${platform}/${arch}/**");
+    assert.ok(drop !== -1 && keep > drop, "the platform's own binaries are re-included after all are dropped");
+    assert.ok(config.asarUnpack.includes("node_modules/onnxruntime-node/bin/**"));
+    const packageMetadata = JSON.parse(await readFile(path.resolve(dirname, "..", "package.json"), "utf8"));
+    const serverMetadata = JSON.parse(await readFile(path.resolve(dirname, "..", "..", "server", "package.json"), "utf8"));
+    assert.equal(packageMetadata.dependencies["onnxruntime-node"], serverMetadata.dependencies["onnxruntime-node"]);
+  });
+
   it("keeps the public artifact and protocol unchanged", async () => {
     const config = await readConfig("electron-builder.yml");
     assert.equal(config.extends, "./electron-builder.base.yml");
