@@ -18,6 +18,7 @@
     "publish:npm": "pnpm build:bin && node scripts/publish-npm.mjs",
     "start": "bun dist/cli.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "privacy:eval": "bun build src/privacy/eval/run.ts --target=node --external onnxruntime-node --outfile .privacy-models/eval.mjs && node ../../scripts/with-env.mjs REDROB_SERVER_ROOT=. -- node .privacy-models/eval.mjs",
     "prepublishOnly": "pnpm build:bin"
   },
   "files": [

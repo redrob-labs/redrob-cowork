@@ -33,6 +33,7 @@
     "upstream:report": "node scripts/upstream-sync.mjs report",
     "upstream:fetch": "node scripts/upstream-sync.mjs setup && node scripts/upstream-sync.mjs fetch",
     "test:e2e": "pnpm --filter @redrob/app test:e2e",
+    "privacy:eval": "pnpm --filter redrob-server privacy:eval",
     "release:review": "node scripts/release/review.mjs",
     "release:rollback": "node scripts/release/rollback.mjs",
     "release:cut": "node scripts/release/cut.mjs",
