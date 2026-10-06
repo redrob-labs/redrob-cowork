@@ -140,7 +140,7 @@ import {
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
-import { carriesLockTag, redrobAfterImport, touchesPrivacyLock } from "./team-lock.js";
+import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import {
   applyTeamPolicy,
   describeTeamPolicyState,
@@ -2247,8 +2247,7 @@ function createRoutes(
     }
     const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null;
     refuseTeamPolicyTag(tags);
-    // Only the owner adds a locked note: a collaborator could otherwise plant notes nobody can remove.
-    if (carriesLockTag(tags)) requireClientScope(ctx, "owner");
+    refuseLockTag(tags);
     const memory = await saveMemory(config, {
       content,
       tags,
@@ -2257,8 +2256,8 @@ function createRoutes(
     return jsonResponse({ memory }, 201);
   });
 
-  // A note from a team file changes in the team file, not here. The owner may remove one,
-  // which is how a newer team file drops the notes it no longer carries.
+  // A locked note changes only through a newer signed policy. One an earlier build's team file
+  // locked has no policy behind it, so the owner may remove it; nobody edits it in place.
   const refuseLockedMemory = async (ctx: RequestContext, memoryId: string, ownerMayRemove: boolean) => {
     const memory = await findMemory(config, memoryId);
     if (!memory || !isLockedMemory(memory)) return;
@@ -2267,7 +2266,7 @@ function createRoutes(
       throw new ApiError(403, "memory_team_policy", "This note comes from your team's policy and changes only when an admin updates it");
     }
     if (ownerMayRemove && ctx.actor?.scope === "owner") return;
-    throw new ApiError(403, "memory_locked", "This note came with a team file and cannot be changed here");
+    throw new ApiError(403, "memory_locked", "This note is locked and cannot be changed here. The owner of this workspace can remove it");
   };
 
   addRoute(routes, "PATCH", "/memory/:memoryId", "client", async (ctx) => {
@@ -2280,7 +2279,7 @@ function createRoutes(
     await refuseLockedMemory(ctx, ctx.params.memoryId, false);
     const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : undefined;
     refuseTeamPolicyTag(tags);
-    if (carriesLockTag(tags)) requireClientScope(ctx, "owner");
+    refuseLockTag(tags);
     const memory = await updateMemory(config, ctx.params.memoryId, {
       ...(typeof body.content === "string" ? { content: body.content } : {}),
       ...(tags ? { tags } : {}),
@@ -3045,8 +3044,10 @@ function createRoutes(
     }
     if (redrob) {
       const stored = await readRedrobWorkspaceConfig(config, workspace.id);
-      if (touchesPrivacyLock(stored, { ...stored, ...redrob })) {
+      const next = { ...stored, ...redrob };
+      if (touchesPrivacyLock(stored, next)) {
         await refuseTeamPolicyPrivacyChange(config, workspace.id);
+        refuseNewPrivacyLock(stored, next);
         requireClientScope(ctx, "owner");
       }
     }
@@ -3911,8 +3912,10 @@ function createRoutes(
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
     const storedRedrob = await readRedrobWorkspaceConfig(config, workspace.id);
-    if (touchesPrivacyLock(storedRedrob, redrobAfterImport(storedRedrob, body))) {
+    const importedRedrob = redrobAfterImport(storedRedrob, body);
+    if (touchesPrivacyLock(storedRedrob, importedRedrob)) {
       await refuseTeamPolicyPrivacyChange(config, workspace.id);
+      refuseNewPrivacyLock(storedRedrob, importedRedrob);
       requireClientScope(ctx, "owner");
     }
     const importedOpencode = body.opencode as Record<string, unknown> | undefined;
@@ -4096,6 +4099,20 @@ function scopeRank(scope: TokenScope): number {
 function refuseTeamPolicyTag(tags: readonly string[] | null | undefined): void {
   if (tags?.some((tag) => tag === TEAM_POLICY_NOTE_TAG || tag.startsWith(`${TEAM_POLICY_NOTE_TAG}:`))) {
     throw new ApiError(403, "memory_team_policy", "Team policy notes come only from your team's signed policy");
+  }
+}
+
+/** Only a verified team policy locks a note; no token adds the lock by hand. */
+function refuseLockTag(tags: readonly string[] | null | undefined): void {
+  if (carriesLockTag(tags)) {
+    throw new ApiError(403, "memory_lock_policy_only", "Only your team's signed policy locks a note");
+  }
+}
+
+/** Only a verified team policy locks the privacy setting; no token sets a lock by config or import. */
+function refuseNewPrivacyLock(before: Record<string, unknown>, after: Record<string, unknown>): void {
+  if (setsPrivacyLock(before, after)) {
+    throw new ApiError(403, "privacy_lock_policy_only", "Only your team's signed policy locks the privacy setting");
   }
 }
 

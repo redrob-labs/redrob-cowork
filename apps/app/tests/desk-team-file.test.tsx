@@ -20,7 +20,7 @@ const memory = (id: string, content: string, tags: string[]): Memory => ({
 });
 
 /** Two workspaces' worth of server: the admin's, then a teammate's. */
-function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown>; opencode?: Record<string, unknown> }) {
+function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown>; opencode?: Record<string, unknown>; joined?: boolean }) {
   const calls: string[] = [];
   let memories = [...start.memories];
   let redrob = { ...start.redrob };
@@ -58,6 +58,13 @@ function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown>
       memories = memories.filter((entry) => entry.id !== memoryId);
     },
     getConfig: async () => ({ opencode: {}, redrob }),
+    getTeamPolicy: async () =>
+      ({
+        joined: start.joined ?? false,
+        accountId: null,
+        version: null,
+        sync: { checkedAt: null, status: null, code: null, lastSuccessAt: null, stale: false },
+      }) as const,
     patchConfig: async (_workspaceId: string, payload: { redrob?: Record<string, unknown> }) => {
       calls.push("patch");
       redrob = { ...redrob, ...payload.redrob };
@@ -86,23 +93,23 @@ describe("the team file", () => {
     expect(readTeamSettings({ workspaceId: "x" })).toBeNull();
   });
 
-  test("a teammate's import: the workspace, then the team notes once each and the level, locked", async () => {
+  test("a teammate's import: the level, the workspace, then the team notes once each, none of it locked", async () => {
     const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"])], redrob: { deskPrivacy: { level: "strict", names: ["Seorin"] } } });
     const file = await buildTeamFile(admin.client, "ws_admin", "Park");
     const mate = fakeServer({ memories: [], redrob: {} });
     // Reviewing changes nothing: only the server's preview is asked.
     const review = await reviewTeamFile(mate.client, "ws_mate", file);
     expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId"]);
-    expect(review).toMatchObject({ fingerprint: "fp-1", changes: 1, playbooks: 1, notesAdded: 1, notesRemoved: 0, connectors: [], plugins: [], permissions: false });
-    expect(await applyTeamFile(mate.client, "ws_mate", review)).toEqual({ notesAdded: 1, notesRemoved: 0, level: "strict", setBy: "Park" });
-    // The locked level goes first: it is the step a refusal comes at, so a refusal changes nothing.
-    expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "patch", "import:fp-1", "save:House style:desk-scope:team,desk-locked"]);
-    expect(mate.redrob().deskPrivacy).toEqual({ level: "strict", names: ["Seorin"], setBy: "Park", locked: true });
+    expect(review).toMatchObject({ fingerprint: "fp-1", changes: 1, playbooks: 1, notesAdded: 1, notesRemoved: 0, connectors: [], plugins: [], permissions: false, policyManaged: false });
+    expect(await applyTeamFile(mate.client, "ws_mate", review)).toEqual({ notesAdded: 1, notesRemoved: 0, level: "strict", setBy: "Park", policyManaged: false });
+    // The level goes first: it is the step a refusal comes at, so a refusal changes nothing.
+    expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "patch", "import:fp-1", "save:House style:desk-scope:team"]);
+    expect(mate.redrob().deskPrivacy).toEqual({ level: "strict", names: ["Seorin"], setBy: "Park", locked: false });
 
     // Using it again adds nothing twice.
     expect((await applyTeamFile(mate.client, "ws_mate", await reviewTeamFile(mate.client, "ws_mate", file))).notesAdded).toBe(0);
 
-    // And on the teammate's screens: locked notes, a locked level that says who set it.
+    // And on the teammate's screens: a team note and a level they can change.
     const unused = async (): Promise<never> => {
       throw new Error("not used");
     };
@@ -125,12 +132,15 @@ describe("the team file", () => {
       answerScheduleWaiting: unused,
     };
     const services = createRealDeskServices({ client: deskClient, workspaceId: "ws_mate" });
-    expect((await services.notes.list()).data).toMatchObject([{ text: "House style", scope: "team", locked: true }]);
-    expect((await services.privacy.get()).data).toMatchObject({ level: "strict", setBy: "Park", locked: true });
-    await expect(services.privacy.setLevel("off")).rejects.toThrow();
+    const notes = (await services.notes.list()).data;
+    expect(notes).toMatchObject([{ text: "House style", scope: "team" }]);
+    expect(notes[0]?.locked).toBeUndefined();
+    expect((await services.privacy.get()).data).toMatchObject({ level: "strict", setBy: "Park", locked: false });
+    await services.privacy.setLevel("off");
+    expect((mate.redrob().deskPrivacy as { level: string }).level).toBe("off");
   });
 
-  test("a refused privacy lock stops the file before the project is imported, and says why", async () => {
+  test("a refused privacy level stops the file before the project is imported, and says why", async () => {
     const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"])], redrob: { deskPrivacy: { level: "high", names: [] } } });
     const file = await buildTeamFile(admin.client, "ws_admin", "Park");
     for (const [error, text] of [
@@ -160,21 +170,54 @@ describe("the team file", () => {
     expect(mate.calls).toEqual([]);
   });
 
-  test("a newer file drops the locked notes it no longer carries, and leaves personal notes alone", async () => {
+  test("a newer file drops the team notes it no longer carries, unlocks ones an earlier file locked, and leaves personal and policy notes alone", async () => {
     const mate = fakeServer({
       memories: [
         memory("old", "Old rule", ["desk-scope:team", "desk-locked"]),
         memory("kept", "House style", ["desk-scope:team", "desk-locked"]),
+        memory("plain", "Use metric units", ["desk-scope:team"]),
+        memory("policy", "Policy rule", ["desk-scope:team", "desk-locked", "team-policy"]),
         memory("mine", "Call me Jiwoo", ["desk-scope:you"]),
       ],
       redrob: {},
     });
-    const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"]), memory("m2", "New rule", ["desk-scope:team"])], redrob: {} });
+    const admin = fakeServer({
+      memories: [memory("m1", "House style", ["desk-scope:team"]), memory("m2", "New rule", ["desk-scope:team"]), memory("m3", "Use metric units", ["desk-scope:team"])],
+      redrob: {},
+    });
     const review = await reviewTeamFile(mate.client, "ws_mate", await buildTeamFile(admin.client, "ws_admin", "Park"));
     expect(review).toMatchObject({ notesAdded: 1, notesRemoved: 1 });
     expect(await applyTeamFile(mate.client, "ws_mate", review)).toMatchObject({ notesAdded: 1, notesRemoved: 1 });
     expect(mate.calls).toContain("delete:old");
-    expect(mate.memories().map((entry) => entry.content).sort()).toEqual(["Call me Jiwoo", "House style", "New rule"]);
+    // The note the earlier file locked is replaced by the same note, unlocked; the plain one stays put.
+    expect(mate.calls).toContain("delete:kept");
+    expect(mate.calls).not.toContain("delete:plain");
+    expect(mate.calls).not.toContain("delete:policy");
+    expect(mate.memories().map((entry) => `${entry.content}:${(entry.tags ?? []).join(",")}`).sort()).toEqual([
+      "Call me Jiwoo:desk-scope:you",
+      "House style:desk-scope:team",
+      "New rule:desk-scope:team",
+      "Policy rule:desk-scope:team,desk-locked,team-policy",
+      "Use metric units:desk-scope:team",
+    ]);
+  });
+
+  test("in a project that follows a team policy, the file brings its setup but not its level or notes", async () => {
+    const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"])], redrob: { deskPrivacy: { level: "off", names: [] } } });
+    const file = await buildTeamFile(admin.client, "ws_admin", "Park");
+    const mate = fakeServer({
+      memories: [memory("policy", "Policy rule", ["desk-scope:team", "desk-locked", "team-policy"])],
+      redrob: { deskPrivacy: { level: "strict", names: [], setBy: "Jiwon", locked: true } },
+      joined: true,
+    });
+    const review = await reviewTeamFile(mate.client, "ws_mate", file);
+    expect(review).toMatchObject({ policyManaged: true, notesAdded: 0, notesRemoved: 0 });
+    expect(await applyTeamFile(mate.client, "ws_mate", review)).toMatchObject({ policyManaged: true, notesAdded: 0 });
+    expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "import:fp-1"]);
+    expect(mate.redrob().deskPrivacy).toMatchObject({ level: "strict", locked: true });
+    const html = renderToStaticMarkup(<TeamReviewBody review={review} />);
+    expect(html).toContain("follows your team&#x27;s policy");
+    expect(html).not.toContain("Privacy level:");
   });
 
   test("the review names connectors that start programs, add-ons and permission changes before anything changes", async () => {

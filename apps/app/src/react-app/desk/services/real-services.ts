@@ -118,10 +118,10 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
   };
 
   const readPrivacy = async () => readStoredPrivacy((await client.getConfig(workspaceId)).redrob);
-  // A level set by a team file stays as it was set.
+  // A locked level stays as the team policy set it.
   const writePrivacy = async (patch: Partial<Pick<StoredPrivacy, "level" | "names">>) => {
     const current = await readPrivacy();
-    if (current.locked) throw new Error("Privacy is set by a team file");
+    if (current.locked) throw new Error("Privacy is locked by your team's policy");
     const next: StoredPrivacy = { ...current, ...patch };
     await client.patchConfig(workspaceId, { redrob: { [DESK_PRIVACY_CONFIG_KEY]: next } });
     return next;

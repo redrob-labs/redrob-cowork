@@ -76,9 +76,9 @@ describe("PrivacyView", () => {
     expect(html).not.toContain("Names to keep private");
   });
 
-  test("set by a team file: the level and names cannot change here, and it says who set them", () => {
+  test("locked by the team policy: the level and names cannot change here, and it says who set them", () => {
     const html = view({ ...PRIVACY, locked: true, setBy: "Park Hyunjin" });
-    expect(html).toContain("Set by Park Hyunjin with a team file. It cannot be changed here.");
+    expect(html).toContain("Set by Park Hyunjin in your team&#x27;s policy. It cannot be changed here.");
     expect(html).not.toContain(">Use<");
     expect(html).not.toContain("Save names");
     expect(html).toMatch(/<textarea[^>]*disabled/);

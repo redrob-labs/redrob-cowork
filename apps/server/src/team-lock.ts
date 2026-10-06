@@ -1,9 +1,14 @@
 import { LOCKED_MEMORY_TAG } from "./local-memory-store.js";
 
 /*
- * What a team file locks: the workspace's privacy setting and the team's notes. Only the
- * machine's owner can set, lift or change a lock. A collaborator token works under a lock
- * but cannot move it, so sharing a workspace never hands out the power to unlock it.
+ * Locks on the workspace's privacy setting and on team notes. Only a verified team policy sets
+ * one (team-policy/apply.ts writes them directly, never through a route): an unsigned team file
+ * proves nothing about who made it, so it cannot lock anything, and no route sets a lock for any
+ * token.
+ *
+ * Earlier builds let a team file lock them. Those locks may still be on disk, so lifting or
+ * changing one, or removing such a note, stays the machine owner's. A collaborator token works
+ * under any lock but cannot move it.
  */
 
 /** Matches DESK_PRIVACY_CONFIG_KEY in apps/app/src/react-app/desk/privacy/privacy-store.ts. */
@@ -29,6 +34,11 @@ const lockedPrivacy = (redrob: Record<string, unknown>) => {
 export function touchesPrivacyLock(before: Record<string, unknown>, after: Record<string, unknown>): boolean {
   if (!lockedPrivacy(before) && !lockedPrivacy(after)) return false;
   return stable(before[DESK_PRIVACY_CONFIG_KEY]) !== stable(after[DESK_PRIVACY_CONFIG_KEY]);
+}
+
+/** Whether `after` holds a locked privacy setting that `before` does not hold as it is: a new lock. */
+export function setsPrivacyLock(before: Record<string, unknown>, after: Record<string, unknown>): boolean {
+  return lockedPrivacy(after) && stable(before[DESK_PRIVACY_CONFIG_KEY]) !== stable(after[DESK_PRIVACY_CONFIG_KEY]);
 }
 
 /** The redrob config an import would leave behind, for the lock check. */

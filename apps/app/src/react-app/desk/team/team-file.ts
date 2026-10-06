@@ -5,16 +5,22 @@ import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy } from "../privacy/privacy-s
 import type { PrivacyLevel } from "../services/types";
 
 /*
- * The team file: one workspace export an admin hands out. On top of what an export already
- * carries (playbooks, skills, connectors, config), `redrob.team` holds the team's notes and
- * its privacy level. Using the file imports the workspace part as usual, then adds the notes
- * as team notes and sets the level, both locked: they change by handing out a new file.
+ * The team file: one workspace export a teammate hands out, to set a project up the same way.
+ * On top of what an export already carries (playbooks, skills, connectors, config),
+ * `redrob.team` holds the team's notes and a privacy level.
+ *
+ * A file proves nothing about who made it, so it locks nothing: the notes it brings and the
+ * level it sets are anyone's to change afterwards. Locked settings come only from the team's
+ * signed policy (team-policy-group.tsx), and in a project that follows one, the file's notes
+ * and level are left out: the policy's stay as they are.
  */
 
 export const TEAM_KEY = "team";
 export const TEAM_SCOPE_TAG = "desk-scope:team";
 /** Matches LOCKED_MEMORY_TAG in apps/server/src/local-memory-store.ts. */
 export const LOCKED_TAG = "desk-locked";
+/** Matches TEAM_POLICY_NOTE_TAG in apps/server/src/team-policy/apply.ts. */
+export const TEAM_POLICY_TAG = "team-policy";
 
 export type TeamSettings = {
   privacy: { level: PrivacyLevel; names: string[]; setBy: string | null };
@@ -33,6 +39,7 @@ type TeamClient = Pick<
   | "deleteMemory"
   | "getConfig"
   | "patchConfig"
+  | "getTeamPolicy"
 >;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -97,9 +104,26 @@ export type TeamReview = {
   permissions: boolean;
   notesAdded: number;
   notesRemoved: number;
+  /** The project follows a signed team policy: the file's notes and level are left out. */
+  policyManaged: boolean;
 };
 
-const lockedTeamNotes = (memories: Memory[]) => memories.filter((memory) => isTeamNote(memory) && (memory.tags?.includes(LOCKED_TAG) ?? false));
+const isPolicyNote = (memory: Pick<Memory, "tags">) => memory.tags?.includes(TEAM_POLICY_TAG) ?? false;
+/**
+ * The team notes a team file manages: every team note except a policy's. That includes notes an
+ * earlier build's team file locked, which a file now replaces with unlocked ones.
+ */
+const fileTeamNotes = (memories: Memory[]) => memories.filter((memory) => isTeamNote(memory) && !isPolicyNote(memory));
+const isLegacyLocked = (memory: Pick<Memory, "tags">) => memory.tags?.includes(LOCKED_TAG) ?? false;
+
+/** Whether the project follows a signed team policy. A server that cannot say is taken as no: it still refuses what a policy locks. */
+async function followsTeamPolicy(client: TeamClient, workspaceId: string): Promise<boolean> {
+  try {
+    return (await client.getTeamPolicy(workspaceId)).joined;
+  } catch {
+    return false;
+  }
+}
 
 function readConnectors(opencode: Record<string, unknown> | null): TeamConnector[] {
   const mcp = opencode && isRecord(opencode.mcp) ? opencode.mcp : {};
@@ -121,10 +145,14 @@ function readPlugins(opencode: Record<string, unknown> | null): string[] {
 export async function reviewTeamFile(client: TeamClient, workspaceId: string, file: unknown): Promise<TeamReview> {
   const team = readTeamSettings(file);
   if (!team || !isRecord(file)) throw new Error("This is not a team file");
-  const [preview, memories] = await Promise.all([client.previewWorkspaceImport(workspaceId, file), client.listMemories()]);
+  const [preview, memories, policyManaged] = await Promise.all([
+    client.previewWorkspaceImport(workspaceId, file),
+    client.listMemories(),
+    followsTeamPolicy(client, workspaceId),
+  ]);
   const opencode = isRecord(file.opencode) ? file.opencode : null;
-  const locked = lockedTeamNotes(memories).map((memory) => memory.content.trim());
-  const incoming = new Set(team.notes.map((note) => note.text));
+  const current = fileTeamNotes(memories).map((memory) => memory.content.trim());
+  const incoming = new Set(policyManaged ? [] : team.notes.map((note) => note.text));
   return {
     file,
     team,
@@ -135,43 +163,60 @@ export async function reviewTeamFile(client: TeamClient, workspaceId: string, fi
     connectors: readConnectors(opencode),
     plugins: readPlugins(opencode),
     permissions: opencode ? opencode.permission !== undefined : false,
-    notesAdded: [...incoming].filter((text) => !locked.includes(text)).length,
-    notesRemoved: locked.filter((text) => !incoming.has(text)).length,
+    notesAdded: [...incoming].filter((text) => !current.includes(text)).length,
+    notesRemoved: policyManaged ? 0 : current.filter((text) => !incoming.has(text)).length,
+    policyManaged,
   };
 }
 
-export type TeamImportResult = { notesAdded: number; notesRemoved: number; level: PrivacyLevel; setBy: string | null };
+export type TeamImportResult = {
+  notesAdded: number;
+  notesRemoved: number;
+  level: PrivacyLevel;
+  setBy: string | null;
+  policyManaged: boolean;
+};
 
 /**
- * Uses a reviewed team file: imports it with the preview's fingerprint, so the server
- * refuses if the project changed since the review. Then the team's notes become exactly the
- * file's (new ones added, ones it no longer carries removed) and the level is set, locked.
+ * Uses a reviewed team file: imports it with the preview's fingerprint, so the server refuses if
+ * the project changed since the review. Then, unless the project follows a team policy, the team
+ * notes become exactly the file's (new ones added, ones it no longer carries removed) and the
+ * level is set, all unlocked.
  */
 export async function applyTeamFile(client: TeamClient, workspaceId: string, review: TeamReview): Promise<TeamImportResult> {
-  const { team } = review;
-  // The locked privacy level first: it is the step a token without the owner scope, or a workspace
-  // that follows a signed team policy, is refused at. Refused here, nothing has changed yet; refused
-  // after the import, the project would be half set up with no way to tell.
-  await client.patchConfig(workspaceId, {
-    redrob: { [DESK_PRIVACY_CONFIG_KEY]: { ...team.privacy, locked: true } },
-  });
+  const { team, policyManaged } = review;
+  if (!policyManaged) {
+    // The level first: a lock an earlier team file left is lifted only with the owner's token, and
+    // refused here nothing has changed yet; refused after the import, the project would be half set up.
+    await client.patchConfig(workspaceId, {
+      redrob: { [DESK_PRIVACY_CONFIG_KEY]: { ...team.privacy, locked: false } },
+    });
+  }
   await client.importWorkspace(workspaceId, { ...review.file, previewFingerprint: review.fingerprint });
+  if (policyManaged) return { notesAdded: 0, notesRemoved: 0, level: team.privacy.level, setBy: team.privacy.setBy, policyManaged };
 
   const incoming = new Set(team.notes.map((note) => note.text));
-  const locked = lockedTeamNotes(await client.listMemories());
+  const current = fileTeamNotes(await client.listMemories());
   let notesRemoved = 0;
-  for (const memory of locked) {
-    if (incoming.has(memory.content.trim())) continue;
+  const have = new Set<string>();
+  for (const memory of current) {
+    const text = memory.content.trim();
+    // A note the file still carries stays, unless an earlier file locked it: that one is
+    // replaced by the same note unlocked, and is not counted as a change.
+    if (incoming.has(text) && !isLegacyLocked(memory) && !have.has(text)) {
+      have.add(text);
+      continue;
+    }
     await client.deleteMemory(memory.id);
-    notesRemoved += 1;
+    if (!incoming.has(text)) notesRemoved += 1;
   }
-  const have = new Set(locked.map((memory) => memory.content.trim()));
+  const before = new Set(current.map((memory) => memory.content.trim()));
   let notesAdded = 0;
   for (const note of team.notes) {
     if (have.has(note.text)) continue;
-    await client.saveMemory({ content: note.text, tags: [TEAM_SCOPE_TAG, LOCKED_TAG], source: "user" });
+    await client.saveMemory({ content: note.text, tags: [TEAM_SCOPE_TAG], source: "user" });
     have.add(note.text);
-    notesAdded += 1;
+    if (!before.has(note.text)) notesAdded += 1;
   }
-  return { notesAdded, notesRemoved, level: team.privacy.level, setBy: team.privacy.setBy };
+  return { notesAdded, notesRemoved, level: team.privacy.level, setBy: team.privacy.setBy, policyManaged };
 }

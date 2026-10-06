@@ -3,10 +3,11 @@ import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { LOCKED_MEMORY_TAG, isLockedMemory } from "./local-memory-store.js";
+import { LOCKED_MEMORY_TAG, isLockedMemory, saveMemory } from "./local-memory-store.js";
+import { writeRedrobWorkspaceConfig } from "./redrob-workspace-config-store.js";
 import { startServer } from "./server.js";
 import type { ServerConfig } from "./types.js";
-import { redrobAfterImport, touchesPrivacyLock } from "./team-lock.js";
+import { redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import { buildWorkspaceImportPreview } from "./workspace-import-preview.js";
 
 const dirs: string[] = [];
@@ -53,7 +54,8 @@ async function startTeamServer() {
   process.env.REDROB_DATA_DIR = dataDir;
   process.env.REDROB_RUNTIME_DB = join(dataDir, "runtime.sqlite");
   process.env.REDROB_DISABLE_SCHEDULER = "1";
-  const server = (await startServer(serverConfig(workspace, dataDir))) as { port: number; stop: (force?: boolean) => void };
+  const config = serverConfig(workspace, dataDir);
+  const server = (await startServer(config)) as { port: number; stop: (force?: boolean) => void };
   const base = `http://127.0.0.1:${server.port}`;
   // The desktop app holds an owner token like this one; a shared workspace hands out the collaborator one.
   const issued = await fetch(`${base}/tokens`, {
@@ -68,7 +70,11 @@ async function startTeamServer() {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
-  return { server, collaborator: as("test-token"), owner: as(ownerToken) };
+  // A lock left on disk by an earlier build's team file: no route sets one any more.
+  const legacyNote = async (content: string) => (await saveMemory(config, { content, tags: ["desk-scope:team", LOCKED_MEMORY_TAG] })).id;
+  const legacyPrivacyLock = (privacy: Record<string, unknown>) =>
+    writeRedrobWorkspaceConfig(config, "workspace", (current) => ({ ...current, deskPrivacy: privacy }));
+  return { server, collaborator: as("test-token"), owner: as(ownerToken), legacyNote, legacyPrivacyLock };
 }
 
 describe("team file notes", () => {
@@ -79,11 +85,10 @@ describe("team file notes", () => {
   });
 
   test("the server refuses to change or forget a locked note, and changes an ordinary one", async () => {
-    const { server, collaborator, owner } = await startTeamServer();
+    const { server, collaborator, legacyNote } = await startTeamServer();
     try {
       const idOf = async (response: Response) => ((await response.json()) as { memory: { id: string } }).memory.id;
-      // Locked notes come from a team file, which only the owner applies.
-      const locked = await idOf(await owner("POST", "/memory", { content: "House style", tags: ["desk-scope:team", LOCKED_MEMORY_TAG] }));
+      const locked = await legacyNote("House style");
       const own = await idOf(await collaborator("POST", "/memory", { content: "House style", tags: ["desk-scope:you"] }));
       expect((await collaborator("PATCH", `/memory/${locked}`, { content: "Changed" })).status).toBe(403);
       expect((await collaborator("DELETE", `/memory/${locked}`)).status).toBe(403);
@@ -95,8 +100,8 @@ describe("team file notes", () => {
   });
 });
 
-describe("team locks belong to the owner", () => {
-  test("which config changes touch a lock", () => {
+describe("only a signed team policy sets a lock", () => {
+  test("which config changes touch a lock, and which set a new one", () => {
     const locked = { deskPrivacy: { level: "high", names: [], setBy: "Park", locked: true } };
     expect(touchesPrivacyLock({}, { deskPrivacy: { level: "high" } })).toBe(false);
     expect(touchesPrivacyLock({}, { deskPrivacy: { level: "high", locked: true } })).toBe(true);
@@ -105,26 +110,36 @@ describe("team locks belong to the owner", () => {
     expect(touchesPrivacyLock(locked, { deskPrivacy: { locked: true, setBy: "Park", names: [], level: "high" } })).toBe(false);
     expect(touchesPrivacyLock(locked, { deskPrivacy: { ...locked.deskPrivacy, level: "off" } })).toBe(true);
     expect(touchesPrivacyLock(locked, {})).toBe(true);
+
+    expect(setsPrivacyLock({}, locked)).toBe(true);
+    // Changing a lock while keeping it is setting a new one; lifting it is not.
+    expect(setsPrivacyLock(locked, { deskPrivacy: { ...locked.deskPrivacy, level: "off" } })).toBe(true);
+    expect(setsPrivacyLock(locked, { deskPrivacy: { ...locked.deskPrivacy, locked: false } })).toBe(false);
+    expect(setsPrivacyLock(locked, { deskPrivacy: { locked: true, setBy: "Park", names: [], level: "high" } })).toBe(false);
+
     expect(redrobAfterImport(locked, { redrob: { x: 1 } })).toEqual({ ...locked, x: 1 });
     expect(redrobAfterImport(locked, { redrob: { x: 1 }, mode: { redrob: "replace" } })).toEqual({ x: 1 });
     expect(redrobAfterImport(locked, {})).toBe(locked);
   });
 
-  test("a collaborator cannot add, tag or remove a locked note; the owner can add and remove one", async () => {
-    const { server, collaborator, owner } = await startTeamServer();
+  test("no token adds a locked note or tags one; the owner can remove a lock an earlier team file left", async () => {
+    const { server, collaborator, owner, legacyNote } = await startTeamServer();
     try {
       const note = { content: "House style", tags: ["desk-scope:team", LOCKED_MEMORY_TAG] };
-      expect((await collaborator("POST", "/memory", note)).status).toBe(403);
-      const created = await owner("POST", "/memory", note);
-      expect(created.status).toBe(201);
-      const lockedId = ((await created.json()) as { memory: { id: string } }).memory.id;
+      for (const as of [collaborator, owner]) {
+        const refused = await as("POST", "/memory", note);
+        expect(refused.status).toBe(403);
+        expect(((await refused.json()) as { code: string }).code).toBe("memory_lock_policy_only");
+      }
+      // An unlocked team note, as a team file now brings, is anyone's to add, change and remove.
+      const team = await collaborator("POST", "/memory", { content: "House style", tags: ["desk-scope:team"] });
+      expect(team.status).toBe(201);
+      const teamId = ((await team.json()) as { memory: { id: string } }).memory.id;
+      for (const as of [collaborator, owner]) expect((await as("PATCH", `/memory/${teamId}`, { tags: ["desk-scope:team", LOCKED_MEMORY_TAG] })).status).toBe(403);
+      expect((await collaborator("PATCH", `/memory/${teamId}`, { content: "House style v2" })).status).toBe(200);
 
-      const own = await collaborator("POST", "/memory", { content: "Mine", tags: ["desk-scope:you"] });
-      const ownId = ((await own.json()) as { memory: { id: string } }).memory.id;
-      expect((await collaborator("PATCH", `/memory/${ownId}`, { tags: [LOCKED_MEMORY_TAG] })).status).toBe(403);
-
+      const lockedId = await legacyNote("Old rule");
       expect((await collaborator("DELETE", `/memory/${lockedId}`)).status).toBe(403);
-      // Nobody edits a locked note in place; it changes with a new team file.
       expect((await owner("PATCH", `/memory/${lockedId}`, { content: "Changed" })).status).toBe(403);
       expect((await owner("DELETE", `/memory/${lockedId}`)).status).toBe(200);
     } finally {
@@ -132,23 +147,30 @@ describe("team locks belong to the owner", () => {
     }
   });
 
-  test("a collaborator cannot set, lift or change a locked privacy level, by config or by import", async () => {
-    const { server, collaborator, owner } = await startTeamServer();
+  test("no token locks the privacy level by config or import; the owner can lift a lock an earlier team file left", async () => {
+    const { server, collaborator, owner, legacyPrivacyLock } = await startTeamServer();
     try {
       const lock = { deskPrivacy: { level: "high", names: [], setBy: "Park", locked: true } };
-      expect((await collaborator("PATCH", "/workspace/workspace/config", { redrob: lock })).status).toBe(403);
+      for (const as of [collaborator, owner]) {
+        const patched = await as("PATCH", "/workspace/workspace/config", { redrob: lock });
+        expect(patched.status).toBe(403);
+        expect(((await patched.json()) as { code: string }).code).toBe("privacy_lock_policy_only");
+        expect((await as("POST", "/workspace/workspace/import", { redrob: lock })).status).toBe(403);
+      }
       // An unlocked level stays the person's own to change.
       expect((await collaborator("PATCH", "/workspace/workspace/config", { redrob: { deskPrivacy: { level: "strict" } } })).status).toBe(200);
-      expect((await owner("PATCH", "/workspace/workspace/config", { redrob: lock })).status).toBe(200);
 
-      expect((await collaborator("PATCH", "/workspace/workspace/config", { redrob: { deskPrivacy: { level: "off" } } })).status).toBe(403);
-      // Other settings still change under a lock.
+      await legacyPrivacyLock(lock.deskPrivacy);
+      // Under a lock: other settings still change, the lock does not move for a collaborator.
       expect((await collaborator("PATCH", "/workspace/workspace/config", { redrob: { theme: "dark" } })).status).toBe(200);
-
-      expect((await collaborator("POST", "/workspace/workspace/import", { redrob: { deskPrivacy: { level: "off" } } })).status).toBe(403);
+      expect((await collaborator("PATCH", "/workspace/workspace/config", { redrob: { deskPrivacy: { level: "off" } } })).status).toBe(403);
       expect((await collaborator("POST", "/workspace/workspace/import", { redrob: { theme: "light" }, mode: { redrob: "replace" } })).status).toBe(403);
+      // The owner cannot re-lock it differently, only lift it.
+      expect((await owner("PATCH", "/workspace/workspace/config", { redrob: { deskPrivacy: { ...lock.deskPrivacy, level: "off" } } })).status).toBe(403);
+      const unlocked = { level: "high", names: [], setBy: null, locked: false };
+      expect((await owner("PATCH", "/workspace/workspace/config", { redrob: { deskPrivacy: unlocked } })).status).toBe(200);
       const config = (await (await owner("GET", "/workspace/workspace/config")).json()) as { redrob: Record<string, unknown> };
-      expect(config.redrob.deskPrivacy).toEqual(lock.deskPrivacy);
+      expect(config.redrob.deskPrivacy).toEqual(unlocked);
     } finally {
       server.stop(true);
     }

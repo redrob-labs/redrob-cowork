@@ -55,10 +55,16 @@ export function TeamReviewBody(props: { review: TeamReview }) {
   const programs = review.connectors.filter((connector) => connector.runsProgram);
   const risky = programs.length > 0 || review.plugins.length > 0 || review.permissions;
   const setBy = review.team.privacy.setBy;
+  // In a project that follows a team policy, the policy keeps its own level and notes.
+  const team = review.policyManaged
+    ? [t("desk.team_review_policy_managed")]
+    : [
+        t("desk.team_review_level", { level: privacyLevelLabel(review.team.privacy.level) }),
+        setBy ? t("desk.team_review_set_by", { name: setBy }) : t("desk.team_review_set_by_unknown"),
+        t("desk.team_review_notes", { added: review.notesAdded, removed: review.notesRemoved }),
+      ];
   const items = [
-    t("desk.team_review_level", { level: privacyLevelLabel(review.team.privacy.level) }),
-    setBy ? t("desk.team_review_set_by", { name: setBy }) : t("desk.team_review_set_by_unknown"),
-    t("desk.team_review_notes", { added: review.notesAdded, removed: review.notesRemoved }),
+    ...team,
     t("desk.team_review_playbooks", { playbooks: review.playbooks, skills: review.skills }),
     ...(review.connectors.length ? [t("desk.team_review_connectors", { names: review.connectors.map((connector) => connector.name).join(", ") })] : []),
     t("desk.team_review_changes", { count: review.changes }),
@@ -137,7 +143,10 @@ export function TeamFileGroup() {
       const result = await applyTeamFile(client, workspaceId, reviewed);
       // Notes, privacy and playbooks all changed under the screens that show them.
       await queryClient.invalidateQueries();
-      showToast(t("desk.team_used_title"), t("desk.team_used_text", { count: result.notesAdded }));
+      showToast(
+        t("desk.team_used_title"),
+        result.policyManaged ? t("desk.team_used_text_policy") : t("desk.team_used_text", { count: result.notesAdded }),
+      );
     } catch (error) {
       showToast(t("desk.team_use_failed"), teamFileRefusalText(error), "danger");
     } finally {
