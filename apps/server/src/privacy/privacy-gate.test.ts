@@ -66,11 +66,18 @@ describe("labels", () => {
     expect(restoreDeep({ to: ["[PERSON_1]"], n: 3 }, map)).toEqual({ to: ["김지원"], n: 3 });
   });
 
-  test("the policy's transforms: amounts rounded, dates moved by the chat's fixed offset and back", () => {
+  test("the policy's transforms: amounts rounded behind labels, dates moved by the chat's fixed offset and back", () => {
     const rules: PrivacyRules = { level: "high", names: [], transforms: { roundAmounts: true, shiftDates: true } };
     const map = emptyLabelMap(10);
-    const out = labelText("Due 2026-10-31 and 2026년 11월 3일: ₩12,345,678 and 9,876,543원", rules, map).text;
-    expect(out).toBe("Due 2026-11-10 and 2026년 11월 13일: ₩12,000,000 and 9,900,000원");
+    const text = "Due 2026-10-31 and 2026년 11월 3일: ₩12,345,678 and 9,876,543원";
+    const out = labelText(text, rules, map).text;
+    expect(out).toBe("Due 2026-11-10 and 2026년 11월 13일: [AMOUNT_1](≈₩12,000,000) and [AMOUNT_2](≈9,900,000원)");
+    // The exact figures come back, with or without the approximation the model may repeat.
+    expect(restoreText(out, map).text).toBe(text);
+    expect(restoreText("[AMOUNT_1] vs [AMOUNT_2] (≈9,900,000원)", map).text).toBe("₩12,345,678 vs 9,876,543원");
+    // The same amount keeps its label, and a labelled amount is never rounded twice.
+    expect(labelText("again ₩12,345,678", rules, map).text).toBe("again [AMOUNT_1](≈₩12,000,000)");
+    expect(labelText(out, rules, emptyLabelMap(10)).text).toContain("[AMOUNT_1](≈₩12,000,000)");
     // The gap between the dates is unchanged, and a restore moves them back.
     expect(restoreText("2026-11-10", map).text).toBe("2026-10-31");
     expect(shiftDates("2026-02-27", 2)).toBe("2026-03-01");
@@ -238,6 +245,50 @@ describe("the privacy gate in the engine", () => {
       expect(output.messages[0]!.parts[0]!.text).toBe("Summarise the contract for 김지원 ([EMAIL_1]).");
     } finally {
       standard.server.stop(true);
+    }
+  });
+
+  test("privacy_compute: the model adds rounded amounts by label and gets the exact sum, labelled again", async () => {
+    const { server, hooks } = await gateWithServer({ level: "high", names: [], transforms: { roundAmounts: true } });
+    try {
+      const output = {
+        messages: [{ info: { id: "m1", sessionID: "ses_sum", role: "user" }, parts: [{ type: "text", text: "Fees: ₩12,345,678 and ₩3,210,987. Total?" }] }] as Array<{
+          info: Record<string, unknown>;
+          parts: Array<Record<string, any>>;
+        }>,
+      };
+      await hooks["experimental.chat.messages.transform"]({}, output);
+      expect(output.messages[0]!.parts[0]!.text).toBe("Fees: [AMOUNT_1](≈₩12,000,000) and [AMOUNT_2](≈₩3,200,000). Total?");
+
+      // The engine restores a tool's arguments, then runs it here; its own fallback restores too.
+      const call = { args: { expression: "[AMOUNT_1] + [AMOUNT_2]" } };
+      await hooks["tool.execute.before"]({ sessionID: "ses_sum" }, call);
+      expect(call.args.expression).toBe("₩12,345,678 + ₩3,210,987");
+      const tool = hooks.tool.privacy_compute;
+      expect(JSON.parse(await tool.execute(call.args, { sessionID: "ses_sum" }))).toEqual({ ok: true, result: "₩15,556,665" });
+      expect(JSON.parse(await tool.execute({ expression: "[AMOUNT_1] - [AMOUNT_2]" }, { sessionID: "ses_sum" }))).toEqual({
+        ok: true,
+        result: "₩9,134,691",
+      });
+      expect(JSON.parse(await tool.execute({ expression: "[AMOUNT_9] * 2" }, { sessionID: "ses_sum" }))).toEqual({
+        ok: false,
+        error: "This conversation has no value for [AMOUNT_9].",
+      });
+
+      // The exact result reaches the model only as a label again.
+      const next = {
+        messages: [
+          ...output.messages,
+          { info: { id: "m2", sessionID: "ses_sum", role: "assistant" }, parts: [{ type: "tool", tool: "privacy_compute", state: { status: "completed", output: '{"ok":true,"result":"₩15,556,665"}' } }] },
+        ],
+      };
+      await hooks["experimental.chat.messages.transform"]({}, next);
+      expect(next.messages[1]!.parts[0]!.state.output).toBe('{"ok":true,"result":"[AMOUNT_3](≈₩16,000,000)"}');
+      const answer = { text: "The total is [AMOUNT_3](≈₩16,000,000)." };
+      await hooks["experimental.text.complete"]({ sessionID: "ses_sum" }, answer);
+      expect(answer.text).toBe("The total is ₩15,556,665.");
+    } finally {
+      server.stop(true);
     }
   });
 

@@ -9,7 +9,9 @@
  *     (`[PERSON_1]님은`), so 김지원, 김지원님 and Jiwon Kim are all PERSON_1;
  *   - PERSON and ORG for listed names, NAME kept as an alias so older chats still restore;
  *   - amounts, percentages, clause numbers and ordinary dates are kept, because the work is about
- *     them; the policy can require rounding amounts or shifting dates instead;
+ *     them; the policy can require rounding amounts or shifting dates instead. A rounded amount is
+ *     a label with its approximation, `[AMOUNT_1](≈₩12,000,000)`, so the exact figure comes back
+ *     in the answer and the privacy_compute tool (compute.ts) can still work with it;
  *   - restore tolerates the ways a model garbles a label: `[PERSON 1]`, `PERSON_1`, `［PERSON_1］`.
  *
  * Pure and dependency-free, so the server and its tests use the same code.
@@ -27,7 +29,8 @@ export type LabelCategory =
   | "ADDRESS"
   | "PERSON"
   | "ORG"
-  | "TITLE";
+  | "TITLE"
+  | "AMOUNT";
 
 export type PrivacyRules = {
   level: PrivacyLevel;
@@ -178,16 +181,27 @@ function roundSignificant(value: number): number {
   return Math.round(value / magnitude) * magnitude;
 }
 
-function roundAmounts(text: string): string {
+/** An amount already labelled, with its approximation: left as it is, never rounded twice. */
+const LABELLED_AMOUNT = /\[AMOUNT_\d+\]\(≈[^)\n]{0,40}\)/g;
+
+/** Each amount becomes a label with its rounded value; the map keeps the exact figure. */
+function roundAmounts(text: string, ctx: Ctx): string {
+  const pattern = new RegExp(`${LABELLED_AMOUNT.source}|${AMOUNT.source}`, "g");
   return text.replace(
-    AMOUNT,
+    pattern,
     (match, prefix: string | undefined, before: string | undefined, after: string | undefined, suffix: string | undefined) => {
+      if (match.startsWith("[AMOUNT_")) return match;
       const raw = prefix ? before : after;
       if (!raw) return match;
       const rounded = roundSignificant(Number(raw.replace(/,/g, ""))).toLocaleString("en-US");
-      if (prefix) return `${prefix}${rounded}`;
-      const gap = match.slice(match.indexOf(raw) + raw.length).match(/^[.\d]*(\s?)/)?.[1] ?? "";
-      return `${rounded}${gap}${suffix ?? ""}`;
+      let approximate: string;
+      if (prefix) approximate = `${prefix}${rounded}`;
+      else {
+        const gap = match.slice(match.indexOf(raw) + raw.length).match(/^[.\d]*(\s?)/)?.[1] ?? "";
+        approximate = `${rounded}${gap}${suffix ?? ""}`;
+      }
+      ctx.found.push("AMOUNT");
+      return `${labelFor(ctx, "AMOUNT", match)}(≈${approximate})`;
     },
   );
 }
@@ -326,16 +340,19 @@ export function labelText(text: string, rules: PrivacyRules, map: LabelMap, dete
       });
   }
 
-  if (rules.transforms?.roundAmounts) next = roundAmounts(next);
+  if (rules.transforms?.roundAmounts) next = roundAmounts(next, ctx);
   if (rules.transforms?.shiftDates) next = shiftDates(next, map.dateShiftDays);
 
   return { text: next, found: ctx.found };
 }
 
-const CATEGORY_ALTERNATION = "EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|PERSON|ORG|TITLE|NAME";
-/** `[PERSON_1]`, `[PERSON 1]`, `［PERSON_1］`, and a bare `PERSON_1` as a whole word. */
+const CATEGORY_ALTERNATION = "EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|PERSON|ORG|TITLE|AMOUNT|NAME";
+/**
+ * `[PERSON_1]`, `[PERSON 1]`, `［PERSON_1］`, and a bare `PERSON_1` as a whole word. A bracketed
+ * label's approximation, `(≈₩12,000,000)`, goes with it: the exact value replaces both.
+ */
 const LABEL_PATTERN = new RegExp(
-  `[\\[［]\\s*(${CATEGORY_ALTERNATION})[_\\s](\\d+)\\s*[\\]］]|(?<![A-Za-z0-9_])(${CATEGORY_ALTERNATION})_(\\d+)(?![A-Za-z0-9_])`,
+  `[\\[［]\\s*(${CATEGORY_ALTERNATION})[_\\s](\\d+)\\s*[\\]］](?:\\s?\\(≈[^)\\n]{0,40}\\))?|(?<![A-Za-z0-9_])(${CATEGORY_ALTERNATION})_(\\d+)(?![A-Za-z0-9_])`,
   "g",
 );
 
@@ -378,4 +395,4 @@ export function restoreDeep(value: unknown, map: LabelMap): unknown {
 
 /** The system line that keeps labels intact through the answer. Model input, not copy. */
 export const LABEL_INSTRUCTION =
-  "Private details in this conversation were replaced with labels such as [PERSON_1], [ORG_1] or [ACCOUNT_1]. The same label always means the same person, organisation or detail. Keep every label exactly as written, brackets included, wherever you use that detail, including in tool calls; the real values are filled in on the person's computer. Do not guess what a label stands for.";
+  "Private details in this conversation were replaced with labels such as [PERSON_1], [ORG_1] or [ACCOUNT_1]. The same label always means the same person, organisation or detail. Keep every label exactly as written, brackets included, wherever you use that detail, including in tool calls; the real values are filled in on the person's computer. Do not guess what a label stands for. An amount shown as [AMOUNT_1](≈₩12,000,000) is rounded; for exact arithmetic on amounts, percentages or dates, call the privacy_compute tool with the labels, which works on the real values.";

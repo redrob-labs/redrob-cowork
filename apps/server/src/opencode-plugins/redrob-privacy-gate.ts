@@ -17,11 +17,18 @@
  *   history keeps real values and the person reads them.
  * - `config`: chat titles are written by a separate model call that does not run the messages
  *   hook (session/prompt.ts ensureTitle), so with protection on, the title agent is turned off.
+ * - `tool`: `privacy_compute`, exact arithmetic on the real values behind labels
+ *   (privacy/compute.ts). It runs here, on this machine, after its arguments were restored, and
+ *   its answer reaches the model through the messages hook like any tool result.
  *
  * Fails closed: if the server cannot label a request while protection is on, the request is not
  * sent. An attachment the gate cannot read (an image, a PDF that is not text) is left out at High
  * and Strict, with a note in its place saying why.
  */
+
+import { z } from "zod";
+
+import { compute, ComputeError } from "../privacy/compute.js";
 
 type Json = Record<string, unknown>;
 type Part = Json & { type?: string };
@@ -108,6 +115,22 @@ function sessionOf(messages: Message[]): string | null {
   return null;
 }
 
+const computeArgsSchema = z.object({
+  expression: z
+    .string()
+    .min(1)
+    .max(2_000)
+    .describe(
+      "One expression using labels as written, for example `[AMOUNT_3] + [AMOUNT_7]`, `[AMOUNT_2] * 3.5%`, `days(2026-03-01, 2026-10-31)` or `[AMOUNT_1] > [AMOUNT_4]`. Supports + - * / ( ), one comparison, and sum, min, max, abs, round(value, places), days(from, to).",
+    ),
+});
+
+const COMPUTE_DESCRIPTION =
+  "Exact arithmetic on the real values behind privacy labels, run on the person's computer. Use it whenever you need the exact sum, difference, ratio or comparison of amounts, or the days between dates, in a conversation with labels: rounded amounts such as [AMOUNT_1](≈₩12,000,000) are not exact. Pass the labels as written. The result comes back labelled where it is private.";
+
+/** Labels the gate could not resolve, as written; none means the arguments were restored. */
+const UNRESOLVED = /[\[［]\s*(?:EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|PERSON|ORG|TITLE|AMOUNT|NAME)[_\s]\d+\s*[\]］]/;
+
 // Single export: the OpenCode plugin loader treats every export of a plugin
 // module as a plugin factory, so helpers must stay module-private.
 export const RedrobWorkPrivacyGate = async (factoryInput?: unknown) => {
@@ -176,6 +199,33 @@ export const RedrobWorkPrivacyGate = async (factoryInput?: unknown) => {
         () => null,
       );
       if (result && typeof result.value === "string") output.text = result.value;
+    },
+
+    tool: {
+      privacy_compute: {
+        description: COMPUTE_DESCRIPTION,
+        args: computeArgsSchema.shape,
+        async execute(rawArgs: unknown, context?: { sessionID?: string }) {
+          let { expression } = computeArgsSchema.parse(rawArgs);
+          // tool.execute.before has normally restored the arguments already; restoring twice is
+          // harmless, and covers a runtime that skips that hook for plugin tools.
+          if (context?.sessionID && UNRESOLVED.test(expression)) {
+            const restored = await gate<{ value: unknown }>({ op: "restore", sessionID: context.sessionID, value: expression }).catch(() => null);
+            if (restored && typeof restored.value === "string") expression = restored.value;
+          }
+          const unresolved = expression.match(new RegExp(UNRESOLVED.source, "g"));
+          if (unresolved) {
+            return JSON.stringify({ ok: false, error: `This conversation has no value for ${[...new Set(unresolved)].join(", ")}.` });
+          }
+          try {
+            const result = compute(expression);
+            return JSON.stringify({ ok: true, result: result.text });
+          } catch (error) {
+            if (error instanceof ComputeError) return JSON.stringify({ ok: false, error: error.message });
+            throw error;
+          }
+        },
+      },
     },
   };
 };
