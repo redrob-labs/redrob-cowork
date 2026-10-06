@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Input } from "@redrob-labs/ui";
 
 import { downloadTextAsFile } from "../../../app/lib/download";
+import { RedrobServerError } from "../../../app/lib/redrob-server";
 import { t } from "../../../i18n";
 import { Group, Row } from "../settings/desk-settings";
 import { DeskDialog } from "../shell/desk-dialog";
@@ -84,6 +85,15 @@ export function TeamReviewBody(props: { review: TeamReview }) {
   );
 }
 
+/** Why a team file was refused, when the server said; the generic hint otherwise. */
+export function teamFileRefusalText(error: unknown): string {
+  if (error instanceof RedrobServerError) {
+    if (error.code === "team_policy_locked") return t("desk.team_use_failed_policy");
+    if (error.status === 403) return t("desk.team_use_failed_owner");
+  }
+  return t("desk.team_use_failed_text");
+}
+
 /** The team file group, wired to the open workspace. Nothing to show without one. */
 export function TeamFileGroup() {
   const client = useDeskConnection((state) => state.client);
@@ -128,8 +138,8 @@ export function TeamFileGroup() {
       // Notes, privacy and playbooks all changed under the screens that show them.
       await queryClient.invalidateQueries();
       showToast(t("desk.team_used_title"), t("desk.team_used_text", { count: result.notesAdded }));
-    } catch {
-      showToast(t("desk.team_use_failed"), t("desk.team_use_failed_text"), "danger");
+    } catch (error) {
+      showToast(t("desk.team_use_failed"), teamFileRefusalText(error), "danger");
     } finally {
       setBusy(false);
       setReview(null);

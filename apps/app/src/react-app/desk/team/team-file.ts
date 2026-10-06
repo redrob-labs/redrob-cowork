@@ -149,6 +149,12 @@ export type TeamImportResult = { notesAdded: number; notesRemoved: number; level
  */
 export async function applyTeamFile(client: TeamClient, workspaceId: string, review: TeamReview): Promise<TeamImportResult> {
   const { team } = review;
+  // The locked privacy level first: it is the step a token without the owner scope, or a workspace
+  // that follows a signed team policy, is refused at. Refused here, nothing has changed yet; refused
+  // after the import, the project would be half set up with no way to tell.
+  await client.patchConfig(workspaceId, {
+    redrob: { [DESK_PRIVACY_CONFIG_KEY]: { ...team.privacy, locked: true } },
+  });
   await client.importWorkspace(workspaceId, { ...review.file, previewFingerprint: review.fingerprint });
 
   const incoming = new Set(team.notes.map((note) => note.text));
@@ -167,8 +173,5 @@ export async function applyTeamFile(client: TeamClient, workspaceId: string, rev
     have.add(note.text);
     notesAdded += 1;
   }
-  await client.patchConfig(workspaceId, {
-    redrob: { [DESK_PRIVACY_CONFIG_KEY]: { ...team.privacy, locked: true } },
-  });
   return { notesAdded, notesRemoved, level: team.privacy.level, setBy: team.privacy.setBy };
 }

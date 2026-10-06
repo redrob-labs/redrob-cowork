@@ -18,7 +18,10 @@ export type DeskProjectClient = Pick<
 export type DeskConnectorClient = Pick<RedrobServerClient, "setMcpEnabled" | "connectManagedMcp">;
 
 /** The calls the team file adds: export the workspace, and import one. */
-export type DeskTeamClient = Pick<RedrobServerClient, "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace">;
+export type DeskTeamClient = Pick<
+  RedrobServerClient,
+  "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace" | "getTeamPolicy" | "syncTeamPolicy" | "leaveTeamPolicy"
+>;
 
 export type DeskConnection = {
   client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient) | null;

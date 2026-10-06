@@ -843,6 +843,43 @@ export function clearRedrobServerSettings() {
   }
 }
 
+/** GET /workspace/:id/team-policy. Mirrors describeTeamPolicyState + describeTeamPolicySync in redrob-server. */
+export type RedrobTeamPolicyStatus = {
+  joined: boolean;
+  accountId: string | null;
+  version: number | null;
+  issuedAt?: string;
+  appliedAt?: number;
+  setBy?: { userId: string; name: string; role: "admin" | "developer" | "viewer" };
+  signedWithTestKey?: boolean;
+  privacy?: { level: "off" | "standard" | "high" | "strict"; locked: boolean };
+  notes?: number;
+  playbooks?: string[];
+  skills?: string[];
+  sync: {
+    checkedAt: number | null;
+    status: RedrobTeamPolicySyncOutcome["status"] | null;
+    code: string | null;
+    lastSuccessAt: number | null;
+    stale: boolean;
+  };
+};
+
+export type RedrobTeamPolicySyncOutcome = {
+  status:
+    | "applied"
+    | "unchanged"
+    | "no_policy"
+    | "not_connected"
+    | "not_joined"
+    | "not_member"
+    | "removed"
+    | "refused"
+    | "unreachable";
+  code?: string;
+  version?: number;
+};
+
 export class RedrobServerError extends Error {
   status: number;
   code: string;
@@ -1374,6 +1411,26 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         `/workspace/${workspaceId}/config`,
         { token, hostToken, timeoutMs: timeouts.config },
       ),
+    /** The team policy this workspace follows, and when it was last checked. */
+    getTeamPolicy: (workspaceId: string) =>
+      requestJson<RedrobTeamPolicyStatus>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/team-policy`, {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      }),
+    /** Checks the console now. `join` starts following the team; it needs the owner token. */
+    syncTeamPolicy: (workspaceId: string, options: { join?: boolean } = {}) =>
+      requestJson<RedrobTeamPolicyStatus & { outcome: RedrobTeamPolicySyncOutcome }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/team-policy/sync`,
+        { token, hostToken, method: "POST", body: { join: options.join === true }, timeoutMs: 30_000 },
+      ),
+    leaveTeamPolicy: (workspaceId: string) =>
+      requestJson<RedrobTeamPolicyStatus>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/team-policy`, {
+        token,
+        hostToken,
+        method: "DELETE",
+      }),
     listAuthorizedFolders: (workspaceId: string) =>
       requestJson<RedrobAuthorizedFoldersResponse>(
         baseUrl,

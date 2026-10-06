@@ -2,10 +2,11 @@ import { describe, expect, test } from "bun:test";
 import type { Memory } from "@redrob/types/memory";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import type { RedrobWorkspaceImportPreview } from "../src/app/lib/redrob-server";
+import { RedrobServerError, type RedrobWorkspaceImportPreview } from "../src/app/lib/redrob-server";
+import { t } from "../src/i18n";
 import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
 import { applyTeamFile, buildTeamFile, readTeamSettings, reviewTeamFile } from "../src/react-app/desk/team/team-file";
-import { TeamFileView, TeamReviewBody } from "../src/react-app/desk/team/team-file-group";
+import { TeamFileView, TeamReviewBody, teamFileRefusalText } from "../src/react-app/desk/team/team-file-group";
 
 const memory = (id: string, content: string, tags: string[]): Memory => ({
   id,
@@ -94,7 +95,8 @@ describe("the team file", () => {
     expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId"]);
     expect(review).toMatchObject({ fingerprint: "fp-1", changes: 1, playbooks: 1, notesAdded: 1, notesRemoved: 0, connectors: [], plugins: [], permissions: false });
     expect(await applyTeamFile(mate.client, "ws_mate", review)).toEqual({ notesAdded: 1, notesRemoved: 0, level: "strict", setBy: "Park" });
-    expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "import:fp-1", "save:House style:desk-scope:team,desk-locked", "patch"]);
+    // The locked level goes first: it is the step a refusal comes at, so a refusal changes nothing.
+    expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "patch", "import:fp-1", "save:House style:desk-scope:team,desk-locked"]);
     expect(mate.redrob().deskPrivacy).toEqual({ level: "strict", names: ["Seorin"], setBy: "Park", locked: true });
 
     // Using it again adds nothing twice.
@@ -126,6 +128,30 @@ describe("the team file", () => {
     expect((await services.notes.list()).data).toMatchObject([{ text: "House style", scope: "team", locked: true }]);
     expect((await services.privacy.get()).data).toMatchObject({ level: "strict", setBy: "Park", locked: true });
     await expect(services.privacy.setLevel("off")).rejects.toThrow();
+  });
+
+  test("a refused privacy lock stops the file before the project is imported, and says why", async () => {
+    const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"])], redrob: { deskPrivacy: { level: "high", names: [] } } });
+    const file = await buildTeamFile(admin.client, "ws_admin", "Park");
+    for (const [error, text] of [
+      [new RedrobServerError(403, "forbidden", "Insufficient token scope"), t("desk.team_use_failed_owner")],
+      [new RedrobServerError(403, "team_policy_locked", "locked"), t("desk.team_use_failed_policy")],
+    ] as const) {
+      const mate = fakeServer({ memories: [], redrob: {} });
+      const refusing = {
+        ...mate.client,
+        patchConfig: async () => {
+          mate.calls.push("patch");
+          throw error;
+        },
+      };
+      const review = await reviewTeamFile(refusing, "ws_mate", file);
+      const failure = await applyTeamFile(refusing, "ws_mate", review).catch((reason: unknown) => reason);
+      expect(failure).toBe(error);
+      expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "patch"]);
+      expect(teamFileRefusalText(failure)).toBe(text);
+    }
+    expect(teamFileRefusalText(new Error("network"))).toBe(t("desk.team_use_failed_text"));
   });
 
   test("a file that is not a team file is refused before anything changes", async () => {
