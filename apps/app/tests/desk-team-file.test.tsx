@@ -4,8 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import type { RedrobWorkspaceImportPreview } from "../src/app/lib/redrob-server";
 import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
-import { applyTeamFile, buildTeamFile, readTeamSettings } from "../src/react-app/desk/team/team-file";
-import { TeamFileView } from "../src/react-app/desk/team/team-file-group";
+import { applyTeamFile, buildTeamFile, readTeamSettings, reviewTeamFile } from "../src/react-app/desk/team/team-file";
+import { TeamFileView, TeamReviewBody } from "../src/react-app/desk/team/team-file-group";
 
 const memory = (id: string, content: string, tags: string[]): Memory => ({
   id,
@@ -19,7 +19,7 @@ const memory = (id: string, content: string, tags: string[]): Memory => ({
 });
 
 /** Two workspaces' worth of server: the admin's, then a teammate's. */
-function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown> }) {
+function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown>; opencode?: Record<string, unknown> }) {
   const calls: string[] = [];
   let memories = [...start.memories];
   let redrob = { ...start.redrob };
@@ -30,7 +30,13 @@ function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown>
     changes: [],
   };
   const client = {
-    exportWorkspace: async () => ({ workspaceId: "ws_admin", exportedAt: 1, redrob: { ...redrob }, commands: [{ name: "weekly-update", template: "# Weekly\n\nDo it." }] }),
+    exportWorkspace: async () => ({
+      workspaceId: "ws_admin",
+      exportedAt: 1,
+      redrob: { ...redrob },
+      ...(start.opencode ? { opencode: start.opencode } : {}),
+      commands: [{ name: "weekly-update", template: "# Weekly\n\nDo it." }],
+    }),
     previewWorkspaceImport: async (_workspaceId: string, payload: Record<string, unknown>) => {
       calls.push(`preview:${Object.keys(payload).sort().join(",")}`);
       return preview;
@@ -45,6 +51,10 @@ function fakeServer(start: { memories: Memory[]; redrob: Record<string, unknown>
       const saved = memory(`m${next++}`, payload.content, payload.tags ?? []);
       memories = [...memories, saved];
       return saved;
+    },
+    deleteMemory: async (memoryId: string) => {
+      calls.push(`delete:${memoryId}`);
+      memories = memories.filter((entry) => entry.id !== memoryId);
     },
     getConfig: async () => ({ opencode: {}, redrob }),
     patchConfig: async (_workspaceId: string, payload: { redrob?: Record<string, unknown> }) => {
@@ -79,12 +89,16 @@ describe("the team file", () => {
     const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"])], redrob: { deskPrivacy: { level: "strict", names: ["Seorin"] } } });
     const file = await buildTeamFile(admin.client, "ws_admin", "Park");
     const mate = fakeServer({ memories: [], redrob: {} });
-    expect(await applyTeamFile(mate.client, "ws_mate", file)).toEqual({ notesAdded: 1, level: "strict", setBy: "Park" });
+    // Reviewing changes nothing: only the server's preview is asked.
+    const review = await reviewTeamFile(mate.client, "ws_mate", file);
+    expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId"]);
+    expect(review).toMatchObject({ fingerprint: "fp-1", changes: 1, playbooks: 1, notesAdded: 1, notesRemoved: 0, connectors: [], plugins: [], permissions: false });
+    expect(await applyTeamFile(mate.client, "ws_mate", review)).toEqual({ notesAdded: 1, notesRemoved: 0, level: "strict", setBy: "Park" });
     expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "import:fp-1", "save:House style:desk-scope:team,desk-locked", "patch"]);
     expect(mate.redrob().deskPrivacy).toEqual({ level: "strict", names: ["Seorin"], setBy: "Park", locked: true });
 
     // Using it again adds nothing twice.
-    expect((await applyTeamFile(mate.client, "ws_mate", file)).notesAdded).toBe(0);
+    expect((await applyTeamFile(mate.client, "ws_mate", await reviewTeamFile(mate.client, "ws_mate", file))).notesAdded).toBe(0);
 
     // And on the teammate's screens: locked notes, a locked level that says who set it.
     const unused = async (): Promise<never> => {
@@ -116,8 +130,58 @@ describe("the team file", () => {
 
   test("a file that is not a team file is refused before anything changes", async () => {
     const mate = fakeServer({ memories: [], redrob: {} });
-    await expect(applyTeamFile(mate.client, "ws_mate", { workspaceId: "x", redrob: {} })).rejects.toThrow();
+    await expect(reviewTeamFile(mate.client, "ws_mate", { workspaceId: "x", redrob: {} })).rejects.toThrow();
     expect(mate.calls).toEqual([]);
+  });
+
+  test("a newer file drops the locked notes it no longer carries, and leaves personal notes alone", async () => {
+    const mate = fakeServer({
+      memories: [
+        memory("old", "Old rule", ["desk-scope:team", "desk-locked"]),
+        memory("kept", "House style", ["desk-scope:team", "desk-locked"]),
+        memory("mine", "Call me Jiwoo", ["desk-scope:you"]),
+      ],
+      redrob: {},
+    });
+    const admin = fakeServer({ memories: [memory("m1", "House style", ["desk-scope:team"]), memory("m2", "New rule", ["desk-scope:team"])], redrob: {} });
+    const review = await reviewTeamFile(mate.client, "ws_mate", await buildTeamFile(admin.client, "ws_admin", "Park"));
+    expect(review).toMatchObject({ notesAdded: 1, notesRemoved: 1 });
+    expect(await applyTeamFile(mate.client, "ws_mate", review)).toMatchObject({ notesAdded: 1, notesRemoved: 1 });
+    expect(mate.calls).toContain("delete:old");
+    expect(mate.memories().map((entry) => entry.content).sort()).toEqual(["Call me Jiwoo", "House style", "New rule"]);
+  });
+
+  test("the review names connectors that start programs, add-ons and permission changes before anything changes", async () => {
+    const admin = fakeServer({
+      memories: [],
+      redrob: {},
+      opencode: {
+        mcp: { notes: { type: "remote", url: "https://example.com/mcp" }, helper: { type: "local", command: ["node", "helper.js"] } },
+        plugin: ["some-addon"],
+        permission: { bash: "allow" },
+      },
+    });
+    const file = await buildTeamFile(admin.client, "ws_admin", "");
+    const mate = fakeServer({ memories: [], redrob: {} });
+    const review = await reviewTeamFile(mate.client, "ws_mate", file);
+    expect(review.connectors).toEqual([{ name: "notes", runsProgram: false }, { name: "helper", runsProgram: true }]);
+    expect(review.plugins).toEqual(["some-addon"]);
+    expect(review.permissions).toBe(true);
+    expect(mate.calls.some((call) => call.startsWith("import"))).toBe(false);
+
+    const html = renderToStaticMarkup(<TeamReviewBody review={review} />);
+    expect(html).toContain("This file can run things on this computer");
+    expect(html).toContain("start programs on this computer: helper");
+    expect(html).toContain("some-addon");
+    expect(html).toContain("what the AI may do without asking");
+    expect(html).toContain("Doesn&#x27;t say who set it.");
+    expect(html).toContain("Nothing has changed yet.");
+
+    // A file with nothing that runs carries no warning, and says who it claims set it.
+    const plain = await reviewTeamFile(mate.client, "ws_mate", await buildTeamFile(fakeServer({ memories: [], redrob: {} }).client, "ws_admin", "Park"));
+    const quiet = renderToStaticMarkup(<TeamReviewBody review={plain} />);
+    expect(quiet).not.toContain("This file can run things");
+    expect(quiet).toContain("Says it was set by Park. The file can&#x27;t prove who made it.");
   });
 
   test("Settings offers both, in words", () => {

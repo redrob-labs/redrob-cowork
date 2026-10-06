@@ -139,6 +139,7 @@ import {
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
+import { carriesLockTag, redrobAfterImport, touchesPrivacyLock } from "./team-lock.js";
 import { readHarnessAvailability } from "./harness-availability.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
@@ -2176,20 +2177,24 @@ function createRoutes(
     if (!content) {
       throw new ApiError(400, "invalid_payload", "content is required");
     }
+    const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null;
+    // Only the owner adds a locked note: a collaborator could otherwise plant notes nobody can remove.
+    if (carriesLockTag(tags)) requireClientScope(ctx, "owner");
     const memory = await saveMemory(config, {
       content,
-      tags: Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null,
+      tags,
       ...(typeof body.source === "string" ? { source: body.source } : {}),
     });
     return jsonResponse({ memory }, 201);
   });
 
-  // A note from a team file changes in the team file, not here.
-  const refuseLockedMemory = async (memoryId: string) => {
+  // A note from a team file changes in the team file, not here. The owner may remove one,
+  // which is how a newer team file drops the notes it no longer carries.
+  const refuseLockedMemory = async (ctx: RequestContext, memoryId: string, ownerMayRemove: boolean) => {
     const memory = await findMemory(config, memoryId);
-    if (memory && isLockedMemory(memory)) {
-      throw new ApiError(403, "memory_locked", "This note came with a team file and cannot be changed here");
-    }
+    if (!memory || !isLockedMemory(memory)) return;
+    if (ownerMayRemove && ctx.actor?.scope === "owner") return;
+    throw new ApiError(403, "memory_locked", "This note came with a team file and cannot be changed here");
   };
 
   addRoute(routes, "PATCH", "/memory/:memoryId", "client", async (ctx) => {
@@ -2199,10 +2204,12 @@ function createRoutes(
     if (body.content !== undefined && (typeof body.content !== "string" || !body.content.trim())) {
       throw new ApiError(400, "invalid_payload", "content must be a non-empty string");
     }
-    await refuseLockedMemory(ctx.params.memoryId);
+    await refuseLockedMemory(ctx, ctx.params.memoryId, false);
+    const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : undefined;
+    if (carriesLockTag(tags)) requireClientScope(ctx, "owner");
     const memory = await updateMemory(config, ctx.params.memoryId, {
       ...(typeof body.content === "string" ? { content: body.content } : {}),
-      ...(Array.isArray(body.tags) ? { tags: body.tags.filter((tag): tag is string => typeof tag === "string") } : {}),
+      ...(tags ? { tags } : {}),
     });
     if (!memory) {
       throw new ApiError(404, "not_found", "memory not found");
@@ -2213,7 +2220,7 @@ function createRoutes(
   addRoute(routes, "DELETE", "/memory/:memoryId", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
-    await refuseLockedMemory(ctx.params.memoryId);
+    await refuseLockedMemory(ctx, ctx.params.memoryId, true);
     const removed = await deleteMemory(config, ctx.params.memoryId);
     if (!removed) {
       throw new ApiError(404, "not_found", "memory not found");
@@ -2845,6 +2852,10 @@ function createRoutes(
 
     if (!opencode && !redrob) {
       throw new ApiError(400, "invalid_payload", "opencode or redrob updates required");
+    }
+    if (redrob) {
+      const stored = await readRedrobWorkspaceConfig(config, workspace.id);
+      if (touchesPrivacyLock(stored, { ...stored, ...redrob })) requireClientScope(ctx, "owner");
     }
 
     await requireApproval(ctx, {
@@ -3685,6 +3696,8 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
+    const storedRedrob = await readRedrobWorkspaceConfig(config, workspace.id);
+    if (touchesPrivacyLock(storedRedrob, redrobAfterImport(storedRedrob, body))) requireClientScope(ctx, "owner");
     const expectedFingerprint = parseWorkspaceImportPreviewFingerprint(body);
     const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     if (expectedFingerprint && expectedFingerprint !== preview.fingerprint) {

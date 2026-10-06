@@ -25,7 +25,14 @@ export type TeamFile = RedrobWorkspaceExport & { redrob: Record<string, unknown>
 
 type TeamClient = Pick<
   RedrobServerClient,
-  "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace" | "listMemories" | "saveMemory" | "getConfig" | "patchConfig"
+  | "exportWorkspace"
+  | "previewWorkspaceImport"
+  | "importWorkspace"
+  | "listMemories"
+  | "saveMemory"
+  | "deleteMemory"
+  | "getConfig"
+  | "patchConfig"
 >;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -72,19 +79,87 @@ export function teamFileName(now = new Date()): string {
   return `redrob-team-${now.toISOString().slice(0, 10)}.json`;
 }
 
-export type TeamImportResult = { notesAdded: number; level: PrivacyLevel; setBy: string | null };
+/** A connector the file adds. `runsProgram` when it starts a program on this computer. */
+export type TeamConnector = { name: string; runsProgram: boolean };
+
+/** What using a team file would change, shown before anything changes. */
+export type TeamReview = {
+  file: Record<string, unknown>;
+  team: TeamSettings;
+  /** From the server's own preview; the import must carry it back. */
+  fingerprint: string;
+  changes: number;
+  playbooks: number;
+  skills: number;
+  connectors: TeamConnector[];
+  plugins: string[];
+  /** The file changes what the AI is allowed to do without asking. */
+  permissions: boolean;
+  notesAdded: number;
+  notesRemoved: number;
+};
+
+const lockedTeamNotes = (memories: Memory[]) => memories.filter((memory) => isTeamNote(memory) && (memory.tags?.includes(LOCKED_TAG) ?? false));
+
+function readConnectors(opencode: Record<string, unknown> | null): TeamConnector[] {
+  const mcp = opencode && isRecord(opencode.mcp) ? opencode.mcp : {};
+  return Object.entries(mcp).map(([name, entry]) => ({
+    name,
+    runsProgram: isRecord(entry) && (entry.type === "local" || entry.command !== undefined),
+  }));
+}
+
+function readPlugins(opencode: Record<string, unknown> | null): string[] {
+  const plugin = opencode?.plugin;
+  return Array.isArray(plugin) ? plugin.filter((entry): entry is string => typeof entry === "string") : [];
+}
 
 /**
- * Uses a team file in a workspace: the export is previewed and imported as the server does
- * it, then the team's notes are added once each and the level is set, locked.
+ * Reads a team file and asks the server what using it would change, without changing
+ * anything. The person sees this and decides; only then does `applyTeamFile` run.
  */
-export async function applyTeamFile(client: TeamClient, workspaceId: string, file: unknown): Promise<TeamImportResult> {
+export async function reviewTeamFile(client: TeamClient, workspaceId: string, file: unknown): Promise<TeamReview> {
   const team = readTeamSettings(file);
   if (!team || !isRecord(file)) throw new Error("This is not a team file");
-  const preview = await client.previewWorkspaceImport(workspaceId, file);
-  await client.importWorkspace(workspaceId, { ...file, previewFingerprint: preview.fingerprint });
+  const [preview, memories] = await Promise.all([client.previewWorkspaceImport(workspaceId, file), client.listMemories()]);
+  const opencode = isRecord(file.opencode) ? file.opencode : null;
+  const locked = lockedTeamNotes(memories).map((memory) => memory.content.trim());
+  const incoming = new Set(team.notes.map((note) => note.text));
+  return {
+    file,
+    team,
+    fingerprint: preview.fingerprint,
+    changes: preview.summary.create + preview.summary.update + preview.summary.replace + preview.summary.delete,
+    playbooks: Array.isArray(file.commands) ? file.commands.length : 0,
+    skills: Array.isArray(file.skills) ? file.skills.length : 0,
+    connectors: readConnectors(opencode),
+    plugins: readPlugins(opencode),
+    permissions: opencode ? opencode.permission !== undefined : false,
+    notesAdded: [...incoming].filter((text) => !locked.includes(text)).length,
+    notesRemoved: locked.filter((text) => !incoming.has(text)).length,
+  };
+}
 
-  const have = new Set((await client.listMemories()).filter(isTeamNote).map((memory) => memory.content.trim()));
+export type TeamImportResult = { notesAdded: number; notesRemoved: number; level: PrivacyLevel; setBy: string | null };
+
+/**
+ * Uses a reviewed team file: imports it with the preview's fingerprint, so the server
+ * refuses if the project changed since the review. Then the team's notes become exactly the
+ * file's (new ones added, ones it no longer carries removed) and the level is set, locked.
+ */
+export async function applyTeamFile(client: TeamClient, workspaceId: string, review: TeamReview): Promise<TeamImportResult> {
+  const { team } = review;
+  await client.importWorkspace(workspaceId, { ...review.file, previewFingerprint: review.fingerprint });
+
+  const incoming = new Set(team.notes.map((note) => note.text));
+  const locked = lockedTeamNotes(await client.listMemories());
+  let notesRemoved = 0;
+  for (const memory of locked) {
+    if (incoming.has(memory.content.trim())) continue;
+    await client.deleteMemory(memory.id);
+    notesRemoved += 1;
+  }
+  const have = new Set(locked.map((memory) => memory.content.trim()));
   let notesAdded = 0;
   for (const note of team.notes) {
     if (have.has(note.text)) continue;
@@ -95,5 +170,5 @@ export async function applyTeamFile(client: TeamClient, workspaceId: string, fil
   await client.patchConfig(workspaceId, {
     redrob: { [DESK_PRIVACY_CONFIG_KEY]: { ...team.privacy, locked: true } },
   });
-  return { notesAdded, level: team.privacy.level, setBy: team.privacy.setBy };
+  return { notesAdded, notesRemoved, level: team.privacy.level, setBy: team.privacy.setBy };
 }
