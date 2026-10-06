@@ -19,7 +19,7 @@ import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
 import { toNote } from "@/react-app/desk/services/real-services";
-import { createSendRedactor, previewRedaction, privacySettingsFor, usePrivacyConfirmStore } from "@/react-app/desk/privacy/privacy-send";
+import { previewRedaction, privacySettingsFor, usePrivacyConfirmStore } from "@/react-app/desk/privacy/privacy-send";
 import { DEFAULT_PRIVACY_LEVEL, usePrivacyMapStore } from "@/react-app/desk/privacy/privacy-store";
 import { restore } from "@/react-app/desk/privacy/redact";
 import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
@@ -1044,8 +1044,10 @@ export function SessionRoute() {
             return { outcome: "cancelled", reason: "context_changed" };
           }
         }
-        const redactor = privacySettings ? createSendRedactor(privacySettings, previousPlaceholders) : null;
-        const sendable = (value: string) => (redactor ? redactor.text(value) : value);
+        // Labelling happens in redrob-server's privacy gate, for everything the model reads (typed
+        // text, attachments, tool and connector results, these notes), on desktop and web alike. The
+        // app sends what the person wrote; the Strict confirm above is the only part left here.
+        const sendable = (value: string) => value;
 
         await sendWithRevertRollback({
           revertMessageId: draft.revertMessageId,
@@ -1088,7 +1090,7 @@ export function SessionRoute() {
             }
 
             const draftParts = await draftToParts(draft, selectedWorkspaceRoot, targetSessionId, selectedWorkspaceEndpoint);
-            const parts = redactor ? redactor.parts(draftParts) : draftParts;
+            const parts = draftParts;
             const envSystemContext = await buildRedrobEnvSystemContext(client, {
               cacheKey: targetSessionId,
               runtimeKey: environmentRuntimeKey,
@@ -1108,10 +1110,8 @@ export function SessionRoute() {
             const deskSystem = inDeskFrame
               ? deskSystemText(deskMemory, envSystemContext || undefined, deskNotes)
               : envSystemContext;
-            const keepPlaceholders = redactor?.instruction();
-            const system = keepPlaceholders ? (deskSystem ? `${deskSystem}\n\n${keepPlaceholders}` : keepPlaceholders) : deskSystem;
+            const system = deskSystem;
             // The map back to the real values stays on this computer, for showing the chat.
-            redactor?.commit(targetSessionId);
             // A Run prompt's answer is what Cross-check reads, once it arrives.
             if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {
               useCheckStore.getState().expect(targetSessionId, {
@@ -1628,17 +1628,9 @@ export function SessionRoute() {
     */
     const writtenRequest =
       command.kind === "paraphrase" ? buildParaphrasePrompt(command.prompt) : command.prompt;
-    // The variants leave the way the chat does: private details as placeholders, read back
-    // with the real values.
-    const variantPrivacy = inDeskFrame && isDesktopRuntime() && deskServerClient
-      ? await privacySettingsFor(deskServerClient, workspaceId).catch(() => ({ level: DEFAULT_PRIVACY_LEVEL, names: [] }))
-      : null;
-    const variantRedactor = variantPrivacy
-      ? createSendRedactor(variantPrivacy, usePrivacyMapStore.getState().maps[sessionId] ?? {})
-      : null;
-    const requestText = variantRedactor ? variantRedactor.text(writtenRequest) : writtenRequest;
-    const keepPlaceholders = variantRedactor?.instruction() ?? undefined;
-    variantRedactor?.commit(sessionId);
+    // The privacy gate in redrob-server labels the variants' requests too, and restores their answers.
+    const requestText = writtenRequest;
+    const keepPlaceholders: string | undefined = undefined;
     const shown = (value: string) => restore(value, usePrivacyMapStore.getState().maps[sessionId] ?? {});
     let run = startingRun({ kind: command.kind, prompt: command.prompt, slots });
     variantRunRef.current = run;

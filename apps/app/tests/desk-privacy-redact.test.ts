@@ -133,16 +133,18 @@ describe("stored settings", () => {
 describe("wiring", () => {
   const src = (path: string) => readFileSync(join(import.meta.dir, "..", "src", path), "utf8");
 
-  test("the send path redacts the parts, the notes, the command and the check question", () => {
+  test("the send path no longer redacts: redrob-server's privacy gate labels everything the model reads", () => {
     const route = src("react-app/shell/session-route.tsx");
-    expect(route).toContain("const parts = redactor ? redactor.parts(draftParts) : draftParts;");
-    expect(route).toContain("const deskNotes = notesContext ? sendable(notesContext) : null;");
-    expect(route).toContain("arguments: sendable(draft.command.arguments)");
-    expect(route).toContain("question: sendable(text)");
-    expect(route).toContain("redactor?.commit(targetSessionId);");
-    expect(route).toContain("const requestText = variantRedactor ? variantRedactor.text(writtenRequest) : writtenRequest;");
-    // Settings that cannot be read do not mean sending as written.
+    // Redacting here as well would label typed text twice, with two maps, and still miss attachments
+    // and tool results; the gate (apps/server/src/opencode-plugins/redrob-privacy-gate.ts) covers all of it.
+    expect(route).not.toContain("createSendRedactor");
+    expect(route).toContain("const parts = draftParts;");
+    expect(route).toContain("const requestText = writtenRequest;");
+    // The Strict confirm still asks before anything is sent, and unreadable settings still mean the default.
+    expect(route).toContain("previewRedaction(text, privacySettings, previousPlaceholders)");
     expect(route).toContain(".catch(() => ({ level: DEFAULT_PRIVACY_LEVEL, names: [] }))");
+    const runtime = readFileSync(join(import.meta.dir, "..", "..", "server", "src", "redrob-runtime-config.ts"), "utf8");
+    expect(runtime).toContain("redrobPrivacyGatePluginPath()");
   });
 
   test("the chat shows the real details, in answers, the person's messages, edits and copies", () => {
