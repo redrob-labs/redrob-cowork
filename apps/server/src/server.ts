@@ -67,6 +67,7 @@ import {
   migrateLegacyRedrobKey,
   putRedrobEngineAuth,
   readRedrobEngineAuthStatus,
+  readRedrobEngineKey,
 } from "./redrob-auth.js";
 import { createRedrobDeviceConnections } from "./redrob-device.js";
 import { EnvService } from "./env-file.js";
@@ -143,10 +144,15 @@ import { carriesLockTag, redrobAfterImport, touchesPrivacyLock } from "./team-lo
 import {
   applyTeamPolicy,
   describeTeamPolicyState,
+  describeTeamPolicySync,
   leaveTeamPolicy,
   readTeamPolicyState,
+  readTeamPolicySync,
+  startTeamPolicySync,
+  syncTeamPolicy,
   teamPolicyLocksPrivacy,
   TEAM_POLICY_NOTE_TAG,
+  type TeamPolicySyncDeps,
 } from "./team-policy/index.js";
 import { readHarnessAvailability } from "./harness-availability.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
@@ -1245,16 +1251,27 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
     ? () => {}
     : startScheduler({ config, engine: createScheduleEngine(config), logger });
 
+  // Joined workspaces follow their team's signed policy; see team-policy/sync.ts.
+  const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startTeamPolicySync(config, teamPolicySyncDeps(config), logger);
+
   return {
     ...server,
     stop: async () => {
       stopScheduler();
+      stopTeamPolicySync();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
       reloadBaselineRefreshers.delete(config);
       await server.stop();
     },
   };
+}
+
+/** The key comes from the engine at the moment of each check; nothing here stores it. */
+function teamPolicySyncDeps(config: ServerConfig): TeamPolicySyncDeps {
+  return { readKey: () => readRedrobEngineKey({ config }) };
 }
 
 function buildOpencodeProxyUrl(baseUrl: string, path: string, search: string) {
@@ -2855,9 +2872,46 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
+  const describeTeamPolicy = async (workspaceId: string) => ({
+    ...describeTeamPolicyState(await readTeamPolicyState(config, workspaceId)),
+    sync: describeTeamPolicySync(await readTeamPolicySync(config, workspaceId)),
+  });
+
   addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    return jsonResponse(describeTeamPolicyState(await readTeamPolicyState(config, workspace.id)));
+    return jsonResponse(await describeTeamPolicy(workspace.id));
+  });
+
+  /*
+   * Checks the console for a newer policy now. `join: true` is how a workspace starts following its
+   * team: it needs the owner scope and an approval, because from then on the team's signed policy
+   * changes what this workspace runs. A check of an already joined workspace needs neither; the
+   * signature is what authorises the content, as with POST /team-policy.
+   */
+  addRoute(routes, "POST", "/workspace/:id/team-policy/sync", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "owner");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readOptionalJsonBody(ctx.request);
+    const join = body?.join === true;
+    if (join) {
+      await requireApproval(ctx, {
+        workspaceId: workspace.id,
+        action: "team_policy.join",
+        summary: "Follow the team policy from the Redrob console",
+        paths: [],
+      });
+    }
+    const outcome = await syncTeamPolicy(config, workspace, teamPolicySyncDeps(config), {
+      join,
+      actor: ctx.actor ?? { type: "remote" },
+    });
+    if (outcome.status === "applied" || outcome.status === "removed") {
+      emitReloadEvent(ctx.reloadEvents, workspace, "config");
+      emitReloadEvent(ctx.reloadEvents, workspace, "skills");
+      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    }
+    return jsonResponse({ outcome, ...(await describeTeamPolicy(workspace.id)) });
   });
 
   // Applies a signed team policy. The signature, not the token, is what authorises the content;
@@ -2885,18 +2939,18 @@ function createRoutes(
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
       emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
-    return jsonResponse({ status: result.status, ...describeTeamPolicyState(result.state) });
+    return jsonResponse({ status: result.status, ...(await describeTeamPolicy(workspace.id)) });
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/team-policy", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "owner");
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    const state = await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
+    await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
     emitReloadEvent(ctx.reloadEvents, workspace, "config");
     emitReloadEvent(ctx.reloadEvents, workspace, "skills");
     emitReloadEvent(ctx.reloadEvents, workspace, "commands");
-    return jsonResponse(describeTeamPolicyState(state));
+    return jsonResponse(await describeTeamPolicy(workspace.id));
   });
 
   addRoute(routes, "PATCH", "/workspace/:id/config", "client", async (ctx) => {

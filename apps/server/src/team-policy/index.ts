@@ -12,3 +12,12 @@ export {
 export { verifyTeamPolicyJws, TEAM_POLICY_JWS_TYPE, type VerifiedTeamPolicy } from "./jws.js";
 export { PRODUCTION_KEYS, TEST_KEYS, testKeysAllowed, trustedKeys, type PinnedKey } from "./keys.js";
 export { teamPolicySchema, type TeamPolicy } from "./policy.js";
+export {
+  describeTeamPolicySync,
+  readTeamPolicySync,
+  startTeamPolicySync,
+  syncTeamPolicy,
+  teamPolicyConsoleBaseUrl,
+  type TeamPolicySyncDeps,
+  type TeamPolicySyncOutcome,
+} from "./sync.js";
