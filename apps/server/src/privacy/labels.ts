@@ -218,11 +218,30 @@ export function shiftDates(text: string, days: number): string {
     });
 }
 
+/** What the detection model may add at each level; patterns and listed names cover the rest. */
+export const MODEL_CATEGORIES: Record<PrivacyLevel, readonly LabelCategory[]> = {
+  off: [],
+  standard: [],
+  high: ["ADDRESS", "ORG"],
+  strict: ["ADDRESS", "ORG", "PERSON"],
+};
+
+/** An entity the detection model found, by value: it is labelled wherever that value appears. */
+export type DetectedValue = { category: LabelCategory; value: string };
+
+const ENTITY_CATEGORIES = new Set<LabelCategory>(["PERSON", "ORG", "ADDRESS"]);
+
 /**
  * Labels one text with the chat's map, which it extends. Texts that already hold labels are left
  * alone where they hold them: a label is not a private detail.
+ *
+ * `detected` are the model's finds in this text. They are matched after the patterns, so where a
+ * pattern and the model overlap the pattern wins (it was checked against a checksum), and they are
+ * matched as values, so every mention gets the label, not only the one the model saw. Entities this
+ * chat already labelled are matched the same way, so a name the model found once stays labelled in
+ * later turns even where the model misses it.
  */
-export function labelText(text: string, rules: PrivacyRules, map: LabelMap): LabelResult {
+export function labelText(text: string, rules: PrivacyRules, map: LabelMap, detected: readonly DetectedValue[] = []): LabelResult {
   const allowed = new Set(LEVEL_CATEGORIES[rules.level]);
   if (!allowed.size || !text) return { text, found: [] };
   const ctx: Ctx = { map, groups: new Map(), found: [] };
@@ -241,9 +260,50 @@ export function labelText(text: string, rules: PrivacyRules, map: LabelMap): Lab
     }
   }
 
+  // The model's finds and this chat's earlier entities join the listed names. Listed names keep
+  // their grouping; a value already grouped is not re-added under another category.
+  const known = new Set(nameForms.map((item) => normalise(item.form)));
+  const extra: DetectedValue[] = [...detected];
+  for (const [label, value] of Object.entries(map.byLabel)) {
+    const category = /^\[([A-Z]+)_\d+\]$/.exec(label)?.[1] as LabelCategory | undefined;
+    if (category && ENTITY_CATEGORIES.has(category)) extra.push({ category, value });
+  }
+  for (const { category, value } of extra) {
+    const form = value.trim();
+    if (form.length < 2 || !allowed.has(category) || known.has(normalise(form))) continue;
+    known.add(normalise(form));
+    nameForms.push({ form, category });
+  }
+
+  let addressesDone = false;
+  const replaceForms = (input: string, forms: Array<{ form: string; category: LabelCategory }>) => {
+    if (!forms.length) return input;
+    // Longest first, so a full name is taken before a part of it. Korean has no word boundaries, so
+    // a Korean form matches anywhere and the particle after it stays where it is; a Latin form has
+    // to be a whole word, so `Kim` in `Kimchi` is left alone.
+    const sorted = [...forms].sort((a, b) => b.form.length - a.form.length);
+    const byNorm = new Map(sorted.map((item) => [normalise(item.form), item.category]));
+    const alternatives = sorted.map(({ form }) => {
+      const body = escapeRegExp(form).replace(/\s+/g, "\\s+");
+      return /^[A-Za-z]/.test(form) ? `(?<![A-Za-z])${body}(?![A-Za-z])` : body;
+    });
+    return input.replace(new RegExp(alternatives.join("|"), "giu"), (match) => {
+      const category = byNorm.get(normalise(match)) ?? "PERSON";
+      ctx.found.push(category);
+      return labelFor(ctx, category, match);
+    });
+  };
+
   let next = text;
   for (const rule of RULES) {
     if (!allowed.has(rule.category)) continue;
+    // A whole address the model found goes before the address patterns, which only know the
+    // street part: otherwise the pattern takes `테헤란로 152` and leaves `, 12층` behind. Addresses
+    // have no checksum, so there is nothing for the pattern to win on.
+    if (rule.category === "ADDRESS" && !addressesDone) {
+      next = replaceForms(next, nameForms.filter((item) => item.category === "ADDRESS"));
+      addressesDone = true;
+    }
     next = next.replace(rule.pattern, (match: string, ...rest: unknown[]) => {
       const captured = rule.group ? rest[rule.group - 1] : match;
       const value = typeof captured === "string" ? captured : match;
@@ -252,23 +312,7 @@ export function labelText(text: string, rules: PrivacyRules, map: LabelMap): Lab
       return match.replace(value, labelFor(ctx, rule.category, value));
     });
   }
-
-  if (nameForms.length) {
-    // Longest first, so a full name is taken before a part of it. Korean has no word boundaries, so
-    // a Korean form matches anywhere and the particle after it stays where it is; a Latin form has
-    // to be a whole word, so `Kim` in `Kimchi` is left alone.
-    const sorted = [...nameForms].sort((a, b) => b.form.length - a.form.length);
-    const byNorm = new Map(sorted.map((item) => [normalise(item.form), item.category]));
-    const alternatives = sorted.map(({ form }) => {
-      const body = escapeRegExp(form).replace(/\s+/g, "\\s+");
-      return /^[A-Za-z]/.test(form) ? `(?<![A-Za-z])${body}(?![A-Za-z])` : body;
-    });
-    next = next.replace(new RegExp(alternatives.join("|"), "giu"), (match) => {
-      const category = byNorm.get(normalise(match)) ?? "PERSON";
-      ctx.found.push(category);
-      return labelFor(ctx, category, match);
-    });
-  }
+  next = replaceForms(next, nameForms.filter((item) => item.category !== "ADDRESS" || !addressesDone));
 
   if (allowed.has("TITLE") && rules.transforms?.titlesNearNames) {
     next = next

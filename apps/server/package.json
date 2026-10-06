@@ -58,6 +58,7 @@
     "drizzle-orm": "^0.45.2",
     "jsonc-parser": "^3.2.1",
     "minimatch": "^10.2.5",
+    "onnxruntime-node": "1.23.0",
     "undici": "6.28.0",
     "yaml": "^2.9.0",
     "zod": "^4.3.6"

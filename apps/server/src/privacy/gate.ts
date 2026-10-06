@@ -4,10 +4,13 @@ import { resolve } from "node:path";
 import { readRedrobWorkspaceConfig } from "../redrob-workspace-config-store.js";
 import { DESK_PRIVACY_CONFIG_KEY } from "../team-lock.js";
 import type { ServerConfig } from "../types.js";
+import { DetectorSource, type DetectorStatus } from "./detector-source.js";
 import {
   emptyLabelMap,
   LABEL_INSTRUCTION,
   labelText,
+  MODEL_CATEGORIES,
+  type DetectedValue,
   restoreDeep,
   restoreText,
   type LabelCategory,
@@ -70,7 +73,14 @@ export function workspaceForDirectory(config: ServerConfig): GateWorkspaceResolv
   };
 }
 
-export type GateTextsResult = { texts: string[]; found: LabelCategory[]; level: PrivacyLevel; instruction: string | null };
+export type GateTextsResult = {
+  texts: string[];
+  found: LabelCategory[];
+  level: PrivacyLevel;
+  instruction: string | null;
+  /** How names, organisations and addresses were looked for: by the model, or by patterns alone. */
+  detection: "model" | "patterns";
+};
 
 export class PrivacyGate {
   private readonly maps = new Map<string, LabelMap>();
@@ -78,7 +88,13 @@ export class PrivacyGate {
   constructor(
     private readonly config: ServerConfig,
     private readonly resolveWorkspace: GateWorkspaceResolver = workspaceForDirectory(config),
+    private readonly detectors: DetectorSource = DetectorSource.fromEnvironment(),
   ) {}
+
+  /** For the Privacy screen: whether a detection model is in use, and if not, why. */
+  detectorStatus(): DetectorStatus {
+    return this.detectors.status();
+  }
 
   /** The rules for a directory. A directory no workspace owns gets the default level, never off. */
   async rules(directory: string | null): Promise<PrivacyRules> {
@@ -105,19 +121,31 @@ export class PrivacyGate {
 
   async label(input: { sessionID: string; directory: string | null; texts: string[] }): Promise<GateTextsResult> {
     const rules = await this.rules(input.directory);
-    if (rules.level === "off") return { texts: input.texts, found: [], level: rules.level, instruction: null };
+    if (rules.level === "off") return { texts: input.texts, found: [], level: rules.level, instruction: null, detection: "patterns" };
     const map = this.map(input.sessionID);
+    // The model only runs where its finds would be used (High and Strict). A model that fails while
+    // reading throws out of here, and the plugin then sends nothing: no silent fallback mid-chat.
+    const modelCategories = new Set(MODEL_CATEGORIES[rules.level]);
+    const detector = modelCategories.size ? await this.detectors.get() : null;
     const found: LabelCategory[] = [];
-    const texts = input.texts.map((text) => {
-      const result = labelText(text, rules, map);
+    const texts: string[] = [];
+    for (const text of input.texts) {
+      let detected: DetectedValue[] = [];
+      if (detector && text.trim()) {
+        detected = (await this.detectors.detect(detector, text))
+          .filter((entity) => modelCategories.has(entity.category))
+          .map(({ category, value }) => ({ category, value }));
+      }
+      const result = labelText(text, rules, map, detected);
       found.push(...result.found);
-      return result.text;
-    });
+      texts.push(result.text);
+    }
     return {
       texts,
       found: [...new Set(found)],
       level: rules.level,
       instruction: Object.keys(map.byLabel).length ? LABEL_INSTRUCTION : null,
+      detection: detector ? "model" : "patterns",
     };
   }
 

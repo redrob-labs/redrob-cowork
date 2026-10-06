@@ -70,3 +70,6 @@ transcript-analysis
 
 # Scratch commit-message files used by tooling; never part of the tree.
 .commit-msg.txt
+
+# Privacy model candidates downloaded by apps/server/scripts/privacy-model/prepare.py
+apps/server/.privacy-models/

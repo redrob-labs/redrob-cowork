@@ -2933,7 +2933,7 @@ function createRoutes(
     const sessionID = typeof body.sessionID === "string" ? body.sessionID : "";
     switch (body.op) {
       case "settings":
-        return jsonResponse({ level: (await privacyGate.rules(directory)).level });
+        return jsonResponse({ level: (await privacyGate.rules(directory)).level, detector: privacyGate.detectorStatus() });
       case "label": {
         if (!sessionID || !Array.isArray(body.texts) || body.texts.some((text) => typeof text !== "string")) {
           throw new ApiError(400, "invalid_payload", "sessionID and texts (strings) are required");
@@ -2947,6 +2947,12 @@ function createRoutes(
       default:
         throw new ApiError(400, "invalid_payload", "op must be settings, label or restore");
     }
+  });
+
+  /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */
+  addRoute(routes, "GET", "/privacy/detector", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    return jsonResponse(privacyGate.detectorStatus());
   });
 
   addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {
