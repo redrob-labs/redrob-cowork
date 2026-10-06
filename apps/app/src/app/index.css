@@ -1426,10 +1426,14 @@
   white-space: nowrap;
 }
 
+/* The one column that wraps keeps a reading width. Without it, beside the side panel, the
+   columns that hug their content took the row and "What" wrapped to a word per line; now
+   the table scrolls sideways inside its frame instead. */
 .desk-preview__what {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 15rem;
 }
 
 .desk-preview__what span {
