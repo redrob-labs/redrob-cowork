@@ -1,5 +1,5 @@
-import { parseRedrobPricing } from "../src/app/lib/redrob-pricing";
-import { GUIDE_QUERY_KEY } from "../src/react-app/desk/preview/desk-guide";
+import { loadGuideResearch } from "../src/react-app/desk/guide/model-guide";
+import { GUIDE_RESEARCH_KEY } from "../src/react-app/desk/preview/desk-guide";
 import { afterEach, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -59,12 +59,6 @@ function readable(html: string): string {
 }
 
 /** A query cache holding the sample data each Preview screen reads. */
-/** A published catalogue with Auto and one model, for the guide. */
-const GUIDE_PRICING = parseRedrobPricing({
-  autoModelId: "auto",
-  models: [{ id: "auto", routed: true }, { id: "fast", label: "Fast one", priceBand: "budget" }],
-});
-
 async function seeded(): Promise<QueryClient> {
   const fixture = createFixtureDeskServices();
   const client = new QueryClient();
@@ -195,7 +189,7 @@ describe("the Preview routes", () => {
     expect(route("/playbooks", client)).toContain("미리 보기: 예시 플레이북입니다.");
     expect(route("/scheduled", client)).toContain("나를 기다리는 실행 (2)");
     expect(route("/history", client)).toContain("스스로 실행");
-    client.setQueryData(GUIDE_QUERY_KEY, GUIDE_PRICING);
+    client.setQueryData(GUIDE_RESEARCH_KEY, await loadGuideResearch());
     expect(route("/guide", client)).toContain("레드롭 오토");
   });
 });
@@ -444,15 +438,17 @@ describe("History", () => {
 });
 
 describe("Model Guide", () => {
-  test("renders the published models, with no sample note and no sample rankings", async () => {
+  test("opens by profession on the researched rankings, with the price view a tab away", async () => {
     const client = await seeded();
-    client.setQueryData(GUIDE_QUERY_KEY, GUIDE_PRICING);
+    client.setQueryData(GUIDE_RESEARCH_KEY, await loadGuideResearch());
     const html = route("/guide", client);
     expect(html).toContain('<h1 class="rr-shell__title">Model Guide</h1>');
     expect(html).toContain('href="/guide" aria-current="page"');
-    expect(html).toContain("Every message goes to Redrob Auto");
-    expect(html).toContain("Fast one");
+    expect(html).toContain('aria-selected="true" aria-controls="panel-profession"');
+    expect(html).toContain("By price");
+    expect(html).toContain("every message goes to Redrob Auto");
+    expect(html).toContain("Rankings as of 2026-10-06");
     expect(html).not.toContain("rr-alert");
-    expect(html).not.toContain("Claude Opus 5.5");
+    expect(html).not.toContain("Sample output, illustrative");
   });
 });

@@ -1,9 +1,9 @@
 /** @jsxImportSource react */
 import { useQuery } from "@tanstack/react-query";
-import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, icons, type TableColumn } from "@redrob-labs/ui";
+import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, Tabs, icons, type TableColumn } from "@redrob-labs/ui";
+import { useState, useSyncExternalStore } from "react";
 
-import { t } from "../../../i18n";
-import type { ModelCatalog } from "../services/types";
+import { currentLocale, subscribeToLocale, t, type Language } from "../../../i18n";
 import { desktopFetchViaMain } from "../../../app/lib/desktop";
 import {
   estimatedCostFor,
@@ -16,19 +16,28 @@ import {
 } from "../../../app/lib/redrob-pricing";
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { autoModel, guideGroups, guideModelCount, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
+import { guideLanguages, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
 
-/** The header meta: the edition the rankings come from. */
-export function guideMeta(catalog: Pick<ModelCatalog, "source">): string {
-  const { source } = catalog;
-  return `${source.name}, ${source.edition}. ${source.note}.`;
+/** "Use this" in the guide: Auto picks, so it explains that instead of switching anything. */
+function AutoPicksNote() {
+  return (
+    <ProtectionStatus
+      tone="safe"
+      icon={icons.sparkle({ width: 20, height: 20, "aria-hidden": true })}
+      title={t("desk.preview_guide_use_title")}
+    >
+      {t("desk.preview_guide_use_text")}
+    </ProtectionStatus>
+  );
 }
 
 /**
- * The Model Guide on the sample catalog. In Redrob Cowork every message goes to Redrob Auto,
- * so the guide explains how it chooses; there is no model to pick here.
+ * "By profession": the researched top five for each task, in the language the work is done in. In Redrob Cowork
+ * every message goes to Redrob Auto, so the guide shows what Auto chooses from; there is no model to pick here.
  */
-export function GuideView(props: { catalog: ModelCatalog; locale: string; onUse: () => void }) {
+export function ProfessionGuideView(props: { research: GuideResearch; locale: Language }) {
+  const [explained, setExplained] = useState(false);
   return (
     <>
       <p className="desk-settings__note">
@@ -36,26 +45,49 @@ export function GuideView(props: { catalog: ModelCatalog; locale: string; onUse:
         {t("desk.preview_guide_auto")}
       </p>
       <ModelGuide
-        professions={props.catalog.professions}
-        source={props.catalog.source}
+        professions={guideProfessions(props.research, props.locale)}
+        weights={props.research.weights}
         locale={props.locale}
         defaultProfession="lawyer"
+        languages={guideLanguages()}
+        defaultLanguage={props.locale}
         title={t("desk.nav_guide")}
-        lede={t("desk.preview_guide_lede")}
+        lede={t("desk.guide_profession_lede")}
+        method={t("desk.guide_method")}
+        methodLabel={t("desk.guide_method_label")}
         simpleLabel={t("desk.preview_guide_simple")}
         advancedLabel={t("desk.preview_guide_advanced")}
         professionLabel={t("desk.preview_guide_profession")}
         taskLabel={t("desk.preview_guide_task")}
-        promptLabel={t("desk.preview_guide_prompt")}
-        outputLabel={t("desk.preview_guide_output")}
-        illustrativeLabel={t("desk.preview_guide_illustrative")}
+        languageLabel={t("desk.guide_language_label")}
+        topLabel={t("desk.guide_top")}
+        rangeLabel={t("desk.guide_range")}
         effortLabel={t("desk.preview_guide_effort")}
+        effortHint={t("desk.guide_effort_hint")}
+        perLabel={t("desk.guide_per_month")}
+        effortNote={(note) => [
+          t(note.custom ? "desk.guide_effort_note_custom" : "desk.guide_effort_note_ranked", { effort: note.level.label ?? "" }),
+          " ",
+          note.price,
+          note.price ? note.per : null,
+        ]}
         rankedLabel={t("desk.preview_guide_ranked")}
+        kindLabels={{
+          measured: t("desk.guide_kind_measured"),
+          published: t("desk.guide_kind_published"),
+          derived: t("desk.guide_kind_derived"),
+          estimate: t("desk.guide_kind_estimate"),
+        }}
+        comingSoonLabel={t("desk.guide_coming_soon")}
+        missingLabel={t("desk.guide_missing")}
+        toolsLabel={t("desk.guide_tools")}
+        sourcesLabel={t("desk.guide_sources")}
         emptyTitle={t("desk.preview_guide_empty_title")}
         emptyText={t("desk.preview_guide_empty_text")}
         useLabel={t("desk.preview_guide_use")}
-        onUse={props.onUse}
+        onUse={() => setExplained(true)}
       />
+      {explained ? <AutoPicksNote /> : null}
     </>
   );
 }
@@ -159,31 +191,57 @@ export function guideFetch(desktop: boolean): typeof fetch {
 }
 
 export const GUIDE_QUERY_KEY = ["desk-guide", "pricing"];
+export const GUIDE_RESEARCH_KEY = ["desk-guide", "research"];
 
-/** `/guide`: Auto and the models it chooses from, from the console's published prices. */
+export type GuideTab = "profession" | "price";
+
+/** `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from. */
 export function GuideScreen() {
-  const query = useQuery({
+  const [tab, setTab] = useState<GuideTab>("profession");
+  const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+  const pricing = useQuery({
     queryKey: GUIDE_QUERY_KEY,
     queryFn: () => fetchRedrobPricing(guideFetch(isDesktopRuntime())),
     staleTime: 60 * 60 * 1000,
     retry: 1,
+    enabled: tab === "price",
   });
-  const count = query.data ? guideModelCount(query.data) : undefined;
+  const research = useQuery({ queryKey: GUIDE_RESEARCH_KEY, queryFn: loadGuideResearch, staleTime: Infinity });
+  const count = pricing.data ? guideModelCount(pricing.data) : undefined;
+  const meta =
+    tab === "profession"
+      ? research.data && t("desk.guide_profession_meta", { date: research.data.asOf })
+      : count === undefined
+        ? undefined
+        : t("desk.guide_meta", { count });
   return (
-    <DeskShell
-      current="guide"
-      title={t("desk.nav_guide")}
-      meta={count === undefined ? undefined : t("desk.guide_meta", { count })}
-      measure={false}
-    >
+    <DeskShell current="guide" title={t("desk.nav_guide")} meta={meta} measure={false}>
       <div className="desk-settings__main desk-preview--wide">
-        {query.isLoading ? (
+        <Tabs
+          label={t("desk.guide_tabs")}
+          value={tab}
+          onChange={(id) => setTab(id === "price" ? "price" : "profession")}
+          items={[
+            { id: "profession", label: t("desk.guide_tab_profession") },
+            { id: "price", label: t("desk.guide_tab_price") },
+          ]}
+        >
+          {tab === "profession" ? (
+          research.isLoading ? (
+            <Skeleton variant="text" lines={6} />
+          ) : !research.data ? (
+            <EmptyState title={t("desk.guide_profession_error")} description={t("desk.settings_try_again")} />
+          ) : (
+            <ProfessionGuideView research={research.data} locale={locale} />
+          )
+        ) : pricing.isLoading ? (
           <Skeleton variant="text" lines={6} />
-        ) : !query.data ? (
+        ) : !pricing.data ? (
           <EmptyState title={t("desk.guide_error_title")} description={t("desk.settings_try_again")} />
         ) : (
-          <PricingGuideView pricing={query.data} />
+          <PricingGuideView pricing={pricing.data} />
         )}
+        </Tabs>
       </div>
     </DeskShell>
   );
