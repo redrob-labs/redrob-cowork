@@ -45,7 +45,9 @@ function ConnectorTile(props: { connector: Connector } & Omit<ConnectorsViewProp
   const { connector, preview } = props;
   const connected = connector.state === "connected";
   const off = connector.state === "off";
-  const act = (run: (connector: Connector) => void) => (preview ? undefined : () => run(connector));
+  // The server would refuse it anyway; no button that can only fail.
+  const blocked = connector.state === "blocked";
+  const act = (run: (connector: Connector) => void) => (preview || blocked ? undefined : () => run(connector));
   return (
     <li>
       <ConnectorCard

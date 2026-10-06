@@ -81,6 +81,23 @@ describe("connectorFromMcp", () => {
     expect(connectorState(managed("connected", false), undefined)).toBe("off");
   });
 
+  test("a connector the team policy blocks says so, whatever the engine reports, and offers no button", () => {
+    const blocked: DeskMcpEntry = { ...notion, teamPolicy: { blocked: true, reason: "not_listed" } };
+    expect(connectorState(blocked, { status: "connected" })).toBe("blocked");
+    expect(connectorState({ ...managed("connected"), teamPolicy: { blocked: true, reason: "url_mismatch" } }, undefined)).toBe("blocked");
+    const html = renderToStaticMarkup(
+      <ConnectorsView
+        connectors={[connectorFromMcp(blocked, { status: "connected" })]}
+        developerMode
+        preview={false}
+        onSignIn={() => {}}
+        onTurnOn={() => {}}
+        onTurnOff={() => {}}
+      />,
+    );
+    expect(html).toContain("Blocked by your team&#x27;s policy");
+  });
+
   test("a catalog app keeps its name and description; anything else is a tool your team built", () => {
     const card = connectorFromMcp(notion, { status: "connected" });
     expect(card).toMatchObject({ id: "notion", name: "Notion", state: "connected", custom: false, icon: "note" });

@@ -295,6 +295,8 @@ export type RedrobMcpItem = {
   source: "config.project" | "config.global" | "config.remote";
   disabledByTools?: boolean;
   managedOAuth?: RedrobManagedMcpConnection | null;
+  /** Set when the workspace follows a team policy that does not allow this connector. */
+  teamPolicy?: { blocked: true; reason: "local_programs_blocked" | "not_listed" | "url_mismatch" } | null;
 };
 
 export type RedrobMcpAppResource = {

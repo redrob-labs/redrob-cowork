@@ -9,7 +9,7 @@ import type { Connector, ConnectorServer, ConnectorState } from "../services/typ
 import type { ToastTone } from "../store/frame-store";
 
 /** A configured server as redrob-server lists it. */
-export type DeskMcpEntry = Pick<RedrobMcpItem, "name" | "config" | "source" | "disabledByTools" | "managedOAuth">;
+export type DeskMcpEntry = Pick<RedrobMcpItem, "name" | "config" | "source" | "disabledByTools" | "managedOAuth" | "teamPolicy">;
 
 /** The engine's live state for one server: connected, failed, needs_auth, disabled, ... */
 export type DeskMcpStatus = { status: string };
@@ -60,6 +60,7 @@ export function prettifyServerName(name: string): string {
 
 /** What the card says about a server, from its config, its sign-in and the engine's status. */
 export function connectorState(entry: DeskMcpEntry, status: DeskMcpStatus | undefined): ConnectorState {
+  if (entry.teamPolicy?.blocked) return "blocked";
   const config = configSchema.safeParse(entry.config);
   if (entry.disabledByTools || (config.success && config.data.enabled === false)) return "off";
   const managed = entry.managedOAuth;
@@ -235,5 +236,7 @@ export function connectorStateLabel(state: ConnectorState): string {
       return t("desk.connectors_state_off");
     case "failed":
       return t("desk.connectors_state_failed");
+    case "blocked":
+      return t("desk.connectors_state_blocked");
   }
 }

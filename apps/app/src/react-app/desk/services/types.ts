@@ -126,7 +126,8 @@ export type HistoryEntry = {
   steps?: HistoryStep[];
 };
 
-export type ConnectorState = "connected" | "needs-sign-in" | "off" | "failed";
+/** `blocked`: the team policy does not allow it, so it cannot be turned on here. */
+export type ConnectorState = "connected" | "needs-sign-in" | "off" | "failed" | "blocked";
 
 /** The configured server behind a real connector. Never shown. */
 export type ConnectorServer = {

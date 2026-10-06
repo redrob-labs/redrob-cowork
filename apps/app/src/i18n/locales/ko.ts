@@ -412,6 +412,7 @@ const ko = {
   "desk.connectors_preview_text": "채팅을 열면 이 컴퓨터의 커넥터가 보입니다. 아직 여기서는 아무것도 바뀌지 않습니다.",
   "desk.connectors_preview_title": "예시 커넥터",
   "desk.connectors_sign_in": "로그인",
+  "desk.connectors_state_blocked": "팀 정책으로 막혀 있음",
   "desk.connectors_state_connected": "연결됨",
   "desk.connectors_state_failed": "연결하지 못했습니다",
   "desk.connectors_state_off": "꺼짐",

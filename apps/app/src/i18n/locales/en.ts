@@ -414,6 +414,7 @@ const en = {
   "desk.connectors_preview_text": "Open a chat to see the connectors on this computer. Nothing here changes yet.",
   "desk.connectors_preview_title": "Sample connectors",
   "desk.connectors_sign_in": "Sign in",
+  "desk.connectors_state_blocked": "Blocked by your team's policy",
   "desk.connectors_state_connected": "Connected",
   "desk.connectors_state_failed": "Could not connect",
   "desk.connectors_state_off": "Off",
