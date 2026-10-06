@@ -140,6 +140,14 @@ import {
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { carriesLockTag, redrobAfterImport, touchesPrivacyLock } from "./team-lock.js";
+import {
+  applyTeamPolicy,
+  describeTeamPolicyState,
+  leaveTeamPolicy,
+  readTeamPolicyState,
+  teamPolicyLocksPrivacy,
+  TEAM_POLICY_NOTE_TAG,
+} from "./team-policy/index.js";
 import { readHarnessAvailability } from "./harness-availability.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
@@ -2178,6 +2186,7 @@ function createRoutes(
       throw new ApiError(400, "invalid_payload", "content is required");
     }
     const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null;
+    refuseTeamPolicyTag(tags);
     // Only the owner adds a locked note: a collaborator could otherwise plant notes nobody can remove.
     if (carriesLockTag(tags)) requireClientScope(ctx, "owner");
     const memory = await saveMemory(config, {
@@ -2193,6 +2202,10 @@ function createRoutes(
   const refuseLockedMemory = async (ctx: RequestContext, memoryId: string, ownerMayRemove: boolean) => {
     const memory = await findMemory(config, memoryId);
     if (!memory || !isLockedMemory(memory)) return;
+    // A team policy's note changes only through a newer signed policy, for every token.
+    if (memory.tags?.includes(TEAM_POLICY_NOTE_TAG)) {
+      throw new ApiError(403, "memory_team_policy", "This note comes from your team's policy and changes only when an admin updates it");
+    }
     if (ownerMayRemove && ctx.actor?.scope === "owner") return;
     throw new ApiError(403, "memory_locked", "This note came with a team file and cannot be changed here");
   };
@@ -2206,6 +2219,7 @@ function createRoutes(
     }
     await refuseLockedMemory(ctx, ctx.params.memoryId, false);
     const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : undefined;
+    refuseTeamPolicyTag(tags);
     if (carriesLockTag(tags)) requireClientScope(ctx, "owner");
     const memory = await updateMemory(config, ctx.params.memoryId, {
       ...(typeof body.content === "string" ? { content: body.content } : {}),
@@ -2841,6 +2855,50 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
+  addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(describeTeamPolicyState(await readTeamPolicyState(config, workspace.id)));
+  });
+
+  // Applies a signed team policy. The signature, not the token, is what authorises the content;
+  // the owner scope is required because joining a team changes what this machine runs.
+  addRoute(routes, "POST", "/workspace/:id/team-policy", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "owner");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.policy !== "string") {
+      throw new ApiError(400, "invalid_payload", "policy (a compact JWS) is required");
+    }
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "team_policy.apply",
+      summary: "Apply the team policy",
+      paths: [],
+    });
+    const result = await applyTeamPolicy(config, workspace, body.policy, {
+      actor: ctx.actor ?? { type: "remote" },
+      ...(typeof body.accountId === "string" ? { expectedAccountId: body.accountId } : {}),
+    });
+    if (result.status === "applied") {
+      emitReloadEvent(ctx.reloadEvents, workspace, "config");
+      emitReloadEvent(ctx.reloadEvents, workspace, "skills");
+      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    }
+    return jsonResponse({ status: result.status, ...describeTeamPolicyState(result.state) });
+  });
+
+  addRoute(routes, "DELETE", "/workspace/:id/team-policy", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "owner");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const state = await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
+    emitReloadEvent(ctx.reloadEvents, workspace, "config");
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills");
+    emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    return jsonResponse(describeTeamPolicyState(state));
+  });
+
   addRoute(routes, "PATCH", "/workspace/:id/config", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
@@ -2855,7 +2913,10 @@ function createRoutes(
     }
     if (redrob) {
       const stored = await readRedrobWorkspaceConfig(config, workspace.id);
-      if (touchesPrivacyLock(stored, { ...stored, ...redrob })) requireClientScope(ctx, "owner");
+      if (touchesPrivacyLock(stored, { ...stored, ...redrob })) {
+        await refuseTeamPolicyPrivacyChange(config, workspace.id);
+        requireClientScope(ctx, "owner");
+      }
     }
 
     await requireApproval(ctx, {
@@ -3697,7 +3758,10 @@ function createRoutes(
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
     const storedRedrob = await readRedrobWorkspaceConfig(config, workspace.id);
-    if (touchesPrivacyLock(storedRedrob, redrobAfterImport(storedRedrob, body))) requireClientScope(ctx, "owner");
+    if (touchesPrivacyLock(storedRedrob, redrobAfterImport(storedRedrob, body))) {
+      await refuseTeamPolicyPrivacyChange(config, workspace.id);
+      requireClientScope(ctx, "owner");
+    }
     const expectedFingerprint = parseWorkspaceImportPreviewFingerprint(body);
     const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     if (expectedFingerprint && expectedFingerprint !== preview.fingerprint) {
@@ -3869,6 +3933,20 @@ function scopeRank(scope: TokenScope): number {
   if (scope === "viewer") return 1;
   if (scope === "collaborator") return 2;
   return 3;
+}
+
+/** Nobody tags a note as a team policy's by hand: only a verified policy brings those. */
+function refuseTeamPolicyTag(tags: readonly string[] | null | undefined): void {
+  if (tags?.some((tag) => tag === TEAM_POLICY_NOTE_TAG || tag.startsWith(`${TEAM_POLICY_NOTE_TAG}:`))) {
+    throw new ApiError(403, "memory_team_policy", "Team policy notes come only from your team's signed policy");
+  }
+}
+
+/** A privacy setting the team policy locks changes only through a newer signed policy, for every token. */
+async function refuseTeamPolicyPrivacyChange(config: ServerConfig, workspaceId: string): Promise<void> {
+  if (await teamPolicyLocksPrivacy(config, workspaceId)) {
+    throw new ApiError(403, "team_policy_locked", "Your team's policy locks this privacy setting. An admin changes it in the console.");
+  }
 }
 
 function requireClientScope(ctx: RequestContext, required: TokenScope): void {

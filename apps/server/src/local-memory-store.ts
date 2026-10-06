@@ -174,3 +174,30 @@ export async function deleteMemory(config: ServerConfig, id: string): Promise<bo
 }
 
 export const localMemoryStoreInternals = { GLOBAL_MEMORY_KEY, parseMemories, sortNewestFirst };
+
+/**
+ * Replaces every memory carrying `tag` with new ones built from `drafts`, in one write. Used for a
+ * team policy's notes, which arrive as a whole set: a note the policy dropped must go in the same
+ * step the new ones arrive, so there is no moment with both or neither.
+ */
+export async function replaceTaggedMemories(
+  config: ServerConfig,
+  tag: string,
+  drafts: readonly MemoryDraft[],
+): Promise<Memory[]> {
+  const existing = await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? [];
+  const now = new Date().toISOString();
+  const created: Memory[] = drafts.map((draft) => ({
+    id: randomUUID(),
+    content: draft.content.trim(),
+    tags: readTags(draft.tags),
+    source: draft.source?.trim() || "agent",
+    scope: MEMORY_SCOPE_LOCAL,
+    createdAt: now,
+    updatedAt: now,
+    contexts: [],
+  }));
+  const kept = existing.filter((memory) => !(memory.tags?.includes(tag) ?? false));
+  await memoryStore.set(config, GLOBAL_MEMORY_KEY, [...created, ...kept]);
+  return created;
+}
