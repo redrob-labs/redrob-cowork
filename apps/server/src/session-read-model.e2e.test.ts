@@ -463,7 +463,7 @@ describe("workspace session read APIs", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
       code: "opencode_unconfigured",
-      message: "OpenCode base URL is missing for this workspace",
+      message: "Redrob Code base URL is missing for this workspace",
       details: {
         workspaceId: "ws_1",
         workspaceType: "local",
