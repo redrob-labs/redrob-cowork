@@ -241,6 +241,12 @@ interface ModelSelectProps {
   onBehaviorChange?: (value: string | null) => void;
 }
 
+/** The Desk work column (AppShell's `main`), or the default clipping ancestors outside the Desk frame. */
+function deskWorkColumn(): Element | "clipping-ancestors" {
+  if (typeof document === "undefined") return "clipping-ancestors";
+  return document.getElementById("rr-shell-main") ?? "clipping-ancestors";
+}
+
 export function ModelSelect({
   open,
   value,
@@ -440,6 +446,8 @@ export function ModelSelect({
       <PopoverContent
         className="flex h-80 max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible bg-transparent p-0 shadow-none ring-0"
         align="start"
+        // Inside the Desk frame the menu stays in the work column; it used to run over the side panel.
+        collisionBoundary={open ? deskWorkColumn() : undefined}
         initialFocus={false}
       >
         {/*

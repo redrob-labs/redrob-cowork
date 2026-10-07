@@ -8,12 +8,12 @@ import { DsStory } from "../src/react-app/desk/ds-story";
 const appRootPath = fileURLToPath(new URL("../src/react-app/shell/app-root.tsx", import.meta.url));
 const packagePath = fileURLToPath(new URL("../package.json", import.meta.url));
 
-describe("design system 1.1 in the renderer", () => {
-  test("pins @redrob-labs/ui exactly at 1.1.0", () => {
+describe("design system 1.2 in the renderer", () => {
+  test("pins @redrob-labs/ui exactly at 1.2.0", () => {
     const pkg: unknown = JSON.parse(readFileSync(packagePath, "utf8"));
     const deps = typeof pkg === "object" && pkg !== null && "dependencies" in pkg ? pkg.dependencies : null;
     const version = typeof deps === "object" && deps !== null && "@redrob-labs/ui" in deps ? deps["@redrob-labs/ui"] : null;
-    expect(version).toBe("1.1.0");
+    expect(version).toBe("1.2.0");
   });
 
   test("the story renders the 1.1 components the Desk screens need", () => {
