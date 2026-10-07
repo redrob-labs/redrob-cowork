@@ -77,3 +77,6 @@ apps/server/.privacy-models/
 # Privacy model weights fetched by apps/desktop/scripts/prepare-privacy-model.mjs (manifest.json is tracked)
 apps/desktop/resources/privacy-model/*.onnx
 apps/desktop/resources/privacy-model/tokenizer.json
+
+# Agent scratch/task state. Not part of the product and not reviewed.
+.agents/
