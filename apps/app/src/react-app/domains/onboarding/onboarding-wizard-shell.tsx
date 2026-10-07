@@ -56,7 +56,7 @@ export function OnboardingWizardShell({
           ) : null}
         </div>
 
-        <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
+        <div className="rounded-2xl border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
           <div
             className="mb-8 h-1.5 w-full overflow-hidden rounded-full bg-muted"
             role="progressbar"
@@ -75,10 +75,10 @@ export function OnboardingWizardShell({
           </div>
 
           <div className="mb-9 space-y-2.5 text-center">
-            <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-[32px] sm:leading-[38px]">
+            <h1 className="text-2xl font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-3xl sm:leading-[38px]">
               {title}
             </h1>
-            <p className="whitespace-pre-line text-[15px] leading-[23px] text-muted-foreground">
+            <p className="whitespace-pre-line text-base leading-[23px] text-muted-foreground">
               {description}
             </p>
           </div>

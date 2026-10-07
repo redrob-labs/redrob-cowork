@@ -93,7 +93,7 @@ function SnippetLine(props: { item: ResultItem }) {
       <div className="truncate text-muted-foreground text-xs">
         {item.role === "user" ? "You: " : item.role === "assistant" ? "Agent: " : null}
         {item.snippet.before}
-        <span className="rounded-[3px] bg-primary/15 font-medium text-foreground">
+        <span className="rounded-xs bg-primary/15 font-medium text-foreground">
           {item.snippet.match}
         </span>
         {item.snippet.after}
@@ -289,7 +289,7 @@ export function SessionSearchDialog(props: SessionSearchDialogProps) {
                           <div className="flex items-baseline gap-2">
                             <span className="truncate font-medium">{item.session.title}</span>
                             {item.kind === "message" ? (
-                              <span className="shrink-0 truncate text-[11px] text-muted-foreground/72">
+                              <span className="shrink-0 truncate text-2xs text-muted-foreground/72">
                                 {item.session.workspaceTitle}
                               </span>
                             ) : null}

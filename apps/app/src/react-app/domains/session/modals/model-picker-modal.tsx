@@ -243,13 +243,13 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
           {/* Filter rail. Hidden on narrow viewports, where the sheet has no room for two panes. */}
           <aside className="hidden w-52 shrink-0 flex-col overflow-y-auto border-e border-border px-3 py-3 lg:flex">
             <div className="flex items-center justify-between pb-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="text-2xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 {t("model_table.filters")}
               </span>
               {filterCount > 0 ? (
                 <button
                   type="button"
-                  className="text-[11px] text-muted-foreground underline decoration-border underline-offset-2 hover:text-foreground"
+                  className="text-2xs text-muted-foreground underline decoration-border underline-offset-2 hover:text-foreground"
                   onClick={() => setFilters(EMPTY_FILTERS)}
                 >
                   {t("model_table.clear")}
@@ -364,7 +364,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                         numeric
                         className="w-[7rem]"
                       />
-                      <th className="w-[9rem] border-b border-border px-3 py-2 text-start text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                      <th className="w-[9rem] border-b border-border px-3 py-2 text-start text-2xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                         {t("model_table.col_capabilities")}
                       </th>
                       <SortHeader
@@ -434,7 +434,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
 function FacetGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="pb-3">
-      <div className="pb-1 text-[11px] font-medium text-muted-foreground">{title}</div>
+      <div className="pb-1 text-2xs font-medium text-muted-foreground">{title}</div>
       <div className="flex flex-col">{children}</div>
     </div>
   );
@@ -456,7 +456,7 @@ function FacetCheck({
       type="button"
       onClick={onToggle}
       aria-pressed={checked}
-      className="flex items-center gap-2 rounded-md px-1.5 py-1 text-start text-[13px] text-foreground/90 hover:bg-foreground/5"
+      className="flex items-center gap-2 rounded-md px-1.5 py-1 text-start text-sm text-foreground/90 hover:bg-foreground/5"
     >
       <span
         className={cn(
@@ -468,7 +468,7 @@ function FacetCheck({
       </span>
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {count === undefined ? null : (
-        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{count}</span>
+        <span className="shrink-0 text-2xs tabular-nums text-muted-foreground">{count}</span>
       )}
     </button>
   );
@@ -501,7 +501,7 @@ function SortHeader({
         type="button"
         onClick={() => onSort(nextSort(sort, sortKey))}
         className={cn(
-          "flex w-full items-center gap-1 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors hover:text-foreground",
+          "flex w-full items-center gap-1 px-3 py-2 text-2xs font-semibold uppercase tracking-[0.1em] transition-colors hover:text-foreground",
           numeric ? "justify-end" : "justify-start",
           active ? "text-foreground" : "text-muted-foreground",
         )}
@@ -560,7 +560,7 @@ function ModelTableRow({
             {row.title}
           </span>
           {pinned ? (
-            <span className="shrink-0 rounded bg-[var(--dls-accent)] px-1.5 py-px text-[10px] font-medium text-[var(--dls-accent-fg)]">
+            <span className="shrink-0 rounded bg-[var(--dls-accent)] px-1.5 py-px text-2xs font-medium text-[var(--dls-accent-fg)]">
               {t("model_table.recommended")}
             </span>
           ) : null}

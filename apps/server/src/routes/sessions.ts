@@ -1,6 +1,8 @@
 import { realpath } from "node:fs/promises";
 import type { createRedrobClient } from "@redrob-labs/sdk/v2/client";
+import { recordAudit } from "../audit.js";
 import { ApiError } from "../errors.js";
+import { setOpencodeSessionProject } from "../opencode-db.js";
 import { buildSession, buildSessionList, buildSessionMessages, buildSessionSnapshot } from "../session-read-model.js";
 import {
   createSessionGroupId,
@@ -12,6 +14,7 @@ import {
   type SessionGroupState,
 } from "../session-groups.js";
 import type { ServerConfig, TokenScope, WorkspaceInfo } from "../types.js";
+import { shortId } from "../utils.js";
 import { addRoute, type RequestContext, type Route } from "./registry.js";
 
 type JsonResponse = (data: unknown, status?: number) => Response;
@@ -307,6 +310,71 @@ export function registerSessionRoutes(options: RegisterSessionRoutesOptions): vo
       actorType: ctx.actor?.type ?? "unknown",
     });
     return jsonResponse({ ok: true });
+  });
+
+  // Moves a chat between two local workspaces, keeping its id and history. Every local workspace
+  // shares one engine, so this re-scopes the session rather than copying it.
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/move", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const source = await resolveWorkspace(config, ctx.params.id);
+    const sessionId = (ctx.params.sessionId ?? "").trim();
+    if (!sessionId) throw new ApiError(400, "invalid_payload", "sessionId is required");
+    const body = await readJsonBody(ctx.request);
+    const targetWorkspaceId = requireStringField(body, "targetWorkspaceId");
+    if (targetWorkspaceId === source.id) {
+      throw new ApiError(400, "invalid_payload", "targetWorkspaceId must differ from the source workspace");
+    }
+    const target = await resolveWorkspace(config, targetWorkspaceId);
+    const targetDirectory = resolveOpencodeDirectory(target);
+    if (source.workspaceType !== "local" || target.workspaceType !== "local" || !targetDirectory) {
+      throw new ApiError(400, "invalid_payload", "Sessions can only move between local workspaces");
+    }
+    const session = await readWorkspaceSession(source, sessionId);
+
+    // The engine move refuses a destination in another project, so re-point project_id first.
+    // project.current is the engine's own derivation for the target directory, and it creates the
+    // project row if this is the first time the engine sees that directory.
+    const targetProject = unwrapOpencodeResult(
+      await createWorkspaceOpencodeClient(config, target).project.current(),
+      "/project/current",
+    );
+    const crossesProjects = session.projectID !== targetProject.id;
+    const repointed = crossesProjects ? setOpencodeSessionProject({ sessionId, projectId: targetProject.id }) : null;
+    if (crossesProjects && !repointed) {
+      throw new ApiError(500, "opencode_db_not_found", "Could not find the session in the Redrob Code database");
+    }
+    const rollback = () => {
+      if (repointed) {
+        setOpencodeSessionProject({ sessionId, projectId: repointed.previousProjectId, dbPath: repointed.dbPath });
+      }
+    };
+
+    const result = await createWorkspaceOpencodeClient(config, source, { sessionId })
+      .experimental.controlPlane.moveSession({ sessionID: sessionId, destination: { directory: targetDirectory } })
+      .catch((error: unknown) => {
+        rollback();
+        throw error;
+      });
+    if (result.error !== undefined) {
+      rollback();
+      const upstreamStatus = result.response?.status;
+      throw new ApiError(upstreamStatus === 400 ? 409 : 502, "session_move_failed", "Redrob Code could not move the session", {
+        ...(upstreamStatus === undefined ? {} : { status: upstreamStatus }),
+        body: result.error,
+      });
+    }
+
+    await recordAudit(source.path, {
+      id: shortId(),
+      workspaceId: source.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "session.move",
+      target: sessionId,
+      summary: `Moved session to workspace ${target.id}`,
+      timestamp: Date.now(),
+    });
+    return jsonResponse({ ok: true, session: { id: sessionId, workspaceId: target.id } });
   });
 
   addRoute(routes, "GET", "/workspace/:id/sessions", "client", async (ctx) => {

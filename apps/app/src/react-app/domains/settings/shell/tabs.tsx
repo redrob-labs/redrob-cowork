@@ -1,6 +1,7 @@
 /** @jsxImportSource react */
 import type * as React from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +21,7 @@ type TabsGroupProps = {
 
 export function TabsGroup(props: TabsGroupProps) {
   return (
-    <div className={cn("rounded-[24px] border border-dls-border bg-dls-sidebar p-3")}>
+    <div className={cn("rounded-lg border border-border bg-sidebar p-3")}>
       {props.children}
     </div>
   );
@@ -32,7 +33,9 @@ type TabsGroupTitleProps = {
 
 export function TabsGroupTitle(props: TabsGroupTitleProps) {
   return (
-    <div className={cn("mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-gray-8")}>
+    // The design system's meta line: 12px medium in secondary ink, sentence
+    // case and no tracking - "never uppercase and never a second typeface".
+    <div className={cn("mb-2 px-2 text-xs font-medium text-muted-foreground")}>
       {props.children}
     </div>
   );
@@ -57,19 +60,19 @@ export function TabsTrigger(props: TabsTriggerProps) {
   return (
     <button
       type="button"
+      aria-current={props.active ? "page" : undefined}
       className={cn(
-        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-medium transition-colors text-gray-10 hover:bg-dls-surface/50 hover:text-dls-text",
-        props.active &&
-          "bg-dls-surface text-dls-text shadow-sm hover:bg-dls-surface hover:text-dls-text",
+        // A navigation row on the design system's control radius: sunken on
+        // hover, and the brand-tinted selection with brand ink when current.
+        "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground",
+        props.active && "bg-primary-soft text-primary-ink hover:bg-primary-soft hover:text-primary-ink",
       )}
       onClick={props.onSelect}
     >
       <span className="flex min-w-0 items-center gap-2">
         <span>{props.children}</span>
         {props.beta ? (
-          <span className="shrink-0 rounded-full border border-warning-muted/40 bg-warning-soft/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-warning-ink">
-            {t("common.beta")}
-          </span>
+          <Badge variant="warning">{t("common.beta")}</Badge>
         ) : null}
       </span>
     </button>

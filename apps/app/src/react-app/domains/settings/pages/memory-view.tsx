@@ -31,7 +31,7 @@ const UNDO_DELETE_DELAY_MS = 6000;
 const UNDO_TOAST_DURATION_MS = 5000;
 
 // Secondary cross-tool utility (Claude Code / external harnesses): on desktop the agent is
-// already primed by the injected `## Memory Bank` prompt, so this is not the first-run path.
+// handed the saved notes in the system text, so this is not the first-run path.
 // Deliberately NOT localized: this is copied to the clipboard to be PASTED INTO AN AGENT, so it
 // is model input rather than UI copy, and translating it would change what the model does.
 const COPY_SAVE_PROMPT =

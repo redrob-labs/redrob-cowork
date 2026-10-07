@@ -211,11 +211,11 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
               </span>
             ) : null}
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[12px] font-medium text-sidebar-foreground">
+              <span className="block truncate text-xs font-medium text-sidebar-foreground">
                 {runtimeStatus?.label ?? t("status.settings")}
               </span>
               {runtimeStatus?.detail ? (
-                <span className="block truncate text-[10.5px] leading-tight text-muted-foreground">
+                <span className="block truncate text-2xs leading-tight text-muted-foreground">
                   {runtimeStatus.detail}
                 </span>
               ) : null}
@@ -234,16 +234,16 @@ export function SidebarStatusMenu(props: SidebarStatusMenuProps) {
                 <StatusDot variant={runtimeStatus.variant} label={runtimeStatus.label} />
               </span>
               <div className="min-w-0">
-                <div className="text-[11.5px] font-medium text-foreground">{runtimeStatus.label}</div>
+                <div className="text-xs font-medium text-foreground">{runtimeStatus.label}</div>
                 {runtimeStatus.detail ? (
-                  <div className="text-[10.5px] leading-tight text-muted-foreground">
+                  <div className="text-2xs leading-tight text-muted-foreground">
                     {runtimeStatus.detail}
                   </div>
                 ) : null}
               </div>
             </div>
             {props.showConnectionStatus && props.developerMode ? (
-              <div className="text-[10.5px] leading-tight text-muted-foreground">
+              <div className="text-2xs leading-tight text-muted-foreground">
                 {/* Each fact gets its own tooltip. The counts were labelled but
                     unexplained: "2 MCP servers" says nothing about what an MCP
                     server is or where to change them, and a reader who does not

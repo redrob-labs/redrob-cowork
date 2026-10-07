@@ -38,7 +38,7 @@ function ArtifactChip({ artifact }: ArtifactChipProps) {
         className="flex min-w-0 cursor-pointer items-center gap-2 px-2.5 py-1.5 transition-colors hover:bg-muted disabled:cursor-default disabled:hover:bg-transparent"
       >
         <ArtifactIcon className="size-3.5 shrink-0 text-muted-foreground" type={artifact.type} />
-        <span className="max-w-40 truncate text-[13px] font-medium leading-4 text-foreground" title={artifact.name}>
+        <span className="max-w-40 truncate text-sm font-medium leading-4 text-foreground" title={artifact.name}>
           {artifact.name}
         </span>
       </button>
@@ -76,7 +76,7 @@ export function ArtifactList({ messages, includeTargetFallbacks = false }: Artif
   return (
     <div className="mx-auto w-full max-w-3xl px-2 md:px-10" data-files-strip>
       <div className="no-scrollbar flex min-w-0 flex-nowrap items-center gap-2.5 overflow-x-auto pb-1">
-        <span className="shrink-0 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground/80">
+        <span className="shrink-0 text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground/80">
           Files
         </span>
         {artifacts.map((artifact) => (

@@ -101,7 +101,7 @@ type SerializedComposerSkillNode = Spread<
 >;
 
 const MENTION_PILL_CLASS: Record<ComposerMentionKind, string> = {
-  file: "inline-flex items-center rounded-full border border-gray-6 bg-gray-3 px-2.5 py-1 text-xs font-medium text-gray-11",
+  file: "inline-flex items-center rounded-full border border-border bg-accent px-2.5 py-1 text-xs font-medium text-muted-foreground",
   agent: "inline-flex items-center rounded-full border border-spectrum-sky/35 bg-spectrum-sky/15 px-2.5 py-1 text-xs font-medium text-foreground",
   app: "inline-flex items-center rounded-full border border-spectrum-teal/35 bg-spectrum-teal/15 px-2.5 py-1 text-xs font-medium text-foreground",
 };
@@ -337,7 +337,7 @@ function createPastedTextChipDom(label: string, lines: number) {
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[11px] font-medium text-foreground underline underline-offset-2 transition-colors hover:bg-spectrum-yellow/25";
+  button.className = "ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-2xs font-medium text-foreground underline underline-offset-2 transition-colors hover:bg-spectrum-yellow/25";
   button.title = t("composer.pasted_expand");
   button.setAttribute("aria-label", t("composer.pasted_expand_aria"));
   button.dataset.pastedExpandLabel = label;
@@ -472,7 +472,7 @@ function createAttachmentChipDom(attachment: ComposerAttachmentToken) {
     const chip = document.createElement("span");
     chip.className = "inline-flex h-10 max-w-[140px] items-center gap-1.5 rounded-xl border border-border/70 bg-muted/40 px-2";
     const label = document.createElement("span");
-    label.className = "truncate text-[11px] font-medium text-foreground";
+    label.className = "truncate text-2xs font-medium text-foreground";
     label.textContent = attachment.name;
     chip.append(label);
     dom.append(chip);
@@ -1264,7 +1264,7 @@ export const LexicalPromptEditor = forwardRef<LexicalPromptEditorHandle, EditorP
         <PlainTextPlugin
           contentEditable={
             <ContentEditable
-              className="min-h-[60px] max-h-[280px] w-full resize-none overflow-y-auto bg-transparent text-base leading-6 text-dls-text outline-none placeholder:text-dls-secondary lg:text-[13px] lg:leading-[1.55] [&_p]:min-h-[1.5rem] [&_p]:m-0"
+              className="min-h-[60px] max-h-[280px] w-full resize-none overflow-y-auto bg-transparent text-base leading-6 text-dls-text outline-none placeholder:text-dls-secondary lg:text-sm lg:leading-[1.55] [&_p]:min-h-[1.5rem] [&_p]:m-0"
               aria-placeholder={props.placeholder}
               placeholder={<span />}
               onPaste={props.onPaste}
@@ -1274,7 +1274,7 @@ export const LexicalPromptEditor = forwardRef<LexicalPromptEditorHandle, EditorP
             />
           }
           placeholder={
-            <div className="pointer-events-none absolute left-0 top-0 text-base leading-6 text-dls-secondary/70 lg:text-[13px] lg:leading-[1.55]">
+            <div className="pointer-events-none absolute left-0 top-0 text-base leading-6 text-dls-secondary/70 lg:text-sm lg:leading-[1.55]">
               {props.placeholder}
             </div>
           }

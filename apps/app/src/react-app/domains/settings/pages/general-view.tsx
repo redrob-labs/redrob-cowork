@@ -68,8 +68,8 @@ function SettingsCard(props: {
         <props.icon size={16} className="text-dls-secondary" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] font-medium text-dls-text">{props.title}</div>
-        <div className="text-[11px] text-dls-secondary">{props.desc}</div>
+        <div className="text-sm font-medium text-dls-text">{props.title}</div>
+        <div className="text-2xs text-dls-secondary">{props.desc}</div>
       </div>
       <ArrowRight size={14} className="shrink-0 text-dls-secondary" />
     </button>
@@ -81,7 +81,7 @@ export function GeneralSettingsView(props: GeneralSettingsViewProps) {
     <div className="w-full max-w-3xl space-y-8">
       {/* Workspace settings */}
       <div className="space-y-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-dls-secondary">
+        <div className="text-2xs font-semibold uppercase tracking-[0.15em] text-dls-secondary">
           {t("settings.general_section_workspace")}
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -99,7 +99,7 @@ export function GeneralSettingsView(props: GeneralSettingsViewProps) {
 
       {/* Global settings */}
       <div className="space-y-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-dls-secondary">
+        <div className="text-2xs font-semibold uppercase tracking-[0.15em] text-dls-secondary">
           {t("settings.general_section_global")}
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -117,7 +117,7 @@ export function GeneralSettingsView(props: GeneralSettingsViewProps) {
 
       {/* Feedback */}
       <div className="space-y-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-dls-secondary">
+        <div className="text-2xs font-semibold uppercase tracking-[0.15em] text-dls-secondary">
           {t("settings.general_section_help")}
         </div>
         <div className="rounded-2xl border border-dls-border bg-dls-surface p-4">
@@ -125,9 +125,9 @@ export function GeneralSettingsView(props: GeneralSettingsViewProps) {
             <div>
               <div className="flex items-center gap-2">
                 <LifeBuoy size={14} className="text-dls-secondary" />
-                <div className="text-[13px] font-medium text-dls-text">{t("settings.feedback_title")}</div>
+                <div className="text-sm font-medium text-dls-text">{t("settings.feedback_title")}</div>
               </div>
-              <div className="mt-1 max-w-[58ch] text-[11px] text-dls-secondary">{t("settings.feedback_desc")}</div>
+              <div className="mt-1 max-w-[58ch] text-2xs text-dls-secondary">{t("settings.feedback_desc")}</div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button

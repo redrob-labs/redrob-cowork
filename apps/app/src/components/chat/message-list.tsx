@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   AlertTriangle,
+  BookmarkPlus,
   Check,
   ChevronRight,
   Copy,
@@ -126,6 +127,13 @@ import { AnotherAnswerButton } from "./another-answer-button"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
+import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
+import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
+import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
+import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
+import { useFrameStore } from "@/react-app/desk/store/frame-store"
+import { restore } from "@/react-app/desk/privacy/redact"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
 
@@ -139,7 +147,7 @@ function MessageTimestamp({ message, className }: { message: UIMessage; classNam
   return (
     <span
       className={cn(
-        "select-none whitespace-nowrap text-[11px] tabular-nums text-muted-foreground/70",
+        "select-none whitespace-nowrap text-2xs tabular-nums text-muted-foreground/70",
         className
       )}
       title={new Date(created).toLocaleString()}
@@ -332,7 +340,7 @@ function FileMessage({ part, tone }: FileMessageProps) {
         <DescriptiveButtonContent className="gap-0">
           <DescriptiveButtonTitle className="truncate text-xs">{title}</DescriptiveButtonTitle>
           {badge ? (
-            <DescriptiveButtonDescription className="text-[10px]">
+            <DescriptiveButtonDescription className="text-2xs">
               {badge}
             </DescriptiveButtonDescription>
           ) : null}
@@ -453,8 +461,12 @@ function AnswerOptionChips({
 }
 
 const AssistantMessage = React.memo(
-  ({ message, isStreaming, hideReasoning }: AssistantMessageProps) => {
-    const { showThinking, highlightQuery, setPrompt } = useMessageList()
+  ({ message, isLastMessage, isStreaming, hideReasoning }: AssistantMessageProps) => {
+    const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
+    // Inside the Desk frame, Plan's and Cross-check's fenced blocks render as the design system's.
+    const inDeskFrame = useInDeskFrame()
+    // Private details went to the AI as placeholders; the person reads the real ones.
+    const placeholders = usePlaceholderMap(sessionId)
     const assistantRenderGroups = React.useMemo(
       () => {
         const groups = getAssistantRenderGroups(message.parts, showThinking)
@@ -480,20 +492,29 @@ const AssistantMessage = React.memo(
                 While the marker is still streaming in, the raw text is shown and no chips appear. Chips
                 that pop in and then rewrite themselves under a reader's cursor are worse than late ones.
               */
-              const streamingMarker = isStreaming && hasIncompleteOptionsMarker(group.text)
+              const groupText = restore(group.text, placeholders)
+              const streamingMarker = isStreaming && hasIncompleteOptionsMarker(groupText)
               const parsed = streamingMarker
-                ? { body: group.text, options: [] as string[] }
-                : parseAnswerOptions(group.text)
+                ? { body: groupText, options: [] as string[] }
+                : parseAnswerOptions(groupText)
+              const blocks = inDeskFrame ? parseDeskBlocks(parsed.body, { streaming: isStreaming }) : null
+              const deskBlocks = blocks && hasDeskBlocks(blocks) ? blocks : null
+              const body = deskBlocks ? deskBlocks.prose : parsed.body
               return (
                 <React.Fragment key={`text-${index}`}>
-                  <MessageContent
-                    className="text-foreground prose w-full min-w-0 flex-1 rounded-lg bg-transparent p-0"
+                  {deskBlocks && !body ? null : <MessageContent
+                    // The design system's assistant bubble: generated text sits on
+                    // the AI surface with the AI edge, so machine output is never
+                    // mistaken for a person's.
+                    data-surface="ai"
+                    className="text-foreground prose w-full min-w-0 flex-1 rounded-lg border border-border-ai bg-surface-ai p-4"
                     markdown
                     isStreaming={isStreaming}
                     highlightQuery={highlightQuery}
                   >
-                    {parsed.body}
-                  </MessageContent>
+                    {body}
+                  </MessageContent>}
+                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -624,7 +645,7 @@ function renderPlainTextWithLinks(text: string, highlightQuery: string | undefin
             aria-hidden="true"
             loading="lazy"
             decoding="async"
-            className="me-1 inline-block size-3.5 rounded-[3px] align-[-2px]"
+            className="me-1 inline-block size-3.5 rounded-xs align-[-2px]"
           />
         ) : null}
         {url}
@@ -657,8 +678,13 @@ function renderUserTextWithSkillChips(text: string, highlightQuery: string | und
 
 const UserMessage = React.memo(
   ({ message, isStreaming }: UserMessageProps) => {
-    const { onRevertToUserMessage, onForkAtMessage, onEditUserMessage, highlightQuery } = useMessageList()
-    const messageText = React.useMemo(() => getMessagesText([message]), [message])
+    const { onRevertToUserMessage, onForkAtMessage, onEditUserMessage, highlightQuery, sessionId } = useMessageList()
+    // What the person wrote, with the real details where placeholders were sent.
+    const placeholders = usePlaceholderMap(sessionId)
+    const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
+    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    const inDeskFrame = useInDeskFrame()
+    const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
       () => message.parts.filter((part) => (part.type === "text" && Boolean(part.text)) || isFileUIPart(part)),
       [message.parts],
@@ -682,14 +708,16 @@ const UserMessage = React.memo(
               >
                 {hasContent ? (
                   <MessageContent
-                    className="bg-muted text-foreground max-w-[85%] rounded-3xl px-4 py-2.5 leading-6 sm:max-w-[75%] !select-text not-prose"
+                    // The design system's user bubble: the sunken surface at the
+                    // card radius, 12/16 inset.
+                    className="bg-muted text-foreground max-w-[85%] rounded-lg px-4 py-3 leading-6 sm:max-w-[75%] !select-text not-prose"
                     style={{ userSelect: "text" }}
                   >
                     {inlineParts.map((part, index) => {
                       if (part.type === "text") {
                         return (
                           <span key={`text-${index}`} className="whitespace-pre-wrap">
-                            {renderUserTextWithSkillChips(part.text, highlightQuery)}
+                            {renderUserTextWithSkillChips(restore(part.text, placeholders), highlightQuery)}
                           </span>
                         )
                       }
@@ -724,6 +752,18 @@ const UserMessage = React.memo(
                           onClick={() => onEditUserMessage(message.id, messageText)}
                         >
                           <Pencil />
+                        </Button>
+                      </MessageAction>
+                    ) : null}
+                    {inDeskFrame && messageText ? (
+                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("desk.playbook_save_from_message")}
+                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                        >
+                          <BookmarkPlus />
                         </Button>
                       </MessageAction>
                     ) : null}
@@ -1037,6 +1077,7 @@ function MessageGroup({
   isStreaming,
 }: AssistantMessageGroupProps) {
   const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
+  const inDeskFrame = useInDeskFrame()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
   // client-side messages (e.g. session errors) don't exist on the server and
@@ -1089,6 +1130,22 @@ function MessageGroup({
   const renderableItems = getRenderableMessages(items)
   const lastTextMessage = getLastTextPart(lastItem.message)
   const mcpAppParts = collectMcpAppParts(items)
+  // Inside the Desk frame: notes the run saved to memory, and a receipt under a finished
+  // answer (not under Plan's questions or plan, which wait on the person).
+  const memoryNotes = inDeskFrame
+    ? items.flatMap((item) =>
+      item.message.role === "assistant"
+        ? item.message.parts.flatMap((part) => {
+          const text = memorySavedFrom(part)
+          return text ? [text] : []
+        })
+        : []
+    )
+    : []
+  const lastBlocks = inDeskFrame && lastTextMessage ? parseDeskBlocks(getMessagesText([lastTextMessage])) : null
+  const showDeskReceipt = Boolean(
+    inDeskFrame && lastTextMessage && lastRealItem && !isStreaming && !lastBlocks?.questions && !lastBlocks?.plan
+  )
 
   // Leading messages without prose (tool/reasoning steps) render inside a
   // height-capped scroll area so long runs stay compact; messages with text
@@ -1251,6 +1308,19 @@ function MessageGroup({
         messages={items.map((item) => item.message)}
         includeTargetFallbacks={false}
       />
+      {memoryNotes.map((text, index) => (
+        <div key={`memory-${index}`} className={CHAT_COLUMN}>
+          <DeskMemoryNote text={text} />
+        </div>
+      ))}
+      {showDeskReceipt && lastRealItem ? (
+        <div className={CHAT_COLUMN}>
+          <DeskAnswerFooter
+            messageId={lastRealItem.message.id}
+            model={renderableItems.map((item) => readMessageUsage(item.message)?.routedModel).findLast(Boolean)}
+          />
+        </div>
+      ) : null}
       {/*
         What THIS turn cost, on the turn itself and always visible.
 
@@ -1442,7 +1512,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
       ) : null}
       {routedModel ? (
         <span
-          className="max-w-[50%] truncate font-mono text-[11px] text-muted-foreground/80"
+          className="max-w-[50%] truncate font-mono text-2xs text-muted-foreground/80"
           title={t("usage.routed_model")}
         >
           {routedModel}
@@ -1450,7 +1520,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
       ) : null}
       {text ? (
         <span
-          className="font-mono text-[11px] tabular-nums text-muted-foreground/80"
+          className="font-mono text-2xs tabular-nums text-muted-foreground/80"
           title={t("usage.turn_cost")}
         >
           {text}
@@ -1463,6 +1533,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
 export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
+  const inDeskFrame = useInDeskFrame()
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
   /*
     Which rows a context compaction owns. The engine's summary arrives as real messages - a marked user
@@ -1530,7 +1601,12 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
         )
       })}
 
-      {showLoading && <LoadingMessage label={liveActionLabel ?? undefined} />}
+      {showLoading && !inDeskFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
+      {showLoading && inDeskFrame ? (
+        <div className={CHAT_COLUMN}>
+          <DeskRunStatus label={liveActionLabel} />
+        </div>
+      ) : null}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}
       {blockedStatus ? <BlockedMessage status={blockedStatus} /> : null}
       {error && !hasSessionErrorMessage ? <ErrorMessage error={error} /> : null}

@@ -114,7 +114,7 @@ const statusDotVariants = cva("", {
       ready: "bg-success",
       warning: "bg-warning",
       error: "bg-destructive",
-      neutral: "bg-gray-8",
+      neutral: "bg-border-strong",
     },
   },
 });
@@ -233,14 +233,14 @@ export function SettingsGroupHeader({ label, count, hint, className }: SettingsG
   return (
     <div className={cn("flex items-center justify-between gap-3", className)}>
       <div className="flex items-center gap-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-widest text-dls-secondary">
+        <h3 className="text-2xs font-semibold uppercase tracking-widest text-dls-secondary">
           {label}
         </h3>
         {typeof count === "number" ? (
-          <span className="text-[11px] uppercase text-dls-secondary">{count}</span>
+          <span className="text-2xs uppercase text-dls-secondary">{count}</span>
         ) : null}
       </div>
-      {hint ? <span className="text-[11px] text-dls-secondary">{hint}</span> : null}
+      {hint ? <span className="text-2xs text-dls-secondary">{hint}</span> : null}
     </div>
   );
 }

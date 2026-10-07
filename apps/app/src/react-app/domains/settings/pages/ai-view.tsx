@@ -52,9 +52,9 @@ function providerSourceLabel(source?: ConnectedProvider["source"]) {
 
 function providerSourceBadgeClassName(input: { source?: ConnectedProvider["source"] }) {
   if (input.source === "env") {
-    return "shrink-0 rounded-full border border-warning-muted bg-warning-soft px-2 py-0.5 text-[10px] font-medium text-warning-ink";
+    return "shrink-0 rounded-full border border-warning-muted bg-warning-soft px-2 py-0.5 text-2xs font-medium text-warning-ink";
   }
-  return "shrink-0 rounded-full border border-dls-border bg-dls-sidebar/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground";
+  return "shrink-0 rounded-full border border-dls-border bg-dls-sidebar/40 px-2 py-0.5 text-2xs font-medium text-muted-foreground";
 }
 
 function providerStatusTone(label: string): "ready" | "warning" | "neutral" {

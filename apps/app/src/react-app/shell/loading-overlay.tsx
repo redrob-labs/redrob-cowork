@@ -50,7 +50,7 @@ export function LoadingOverlay() {
     >
       <div className="flex w-full max-w-[320px] flex-col items-center gap-4 px-6 text-center">
         {error ? (
-          <div className="flex w-full flex-col gap-3 text-[12px] leading-5">
+          <div className="flex w-full flex-col gap-3 text-xs leading-5">
             <div className="text-base font-medium text-dls-primary">{t("boot.failed_title")}</div>
             <div className="text-dls-secondary">{t("boot.failed_description")}</div>
             <button
@@ -67,7 +67,7 @@ export function LoadingOverlay() {
         ) : (
           <>
             <OwDotTicker size="md" />
-            <div className="text-[12px] leading-5 text-dls-secondary">
+            <div className="text-xs leading-5 text-dls-secondary">
               {message || t("session.preparing_workspace")}
             </div>
           </>

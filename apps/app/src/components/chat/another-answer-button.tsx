@@ -74,7 +74,7 @@ export function AnotherAnswerButton({
   return (
     <div className="relative flex items-center" ref={rootRef}>
       <button
-        className="rounded px-1.5 py-0.5 text-[11px] text-muted-foreground/80 underline decoration-dotted underline-offset-2 transition-colors hover:bg-dls-bg-hover hover:text-foreground disabled:opacity-50"
+        className="rounded px-1.5 py-0.5 text-2xs text-muted-foreground/80 underline decoration-dotted underline-offset-2 transition-colors hover:bg-dls-bg-hover hover:text-foreground disabled:opacity-50"
         disabled={busy === true}
         onClick={() => {
           /*
@@ -92,7 +92,7 @@ export function AnotherAnswerButton({
       {remembered ? (
         <button
           aria-label={t("variants.change_model")}
-          className="rounded px-1 py-0.5 text-[11px] text-muted-foreground/60 transition-colors hover:bg-dls-bg-hover hover:text-foreground"
+          className="rounded px-1 py-0.5 text-2xs text-muted-foreground/60 transition-colors hover:bg-dls-bg-hover hover:text-foreground"
           disabled={busy === true}
           onClick={() => setOpen((value) => !value)}
           title={t("variants.change_model")}
@@ -147,7 +147,7 @@ export function AnotherAnswerButton({
             ) : (
               filtered.map((model) => (
                 <button
-                  className="block w-full truncate px-3 py-1.5 text-left font-mono text-[11px] text-foreground transition-colors hover:bg-dls-hover"
+                  className="block w-full truncate px-3 py-1.5 text-left font-mono text-2xs text-foreground transition-colors hover:bg-dls-hover"
                   key={`${model.providerID}/${model.modelID}`}
                   onClick={() => {
                     setOpen(false)

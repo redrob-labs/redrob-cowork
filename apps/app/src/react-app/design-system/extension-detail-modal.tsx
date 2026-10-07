@@ -258,20 +258,20 @@ export function ExtensionDetailModal({
 
   const taxonomyPills = (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+      <span className="rounded-md bg-muted px-1.5 py-0.5 text-2xs font-medium text-muted-foreground">
         {extensionTaxonomyLabel(taxonomy)}
       </span>
       {connected ? (
-        <span className="flex items-center gap-1 rounded-md bg-success-soft px-2 py-0.5 text-[10px] font-medium text-success-ink">
+        <span className="flex items-center gap-1 rounded-md bg-success-soft px-2 py-0.5 text-2xs font-medium text-success-ink">
           <CheckCircle2 size={10} strokeWidth={3} />
           {t("extensions.detail_ready")}
         </span>
       ) : null}
       {preview ? (
-        <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary-ink">{t("extension.preview")}</span>
+        <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-2xs font-medium text-primary-ink">{t("extension.preview")}</span>
       ) : null}
       {beta ? (
-        <span className="rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-warning-ink">{t("common.beta")}</span>
+        <span className="rounded-md bg-warning-soft px-1.5 py-0.5 text-2xs font-medium text-warning-ink">{t("common.beta")}</span>
       ) : null}
     </div>
   );
@@ -403,7 +403,7 @@ export function ExtensionDetailModal({
               <div
                 key={`${row}:${index}`}
                 className={cn(
-                  "px-4 py-2.5 text-[13px] leading-5 text-muted-foreground",
+                  "px-4 py-2.5 text-sm leading-5 text-muted-foreground",
                   index < triggerRows.length - 1 ? "border-b border-border" : "",
                 )}
               >
@@ -573,7 +573,7 @@ export function ExtensionDetailModal({
                     index < contents.length - 1 ? "border-b border-border" : "",
                   )}
                 >
-                  <span className="w-20 shrink-0 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  <span className="w-20 shrink-0 text-2xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
                     {item.kindLabel}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm font-medium text-card-foreground">{item.name}</span>
@@ -802,7 +802,7 @@ function UiControlConnectionDetails(props: UiControlConnectionDetailsProps) {
           <CardTitle>{t("extension.discovery")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative overflow-hidden rounded-xl bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-xl)-1px)] before:border before:border-border">
+          <div className="relative overflow-hidden rounded-xl bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(--theme(--radius-xl)-1px)] before:border before:border-border">
             <Table className="text-xs">
               <TableBody>
                 <TableRow className="*:border-border hover:bg-transparent [&>:not(:last-child)]:border-r">
