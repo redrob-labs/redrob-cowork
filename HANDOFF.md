@@ -1,6 +1,6 @@
 # Handoff: redrob-work
 
-Current state of `main` as of 2026-09-17, checked against the tree at `8cde784`.
+Current state as of 2026-09-17 16:00 UTC, checked against `develop`, which is now the default branch.
 
 Where a number below was re-measured it says so. A number carried forward from an earlier
 measurement is marked as such and has not been re-run.
@@ -101,9 +101,50 @@ ceiling (`compaction.maxTurnInputCostUsd`, default `0.5`). The console's side: #
 merged and deployed, which put the billed cost in the streaming response and added model
 popularity to the usage page.
 
-**CI does not run the tests.** `ci-i18n.yml` and `ci-redrob-ui-mcp.yml` run on `pull_request`, so a
-PR gets exactly three checks. **`ci-tests.yml` is `workflow_dispatch` only**, which is why a green
-PR here says nothing about the app suite. Run it locally; that is the only gate.
+**CI runs the tests now.** `ci-tests.yml` was `workflow_dispatch` only and is now on `pull_request`
+plus pushes to `main` and `develop`. That change alone surfaced six defects that had been sitting on
+`develop` unreported, because a suite that runs only on request is a suite nobody runs:
+
+| Defect | Why it was invisible |
+| --- | --- |
+| `buildNukeManifest` could not clear a dev profile's own data dir | desktop suite never ran on a PR |
+| the chain repair total timeout was `unref`'d, so the bound never fired | same |
+| the engine pin was asserted by equality against a literal five releases stale | failed on every bump, silently |
+| a server test expected `OpenCode base URL is missing` after the rename to `Redrob Code` | server suite never ran on a PR |
+| `typecheck:electron` failed on `develop` on a `spawnSync` overload | that step only ran on dispatch |
+| `redrob-labs/redrob-work` (404) in the rollback script, the changelog generator and its own checker | the checker agreed with the generator, and both were wrong |
+
+The last one is the one to remember: the updater assertions that named the dead repository carry
+`skip: process.platform !== "darwin"`, so they never run on Linux either. A macOS-only assertion behind
+a paused workflow had not been executed since the rename.
+
+`ci-tests.yml` is **not yet a required check.** It should report green on real pull requests, in both
+matrix legs, before anything is gated on it.
+
+## Gitflow, and what enforces it
+
+`develop` is the default branch in all twelve repositories, `main` is released state, and
+`main` is contained in `develop` in every one of them (`git rev-list --count origin/develop..origin/main`
+is 0 across the board).
+
+`.github/workflows/gitflow.yml` is installed in all twelve and carries two jobs on two triggers,
+because the two questions can only be answered at different moments:
+
+- `branch name follows the convention`, on `pull_request`: the head branch must be `<type>/<slug>` with
+  a type this repository's own documentation declares. `develop` and `main` pass as themselves, since a
+  promotion or a back-merge is not named after a type.
+- `main is contained in develop`, on push to `main`: fails while `main` holds a commit `develop` does
+  not, listing them.
+
+Neither job has a branch filter on `pull_request`, deliberately. A filter that omits the default branch
+silently stops running: that happened in `redrob-design`, where `ci.yml`, `preview.yml` and
+`native-contracts-image.yml` all filtered on `[main, master]` and reported **zero** checks on a pull
+request once `develop` became the default.
+
+**A promotion always leaves `main` one commit ahead**, because the merge commit lives there alone. That
+is not a tooling accident, it is the shape of gitflow, and the back-merge check fires on it every time.
+Open the back-merge immediately after the promotion; the release guard in the release workflow refuses
+to tag a `main` that `develop` has moved past.
 
 ## Verifying in the running app, not in the suite
 
@@ -151,14 +192,15 @@ pnpm install
 pnpm typecheck                          # only filters @redrob/app
 pnpm --filter redrob-server typecheck   # root typecheck does NOT cover the server
 pnpm --filter @redrob/app test          # 859 pass / 0 fail, 135 files, ~26s  (2026-09-17)
+pnpm --filter @redrob/desktop typecheck:electron  # 0 errors; CI runs this and it used to fail here
 pnpm build:ui                           # exit 0, ~10s
-pnpm --filter @redrob/desktop test      # 220 tests: 216 pass / 0 fail / 4 skip
-pnpm --filter redrob-server test        # 530 pass / 5 skip / 6 fail on main; see #12
+pnpm --filter @redrob/desktop test      # 285 tests: 281 pass / 0 fail / 4 skip  (2026-09-17)
+pnpm --filter redrob-server test        # 590 pass / 5 skip / 0 fail  (2026-09-17)
 pnpm check:outbound-access              # manifest covers 33 hosts, 28 scanned, no stale entries
 ```
 
-The app count was re-measured on 2026-09-17. The others are the 2026-08-28 measurement and were
-not re-run.
+App, desktop and server were all re-measured on 2026-09-17 and all exit 0. The remaining counts are
+the 2026-08-28 measurement and were not re-run.
 
 **Judge by the exit code, not by the pass count.** `pnpm test` prints `859 pass / 0 fail` and still
 exits 1 when a file fails to LOAD: a module-level throw is reported as `1 error` beside the
