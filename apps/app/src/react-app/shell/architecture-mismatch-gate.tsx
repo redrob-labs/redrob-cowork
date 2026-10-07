@@ -99,9 +99,9 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
   if (!info?.mismatch) return <>{children}</>;
 
   return (
-    <main className="dark min-h-dvh bg-background-secondary text-foreground">
+    <main data-theme="dark" className="min-h-dvh bg-background-secondary text-foreground">
       <div className="mx-auto flex min-h-dvh w-full max-w-5xl items-center px-6 py-12">
-        <section className="w-full overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/40">
+        <section className="w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/40">
           <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-8 p-8 sm:p-10 lg:p-12">
               <div className="inline-flex rounded-full border border-warning-muted/40 bg-warning-soft/50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-warning-ink">{t("architecture.mismatch")}</div>
@@ -140,7 +140,7 @@ export function ArchitectureMismatchGate({ children }: ArchitectureMismatchGateP
             </div>
 
             <aside className="border-t border-white/10 bg-gradient-to-br from-success-soft/50 via-primary-soft/50 to-transparent p-8 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
-              <div className="space-y-5 rounded-[28px] border border-white/10 bg-black/25 p-6 text-sm leading-6 text-white/68">
+              <div className="space-y-5 rounded-2xl border border-white/10 bg-black/25 p-6 text-sm leading-6 text-white/68">
                 <div className="text-lg font-semibold text-white">{t("architecture.why_stopped")}</div>
                 <p>{t("architecture.explanation")}</p>
                 <p>

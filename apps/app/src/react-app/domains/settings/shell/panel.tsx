@@ -83,7 +83,7 @@ export function SettingsPanelToolbarStatus(props: SettingsPanelToolbarStatusProp
     <div
       className={cn(
         "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs shadow-sm",
-        props.tone ?? "bg-gray-4/60 text-gray-11 border-gray-7/50",
+        props.tone ?? "bg-accent-active/60 text-muted-foreground border-border-strong/50",
       )}
       title={props.title}
     >

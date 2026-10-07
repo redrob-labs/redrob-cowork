@@ -15,6 +15,7 @@ import {
   resetRuntimeStatesAfterFailedServerStart,
   resolveEngineRolloverPreference,
   resolveEvalLocalServerDelayMs,
+  resolvePrivacyModelDir,
   resolveRedrobServerConfigPath,
   seedWorkspacePathsForEmbeddedServer,
   selectStickyRedrobPortWorkspace,
@@ -77,6 +78,24 @@ describe("workspace root preparation", () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("privacy model location", () => {
+  const manifestIn = (...dirs) => (file) => dirs.some((dir) => file === path.join(dir, "manifest.json"));
+  const runtimeDir = path.join("/repo", "apps", "desktop", "electron");
+  const devDir = path.join("/repo", "apps", "desktop", "resources", "privacy-model");
+  const packagedDir = path.join("/App", "Resources", "privacy-model");
+
+  it("prefers the installer's copy in a packaged build and the checkout's in dev mode", () => {
+    const exists = manifestIn(devDir, packagedDir);
+    assert.equal(resolvePrivacyModelDir({ resourcesPath: "/App/Resources", runtimeDir, devMode: false, exists }), packagedDir);
+    assert.equal(resolvePrivacyModelDir({ resourcesPath: "/App/Resources", runtimeDir, devMode: true, exists }), devDir);
+  });
+
+  it("names no folder that lacks a manifest", () => {
+    assert.equal(resolvePrivacyModelDir({ resourcesPath: "/App/Resources", runtimeDir, devMode: false, exists: () => false }), null);
+    assert.equal(resolvePrivacyModelDir({ resourcesPath: undefined, runtimeDir, devMode: false, exists: manifestIn(devDir) }), devDir);
   });
 });
 

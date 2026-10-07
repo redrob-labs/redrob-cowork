@@ -1,34 +1,34 @@
 export const modalBodyClass = "min-h-0 flex-1 overflow-y-auto";
 
 export const surfaceCardClass =
-  "rounded-[20px] border border-dls-border bg-dls-surface p-5";
+  "rounded-2xl border border-dls-border bg-dls-surface p-5";
 
 export const softCardClass =
-  "rounded-[20px] border border-dls-border bg-dls-hover p-4";
+  "rounded-2xl border border-dls-border bg-dls-hover p-4";
 
 export const interactiveCardClass =
-  "rounded-[20px] border border-dls-border bg-dls-surface p-5 text-left transition-all duration-150 hover:border-dls-border hover:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.16)]";
+  "rounded-2xl border border-dls-border bg-dls-surface p-5 text-left transition-all duration-150 hover:border-dls-border hover:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.16)]";
 
 export const iconTileClass =
   "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dls-border bg-dls-hover text-dls-secondary";
 
 export const sectionTitleClass =
-  "text-[15px] font-medium tracking-[-0.2px] text-dls-text";
+  "text-base font-medium tracking-[-0.2px] text-dls-text";
 
-export const sectionBodyClass = "mt-1 text-[13px] leading-relaxed text-dls-secondary";
+export const sectionBodyClass = "mt-1 text-sm leading-relaxed text-dls-secondary";
 
-export const inputLabelClass = "text-[13px] font-medium text-dls-text";
+export const inputLabelClass = "text-sm font-medium text-dls-text";
 
-export const inputHintClass = "text-[12px] leading-5 text-dls-secondary";
+export const inputHintClass = "text-xs leading-5 text-dls-secondary";
 
 export const inputClass =
-  "w-full rounded-xl border border-dls-border bg-dls-surface px-4 py-3 text-[14px] text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-xl border border-dls-border bg-dls-surface px-4 py-3 text-sm text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60";
 
 export const subtleInputClass =
-  "w-full rounded-xl border border-dls-border bg-dls-hover px-4 py-3 text-[14px] text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-xl border border-dls-border bg-dls-hover px-4 py-3 text-sm text-dls-text placeholder:text-dls-secondary focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.12)] disabled:cursor-not-allowed disabled:opacity-60";
 
 const pillButtonBaseClass =
-  "inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.18)] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.18)] disabled:cursor-not-allowed disabled:opacity-60";
 
 export const pillPrimaryClass = `${pillButtonBaseClass} bg-dls-accent text-[var(--dls-accent-fg)] hover:bg-[var(--dls-accent-hover)]`;
 
@@ -37,25 +37,25 @@ export const pillSecondaryClass = `${pillButtonBaseClass} border border-dls-bord
 export const pillGhostClass = `${pillButtonBaseClass} border border-dls-border bg-dls-surface text-dls-secondary hover:bg-dls-hover hover:text-dls-text`;
 
 export const tagClass =
-  "inline-flex items-center rounded-md border border-dls-border bg-dls-hover px-2 py-1 text-[11px] text-dls-secondary";
+  "inline-flex items-center rounded-md border border-dls-border bg-dls-hover px-2 py-1 text-2xs text-dls-secondary";
 
 export const infoBannerClass =
-  "rounded-[20px] border border-dls-border bg-dls-hover px-4 py-3 text-[13px] text-dls-secondary";
+  "rounded-2xl border border-dls-border bg-dls-hover px-4 py-3 text-sm text-dls-secondary";
 
 export const warningBannerClass =
-  "rounded-[20px] border border-warning-muted/20 bg-warning-soft/30 px-4 py-3 text-[13px] text-warning-ink";
+  "rounded-2xl border border-warning-muted/20 bg-warning-soft/30 px-4 py-3 text-sm text-warning-ink";
 
 export const errorBannerClass =
-  "rounded-[20px] border border-destructive-muted/20 bg-destructive-soft/40 px-4 py-3 text-[13px] text-destructive-ink";
+  "rounded-2xl border border-destructive-muted/20 bg-destructive-soft/40 px-4 py-3 text-sm text-destructive-ink";
 
 export const successBannerClass =
-  "rounded-[20px] border border-success-muted/20 bg-success-soft/30 px-4 py-3 text-[13px] text-success-ink";
+  "rounded-2xl border border-success-muted/20 bg-success-soft/30 px-4 py-3 text-sm text-success-ink";
 
 export const modalNoticeNeutralClass =
-  "rounded-xl border border-dls-border bg-dls-hover px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
+  "rounded-xl border border-dls-border bg-dls-hover px-3 py-2.5 text-sm leading-relaxed text-dls-text";
 
 export const modalNoticeSuccessClass =
-  "rounded-xl border border-dls-border bg-success-soft/25 px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
+  "rounded-xl border border-dls-border bg-success-soft/25 px-3 py-2.5 text-sm leading-relaxed text-dls-text";
 
 export const modalNoticeErrorClass =
-  "rounded-xl border border-dls-border bg-destructive-soft/20 px-3 py-2.5 text-[13px] leading-relaxed text-dls-text";
+  "rounded-xl border border-dls-border bg-destructive-soft/20 px-3 py-2.5 text-sm leading-relaxed text-dls-text";

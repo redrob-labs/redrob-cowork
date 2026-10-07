@@ -1,4 +1,6 @@
 /** @jsxImportSource react */
+import { usePrivacyMapStore } from "@/react-app/desk/privacy/privacy-store";
+import { restore } from "@/react-app/desk/privacy/redact";
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { useQuery } from "@tanstack/react-query";
@@ -60,6 +62,7 @@ import { SessionFindBar } from "./find-bar";
 import { useSessionFindStore } from "./find-store";
 import { getSessionActivityStatusLabel, useSessionActivityStore, type SessionActivityStatus } from "@/react-app/domains/session/status/session-activity-store";
 import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permission-approval-modal";
+import { DeskThreadContext, textDraft, type DeskThread } from "@/react-app/desk/thread/desk-thread-context";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
 import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
@@ -464,7 +467,7 @@ function messageHasVisibleAssistantOutput(message: UIMessage) {
 function AssistantWaitingCard({ label = t("session.assistant_thinking") }: { label?: string }) {
   return (
     <div className="flex justify-start" role="status" aria-live="polite">
-      <div className="inline-flex items-center gap-1.5 px-1 py-1 text-[12px] text-dls-secondary">
+      <div className="inline-flex items-center gap-1.5 px-1 py-1 text-xs text-dls-secondary">
         <div style={{ width: 20, height: 20, borderRadius: "50%", overflow: "hidden" }}>
           <PaperGrainGradient
             speed={12}
@@ -496,13 +499,13 @@ function TodoPanel(props: { todos: TodoItem[] }) {
     <div className="overflow-hidden border-b border-dls-border bg-transparent">
         <button
           type="button"
-          className="flex w-full items-center justify-between px-4 py-3 text-xs text-gray-9 transition-colors hover:bg-gray-2/50"
+          className="flex w-full items-center justify-between px-4 py-3 text-xs text-subtle-foreground transition-colors hover:bg-muted/50"
           onClick={() => setExpanded((current) => !current)}
         >
           <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-11">{label}</span>
+            <span className="font-medium text-muted-foreground">{label}</span>
           </div>
-          <Minimize2 size={12} className={`text-gray-8 transition-transform ${expanded ? "" : "rotate-180"}`} />
+          <Minimize2 size={12} className={`text-disabled-foreground transition-transform ${expanded ? "" : "rotate-180"}`} />
         </button>
         {expanded ? (
           <div className="max-h-60 space-y-2.5 overflow-auto border-t border-dls-border px-4 pb-3">
@@ -520,15 +523,15 @@ function TodoPanel(props: { todos: TodoItem[] }) {
                           : active
                             ? "border-warning-muted bg-warning-soft text-warning-ink"
                             : cancelled
-                              ? "border-gray-6 bg-gray-2 text-gray-8"
-                              : "border-gray-6 bg-gray-1 text-gray-8"
+                              ? "border-border bg-muted text-disabled-foreground"
+                              : "border-border bg-background text-disabled-foreground"
                       }`}
                     >
                       {done ? <Check size={10} /> : active ? <span className="size-1.5 rounded-full bg-warning" /> : null}
                     </div>
                   </div>
-                  <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-gray-9 line-through" : "text-gray-12"}`}>
-                    <span className="mr-1.5 text-gray-9">{index + 1}.</span>
+                  <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-subtle-foreground line-through" : "text-foreground"}`}>
+                    <span className="mr-1.5 text-subtle-foreground">{index + 1}.</span>
                     {todo.content}
                   </div>
                 </div>
@@ -1155,7 +1158,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   const handleCopyTranscript = async () => {
     try {
-      await navigator.clipboard.writeText(transcriptToText(renderedMessages));
+      // Copied as the person reads it: real details, not the placeholders that were sent.
+      await navigator.clipboard.writeText(restore(transcriptToText(renderedMessages), usePrivacyMapStore.getState().maps[props.sessionId] ?? {}));
     } catch (nextError) {
       setError({ message: nextError instanceof Error ? nextError.message : t("session.error_copy_transcript_failed") });
     }
@@ -1969,6 +1973,16 @@ export function SessionSurface(props: SessionSurfaceProps) {
   }), [props.sessionId, renderedMessages]);
   useControlAction(props.isControlTarget ? sessionReadTranscriptControlAction : null);
 
+  // The Desk thread's own controls (Plan's questions, Run this plan) reply through `sendDraft`,
+  // the composer's path, so busy state, errors and the transcript behave as for a typed reply.
+  const deskThread = useMemo<DeskThread>(() => ({
+    sessionId: props.sessionId,
+    busy: chatStreaming,
+    sendText: async (text) => {
+      await sendDraft(textDraft(text));
+    },
+  }), [chatStreaming, props.sessionId, sendDraft]);
+
   return (
     <DevProfiler id="SessionSurface">
     <div
@@ -2036,7 +2050,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
             ) : null}
             {showDelayedLoading && pendingSessionLoad ? (
               <div className="px-6 py-16">
-                <div className="mx-auto max-w-sm rounded-3xl border border-dls-border bg-dls-hover/60 px-8 py-10 text-center">
+                <div className="mx-auto max-w-sm rounded-2xl border border-dls-border bg-dls-hover/60 px-8 py-10 text-center">
                   <div className="text-sm text-dls-secondary">{t("session.opening")}</div>
                 </div>
               </div>
@@ -2050,7 +2064,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
                     onOpenModelPicker={handleOpenModelPicker}
                   />
                 ) : (
-                  <div className="mx-auto max-w-xl rounded-3xl border border-destructive-muted/40 bg-destructive-soft/20 px-6 py-5 text-sm text-destructive-ink">
+                  <div className="mx-auto max-w-xl rounded-2xl border border-destructive-muted/40 bg-destructive-soft/20 px-6 py-5 text-sm text-destructive-ink">
                     {snapshotQuery.error instanceof Error ? snapshotQuery.error.message : t("session.error_load_failed")}
                   </div>
                 )}
@@ -2109,12 +2123,14 @@ export function SessionSurface(props: SessionSurfaceProps) {
                       onEditUserMessage={handleEditUserMessage}
                       onRetryMessage={handleRetryMessage}
                     >
+                      <DeskThreadContext value={deskThread}>
                       <MessageList
                         messages={renderedMessages}
                         status={status}
                         retryStatus={liveStatus.type === "retry" ? liveStatus : null}
                         blockedStatus={liveStatus.type === "blocked" ? liveStatus : null}
                       />
+                      </DeskThreadContext>
                     </MessageListProvider>
                   </EnvironmentVariableProvider>
                 </OpenTargetProvider>

@@ -4,8 +4,8 @@
   "description": "Local-first agent workspace",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8f9fb",
-  "theme_color": "#f8f9fb",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "/apple-touch-icon.png",

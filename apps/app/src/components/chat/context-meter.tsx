@@ -27,12 +27,12 @@ export function ContextMeter(props: { usedPercent: number | null; onCompact?: ()
       ? "text-destructive-ink"
       : (props.usedPercent ?? 0) >= 75
         ? "text-warning-ink"
-        : "text-gray-10";
+        : "text-subtle-foreground";
   return (
     // `px-2 md:px-4` rather than a flat `px-4`, matching every transcript row and the composer. A fixed
     // px-4 lines up on a wide window and is 8px out on a narrow one, which is the worst kind of
     // misalignment because it only appears at sizes nobody screenshots.
-    <div className="flex items-center justify-end gap-2 px-2 pb-1 pt-1 text-[11px] tabular-nums md:px-4">
+    <div className="flex items-center justify-end gap-2 px-2 pb-1 pt-1 text-2xs tabular-nums md:px-4">
       {/*
         Summarise now.
 
@@ -49,7 +49,7 @@ export function ContextMeter(props: { usedPercent: number | null; onCompact?: ()
       */}
       {props.onCompact ? (
         <button
-          className="rounded px-1.5 py-0.5 text-gray-10 underline decoration-dotted underline-offset-2 transition-colors hover:bg-dls-bg-hover hover:text-gray-12 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded px-1.5 py-0.5 text-subtle-foreground underline decoration-dotted underline-offset-2 transition-colors hover:bg-dls-bg-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           disabled={props.compacting === true}
           onClick={props.onCompact}
           title={t("usage.compact_now_hint")}

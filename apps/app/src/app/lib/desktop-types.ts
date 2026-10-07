@@ -60,7 +60,8 @@ export type BrowserPanelTab = {
   label: string;
   url: string;
   favicon: string | null;
-  status: "loading" | "ready";
+  /** `error`: the page did not load (the desktop app's `did-fail-load` on the main frame). */
+  status: "loading" | "ready" | "error";
   canGoBack: boolean;
   canGoForward: boolean;
 };

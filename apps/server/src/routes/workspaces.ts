@@ -1,10 +1,11 @@
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { recordAudit } from "../audit.js";
 import { ApiError } from "../errors.js";
 import { inheritWorkspaceOpencodeConnection, resolveWorkspaceOpencodeConnection } from "../opencode-connection.js";
 import { externalFetch } from "../server-fetch.js";
-import type { ServerConfig, WorkspaceInfo } from "../types.js";
+import { runtimeStorageDir } from "../runtime-db.js";
+import type { Actor, ServerConfig, WorkspaceInfo, WorkspaceKind } from "../types.js";
 import { ensureDir, exists, shortId } from "../utils.js";
 import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles } from "../workspace-init.js";
 import { seedRedrobWorkspaceConfigIfEmpty } from "../redrob-workspace-config-store.js";
@@ -41,6 +42,22 @@ function readStringField(value: unknown, key: string): string {
   if (!isRecord(value)) return "";
   const field = value[key];
   return typeof field === "string" ? field.trim() : "";
+}
+
+/**
+ * A managed project's folder name from its display name: letters and digits in any script, runs of
+ * anything else as one dash, lowercase, at most 48 characters. Never empty, never a path, and never
+ * a name Windows reserves for a device.
+ */
+export function projectFolderSlug(name: string): string {
+  const slug = name
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .slice(0, 48)
+    .replace(/^-+|-+$/g, "");
+  if (!slug) return "project";
+  return /^(con|prn|aux|nul|com\d|lpt\d)$/.test(slug) ? `project-${slug}` : slug;
 }
 
 function normalizeRemoteDirectory(value: unknown): string {
@@ -209,6 +226,7 @@ function serializeWorkspaceConfigEntry(workspace: WorkspaceInfo): Record<string,
     ...(workspace.sandboxContainerName ? { sandboxContainerName: workspace.sandboxContainerName } : {}),
     ...(!isLocalWorkspace && workspace.opencodeUsername ? { opencodeUsername: workspace.opencodeUsername } : {}),
     ...(!isLocalWorkspace && workspace.opencodePassword ? { opencodePassword: workspace.opencodePassword } : {}),
+    ...(workspace.kind ? { kind: workspace.kind } : {}),
   };
 }
 
@@ -268,18 +286,18 @@ export function registerWorkspaceRoutes(options: RegisterWorkspaceRoutesOptions)
     return resolveWorkspace(config, id);
   };
 
-  addRoute(routes, "POST", "/workspaces/local", "host", async (ctx) => {
-    ensureWritable(config);
-    const body = await readJsonBody(ctx.request);
-    const folderPath = typeof body.folderPath === "string" ? body.folderPath.trim() : "";
-    const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : basename(folderPath || "Workspace");
-    const preset = typeof body.preset === "string" && body.preset.trim() ? body.preset.trim() : "starter";
-
-    if (!folderPath) {
-      throw new ApiError(400, "invalid_payload", "folderPath is required");
-    }
-
-    const workspacePath = resolve(folderPath);
+  // `activate` puts the workspace first, which is what makes it the active one; otherwise an
+  // existing entry keeps its place and a new one is appended.
+  const addLocalWorkspace = async (input: {
+    folderPath: string;
+    name: string;
+    preset: string;
+    kind?: WorkspaceKind;
+    activate: boolean;
+    actor: Actor;
+  }) => {
+    const { name, preset } = input;
+    const workspacePath = resolve(input.folderPath);
     await ensureDir(workspacePath);
     await ensureWorkspaceFiles(workspacePath, preset);
 
@@ -299,9 +317,15 @@ export function registerWorkspaceRoutes(options: RegisterWorkspaceRoutesOptions)
       preset,
       workspaceType: "local",
       ...inheritWorkspaceOpencodeConnection(config),
+      ...(input.kind ? { kind: input.kind } : {}),
     };
 
-    config.workspaces = [workspace, ...config.workspaces.filter((entry) => entry.id !== workspace.id)];
+    const others = config.workspaces.filter((entry) => entry.id !== workspace.id);
+    config.workspaces = input.activate
+      ? [workspace, ...others]
+      : others.length < config.workspaces.length
+        ? config.workspaces.map((entry) => entry.id === workspace.id ? workspace : entry)
+        : [...config.workspaces, workspace];
     if (!config.authorizedRoots.some((root) => resolve(root) === workspacePath)) {
       config.authorizedRoots = [...config.authorizedRoots, workspacePath];
     }
@@ -311,15 +335,84 @@ export function registerWorkspaceRoutes(options: RegisterWorkspaceRoutesOptions)
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,
-      actor: ctx.actor ?? { type: "host" },
+      actor: input.actor,
       action: "workspace.create",
       target: workspace.path,
       summary: `Created workspace ${name}`,
       timestamp: Date.now(),
     });
 
+    return { workspace, persisted };
+  };
+
+  // A new folder for a managed project, under runtime storage, never one another project uses.
+  const managedProjectFolder = async (name: string) => {
+    const root = join(runtimeStorageDir(config), "projects");
+    const slug = projectFolderSlug(name);
+    const taken = new Set(config.workspaces.map((entry) => resolve(entry.path)));
+    for (let n = 1; ; n += 1) {
+      const candidate = join(root, n === 1 ? slug : `${slug}-${n}`);
+      if (!taken.has(resolve(candidate)) && !(await exists(candidate))) return candidate;
+    }
+  };
+
+  addRoute(routes, "POST", "/workspaces/local", "host", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    // `managed: true` makes the folder too: a project that has no folder of the person's yet.
+    const managed = body.managed === true;
+    const requestedName = typeof body.name === "string" ? body.name.trim() : "";
+    const folderPath = managed
+      ? await managedProjectFolder(requestedName)
+      : typeof body.folderPath === "string" ? body.folderPath.trim() : "";
+    const name = requestedName || basename(folderPath || "Workspace");
+    const preset = typeof body.preset === "string" && body.preset.trim() ? body.preset.trim() : "starter";
+
+    if (!folderPath) {
+      throw new ApiError(400, "invalid_payload", "folderPath is required");
+    }
+
+    // A managed project does not take over the open workspace; opening it activates it.
+    const { workspace, persisted } = await addLocalWorkspace({
+      folderPath,
+      name,
+      preset,
+      kind: managed ? "managed" : undefined,
+      activate: !managed || config.workspaces.length === 0,
+      actor: ctx.actor ?? { type: "host" },
+    });
     return jsonResponse({
-      activeId: workspace.id,
+      activeId: config.workspaces[0]?.id ?? workspace.id,
+      workspace: serializeWorkspace(workspace),
+      workspaces: config.workspaces.map(serializeWorkspace),
+      persisted,
+    }, 201);
+  });
+
+  // Idempotent ensure of the app-managed workspace for chats outside any project. Its folder lives
+  // under the server's runtime storage, and it only becomes active when no other workspace exists.
+  addRoute(routes, "POST", "/workspaces/personal", "host", async (ctx) => {
+    ensureWritable(config);
+    const existing = config.workspaces.find((entry) => entry.kind === "personal");
+    if (existing) {
+      return jsonResponse({
+        activeId: config.workspaces[0]?.id ?? null,
+        workspace: serializeWorkspace(existing),
+        workspaces: config.workspaces.map(serializeWorkspace),
+        persisted: false,
+      });
+    }
+    const { workspace, persisted } = await addLocalWorkspace({
+      folderPath: join(runtimeStorageDir(config), "personal"),
+      name: "Personal",
+      preset: "starter",
+      kind: "personal",
+      activate: config.workspaces.length === 0,
+      actor: ctx.actor ?? { type: "host" },
+    });
+    return jsonResponse({
+      activeId: config.workspaces[0]?.id ?? null,
+      workspace: serializeWorkspace(workspace),
       workspaces: config.workspaces.map(serializeWorkspace),
       persisted,
     }, 201);

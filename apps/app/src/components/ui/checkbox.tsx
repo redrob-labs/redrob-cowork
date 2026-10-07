@@ -1,24 +1,38 @@
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox"
-
 import { cn } from "@/lib/utils"
-import { CheckIcon } from "lucide-react"
+import { CheckIcon, MinusIcon } from "lucide-react"
 
-function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
+/**
+ * The design system's Checkbox box and mark (`rr-choice__box`, `rr-choice__mark`).
+ *
+ * Base UI keeps the behaviour, which means the box is the focusable element and
+ * its state is a `data-checked` / `data-indeterminate` attribute rather than a
+ * native `:checked` the design system's sibling selector reads. So the box takes
+ * the design system's classes for its resting look and the checked, focus and
+ * disabled states are spelled with the same tokens here (`--primary` is
+ * `--action-primary`). The mark is only mounted while checked, so it is shown.
+ */
+function Checkbox({ className, indeterminate, ...props }: CheckboxPrimitive.Root.Props) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
+      indeterminate={indeterminate}
       className={cn(
-        "peer relative flex size-4 shrink-0 items-center justify-center rounded-[5px] border border-transparent bg-input/90 transition-shadow outline-none group-has-disabled/field:opacity-50 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 aria-invalid:aria-checked:border-primary dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground dark:data-checked:bg-primary",
+        "rr-choice__box peer relative mt-0 cursor-pointer outline-none after:absolute after:-inset-x-3 after:-inset-y-2",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "data-checked:border-primary data-checked:bg-primary data-indeterminate:border-primary data-indeterminate:bg-primary",
+        "data-disabled:cursor-not-allowed data-disabled:border-border data-disabled:bg-muted",
+        "aria-invalid:border-destructive group-has-disabled/field:opacity-50",
         className
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="grid place-content-center text-current transition-none [&>svg]:size-3.5"
-      >
-        <CheckIcon
-        />
+      <CheckboxPrimitive.Indicator data-slot="checkbox-indicator" className="contents">
+        {indeterminate ? (
+          <MinusIcon className="rr-choice__mark opacity-100" />
+        ) : (
+          <CheckIcon className="rr-choice__mark opacity-100" />
+        )}
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )

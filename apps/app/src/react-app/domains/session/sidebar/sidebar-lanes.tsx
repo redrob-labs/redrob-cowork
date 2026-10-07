@@ -37,7 +37,7 @@ export const SIDEBAR_ROW_LANE_NESTED = "ps-6";
 export const SIDEBAR_SECTION_LANE = "mx-2 ps-2.5 pe-2";
 
 export const SIDEBAR_SECTION_LABEL =
-  "text-[11px] font-light text-muted-foreground";
+  "text-2xs font-light text-muted-foreground";
 
 const GLYPH_SLOT = "flex size-4 shrink-0 items-center justify-center";
 

@@ -41,7 +41,7 @@ import {
 /** Injected by the suites. Resolves to whether Redrob Code still holds a workspace key. */
 export type RedrobPayRecheck = () => Promise<boolean>;
 
-async function recheckRedrobKey(): Promise<boolean> {
+export async function recheckRedrobKey(): Promise<boolean> {
   const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await resolveRedrobConnection();
   if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
     throw new Error("redrob_server_unavailable");

@@ -227,9 +227,15 @@ failures) do not reproduce on Linux.
   alternatives (`slash-command.ts`, `composer/editor.tsx`, `queued-messages-panel.tsx`,
   `session-surface.tsx`). Unreachable today, but inert and covered by
   `apps/app/tests/prompt-file-parts.test.ts`.
-- **Do not rebuild the Den control plane, Connect links, scheduled automations, or the `cloud`
-  and `enterprise` desktop distributions.** Both distributions gated sign-in and an activation
-  only a control plane could grant, so either build would now be permanently locked.
+- **Do not rebuild the Den control plane, Connect links, or the `cloud` and `enterprise` desktop
+  distributions.** Both distributions gated sign-in and an activation only a control plane could
+  grant, so either build would now be permanently locked.
+- **Scheduled automations are back, deliberately and local-only** (owner's decision for the
+  small-team beta, 2026-10). `apps/server/src/desk-schedules.ts` runs scheduled playbooks inside
+  redrob-server while the app is open: a 30-second pass, state in the runtime DB table
+  `desk_schedules`, a missed time is recorded and skipped, a permission ask waits on the Scheduled
+  screen. Do not grow it into a hosted or always-on scheduler; nothing wakes the computer.
+  `REDROB_DISABLE_SCHEDULER=1` turns it off.
 - **Do not call bare `fetch` in `apps/server/src`.** External egress goes through `externalFetch`
   and loopback through `loopbackFetch` (`apps/server/src/server-fetch.ts`); `loopbackFetch` is
   only for 127.0.0.1, localhost and managed engine traffic. `pnpm check:outbound-access` and

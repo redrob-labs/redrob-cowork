@@ -7,6 +7,9 @@ files:
   - server/**/*
   - "!server/dist/opencode-plugins/**"
   - package.json
+  # onnxruntime-node carries native binaries for six platforms (about 245 MB); keep the one built for.
+  - "!node_modules/onnxruntime-node/bin/**"
+  - "node_modules/onnxruntime-node/bin/napi-v6/${platform}/${arch}/**"
   - from: .electron-runtime/node_modules
     to: node_modules
 extraResources:
@@ -14,6 +17,15 @@ extraResources:
     to: redrob-sentry.json
   - from: ../app/dist
     to: app-dist
+  # The privacy detection model redrob-server loads at High and Strict, pinned by manifest hash.
+  # scripts/prepare-privacy-model.mjs fetches and verifies the weights before packaging.
+  - from: resources/privacy-model
+    to: privacy-model
+    filter:
+      - manifest.json
+      - "*.onnx"
+      - tokenizer.json
+      - NOTICE.md
   - from: server/dist/opencode-plugins
     to: opencode-plugins
     filter:
@@ -28,6 +40,8 @@ asar: true
 asarUnpack:
   - node_modules/.pnpm/@lydell+node-pty*/**
   - node_modules/node-pty/**
+  # dlopen cannot read inside app.asar: the binding and the libonnxruntime beside it stay on disk.
+  - node_modules/onnxruntime-node/bin/**
 npmRebuild: false
 afterPack: scripts/electron-after-pack.cjs
 afterSign: scripts/electron-after-sign.cjs

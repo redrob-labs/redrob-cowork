@@ -101,6 +101,42 @@ export type RedrobSessionMessage = {
   parts: Part[];
 };
 
+/** When a scheduled playbook runs (apps/server/src/desk-schedules.ts). */
+export type RedrobScheduleRule = {
+  mode: "once" | "repeat";
+  date?: string;
+  start?: string;
+  time: string;
+  zone: string;
+  freq?: "daily" | "weekdays" | "weekly" | "monthly";
+  days?: string[];
+  dom?: string;
+};
+
+export type RedrobScheduleRunState = "running" | "waiting" | "done" | "missed" | "failed";
+
+export type RedrobScheduleState = {
+  schedules: Array<{
+    id: string;
+    playbookId: string;
+    label: string;
+    rule: RedrobScheduleRule;
+    nextRunAt: number | null;
+    enabled: boolean;
+    lastRun: { state: RedrobScheduleRunState; at: number; sessionId?: string } | null;
+  }>;
+  runs: Array<{ id: string; scheduleId: string; sessionId: string | null; at: number; state: RedrobScheduleRunState }>;
+  waiting: Array<{
+    id: string;
+    scheduleId: string;
+    sessionId: string;
+    requestId: string;
+    permission: string;
+    patterns: string[];
+    askedAt: number;
+  }>;
+};
+
 export type RedrobSessionSnapshot = {
   session: Session;
   messages: RedrobSessionMessage[];
@@ -259,6 +295,8 @@ export type RedrobMcpItem = {
   source: "config.project" | "config.global" | "config.remote";
   disabledByTools?: boolean;
   managedOAuth?: RedrobManagedMcpConnection | null;
+  /** Set when the workspace follows a team policy that does not allow this connector. */
+  teamPolicy?: { blocked: true; reason: "local_programs_blocked" | "not_listed" | "url_mismatch" } | null;
 };
 
 export type RedrobMcpAppResource = {
@@ -807,6 +845,43 @@ export function clearRedrobServerSettings() {
   }
 }
 
+/** GET /workspace/:id/team-policy. Mirrors describeTeamPolicyState + describeTeamPolicySync in redrob-server. */
+export type RedrobTeamPolicyStatus = {
+  joined: boolean;
+  accountId: string | null;
+  version: number | null;
+  issuedAt?: string;
+  appliedAt?: number;
+  setBy?: { userId: string; name: string; role: "admin" | "developer" | "viewer" };
+  signedWithTestKey?: boolean;
+  privacy?: { level: "off" | "standard" | "high" | "strict"; locked: boolean };
+  notes?: number;
+  playbooks?: string[];
+  skills?: string[];
+  sync: {
+    checkedAt: number | null;
+    status: RedrobTeamPolicySyncOutcome["status"] | null;
+    code: string | null;
+    lastSuccessAt: number | null;
+    stale: boolean;
+  };
+};
+
+export type RedrobTeamPolicySyncOutcome = {
+  status:
+    | "applied"
+    | "unchanged"
+    | "no_policy"
+    | "not_connected"
+    | "not_joined"
+    | "not_member"
+    | "removed"
+    | "refused"
+    | "unreachable";
+  code?: string;
+  version?: number;
+};
+
 export class RedrobServerError extends Error {
   status: number;
   code: string;
@@ -1052,6 +1127,16 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       });
       return response.memory;
     },
+    updateMemory: async (memoryId: string, payload: { content?: string; tags?: string[] }): Promise<Memory> => {
+      const response = await requestJson<{ memory: Memory }>(baseUrl, `/memory/${encodeURIComponent(memoryId)}`, {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: payload,
+        timeoutMs: timeouts.config,
+      });
+      return response.memory;
+    },
     deleteMemory: async (memoryId: string): Promise<void> => {
       await requestJson<unknown>(baseUrl, `/memory/${encodeURIComponent(memoryId)}`, {
         token,
@@ -1075,6 +1160,33 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         hostToken,
         method: "POST",
         body: payload,
+        timeoutMs: timeouts.activateWorkspace,
+      }),
+    // A project with a folder the server makes under its runtime storage. It does not become active.
+    createManagedProject: (name: string) =>
+      requestJson<{
+        activeId: string | null;
+        workspace: RedrobWorkspaceInfo;
+        workspaces: RedrobWorkspaceInfo[];
+        persisted: boolean;
+      }>(baseUrl, "/workspaces/local", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { name, managed: true, preset: "starter" },
+        timeoutMs: timeouts.activateWorkspace,
+      }),
+    // Idempotent: returns the app-managed Personal workspace, creating it on first call.
+    ensurePersonalWorkspace: () =>
+      requestJson<{
+        activeId: string | null;
+        workspace: RedrobWorkspaceInfo;
+        workspaces: RedrobWorkspaceInfo[];
+        persisted: boolean;
+      }>(baseUrl, "/workspaces/personal", {
+        token,
+        hostToken,
+        method: "POST",
         timeoutMs: timeouts.activateWorkspace,
       }),
     createRemoteWorkspace: (payload: {
@@ -1124,6 +1236,12 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         baseUrl,
         `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}`,
         { token, hostToken, method: "DELETE", timeoutMs: timeouts.deleteSession },
+      ),
+    moveSession: (workspaceId: string, sessionId: string, targetWorkspaceId: string) =>
+      requestJson<{ ok: boolean; session: { id: string; workspaceId: string } }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/move`,
+        { token, hostToken, method: "POST", body: { targetWorkspaceId }, timeoutMs: timeouts.deleteSession },
       ),
     listSessions: (
       workspaceId: string,
@@ -1263,12 +1381,58 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
           timeoutMs: timeouts.workspaceImport,
         },
       ),
+    listSchedules: (workspaceId: string) =>
+      requestJson<RedrobScheduleState>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/schedules`, {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      }),
+    addSchedule: (workspaceId: string, payload: { playbookId: string; label: string; rule: RedrobScheduleRule }) =>
+      requestJson<RedrobScheduleState>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/schedules`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: payload,
+        timeoutMs: timeouts.config,
+      }),
+    updateSchedule: (workspaceId: string, scheduleId: string, payload: { enabled: boolean }) =>
+      requestJson<RedrobScheduleState>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/schedules/${encodeURIComponent(scheduleId)}`,
+        { token, hostToken, method: "PATCH", body: payload, timeoutMs: timeouts.config },
+      ),
+    answerScheduleWaiting: (workspaceId: string, waitingId: string, approve: boolean) =>
+      requestJson<RedrobScheduleState>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/schedules/waiting/${encodeURIComponent(waitingId)}`,
+        { token, hostToken, method: "POST", body: { approve }, timeoutMs: timeouts.config },
+      ),
     getConfig: (workspaceId: string) =>
       requestJson<{ opencode: Record<string, unknown>; redrob: Record<string, unknown>; updatedAt?: number | null }>(
         baseUrl,
         `/workspace/${workspaceId}/config`,
         { token, hostToken, timeoutMs: timeouts.config },
       ),
+    /** The team policy this workspace follows, and when it was last checked. */
+    getTeamPolicy: (workspaceId: string) =>
+      requestJson<RedrobTeamPolicyStatus>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/team-policy`, {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      }),
+    /** Checks the console now. `join` starts following the team; it needs the owner token. */
+    syncTeamPolicy: (workspaceId: string, options: { join?: boolean } = {}) =>
+      requestJson<RedrobTeamPolicyStatus & { outcome: RedrobTeamPolicySyncOutcome }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/team-policy/sync`,
+        { token, hostToken, method: "POST", body: { join: options.join === true }, timeoutMs: 30_000 },
+      ),
+    leaveTeamPolicy: (workspaceId: string) =>
+      requestJson<RedrobTeamPolicyStatus>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/team-policy`, {
+        token,
+        hostToken,
+        method: "DELETE",
+      }),
     listAuthorizedFolders: (workspaceId: string) =>
       requestJson<RedrobAuthorizedFoldersResponse>(
         baseUrl,

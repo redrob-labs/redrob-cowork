@@ -163,20 +163,20 @@ const HOST_STYLE_SOURCES: Partial<Record<McpUiStyleVariableKey, string>> = {
   "--color-background-success": "--success-soft",
   "--color-background-warning": "--warning-soft",
   "--color-background-danger": "--destructive-soft",
-  "--color-background-info": "--primary-soft",
+  "--color-background-info": "--info-soft",
   "--color-text-primary": "--foreground",
   "--color-text-secondary": "--muted-foreground",
   "--color-text-inverse": "--primary-foreground",
   "--color-text-success": "--success-ink",
   "--color-text-warning": "--warning-ink",
   "--color-text-danger": "--destructive-ink",
-  "--color-text-info": "--primary-ink",
+  "--color-text-info": "--info-ink",
   "--color-border-primary": "--border",
-  "--color-border-secondary": "--border-subtle",
+  "--color-border-secondary": "--app-border-subtle",
   "--color-border-success": "--success",
   "--color-border-warning": "--warning",
   "--color-border-danger": "--destructive",
-  "--color-border-info": "--primary",
+  "--color-border-info": "--info",
   "--border-radius-lg": "--dls-radius",
   "--shadow-sm": "--shadow-card",
 }
@@ -303,7 +303,8 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
       { serverTools: {} },
       {
         hostContext: {
-          theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
+          // theme.ts writes `data-theme` on <html>; nothing sets a `dark` class there.
+          theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
           displayMode: "inline",
           styles: { variables: hostStyleVariables() },
         },
@@ -537,7 +538,7 @@ export function McpAppFrame({ part }: { part: DynamicToolUIPart }) {
         <details className="mt-1">
           <summary className="cursor-pointer select-none">{t("mcp.technical_details")} ({error.code})</summary>
           <p className="mt-1">{t("mcp_app.copy_details_hint")}</p>
-          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-[11px] text-foreground">{details}</pre>
+          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-2xs text-foreground">{details}</pre>
           <button
             type="button"
             className="mt-1 underline underline-offset-2"

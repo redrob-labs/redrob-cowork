@@ -14,7 +14,7 @@ import test from "node:test";
 const ELECTRON_DIR = import.meta.dirname;
 const MAIN = readFileSync(join(ELECTRON_DIR, "main.mjs"), "utf8");
 
-/** Redrob primitives, the same values the app's `--rr-*` layer declares. */
+/** Redrob primitives, the same values the design system (`@redrob-labs/ui`) declares. */
 const REDROB_BLACK = "#0a0b0c";
 const REDROB_GRAY_1 = "#f8f9fb";
 const REDROB_GRAY_5 = "#aab0bb";
@@ -57,4 +57,14 @@ test("the window frame stays transparent so the renderer owns the background", (
   // background colour would show through as a second, off-token surface during
   // resize, so the frame keeps the near-transparent value it already used.
   assert.match(MAIN, /backgroundColor: "#00000001"/);
+});
+
+test("the Windows title bar draws its controls in a design-system neutral", () => {
+  // The overlay's minimise/maximise/close glyphs are painted by Windows from this
+  // value. It was Tailwind's #9ca3af, a grey from no Redrob palette; Gray 5 is
+  // the design system's neutral for icons on light and dark grounds alike.
+  const overlay = /titleBarOverlay: \{([^}]*)\}/.exec(MAIN);
+  assert.ok(overlay, "the Windows title bar overlay should still be configured");
+  assert.match(overlay[1], new RegExp(`symbolColor: "${REDROB_GRAY_5}"`));
+  assert.doesNotMatch(MAIN, /#9ca3af/);
 });

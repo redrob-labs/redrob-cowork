@@ -38,6 +38,17 @@ import {
 import { exportExtensions } from "./extensions-export.js";
 import { deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
+import {
+  addSchedule,
+  answerWaiting,
+  readRule,
+  readSchedules,
+  removeSchedule,
+  startScheduler,
+  updateSchedule,
+  type ScheduleEngine,
+} from "./desk-schedules.js";
+import { DESK_RUN_AGENT } from "./redrob-desk-agents.js";
 import { ApiError, formatError } from "./errors.js";
 import { readJsoncFile, updateJsoncTopLevel, writeJsoncFile } from "./jsonc.js";
 import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
@@ -56,6 +67,7 @@ import {
   migrateLegacyRedrobKey,
   putRedrobEngineAuth,
   readRedrobEngineAuthStatus,
+  readRedrobEngineKey,
 } from "./redrob-auth.js";
 import { createRedrobDeviceConnections } from "./redrob-device.js";
 import { EnvService } from "./env-file.js";
@@ -127,8 +139,30 @@ import {
   seedRedrobWorkspaceConfigIfEmpty,
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
-import { deleteMemory, listMemories, saveMemory } from "./local-memory-store.js";
+import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
+import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
+import {
+  applyTeamPolicy,
+  describeTeamPolicyState,
+  describeTeamPolicySync,
+  blockedConnectorNames,
+  leaveTeamPolicy,
+  onTeamPolicyChange,
+  readTeamPolicyState,
+  readTeamPolicySync,
+  refuseBlockedConnector,
+  refuseBlockedConnectors,
+  connectorVerdict,
+  teamConnectorPolicy,
+  writeTeamConnectorsFile,
+  startTeamPolicySync,
+  syncTeamPolicy,
+  teamPolicyLocksPrivacy,
+  TEAM_POLICY_NOTE_TAG,
+  type TeamPolicySyncDeps,
+} from "./team-policy/index.js";
 import { readHarnessAvailability } from "./harness-availability.js";
+import { PrivacyGate } from "./privacy/gate.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -1220,15 +1254,67 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   resetManagedProviderAuthCache();
   void syncManagedProviderAuth({ config, env, logger: toManagedProviderAuthLogger(logger) }).catch(() => undefined);
 
+  // Scheduled playbooks run while this server does; REDROB_DISABLE_SCHEDULER turns them off.
+  const stopScheduler = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startScheduler({ config, engine: createScheduleEngine(config), logger });
+
+  // The connector allowlist reaches the engine through team-connectors.json and the
+  // redrob-team-connectors plugin. Written before any engine starts, and again whenever a workspace
+  // starts, changes or stops following a policy; a change in what is allowed rebuilds that
+  // workspace's engine so the plugin re-reads it before any connector starts.
+  await writeTeamConnectorsFile(config).catch((error) => {
+    logger.log("warn", "Failed to write the team connector policy.", {
+      error: error instanceof Error ? error.message : "unknown",
+    });
+  });
+  const appliedConnectorPolicies = new Map<string, string>();
+  for (const workspace of config.workspaces) {
+    const policy = await teamConnectorPolicy(config, workspace.id).catch(() => null);
+    appliedConnectorPolicies.set(workspace.id, JSON.stringify(policy));
+  }
+  const stopConnectorPolicyListener = onTeamPolicyChange(async (_config, changed) => {
+    await writeTeamConnectorsFile(config);
+    const policy = JSON.stringify(await teamConnectorPolicy(config, changed.id));
+    if (appliedConnectorPolicies.get(changed.id) === policy) return;
+    appliedConnectorPolicies.set(changed.id, policy);
+    const workspace = config.workspaces.find((item) => item.id === changed.id);
+    if (!workspace) return;
+    // In the background: the policy is already recorded, and a rebuild can take seconds.
+    void (async () => {
+      await syncRuntimeMcpToOpencodeEngine(config, workspace, undefined, undefined, engineMcpServerState);
+      await writeRedrobRuntimeConfigFile(config, workspace.id);
+      await reloadOpencodeEngine(config, workspace, engineMcpServerState);
+    })().catch((error) => {
+      logger.log("warn", "Failed to rebuild the engine after a team connector policy change.", {
+        workspaceId: workspace.id,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+    });
+  });
+
+  // Joined workspaces follow their team's signed policy; see team-policy/sync.ts.
+  const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startTeamPolicySync(config, teamPolicySyncDeps(config), logger);
+
   return {
     ...server,
     stop: async () => {
+      stopScheduler();
+      stopTeamPolicySync();
+      stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
       reloadBaselineRefreshers.delete(config);
       await server.stop();
     },
   };
+}
+
+/** The key comes from the engine at the moment of each check; nothing here stores it. */
+function teamPolicySyncDeps(config: ServerConfig): TeamPolicySyncDeps {
+  return { readKey: () => readRedrobEngineKey({ config }) };
 }
 
 function buildOpencodeProxyUrl(baseUrl: string, path: string, search: string) {
@@ -1315,6 +1401,47 @@ export function createWorkspaceOpencodeClient(
     ...(clientFetch ? { fetch: clientFetch } : {}),
     ...(connection.authHeader ? { headers: { Authorization: connection.authHeader } } : {}),
   });
+}
+
+/** The engine calls the scheduler makes, through the workspace's own engine client. */
+function createScheduleEngine(config: ServerConfig): ScheduleEngine {
+  return {
+    template: async (workspace, playbookId) => {
+      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === playbookId);
+      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === playbookId);
+      return own?.template ?? global?.template ?? null;
+    },
+    startRun: async (workspace, input) => {
+      const opencode = createWorkspaceOpencodeClient(config, workspace);
+      const session = unwrapOpencodeResult(await opencode.session.create({ title: input.title || "Scheduled run" }), "/session");
+      const result = await opencode.session.promptAsync({
+        sessionID: session.id,
+        agent: DESK_RUN_AGENT,
+        parts: [{ type: "text", text: input.prompt }],
+      });
+      if (result.error !== undefined) {
+        throw new ApiError(502, "opencode_request_failed", "Redrob Code did not start the scheduled run");
+      }
+      return session.id;
+    },
+    status: async (workspace) => {
+      const statuses = unwrapOpencodeResult(await createWorkspaceOpencodeClient(config, workspace).session.status(), "/session/status");
+      return Object.fromEntries(Object.entries(statuses).map(([sessionId, status]) => [sessionId, status.type]));
+    },
+    pendingPermissions: async (workspace) =>
+      unwrapOpencodeResult(await createWorkspaceOpencodeClient(config, workspace).permission.list(), "/permission").map((ask) => ({
+        id: ask.id,
+        sessionID: ask.sessionID,
+        permission: ask.permission,
+        patterns: ask.patterns,
+      })),
+    reply: async (workspace, requestId, reply) => {
+      const result = await createWorkspaceOpencodeClient(config, workspace).permission.reply({ requestID: requestId, reply });
+      if (result.error !== undefined) {
+        throw new ApiError(502, "opencode_request_failed", "Redrob Code did not take the answer");
+      }
+    },
+  };
 }
 
 export function unwrapOpencodeResult<T, E>(result: OpencodeClientResult<T, E>, path: string): NonNullable<T> {
@@ -2118,17 +2245,55 @@ function createRoutes(
     if (!content) {
       throw new ApiError(400, "invalid_payload", "content is required");
     }
+    const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null;
+    refuseTeamPolicyTag(tags);
+    refuseLockTag(tags);
     const memory = await saveMemory(config, {
       content,
-      tags: Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : null,
+      tags,
       ...(typeof body.source === "string" ? { source: body.source } : {}),
     });
     return jsonResponse({ memory }, 201);
   });
 
+  // A locked note changes only through a newer signed policy. One an earlier build's team file
+  // locked has no policy behind it, so the owner may remove it; nobody edits it in place.
+  const refuseLockedMemory = async (ctx: RequestContext, memoryId: string, ownerMayRemove: boolean) => {
+    const memory = await findMemory(config, memoryId);
+    if (!memory || !isLockedMemory(memory)) return;
+    // A team policy's note changes only through a newer signed policy, for every token.
+    if (memory.tags?.includes(TEAM_POLICY_NOTE_TAG)) {
+      throw new ApiError(403, "memory_team_policy", "This note comes from your team's policy and changes only when an admin updates it");
+    }
+    if (ownerMayRemove && ctx.actor?.scope === "owner") return;
+    throw new ApiError(403, "memory_locked", "This note is locked and cannot be changed here. The owner of this workspace can remove it");
+  };
+
+  addRoute(routes, "PATCH", "/memory/:memoryId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    if (body.content !== undefined && (typeof body.content !== "string" || !body.content.trim())) {
+      throw new ApiError(400, "invalid_payload", "content must be a non-empty string");
+    }
+    await refuseLockedMemory(ctx, ctx.params.memoryId, false);
+    const tags = Array.isArray(body.tags) ? body.tags.filter((tag): tag is string => typeof tag === "string") : undefined;
+    refuseTeamPolicyTag(tags);
+    refuseLockTag(tags);
+    const memory = await updateMemory(config, ctx.params.memoryId, {
+      ...(typeof body.content === "string" ? { content: body.content } : {}),
+      ...(tags ? { tags } : {}),
+    });
+    if (!memory) {
+      throw new ApiError(404, "not_found", "memory not found");
+    }
+    return jsonResponse({ memory });
+  });
+
   addRoute(routes, "DELETE", "/memory/:memoryId", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
+    await refuseLockedMemory(ctx, ctx.params.memoryId, true);
     const removed = await deleteMemory(config, ctx.params.memoryId);
     if (!removed) {
       throw new ApiError(404, "not_found", "memory not found");
@@ -2749,6 +2914,122 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
+  const describeTeamPolicy = async (workspaceId: string) => ({
+    ...describeTeamPolicyState(await readTeamPolicyState(config, workspaceId)),
+    sync: describeTeamPolicySync(await readTeamPolicySync(config, workspaceId)),
+  });
+
+  /*
+   * The privacy gate's server half, called by the engine plugin redrob-privacy-gate for every model
+   * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
+   * the chats whose labels this resolves, so restoring them reveals nothing new.
+   */
+  const privacyGate = new PrivacyGate(config);
+  addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const directory = typeof body.directory === "string" && body.directory ? body.directory : null;
+    const sessionID = typeof body.sessionID === "string" ? body.sessionID : "";
+    switch (body.op) {
+      case "settings":
+        return jsonResponse({ level: (await privacyGate.rules(directory)).level, detector: privacyGate.detectorStatus() });
+      case "label": {
+        if (!sessionID || !Array.isArray(body.texts) || body.texts.some((text) => typeof text !== "string")) {
+          throw new ApiError(400, "invalid_payload", "sessionID and texts (strings) are required");
+        }
+        return jsonResponse(await privacyGate.label({ sessionID, directory, texts: body.texts as string[] }));
+      }
+      case "restore": {
+        if (!sessionID) throw new ApiError(400, "invalid_payload", "sessionID is required");
+        return jsonResponse(privacyGate.restore({ sessionID, value: body.value }));
+      }
+      default:
+        throw new ApiError(400, "invalid_payload", "op must be settings, label or restore");
+    }
+  });
+
+  /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */
+  addRoute(routes, "GET", "/privacy/detector", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    return jsonResponse(privacyGate.detectorStatus());
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await describeTeamPolicy(workspace.id));
+  });
+
+  /*
+   * Checks the console for a newer policy now. `join: true` is how a workspace starts following its
+   * team: it needs the owner scope and an approval, because from then on the team's signed policy
+   * changes what this workspace runs. A check of an already joined workspace needs neither; the
+   * signature is what authorises the content, as with POST /team-policy.
+   */
+  addRoute(routes, "POST", "/workspace/:id/team-policy/sync", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "owner");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readOptionalJsonBody(ctx.request);
+    const join = body?.join === true;
+    if (join) {
+      await requireApproval(ctx, {
+        workspaceId: workspace.id,
+        action: "team_policy.join",
+        summary: "Follow the team policy from the Redrob console",
+        paths: [],
+      });
+    }
+    const outcome = await syncTeamPolicy(config, workspace, teamPolicySyncDeps(config), {
+      join,
+      actor: ctx.actor ?? { type: "remote" },
+    });
+    if (outcome.status === "applied" || outcome.status === "removed") {
+      emitReloadEvent(ctx.reloadEvents, workspace, "config");
+      emitReloadEvent(ctx.reloadEvents, workspace, "skills");
+      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    }
+    return jsonResponse({ outcome, ...(await describeTeamPolicy(workspace.id)) });
+  });
+
+  // Applies a signed team policy. The signature, not the token, is what authorises the content;
+  // the owner scope is required because joining a team changes what this machine runs.
+  addRoute(routes, "POST", "/workspace/:id/team-policy", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "owner");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.policy !== "string") {
+      throw new ApiError(400, "invalid_payload", "policy (a compact JWS) is required");
+    }
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "team_policy.apply",
+      summary: "Apply the team policy",
+      paths: [],
+    });
+    const result = await applyTeamPolicy(config, workspace, body.policy, {
+      actor: ctx.actor ?? { type: "remote" },
+      ...(typeof body.accountId === "string" ? { expectedAccountId: body.accountId } : {}),
+    });
+    if (result.status === "applied") {
+      emitReloadEvent(ctx.reloadEvents, workspace, "config");
+      emitReloadEvent(ctx.reloadEvents, workspace, "skills");
+      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    }
+    return jsonResponse({ status: result.status, ...(await describeTeamPolicy(workspace.id)) });
+  });
+
+  addRoute(routes, "DELETE", "/workspace/:id/team-policy", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "owner");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
+    emitReloadEvent(ctx.reloadEvents, workspace, "config");
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills");
+    emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    return jsonResponse(await describeTeamPolicy(workspace.id));
+  });
+
   addRoute(routes, "PATCH", "/workspace/:id/config", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");
@@ -2761,6 +3042,16 @@ function createRoutes(
     if (!opencode && !redrob) {
       throw new ApiError(400, "invalid_payload", "opencode or redrob updates required");
     }
+    if (redrob) {
+      const stored = await readRedrobWorkspaceConfig(config, workspace.id);
+      const next = { ...stored, ...redrob };
+      if (touchesPrivacyLock(stored, next)) {
+        await refuseTeamPolicyPrivacyChange(config, workspace.id);
+        refuseNewPrivacyLock(stored, next);
+        requireClientScope(ctx, "owner");
+      }
+    }
+    if (opencode) await refuseBlockedConnectors(config, workspace.id, opencode.mcp);
 
     await requireApproval(ctx, {
       workspaceId: workspace.id,
@@ -3034,8 +3325,16 @@ function createRoutes(
     const items = await listMcp(config, workspace.id, workspace.path);
     const managedState = await listLocalManagedMcpConnectionsSafe(config, workspace.id);
     const managed = new Map(managedState.connections.map((connection) => [connection.name, connection]));
+    const teamPolicy = await teamConnectorPolicy(config, workspace.id);
+    const verdictFor = (item: (typeof items)[number]) => {
+      if (!teamPolicy) return null;
+      const verdict = connectorVerdict(teamPolicy, item.name, item.config, {
+        managedServerUrl: managed.get(item.name)?.serverUrl ?? null,
+      });
+      return verdict.allowed ? null : { blocked: true, reason: verdict.reason };
+    };
     return jsonResponse({
-      items: items.map((item) => ({ ...item, managedOAuth: managed.get(item.name) ?? null })),
+      items: items.map((item) => ({ ...item, managedOAuth: managed.get(item.name) ?? null, teamPolicy: verdictFor(item) })),
       engineSync: engineMcpSyncStateInState(config, engineMcpServerState, workspace),
       managedOAuthState: { available: managedState.available, recovery: managedState.recovery },
     });
@@ -3136,6 +3435,7 @@ function createRoutes(
     if ((await listMcp(config, workspace.id, workspace.path)).some((item) => item.name === name)) {
       throw new ApiError(409, "mcp_exists", `MCP ${name} already exists in this workspace`);
     }
+    await refuseBlockedConnector(config, workspace.id, name, { type: "remote", url: serverUrl }, { managedServerUrl: serverUrl });
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "mcp.add",
@@ -3266,6 +3566,7 @@ function createRoutes(
     if (!configPayload) {
       throw new ApiError(400, "invalid_payload", "MCP config is required");
     }
+    await refuseBlockedConnector(config, workspace.id, name, configPayload);
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "mcp.add",
@@ -3347,6 +3648,16 @@ function createRoutes(
       throw new ApiError(400, "invalid_payload", "enabled must be a boolean");
     }
     const enabled = body.enabled;
+    if (enabled) {
+      // Turning one on is adding it, as far as the allowlist is concerned. Turning one off is always fine.
+      const item = (await listMcp(config, workspace.id, workspace.path)).find((entry) => entry.name === name);
+      const managed = (await listLocalManagedMcpConnectionsSafe(config, workspace.id)).connections.find(
+        (connection) => connection.name === name,
+      );
+      await refuseBlockedConnector(config, workspace.id, name, item?.config ?? { type: "remote", url: managed?.serverUrl }, {
+        managedServerUrl: managed?.serverUrl ?? null,
+      });
+    }
     const action = enabled ? "mcp.enable" : "mcp.disable";
     const summary = `${enabled ? "Enable" : "Disable"} MCP ${name}`;
     await requireApproval(ctx, {
@@ -3456,6 +3767,48 @@ function createRoutes(
     return jsonResponse({ ok: true });
   });
 
+  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await readSchedules(config, workspace.id));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/schedules", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const playbookId = typeof body.playbookId === "string" ? sanitizeCommandName(body.playbookId) : "";
+    if (!playbookId) throw new ApiError(400, "invalid_payload", "playbookId is required");
+    const label = typeof body.label === "string" ? body.label.trim().slice(0, 200) : "";
+    return jsonResponse(await addSchedule(config, workspace.id, { playbookId, label, rule: readRule(body.rule) }), 201);
+  });
+
+  addRoute(routes, "PATCH", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const enabled = typeof body.enabled === "boolean" ? body.enabled : undefined;
+    return jsonResponse(await updateSchedule(config, workspace.id, ctx.params.scheduleId, { enabled }));
+  });
+
+  addRoute(routes, "DELETE", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await removeSchedule(config, workspace.id, ctx.params.scheduleId));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/schedules/waiting/:waitingId", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.approve !== "boolean") throw new ApiError(400, "invalid_payload", "approve must be true or false");
+    return jsonResponse(await answerWaiting(config, workspace, createScheduleEngine(config), ctx.params.waitingId, body.approve));
+  });
+
   addRoute(routes, "GET", "/workspace/:id/commands", "client", async (ctx) => {
     const scope = ctx.url.searchParams.get("scope") === "global" ? "global" : "workspace";
     if (scope === "global") {
@@ -3549,7 +3902,7 @@ function createRoutes(
     requireClientScope(ctx, "viewer");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const preview = await buildWorkspaceImportPreview(workspace.path, body);
+    const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     return jsonResponse(publicWorkspaceImportPreview(preview));
   });
 
@@ -3558,8 +3911,19 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
+    const storedRedrob = await readRedrobWorkspaceConfig(config, workspace.id);
+    const importedRedrob = redrobAfterImport(storedRedrob, body);
+    if (touchesPrivacyLock(storedRedrob, importedRedrob)) {
+      await refuseTeamPolicyPrivacyChange(config, workspace.id);
+      refuseNewPrivacyLock(storedRedrob, importedRedrob);
+      requireClientScope(ctx, "owner");
+    }
+    const importedOpencode = body.opencode as Record<string, unknown> | undefined;
+    if (importedOpencode && typeof importedOpencode === "object") {
+      await refuseBlockedConnectors(config, workspace.id, importedOpencode.mcp);
+    }
     const expectedFingerprint = parseWorkspaceImportPreviewFingerprint(body);
-    const preview = await buildWorkspaceImportPreview(workspace.path, body);
+    const preview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     if (expectedFingerprint && expectedFingerprint !== preview.fingerprint) {
       return jsonResponse(
         {
@@ -3592,7 +3956,7 @@ function createRoutes(
       summary: summarizeWorkspaceImportPreview(preview),
       paths: approvalPaths,
     });
-    const latestPreview = await buildWorkspaceImportPreview(workspace.path, body);
+    const latestPreview = await buildWorkspaceImportPreview(workspace.path, body, { readStoredRedrob: () => readRedrobWorkspaceConfig(config, workspace.id) });
     if (latestPreview.fingerprint !== expectedFingerprint) {
       return jsonResponse(
         {
@@ -3729,6 +4093,34 @@ function scopeRank(scope: TokenScope): number {
   if (scope === "viewer") return 1;
   if (scope === "collaborator") return 2;
   return 3;
+}
+
+/** Nobody tags a note as a team policy's by hand: only a verified policy brings those. */
+function refuseTeamPolicyTag(tags: readonly string[] | null | undefined): void {
+  if (tags?.some((tag) => tag === TEAM_POLICY_NOTE_TAG || tag.startsWith(`${TEAM_POLICY_NOTE_TAG}:`))) {
+    throw new ApiError(403, "memory_team_policy", "Team policy notes come only from your team's signed policy");
+  }
+}
+
+/** Only a verified team policy locks a note; no token adds the lock by hand. */
+function refuseLockTag(tags: readonly string[] | null | undefined): void {
+  if (carriesLockTag(tags)) {
+    throw new ApiError(403, "memory_lock_policy_only", "Only your team's signed policy locks a note");
+  }
+}
+
+/** Only a verified team policy locks the privacy setting; no token sets a lock by config or import. */
+function refuseNewPrivacyLock(before: Record<string, unknown>, after: Record<string, unknown>): void {
+  if (setsPrivacyLock(before, after)) {
+    throw new ApiError(403, "privacy_lock_policy_only", "Only your team's signed policy locks the privacy setting");
+  }
+}
+
+/** A privacy setting the team policy locks changes only through a newer signed policy, for every token. */
+async function refuseTeamPolicyPrivacyChange(config: ServerConfig, workspaceId: string): Promise<void> {
+  if (await teamPolicyLocksPrivacy(config, workspaceId)) {
+    throw new ApiError(403, "team_policy_locked", "Your team's policy locks this privacy setting. An admin changes it in the console.");
+  }
 }
 
 function requireClientScope(ctx: RequestContext, required: TokenScope): void {
@@ -4290,8 +4682,18 @@ async function runRuntimeMcpSyncToOpencodeEngine(
   }
 
   const runtimeConfig = await readRuntimeOpencodeConfig(config, workspace.id);
+  // A connector the team policy blocks is never hot-added, and is disconnected if it is running.
+  const teamBlocked = await blockedConnectorNames(config, workspace.id, runtimeMcpMap(runtimeConfig)).catch(
+    () => new Set<string>(),
+  );
+  for (const name of teamBlocked) {
+    if (!onlyNames || onlyNames.includes(name)) {
+      await disconnectMcpFromOpencodeEngine(config, workspace, name).catch(() => undefined);
+    }
+  }
   const entries = Object.entries(runtimeMcpMap(runtimeConfig)).filter(
     ([name]) => !name.startsWith(LEGACY_MANAGED_MCP_SERVER_NAME_PREFIX)
+      && !teamBlocked.has(name)
       && (!onlyNames || onlyNames.includes(name)),
   );
   if (entries.length === 0) {

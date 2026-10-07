@@ -39,6 +39,8 @@ type RedrobKeyStepProps = {
    */
   skipLabel?: string;
   skipDescription?: string;
+  /** Plainer words for the paste path, for Desk Settings, where no developer words appear. */
+  copy?: { getKey: string; label: string; placeholder: string };
 };
 
 /**
@@ -64,6 +66,7 @@ export function RedrobKeyStep({
   connectPrompt,
   skipLabel,
   skipDescription,
+  copy,
 }: RedrobKeyStepProps) {
   const [apiKey, setApiKey] = useState("");
   /** Opened by the user, and kept open, so a failed paste attempt does not fold away under them. */
@@ -81,12 +84,12 @@ export function RedrobKeyStep({
           <OnboardingBrandMark />
         </div>
 
-        <div className="rounded-[28px] border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
+        <div className="rounded-2xl border border-border bg-background px-8 py-10 shadow-sm sm:px-10">
           <div className="mb-8 space-y-2.5 text-center">
-            <h1 className="text-[28px] font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-[32px] sm:leading-[38px]">
+            <h1 className="text-2xl font-semibold leading-[34px] tracking-[-0.02em] text-foreground sm:text-3xl sm:leading-[38px]">
               {t("welcome.redrob_key_title")}
             </h1>
-            <p className="text-[15px] leading-[23px] text-muted-foreground">
+            <p className="text-base leading-[23px] text-muted-foreground">
               {t("welcome.redrob_key_subtitle")}
             </p>
           </div>
@@ -96,7 +99,7 @@ export function RedrobKeyStep({
               <Button
                 type="button"
                 size="lg"
-                className="h-12 w-full text-[15px] font-semibold"
+                className="h-12 w-full text-base font-semibold"
                 disabled={busy || connectBusy}
                 onClick={() => void onConnect()}
                 data-testid="redrob-connect"
@@ -156,7 +159,7 @@ export function RedrobKeyStep({
                   <ExternalLinkIcon className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
                   <div>
                     <div className="text-sm font-medium text-foreground">
-                      {t("welcome.redrob_key_get_cta")}
+                      {copy?.getKey ?? t("welcome.redrob_key_get_cta")}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       {REDROB_CONSOLE_URL}
@@ -165,12 +168,12 @@ export function RedrobKeyStep({
                 </button>
 
                 <label className="grid gap-2 text-xs font-medium text-muted-foreground">
-                  {t("welcome.redrob_key_label")}
+                  {copy?.label ?? t("welcome.redrob_key_label")}
                   <TextInput
                     type="password"
                     value={apiKey}
                     onChange={(event) => setApiKey(event.currentTarget.value)}
-                    placeholder={t("welcome.redrob_key_placeholder")}
+                    placeholder={copy?.placeholder ?? t("welcome.redrob_key_placeholder")}
                     disabled={busy || waiting}
                     autoFocus={!onConnect}
                   />
@@ -180,7 +183,7 @@ export function RedrobKeyStep({
                   type="button"
                   variant={onConnect ? "outline" : "default"}
                   size="lg"
-                  className="h-12 w-full text-[15px] font-semibold"
+                  className="h-12 w-full text-base font-semibold"
                   disabled={!canSubmit}
                   onClick={() => void onSubmitKey(apiKey.trim())}
                   data-testid="redrob-submit-key"

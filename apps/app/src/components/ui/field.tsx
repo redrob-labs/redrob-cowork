@@ -49,8 +49,10 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// `rr-field` is the design system's field frame; the orientation utilities below
+// still decide its direction, because utilities come after the components layer.
 const fieldVariants = cva(
-  "group/field flex w-full data-[invalid=true]:text-destructive",
+  "rr-field group/field flex w-full data-[invalid=true]:text-destructive",
   {
     variants: {
       orientation: {
@@ -125,7 +127,7 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="field-label"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm font-medium group-data-[disabled=true]/field:opacity-50",
+        "rr-field__label flex w-fit items-center gap-2 group-data-[disabled=true]/field:opacity-50",
         className
       )}
       {...props}
@@ -138,7 +140,7 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="field-description"
       className={cn(
-        "text-start text-sm leading-normal font-normal text-muted-foreground group-has-data-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
+        "rr-field__hint text-start group-has-data-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
         "last:mt-0 nth-last-2:-mt-1",
         "[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
@@ -191,7 +193,7 @@ function FieldError({
       <div
         role="alert"
         data-slot="field-error"
-        className={cn("text-sm font-normal text-destructive", className)}
+        className={cn("rr-field__error", className)}
         {...props}
       >
         {children}
@@ -225,7 +227,7 @@ function FieldError({
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-sm font-normal text-destructive", className)}
+      className={cn("rr-field__error", className)}
       {...props}
     >
       {content}

@@ -60,7 +60,7 @@ function PageContainer({ className, children, ...props }: ComponentProps<"div">)
       {...props}
     >
       <div className="mx-auto flex min-h-full w-full max-w-[760px] items-center justify-center">
-        <div className="flex w-full flex-col items-center space-y-8 rounded-3xl border border-border bg-background px-6 py-10 sm:px-14 sm:py-12">
+        <div className="flex w-full flex-col items-center space-y-8 rounded-2xl border border-border bg-background px-6 py-10 sm:px-14 sm:py-12">
           {children}
         </div>
       </div>

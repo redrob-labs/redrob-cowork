@@ -177,7 +177,7 @@ export function EngineDownloadStep({
         ) : null}
 
         {phase === "download" ? (
-          <p className="text-center text-[15px] leading-[23px] text-muted-foreground">
+          <p className="text-center text-base leading-[23px] text-muted-foreground">
             {t("onboarding.engine_download_hint")}
           </p>
         ) : null}
@@ -215,7 +215,7 @@ export function EngineDownloadStep({
           <Button
             type="button"
             size="lg"
-            className="h-12 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-base font-semibold"
             onClick={() => void handleInstall()}
             data-testid="onboarding-engine-download"
           >
@@ -229,7 +229,7 @@ export function EngineDownloadStep({
             type="button"
             size="lg"
             variant="outline"
-            className="h-12 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-base font-semibold"
             onClick={() => void handleInstall()}
             data-testid="onboarding-engine-retry"
           >
@@ -243,7 +243,7 @@ export function EngineDownloadStep({
             type="button"
             size="lg"
             variant="outline"
-            className="h-12 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-base font-semibold"
             onClick={() => void handleCancel()}
             data-testid="onboarding-engine-cancel"
           >
@@ -259,7 +259,7 @@ export function EngineDownloadStep({
           <Button
             type="button"
             size="lg"
-            className="h-12 w-full text-[15px] font-semibold"
+            className="h-12 w-full text-base font-semibold"
             onClick={onContinue}
             data-testid="onboarding-engine-continue"
           >

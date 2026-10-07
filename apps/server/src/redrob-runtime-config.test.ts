@@ -18,7 +18,8 @@ let previousDb: string | undefined;
 
 afterEach(async () => {
   while (cleanups.length) cleanups.pop()?.();
-  while (roots.length) await rm(roots.pop()!, { recursive: true, force: true });
+  // Windows keeps the open runtime database locked; a leftover temp dir is not a failure.
+  while (roots.length) await rm(roots.pop()!, { recursive: true, force: true }).catch(() => {});
   if (previousDb === undefined) delete process.env.REDROB_RUNTIME_DB;
   else process.env.REDROB_RUNTIME_DB = previousDb;
 });
@@ -89,7 +90,7 @@ describe("redrob runtime config file", () => {
     });
   });
 
-  test("redrob prompt has a static search-first Memory Bank section, distinct from ## Memory", async () => {
+  test("redrob prompt says saved notes arrive in the system text, and names no memory tool", async () => {
     const { config } = await setup();
     await writeRedrobRuntimeConfigFile(config, "ws_1");
 
@@ -97,16 +98,17 @@ describe("redrob runtime config file", () => {
     const agent = parsed.agent as Record<string, { prompt?: string }>;
     const prompt = agent.redrob?.prompt ?? "";
 
-    // The new Memory Bank section is present and distinct from the existing ## Memory section.
+    // The Memory Bank section is present and distinct from the existing ## Memory section.
     expect(prompt).toContain("## Memory Bank");
     expect(prompt).toContain("## Memory\n");
-    // Search-first (B1): never name tools that do not exist.
-    expect(prompt).toContain("search_capabilities");
-    expect(prompt).toContain("execute_capability");
+    // The app puts the notes in the system text under this heading (desk/thread/memory-context.ts).
+    expect(prompt).toContain("Notes the person saved");
+    // The meta-MCP the old flow relied on is swept from configs, so nothing may point at it.
+    expect(prompt).not.toContain("search_capabilities");
+    expect(prompt).not.toContain("execute_capability");
+    expect(prompt).not.toContain("postMemory");
     expect(prompt).not.toContain("memory_save");
-    expect(prompt).not.toContain("memory_search");
-    // No-secrets guidance is the only v0 plaintext-at-rest mitigation.
-    expect(prompt).toMatch(/secret|credential|API key|token|PII/i);
+    expect(prompt).toMatch(/secret|credential|API key|token/i);
   });
 
   test("keepRedrobRuntimeConfigFileFresh rewrites the file on runtime-DB writes", async () => {

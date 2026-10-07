@@ -2,6 +2,11 @@ import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * The design system's Progress (`rr-progress`, `rr-progress__track`,
+ * `rr-progress__bar`, `rr-progress__label`, `rr-progress__value`). Base UI keeps
+ * the `role="progressbar"` and its value attributes, and sizes the bar.
+ */
 function Progress({
   className,
   children,
@@ -12,7 +17,7 @@ function Progress({
     <ProgressPrimitive.Root
       value={value}
       data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
+      className={cn("rr-progress flex-row flex-wrap", className)}
       {...props}
     >
       {children}
@@ -26,10 +31,7 @@ function Progress({
 function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   return (
     <ProgressPrimitive.Track
-      className={cn(
-        "relative flex h-3 w-full items-center overflow-x-hidden rounded-full bg-muted",
-        className
-      )}
+      className={cn("rr-progress__track relative w-full", className)}
       data-slot="progress-track"
       {...props}
     />
@@ -43,7 +45,7 @@ function ProgressIndicator({
   return (
     <ProgressPrimitive.Indicator
       data-slot="progress-indicator"
-      className={cn("h-full bg-primary transition-all", className)}
+      className={cn("rr-progress__bar", className)}
       {...props}
     />
   )
@@ -52,7 +54,7 @@ function ProgressIndicator({
 function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   return (
     <ProgressPrimitive.Label
-      className={cn("text-sm font-medium", className)}
+      className={cn("rr-progress__label text-sm", className)}
       data-slot="progress-label"
       {...props}
     />
@@ -62,10 +64,7 @@ function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
 function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
   return (
     <ProgressPrimitive.Value
-      className={cn(
-        "ms-auto text-sm text-muted-foreground tabular-nums",
-        className
-      )}
+      className={cn("rr-progress__value ms-auto text-sm", className)}
       data-slot="progress-value"
       {...props}
     />

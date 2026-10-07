@@ -37,6 +37,8 @@ run(
     "src/opencode-plugins/redrob-office-attachments.ts",
     "src/opencode-plugins/redrob-anthropic-adaptive-thinking.ts",
     "src/opencode-plugins/redrob-anthropic-tool-schema.ts",
+    "src/opencode-plugins/redrob-team-connectors.ts",
+    "src/opencode-plugins/redrob-privacy-gate.ts",
     "--outdir",
     "dist/opencode-plugins",
     "--target",

@@ -51,7 +51,8 @@ function ContextMenuSurface({
 
   return (
     <div
-      className="dark h-dvh overflow-hidden bg-transparent text-popover-foreground p-px"
+      data-theme="dark"
+      className="h-dvh overflow-hidden bg-transparent text-popover-foreground p-px"
       onKeyDown={(event) => {
         const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(MENU_ITEM_SELECTOR));
         const currentIndex = Math.max(buttons.indexOf(document.activeElement as HTMLButtonElement), 0);

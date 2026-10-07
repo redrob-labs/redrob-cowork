@@ -2,36 +2,36 @@
  * A card is styled by whatever the host sends through the MCP Apps style
  * vocabulary; Redrob Cowork sends its semantic roles, so a card matches the chat
  * around it. The fallbacks are for a host that sends nothing, and they are the
- * Redrob primitives rather than a nearby grey: White and Gray 1/2/3/7/9, Blue 6,
- * and the status hues at level 1 and 4. Values, not variables, because this
+ * design system's light values rather than a nearby grey: Redrob Black and White,
+ * Gray 1/2/3/7, Blue 6, and the status hues at level 1 and 4. Values, not variables, because this
  * stylesheet ships inside the card document and cannot read the app's tokens.
  */
 :root {
   color-scheme: light dark;
-  color: var(--color-text-primary, #141719);
+  color: var(--color-text-primary, #0a0b0c);
   background: transparent;
   font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 
-  --app-bg: var(--color-background-primary, #ffffff);
+  --app-bg: var(--color-background-primary, #f8f9fb);
   --app-bg-subtle: var(--color-background-secondary, #eff1f4);
-  --app-bg-hover: var(--color-background-tertiary, #f8f9fb);
-  --app-text: var(--color-text-primary, #141719);
+  --app-bg-hover: var(--color-background-tertiary, #eff1f4);
+  --app-text: var(--color-text-primary, #0a0b0c);
   --app-muted: var(--color-text-secondary, #576071);
   --app-border: var(--color-border-primary, #dfe2e8);
   --app-accent: var(--color-background-inverse, #2b52ff);
   --app-accent-fg: var(--color-text-inverse, #ffffff);
-  --app-success: var(--color-text-success, #004829);
+  --app-success: var(--color-text-success, #00864a);
   --app-success-bg: var(--color-background-success, #d6ffe1);
   --app-success-border: var(--color-border-success, #00864a);
   --app-warning: var(--color-text-warning, #ae5100);
   --app-warning-bg: var(--color-background-warning, #ffedda);
   --app-warning-border: var(--color-border-warning, #ae5100);
   --app-danger: var(--color-text-danger, #a31310);
-  --app-danger-bg: var(--color-background-danger, #ffe8e1);
+  --app-danger-bg: var(--color-background-danger, #ffe1e1);
   --app-danger-border: var(--color-border-danger, #a31310);
-  --app-info: var(--color-text-info, #2b52ff);
-  --app-info-bg: var(--color-background-info, #eff4ff);
-  --app-info-border: var(--color-border-info, #2b52ff);
+  --app-info: var(--color-text-info, #0e51b6);
+  --app-info-bg: var(--color-background-info, #e4f0ff);
+  --app-info-border: var(--color-border-info, #0e51b6);
   --app-radius: var(--border-radius-lg, 16px);
   --app-radius-sm: 10px;
   --app-shadow: var(--shadow-sm, 0 1px 2px rgb(41 46 55 / 5%));

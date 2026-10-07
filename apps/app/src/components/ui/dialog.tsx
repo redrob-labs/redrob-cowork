@@ -4,7 +4,15 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
+import { t } from "@/i18n"
 
+/**
+ * Dialog, drawn as the design system's Modal (`rr-modal-scrim`, `rr-modal`,
+ * `rr-modal__head` / `__title` / `__body` / `__footer`). Base UI keeps the
+ * behaviour - focus trap, portal, scroll lock, dismissal - so the scrim is the
+ * popup's sibling rather than its parent, and the app's dialogs lay out their own
+ * head, body and footer inside the design system's 20px panel inset.
+ */
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
@@ -29,7 +37,7 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/30 duration-100 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "rr-modal-scrim fixed inset-0 isolate z-50 block p-0 duration-100 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -51,7 +59,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed z-50 grid gap-6 overflow-hidden bg-popover p-6 text-sm text-popover-foreground shadow-xl ring-1 ring-foreground/5 duration-100 outline-none dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 max-lg:inset-x-0 max-lg:bottom-0 max-lg:top-auto max-lg:max-h-[min(92dvh,calc(100dvh-env(safe-area-inset-top)))] max-lg:w-full max-lg:max-w-none max-lg:translate-x-0 max-lg:translate-y-0 max-lg:rounded-t-3xl max-lg:rounded-b-none max-lg:pb-[max(1.5rem,env(safe-area-inset-bottom))] max-lg:data-open:slide-in-from-bottom-4 max-lg:data-closed:slide-out-to-bottom-4 lg:top-1/2 lg:inset-s-1/2 lg:w-[calc(100%-2rem)] lg:max-w-md lg:-translate-x-1/2 rtl:lg:translate-x-1/2 lg:-translate-y-1/2 lg:rounded-4xl lg:data-open:zoom-in-95 lg:data-closed:zoom-out-95",
+          "rr-modal fixed z-50 grid gap-4 p-5 outline-none duration-100 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 max-lg:inset-x-0 max-lg:bottom-0 max-lg:top-auto max-lg:max-h-[min(92dvh,calc(100dvh-env(safe-area-inset-top)))] max-lg:w-full max-lg:max-w-none max-lg:translate-x-0 max-lg:translate-y-0 max-lg:rounded-t-2xl max-lg:rounded-b-none max-lg:pb-[max(1.5rem,env(safe-area-inset-bottom))] max-lg:data-open:slide-in-from-bottom-4 max-lg:data-closed:slide-out-to-bottom-4 lg:top-1/2 lg:inset-s-1/2 lg:w-[calc(100%-2rem)] lg:max-w-120 lg:-translate-x-1/2 rtl:lg:translate-x-1/2 lg:-translate-y-1/2 lg:data-open:zoom-in-95 lg:data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -63,14 +71,13 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-4 inset-e-4 bg-secondary"
+                className="absolute top-4 inset-e-4"
                 size="icon-sm"
+                label={t("common.close")}
               />
             }
           >
-            <XIcon
-            />
-            <span className="sr-only">Close</span>
+            <XIcon />
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -82,7 +89,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-1.5", className)}
+      className={cn("rr-modal__head flex-col items-stretch gap-1 p-0 pe-8", className)}
       {...props}
     />
   )
@@ -100,7 +107,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "-mx-6 -mb-6 flex flex-col-reverse gap-2 rounded-b-4xl border-t bg-muted/20 p-4 sm:flex-row sm:justify-end",
+        "rr-modal__footer -mx-5 -mb-5 flex-col-reverse sm:flex-row",
         className
       )}
       {...props}
@@ -108,7 +115,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close render={<Button variant="outline" />}>
-          Close
+          {t("common.close")}
         </DialogPrimitive.Close>
       )}
     </div>
@@ -120,7 +127,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading text-base leading-none font-medium",
+        "rr-modal__title font-heading",
         className
       )}
       {...props}
@@ -136,7 +143,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "rr-modal__body p-0 *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
         className
       )}
       {...props}

@@ -233,7 +233,9 @@ describe("supported locales", () => {
       // strip would otherwise consume "opencode" and leave a stray "-wakatime".
       /opencode-wakatime/g,
       // Third-party product / proper nouns that stay in Latin script.
-      /\b(Docker Desktop|Docker|Slack|GitHub|Linear|Notion|Sentry|Stripe|Context7|Anthropic|OpenAI|ChatGPT|macOS|Finder|Exa|Chromium|Bun|Claude Code|Claude Cowork|Claude|Gemini|Perplexity|Google|Bing|DuckDuckGo|LinkedIn|YouTube|Reddit|X|AppImage|Mac|Electron|Tauri|Ollama|Realtime|microsandbox|opencode)\b/g,
+      /\b(Docker Desktop|Docker|Slack|GitHub|Linear|Notion|Sentry|Stripe|Context7|Anthropic|OpenAI|ChatGPT Work|ChatGPT|macOS|Finder|Exa|Chromium|Bun|Claude Code|Claude Cowork|Claude|Gemini|Perplexity|Google|Bing|DuckDuckGo|LinkedIn|YouTube|Reddit|X|AppImage|Mac|Electron|Tauri|Ollama|Realtime|microsandbox|opencode)\b/g,
+      // The benchmark sites the Model Guide cites, and CRM, the product category it names as a tool.
+      /\b(LMArena|Artificial Analysis|Vals|CRM)\b/g,
       // Example folder path shown as a literal placeholder.
       /\/workspace\/my-project/g,
       // The stdio wrapper's literal command name, matched before the generic
@@ -309,6 +311,8 @@ describe("supported locales", () => {
       /npm(?!\.)/g,
       // v-prefixed semantic version placeholders left after {version} strip.
       /\bv\{version\}/g,
+      // Privacy placeholders, quoted exactly as the AI sees them (desk/privacy/redact.ts).
+      /\[(EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|NAME)_\d+\]/g,
     ];
 
     const englishWordPattern = /[A-Za-z]{2,}/g;
