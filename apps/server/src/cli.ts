@@ -23,6 +23,10 @@ import {
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
 import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
+import { startHarnessShim } from "./harness-shim.js";
+import { setActiveHarnessShim } from "./harness-provider.js";
+import { discoverCodexBinary } from "./codex-runtime.js";
+import { discoverClaudeBinary } from "./claude-runtime.js";
 import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
 import { startWorkerActivityHeartbeat } from "./worker-activity-heartbeat.js";
 import pkg from "../package.json" with { type: "json" };
@@ -65,6 +69,31 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
     // Reap engines recorded by servers that died without cleanup. Best
     // effort: a failed reap must never block startup.
     await reapOrphanEngineInstances(config, { logger }).catch(() => undefined);
+    // Start the harness shim BEFORE writing the runtime config: the config is what tells
+    // the engine which providers exist, so starting the shim afterwards would hand the
+    // engine a config with no harness providers in it and only fix itself on the next
+    // write. Best effort — a machine with neither runtime installed, or a shim that
+    // cannot bind, must not stop the server. The providers are simply absent then, which
+    // is the same state as before this feature existed.
+    const managedShimCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
+    await startHarnessShim({ workingDirectory: managedShimCwd })
+      .then((shim) => {
+        const codexAvailable = discoverCodexBinary() !== null;
+        const claudeAvailable = discoverClaudeBinary() !== null;
+        if (!codexAvailable && !claudeAvailable) {
+          // Nothing to serve, so do not advertise providers and do not keep a listener.
+          return shim.close();
+        }
+        setActiveHarnessShim({ baseUrl: shim.baseUrl, codexAvailable, claudeAvailable });
+        logger.log(
+          "info",
+          `harness shim listening on ${shim.baseUrl} (codex: ${codexAvailable}, claude: ${claudeAvailable})`,
+        );
+        return undefined;
+      })
+      .catch((error: unknown) => {
+        logger.log("warn", `harness shim did not start: ${error instanceof Error ? error.message : String(error)}`);
+      });
     // Server-managed config file: the engine re-reads it from disk on every
     // instance rebuild, and keepRedrobRuntimeConfigFileFresh synchronizes it
     // on every runtime-DB write — so disposes always pick up current state.

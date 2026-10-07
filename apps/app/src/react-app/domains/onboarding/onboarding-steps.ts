@@ -3,15 +3,19 @@
  * wizard chrome (step indicator + Back navigation). Kept framework-free so the
  * ordering logic can be unit-tested without React.
  *
- * These are the two leading steps that render through `OnboardingWizardShell`
- * and therefore carry the "Step N of 2" indicator + Back control: language ->
- * engine (engine download). The subsequent API-key / "just look around" branch
- * is part of the existing welcome flow (RedrobKeyStep behind the
+ * Three steps render through `OnboardingWizardShell` and therefore carry the
+ * "Step N of 3" indicator + Back control: language -> engine (engine download) ->
+ * connect (which AI the user already has). The subsequent API-key / "just look
+ * around" branch is part of the existing welcome flow (RedrobKeyStep behind the
  * workspace-creation gate) and does not use the wizard chrome, so it is not
  * modeled here. Completion is persisted through the existing
  * `local.prefs.hasCompletedOnboarding` pref by welcome-route.tsx.
+ *
+ * `connect` comes AFTER `engine` deliberately: the engine download is what makes a
+ * Redrob choice usable, so offering the three options before it would let a user pick
+ * Redrob and then wait, which reads as the choice having failed.
  */
-export const ONBOARDING_STEPS = ["language", "engine"] as const;
+export const ONBOARDING_STEPS = ["language", "engine", "connect"] as const;
 
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 

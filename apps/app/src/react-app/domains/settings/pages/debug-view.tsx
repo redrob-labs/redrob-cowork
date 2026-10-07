@@ -41,15 +41,15 @@ import type {
 } from "@/app/lib/redrob-server";
 
 const sectionHeaderClass = "flex flex-col gap-1 pb-2";
-const sectionTitleClass = "text-[15px] font-semibold tracking-[-0.2px] text-dls-text";
-const sectionDescClass = "text-[12px] text-dls-secondary";
+const sectionTitleClass = "text-base font-semibold tracking-[-0.2px] text-dls-text";
+const sectionDescClass = "text-xs text-dls-secondary";
 const cardClass =
   "rounded-2xl border border-dls-border bg-dls-surface/95 p-5 space-y-4";
 const subCardClass = "rounded-xl border border-dls-border bg-dls-sidebar/40 p-4 space-y-3";
 const monoPreClass =
-  "max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-dls-border bg-dls-sidebar/40 p-3 text-[11px] font-mono text-dls-text";
+  "max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-dls-border bg-dls-sidebar/40 p-3 text-2xs font-mono text-dls-text";
 const miniPreClass =
-  "max-h-28 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-dls-border bg-dls-sidebar/30 p-2 text-[11px] font-mono text-dls-text";
+  "max-h-28 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-dls-border bg-dls-sidebar/30 p-2 text-2xs font-mono text-dls-text";
 const compactDangerActionClass =
   "inline-flex h-9 items-center gap-2 rounded-xl border border-destructive-muted/40 bg-destructive px-4 text-xs font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60";
 
@@ -211,7 +211,7 @@ function DebugLines(props: { lines: string[] }) {
       const key = `${offset}:${line}`;
       offset += line.length + 1;
       return (
-        <div key={key} className="truncate text-[11px] font-mono text-dls-secondary">
+        <div key={key} className="truncate text-2xs font-mono text-dls-secondary">
           {line}
         </div>
       );
@@ -227,7 +227,7 @@ function StatusBanner(props: { tone: "success" | "error" | "info"; message: stri
         ? "border-destructive-muted bg-destructive-soft/40 text-destructive-ink"
         : "border-dls-border bg-dls-sidebar/40 text-dls-secondary";
   return (
-    <div className={`rounded-lg border px-3 py-2 text-[11px] ${cls}`}>{props.message}</div>
+    <div className={`rounded-lg border px-3 py-2 text-2xs ${cls}`}>{props.message}</div>
   );
 }
 
@@ -245,32 +245,32 @@ function ExecutionDetails(props: { execution: OpencodeExecutionSnapshot }) {
     <div className="rounded-xl border border-primary-muted/30 bg-primary-soft/20 p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-primary-ink">{t("settings.debug_execution_title")}</div>
-          <div className="text-[11px] text-dls-secondary">{t("settings.debug_execution_desc")}</div>
+          <div className="text-2xs font-semibold uppercase tracking-wider text-primary-ink">{t("settings.debug_execution_title")}</div>
+          <div className="text-2xs text-dls-secondary">{t("settings.debug_execution_desc")}</div>
         </div>
-        <div className="shrink-0 rounded-full border border-primary-muted/30 bg-primary-soft/10 px-2 py-1 text-[10px] font-medium text-primary-ink">
+        <div className="shrink-0 rounded-full border border-primary-muted/30 bg-primary-soft/10 px-2 py-1 text-2xs font-medium text-primary-ink">
           {t("settings.debug_execution_redacted")}
         </div>
       </div>
       <div className="space-y-3">
         <div>
-          <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">{t("settings.debug_execution_command_label")}</div>
+          <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">{t("settings.debug_execution_command_label")}</div>
           <pre className={miniPreClass}>{formatExecutionCommand(props.execution)}</pre>
         </div>
         <div>
-          <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">{t("settings.debug_execution_cwd_label")}</div>
+          <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">{t("settings.debug_execution_cwd_label")}</div>
           <pre className={miniPreClass}>{props.execution.cwd}</pre>
         </div>
         <div>
-          <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">{t("settings.debug_execution_env_label")}</div>
+          <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">{t("settings.debug_execution_env_label")}</div>
           <div className="max-h-64 overflow-auto rounded-lg border border-dls-border bg-dls-sidebar/30">
             {props.execution.env.length > 0 ? props.execution.env.map((entry) => (
               <div key={entry.name} className="grid gap-2 border-b border-dls-border/50 p-2 last:border-b-0 md:grid-cols-[180px_minmax(0,1fr)]">
-                <div className="font-mono text-[11px] font-semibold text-dls-text">{entry.name}</div>
-                <pre className="whitespace-pre-wrap break-words font-mono text-[11px] text-dls-secondary">{entry.value}</pre>
+                <div className="font-mono text-2xs font-semibold text-dls-text">{entry.name}</div>
+                <pre className="whitespace-pre-wrap break-words font-mono text-2xs text-dls-secondary">{entry.value}</pre>
               </div>
             )) : (
-              <div className="p-2 text-[11px] text-dls-secondary">{t("settings.debug_execution_env_empty")}</div>
+              <div className="p-2 text-2xs text-dls-secondary">{t("settings.debug_execution_env_empty")}</div>
             )}
           </div>
         </div>
@@ -298,7 +298,7 @@ function RuntimeConfigOwnershipCard(props: {
 
       {props.error ? <StatusBanner tone="error" message={props.error} /> : null}
 
-      <div className="grid gap-2 text-[12px] text-dls-secondary">
+      <div className="grid gap-2 text-xs text-dls-secondary">
         <div>
           {t("settings.runtime_config_managed_file_path", {
             path: props.status?.managedFilePath ?? "—",
@@ -312,7 +312,7 @@ function RuntimeConfigOwnershipCard(props: {
       </div>
 
       <details className="group">
-        <summary className="cursor-pointer select-none text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+        <summary className="cursor-pointer select-none text-2xs font-medium uppercase tracking-wider text-dls-secondary">
           {t("settings.runtime_config_redacted_content")}
         </summary>
         <pre className={`${monoPreClass} mt-2`}>
@@ -325,22 +325,22 @@ function RuntimeConfigOwnershipCard(props: {
           {t("settings.runtime_config_legacy_cleanup_title")}
         </div>
         {!props.status?.sweep ? (
-          <div className="text-[12px] text-dls-secondary">{t("settings.runtime_config_cleanup_pending")}</div>
+          <div className="text-xs text-dls-secondary">{t("settings.runtime_config_cleanup_pending")}</div>
         ) : props.status.sweep.error ? (
           <StatusBanner tone="error" message={props.status.sweep.error} />
         ) : props.status.sweep.files.length === 0 ? (
-          <div className="text-[12px] text-dls-secondary">{t("settings.runtime_config_cleanup_no_files")}</div>
+          <div className="text-xs text-dls-secondary">{t("settings.runtime_config_cleanup_no_files")}</div>
         ) : (
           <div className="divide-y divide-dls-border/60">
             {props.status.sweep.files.map((file) => (
               <div key={file.path} className="space-y-1 py-2 first:pt-0 last:pb-0">
-                <div className="truncate font-mono text-[11px] text-dls-text" title={file.path}>{file.path}</div>
-                <div className="text-[11px] text-dls-secondary">
+                <div className="truncate font-mono text-2xs text-dls-text" title={file.path}>{file.path}</div>
+                <div className="text-2xs text-dls-secondary">
                   {file.removedKeys.length > 0
                     ? t("settings.runtime_config_removed_keys", { keys: file.removedKeys.join(", ") })
                     : t("settings.runtime_config_no_removed_keys")}
                 </div>
-                <div className="truncate text-[11px] text-dls-secondary" title={file.backupPath ?? undefined}>
+                <div className="truncate text-2xs text-dls-secondary" title={file.backupPath ?? undefined}>
                   {file.backupPath
                     ? t("settings.runtime_config_backup_path", { path: file.backupPath })
                     : t("settings.runtime_config_no_backup")}
@@ -380,9 +380,9 @@ function ServiceCard(props: ServiceCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">{props.title}</div>
-          <div className="text-[12px] text-dls-secondary">{props.description}</div>
+          <div className="text-xs text-dls-secondary">{props.description}</div>
         </div>
-        <div className={`rounded-full border px-2 py-1 text-[11px] font-medium ${props.pill.className}`}>
+        <div className={`rounded-full border px-2 py-1 text-2xs font-medium ${props.pill.className}`}>
           {props.pill.label}
         </div>
       </div>
@@ -425,25 +425,25 @@ function ServiceCard(props: ServiceCardProps) {
       {props.logStatus ? <StatusBanner tone="info" message={props.logStatus} /> : null}
 
       <details className="group">
-        <summary className="cursor-pointer select-none text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+        <summary className="cursor-pointer select-none text-2xs font-medium uppercase tracking-wider text-dls-secondary">
           {t("settings.last_stdout")} / {t("settings.last_stderr")}
         </summary>
         <div className="mt-2 grid gap-2">
           <div>
-            <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">
+            <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">
               {t("settings.last_stdout")}
             </div>
             <pre className={miniPreClass}>{props.stdout || t("settings.no_logs_captured")}</pre>
           </div>
           <div>
-            <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">
+            <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">
               {t("settings.last_stderr")}
             </div>
             <pre className={miniPreClass}>{props.stderr || t("settings.no_logs_captured")}</pre>
           </div>
           {props.error ? (
             <div>
-              <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">
+              <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">
                 {t("settings.last_error")}
               </div>
               <pre className={miniPreClass}>{props.error}</pre>
@@ -490,7 +490,7 @@ export function DebugView(props: DebugViewProps) {
             </Button>
           </div>
         </div>
-        <div className="grid gap-2 text-[12px] text-dls-secondary md:grid-cols-2">
+        <div className="grid gap-2 text-xs text-dls-secondary md:grid-cols-2">
           <div>{t("settings.debug_desktop_app", { version: props.runtimeSummary.appVersionLabel })}</div>
           <div>{t("settings.debug_commit", { commit: props.runtimeSummary.appCommitLabel })}</div>
           <div>
@@ -504,7 +504,7 @@ export function DebugView(props: DebugViewProps) {
         </div>
         {props.runtimeDebugStatus ? <StatusBanner tone="info" message={props.runtimeDebugStatus} /> : null}
         <details className="group">
-          <summary className="cursor-pointer select-none text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+          <summary className="cursor-pointer select-none text-2xs font-medium uppercase tracking-wider text-dls-secondary">
             JSON
           </summary>
           <pre className={`${monoPreClass} mt-2`}>{props.runtimeDebugReportJson}</pre>
@@ -512,7 +512,7 @@ export function DebugView(props: DebugViewProps) {
         <div className={subCardClass}>
           <div>
             <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">{t("settings.bootstrap_config_title")}</div>
-            <div className="text-[12px] text-dls-secondary">{t("settings.bootstrap_config_desc")}</div>
+            <div className="text-xs text-dls-secondary">{t("settings.bootstrap_config_desc")}</div>
           </div>
           <pre className={monoPreClass}>{props.bootstrapConfigDebugJson}</pre>
         </div>
@@ -576,9 +576,9 @@ export function DebugView(props: DebugViewProps) {
               <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">
                 {t("settings.opencode_sdk_title")}
               </div>
-              <div className="text-[12px] text-dls-secondary">{t("settings.opencode_sdk_desc")}</div>
+              <div className="text-xs text-dls-secondary">{t("settings.opencode_sdk_desc")}</div>
             </div>
-            <div className={`rounded-full border px-2 py-1 text-[11px] font-medium ${props.opencodeConnectCard.className}`}>
+            <div className={`rounded-full border px-2 py-1 text-2xs font-medium ${props.opencodeConnectCard.className}`}>
               {props.opencodeConnectCard.label}
             </div>
           </div>
@@ -590,7 +590,7 @@ export function DebugView(props: DebugViewProps) {
           ) : null}
           {props.opencodeConnectCard.error ? (
             <div>
-              <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dls-secondary">
+              <div className="mb-1 text-2xs font-medium uppercase tracking-wider text-dls-secondary">
                 {t("settings.last_error")}
               </div>
               <pre className={miniPreClass}>{props.opencodeConnectCard.error}</pre>
@@ -609,14 +609,14 @@ export function DebugView(props: DebugViewProps) {
         <div className={sectionHeaderClass}>
           <div className={sectionTitleClass}>{t("settings.redrob_diagnostics_title")}</div>
           <div className={sectionDescClass}>
-            <span className="font-mono text-[11px] text-dls-secondary">
+            <span className="font-mono text-2xs text-dls-secondary">
               {props.redrobServerDiagnostics?.version ?? "—"}
             </span>
           </div>
         </div>
 
         {props.redrobServerDiagnostics ? (
-          <div className="grid gap-2 text-[12px] text-dls-secondary md:grid-cols-2">
+          <div className="grid gap-2 text-xs text-dls-secondary md:grid-cols-2">
             <div>{t("settings.diag_started", { time: formatUptime(props.redrobServerDiagnostics.uptimeMs) })}</div>
             <div>
               {t("settings.diag_read_only", {
@@ -657,7 +657,7 @@ export function DebugView(props: DebugViewProps) {
             </div>
           </div>
         ) : (
-          <div className="text-[12px] text-dls-secondary">{t("settings.diagnostics_unavailable")}</div>
+          <div className="text-xs text-dls-secondary">{t("settings.diagnostics_unavailable")}</div>
         )}
 
         <div className={subCardClass}>
@@ -665,14 +665,14 @@ export function DebugView(props: DebugViewProps) {
             <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">
               {t("settings.capabilities_title")}
             </div>
-            <div className="truncate font-mono text-[11px] text-dls-secondary">
+            <div className="truncate font-mono text-2xs text-dls-secondary">
               {props.runtimeWorkspaceId
                 ? t("settings.worker_id_label", { id: props.runtimeWorkspaceId })
                 : t("settings.worker_unresolved")}
             </div>
           </div>
           {props.redrobServerCapabilities ? (
-            <div className="grid gap-2 text-[12px] text-dls-secondary md:grid-cols-2">
+            <div className="grid gap-2 text-xs text-dls-secondary md:grid-cols-2">
               <div>{t("settings.cap_skills", { value: formatCapability(props.redrobServerCapabilities.skills) })}</div>
               <div>{t("settings.cap_plugins", { value: formatCapability(props.redrobServerCapabilities.plugins) })}</div>
               <div>{t("settings.cap_mcp", { value: formatCapability(props.redrobServerCapabilities.mcp) })}</div>
@@ -708,7 +708,7 @@ export function DebugView(props: DebugViewProps) {
               </div>
             </div>
           ) : (
-            <div className="text-[12px] text-dls-secondary">{t("settings.capabilities_unavailable")}</div>
+            <div className="text-xs text-dls-secondary">{t("settings.capabilities_unavailable")}</div>
           )}
         </div>
       </div>
@@ -725,7 +725,7 @@ export function DebugView(props: DebugViewProps) {
             <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">
               {t("settings.audit_log_title")}
             </div>
-            <div className={`rounded-full border px-2 py-1 text-[11px] font-medium ${props.redrobAuditStatus.className}`}>
+            <div className={`rounded-full border px-2 py-1 text-2xs font-medium ${props.redrobAuditStatus.className}`}>
               {props.redrobAuditStatus.label}
             </div>
           </div>
@@ -736,35 +736,35 @@ export function DebugView(props: DebugViewProps) {
                 <div key={entry.id} className="flex items-start justify-between gap-4 py-2">
                   <div className="min-w-0">
                     <div className="truncate text-sm text-dls-text">{entry.summary}</div>
-                    <div className="truncate text-[11px] text-dls-secondary">
+                    <div className="truncate text-2xs text-dls-secondary">
                       {entry.action} · {entry.target} · {formatActor(entry)}
                     </div>
                   </div>
-                  <div className="whitespace-nowrap text-[11px] text-dls-secondary">
+                  <div className="whitespace-nowrap text-2xs text-dls-secondary">
                     {entry.timestamp ? formatRelativeTime(entry.timestamp) : "—"}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-[12px] text-dls-secondary">{t("settings.no_audit_entries")}</div>
+            <div className="text-xs text-dls-secondary">{t("settings.no_audit_entries")}</div>
           )}
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
           <div className={subCardClass}>
-            <div className="text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+            <div className="text-2xs font-medium uppercase tracking-wider text-dls-secondary">
               {t("settings.pending_permissions")}
             </div>
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-[11px] font-mono text-dls-text">
+            <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-2xs font-mono text-dls-text">
               {props.safeStringify(props.pendingPermissions)}
             </pre>
           </div>
           <div className={subCardClass}>
-            <div className="text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+            <div className="text-2xs font-medium uppercase tracking-wider text-dls-secondary">
               {t("settings.recent_events")}
             </div>
-            <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-[11px] font-mono text-dls-text">
+            <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-2xs font-mono text-dls-text">
               {props.safeStringify(props.events)}
             </pre>
           </div>
@@ -772,7 +772,7 @@ export function DebugView(props: DebugViewProps) {
 
         <div className={subCardClass}>
           <div className="flex items-center justify-between gap-3">
-            <div className="text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+            <div className="text-2xs font-medium uppercase tracking-wider text-dls-secondary">
               {t("settings.workspace_debug_events_label")}
             </div>
             <Button
@@ -785,7 +785,7 @@ export function DebugView(props: DebugViewProps) {
               {t("settings.clear_button")}
             </Button>
           </div>
-          <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-[11px] font-mono text-dls-text">
+          <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-2xs font-mono text-dls-text">
             {props.safeStringify(props.workspaceDebugEvents)}
           </pre>
           {props.workspaceDebugEventsStatus ? (
@@ -815,7 +815,7 @@ export function DebugView(props: DebugViewProps) {
             </Button>
           </div>
         </div>
-        <div className="text-[11px] text-dls-secondary">
+        <div className="text-2xs text-dls-secondary">
           {t("settings.developer_log_count", { count: String(props.developerLogRecordCount) })}
         </div>
         <pre className={monoPreClass}>{props.developerLogText || t("settings.developer_log_empty")}</pre>
@@ -833,7 +833,7 @@ export function DebugView(props: DebugViewProps) {
           <div className={subCardClass}>
             <div>
               <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">{t("settings.engine_title")}</div>
-              <div className="text-[12px] text-dls-secondary">{t("settings.engine_desc")}</div>
+              <div className="text-xs text-dls-secondary">{t("settings.engine_desc")}</div>
             </div>
 
             {!isLocalPreference ? (
@@ -841,7 +841,7 @@ export function DebugView(props: DebugViewProps) {
             ) : null}
 
             <div className="space-y-3">
-              <div className="text-[12px] text-dls-secondary">{t("settings.engine_source_debug")}</div>
+              <div className="text-xs text-dls-secondary">{t("settings.engine_source_debug")}</div>
               <div className={props.developerMode ? "grid grid-cols-3 gap-2" : "grid grid-cols-2 gap-2"}>
                 <Button
                   variant={props.engineSource === "sidecar" ? "secondary" : "outline"}
@@ -867,15 +867,15 @@ export function DebugView(props: DebugViewProps) {
                   </Button>
                 ) : null}
               </div>
-              <div className="text-[11px] text-dls-secondary">{t("settings.engine_bundled_hint")}</div>
+              <div className="text-2xs text-dls-secondary">{t("settings.engine_bundled_hint")}</div>
             </div>
 
             {props.developerMode && props.engineSource === "custom" ? (
               <div className="space-y-2">
-                <div className="text-[12px] text-dls-secondary">{t("settings.custom_binary_label")}</div>
+                <div className="text-xs text-dls-secondary">{t("settings.custom_binary_label")}</div>
                 <div className="flex items-center gap-2">
                   <div
-                    className="min-w-0 flex-1 truncate rounded-xl border border-dls-border bg-dls-surface p-3 font-mono text-[11px] text-dls-secondary"
+                    className="min-w-0 flex-1 truncate rounded-xl border border-dls-border bg-dls-surface p-3 font-mono text-2xs text-dls-secondary"
                     title={props.engineCustomBinPathLabel}
                   >
                     {props.engineCustomBinPathLabel}
@@ -898,7 +898,7 @@ export function DebugView(props: DebugViewProps) {
                     {t("settings.clear")}
                   </Button>
                 </div>
-                <div className="text-[11px] text-dls-secondary">{t("settings.custom_binary_hint")}</div>
+                <div className="text-2xs text-dls-secondary">{t("settings.custom_binary_hint")}</div>
               </div>
             ) : null}
           </div>
@@ -939,7 +939,7 @@ export function DebugView(props: DebugViewProps) {
             <RefreshCcw size={14} className="opacity-80 transition-transform group-hover:rotate-180" />
           </Button>
 
-          <p className="text-[11px] text-dls-secondary">{t("settings.startup_reset_hint")}</p>
+          <p className="text-2xs text-dls-secondary">{t("settings.startup_reset_hint")}</p>
           {props.startupStatus ? <StatusBanner tone="info" message={props.startupStatus} /> : null}
         </div>
       </div>
@@ -954,7 +954,7 @@ export function DebugView(props: DebugViewProps) {
         <div className="flex items-center justify-between gap-3 rounded-xl border border-dls-border bg-dls-surface p-3">
           <div className="min-w-0">
             <div className="text-sm text-dls-text">{t("settings.reset_onboarding_title")}</div>
-            <div className="text-[12px] text-dls-secondary">{t("settings.reset_onboarding_description")}</div>
+            <div className="text-xs text-dls-secondary">{t("settings.reset_onboarding_description")}</div>
           </div>
           <Button
             variant="outline"
@@ -970,7 +970,7 @@ export function DebugView(props: DebugViewProps) {
         <div className="flex items-center justify-between gap-3 rounded-xl border border-dls-border bg-dls-surface p-3">
           <div className="min-w-0">
             <div className="text-sm text-dls-text">{t("settings.reset_app_data_title")}</div>
-            <div className="text-[12px] text-dls-secondary">{t("settings.reset_app_data_description")}</div>
+            <div className="text-xs text-dls-secondary">{t("settings.reset_app_data_description")}</div>
           </div>
           <Button
             variant="destructive"
@@ -983,7 +983,7 @@ export function DebugView(props: DebugViewProps) {
           </Button>
         </div>
 
-        <div className="text-[11px] text-dls-secondary">{t("settings.reset_requires_confirm")}</div>
+        <div className="text-2xs text-dls-secondary">{t("settings.reset_requires_confirm")}</div>
         {props.resetStatus ? <StatusBanner tone="info" message={props.resetStatus} /> : null}
       </div>
 
@@ -1007,7 +1007,7 @@ export function DebugView(props: DebugViewProps) {
             </Button>
           </div>
 
-          <div className="rounded-xl border border-success-muted/25 bg-success-soft/10 px-3 py-2 text-[12px] leading-relaxed text-success-ink">
+          <div className="rounded-xl border border-success-muted/25 bg-success-soft/10 px-3 py-2 text-xs leading-relaxed text-success-ink">
             {t("settings.electron_migration_safe_default_intro")}<strong>{t("settings.electron_migration_prepare_button")}</strong>
             {t("settings.electron_migration_safe_default_outro")}
             <code className="font-mono">Redrob Cowork.app.migrate-bak</code>.
@@ -1022,47 +1022,47 @@ export function DebugView(props: DebugViewProps) {
               {props.electronMigrationBusy ? t("settings.electron_migration_resolving") : t("settings.electron_migration_resolve_button")}
             </Button>
             {props.electronMigrationArtifactLabel ? (
-              <div className="min-w-0 flex-1 truncate text-[11px] text-dls-secondary">
+              <div className="min-w-0 flex-1 truncate text-2xs text-dls-secondary">
                 {props.electronMigrationArtifactLabel}
               </div>
             ) : (
-              <div className="text-[11px] text-dls-secondary">{t("settings.electron_migration_artifact_hint")}</div>
+              <div className="text-2xs text-dls-secondary">{t("settings.electron_migration_artifact_hint")}</div>
             )}
           </div>
 
           <details className="rounded-xl border border-dls-border bg-dls-sidebar/30 p-3">
-            <summary className="cursor-pointer select-none text-[11px] font-medium uppercase tracking-wider text-dls-secondary">
+            <summary className="cursor-pointer select-none text-2xs font-medium uppercase tracking-wider text-dls-secondary">
               {t("settings.electron_migration_advanced_override")}
             </summary>
             <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
-              <label className="space-y-1 text-[12px] text-dls-secondary">
+              <label className="space-y-1 text-xs text-dls-secondary">
                 <span>{t("settings.electron_migration_url_label")}</span>
                 <input
                   type="url"
                   value={props.electronMigrationUrl}
                   onChange={(event) => props.onSetElectronMigrationUrl(event.currentTarget.value)}
                   placeholder={t("settings.electron_migration_url_placeholder")}
-                  className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface px-3 font-mono text-[11px] text-dls-text outline-none transition-colors placeholder:text-dls-secondary focus:border-dls-accent"
+                  className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface px-3 font-mono text-2xs text-dls-text outline-none transition-colors placeholder:text-dls-secondary focus:border-dls-accent"
                 />
               </label>
-              <label className="space-y-1 text-[12px] text-dls-secondary">
+              <label className="space-y-1 text-xs text-dls-secondary">
                 <span>{t("settings.electron_migration_sha512_label")}</span>
                 <input
                   type="text"
                   value={props.electronMigrationSha512}
                   onChange={(event) => props.onSetElectronMigrationSha512(event.currentTarget.value)}
                   placeholder={t("settings.electron_migration_sha512_placeholder")}
-                  className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface px-3 font-mono text-[11px] text-dls-text outline-none transition-colors placeholder:text-dls-secondary focus:border-dls-accent"
+                  className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface px-3 font-mono text-2xs text-dls-text outline-none transition-colors placeholder:text-dls-secondary focus:border-dls-accent"
                 />
               </label>
-              <label className="space-y-1 text-[12px] text-dls-secondary md:col-span-2">
+              <label className="space-y-1 text-xs text-dls-secondary md:col-span-2">
                 <span>{t("settings.electron_migration_sha256_label")}</span>
                 <input
                   type="text"
                   value={props.electronMigrationSha256}
                   onChange={(event) => props.onSetElectronMigrationSha256(event.currentTarget.value)}
                   placeholder={t("settings.electron_migration_sha256_placeholder")}
-                  className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface px-3 font-mono text-[11px] text-dls-text outline-none transition-colors placeholder:text-dls-secondary focus:border-dls-accent"
+                  className="h-10 w-full rounded-xl border border-dls-border bg-dls-surface px-3 font-mono text-2xs text-dls-text outline-none transition-colors placeholder:text-dls-secondary focus:border-dls-accent"
                 />
               </label>
             </div>
@@ -1093,7 +1093,7 @@ export function DebugView(props: DebugViewProps) {
             >
               {t("settings.electron_migration_reveal_backup_button")}
             </Button>
-            <div className="text-[11px] text-dls-secondary">
+            <div className="text-2xs text-dls-secondary">
               {t("settings.electron_migration_release_page")} <span className="font-mono">{props.electronPreviewReleaseUrl}</span>
             </div>
           </div>
@@ -1114,7 +1114,7 @@ export function DebugView(props: DebugViewProps) {
                 {t("settings.electron_alpha_updater_desc")}
               </div>
             </div>
-            <div className="rounded-full border border-dls-border bg-dls-sidebar/50 px-2.5 py-1 text-[11px] font-medium text-dls-secondary">
+            <div className="rounded-full border border-dls-border bg-dls-sidebar/50 px-2.5 py-1 text-2xs font-medium text-dls-secondary">
               {props.electronAlphaUpdaterChannel === "alpha" ? t("settings.release_channel_alpha") : t("settings.release_channel_stable")}
             </div>
           </div>
@@ -1146,7 +1146,7 @@ export function DebugView(props: DebugViewProps) {
             </Button>
           </div>
 
-          <div className="text-[11px] text-dls-secondary">
+          <div className="text-2xs text-dls-secondary">
             {t("settings.electron_alpha_updater_feed_alpha")} <span className="font-mono">alpha-macos-latest/latest-mac.yml</span>. {t("settings.electron_alpha_updater_feed_stable")}{" "}
             <span className="font-mono">github.com/redrob-labs/redrob-cowork/releases/latest/download/latest-mac.yml</span>.
           </div>
@@ -1161,7 +1161,7 @@ export function DebugView(props: DebugViewProps) {
       {isDesktop ? (
         <div className="space-y-3 rounded-2xl border border-destructive-muted/30 bg-destructive-soft/10 p-5">
           <div className={sectionHeaderClass}>
-            <div className="text-[15px] font-semibold tracking-[-0.2px] text-destructive-ink">
+            <div className="text-base font-semibold tracking-[-0.2px] text-destructive-ink">
               {t("settings.danger_section_title")}
             </div>
             <div className={sectionDescClass}>{t("settings.danger_section_desc")}</div>
@@ -1172,14 +1172,14 @@ export function DebugView(props: DebugViewProps) {
               <div className="text-sm font-semibold tracking-[-0.1px] text-dls-text">
                 {t("settings.reset_redrob_title")}
               </div>
-              <div className="text-[12px] text-dls-secondary">
+              <div className="text-xs text-dls-secondary">
                 {props.opencodeDevModeEnabled
                   ? t("settings.reset_redrob_desc_dev")
                   : t("settings.reset_redrob_desc_prod")}
               </div>
             </div>
             <div
-              className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-2xs font-medium ${
                 props.opencodeDevModeEnabled
                   ? "border-primary-muted/35 bg-primary-soft/25 text-primary-ink"
                   : "border-dls-border bg-dls-sidebar/50 text-dls-secondary"
@@ -1191,7 +1191,7 @@ export function DebugView(props: DebugViewProps) {
             </div>
           </div>
 
-          <div className="text-[11px] text-dls-secondary">{t("settings.quit_hint")}</div>
+          <div className="text-2xs text-dls-secondary">{t("settings.quit_hint")}</div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -1207,7 +1207,7 @@ export function DebugView(props: DebugViewProps) {
                   ? t("settings.nuke_previewing")
                 : t("settings.delete_local_config")}
             </button>
-            <div className="text-[12px] text-dls-secondary">{t("settings.nuke_hint")}</div>
+            <div className="text-xs text-dls-secondary">{t("settings.nuke_hint")}</div>
           </div>
 
           {props.nukeConfigStatus ? <StatusBanner tone="error" message={props.nukeConfigStatus} /> : null}

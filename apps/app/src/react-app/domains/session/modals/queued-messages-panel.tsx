@@ -95,7 +95,7 @@ function QueuedDraftContent(props: { draft: ComposerDraft }) {
 
   if (nodes.length === 0) {
     return (
-      <span className="text-gray-10">
+      <span className="text-subtle-foreground">
         {t("composer.queued_attachments_only", { count: props.draft.attachments.length })}
       </span>
     );
@@ -121,7 +121,7 @@ function QueuedAttachmentChip(props: { attachment: ComposerAttachment }) {
       title={props.attachment.name}
     >
       <FileText className="size-3.5 shrink-0 text-muted-foreground" />
-      <span className="truncate text-[11px] font-medium text-foreground">{props.attachment.name}</span>
+      <span className="truncate text-2xs font-medium text-foreground">{props.attachment.name}</span>
     </span>
   );
 }
@@ -188,10 +188,10 @@ function QueuedDraftRow(props: {
       onDragEnd={() => {
         draggingRef.current = false;
       }}
-      className="flex items-start gap-2 rounded-xl border border-gray-6 bg-gray-1 px-2 py-2.5"
+      className="flex items-start gap-2 rounded-xl border border-border bg-background px-2 py-2.5"
     >
       <span
-        className="mt-0.5 flex size-5 shrink-0 cursor-grab items-center justify-center text-gray-9 active:cursor-grabbing"
+        className="mt-0.5 flex size-5 shrink-0 cursor-grab items-center justify-center text-subtle-foreground active:cursor-grabbing"
         title={t("composer.queued_reorder")}
         aria-hidden="true"
       >
@@ -216,7 +216,7 @@ function QueuedDraftRow(props: {
                 commitEdit();
               }
             }}
-            className="min-h-16 w-full resize-y rounded-lg border border-gray-6 bg-gray-2 px-2 py-1.5 text-sm leading-5 text-gray-12 outline-none focus:border-gray-8"
+            className="min-h-16 w-full resize-y rounded-lg border border-border bg-muted px-2 py-1.5 text-sm leading-5 text-foreground outline-none focus:border-border-strong"
             aria-label={t("composer.queued_edit")}
           />
         ) : (
@@ -228,7 +228,7 @@ function QueuedDraftRow(props: {
               setDraftText(props.item.draft.text);
               setEditing(true);
             }}
-            className="w-full rounded-md px-0.5 text-left text-sm leading-5 text-gray-11 hover:text-gray-12 disabled:pointer-events-none"
+            className="w-full rounded-md px-0.5 text-left text-sm leading-5 text-muted-foreground hover:text-foreground disabled:pointer-events-none"
             title={t("composer.queued_edit")}
           >
             <QueuedDraftContent draft={props.item.draft} />
@@ -240,7 +240,7 @@ function QueuedDraftRow(props: {
           type="button"
           onClick={() => props.onSendNow(props.item.id)}
           disabled={props.sending}
-          className="flex size-5 items-center justify-center rounded-md text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12 disabled:pointer-events-none disabled:opacity-40"
+          className="flex size-5 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
           title={t("composer.queued_send_now")}
           aria-label={t("composer.queued_send_now")}
         >
@@ -250,7 +250,7 @@ function QueuedDraftRow(props: {
           type="button"
           onClick={() => props.onRemove(props.item.id)}
           disabled={props.sending}
-          className="flex size-5 items-center justify-center rounded-md text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12 disabled:pointer-events-none disabled:opacity-40"
+          className="flex size-5 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
           title={t("common.remove")}
           aria-label={t("common.remove")}
         >
@@ -273,10 +273,10 @@ export function QueuedMessagesPanel(props: QueuedMessagesPanelProps) {
     <div className="overflow-hidden border-b border-dls-border bg-transparent">
       <div className="border-b border-dls-border px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-5 shrink-0 items-center justify-center rounded-full border border-gray-7/40 bg-gray-3/40 text-gray-11">
+          <div className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-strong/40 bg-accent/40 text-muted-foreground">
             <ListPlus size={12} />
           </div>
-          <div className="text-sm font-medium leading-5 text-gray-12">
+          <div className="text-sm font-medium leading-5 text-foreground">
             {t("composer.queued_count", { count: props.items.length })}
           </div>
         </div>

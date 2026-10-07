@@ -310,23 +310,23 @@ function DevProfilerOverlayVisible({ onHide }: { onHide: () => void }) {
 
   return (
     <div
-      className="pointer-events-auto fixed bottom-3 right-3 z-[1100] w-[280px] overflow-hidden rounded-lg border border-dls-border bg-dls-canvas/95 text-[11px] text-dls-text backdrop-blur-sm"
+      className="pointer-events-auto fixed bottom-3 right-3 z-[1100] w-[280px] overflow-hidden rounded-lg border border-dls-border bg-dls-canvas/95 text-2xs text-dls-text backdrop-blur-sm"
       role="status"
       aria-live="polite"
     >
       <div className="flex items-center justify-between border-b border-dls-border px-2.5 py-1.5">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-dls-secondary">
+          <span className="font-mono text-2xs uppercase tracking-[0.14em] text-dls-secondary">
             react profiler
           </span>
-          <span className="text-[10px] text-dls-secondary">
+          <span className="text-2xs text-dls-secondary">
             {snapshot.totalCommits} commits · {snapshot.totalActualMs}ms
           </span>
         </div>
         <div className="flex items-center gap-1">
           <button
             type="button"
-            className="rounded px-1.5 py-0.5 text-[10px] text-dls-secondary hover:bg-dls-hover"
+            className="rounded px-1.5 py-0.5 text-2xs text-dls-secondary hover:bg-dls-hover"
             onClick={() => {
               state.zonesById.clear();
               state.recent.length = 0;
@@ -338,7 +338,7 @@ function DevProfilerOverlayVisible({ onHide }: { onHide: () => void }) {
           </button>
           <button
             type="button"
-            className="rounded px-1.5 py-0.5 text-[10px] text-dls-secondary hover:bg-dls-hover"
+            className="rounded px-1.5 py-0.5 text-2xs text-dls-secondary hover:bg-dls-hover"
             onClick={() => setCollapsed((value) => !value)}
             title="Collapse"
           >
@@ -346,7 +346,7 @@ function DevProfilerOverlayVisible({ onHide }: { onHide: () => void }) {
           </button>
           <button
             type="button"
-            className="rounded px-1.5 py-0.5 text-[10px] text-dls-secondary hover:bg-dls-hover"
+            className="rounded px-1.5 py-0.5 text-2xs text-dls-secondary hover:bg-dls-hover"
             onClick={onHide}
             title="Hide (Cmd+Shift+P to toggle)"
           >
@@ -363,7 +363,7 @@ function DevProfilerOverlayVisible({ onHide }: { onHide: () => void }) {
           ) : (
             <table className="w-full border-collapse">
               <thead>
-                <tr className="text-[10px] uppercase tracking-[0.1em] text-dls-secondary">
+                <tr className="text-2xs uppercase tracking-[0.1em] text-dls-secondary">
                   <th className="px-2 py-1 text-left font-medium">zone</th>
                   <th className="px-2 py-1 text-right font-medium">#</th>
                   <th className="px-2 py-1 text-right font-medium">last</th>
@@ -380,11 +380,11 @@ function DevProfilerOverlayVisible({ onHide }: { onHide: () => void }) {
                         isFlashing ? "bg-[rgba(var(--dls-accent-rgb),0.14)]" : ""
                       }`}
                     >
-                      <td className="px-2 py-1 font-mono text-[11px] text-dls-text">
+                      <td className="px-2 py-1 font-mono text-2xs text-dls-text">
                         <span className="block truncate" title={zone.id}>
                           {zone.id}
                         </span>
-                        <span className="block text-[9px] uppercase tracking-[0.1em] text-dls-secondary">
+                        <span className="block text-2xs uppercase tracking-[0.1em] text-dls-secondary">
                           {zone.mountCount}m · {zone.updateCount}u
                         </span>
                       </td>
@@ -405,7 +405,7 @@ function DevProfilerOverlayVisible({ onHide }: { onHide: () => void }) {
           )}
         </div>
       )}
-      <div className="border-t border-dls-border px-2.5 py-1 text-[10px] text-dls-secondary">
+      <div className="border-t border-dls-border px-2.5 py-1 text-2xs text-dls-secondary">
         Cmd+Shift+P to toggle. Prod builds: off.
       </div>
     </div>

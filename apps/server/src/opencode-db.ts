@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { isAbsolute, join } from "node:path";
-import { opencodeDataDirs as defaultOpencodeDataDirs } from "@redrob/paths";
+import { engineHomeDirs, opencodeDataDirs as defaultOpencodeDataDirs } from "@redrob/paths";
 
 // better-sqlite3's N-API binding hard-crashes Bun (panic: "NAPI FATAL ERROR:
 // Error::New napi_get_last_error_info"), and the Daytona worker runtime ships
@@ -50,8 +50,10 @@ type SeedMessage = {
 };
 
 const DEFAULT_AGENT = "redrob";
-const DEFAULT_PROVIDER = "openai";
-const DEFAULT_MODEL = "gpt-5.4";
+// Redrob is the only inference provider, and `auto` picks the model per message.
+// REDROB_PROVIDER_ID in redrob-auth.ts; not imported, to keep this module free of the server graph.
+const DEFAULT_PROVIDER = "redrob";
+const DEFAULT_MODEL = "auto";
 const REDROB_DEV_DATA_DIRS = ["redrob-dev-data", "opencode-dev"];
 
 function truthy(value: string | undefined): boolean {
@@ -128,8 +130,21 @@ export function resolveOpencodeDbPath(): string {
   return "opencode.db";
 }
 
-function findOpencodeSessionDbPath(sessionId: string, inputPath?: string): string | null {
-  const candidates = (inputPath ? [inputPath] : candidateOpencodeDbPaths()).filter((candidate) => existsSync(candidate));
+// The engine keeps its database under its own name: `<XDG_DATA_HOME or ~/.local/share>/redrob/redrob.db`,
+// and under REDROB_DATA_DIR in dev mode. candidateOpencodeDbPaths only knows upstream's `opencode` layout,
+// so a lookup that must find the live engine database checks these first. OPENCODE_DB still wins.
+function engineDbPaths(): string[] {
+  if (process.env.OPENCODE_DB?.trim()) return candidateOpencodeDbPaths();
+  const root = process.env.REDROB_DATA_DIR?.trim();
+  const dirs = [
+    ...engineHomeDirs().slice(0, 1),
+    ...(root ? REDROB_DEV_DATA_DIRS.map((name) => join(root, name, "xdg", "data", "redrob")) : []),
+  ];
+  return Array.from(new Set([...dirs.map((dir) => join(dir, "redrob.db")), ...candidateOpencodeDbPaths()]));
+}
+
+function findOpencodeSessionDbPath(sessionId: string, inputPath?: string, candidatePaths?: string[]): string | null {
+  const candidates = (inputPath ? [inputPath] : candidatePaths ?? candidateOpencodeDbPaths()).filter((candidate) => existsSync(candidate));
   for (const dbPath of candidates) {
     const db = openDatabase(dbPath, { readonly: true });
     try {
@@ -262,6 +277,45 @@ export function seedOpencodeSessionMessages(input: {
     });
 
     return run();
+  } finally {
+    db.close();
+  }
+}
+
+/**
+ * Re-points a session at another engine project, in one transaction, and nothing else.
+ *
+ * The engine's own move (`POST /experimental/control-plane/move-session`) re-derives `directory` and
+ * `path`, and records the move event, but refuses a destination that belongs to a different project.
+ * Setting `project_id` first is what lets a chat cross projects; the engine move then does the rest.
+ * Returns the database written and the previous project id, so a failed engine move can be undone by
+ * calling this again with `previousProjectId`. Returns null when no database holds the session.
+ */
+export function setOpencodeSessionProject(input: {
+  sessionId: string;
+  projectId: string;
+  dbPath?: string;
+}): { dbPath: string; previousProjectId: string } | null {
+  const dbPath = findOpencodeSessionDbPath(input.sessionId, input.dbPath?.trim() || undefined, engineDbPaths());
+  if (!dbPath) return null;
+
+  const db = openDatabase(dbPath);
+  try {
+    // The engine holds this database open; wait out its write lock instead of failing on SQLITE_BUSY.
+    db.exec("PRAGMA busy_timeout = 5000");
+    return db.transaction(() => {
+      const row = db.prepare("select project_id from session where id = ?").get(input.sessionId);
+      const previousProjectId =
+        typeof row === "object" && row !== null && "project_id" in row && typeof row.project_id === "string"
+          ? row.project_id
+          : null;
+      if (previousProjectId === null) return null;
+      if (!db.prepare("select id from project where id = ?").get(input.projectId)) {
+        throw new Error(`OpenCode project not found: ${input.projectId}`);
+      }
+      db.prepare("update session set project_id = ? where id = ?").run(input.projectId, input.sessionId);
+      return { dbPath, previousProjectId };
+    })();
   } finally {
     db.close();
   }

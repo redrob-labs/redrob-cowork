@@ -45,6 +45,8 @@ import {
 } from "./nuke.mjs";
 import { applyDesktopBootstrapBrandIcon } from "./brand-icon-bootstrap.mjs";
 import { openExternalUrl } from "./open-external.mjs";
+import { resolveWorkspaceFile } from "./workspace-file-access.mjs";
+import { createKeepAwake } from "./keep-awake.mjs";
 import { resolveAppIdentifier, resolveUserDataPath } from "./dev-profile.mjs";
 import {
   createLinuxDesktopIntegration,
@@ -65,6 +67,8 @@ import { createDesktopVaultKeyProvider } from "./secure-vault-key.mjs";
 import {
   clearRedrobSentrySession,
   initRedrobSentry,
+  resolveRedrobInstallId,
+  setRedrobSentryConsent,
   setRedrobSentrySession,
 } from "./sentry.mjs";
 import { installStdioErrorHandlers } from "./stdio-errors.mjs";
@@ -85,6 +89,7 @@ const {
   nativeTheme,
   net: electronNet,
   powerMonitor,
+  powerSaveBlocker,
   Notification: ElectronNotification,
   session,
   shell,
@@ -1553,6 +1558,18 @@ function engineDoctor(options = {}) {
   return runtimeManager.engineDoctor(options);
 }
 
+const keepAwake = createKeepAwake(powerSaveBlocker);
+
+/** A workspace file, resolved only under a local workspace or a folder its config authorizes. */
+async function authorizedWorkspaceFile(root, relativePath) {
+  const workspacePaths = await workspaceStore.listLocalWorkspacePaths();
+  const configs = await Promise.all(
+    workspacePaths.map((workspacePath) => workspaceStore.readWorkspaceRedrobConfig(workspacePath).catch(() => null)),
+  );
+  const authorized = configs.flatMap((config) => (Array.isArray(config?.authorizedRoots) ? config.authorizedRoots : []));
+  return resolveWorkspaceFile({ root, relativePath, knownRoots: [...workspacePaths, ...authorized] });
+}
+
 function activeWindowFromEvent(event) {
   return BrowserWindow.fromWebContents(event.sender) ?? mainWindow ?? undefined;
 }
@@ -1694,6 +1711,15 @@ const desktopCommandHandlers = {
         enabled: setRedrobSentrySession({
           userId: input.userId,
           orgId: input.orgId,
+        }),
+      };
+  },
+  "desktopSentrySetConsent": async (event, ...args) => {
+      const enabled = args[0]?.enabled === true;
+      return {
+        enabled: setRedrobSentryConsent({
+          enabled,
+          installId: enabled ? resolveRedrobInstallId(app.getPath("userData")) : null,
         }),
       };
   },
@@ -1959,6 +1985,24 @@ const desktopCommandHandlers = {
       }
       return `Could not find "${target}" on disk.`;
   },
+  // The Desk side panel's Open and Show in folder: a workspace-relative file, only inside a
+  // local workspace (or a folder one authorizes). Never a path the renderer made up.
+  "__openWorkspaceFile": async (event, ...args) => {
+      const target = await authorizedWorkspaceFile(args[0], args[1]);
+      if (!target) return "This file is outside the folders Desk may use.";
+      if (!existsSync(target)) return "This file is no longer there.";
+      return shell.openPath(target);
+  },
+  "__revealWorkspaceFile": async (event, ...args) => {
+      const target = await authorizedWorkspaceFile(args[0], args[1]);
+      if (!target) return "This file is outside the folders Desk may use.";
+      if (!existsSync(target)) return "This file is no longer there.";
+      shell.showItemInFolder(target);
+      return undefined;
+  },
+  // "Keep this computer awake during a run": the renderer says when a run is busy with the
+  // setting on, and when it is not. One hold at most; see keep-awake.mjs.
+  "__setKeepAwake": async (event, ...args) => keepAwake.set(args[0] === true),
   "__getFileIcon": async (event, ...args) => {
       const target = String(args[0] ?? "").trim();
       if (!target) return null;
@@ -2301,7 +2345,9 @@ async function createMainWindow() {
       process.platform === "win32"
         ? {
             titleBarStyle: "hidden",
-            titleBarOverlay: { color: "#00000000", symbolColor: "#9ca3af", height: 40 },
+            // Gray 5, the design system's neutral for icons on either ground; the
+            // overlay cannot read the renderer's tokens, so the value is written out.
+            titleBarOverlay: { color: "#00000000", symbolColor: "#aab0bb", height: 40 },
           }
         : { frame: false },
     );

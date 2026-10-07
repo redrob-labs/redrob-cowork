@@ -1,0 +1,83 @@
+{
+  "$comment": "Pretrained candidates for the privacy detector. Shortlisted 2026-10-06 from 45 screened: Apache-2.0 (commercial use), Korean-capable, at most 120 MB at int8, token classification. `onnx` names a file shipped in the repo at that revision, measured as is; without it prepare.py exports the checkpoint and quantizes its weights only (8-bit matmuls, 4-bit embeddings). `categories` maps the model's entity types to ours.",
+  "candidates": [
+    {
+      "key": "atonlee-ko-pii",
+      "id": "atonlee/koelectra-ko-pii-ner",
+      "revision": "1e75c01e707232401883cf364151bbe2e560c708",
+      "license": "Apache-2.0",
+      "tokenizer": "tokenizer.json",
+      "categories": {
+        "NAME": "PERSON",
+        "ORGANIZATION": "ORG",
+        "ADDRESS": "ADDRESS"
+      }
+    },
+    {
+      "key": "atonlee-ko-pii-shipped",
+      "id": "atonlee/koelectra-ko-pii-ner",
+      "revision": "1e75c01e707232401883cf364151bbe2e560c708",
+      "license": "Apache-2.0",
+      "onnx": "onnx/model_int8.onnx",
+      "tokenizer": "tokenizer.json",
+      "categories": {
+        "NAME": "PERSON",
+        "ORGANIZATION": "ORG",
+        "ADDRESS": "ADDRESS"
+      }
+    },
+    {
+      "key": "veil-ko-lite",
+      "id": "1T/veil-pii-ko-lite",
+      "revision": "dd26d2b1ca189f9c819a783f75e944e4baf22050",
+      "license": "Apache-2.0",
+      "tokenizer": "tokenizer.json",
+      "categories": {
+        "PERSON": "PERSON",
+        "ORGANIZATION": "ORG",
+        "ADDRESS": "ADDRESS"
+      }
+    },
+    {
+      "key": "veil-ko-lite-shipped",
+      "id": "1T/veil-pii-ko-lite",
+      "revision": "dd26d2b1ca189f9c819a783f75e944e4baf22050",
+      "license": "Apache-2.0",
+      "onnx": "model.int8.onnx",
+      "tokenizer": "tokenizer.json",
+      "categories": {
+        "PERSON": "PERSON",
+        "ORGANIZATION": "ORG",
+        "ADDRESS": "ADDRESS"
+      }
+    },
+    {
+      "key": "klue-ner-base",
+      "id": "soddokayo/koelectra-base-klue-ner",
+      "revision": "ba0d4a65d5ac6d9bab48523d7c4bd7e3856ca07f",
+      "license": "Apache-2.0",
+      "tokenizer": "tokenizer.json",
+      "categories": {
+        "PS": "PERSON",
+        "OG": "ORG",
+        "LC": "ADDRESS"
+      }
+    },
+    {
+      "key": "amoeba-privacy-small",
+      "id": "amoeba04/koelectra-small-v3-privacy-ner",
+      "revision": "9f4e2fd9e35b12bcdb5fc334ac31be4399cb4281",
+      "license": "Apache-2.0",
+      "tokenizerFrom": {
+        "id": "atonlee/koelectra-ko-pii-ner",
+        "revision": "1e75c01e707232401883cf364151bbe2e560c708",
+        "file": "tokenizer.json"
+      },
+      "categories": {
+        "PER": "PERSON",
+        "ORG": "ORG",
+        "LOC": "ADDRESS"
+      }
+    }
+  ]
+}

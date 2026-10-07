@@ -84,7 +84,7 @@ function PanelTabClose({
         className,
       )}
       title={t("panel_tabs.close")}
-      aria-label={`Close tab: ${label}`}
+      aria-label={`${t("panel_tabs.close")}: ${label}`}
       onClick={(event) => {
         event.stopPropagation();
         onClick?.(event);

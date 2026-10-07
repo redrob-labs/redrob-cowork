@@ -12,7 +12,7 @@ describe("markdown code blocks", () => {
     const html = renderMarkdownHtml(MARKDOWN);
 
     expect(html).toContain("data-redrob-code-block");
-    expect(html).toContain("bg-gray-2/60");
+    expect(html).toContain("bg-muted/60");
     expect(html).toContain("data-redrob-code-copy");
     expect(html).toContain("data-redrob-code-copy-icon");
     expect(html).toContain("data-redrob-code-copy-check-icon");
@@ -43,7 +43,7 @@ describe("markdown code blocks", () => {
   test("renders surface code blocks without chat-only copy controls", async () => {
     const fallbackHtml = renderPrimitiveMarkdownHtml(MARKDOWN, "surface");
     expect(fallbackHtml).toContain("border-dls-border/70");
-    expect(fallbackHtml).toContain("bg-gray-1/80");
+    expect(fallbackHtml).toContain("bg-background/80");
     expect(fallbackHtml).toContain('class="language-ts"');
     expect(fallbackHtml).not.toContain("data-redrob-code-copy");
 

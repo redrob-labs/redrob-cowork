@@ -123,30 +123,30 @@ export function CreateWorkspaceLocalPanel(
               {t("welcome.folder_explanation")}
             </div>
             <ul className="mt-3 space-y-1.5 pl-1">
-              <li className="flex items-start gap-2 text-[13px] text-dls-secondary">
+              <li className="flex items-start gap-2 text-sm text-dls-secondary">
                 <Check size={14} className="mt-0.5 shrink-0 text-success-ink" />
                 {t("welcome.folder_read")}
               </li>
-              <li className="flex items-start gap-2 text-[13px] text-dls-secondary">
+              <li className="flex items-start gap-2 text-sm text-dls-secondary">
                 <Check size={14} className="mt-0.5 shrink-0 text-success-ink" />
                 {t("welcome.folder_write")}
               </li>
-              <li className="flex items-start gap-2 text-[13px] text-dls-secondary">
+              <li className="flex items-start gap-2 text-sm text-dls-secondary">
                 <Check size={14} className="mt-0.5 shrink-0 text-success-ink" />
                 {t("welcome.folder_anything")}
               </li>
             </ul>
-            <div className="mt-2 text-[12px] text-dls-secondary italic">
+            <div className="mt-2 text-xs text-dls-secondary italic">
               {t("welcome.folder_drop_hint")}
             </div>
 
-            <div className="mt-4 rounded-[20px] border border-dls-border bg-dls-hover px-4 py-3">
+            <div className="mt-4 rounded-2xl border border-dls-border bg-dls-hover px-4 py-3">
               {props.hasSelectedFolder ? (
-                <span className="block truncate font-mono text-[12px] text-dls-text">
+                <span className="block truncate font-mono text-xs text-dls-text">
                   {props.selectedFolder}
                 </span>
               ) : (
-                <span className="text-[14px] text-dls-secondary">{t("workspace.no_folder_selected")}</span>
+                <span className="text-sm text-dls-secondary">{t("workspace.no_folder_selected")}</span>
               )}
             </div>
 
@@ -154,7 +154,7 @@ export function CreateWorkspaceLocalPanel(
               <Accordion
                 multiple
                 defaultValue={hasProjectLabel ? ["analytics"] : []}
-                className="mt-4 overflow-hidden rounded-[20px] border-dls-border bg-dls-hover/60 shadow-none before:hidden"
+                className="mt-4 overflow-hidden rounded-2xl border-dls-border bg-dls-hover/60 shadow-none before:hidden"
               >
                 <AccordionItem value="analytics" className="border-b-0">
                   <AccordionTrigger className="items-center px-4 py-4 hover:no-underline focus-visible:ring-2 focus-visible:ring-[rgba(var(--dls-accent-rgb),0.18)]">
@@ -163,14 +163,14 @@ export function CreateWorkspaceLocalPanel(
                         <ChartNoAxesColumnIncreasing size={17} className="shrink-0 text-current" />
                       </span>
                       <span className="min-w-0">
-                        <span className="block text-[14px] font-semibold text-dls-text">{t("workspace.more_analytics")}</span>
-                        <span className="mt-1 block text-[12px] leading-5 text-dls-secondary">{t("workspace.project_name_hint")}</span>
+                        <span className="block text-sm font-semibold text-dls-text">{t("workspace.more_analytics")}</span>
+                        <span className="mt-1 block text-xs leading-5 text-dls-secondary">{t("workspace.project_name_hint")}</span>
                       </span>
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="space-y-3 px-4 pb-4">
                     <div>
-                      <label className="text-[13px] font-medium text-dls-text">{t("workspace.project_name")}<span className="text-dls-secondary">(optional)</span>
+                      <label className="text-sm font-medium text-dls-text">{t("workspace.project_name")}<span className="text-dls-secondary">(optional)</span>
                       </label>
                       <input
                         type="text"
@@ -178,7 +178,7 @@ export function CreateWorkspaceLocalPanel(
                         onChange={(event) => props.onProjectLabelInput(event.currentTarget.value)}
                         placeholder={t("workspace.name_placeholder")}
                         disabled={props.submitting}
-                        className="mt-2 w-full rounded-[20px] border border-dls-border bg-dls-surface px-4 py-3 text-[14px] text-dls-text outline-none placeholder:text-dls-secondary transition-colors focus:border-dls-accent disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-2 w-full rounded-2xl border border-dls-border bg-dls-surface px-4 py-3 text-sm text-dls-text outline-none placeholder:text-dls-secondary transition-colors focus:border-dls-accent disabled:cursor-not-allowed disabled:opacity-60"
                       />
                     </div>
                   </AccordionContent>
@@ -212,7 +212,7 @@ export function CreateWorkspaceLocalPanel(
           <div className={softCardClass}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 text-[12px] font-semibold text-dls-text">
+                <div className="flex items-center gap-2 text-xs font-semibold text-dls-text">
                   {progress.error ? (
                     <XCircle size={14} className="text-destructive-ink" />
                   ) : (
@@ -220,10 +220,10 @@ export function CreateWorkspaceLocalPanel(
                   )}
                   Sandbox setup
                 </div>
-                <div className="mt-1 truncate text-[14px] leading-snug text-dls-text">
+                <div className="mt-1 truncate text-sm leading-snug text-dls-text">
                   {progress.stage}
                 </div>
-                <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-dls-secondary">
+                <div className="mt-1 font-mono text-2xs uppercase tracking-wider text-dls-secondary">
                   {props.elapsedSeconds}s
                 </div>
               </div>
@@ -248,7 +248,7 @@ export function CreateWorkspaceLocalPanel(
                   </div>
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
                     <div
-                      className={`text-[12px] ${stepTextClass(step.status)} transition-colors duration-200`.trim()}
+                      className={`text-xs ${stepTextClass(step.status)} transition-colors duration-200`.trim()}
                     >
                       {step.label}
                     </div>
@@ -266,12 +266,12 @@ export function CreateWorkspaceLocalPanel(
 
             {props.showProgressDetails && progress.logs.length > 0 ? (
               <div className={`mt-3 ${softCardClass}`}>
-                <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-dls-secondary">{t("workspace.live_logs")}</div>
+                <div className="mb-2 text-2xs font-semibold uppercase tracking-wide text-dls-secondary">{t("workspace.live_logs")}</div>
                 <div className="max-h-[120px] space-y-0.5 overflow-y-auto">
                   {toKeyedLines(progress.logs.slice(-10)).map(({ key, line }) => (
                     <div
                       key={`${progress.runId}-log-${key}`}
-                      className="break-all font-mono text-[10px] leading-tight text-dls-text"
+                      className="break-all font-mono text-2xs leading-tight text-dls-text"
                     >
                       {line}
                     </div>
@@ -316,9 +316,9 @@ export function CreateWorkspaceLocalPanel(
             </div>
             {props.workerDebugLines.length > 0 ? (
               <details
-                className={`mt-3 ${softCardClass} text-[11px] text-dls-text`}
+                className={`mt-3 ${softCardClass} text-2xs text-dls-text`}
               >
-                <summary className="cursor-pointer text-[12px] font-semibold text-dls-text">{t("workspace.docker_debug_details")}</summary>
+                <summary className="cursor-pointer text-xs font-semibold text-dls-text">{t("workspace.docker_debug_details")}</summary>
                 <div className="mt-2 space-y-1 break-words font-mono">
                   {toKeyedLines(props.workerDebugLines).map(({ key, line }) => (
                     <div key={`docker-line-${key}`}>{line}</div>
@@ -330,7 +330,7 @@ export function CreateWorkspaceLocalPanel(
         ) : null}
 
         {props.localError ? (
-          <div className="mb-3 whitespace-pre-line rounded-[20px] border border-destructive-muted/20 bg-destructive-soft/40 px-4 py-3 text-[13px] text-destructive-ink">
+          <div className="mb-3 whitespace-pre-line rounded-2xl border border-destructive-muted/20 bg-destructive-soft/40 px-4 py-3 text-sm text-destructive-ink">
             {props.localError}
           </div>
         ) : null}

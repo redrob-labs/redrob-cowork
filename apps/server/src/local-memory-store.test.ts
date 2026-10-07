@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { MEMORY_SCOPE_LOCAL, deleteMemory, listMemories, localMemoryStoreInternals, saveMemory } from "./local-memory-store.js";
+import { MEMORY_SCOPE_LOCAL, deleteMemory, listMemories, localMemoryStoreInternals, saveMemory, updateMemory } from "./local-memory-store.js";
 import type { ServerConfig } from "./types.js";
 
 const roots: string[] = [];
@@ -11,7 +11,8 @@ const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
 afterEach(async () => {
   while (roots.length) {
     const root = roots.pop();
-    if (root) await rm(root, { recursive: true, force: true });
+    // Windows keeps the open runtime database locked; a leftover temp dir is not a failure.
+    if (root) await rm(root, { recursive: true, force: true }).catch(() => {});
   }
   if (previousRuntimeDb === undefined) delete process.env.REDROB_RUNTIME_DB;
   else process.env.REDROB_RUNTIME_DB = previousRuntimeDb;
@@ -93,6 +94,24 @@ describe("local memory bank", () => {
 
     expect(await deleteMemory(config, doomed.id)).toBe(false);
     expect(await deleteMemory(config, "never-existed")).toBe(false);
+  });
+
+  test("updates a memory in place, keeping its id and when it was made", async () => {
+    const config = await tempConfig();
+    const saved = await saveMemory(config, { content: "Fiscal year starts in March", tags: ["desk-scope:you"] });
+    await new Promise((resolve) => setTimeout(resolve, 2));
+
+    const updated = await updateMemory(config, saved.id, { content: "  Fiscal year starts in April " });
+    expect(updated?.id).toBe(saved.id);
+    expect(updated?.content).toBe("Fiscal year starts in April");
+    expect(updated?.createdAt).toBe(saved.createdAt);
+    expect(updated?.tags).toEqual(["desk-scope:you"]);
+    expect(updated && updated.updatedAt > saved.updatedAt).toBe(true);
+    expect((await listMemories(config)).map((memory) => memory.content)).toEqual(["Fiscal year starts in April"]);
+
+    expect((await updateMemory(config, saved.id, { tags: ["desk-scope:team"] }))?.tags).toEqual(["desk-scope:team"]);
+    expect(await updateMemory(config, "never-existed", { content: "x" })).toBeNull();
+    await expect(updateMemory(config, saved.id, { content: "   " })).rejects.toBeInstanceOf(Error);
   });
 
   test("survives a reopen so memories outlive the process", async () => {

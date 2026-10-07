@@ -1,6 +1,7 @@
 minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - "@redrob-labs/sdk"
+  - "@redrob-labs/ui"
   - "acorn"
   - "dompurify"
   - "enhanced-resolve"
@@ -112,6 +113,7 @@ allowBuilds:
   msgpackr-extract: false
   msw: false
   node-pty: true
+  onnxruntime-node: false
   protobufjs: true
   sharp: true
 patchedDependencies:

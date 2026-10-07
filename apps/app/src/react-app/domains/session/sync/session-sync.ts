@@ -110,6 +110,30 @@ const defaultSessionStatusFetcher: SessionStatusFetcher = async (baseUrl, redrob
 let syncSubscriptionFactory = defaultSyncSubscriptionFactory;
 let sessionStatusFetcher = defaultSessionStatusFetcher;
 
+type SessionSyncEventListener = (workspaceId: string, event: OpencodeEvent) => void;
+const sessionSyncEventListeners = new Set<SessionSyncEventListener>();
+
+/**
+ * Every engine event the session sync applies, after it has applied it, for every workspace.
+ * Read-only: a listener sees the event and cannot change what the sync does with it.
+ */
+export function subscribeSessionSyncEvents(listener: SessionSyncEventListener): () => void {
+  sessionSyncEventListeners.add(listener);
+  return () => {
+    sessionSyncEventListeners.delete(listener);
+  };
+}
+
+function notifySessionSyncEventListeners(workspaceId: string, event: OpencodeEvent) {
+  for (const listener of sessionSyncEventListeners) {
+    try {
+      listener(workspaceId, event);
+    } catch {
+      // A listener's failure must not end the stream the transcript depends on.
+    }
+  }
+}
+
 export function markSessionSnapshotFetchStart(snapshot: RedrobSessionSnapshot, startedAt: number) {
   sessionSnapshotFetchStarts.set(snapshot, startedAt);
 }
@@ -1206,6 +1230,7 @@ function startSync(input: SyncOptions, entry: SyncEntry) {
         const event = normalizeEvent(raw);
         if (!event) continue;
         applyEvent(entry, input.workspaceId, event);
+        notifySessionSyncEventListeners(input.workspaceId, event);
       }
       if (!controller.signal.aborted && activeConnectionController === connectionController) scheduleRetry();
     } catch (error) {

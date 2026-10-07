@@ -208,6 +208,42 @@ export function deriveRedrobAuthStatus(providerList: unknown): RedrobAuthStatus 
 }
 
 /**
+ * The Redrob Key the engine resolved, for the one in-process caller that has to present it to the
+ * console itself: team policy sync (team-policy/sync.ts), which fetches the workspace's signed
+ * policy with it. The same gate as status applies, so the engine's "public" sentinel is never
+ * mistaken for a key. The value is read at the moment it is needed and never stored, logged or
+ * returned to a client; ownership stays with the engine.
+ */
+export function extractRedrobEngineKey(providerList: unknown): string | null {
+  if (!deriveRedrobAuthStatus(providerList).connected) return null;
+  if (!isRecord(providerList) || !Array.isArray(providerList.all)) return null;
+  const entry = providerList.all.find(
+    (candidate): candidate is EngineProviderEntry => isRecord(candidate) && candidate.id === REDROB_PROVIDER_ID,
+  );
+  const options = entry && isRecord(entry.options) ? entry.options : {};
+  for (const value of [entry?.key, options.apiKey]) {
+    if (typeof value === "string" && value.trim() && value !== ENGINE_PUBLIC_API_KEY_SENTINEL) return value.trim();
+  }
+  return null;
+}
+
+export async function readRedrobEngineKey(input: RedrobAuthInput): Promise<string | null> {
+  let target: EngineTarget;
+  try {
+    target = resolveEngineTarget(input);
+  } catch {
+    return null;
+  }
+  try {
+    const response = await target.fetchImpl(`${target.baseUrl}/provider`, { headers: target.headers });
+    if (!response.ok) return null;
+    return extractRedrobEngineKey(await response.json());
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Ask the engine whether it currently holds a Redrob credential.
  *
  * Reads the engine's own provider report rather than any Work-side state, so

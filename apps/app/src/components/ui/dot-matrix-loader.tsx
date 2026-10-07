@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -10,56 +8,33 @@ type DotMatrixLoaderProps = React.ComponentPropsWithoutRef<"span"> & {
 }
 
 /**
- * Paper rendering rules: 3×3 dot-matrix is the only "living mark" for
- * running work (sidebar rows, transcript tool lines). Frames shuffle;
- * under prefers-reduced-motion a single static frame is shown. Dots use
- * currentColor at two opacities so the lit/dim contrast holds in both
- * light and dark themes.
+ * The running-work mark, drawn as the design system's Loader at its small size
+ * (`rr-loader rr-loader--sm`): three bars on the brand's 40 degree rake, passing
+ * a highlight along, with a static hold under reduced motion. The design system
+ * owns the animation in CSS, so nothing ticks in JavaScript.
+ *
+ * The label is the design system's visually hidden `rr-loader__sr` text plus a
+ * `title`. It is not a live region: these marks sit on every running row of a
+ * transcript or the sidebar, and a region per row would talk over the reader
+ * each time one starts, which the design system's `live={false}` is for.
+ *
+ * A span rather than the design system's div, because the mark sits inline in a
+ * line of text. The export keeps its name so call sites do not change.
  */
-const FRAMES: ReadonlyArray<ReadonlyArray<number>> = [
-  [1, 0, 0, 1, 1, 0, 1, 0, 1],
-  [0, 1, 0, 1, 0, 1, 0, 1, 1],
-  [0, 0, 1, 0, 1, 1, 1, 1, 0],
-  [1, 1, 0, 0, 1, 0, 1, 0, 1],
-]
-
 export function DotMatrixLoader({ className, label, ...rest }: DotMatrixLoaderProps) {
-  const [frame, setFrame] = React.useState(0)
-  const [reduceMotion, setReduceMotion] = React.useState(false)
-
-  React.useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const sync = () => setReduceMotion(media.matches)
-    sync()
-    media.addEventListener("change", sync)
-    return () => media.removeEventListener("change", sync)
-  }, [])
-
-  React.useEffect(() => {
-    if (reduceMotion) return
-    const id = window.setInterval(() => {
-      setFrame((current) => (current + 1) % FRAMES.length)
-    }, 180)
-    return () => window.clearInterval(id)
-  }, [reduceMotion])
-
-  const pattern = FRAMES[frame] ?? FRAMES[0]
-
   return (
     <span
       {...rest}
       role="status"
-      aria-label={label}
       title={label}
-      className={cn("inline-grid size-3.5 shrink-0 grid-cols-3 grid-rows-3 gap-px", className)}
+      className={cn("rr-loader rr-loader--sm shrink-0", className)}
     >
-      {pattern.map((lit, index) => (
-        <span
-          key={index}
-          aria-hidden="true"
-          className={cn("size-full rounded-full bg-current", lit ? "opacity-90" : "opacity-25")}
-        />
-      ))}
+      <span className="rr-loader__bars" aria-hidden="true">
+        <span className="rr-loader__bar" />
+        <span className="rr-loader__bar" />
+        <span className="rr-loader__bar" />
+      </span>
+      <span className="rr-loader__sr">{label}</span>
     </span>
   )
 }

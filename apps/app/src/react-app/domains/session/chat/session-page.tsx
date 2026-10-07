@@ -70,6 +70,16 @@ import type { NewTaskComposerContext } from "./new-task-composer";
 import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
+import { useInDeskFrame } from "../../../desk/shell/desk-frame";
+import {
+  applyFramePanelCommand,
+  BROWSER_TARGET,
+  FILES_TARGET,
+  routeSidePanelRequest,
+  type SidePanelTarget,
+} from "../../../desk/panel/route-side-panel";
+import { useFrameStore } from "../../../desk/store/frame-store";
+import { browserHeldResult } from "../../../desk/panel/desk-browser-state";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
 import { useBootOverlayVisible } from "../../../shell/boot-state";
@@ -332,6 +342,9 @@ function controlStringArg(args: unknown, key: string) {
 
 export function SessionPage(props: SessionPageProps) {
   const { config: shellConfig } = useShellConfig();
+  // Inside the Desk frame the shell owns the menu, so the session sidebar stays hidden.
+  const inDeskFrame = useInDeskFrame();
+  const showSidebar = shellConfig.sidebar && !inDeskFrame;
   const platform = usePlatform();
   const isMobile = useIsMobile();
   const bootOverlayVisible = useBootOverlayVisible();
@@ -366,7 +379,8 @@ export function SessionPage(props: SessionPageProps) {
   const artifactTargetCount = artifactFileTargets.length;
   const hasArtifactTargets = artifactTargetCount > 0;
   const hasBrowserTabs = sessionPanelState.tabs.some((tab) => tab.type === "browser");
-  const activeSidePanel = voiceSidePanelOpen ? "voice" : sessionSidePanel;
+  // In the Desk frame the old panel never shows, even if a stored state still names it.
+  const activeSidePanel = voiceSidePanelOpen ? "voice" : inDeskFrame && sessionSidePanel === "panel" ? null : sessionSidePanel;
   const sidePanelOpen = activeSidePanel !== null;
   const panelRailActive = activeSidePanel === "panel";
   const voiceRailActive = activeSidePanel === "voice";
@@ -411,20 +425,25 @@ export function SessionPage(props: SessionPageProps) {
   const browserPanelRef = usePanelRef();
   const preserveSidePanelOnPanelOpenRef = useRef(false);
 
-  const setCurrentSidePanel = useCallback((panel: SidePanelItem | null) => {
+  // Inside the Desk frame both of these hand "panel" requests to the frame's side panel.
+  const setCurrentSidePanel = useCallback((panel: SidePanelItem | null, target?: SidePanelTarget) => {
+    const command = routeSidePanelRequest(panel, inDeskFrame, target);
+    if (command) return applyFramePanelCommand(command, useFrameStore.getState());
     setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, panel === "voice" ? "voice" : null);
     if (panel === "voice") return;
     setSidePanelState(sidePanelSessionKey, panel);
-  }, [setSidePanelState, sidePanelSessionKey]);
+  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey]);
 
-  const toggleCurrentSidePanel = useCallback((panel: SidePanelItem) => {
+  const toggleCurrentSidePanel = useCallback((panel: SidePanelItem, target: SidePanelTarget = BROWSER_TARGET) => {
+    const command = routeSidePanelRequest(panel, inDeskFrame, { ...target, toggle: true });
+    if (command) return applyFramePanelCommand(command, useFrameStore.getState());
     if (panel === "voice") {
       toggleSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, "voice");
       return;
     }
     setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, null);
     toggleSidePanelState(sidePanelSessionKey, panel);
-  }, [setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
+  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
 
   // When the agent calls a built-in browser tool, the main process opens
   // the WebContentsView and sends panel-opened; when hide_browser is called
@@ -538,7 +557,7 @@ export function SessionPage(props: SessionPageProps) {
       preview: target.preview,
     });
     preserveSidePanelOnPanelOpenRef.current = true;
-    setCurrentSidePanel("panel");
+    setCurrentSidePanel("panel", { tab: "files", file: target.id });
   }, [activePanelTab?.id, browserUrlForTarget, downloadOpenTarget, openTab, props.selectedSessionId, props.selectedWorkspaceDisplay.workspaceType, props.selectedWorkspaceRoot, setCurrentSidePanel]);
   const closeRightPane = useCallback(() => {
     setCurrentSidePanel(null);
@@ -571,6 +590,9 @@ export function SessionPage(props: SessionPageProps) {
       if (provider !== "auto" && provider !== "builtin") {
         return { ok: false, error: `Browser provider is not available yet: ${provider}` };
       }
+      // Take over in the Desk panel hands the browser to the person; Desk waits for it back.
+      const held = browserHeldResult(useFrameStore.getState().browser.desk);
+      if (held) return held;
       setCurrentSidePanel("panel");
       return window.__REDROB_ELECTRON__?.browser?.openUrl?.(url, provider);
     },
@@ -587,6 +609,8 @@ export function SessionPage(props: SessionPageProps) {
     previewArgs: { proxy: "env:DE" },
     disabled: !isElectronRuntime(),
     execute: async (args) => {
+      const held = browserHeldResult(useFrameStore.getState().browser.desk);
+      if (held) return held;
       const proxy = controlStringArg(args, "proxy") || "";
       const setProxy = window.__REDROB_ELECTRON__?.browser?.setProxy;
       if (!setProxy) return { ok: false, error: "Built-in browser is not available." };
@@ -596,7 +620,7 @@ export function SessionPage(props: SessionPageProps) {
   useControlAction(setBrowserProxyControlAction);
   const openArtifactRailPane = useCallback(() => {
     if (!hasArtifactTargets) {
-      setCurrentSidePanel("panel");
+      setCurrentSidePanel("panel", FILES_TARGET);
       return;
     }
     if (!props.selectedSessionId) return;
@@ -624,14 +648,14 @@ export function SessionPage(props: SessionPageProps) {
     }
 
     if (panelRailActive && activeTab?.type === "artifact") {
-      toggleCurrentSidePanel("panel");
+      toggleCurrentSidePanel("panel", FILES_TARGET);
       return;
     }
     if (!panelRailActive) {
       preserveSidePanelOnPanelOpenRef.current = true;
     }
     if (!panelRailActive) {
-      toggleCurrentSidePanel("panel");
+      toggleCurrentSidePanel("panel", FILES_TARGET);
     }
   }, [artifactFileTargets, hasArtifactTargets, openTab, panelRailActive, props.selectedSessionId, selectTab, sessionPanelState, setCurrentSidePanel, toggleCurrentSidePanel]);
   const openVoiceRailPane = useCallback(() => {
@@ -1027,7 +1051,7 @@ export function SessionPage(props: SessionPageProps) {
           "relative min-h-0 flex-1 mac:bg-transparent",
           leftSidebarResizing &&
             "**:data-[slot=sidebar-container]:transition-none **:data-[slot=sidebar-gap]:transition-none",
-          !shellConfig.sidebar && "**:data-[slot=sidebar-container]:hidden **:data-[slot=sidebar-gap]:hidden",
+          !showSidebar && "**:data-[slot=sidebar-container]:hidden **:data-[slot=sidebar-gap]:hidden",
         )}
         style={sidebarProviderStyle}
       >
@@ -1096,14 +1120,14 @@ export function SessionPage(props: SessionPageProps) {
           <ResizablePanelGroup
             orientation="horizontal"
             onLayoutChanged={sidePanelOpen ? commitBrowserPanelWidth : undefined}
-            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-[14px]"
+            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-(--card-radius)"
           >
             <ResizablePanel minSize={isMobile ? "0px" : "360px"} className="min-w-0">
-              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-dls-surface max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-[14px] lg:border lg:border-border lg:shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:lg:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
             <div className="flex min-w-0 items-center gap-3">
-              {shellConfig.sidebar ? <SidebarTrigger className="mac:hidden" /> : null}
-              <h1 className="truncate text-[13px] font-medium text-dls-text">
+              {showSidebar ? <SidebarTrigger className="mac:hidden" /> : null}
+              <h1 className="truncate text-sm font-medium text-dls-text">
                 {props.primaryTitle
                   ? props.primaryTitle
                   : props.mainContentTitle
@@ -1113,18 +1137,18 @@ export function SessionPage(props: SessionPageProps) {
                   : selectedSessionTitle || t("session.default_title")}
               </h1>
               {props.developerMode ? (
-                <span className="hidden text-[12px] text-dls-secondary lg:inline">
+                <span className="hidden text-xs text-dls-secondary lg:inline">
                   {props.headerStatus}
                 </span>
               ) : null}
               {props.busyHint ? (
-                <span className="hidden text-[12px] text-dls-secondary lg:inline">
+                <span className="hidden text-xs text-dls-secondary lg:inline">
                   {props.busyHint}
                 </span>
               ) : null}
             </div>
 
-            <div className="flex items-center gap-1.5 text-gray-10 mac:titlebar-no-drag">
+            <div className="flex items-center gap-1.5 text-subtle-foreground mac:titlebar-no-drag">
               {!props.primarySlot && findButtonSessionId && !hasMainContentTakeover ? (
                 <Tooltip>
                   <TooltipTrigger
@@ -1132,7 +1156,7 @@ export function SessionPage(props: SessionPageProps) {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        className="hidden rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:inline-flex"
+                        className="hidden rounded-xl text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground lg:inline-flex"
                         aria-label={t("find.in_conversation")}
                         onClick={() => useSessionFindStore.getState().openFind({ sessionId: findButtonSessionId })}
                       >
@@ -1143,14 +1167,15 @@ export function SessionPage(props: SessionPageProps) {
                   <TooltipContent>Find in conversation (⌘F)</TooltipContent>
                 </Tooltip>
               ) : null}
-              <Tooltip>
+              {/* The Desk frame has its own side panel button. */}
+              {inDeskFrame ? null : <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
                       variant="ghost"
                       size="icon-sm"
                       className={cn(
-                        "hidden rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:inline-flex",
+                        "hidden rounded-xl text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground lg:inline-flex",
                         sidePanelOpen && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
                       )}
                       aria-label={sidePanelOpen ? "Close side panel" : "Open side panel"}
@@ -1168,14 +1193,14 @@ export function SessionPage(props: SessionPageProps) {
                   }
                 />
                 <TooltipContent>{sidePanelOpen ? "Close side panel" : "Open side panel"}</TooltipContent>
-              </Tooltip>
+              </Tooltip>}
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      className="rounded-xl text-gray-10 transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+                      className="rounded-xl text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
                       aria-label={t("session.more_actions")}
                     >
                       <MoreHorizontal size={18} />
@@ -1272,7 +1297,7 @@ export function SessionPage(props: SessionPageProps) {
                   // loading pane reads as "something is wrong". Keep it to a
                   // quiet text shimmer.
                   <div className="px-6 py-16 text-center" role="status" aria-live="polite">
-                    <span className="ow-text-shimmer text-[12px] leading-5">
+                    <span className="ow-text-shimmer text-xs leading-5">
                       {t("session.loading_detail")}
                     </span>
                   </div>
@@ -1284,7 +1309,7 @@ export function SessionPage(props: SessionPageProps) {
                       aria-live="polite"
                     >
                       <OwDotTicker size="md" />
-                      <div className="text-[12px] leading-5 text-dls-secondary">
+                      <div className="text-xs leading-5 text-dls-secondary">
                         {t("session.loading_detail")}
                       </div>
                     </div>
@@ -1511,7 +1536,7 @@ export function SessionPage(props: SessionPageProps) {
                   maxSize="70%"
                   className="min-h-0 overflow-hidden pl-2 lg:flex lg:flex-col"
                 >
-                  <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[14px] border border-border bg-dls-surface shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.45)] mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+                  <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-(--card-radius) border border-border bg-card shadow-card mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
                   {activeSidePanel === "extensions" && props.settingsSlot ? (
                     <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-background">
                       {props.settingsSlot}
@@ -1583,8 +1608,9 @@ export function SessionPage(props: SessionPageProps) {
               </Sheet>
             ) : null}
           </ResizablePanelGroup>
-          <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
-            {isElectronRuntime() ? (
+          {/* In the Desk frame the browser and the files are the frame's panel; only voice stays here. */}
+          {inDeskFrame && !voiceExtensionEnabled ? null : <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
+            {isElectronRuntime() && !inDeskFrame ? (
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -1617,7 +1643,7 @@ export function SessionPage(props: SessionPageProps) {
                 <Mic2 size={15} />
               </Button>
             ) : null}
-            <Button
+            {inDeskFrame ? null : <Button
               variant="ghost"
               size="icon-sm"
               className={cn(
@@ -1631,15 +1657,15 @@ export function SessionPage(props: SessionPageProps) {
             >
               <FileText size={15} />
               {artifactTargetCount > 0 ? (
-                <span className="absolute right-0 top-0 flex min-w-3.5 translate-x-1 -translate-y-1 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold leading-3 text-primary-foreground">
+                <span className="absolute right-0 top-0 flex min-w-3.5 translate-x-1 -translate-y-1 items-center justify-center rounded-full bg-primary px-1 text-2xs font-semibold leading-3 text-primary-foreground">
                   {artifactTargetCount > 9 ? "9+" : artifactTargetCount}
                 </span>
               ) : null}
-            </Button>
-          </aside>
+            </Button>}
+          </aside>}
           </div>
         </SidebarInset>
-        {shellConfig.sidebar ? <SidebarTrigger className="hidden mac:absolute mac:left-[88px] top-[3px] z-50 mac:flex titlebar-no-drag" /> : null}
+        {showSidebar ? <SidebarTrigger className="hidden mac:absolute mac:left-[88px] top-[3px] z-50 mac:flex titlebar-no-drag" /> : null}
       </SidebarProvider>
 
       {props.providerAuthModal ? <ProviderAuthModal {...props.providerAuthModal} /> : null}

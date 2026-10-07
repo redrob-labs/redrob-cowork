@@ -14,6 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
 import type { PendingPermission } from "@/app/types";
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { useFrameStore } from "@/react-app/desk/store/frame-store";
+import { DeskApproval } from "@/react-app/desk/thread/desk-thread";
+import { approvalActions } from "@/react-app/desk/thread/thread-logic";
 
 type PermissionPresentation = {
   title: string;
@@ -274,41 +278,41 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
         </AlertDialogHeader>
 
         <div className="space-y-3 px-6 py-5">
-          <div className="rounded-[20px] border border-dls-border bg-dls-hover/45 p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+          <div className="rounded-2xl border border-dls-border bg-dls-hover/45 p-4">
+            <div className="text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
               {t("session.permission_label")}
             </div>
-            <div className="mt-2 font-mono text-[14px] leading-6 text-dls-text">
+            <div className="mt-2 font-mono text-sm leading-6 text-dls-text">
               {presentation.permissionLabel}
             </div>
             {presentation.note ? (
-              <p className="mt-2 text-[13px] leading-5 text-dls-secondary">
+              <p className="mt-2 text-sm leading-5 text-dls-secondary">
                 {presentation.note}
               </p>
             ) : null}
           </div>
 
-          <div className="rounded-[20px] border border-dls-border bg-dls-surface p-4">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+          <div className="rounded-2xl border border-dls-border bg-dls-surface p-4">
+            <div className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
               <HardDrive size={13} />
               {presentation.scopeLabel}
             </div>
-            <div className="mt-3 rounded-2xl border border-dls-border bg-dls-hover/55 px-3.5 py-3 font-mono text-[13px] leading-6 text-dls-text">
+            <div className="mt-3 rounded-2xl border border-dls-border bg-dls-hover/55 px-3.5 py-3 font-mono text-sm leading-6 text-dls-text">
               <span className="block break-all">{presentation.scopeValue}</span>
             </div>
           </div>
 
           {detailRows.length > 0 ? (
-            <div className="rounded-[20px] border border-dls-border bg-dls-surface p-4">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
+            <div className="rounded-2xl border border-dls-border bg-dls-surface p-4">
+              <div className="text-2xs font-semibold uppercase tracking-[0.16em] text-dls-secondary">
                 {t("session.permission_review_label")}
               </div>
               <div className="mt-3 space-y-3">
                 {detailRows.map((row) => (
                   <div key={row.label}>
-                    <div className="text-[12px] font-medium text-dls-secondary">{row.label}</div>
+                    <div className="text-xs font-medium text-dls-secondary">{row.label}</div>
                     <div
-                      className={`mt-1 rounded-xl border border-dls-border bg-dls-hover/55 px-3 py-2 font-mono text-[12px] leading-5 text-dls-text ${
+                      className={`mt-1 rounded-xl border border-dls-border bg-dls-hover/55 px-3 py-2 font-mono text-xs leading-5 text-dls-text ${
                         row.multiline ? "max-h-44 overflow-auto whitespace-pre-wrap" : "break-all"
                       }`}
                     >
@@ -321,12 +325,12 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
           ) : null}
 
           {hasMetadata ? (
-            <details className="group rounded-[18px] border border-dls-border bg-dls-surface px-4 py-3">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13px] font-medium text-dls-text">
+            <details className="group rounded-xl border border-dls-border bg-dls-surface px-4 py-3">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-dls-text">
                 <span>{t("session.details_label")}</span>
                 <ChevronRight size={15} className="text-dls-secondary transition-transform group-open:rotate-90" />
               </summary>
-              <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-dls-border bg-dls-hover/45 px-3 py-2.5 text-[12px] leading-5 text-dls-secondary">
+              <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-dls-border bg-dls-hover/45 px-3 py-2.5 text-xs leading-5 text-dls-secondary">
                 {stringifyMetadata(metadata, props.safeStringify)}
               </pre>
             </details>
@@ -334,7 +338,7 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
         </div>
 
         <AlertDialogFooter className="flex-col gap-4">
-          <p className="mb-4 text-[12px] leading-5 text-dls-secondary">
+          <p className="mb-4 text-xs leading-5 text-dls-secondary">
             {t("session.permission_decision_hint")}
           </p>
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-[1fr_auto_auto]">
@@ -371,6 +375,8 @@ export function PermissionApprovalModal(props: PermissionApprovalModalProps) {
 
 export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
   const presentation = useMemo(() => describePermissionRequest(props.permission), [props.permission]);
+  const inDeskFrame = useInDeskFrame();
+  const developerMode = useFrameStore((state) => state.developerMode);
   const metadata =
     props.permission.metadata && typeof props.permission.metadata === "object"
       ? props.permission.metadata
@@ -378,28 +384,53 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
   const hasMetadata = Object.keys(metadata).length > 0;
   const Icon = presentation.isDoomLoop ? RefreshCcw : ShieldCheck;
 
+  // Inside the Desk frame the ask is the design system's ApprovalStep: Approve answers once,
+  // and widening it to the whole session is for Developer mode only.
+  if (inDeskFrame && props.respondPermission) {
+    return (
+      <div className="border-b border-border px-4 py-3" data-slot="permission-approval">
+        <DeskApproval
+          title={presentation.title}
+          description={presentation.note ? `${presentation.message} ${presentation.note}` : presentation.message}
+          detail={`${presentation.permissionLabel}: ${presentation.scopeValue}`}
+          busy={props.busy}
+          {...approvalActions(props.permission.id, props.respondPermission, developerMode)}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-hidden border-b border-dls-border bg-transparent">
-        <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border border-dls-border bg-dls-hover text-dls-secondary">
-              <Icon size={16} strokeWidth={1.9} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[13px] font-medium leading-5 text-dls-text">{presentation.title}</div>
-              <div className="mt-0.5 text-[12px] leading-5 text-dls-secondary">{presentation.message}</div>
-              {presentation.note ? (
-                <div className="mt-1 text-[12px] leading-5 text-dls-secondary">{presentation.note}</div>
-              ) : null}
+    // The design system's ApprovalStep (`rr-approval`): the agent has stopped and is
+    // asking before it does something. A group named by its title, the warning
+    // shield, what it wants to do, the exact scope on the sunken detail well, and
+    // the answers. The safer one-shot approval stays ahead of the session-wide
+    // one in keyboard order; the design system's reject, approve and "always"
+    // weights are secondary, primary and ghost.
+    <div className="border-b border-border px-4 py-3">
+      <div
+        role="group"
+        aria-label={presentation.title}
+        className="rr-approval max-w-none"
+        data-slot="permission-approval"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="rr-approval__head min-w-0">
+            <span className="rr-approval__icon" aria-hidden="true">
+              <Icon className="size-full" strokeWidth={1.9} />
+            </span>
+            <div className="flex min-w-0 flex-col gap-1">
+              <span className="rr-approval__title">{presentation.title}</span>
+              <span className="rr-approval__what">{presentation.message}</span>
+              {presentation.note ? <span className="rr-approval__what">{presentation.note}</span> : null}
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+          <div className="rr-approval__actions shrink-0 flex-wrap sm:justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
-              className="border-destructive-muted/25 text-destructive-ink hover:bg-destructive-soft/40"
               onClick={() => props.respondPermission?.(props.permission.id, "reject")}
               disabled={props.busy || !props.respondPermission}
             >
@@ -417,7 +448,7 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => props.respondPermission?.(props.permission.id, "always")}
               disabled={props.busy || !props.respondPermission}
@@ -428,38 +459,29 @@ export function PermissionApprovalPanel(props: PermissionApprovalModalProps) {
           </div>
         </div>
 
-        <div className="border-t border-dls-border px-4 py-3">
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
-                {t("session.permission_label")}
-              </div>
-              <div className="mt-1 font-mono text-[12px] leading-5 text-dls-text">
-                {presentation.permissionLabel}
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-dls-secondary">
-                {presentation.scopeLabel}
-              </div>
-              <div className="mt-1 truncate rounded-lg border border-dls-border bg-dls-hover/55 px-2.5 py-1.5 font-mono text-[12px] leading-5 text-dls-text">
-                {presentation.scopeValue}
-              </div>
-            </div>
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-muted-foreground">{t("session.permission_label")}</div>
+            <div className="rr-approval__detail mt-1 py-1.5">{presentation.permissionLabel}</div>
           </div>
-
-          {hasMetadata ? (
-            <details className="group mt-3 rounded-xl border border-dls-border bg-dls-surface px-3 py-2">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[12px] font-medium text-dls-text">
-                <span>{t("session.details_label")}</span>
-                <ChevronRight size={14} className="text-dls-secondary transition-transform group-open:rotate-90" />
-              </summary>
-              <pre className="mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-dls-hover/45 px-3 py-2 text-[11px] leading-5 text-dls-secondary">
-                {stringifyMetadata(metadata, props.safeStringify)}
-              </pre>
-            </details>
-          ) : null}
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-muted-foreground">{presentation.scopeLabel}</div>
+            <div className="rr-approval__detail mt-1 truncate py-1.5">{presentation.scopeValue}</div>
+          </div>
         </div>
+
+        {hasMetadata ? (
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-foreground">
+              <span>{t("session.details_label")}</span>
+              <ChevronRight size={14} className="text-muted-foreground transition-transform group-open:rotate-90" />
+            </summary>
+            <pre className="rr-approval__detail mt-2 max-h-32 overflow-auto whitespace-pre-wrap break-words text-2xs leading-5 text-muted-foreground">
+              {stringifyMetadata(metadata, props.safeStringify)}
+            </pre>
+          </details>
+        ) : null}
+      </div>
     </div>
   );
 }

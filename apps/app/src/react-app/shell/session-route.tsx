@@ -2,12 +2,28 @@
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
+import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
+import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
+import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/playbooks/start-chat";
+import { syncCrashReports } from "@/react-app/desk/settings/crash-reports";
+import { useCheckStore } from "@/react-app/desk/thread/check-store";
+import { deskSystemText } from "@/react-app/desk/thread/memory-off";
+import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
+import { toNote } from "@/react-app/desk/services/real-services";
+import { previewRedaction, privacySettingsFor, usePrivacyConfirmStore } from "@/react-app/desk/privacy/privacy-send";
+import { DEFAULT_PRIVACY_LEVEL, usePrivacyMapStore } from "@/react-app/desk/privacy/privacy-store";
+import { restore } from "@/react-app/desk/privacy/redact";
+import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
+import { useDeskCrossCheck } from "@/react-app/desk/thread/use-desk-cross-check";
 import type {
   AgentPartInput,
   FilePartInput,
@@ -148,6 +164,7 @@ import { buildCommandPaletteSessions } from "./command-palette-sessions";
 import { SessionSearchDialog } from "./session-search-dialog";
 import type { SessionMessageFetcher } from "@/react-app/domains/session/search/session-search";
 import { useBootState } from "./boot-state";
+import { useFrameStore } from "@/react-app/desk/store/frame-store";
 import {
   forgetWorkspaceMemory,
   readLastSessionFor,
@@ -444,10 +461,8 @@ export function SessionRoute() {
   const [redrobServerHostInfoState, setRedrobServerHostInfoState] = useState<RedrobServerInfo | null>(null);
   const [redrobServerSettingsVersion, setRedrobServerSettingsVersion] = useState(0);
 
-  const [developerMode, setDeveloperMode] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("redrob.developerMode") === "1";
-  });
+  const developerMode = useFrameStore((s) => s.developerMode);
+  const setDeveloperMode = useFrameStore((s) => s.setDeveloperMode);
 
   // Progressive disclosure: a first-run user starts without the status menu and
   // the notification bell, and they appear once the user has opened a few
@@ -455,6 +470,11 @@ export function SessionRoute() {
   useEffect(() => {
     recordSessionOpened();
   }, [recordSessionOpened]);
+
+  // The desktop app sends crash reports only while the person's choice says so.
+  useEffect(() => {
+    void syncCrashReports(local.prefs.crashReports);
+  }, [local.prefs.crashReports]);
   const [variantRun, setVariantRun] = useState<VariantRun | null>(null);
   /** The run the poll belongs to, so a discarded run's poll stops instead of running to its deadline. */
   const variantRunRef = useRef<VariantRun | null>(null);
@@ -513,6 +533,8 @@ export function SessionRoute() {
   // Agent selection is persisted in local prefs (like the model variant) so
   // it survives reloads instead of silently falling back to "build" (#2101).
   const selectedAgent = local.prefs.selectedAgent;
+  // Inside the Desk frame the chat's Plan or Run decides the agent a prompt goes to.
+  const inDeskFrame = useInDeskFrame();
   const setSelectedAgent = useCallback(
     (agent: string | null) => {
       local.setPrefs((previous) => ({ ...previous, selectedAgent: agent }));
@@ -1009,6 +1031,24 @@ export function SessionRoute() {
         const sendVariant = sessionModelSelection ? sessionModelSelection.variant : modelVariantValue;
         if (!sessionModelSelection && selectedModelUnavailable) throw new Error(t("composer.selected_model_unavailable"));
 
+        // Privacy protection: in the desktop app, what the person typed leaves with private
+        // details swapped for placeholders. Settings that cannot be read fall back to the
+        // default level rather than to sending as written.
+        const privacySettings = inDeskFrame && isDesktopRuntime() && client && selectedWorkspaceId
+          ? await privacySettingsFor(client, selectedWorkspaceId).catch(() => ({ level: DEFAULT_PRIVACY_LEVEL, names: [] }))
+          : null;
+        const previousPlaceholders = usePrivacyMapStore.getState().maps[targetSessionId] ?? {};
+        if (privacySettings?.level === "strict" && draft.mode !== "shell") {
+          const hidden = previewRedaction(text, privacySettings, previousPlaceholders);
+          if (hidden.length && !(await usePrivacyConfirmStore.getState().ask(hidden))) {
+            return { outcome: "cancelled", reason: "context_changed" };
+          }
+        }
+        // Labelling happens in redrob-server's privacy gate, for everything the model reads (typed
+        // text, attachments, tool and connector results, these notes), on desktop and web alike. The
+        // app sends what the person wrote; the Strict confirm above is the only part left here.
+        const sendable = (value: string) => value;
+
         await sendWithRevertRollback({
           revertMessageId: draft.revertMessageId,
           abort: () => abortSessionSafe(opencodeClient, targetSessionId, selectedWorkspaceRoot || undefined, {
@@ -1041,7 +1081,7 @@ export function SessionRoute() {
               const result = await opencodeClient.session.command({
                 sessionID: targetSessionId,
                 command: draft.command.name,
-                arguments: draft.command.arguments,
+                arguments: sendable(draft.command.arguments),
               });
               if (result.error) {
                 throw new Error(serializeSDKError(result.error));
@@ -1049,18 +1089,49 @@ export function SessionRoute() {
               return;
             }
 
-            const parts = await draftToParts(draft, selectedWorkspaceRoot, targetSessionId, selectedWorkspaceEndpoint);
+            const draftParts = await draftToParts(draft, selectedWorkspaceRoot, targetSessionId, selectedWorkspaceEndpoint);
+            const parts = draftParts;
             const envSystemContext = await buildRedrobEnvSystemContext(client, {
               cacheKey: targetSessionId,
               runtimeKey: environmentRuntimeKey,
             });
+            const deskChats = useDeskComposerStore.getState().chats;
+            // Inside the frame the chat's saved notes ride in the system text, or the memory
+            // rule when memory is off. A workspace other than Personal is a project.
+            const deskMemory = memoryFor(deskChats, targetSessionId, Boolean(selectedWorkspace && selectedWorkspace.kind !== "personal"));
+            const notesContext = inDeskFrame && deskMemory !== "none" && client
+              ? memoryContext(
+                  await notesCacheFor(client, async () => (await client.listMemories()).map(toNote)).get().catch(() => []),
+                  { memory: deskMemory, projectId: selectedWorkspaceId || null },
+                ).text
+              : null;
+            // Notes go out the same way the message does: private details as placeholders.
+            const deskNotes = notesContext ? sendable(notesContext) : null;
+            const deskSystem = inDeskFrame
+              ? deskSystemText(deskMemory, envSystemContext || undefined, deskNotes)
+              : envSystemContext;
+            const system = deskSystem;
+            // The map back to the real values stays on this computer, for showing the chat.
+            // A Run prompt's answer is what Cross-check reads, once it arrives.
+            if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {
+              useCheckStore.getState().expect(targetSessionId, {
+                question: sendable(text),
+                planned: isPlanRunPrompt(text),
+                ...(sendModel ? { model: { providerID: sendModel.providerID, modelID: sendModel.modelID } } : {}),
+                ...(sendVariant ? { variant: sendVariant } : {}),
+              });
+            }
             const result = await opencodeClient.session.promptAsync({
               sessionID: targetSessionId,
               parts,
               model: sendModel ?? undefined,
-              agent: selectedAgent ?? undefined,
+              agent: resolvePromptAgent({
+                inFrame: inDeskFrame,
+                mode: modeFor(useDeskComposerStore.getState().chats, targetSessionId, local.prefs.deskNewChatMode),
+                selectedAgent,
+              }) ?? undefined,
               ...(sendVariant ? { variant: sendVariant } : {}),
-              ...(envSystemContext ? { system: envSystemContext } : {}),
+              ...(system ? { system } : {}),
             });
             if (result.error) {
               throw new Error(serializeSDKError(result.error));
@@ -1191,6 +1262,7 @@ export function SessionRoute() {
     hasUsableModel,
     handleApplyEnvironmentChanges,
     environmentRuntimeKey,
+    inDeskFrame,
     local,
     listAgents,
     listSlashCommands,
@@ -1504,6 +1576,8 @@ export function SessionRoute() {
    * subscription exists. Nothing is added to the sidebar: a fork that exists for the length of one choice
    * is not a session the user has to manage.
    */
+  // The redrob-server client, named apart: the variant runner below shadows `client` with the engine one.
+  const deskServerClient = client;
   const handleVariantRun = useCallback(async (
     command:
       | FanOutCommand
@@ -1552,8 +1626,12 @@ export function SessionRoute() {
       What each variant is actually sent. Compare re-asks the question; paraphrase is handed the answer with
       an instruction to rewrite it and keep every fact.
     */
-    const requestText =
+    const writtenRequest =
       command.kind === "paraphrase" ? buildParaphrasePrompt(command.prompt) : command.prompt;
+    // The privacy gate in redrob-server labels the variants' requests too, and restores their answers.
+    const requestText = writtenRequest;
+    const keepPlaceholders: string | undefined = undefined;
+    const shown = (value: string) => restore(value, usePrivacyMapStore.getState().maps[sessionId] ?? {});
     let run = startingRun({ kind: command.kind, prompt: command.prompt, slots });
     variantRunRef.current = run;
     setVariantRun(run);
@@ -1583,6 +1661,7 @@ export function SessionRoute() {
             model: { providerID: slot.model.providerID, modelID: slot.model.modelID },
             variant: slot.model.variant ?? undefined,
             parts: [{ type: "text", text: requestText }],
+            ...(keepPlaceholders ? { system: keepPlaceholders } : {}),
           });
         } catch (error) {
           publish(
@@ -1615,7 +1694,7 @@ export function SessionRoute() {
           ) as never[];
           const text = finishedAssistantText(messages);
           if (text) {
-            publish(withVariant(run, variant.index, { status: "done", text }));
+            publish(withVariant(run, variant.index, { status: "done", text: shown(text) }));
           } else {
             /*
               Show the answer as it is written. A column that says "working" for forty seconds and then
@@ -1623,7 +1702,8 @@ export function SessionRoute() {
               Only the "done" branch above makes a variant adoptable, so streaming text here cannot be
               mistaken for a finished answer.
             */
-            const partial = partialAssistantText(messages);
+            const partialText = partialAssistantText(messages);
+            const partial = partialText ? shown(partialText) : partialText;
             if (partial && partial !== run.variants[variant.index]?.text) {
               publish(withVariant(run, variant.index, { text: partial }));
             }
@@ -1634,7 +1714,7 @@ export function SessionRoute() {
       }
     }
     return slots.length;
-  }, [endpointForWorkspace, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
+  }, [deskServerClient, endpointForWorkspace, inDeskFrame, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
 
   /**
    * Keep the chosen answer by continuing in its fork, and delete the rest.
@@ -2010,13 +2090,9 @@ export function SessionRoute() {
     searchText: "developer dev mode debug diagnostics toggle enable disable",
     action: () => {
       setCommandPaletteOpen(false);
-      setDeveloperMode((current) => {
-        const next = !current;
-        try { window.localStorage.setItem("redrob.developerMode", next ? "1" : "0"); } catch {}
-        return next;
-      });
+      setDeveloperMode(!developerMode);
     },
-  }), [developerMode]);
+  }), [developerMode, setDeveloperMode]);
 
   const buildCommandDiagnosticsBundle = useCallback(() => buildDiagnosticsBundleJson({
     anyActiveRuns: activeReloadBlockingSessions.length > 0,
@@ -2253,6 +2329,8 @@ export function SessionRoute() {
             }
             // One-step run: the session surface sends the seeded draft itself.
             markComposerAutoSend(session.id);
+            // Plan or Run and the memory picked on the new chat screen belong to this chat now.
+            useDeskComposerStore.getState().claimNewChat(session.id);
           }
           writeLastSessionFor(targetWorkspaceId, session.id);
           rememberPendingCreatedSession(targetWorkspaceId, session.id);
@@ -2280,6 +2358,68 @@ export function SessionRoute() {
    * workspace under the user's home folder instead of asking where to put
    * it. Falls back to the create-workspace modal off desktop.
    */
+  // A new chat that sends its first prompt itself: the new chat screen, and a playbook's Run.
+  const createTaskWithPrompt = (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => {
+    void (async () => {
+      const workspace = workspaces.find((item) => item.id === workspaceId);
+      if (!workspace) return;
+      const endpoint = endpointForWorkspace(workspace);
+      if (!endpoint?.token) return;
+      const workspaceClient = createClient(
+        endpoint.opencodeBaseUrl,
+        workspace.path?.trim() || undefined,
+        { token: endpoint.token, mode: "redrob" },
+      );
+      try {
+        const session = unwrap(
+          await workspaceClient.session.create({ directory: workspace.path?.trim() || undefined }),
+        );
+        const firstTaskPrompt = prompt.trim();
+        if (firstTaskPrompt) {
+          const firstTaskAttachments = attachments ?? [];
+          // Attachment chips only survive in-memory (File objects), so the
+          // persisted fallback draft drops their tokens.
+          saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
+          // The composer reads its draft from the composer state store,
+          // not the persisted draft store — seed both.
+          useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
+          if (firstTaskAttachments.length) {
+            useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
+          }
+          // One-step run: the session surface sends the seeded draft itself.
+          markComposerAutoSend(session.id);
+          // Plan or Run and the memory picked on the new chat screen belong to this chat now.
+          useDeskComposerStore.getState().claimNewChat(session.id);
+        }
+        writeActiveWorkspaceId(workspaceId || null);
+        writeLastSessionFor(workspaceId, session.id);
+        rememberPendingCreatedSession(workspaceId, session.id);
+        applyLastUsedModelToSession(session.id);
+        setSessionsByWorkspaceId((current) => ({
+          ...current,
+          [workspaceId]: [session, ...(current[workspaceId] ?? [])],
+        }));
+        navigateToWorkspaceSession(workspaceId, session.id);
+        focusPromptSoon();
+      } catch {
+        // Fall back to normal task creation without prompt
+        void handleCreateTaskInWorkspace(workspaceId);
+      }
+    })();
+  };
+
+  // A playbook asked for a chat from its own screen: start it here, where chats are made.
+  const startPendingChat = useEffectEvent((pending: PendingDeskChat) => {
+    if (!workspaces.some((item) => item.id === pending.workspaceId)) return;
+    useDeskStartStore.getState().clear();
+    useDeskComposerStore.getState().setMode(NEW_CHAT_KEY, pending.mode);
+    createTaskWithPrompt(pending.workspaceId, pending.prompt);
+  });
+  const pendingDeskChat = useDeskStartStore((state) => state.pending);
+  useEffect(() => {
+    if (pendingDeskChat) startPendingChat(pendingDeskChat);
+  }, [pendingDeskChat, workspaces]);
+
   const handleChatFirstTask = useCallback((prompt: string, attachments?: ComposerAttachment[]) => {
     void (async () => {
       if (!isDesktopRuntime()) {
@@ -2320,6 +2460,29 @@ export function SessionRoute() {
     },
   }), [handleCreateWorkspace]);
   useControlAction(createWorkspaceControlAction);
+
+  // The Desk menu lists this workspace's recent chats through the same server connection.
+  const deskChatsVersion = useMemo(
+    () => (sessionsByWorkspaceId[selectedWorkspaceId] ?? []).map((session) => `${session.id}:${session.title}`).join("|"),
+    [sessionsByWorkspaceId, selectedWorkspaceId],
+  );
+  useEffect(() => {
+    publishDeskConnection({
+      client: selectedWorkspaceEndpoint?.client ?? null,
+      opencode: opencodeClient ?? null,
+      workspaceId: selectedWorkspaceEndpoint?.workspaceId || null,
+      workspaceRoot: selectedWorkspace?.workspaceType === "remote" ? null : selectedWorkspaceRoot || null,
+      chatsVersion: deskChatsVersion,
+    });
+  }, [deskChatsVersion, opencodeClient, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
+  // The local server (not a remote workspace's) holds the Personal workspace.
+  useEffect(() => ensurePersonalWorkspaceOnce(client), [client]);
+
+  useDeskCrossCheck({
+    client: opencodeClient,
+    directory: selectedWorkspaceRoot || undefined,
+    levels: local.prefs.deskCrossCheck,
+  });
 
   return (
     <WorkspaceProvider
@@ -2474,52 +2637,7 @@ export function SessionRoute() {
             }
           });
         },
-        onCreateTaskWithPrompt: (workspaceId, prompt, attachments) => {
-          void (async () => {
-            const workspace = workspaces.find((item) => item.id === workspaceId);
-            if (!workspace) return;
-            const endpoint = endpointForWorkspace(workspace);
-            if (!endpoint?.token) return;
-            const workspaceClient = createClient(
-              endpoint.opencodeBaseUrl,
-              workspace.path?.trim() || undefined,
-              { token: endpoint.token, mode: "redrob" },
-            );
-            try {
-              const session = unwrap(
-                await workspaceClient.session.create({ directory: workspace.path?.trim() || undefined }),
-              );
-              const firstTaskPrompt = prompt.trim();
-              if (firstTaskPrompt) {
-                const firstTaskAttachments = attachments ?? [];
-                // Attachment chips only survive in-memory (File objects), so the
-                // persisted fallback draft drops their tokens.
-                saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
-                // The composer reads its draft from the composer state store,
-                // not the persisted draft store — seed both.
-                useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
-                if (firstTaskAttachments.length) {
-                  useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
-                }
-                // One-step run: the session surface sends the seeded draft itself.
-                markComposerAutoSend(session.id);
-              }
-              writeActiveWorkspaceId(workspaceId || null);
-              writeLastSessionFor(workspaceId, session.id);
-              rememberPendingCreatedSession(workspaceId, session.id);
-              applyLastUsedModelToSession(session.id);
-              setSessionsByWorkspaceId((current) => ({
-                ...current,
-                [workspaceId]: [session, ...(current[workspaceId] ?? [])],
-              }));
-              navigateToWorkspaceSession(workspaceId, session.id);
-              focusPromptSoon();
-            } catch {
-              // Fall back to normal task creation without prompt
-              void handleCreateTaskInWorkspace(workspaceId);
-            }
-          })();
-        },
+        onCreateTaskWithPrompt: createTaskWithPrompt,
         onOpenRenameWorkspace: handleOpenRenameWorkspace,
         onShareWorkspace: handleShareWorkspace,
         onRevealWorkspace: (id) => void handleRevealWorkspace(id),

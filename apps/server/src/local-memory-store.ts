@@ -128,6 +128,42 @@ export async function saveMemory(config: ServerConfig, draft: MemoryDraft): Prom
   return memory;
 }
 
+/** A note that came with a team file. It is read-only here: the team file is where it changes. */
+export const LOCKED_MEMORY_TAG = "desk-locked";
+
+export function isLockedMemory(memory: Pick<Memory, "tags">): boolean {
+  return memory.tags?.includes(LOCKED_MEMORY_TAG) ?? false;
+}
+
+/** The memory with this id, or null. */
+export async function findMemory(config: ServerConfig, id: string): Promise<Memory | null> {
+  return (await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? []).find((memory) => memory.id === id) ?? null;
+}
+
+/**
+ * Changes a memory in place: the id and createdAt are kept, updatedAt moves. Returns null
+ * when no memory carried that id, so the route can answer 404.
+ */
+export async function updateMemory(
+  config: ServerConfig,
+  id: string,
+  patch: { content?: string; tags?: string[] | null },
+): Promise<Memory | null> {
+  const existing = await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? [];
+  const current = existing.find((memory) => memory.id === id);
+  if (!current) return null;
+  const content = patch.content === undefined ? current.content : patch.content.trim();
+  if (!content) throw new Error("A memory needs content.");
+  const updated: Memory = {
+    ...current,
+    content,
+    tags: patch.tags === undefined ? current.tags : readTags(patch.tags),
+    updatedAt: new Date().toISOString(),
+  };
+  await memoryStore.set(config, GLOBAL_MEMORY_KEY, existing.map((memory) => (memory.id === id ? updated : memory)));
+  return updated;
+}
+
 /** Returns false when no memory carried that id, so the route can answer 404. */
 export async function deleteMemory(config: ServerConfig, id: string): Promise<boolean> {
   const existing = await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? [];
@@ -138,3 +174,30 @@ export async function deleteMemory(config: ServerConfig, id: string): Promise<bo
 }
 
 export const localMemoryStoreInternals = { GLOBAL_MEMORY_KEY, parseMemories, sortNewestFirst };
+
+/**
+ * Replaces every memory carrying `tag` with new ones built from `drafts`, in one write. Used for a
+ * team policy's notes, which arrive as a whole set: a note the policy dropped must go in the same
+ * step the new ones arrive, so there is no moment with both or neither.
+ */
+export async function replaceTaggedMemories(
+  config: ServerConfig,
+  tag: string,
+  drafts: readonly MemoryDraft[],
+): Promise<Memory[]> {
+  const existing = await memoryStore.get(config, GLOBAL_MEMORY_KEY) ?? [];
+  const now = new Date().toISOString();
+  const created: Memory[] = drafts.map((draft) => ({
+    id: randomUUID(),
+    content: draft.content.trim(),
+    tags: readTags(draft.tags),
+    source: draft.source?.trim() || "agent",
+    scope: MEMORY_SCOPE_LOCAL,
+    createdAt: now,
+    updatedAt: now,
+    contexts: [],
+  }));
+  const kept = existing.filter((memory) => !(memory.tags?.includes(tag) ?? false));
+  await memoryStore.set(config, GLOBAL_MEMORY_KEY, [...created, ...kept]);
+  return created;
+}

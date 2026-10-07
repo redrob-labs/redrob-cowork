@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { publishInspectorSlice, recordInspectorEvent } from "@/app/lib/app-inspector";
 import { useControlAction, type RedrobControlAction } from "../../../shell/control/control-provider";
 import { t } from "@/i18n";
+import { waitForDataChannelOpen } from "./voice-dictation";
 
 type VoiceStatus = "idle" | "connecting" | "listening" | "muted" | "speaking" | "error";
 
@@ -229,28 +230,6 @@ async function loadVoiceSessionContext(client: RedrobServerClient, workspaceId: 
   }
 }
 
-function waitForDataChannelOpen(channel: RTCDataChannel) {
-  if (channel.readyState === "open") return Promise.resolve();
-  return new Promise<void>((resolve, reject) => {
-    const cleanup = () => {
-      window.clearTimeout(timeout);
-      channel.removeEventListener("open", handleOpen);
-      channel.removeEventListener("close", handleClose);
-      channel.removeEventListener("error", handleError);
-    };
-    const timeout = window.setTimeout(() => {
-      cleanup();
-      reject(new Error(t("voice.realtime_channel_timeout")));
-    }, 10_000);
-    const handleOpen = () => { cleanup(); resolve(); };
-    const handleClose = () => { cleanup(); reject(new Error(t("voice.realtime_channel_closed_early"))); };
-    const handleError = () => { cleanup(); reject(new Error(t("voice.realtime_channel_failed"))); };
-    channel.addEventListener("open", handleOpen);
-    channel.addEventListener("close", handleClose);
-    channel.addEventListener("error", handleError);
-  });
-}
-
 function describeAudioTrack(track: MediaStreamTrack | undefined) {
   if (!track) return t("voice.mic_no_track");
   // One complete sentence per state, not assembled from fragments: word order
@@ -325,7 +304,7 @@ function VoiceOrb(props: { status: VoiceStatus; muted: boolean }) {
       </div>
       <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_32%_20%,rgba(255,255,255,0.55),transparent_26%)]" />
       <div className={cn(
-        "absolute -bottom-2 rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm",
+        "absolute -bottom-2 rounded-full border border-border bg-background px-3 py-1 text-2xs font-medium text-muted-foreground shadow-sm",
         active && "text-foreground",
       )}>
         {props.status === "speaking" ? "Speaking" : props.muted ? "Muted" : active ? "Listening" : "Ready"}
@@ -355,7 +334,7 @@ function VoiceTimelineRow(props: {
   if (entry.role === "assistant") {
     return (
       <article className="mr-8 rounded-2xl border border-border bg-card px-3 py-2 text-sm leading-relaxed text-card-foreground shadow-sm">
-        {entry.error ? <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-destructive">Error</div> : null}
+        {entry.error ? <div className="mb-1 text-2xs font-semibold uppercase tracking-[0.14em] text-destructive">Error</div> : null}
         <div className="whitespace-pre-wrap break-words">{entry.text}</div>
       </article>
     );
@@ -379,7 +358,7 @@ function VoiceTimelineRow(props: {
         <span className="font-medium text-foreground/80">
           {entry.toolName ? humanToolLabel(entry.toolName) : entry.error ? "Voice error" : "Voice note"}
         </span>
-        <span className="ml-2 text-[10px] opacity-70">{relativeTime(entry.at)}</span>
+        <span className="ml-2 text-2xs opacity-70">{relativeTime(entry.at)}</span>
         {copy ? <span className="mt-1 block whitespace-pre-wrap break-words">{copy}</span> : null}
       </span>
     </button>
@@ -895,7 +874,7 @@ export function VoicePanel(props: VoicePanelProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-2 px-3 pb-3 pt-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("voice.rendering_response")}</div>
+                  <div className="text-2xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("voice.rendering_response")}</div>
                   <div className="whitespace-pre-wrap break-words text-sm leading-relaxed text-card-foreground" aria-live="polite">
                     {assistantPreview}
                   </div>

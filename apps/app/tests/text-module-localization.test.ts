@@ -132,6 +132,7 @@ const ALLOWED = new Set<string>([
   "Summarize the current Redrob Cowork session and put the next step in the composer.",
   "Text command to send through the Realtime model.",
   "The link could not be opened.",
+  "The person has this tab. Wait until they hand it back.",
   "The user declined the MCP App tool call.",
   "Toggle the microphone track without closing the Realtime session.",
   "Transcript text to inject.",

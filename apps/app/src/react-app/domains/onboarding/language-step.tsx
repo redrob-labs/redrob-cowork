@@ -56,7 +56,7 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
                 data-testid={`onboarding-language-${option.value}`}
               >
                 <div>
-                  <div className="text-[15px] font-medium text-foreground">
+                  <div className="text-base font-medium text-foreground">
                     {option.nativeName}
                   </div>
                   {/* Sub-label names the language in the language the UI is
@@ -85,7 +85,7 @@ export function LanguageStep({ onContinue }: LanguageStepProps) {
         <Button
           type="button"
           size="lg"
-          className="h-12 w-full text-[15px] font-semibold"
+          className="h-12 w-full text-base font-semibold"
           onClick={onContinue}
           data-testid="onboarding-language-continue"
         >

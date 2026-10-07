@@ -16,10 +16,11 @@
  * not declared produces no utility, which is the one ratchet that cannot be
  * forgotten, because it fails at the class rather than in a review.
  *
- * Radix `gray` is the exception and stays, at 428 call sites. It is the neutral ramp,
- * and moving it is the other half of this migration: the neutral roles
- * (`--foreground`, `--muted-foreground`, `--border`, `--muted`) are declared and
- * waiting, and the count in `tests/design-tokens.test.ts` is what stops it rising.
+ * Radix `gray` was the last ramp, at 402 call sites. They now read the neutral roles
+ * (`foreground`, `muted-foreground`, `subtle-foreground`, `border`, `muted`,
+ * `accent`), so `gray` is reset with the rest and `styles/colors.css` is gone. The
+ * design system's own neutrals are its `--gray-1..9` tokens, reached only through
+ * those roles.
  *
  * White and Redrob Black are declared here because they are brand values rather than
  * Tailwind's `#fff` and `#000`, which is also what lets the built stylesheet be
@@ -71,32 +72,8 @@
   --color-black: #0a0b0c;
 }
 
-/* Radix gray, backed by the light and dark variables in colors.css. */
+/* The app's own dls-* vocabulary, bound as utilities. */
 @theme inline {
-  --color-gray-1: var(--gray-1);
-  --color-gray-2: var(--gray-2);
-  --color-gray-3: var(--gray-3);
-  --color-gray-4: var(--gray-4);
-  --color-gray-5: var(--gray-5);
-  --color-gray-6: var(--gray-6);
-  --color-gray-7: var(--gray-7);
-  --color-gray-8: var(--gray-8);
-  --color-gray-9: var(--gray-9);
-  --color-gray-10: var(--gray-10);
-  --color-gray-11: var(--gray-11);
-  --color-gray-12: var(--gray-12);
-  --color-gray-a1: var(--gray-a1);
-  --color-gray-a2: var(--gray-a2);
-  --color-gray-a3: var(--gray-a3);
-  --color-gray-a4: var(--gray-a4);
-  --color-gray-a5: var(--gray-a5);
-  --color-gray-a6: var(--gray-a6);
-  --color-gray-a7: var(--gray-a7);
-  --color-gray-a8: var(--gray-a8);
-  --color-gray-a9: var(--gray-a9);
-  --color-gray-a10: var(--gray-a10);
-  --color-gray-a11: var(--gray-a11);
-  --color-gray-a12: var(--gray-a12);
   --color-dls-surface: var(--dls-surface);
   --color-dls-background: var(--dls-background);
   --color-dls-canvas: var(--dls-canvas);

@@ -33,7 +33,11 @@ export interface WorkspaceConfig {
   sandboxContainerName?: string;
   opencodeUsername?: string;
   opencodePassword?: string;
+  kind?: WorkspaceKind;
 }
+
+/** "personal": the app-managed workspace for chats outside any project. "managed": a project whose folder the server made. */
+export type WorkspaceKind = "personal" | "managed";
 
 export interface WorkspaceInfo {
   id: string;
@@ -54,6 +58,7 @@ export interface WorkspaceInfo {
   sandboxContainerName?: string;
   opencodeUsername?: string;
   opencodePassword?: string;
+  kind?: WorkspaceKind;
   opencode?: {
     baseUrl?: string;
     directory?: string;

@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- Redrob Gray 1 and Gray 9, the page colour of each theme. -->
-    <meta name="theme-color" content="#f8f9fb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#141719" media="(prefers-color-scheme: dark)" />
+    <!-- The design system's surface-base in each theme: Redrob White and Redrob Black. -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0b0c" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Redrob Cowork" />
@@ -19,7 +19,11 @@
     <script>
       (function () {
         try {
-          var mode = localStorage.getItem("redrob.themePref") || "system";
+          // The key theme.ts writes, then the legacy one it migrates from, so the
+          // first paint is the theme the app is about to apply rather than a flash
+          // of the other one on the design system's white or Redrob Black page.
+          var stored = localStorage.getItem("redrob.react.settings.theme-mode") || localStorage.getItem("redrob.themePref");
+          var mode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
           var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           var resolved = mode === "dark" || (mode === "system" && prefersDark) ? "dark" : "light";
           document.documentElement.dataset.theme = resolved;
@@ -31,7 +35,7 @@
       })();
     </script>
   </head>
-  <body class="bg-dls-surface text-dls-text mac:bg-transparent">
+  <body class="bg-background text-foreground mac:bg-transparent">
     <div id="root"></div>
     <script type="module" src="/src/index.react.tsx"></script>
   </body>

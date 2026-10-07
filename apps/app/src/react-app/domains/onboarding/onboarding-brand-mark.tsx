@@ -22,7 +22,7 @@ export function OnboardingBrandMark() {
         className="shrink-0 dark:invert"
         aria-hidden="true"
       />
-      <span className="text-[13px] font-semibold tracking-tight text-foreground">
+      <span className="text-sm font-semibold tracking-tight text-foreground">
         {config.appName}
       </span>
     </div>

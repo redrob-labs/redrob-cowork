@@ -70,14 +70,14 @@ function targetIcon(target: AccessibleTargetOption) {
   if (target.kind === "url") return <Globe className="size-4 text-primary" />;
   if (target.preview === "sheet") {
     return (
-      <span className="inline-flex h-4 min-w-6 shrink-0 items-center justify-center rounded-[4px] border border-success-muted/40 bg-success-soft/60 px-0.5 text-[7px] font-bold leading-none text-success-ink">
+      <span className="inline-flex h-4 min-w-6 shrink-0 items-center justify-center rounded-xs border border-success-muted/40 bg-success-soft/60 px-0.5 text-[7px] font-bold leading-none text-success-ink">
         XLS
       </span>
     );
   }
   if (target.preview === "markdown") {
     return (
-      <span className="inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-primary/25 bg-primary/10 text-[8px] font-bold leading-none text-primary">
+      <span className="inline-flex size-4 shrink-0 items-center justify-center rounded-xs border border-primary/25 bg-primary/10 text-[8px] font-bold leading-none text-primary">
         MD
       </span>
     );

@@ -1,10 +1,10 @@
 import * as React from "react"
 import { Toaster as Sonner, toast as sonnerToast, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon, type LucideIcon, XIcon } from "lucide-react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { Toast as DsToast } from "@redrob-labs/ui"
 import { getResolvedThemeMode, subscribeToTheme } from "@/app/theme"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { t } from "@/i18n"
 
 function useTheme() {
   return React.useSyncExternalStore(
@@ -71,56 +71,24 @@ interface ToastOptions {
   duration?: number
 }
 
-const TOAST_ICONS: Record<Exclude<ToastType, "default">, LucideIcon> = {
-  success: CircleCheckIcon,
-  info: InfoIcon,
-  warning: TriangleAlertIcon,
-  error: OctagonXIcon,
-}
-
-const toastTile = cva(
-  "mt-0.5 flex shrink-0 items-center justify-center",
-  {
-    variants: {
-      type: {
-        default: "text-primary-ink",
-        success: "text-success-ink",
-        info: "text-primary-ink",
-        warning: "text-warning-ink",
-        error: "text-destructive-ink",
-      },
-      size: {
-        default: "size-10 rounded-2xl border",
-        sm: "size-4",
-      },
-    },
-    compoundVariants: [
-      { size: "default", type: "default", className: "border-primary-muted/40 bg-primary-soft/80" },
-      { size: "default", type: "success", className: "border-success-muted/40 bg-success-soft/80" },
-      { size: "default", type: "info", className: "border-primary-muted/40 bg-primary-soft/80" },
-      { size: "default", type: "warning", className: "border-warning-muted/40 bg-warning-soft/80" },
-      { size: "default", type: "error", className: "border-destructive-muted/40 bg-destructive-soft/80" },
-    ],
-    defaultVariants: { type: "default", size: "default" },
-  },
-)
-
-interface ToastIconProps extends VariantProps<typeof toastTile> {
-  className?: string
-}
-
-function ToastIcon({ className, type, size }: ToastIconProps) {
-  if (!type || type === "default") {
-    return null;
+/**
+ * The app's toast types onto the design system's tones. A function declaration
+ * rather than a lookup const: this module sits in an import cycle through
+ * `@/i18n`, and a hoisted function cannot be read before it is initialised.
+ */
+function toneOf(type: ToastType): "success" | "info" | "warning" | "danger" | undefined {
+  switch (type) {
+    case "success":
+      return "success"
+    case "info":
+      return "info"
+    case "warning":
+      return "warning"
+    case "error":
+      return "danger"
+    case "default":
+      return undefined
   }
-
-  const Icon = TOAST_ICONS[type]
-
-  return (
-    <div className={cn(toastTile({ type, size, className }))}>
-      <Icon className="size-4" />
-    </div>
-  )
 }
 
 interface ToastCardProps {
@@ -130,67 +98,54 @@ interface ToastCardProps {
   description?: React.ReactNode
   action?: ToastAction
   cancel?: ToastAction
-  notification?: boolean
 }
 
-function ToastCard({ id, type, title, description, action, cancel, notification }: ToastCardProps) {
-  if (notification) {
-    return (
-      <div className={cn("flex w-full gap-3 rounded-2xl border border-border bg-popover/95 backdrop-blur-sm p-4 text-popover-foreground shadow-md md:max-w-sm ring-1 ring-popover-border/20 items-center")}>
-        <ToastIcon type={type} size="sm" />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">{title}</p>
-            <Button variant="ghost" size="sm" onClick={() => sonnerToast.dismiss(id)}>
-              <XIcon className="size-4" />
-            </Button>
-          </div>
-          {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className={cn("flex w-full items-start gap-3 rounded-2xl border border-border bg-popover/95 backdrop-blur-sm p-4 text-popover-foreground shadow-md md:max-w-sm ring-1 ring-popover-border/20")}>
-      <ToastIcon type={type} />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex items-center gap-2">
-         <p className="text-sm font-medium">{title}</p>
-         <Button variant="ghost" size="sm" onClick={() => sonnerToast.dismiss(id)}>
-          <XIcon className="size-4" />
+/**
+ * One toast, rendered by the design system's own Toast: `rr-toast` on the raised
+ * surface, the tone's icon, title, text and one action, `role="status"` with
+ * `aria-live="polite"`. The design system leaves stacking, timing and dismissal to
+ * the app, which is what sonner does around it. A plain toast passes no tone and
+ * so is the design system's default, informational one.
+ */
+function ToastCard({ id, type, title, description, action, cancel }: ToastCardProps) {
+  const actions =
+    action || cancel ? (
+      <div className="flex gap-2">
+        {action ? (
+          <Button
+            size="sm"
+            onClick={() => {
+              action.onClick()
+              sonnerToast.dismiss(id)
+            }}
+          >
+            {action.label}
           </Button>
-        </div>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
-        {action || cancel ? (
-          <div className="mt-2 flex gap-2">
-            {action ? (
-              <Button
-                size="sm"
-                onClick={() => {
-                  action.onClick()
-                  sonnerToast.dismiss(id)
-                }}
-              >
-                {action.label}
-              </Button>
-            ) : null}
-            {cancel ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  cancel.onClick()
-                  sonnerToast.dismiss(id)
-                }}
-              >
-                {cancel.label}
-              </Button>
-            ) : null}
-          </div>
+        ) : null}
+        {cancel ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              cancel.onClick()
+              sonnerToast.dismiss(id)
+            }}
+          >
+            {cancel.label}
+          </Button>
         ) : null}
       </div>
-    </div>
+    ) : undefined
+  return (
+    <DsToast
+      tone={toneOf(type)}
+      title={title}
+      action={actions}
+      closeLabel={t("common.dismiss")}
+      onClose={() => sonnerToast.dismiss(id)}
+    >
+      {description}
+    </DsToast>
   )
 }
 
@@ -206,7 +161,6 @@ function showToast(type: ToastType, message: React.ReactNode, options?: ToastOpt
         description={options?.description}
         action={options?.action}
         cancel={options?.cancel}
-        notification={notification}
       />
     ),
     {
@@ -231,4 +185,4 @@ const toast = Object.assign(
   },
 )
 
-export { Toaster, toast }
+export { Toaster, ToastCard, toast }

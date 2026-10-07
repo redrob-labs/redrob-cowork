@@ -241,6 +241,12 @@ interface ModelSelectProps {
   onBehaviorChange?: (value: string | null) => void;
 }
 
+/** The Desk work column (AppShell's `main`), or the default clipping ancestors outside the Desk frame. */
+function deskWorkColumn(): Element | "clipping-ancestors" {
+  if (typeof document === "undefined") return "clipping-ancestors";
+  return document.getElementById("rr-shell-main") ?? "clipping-ancestors";
+}
+
 export function ModelSelect({
   open,
   value,
@@ -367,13 +373,13 @@ export function ModelSelect({
           </span>
         </span>
         {context ? (
-          <span className="shrink-0 text-[10px] text-muted-foreground">
+          <span className="shrink-0 text-2xs text-muted-foreground">
             {t("pricing.context_window", { tokens: context })}
           </span>
         ) : null}
         {tier ? (
           <span
-            className="shrink-0 font-mono text-[10px] text-muted-foreground"
+            className="shrink-0 font-mono text-2xs text-muted-foreground"
             title={t("pricing.tier_hint")}
           >
             {tier}
@@ -381,14 +387,14 @@ export function ModelSelect({
         ) : null}
         {chatCost ? (
           <span
-            className="shrink-0 font-mono text-[10px] text-muted-foreground"
+            className="shrink-0 font-mono text-2xs text-muted-foreground"
             title={t("pricing.per_request_hint")}
           >
             {t("pricing.per_request", { amount: chatCost })}
           </span>
         ) : price ? (
           <span
-            className="shrink-0 font-mono text-[10px] text-muted-foreground"
+            className="shrink-0 font-mono text-2xs text-muted-foreground"
             title={t("pricing.per_million_hint")}
           >
             {price}
@@ -417,7 +423,7 @@ export function ModelSelect({
               disabled={disabled}
               aria-label={t("session.change_model")}
               aria-keyshortcuts="Meta+Alt+/"
-              className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12 disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             />
           }
         >
@@ -440,6 +446,8 @@ export function ModelSelect({
       <PopoverContent
         className="flex h-80 max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible bg-transparent p-0 shadow-none ring-0"
         align="start"
+        // Inside the Desk frame the menu stays in the work column; it used to run over the side panel.
+        collisionBoundary={open ? deskWorkColumn() : undefined}
         initialFocus={false}
       >
         {/*
@@ -451,7 +459,7 @@ export function ModelSelect({
           table is a click away behind "All models". Capped at the viewport so a narrow window still
           gets a usable menu rather than one hanging off the edge.
         */}
-        <div className="flex h-full w-[min(92vw,26rem)] min-w-0 flex-col overflow-hidden rounded-3xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
+        <div className="flex h-full w-[min(92vw,26rem)] min-w-0 flex-col overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
         <Command
           items={flatten ? flatItems : groups}
           filter={filterModelItem}

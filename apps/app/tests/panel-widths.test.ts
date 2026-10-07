@@ -49,7 +49,7 @@ describe("provider connect dialog", () => {
     expect(source).toContain("group flex items-center gap-3.5");
     expect(source).not.toContain("group flex items-start gap-3.5");
     // Fixed columns for the fields that are the same width every row, slack to the name.
-    expect(source).toContain("min-w-0 flex-1 truncate text-[14px]");
+    expect(source).toContain("min-w-0 flex-1 truncate text-sm");
   });
 });
 

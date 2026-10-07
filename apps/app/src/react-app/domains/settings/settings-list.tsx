@@ -126,7 +126,7 @@ export function SettingsFactRow({ label, value, mono = false, action, className 
   return (
     <div className={cn("flex items-start justify-between gap-3", className)}>
       <div className="min-w-0 flex-1">
-        <div className="text-[11px] font-semibold uppercase tracking-wide text-dls-secondary">{label}</div>
+        <div className="text-2xs font-semibold uppercase tracking-wide text-dls-secondary">{label}</div>
         <div className={cn("mt-0.5 break-words text-sm text-dls-text", mono && "font-mono text-xs")}>
           {value}
         </div>

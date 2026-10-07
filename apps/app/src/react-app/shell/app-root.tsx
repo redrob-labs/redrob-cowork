@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 
 import { useEffect, useMemo, useSyncExternalStore } from "react";
-import { Navigate, Route, Routes } from "react-router";
+import { Route, Routes, useParams } from "react-router";
 
 
 
@@ -26,6 +26,33 @@ import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
+import { DsStory } from "../desk/ds-story";
+import { SaveAsProjectAction } from "../desk/projects/project-dialog";
+import { DeskShell } from "../desk/shell/desk-shell";
+import { DeskLayer } from "../desk/shell/desk-layer";
+import { deskRoutes } from "../desk/shell/desk-routes";
+import { DeskSettingsGate } from "../desk/settings/desk-settings";
+
+/**
+ * The working chat (the session page) inside the Desk frame, with the old sidebar left to
+ * the shell. New chat is current until a chat is open; then that chat is marked in Recent.
+ */
+function ChatRoute() {
+  const { sessionId } = useParams<{ sessionId?: string }>();
+  return (
+    <DeskShell
+      current={sessionId ? null : "chat"}
+      chatId={sessionId ?? null}
+      actions={<SaveAsProjectAction chatId={sessionId ?? null} />}
+      measure={false}
+      fill
+    >
+      <DevProfiler id="SessionRoute">
+        <SessionRoute />
+      </DevProfiler>
+    </DeskShell>
+  );
+}
 
 /**
  * Dev-only eval hook that relaunches the Electron app. Lives inside
@@ -85,38 +112,7 @@ export function AppRoot() {
                 }
               />
 
-              <Route
-                path="/session"
-                element={
-                  <DevProfiler id="SessionRoute">
-                    <SessionRoute />
-                  </DevProfiler>
-                }
-              />
-              <Route
-                path="/session/:sessionId"
-                element={
-                  <DevProfiler id="SessionRoute">
-                    <SessionRoute />
-                  </DevProfiler>
-                }
-              />
-              <Route
-                path="/workspace/:workspaceId/session"
-                element={
-                  <DevProfiler id="SessionRoute">
-                    <SessionRoute />
-                  </DevProfiler>
-                }
-              />
-              <Route
-                path="/workspace/:workspaceId/session/:sessionId"
-                element={
-                  <DevProfiler id="SessionRoute">
-                    <SessionRoute />
-                  </DevProfiler>
-                }
-              />
+              {deskRoutes(<ChatRoute />)}
               <Route
                 path="/workspace/:workspaceId/extensions/*"
                 element={
@@ -136,24 +132,30 @@ export function AppRoot() {
               <Route
                 path="/workspace/:workspaceId/settings/*"
                 element={
-                  <DevProfiler id="SettingsRoute">
-                    <SettingsRoute />
-                  </DevProfiler>
+                  <DeskSettingsGate
+                    developer={
+                      <DevProfiler id="SettingsRoute">
+                        <SettingsRoute />
+                      </DevProfiler>
+                    }
+                  />
                 }
               />
               <Route
                 path="/settings/*"
                 element={
-                  <DevProfiler id="SettingsRoute">
-                    <SettingsRoute />
-                  </DevProfiler>
+                  <DeskSettingsGate
+                    developer={
+                      <DevProfiler id="SettingsRoute">
+                        <SettingsRoute />
+                      </DevProfiler>
+                    }
+                  />
                 }
               />
-              {/* Default + fallback: land on the session view. Users open
-                  settings deliberately via the sidebar or command palette. */}
-              <Route path="/" element={<Navigate to="/session" replace />} />
-              <Route path="*" element={<Navigate to="/session" replace />} />
+              {import.meta.env.DEV ? <Route path="/__ds" element={<DsStory />} /> : null}
             </Routes>
+          <DeskLayer />
           <LoadingOverlay />
         </RedrobControlProvider>
         </AppMenuProvider>

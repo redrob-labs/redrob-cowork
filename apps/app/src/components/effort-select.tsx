@@ -53,7 +53,7 @@ export function EffortSelect(props: {
               type="button"
               disabled={props.disabled}
               aria-label={props.title ?? t("effort.label")}
-              className="flex h-9 max-h-9 items-center gap-1 rounded-md px-2 text-sm text-gray-10 transition-colors hover:bg-gray-3 hover:text-gray-12 disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-9 max-h-9 items-center gap-1 rounded-md px-2 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             />
           }
         >
@@ -63,7 +63,7 @@ export function EffortSelect(props: {
         <TooltipContent>{props.title ?? t("effort.label")}</TooltipContent>
       </Tooltip>
       <PopoverContent align="start" className="w-56 p-1">
-        <div className="border-b border-border px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
+        <div className="border-b border-border px-2 py-1.5 text-2xs font-medium text-muted-foreground">
           {props.title ?? t("effort.label")}
         </div>
         <div className="flex flex-col py-1">
@@ -82,7 +82,7 @@ export function EffortSelect(props: {
             >
               <span className="text-foreground">{option.label}</span>
               {option.description ? (
-                <span className="text-[11px] leading-4 text-muted-foreground">{option.description}</span>
+                <span className="text-2xs leading-4 text-muted-foreground">{option.description}</span>
               ) : null}
             </button>
           ))}

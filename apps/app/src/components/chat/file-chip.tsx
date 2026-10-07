@@ -40,7 +40,7 @@ export function FileChip({ path, className }: FileChipProps) {
         className="flex min-w-0 cursor-pointer items-center gap-1.5 px-1.5 py-0.5 transition-colors hover:bg-muted"
       >
         <FileText aria-hidden="true" className="size-3 shrink-0 text-muted-foreground" />
-        <span className="min-w-0 truncate font-mono text-[11px] leading-4 text-foreground">
+        <span className="min-w-0 truncate font-mono text-2xs leading-4 text-foreground">
           {name}
         </span>
       </button>

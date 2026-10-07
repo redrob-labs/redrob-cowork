@@ -128,6 +128,14 @@ export function useBootState(): BootStateContextValue {
 }
 
 /**
+ * The boot state when there is one, `null` outside the provider. For a component that only reports
+ * readiness and also renders on its own (a screen in a test, a story), where there is no boot to report to.
+ */
+export function useOptionalBootState(): BootStateContextValue | null {
+  return use(BootStateContext);
+}
+
+/**
  * Overlay stays up until BOTH the desktop boot hook has reported `ready` AND
  * the main route has completed its first refresh (`routeReady`). After that
  * we hold for ~160ms so the fade feels intentional instead of a flicker.

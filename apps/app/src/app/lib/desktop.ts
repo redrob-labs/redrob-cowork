@@ -420,6 +420,23 @@ export async function revealDesktopItemInDir(target: string): Promise<void> {
   }
 }
 
+/** Opens a workspace file with the system's default app; the main process refuses paths outside the workspace. */
+export async function openWorkspaceFile(root: string, relativePath: string): Promise<void> {
+  const result = await invokeElectronHelper("__openWorkspaceFile", root, relativePath);
+  if (result?.trim()) throw new Error(result);
+}
+
+/** Shows a workspace file in the system file manager, under the same check. */
+export async function revealWorkspaceFile(root: string, relativePath: string): Promise<void> {
+  const result = await invokeElectronHelper("__revealWorkspaceFile", root, relativePath);
+  if (result?.trim()) throw new Error(result);
+}
+
+/** Holds off system sleep while a run is under way (the screen may still turn off); false lets it sleep. */
+export async function setDesktopKeepAwake(on: boolean): Promise<boolean> {
+  return invokeElectronHelper("__setKeepAwake", on);
+}
+
 export async function getDesktopFileIcon(target: string, size?: "small" | "normal" | "large"): Promise<string | null> {
   return invokeElectronHelper("__getFileIcon", target, size);
 }
