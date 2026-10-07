@@ -24,7 +24,7 @@ import { DetectorIntegrityError, loadDetector, type DetectedEntity, type EntityD
  * hashes pin the model and tokenizer: 1T/veil-pii-ko-lite, weight-only int8 (model-evaluation.md).
  * A test fails when the two drift apart.
  */
-export const PINNED_MANIFEST_SHA256: string | null = "b96f3f3d3d2c638534ee76d8f0827f50f45ab3050435be7943569f4a7a2ca3b7";
+export const PINNED_MANIFEST_SHA256: string | null = "7097232d0a0164bfe6f6e34ec5dcb1d1961ae162b58369eefe0be3afc386fb47";
 
 export type DetectorStatus =
   | { state: "ready"; model: string }

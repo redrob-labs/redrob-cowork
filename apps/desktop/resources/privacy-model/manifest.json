@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "model": {
     "file": "model.int8.onnx",
-    "sha256": "e67333818b02500ebfc4e3c69a2c95992e1c060678f1a4653bc80a192174739d"
+    "sha256": "35f8fd66a328b32b67b79f93a4c29d790dddaa8f094a165efc095ef5e312194d"
   },
   "tokenizer": {
     "file": "tokenizer.json",
