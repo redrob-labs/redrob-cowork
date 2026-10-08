@@ -14,13 +14,21 @@ import {
   WorkClassifierSource,
   type WorkHead,
 } from "./work-classifier.js";
+import { WORK_ACTIONS } from "./vocabulary.js";
 
 const sha = (bytes: string | Buffer) => createHash("sha256").update(bytes).digest("hex");
 
-/** Two dimensions: along the first is code, along the second is not work. */
+/** Two dimensions: along the first is code, along the second is not work. No kind of work. */
 const HEAD: WorkHead = {
   prefix: "query: ",
+  action: null,
   family: { classes: ["code", null], scale: 20, floor: 0.6, w: [[1, 0], [0, 1]], b: [0, 0] },
+};
+/** Three dimensions: a fix, a test, or not work; the family head knows code from not work. */
+const BOTH: WorkHead = {
+  prefix: "query: ",
+  action: { classes: ["fix", "test", null], scale: 20, floor: 0.6, w: [[1, 0, 0], [0, 1, 0], [0, 0, 1]], b: [0, 0, 0] },
+  family: { classes: ["code", null], scale: 20, floor: 0.6, w: [[1, 0], [1, 0], [0, 1]], b: [0, 0] },
 };
 
 const TOKENIZER = JSON.stringify({
@@ -76,12 +84,22 @@ async function modelDir(tokenizer = TOKENIZER) {
 }
 
 describe("work classifier", () => {
-  test("the pinned hash is the shipped manifest's, and the shipped head names families only", async () => {
+  test("the pinned hash is the shipped manifest's, and the shipped head names every kind of work and family", async () => {
     const shipped = await readFile(join(import.meta.dir, "../../../desktop/resources/insights-model/manifest.json"));
     expect(sha(shipped)).toBe(PINNED_INSIGHTS_MANIFEST_SHA256!);
+    expect(JSON.parse(shipped.toString()).id).toBe("Xenova/multilingual-e5-base");
     expect(WORK_HEAD.prefix).toBe("query: ");
     expect(WORK_HEAD.family.classes).toEqual(["code", "design", "sheet", "write", null]);
-    expect(WORK_HEAD.family.w).toHaveLength(384);
+    expect(WORK_HEAD.family.w).toHaveLength(768);
+    expect(WORK_HEAD.action?.classes).toEqual([...[...WORK_ACTIONS].sort(), null]);
+    expect(WORK_HEAD.action?.w).toHaveLength(768);
+  });
+
+  test("a kind of work above its floor brings its family; below it, the family head may still name one", () => {
+    expect(labelEmbedding(BOTH, Float32Array.from([1, 0, 0]))).toMatchObject({ action: "fix", family: "code" });
+    // Torn between a fix and a test, so no kind of work, but surely code.
+    expect(labelEmbedding(BOTH, Float32Array.from([0.5, 0.5, 0]))).toMatchObject({ action: null, family: "code" });
+    expect(labelEmbedding(BOTH, Float32Array.from([0, 0, 1]))).toMatchObject({ action: null, family: null });
   });
 
   test("names the family above the floor, and nothing for not work or below it", () => {
@@ -105,7 +123,7 @@ describe("work classifier", () => {
     expect(seen[0]).toEqual([0n, 5n, 4n, 2n]);
     await classifier.label("fix ".repeat(400));
     expect(seen[1]).toHaveLength(256);
-    expect(await classifier.label("   ")).toEqual({ family: null, confidence: 0 });
+    expect(await classifier.label("   ")).toEqual({ action: null, family: null, confidence: 0 });
     expect(seen).toHaveLength(2);
   });
 

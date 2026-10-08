@@ -127,3 +127,40 @@ What would get the kind of work over the bar, in the order worth trying:
 1. **e5-base, if 278 MB is acceptable.** It is the only change already measured to pass. It would mean raising the size limit in the bar, which is a product decision.
 2. **Structural inputs on e5-small.** Whether tests ran, whether something was sent, and the type of file written all separate the pairs the text alone confuses. They need the head to train on session facts, so the training set needs those facts written alongside each message.
 3. More contrastive examples, measured on the tuning slice first.
+
+## Round 4: shipping e5-base (2026-10-08)
+
+The size limit in the bar was raised from 120 MB to 300 MB, by product decision, so that the kind of work can ship on multilingual-e5-base (278 MB). Nothing else changed: the same training set, tuning slice and floor rule as Round 3, and the numbers are those of Round 3's e5-base rows. `train.py` now writes the head of the candidate that passes the most levels.
+
+The app runs both heads. When the kind of work is above its floor, its family comes with it. When it is not, the family head may still name the family on its own.
+
+| Level | Floor | Precision | Coverage | Abstains | en / ko precision | Hard cases precision | Bar |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Kind of work | 0.39 | **88.6%** | 82.6% | 100% | 89.7% / 87.1% | 87.5% | **pass** |
+| Family, as the app labels it | 0.96 | **93.8%** | 87.0% | 90.0% | 93.9% / 93.5% | 88.9% | **pass** |
+
+The app's family label combines both heads, so its numbers differ from the family head alone (91.7% precision, 73.9% coverage).
+
+Precision for each kind of work, of the sessions labeled with it:
+
+| Kind of work | Precision | Kind of work | Precision |
+| --- | --- | --- | --- |
+| translate | 17/17 (100%) | test | 16/18 (89%) |
+| policy | 15/15 (100%) | code | 11/13 (85%) |
+| finance | 10/10 (100%) | fix | 15/18 (83%) |
+| reply | 15/16 (94%) | copy | 13/16 (81%) |
+| research | 15/16 (94%) | review | 12/15 (80%) |
+| design | 11/12 (92%) | spec | 7/9 (78%) |
+| email | 12/13 (92%) | summ | 12/17 (71%) |
+| hr | 12/13 (92%) | | |
+| analyze | 9/10 (90%) | | |
+
+Summaries are the weakest. They are the label most often given to something else, because nearly any request can be read as "condense this".
+
+In the app (redrob-server, onnxruntime-node 1.23, one thread):
+- It gives the same kind of work and family as the Python reference on all 296 evaluation samples; confidences differ by under 2e-6.
+- The tokenizer gives the same ids as Hugging Face `tokenizers` on all 1,772 training, tuning, evaluation and edge-case texts, for both e5-base and e5-small.
+- A label takes 14 ms (median) and 29 ms at the 95th percentile.
+- Loading takes 1.3 s.
+- The server's resident memory grows by about 780 MB once the model is loaded. That is the main cost of the larger model; it is paid only once a session is labeled.
+

@@ -12,8 +12,8 @@ family (write, sheet, code, design, or not work) and the kind of work. Training 
 and the prototypes. The confidence floors come from the tuning slice (src/insights/train/tuning.ts),
 written like the evaluation set but apart from it: the lowest floor at which the tuning slice reaches
 TUNING_PRECISION with TUNING_COVERAGE, chosen before the evaluation set is scored. The evaluation set
-is embedded once, at the end, and only scored. Writes the head of the best candidate
-that passes to .insights-models/head.json.
+is embedded once, at the end, and only scored. Writes the head of the candidate that
+passes the most levels (the smaller on a tie) to .insights-models/head.json.
 """
 
 import json
@@ -159,15 +159,17 @@ def main():
             result[level] = r
         report = {"id": cid, "repo": repo, "revision": full, "file": onnx_file, "size_mb": round(size_mb, 1), "ms": round(ms, 1), **result}
         reports.append(report)
-        if best is None and (result["action"]["bar"] == "pass" or result["family"]["bar"] == "pass"):
-            best = (report, action_model, action_floor, family_model, family_floor, prefix)
+        # The candidate that passes more levels wins; on a tie, the earlier (smaller) one.
+        passed = (result["action"]["bar"] == "pass") + (result["family"]["bar"] == "pass")
+        if passed and (best is None or passed > best[0]):
+            best = (passed, report, action_model, action_floor, family_model, family_floor, prefix)
     print(json.dumps({"bar": ev.BAR, "training": len(train), "tuning": len(tuning), "samples": len(samples), "reports": reports}, indent=1))
     if best:
-        report, am, af, fm, ff, prefix = best
+        _, report, am, af, fm, ff, prefix = best
 
         def dump(model, floor):
             classes, w, b = model
-            return {"classes": classes, "scale": SCALE, "floor": floor, "w": np.round(w, 5).tolist(), "b": np.round(b, 5).tolist()}
+            return {"classes": classes, "scale": SCALE, "floor": round(floor, 2), "w": np.round(w, 5).tolist(), "b": np.round(b, 5).tolist()}
 
         head = {
             "encoder": {k: report[k] for k in ("repo", "revision", "file")},

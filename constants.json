@@ -1,5 +1,5 @@
 {
   "redrobCodeVersion": "v0.1.0",
   "privacyModelRelease": "privacy-model-veil-ko-lite-2026.10",
-  "insightsModelRelease": "insights-model-e5-small-2026.10"
+  "insightsModelRelease": "insights-model-e5-base-2026.10"
 }

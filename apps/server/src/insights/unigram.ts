@@ -1,8 +1,8 @@
 /*
- * The XLM-R SentencePiece tokenizer the work classifier's encoder (multilingual-e5-small) reads, as
+ * The XLM-R SentencePiece tokenizer the work classifier's encoder (multilingual-e5-base) reads, as
  * Hugging Face `tokenizers` runs it from tokenizer.json: split out special tokens, the Precompiled
- * normalizer (SentencePiece's nmt_nfkc charsmap), runs of spaces collapsed, Metaspace, Unigram
- * Viterbi, then `<s> A </s>`. Ids match `tokenizers` exactly (fixtures/unigram-parity.json), because
+ * normalizer (SentencePiece's nmt_nfkc charsmap), then either a whitespace split (e5-base) or runs of
+ * spaces collapsed (e5-small), Metaspace, Unigram Viterbi, then `<s> A </s>`. Ids match `tokenizers` exactly (fixtures/unigram-parity.json), because
  * the head was trained on what that library produced.
  */
 
@@ -11,6 +11,8 @@ import { z } from "zod";
 const SPACE = "\u2581";
 /** `tokenizers`' Unigram: an unknown character costs this much below the vocab's lowest score. */
 const UNK_PENALTY = 10;
+/** Rust's `char::is_whitespace`, which `tokenizers`' WhitespaceSplit uses; JavaScript's `\s` differs. */
+const WHITESPACE = "[\\t\\n\\v\\f\\r \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000]";
 
 export type UnigramPiece = { id: number; score: number };
 
@@ -23,6 +25,11 @@ export type UnigramOptions = {
   charsmap: Uint8Array | null;
   /** Special tokens matched in the raw text, as `tokenizers`' added vocabulary does. */
   specials: ReadonlyMap<string, number>;
+  /** Specials that take the whitespace before them (`lstrip`). */
+  lstrip?: ReadonlySet<string>;
+  /** Pre-tokenizer: split on whitespace, then Metaspace each word (e5-base), or Metaspace alone after
+   * collapsing runs of spaces (e5-small). */
+  whitespaceSplit: boolean;
   bosId: number;
   eosId: number;
 };
@@ -92,7 +99,9 @@ export class Unigram {
     for (const piece of options.pieces.keys()) longest = Math.max(longest, [...piece].length);
     this.longest = longest;
     const names = [...options.specials.keys()].sort((a, b) => b.length - a.length);
-    this.specials = names.length ? new RegExp(names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "g") : null;
+    const pattern = (name: string) =>
+      `${options.lstrip?.has(name) ? `${WHITESPACE}*` : ""}${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`;
+    this.specials = names.length ? new RegExp(names.map(pattern).join("|"), "g") : null;
   }
 
   /** Token ids with `<s>` and `</s>`, at most `maxLength` of them in all. */
@@ -100,16 +109,28 @@ export class Unigram {
     const ids: number[] = [];
     let last = 0;
     for (const match of this.specials ? text.matchAll(this.specials) : []) {
-      ids.push(...this.segment(text.slice(last, match.index)), this.options.specials.get(match[0])!);
+      ids.push(...this.segment(text.slice(last, match.index)), this.options.specials.get(match[0].replace(this.leading, ""))!);
       last = match.index + match[0].length;
     }
     ids.push(...this.segment(text.slice(last)));
     return [this.options.bosId, ...ids.slice(0, Math.max(0, maxLength - 2)), this.options.eosId];
   }
 
+  private readonly leading = new RegExp(`^${WHITESPACE}+`);
+
   private segment(text: string): number[] {
     if (!text) return [];
-    const normalized = (this.charsmap ? this.charsmap.normalize(text) : text).replace(/ {2,}/g, " ").replaceAll(" ", SPACE);
+    const plain = this.charsmap ? this.charsmap.normalize(text) : text;
+    if (this.options.whitespaceSplit) {
+      const ids: number[] = [];
+      for (const word of plain.split(new RegExp(`${WHITESPACE}+`))) {
+        if (!word) continue;
+        const marked = word.startsWith(SPACE) ? word : SPACE + word;
+        for (const piece of marked.split(new RegExp(`(?=${SPACE})`))) ids.push(...this.viterbi(piece));
+      }
+      return ids;
+    }
+    const normalized = plain.replace(/ {2,}/g, " ").replaceAll(" ", SPACE);
     if (!normalized) return [];
     const marked = normalized.startsWith(SPACE) ? normalized : SPACE + normalized;
     const ids: number[] = [];
@@ -160,25 +181,34 @@ export function unigramFromTokenizerJson(json: unknown): Unigram {
     pieces.set(piece, { id, score });
     minScore = Math.min(minScore, score);
   });
-  const charsmap = parsed.normalizer.normalizers.find((step) => step.type === "Precompiled")?.precompiled_charsmap;
-  const specials = new Map(parsed.added_tokens.filter((token) => token.special).map((token) => [token.content, token.id]));
+  const steps = "normalizers" in parsed.normalizer ? parsed.normalizer.normalizers : [parsed.normalizer];
+  const charsmap = steps.find((step) => step.type === "Precompiled")?.precompiled_charsmap;
+  const special = parsed.added_tokens.filter((token) => token.special);
+  const specials = new Map(special.map((token) => [token.content, token.id]));
+  const lstrip = new Set(special.filter((token) => token.lstrip).map((token) => token.content));
+  const pre = parsed.pre_tokenizer;
+  const whitespaceSplit = pre.type === "Sequence" && pre.pretokenizers[0]?.type === "WhitespaceSplit";
   return new Unigram({
     pieces,
     unkId: parsed.model.unk_id,
     minScore,
     charsmap: charsmap ? Buffer.from(charsmap, "base64") : null,
     specials,
+    lstrip,
+    whitespaceSplit,
     bosId: specials.get("<s>")!,
     eosId: specials.get("</s>")!,
   });
 }
 
+const Step = z.object({ type: z.string(), precompiled_charsmap: z.string().optional() });
+const Metaspace = z.object({ type: z.literal("Metaspace"), replacement: z.literal(SPACE) });
 const TokenizerJson = z.object({
-  added_tokens: z.array(z.object({ id: z.number(), content: z.string(), special: z.boolean() })),
-  normalizer: z.object({
-    type: z.literal("Sequence"),
-    normalizers: z.array(z.object({ type: z.string(), precompiled_charsmap: z.string().optional() })),
-  }),
-  pre_tokenizer: z.object({ type: z.literal("Metaspace"), replacement: z.literal(SPACE) }),
+  added_tokens: z.array(z.object({ id: z.number(), content: z.string(), special: z.boolean(), lstrip: z.boolean().optional() })),
+  normalizer: z.union([z.object({ type: z.literal("Sequence"), normalizers: z.array(Step) }), Step]),
+  pre_tokenizer: z.union([
+    Metaspace,
+    z.object({ type: z.literal("Sequence"), pretokenizers: z.tuple([z.object({ type: z.literal("WhitespaceSplit") }), Metaspace]) }),
+  ]),
   model: z.object({ type: z.literal("Unigram"), unk_id: z.number(), vocab: z.array(z.tuple([z.string(), z.number()])) }),
 });

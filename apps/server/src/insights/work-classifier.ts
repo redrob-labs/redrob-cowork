@@ -7,40 +7,48 @@ import { z } from "zod";
 
 import { DetectorIntegrityError, type OrtRuntime } from "../privacy/detector.js";
 import { unigramFromTokenizerJson, type Unigram } from "./unigram.js";
+import { ACTION_FAMILY, WORK_ACTIONS } from "./vocabulary.js";
 import trainedHead from "./work-head.json" with { type: "json" };
 
 /*
- * The work classifier: which family of work a session was (writing, a sheet, code, design), read
- * from its first message on this machine. Only the label leaves it.
+ * The work classifier: which kind of work a session was (a support reply, a bug fix, ...) and its
+ * family (writing, a sheet, code, design), read from its first message on this machine. Only the
+ * labels leave it.
  *
- * A frozen multilingual-e5-small encoder (int8 ONNX, about 118 MB, shipped like the privacy model)
- * turns the message into a sentence embedding; a softmax head trained on the hand-written set
- * (work-head.json, from scripts/insights-model/train.py) names the family or says it is not work.
- * Measured in docs/features/ai-work-insights/model-evaluation.md: the family level passes the bar,
- * the kind-of-work level does not yet, so the head carries no `action` and none is ever named.
+ * A frozen multilingual-e5-base encoder (int8 ONNX, about 278 MB, shipped like the privacy model)
+ * turns the message into a sentence embedding; two softmax heads trained on the hand-written set
+ * (work-head.json, from scripts/insights-model/train.py) name the kind of work and the family, or say
+ * it is not work. Both pass the bar (docs/features/ai-work-insights/model-evaluation.md). When the
+ * kind of work is named, the family is its family; when it is under its floor, the family head may
+ * still name the family alone.
  *
  * Trust mirrors the privacy model: REDROB_INSIGHTS_MODEL_DIR says where to look, the pinned manifest
  * hash says what to load, and the manifest's own hashes pin the weights and tokenizer.
  */
 
 /** SHA-256 of apps/desktop/resources/insights-model/manifest.json. A test fails when they drift. */
-export const PINNED_INSIGHTS_MANIFEST_SHA256: string | null = "185259b5d6b32571a57b6e67652f98f2fbc03daa6a7b91c652b62e5ff55fd296";
+export const PINNED_INSIGHTS_MANIFEST_SHA256: string | null = "d059e8080802044eeecfd16445f67886b66940cb62b02e76aa0253f788098c31";
 
 export const WORK_FAMILIES = ["write", "sheet", "code", "design"] as const;
 export type WorkFamily = (typeof WORK_FAMILIES)[number];
-export type WorkLabel = { family: WorkFamily | null; confidence: number };
+export type WorkLabel = { action: string | null; family: WorkFamily | null; confidence: number };
 
 /** What the encoder reads at most, as in training (truncation 256). */
 const MAX_TOKENS = 256;
 
-const Level = z.object({
-  classes: z.array(z.enum(WORK_FAMILIES).nullable()),
-  scale: z.number(),
-  floor: z.number(),
-  w: z.array(z.array(z.number())),
-  b: z.array(z.number()),
+const level = <T extends z.ZodType<string>>(name: T) =>
+  z.object({
+    classes: z.array(name.nullable()),
+    scale: z.number(),
+    floor: z.number(),
+    w: z.array(z.array(z.number())),
+    b: z.array(z.number()),
+  });
+const Head = z.object({
+  prefix: z.string(),
+  action: level(z.string().refine((key) => WORK_ACTIONS.includes(key), "not a kind of work")).nullable(),
+  family: level(z.enum(WORK_FAMILIES)),
 });
-const Head = z.object({ prefix: z.string(), family: Level });
 export type WorkHead = z.infer<typeof Head>;
 
 export const WORK_HEAD: WorkHead = Head.parse(trainedHead);
@@ -53,21 +61,33 @@ const Manifest = z.object({
   tokenizer: z.object({ file: z.string(), sha256: z.string() }),
 });
 
-/** The family for an L2-normalised sentence embedding, or null below the floor or for not work. */
-export function labelEmbedding(head: WorkHead, embedding: Float32Array): WorkLabel {
-  const { classes, scale, floor, w, b } = head.family;
-  const logits = b.map((bias, k) => {
+/** The most likely class of one head, and its probability. */
+function top<C>(level: { classes: readonly C[]; scale: number; w: number[][]; b: number[] }, embedding: Float32Array) {
+  const logits = level.b.map((bias, k) => {
     let sum = bias;
-    for (let i = 0; i < embedding.length; i += 1) sum += embedding[i]! * scale * w[i]![k]!;
+    for (let i = 0; i < embedding.length; i += 1) sum += embedding[i]! * level.scale * level.w[i]![k]!;
     return sum;
   });
-  const top = Math.max(...logits);
-  const exps = logits.map((logit) => Math.exp(logit - top));
+  const peak = Math.max(...logits);
+  const exps = logits.map((logit) => Math.exp(logit - peak));
   const total = exps.reduce((sum, value) => sum + value, 0);
   const best = exps.indexOf(Math.max(...exps));
-  const confidence = exps[best]! / total;
-  const family = classes[best]!;
-  return { family: family && confidence >= floor ? family : null, confidence };
+  return { name: level.classes[best]!, confidence: exps[best]! / total };
+}
+
+/**
+ * The labels for an L2-normalised sentence embedding. The kind of work when its head is sure enough,
+ * with its family; else the family alone when that head is; else nothing (not work, or unsure).
+ */
+export function labelEmbedding(head: WorkHead, embedding: Float32Array): WorkLabel {
+  if (head.action) {
+    const action = top(head.action, embedding);
+    if (action.name && action.confidence >= head.action.floor) {
+      return { action: action.name, family: ACTION_FAMILY[action.name] ?? null, confidence: action.confidence };
+    }
+  }
+  const family = top(head.family, embedding);
+  return { action: null, family: family.name && family.confidence >= head.family.floor ? family.name : null, confidence: family.confidence };
 }
 
 /** Mean of the token vectors (every token is attended), then L2 normalisation. */
@@ -99,7 +119,7 @@ class OnnxWorkClassifier implements WorkClassifier {
   ) {}
 
   async label(text: string): Promise<WorkLabel> {
-    if (!text.trim()) return { family: null, confidence: 0 };
+    if (!text.trim()) return { action: null, family: null, confidence: 0 };
     const ids = BigInt64Array.from(this.tokenizer.encode(this.head.prefix + text, MAX_TOKENS).map(BigInt));
     const dims = [1, ids.length] as const;
     const feeds: Record<string, unknown> = {

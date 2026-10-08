@@ -1,13 +1,13 @@
 {
-  "id": "Xenova/multilingual-e5-small",
-  "revision": "761b726dd34fb83930e26aab4e9ac3899aa1fa78",
+  "id": "Xenova/multilingual-e5-base",
+  "revision": "1ec9243030a27d1a115d5c340572074c125b58b2",
   "license": "MIT",
   "model": {
     "file": "model_int8.onnx",
-    "sha256": "4d24e2bc01a447951524466ef533e52944bf48509e6552810bcee1a2711cb02c"
+    "sha256": "9ddfd8b45086dabc59a7e1bb00463225dace8954962418b240840f2153bc87da"
   },
   "tokenizer": {
     "file": "tokenizer.json",
-    "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39"
+    "sha256": "62c24cdc13d4c9952d63718d6c9fa4c287974249e16b7ade6d5a85e7bbb75626"
   }
 }
