@@ -26,6 +26,15 @@ export const WORK_TASKS: Readonly<Record<string, readonly string[]>> = {
 
 export const WORK_ACTIONS = Object.keys(WORK_TASKS);
 
+/** The family each kind of work belongs to, as console `reference.ts` ACTIONS gives it. */
+export const ACTION_FAMILY: Readonly<Record<string, "write" | "sheet" | "code" | "design">> = {
+  reply: "write", summ: "write", email: "write", research: "write", spec: "write", copy: "write",
+  translate: "write", policy: "write", hr: "write",
+  analyze: "sheet", finance: "sheet",
+  code: "code", fix: "code", review: "code", test: "code",
+  design: "design",
+};
+
 /** The console's task key: `reply.refund-request`. */
 export function taskKey(action: string, task: string): string {
   return `${action}.${task}`;
