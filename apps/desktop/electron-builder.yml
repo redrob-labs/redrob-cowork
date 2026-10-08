@@ -5,6 +5,13 @@ protocols:
   - name: Redrob Cowork
     schemes:
       - redrob
+# A handoff a teammate sent opens in the app (docs/features/handoff-and-live-coworking).
+fileAssociations:
+  - ext: redrobhandoff
+    name: Redrob Cowork handoff
+    description: Work handed off from Redrob Cowork
+    mimeType: application/x-redrob-handoff
+    role: Editor
 linux:
   executableName: redrob
 artifactName: redrob-${os}-${arch}-${version}.${ext}

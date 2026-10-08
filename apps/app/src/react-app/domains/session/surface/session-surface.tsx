@@ -97,6 +97,7 @@ import {
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
+import { useHandoffLock } from "@/react-app/desk/handoff/handoff-open";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
@@ -1975,13 +1976,16 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // The Desk thread's own controls (Plan's questions, Run this plan) reply through `sendDraft`,
   // the composer's path, so busy state, errors and the transcript behave as for a typed reply.
+  // A chat opened from a handoff takes no messages until the person presses Continue.
+  const handoffLocked = useHandoffLock((state) => Boolean(state.locked[props.sessionId]));
   const deskThread = useMemo<DeskThread>(() => ({
     sessionId: props.sessionId,
     busy: chatStreaming,
     sendText: async (text) => {
+      if (handoffLocked) throw new Error("This chat is a handoff under review; press Continue first.");
       await sendDraft(textDraft(text));
     },
-  }), [chatStreaming, props.sessionId, sendDraft]);
+  }), [chatStreaming, handoffLocked, props.sessionId, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">
@@ -2181,7 +2185,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
         busy={chatStreaming}
         steering={steering}
         queuedCount={queuedItems.length}
-        disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable)}
+        disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable) || handoffLocked}
         modelUnavailable={Boolean(props.modelUnavailable)}
         modelUnavailableMessage={props.modelUnavailableMessage}
         statusLabel={statusLabel(snapshot ?? undefined, chatStreaming)}

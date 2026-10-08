@@ -11,6 +11,7 @@ import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
 import { kindsLabel, usePrivacyConfirmStore, type PrivacyConfirm } from "../privacy/privacy-send";
 import { PlaybookDialog } from "../playbooks/playbook-dialog";
+import { HandoffOpenHost } from "../handoff/handoff-open";
 import { ProjectDialog } from "../projects/project-dialog";
 import { useDeskRunEvents } from "../run/use-desk-run-events";
 import { isDeskSettingsPath } from "../settings/settings-sections";
@@ -300,6 +301,7 @@ export function DeskLayerView(props: DeskLayerViewProps) {
         <PlaybookDialog playbookId={props.modal.playbookId} prompt={props.modal.prompt} onClose={props.onCloseModal} />
       ) : null}
       <PrivacyConfirmDialog />
+      <HandoffOpenHost />
       <DeskToast toast={props.toast} onClose={props.onCloseToast} />
     </>
   );

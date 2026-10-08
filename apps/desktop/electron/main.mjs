@@ -1,3 +1,4 @@
+import { handoffLinkForPath, handoffLinksFromArgv, isHandoffFilePath } from "./handoff-file-links.mjs";
 import { processBlankSlateProfile, resolveBlankSlateLaunch } from "./blank-slate-profile.mjs";
 import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -1050,7 +1051,7 @@ function normalizePlatform(value) {
 }
 
 function forwardedDeepLinks(argv) {
-  return argv
+  const links = argv
     .slice(1)
     .map((entry) => entry.trim())
     .filter(
@@ -1060,6 +1061,8 @@ function forwardedDeepLinks(argv) {
         entry.startsWith("https://") ||
         entry.startsWith("http://"),
     );
+  // A double-clicked .redrobhandoff on Windows and Linux arrives as a path in argv.
+  return [...links, ...handoffLinksFromArgv(argv, { scheme: DESKTOP_PROTOCOL_SCHEME, exists: existsSync })];
 }
 
 function queueDeepLinks(urls) {
@@ -2601,6 +2604,19 @@ or use: pnpm dev:worktree`);
     win.show();
     win.focus();
     queueDeepLinks(forwardedDeepLinks(argv));
+  });
+
+  // macOS hands a double-clicked .redrobhandoff over as open-file, before or after launch.
+  app.on("open-file", async (event, filePath) => {
+    if (!isHandoffFilePath(filePath)) return;
+    event.preventDefault();
+    const win = await createMainWindow();
+    if (win.isMinimized()) {
+      win.restore();
+    }
+    win.show();
+    win.focus();
+    queueDeepLinks([handoffLinkForPath(filePath, DESKTOP_PROTOCOL_SCHEME)]);
   });
 
   app.on("open-url", async (event, url) => {
