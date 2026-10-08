@@ -223,7 +223,12 @@ export function GuideScreen() {
     retry: 1,
     enabled: tab === "price",
   });
-  const research = useQuery({ queryKey: GUIDE_RESEARCH_KEY, queryFn: loadGuideResearch, staleTime: Infinity });
+  const research = useQuery({
+    queryKey: GUIDE_RESEARCH_KEY,
+    queryFn: () => loadGuideResearch(guideFetch(isDesktopRuntime())),
+    // An edition changes monthly; an hour keeps a long-open window from showing last month's.
+    staleTime: 60 * 60 * 1000,
+  });
   const count = pricing.data ? guideModelCount(pricing.data) : undefined;
   const meta =
     tab === "profession"

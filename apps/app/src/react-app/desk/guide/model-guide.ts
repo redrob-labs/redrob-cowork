@@ -2,6 +2,7 @@ import type { Effort, EffortLevel, GuidePick, GuideProfession, GuideSource, Guid
 import { z } from "zod";
 
 import { t, type Language } from "../../../i18n";
+import { REDROB_BASE_URL } from "../../domains/settings/redrob-provider";
 
 /**
  * The research behind "By profession": each profession's top five tasks, and the five best models (or model
@@ -241,8 +242,30 @@ export function guideProfessions(research: GuideResearch, locale: Language): Gui
   }));
 }
 
-/** Loaded on demand: the research is a few megabytes, and only `/guide` reads it. */
-export async function loadGuideResearch(): Promise<GuideResearch> {
+/** Where Console publishes the edition Redrob Auto routes on. Unauthenticated, like `/pricing`. */
+export const REDROB_GUIDE_URL = `${REDROB_BASE_URL}/guide`;
+
+/**
+ * The research, as Redrob Auto routes on it: Console's live edition (`GET /v1/guide`), so the ranking
+ * a person reads here is the one their requests are routed by. Console keeps only the picks it can
+ * route (the `redrob-desk` harness), so a pick ranked on another harness is not listed.
+ *
+ * The bundled copy below is still the published source Console syncs from, and is what this shows
+ * when Console cannot be reached, which is a guide that may be a month behind rather than no guide.
+ * Loaded on demand: it is a few megabytes, and only `/guide` reads it.
+ */
+export async function loadGuideResearch(fetchImpl?: typeof fetch): Promise<GuideResearch> {
+  if (fetchImpl) {
+    try {
+      const response = await fetchImpl(REDROB_GUIDE_URL, { method: "GET", headers: { accept: "application/json" } });
+      if (response.ok) {
+        const live = GuideResearch.safeParse(await response.json());
+        if (live.success) return live.data;
+      }
+    } catch {
+      // Offline, or Console is having a moment: the bundled edition below.
+    }
+  }
   const module = await import("./model-guide.json");
   return GuideResearch.parse(module.default);
 }
