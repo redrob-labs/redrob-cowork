@@ -98,3 +98,32 @@ Reusing the encoder Cowork already ships for Redrob Auto's route labels (distilu
 ### In the app
 
 redrob-server runs the family head in `src/insights/work-classifier.ts`: its own SentencePiece tokenizer (`unigram.ts`, which gives the same ids as Hugging Face `tokenizers` on all 1,484 training, evaluation and edge-case texts), the pinned encoder from `apps/desktop/resources/insights-model`, and `work-head.json` from `train.py`. On the 296 evaluation samples it gives the same label as the Python reference on all 296; confidences differ by under 1e-6. A label takes 4.4 ms (median), and loading the model takes under a second.
+
+## Round 3: a tuning slice and contrastive examples (2026-10-08)
+
+Round 2's caveat was the floor: chosen by cross-validation on the training set, it came out at 0.05 and filtered nothing. Round 3 adds two things.
+
+- **A tuning slice** (`src/insights/train/tuning.ts`): 144 messages written the way the evaluation set is, a briefed request and a terse one per kind of work and language, plus not-work and learning messages. The head never trains on it. It only chooses the floor: the lowest floor at which the tuning slice reaches 90% precision with at least 70% coverage. That is five points above the bar, because 128 work messages give a noisy estimate. The rule was fixed before the evaluation set was scored.
+- **Contrastive training examples** (`src/insights/train/contrast.ts`): 140 more, for the pairs the tuning slice confused, such as reviewing a contract (policy) versus a pull request (review), and a failing test (fix) versus tests to write (test). The pairs were taken from the tuning slice, not the evaluation set.
+
+`train.test.ts` checks that the tuning slice shares nothing with the training or evaluation sets.
+
+| Candidate | Level | Size | ms | Floor | Precision | Coverage | Abstains | en / ko precision | Hard cases precision | Bar |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| multilingual-e5-small | family | 118 MB | 4.2 | 0.87 | **89.7%** | 80.8% | 100% | 91.1% / 88.0% | 93.8% | **pass** |
+| multilingual-e5-small | kind of work | 118 MB | 4.2 | 0.40 | 82.5% | 83.0% | 100% | 81.8% / 83.3% | 61.1% | fail: precision |
+| paraphrase-multilingual-MiniLM-L12 | family | 118 MB | 4.1 | 0.96 | 82.8% | 72.1% | 75.0% | 81.4% / 85.1% | 55.6% | fail: precision |
+| paraphrase-multilingual-MiniLM-L12 | kind of work | 118 MB | 4.1 | 0.96 | 81.1% | 39.9% | 95.0% | 76.9% / 87.0% | 50.0% | fail: precision, coverage |
+| multilingual-e5-base | family | 278 MB | 9.9 | 0.96 | 91.7% | 73.9% | 90.0% | 91.9% / 91.2% | 87.5% | fail: size |
+| multilingual-e5-base | kind of work | 278 MB | 9.9 | 0.39 | 88.6% | 82.6% | 100% | 89.7% / 87.1% | 87.5% | fail: size |
+
+**Result:** the family level ships with a real floor. Precision rises from 87.7% to 89.7% and coverage falls from 85.1% to 80.8%. The kind of work on e5-small improves from 79.3% to 82.5% but still fails. On e5-base it would pass on every measure except size.
+
+Across Rounds 2 and 3 the evaluation set has now scored the kind-of-work level twice, once per round, and nothing was tuned on it. Before scoring it again, the next change should be measured on the tuning slice, and the evaluation set scored once at the end. If it keeps being scored after each tweak, it stops measuring anything.
+
+In the app, the retrained head again gives the same label as the Python reference on all 296 evaluation samples.
+
+What would get the kind of work over the bar, in the order worth trying:
+1. **e5-base, if 278 MB is acceptable.** It is the only change already measured to pass. It would mean raising the size limit in the bar, which is a product decision.
+2. **Structural inputs on e5-small.** Whether tests ran, whether something was sent, and the type of file written all separate the pairs the text alone confuses. They need the head to train on session facts, so the training set needs those facts written alongside each message.
+3. More contrastive examples, measured on the tuning slice first.

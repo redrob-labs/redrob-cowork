@@ -9,8 +9,10 @@ Reproduce:
 
 The head is softmax regression on a frozen encoder's sentence embeddings, at two levels: the work
 family (write, sheet, code, design, or not work) and the kind of work. Training uses the training set
-and the prototypes; the confidence floors come from 5-fold cross-validation on that same data. The
-evaluation set is embedded once, at the end, and only scored. Writes the head of the best candidate
+and the prototypes. The confidence floors come from the tuning slice (src/insights/train/tuning.ts),
+written like the evaluation set but apart from it: the lowest floor at which the tuning slice reaches
+TUNING_PRECISION with TUNING_COVERAGE, chosen before the evaluation set is scored. The evaluation set
+is embedded once, at the end, and only scored. Writes the head of the best candidate
 that passes to .insights-models/head.json.
 """
 
@@ -30,8 +32,11 @@ FAMILY = {
     "code": "code", "fix": "code", "review": "code", "test": "code",
     "design": "design",
 }
-FOLDS = 5
 SCALE = 20.0
+# Five points above the bar: the tuning slice is small (128 work messages), so a floor that only just
+# reaches 85% on it would land under 85% about half the time on new data.
+TUNING_PRECISION = 0.90
+TUNING_COVERAGE = 0.70
 
 
 def fit(x, labels, epochs=600, lr=0.5, l2=1e-3):
@@ -62,20 +67,19 @@ def predict(model, x):
     return [classes[i] for i in k], p[np.arange(len(k)), k]
 
 
-def floor_for(x, labels, target):
-    """The lowest confidence at which cross-validated precision on named labels reaches the target."""
-    rng = np.random.default_rng(7)
-    order = rng.permutation(len(labels))
-    held = []
-    for f in range(FOLDS):
-        test = order[f::FOLDS]
-        train = np.setdiff1d(order, test)
-        model = fit(x[train], [labels[i] for i in train])
-        names, conf = predict(model, x[test])
-        held += [(n, c, labels[i]) for n, c, i in zip(names, conf, test)]
+def floor_for(model, x, labels):
+    """The lowest floor at which the tuning slice reaches the tuning precision and coverage."""
+    names, conf = predict(model, x)
+    work = sum(1 for l in labels if l is not None)
     for floor in np.arange(0.05, 0.96, 0.01):
-        named = [(n, l) for n, c, l in held if n is not None and c >= floor]
-        if named and sum(n == l for n, l in named) / len(named) >= ev.BAR["precision"]:
+        named = [(n, l) for n, c, l in zip(names, conf, labels) if n is not None and c >= floor]
+        if not named:
+            break
+        precision = sum(n == l for n, l in named) / len(named)
+        coverage = sum(1 for n, l in named if l is not None) / work
+        if coverage < TUNING_COVERAGE:
+            break
+        if precision >= TUNING_PRECISION:
             return float(floor)
     return 0.96
 
@@ -129,6 +133,7 @@ def main():
         {"text": t["text"], "action": None if t["learn"] else t["action"]} for t in data["training"]
     ]
     samples = data["samples"]
+    tuning = data["tuning"]
     reports = []
     best = None
     for cid, repo, revision, onnx_file, prefix, _ in ev.CANDIDATES:
@@ -137,7 +142,10 @@ def main():
         actions = [t["action"] for t in train]
         families = [FAMILY[a] if a else None for a in actions]
         action_model, family_model = fit(x, actions), fit(x, families)
-        action_floor, family_floor = floor_for(x, actions, ev.BAR["precision"]), floor_for(x, families, ev.BAR["precision"])
+        tx, _ = ev.embed(session, tokenizer, [t["text"] for t in tuning], prefix)
+        tuning_actions = [t["action"] for t in tuning]
+        action_floor = floor_for(action_model, tx, tuning_actions)
+        family_floor = floor_for(family_model, tx, [FAMILY[a] if a else None for a in tuning_actions])
         sx, times = ev.embed(session, tokenizer, [s["text"] for s in samples], prefix)
         ms = float(np.median(times))
         result = {}
@@ -153,7 +161,7 @@ def main():
         reports.append(report)
         if best is None and (result["action"]["bar"] == "pass" or result["family"]["bar"] == "pass"):
             best = (report, action_model, action_floor, family_model, family_floor, prefix)
-    print(json.dumps({"bar": ev.BAR, "training": len(train), "samples": len(samples), "reports": reports}, indent=1))
+    print(json.dumps({"bar": ev.BAR, "training": len(train), "tuning": len(tuning), "samples": len(samples), "reports": reports}, indent=1))
     if best:
         report, am, af, fm, ff, prefix = best
 
