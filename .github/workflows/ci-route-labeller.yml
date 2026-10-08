@@ -50,7 +50,8 @@ jobs:
       - name: Evaluate
         run: pnpm eval
       - name: Dry-run publish
-        run: npm publish --dry-run --access public
+        # pnpm, not npm: publishConfig.exports swaps the workspace's src entry points for dist.
+        run: pnpm publish --dry-run --no-git-checks --access public
 
   publish:
     name: Publish to npm
@@ -80,6 +81,6 @@ jobs:
           have="$(node -p "require('./package.json').version")"
           [ "$want" = "$have" ] || { echo "::error::tag says $want, package.json says $have"; exit 1; }
       - name: Publish
-        run: npm publish --access public --provenance
+        run: pnpm publish --no-git-checks --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

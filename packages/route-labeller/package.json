@@ -61,5 +61,24 @@
     "onnxruntime-node": "1.23.0",
     "tsup": "^8.5.0",
     "typescript": "^5.6.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./node": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "./wordpiece": {
+        "types": "./dist/wordpiece.d.ts",
+        "default": "./dist/wordpiece.js"
+      },
+      "./lexicon.json": "./src/lexicon.json",
+      "./manifest.json": "./src/manifest.json"
+    }
   }
 }
