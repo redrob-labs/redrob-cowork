@@ -36,7 +36,8 @@ BAR = {
     "coverage": 0.70,  # of messages that are work, the share it names a kind for
     "abstain": 0.70,  # of messages that are not work or too vague, the share it leaves unlabeled
     "ko_gap": 0.10,  # Korean precision no more than this below English
-    "size_mb": 120,
+    # Raised from 120 MB on 2026-10-08, by product decision, to ship the kind of work on e5-base (278 MB).
+    "size_mb": 300,
     "ms": 50,  # median per message, 2 threads
 }
 

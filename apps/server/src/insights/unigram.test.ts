@@ -11,6 +11,8 @@ describe("Unigram", () => {
     minScore: parity.minScore,
     charsmap: Buffer.from(parity.charsmap, "base64"),
     specials,
+    lstrip: new Set(parity.lstrip),
+    whitespaceSplit: true,
     bosId: specials.get("<s>")!,
     eosId: specials.get("</s>")!,
   });
