@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, Tabs, icons, type TableColumn } from "@redrob-labs/ui";
 import { useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "react-router";
 
 import { currentLocale, subscribeToLocale, t, type Language } from "../../../i18n";
 import { desktopFetchViaMain } from "../../../app/lib/desktop";
@@ -203,9 +204,17 @@ export const GUIDE_RESEARCH_KEY = ["desk-guide", "research"];
 
 export type GuideTab = "profession" | "price";
 
-/** `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from. */
+/**
+ * `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from.
+ *
+ * The tab is in the URL (`?tab=price`), so a link can open either one. The model menu's "Recommended best
+ * models" opens `?tab=profession`. That has to win even when the guide is already open on By price, which
+ * local state could not do, because the screen stays mounted.
+ */
 export function GuideScreen() {
-  const [tab, setTab] = useState<GuideTab>("profession");
+  const [params, setParams] = useSearchParams();
+  const tab: GuideTab = params.get("tab") === "price" ? "price" : "profession";
+  const setTab = (next: GuideTab) => setParams({ tab: next }, { replace: true });
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const pricing = useQuery({
     queryKey: GUIDE_QUERY_KEY,
