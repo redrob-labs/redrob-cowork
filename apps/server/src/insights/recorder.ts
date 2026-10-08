@@ -73,6 +73,8 @@ export class InsightsRecorder {
           permissionsAlways: 0,
           aborted: 0,
           redirected: 0,
+          sensitiveSends: 0,
+          unmaskedSends: 0,
         },
         userMessages: new Set(),
         firstUserMessage: null,
@@ -181,6 +183,17 @@ export class InsightsRecorder {
         }
         return;
     }
+  }
+
+  /**
+   * From the privacy gate, not the engine: the plugin has no way to report this, so a fact sent to
+   * the facts route can never claim a session was handled safely.
+   */
+  observeSensitivity(sessionID: string, at: number, unmasked: boolean): void {
+    const root = this.rootOf(sessionID);
+    const live = this.entry(root, at);
+    live.tally.sensitiveSends += 1;
+    if (unmasked) live.tally.unmaskedSends += 1;
   }
 
   /** Labels and hands over every session quiet for long enough. Returns how many were finished. */

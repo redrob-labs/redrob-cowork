@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { RedrobWorkInsightsRecorder } from "../opencode-plugins/redrob-insights-recorder.js";
+import { DetectorSource } from "../privacy/detector-source.js";
+import { PrivacyGate, type SensitivityReport } from "../privacy/gate.js";
 import type { ServerConfig } from "../types.js";
 import { factsOf, parseFact, toolEffect, type Fact } from "./facts.js";
 import { externalIdOf, labelSession, modeOf, type LabeledSession, type SessionTally } from "./labeler.js";
@@ -94,7 +96,7 @@ describe("modes", () => {
   const tally = (over: Partial<SessionTally>): SessionTally => ({
     rootSessionID: "s", startedAt: 0, lastActivityAt: 0, userTurns: 1, firstAttachedSource: false, assistantMessages: 1,
     toolCalls: 0, artifacts: 0, checks: 0, sends: 0, delegations: 0, peakConcurrentAgents: 0, subagentMinutes: 0,
-    busyMinutes: 0, attentionMinutes: 0, permissionsAsked: 0, permissionsAlways: 0, aborted: 0, redirected: 0, ...over,
+    busyMinutes: 0, attentionMinutes: 0, permissionsAsked: 0, permissionsAlways: 0, aborted: 0, redirected: 0, sensitiveSends: 0, unmaskedSends: 0, ...over,
   });
   test("one question, nothing produced, is a look-up", () => expect(modeOf(tally({}))).toBe(0));
   test("a back and forth with nothing produced is learning", () => expect(modeOf(tally({ userTurns: 3 }))).toBe(1));
@@ -190,6 +192,7 @@ describe("the recorder, from engine events", () => {
       rootSessionID: "s", startedAt: 0, lastActivityAt: 0, userTurns: 1, firstAttachedSource: false, assistantMessages: 1,
       toolCalls: 9, artifacts: 1, checks: 0, sends: 0, delegations: 0, peakConcurrentAgents: 0, subagentMinutes: 0,
       busyMinutes: 1.234, attentionMinutes: 0.5, permissionsAsked: 2, permissionsAlways: 0, aborted: 0, redirected: 0,
+      sensitiveSends: 0, unmaskedSends: 0,
     });
     expect(Object.keys(s).sort()).toEqual(
       ["agent", "brief", "checked", "context", "externalId", "labelerId", "labelerVersion", "mode", "outward", "producedOutput", "sensitiveOk",
@@ -276,6 +279,7 @@ describe("the outbox", () => {
     rootSessionID: id, startedAt: 0, lastActivityAt: 0, userTurns: 1, firstAttachedSource: false, assistantMessages: 1,
     toolCalls: 0, artifacts: 0, checks: 0, sends: 0, delegations: 0, peakConcurrentAgents: 0, subagentMinutes: 0,
     busyMinutes: 0, attentionMinutes: 0, permissionsAsked: 0, permissionsAlways: 0, aborted: 0, redirected: 0,
+    sensitiveSends: 0, unmaskedSends: 0,
   });
 
   test("keeps what is queued, once each, and drops what was sent", async () => {
@@ -292,5 +296,66 @@ describe("the outbox", () => {
     const entries = await outbox.list();
     expect(entries).toHaveLength(OUTBOX_LIMIT);
     expect(entries[0]?.session.externalId).toBe(externalIdOf("s3"));
+  });
+});
+
+describe("sensitive data, from the privacy gate", () => {
+  const gate = (reports: SensitivityReport[], level: "off" | "standard") => {
+    const config: ServerConfig = {
+      host: "127.0.0.1", port: 0, token: "t", hostToken: "h", configPath: "/nonexistent/config.json",
+      approval: { mode: "auto", timeoutMs: 1000 }, corsOrigins: [], workspaces: [], authorizedRoots: [], readOnly: false,
+      startedAt: 0, tokenSource: "generated", hostTokenSource: "generated", logFormat: "pretty", logRequests: false,
+    };
+    const instance = new PrivacyGate(
+      config,
+      () => null,
+      new DetectorSource({ directory: null, pinnedManifestSha256: null, allowUnpinned: false }),
+      (report) => reports.push(report),
+    );
+    // A directory no workspace owns gets the default level; "off" is reached through the rules.
+    if (level === "off") instance.rules = async () => ({ level: "off", names: [] });
+    return instance;
+  };
+
+  test("an email at Standard is touched and masked; an account number is touched and not", async () => {
+    const reports: SensitivityReport[] = [];
+    const g = gate(reports, "standard");
+    const masked = await g.label({ sessionID: "s1", directory: null, texts: ["Write to jiwon@acme.test about the renewal"] });
+    expect(masked.texts[0]).not.toContain("jiwon@acme.test");
+    await g.label({ sessionID: "s2", directory: null, texts: ["Pay into 110-234-567890 today"] });
+    await g.label({ sessionID: "s3", directory: null, texts: ["Summarize this thread"] });
+    expect(reports).toEqual([
+      { sessionID: "s1", touched: true, unmasked: false },
+      { sessionID: "s2", touched: true, unmasked: true },
+    ]);
+  });
+
+  test("with protection off, anything sensitive went out unmasked", async () => {
+    const reports: SensitivityReport[] = [];
+    await gate(reports, "off").label({ sessionID: "s", directory: null, texts: ["Call 010-1234-5678"] });
+    expect(reports).toEqual([{ sessionID: "s", touched: true, unmasked: true }]);
+  });
+
+  test("a report carries no value, and the chat's own labels are untouched", async () => {
+    const reports: SensitivityReport[] = [];
+    const g = gate(reports, "standard");
+    const first = await g.label({ sessionID: "s", directory: null, texts: ["Pay into 110-234-567890, mail kim@acme.test"] });
+    expect(JSON.stringify(reports)).not.toContain("110-234");
+    expect(first.texts[0]).toContain("[EMAIL_1]");
+    expect(first.texts[0]).toContain("110-234-567890");
+  });
+
+  test("the session's labels follow: touched, and safe only when nothing went out unmasked", async () => {
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.user("safe", "m1", 0)], [0, ev.user("leaky", "m2", 0)], [0, ev.user("none", "m3", 0)]]);
+    recorder.observeSensitivity("safe", 1, false);
+    recorder.observeSensitivity("leaky", 1, false);
+    recorder.observeSensitivity("leaky", 2, true);
+    await recorder.sweep(60 * MINUTE);
+    const by = Object.fromEntries(out.map((s) => [s.externalId, s]));
+    expect(by[externalIdOf("safe")]).toMatchObject({ sensitiveTouched: true, sensitiveOk: true });
+    expect(by[externalIdOf("leaky")]).toMatchObject({ sensitiveTouched: true, sensitiveOk: false });
+    expect(by[externalIdOf("none")]).toMatchObject({ sensitiveTouched: false, sensitiveOk: false });
   });
 });

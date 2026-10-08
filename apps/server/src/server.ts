@@ -2927,7 +2927,18 @@ function createRoutes(
    * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
    * the chats whose labels this resolves, so restoring them reveals nothing new.
    */
-  const privacyGate = new PrivacyGate(config);
+  /*
+   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
+   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
+   * Nothing is sent anywhere from these routes.
+   */
+  const insightsOutbox = new InsightsOutbox(config);
+  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
+  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
+  insightsSweep.unref?.();
+  const privacyGate = new PrivacyGate(config, undefined, undefined, (report) =>
+    insightsRecorder.observeSensitivity(report.sessionID, Date.now(), report.unmasked),
+  );
   addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -2951,15 +2962,6 @@ function createRoutes(
     }
   });
 
-  /*
-   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
-   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
-   * Nothing is sent anywhere from these routes.
-   */
-  const insightsOutbox = new InsightsOutbox(config);
-  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
-  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
-  insightsSweep.unref?.();
   addRoute(routes, "POST", "/insights/facts", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);

@@ -10,7 +10,7 @@
 import { createHash } from "node:crypto";
 
 export const LABELER_ID = "cowork-structural";
-export const LABELER_VERSION = "1";
+export const LABELER_VERSION = "2";
 
 /** What the recorder accumulated for a session and every subagent session under it. */
 export type SessionTally = {
@@ -39,6 +39,10 @@ export type SessionTally = {
   aborted: number;
   /** A message from the person within two messages after an abort: the run was redirected. */
   redirected: number;
+  /** Sends to the model that carried something sensitive, from the privacy gate. */
+  sensitiveSends: number;
+  /** Of those, sends where something sensitive went out unmasked at the chat's level. */
+  unmaskedSends: number;
 };
 
 export type LabeledSession = {
@@ -119,9 +123,8 @@ export function labelSession(t: SessionTally): LabeledSession {
     steerApplicable: t.aborted > 0 || (mode >= 3 && t.userTurns >= 3),
     steered: t.redirected > 0,
     outward: t.sends > 0,
-    // The privacy gate's counts arrive with the sensitive-data step.
-    sensitiveTouched: false,
-    sensitiveOk: false,
+    sensitiveTouched: t.sensitiveSends > 0,
+    sensitiveOk: t.sensitiveSends > 0 && t.unmaskedSends === 0,
     turns: t.userTurns,
     ...(agent
       ? {
