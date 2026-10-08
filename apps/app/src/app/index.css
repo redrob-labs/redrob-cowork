@@ -1303,6 +1303,92 @@
   color: var(--ink-muted);
 }
 
+/* Review: comments on a chat, its steps and claims, and the verdict above it. */
+.desk-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--border-subtle, var(--ink-muted));
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.desk-review__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.desk-review__comment {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.desk-review__comment[data-resolved] .desk-review__text {
+  color: var(--ink-muted);
+}
+
+.desk-review__body,
+.desk-review__form,
+.desk-review__group {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.desk-review__form {
+  gap: var(--space-2);
+}
+
+.desk-review__meta,
+.desk-review__item,
+.desk-review__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink-secondary);
+}
+
+.desk-review__meta b,
+.desk-review__item {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-review__text,
+.desk-review__note {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink-primary);
+}
+
+.desk-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.desk-review__bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .desk-settings__auto {
   display: flex;
   flex-direction: column;

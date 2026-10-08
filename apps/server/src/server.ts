@@ -141,6 +141,7 @@ import {
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
+import { installAuthor, registerReviewRoutes } from "./routes/review.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import {
   applyTeamPolicy,
@@ -2229,6 +2230,17 @@ function createRoutes(
     resolveOpencodeDirectory,
     createWorkspaceOpencodeClient,
     unwrapOpencodeResult,
+  });
+
+  registerReviewRoutes({
+    routes,
+    config,
+    jsonResponse,
+    readJsonBody,
+    ensureWritable,
+    requireClientScope,
+    resolveWorkspaceWithoutBootstrap,
+    resolveAuthor: () => installAuthor(config),
   });
 
   addRoute(routes, "GET", "/memory", "client", async () => {
