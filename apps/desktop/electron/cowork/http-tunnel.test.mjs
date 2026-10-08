@@ -48,7 +48,7 @@ describe("HTTP over iroh", { skip: iroh ? false : "@number0/iroh is not installe
       });
     });
     await new Promise((resolve) => upstream.listen(0, "127.0.0.1", resolve));
-    upstreamUrl = `http://127.0.0.1:${upstream.address().port}`;
+    upstreamUrl = `http://127.0.0.1:${/** @type {import("node:net").AddressInfo} */ (upstream.address()).port}`;
 
     const bind = async () => {
       const builder = iroh.Endpoint.builder();

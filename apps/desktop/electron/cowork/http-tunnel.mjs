@@ -159,9 +159,9 @@ export async function startLoopbackProxy(connection, options = {}) {
   });
   await new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(options.port ?? 0, "127.0.0.1", resolve);
+    server.listen(options.port ?? 0, "127.0.0.1", () => resolve(undefined));
   });
-  const address = server.address();
+  const address = /** @type {import("node:net").AddressInfo} */ (server.address());
   return {
     url: `http://127.0.0.1:${address.port}`,
     port: address.port,

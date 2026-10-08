@@ -209,6 +209,20 @@ contextBridge.exposeInMainWorld("__REDROB_ELECTRON__", {
       return () => ipcRenderer.removeListener("redrob:terminal:exit", handler);
     },
   },
+  /** Live co-working (cowork/bridge.mjs). Every call resolves `{ ok, value }` or `{ ok: false, code, message }`. */
+  cowork: {
+    status() { return ipcRenderer.invoke("redrob:cowork:status"); },
+    host(input) { return ipcRenderer.invoke("redrob:cowork:host", input); },
+    stopHosting(input) { return ipcRenderer.invoke("redrob:cowork:stopHosting", input); },
+    join(input) { return ipcRenderer.invoke("redrob:cowork:join", input); },
+    cancelJoin(input) { return ipcRenderer.invoke("redrob:cowork:cancelJoin", input); },
+    leave(input) { return ipcRenderer.invoke("redrob:cowork:leave", input); },
+    onEvent(callback) {
+      const handler = (_event, payload) => callback(payload);
+      ipcRenderer.on("redrob:cowork:event", handler);
+      return () => ipcRenderer.removeListener("redrob:cowork:event", handler);
+    },
+  },
   meta: {
     desktopBootstrap,
     distribution: desktopDistribution,

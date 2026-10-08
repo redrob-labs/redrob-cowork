@@ -39,6 +39,7 @@ import { createApplicationMenu } from "./app-menu.mjs";
 import { applyBrandAppName } from "./brand-app-name.mjs";
 import { createBrowserPanel } from "./browser-panel.mjs";
 import { createWorkspaceStore } from "./workspace-store.mjs";
+import { createCoworkBridge, loadEndpointKey, registerCoworkIpc } from "./cowork/bridge.mjs";
 import {
   buildNukeManifest,
   executeNukeFreshStart,
@@ -1042,6 +1043,39 @@ const browserPanel = createBrowserPanel({
 });
 
 const workspaceStore = createWorkspaceStore({ app });
+
+/*
+ * Live co-working's bridge (see cowork/bridge.mjs). Nothing runs until the renderer asks: the iroh
+ * binding is loaded lazily so an Intel Mac, which has none, still boots.
+ */
+/** @type {(event: object) => void} */
+let emitCoworkEvent = () => {};
+const coworkBridge = createCoworkBridge({
+  loadIroh: async () => {
+    try {
+      return require("@number0/iroh");
+    } catch {
+      return null;
+    }
+  },
+  platform: process.platform,
+  arch: process.arch,
+  packaged: app.isPackaged,
+  scheme: DESKTOP_PROTOCOL_SCHEME,
+  schemes: app.isPackaged ? [DESKTOP_PROTOCOL_SCHEME] : [DESKTOP_PROTOCOL_SCHEME, "redrob-dev"],
+  serverInfo: async () => {
+    const boot = await ensureRuntimeBootstrap();
+    if (!boot?.ok) throw Object.assign(new Error(boot?.error ?? "Redrob Cowork is still starting"), { code: "server_unavailable" });
+    return assertRedrobServerReady(await runtimeManager.redrobServerInfo());
+  },
+  // loopback-fetch: only ever this machine's redrob-server, at the base URL it reported.
+  localFetch: (url, init) => fetch(url, init),
+  endpointKey: () => loadEndpointKey(path.join(app.getPath("userData"), "cowork")),
+  addRemoteWorkspace: (input) => workspaceStore.createRemoteWorkspace(input),
+  emit: (event) => emitCoworkEvent(event),
+  // Two dev instances on one machine with no relay: invites carry socket addresses.
+  directAddresses: !app.isPackaged && process.env.REDROB_COWORK_DIRECT_ADDRESSES === "1",
+});
 
 
 function normalizePlatform(value) {
@@ -2555,6 +2589,7 @@ ipcMain.handle("redrob:terminal:kill", (event, terminalId) => {
 });
 
 browserPanel.registerIpc(ipcMain);
+emitCoworkEvent = registerCoworkIpc({ ipcMain, bridge: coworkBridge, getWindow: () => mainWindow });
 
 registerMigrationIpc({ app, ipcMain });
 const { ensureAutoUpdater } = registerUpdaterIpc({
@@ -2590,6 +2625,7 @@ or use: pnpm dev:worktree`);
     void Promise.all([
       disposeRuntimeBeforeQuit(),
       uiControlServer.stop(),
+      coworkBridge.close().catch(() => undefined),
     ]).finally(() => {
       scheduleBlankSlateProfileCleanup();
       app.quit();
