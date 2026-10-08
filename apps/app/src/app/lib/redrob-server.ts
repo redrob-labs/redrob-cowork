@@ -393,6 +393,29 @@ export type RedrobWorkspaceImportPreview = {
 
 export type RedrobWorkspaceExportSensitiveMode = "auto" | "include" | "exclude";
 
+/** Mirrors apps/server/src/review-store.ts. */
+export type RedrobReviewAnchor =
+  | { kind: "message"; messageId: string }
+  | { kind: "plan-step" | "claim"; messageId: string; itemId: string };
+export type RedrobReviewAuthor = { participantId: string; displayName: string };
+export type RedrobReviewComment = {
+  id: string;
+  anchor: RedrobReviewAnchor;
+  author: RedrobReviewAuthor;
+  text: string;
+  createdAt: number;
+  resolvedAt?: number;
+  resolvedBy?: RedrobReviewAuthor;
+  origin: "local" | "handoff" | "reply" | "room";
+};
+export type RedrobReviewStatus = "open" | "approved" | "changes_requested";
+export type RedrobReviewState = { status: RedrobReviewStatus; by: RedrobReviewAuthor | null; at: number; note?: string };
+export type RedrobSessionReview = { comments: RedrobReviewComment[]; state: RedrobReviewState };
+
+function reviewPath(workspaceId: string, sessionId: string): string {
+  return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/review`;
+}
+
 /** This install as teammates see it: a stable id and a name the person chose. Neither is verified. */
 export type RedrobParticipantProfile = {
   participantId: string;
@@ -1114,6 +1137,58 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       requestJson<RedrobRuntimeSnapshot>(baseUrl, "/runtime/versions", { token, hostToken, timeoutMs: timeouts.status }),
     status: () => requestJson<RedrobServerDiagnostics>(baseUrl, "/status", { token, hostToken, timeoutMs: timeouts.status }),
     capabilities: () => requestJson<RedrobServerCapabilities>(baseUrl, "/capabilities", { token, hostToken, timeoutMs: timeouts.capabilities }),
+    getSessionReview: async (workspaceId: string, sessionId: string): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(baseUrl, reviewPath(workspaceId, sessionId), {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      });
+      return payload.review;
+    },
+    addReviewComment: async (
+      workspaceId: string,
+      sessionId: string,
+      input: { anchor: RedrobReviewAnchor; text: string },
+    ): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(baseUrl, `${reviewPath(workspaceId, sessionId)}/comments`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: timeouts.config,
+      });
+      return payload.review;
+    },
+    resolveReviewComment: async (workspaceId: string, sessionId: string, commentId: string, resolved: boolean): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(
+        baseUrl,
+        `${reviewPath(workspaceId, sessionId)}/comments/${encodeURIComponent(commentId)}/resolve`,
+        { token, hostToken, method: "POST", body: { resolved }, timeoutMs: timeouts.config },
+      );
+      return payload.review;
+    },
+    deleteReviewComment: async (workspaceId: string, sessionId: string, commentId: string): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(
+        baseUrl,
+        `${reviewPath(workspaceId, sessionId)}/comments/${encodeURIComponent(commentId)}`,
+        { token, hostToken, method: "DELETE", timeoutMs: timeouts.config },
+      );
+      return payload.review;
+    },
+    setReviewState: async (
+      workspaceId: string,
+      sessionId: string,
+      input: { status: RedrobReviewStatus; note?: string },
+    ): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(baseUrl, `${reviewPath(workspaceId, sessionId)}/state`, {
+        token,
+        hostToken,
+        method: "PUT",
+        body: input,
+        timeoutMs: timeouts.config,
+      });
+      return payload.review;
+    },
     getProfile: async (): Promise<RedrobParticipantProfile> => {
       const payload = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
         token,

@@ -26,9 +26,22 @@ export type DeskTeamClient = Pick<
 /** The calls the profile adds: the name teammates see on handoffs and in shared chats. */
 export type DeskProfileClient = Pick<RedrobServerClient, "getProfile" | "updateProfile">;
 
+/** The calls review adds: comments on a chat and the verdict on it. */
+export type DeskReviewClient = Pick<
+  RedrobServerClient,
+  "getSessionReview" | "addReviewComment" | "resolveReviewComment" | "deleteReviewComment" | "setReviewState"
+>;
+
 export type DeskConnection = {
   client:
-    | (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient & DeskProfileClient)
+    | (DeskServerClient &
+        DeskFileClient &
+        DictationClient &
+        DeskProjectClient &
+        DeskConnectorClient &
+        DeskTeamClient &
+        DeskProfileClient &
+        DeskReviewClient)
     | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;

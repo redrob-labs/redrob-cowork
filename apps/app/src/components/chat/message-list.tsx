@@ -11,6 +11,7 @@ import {
   FileIcon,
   FolderOpen,
   LoaderCircle,
+  MessageSquare,
   MoreHorizontal,
   Pencil,
   RotateCcw,
@@ -130,6 +131,7 @@ import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
+import { DeskReviewBar, MessageReview, useReviewUi } from "@/react-app/desk/review/review-thread"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
 import { useFrameStore } from "@/react-app/desk/store/frame-store"
@@ -514,7 +516,7 @@ const AssistantMessage = React.memo(
                   >
                     {body}
                   </MessageContent>}
-                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} /> : null}
+                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} messageId={message.id} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -767,6 +769,7 @@ const UserMessage = React.memo(
                         </Button>
                       </MessageAction>
                     ) : null}
+                    {inDeskFrame ? <CommentMessageAction messageId={message.id} /> : null}
                     <MessageAction tooltip={t("message.branch_new_chat")}>
                       <Button
                         variant="ghost"
@@ -815,6 +818,7 @@ const UserMessage = React.memo(
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        {inDeskFrame ? <MessageReview sessionId={sessionId} messageId={message.id} /> : null}
       </Message>
     )
   }
@@ -1076,7 +1080,7 @@ function MessageGroup({
   messages,
   isStreaming,
 }: AssistantMessageGroupProps) {
-  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
+  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking, sessionId } = useMessageList()
   const inDeskFrame = useInDeskFrame()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
@@ -1313,6 +1317,11 @@ function MessageGroup({
           <DeskMemoryNote text={text} />
         </div>
       ))}
+      {inDeskFrame && lastRealItem && !isStreaming ? (
+        <div className={CHAT_COLUMN}>
+          <MessageReview sessionId={sessionId} messageId={lastRealItem.message.id} />
+        </div>
+      ) : null}
       {showDeskReceipt && lastRealItem ? (
         <div className={CHAT_COLUMN}>
           <DeskAnswerFooter
@@ -1382,6 +1391,7 @@ function MessageGroup({
                     <Undo2 />
                   </Button>
                 </MessageAction>
+                {inDeskFrame ? <CommentMessageAction messageId={lastRealItem.message.id} /> : null}
               </>
             ) : null}
           </MessageActions>
@@ -1530,6 +1540,18 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
   )
 }
 
+/** Opens or closes the comment box under one message. */
+function CommentMessageAction({ messageId }: { messageId: string }) {
+  const toggle = useReviewUi((state) => state.toggle)
+  return (
+    <MessageAction tooltip={t("desk.review_comment")}>
+      <Button variant="ghost" size="icon" aria-label={t("desk.review_comment")} onClick={() => toggle(messageId)}>
+        <MessageSquare />
+      </Button>
+    </MessageAction>
+  )
+}
+
 export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
@@ -1558,6 +1580,11 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
+      {inDeskFrame && messages.length > 0 ? (
+        <div className={CHAT_COLUMN}>
+          <DeskReviewBar />
+        </div>
+      ) : null}
       {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
 
       {items.map((item) => {

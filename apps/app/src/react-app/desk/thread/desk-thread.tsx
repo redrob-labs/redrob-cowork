@@ -17,7 +17,9 @@ import {
 import { t } from "../../../i18n";
 import { useDeskComposerStore } from "../composer/composer-state";
 import { useCheckStore, type AnswerChecks } from "./check-store";
-import type { ChallengeData, DeskBlocks, FactCheckData, PlanDoc, PlanQuestionData } from "./desk-blocks";
+import { ItemsReview, itemLabel } from "../review/review-thread";
+import type { ReviewItem } from "../review/review-logic";
+import { claimIds, planStepIds, type ChallengeData, type DeskBlocks, type FactCheckData, type PlanDoc, type PlanQuestionData } from "./desk-blocks";
 import { useDeskThread } from "./desk-thread-context";
 import {
   answersSummary,
@@ -165,14 +167,30 @@ function DeskPlan(props: { plan: PlanDoc; isLatest: boolean }) {
   );
 }
 
-/** The blocks in an assistant answer, as the design system draws them. */
-export function DeskBlocksView(props: { blocks: DeskBlocks; isLatest: boolean }) {
+/** A plan's steps as comment targets, in order, with their anchors. */
+export function planReviewItems(plan: PlanDoc): ReviewItem[] {
+  const ids = planStepIds(plan);
+  return plan.todo.map((step, index) => ({ id: ids[index] ?? `idx-${index + 1}`, label: itemLabel(step.label) }));
+}
+
+/** A fact check's claims as comment targets. */
+export function claimReviewItems(fact: FactCheckData): ReviewItem[] {
+  const ids = claimIds(fact);
+  return fact.claims.map((claim, index) => ({ id: ids[index] ?? `idx-${index + 1}`, label: itemLabel(claim.claim) }));
+}
+
+/** The blocks in an assistant answer, as the design system draws them. With `messageId`, they take comments. */
+export function DeskBlocksView(props: { blocks: DeskBlocks; isLatest: boolean; messageId?: string }) {
+  const thread = useDeskThread();
   const { questions, plan, check } = props.blocks;
+  const reviewable = props.messageId && thread ? { sessionId: thread.sessionId, messageId: props.messageId } : null;
   return (
     <>
       {questions ? <DeskQuestions questions={questions} isLatest={props.isLatest} /> : null}
       {plan ? <DeskPlan plan={plan} isLatest={props.isLatest} /> : null}
+      {plan && reviewable ? <ItemsReview {...reviewable} kind="plan-step" items={planReviewItems(plan)} /> : null}
       {check?.fact ? <FactCheckReport {...factReportProps(check.fact)} /> : null}
+      {check?.fact && reviewable ? <ItemsReview {...reviewable} kind="claim" items={claimReviewItems(check.fact)} /> : null}
       {check?.challenge ? <ChallengeReport {...challengeReportProps(check.challenge)} /> : null}
     </>
   );
@@ -182,7 +200,16 @@ export function DeskBlocksView(props: { blocks: DeskBlocks; isLatest: boolean })
 export function DeskAnswerFooter(props: { messageId: string; model?: string }) {
   const checks = useCheckStore((state) => state.answers[props.messageId]);
   const retry = useCheckStore((state) => state.retryHandler);
-  return <DeskAnswerFooterView checks={checks} model={props.model} onRetry={retry ? () => retry(props.messageId) : undefined} />;
+  const thread = useDeskThread();
+  const fact = checks?.fact === "done" ? checks.result?.fact : undefined;
+  return (
+    <>
+      <DeskAnswerFooterView checks={checks} model={props.model} onRetry={retry ? () => retry(props.messageId) : undefined} />
+      {fact && thread ? (
+        <ItemsReview sessionId={thread.sessionId} messageId={props.messageId} kind="claim" items={claimReviewItems(fact)} />
+      ) : null}
+    </>
+  );
 }
 
 /** A check that failed can run again, when the cross-check is mounted and knows what was asked. */
