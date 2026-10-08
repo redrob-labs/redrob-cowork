@@ -142,6 +142,9 @@ import {
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
 import { actorAuthor, registerReviewRoutes } from "./routes/review.js";
+import { registerRoomRoutes } from "./routes/room.js";
+import { activeRoom, broadcast, recordAuthorship, withServerMessageId } from "./cowork-room.js";
+import { engineId } from "./engine-ids.js";
 import {
   assertGuestEngineRequest,
   assertGuestRoute,
@@ -995,6 +998,48 @@ export function assertOpencodeProxyAllowed(actor: Actor, method: string, proxyPa
   }
 }
 
+const PROMPT_PATH = /^\/session\/([^/]+)\/(prompt_async|message|command)$/;
+
+/**
+ * In a live room the server picks each message's id, so it can record who sent it before the
+ * engine has the message. Outside a room the request goes through untouched.
+ */
+async function withRoomAuthorship(
+  config: ServerConfig,
+  workspace: WorkspaceInfo,
+  actor: Actor,
+  request: Request,
+  proxyPath: string,
+): Promise<{ request: Request; finish(response: Response): Promise<void> } | null> {
+  if (request.method.toUpperCase() !== "POST") return null;
+  const match = PROMPT_PATH.exec(normalizeOpencodeProxyPath(proxyPath));
+  if (!match) return null;
+  const sessionId = decodeURIComponent(match[1] ?? "");
+  const room = await activeRoom(config, workspace.id, sessionId);
+  if (!room) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await request.clone().text());
+  } catch {
+    return null;
+  }
+  const minted = withServerMessageId(parsed, () => engineId("msg", "ascending"));
+  if (!minted) return null;
+  const headers = new Headers(request.headers);
+  headers.delete("content-length");
+  const next = new Request(request.url, { method: "POST", headers, body: JSON.stringify(minted.body), signal: request.signal });
+  return {
+    request: next,
+    finish: async (response) => {
+      if (!response.ok) return;
+      const who = actor.guest ? actor.guest.participant : await actorAuthor(config, { actor } as RequestContext);
+      const entry = { messageId: minted.messageId, participantId: who.participantId, displayName: who.displayName, at: Date.now() };
+      await recordAuthorship(config, workspace.id, sessionId, entry);
+      broadcast(room.roomId, { type: "room.authorship", entry });
+    },
+  };
+}
+
 /** The header the host bridge (L4) sets to the guest's authenticated endpoint key. */
 const GUEST_ENDPOINT_HEADER = "x-redrob-endpoint-id";
 
@@ -1171,7 +1216,9 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
           const workspace = await resolveWorkspace(config, mount.workspaceId);
           proxyService = "opencode";
           proxyBaseUrl = workspace.baseUrl?.trim() || undefined;
-          const response = await proxyOpencodeRequest({ config, request, url, workspace, proxyPath: mount.restPath });
+          const authored = await withRoomAuthorship(config, workspace, actor, request, mount.restPath);
+          const response = await proxyOpencodeRequest({ config, request: authored?.request ?? request, url, workspace, proxyPath: mount.restPath });
+          await authored?.finish(response);
           return finalize(await afterEngineProxy({ config, workspace, actor, access, method: request.method, proxyPath: mount.restPath, response }));
         } catch (error) {
           const requestCanceled = isExpectedRequestCancellation(error, request.signal);
@@ -1227,8 +1274,10 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
           assertOpencodeProxyAllowed(actor, request.method, url.pathname);
           const access = guestEngineAccess(actor, config.workspaces[0]?.id ?? "", request.method, url.pathname);
           proxyService = "opencode";
-          const response = await proxyOpencodeRequest({ config, request, url, workspace: config.workspaces[0] });
           const rootWorkspace = config.workspaces[0];
+          const authored = rootWorkspace ? await withRoomAuthorship(config, rootWorkspace, actor, request, url.pathname) : null;
+          const response = await proxyOpencodeRequest({ config, request: authored?.request ?? request, url, workspace: rootWorkspace });
+          await authored?.finish(response);
           return finalize(
             rootWorkspace
               ? await afterEngineProxy({ config, workspace: rootWorkspace, actor, access, method: request.method, proxyPath: url.pathname, response })
@@ -2334,6 +2383,20 @@ function createRoutes(
     readJsonBody,
     ensureWritable,
     requireClientScope,
+    resolveWorkspaceWithoutBootstrap,
+    resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    onChange: async (workspaceId, sessionId) => {
+      const room = await activeRoom(config, workspaceId, sessionId);
+      if (room) broadcast(room.roomId, { type: "review.updated" });
+    },
+  });
+
+  registerRoomRoutes({
+    routes,
+    config,
+    jsonResponse,
+    readJsonBody,
+    ensureWritable,
     resolveWorkspaceWithoutBootstrap,
     resolveAuthor: (ctx) => actorAuthor(config, ctx),
   });
