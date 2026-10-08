@@ -143,6 +143,7 @@ import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, upd
 import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
 import { actorAuthor, registerReviewRoutes } from "./routes/review.js";
 import { registerRoomRoutes } from "./routes/room.js";
+import { registerCoworkRelayRoutes } from "./routes/cowork-relay.js";
 import { activeRoom, broadcast, recordAuthorship, withServerMessageId } from "./cowork-room.js";
 import { claimAsk, releaseAsk } from "./cowork-queue.js";
 import { engineId } from "./engine-ids.js";
@@ -2466,6 +2467,8 @@ function createRoutes(
       if (room) broadcast(room.roomId, { type: "review.updated" });
     },
   });
+
+  registerCoworkRelayRoutes({ routes, jsonResponse, readJsonBody, readKey: () => readRedrobEngineKey({ config }) });
 
   registerRoomRoutes({
     routes,
