@@ -74,10 +74,13 @@ transcript-analysis
 # Privacy model candidates downloaded by apps/server/scripts/privacy-model/prepare.py
 apps/server/.privacy-models/
 apps/server/.insights-models/
+apps/server/scripts/*/__pycache__/
 
 # Privacy model weights fetched by apps/desktop/scripts/prepare-privacy-model.mjs (manifest.json is tracked)
 apps/desktop/resources/privacy-model/*.onnx
 apps/desktop/resources/privacy-model/tokenizer.json
+apps/desktop/resources/insights-model/*.onnx
+apps/desktop/resources/insights-model/tokenizer.json
 
 # Agent scratch/task state. Not part of the product and not reviewed.
 .agents/

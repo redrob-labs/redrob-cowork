@@ -331,14 +331,15 @@ export function commandMatchesPackagedSidecar(command, sidecarDirs = []) {
 }
 
 /**
- * The privacy model folder the embedded server should load: the installer's copy in a packaged
- * build, the one prepare-privacy-model.mjs fills in a dev checkout. Only a folder that holds a
+ * The privacy model folder (or, with `folder: "insights-model"`, the work model's) the embedded
+ * server should load: the installer's copy in a packaged build, the one prepare-*-model.mjs fills in
+ * a dev checkout. Only a folder that holds a
  * manifest counts; redrob-server checks that manifest against its pinned hash before loading
  * anything, so this choice decides where to look, not what to trust.
  */
-export function resolvePrivacyModelDir({ resourcesPath = process.resourcesPath, runtimeDir = __runtimeDir, devMode = process.env.REDROB_DEV_MODE === "1", exists = existsSync } = {}) {
-  const packaged = resourcesPath ? path.join(resourcesPath, "privacy-model") : null;
-  const dev = path.resolve(runtimeDir, "..", "resources", "privacy-model");
+export function resolvePrivacyModelDir({ resourcesPath = process.resourcesPath, runtimeDir = __runtimeDir, devMode = process.env.REDROB_DEV_MODE === "1", exists = existsSync, folder = "privacy-model" } = {}) {
+  const packaged = resourcesPath ? path.join(resourcesPath, folder) : null;
+  const dev = path.resolve(runtimeDir, "..", "resources", folder);
   const candidates = devMode ? [dev, packaged] : [packaged, dev];
   return candidates.find((dir) => dir && exists(path.join(dir, "manifest.json"))) ?? null;
 }
@@ -2063,6 +2064,9 @@ export function createRuntimeManager({
     // Read by redrob-server's privacy gate on first use at High or Strict. An explicit value wins.
     const privacyModelDir = process.env.REDROB_PRIVACY_MODEL_DIR?.trim() || resolvePrivacyModelDir();
     if (privacyModelDir) process.env.REDROB_PRIVACY_MODEL_DIR = privacyModelDir;
+    // Read by redrob-server's work classifier, the same way, when it labels a session.
+    const insightsModelDir = process.env.REDROB_INSIGHTS_MODEL_DIR?.trim() || resolvePrivacyModelDir({ folder: "insights-model" });
+    if (insightsModelDir) process.env.REDROB_INSIGHTS_MODEL_DIR = insightsModelDir;
     // startEmbeddedServer falls back to an OS-assigned port if `port` races
     // into EADDRINUSE (see apps/server/src/serve-node.ts), so the bound port
     // below is authoritative.

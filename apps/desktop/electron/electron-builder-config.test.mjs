@@ -42,6 +42,9 @@ describe("Electron distribution configs", () => {
     const model = config.extraResources.find((entry) => entry.to === "privacy-model");
     assert.equal(model.from, "resources/privacy-model");
     assert.ok(model.filter.includes("manifest.json") && model.filter.includes("*.onnx") && model.filter.includes("tokenizer.json"));
+    const work = config.extraResources.find((entry) => entry.to === "insights-model");
+    assert.equal(work.from, "resources/insights-model");
+    assert.ok(work.filter.includes("manifest.json") && work.filter.includes("*.onnx") && work.filter.includes("tokenizer.json"));
     const drop = config.files.indexOf("!node_modules/onnxruntime-node/bin/**");
     const keep = config.files.indexOf("node_modules/onnxruntime-node/bin/napi-v6/${platform}/${arch}/**");
     assert.ok(drop !== -1 && keep > drop, "the platform's own binaries are re-included after all are dropped");

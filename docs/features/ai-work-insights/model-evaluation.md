@@ -78,15 +78,21 @@ Reproduce: `python scripts/insights-model/train.py .insights-models/eval-data.js
 
 | Candidate | Level | Size | ms | Precision | Coverage | Abstains | en / ko precision | Hard cases precision | Bar |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| multilingual-e5-small | family | 118 MB | 3.5 | **87.9%** | 84.1% | 100% | 89.6% / 86.0% | 88.2% | **pass** |
-| multilingual-e5-small | kind of work | 118 MB | 3.5 | 79.6% | 87.0% | 100% | 82.7% / 76.8% | 63.2% | fail: precision |
-| paraphrase-multilingual-MiniLM-L12 | family | 118 MB | 3.3 | 79.2% | 75.0% | 75.0% | 78.3% / 80.6% | 55.6% | fail: precision |
-| paraphrase-multilingual-MiniLM-L12 | kind of work | 118 MB | 3.3 | 73.0% | 67.8% | 90.0% | 70.6% / 76.6% | 53.8% | fail: precision, coverage |
-| multilingual-e5-base | family | 278 MB | 7.8 | 86.6% | 85.5% | 90.0% | 86.6% / 86.0% | 83.3% | fail: size |
-| multilingual-e5-base | kind of work | 278 MB | 7.8 | 85.0% | 87.0% | 100% | 85.0% / 85.2% | 81.2% | fail: size |
+| multilingual-e5-small | family | 118 MB | 4.0 | **87.7%** | 85.1% | 100% | 88.1% / 86.8% | 88.2% | **pass** |
+| multilingual-e5-small | kind of work | 118 MB | 4.0 | 79.3% | 87.3% | 100% | 81.1% / 77.6% | 63.2% | fail: precision |
+| paraphrase-multilingual-MiniLM-L12 | family | 118 MB | 3.7 | 79.9% | 73.9% | 75.0% | 78.1% / 82.4% | 55.6% | fail: precision |
+| paraphrase-multilingual-MiniLM-L12 | kind of work | 118 MB | 3.7 | 74.2% | 66.3% | 85.0% | 71.7% / 77.9% | 46.2% | fail: precision, coverage |
+| multilingual-e5-base | family | 278 MB | 9.6 | 88.3% | 86.2% | 90.0% | 88.5% / 87.7% | 88.9% | fail: size |
+| multilingual-e5-base | kind of work | 278 MB | 9.6 | 84.1% | 86.6% | 100% | 84.1% / 84.3% | 81.2% | fail: precision, size |
 
-**Result: the family level ships, on multilingual-e5-small.** The kind of work does not yet. On the small model it is 5 points under the bar. On the base model it meets the bar on precision exactly, but at 278 MB, over the size limit.
+These numbers use onnxruntime's basic graph optimisations only. A first run used the default, extended fusions, and scored the e5-small family at 87.9%; but those fusions change int8 results between onnxruntime versions, so redrob-server (onnxruntime-node 1.23) did not reproduce the embeddings the head was trained on (3 of 296 labels differed). Basic optimisations are exact, so the head was retrained on them.
+
+**Result: the family level ships, on multilingual-e5-small.** The kind of work does not yet. On the small model it is 5 points under the bar. On the base model it is 0.9 points under, and at 278 MB it is over the size limit as well.
 
 One caveat about the floors. Cross-validation on the training data reached 85% precision at the lowest floor tried (0.05), so the floor filters nothing: the model is more certain on training-style messages than on evaluation ones. The floor is not tuned on the evaluation set, because that would make the score above meaningless. The family result passes with that floor anyway. Before the kind of work ships, the training set needs a held-out slice written in the evaluation set's style, so a floor can be chosen on data that looks like real use.
 
 Next for the kind of work, in order: more training messages for the pairs that are still confused, a held-out slice for the floor, then the structural inputs (tests ran, something was sent, the type of file written).
+
+### In the app
+
+redrob-server runs the family head in `src/insights/work-classifier.ts`: its own SentencePiece tokenizer (`unigram.ts`, which gives the same ids as Hugging Face `tokenizers` on all 1,484 training, evaluation and edge-case texts), the pinned encoder from `apps/desktop/resources/insights-model`, and `work-head.json` from `train.py`. On the 296 evaluation samples it gives the same label as the Python reference on all 296; confidences differ by under 1e-6. A label takes 4.4 ms (median), and loading the model takes under a second.

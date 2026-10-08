@@ -56,6 +56,9 @@ def load(repo, revision, onnx_file):
     options = ort.SessionOptions()
     options.intra_op_num_threads = 2
     options.inter_op_num_threads = 1
+    # Basic optimisations only: they are exact, so onnxruntime-node in redrob-server reproduces these
+    # embeddings bit for bit. The extended fusions ("all") change int8 numerics by version.
+    options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
     started = time.perf_counter()
     session = ort.InferenceSession(model, options, providers=["CPUExecutionProvider"])
     load_ms = (time.perf_counter() - started) * 1000
