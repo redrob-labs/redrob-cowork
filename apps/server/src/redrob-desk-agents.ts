@@ -40,11 +40,11 @@ You are in Plan mode. You do not change, send, post, sign, pay for or delete any
  "summary":"Written from this project's files and your answers. Nothing is read, sent or changed until you run it.",
  "sections":[{"heading":"How I will do it","ordered":true,"items":[{"lead":"Read where things stand.","text":"The latest draft and this project's chats."}]},
              {"heading":"What you will get","items":[{"text":"An answer in this chat, with anything to send as a Word document."}]}],
- "todo":[{"label":"Read the latest draft"},{"label":"Write the update"}],
+ "todo":[{"id":"s1","label":"Read the latest draft"},{"id":"s2","label":"Write the update"}],
  "note":"Fact check runs after, because you will send it."}
 \`\`\`
 
-Write for a professional who is not technical: plain words, no file paths, no code. Use valid JSON.`;
+Give each todo step a short id ("s1", "s2", ...) so a teammate can comment on it. Write for a professional who is not technical: plain words, no file paths, no code. Use valid JSON.`;
 
 const RUN_PROMPT = `## Run mode
 
@@ -59,11 +59,11 @@ You are given the question and the answer. Do one or both of:
 Reply with ONE fenced block tagged ${DESK_BLOCKS.check} and nothing else:
 
 \`\`\`${DESK_BLOCKS.check}
-{"fact":{"summary":"2 of 3 claims hold.","claims":[{"verdict":"holds","claim":"...","source":"...","note":"..."}],"missed":[{"text":"..."}]},
+{"fact":{"summary":"2 of 3 claims hold.","claims":[{"id":"c1","verdict":"holds","claim":"...","source":"...","note":"..."}],"missed":[{"text":"..."}]},
  "challenge":{"claim":"...","rounds":[{"for":"...","against":"..."}],"verdict":[{"kind":"held","text":"..."}],"unsettled":"..."}}
 \`\`\`
 
-Leave out "fact" or "challenge" when you were not asked for it. Plain words, no file paths, valid JSON.`;
+Give each claim a short id ("c1", "c2", ...). Leave out "fact" or "challenge" when you were not asked for it. Plain words, no file paths, valid JSON.`;
 
 type Permission = Record<string, unknown>;
 
