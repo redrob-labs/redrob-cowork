@@ -65,6 +65,9 @@ export function ProfessionGuideView(props: { research: GuideResearch; locale: La
         anyOutputLabel={t("desk.guide_output_any")}
         benchmarkLabel={t("desk.guide_benchmark")}
         benchmarkNote={t("desk.guide_benchmark_note")}
+        harnessLabel={(harness) => t("desk.guide_on_harness", { harness })}
+        rankLabel={(place, task) => t("desk.guide_rank", { place, task })}
+        effortUnit=""
         topLabel={t("desk.guide_top")}
         rangeLabel={t("desk.guide_range")}
         effortLabel={t("desk.preview_guide_effort")}

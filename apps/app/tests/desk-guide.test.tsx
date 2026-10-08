@@ -5,6 +5,7 @@ import { parseRedrobPricing, type RedrobPricing } from "../src/app/lib/redrob-pr
 import { autoModel, guideGroups, guideModelCount } from "../src/react-app/desk/guide/guide";
 import { guideOutputs, guideProfessions, loadGuideResearch } from "../src/react-app/desk/guide/model-guide";
 import { PricingGuideView, ProfessionGuideView, guideFetch } from "../src/react-app/desk/preview/desk-guide";
+import { setLocale } from "../src/i18n";
 
 const model = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
@@ -197,5 +198,17 @@ describe("the guide by profession", () => {
     expect(html).toContain("Anything");
     expect(html).toContain("Benchmark");
     expect(html).toContain("is-benchmark");
+  });
+
+  test("in Korean, the harness, rank and effort read as Korean, not as English left in the component", async () => {
+    const research = await loadGuideResearch();
+    setLocale("ko");
+    const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="ko" />);
+    setLocale("en");
+    expect(html).toContain("· 레드롭 코워크");
+    expect(html).toMatch(/1위/);
+    expect(html).not.toContain(" effort<");
+    expect(html).not.toContain("on 레드롭 코워크");
+    expect(html).not.toMatch(/#1 for /);
   });
 });
