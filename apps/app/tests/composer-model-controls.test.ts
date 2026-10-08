@@ -37,7 +37,9 @@ describe("composer model controls", () => {
     */
     expect(modelSelectSource).not.toContain("setThinkingFor");
     expect(modelSelectSource).not.toContain('data-slot="model-thinking-submenu"');
-    expect(modelSelectSource).toContain("const handleSelect = (option: ModelOption) => {\n    applyModel(option);");
+    expect(modelSelectSource).toContain(
+      "const handleSelect = (option: ModelOption) => {\n    onChange({ providerID: option.providerID, modelID: option.modelID });",
+    );
     expect(composerSource).toContain("<EffortSelect");
     expect(modelSelectSource).not.toContain("setThinkingOpen(true)");
     expect(modelSelectSource).not.toContain("onMouseEnter");

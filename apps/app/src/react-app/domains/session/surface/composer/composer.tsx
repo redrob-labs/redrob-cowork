@@ -1077,14 +1077,10 @@ export function ReactSessionComposer(props: ComposerProps) {
           if (!props.steering) props.onModelChange(model, variant);
         }}
         disabled={props.steering}
-        sessionId={props.sessionId}
         fallbackOptions={props.modelOptions}
         behaviorValue={props.modelVariant}
         behaviorLabel={props.modelVariantLabel}
         behaviorOptions={props.modelBehaviorOptions}
-        onBehaviorChange={(value) => {
-          if (!props.steering) props.onModelVariantChange(value);
-        }}
       />
       {/*
         Effort as its own button, beside the model button rather than inside it. The level was
