@@ -211,10 +211,11 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
           return `${entry.name} ${entry.id} ${methodText}`.toLowerCase().includes(query);
         })
       : entries;
-    return [
-      ...matched.filter((entry) => entry.connected),
-      ...matched.filter((entry) => !entry.connected),
-    ];
+    // Redrob leads the connected group: it is included, and it is where Redrob Auto lives.
+    const connectedFirst = matched
+      .filter((entry) => entry.connected)
+      .sort((a, b) => Number(b.id === "redrob") - Number(a.id === "redrob"));
+    return [...connectedFirst, ...matched.filter((entry) => !entry.connected)];
   }, [entries, searchQuery]);
 
   const connectedCount = useMemo(
@@ -264,6 +265,13 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
   };
 
   const actionDisabled = props.loading || props.submitting;
+
+  /** Redrob is included; a provider with nothing to paste runs on this computer; the rest are your own account. */
+  const providerPlainLine = (entry: { id: string; name: string; env: string[] }) => {
+    if (entry.id === "redrob") return t("provider_auth.line_redrob");
+    if (entry.env.length === 0) return t("provider_auth.line_local");
+    return t("provider_auth.line_account", { provider: entry.name });
+  };
 
   const resetState = () => {
     if (oauthCodeCopiedResetRef.current !== null && typeof window !== "undefined") {
@@ -778,8 +786,15 @@ export default function ProviderAuthModal(props: ProviderAuthModalProps) {
                               {entry.name}
                             </div>
 
-                            <div className="hidden w-[13rem] shrink-0 truncate font-mono text-2xs text-subtle-foreground opacity-60 transition-opacity group-hover:opacity-80 sm:block">
-                              {entry.id}
+                            {/*
+                              What the provider is to the reader, in a sentence, instead of its id. The id
+                              still matches the search box and is on the row's tooltip.
+                            */}
+                            <div
+                              className="hidden w-[16rem] shrink-0 truncate text-xs text-subtle-foreground sm:block"
+                              title={entry.id}
+                            >
+                              {providerPlainLine(entry)}
                             </div>
 
                             {/*

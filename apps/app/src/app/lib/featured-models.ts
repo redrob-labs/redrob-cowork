@@ -98,3 +98,22 @@ export function curateModelOptions(input: {
   }
   return rows;
 }
+
+/**
+ * The recommended models, in order, with each one's note in the reader's language: the console's list
+ * when it publishes one, the app's own until then. The model list in Settings leads with these.
+ */
+export function recommendedModels(
+  featured: readonly RedrobFeaturedModel[],
+  locale: Language,
+): Array<{ modelId: string; name?: string; lab: string; note: string }> {
+  if (featured.length) {
+    return featured.map((entry) => ({
+      modelId: entry.modelId,
+      name: entry.name,
+      lab: entry.lab,
+      note: locale === "ko" ? entry.note.ko : entry.note.en,
+    }));
+  }
+  return FALLBACK_FEATURED.map((entry) => ({ modelId: entry.modelId, name: entry.name, lab: entry.lab, note: entry.note() }));
+}
