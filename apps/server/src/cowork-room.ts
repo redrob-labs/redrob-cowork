@@ -189,6 +189,8 @@ export type RoomEvent =
   | { type: "room.presence"; present: Presence[] }
   | { type: "room.authorship"; entry: Authorship }
   | { type: "room.participants" }
+  /** Someone is waiting to come in, or was answered. No names: the host reads them from /room/knocks. */
+  | { type: "room.knocks" }
   | { type: "review.updated" }
   | { type: "room.queue"; queue: unknown[] }
   | { type: "room.ask_answered"; requestId: string; by: RoomParticipant }

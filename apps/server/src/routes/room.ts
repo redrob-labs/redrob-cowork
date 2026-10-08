@@ -25,7 +25,19 @@ import {
   type QueueItem,
 } from "../cowork-queue.js";
 import type { Room } from "../cowork-room.js";
-import { DEFAULT_GUEST_CAPABILITIES, readCapabilities, requireCapability } from "../guest-access.js";
+import {
+  InviteError,
+  createInvite,
+  decideKnock,
+  forgetRoom,
+  isEndpointId,
+  knock,
+  knockFor,
+  pendingKnock,
+  pendingKnocks,
+  revokeInvites,
+} from "../cowork-invites.js";
+import { DEFAULT_GUEST_CAPABILITIES, readCapabilities, requireCapability, type GuestCapability } from "../guest-access.js";
 import { isParticipantId, normalizeDisplayName } from "../participant-profile.js";
 import { isSafeId, type ReviewAuthor } from "../review-store.js";
 import type { ServerConfig, WorkspaceInfo } from "../types.js";
@@ -106,6 +118,30 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
   // The host's own name, the same one handoffs carry.
   const resolveAuthorForHost = () => resolveAuthor({ actor: { type: "host" } } as RequestContext);
 
+  /** Mints a guest's token for the room and tells everyone. Shared by the guest list and knocks. */
+  const admitGuest = async (
+    ctx: RequestContext,
+    input: { workspace: WorkspaceInfo; sessionId: string; room: Room; participant: { participantId: string; displayName: string }; capabilities: GuestCapability[]; endpointId?: string },
+  ) => {
+    const { workspace, sessionId, room, participant, capabilities, endpointId } = input;
+    const issued = await ctx.tokens.create("collaborator", {
+      label: `Guest: ${participant.displayName || participant.participantId}`,
+      expiresAt: Date.now() + GUEST_TOKEN_MS,
+      guest: { workspaceId: workspace.id, sessionId, participant, capabilities, roomId: room.roomId, ...(endpointId ? { endpointId } : {}) },
+    });
+    broadcast(room.roomId, { type: "room.participants" });
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "host" },
+      action: "room.joined",
+      target: sessionId,
+      summary: `${participant.displayName || "A guest"} joined the live room`,
+      timestamp: Date.now(),
+    });
+    return issued;
+  };
+
   addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/room", "host", async (ctx) => {
     ensureWritable(config);
     const { workspace, sessionId } = await target(ctx);
@@ -122,6 +158,7 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     broadcast(room.roomId, { type: "room.ended" });
     closeRoomStreams(room.roomId);
     clearQueue(room.roomId);
+    forgetRoom(room.roomId);
     await endRoom(config, workspace.id, sessionId);
     await recordAudit(workspace.path, {
       id: shortId(),
@@ -185,28 +222,8 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     if (!participant || !isParticipantId(participant.participantId) || !name.ok || !capabilities) {
       throw new ApiError(400, "invalid_payload", "participant and capabilities are required");
     }
-    const issued = await ctx.tokens.create("collaborator", {
-      label: `Guest: ${name.value || participant.participantId}`,
-      expiresAt: Date.now() + GUEST_TOKEN_MS,
-      guest: {
-        workspaceId: workspace.id,
-        sessionId,
-        participant: { participantId: participant.participantId as string, displayName: name.value },
-        capabilities,
-        roomId: room.roomId,
-        ...(typeof body.endpointId === "string" && body.endpointId.trim() ? { endpointId: body.endpointId.trim() } : {}),
-      },
-    });
-    broadcast(room.roomId, { type: "room.participants" });
-    await recordAudit(workspace.path, {
-      id: shortId(),
-      workspaceId: workspace.id,
-      actor: ctx.actor ?? { type: "host" },
-      action: "room.joined",
-      target: sessionId,
-      summary: `${name.value || "A guest"} joined the live room`,
-      timestamp: Date.now(),
-    });
+    const endpointId = typeof body.endpointId === "string" && body.endpointId.trim() ? body.endpointId.trim() : undefined;
+    const issued = await admitGuest(ctx, { workspace, sessionId, room, participant: { participantId: participant.participantId as string, displayName: name.value }, capabilities, endpointId });
     return jsonResponse({ token: issued.token, tokenId: issued.id, expiresAt: issued.expiresAt }, 201);
   });
 
@@ -252,6 +269,111 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
       timestamp: Date.now(),
     });
     return jsonResponse({ ok: true });
+  });
+
+  /* ---------- Invites and knocks (L4) ---------- */
+
+  const inviteFailure = (error: unknown): never => {
+    if (error instanceof InviteError) {
+      const status = error.code === "knock_not_found" ? 404 : error.code === "invite_invalid" ? 403 : 409;
+      throw new ApiError(status, error.code, error.message);
+    }
+    throw error;
+  };
+
+  /**
+   * The device asking, as the host's bridge named it. A knock that did not come through the bridge
+   * has none, and is refused: knocking is how a device on another machine gets in, not a way round
+   * the guest list for something on this one.
+   */
+  const knockingEndpoint = (ctx: RequestContext) => {
+    const endpointId = (ctx.request.headers.get("x-redrob-endpoint-id") ?? "").trim();
+    if (!isEndpointId(endpointId)) throw new ApiError(400, "knock_needs_bridge", "Knocks come through the co-working bridge");
+    return endpointId;
+  };
+
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/room/invites", "host", async (ctx) => {
+    ensureWritable(config);
+    const { room } = await requireRoom(ctx);
+    try {
+      return jsonResponse(createInvite(room.roomId), 201);
+    } catch (error) {
+      return inviteFailure(error);
+    }
+  });
+
+  addRoute(routes, "DELETE", "/workspace/:id/sessions/:sessionId/room/invites", "host", async (ctx) => {
+    ensureWritable(config);
+    const { room } = await requireRoom(ctx);
+    revokeInvites(room.roomId);
+    broadcast(room.roomId, { type: "room.knocks" });
+    return jsonResponse({ ok: true });
+  });
+
+  // No token: the invite secret is the credential, and the bridge has named the device.
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/room/knock", "none", async (ctx) => {
+    const endpointId = knockingEndpoint(ctx);
+    const { room } = await requireRoom(ctx);
+    const body = await readJsonBody(ctx.request);
+    const participant = body.participant && typeof body.participant === "object" ? (body.participant as Record<string, unknown>) : null;
+    const name = normalizeDisplayName(participant?.displayName ?? "");
+    if (!participant || !isParticipantId(participant.participantId) || !name.ok || typeof body.secret !== "string") {
+      throw new ApiError(400, "invalid_payload", "secret and participant are required");
+    }
+    try {
+      const entry = knock({
+        roomId: room.roomId,
+        secret: body.secret,
+        endpointId,
+        participant: { participantId: participant.participantId as string, displayName: name.value },
+      });
+      broadcast(room.roomId, { type: "room.knocks" });
+      return jsonResponse({ knockId: entry.knockId, status: entry.status }, 202);
+    } catch (error) {
+      return inviteFailure(error);
+    }
+  });
+
+  // The knocking device collects its answer here. The knock id is unguessable and bound to the device.
+  addRoute(routes, "GET", "/workspace/:id/sessions/:sessionId/room/knock/:knockId", "none", async (ctx) => {
+    const endpointId = knockingEndpoint(ctx);
+    const entry = knockFor(ctx.params.knockId ?? "", endpointId);
+    if (!entry) throw new ApiError(404, "knock_not_found", "Nobody is waiting with that knock");
+    if (entry.status !== "allowed" || !entry.grant) return jsonResponse({ status: entry.status });
+    const { room } = await requireRoom(ctx);
+    if (room.roomId !== entry.roomId) throw new ApiError(404, "knock_not_found", "Nobody is waiting with that knock");
+    return jsonResponse({ status: entry.status, token: entry.grant.token, tokenId: entry.grant.tokenId, expiresAt: entry.grant.expiresAt });
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/sessions/:sessionId/room/knocks", "host", async (ctx) => {
+    const { room } = await requireRoom(ctx);
+    return jsonResponse({
+      knocks: pendingKnocks(room.roomId).map(({ knockId, participant, endpointId, createdAt }) => ({ knockId, participant, endpointId, createdAt })),
+    });
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/room/knocks/:knockId", "host", async (ctx) => {
+    ensureWritable(config);
+    const { workspace, sessionId, room } = await requireRoom(ctx);
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.allow !== "boolean") throw new ApiError(400, "invalid_payload", "allow must be true or false");
+    const capabilities = body.capabilities === undefined ? [...DEFAULT_GUEST_CAPABILITIES] : readCapabilities(body.capabilities);
+    if (!capabilities) throw new ApiError(400, "invalid_payload", "capabilities must be a list of send, approve and stop");
+    let entry;
+    try {
+      entry = pendingKnock(room.roomId, ctx.params.knockId ?? "");
+    } catch (error) {
+      return inviteFailure(error);
+    }
+    if (!body.allow) {
+      decideKnock(entry, { allow: false });
+      broadcast(room.roomId, { type: "room.knocks" });
+      return jsonResponse({ ok: true, status: "denied" });
+    }
+    const issued = await admitGuest(ctx, { workspace, sessionId, room, participant: entry.participant, capabilities, endpointId: entry.endpointId });
+    decideKnock(entry, { allow: true, grant: { token: issued.token, tokenId: issued.id, expiresAt: issued.expiresAt } });
+    broadcast(room.roomId, { type: "room.knocks" });
+    return jsonResponse({ ok: true, status: "allowed", tokenId: issued.id });
   });
 
   /* ---------- The shared queue ---------- */
