@@ -52,6 +52,10 @@ asarUnpack:
   - node_modules/node-pty/**
   # dlopen cannot read inside app.asar: the binding and the libonnxruntime beside it stay on disk.
   - node_modules/onnxruntime-node/bin/**
+  # The iroh binding for live co-working (docs/features/handoff-and-live-coworking): the main
+  # package and the one platform package npm installed beside it.
+  - node_modules/@number0/**
+  - node_modules/.pnpm/@number0+iroh*/**
 npmRebuild: false
 afterPack: scripts/electron-after-pack.cjs
 afterSign: scripts/electron-after-sign.cjs
