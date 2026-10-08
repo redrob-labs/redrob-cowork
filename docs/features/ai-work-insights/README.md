@@ -12,7 +12,7 @@ The engine plugin `apps/server/src/opencode-plugins/redrob-insights-recorder.ts`
 - a permission was asked or answered;
 - a session started, became busy or idle, or was stopped.
 
-Message text, file contents, command lines and tool output never leave the plugin. When one of them decides a flag (a command that runs tests), the plugin computes the flag and only the boolean crosses. The one exception is the text of each session's first message. It goes once to redrob-server on the same machine, where the work classifier names its family and the text is dropped.
+Message text, file contents, command lines and tool output never leave the plugin. When one of them decides a flag (a command that runs tests), the plugin computes the flag and only the boolean crosses. The one exception is the text of each session's first message. It goes once to redrob-server on the same machine, where the work classifier names its kind of work and family and the text is dropped.
 
 When a session has been quiet for 15 minutes, `insights/recorder.ts` folds its facts, and those of any subagents it started, into one tally. `insights/labeler.ts` then turns the tally into the console's labels:
 
@@ -27,7 +27,7 @@ When a session has been quiet for 15 minutes, `insights/recorder.ts` folds its f
 | Sensitive data | The privacy gate saw a customer detail, number or key in what was sent to the model (touched), and none of it went out unmasked at the chat's level (safe) |
 | Agent figures | Steps, messages, minutes the agents ran, minutes between an answer and the next message (each capped at 10), whether permissions were asked, whether the run was stopped, agents at once |
 
-The family of work (`familyKey`: write, sheet, code or design) comes from the work classifier (`apps/server/src/insights/work-classifier.ts`, measured in `model-evaluation.md`). A session gets no family when the classifier names none, or when the app was packaged without the model. The kind of work within a family, whether the first message said what done looks like, and whether a chat-only session was a draft have not passed the evaluation yet, so those labels are left out. A session that only wrote text in the chat counts as an answer, which undercounts drafts but never overcounts them.
+The kind of work (`actionKey`, one of the console's 16) and its family (`familyKey`: write, sheet, code or design) come from the work classifier (`apps/server/src/insights/work-classifier.ts`, measured in `model-evaluation.md`). When the classifier is unsure of the kind of work it may still name the family alone, and a session gets neither when it names nothing or the app was packaged without the model. The task within a kind of work, whether the first message said what done looks like, and whether a chat-only session was a draft are not measured yet, so those labels are left out. A session that only wrote text in the chat counts as an answer, which undercounts drafts but never overcounts them.
 
 The sensitive-data labels come from the privacy gate, not the engine: on every send it also runs its patterns over the text in observe-only mode, at every category, and reports two booleans per send, touched and unmasked. Which details, and their values, stay in the gate; the chat's own labels are untouched.
 

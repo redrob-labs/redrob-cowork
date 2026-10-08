@@ -202,7 +202,7 @@ export class InsightsRecorder {
 
   /**
    * The first message's text, from the plugin, for the work classifier. Only a root session's first
-   * message is read, once; the text is passed to `label` and not kept, and only the family is.
+   * message is read, once; the text is passed to `label` and not kept, and only the labels are.
    * Returns whether it was read.
    */
   async observeFirstMessage(
@@ -215,6 +215,7 @@ export class InsightsRecorder {
     if (!live || this.rootOf(sessionID) !== sessionID || live.firstUserMessage !== messageID || live.workRead) return false;
     live.workRead = true;
     const result = await label(text);
+    live.tally.action = result?.action ?? null;
     live.tally.family = result?.family ?? null;
     return true;
   }

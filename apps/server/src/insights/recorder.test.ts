@@ -210,7 +210,7 @@ describe("the work family", () => {
   const labels: string[] = [];
   const label = async (text: string) => {
     labels.push(text);
-    return { family: "write" as const, confidence: 0.9 };
+    return { action: "reply", family: "write" as const, confidence: 0.9 };
   };
 
   test("only the first message of the session the person wrote in is read, once, and only the family is kept", async () => {
@@ -226,6 +226,7 @@ describe("the work family", () => {
     expect(labels).toEqual([SECRET]);
     await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
     expect(out[0]!.familyKey).toBe("write");
+    expect(out[0]!.actionKey).toBe("reply");
     expect(JSON.stringify(out)).not.toContain("김지원");
   });
 
@@ -233,10 +234,19 @@ describe("the work family", () => {
     const out: LabeledSession[] = [];
     const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
     play(recorder, [[0, ev.user("a", "m1", 0)], [0, ev.user("b", "m1", 0)]]);
-    await recorder.observeFirstMessage("a", "m1", "hi", async () => ({ family: null, confidence: 0.4 }));
+    await recorder.observeFirstMessage("a", "m1", "hi", async () => ({ action: null, family: null, confidence: 0.4 }));
     await recorder.observeFirstMessage("b", "m1", "hi", async () => null);
     await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
-    expect(out.map((s) => "familyKey" in s)).toEqual([false, false]);
+    expect(out.map((s) => "familyKey" in s || "actionKey" in s)).toEqual([false, false]);
+  });
+
+  test("a family the classifier named without a kind of work is sent alone", async () => {
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.user("c", "m1", 0)]]);
+    await recorder.observeFirstMessage("c", "m1", "hi", async () => ({ action: null, family: "code", confidence: 0.97 }));
+    await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
+    expect([out[0]!.familyKey, "actionKey" in out[0]!]).toEqual(["code", false]);
   });
 });
 
