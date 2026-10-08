@@ -69,3 +69,24 @@ These are listed in the order I'd try them. Each needs the same measurement befo
 2. **More prototypes, written by people in each function.** 6 phrases per kind of work is thin. The confusions concentrate in a few pairs, and each pair needs phrases that separate it.
 3. **Use more than the first message.** The structural labels already know whether tests ran (code against test) and whether a connector sent something (email against copy). The classifier could take them as inputs.
 4. **A fine-tuned head on labeled examples.** This needs a training set separate from the evaluation set, which in practice means synthetic messages written for training.
+
+## Round 2: a training set (2026-10-08)
+
+The first round's limit was data: 114 prototype phrases. Round 2 adds a hand-written training set (`src/insights/train/`) of 1,060 first messages: 30 per kind of work in each language, plus 25 learning and 25 not-work examples per language. `train.test.ts` fails if any of them is, or contains, an evaluation message. The head is trained on the training set and the prototypes at two levels, the family (write, sheet, code, design, or not work) and the kind of work. Confidence floors come from 5-fold cross-validation on the training data. The evaluation set is embedded once, at the end, and only scored.
+
+Reproduce: `python scripts/insights-model/train.py .insights-models/eval-data.json`.
+
+| Candidate | Level | Size | ms | Precision | Coverage | Abstains | en / ko precision | Hard cases precision | Bar |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| multilingual-e5-small | family | 118 MB | 3.5 | **87.9%** | 84.1% | 100% | 89.6% / 86.0% | 88.2% | **pass** |
+| multilingual-e5-small | kind of work | 118 MB | 3.5 | 79.6% | 87.0% | 100% | 82.7% / 76.8% | 63.2% | fail: precision |
+| paraphrase-multilingual-MiniLM-L12 | family | 118 MB | 3.3 | 79.2% | 75.0% | 75.0% | 78.3% / 80.6% | 55.6% | fail: precision |
+| paraphrase-multilingual-MiniLM-L12 | kind of work | 118 MB | 3.3 | 73.0% | 67.8% | 90.0% | 70.6% / 76.6% | 53.8% | fail: precision, coverage |
+| multilingual-e5-base | family | 278 MB | 7.8 | 86.6% | 85.5% | 90.0% | 86.6% / 86.0% | 83.3% | fail: size |
+| multilingual-e5-base | kind of work | 278 MB | 7.8 | 85.0% | 87.0% | 100% | 85.0% / 85.2% | 81.2% | fail: size |
+
+**Result: the family level ships, on multilingual-e5-small.** The kind of work does not yet. On the small model it is 5 points under the bar. On the base model it meets the bar on precision exactly, but at 278 MB, over the size limit.
+
+One caveat about the floors. Cross-validation on the training data reached 85% precision at the lowest floor tried (0.05), so the floor filters nothing: the model is more certain on training-style messages than on evaluation ones. The floor is not tuned on the evaluation set, because that would make the score above meaningless. The family result passes with that floor anyway. Before the kind of work ships, the training set needs a held-out slice written in the evaluation set's style, so a floor can be chosen on data that looks like real use.
+
+Next for the kind of work, in order: more training messages for the pairs that are still confused, a held-out slice for the floor, then the structural inputs (tests ran, something was sent, the type of file written).
