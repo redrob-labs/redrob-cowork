@@ -1,6 +1,7 @@
 /** @jsxImportSource react */
 import { useEffect, useState } from "react";
 
+import { BrandMarkIcon, brandMarkFor } from "./brand-marks";
 import { needsDarkModeLift, providerLogoCandidates } from "./provider-logo-src";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,9 @@ export function ProviderIcon(props: ProviderIconProps) {
   const isOpenAI = hasProviderFamily("openai");
   const isOpenCode = hasProviderFamily("opencode");
   const isOpenRouter = hasProviderFamily("openrouter");
-  const hasInlineMark = isAnthropic || isOpenAI || isOpenCode || isOpenRouter;
+  // Gemini, Meta, Qwen and Grok are carried in the app too. See brand-marks.tsx for why.
+  const brandMark = brandMarkFor(normalizedId);
+  const hasInlineMark = isAnthropic || isOpenAI || isOpenCode || isOpenRouter || brandMark !== null;
 
   // Remote logos are walked in order and each failure advances one step, so a
   // provider only falls back to its monogram once every source is exhausted.
@@ -148,6 +151,8 @@ export function ProviderIcon(props: ProviderIconProps) {
           <path d="M2 17l10 5 10-5" />
           <path d="M2 12l10 5 10-5" />
         </svg>
+      ) : brandMark ? (
+        <BrandMarkIcon mark={brandMark} size={size} />
       ) : logoUrl ? (
         <img
           src={logoUrl}

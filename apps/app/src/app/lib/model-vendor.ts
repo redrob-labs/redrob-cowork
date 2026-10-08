@@ -75,7 +75,12 @@ export function inferModelVendor(modelID: string): ModelVendor | null {
 
   let match: { prefix: string; vendor: ModelVendor } | null = null;
   for (const [prefix, vendor] of VENDOR_PREFIXES) {
-    if (bare !== prefix && !bare.startsWith(`${prefix}-`) && !bare.startsWith(`${prefix}.`) && !bare.startsWith(`${prefix}_`)) {
+    // The prefix has to end at a separator or a version number: `qwen3.8-max` is Qwen, which a
+    // separator-only rule missed, so every Qwen row showed the Redrob mark. `notclaude-x` still is not
+    // Anthropic, because the prefix has to start the id.
+    const next = bare.charAt(prefix.length);
+    const atBoundary = next === "-" || next === "." || next === "_" || (next >= "0" && next <= "9");
+    if (bare !== prefix && !(bare.startsWith(prefix) && atBoundary)) {
       continue;
     }
     if (!match || prefix.length > match.prefix.length) {
