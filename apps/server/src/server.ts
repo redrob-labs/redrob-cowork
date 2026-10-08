@@ -144,10 +144,12 @@ import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile 
 import { actorAuthor, registerReviewRoutes } from "./routes/review.js";
 import { registerRoomRoutes } from "./routes/room.js";
 import { activeRoom, broadcast, recordAuthorship, withServerMessageId } from "./cowork-room.js";
+import { claimAsk, releaseAsk } from "./cowork-queue.js";
 import { engineId } from "./engine-ids.js";
 import {
   assertGuestEngineRequest,
   assertGuestRoute,
+  engineSessionIdOf,
   filterGuestEventStream,
   filterJsonResponse,
   type GuestEngineAccess,
@@ -998,6 +1000,74 @@ export function assertOpencodeProxyAllowed(actor: Actor, method: string, proxyPa
   }
 }
 
+/** A call straight to this workspace's engine, for the room's own needs (status, queued sends, asks). */
+async function engineFetch(config: ServerConfig, workspace: WorkspaceInfo, path: string, init: { method: string; body?: string }): Promise<Response> {
+  const connection = resolveWorkspaceOpencodeConnection(config, workspace);
+  const baseUrl = connection.baseUrl?.trim();
+  if (!baseUrl) throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace");
+  const headers = new Headers({ "Content-Type": "application/json" });
+  if (connection.authHeader) headers.set("Authorization", connection.authHeader);
+  const directory = resolveOpencodeDirectory(workspace);
+  if (directory) headers.set(ENGINE_DIRECTORY_HEADER, buildEngineDirectoryHeader(directory));
+  return loopbackFetch(buildOpencodeProxyUrl(baseUrl, path, ""), { method: init.method, headers, ...(init.body ? { body: init.body } : {}) });
+}
+
+const ASK_REPLY_PATH = /^\/(?:(permission|question)\/([^/]+)\/(?:reply|reject)|session\/([^/]+)\/permissions\/([^/]+))$/;
+
+/**
+ * One answer per ask. For a guest the ask must belong to the shared chat; in a live room the first
+ * reply takes it and the others get 409 with who answered. Outside a room, for anyone but a guest,
+ * replies go through as before.
+ */
+async function arbitrateAsk(
+  config: ServerConfig,
+  workspace: WorkspaceInfo,
+  actor: Actor,
+  method: string,
+  proxyPath: string,
+): Promise<{ finish(response: Response): Promise<void> } | null> {
+  if (method.toUpperCase() !== "POST") return null;
+  const match = ASK_REPLY_PATH.exec(normalizeOpencodeProxyPath(proxyPath));
+  if (!match) return null;
+  const kind = match[1] === "question" ? "question" : "permission";
+  const requestId = decodeURIComponent(match[2] ?? match[4] ?? "");
+  let sessionId = match[3] ? decodeURIComponent(match[3]) : null;
+  if (!sessionId) {
+    const pending = await engineFetch(config, workspace, kind === "question" ? "/question" : "/permission", { method: "GET" }).catch(() => null);
+    const items = pending?.ok ? ((await pending.json().catch(() => [])) as unknown) : [];
+    const list = Array.isArray(items) ? items : isRecord(items) ? (Object.values(items).find(Array.isArray) as unknown[] | undefined) ?? [] : [];
+    const found = list.find((item) => isRecord(item) && [item.id, item.requestID, item.permissionID, item.questionID].includes(requestId));
+    sessionId = found ? engineSessionIdOf(found) : null;
+    if (actor.guest && !found) throw new ApiError(404, "ask_not_found", "That question is no longer waiting");
+  }
+  if (actor.guest && sessionId !== actor.guest.sessionId) throw new ApiError(403, "guest_forbidden", "Guests can only answer in the shared chat");
+  const room = sessionId ? await activeRoom(config, workspace.id, sessionId) : null;
+  if (!room) return null;
+  const by = await actorAuthor(config, { actor } as RequestContext);
+  const claim = claimAsk(requestId, by);
+  if (!claim.ok) {
+    throw new ApiError(409, "already_answered", `${claim.by.displayName || "Someone"} already answered this`, { by: claim.by });
+  }
+  return {
+    finish: async (response) => {
+      if (!response.ok) {
+        releaseAsk(requestId);
+        return;
+      }
+      broadcast(room.roomId, { type: "room.ask_answered", requestId, by });
+    },
+  };
+}
+
+/** In a live room, everyone sees who stopped the agent. */
+async function announceStop(config: ServerConfig, workspace: WorkspaceInfo, actor: Actor, method: string, proxyPath: string, response: Response) {
+  if (method.toUpperCase() !== "POST" || !response.ok) return;
+  const match = /^\/session\/([^/]+)\/abort$/.exec(normalizeOpencodeProxyPath(proxyPath));
+  if (!match) return;
+  const room = await activeRoom(config, workspace.id, decodeURIComponent(match[1] ?? ""));
+  if (room) broadcast(room.roomId, { type: "room.stopped", by: await actorAuthor(config, { actor } as RequestContext) });
+}
+
 const PROMPT_PATH = /^\/session\/([^/]+)\/(prompt_async|message|command)$/;
 
 /**
@@ -1217,8 +1287,11 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
           proxyService = "opencode";
           proxyBaseUrl = workspace.baseUrl?.trim() || undefined;
           const authored = await withRoomAuthorship(config, workspace, actor, request, mount.restPath);
+          const ask = await arbitrateAsk(config, workspace, actor, request.method, mount.restPath);
           const response = await proxyOpencodeRequest({ config, request: authored?.request ?? request, url, workspace, proxyPath: mount.restPath });
           await authored?.finish(response);
+          await ask?.finish(response);
+          await announceStop(config, workspace, actor, request.method, mount.restPath, response);
           return finalize(await afterEngineProxy({ config, workspace, actor, access, method: request.method, proxyPath: mount.restPath, response }));
         } catch (error) {
           const requestCanceled = isExpectedRequestCancellation(error, request.signal);
@@ -1276,8 +1349,11 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
           proxyService = "opencode";
           const rootWorkspace = config.workspaces[0];
           const authored = rootWorkspace ? await withRoomAuthorship(config, rootWorkspace, actor, request, url.pathname) : null;
+          const ask = rootWorkspace ? await arbitrateAsk(config, rootWorkspace, actor, request.method, url.pathname) : null;
           const response = await proxyOpencodeRequest({ config, request: authored?.request ?? request, url, workspace: rootWorkspace });
           await authored?.finish(response);
+          await ask?.finish(response);
+          if (rootWorkspace) await announceStop(config, rootWorkspace, actor, request.method, url.pathname, response);
           return finalize(
             rootWorkspace
               ? await afterEngineProxy({ config, workspace: rootWorkspace, actor, access, method: request.method, proxyPath: url.pathname, response })
@@ -2399,6 +2475,26 @@ function createRoutes(
     ensureWritable,
     resolveWorkspaceWithoutBootstrap,
     resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    queueEngine: (workspace, sessionId, room) => ({
+      busy: async () => {
+        const response = await engineFetch(config, workspace, "/session/status", { method: "GET" });
+        if (!response.ok) return true;
+        const statuses = (await response.json().catch(() => ({}))) as Record<string, { type?: string } | undefined>;
+        const type = statuses[sessionId]?.type;
+        return type !== undefined && type !== "idle";
+      },
+      send: async (body, item) => {
+        const messageId = engineId("msg", "ascending");
+        const response = await engineFetch(config, workspace, `/session/${encodeURIComponent(sessionId)}/prompt_async`, {
+          method: "POST",
+          body: JSON.stringify({ ...body, messageID: messageId }),
+        });
+        if (!response.ok) throw new Error(`Redrob Code refused the queued message (${response.status})`);
+        const entry = { messageId, participantId: item.author.participantId, displayName: item.author.displayName, at: Date.now() };
+        await recordAuthorship(config, workspace.id, sessionId, entry);
+        broadcast(room.roomId, { type: "room.authorship", entry });
+      },
+    }),
   });
 
   registerHandoffRoutes({

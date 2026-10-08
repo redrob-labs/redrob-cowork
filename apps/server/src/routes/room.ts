@@ -13,7 +13,19 @@ import {
   touchPresence,
 } from "../cowork-room.js";
 import { ApiError } from "../errors.js";
-import { DEFAULT_GUEST_CAPABILITIES, readCapabilities } from "../guest-access.js";
+import {
+  QueueError,
+  clearQueue,
+  editQueued,
+  enqueue,
+  queueView,
+  removeQueued,
+  scheduleDrain,
+  type QueueEngine,
+  type QueueItem,
+} from "../cowork-queue.js";
+import type { Room } from "../cowork-room.js";
+import { DEFAULT_GUEST_CAPABILITIES, readCapabilities, requireCapability } from "../guest-access.js";
 import { isParticipantId, normalizeDisplayName } from "../participant-profile.js";
 import { isSafeId, type ReviewAuthor } from "../review-store.js";
 import type { ServerConfig, WorkspaceInfo } from "../types.js";
@@ -31,6 +43,16 @@ export interface RegisterRoomRoutesOptions {
   ensureWritable: (config: ServerConfig) => void;
   resolveWorkspaceWithoutBootstrap: (config: ServerConfig, id: string) => Promise<WorkspaceInfo>;
   resolveAuthor: (ctx: RequestContext) => Promise<ReviewAuthor>;
+  /** How the room's queue reaches the engine for this chat: whether it is busy, and sending. */
+  queueEngine: (workspace: WorkspaceInfo, sessionId: string, room: Room) => QueueEngine;
+}
+
+function queueFailure(error: unknown): never {
+  if (error instanceof QueueError) {
+    const status = error.code === "queue_item_not_found" ? 404 : error.code === "not_queue_author" ? 403 : error.code === "queue_full" ? 409 : 400;
+    throw new ApiError(status, error.code, error.message);
+  }
+  throw error;
 }
 
 const GUEST_TOKEN_MS = 24 * 60 * 60 * 1000;
@@ -99,6 +121,7 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     }
     broadcast(room.roomId, { type: "room.ended" });
     closeRoomStreams(room.roomId);
+    clearQueue(room.roomId);
     await endRoom(config, workspace.id, sessionId);
     await recordAudit(workspace.path, {
       id: shortId(),
@@ -229,5 +252,57 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
       timestamp: Date.now(),
     });
     return jsonResponse({ ok: true });
+  });
+
+  /* ---------- The shared queue ---------- */
+
+  const announceQueue = (roomId: string) => broadcast(roomId, { type: "room.queue", queue: queueView(roomId) });
+
+  addRoute(routes, "GET", "/workspace/:id/sessions/:sessionId/room/queue", "client", async (ctx) => {
+    const { room } = await requireRoom(ctx);
+    return jsonResponse({ queue: queueView(room.roomId) });
+  });
+
+  // A message for when the agent is free. Sent in order, by the server, under its author's name.
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/room/queue", "client", async (ctx) => {
+    const { workspace, sessionId, room } = await requireRoom(ctx);
+    if (ctx.actor?.guest) requireCapability(ctx.actor.guest, "send");
+    else if (ctx.actor?.scope === "viewer") throw new ApiError(403, "forbidden", "Viewer tokens are read-only");
+    const body = await readJsonBody(ctx.request);
+    const author = await resolveAuthor(ctx);
+    let item: QueueItem;
+    try {
+      item = enqueue(room.roomId, author, body.body);
+    } catch (error) {
+      return queueFailure(error);
+    }
+    announceQueue(room.roomId);
+    scheduleDrain(room.roomId, () => options.queueEngine(workspace, sessionId, room), () => announceQueue(room.roomId));
+    const { body: _body, ...view } = item;
+    return jsonResponse({ item: view, queue: queueView(room.roomId) }, 201);
+  });
+
+  addRoute(routes, "PATCH", "/workspace/:id/sessions/:sessionId/room/queue/:itemId", "client", async (ctx) => {
+    const { room } = await requireRoom(ctx);
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.text !== "string") throw new ApiError(400, "invalid_payload", "text is required");
+    try {
+      editQueued(room.roomId, ctx.params.itemId ?? "", body.text, await resolveAuthor(ctx), isHost(ctx));
+    } catch (error) {
+      return queueFailure(error);
+    }
+    announceQueue(room.roomId);
+    return jsonResponse({ queue: queueView(room.roomId) });
+  });
+
+  addRoute(routes, "DELETE", "/workspace/:id/sessions/:sessionId/room/queue/:itemId", "client", async (ctx) => {
+    const { room } = await requireRoom(ctx);
+    try {
+      removeQueued(room.roomId, ctx.params.itemId ?? "", await resolveAuthor(ctx), isHost(ctx));
+    } catch (error) {
+      return queueFailure(error);
+    }
+    announceQueue(room.roomId);
+    return jsonResponse({ queue: queueView(room.roomId) });
   });
 }
