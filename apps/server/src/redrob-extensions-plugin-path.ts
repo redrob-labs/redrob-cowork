@@ -38,3 +38,4 @@ export const redrobAnthropicToolSchemaPluginPath = () => redrobPluginPath("redro
 export const redrobOfficeAttachmentsPluginPath = () => redrobPluginPath("redrob-office-attachments");
 export const redrobTeamConnectorsPluginPath = () => redrobPluginPath("redrob-team-connectors");
 export const redrobPrivacyGatePluginPath = () => redrobPluginPath("redrob-privacy-gate");
+export const redrobRouteLabelsPluginPath = () => redrobPluginPath("redrob-route-labels");
