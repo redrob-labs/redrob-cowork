@@ -393,6 +393,13 @@ export type RedrobWorkspaceImportPreview = {
 
 export type RedrobWorkspaceExportSensitiveMode = "auto" | "include" | "exclude";
 
+/** This install as teammates see it: a stable id and a name the person chose. Neither is verified. */
+export type RedrobParticipantProfile = {
+  participantId: string;
+  displayName: string;
+  updatedAt: number;
+};
+
 export type RedrobWorkspaceExportWarning = {
   id: string;
   label: string;
@@ -1107,6 +1114,24 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       requestJson<RedrobRuntimeSnapshot>(baseUrl, "/runtime/versions", { token, hostToken, timeoutMs: timeouts.status }),
     status: () => requestJson<RedrobServerDiagnostics>(baseUrl, "/status", { token, hostToken, timeoutMs: timeouts.status }),
     capabilities: () => requestJson<RedrobServerCapabilities>(baseUrl, "/capabilities", { token, hostToken, timeoutMs: timeouts.capabilities }),
+    getProfile: async (): Promise<RedrobParticipantProfile> => {
+      const payload = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      });
+      return payload.profile;
+    },
+    updateProfile: async (payload: { displayName: string }): Promise<RedrobParticipantProfile> => {
+      const response = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
+        token,
+        hostToken,
+        method: "PUT",
+        body: payload,
+        timeoutMs: timeouts.config,
+      });
+      return response.profile;
+    },
     // The memory bank is global, not workspace-scoped: it replaced an
     // organization-scoped hosted store that followed the user across projects.
     listMemories: async (): Promise<Memory[]> => {

@@ -140,6 +140,7 @@ import {
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
+import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import {
   applyTeamPolicy,
@@ -2232,6 +2233,21 @@ function createRoutes(
 
   addRoute(routes, "GET", "/memory", "client", async () => {
     return jsonResponse({ memories: await listMemories(config) });
+  });
+
+  // The install's participant profile: the stable id and the self-chosen name a handoff or a
+  // live room shows to teammates. Reading is open to any client so the app can label its own
+  // messages; only the person at this machine changes the name.
+  addRoute(routes, "GET", "/profile", "client", async () => {
+    return jsonResponse({ profile: await readParticipantProfile(config) });
+  });
+
+  addRoute(routes, "PUT", "/profile", "host", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    const name = normalizeDisplayName(body.displayName);
+    if (!name.ok) throw new ApiError(400, "invalid_payload", name.error);
+    return jsonResponse({ profile: await updateParticipantProfile(config, { displayName: name.value }) });
   });
 
   // What local AI runtimes this machine has, for the onboarding choice screen. Reports
