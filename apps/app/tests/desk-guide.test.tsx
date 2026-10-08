@@ -3,8 +3,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { parseRedrobPricing, type RedrobPricing } from "../src/app/lib/redrob-pricing";
 import { autoModel, guideGroups, guideModelCount } from "../src/react-app/desk/guide/guide";
-import { guideProfessions, loadGuideResearch } from "../src/react-app/desk/guide/model-guide";
+import { guideOutputs, guideProfessions, loadGuideResearch } from "../src/react-app/desk/guide/model-guide";
 import { PricingGuideView, ProfessionGuideView, guideFetch } from "../src/react-app/desk/preview/desk-guide";
+import { setLocale } from "../src/i18n";
 
 const model = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
@@ -74,16 +75,71 @@ describe("the guide screen", () => {
 });
 
 describe("the guide by profession", () => {
-  test("the shipped research parses: 11 professions, 5 tasks each, 5 picks per language", async () => {
+  test("the shipped research parses: 12 professions, 5 tasks each, 5 ranked picks per language and per output", async () => {
     const research = await loadGuideResearch();
-    expect(research.professions).toHaveLength(11);
+    expect(research.professions).toHaveLength(12);
+    const ranked = (picks: Array<{ benchmark?: boolean }>) => picks.filter((pick) => !pick.benchmark);
     for (const profession of research.professions) {
       expect(profession.tasks).toHaveLength(5);
       for (const task of profession.tasks) {
         expect(Object.keys(task.picks).sort()).toEqual(["en", "hi", "ko"]);
-        for (const picks of Object.values(task.picks)) expect(picks).toHaveLength(5);
+        for (const picks of Object.values(task.picks)) expect(ranked(picks)).toHaveLength(5);
+        expect(Object.keys(task.picksByOutput).sort()).toEqual([...task.outputs].sort());
+        for (const byLanguage of Object.values(task.picksByOutput)) {
+          expect(Object.keys(byLanguage).sort()).toEqual(["en", "hi", "ko"]);
+          for (const picks of Object.values(byLanguage)) expect(ranked(picks)).toHaveLength(5);
+        }
       }
     }
+  });
+
+  test("a benchmark is GPT-6 Astra on ChatGPT Work or Opus 5.5 on Claude Cowork, only when it would make the top five", async () => {
+    const research = await loadGuideResearch();
+    const w = research.weights;
+    const total = (pick: { score: { quality: number; reliability: number; speed: number; cost: number } }) =>
+      w.quality * pick.score.quality + w.reliability * pick.score.reliability + w.speed * pick.score.speed + w.cost * pick.score.cost;
+    const lists = research.professions.flatMap((p) =>
+      p.tasks.flatMap((task) => [...Object.values(task.picks), ...Object.values(task.picksByOutput).flatMap((x) => Object.values(x))]),
+    );
+    let shown = 0;
+    for (const picks of lists) {
+      expect(picks[0]?.benchmark).toBeUndefined();
+      const fifth = picks.filter((pick) => !pick.benchmark).at(-1);
+      for (const pick of picks.filter((entry) => entry.benchmark)) {
+        shown += 1;
+        expect(["gpt-6-astra@chatgpt-work", "claude-opus-5-5@claude-cowork"]).toContain(`${pick.steps[0]?.model}@${pick.harness}`);
+        // The stored scores are rounded to one decimal, so allow for that in the comparison.
+        expect(total(pick)).toBeGreaterThanOrEqual(total(fifth ?? pick) - 0.1);
+      }
+    }
+    expect(shown).toBeGreaterThan(0);
+  });
+
+  test("accountants: five CPA tasks, in Korean too, where the Korean ranking says it is partly estimated", async () => {
+    const research = await loadGuideResearch();
+    const accountant = research.professions.find((p) => p.id === "accountant");
+    expect(accountant?.label.ko).toBe("회계사");
+    expect(accountant?.tasks.map((task) => task.id)).toEqual([
+      "close-books",
+      "prepare-tax",
+      "audit-workpapers",
+      "financial-statements",
+      "client-advisory",
+    ]);
+    for (const task of accountant?.tasks ?? [])
+      for (const pick of task.picks.ko ?? []) expect(pick.flags).toContain("partly-estimated");
+  });
+
+  test("a task offers only the outputs it is ranked for, labelled in the app's language", async () => {
+    const research = await loadGuideResearch();
+    const statements = guideProfessions(research, "ko")
+      .find((p) => p.id === "accountant")
+      ?.tasks?.find((task) => task.id === "financial-statements");
+    expect(Object.keys(statements?.picksByOutput ?? {}).sort()).toEqual(["documents", "presentations", "spreadsheets"]);
+    expect(statements?.label).toBe("재무제표와 주석 작성(US GAAP·K-IFRS)");
+    expect(statements?.picksByOutput?.documents?.ko?.[0]?.harness).toBe("Redrob Cowork");
+    const outputs = guideOutputs();
+    expect(outputs.map((o) => o.value)).toEqual(["documents", "presentations", "spreadsheets", "graphics", "web"]);
   });
 
   test("every figure says what kind it is, and every non-estimate benchmark or price links its source", async () => {
@@ -138,5 +194,21 @@ describe("the guide by profession", () => {
     expect(html).toContain("Sources");
     expect(html).toContain("Redrob Cowork");
     expect(html).toContain("every message goes to Redrob Auto");
+    expect(html).toContain("I need");
+    expect(html).toContain("Anything");
+    expect(html).toContain("Benchmark");
+    expect(html).toContain("is-benchmark");
+  });
+
+  test("in Korean, the harness, rank and effort read as Korean, not as English left in the component", async () => {
+    const research = await loadGuideResearch();
+    setLocale("ko");
+    const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="ko" />);
+    setLocale("en");
+    expect(html).toContain("· 레드롭 코워크");
+    expect(html).toMatch(/1위/);
+    expect(html).not.toContain(" effort<");
+    expect(html).not.toContain("on 레드롭 코워크");
+    expect(html).not.toMatch(/#1 for /);
   });
 });
