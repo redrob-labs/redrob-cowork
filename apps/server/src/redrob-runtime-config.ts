@@ -22,6 +22,7 @@ import {
   redrobAnthropicToolSchemaPluginPath,
   redrobOfficeAttachmentsPluginPath,
   redrobPrivacyGatePluginPath,
+  redrobInsightsRecorderPluginPath,
   redrobTeamConnectorsPluginPath,
 } from "./redrob-extensions-plugin-path.js";
 import { blockedConnectorNames } from "./team-policy/connectors.js";
@@ -144,6 +145,8 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
       // Last of Redrob's own, after the office plugin has turned attachments into text: labels
       // everything the model reads and restores what comes back. See the plugin.
       redrobPrivacyGatePluginPath(),
+      // Records counts and flags about each session for insights, never text; see the plugin.
+      redrobInsightsRecorderPluginPath(),
       ...runtimePluginList(runtimeConfig),
     ],
     ...(disabledProviders.length ? { disabled_providers: disabledProviders } : {}),
