@@ -41,6 +41,7 @@ import { PROJECTS_QUERY_KEY } from "../projects/desk-projects";
 import { deskKeepAwake, type KeepAwakeSync } from "../run/keep-awake";
 import { syncCrashReports } from "./crash-reports";
 import { TeamFileGroup } from "../team/team-file-group";
+import { ProfileGroup } from "./profile-group";
 import { TeamPolicyGroup } from "../team/team-policy-group";
 import type { ChatMode } from "../services/types";
 import { REDROB_KEY_QUERY_KEY, useRedrobKeyConnected } from "../shell/account-menu";
@@ -598,6 +599,7 @@ function SectionBody(props: { section: DeskSettingsSection }) {
     case "general":
       return (
         <>
+          <ProfileGroup />
           <GeneralSection />
           <TeamPolicyGroup />
           <TeamFileGroup />

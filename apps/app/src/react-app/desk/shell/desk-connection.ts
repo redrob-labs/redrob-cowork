@@ -23,8 +23,13 @@ export type DeskTeamClient = Pick<
   "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace" | "getTeamPolicy" | "syncTeamPolicy" | "leaveTeamPolicy"
 >;
 
+/** The calls the profile adds: the name teammates see on handoffs and in shared chats. */
+export type DeskProfileClient = Pick<RedrobServerClient, "getProfile" | "updateProfile">;
+
 export type DeskConnection = {
-  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient) | null;
+  client:
+    | (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient & DeskProfileClient)
+    | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;
   /** The server-side id of the workspace the chat route has open. */
