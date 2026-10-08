@@ -28,6 +28,7 @@ import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
 import { DsStory } from "../desk/ds-story";
 import { SaveAsProjectAction } from "../desk/projects/project-dialog";
+import { HandoffAction } from "../desk/handoff/handoff-dialog";
 import { DeskShell } from "../desk/shell/desk-shell";
 import { DeskLayer } from "../desk/shell/desk-layer";
 import { deskRoutes } from "../desk/shell/desk-routes";
@@ -43,7 +44,12 @@ function ChatRoute() {
     <DeskShell
       current={sessionId ? null : "chat"}
       chatId={sessionId ?? null}
-      actions={<SaveAsProjectAction chatId={sessionId ?? null} />}
+      actions={
+        <>
+          <HandoffAction chatId={sessionId ?? null} />
+          <SaveAsProjectAction chatId={sessionId ?? null} />
+        </>
+      }
       measure={false}
       fill
     >
