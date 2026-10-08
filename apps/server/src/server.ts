@@ -142,6 +142,7 @@ import {
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
 import { installAuthor, registerReviewRoutes } from "./routes/review.js";
+import { engineCliTemplate } from "./engine-cli.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import {
   applyTeamPolicy,
@@ -2252,6 +2253,12 @@ function createRoutes(
   // messages; only the person at this machine changes the name.
   addRoute(routes, "GET", "/profile", "client", async () => {
     return jsonResponse({ profile: await readParticipantProfile(config) });
+  });
+
+  // What a handoff can do here: whether the engine's export/import commands are reachable, and
+  // which engine version a bundle made here will name.
+  addRoute(routes, "GET", "/handoff/capabilities", "client", async () => {
+    return jsonResponse({ engineCli: engineCliTemplate() !== null, redrobCodeVersion: REDROB_CODE_VERSION });
   });
 
   addRoute(routes, "PUT", "/profile", "host", async (ctx) => {
