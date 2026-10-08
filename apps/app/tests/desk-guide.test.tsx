@@ -19,6 +19,7 @@ const model = (id: string, extra: Record<string, unknown> = {}) => ({
 });
 
 const PRICING: RedrobPricing = {
+  featured: [],
   autoModelId: "auto",
   costProfiles: [{ id: "chat", label: "short question" }],
   byModelId: {
