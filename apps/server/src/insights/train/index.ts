@@ -7,6 +7,7 @@
  * only; the evaluation set is used for the final score and nothing else.
  */
 import type { TrainingRows } from "./types.js";
+import { CONTRAST } from "./contrast.js";
 import { SHEET_CODE_DESIGN } from "./sheet-code-design.js";
 import { WRITE_A } from "./write-a.js";
 import { WRITE_B } from "./write-b.js";
@@ -139,4 +140,7 @@ export const TRAINING_EXAMPLES: TrainingExample[] = [
   ),
   ...LANGS.flatMap((lang) => LEARN[lang].map((text) => ({ action: null, learn: true, lang, text }))),
   ...LANGS.flatMap((lang) => NONE[lang].map((text) => ({ action: null, learn: false, lang, text }))),
+  ...Object.entries(CONTRAST).flatMap(([action, rows]) =>
+    LANGS.flatMap((lang) => rows[lang].map((text) => ({ action, learn: false, lang, text }))),
+  ),
 ];
