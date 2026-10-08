@@ -35,4 +35,8 @@ Every model request also carries `x-redrob-session`, a hash of the session's id.
 
 ## Where it goes
 
-Finished sessions wait in the outbox (`insights/outbox.ts`) on this machine. `GET /insights/outbox` returns exactly what would be sent. In this version nothing is sent: the sync to the console is a separate change, together with the update to the privacy documentation it requires.
+Finished sessions wait in the outbox (`insights/outbox.ts`) on this machine, and `GET /insights/outbox` returns exactly what will be sent. Every 10 minutes or so, `insights/sync.ts` posts the outbox to the Redrob Console (`POST /v1/insights/sessions`) with the person's Redrob Key. The console attributes each session to the key's holder and to nobody else, and it refuses any field that isn't a label.
+
+Sending is on whenever Cowork has a Redrob Key, with no separate opt-in. This was decided for the console's insights in its design document. Admins see the workspace, team leads their own team, and each person their own work. No figure is shown for fewer people than the workspace's minimum group, except to the person themselves.
+
+Sessions the console accepted, updated or rejected leave the outbox. Anything without an answer, whether the console was unreachable or the key was refused, stays and is tried again.

@@ -166,6 +166,7 @@ import { PrivacyGate } from "./privacy/gate.js";
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
+import { startInsightsSync } from "./insights/sync.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -1300,12 +1301,17 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startTeamPolicySync(config, teamPolicySyncDeps(config), logger);
+  // Labeled sessions go to the console with the person's Redrob Key; see insights/sync.ts.
+  const stopInsightsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startInsightsSync(config, teamPolicySyncDeps(config), logger);
 
   return {
     ...server,
     stop: async () => {
       stopScheduler();
       stopTeamPolicySync();
+      stopInsightsSync();
       stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
