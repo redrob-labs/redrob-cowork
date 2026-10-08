@@ -220,6 +220,8 @@ export interface Actor {
   clientId?: string;
   tokenHash?: string;
   scope?: TokenScope;
+  /** Set for a live-room guest: the one chat the token reaches, who holds it, and what they may do. */
+  guest?: import("./guest-access.js").GuestGrant;
 }
 
 export interface ApprovalRequest {

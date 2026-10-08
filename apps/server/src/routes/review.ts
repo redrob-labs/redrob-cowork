@@ -34,10 +34,15 @@ interface RegisterReviewRoutesOptions {
   resolveAuthor: (ctx: RequestContext) => Promise<ReviewAuthor>;
 }
 
-/** The author of a request: this install's profile. Live rooms (L1) add the guest's own. */
+/** This install's profile, as a review author. */
 export async function installAuthor(config: ServerConfig): Promise<ReviewAuthor> {
   const profile = await readParticipantProfile(config);
   return { participantId: profile.participantId, displayName: profile.displayName };
+}
+
+/** The author of a request: a guest is themselves; everyone else is the person at this machine. */
+export async function actorAuthor(config: ServerConfig, ctx: RequestContext): Promise<ReviewAuthor> {
+  return ctx.actor?.guest ? { ...ctx.actor.guest.participant } : installAuthor(config);
 }
 
 function isStatus(value: unknown): value is ReviewStatus {
