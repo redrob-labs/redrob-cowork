@@ -93,6 +93,8 @@ One caveat about the floors. Cross-validation on the training data reached 85% p
 
 Next for the kind of work, in order: more training messages for the pairs that are still confused, a held-out slice for the floor, then the structural inputs (tests ran, something was sent, the type of file written).
 
+Reusing the encoder Cowork already ships for Redrob Auto's route labels (distiluse-base-multilingual-cased-v2, `packages/route-labeller`) would add nothing to the download, so it was measured the same way: 84.5% family precision and 72.0% for the kind of work, both under the bar. The second model is the price of the family level passing.
+
 ### In the app
 
 redrob-server runs the family head in `src/insights/work-classifier.ts`: its own SentencePiece tokenizer (`unigram.ts`, which gives the same ids as Hugging Face `tokenizers` on all 1,484 training, evaluation and edge-case texts), the pinned encoder from `apps/desktop/resources/insights-model`, and `work-head.json` from `train.py`. On the 296 evaluation samples it gives the same label as the Python reference on all 296; confidences differ by under 1e-6. A label takes 4.4 ms (median), and loading the model takes under a second.

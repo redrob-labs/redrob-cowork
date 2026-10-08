@@ -50,6 +50,7 @@ const VENDOR_PREFIXES: ReadonlyArray<readonly [string, ModelVendor]> = [
   ["qwen", QWEN],
   ["qwq", QWEN],
   ["llama", META],
+  ["muse", META],
   ["mistral", MISTRAL],
   ["mixtral", MISTRAL],
   ["magistral", MISTRAL],

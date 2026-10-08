@@ -82,5 +82,9 @@ apps/desktop/resources/privacy-model/tokenizer.json
 apps/desktop/resources/insights-model/*.onnx
 apps/desktop/resources/insights-model/tokenizer.json
 
+# Route model weights and manifest written by apps/desktop/scripts/prepare-route-model.mjs (pinned in
+# packages/route-labeller/src/manifest.json)
+apps/desktop/resources/route-model/
+
 # Agent scratch/task state. Not part of the product and not reviewed.
 .agents/

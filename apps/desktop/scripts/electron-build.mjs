@@ -54,6 +54,9 @@ run(nodeCmd, [resolve(__dirname, "prepare-runtime-node-modules.mjs"), "--outdir"
 run(nodeCmd, [resolve(__dirname, "prepare-privacy-model.mjs")], desktopRoot);
 // The work classifier's encoder (about 118 MB); a build without it sends sessions without a work family.
 run(nodeCmd, [resolve(__dirname, "prepare-insights-model.mjs")], desktopRoot);
+// The route model (about 140 MB) Redrob Auto's on-device labeller runs, pinned by @redrob-labs/route-labeller.
+run(packageManager.command, [...packageManager.args, ...["--filter", "@redrob-labs/route-labeller", "build"]], repoRoot);
+run(nodeCmd, [resolve(__dirname, "prepare-route-model.mjs")], desktopRoot);
 writeSentryBuildConfig();
 // Build the server TS → JS so Electron can import it in-process
 run(packageManager.command, [...packageManager.args, ...["--filter", "redrob-server", "build"]], repoRoot);

@@ -344,6 +344,19 @@ export function resolvePrivacyModelDir({ resourcesPath = process.resourcesPath, 
   return candidates.find((dir) => dir && exists(path.join(dir, "manifest.json"))) ?? null;
 }
 
+/**
+ * The route model folder the embedded server labels requests to Auto with: the installer's copy in a
+ * packaged build, the one prepare-route-model.mjs fills in a dev checkout. Only a folder holding a
+ * manifest counts; the labeller checks every file against the manifest pinned in
+ * @redrob-labs/route-labeller, so this decides where to look, not what to trust.
+ */
+export function resolveRouteModelDir({ resourcesPath = process.resourcesPath, runtimeDir = __runtimeDir, devMode = process.env.REDROB_DEV_MODE === "1", exists = existsSync } = {}) {
+  const packaged = resourcesPath ? path.join(resourcesPath, "route-model") : null;
+  const dev = path.resolve(runtimeDir, "..", "resources", "route-model");
+  const candidates = devMode ? [dev, packaged] : [packaged, dev];
+  return candidates.find((dir) => dir && exists(path.join(dir, "manifest.json"))) ?? null;
+}
+
 export function embeddedServerImportUrl(embeddedPath) {
   const url = pathToFileURL(embeddedPath);
   try {
@@ -2067,6 +2080,9 @@ export function createRuntimeManager({
     // Read by redrob-server's work classifier, the same way, when it labels a session.
     const insightsModelDir = process.env.REDROB_INSIGHTS_MODEL_DIR?.trim() || resolvePrivacyModelDir({ folder: "insights-model" });
     if (insightsModelDir) process.env.REDROB_INSIGHTS_MODEL_DIR = insightsModelDir;
+    // Read by redrob-server's route labeller on the first request to Redrob Auto. An explicit value wins.
+    const routeModelDir = process.env.REDROB_ROUTE_MODEL_DIR?.trim() || resolveRouteModelDir();
+    if (routeModelDir) process.env.REDROB_ROUTE_MODEL_DIR = routeModelDir;
     // startEmbeddedServer falls back to an OS-assigned port if `port` races
     // into EADDRINUSE (see apps/server/src/serve-node.ts), so the bound port
     // below is authoritative.

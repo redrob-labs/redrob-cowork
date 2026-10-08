@@ -23,6 +23,12 @@ run(
   [...packageManager.args, "--filter", "@redrob/enterprise-mcp-client", "build"],
   repoRoot,
 );
+// The route labeller is imported by the compiled server at runtime, so its dist has to exist first.
+run(
+  packageManager.command,
+  [...packageManager.args, "--filter", "@redrob-labs/route-labeller", "build"],
+  repoRoot,
+);
 run(
   packageManager.command,
   [...packageManager.args, "--filter", "redrob-server", "exec", "tsc", "-p", "tsconfig.json"],
@@ -39,6 +45,8 @@ run(
     "src/opencode-plugins/redrob-anthropic-tool-schema.ts",
     "src/opencode-plugins/redrob-team-connectors.ts",
     "src/opencode-plugins/redrob-privacy-gate.ts",
+    "src/opencode-plugins/redrob-route-labels.ts",
+    "src/opencode-plugins/redrob-insights-recorder.ts",
     "--outdir",
     "dist/opencode-plugins",
     "--target",

@@ -34,6 +34,16 @@ extraResources:
       - "*.onnx"
       - tokenizer.json
       - NOTICE.md
+  # The route model redrob-server labels requests to Redrob Auto with, pinned by the manifest in
+  # @redrob-labs/route-labeller. scripts/prepare-route-model.mjs fetches and verifies it.
+  - from: resources/route-model
+    to: route-model
+    filter:
+      - manifest.json
+      - "*.onnx"
+      - tokenizer.json
+      - dense.safetensors
+      - NOTICE.md
   - from: server/dist/opencode-plugins
     to: opencode-plugins
     filter:
