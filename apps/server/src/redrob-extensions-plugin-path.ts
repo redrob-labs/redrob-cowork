@@ -39,3 +39,4 @@ export const redrobOfficeAttachmentsPluginPath = () => redrobPluginPath("redrob-
 export const redrobTeamConnectorsPluginPath = () => redrobPluginPath("redrob-team-connectors");
 export const redrobPrivacyGatePluginPath = () => redrobPluginPath("redrob-privacy-gate");
 export const redrobRouteLabelsPluginPath = () => redrobPluginPath("redrob-route-labels");
+export const redrobInsightsRecorderPluginPath = () => redrobPluginPath("redrob-insights-recorder");

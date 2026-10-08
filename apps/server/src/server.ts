@@ -164,6 +164,9 @@ import {
 import { readHarnessAvailability } from "./harness-availability.js";
 import { PrivacyGate } from "./privacy/gate.js";
 import { RouteLabelSource } from "./route/label-source.js";
+import { parseFact } from "./insights/facts.js";
+import { InsightsOutbox } from "./insights/outbox.js";
+import { InsightsRecorder } from "./insights/recorder.js";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -2947,6 +2950,33 @@ function createRoutes(
       default:
         throw new ApiError(400, "invalid_payload", "op must be settings, label or restore");
     }
+  });
+
+  /*
+   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
+   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
+   * Nothing is sent anywhere from these routes.
+   */
+  const insightsOutbox = new InsightsOutbox(config);
+  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
+  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
+  insightsSweep.unref?.();
+  addRoute(routes, "POST", "/insights/facts", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const facts = Array.isArray(body.facts) ? body.facts.slice(0, 1_000) : [];
+    let accepted = 0;
+    for (const value of facts) {
+      const fact = parseFact(value);
+      if (!fact) continue;
+      insightsRecorder.observe(fact);
+      accepted += 1;
+    }
+    return jsonResponse({ accepted });
+  });
+  addRoute(routes, "GET", "/insights/outbox", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount() });
   });
 
   /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */

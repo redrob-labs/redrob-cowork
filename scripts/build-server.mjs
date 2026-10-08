@@ -46,6 +46,7 @@ run(
     "src/opencode-plugins/redrob-team-connectors.ts",
     "src/opencode-plugins/redrob-privacy-gate.ts",
     "src/opencode-plugins/redrob-route-labels.ts",
+    "src/opencode-plugins/redrob-insights-recorder.ts",
     "--outdir",
     "dist/opencode-plugins",
     "--target",
