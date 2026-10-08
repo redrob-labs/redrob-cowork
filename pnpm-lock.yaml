@@ -146,8 +146,8 @@ importers:
         specifier: ^0.4.1
         version: 0.4.1
       '@redrob-labs/ui':
-        specifier: 1.2.0
-        version: 1.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: 1.3.1
+        version: 1.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@redrob/install-config':
         specifier: workspace:*
         version: link:../../packages/install-config
@@ -2225,8 +2225,8 @@ packages:
   '@redrob-labs/sdk@0.4.1':
     resolution: {integrity: sha512-ocqmm8K5lCWiwO6qXoMhhOFEwiNNEneRlWBEYxEsKATAbjREC4EXFlq474Ix2+WtDLI7cNM5/+b9cMkkb1TBDQ==}
 
-  '@redrob-labs/ui@1.2.0':
-    resolution: {integrity: sha512-eaqnBrrczxkfZ6i84om+lT2ZmUxjLAhykXb/+NWZkkHfokxbHsZKccmM5P9ynGfVzDe1YvzsLU8r9XksGOIl0w==}
+  '@redrob-labs/ui@1.3.1':
+    resolution: {integrity: sha512-fEaubVbps9rT7b9RNTikWo8GU5yaGbbzdCY4Y2wjFaZZ2V6TuzqN+/XwGjDUmpNZN54xKmegYZ8ZXFG+sTgFzA==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
       react-dom: ^18.2.0 || ^19.0.0
@@ -7498,7 +7498,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@redrob-labs/ui@1.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@redrob-labs/ui@1.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)

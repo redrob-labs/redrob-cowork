@@ -137,7 +137,7 @@ describe("the console pricing contract", () => {
   });
 
   test("a response that is not the expected shape yields an empty catalogue", () => {
-    expect(parseRedrobPricing(null)).toEqual({ byModelId: {}, costProfiles: [] });
+    expect(parseRedrobPricing(null)).toEqual({ byModelId: {}, costProfiles: [], featured: [] });
     expect(parseRedrobPricing({ models: "nope" }).byModelId).toEqual({});
   });
 });

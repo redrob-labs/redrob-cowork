@@ -60,6 +60,28 @@
       "override": "installer apiUrl / self-hosted Den API origin"
     },
     {
+      "host": "arena.ai",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
+      "host": "artificialanalysis.ai",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
       "host": "casenote.kr",
       "kind": "link-only",
       "components": [
@@ -124,6 +146,61 @@
       "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup, and the device authorization endpoints Work uses to connect a workspace without the user handling an API key.",
       "requirement": "required",
       "blockedEffect": "Inference and model selection are unavailable.",
+      "override": null
+    },
+    {
+      "host": "dev.meta.ai",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
+      "host": "developers.openai.com",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
+      "host": "docs.anthropic.com",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
+      "host": "docs.x.ai",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
+      "host": "docs.z.ai",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
       "override": null
     },
     {
@@ -448,6 +525,17 @@
       "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
       "requirement": "optional",
       "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
+      "override": null
+    },
+    {
+      "host": "www.vals.ai",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
       "override": null
     }
   ]
