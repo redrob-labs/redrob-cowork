@@ -16,7 +16,7 @@ import {
 } from "../../../app/lib/redrob-pricing";
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { autoModel, guideGroups, guideModelCount, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
-import { guideLanguages, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
+import { guideLanguages, guideOutputs, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
 
 /** "Use this" in the guide: Auto picks, so it explains that instead of switching anything. */
@@ -60,6 +60,11 @@ export function ProfessionGuideView(props: { research: GuideResearch; locale: La
         professionLabel={t("desk.preview_guide_profession")}
         taskLabel={t("desk.preview_guide_task")}
         languageLabel={t("desk.guide_language_label")}
+        outputs={guideOutputs()}
+        deliverableLabel={t("desk.guide_output_label")}
+        anyOutputLabel={t("desk.guide_output_any")}
+        benchmarkLabel={t("desk.guide_benchmark")}
+        benchmarkNote={t("desk.guide_benchmark_note")}
         topLabel={t("desk.guide_top")}
         rangeLabel={t("desk.guide_range")}
         effortLabel={t("desk.preview_guide_effort")}
