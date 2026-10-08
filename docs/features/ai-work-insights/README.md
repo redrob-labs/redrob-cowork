@@ -12,7 +12,7 @@ The engine plugin `apps/server/src/opencode-plugins/redrob-insights-recorder.ts`
 - a permission was asked or answered;
 - a session started, became busy or idle, or was stopped.
 
-Message text, file contents, command lines and tool output never leave the plugin. When one of them decides a flag (a command that runs tests), the plugin computes the flag and only the boolean crosses.
+Message text, file contents, command lines and tool output never leave the plugin. When one of them decides a flag (a command that runs tests), the plugin computes the flag and only the boolean crosses. The one exception is the text of each session's first message. It goes once to redrob-server on the same machine, where the work classifier names its kind of work and family and the text is dropped.
 
 When a session has been quiet for 15 minutes, `insights/recorder.ts` folds its facts, and those of any subagents it started, into one tally. `insights/labeler.ts` then turns the tally into the console's labels:
 
@@ -24,12 +24,19 @@ When a session has been quiet for 15 minutes, `insights/recorder.ts` folds its f
 | Checked | A check ran |
 | Steered | The person stopped a run and wrote again |
 | Outward | Something was sent through a connector |
+| Sensitive data | The privacy gate saw a customer detail, number or key in what was sent to the model (touched), and none of it went out unmasked at the chat's level (safe) |
 | Agent figures | Steps, messages, minutes the agents ran, minutes between an answer and the next message (each capped at 10), whether permissions were asked, whether the run was stopped, agents at once |
 
-The kind of work, whether the first message said what done looks like, and whether a chat-only session was a draft need the work classifier, which is evaluated first (`apps/server/src/insights/eval`). Until it ships, those labels are left out. A session that only wrote text in the chat counts as an answer, which undercounts drafts but never overcounts them.
+The kind of work (`actionKey`, one of the console's 16) and its family (`familyKey`: write, sheet, code or design) come from the work classifier (`apps/server/src/insights/work-classifier.ts`, measured in `model-evaluation.md`). When the classifier is unsure of the kind of work it may still name the family alone, and a session gets neither when it names nothing or the app was packaged without the model. The task within a kind of work, whether the first message said what done looks like, and whether a chat-only session was a draft are not measured yet, so those labels are left out. A session that only wrote text in the chat counts as an answer, which undercounts drafts but never overcounts them.
+
+The sensitive-data labels come from the privacy gate, not the engine: on every send it also runs its patterns over the text in observe-only mode, at every category, and reports two booleans per send, touched and unmasked. Which details, and their values, stay in the gate; the chat's own labels are untouched.
 
 Every model request also carries `x-redrob-session`, a hash of the session's id. The console uses it to join the session to its own record of the requests' cost and model, so neither is taken from the device.
 
 ## Where it goes
 
-Finished sessions wait in the outbox (`insights/outbox.ts`) on this machine. `GET /insights/outbox` returns exactly what would be sent. In this version nothing is sent: the sync to the console is a separate change, together with the update to the privacy documentation it requires.
+Finished sessions wait in the outbox (`insights/outbox.ts`) on this machine, and `GET /insights/outbox` returns exactly what will be sent. Every 10 minutes or so, `insights/sync.ts` posts the outbox to the Redrob Console (`POST /v1/insights/sessions`) with the person's Redrob Key. The console attributes each session to the key's holder and to nobody else, and it refuses any field that isn't a label.
+
+Sending is on whenever Cowork has a Redrob Key, with no separate opt-in. This was decided for the console's insights in its design document. Admins see the workspace, team leads their own team, and each person their own work. No figure is shown for fewer people than the workspace's minimum group, except to the person themselves.
+
+Sessions the console accepted, updated or rejected leave the outbox. Anything without an answer, whether the console was unreachable or the key was refused, stays and is tried again.

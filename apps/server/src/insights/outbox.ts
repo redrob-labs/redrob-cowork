@@ -34,10 +34,20 @@ const store = createWorkspaceKvStore<OutboxEntry[]>({
   serialize: (value) => JSON.stringify(value),
 });
 
-export class InsightsOutbox {
-  /** Writes are serialised, so two sessions finishing together cannot drop one another. */
-  private queue: Promise<unknown> = Promise.resolve();
+/**
+ * Writes are serialised per database, across every outbox object, so a session finishing while the
+ * sync removes what it sent cannot undo either.
+ */
+const queues = new Map<string, Promise<unknown>>();
 
+function serialised(config: ServerConfig, work: () => Promise<void>): Promise<void> {
+  const key = config.configPath ?? "default";
+  const next = (queues.get(key) ?? Promise.resolve()).then(work);
+  queues.set(key, next.catch(() => undefined));
+  return next;
+}
+
+export class InsightsOutbox {
   constructor(private readonly config: ServerConfig) {}
 
   async list(): Promise<OutboxEntry[]> {
@@ -45,23 +55,19 @@ export class InsightsOutbox {
   }
 
   add(session: LabeledSession, now = Date.now()): Promise<void> {
-    const next = this.queue.then(async () => {
+    return serialised(this.config, async () => {
       const entries = (await this.list()).filter((entry) => entry.session.externalId !== session.externalId);
       entries.push({ session, queuedAt: now });
       await store.set(this.config, OUTBOX_KEY, entries.slice(-OUTBOX_LIMIT), now);
     });
-    this.queue = next.catch(() => undefined);
-    return next;
   }
 
   /** Drops the sessions the console has accepted, so they are not sent twice. */
   remove(externalIds: readonly string[], now = Date.now()): Promise<void> {
     const drop = new Set(externalIds);
-    const next = this.queue.then(async () => {
+    return serialised(this.config, async () => {
       const entries = (await this.list()).filter((entry) => !drop.has(entry.session.externalId));
       await store.set(this.config, OUTBOX_KEY, entries, now);
     });
-    this.queue = next.catch(() => undefined);
-    return next;
   }
 }

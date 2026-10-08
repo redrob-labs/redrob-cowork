@@ -2,15 +2,20 @@
  * Structural labels for one finished session: mode, outcome, craft flags that can be seen without
  * reading anything, and the agent figures. Pure, so every rule is a test away.
  *
- * What this cannot see without reading the conversation is left for the work classifier: the kind
- * of work, whether the first message said what done looks like, and whether a session without a file
- * was a draft or an answer. Until the classifier runs, a session that only wrote text in the chat is
- * labeled as an answer (Look up or Learn), which undercounts drafts; it never overcounts them.
+ * The kind of work and its family come from the work classifier, which reads the first message on
+ * this machine (work-classifier.ts); only the labels are kept. When it is unsure of the kind of work it
+ * may still name the family alone. What it cannot tell yet is left out: the task within a kind of
+ * work, whether the first message said what done looks like, and whether a session without a file
+ * was a draft or an answer. So a session that only wrote
+ * text in the chat is labeled as an answer (Look up or Learn), which undercounts drafts; it never
+ * overcounts them.
  */
 import { createHash } from "node:crypto";
 
+import type { WorkFamily } from "./work-classifier.js";
+
 export const LABELER_ID = "cowork-structural";
-export const LABELER_VERSION = "1";
+export const LABELER_VERSION = "4";
 
 /** What the recorder accumulated for a session and every subagent session under it. */
 export type SessionTally = {
@@ -39,6 +44,14 @@ export type SessionTally = {
   aborted: number;
   /** A message from the person within two messages after an abort: the run was redirected. */
   redirected: number;
+  /** Sends to the model that carried something sensitive, from the privacy gate. */
+  sensitiveSends: number;
+  /** Of those, sends where something sensitive went out unmasked at the chat's level. */
+  unmaskedSends: number;
+  /** The work classifier's kind of work for the first message; absent when it named none or did not run. */
+  action?: string | null;
+  /** Its family: the kind of work's, or the classifier's alone when it was unsure of the kind. */
+  family?: WorkFamily | null;
 };
 
 export type LabeledSession = {
@@ -56,6 +69,8 @@ export type LabeledSession = {
   sensitiveTouched: boolean;
   sensitiveOk: boolean;
   turns: number;
+  familyKey?: WorkFamily;
+  actionKey?: string;
   agent?: {
     actions: number;
     instructions: number;
@@ -119,10 +134,11 @@ export function labelSession(t: SessionTally): LabeledSession {
     steerApplicable: t.aborted > 0 || (mode >= 3 && t.userTurns >= 3),
     steered: t.redirected > 0,
     outward: t.sends > 0,
-    // The privacy gate's counts arrive with the sensitive-data step.
-    sensitiveTouched: false,
-    sensitiveOk: false,
+    sensitiveTouched: t.sensitiveSends > 0,
+    sensitiveOk: t.sensitiveSends > 0 && t.unmaskedSends === 0,
     turns: t.userTurns,
+    ...(t.family ? { familyKey: t.family } : {}),
+    ...(t.action ? { actionKey: t.action } : {}),
     ...(agent
       ? {
           agent: {

@@ -11,6 +11,7 @@
  */
 import type { Fact } from "./facts.js";
 import { labelSession, type LabeledSession, type SessionTally } from "./labeler.js";
+import type { WorkLabel } from "./work-classifier.js";
 
 const MINUTE = 60_000;
 /** A gap longer than this between an answer and the next message is the person away, not reading. */
@@ -21,6 +22,8 @@ type Live = {
   tally: SessionTally;
   userMessages: Set<string>;
   firstUserMessage: string | null;
+  /** The first message went to the work classifier. */
+  workRead: boolean;
   toolCalls: Set<string>;
   delegations: Set<string>;
   lastAnswerAt: number | null;
@@ -73,9 +76,12 @@ export class InsightsRecorder {
           permissionsAlways: 0,
           aborted: 0,
           redirected: 0,
+          sensitiveSends: 0,
+          unmaskedSends: 0,
         },
         userMessages: new Set(),
         firstUserMessage: null,
+        workRead: false,
         toolCalls: new Set(),
         delegations: new Set(),
         lastAnswerAt: null,
@@ -181,6 +187,37 @@ export class InsightsRecorder {
         }
         return;
     }
+  }
+
+  /**
+   * From the privacy gate, not the engine: the plugin has no way to report this, so a fact sent to
+   * the facts route can never claim a session was handled safely.
+   */
+  observeSensitivity(sessionID: string, at: number, unmasked: boolean): void {
+    const root = this.rootOf(sessionID);
+    const live = this.entry(root, at);
+    live.tally.sensitiveSends += 1;
+    if (unmasked) live.tally.unmaskedSends += 1;
+  }
+
+  /**
+   * The first message's text, from the plugin, for the work classifier. Only a root session's first
+   * message is read, once; the text is passed to `label` and not kept, and only the labels are.
+   * Returns whether it was read.
+   */
+  async observeFirstMessage(
+    sessionID: string,
+    messageID: string,
+    text: string,
+    label: (text: string) => Promise<WorkLabel | null>,
+  ): Promise<boolean> {
+    const live = this.live.get(sessionID);
+    if (!live || this.rootOf(sessionID) !== sessionID || live.firstUserMessage !== messageID || live.workRead) return false;
+    live.workRead = true;
+    const result = await label(text);
+    live.tally.action = result?.action ?? null;
+    live.tally.family = result?.family ?? null;
+    return true;
   }
 
   /** Labels and hands over every session quiet for long enough. Returns how many were finished. */
