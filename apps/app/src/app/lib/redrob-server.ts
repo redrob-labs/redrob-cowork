@@ -475,6 +475,19 @@ export type RedrobHandoffInspection = {
   alreadyOpened: { workspaceId: string; sessionId: string } | null;
 };
 
+export type RedrobReplyInspection = {
+  reply: {
+    replyTo: string;
+    from: RedrobReviewAuthor;
+    createdAt: string;
+    state: RedrobReviewState;
+    comments: number;
+    continued: { messages: number } | null;
+  };
+  digest: string;
+  target: { workspaceId: string; sessionId: string };
+};
+
 export type RedrobReceivedHandoff = {
   id: string;
   direction: "received";
@@ -1319,6 +1332,28 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
           body: {},
         })
       ).handoff,
+    createHandoffReply: (workspaceId: string, sessionId: string, input: { includeContinuation: boolean }) =>
+      requestBinary(baseUrl, `${handoffPath(workspaceId, sessionId)}/reply`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    inspectHandoffReply: (file: RedrobHandoffFile) =>
+      requestJson<RedrobReplyInspection>(baseUrl, "/handoff/reply/inspect", {
+        token,
+        hostToken,
+        method: "POST",
+        ...handoffFileBody(file),
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    applyHandoffReply: (file: RedrobHandoffFile, digest: string) =>
+      requestJson<{ workspaceId: string; sessionId: string; added: number; state: RedrobReviewState; continuationSessionId: string | null }>(
+        baseUrl,
+        `/handoff/reply/apply?digest=${encodeURIComponent(digest)}`,
+        { token, hostToken, method: "POST", ...handoffFileBody(file), timeoutMs: HANDOFF_TIMEOUT_MS },
+      ),
     getProfile: async (): Promise<RedrobParticipantProfile> => {
       const payload = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
         token,

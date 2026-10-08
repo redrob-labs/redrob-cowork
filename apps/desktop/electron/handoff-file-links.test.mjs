@@ -7,6 +7,7 @@ import { handoffLinkForPath, handoffLinksFromArgv, isHandoffFilePath } from "./h
 describe("handoff file links", () => {
   it("knows a handoff file by its extension, in any case", () => {
     assert.equal(isHandoffFilePath("/a/Lease.RedrobHandoff"), true);
+    assert.equal(isHandoffFilePath("/a/lease-reply.redrobreply"), true);
     assert.equal(isHandoffFilePath("/a/lease.zip"), false);
     assert.equal(isHandoffFilePath(undefined), false);
   });
