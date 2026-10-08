@@ -14,6 +14,7 @@ import {
   releaseAssetUrl,
   removeUnverified,
 } from "./prepare-privacy-model.mjs";
+import { DEFAULT_INSIGHTS_MODEL_DIR, prepareInsightsModel } from "./prepare-insights-model.mjs";
 
 const sha = (text) => createHash("sha256").update(text).digest("hex");
 const MODEL = "fake onnx bytes";
@@ -103,5 +104,34 @@ describe("prepare-privacy-model", () => {
       await readFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json"), "utf8"),
     );
     assert.match(constants.privacyModelRelease, /^privacy-model-/);
+  });
+});
+
+describe("prepare-insights-model", () => {
+  it("fetches the work model from its own release, verified the same way", async () => {
+    const { modelDir } = await fixture();
+    const asked = [];
+    const fetchImpl = async (url) => {
+      asked.push(url);
+      return new Response(url.endsWith("tokenizer.json") ? TOKENIZER : MODEL);
+    };
+    await prepareInsightsModel({ modelDir, source: null, releaseTag: "insights-model-x", fetchImpl });
+    assert.deepEqual(asked, [
+      "https://github.com/redrob-labs/redrob-cowork/releases/download/insights-model-x/model.int8.onnx",
+      "https://github.com/redrob-labs/redrob-cowork/releases/download/insights-model-x/tokenizer.json",
+    ]);
+    await assert.rejects(
+      prepareInsightsModel({ modelDir: (await fixture()).modelDir, source: null, releaseTag: "t", fetchImpl: async () => new Response("evil") }),
+      /does not match the pinned SHA-256/,
+    );
+  });
+
+  it("the tracked manifest pins the encoder and tokenizer, and constants.json names their release", async () => {
+    const manifest = JSON.parse(await readFile(path.join(DEFAULT_INSIGHTS_MODEL_DIR, "manifest.json"), "utf8"));
+    assert.deepEqual(pinnedFiles(manifest).map((entry) => entry.file), ["model_int8.onnx", "tokenizer.json"]);
+    const constants = JSON.parse(
+      await readFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json"), "utf8"),
+    );
+    assert.match(constants.insightsModelRelease, /^insights-model-/);
   });
 });

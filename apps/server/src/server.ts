@@ -163,6 +163,7 @@ import {
 } from "./team-policy/index.js";
 import { readHarnessAvailability } from "./harness-availability.js";
 import { PrivacyGate } from "./privacy/gate.js";
+import { RouteLabelSource } from "./route/label-source.js";
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
@@ -2990,6 +2991,26 @@ function createRoutes(
   addRoute(routes, "GET", "/privacy/detector", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     return jsonResponse(privacyGate.detectorStatus());
+  });
+
+  /*
+   * The route labeller's server half, called by the engine plugin redrob-route-labels before every
+   * request to Redrob Auto (route/label-source.ts). Collaborator scope, the engine's own. The text is
+   * read here, on this machine; what goes back to the engine is a profession and a task.
+   */
+  const routeLabels = RouteLabelSource.fromEnvironment();
+  addRoute(routes, "POST", "/route/label", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    if (typeof body.text !== "string") throw new ApiError(400, "invalid_payload", "text (a string) is required");
+    const profession = typeof body.profession === "string" && body.profession ? body.profession : null;
+    return jsonResponse(await routeLabels.label(body.text, { profession, coding: body.coding === true }));
+  });
+
+  /** Whether requests are labelled with the embedding model or by words alone, and why. */
+  addRoute(routes, "GET", "/route/labeller", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    return jsonResponse(routeLabels.status());
   });
 
   addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {

@@ -1,19 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronDown, ChevronRight, Settings2 } from "lucide-react";
+import { Check, ChevronDown, ChevronRight } from "lucide-react";
+import { useInRouterContext, useNavigate } from "react-router";
 
 import type { ModelBehaviorOption, ModelOption, ModelRef } from "@/app/types";
 import { getModelBehaviorSummary } from "@/app/lib/model-behavior";
-import { matchesModelQuery } from "@/app/lib/model-search";
+import { curateModelOptions, type CuratedModelRow } from "@/app/lib/featured-models";
 import { inferModelVendor } from "@/app/lib/model-vendor";
-import {
-  estimatedCostFor,
-  formatModelPriceRange,
-  formatPriceTier,
-  formatTokenCount,
-  formatUsdAmount,
-} from "@/app/lib/redrob-pricing";
+import { formatPriceTier, type RedrobPricing } from "@/app/lib/redrob-pricing";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { ProviderIcon } from "@/react-app/design-system/provider-icon";
 import { REDROB_MODEL_ID as AUTO_MODEL_ID } from "@/react-app/domains/settings/redrob-provider";
@@ -31,20 +26,8 @@ import { useWorkspace } from "@/react-app/shell/workspace-provider";
 import { getConnectedProviderItems, useProviderListQuery } from "@/react-app/infra/provider-list-query";
 import { mergeModelOptions } from "@/react-app/domains/connections/provider-auth/assigned-model-options";
 import { isRedrobOnlyProviderId } from "@/react-app/domains/settings/redrob-provider";
-import {
-  Command,
-  CommandCollection,
-  CommandEmpty,
-  CommandGroup,
-  CommandGroupLabel,
-  CommandHeader,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { openModelPickerEvent, openProviderAuthEvent } from "@/react-app/shell/new-providers-listener";
 import { newProvidersEvent } from "@/app/lib/provider-events";
-import { t } from "@/i18n"
+import { currentLocale, t } from "@/i18n"
 
 function getProviderDisplayName(providerId: string) {
   return providerId
@@ -113,7 +96,7 @@ type ModelSelectItem = {
   option: ModelOption;
 };
 
-type ModelSelectGroup = {
+export type ModelSelectGroup = {
   value: string;
   items: ModelSelectItem[];
 };
@@ -186,13 +169,6 @@ function modelRowSubtitle(option: ModelOption): string {
   return `${vendor.name} · ${providerLabel}`;
 }
 
-/** Match a picker row against the search query. Groups always pass through. */
-function filterModelItem(item: unknown, query: string): boolean {
-  const option = (item as ModelSelectItem | undefined)?.option;
-  if (!option) return true;
-  return matchesModelQuery(option, query);
-}
-
 function thinkingOptionsFor(option: ModelOption): ModelBehaviorOption[] {
   return (option.behaviorOptions ?? []).filter((item) => item.value != null);
 }
@@ -231,14 +207,11 @@ interface ModelSelectProps {
   onOpenChange: (open: boolean) => void;
   onChange: (model: ModelRef, variant?: string | null) => void;
   disabled?: boolean;
-  /** When set, "All models" opens the full picker scoped to this session. */
-  sessionId?: string;
   /** Models available before a workspace OpenCode client exists. */
   fallbackOptions?: readonly ModelOption[];
   behaviorValue?: string | null;
   behaviorLabel?: string;
   behaviorOptions?: { value: string | null; label: string }[];
-  onBehaviorChange?: (value: string | null) => void;
 }
 
 /** The Desk work column (AppShell's `main`), or the default clipping ancestors outside the Desk frame. */
@@ -247,6 +220,158 @@ function deskWorkColumn(): Element | "clipping-ancestors" {
   return document.getElementById("rr-shell-main") ?? "clipping-ancestors";
 }
 
+/** Where "Recommended best models" goes: the Model Guide, on its By profession tab. */
+export const MODEL_GUIDE_PATH = "/guide?tab=profession";
+
+const GUIDE_LINK_CLASS =
+  "flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-foreground transition-colors hover:bg-accent";
+
+function GuideLinkLabel() {
+  return (
+    <>
+      <span className="min-w-0">
+        <span className="block">{t("model_select.guide_link")}</span>
+        <span className="block font-normal text-muted-foreground">{t("model_select.guide_link_hint")}</span>
+      </span>
+      <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+    </>
+  );
+}
+
+/** Routes within the app, so the open chat and its state survive the trip to the guide. */
+function RoutedGuideLink(props: { onNavigate: () => void }) {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      className={GUIDE_LINK_CLASS}
+      onClick={() => {
+        props.onNavigate();
+        navigate(MODEL_GUIDE_PATH);
+      }}
+    >
+      <GuideLinkLabel />
+    </button>
+  );
+}
+
+/**
+ * "Recommended best models". Outside a router (a test, or a surface rendered on its own) it is a
+ * plain link, so the menu never depends on where it is mounted.
+ */
+function GuideLink(props: { onNavigate: () => void }) {
+  if (useInRouterContext()) return <RoutedGuideLink onNavigate={props.onNavigate} />;
+  return (
+    <a className={GUIDE_LINK_CLASS} href={`#${MODEL_GUIDE_PATH}`} onClick={props.onNavigate}>
+      <GuideLinkLabel />
+    </a>
+  );
+}
+
+/**
+ * What the open menu shows: the rows, then "Recommended best models". Separate from the popover so it
+ * can be rendered and checked on its own.
+ */
+export function ModelMenu(props: {
+  /** Curated rows, or `null` to list `groups` (Redrob not connected). */
+  rows: CuratedModelRow[] | null;
+  groups: ModelSelectGroup[];
+  value: ModelRef;
+  pricing: RedrobPricing | undefined;
+  onSelect: (option: ModelOption) => void;
+  onNavigate: () => void;
+}) {
+  const renderRow = (key: string, option: ModelOption, row?: CuratedModelRow) => {
+    const vendor = inferModelVendor(option.modelID);
+    const checked = isSameModel(props.value, option);
+    // One price band, from the console, so "is this one expensive?" needs no arithmetic. Auto has none:
+    // a router has no single rate.
+    const tier = isRedrobOnlyProviderId(option.providerID)
+      ? formatPriceTier(props.pricing?.byModelId[option.modelID])
+      : null;
+    const subtitle = row?.kind === "featured" && row.lab ? row.lab : modelRowSubtitle(option);
+    return (
+      <button
+        key={key}
+        type="button"
+        role="option"
+        aria-selected={checked}
+        data-checked={checked}
+        data-kind={row?.kind}
+        className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+        onClick={() => props.onSelect(option)}
+      >
+        <ProviderIcon
+          providerId={vendor?.id ?? option.providerID}
+          providerName={vendor?.name ?? option.description}
+          className="mt-0.5 size-4 shrink-0 opacity-80"
+          size={16}
+        />
+        <span className="min-w-0 flex-1">
+          <span className="flex items-baseline gap-1.5">
+            <span className="truncate text-sm font-medium text-foreground">{option.title}</span>
+            <span className="shrink-0 truncate text-xs text-muted-foreground">{subtitle}</span>
+            {row?.kind === "current" ? (
+              <span className="shrink-0 rounded-full bg-muted px-1.5 text-2xs text-muted-foreground">
+                {t("model_select.current")}
+              </span>
+            ) : null}
+          </span>
+          {row?.note ? (
+            <span className="block truncate text-xs text-muted-foreground">{row.note}</span>
+          ) : null}
+        </span>
+        {tier ? (
+          <span className="mt-0.5 shrink-0 font-mono text-2xs text-muted-foreground" title={t("pricing.tier_hint")}>
+            {tier}
+          </span>
+        ) : null}
+        <Check className={`mt-0.5 size-3.5 shrink-0 ${checked ? "text-foreground" : "invisible"}`} aria-hidden />
+      </button>
+    );
+  };
+
+  // 26rem, capped at the viewport: room for the model name, its lab and a line on what it is for,
+  // without the popover turning into a page.
+  return (
+    <div className="flex max-h-[min(32rem,var(--available-height))] w-[min(92vw,26rem)] min-w-0 flex-col overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
+      <div role="listbox" aria-label={t("session.change_model")} className="min-h-0 flex-1 overflow-y-auto p-1.5">
+        {props.rows
+          ? props.rows.map((row) => renderRow(`${row.kind}:${row.option.providerID}:${row.option.modelID}`, row.option, row))
+          : props.groups.map((group) => (
+              <div key={group.value} role="group" aria-label={group.value}>
+                {props.groups.length > 1 ? (
+                  <div className="px-2.5 pb-1 pt-2 text-2xs font-medium text-muted-foreground">{group.value}</div>
+                ) : null}
+                {group.items.map((item) => renderRow(item.id, item.option))}
+              </div>
+            ))}
+        {!props.rows && props.groups.length === 0 ? (
+          <div className="px-2.5 py-3 text-xs text-muted-foreground">{t("model_select.none_found")}</div>
+        ) : null}
+      </div>
+      <div className="border-t border-border p-1.5">
+        <GuideLink onNavigate={props.onNavigate} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The model menu under the composer.
+ *
+ * It shows Redrob Auto, then one recommended model per major lab, then the model in use if it is
+ * neither. Each row has a line saying what the model is for. It used to list every model from every
+ * connected provider, which through Redrob alone is several hundred. That asks the reader to already
+ * know which model is good at what. The comparison behind the recommendations is one click away in
+ * the Model Guide.
+ *
+ * The full list and adding providers are in Settings, under AI, for Developer mode. The command palette
+ * and a session error's "Change model" still open the full list directly.
+ *
+ * With Redrob not connected there is nothing to recommend, so the menu lists the connected providers'
+ * own models instead.
+ */
 export function ModelSelect({
   open,
   value,
@@ -254,15 +379,11 @@ export function ModelSelect({
   onOpenChange,
   onChange,
   disabled = false,
-  sessionId,
   fallbackOptions = [],
   behaviorValue = null,
   behaviorLabel,
   behaviorOptions = [],
-  onBehaviorChange,
 }: ModelSelectProps) {
-  const [search, setSearch] = React.useState("");
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const catalogOptions = useModelOptions(open, fallbackOptions);
   const { data: pricing } = useRedrobPricingQuery({ enabled: open });
   const modelOptions = React.useMemo(
@@ -273,26 +394,6 @@ export function ModelSelect({
     }),
     [behaviorLabel, behaviorOptions, behaviorValue, catalogOptions, value],
   );
-  const focusSearchInput = React.useCallback(() => {
-    window.requestAnimationFrame(() => {
-      const input = searchInputRef.current;
-
-      if (!input) {
-        return;
-      }
-
-      input.focus();
-      input.select();
-    });
-  }, []);
-
-  React.useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    focusSearchInput();
-  }, [focusSearchInput, open]);
 
   const selectedOption = modelOptions?.find((option) =>
     isSameModel(value, {
@@ -301,21 +402,14 @@ export function ModelSelect({
     }),
   );
 
+  const curated = React.useMemo(
+    () => curateModelOptions({ options: modelOptions, featured: pricing?.featured ?? [], value, locale: currentLocale() }),
+    [modelOptions, pricing, value],
+  );
   const groups = React.useMemo(() => groupByProvider(modelOptions, value), [modelOptions, value]);
-  // One provider means the group label repeats on every row and buys nothing,
-  // so the list renders flat. Grouping returns as soon as a second provider is
-  // connected.
-  const flatItems = React.useMemo(() => groups.flatMap((group) => group.items), [groups]);
-  const flatten = groups.length <= 1;
-
-  const applyModel = (option: ModelOption, behavior?: string | null) => {
-    onChange({ providerID: option.providerID, modelID: option.modelID }, behavior);
-    if (behavior !== undefined) {
-      onBehaviorChange?.(behavior);
-    }
-    setSearch("");
-    onOpenChange(false);
-  };
+  // The button reads the same name as the menu row, so picking GPT-6 Astra does not show `gpt-6-astra`.
+  const shownTitle =
+    curated?.find((row) => isSameModel(row.option, value))?.option.title ?? selectedOption?.title ?? value.modelID;
 
   /**
    * Picking a model picks the model.
@@ -326,95 +420,12 @@ export function ModelSelect({
    * for. Effort is now its own control beside the model button, so this path has one job.
    */
   const handleSelect = (option: ModelOption) => {
-    applyModel(option);
-  };
-
-  const handleConnectProvider = React.useCallback(() => {
+    onChange({ providerID: option.providerID, modelID: option.modelID });
     onOpenChange(false);
-    setSearch("");
-    window.dispatchEvent(new Event(openProviderAuthEvent));
-  }, [onOpenChange]);
-
-  const renderItem = (item: ModelSelectItem) => {
-    const option = item.option;
-    const vendor = inferModelVendor(option.modelID);
-    // Published console rate, input / output per million tokens. Absent when the
-    // catalog is unreachable or the model is not a Redrob one — never a zero.
-    const modelPricing = isRedrobOnlyProviderId(option.providerID)
-      ? pricing?.byModelId[option.modelID]
-      : undefined;
-    const price = formatModelPriceRange(modelPricing);
-    // The rate alone does not say whether it is expensive; the band does, and
-    // the console publishes it.
-    const tier = formatPriceTier(modelPricing);
-    // What one short question costs, in dollars. A rate per million tokens is
-    // not a number anyone converts in their head, which is the whole complaint
-    // this answers.
-    const chatCost = formatUsdAmount(estimatedCostFor(modelPricing, "chat")?.costUsd);
-    const context = formatTokenCount(modelPricing?.capabilities.maxContextTokens);
-    return (
-      <CommandItem
-        className="gap-2"
-        key={item.id}
-        value={`${option.providerID}:${option.modelID} ${option.title} ${option.description ?? ""}`}
-        onClick={() => handleSelect(option)}
-        data-checked={isSameModel(value, option)}
-      >
-        <ProviderIcon
-          providerId={vendor?.id ?? option.providerID}
-          providerName={vendor?.name ?? option.description}
-          className="size-3.5 opacity-70"
-          size={14}
-        />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-foreground">{option.title}</span>
-          <span className="block truncate text-xs text-muted-foreground">
-            {modelRowSubtitle(option)}
-          </span>
-        </span>
-        {context ? (
-          <span className="shrink-0 text-2xs text-muted-foreground">
-            {t("pricing.context_window", { tokens: context })}
-          </span>
-        ) : null}
-        {tier ? (
-          <span
-            className="shrink-0 font-mono text-2xs text-muted-foreground"
-            title={t("pricing.tier_hint")}
-          >
-            {tier}
-          </span>
-        ) : null}
-        {chatCost ? (
-          <span
-            className="shrink-0 font-mono text-2xs text-muted-foreground"
-            title={t("pricing.per_request_hint")}
-          >
-            {t("pricing.per_request", { amount: chatCost })}
-          </span>
-        ) : price ? (
-          <span
-            className="shrink-0 font-mono text-2xs text-muted-foreground"
-            title={t("pricing.per_million_hint")}
-          >
-            {price}
-          </span>
-        ) : null}
-      </CommandItem>
-    );
   };
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        onOpenChange(nextOpen);
-
-        if (!nextOpen) {
-          setSearch("");
-        }
-      }}
-    >
+    <Popover open={open} onOpenChange={onOpenChange}>
       <Tooltip>
         <TooltipTrigger
           render={
@@ -429,8 +440,8 @@ export function ModelSelect({
         >
           <span className="max-w-48 truncate">
             {hideValue
-              ? "Select model"
-              : (selectedOption?.title ?? value.modelID ?? "Select model")}
+              ? t("model_select.select_model")
+              : (shownTitle || t("model_select.select_model"))}
           </span>
           {/*
             No effort chip here any more. Effort is its own button beside this one - `EffortSelect` -
@@ -444,75 +455,19 @@ export function ModelSelect({
         </TooltipContent>
       </Tooltip>
       <PopoverContent
-        className="flex h-80 max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible bg-transparent p-0 shadow-none ring-0"
+        className="flex max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible bg-transparent p-0 shadow-none ring-0"
         align="start"
         // Inside the Desk frame the menu stays in the work column; it used to run over the side panel.
         collisionBoundary={open ? deskWorkColumn() : undefined}
-        initialFocus={false}
       >
-        {/*
-          Wider than the 288px it was.
-
-          Each row carries a model name, its vendor, a context figure, a price band and a per-request
-          estimate, and at 288px the name itself truncated to a stub - `aion-la...` - which is the one
-          field the row exists to show. 26rem fits the name and keeps the popover a popover; the full
-          table is a click away behind "All models". Capped at the viewport so a narrow window still
-          gets a usable menu rather than one hanging off the edge.
-        */}
-        <div className="flex h-full w-[min(92vw,26rem)] min-w-0 flex-col overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-foreground/5 dark:ring-foreground/10">
-        <Command
-          items={flatten ? flatItems : groups}
-          filter={filterModelItem}
-          value={search}
-          onValueChange={setSearch}
-        >
-          <CommandHeader>
-            <CommandInput
-              ref={searchInputRef}
-              placeholder={t("settings.search_models")}
-            />
-          </CommandHeader>
-          <CommandEmpty>{t("model_select.none_found")}</CommandEmpty>
-          <CommandList>
-            {flatten
-              ? (item: ModelSelectItem) => renderItem(item)
-              : (group: ModelSelectGroup) => (
-                  <CommandGroup key={group.value} items={group.items}>
-                    <CommandGroupLabel>{group.value}</CommandGroupLabel>
-                    <CommandCollection>
-                      {(item: ModelSelectItem) => renderItem(item)}
-                    </CommandCollection>
-                  </CommandGroup>
-                )}
-          </CommandList>
-          {/* Always offered: with no organization policy, adding a provider is
-              never restricted. */}
-          <div className="border-t border-border px-2 py-1.5">
-            <button
-              type="button"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              onClick={handleConnectProvider}
-            >
-              {t("model_select.connect_more")}
-            </button>
-          </div>
-          {/* Link to full model picker */}
-          <div className="border-t border-border px-2 py-1.5">
-            <button
-              type="button"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-              onClick={() => {
-                onOpenChange(false);
-                setSearch("");
-                window.dispatchEvent(new CustomEvent(openModelPickerEvent, sessionId ? { detail: { sessionId } } : undefined));
-              }}
-            >
-              <Settings2 className="size-3.5" />
-              {t("model_picker.all_models")}
-            </button>
-          </div>
-        </Command>
-        </div>
+        <ModelMenu
+          rows={curated}
+          groups={groups}
+          value={value}
+          pricing={pricing}
+          onSelect={handleSelect}
+          onNavigate={() => onOpenChange(false)}
+        />
       </PopoverContent>
     </Popover>
   );

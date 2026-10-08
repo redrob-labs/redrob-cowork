@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, Tabs, icons, type TableColumn } from "@redrob-labs/ui";
 import { useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "react-router";
 
 import { currentLocale, subscribeToLocale, t, type Language } from "../../../i18n";
 import { desktopFetchViaMain } from "../../../app/lib/desktop";
@@ -16,7 +17,7 @@ import {
 } from "../../../app/lib/redrob-pricing";
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { autoModel, guideGroups, guideModelCount, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
-import { guideLanguages, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
+import { guideLanguages, guideOutputs, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
 
 /** "Use this" in the guide: Auto picks, so it explains that instead of switching anything. */
@@ -60,6 +61,14 @@ export function ProfessionGuideView(props: { research: GuideResearch; locale: La
         professionLabel={t("desk.preview_guide_profession")}
         taskLabel={t("desk.preview_guide_task")}
         languageLabel={t("desk.guide_language_label")}
+        outputs={guideOutputs()}
+        deliverableLabel={t("desk.guide_output_label")}
+        anyOutputLabel={t("desk.guide_output_any")}
+        benchmarkLabel={t("desk.guide_benchmark")}
+        benchmarkNote={t("desk.guide_benchmark_note")}
+        harnessLabel={(harness) => t("desk.guide_on_harness", { harness })}
+        rankLabel={(place, task) => t("desk.guide_rank", { place, task })}
+        effortUnit=""
         topLabel={t("desk.guide_top")}
         rangeLabel={t("desk.guide_range")}
         effortLabel={t("desk.preview_guide_effort")}
@@ -195,9 +204,17 @@ export const GUIDE_RESEARCH_KEY = ["desk-guide", "research"];
 
 export type GuideTab = "profession" | "price";
 
-/** `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from. */
+/**
+ * `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from.
+ *
+ * The tab is in the URL (`?tab=price`), so a link can open either one. The model menu's "Recommended best
+ * models" opens `?tab=profession`. That has to win even when the guide is already open on By price, which
+ * local state could not do, because the screen stays mounted.
+ */
 export function GuideScreen() {
-  const [tab, setTab] = useState<GuideTab>("profession");
+  const [params, setParams] = useSearchParams();
+  const tab: GuideTab = params.get("tab") === "price" ? "price" : "profession";
+  const setTab = (next: GuideTab) => setParams({ tab: next }, { replace: true });
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const pricing = useQuery({
     queryKey: GUIDE_QUERY_KEY,
@@ -206,7 +223,12 @@ export function GuideScreen() {
     retry: 1,
     enabled: tab === "price",
   });
-  const research = useQuery({ queryKey: GUIDE_RESEARCH_KEY, queryFn: loadGuideResearch, staleTime: Infinity });
+  const research = useQuery({
+    queryKey: GUIDE_RESEARCH_KEY,
+    queryFn: () => loadGuideResearch(guideFetch(isDesktopRuntime())),
+    // An edition changes monthly; an hour keeps a long-open window from showing last month's.
+    staleTime: 60 * 60 * 1000,
+  });
   const count = pricing.data ? guideModelCount(pricing.data) : undefined;
   const meta =
     tab === "profession"
