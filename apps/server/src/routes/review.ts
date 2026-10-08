@@ -32,6 +32,8 @@ interface RegisterReviewRoutesOptions {
   resolveWorkspaceWithoutBootstrap: (config: ServerConfig, id: string) => Promise<WorkspaceInfo>;
   /** Who is making this request, as a review author. */
   resolveAuthor: (ctx: RequestContext) => Promise<ReviewAuthor>;
+  /** Told after every change, so a live room can say so. */
+  onChange?: (workspaceId: string, sessionId: string) => void | Promise<void>;
 }
 
 /** This install's profile, as a review author. */
@@ -66,6 +68,9 @@ function reviewFailure(error: unknown): never {
 export function registerReviewRoutes(options: RegisterReviewRoutesOptions): void {
   const { routes, config, jsonResponse, readJsonBody, ensureWritable, requireClientScope, resolveWorkspaceWithoutBootstrap, resolveAuthor } =
     options;
+  const changed = (workspaceId: string, sessionId: string) => {
+    void Promise.resolve(options.onChange?.(workspaceId, sessionId)).catch(() => undefined);
+  };
 
   const target = async (ctx: RequestContext) => {
     const workspace = await resolveWorkspaceWithoutBootstrap(config, ctx.params.id ?? "");
@@ -96,6 +101,7 @@ export function registerReviewRoutes(options: RegisterReviewRoutesOptions): void
     if (!text) throw new ApiError(400, "invalid_payload", "text is required and must be 4000 characters or fewer");
     const author = await resolveAuthor(ctx);
     const result = await addReviewComment(config, { workspaceId, sessionId, anchor, author, text }).catch(reviewFailure);
+    changed(workspaceId, sessionId);
     return jsonResponse(result, 201);
   });
 
@@ -109,6 +115,7 @@ export function registerReviewRoutes(options: RegisterReviewRoutesOptions): void
     const review = await resolveReviewComment(config, { workspaceId, sessionId, commentId: commentId(ctx), resolved: body.resolved, by }).catch(
       reviewFailure,
     );
+    changed(workspaceId, sessionId);
     return jsonResponse({ review });
   });
 
@@ -119,6 +126,7 @@ export function registerReviewRoutes(options: RegisterReviewRoutesOptions): void
     const by = await resolveAuthor(ctx);
     const asOwner = ctx.actor?.type === "host" || ctx.actor?.scope === "owner";
     const review = await deleteReviewComment(config, { workspaceId, sessionId, commentId: commentId(ctx), by, asOwner }).catch(reviewFailure);
+    changed(workspaceId, sessionId);
     return jsonResponse({ review });
   });
 
@@ -132,6 +140,7 @@ export function registerReviewRoutes(options: RegisterReviewRoutesOptions): void
     if (note === null) throw new ApiError(400, "invalid_payload", "note must be a string of 1000 characters or fewer");
     const by = await resolveAuthor(ctx);
     const review = await setReviewState(config, { workspaceId, sessionId, status: body.status, by, ...(note ? { note } : {}) });
+    changed(workspaceId, sessionId);
     return jsonResponse({ review });
   });
 }
