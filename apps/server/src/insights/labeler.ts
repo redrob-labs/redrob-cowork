@@ -2,15 +2,19 @@
  * Structural labels for one finished session: mode, outcome, craft flags that can be seen without
  * reading anything, and the agent figures. Pure, so every rule is a test away.
  *
- * What this cannot see without reading the conversation is left for the work classifier: the kind
- * of work, whether the first message said what done looks like, and whether a session without a file
- * was a draft or an answer. Until the classifier runs, a session that only wrote text in the chat is
- * labeled as an answer (Look up or Learn), which undercounts drafts; it never overcounts them.
+ * The family of work (writing, a sheet, code, design) comes from the work classifier, which reads the
+ * first message on this machine (work-classifier.ts); only the family is kept. What it cannot tell
+ * yet is left out: the kind of work within a family, whether the first message said what done looks
+ * like, and whether a session without a file was a draft or an answer. So a session that only wrote
+ * text in the chat is labeled as an answer (Look up or Learn), which undercounts drafts; it never
+ * overcounts them.
  */
 import { createHash } from "node:crypto";
 
+import type { WorkFamily } from "./work-classifier.js";
+
 export const LABELER_ID = "cowork-structural";
-export const LABELER_VERSION = "2";
+export const LABELER_VERSION = "3";
 
 /** What the recorder accumulated for a session and every subagent session under it. */
 export type SessionTally = {
@@ -43,6 +47,8 @@ export type SessionTally = {
   sensitiveSends: number;
   /** Of those, sends where something sensitive went out unmasked at the chat's level. */
   unmaskedSends: number;
+  /** The work classifier's family for the first message; absent when it named none or did not run. */
+  family?: WorkFamily | null;
 };
 
 export type LabeledSession = {
@@ -60,6 +66,7 @@ export type LabeledSession = {
   sensitiveTouched: boolean;
   sensitiveOk: boolean;
   turns: number;
+  familyKey?: WorkFamily;
   agent?: {
     actions: number;
     instructions: number;
@@ -126,6 +133,7 @@ export function labelSession(t: SessionTally): LabeledSession {
     sensitiveTouched: t.sensitiveSends > 0,
     sensitiveOk: t.sensitiveSends > 0 && t.unmaskedSends === 0,
     turns: t.userTurns,
+    ...(t.family ? { familyKey: t.family } : {}),
     ...(agent
       ? {
           agent: {

@@ -37,7 +37,10 @@ const ev = {
   busy: (sessionID: string, busy: boolean) => ({ type: "session.status", properties: { sessionID, status: { type: busy ? "busy" : "idle" } } }),
   abort: (sessionID: string) => ({ type: "session.error", properties: { sessionID, error: { name: "MessageAbortedError", data: { message: SECRET } } } }),
   idle: (sessionID: string) => ({ type: "session.idle", properties: { sessionID } }),
-  text: (sessionID: string) => ({ type: "message.part.updated", properties: { part: { id: "t", sessionID, messageID: "m", type: "text", text: SECRET } } }),
+  text: (sessionID: string, messageID = "m", text = SECRET, synthetic = false) => ({
+    type: "message.part.updated",
+    properties: { part: { id: "t", sessionID, messageID, type: "text", text, synthetic } },
+  }),
 };
 
 /** Runs events through the plugin-side reduction and the server-side guard, as in production. */
@@ -203,15 +206,52 @@ describe("the recorder, from engine events", () => {
   });
 });
 
+describe("the work family", () => {
+  const labels: string[] = [];
+  const label = async (text: string) => {
+    labels.push(text);
+    return { family: "write" as const, confidence: 0.9 };
+  };
+
+  test("only the first message of the session the person wrote in is read, once, and only the family is kept", async () => {
+    labels.length = 0;
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.created("s")], [0, ev.created("kid", "s")], [0, ev.user("s", "m1", 0)], [1, ev.user("s", "m2", 1)], [1, ev.user("kid", "k1", 1)]]);
+    expect(await recorder.observeFirstMessage("s", "m2", "later", label)).toBe(false);
+    expect(await recorder.observeFirstMessage("kid", "k1", "subagent", label)).toBe(false);
+    expect(await recorder.observeFirstMessage("s", "m1", SECRET, label)).toBe(true);
+    expect(await recorder.observeFirstMessage("s", "m1", SECRET, label)).toBe(false);
+    expect(await recorder.observeFirstMessage("unknown", "m1", "x", label)).toBe(false);
+    expect(labels).toEqual([SECRET]);
+    await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
+    expect(out[0]!.familyKey).toBe("write");
+    expect(JSON.stringify(out)).not.toContain("김지원");
+  });
+
+  test("a session the classifier named nothing for, or could not read, carries no family", async () => {
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.user("a", "m1", 0)], [0, ev.user("b", "m1", 0)]]);
+    await recorder.observeFirstMessage("a", "m1", "hi", async () => ({ family: null, confidence: 0.4 }));
+    await recorder.observeFirstMessage("b", "m1", "hi", async () => null);
+    await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
+    expect(out.map((s) => "familyKey" in s)).toEqual([false, false]);
+  });
+});
+
 describe("the engine plugin", () => {
   let posted: unknown[] = [];
+  let paths: string[] = [];
   let serverHandle: ReturnType<typeof Bun.serve> | null = null;
   const saved = { url: process.env.REDROB_SERVER_URL, token: process.env.REDROB_SERVER_TOKEN };
   beforeEach(() => {
     posted = [];
+    paths = [];
     serverHandle = Bun.serve({
       port: 0,
       fetch: async (request) => {
+        paths.push(new URL(request.url).pathname);
         posted.push(await request.json());
         return Response.json({ accepted: 1 });
       },
@@ -245,6 +285,24 @@ describe("the engine plugin", () => {
     expect(body).not.toContain("acme.test");
     const facts = (posted[0] as { facts: Fact[] }).facts;
     expect(facts.map((f) => f.kind)).toEqual(["user-turn", "tool", "idle"]);
+  });
+
+  test("the first message's text goes once to the local classifier, after the facts; no other text does", async () => {
+    const hooks = await RedrobWorkInsightsRecorder();
+    await hooks.event({ event: ev.created("kid", "s") });
+    await hooks.event({ event: ev.user("s", "m1", 1) });
+    await hooks.event({ event: ev.text("s", "m1", "added by the engine", true) });
+    await hooks.event({ event: ev.text("s", "m1") });
+    await hooks.event({ event: ev.text("s", "m1", "edited") });
+    await hooks.event({ event: ev.user("s", "m2", 2) });
+    await hooks.event({ event: ev.text("s", "m2", "second message") });
+    await hooks.event({ event: ev.user("kid", "k1", 3) });
+    await hooks.event({ event: ev.text("kid", "k1", "subagent instruction") });
+    await hooks.event({ event: ev.idle("s") });
+    expect(paths).toEqual(["/insights/facts", "/insights/work", "/insights/facts"]);
+    expect(posted[1]).toEqual({ sessionID: "s", messageID: "m1", text: SECRET });
+    expect((posted[0] as { facts: Fact[] }).facts.map((f) => f.kind)).toEqual(["session", "user-turn"]);
+    for (const body of [posted[0], posted[2]]) expect(JSON.stringify(body)).not.toMatch(/김지원|second message|subagent instruction/);
   });
 
   test("an unreachable server never breaks the chat", async () => {

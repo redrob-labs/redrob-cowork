@@ -6,6 +6,10 @@
  * command line and a tool's output all stay in the plugin: where one of them decides a flag (a
  * command that runs tests, a file attached to the first message) the flag is computed here and only
  * the boolean leaves.
+ *
+ * One exception, kept out of facts: the text of a session's first message goes, once, to
+ * redrob-server's /insights/work on this machine, where the work classifier names its family and the
+ * text is dropped (`textPartOf`). Only the family is stored or sent on.
  */
 
 export type Fact =
@@ -142,6 +146,17 @@ export function factsOf(event: unknown, now: number): Fact | null {
   }
 
   return null;
+}
+
+/** A text part the person wrote (not one the engine added), for the work classifier. */
+export function textPartOf(event: unknown): { sessionID: string; messageID: string; text: string } | null {
+  if (str(field(event, "type")) !== "message.part.updated") return null;
+  const part = field(field(event, "properties"), "part");
+  const sessionID = str(field(part, "sessionID"));
+  const messageID = str(field(part, "messageID"));
+  const text = str(field(part, "text"));
+  if (str(field(part, "type")) !== "text" || field(part, "synthetic") === true || !sessionID || !messageID || !text) return null;
+  return { sessionID, messageID, text };
 }
 
 const EFFECTS: readonly ToolEffect[] = ["artifact", "checks", "delegates", "sends", "reads", "other"];
