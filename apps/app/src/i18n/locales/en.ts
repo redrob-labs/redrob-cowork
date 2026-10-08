@@ -515,7 +515,7 @@ const en = {
   "desk.guide_price_note": "Prices are in US dollars, for text sent in and written out, in tokens. A token is a part of a word. Billing is in the Redrob console.",
   "desk.guide_profession_error": "Couldn't load the rankings",
   "desk.guide_profession_lede": "The five best ways to do each job with AI, ranked on public benchmarks and priced at each maker's list price. Every figure says where it comes from.",
-  "desk.guide_profession_meta": "Rankings as of {date}",
+  "desk.guide_profession_meta": "{edition} edition · Updated monthly",
   "desk.guide_range": "Likely between",
   "desk.guide_rank": "#{place} for {task}",
   "desk.guide_reads": "Reads up to",

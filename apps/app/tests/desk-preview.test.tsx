@@ -447,7 +447,8 @@ describe("Model Guide", () => {
     expect(html).toContain('aria-selected="true" aria-controls="panel-profession"');
     expect(html).toContain("By price");
     expect(html).toContain("every message goes to Redrob Auto");
-    expect(html).toContain("Rankings as of 2026-10-08");
+    expect(html).toContain("October 2026 edition · Updated monthly");
+    expect(html).not.toContain("Rankings as of");
     expect(html).not.toContain("rr-alert");
     expect(html).not.toContain("Sample output, illustrative");
   });
