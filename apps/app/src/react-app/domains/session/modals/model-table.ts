@@ -40,7 +40,9 @@ export type ModelCapabilityFlag =
   | "fileInput"
   | "audioInput"
   | "structuredOutputs"
-  | "reasoning";
+  | "reasoning"
+  /** Reads at least half a million tokens at once. A filter in the friendly view, not a column. */
+  | "longContext";
 
 export const CAPABILITY_FLAGS: readonly ModelCapabilityFlag[] = [
   "tools",
@@ -50,6 +52,12 @@ export const CAPABILITY_FLAGS: readonly ModelCapabilityFlag[] = [
   "audioInput",
   "structuredOutputs",
 ];
+
+/** What the friendly view asks "What do you need?" with, in this order. */
+export const NEED_FLAGS: readonly ModelCapabilityFlag[] = ["tools", "reasoning", "imageInput", "longContext", "audioInput"];
+
+/** Half a million tokens, about five books: the line above which a model "handles very long documents". */
+export const LONG_CONTEXT_TOKENS = 500_000;
 
 export type ModelRow = {
   option: ModelOption;
@@ -67,6 +75,8 @@ export type ModelRow = {
   contextTokens: number | null;
   /** USD for one turn on COST_PROFILE_ID, or null when the model publishes no estimate. */
   turnCostUsd: number | null;
+  /** USD for one short question (the console's `chat` profile), which is what the friendly view quotes. */
+  questionCostUsd: number | null;
   capabilities: ReadonlySet<ModelCapabilityFlag>;
   /** Reasoning levels this model accepts, empty when it has none. */
   effortLevels: readonly string[];
@@ -141,6 +151,8 @@ export function buildModelRow(option: ModelOption, pricing?: RedrobPricing): Mod
   if (caps?.audioInput) flags.add("audioInput");
   if (caps?.structuredOutputs) flags.add("structuredOutputs");
   if ((caps?.thinkingLevels?.length ?? 0) > 0) flags.add("reasoning");
+  const contextTokens = caps?.maxContextTokens ?? caps?.shortContextTokens ?? null;
+  if (contextTokens !== null && contextTokens >= LONG_CONTEXT_TOKENS) flags.add("longContext");
 
   const estimate = estimatedCostFor(entry, COST_PROFILE_ID);
 
@@ -155,8 +167,9 @@ export function buildModelRow(option: ModelOption, pricing?: RedrobPricing): Mod
     isAuto: isAutoOption(option),
     priceBand: entry?.priceBand ?? null,
     priceRank: priceTier(entry),
-    contextTokens: caps?.maxContextTokens ?? caps?.shortContextTokens ?? null,
+    contextTokens,
     turnCostUsd: estimate?.costUsd ?? null,
+    questionCostUsd: estimatedCostFor(entry, "chat")?.costUsd ?? null,
     capabilities: flags,
     effortLevels: caps?.thinkingLevels ?? [],
     disabled: option.disabled === true,
@@ -277,4 +290,41 @@ export function orderedRows(rows: readonly ModelRow[], sort: ModelSort): { auto:
 export function nextSort(current: ModelSort, key: ModelSortKey): ModelSort {
   if (current.key !== key) return { key, direction: "asc" };
   return { key, direction: current.direction === "asc" ? "desc" : "asc" };
+}
+
+/**
+ * The friendly view's order: Auto, then the recommended models in the console's order, then every other
+ * model grouped by the lab that makes it.
+ *
+ * Grouped by lab rather than sorted by price, because "which company's models are these" is how someone
+ * who is not comparing spec sheets finds their way around 344 rows. A recommended model is not repeated
+ * in its lab's group.
+ */
+export function friendlyGroups(
+  rows: readonly ModelRow[],
+  recommendedIds: readonly string[],
+): { auto: ModelRow[]; recommended: ModelRow[]; labs: Array<{ id: string; name: string; rows: ModelRow[] }> } {
+  const auto = rows.filter((row) => row.isAuto);
+  const byId = new Map(rows.map((row) => [row.modelId, row]));
+  const recommended = recommendedIds.flatMap((id) => {
+    const row = byId.get(id);
+    return row && !row.isAuto ? [row] : [];
+  });
+  const taken = new Set(recommended.map((row) => row.key));
+  const labs = new Map<string, { id: string; name: string; rows: ModelRow[] }>();
+  for (const row of rows) {
+    if (row.isAuto || taken.has(row.key)) continue;
+    const id = row.vendorId || "other";
+    const group = labs.get(id) ?? { id, name: row.vendorName || row.vendorId, rows: [] };
+    group.rows.push(row);
+    labs.set(id, group);
+  }
+  const sortedLabs = [...labs.values()].sort((a, b) => {
+    // Rows with no known lab go last, under "Other".
+    if (a.id === "other") return 1;
+    if (b.id === "other") return -1;
+    return a.name.localeCompare(b.name);
+  });
+  for (const lab of sortedLabs) lab.rows.sort((a, b) => a.title.localeCompare(b.title));
+  return { auto, recommended, labs: sortedLabs };
 }
