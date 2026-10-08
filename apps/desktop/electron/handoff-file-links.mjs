@@ -8,9 +8,13 @@ import path from "node:path";
  */
 
 export const HANDOFF_EXTENSION = ".redrobhandoff";
+/** A teammate's reply to a handoff, opened on the machine that sent it. */
+export const REPLY_EXTENSION = ".redrobreply";
 
 export function isHandoffFilePath(value) {
-  return typeof value === "string" && value.trim().toLowerCase().endsWith(HANDOFF_EXTENSION);
+  if (typeof value !== "string") return false;
+  const lower = value.trim().toLowerCase();
+  return lower.endsWith(HANDOFF_EXTENSION) || lower.endsWith(REPLY_EXTENSION);
 }
 
 export function handoffLinkForPath(filePath, scheme) {

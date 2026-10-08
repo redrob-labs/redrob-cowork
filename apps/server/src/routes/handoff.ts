@@ -13,7 +13,9 @@ import {
   type HandoffAsk,
   type HandoffDraft,
 } from "../handoff-bundle.js";
-import { findHandoff, receivedHandoffForSession, recordHandoff, type ReceivedHandoff } from "../handoff-registry.js";
+import { findHandoff, receivedHandoffForSession, recordHandoff, type ReceivedHandoff, type SentHandoff } from "../handoff-registry.js";
+import { describeReply, openReplyBundle, replyFileName, writeReplyBundle } from "../handoff-reply.js";
+import { listHandoffs } from "../handoff-registry.js";
 import {
   HandoffOpenError,
   describeBundle,
@@ -333,6 +335,12 @@ export function registerHandoffRoutes(options: RegisterHandoffRoutesOptions): vo
       ask: opened.manifest.ask,
       ...(opened.manifest.note ? { note: opened.manifest.note } : {}),
       ...(fallbackMessageId ? { fallback: true } : {}),
+      ...(rekeyed && !fallbackMessageId
+        ? { originMessageIds: Object.fromEntries([...rekeyed.messageIds].map(([origin, local]) => [local, origin])) }
+        : {}),
+      ...(fallbackMessageId && opened.exported.messages.length
+        ? { fallbackOriginMessageId: opened.exported.messages[opened.exported.messages.length - 1]!.info.id }
+        : {}),
     };
     await recordHandoff(config, record);
     await recordAudit(workspace.path, {
@@ -365,5 +373,107 @@ export function registerHandoffRoutes(options: RegisterHandoffRoutesOptions): vo
     const next: ReceivedHandoff = { ...record, continuedAt: record.continuedAt ?? Date.now() };
     await recordHandoff(config, next);
     return jsonResponse({ handoff: next });
+  });
+
+  // Send back: the comments and verdict on a chat opened from a handoff, and the chat itself if
+  // the person continued it, as a .redrobreply for the person who sent it.
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/handoff/reply", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id ?? "");
+    const sessionId = (ctx.params.sessionId ?? "").trim();
+    if (!isSafeId(sessionId)) throw new ApiError(400, "invalid_payload", "sessionId is invalid");
+    const record = await receivedHandoffForSession(config, workspace.id, sessionId);
+    if (!record) throw new ApiError(404, "handoff_not_found", "This chat did not come from a handoff");
+    const body = await readJsonBody(ctx.request);
+    const includeContinuation = body.includeContinuation === true;
+    const review = await readSessionReview(config, workspace.id, sessionId);
+    // Back to the sender's message ids: the ones their chat has.
+    const toOrigin = (messageId: string) =>
+      record.fallbackOriginMessageId ?? record.originMessageIds?.[messageId] ?? messageId;
+    const comments = review.comments.map((comment) => ({ ...comment, anchor: { ...comment.anchor, messageId: toOrigin(comment.anchor.messageId) } }));
+    const cwd = resolveOpencodeDirectory(workspace) ?? workspace.path;
+    const continued = includeContinuation ? await exportSession(sessionId, cwd).catch(failure) : null;
+    const from = await resolveAuthor(ctx);
+    const built = writeReplyBundle({
+      replyTo: record.id,
+      originSessionId: record.originSessionId,
+      from,
+      state: review.state,
+      comments,
+      continued,
+    });
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "handoff.replied",
+      target: sessionId,
+      summary: `Replied to ${record.fromName || "a teammate"} with ${comments.length} comments${continued ? " and the continued chat" : ""}`,
+      timestamp: Date.now(),
+    });
+    const title = typeof continued?.info.title === "string" ? continued.info.title : (workspace.name ?? "chat");
+    const fileName = replyFileName(title);
+    return new Response(new Uint8Array(built.zip), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/zip",
+        "Content-Disposition": `attachment; filename="${fileName.replace(/[^\x20-\x7e]/g, "_")}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+        "X-Redrob-Redacted": String(built.redacted),
+      },
+    });
+  });
+
+  const replyTarget = async (replyTo: string) => {
+    const sent = (await listHandoffs(config)).find((entry): entry is SentHandoff => entry.id === replyTo && entry.direction === "sent");
+    if (!sent) throw new ApiError(404, "reply_unknown_handoff", "This reply is for a handoff that was not sent from this computer");
+    return sent;
+  };
+
+  addRoute(routes, "POST", "/handoff/reply/inspect", "host", async (ctx) => {
+    const opened = await readBundleBody(ctx.request).then(openReplyBundle).catch(openFailure);
+    const sent = await replyTarget(opened.manifest.replyTo);
+    return jsonResponse({ reply: describeReply(opened), digest: opened.manifest.digest, target: { workspaceId: sent.workspaceId, sessionId: sent.sessionId } });
+  });
+
+  addRoute(routes, "POST", "/handoff/reply/apply", "host", async (ctx) => {
+    ensureWritable(config);
+    const opened = await readBundleBody(ctx.request).then(openReplyBundle).catch(openFailure);
+    if ((ctx.url.searchParams.get("digest") ?? "") !== opened.manifest.digest) {
+      throw new ApiError(409, "handoff_changed", "The file is not the one that was checked; open it again");
+    }
+    const sent = await replyTarget(opened.manifest.replyTo);
+    const workspace = await resolveWorkspace(config, sent.workspaceId);
+    const merged = await mergeReview(config, {
+      workspaceId: workspace.id,
+      sessionId: sent.sessionId,
+      comments: opened.comments,
+      origin: "reply",
+      state: opened.manifest.state,
+    });
+    // A continuation lands beside the original, never over it.
+    let continuationSessionId: string | null = null;
+    if (opened.continued) {
+      const name = opened.manifest.from.displayName || "Teammate";
+      const copy = rekeyEngineSessionExportWithMap(opened.continued, { title: `${name}'s continuation` });
+      const cwd = resolveOpencodeDirectory(workspace) ?? workspace.path;
+      continuationSessionId = await importSession(copy.exported, cwd).catch(failure);
+    }
+    await recordHandoff(config, { ...sent, lastReplyAt: Date.now() });
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "host" },
+      action: "handoff.reply_applied",
+      target: sent.sessionId,
+      summary: `Reply from ${opened.manifest.from.displayName || "a teammate"}: ${merged.added} new comments, ${opened.manifest.state.status}${continuationSessionId ? ", with their continuation" : ""}`,
+      timestamp: Date.now(),
+    });
+    return jsonResponse({
+      workspaceId: workspace.id,
+      sessionId: sent.sessionId,
+      added: merged.added,
+      state: merged.review.state,
+      continuationSessionId,
+    });
   });
 }

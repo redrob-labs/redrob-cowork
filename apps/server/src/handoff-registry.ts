@@ -7,7 +7,17 @@ import { isHandoffId, type HandoffAsk } from "./handoff-bundle.js";
  * opened handoff can find the workspace it was unpacked into. Ids and names only: the content
  * is in the file, and in the session it became.
  */
-export type SentHandoff = { id: string; direction: "sent"; workspaceId: string; sessionId: string; createdAt: number; to?: string; ask: HandoffAsk };
+export type SentHandoff = {
+  id: string;
+  direction: "sent";
+  workspaceId: string;
+  sessionId: string;
+  createdAt: number;
+  to?: string;
+  ask: HandoffAsk;
+  /** When the last reply to it was applied. */
+  lastReplyAt?: number;
+};
 export type ReceivedHandoff = {
   id: string;
   direction: "received";
@@ -24,6 +34,13 @@ export type ReceivedHandoff = {
   continuedAt?: number;
   /** The engine could not read the sender's export; the chat starts from the transcript. */
   fallback?: boolean;
+  /**
+   * This chat's message ids to the sender's, when it was opened under new ids, so a reply's
+   * comments point at the sender's messages again.
+   */
+  originMessageIds?: Record<string, string>;
+  /** After a fallback, the sender's last message: where a reply's comments attach. */
+  fallbackOriginMessageId?: string;
 };
 export type HandoffRecord = SentHandoff | ReceivedHandoff;
 

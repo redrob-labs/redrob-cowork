@@ -15,7 +15,15 @@ import {
 import { t } from "../../../i18n";
 import { PROJECTS_QUERY_KEY } from "../projects/desk-projects";
 import { Group, Row } from "../settings/desk-settings";
-import { useDeskConnection, type DeskHandoffOpenClient, type DeskProjectClient } from "../shell/desk-connection";
+import {
+  useDeskConnection,
+  type DeskHandoffOpenClient,
+  type DeskHandoffReplyClient,
+  type DeskProjectClient,
+  type DeskReviewClient,
+} from "../shell/desk-connection";
+import { reviewQueryKey } from "../review/use-session-review";
+import { ReplyDialog, ReplyOpenDialog } from "./handoff-reply";
 import { DeskDialog } from "../shell/desk-dialog";
 import { useFrameStore } from "../store/frame-store";
 import { useDeskThread } from "../thread/desk-thread-context";
@@ -23,12 +31,28 @@ import { askLabel, formatBytes } from "./handoff-logic";
 
 const BUTTON_ICON = { width: 14, height: 14, "aria-hidden": true };
 
-export const HANDOFF_FILE_ACCEPT = ".redrobhandoff,application/zip";
+export const HANDOFF_FILE_ACCEPT = ".redrobhandoff,.redrobreply,application/zip";
 
-/** Which handoff file is waiting to be opened, from the picker or from the desktop shell. */
-export const useHandoffOpenStore = create<{ file: RedrobHandoffFile | null; open(file: RedrobHandoffFile): void; close(): void }>()((set) => ({
+/** A handoff someone sent, or a reply to one this computer sent. Told apart by the file's extension. */
+export type HandoffFileKind = "handoff" | "reply";
+
+export function handoffFileKind(name: string): HandoffFileKind | null {
+  const lower = name.trim().toLowerCase();
+  if (lower.endsWith(".redrobhandoff")) return "handoff";
+  if (lower.endsWith(".redrobreply")) return "reply";
+  return null;
+}
+
+/** Which file is waiting to be opened, from the picker or from the desktop shell. */
+export const useHandoffOpenStore = create<{
+  file: RedrobHandoffFile | null;
+  kind: HandoffFileKind;
+  open(file: RedrobHandoffFile, kind?: HandoffFileKind): void;
+  close(): void;
+}>()((set) => ({
   file: null,
-  open: (file) => set({ file }),
+  kind: "handoff",
+  open: (file, kind = "handoff") => set({ file, kind }),
   close: () => set({ file: null }),
 }));
 
@@ -60,7 +84,7 @@ export function parseOpenHandoffLink(raw: string): { path: string } | null {
     const route = `${url.hostname}${url.pathname}`.replace(/\/+$/, "");
     if (route !== "open-handoff") return null;
     const path = url.searchParams.get("file")?.trim();
-    return path && path.toLowerCase().endsWith(".redrobhandoff") ? { path } : null;
+    return path && handoffFileKind(path) ? { path } : null;
   } catch {
     return null;
   }
@@ -250,6 +274,7 @@ function HandoffOpenDialog(props: { client: DeskHandoffOpenClient & DeskProjectC
 export function HandoffOpenHost() {
   const client = useDeskConnection((state) => state.client);
   const file = useHandoffOpenStore((state) => state.file);
+  const kind = useHandoffOpenStore((state) => state.kind);
   const openFile = useHandoffOpenStore((state) => state.open);
   const close = useHandoffOpenStore((state) => state.close);
 
@@ -257,7 +282,7 @@ export function HandoffOpenHost() {
     if (typeof window === "undefined") return;
     const take = () => {
       const [first] = takeOpenHandoffLinks(window);
-      if (first) openFile(first);
+      if (first) openFile(first, handoffFileKind(first.path) ?? "handoff");
     };
     take();
     window.addEventListener(deepLinkBridgeEvent, take);
@@ -265,6 +290,7 @@ export function HandoffOpenHost() {
   }, [openFile]);
 
   if (!client || !file) return null;
+  if (kind === "reply") return <ReplyOpenDialog client={client} file={file} onClose={close} />;
   return <HandoffOpenDialog client={client} file={file} onClose={close} />;
 }
 
@@ -290,7 +316,7 @@ export function HandoffOpenGroup() {
           onChange={(event) => {
             const picked = event.currentTarget.files?.[0];
             event.currentTarget.value = "";
-            if (picked) void picked.arrayBuffer().then((bytes) => openFile({ bytes }));
+            if (picked) void picked.arrayBuffer().then((bytes) => openFile({ bytes }, handoffFileKind(picked.name) ?? "handoff"));
           }}
         />
       </Row>
@@ -306,6 +332,7 @@ export type HandoffBannerViewProps = {
   handoff: RedrobReceivedHandoff;
   busy: boolean;
   onContinue: () => void;
+  onReply?: () => void;
 };
 
 /** Above a chat opened from a handoff: who sent it, what for, and Continue. */
@@ -320,25 +347,34 @@ export function HandoffBannerView(props: HandoffBannerViewProps) {
       </div>
       {handoff.note ? <p className="desk-review__note">{handoff.note}</p> : null}
       {handoff.fallback ? <p className="desk-hint">{t("desk.handoff_banner_fallback")}</p> : null}
-      {continued ? (
-        <p className="desk-hint">{t("desk.handoff_banner_continued")}</p>
-      ) : (
-        <div className="desk-review__actions">
-          <p className="desk-hint">{t("desk.handoff_banner_review_mode")}</p>
+      {continued ? <p className="desk-hint">{t("desk.handoff_banner_continued")}</p> : <p className="desk-hint">{t("desk.handoff_banner_review_mode")}</p>}
+      <div className="desk-review__actions">
+        {continued ? null : (
           <Button size="sm" variant="primary" loading={props.busy} onClick={props.onContinue}>
             {t("desk.handoff_continue")}
           </Button>
-        </div>
-      )}
+        )}
+        {props.onReply ? (
+          <Button size="sm" variant="secondary" onClick={props.onReply}>
+            {t("desk.reply_action", { name })}
+          </Button>
+        ) : null}
+      </div>
     </section>
   );
 }
 
-function ConnectedHandoffBanner(props: { client: DeskHandoffOpenClient; workspaceId: string; sessionId: string }) {
+function ConnectedHandoffBanner(props: { client: DeskHandoffOpenClient & DeskHandoffReplyClient & DeskReviewClient; workspaceId: string; sessionId: string }) {
   const queryClient = useQueryClient();
   const setLock = useHandoffLock((state) => state.set);
   const showToast = useFrameStore((state) => state.showToast);
   const [busy, setBusy] = useState(false);
+  const [replying, setReplying] = useState(false);
+  const review = useQuery({
+    queryKey: reviewQueryKey(props.workspaceId, props.sessionId),
+    queryFn: () => props.client.getSessionReview(props.workspaceId, props.sessionId),
+    enabled: replying,
+  });
   const key = ["desk", HANDOFF_STATUS_KEY, props.workspaceId, props.sessionId];
   const status = useQuery({
     queryKey: key,
@@ -361,7 +397,21 @@ function ConnectedHandoffBanner(props: { client: DeskHandoffOpenClient; workspac
       .catch(() => showToast(t("desk.review_failed"), t("desk.settings_try_again"), "danger"))
       .finally(() => setBusy(false));
   };
-  return <HandoffBannerView handoff={handoff} busy={busy} onContinue={onContinue} />;
+  return (
+    <>
+      <HandoffBannerView handoff={handoff} busy={busy} onContinue={onContinue} onReply={() => setReplying(true)} />
+      {replying ? (
+        <ReplyDialog
+          client={props.client}
+          workspaceId={props.workspaceId}
+          sessionId={props.sessionId}
+          review={review.data}
+          continued={handoff.continuedAt !== undefined}
+          onClose={() => setReplying(false)}
+        />
+      ) : null}
+    </>
+  );
 }
 
 /** The banner for the thread's own chat. */

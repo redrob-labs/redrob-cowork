@@ -12,6 +12,11 @@ fileAssociations:
     description: Work handed off from Redrob Cowork
     mimeType: application/x-redrob-handoff
     role: Editor
+  - ext: redrobreply
+    name: Redrob Cowork handoff reply
+    description: A reply to work handed off from Redrob Cowork
+    mimeType: application/x-redrob-handoff-reply
+    role: Editor
 linux:
   executableName: redrob
 artifactName: redrob-${os}-${arch}-${version}.${ext}
