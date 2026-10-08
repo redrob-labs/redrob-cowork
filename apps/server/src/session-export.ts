@@ -77,6 +77,14 @@ export function parseEngineExportOutput(stdout: string): EngineSessionExport {
  * id order, which is the engine's time order.
  */
 export function rekeyEngineSessionExport(source: EngineSessionExport, options: { title?: string; now?: number } = {}): EngineSessionExport {
+  return rekeyEngineSessionExportWithMap(source, options).exported;
+}
+
+/** As rekeyEngineSessionExport, with the old-to-new message ids, for anything anchored to a message. */
+export function rekeyEngineSessionExportWithMap(
+  source: EngineSessionExport,
+  options: { title?: string; now?: number } = {},
+): { exported: EngineSessionExport; messageIds: Map<string, string> } {
   const now = options.now ?? Date.now();
   const sessionId = engineId("ses", "descending", now);
   const messageIds = new Map<string, string>();
@@ -88,7 +96,7 @@ export function rekeyEngineSessionExport(source: EngineSessionExport, options: {
   const mapMessage = (id: unknown) => (typeof id === "string" ? (messageIds.get(id) ?? id) : id);
 
   const { share: _share, parentID: _parent, revert: _revert, ...info } = source.info;
-  return {
+  const exported: EngineSessionExport = {
     info: { ...info, id: sessionId, ...(options.title ? { title: options.title } : {}) },
     messages: source.messages.map((message) => ({
       info: {
@@ -105,6 +113,7 @@ export function rekeyEngineSessionExport(source: EngineSessionExport, options: {
       })),
     })),
   };
+  return { exported, messageIds };
 }
 
 /**

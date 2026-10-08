@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { recordAudit } from "../audit.js";
 import { listCommands } from "../commands.js";
-import { EngineCliError, exportEngineSession } from "../engine-cli.js";
+import { EngineCliError, exportEngineSession, importEngineSession } from "../engine-cli.js";
 import { ApiError } from "../errors.js";
 import {
   HANDOFF_ASKS,
@@ -13,13 +13,30 @@ import {
   type HandoffAsk,
   type HandoffDraft,
 } from "../handoff-bundle.js";
-import { recordHandoff } from "../handoff-registry.js";
-import { isSafeId, readSessionReview, type ReviewAuthor } from "../review-store.js";
-import { SessionExportError, type EngineSessionExport } from "../session-export.js";
+import { findHandoff, receivedHandoffForSession, recordHandoff, type ReceivedHandoff } from "../handoff-registry.js";
+import {
+  HandoffOpenError,
+  describeBundle,
+  openHandoffBundle,
+  readHandoffFile,
+  transcriptSeedSession,
+  writeCarriedFiles,
+} from "../handoff-open.js";
+import { upsertCommand } from "../commands.js";
+import { upsertSkill } from "../skills.js";
+import { isSafeId, mergeReview, readSessionReview, type ReviewAuthor, type ReviewComment } from "../review-store.js";
+import {
+  SessionExportError,
+  engineVersionCompatibility,
+  rekeyEngineSessionExportWithMap,
+  type EngineSessionExport,
+} from "../session-export.js";
+import { ZIP_LIMITS } from "../zip.js";
 import { listSkills } from "../skills.js";
 import type { ServerConfig, TokenScope, WorkspaceInfo } from "../types.js";
 import { shortId } from "../utils.js";
 import { ZipError } from "../zip.js";
+
 import { addRoute, type RequestContext, type Route } from "./registry.js";
 
 type JsonResponse = (data: unknown, status?: number) => Response;
@@ -38,6 +55,40 @@ export interface RegisterHandoffRoutesOptions {
   redrobCodeVersion: string;
   /** Overridable in tests; the engine's export by default. */
   exportSession?: (sessionId: string, cwd: string) => Promise<EngineSessionExport>;
+  importSession?: (exported: EngineSessionExport, cwd: string) => Promise<string>;
+}
+
+/** The bundle a request carries: the file's bytes, or `{ path }` of a file the desktop shell was asked to open. */
+async function readBundleBody(request: Request): Promise<Buffer> {
+  const type = request.headers.get("content-type") ?? "";
+  if (type.includes("application/json")) {
+    const body = (await request.json().catch(() => null)) as { path?: unknown } | null;
+    if (!body || typeof body.path !== "string") throw new ApiError(400, "invalid_payload", "path is required");
+    return readHandoffFile(body.path);
+  }
+  const length = Number(request.headers.get("content-length") ?? "0");
+  if (length > ZIP_LIMITS.archiveBytes) throw new ApiError(413, "handoff_too_large", "The handoff file is too large");
+  const data = Buffer.from(await request.arrayBuffer());
+  if (data.length > ZIP_LIMITS.archiveBytes) throw new ApiError(413, "handoff_too_large", "The handoff file is too large");
+  if (data.length === 0) throw new ApiError(400, "invalid_payload", "The handoff file is empty");
+  return data;
+}
+
+function openFailure(error: unknown): never {
+  if (error instanceof HandoffOpenError) {
+    const status = error.code === "handoff_target_not_empty" ? 409 : error.code === "handoff_unsupported" ? 422 : 400;
+    throw new ApiError(status, error.code, error.message);
+  }
+  throw error;
+}
+
+/** Comments keep pointing at the same messages after the session was rekeyed, or at its one message after a fallback. */
+function reanchor(comments: readonly ReviewComment[], messageIds: Map<string, string> | null, fallbackMessageId: string | null): ReviewComment[] {
+  return comments.map((comment) => {
+    if (fallbackMessageId) return { ...comment, anchor: { kind: "message" as const, messageId: fallbackMessageId } };
+    const mapped = messageIds?.get(comment.anchor.messageId);
+    return mapped ? { ...comment, anchor: { ...comment.anchor, messageId: mapped } } : comment;
+  });
 }
 
 const NOTE_MAX = 1000;
@@ -200,5 +251,119 @@ export function registerHandoffRoutes(options: RegisterHandoffRoutesOptions): vo
         "X-Redrob-Handoff-Id": built.manifest.id,
       },
     });
+  });
+
+  const importSession =
+    options.importSession ?? ((exported: EngineSessionExport, cwd: string) => importEngineSession(exported, { cwd, timeoutMs: 120_000 }));
+
+  // What a handoff file is, before anything is written. Host only: opening one writes files and a
+  // chat on this computer, which is the person at this machine's call.
+  addRoute(routes, "POST", "/handoff/inspect", "host", async (ctx) => {
+    const opened = await readBundleBody(ctx.request).then(openHandoffBundle).catch(openFailure);
+    const already = await findHandoff(config, opened.manifest.id, "received");
+    return jsonResponse({
+      handoff: describeBundle(opened),
+      digest: opened.manifest.digest,
+      compatibility: engineVersionCompatibility(opened.manifest.engine.redrobCodeVersion, options.redrobCodeVersion),
+      alreadyOpened: already ? { workspaceId: already.workspaceId, sessionId: already.sessionId } : null,
+    });
+  });
+
+  // Opens a handoff into a workspace made for it (POST /workspaces/local with managed: true):
+  // the files, the skills and playbooks, the chat, and its comments.
+  addRoute(routes, "POST", "/workspace/:id/handoff/open", "host", async (ctx) => {
+    ensureWritable(config);
+    const workspace = await resolveWorkspace(config, ctx.params.id ?? "");
+    if (workspace.workspaceType !== "local") throw new ApiError(400, "invalid_payload", "A handoff opens into a folder on this computer");
+    const opened = await readBundleBody(ctx.request).then(openHandoffBundle).catch(openFailure);
+    const digest = ctx.url.searchParams.get("digest") ?? "";
+    if (digest !== opened.manifest.digest) {
+      throw new ApiError(409, "handoff_changed", "The file is not the one that was checked; open it again");
+    }
+    const cwd = resolveOpencodeDirectory(workspace) ?? workspace.path;
+
+    await writeCarriedFiles(workspace.path, opened.files).catch(openFailure);
+    for (const skill of opened.skills) {
+      await upsertSkill(workspace.path, { name: skill.name, content: skill.content, description: "" }).catch(() => undefined);
+    }
+    for (const command of opened.commands) {
+      await upsertCommand(workspace.path, command).catch(() => undefined);
+    }
+
+    // The same chat id already here (a handoff opened twice, or back on the machine it came from)
+    // would merge into the existing chat, so it is opened under new ids instead.
+    const existing = await exportSession(opened.exported.info.id, cwd).then(
+      () => true,
+      () => false,
+    );
+    const rekeyed = existing ? rekeyEngineSessionExportWithMap(opened.exported) : null;
+    let sessionId: string;
+    let fallbackMessageId: string | null = null;
+    try {
+      sessionId = await importSession(rekeyed?.exported ?? opened.exported, cwd);
+    } catch (error) {
+      if (!(error instanceof EngineCliError) && !(error instanceof SessionExportError)) throw error;
+      const seed = transcriptSeedSession({
+        title: opened.manifest.session.title || "Handoff",
+        transcript: opened.transcript,
+        fromName: opened.manifest.from.displayName,
+        engineVersion: options.redrobCodeVersion,
+        directory: cwd,
+      });
+      sessionId = await importSession(seed, cwd).catch(failure);
+      fallbackMessageId = seed.messages[0]?.info.id ?? null;
+    }
+
+    await mergeReview(config, {
+      workspaceId: workspace.id,
+      sessionId,
+      comments: reanchor(opened.review.comments, rekeyed?.messageIds ?? null, fallbackMessageId),
+      origin: "handoff",
+      state: opened.review.state,
+    });
+    const record: ReceivedHandoff = {
+      id: opened.manifest.id,
+      direction: "received",
+      workspaceId: workspace.id,
+      sessionId,
+      originSessionId: opened.manifest.session.id,
+      createdAt: Date.now(),
+      fromName: opened.manifest.from.displayName,
+      fromParticipantId: opened.manifest.from.participantId,
+      ask: opened.manifest.ask,
+      ...(opened.manifest.note ? { note: opened.manifest.note } : {}),
+      ...(fallbackMessageId ? { fallback: true } : {}),
+    };
+    await recordHandoff(config, record);
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "host" },
+      action: "handoff.opened",
+      target: sessionId,
+      summary: `Opened a handoff from ${opened.manifest.from.displayName || "a teammate"} (${opened.manifest.id})`,
+      timestamp: Date.now(),
+    });
+    return jsonResponse({ sessionId, workspaceId: workspace.id, fallback: Boolean(fallbackMessageId), handoff: record }, 201);
+  });
+
+  // The handoff a chat came from: who sent it, what they asked, and whether the person has continued.
+  addRoute(routes, "GET", "/workspace/:id/sessions/:sessionId/handoff", "client", async (ctx) => {
+    const sessionId = (ctx.params.sessionId ?? "").trim();
+    if (!isSafeId(sessionId)) throw new ApiError(400, "invalid_payload", "sessionId is invalid");
+    return jsonResponse({ handoff: await receivedHandoffForSession(config, ctx.params.id ?? "", sessionId) });
+  });
+
+  // Continue: the chat stops being a review and takes messages.
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/handoff/continue", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const sessionId = (ctx.params.sessionId ?? "").trim();
+    if (!isSafeId(sessionId)) throw new ApiError(400, "invalid_payload", "sessionId is invalid");
+    const record = await receivedHandoffForSession(config, ctx.params.id ?? "", sessionId);
+    if (!record) throw new ApiError(404, "handoff_not_found", "This chat did not come from a handoff");
+    const next: ReceivedHandoff = { ...record, continuedAt: record.continuedAt ?? Date.now() };
+    await recordHandoff(config, next);
+    return jsonResponse({ handoff: next });
   });
 }

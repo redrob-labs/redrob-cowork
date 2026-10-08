@@ -42,6 +42,7 @@ import { deskKeepAwake, type KeepAwakeSync } from "../run/keep-awake";
 import { syncCrashReports } from "./crash-reports";
 import { TeamFileGroup } from "../team/team-file-group";
 import { ProfileGroup } from "./profile-group";
+import { HandoffOpenGroup } from "../handoff/handoff-open";
 import { TeamPolicyGroup } from "../team/team-policy-group";
 import type { ChatMode } from "../services/types";
 import { REDROB_KEY_QUERY_KEY, useRedrobKeyConnected } from "../shell/account-menu";
@@ -603,6 +604,7 @@ function SectionBody(props: { section: DeskSettingsSection }) {
           <GeneralSection />
           <TeamPolicyGroup />
           <TeamFileGroup />
+          <HandoffOpenGroup />
         </>
       );
     case "folders":

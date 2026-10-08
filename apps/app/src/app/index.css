@@ -1326,6 +1326,27 @@
   color: var(--ink-primary);
 }
 
+.desk-handoff__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.desk-handoff__facts > div {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-3);
+}
+
+.desk-handoff__facts dt {
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts dd {
+  margin: 0;
+  color: var(--ink-primary);
+}
+
 .desk-handoff__findings {
   display: flex;
   flex-direction: column;

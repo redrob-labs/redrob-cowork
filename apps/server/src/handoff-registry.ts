@@ -20,6 +20,10 @@ export type ReceivedHandoff = {
   fromParticipantId: string;
   ask: HandoffAsk;
   note?: string;
+  /** When the person pressed Continue; until then the chat opens for review. */
+  continuedAt?: number;
+  /** The engine could not read the sender's export; the chat starts from the transcript. */
+  fallback?: boolean;
 };
 export type HandoffRecord = SentHandoff | ReceivedHandoff;
 
@@ -55,4 +59,13 @@ export async function recordHandoff(config: ServerConfig, record: HandoffRecord)
   const current = await listHandoffs(config);
   const rest = current.filter((entry) => !(entry.id === record.id && entry.direction === record.direction));
   await store.set(config, REGISTRY_KEY, [record, ...rest].slice(0, MAX_RECORDS));
+}
+
+/** The handoff a session on this machine was opened from, if any. */
+export async function receivedHandoffForSession(config: ServerConfig, workspaceId: string, sessionId: string): Promise<ReceivedHandoff | null> {
+  return (
+    (await listHandoffs(config)).find(
+      (record): record is ReceivedHandoff => record.direction === "received" && record.workspaceId === workspaceId && record.sessionId === sessionId,
+    ) ?? null
+  );
 }

@@ -132,6 +132,7 @@ import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
 import { DeskReviewBar, MessageReview, useReviewUi } from "@/react-app/desk/review/review-thread"
+import { DeskHandoffBanner } from "@/react-app/desk/handoff/handoff-open"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
 import { useFrameStore } from "@/react-app/desk/store/frame-store"
@@ -1582,6 +1583,7 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
       {inDeskFrame && messages.length > 0 ? (
         <div className={CHAT_COLUMN}>
+          <DeskHandoffBanner />
           <DeskReviewBar />
         </div>
       ) : null}

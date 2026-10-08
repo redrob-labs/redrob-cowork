@@ -446,6 +446,50 @@ export type RedrobHandoffRequest = {
   fingerprint: string;
 };
 
+/** A handoff file as the app has it: its bytes, or a path the desktop shell was asked to open. */
+export type RedrobHandoffFile = { bytes: ArrayBuffer } | { path: string };
+
+function handoffFileBody(file: RedrobHandoffFile): { bytes: ArrayBuffer } | { body: { path: string } } {
+  return "bytes" in file ? { bytes: file.bytes } : { body: { path: file.path } };
+}
+
+export type RedrobHandoffInspection = {
+  handoff: {
+    id: string;
+    createdAt: string;
+    from: RedrobReviewAuthor;
+    to?: string;
+    ask: RedrobHandoffAsk;
+    note?: string;
+    workspaceName: string;
+    session: { id: string; title: string; messages: number };
+    engine: { redrobCodeVersion: string };
+    files: Array<{ path: string; kind: "produced" | "read"; bytes: number }>;
+    skills: string[];
+    commands: string[];
+    comments: number;
+    state: RedrobReviewStatus;
+  };
+  digest: string;
+  compatibility: "same" | "different" | "unknown";
+  alreadyOpened: { workspaceId: string; sessionId: string } | null;
+};
+
+export type RedrobReceivedHandoff = {
+  id: string;
+  direction: "received";
+  workspaceId: string;
+  sessionId: string;
+  originSessionId: string;
+  createdAt: number;
+  fromName: string;
+  fromParticipantId: string;
+  ask: RedrobHandoffAsk;
+  note?: string;
+  continuedAt?: number;
+  fallback?: boolean;
+};
+
 /** A handoff exports the session through the engine and reads its files; give it longer than a request. */
 const HANDOFF_TIMEOUT_MS = 180_000;
 
@@ -1058,7 +1102,7 @@ async function fetchWithTimeout(
 async function requestJson<T>(
   baseUrl: string,
   path: string,
-  options: { method?: string; token?: string; hostToken?: string; body?: unknown; timeoutMs?: number } = {},
+  options: { method?: string; token?: string; hostToken?: string; body?: unknown; bytes?: ArrayBuffer; timeoutMs?: number } = {},
 ): Promise<T> {
   const url = `${baseUrl}${path}`;
   const fetchImpl = resolveFetch(url);
@@ -1067,8 +1111,11 @@ async function requestJson<T>(
     url,
     {
       method: options.method ?? "GET",
-      headers: buildHeaders(options.token, options.hostToken),
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      // A file's bytes go as they are; everything else is JSON.
+      headers: options.bytes
+        ? { ...buildHeaders(options.token, options.hostToken), "Content-Type": "application/zip" }
+        : buildHeaders(options.token, options.hostToken),
+      body: options.bytes ? options.bytes : options.body ? JSON.stringify(options.body) : undefined,
     },
     options.timeoutMs ?? DEFAULT_REDROB_SERVER_TIMEOUT_MS,
   );
@@ -1246,6 +1293,32 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: input,
         timeoutMs: HANDOFF_TIMEOUT_MS,
       }),
+    /** A handoff file, by its bytes or (desktop) its path: what it is, before anything is written. */
+    inspectHandoff: (file: RedrobHandoffFile) =>
+      requestJson<RedrobHandoffInspection>(baseUrl, "/handoff/inspect", {
+        token,
+        hostToken,
+        method: "POST",
+        ...handoffFileBody(file),
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    openHandoff: (workspaceId: string, file: RedrobHandoffFile, digest: string) =>
+      requestJson<{ sessionId: string; workspaceId: string; fallback: boolean; handoff: RedrobReceivedHandoff }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/handoff/open?digest=${encodeURIComponent(digest)}`,
+        { token, hostToken, method: "POST", ...handoffFileBody(file), timeoutMs: HANDOFF_TIMEOUT_MS },
+      ),
+    getSessionHandoff: async (workspaceId: string, sessionId: string): Promise<RedrobReceivedHandoff | null> =>
+      (await requestJson<{ handoff: RedrobReceivedHandoff | null }>(baseUrl, handoffPath(workspaceId, sessionId), { token, hostToken })).handoff,
+    continueHandoff: async (workspaceId: string, sessionId: string): Promise<RedrobReceivedHandoff> =>
+      (
+        await requestJson<{ handoff: RedrobReceivedHandoff }>(baseUrl, `${handoffPath(workspaceId, sessionId)}/continue`, {
+          token,
+          hostToken,
+          method: "POST",
+          body: {},
+        })
+      ).handoff,
     getProfile: async (): Promise<RedrobParticipantProfile> => {
       const payload = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
         token,

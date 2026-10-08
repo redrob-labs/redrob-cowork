@@ -29,6 +29,9 @@ export type DeskProfileClient = Pick<RedrobServerClient, "getProfile" | "updateP
 /** The calls handoff adds: what a handoff would carry, and the file itself. */
 export type DeskHandoffClient = Pick<RedrobServerClient, "previewHandoff" | "createHandoff">;
 
+/** The calls opening a handoff adds: what a file is, opening it, and the chat's handoff state. */
+export type DeskHandoffOpenClient = Pick<RedrobServerClient, "inspectHandoff" | "openHandoff" | "getSessionHandoff" | "continueHandoff">;
+
 /** The calls review adds: comments on a chat and the verdict on it. */
 export type DeskReviewClient = Pick<
   RedrobServerClient,
@@ -45,7 +48,8 @@ export type DeskConnection = {
         DeskTeamClient &
         DeskProfileClient &
         DeskReviewClient &
-        DeskHandoffClient)
+        DeskHandoffClient &
+        DeskHandoffOpenClient)
     | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;
