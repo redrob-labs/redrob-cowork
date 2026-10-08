@@ -141,7 +141,14 @@ import {
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
-import { installAuthor, registerReviewRoutes } from "./routes/review.js";
+import { actorAuthor, registerReviewRoutes } from "./routes/review.js";
+import {
+  assertGuestEngineRequest,
+  assertGuestRoute,
+  filterGuestEventStream,
+  filterJsonResponse,
+  type GuestEngineAccess,
+} from "./guest-access.js";
 import { engineCliTemplate } from "./engine-cli.js";
 import { registerHandoffRoutes } from "./routes/handoff.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
@@ -988,6 +995,73 @@ export function assertOpencodeProxyAllowed(actor: Actor, method: string, proxyPa
   }
 }
 
+/** The header the host bridge (L4) sets to the guest's authenticated endpoint key. */
+const GUEST_ENDPOINT_HEADER = "x-redrob-endpoint-id";
+
+/** For a guest: what this engine call may do, or a 403. For anyone else: null. */
+function guestEngineAccess(actor: Actor, workspaceId: string, method: string, proxyPath: string): GuestEngineAccess | null {
+  if (!actor.guest) return null;
+  if (workspaceId !== actor.guest.workspaceId) throw new ApiError(403, "guest_forbidden", "Guests can only reach the shared chat");
+  return assertGuestEngineRequest(actor.guest, method, normalizeOpencodeProxyPath(proxyPath));
+}
+
+/** What a proxied engine call did, for the audit log, or null for a read. */
+function engineActionOf(method: string, proxyPath: string): { action: string; sessionId: string | null } | null {
+  if (method.toUpperCase() !== "POST") return null;
+  const path = normalizeOpencodeProxyPath(proxyPath);
+  const session = /^\/session\/([^/]+)\/(prompt_async|message|command|abort|permissions\/[^/]+)$/.exec(path);
+  if (session) {
+    const verb = session[2] ?? "";
+    const action = verb === "abort" ? "run.stopped" : verb.startsWith("permissions/") ? "permission.answered" : "message.sent";
+    return { action, sessionId: decodeURIComponent(session[1] ?? "") };
+  }
+  if (/^\/permission\/[^/]+\/reply$/.test(path)) return { action: "permission.answered", sessionId: null };
+  if (/^\/question\/[^/]+\/(reply|reject)$/.test(path)) return { action: "question.answered", sessionId: null };
+  return null;
+}
+
+/**
+ * After an engine call: a guest's response narrowed to the shared chat, and any action that sends,
+ * stops or answers recorded in the audit log with who did it.
+ */
+async function afterEngineProxy(input: {
+  config: ServerConfig;
+  workspace: WorkspaceInfo;
+  actor: Actor;
+  access: GuestEngineAccess | null;
+  method: string;
+  proxyPath: string;
+  response: Response;
+}): Promise<Response> {
+  const { access, actor } = input;
+  let response = input.response;
+  if (access?.kind === "events" && actor.guest && response.ok && response.body) {
+    const headers = new Headers(response.headers);
+    headers.delete("content-length");
+    response = new Response(filterGuestEventStream(response.body, actor.guest.sessionId), {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  } else if (access?.kind === "filter") {
+    response = await filterJsonResponse(response, access.filter);
+  }
+  const done = engineActionOf(input.method, input.proxyPath);
+  if (done && response.ok) {
+    const who = actor.guest?.participant.displayName;
+    await recordAudit(input.workspace.path, {
+      id: shortId(),
+      workspaceId: input.workspace.id,
+      actor,
+      action: done.action,
+      target: done.sessionId ?? normalizeOpencodeProxyPath(input.proxyPath),
+      summary: who ? `${done.action} by ${who}` : done.action,
+      timestamp: Date.now(),
+    }).catch(() => undefined);
+  }
+  return response;
+}
+
 function isSessionCommandProxyRequest(method: string, proxyPath: string) {
   return method === "POST" && /^\/session\/[^/]+\/command$/.test(normalizeOpencodeProxyPath(proxyPath));
 }
@@ -1093,11 +1167,12 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
         try {
           const actor = await requireClient(request, config, tokens);
           assertOpencodeProxyAllowed(actor, request.method, mount.restPath);
+          const access = guestEngineAccess(actor, mount.workspaceId, request.method, mount.restPath);
           const workspace = await resolveWorkspace(config, mount.workspaceId);
           proxyService = "opencode";
           proxyBaseUrl = workspace.baseUrl?.trim() || undefined;
           const response = await proxyOpencodeRequest({ config, request, url, workspace, proxyPath: mount.restPath });
-          return finalize(response);
+          return finalize(await afterEngineProxy({ config, workspace, actor, access, method: request.method, proxyPath: mount.restPath, response }));
         } catch (error) {
           const requestCanceled = isExpectedRequestCancellation(error, request.signal);
           if (!(error instanceof ApiError) && !requestCanceled) {
@@ -1150,9 +1225,15 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
         try {
           const actor = await requireClient(request, config, tokens);
           assertOpencodeProxyAllowed(actor, request.method, url.pathname);
+          const access = guestEngineAccess(actor, config.workspaces[0]?.id ?? "", request.method, url.pathname);
           proxyService = "opencode";
           const response = await proxyOpencodeRequest({ config, request, url, workspace: config.workspaces[0] });
-          return finalize(response);
+          const rootWorkspace = config.workspaces[0];
+          return finalize(
+            rootWorkspace
+              ? await afterEngineProxy({ config, workspace: rootWorkspace, actor, access, method: request.method, proxyPath: url.pathname, response })
+              : response,
+          );
         } catch (error) {
           const requestCanceled = isExpectedRequestCancellation(error, request.signal);
           if (!(error instanceof ApiError) && !requestCanceled) {
@@ -1186,7 +1267,8 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
               : route.auth === "client"
                 ? await requireClient(request, config, tokens)
                 : undefined;
-        const response = await route.handler({
+        const guestFilter = actor?.guest ? assertGuestRoute(actor.guest, request.method, url.pathname) : null;
+        const handled = await route.handler({
           request,
           url,
           params: route.params,
@@ -1196,6 +1278,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
           tokens,
           actor,
         });
+        const response = guestFilter ? await filterJsonResponse(handled, guestFilter) : handled;
         return finalize(response);
       } catch (error) {
         const requestCanceled = isExpectedRequestCancellation(error, request.signal);
@@ -1878,6 +1961,16 @@ async function requireClient(request: Request, config: ServerConfig, tokens: Tok
     throw new ApiError(401, "unauthorized", "Invalid bearer token");
   }
   const clientId = request.headers.get("x-redrob-client-id") ?? undefined;
+  const record = await tokens.recordForToken(token);
+  if (record?.guest) {
+    // A guest token is bound to the P2P endpoint it was issued to. The host bridge sets this header
+    // from the connection's authenticated key and drops any value the guest sent (L4).
+    const endpoint = request.headers.get(GUEST_ENDPOINT_HEADER) ?? "";
+    if (record.guest.endpointId && endpoint !== record.guest.endpointId) {
+      throw new ApiError(401, "unauthorized", "This guest token belongs to another device");
+    }
+    return { type: "remote", clientId, tokenHash: hashToken(token), scope, guest: record.guest };
+  }
   return { type: "remote", clientId, tokenHash: hashToken(token), scope };
 }
 
@@ -2242,7 +2335,7 @@ function createRoutes(
     ensureWritable,
     requireClientScope,
     resolveWorkspaceWithoutBootstrap,
-    resolveAuthor: () => installAuthor(config),
+    resolveAuthor: (ctx) => actorAuthor(config, ctx),
   });
 
   registerHandoffRoutes({
@@ -2254,7 +2347,7 @@ function createRoutes(
     requireClientScope,
     resolveWorkspace,
     resolveOpencodeDirectory,
-    resolveAuthor: () => installAuthor(config),
+    resolveAuthor: (ctx) => actorAuthor(config, ctx),
     redrobCodeVersion: REDROB_CODE_VERSION,
   });
 
@@ -2265,7 +2358,10 @@ function createRoutes(
   // The install's participant profile: the stable id and the self-chosen name a handoff or a
   // live room shows to teammates. Reading is open to any client so the app can label its own
   // messages; only the person at this machine changes the name.
-  addRoute(routes, "GET", "/profile", "client", async () => {
+  addRoute(routes, "GET", "/profile", "client", async (ctx) => {
+    // A guest is themselves here, not the host.
+    const guest = ctx.actor?.guest;
+    if (guest) return jsonResponse({ profile: { ...guest.participant, updatedAt: 0 } });
     return jsonResponse({ profile: await readParticipantProfile(config) });
   });
 

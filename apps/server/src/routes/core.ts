@@ -15,6 +15,8 @@ import {
 import { callExperimentalExtensionAction, listExperimentalExtensionActions } from "../extensions/index.js";
 import type { TokenService } from "../tokens.js";
 import type { Capabilities, ServerConfig, WorkspaceInfo } from "../types.js";
+import { DEFAULT_GUEST_CAPABILITIES, readCapabilities, type GuestGrant } from "../guest-access.js";
+import { isParticipantId, normalizeDisplayName } from "../participant-profile.js";
 import { addRoute, type Route } from "./registry.js";
 
 type JsonResponse = (data: unknown, status?: number) => Response;
@@ -308,8 +310,21 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
       throw new ApiError(400, "invalid_scope", "Token scope must be owner, collaborator, or viewer");
     }
     const label = typeof body.label === "string" ? body.label.trim() : undefined;
-    const issued = await tokens.create(scope, { label });
+    const guest = body.guest === undefined ? undefined : readGuestRequest(body.guest);
+    const expiresAt = typeof body.expiresAt === "number" && Number.isFinite(body.expiresAt) ? body.expiresAt : undefined;
+    const issued = await tokens.create(scope, { label, ...(guest ? { guest } : {}), ...(expiresAt !== undefined ? { expiresAt } : {}) });
     return jsonResponse(issued, 201);
+  });
+
+  // What a live-room guest may do: send, approve, stop. Host only; takes effect on their next call.
+  addRoute(routes, "PATCH", "/tokens/:id", "host", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    const capabilities = readCapabilities(body.capabilities);
+    if (!capabilities) throw new ApiError(400, "invalid_payload", "capabilities must be a list of send, approve and stop");
+    const updated = await tokens.updateGuest(ctx.params.id, { capabilities });
+    if (!updated) throw new ApiError(404, "token_not_found", "Guest token not found");
+    return jsonResponse({ token: updated });
   });
 
   addRoute(routes, "DELETE", "/tokens/:id", "host", async (ctx) => {
@@ -458,4 +473,33 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     const body = await readJsonBody(ctx.request);
     return jsonResponse(await createOpenAiRealtimeVoiceSession(env, body));
   });
+}
+
+/** A guest grant from a host's request, or a 400. */
+function readGuestRequest(value: unknown): GuestGrant {
+  const record = value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+  const participant = record?.participant && typeof record.participant === "object" ? (record.participant as Record<string, unknown>) : null;
+  const name = normalizeDisplayName(participant?.displayName ?? "");
+  const capabilities = record?.capabilities === undefined ? [...DEFAULT_GUEST_CAPABILITIES] : readCapabilities(record.capabilities);
+  if (
+    !record ||
+    typeof record.workspaceId !== "string" ||
+    !record.workspaceId.trim() ||
+    typeof record.sessionId !== "string" ||
+    !/^[A-Za-z0-9_-]{1,128}$/.test(record.sessionId) ||
+    !participant ||
+    !isParticipantId(participant.participantId) ||
+    !name.ok ||
+    !capabilities
+  ) {
+    throw new ApiError(400, "invalid_payload", "guest needs workspaceId, sessionId, a participant and valid capabilities");
+  }
+  return {
+    workspaceId: record.workspaceId.trim(),
+    sessionId: record.sessionId,
+    participant: { participantId: participant.participantId as string, displayName: name.value },
+    capabilities,
+    ...(typeof record.endpointId === "string" && record.endpointId.trim() ? { endpointId: record.endpointId.trim() } : {}),
+    ...(typeof record.roomId === "string" && record.roomId.trim() ? { roomId: record.roomId.trim() } : {}),
+  };
 }

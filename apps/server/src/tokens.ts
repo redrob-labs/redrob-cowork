@@ -4,6 +4,8 @@ import { redrobConfigDir } from "@redrob/paths";
 
 import type { ServerConfig, TokenScope } from "./types.js";
 import { ensureDir, exists, hashToken, shortId } from "./utils.js";
+import { MAX_GUEST_TOKEN_MS, readCapabilities, type GuestCapability, type GuestGrant } from "./guest-access.js";
+import { isParticipantId, normalizeDisplayName } from "./participant-profile.js";
 
 export type TokenRecord = {
   id: string;
@@ -11,7 +13,37 @@ export type TokenRecord = {
   scope: TokenScope;
   createdAt: number;
   label?: string;
+  /** After this the token no longer works. Guests always have one. */
+  expiresAt?: number;
+  /** A live-room guest's narrowed grant. */
+  guest?: GuestGrant;
 };
+
+/** A stored guest grant, or null when any part of it is missing: such a token then does nothing. */
+function readGuest(value: unknown): GuestGrant | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const participant = record.participant as Record<string, unknown> | undefined;
+  const capabilities = readCapabilities(record.capabilities);
+  const name = normalizeDisplayName(participant?.displayName);
+  if (
+    typeof record.workspaceId !== "string" ||
+    typeof record.sessionId !== "string" ||
+    !participant ||
+    !isParticipantId(participant.participantId) ||
+    !capabilities
+  ) {
+    return null;
+  }
+  return {
+    workspaceId: record.workspaceId,
+    sessionId: record.sessionId,
+    participant: { participantId: participant.participantId as string, displayName: name.ok ? name.value : "" },
+    capabilities,
+    ...(typeof record.endpointId === "string" && record.endpointId ? { endpointId: record.endpointId } : {}),
+    ...(typeof record.roomId === "string" && record.roomId ? { roomId: record.roomId } : {}),
+  };
+}
 
 type TokenStoreFile = {
   schemaVersion: number;
@@ -50,12 +82,19 @@ async function readTokenStore(path: string): Promise<TokenStoreFile> {
           const createdAt = typeof record.createdAt === "number" ? record.createdAt : Date.now();
           const label = typeof record.label === "string" ? record.label : undefined;
           if (!id || !hash || !scope) return null;
+          const expiresAt = typeof record.expiresAt === "number" && Number.isFinite(record.expiresAt) ? record.expiresAt : undefined;
+          const hadGuest = record.guest !== undefined;
+          const guest = readGuest(record.guest);
+          // A damaged guest record must not widen into an ordinary collaborator token.
+          if (hadGuest && !guest) return null;
           const parsedRecord: TokenRecord = {
             id,
             hash,
             scope,
             createdAt,
             ...(label ? { label } : {}),
+            ...(expiresAt !== undefined ? { expiresAt } : {}),
+            ...(guest ? { guest } : {}),
           };
           return parsedRecord;
         })
@@ -106,24 +145,64 @@ export class TokenService {
     return this.tokens.map(({ hash: _hash, ...rest }) => rest);
   }
 
-  async create(scope: TokenScope, options?: { label?: string }): Promise<{ id: string; token: string; scope: TokenScope; createdAt: number; label?: string }> {
+  async create(
+    scope: TokenScope,
+    options?: { label?: string; expiresAt?: number; guest?: GuestGrant },
+  ): Promise<{ id: string; token: string; scope: TokenScope; createdAt: number; label?: string; expiresAt?: number; guest?: GuestGrant }> {
     await this.ensureLoaded();
 
     const id = shortId();
     const token = `owt_${shortId().replace(/-/g, "")}`;
     const createdAt = Date.now();
+    // A guest is never more than a collaborator, and never for longer than the cap.
+    const guest = options?.guest;
+    const effectiveScope: TokenScope = guest ? "collaborator" : scope;
+    const cap = createdAt + MAX_GUEST_TOKEN_MS;
+    const expiresAt = guest ? Math.min(options?.expiresAt ?? cap, cap) : options?.expiresAt;
     const record: TokenRecord = {
       id,
       hash: hashToken(token),
-      scope,
+      scope: effectiveScope,
       createdAt,
       label: options?.label?.trim() || undefined,
+      ...(expiresAt !== undefined ? { expiresAt } : {}),
+      ...(guest ? { guest } : {}),
     };
 
     this.tokens = [record, ...this.tokens];
     this.byHash.set(record.hash, record);
     await writeTokenStore(this.path, this.tokens);
-    return { id, token, scope, createdAt, label: record.label };
+    return { id, token, scope: effectiveScope, createdAt, label: record.label, ...(expiresAt !== undefined ? { expiresAt } : {}), ...(guest ? { guest } : {}) };
+  }
+
+  /** Changes what a guest may do. Returns null when no guest token has that id. */
+  async updateGuest(id: string, patch: { capabilities?: GuestCapability[] }): Promise<Omit<TokenRecord, "hash"> | null> {
+    await this.ensureLoaded();
+    const record = this.tokens.find((token) => token.id === id);
+    if (!record?.guest) return null;
+    if (patch.capabilities) record.guest = { ...record.guest, capabilities: patch.capabilities };
+    await writeTokenStore(this.path, this.tokens);
+    const { hash: _hash, ...rest } = record;
+    return rest;
+  }
+
+  /** Every guest token for a room's chat, live or not. */
+  async guestsFor(workspaceId: string, sessionId: string): Promise<Array<Omit<TokenRecord, "hash">>> {
+    await this.ensureLoaded();
+    return this.tokens
+      .filter((token) => token.guest?.workspaceId === workspaceId && token.guest.sessionId === sessionId)
+      .map(({ hash: _hash, ...rest }) => rest);
+  }
+
+  /** The stored record a bearer token resolves to, if it is valid now. */
+  async recordForToken(token: string, now = Date.now()): Promise<TokenRecord | null> {
+    const trimmed = token.trim();
+    if (!trimmed || trimmed === this.config.token) return null;
+    await this.ensureLoaded();
+    const found = this.byHash.get(hashToken(trimmed));
+    if (!found) return null;
+    if (found.expiresAt !== undefined && found.expiresAt <= now) return null;
+    return found;
   }
 
   async revoke(id: string): Promise<boolean> {
@@ -144,6 +223,7 @@ export class TokenService {
     if (trimmed === this.config.token) return "collaborator";
     await this.ensureLoaded();
     const found = this.byHash.get(hashToken(trimmed));
+    if (found?.expiresAt !== undefined && found.expiresAt <= Date.now()) return null;
     return found?.scope ?? null;
   }
 }
