@@ -10,6 +10,7 @@ import {
   removeEngineInstance,
   reapOrphanEngineInstances,
 } from "./engine-registry.js";
+import { setEngineCliTemplate } from "./engine-cli.js";
 import { createManagedOpencodeServer, REDROB_CODE_BIN_NAME, resolveRedrobCodeBinEnv, type ManagedOpencodeServer } from "./managed-opencode.js";
 import { clearEnginePoolForConfig, computeEngineConfigFingerprint, type EnginePool, type EngineSpawnTemplate } from "./engine-pool.js";
 import {
@@ -119,6 +120,7 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
         return [...new Set([config.port, ...poolPorts].filter((port) => port > 0))];
       },
     };
+    setEngineCliTemplate({ bin: resolveRedrobCodeBinEnv(), env: engineEnv });
     managedOpencode = await createManagedOpencodeServer({
       bin: resolveRedrobCodeBinEnv(),
       cwd: managedOpencodeCwd,
