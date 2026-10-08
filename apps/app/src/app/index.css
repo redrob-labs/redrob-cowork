@@ -1303,6 +1303,38 @@
   color: var(--ink-muted);
 }
 
+/* Handoff: what goes with a chat a teammate takes over. */
+.desk-handoff,
+.desk-handoff__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.desk-handoff__group {
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.desk-handoff__group legend,
+.desk-handoff__group > b {
+  margin-bottom: var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-handoff__findings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
 /* Review: comments on a chat, its steps and claims, and the verdict above it. */
 .desk-review {
   display: flex;

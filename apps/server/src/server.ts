@@ -143,6 +143,7 @@ import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, upd
 import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
 import { installAuthor, registerReviewRoutes } from "./routes/review.js";
 import { engineCliTemplate } from "./engine-cli.js";
+import { registerHandoffRoutes } from "./routes/handoff.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import {
   applyTeamPolicy,
@@ -2242,6 +2243,19 @@ function createRoutes(
     requireClientScope,
     resolveWorkspaceWithoutBootstrap,
     resolveAuthor: () => installAuthor(config),
+  });
+
+  registerHandoffRoutes({
+    routes,
+    config,
+    jsonResponse,
+    readJsonBody,
+    ensureWritable,
+    requireClientScope,
+    resolveWorkspace,
+    resolveOpencodeDirectory,
+    resolveAuthor: () => installAuthor(config),
+    redrobCodeVersion: REDROB_CODE_VERSION,
   });
 
   addRoute(routes, "GET", "/memory", "client", async () => {

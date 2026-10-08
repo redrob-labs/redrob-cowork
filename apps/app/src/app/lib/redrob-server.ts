@@ -416,6 +416,43 @@ function reviewPath(workspaceId: string, sessionId: string): string {
   return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/review`;
 }
 
+/** Mirrors apps/server/src/routes/handoff.ts. */
+export type RedrobHandoffAsk = "review" | "continue" | "approve";
+export type RedrobHandoffEntryKind = "engine" | "transcript" | "desk" | "review" | "produced" | "read" | "skill" | "command";
+export type RedrobHandoffFinding = {
+  id: string;
+  path: string;
+  kind: "bearer" | "token" | "jwt" | "private-key" | "assignment";
+  masked: string;
+  line: number;
+};
+export type RedrobHandoffPreview = {
+  session: { id: string; title: string };
+  from: RedrobReviewAuthor;
+  entries: Array<{ path: string; kind: RedrobHandoffEntryKind; bytes: number; scannable: boolean }>;
+  readCandidates: string[];
+  missing: string[];
+  findings: RedrobHandoffFinding[];
+  unscanned: string[];
+  fingerprint: string;
+};
+export type RedrobHandoffRequest = {
+  ask: RedrobHandoffAsk;
+  to?: string;
+  note?: string;
+  includeRead: string[];
+  keep: string[];
+  exclude: string[];
+  fingerprint: string;
+};
+
+/** A handoff exports the session through the engine and reads its files; give it longer than a request. */
+const HANDOFF_TIMEOUT_MS = 180_000;
+
+function handoffPath(workspaceId: string, sessionId: string): string {
+  return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/handoff`;
+}
+
 /** This install as teammates see it: a stable id and a name the person chose. Neither is verified. */
 export type RedrobParticipantProfile = {
   participantId: string;
@@ -1072,7 +1109,7 @@ async function requestMultipartRaw(
 async function requestBinary(
   baseUrl: string,
   path: string,
-  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number } = {},
+  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number; body?: unknown } = {},
 ): Promise<{ data: ArrayBuffer; contentType: string | null; filename: string | null }>{
   const url = `${baseUrl}${path}`;
   const fetchImpl = resolveFetch(url);
@@ -1081,7 +1118,11 @@ async function requestBinary(
     url,
     {
       method: options.method ?? "GET",
-      headers: buildAuthHeaders(options.token, options.hostToken),
+      headers:
+        options.body === undefined
+          ? buildAuthHeaders(options.token, options.hostToken)
+          : { ...buildAuthHeaders(options.token, options.hostToken), "Content-Type": "application/json" },
+      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     },
     options.timeoutMs ?? DEFAULT_REDROB_SERVER_TIMEOUT_MS,
   );
@@ -1189,6 +1230,22 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       });
       return payload.review;
     },
+    previewHandoff: (workspaceId: string, sessionId: string, input: { includeRead?: string[] } = {}) =>
+      requestJson<RedrobHandoffPreview>(baseUrl, `${handoffPath(workspaceId, sessionId)}/preview`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    createHandoff: (workspaceId: string, sessionId: string, input: RedrobHandoffRequest) =>
+      requestBinary(baseUrl, handoffPath(workspaceId, sessionId), {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
     getProfile: async (): Promise<RedrobParticipantProfile> => {
       const payload = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
         token,
