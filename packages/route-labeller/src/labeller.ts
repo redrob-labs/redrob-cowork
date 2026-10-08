@@ -95,7 +95,12 @@ export class RouteLabeller {
       profession,
       task,
       edition: this.lexicon.edition,
-      labeller: { id: `${LABELLER_ID}/${this.mode}`, version: LABELLER_VERSION, confidence: round(confidence) },
+      labeller: {
+        id: `${LABELLER_ID}/${this.mode}`,
+        version: LABELLER_VERSION,
+        confidence: round(confidence),
+        mode: this.mode,
+      },
       candidates,
     };
   }

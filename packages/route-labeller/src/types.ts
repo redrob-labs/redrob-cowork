@@ -23,7 +23,12 @@ export type RouteLabel = {
   profession: string;
   task: string;
   edition: string;
-  labeller: { id: string; version: string; confidence: number };
+  /**
+   * `mode` is whether the embedding model ran (`embedding`) or the labeller read words alone because
+   * the model is not installed or not downloaded yet (`lexical`). Console routes Redrob Auto on the
+   * ModelGuide only for `embedding`; a `lexical` label routes on the legacy table, and is recorded.
+   */
+  labeller: { id: string; version: string; confidence: number; mode: "embedding" | "lexical" };
   /** The runners-up, best first. Console tries them before its own nearest-cell rules. */
   candidates: Array<{ profession: string; task: string; score: number }>;
 };
