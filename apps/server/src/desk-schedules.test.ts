@@ -7,15 +7,27 @@ import {
   addSchedule,
   answerWaiting,
   nextRunAfter,
+  promptForTarget,
   readRule,
   readSchedules,
+  readTarget,
   tickWorkspace,
   updateSchedule,
   zonedTime,
   type ScheduleEngine,
   type ScheduleRule,
+  type ScheduleTarget,
 } from "./desk-schedules.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
+import { createWorkspaceKvStore } from "./workspace-kv-store.js";
+
+/** The schedules table as raw JSON, to write what an older build saved. */
+const rawStore = createWorkspaceKvStore<string>({
+  tableName: "desk_schedules",
+  valueColumn: "state_json",
+  parse: (json) => json,
+  serialize: (value) => value,
+});
 
 const roots: string[] = [];
 const previousRuntimeDb = process.env.REDROB_RUNTIME_DB;
@@ -58,16 +70,21 @@ async function setup(): Promise<{ config: ServerConfig; workspace: WorkspaceInfo
 /** A fake engine: records what it was asked, and says what the test sets. */
 function fakeEngine() {
   const calls: string[] = [];
-  const state = {
-    statuses: {} as Record<string, string>,
-    asks: [] as Array<{ id: string; sessionID: string; permission: string; patterns: string[] }>,
-    sessions: 0,
-  };
+  const prompts: string[] = [];
+  const state: {
+    statuses: Record<string, string>;
+    asks: Array<{ id: string; sessionID: string; permission: string; patterns: string[] }>;
+    sessions: number;
+    skills: string[];
+    commands: Record<string, string>;
+  } = { statuses: {}, asks: [], sessions: 0, skills: ["weekly-report"], commands: { "weekly-update": "# weekly-update\n\nDo it." } };
   const engine: ScheduleEngine = {
-    template: async (_workspace, playbookId) => (playbookId === "gone" ? null : `# ${playbookId}\n\nDo it.`),
+    resolvePrompt: async (_workspace, target) => promptForTarget(target, async (name) => state.skills.includes(name)),
+    legacyCommandTemplate: async (_workspace, name) => state.commands[name] ?? null,
     startRun: async (_workspace, input) => {
       state.sessions += 1;
       const id = `ses_${state.sessions}`;
+      prompts.push(input.prompt);
       calls.push(`start:${input.title}:${input.prompt.split("\n")[0]}`);
       state.statuses[id] = "busy";
       return id;
@@ -79,8 +96,10 @@ function fakeEngine() {
       state.asks = state.asks.filter((ask) => ask.id !== requestId);
     },
   };
-  return { engine, calls, state };
+  return { engine, calls, prompts, state };
 }
+
+const PROMPT: ScheduleTarget = { kind: "prompt", text: "# weekly-update\n\nDo it." };
 
 const SEOUL_DAILY: ScheduleRule = { mode: "repeat", freq: "daily", time: "09:00", zone: "Asia/Seoul", start: "2026-10-01" };
 // Monday 5 October 2026, 00:00 UTC (09:00 in Seoul).
@@ -120,10 +139,10 @@ describe("the calendar", () => {
 });
 
 describe("the scheduler", () => {
-  test("a due schedule starts its playbook once, and the next run moves on", async () => {
+  test("a due schedule starts its prompt once, and the next run moves on", async () => {
     const { config, workspace } = await setup();
     const { engine, calls } = fakeEngine();
-    await addSchedule(config, workspace.id, { playbookId: "weekly-update", label: "Every day at 09:00", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    await addSchedule(config, workspace.id, { target: PROMPT, label: "Every day at 09:00", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
     const due = MON_0900_SEOUL + 10_000;
     const first = await tickWorkspace(config, workspace, engine, due);
     await tickWorkspace(config, workspace, engine, due + 30_000);
@@ -134,7 +153,7 @@ describe("the scheduler", () => {
   test("a time missed while the app was closed is recorded and skipped, not run late", async () => {
     const { config, workspace } = await setup();
     const { engine, calls } = fakeEngine();
-    await addSchedule(config, workspace.id, { playbookId: "weekly-update", label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    await addSchedule(config, workspace.id, { target: PROMPT, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
     // Opened again two days later, at noon.
     const later = MON_0900_SEOUL + 2 * 86_400_000 + 3 * 3_600_000;
     const state = await tickWorkspace(config, workspace, engine, later);
@@ -146,7 +165,7 @@ describe("the scheduler", () => {
   test("a run that asks waits; approving replies to the engine and lets it go on", async () => {
     const { config, workspace } = await setup();
     const { engine, calls, state } = fakeEngine();
-    await addSchedule(config, workspace.id, { playbookId: "send-notices", label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    await addSchedule(config, workspace.id, { target: PROMPT, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
     await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000);
     state.asks = [{ id: "per_1", sessionID: "ses_1", permission: "bash", patterns: ["send-mail"] }];
     const waiting = await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 31_000);
@@ -171,7 +190,7 @@ describe("the scheduler", () => {
   test("Not now refuses the step", async () => {
     const { config, workspace } = await setup();
     const { engine, calls, state } = fakeEngine();
-    await addSchedule(config, workspace.id, { playbookId: "send-notices", label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    await addSchedule(config, workspace.id, { target: PROMPT, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
     await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000);
     state.asks = [{ id: "per_9", sessionID: "ses_1", permission: "edit", patterns: [] }];
     const waiting = await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 31_000);
@@ -182,7 +201,7 @@ describe("the scheduler", () => {
   test("a paused schedule does not run, and starts from now when turned back on", async () => {
     const { config, workspace } = await setup();
     const { engine, calls } = fakeEngine();
-    const added = await addSchedule(config, workspace.id, { playbookId: "p", label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    const added = await addSchedule(config, workspace.id, { target: PROMPT, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
     const id = added.schedules[0]?.id ?? "";
     await updateSchedule(config, workspace.id, id, { enabled: false });
     await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000);
@@ -191,11 +210,99 @@ describe("the scheduler", () => {
     expect(resumed.schedules[0]?.nextRunAt).toBe(MON_0900_SEOUL + 86_400_000);
   });
 
-  test("a playbook that is gone fails the run instead of throwing", async () => {
+  test("a skill run asks for the skill, with the extra instructions", async () => {
     const { config, workspace } = await setup();
-    const { engine } = fakeEngine();
-    await addSchedule(config, workspace.id, { playbookId: "gone", label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    const { engine, prompts } = fakeEngine();
+    const target: ScheduleTarget = { kind: "skill", name: "weekly-report", instructions: "Only the sales team." };
+    await addSchedule(config, workspace.id, { target, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000);
+    expect(prompts).toEqual(["Use the `weekly-report` skill.\n\nOnly the sales team."]);
+  });
+
+  test("a skill without instructions is just the skill", async () => {
+    expect(await promptForTarget({ kind: "skill", name: "weekly-report" }, async () => true)).toBe("Use the `weekly-report` skill.");
+  });
+
+  test("a skill that is gone fails the run instead of throwing", async () => {
+    const { config, workspace } = await setup();
+    const { engine, calls } = fakeEngine();
+    await addSchedule(config, workspace.id, { target: { kind: "skill", name: "gone" }, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
     const state = await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000);
-    expect(state.schedules[0]?.lastRun?.state).toBe("failed");
+    expect(calls).toEqual([]);
+    expect(state.schedules[0]?.lastRun).toMatchObject({ state: "failed", reason: "The skill is gone" });
+    expect(state.runs.at(-1)).toMatchObject({ state: "failed", reason: "The skill is gone" });
+  });
+
+  test("two schedules for the same skill both stay", async () => {
+    const { config, workspace } = await setup();
+    const target: ScheduleTarget = { kind: "skill", name: "weekly-report" };
+    await addSchedule(config, workspace.id, { target, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    const both = await addSchedule(config, workspace.id, { target, label: "Weekdays", rule: { ...SEOUL_DAILY, freq: "weekdays" } });
+    expect(both.schedules.map((schedule) => schedule.label)).toEqual(["Daily", "Weekdays"]);
+    expect(new Set(both.schedules.map((schedule) => schedule.id)).size).toBe(2);
+  });
+
+  test("an edit changes what runs, its name and its rule, and a new rule starts from now", async () => {
+    const { config, workspace } = await setup();
+    const added = await addSchedule(config, workspace.id, { target: PROMPT, label: "Daily", rule: SEOUL_DAILY }, MON_0900_SEOUL - 60_000);
+    const id = added.schedules[0]?.id ?? "";
+    const target: ScheduleTarget = { kind: "skill", name: "weekly-report" };
+    const weekly: ScheduleRule = { ...SEOUL_DAILY, freq: "weekly", days: ["3"] };
+    const edited = await updateSchedule(config, workspace.id, id, { target, label: "Wednesdays", rule: weekly }, MON_0900_SEOUL);
+    expect(edited.schedules).toHaveLength(1);
+    expect(edited.schedules[0]).toMatchObject({ id, target, label: "Wednesdays", rule: weekly, enabled: true, nextRunAt: Date.UTC(2026, 9, 7, 0, 0) });
+    // Only the label: the next run stays where it was.
+    const renamed = await updateSchedule(config, workspace.id, id, { label: "Midweek" }, MON_0900_SEOUL + 3_600_000);
+    expect(renamed.schedules[0]).toMatchObject({ label: "Midweek", target, nextRunAt: Date.UTC(2026, 9, 7, 0, 0) });
+  });
+
+  test("a schedule saved for a playbook becomes a prompt schedule with the command's text", async () => {
+    const { config, workspace } = await setup();
+    const { engine, prompts } = fakeEngine();
+    const old = { id: "sch_old", label: "Daily", rule: SEOUL_DAILY, nextRunAt: MON_0900_SEOUL, enabled: true, lastRun: null };
+    await rawStore.set(config, workspace.id, JSON.stringify({ schedules: [{ ...old, playbookId: "weekly-update" }], runs: [], waiting: [] }));
+    // Not dropped on read.
+    expect((await readSchedules(config, workspace.id)).legacy).toHaveLength(1);
+    const state = await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000);
+    expect(state.legacy).toEqual([]);
+    expect(state.schedules[0]).toMatchObject({ id: "sch_old", label: "Daily", rule: SEOUL_DAILY, target: { kind: "prompt", text: "# weekly-update\n\nDo it." } });
+    expect(prompts).toEqual(["# weekly-update\n\nDo it."]);
+    // Saved converted.
+    const reread = await readSchedules(config, workspace.id);
+    expect(reread.legacy).toEqual([]);
+    expect(reread.schedules[0]?.target).toEqual({ kind: "prompt", text: "# weekly-update\n\nDo it." });
+  });
+
+  test("a schedule saved for a playbook that is gone is dropped, with a warning", async () => {
+    const { config, workspace } = await setup();
+    const { engine, calls } = fakeEngine();
+    const warnings: string[] = [];
+    const logger = { log: (_level: "warn", message: string) => void warnings.push(message) };
+    const old = { id: "sch_old", playbookId: "gone", label: "Daily", rule: SEOUL_DAILY, nextRunAt: MON_0900_SEOUL, enabled: true, lastRun: null };
+    await rawStore.set(config, workspace.id, JSON.stringify({ schedules: [old], runs: [], waiting: [] }));
+    const state = await tickWorkspace(config, workspace, engine, MON_0900_SEOUL + 1_000, logger);
+    expect(state.schedules).toEqual([]);
+    expect(state.legacy).toEqual([]);
+    expect(calls).toEqual([]);
+    expect(warnings).toHaveLength(1);
+    expect((await readSchedules(config, workspace.id)).legacy).toEqual([]);
+  });
+});
+
+describe("a target from the screen", () => {
+  test("a prompt or a skill, checked", () => {
+    expect(readTarget({ kind: "prompt", text: "  Summarise my inbox " })).toEqual({ kind: "prompt", text: "Summarise my inbox" });
+    expect(readTarget({ kind: "skill", name: "weekly-report", instructions: "" })).toEqual({ kind: "skill", name: "weekly-report" });
+    expect(readTarget({ kind: "skill", name: "weekly-report", instructions: "Short." })).toEqual({
+      kind: "skill",
+      name: "weekly-report",
+      instructions: "Short.",
+    });
+    expect(() => readTarget({ kind: "prompt", text: "  " })).toThrow();
+    expect(() => readTarget({ kind: "prompt", text: "x".repeat(20_001) })).toThrow();
+    expect(() => readTarget({ kind: "skill", name: "Not A Skill" })).toThrow();
+    expect(() => readTarget({ kind: "skill", name: "ok", instructions: "x".repeat(20_001) })).toThrow();
+    expect(() => readTarget({ kind: "playbook", playbookId: "weekly-update" })).toThrow();
+    expect(() => readTarget(undefined)).toThrow();
   });
 });
