@@ -23,8 +23,8 @@ import { testKeysAllowed, type PinnedKey } from "./keys.js";
  *   and reported; the workspace stays on what it had. Locks never fall back to unlocked.
  * - 304: nothing newer.
  * - 401/403: the console no longer accepts this key for the team, which after K1 means the owner was
- *   removed or the key revoked. A joined workspace leaves the team: its notes, playbooks and skills
- *   are removed (leaveTeamPolicy). A Redrob Key that is merely missing is NOT this case.
+ *   removed or the key revoked. A joined workspace leaves the team: its notes and skills are removed
+ *   (leaveTeamPolicy). A Redrob Key that is merely missing is NOT this case.
  * - 404: the team has not published a policy.
  * - anything else, or no answer: unreachable. Nothing changes; the last verified policy stays.
  */
@@ -52,6 +52,8 @@ export type TeamPolicySyncOutcome = {
   /** The refusal code, for `refused`. */
   code?: string;
   version?: number;
+  /** Set when applying or leaving deleted commands a v1 policy installed, so the route reloads them. */
+  removedLegacyCommands?: true;
 };
 
 export type TeamPolicySyncRecord = {
@@ -171,8 +173,8 @@ async function runSync(
   if (response.status === 404) return finish({ status: "no_policy" });
   if (response.status === 401 || response.status === 403) {
     if (active) {
-      await leaveTeamPolicy(config, workspace, { actor, reason: "the team no longer accepts this device", now });
-      return finish({ status: "removed" });
+      const left = await leaveTeamPolicy(config, workspace, { actor, reason: "the team no longer accepts this device", now });
+      return finish({ status: "removed", ...(left.removedLegacyCommands ? { removedLegacyCommands: true } : {}) });
     }
     return finish({ status: "not_member" });
   }
@@ -205,7 +207,11 @@ async function runSync(
     if (result.status === "applied") {
       await report({ version: result.state.version, ok: true, payloadSha256: result.state.payloadSha256 });
     }
-    return finish({ status: result.status, version: result.state.version });
+    return finish({
+      status: result.status,
+      version: result.state.version,
+      ...(result.removedLegacyCommands ? { removedLegacyCommands: true } : {}),
+    });
   } catch (error) {
     if (!(error instanceof ApiError)) throw error;
     if (declaredVersion && declaredVersion > 0) {
