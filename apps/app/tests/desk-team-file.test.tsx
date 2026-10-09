@@ -129,7 +129,9 @@ describe("the team file", () => {
       listSchedules: unused,
       addSchedule: unused,
       updateSchedule: unused,
+      deleteSchedule: unused,
       answerScheduleWaiting: unused,
+      listSkills: unused,
     };
     const services = createRealDeskServices({ client: deskClient, workspaceId: "ws_mate" });
     const notes = (await services.notes.list()).data;

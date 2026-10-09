@@ -51,6 +51,7 @@ async function everyResult(services: DeskServices) {
     await services.playbooks.list(),
     await services.playbooks.get("first-review"),
     await services.schedules.list(),
+    await services.skills.list(),
     await services.history.list(),
     await services.connectors.list(),
     await services.privacy.get(),
@@ -72,6 +73,7 @@ describe("desk fixture services", () => {
     expect(connectors.filter((connector) => connector.state === "connected")).toHaveLength(6);
     expect((await services.schedules.list()).data.waiting).toHaveLength(2);
     expect((await services.privacy.get()).data.level).toBe("high");
+    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(["deadline-tracker", "first-review", "weekly-report"]);
 
     const notes = (await services.notes.list()).data;
     expect(notes.length).toBe(22);

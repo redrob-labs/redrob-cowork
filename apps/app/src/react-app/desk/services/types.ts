@@ -82,24 +82,33 @@ export type PlaybookDraft = { id?: string; name: string; description: string; st
 
 export type RunState = "done" | "blocked" | "stopped";
 
+/** What a schedule runs: a prompt as written, or a skill with optional extra instructions. */
+export type ScheduleTarget = { kind: "prompt"; text: string } | { kind: "skill"; name: string; instructions?: string };
+
 export type Schedule = {
   id: string;
-  playbookId: string;
+  target: ScheduleTarget;
+  /** The target in a few words: the skill's name, or the prompt's first line. */
+  name: string;
   projectId: string;
   cadence: string;
   nextRunAt: number | null;
   /** Null until the schedule has run once. */
   lastRun: { state: RunState | "running" | "failed"; at: number; label: string } | null;
   enabled: boolean;
+  /** What the server runs on, to start an edit from. Sample schedules have none. */
+  rule?: RedrobScheduleRule;
 };
 
 /** A schedule to save. `rule` is what the server runs on; sample schedules have none. */
-export type NewSchedule = Pick<Schedule, "playbookId" | "projectId" | "cadence" | "nextRunAt"> & { rule?: RedrobScheduleRule };
+export type NewSchedule = Pick<Schedule, "target" | "projectId" | "cadence" | "nextRunAt"> & { rule?: RedrobScheduleRule };
 
 /** A scheduled run stopped at a step that asks a person first. */
 export type WaitingRun = {
   id: string;
-  playbookId: string;
+  scheduleId: string;
+  target: ScheduleTarget;
+  name: string;
   projectId: string;
   title: string;
   description: string;
@@ -108,6 +117,9 @@ export type WaitingRun = {
 };
 
 export type ScheduleBoard = { schedules: Schedule[]; waiting: WaitingRun[] };
+
+/** An installed skill a schedule can run. */
+export type DeskSkill = { name: string; description: string };
 
 export type HistoryStep = { label: string; state: "done" | "active" | "todo"; meta?: string };
 

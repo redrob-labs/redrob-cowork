@@ -9,9 +9,10 @@ import { NOTES } from "./fixtures/notes";
 import { PLAYBOOKS } from "./fixtures/playbooks";
 import { PRIVACY } from "./fixtures/privacy";
 import { PROJECTS } from "./fixtures/projects";
-import { SCHEDULE_BOARD } from "./fixtures/schedules";
+import { SCHEDULE_BOARD, SKILLS } from "./fixtures/schedules";
 import type { DeskResult, MemoryNote, Schedule, ScheduleBoard } from "./types";
 import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
+import { scheduleName } from "../scheduled/schedules";
 
 /** The prototype's pace: one step every 650ms. */
 export const SCRIPTED_STEP_MS = 650;
@@ -133,9 +134,7 @@ export function createFixtureDeskServices(
           : { state: "stopped", at: now(), label: "Not now" };
         sampleBoard = {
           waiting: sampleBoard.waiting.filter((entry) => entry.id !== waitingId),
-          schedules: sampleBoard.schedules.map((schedule) =>
-            schedule.playbookId === run.playbookId && schedule.projectId === run.projectId ? { ...schedule, lastRun } : schedule,
-          ),
+          schedules: sampleBoard.schedules.map((schedule) => (schedule.id === run.scheduleId ? { ...schedule, lastRun } : schedule)),
         };
         return preview(copyBoard(sampleBoard));
       },
@@ -147,20 +146,32 @@ export function createFixtureDeskServices(
         return preview(copyBoard(sampleBoard));
       },
       save: (input) => {
-        const same = (schedule: Schedule) => schedule.playbookId === input.playbookId && schedule.projectId === input.projectId;
-        const existing = sampleBoard.schedules.find(same);
-        const schedule: Schedule = existing
-          ? { ...existing, ...input, enabled: true }
-          : { id: `s${sampleBoard.schedules.length + 1}`, ...input, lastRun: null, enabled: true };
+        const id = `s${Math.max(0, ...sampleBoard.schedules.map((entry) => Number(entry.id.slice(1)) || 0)) + 1}`;
+        const schedule: Schedule = { id, ...input, name: scheduleName(input.target), lastRun: null, enabled: true };
+        sampleBoard = { ...sampleBoard, schedules: [...sampleBoard.schedules, schedule] };
+        return preview(copyBoard(sampleBoard));
+      },
+      update: (scheduleId, patch) => {
+        if (!sampleBoard.schedules.some((entry) => entry.id === scheduleId)) return Promise.reject(new Error(`No schedule ${scheduleId}`));
         sampleBoard = {
           ...sampleBoard,
-          schedules: existing
-            ? sampleBoard.schedules.map((entry) => (same(entry) ? schedule : entry))
-            : [...sampleBoard.schedules, schedule],
+          schedules: sampleBoard.schedules.map((schedule) => {
+            if (schedule.id !== scheduleId) return schedule;
+            const target = patch.target ?? schedule.target;
+            return { ...schedule, ...patch, target, name: scheduleName(target) };
+          }),
+        };
+        return preview(copyBoard(sampleBoard));
+      },
+      remove: (scheduleId) => {
+        sampleBoard = {
+          schedules: sampleBoard.schedules.filter((schedule) => schedule.id !== scheduleId),
+          waiting: sampleBoard.waiting.filter((run) => run.scheduleId !== scheduleId),
         };
         return preview(copyBoard(sampleBoard));
       },
     },
+    skills: { list: () => preview(SKILLS.map((skill) => ({ ...skill }))) },
     history: { list: () => preview([...HISTORY]) },
     connectors: { list: () => preview([...CONNECTORS]) },
     privacy: {

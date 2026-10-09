@@ -10,12 +10,13 @@ import { MemoryRouter, Routes } from "react-router";
 import { nextScheduledRun } from "@redrob-labs/ui";
 
 import { setLocale, type Language } from "../src/i18n";
-import { ScheduleDialog } from "../src/react-app/desk/preview/desk-playbook";
 import { RunPlayer } from "../src/react-app/desk/preview/desk-run";
+import { ScheduleDialog } from "../src/react-app/desk/scheduled/schedule-dialog";
 import { scheduledMeta } from "../src/react-app/desk/preview/desk-scheduled";
 import {
   RUN_START,
   answerWaiting,
+  deleteSchedule,
   initialScheduleValue,
   navWaitingKey,
   nextStop,
@@ -224,12 +225,13 @@ describe("Playbooks", () => {
     expect(html).toContain("This playbook is not here");
   });
 
-  test("the Schedule dialog offers the picker with the playbook's project and Save", () => {
+  test("the Schedule dialog starts a prompt from the playbook, with the picker and Save", () => {
     const html = render(
-      <ScheduleDialog open playbook={playbook("renewal-sweep")} onClose={() => {}} now={new Date(2026, 8, 28, 10, 0)} />,
+      <ScheduleDialog prompt="Sweep the renewals" sampleProjectId="supplier" real={false} onClose={() => {}} now={new Date(2026, 8, 28, 10, 0)} />,
       "/playbook/renewal-sweep",
     );
-    expect(html).toContain("Schedule Contract renewal sweep");
+    expect(html).toContain("New schedule");
+    expect(html).toContain("Sweep the renewals");
     expect(html).toContain("Every Monday at 08:00 Seoul time");
     expect(html).toContain("Save");
     expect(html).toContain("Cancel");
@@ -239,28 +241,62 @@ describe("Playbooks", () => {
     const { deps, toasts, client } = boardDeps();
     const now = new Date(2026, 8, 28, 10, 0);
     const value = initialScheduleValue(playbook("renewal-sweep"), now);
-    const schedule = scheduleFromPicker("renewal-sweep", { id: "supplier", name: "Q3 supplier contracts" }, value, now);
+    const target = { kind: "prompt" as const, text: "Sweep the renewals\n\nEvery contract that renews before 30 Nov." };
+    const schedule = scheduleFromPicker(target, { id: "supplier", name: "Q3 supplier contracts" }, value, now);
     expect(schedule.cadence).toBe("Every Monday at 08:00 Seoul time");
     expect(schedule.nextRunAt).toBe(nextScheduledRun(value, now)?.getTime() ?? null);
     expect(schedule.nextRunAt ?? 0).toBeGreaterThan(now.getTime());
-    expect(scheduleFromPicker("renewal-sweep", { id: "supplier", name: "Q3 supplier contracts" }, { ...value, mode: "event" }, now)).toMatchObject({
+    expect(scheduleFromPicker(target, { id: "supplier", name: "Q3 supplier contracts" }, { ...value, mode: "event" }, now)).toMatchObject({
       cadence: "Runs each time a new file arrives in Q3 supplier contracts",
       nextRunAt: null,
     });
 
     const { result, fetched } = await withoutNetwork(() => saveSchedule(deps, schedule));
     expect(fetched).toBe(0);
-    expect(result.preview).toBe(true);
-    const saved = result.data.schedules.filter((entry) => entry.playbookId === "renewal-sweep" && entry.projectId === "supplier");
+    expect(result?.preview).toBe(true);
+    const saved = result?.data.schedules.filter((entry) => entry.name === "Sweep the renewals") ?? [];
     expect(saved).toHaveLength(1);
-    expect(saved[0]).toMatchObject({ cadence: "Every Monday at 08:00 Seoul time", enabled: true });
+    expect(saved[0]).toMatchObject({ target, projectId: "supplier", cadence: "Every Monday at 08:00 Seoul time", enabled: true, lastRun: null });
     expect(client.getQueryData(previewKey("preview", "board"))).toEqual(result);
     expect(toasts).toEqual([["Schedule saved", "This is a preview, so nothing ran and nothing was sent."]]);
 
-    // A playbook new to a project is added, not yet run.
+    // The same prompt again is a second schedule, not a replacement.
     const added = await saveSchedule(deps, { ...schedule, projectId: "clauses" });
-    expect(added.data.schedules).toHaveLength(5);
-    expect(added.data.schedules[4]).toMatchObject({ projectId: "clauses", lastRun: null });
+    expect(added?.data.schedules).toHaveLength(6);
+    expect(added?.data.schedules[5]).toMatchObject({ target, projectId: "clauses", lastRun: null });
+  });
+
+  test("an edit changes the schedule in place; a delete takes it and its waiting run away", async () => {
+    const { deps, toasts } = boardDeps();
+    const now = new Date(2026, 8, 28, 10, 0);
+    const skill = { kind: "skill" as const, name: "weekly-report" };
+    const edit = scheduleFromPicker(skill, { id: "supplier", name: "Q3 supplier contracts" }, initialScheduleValue({ cadence: "" }, now), now);
+    const { result, fetched } = await withoutNetwork(() => saveSchedule(deps, edit, "s1"));
+    expect(fetched).toBe(0);
+    expect(result?.data.schedules).toHaveLength(4);
+    expect(result?.data.schedules.find((entry) => entry.id === "s1")).toMatchObject({ target: skill, name: "weekly-report", cadence: "Every Monday at 08:00 Seoul time" });
+
+    const removed = await deleteSchedule(deps, "s1");
+    expect(removed?.data.schedules.map((entry) => entry.id)).toEqual(["s2", "s3", "s4"]);
+    expect(removed?.data.waiting.map((run) => run.id)).toEqual(["w2"]);
+    expect(toasts.map(([title]) => title)).toEqual(["Schedule saved", "Schedule deleted"]);
+  });
+
+  test("a save or a delete that fails says so and keeps the board", async () => {
+    const { deps, client } = boardDeps();
+    const toasts: Array<[string, string | undefined, string | undefined]> = [];
+    const failing: BoardActionDeps = {
+      ...deps,
+      schedules: { ...deps.schedules, remove: () => Promise.reject(new Error("offline")), update: () => Promise.reject(new Error("offline")) },
+      showToast: (title, text, tone) => toasts.push([title, text, tone]),
+    };
+    expect(await deleteSchedule(failing, "s1")).toBeNull();
+    expect(await saveSchedule(failing, { target: { kind: "prompt", text: "p" }, projectId: "supplier", cadence: "Daily", nextRunAt: null }, "s1")).toBeNull();
+    expect(toasts).toEqual([
+      ["Couldn't delete the schedule", "Try again in a moment.", "danger"],
+      ["Couldn't save the schedule", "Try again in a moment.", "danger"],
+    ]);
+    expect(client.getQueryData(previewKey("preview", "board"))).toBeUndefined();
   });
 
   test("a playbook triggered by a file starts the picker on a new file", () => {

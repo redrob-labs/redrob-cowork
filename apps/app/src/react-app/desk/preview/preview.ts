@@ -5,10 +5,9 @@ import { describeSchedule, icons, nextScheduledRun, type IconName, type Schedule
 import { t } from "../../../i18n";
 import type { DeskServices } from "../services/desk-services";
 import { runScripted } from "../services/fixture-services";
-import { PLAYBOOKS } from "../services/fixtures/playbooks";
 import { PROJECTS } from "../services/fixtures/projects";
 import { createDeskServices } from "../services/real-services";
-import type { DeskResult, NewSchedule, Playbook, Project, ScheduleBoard } from "../services/types";
+import type { DeskResult, NewSchedule, Playbook, Project, ScheduleBoard, ScheduleTarget } from "../services/types";
 import { ruleFromPicker } from "../scheduled/schedules";
 import { useDeskConnection } from "../shell/desk-connection";
 import type { DeskTimers } from "../timers";
@@ -21,7 +20,7 @@ import type { DeskTimers } from "../timers";
 
 export const PREVIEW_QUERY_KEY = "desk-preview";
 
-export type PreviewPart = "playbooks" | "board" | "history" | "catalog";
+export type PreviewPart = "playbooks" | "board" | "history" | "catalog" | "skills";
 
 export function previewKey(scope: string, part: PreviewPart): string[] {
   return [PREVIEW_QUERY_KEY, scope, part];
@@ -51,13 +50,13 @@ export function previewIcon(name: string, size = 16) {
   return icons[isIconName(name) ? name : "repeat"]({ ...ICON, width: size, height: size });
 }
 
-/** The sample playbook a schedule or a run points at. Sample data joins sample data only. */
-export function samplePlaybook(id: string): Playbook | undefined {
-  return PLAYBOOKS.find((playbook) => playbook.id === id);
-}
-
 export function sampleProjectName(id: string): string {
   return PROJECTS.find((project) => project.id === id)?.name ?? "";
+}
+
+/** The sample project a sample schedule runs in, or the first one. */
+export function sampleProject(id: string | undefined): Project | undefined {
+  return PROJECTS.find((project) => project.id === id) ?? PROJECTS[0];
 }
 
 /** Where a playbook runs: the project that keeps it, or the first one. */
@@ -82,13 +81,13 @@ export function formatDay(at: number, locale: string): string {
   return new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short" }).format(new Date(at));
 }
 
-/* ---------- Scheduled: answering, pausing, saving ---------- */
+/* ---------- Scheduled: answering, pausing, saving, deleting ---------- */
 
 export type BoardActionDeps = {
-  schedules: Pick<DeskServices["schedules"], "answer" | "setEnabled" | "save">;
+  schedules: Pick<DeskServices["schedules"], "answer" | "setEnabled" | "save" | "update" | "remove">;
   queryClient: Pick<QueryClient, "setQueryData" | "invalidateQueries">;
   scope: string;
-  showToast: (title: string, text?: string) => void;
+  showToast: (title: string, text?: string, tone?: "danger") => void;
 };
 
 /** A toast on sample data says nothing ran; on real data there is nothing to add. */
@@ -116,11 +115,31 @@ export async function setScheduleEnabled(deps: BoardActionDeps, scheduleId: stri
   return result;
 }
 
-export async function saveSchedule(deps: BoardActionDeps, schedule: NewSchedule) {
-  const result = await deps.schedules.save(schedule);
-  keepBoard(deps, result);
-  deps.showToast(t("desk.preview_schedule_saved"), sampleNote(result));
-  return result;
+/** Saves a new schedule, or changes the one with `scheduleId`. A toast either way; null when it failed. */
+export async function saveSchedule(deps: BoardActionDeps, schedule: NewSchedule, scheduleId?: string) {
+  try {
+    const result = scheduleId ? await deps.schedules.update(scheduleId, schedule) : await deps.schedules.save(schedule);
+    keepBoard(deps, result);
+    deps.showToast(t("desk.preview_schedule_saved"), sampleNote(result));
+    return result;
+  } catch {
+    deps.showToast(t("desk.scheduled_save_failed"), t("desk.settings_try_again"), "danger");
+    return null;
+  }
+}
+
+/** Deletes a schedule; the runs it was waiting on leave with it. A toast either way; null when it failed. */
+export async function deleteSchedule(deps: BoardActionDeps, scheduleId: string) {
+  try {
+    const result = await deps.schedules.remove(scheduleId);
+    keepBoard(deps, result);
+    void deps.queryClient.invalidateQueries({ queryKey: navWaitingKey(deps.scope) });
+    deps.showToast(t("desk.scheduled_deleted"), sampleNote(result));
+    return result;
+  } catch {
+    deps.showToast(t("desk.scheduled_delete_failed"), t("desk.settings_try_again"), "danger");
+    return null;
+  }
 }
 
 function isoDay(day: Date): string {
@@ -143,7 +162,7 @@ export function initialScheduleValue(playbook: Pick<Playbook, "cadence">, today:
 
 /** What the picker chose, as the schedule to save. */
 export function scheduleFromPicker(
-  playbookId: string,
+  target: ScheduleTarget,
   project: Pick<Project, "id" | "name">,
   value: ScheduleValue,
   now: Date,
@@ -153,7 +172,7 @@ export function scheduleFromPicker(
   const sentence = describeSchedule(value, { where: project.name, now }).split(" Next run")[0] ?? "";
   const rule = ruleFromPicker(value);
   return {
-    playbookId,
+    target,
     projectId: project.id,
     cadence: sentence.replace(/\.$/, ""),
     nextRunAt: next ? next.getTime() : null,

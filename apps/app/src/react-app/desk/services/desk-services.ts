@@ -2,6 +2,7 @@ import type {
   Chat,
   Connector,
   DeskFile,
+  DeskSkill,
   DeskResult,
   HistoryEntry,
   MemoryNote,
@@ -44,9 +45,14 @@ export interface DeskServices {
     /** Answers a run waiting for a person; it leaves the waiting list either way. */
     answer(waitingId: string, approved: boolean): Async<ScheduleBoard>;
     setEnabled(scheduleId: string, enabled: boolean): Async<ScheduleBoard>;
-    /** Puts a playbook on a schedule in a project, replacing the one it had there. */
+    /** Puts a prompt or a skill on a new schedule. A target can have more than one. */
     save(schedule: NewSchedule): Async<ScheduleBoard>;
+    /** Changes what a schedule runs, its name or when it runs. */
+    update(scheduleId: string, patch: Partial<NewSchedule>): Async<ScheduleBoard>;
+    remove(scheduleId: string): Async<ScheduleBoard>;
   };
+  /** The installed skills, the workspace's and the person's own. */
+  skills: { list(): Async<DeskSkill[]> };
   history: { list(): Async<HistoryEntry[]> };
   connectors: { list(): Async<Connector[]> };
   privacy: {

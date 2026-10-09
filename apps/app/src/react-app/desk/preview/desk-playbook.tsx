@@ -2,28 +2,19 @@
 import { useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
-import { Badge, Button, EmptyState, Playbook as PlaybookSteps, SchedulePicker, SectionMark, icons, type ScheduleValue } from "@redrob-labs/ui";
+import { Badge, Button, EmptyState, Playbook as PlaybookSteps, SectionMark, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { openExternal } from "../connectors/desk-connectors";
+import { ScheduleDialog } from "../scheduled/schedule-dialog";
 import type { Playbook } from "../services/types";
 import { Row } from "../settings/desk-settings";
-import { DeskDialog } from "../shell/desk-dialog";
 import { DeskShell } from "../shell/desk-shell";
 import { useDeskConnection } from "../shell/desk-connection";
 import { useFrameStore } from "../store/frame-store";
 import { useDeskStartStore, type PendingDeskChat } from "../playbooks/start-chat";
 import { PreviewPage, PreviewState } from "./preview-note";
-import {
-  formatDay,
-  initialScheduleValue,
-  previewKey,
-  projectForPlaybook,
-  runPath,
-  saveSchedule,
-  scheduleFromPicker,
-  usePreviewServices,
-} from "./preview";
+import { formatDay, previewKey, projectForPlaybook, runPath, usePreviewServices } from "./preview";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
 
@@ -111,69 +102,6 @@ export function PlaybookView(props: PlaybookViewProps) {
   );
 }
 
-/** Schedule a playbook. Saving changes only the sample schedules. */
-export function ScheduleDialog(props: { open: boolean; playbook: Playbook; onClose: () => void; now?: Date; real?: boolean }) {
-  const { services, scope } = usePreviewServices();
-  const workspaceId = useDeskConnection((state) => state.workspaceId);
-  const projects = useQuery({ queryKey: [...previewKey(scope, "board"), "projects"], queryFn: () => services.projects.list(), enabled: Boolean(props.real), staleTime: 60_000 });
-  const queryClient = useQueryClient();
-  const showToast = useFrameStore((state) => state.showToast);
-  const [now] = useState(() => props.now ?? new Date());
-  const [value, setValue] = useState<ScheduleValue>(() => initialScheduleValue(props.playbook, now));
-  // A real playbook runs in the open project; a sample one in its sample project.
-  const project = props.real
-    ? projects.data?.data.find((entry) => entry.id === workspaceId)
-    : projectForPlaybook(props.playbook.id);
-  // The server can run at a time; it cannot watch for a file arriving.
-  const canSave = Boolean(project) && (!props.real || value.mode !== "event");
-
-  const save = async () => {
-    if (!project) return;
-    await saveSchedule(
-      { schedules: services.schedules, queryClient, scope, showToast },
-      scheduleFromPicker(props.playbook.id, project, value, now),
-    );
-    props.onClose();
-  };
-
-  return (
-    <DeskDialog
-      open={props.open}
-      title={t("desk.preview_schedule_title", { name: props.playbook.name })}
-      onClose={props.onClose}
-      footer={
-        <>
-          <Button variant="ghost" onClick={props.onClose}>
-            {t("desk.preview_cancel")}
-          </Button>
-          <Button variant="primary" disabled={!canSave} onClick={() => void save()}>
-            {t("desk.preview_schedule_save")}
-          </Button>
-        </>
-      }
-    >
-      <SchedulePicker
-        value={value}
-        onChange={setValue}
-        now={now}
-        where={project?.name}
-        weekStart={1}
-        label={t("desk.preview_schedule_label")}
-        modes={[
-          ["once", t("desk.preview_schedule_mode_once")],
-          ["repeat", t("desk.preview_schedule_mode_repeat")],
-          ...(props.real ? [] : ([["event", t("desk.preview_schedule_mode_event")]] satisfies Array<[string, string]>)),
-        ]}
-        dateLabel={t("desk.preview_schedule_date")}
-        repeatLabel={t("desk.preview_schedule_repeat")}
-        timeLabel={t("desk.preview_schedule_time")}
-        zoneLabel={t("desk.preview_schedule_zone")}
-        startLabel={t("desk.preview_schedule_start")}
-      />
-    </DeskDialog>
-  );
-}
-
 /**
  * Run with a saved prompt: a new chat in Plan, so the person sees the plan before anything
  * runs. A sample playbook has no prompt and opens the sample run.
@@ -257,7 +185,15 @@ export function PlaybookScreen() {
           }
         </PreviewState>
       </PreviewPage>
-      {playbook && scheduling ? <ScheduleDialog open playbook={playbook} real={!preview} onClose={() => setScheduling(false)} /> : null}
+      {/* Playbooks are on their way out: scheduling one schedules its prompt. */}
+      {playbook && scheduling ? (
+        <ScheduleDialog
+          prompt={playbook.prompt ?? playbook.name}
+          sampleProjectId={projectForPlaybook(playbook.id)?.id}
+          real={!preview}
+          onClose={() => setScheduling(false)}
+        />
+      ) : null}
     </DeskShell>
   );
 }
