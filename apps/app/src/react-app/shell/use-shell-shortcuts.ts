@@ -25,8 +25,36 @@ export type UseShellShortcutsInput = {
   onPrevSessionTab?: () => void;
 };
 
+const COMMAND_PALETTE_OPEN_EVENT = "redrob:command-palette:open";
+let commandPaletteHosts = 0;
+
+/**
+ * Opens the command palette when the current screen has one (the developer and settings screens) and
+ * reports whether it did. The title bar's search box and the Desk search shortcut use this to choose
+ * between the palette and the Desk search dialog.
+ */
+export function openCommandPalette(): boolean {
+  if (commandPaletteHosts === 0) return false;
+  window.dispatchEvent(new Event(COMMAND_PALETTE_OPEN_EVENT));
+  return true;
+}
+
+export function hasCommandPalette(): boolean {
+  return commandPaletteHosts > 0;
+}
+
 export function useCommandPaletteShortcut(enabled = true) {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  useEffect(() => {
+    if (!enabled) return;
+    commandPaletteHosts += 1;
+    const open = () => setCommandPaletteOpen(true);
+    window.addEventListener(COMMAND_PALETTE_OPEN_EVENT, open);
+    return () => {
+      commandPaletteHosts -= 1;
+      window.removeEventListener(COMMAND_PALETTE_OPEN_EVENT, open);
+    };
+  }, [enabled]);
   const handleCommandPaletteShortcut = useEffectEvent((event: KeyboardEvent) => {
     if (!enabled) return;
     const isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform);

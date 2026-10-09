@@ -48,6 +48,15 @@ describe("window title bar", () => {
     expect(bar).not.toContain("<Menu");
     expect(bar).not.toContain("<nav");
   });
+
+  test("the bar has Back, Forward, the sidebar toggle and Search", () => {
+    const bar = read("src/react-app/shell/window-title-bar.tsx");
+    expect(bar).toContain("navigate(-1)");
+    expect(bar).toContain("navigate(1)");
+    expect(bar).toContain("redrob:native-menu:toggle-sidebar");
+    // Search opens the screen's command palette when it has one, the Desk search dialog otherwise.
+    expect(bar).toContain('if (!openCommandPalette()) openModal({ kind: "search" })');
+  });
 });
 
 describe("compaction threshold", () => {
@@ -188,6 +197,8 @@ describe("Korean tooltips", () => {
       "settings.compact_threshold_desc",
       "settings.compact_threshold_tooltip",
       "titlebar.minimize",
+      "titlebar.search_placeholder",
+      "titlebar.back",
       "titlebar.close_window",
     ]) {
       expect(en).toContain(`"${key}":`);

@@ -1,14 +1,15 @@
 /** @jsxImportSource react */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useNavigationType } from "react-router";
 import { IconButton, icons } from "@redrob-labs/ui";
 import type { WindowControlAction, WindowState } from "@redrob/types/desktop-ipc";
 
 import { t } from "@/i18n";
-import { resolveExtensionIconSrc } from "@/react-app/design-system/extension-icon-src";
-import { useShellConfig } from "./shell-config";
+import { useFrameStore } from "../desk/store/frame-store";
+import { openCommandPalette } from "./use-shell-shortcuts";
 
 const WINDOW_STATE_EVENT = "redrob:window:state";
-const ICON_SRC = resolveExtensionIconSrc("/redrob-cowork-icon.svg");
+const TOGGLE_SIDEBAR_EVENT = "redrob:native-menu:toggle-sidebar";
 
 type TitleBarPlatform = "windows" | "linux";
 
@@ -53,14 +54,36 @@ function useWindowState(): WindowState {
   return state;
 }
 
+/** Where the router's history stands. React Router keeps the entry's index in `history.state.idx`. */
+function historyIndex(): number {
+  const state: unknown = window.history.state;
+  return typeof state === "object" && state !== null && "idx" in state && typeof state.idx === "number" ? state.idx : 0;
+}
+
 /**
- * The window's title bar on Windows and Linux, in place of the OS title bar and menu bar: the product
- * icon, the app name and the window buttons. There are no File/Edit/View menus; the native menu stays
- * installed underneath (app-menu.mjs) only so its shortcuts keep working.
+ * Whether Back and Forward have anywhere to go. Back: any entry before this one. Forward: an entry
+ * this session has visited past this one, which a new navigation (a PUSH) discards, as browsers do.
+ */
+export function useHistoryReach(): { canGoBack: boolean; canGoForward: boolean } {
+  // Re-read on every navigation; the index itself lives in history.state.
+  useLocation();
+  const navigationType = useNavigationType();
+  const furthest = useRef(0);
+  const index = historyIndex();
+  if (navigationType === "PUSH" || index > furthest.current) furthest.current = index;
+  return { canGoBack: index > 0, canGoForward: index < furthest.current };
+}
+
+/**
+ * The window's title bar on Windows and Linux, in place of the OS title bar and menu bar.
+ *
+ * Laid out like Slack's: the sidebar toggle, Back and Forward at the start, Search in the middle, and the
+ * window buttons at the end. No app name, no File/Edit/View menus; the native menu stays installed
+ * underneath (app-menu.mjs) only so its shortcuts keep working.
  *
  * 40px (`--control-height-md`), so it lines up with the Windows caption buttons main.mjs asks for. The bar
- * drags the window; the buttons in it opt out. On Windows the right end is left empty for the
- * caption buttons Windows draws (they keep Snap Layouts); on Linux the bar draws them itself.
+ * drags the window; its buttons opt out. On Windows the right end is left empty for the caption buttons
+ * Windows draws (they keep Snap Layouts); on Linux the bar draws them itself, round as GNOME's are.
  */
 export function WindowTitleBar() {
   const platform = titleBarPlatform();
@@ -68,33 +91,62 @@ export function WindowTitleBar() {
   return <WindowTitleBarView platform={platform} />;
 }
 
+const glyph = (draw: (typeof icons)["close"]) => draw({ width: 16, height: 16, "aria-hidden": true });
+
 function WindowTitleBarView({ platform }: { platform: TitleBarPlatform }) {
-  const { config } = useShellConfig();
+  const navigate = useNavigate();
+  const { canGoBack, canGoForward } = useHistoryReach();
   const state = useWindowState();
+  const openModal = useFrameStore((store) => store.openModal);
+  const search = () => {
+    if (!openCommandPalette()) openModal({ kind: "search" });
+  };
+
   return (
     // A double click on the bar maximises: the OS does that for a drag region, so there is no handler.
     <div className="window-titlebar titlebar-drag">
-      <img src={ICON_SRC} alt="" width={16} height={16} className="window-titlebar__icon" aria-hidden="true" />
-      <span className="window-titlebar__name">{config.appName}</span>
+      <div className="window-titlebar__nav titlebar-no-drag">
+        <IconButton
+          label={t("titlebar.toggle_sidebar")}
+          size="sm"
+          onClick={() => window.dispatchEvent(new Event(TOGGLE_SIDEBAR_EVENT))}
+        >
+          {glyph(icons.sidebar)}
+        </IconButton>
+        <IconButton label={t("titlebar.back")} size="sm" className="window-titlebar__navbtn" disabled={!canGoBack} onClick={() => navigate(-1)}>
+          {glyph(icons.back)}
+        </IconButton>
+        <IconButton label={t("titlebar.forward")} size="sm" className="window-titlebar__navbtn" disabled={!canGoForward} onClick={() => navigate(1)}>
+          {glyph(icons.forward)}
+        </IconButton>
+      </div>
+      <button type="button" className="window-titlebar__search titlebar-no-drag" onClick={search}>
+        {glyph(icons.search)}
+        <span className="window-titlebar__search-label">{t("titlebar.search_placeholder")}</span>
+        <kbd className="window-titlebar__kbd">Ctrl K</kbd>
+      </button>
       {platform === "linux" ? (
         <div className="window-titlebar__controls titlebar-no-drag">
-          <IconButton label={t("titlebar.minimize")} size="sm" onClick={() => control("minimize")}>
-            {icons.minus({ width: 16, height: 16, "aria-hidden": true })}
+          <IconButton label={t("titlebar.minimize")} size="sm" round className="window-titlebar__winbtn" onClick={() => control("minimize")}>
+            {icons.minus({ width: 14, height: 14, "aria-hidden": true })}
           </IconButton>
           <IconButton
             label={state.maximized ? t("titlebar.restore") : t("titlebar.maximize")}
             size="sm"
+            round
+            className="window-titlebar__winbtn"
             onClick={() => control("toggleMaximize")}
           >
-            {(state.maximized ? icons.copy : icons.maximize)({ width: 16, height: 16, "aria-hidden": true })}
+            {(state.maximized ? icons.copy : icons.maximize)({ width: 14, height: 14, "aria-hidden": true })}
           </IconButton>
           <IconButton
             label={t("titlebar.close_window")}
             size="sm"
-            className="window-titlebar__close"
+            round
+            className="window-titlebar__winbtn window-titlebar__close"
             onClick={() => control("close")}
           >
-            {icons.close({ width: 16, height: 16, "aria-hidden": true })}
+            {icons.close({ width: 14, height: 14, "aria-hidden": true })}
           </IconButton>
         </div>
       ) : (
