@@ -562,6 +562,14 @@ export function CoworkJoinDialog(props: { link: string; onClose: () => void }) {
 export function CoworkJoinHost() {
   const [link, setLink] = useState<string | null>(null);
   useEffect(() => {
+    const bridge = coworkBridge();
+    if (!bridge) return;
+    // A joined chat came back after a restart or a drop, maybe on a new port: re-read the list.
+    return bridge.onEvent((event) => {
+      if (event.type === "join" && event.phase === "reconnected") window.dispatchEvent(new Event("redrob-server-settings-changed"));
+    });
+  }, []);
+  useEffect(() => {
     if (typeof window === "undefined" || !coworkBridge()) return;
     const take = () => {
       const [first] = takeJoinLinks(window);

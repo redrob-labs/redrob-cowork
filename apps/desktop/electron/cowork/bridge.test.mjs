@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 
-import { coworkAllowPath, createCoworkBridge, loadEndpointKey, platformBlocker, registerCoworkIpc } from "./bridge.mjs";
+import { coworkAllowPath, createCoworkBridge, createJoinStore, joinKey, loadEndpointKey, platformBlocker, registerCoworkIpc } from "./bridge.mjs";
 import { buildInviteLink, parseInviteLink } from "./invite-link.mjs";
 
 let iroh = null;
@@ -121,6 +121,25 @@ describe("endpoint key", () => {
   });
 });
 
+describe("saved joins", () => {
+  it("keep what dialling needs, readable only by this user, and drop anything malformed", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "cowork-joins-"));
+    try {
+      const store = createJoinStore(path.join(dir, "cowork"));
+      assert.deepEqual(await store.read(), []);
+      const entry = { hostEndpointId: HOST_ID, relayUrl: null, workspaceId: "ws_1", sessionId: "ses_1", remoteWorkspaceId: "rem_ws_1", port: 4000, expiresAt: 5 };
+      await store.write([entry, { hostEndpointId: "nope" }]);
+      assert.deepEqual(await store.read(), [entry]);
+      assert.equal(joinKey(entry), `${HOST_ID}/ws_1/ses_1`);
+      const text = await readFile(path.join(dir, "cowork", "joins.json"), "utf8");
+      assert.ok(!/token/i.test(text), "no token is written");
+      if (process.platform !== "win32") assert.equal((await stat(path.join(dir, "cowork", "joins.json"))).mode & 0o777, 0o600);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("IPC", () => {
   it("keeps the error code for the renderer", async () => {
     const handlers = new Map();
@@ -157,6 +176,13 @@ describe("IPC", () => {
 describe("host and guest over iroh", { skip: iroh ? false : "@number0/iroh is not installed for this platform" }, () => {
   const ROOM = "/workspace/ws_1/sessions/ses_1/room";
   let hostServer, guestServer, hostBridge, guestBridge;
+  const guestKey = Array.from(randomBytes(32));
+  const memory = () => {
+    let entries = [];
+    return { read: async () => entries.map((entry) => ({ ...entry })), write: async (next) => void (entries = next.map((entry) => ({ ...entry }))) };
+  };
+  const joinStore = memory();
+  const updated = [];
   const seen = [];
   const knocks = new Map();
   const added = [];
@@ -212,9 +238,11 @@ describe("host and guest over iroh", { skip: iroh ? false : "@number0/iroh is no
     guestBridge = createCoworkBridge({
       ...common,
       serverInfo: info(guestServer),
-      endpointKey: async () => Array.from(randomBytes(32)),
-      addRemoteWorkspace: async (input) => (added.push(input), { id: "remote_1" }),
+      endpointKey: async () => guestKey,
+      addRemoteWorkspace: async (input) => (added.push(input), { activeId: "rem_ws_1" }),
       emit: (event) => events.push(event),
+      joinStore,
+      redialMs: [50],
     });
   });
 
@@ -263,6 +291,61 @@ describe("host and guest over iroh", { skip: iroh ? false : "@number0/iroh is no
     // loopback-fetch: the guest's own loopback proxy.
     assert.equal((await fetch(`${joined.url}/w/ws_1${ROOM}`)).status, 403, "stopped hosting: nothing gets through");
     assert.deepEqual(await guestBridge.leave({ hostEndpointId: invite.endpointId, workspaceId: "ws_1", sessionId: "ses_1" }), { ok: true });
+    assert.deepEqual(await joinStore.read(), [], "leaving forgets the join");
+  });
+
+  it("after a restart, reaches the host again and moves the workspace when its port is taken", async () => {
+    const hosted = await hostBridge.host({ workspaceId: "ws_1", sessionId: "ses_1" });
+    const joined = await guestBridge.join({ link: hosted.link, participant: lee });
+    const [saved] = await joinStore.read();
+    assert.equal(saved.remoteWorkspaceId, "rem_ws_1");
+    assert.equal(saved.port, Number(new URL(joined.url).port));
+    assert.equal(saved.hostEndpointId, hosted.endpointId);
+
+    // The app quits; something else takes the old port before it starts again.
+    await guestBridge.close();
+    const blocker = await new Promise((resolve) => {
+      const server = http.createServer();
+      server.listen(saved.port, "127.0.0.1", () => resolve(server));
+    });
+    const restartedEvents = [];
+    guestBridge = createCoworkBridge({
+      platform: process.platform,
+      arch: process.arch,
+      packaged: false,
+      fallbackRelay: /** @type {"disabled"} */ ("disabled"),
+      bindAddr: "127.0.0.1:0",
+      directAddresses: true,
+      scheme: "redrob",
+      localFetch,
+      loadIroh: async () => iroh,
+      serverInfo: info(guestServer),
+      endpointKey: async () => guestKey,
+      addRemoteWorkspace: async () => assert.fail("a rejoin adds nothing"),
+      updateRemoteWorkspace: async (input) => void updated.push(input),
+      emit: (event) => restartedEvents.push(event),
+      joinStore,
+      redialMs: [50],
+    });
+    try {
+      // The earlier test stopped hosting; the host is back for this chat.
+      await hostBridge.host({ workspaceId: "ws_1", sessionId: "ses_1" });
+      assert.deepEqual(await guestBridge.rejoin(), { rejoining: 1 });
+      const deadline = Date.now() + 10_000;
+      while (!restartedEvents.some((event) => event.phase === "reconnected") && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 50));
+      assert.ok(restartedEvents.some((event) => event.phase === "reconnected"), JSON.stringify(restartedEvents));
+      const status = /** @type {{ joined: Array<{ url: string }> }} */ (await guestBridge.status());
+      const [{ url }] = status.joined;
+      assert.notEqual(Number(new URL(url).port), saved.port);
+      assert.deepEqual(updated, [{ workspaceId: "rem_ws_1", baseUrl: `${url}/w/ws_1`, redrobHostUrl: `${url}/w/ws_1` }]);
+      assert.equal((await joinStore.read())[0].port, Number(new URL(url).port));
+      // loopback-fetch: the guest's own loopback proxy, through to the host with the saved token.
+      const through = await fetch(`${url}/w/ws_1${ROOM}`, { headers: { authorization: "Bearer guest-token" } });
+      assert.equal(through.status, 200);
+    } finally {
+      blocker.close();
+      await guestBridge.leave({ hostEndpointId: saved.hostEndpointId, workspaceId: "ws_1", sessionId: "ses_1" });
+    }
   });
 
   it("a denied knock fails the join and leaves nothing behind", async () => {

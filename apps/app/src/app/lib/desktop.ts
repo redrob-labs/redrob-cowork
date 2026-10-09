@@ -87,6 +87,8 @@ export type CoworkStatus =
       relays?: string[];
       hosting: string[];
       joined: Array<{ hostEndpointId: string; workspaceId: string; sessionId: string; url: string }>;
+      /** Joined chats whose host is being dialled again. */
+      reconnecting?: string[];
     };
 
 export type CoworkHosted = { link: string; expiresAt: number; roomId: string; endpointId: string; relayUrl: string | null };
@@ -99,7 +101,7 @@ export type CoworkJoined = {
 };
 
 export type CoworkEvent =
-  | { type: "join"; phase: "dialing" | "waiting" | "joined" | "failed" | "disconnected"; code?: string; workspaceId?: string; sessionId?: string }
+  | { type: "join"; phase: "dialing" | "waiting" | "joined" | "failed" | "disconnected" | "reconnected"; code?: string; workspaceId?: string; sessionId?: string }
   | { type: "relay"; ok: boolean; code?: string }
   | { type: "guest-connected"; endpointId: string };
 

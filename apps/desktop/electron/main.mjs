@@ -39,7 +39,7 @@ import { createApplicationMenu } from "./app-menu.mjs";
 import { applyBrandAppName } from "./brand-app-name.mjs";
 import { createBrowserPanel } from "./browser-panel.mjs";
 import { createWorkspaceStore } from "./workspace-store.mjs";
-import { createCoworkBridge, loadEndpointKey, registerCoworkIpc } from "./cowork/bridge.mjs";
+import { createCoworkBridge, createJoinStore, loadEndpointKey, registerCoworkIpc } from "./cowork/bridge.mjs";
 import {
   buildNukeManifest,
   executeNukeFreshStart,
@@ -1072,6 +1072,9 @@ const coworkBridge = createCoworkBridge({
   localFetch: (url, init) => fetch(url, init),
   endpointKey: () => loadEndpointKey(path.join(app.getPath("userData"), "cowork")),
   addRemoteWorkspace: (input) => workspaceStore.createRemoteWorkspace(input),
+  // Joined chats survive a restart: the bridge redials them and moves the workspace if its port did.
+  joinStore: createJoinStore(path.join(app.getPath("userData"), "cowork")),
+  updateRemoteWorkspace: (input) => workspaceStore.updateRemoteWorkspace(input),
   emit: (event) => emitCoworkEvent(event),
   // Two dev instances on one machine with no relay: invites carry socket addresses.
   directAddresses: !app.isPackaged && process.env.REDROB_COWORK_DIRECT_ADDRESSES === "1",
@@ -2712,6 +2715,8 @@ or use: pnpm dev:worktree`);
     }));
 
     queueDeepLinks(forwardedDeepLinks(process.argv));
+    // Reach the hosts of chats joined before the restart. Nothing loads when there are none.
+    void coworkBridge.rejoin().catch(() => undefined);
     const win = await createMainWindow();
     if (process.platform === "linux" && !BLANK_SLATE_LAUNCH.enabled) {
       await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);
