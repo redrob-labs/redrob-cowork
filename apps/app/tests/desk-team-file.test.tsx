@@ -85,7 +85,7 @@ describe("the team file", () => {
       privacy: { level: "high", names: ["Seorin"], setBy: "Park Hyunjin" },
       notes: [{ text: "House style: numbered clauses" }],
     });
-    // The personal note and the workspace's own privacy entry stay home; playbooks travel.
+    // The personal note and the workspace's own privacy entry stay home; the workspace's files travel.
     expect(JSON.stringify(file)).not.toContain("Call me Jiwoo");
     expect(file.redrob.deskPrivacy).toBeUndefined();
     expect(file.commands?.[0]?.name).toBe("weekly-update");
@@ -100,7 +100,7 @@ describe("the team file", () => {
     // Reviewing changes nothing: only the server's preview is asked.
     const review = await reviewTeamFile(mate.client, "ws_mate", file);
     expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId"]);
-    expect(review).toMatchObject({ fingerprint: "fp-1", changes: 1, playbooks: 1, notesAdded: 1, notesRemoved: 0, connectors: [], plugins: [], permissions: false, policyManaged: false });
+    expect(review).toMatchObject({ fingerprint: "fp-1", changes: 1, skills: 0, notesAdded: 1, notesRemoved: 0, connectors: [], plugins: [], permissions: false, policyManaged: false });
     expect(await applyTeamFile(mate.client, "ws_mate", review)).toEqual({ notesAdded: 1, notesRemoved: 0, level: "strict", setBy: "Park", policyManaged: false });
     // The level goes first: it is the step a refusal comes at, so a refusal changes nothing.
     expect(mate.calls).toEqual(["preview:commands,exportedAt,redrob,workspaceId", "patch", "import:fp-1", "save:House style:desk-scope:team"]);
@@ -123,9 +123,6 @@ describe("the team file", () => {
       getSessionSnapshot: unused,
       listArtifacts: unused,
       listMcp: unused,
-      listCommands: unused,
-      upsertCommand: unused,
-      deleteCommand: unused,
       listSchedules: unused,
       addSchedule: unused,
       updateSchedule: unused,

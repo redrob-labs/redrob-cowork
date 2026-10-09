@@ -132,9 +132,14 @@ describe("the server's schedules on the screen", () => {
       listMcp: unused,
       getConfig: unused,
       patchConfig: unused,
-      listCommands: unused,
-      upsertCommand: unused,
-      deleteCommand: unused,
+      getSkill: unused,
+      upsertSkill: unused,
+      deleteSkill: unused,
+      listLibrarySkills: unused,
+      getSkillTaxonomy: unused,
+      getLibrarySkill: unused,
+      installLibrarySkill: unused,
+      getTeamSkills: unused,
     };
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
     const board = await services.schedules.list();
@@ -152,7 +157,7 @@ describe("the server's schedules on the screen", () => {
     await services.schedules.update("s1", { target: skill, cadence: "Once", rule: once });
     const removed = await services.schedules.remove("s1");
     expect(removed.data.schedules.map((schedule) => schedule.id)).toEqual(["s2"]);
-    expect((await services.skills.list()).data).toEqual([{ name: "weekly-report", description: "The weekly report." }]);
+    expect((await services.skills.list()).data).toEqual([{ name: "weekly-report", description: "The weekly report.", origin: "mine", tags: {}, scope: "global" }]);
     expect(calls).toEqual([
       "list:ws_1",
       "answer:ws_1:w1:true",
@@ -189,7 +194,6 @@ describe("the server's schedules on the screen", () => {
     expect(html.split(">Delete<")).toHaveLength(3);
     expect(html).toContain('aria-label="Edit Send notices"');
     expect(html).toContain('aria-label="Delete weekly-update"');
-    expect(html).not.toContain('href="/playbooks"');
   });
 
   test("with nothing on a schedule, it says what to schedule and offers New schedule", () => {
@@ -278,7 +282,8 @@ describe("the schedule dialog", () => {
     const fromSkill = scheduleDraft({ schedule: skill, now });
     expect(fromSkill).toMatchObject({ kind: "skill", skill: "weekly-update", instructions: "Only the sales team." });
     expect(fromSkill.value).toMatchObject({ mode: "repeat", freq: "weekly", days: ["1"], time: "09:00" });
-    // A playbook's Schedule starts a prompt from the playbook's text.
+    // A skill's Schedule starts on that skill; a prompt to start from starts on the prompt.
+    expect(scheduleDraft({ now, skill: "weekly-update" })).toMatchObject({ kind: "skill", skill: "weekly-update", instructions: "" });
     expect(scheduleDraft({ now, prompt: "# Weekly update" })).toMatchObject({ kind: "prompt", text: "# Weekly update" });
   });
 });

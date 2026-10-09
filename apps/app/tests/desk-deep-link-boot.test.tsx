@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { isValidElement, type ReactElement } from "react";
+import { Navigate } from "react-router";
 
 import { RouteReady, deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 
@@ -16,9 +17,10 @@ describe("desk deep links lift the boot overlay", () => {
   test("every screen route is wrapped in RouteReady", () => {
     const screens = routes.filter((route) => {
       const element = route.props.element;
-      return element !== chat && isValidElement(element) && (element.type as { name?: string }).name !== "RedirectToChat";
+      // Redirects (to the chat, and from the old Playbooks paths to Skills) render no screen of their own.
+      return element !== chat && isValidElement(element) && element.type !== Navigate && (element.type as { name?: string }).name !== "RedirectToChat";
     });
-    expect(screens.length).toBeGreaterThanOrEqual(12);
+    expect(screens.length).toBeGreaterThanOrEqual(11);
     for (const route of screens) {
       expect({ path: route.props.path, wrapped: route.props.element.type === RouteReady }).toEqual({
         path: route.props.path,

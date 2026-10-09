@@ -157,6 +157,16 @@ export type RedrobPluginItem = {
   path?: string;
 };
 
+/** A SKILL.md's `metadata`, as redrob-server lists it. */
+export type RedrobSkillMetadata = {
+  profession?: string;
+  task?: string;
+  language?: string;
+  family?: string;
+  version?: number;
+  source?: "team" | "library";
+};
+
 export type RedrobSkillItem = {
   name: string;
   path: string;
@@ -164,6 +174,41 @@ export type RedrobSkillItem = {
   scope: "project" | "global";
   trigger?: string;
   error?: string;
+  metadata?: RedrobSkillMetadata;
+};
+
+/** Where a library answer came from: the Console, or the copy bundled with redrob-server. */
+export type RedrobLibrarySource = "console" | "snapshot";
+
+export type RedrobLibrarySkillSummary = {
+  name: string;
+  description: string;
+  profession: string;
+  task: string;
+  language: string;
+  family: string;
+  version: number;
+};
+
+export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; content: string; source: RedrobLibrarySource };
+
+export type RedrobLibraryFilter = { profession?: string; task?: string; language?: string; q?: string };
+
+export type RedrobSkillLabel = { en: string; ko: string };
+
+export type RedrobSkillTaxonomy = {
+  professions: Array<{ id: string; label: RedrobSkillLabel; tasks: Array<{ id: string; label: RedrobSkillLabel }> }>;
+  languages: Array<{ id: string; label: RedrobSkillLabel }>;
+  source: RedrobLibrarySource;
+};
+
+/** GET /workspace/:id/skills/team: what the last check of the Console installed. */
+export type RedrobTeamSkillsState = {
+  etag: string | null;
+  installed: string[];
+  conflicts: string[];
+  lastSyncAt: number | null;
+  status: "synced" | "not_connected" | "not_member" | "unreachable" | null;
 };
 
 export type RedrobSkillContent = {
@@ -1581,6 +1626,35 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken },
       );
     },
+    listLibrarySkills: (workspaceId: string, filter: RedrobLibraryFilter = {}) => {
+      const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => Boolean(value))).toString();
+      return requestJson<{ version: string; skills: RedrobLibrarySkillSummary[]; source: RedrobLibrarySource }>(
+        baseUrl,
+        `/workspace/${workspaceId}/skills/library${query ? `?${query}` : ""}`,
+        { token, hostToken },
+      );
+    },
+    getSkillTaxonomy: (workspaceId: string) =>
+      requestJson<RedrobSkillTaxonomy>(baseUrl, `/workspace/${workspaceId}/skills/library/taxonomy`, { token, hostToken }),
+    getLibrarySkill: (workspaceId: string, name: string) =>
+      requestJson<RedrobLibrarySkill>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}`, {
+        token,
+        hostToken,
+      }),
+    installLibrarySkill: (workspaceId: string, name: string) =>
+      requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}/install`, {
+        token,
+        hostToken,
+        method: "POST",
+      }),
+    getTeamSkills: (workspaceId: string) =>
+      requestJson<RedrobTeamSkillsState>(baseUrl, `/workspace/${workspaceId}/skills/team`, { token, hostToken }),
+    syncTeamSkills: (workspaceId: string) =>
+      requestJson<RedrobTeamSkillsState>(baseUrl, `/workspace/${workspaceId}/skills/team/sync`, {
+        token,
+        hostToken,
+        method: "POST",
+      }),
     upsertSkill: (workspaceId: string, payload: { name: string; content: string; description?: string }) =>
       requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills`, {
         token,

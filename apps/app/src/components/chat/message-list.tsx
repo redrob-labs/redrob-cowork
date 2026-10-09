@@ -682,7 +682,7 @@ const UserMessage = React.memo(
     // What the person wrote, with the real details where placeholders were sent.
     const placeholders = usePlaceholderMap(sessionId)
     const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
-    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    // Inside the Desk frame a prompt worth repeating can become a skill.
     const inDeskFrame = useInDeskFrame()
     const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
@@ -756,12 +756,12 @@ const UserMessage = React.memo(
                       </MessageAction>
                     ) : null}
                     {inDeskFrame && messageText ? (
-                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                      <MessageAction tooltip={t("desk.skill_save_from_message")}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("desk.playbook_save_from_message")}
-                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                          aria-label={t("desk.skill_save_from_message")}
+                          onClick={() => openModal({ kind: "skill", instructions: messageText })}
                         >
                           <BookmarkPlus />
                         </Button>

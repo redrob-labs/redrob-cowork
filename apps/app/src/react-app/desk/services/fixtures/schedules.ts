@@ -1,4 +1,4 @@
-import type { DeskSkill, ScheduleBoard, ScheduleTarget } from "../types";
+import type { ScheduleBoard, ScheduleTarget } from "../types";
 import { at } from "./sample-day";
 
 const RENEWAL_SWEEP: ScheduleTarget = {
@@ -7,13 +7,6 @@ const RENEWAL_SWEEP: ScheduleTarget = {
 };
 const DEADLINES: ScheduleTarget = { kind: "skill", name: "deadline-tracker", instructions: "Count under the Civil Procedure Act and skip public holidays." };
 const FIRST_REVIEW: ScheduleTarget = { kind: "skill", name: "first-review" };
-
-/** Sample skills a schedule can run. */
-export const SKILLS: DeskSkill[] = [
-  { name: "deadline-tracker", description: "Reads court orders and adds each deadline to the team calendar." },
-  { name: "first-review", description: "Reviews a contract draft against the house positions and marks what departs." },
-  { name: "weekly-report", description: "Writes the weekly status report from the week's files." },
-];
 
 export const SCHEDULE_BOARD: ScheduleBoard = {
   waiting: [

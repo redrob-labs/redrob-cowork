@@ -13,7 +13,7 @@ import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
-import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/playbooks/start-chat";
+import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/skills/start-chat";
 import { syncCrashReports } from "@/react-app/desk/settings/crash-reports";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
@@ -2358,7 +2358,7 @@ export function SessionRoute() {
    * workspace under the user's home folder instead of asking where to put
    * it. Falls back to the create-workspace modal off desktop.
    */
-  // A new chat that sends its first prompt itself: the new chat screen, and a playbook's Run.
+  // A new chat that sends its first prompt itself: the new chat screen, and a skill's Run.
   const createTaskWithPrompt = (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => {
     void (async () => {
       const workspace = workspaces.find((item) => item.id === workspaceId);
@@ -2408,7 +2408,7 @@ export function SessionRoute() {
     })();
   };
 
-  // A playbook asked for a chat from its own screen: start it here, where chats are made.
+  // A skill asked for a chat from its own screen: start it here, where chats are made.
   const startPendingChat = useEffectEvent((pending: PendingDeskChat) => {
     if (!workspaces.some((item) => item.id === pending.workspaceId)) return;
     useDeskStartStore.getState().clear();
