@@ -1,3 +1,5 @@
+import { join, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ApiError } from "./errors.js";
 import type { Actor } from "./types.js";
 import { isRecord } from "./workspace-kv-store.js";
@@ -11,7 +13,8 @@ import { isRecord } from "./workspace-kv-store.js";
  * docs/features/handoff-and-live-coworking/README.md, "Guest tokens".
  */
 
-export const GUEST_CAPABILITIES = ["send", "approve", "stop"] as const;
+/** `attach` lets a guest put files in the chat's upload folder on the host. Off unless granted. */
+export const GUEST_CAPABILITIES = ["send", "approve", "stop", "attach"] as const;
 export type GuestCapability = (typeof GUEST_CAPABILITIES)[number];
 export const DEFAULT_GUEST_CAPABILITIES: readonly GuestCapability[] = ["send", "stop"];
 
@@ -51,7 +54,8 @@ function forbidden(message = "Guests can only reach the shared chat"): never {
 
 export function requireCapability(guest: GuestGrant, capability: GuestCapability): void {
   if (!guest.capabilities.includes(capability)) {
-    const what = capability === "send" ? "send messages" : capability === "approve" ? "answer what the agent asks" : "stop the agent";
+    const what =
+      capability === "send" ? "send messages" : capability === "approve" ? "answer what the agent asks" : capability === "stop" ? "stop the agent" : "attach files";
     throw new ApiError(403, "guest_capability_missing", `The host has not let you ${what}`);
   }
 }
@@ -274,4 +278,32 @@ export function planOnlyBody(guest: GuestGrant | undefined, body: unknown, planA
   if (!guest?.planOnly) return null;
   if (!isRecord(body)) throw new ApiError(400, "invalid_payload", "A message body is required");
   return { ...body, agent: planAgent };
+}
+
+/** Where a guest's attachments for one chat are kept on the host, under the workspace inbox. */
+export function guestAttachmentDir(inboxDir: string, sessionId: string): string {
+  return join(inboxDir, "cowork", sessionId);
+}
+
+/**
+ * A guest's prompt may carry files only as inline images or as files it uploaded to this chat's
+ * folder. Any other `file://` (a path elsewhere on the host) or URL is refused: otherwise a guest
+ * could point the agent at whatever the host can read, by writing the part by hand.
+ */
+export function assertGuestFileParts(body: unknown, allowedDir: string): void {
+  if (!isRecord(body) || !Array.isArray(body.parts)) return;
+  const root = resolve(allowedDir) + sep;
+  for (const part of body.parts) {
+    if (!isRecord(part) || part.type !== "file") continue;
+    const url = typeof part.url === "string" ? part.url : "";
+    if (/^data:image\/[a-z0-9.+-]+;base64,/i.test(url)) continue;
+    let path = "";
+    try {
+      path = url.startsWith("file://") ? resolve(fileURLToPath(url)) : "";
+    } catch {
+      path = "";
+    }
+    if (path && path.startsWith(root)) continue;
+    throw new ApiError(403, "guest_file_forbidden", "Guests can attach only files they uploaded to this chat");
+  }
 }

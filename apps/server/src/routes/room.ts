@@ -40,7 +40,18 @@ import {
   pendingKnocks,
   revokeInvites,
 } from "../cowork-invites.js";
-import { DEFAULT_GUEST_CAPABILITIES, planOnlyBody, readCapabilities, requireCapability, type GuestCapability } from "../guest-access.js";
+import {
+  DEFAULT_GUEST_CAPABILITIES,
+  assertGuestFileParts,
+  guestAttachmentDir,
+  planOnlyBody,
+  readCapabilities,
+  requireCapability,
+  type GuestCapability,
+} from "../guest-access.js";
+import { mkdir, rename, writeFile } from "node:fs/promises";
+import { basename, join, relative } from "node:path";
+import { pathToFileURL } from "node:url";
 import { DESK_PLAN_AGENT } from "../redrob-desk-agents.js";
 import { isParticipantId, normalizeDisplayName } from "../participant-profile.js";
 import { isSafeId, type ReviewAuthor } from "../review-store.js";
@@ -59,6 +70,8 @@ export interface RegisterRoomRoutesOptions {
   ensureWritable: (config: ServerConfig) => void;
   resolveWorkspaceWithoutBootstrap: (config: ServerConfig, id: string) => Promise<WorkspaceInfo>;
   resolveAuthor: (ctx: RequestContext) => Promise<ReviewAuthor>;
+  /** Where a room's uploads go, and how big one may be (the workspace inbox's own settings). */
+  attachments: { inboxDir: (workspace: WorkspaceInfo) => string; maxBytes: () => number; enabled: () => boolean };
   /** The chat's messages from the engine, for cost per author. */
   sessionMessages: (workspace: WorkspaceInfo, sessionId: string) => Promise<unknown>;
   /** How the room's queue reaches the engine for this chat: whether it is busy, and sending. */
@@ -420,6 +433,56 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     return jsonResponse({ ok: true, status: "allowed", tokenId: issued.id });
   });
 
+  /* ---------- Attachments ---------- */
+
+  /**
+   * A file for the shared chat, from anyone in the room; a guest needs `attach`. It lands in this
+   * chat's folder under the workspace inbox, with a name the server picks, and the answer says
+   * where, so the sender's app can attach it without knowing the host's folders. Only files here
+   * pass a guest's prompt check (assertGuestFileParts).
+   */
+  addRoute(routes, "POST", "/workspace/:id/sessions/:sessionId/room/attachments", "client", async (ctx) => {
+    ensureWritable(config);
+    const { workspace, sessionId } = await requireRoom(ctx);
+    if (ctx.actor?.guest) requireCapability(ctx.actor.guest, "attach");
+    else if (ctx.actor?.scope === "viewer") throw new ApiError(403, "forbidden", "Viewer tokens are read-only");
+    if (!options.attachments.enabled()) throw new ApiError(404, "inbox_disabled", "Uploads are turned off on this computer");
+    if (!(ctx.request.headers.get("content-type") ?? "").toLowerCase().includes("multipart/form-data")) {
+      throw new ApiError(400, "invalid_payload", "Expected multipart/form-data");
+    }
+    let form: FormData;
+    try {
+      form = await ctx.request.formData();
+    } catch {
+      throw new ApiError(400, "invalid_payload", "Malformed multipart/form-data");
+    }
+    const file = form.get("file");
+    if (!(file instanceof File)) throw new ApiError(400, "file_required", "Form field 'file' is required");
+    const maxBytes = options.attachments.maxBytes();
+    if (file.size > maxBytes) throw new ApiError(413, "file_too_large", "File exceeds upload limit", { maxBytes, size: file.size });
+    const filename = safeUploadName(file.name);
+    const dir = guestAttachmentDir(options.attachments.inboxDir(workspace), sessionId);
+    await mkdir(dir, { recursive: true });
+    const dest = join(dir, `${shortId()}-${filename}`);
+    const tmp = join(dir, `.upload-${shortId()}.tmp`);
+    await writeFile(tmp, Buffer.from(await file.arrayBuffer()));
+    await rename(tmp, dest);
+    const who = await resolveAuthor(ctx);
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "host" },
+      action: "room.attachment",
+      target: sessionId,
+      summary: `${who.displayName || "Someone"} attached ${filename} to the live room`,
+      timestamp: Date.now(),
+    });
+    return jsonResponse(
+      { filename, mime: file.type || "application/octet-stream", bytes: file.size, url: pathToFileURL(dest).href, workspacePath: relative(workspace.path, dest).split("\\").join("/") },
+      201,
+    );
+  });
+
   /* ---------- The shared queue ---------- */
 
   const announceQueue = (roomId: string) => broadcast(roomId, { type: "room.queue", queue: queueView(roomId) });
@@ -437,6 +500,7 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     const body = await readJsonBody(ctx.request);
     const author = await resolveAuthor(ctx);
     // The queue sends later as the server, so a plan-only guest's agent is fixed now.
+    if (ctx.actor?.guest) assertGuestFileParts(body.body, guestAttachmentDir(options.attachments.inboxDir(workspace), sessionId));
     const prompt = planOnlyBody(ctx.actor?.guest, body.body, DESK_PLAN_AGENT) ?? body.body;
     let item: QueueItem;
     try {
@@ -473,4 +537,11 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     announceQueue(room.roomId);
     return jsonResponse({ queue: queueView(room.roomId) });
   });
+}
+
+/** A file name that is safe on every platform and says what the file was. */
+function safeUploadName(name: string): string {
+  const base = basename(String(name || "").replace(/\\/g, "/")).normalize("NFC");
+  const cleaned = base.replace(/[\u0000-\u001f<>:"/\\|?*]+/g, "_").replace(/^\.+/, "").trim();
+  return Array.from(cleaned || "attachment").slice(0, 120).join("");
 }
