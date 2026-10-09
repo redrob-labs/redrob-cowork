@@ -12,6 +12,7 @@ import { usePlatform } from "../../kernel/platform";
 import { kindsLabel, usePrivacyConfirmStore, type PrivacyConfirm } from "../privacy/privacy-send";
 import { PlaybookDialog } from "../playbooks/playbook-dialog";
 import { HandoffOpenHost } from "../handoff/handoff-open";
+import { CoworkJoinHost } from "../room/cowork";
 import { ProjectDialog } from "../projects/project-dialog";
 import { useDeskRunEvents } from "../run/use-desk-run-events";
 import { isDeskSettingsPath } from "../settings/settings-sections";
@@ -302,6 +303,7 @@ export function DeskLayerView(props: DeskLayerViewProps) {
       ) : null}
       <PrivacyConfirmDialog />
       <HandoffOpenHost />
+      <CoworkJoinHost />
       <DeskToast toast={props.toast} onClose={props.onCloseToast} />
     </>
   );

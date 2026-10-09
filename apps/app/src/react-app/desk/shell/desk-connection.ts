@@ -41,6 +41,20 @@ export type DeskReviewClient = Pick<
   "getSessionReview" | "addReviewComment" | "resolveReviewComment" | "deleteReviewComment" | "setReviewState"
 >;
 
+/** The calls live co-working adds: the room, who is waiting, and the host's guest list. */
+export type DeskRoomClient = Pick<
+  RedrobServerClient,
+  | "getRoom"
+  | "endRoom"
+  | "roomHeartbeat"
+  | "leaveRoom"
+  | "listRoomKnocks"
+  | "answerRoomKnock"
+  | "revokeRoomInvites"
+  | "setGuestCapabilities"
+  | "removeGuest"
+>;
+
 export type DeskConnection = {
   client:
     | (DeskServerClient &
@@ -53,7 +67,8 @@ export type DeskConnection = {
         DeskReviewClient &
         DeskHandoffClient &
         DeskHandoffOpenClient &
-        DeskHandoffReplyClient)
+        DeskHandoffReplyClient &
+        DeskRoomClient)
     | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;

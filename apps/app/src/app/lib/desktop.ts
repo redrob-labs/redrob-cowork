@@ -74,6 +74,50 @@ export type RecoveryActionResult = {
 // Electron bridge surface
 // ---------------------------------------------------------------------------
 
+/** Every bridge call resolves to this: a value, or the reason it failed with a code to show. */
+export type CoworkResult<T> = { ok: true; value: T } | { ok: false; code: string; message: string };
+
+export type CoworkUnavailableReason = "intel_mac" | "binding_missing" | "self_check_failed";
+
+export type CoworkStatus =
+  | { available: false; reason: CoworkUnavailableReason }
+  | {
+      available: true;
+      endpointId?: string;
+      relays?: string[];
+      hosting: string[];
+      joined: Array<{ hostEndpointId: string; workspaceId: string; sessionId: string; url: string }>;
+    };
+
+export type CoworkHosted = { link: string; expiresAt: number; roomId: string; endpointId: string; relayUrl: string | null };
+
+export type CoworkJoined = {
+  workspace: { activeId?: string | null; selectedId?: string | null } | null;
+  url: string;
+  workspaceId: string;
+  sessionId: string;
+};
+
+export type CoworkEvent =
+  | { type: "join"; phase: "dialing" | "waiting" | "joined" | "failed" | "disconnected"; code?: string; workspaceId?: string; sessionId?: string }
+  | { type: "relay"; ok: boolean; code?: string }
+  | { type: "guest-connected"; endpointId: string };
+
+export type CoworkBridgeApi = {
+  status(): Promise<CoworkResult<CoworkStatus>>;
+  host(input: { workspaceId: string; sessionId: string }): Promise<CoworkResult<CoworkHosted>>;
+  stopHosting(input: { workspaceId: string }): Promise<CoworkResult<{ hosting: string[] }>>;
+  join(input: { link: string; participant: { participantId: string; displayName: string } }): Promise<CoworkResult<CoworkJoined>>;
+  cancelJoin(input: { link: string }): Promise<CoworkResult<{ ok: boolean }>>;
+  leave(input: { hostEndpointId: string; workspaceId: string; sessionId: string }): Promise<CoworkResult<{ ok: boolean }>>;
+  onEvent(callback: (event: CoworkEvent) => void): () => void;
+};
+
+/** The co-working bridge, in the desktop app only. */
+export function coworkBridge(): CoworkBridgeApi | null {
+  return typeof window !== "undefined" ? (window.__REDROB_ELECTRON__?.cowork ?? null) : null;
+}
+
 declare global {
   interface Window {
     __redrobRecoveryControl?: {
@@ -81,6 +125,8 @@ declare global {
       select: (id: string) => Promise<unknown>;
     };
     __REDROB_ELECTRON__?: {
+      /** Live co-working's bridge (apps/desktop/electron/cowork/bridge.mjs). */
+      cowork?: CoworkBridgeApi;
       invokeDesktop?: <C extends DesktopCommandName>(
         command: C,
         ...args: DesktopCommandArgs<C>

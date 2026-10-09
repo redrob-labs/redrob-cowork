@@ -517,6 +517,37 @@ export type RedrobParticipantProfile = {
   updatedAt: number;
 };
 
+/* ---------- Live co-working (apps/server/src/routes/room.ts) ---------- */
+
+export type RedrobGuestCapability = "send" | "approve" | "stop";
+
+export type RedrobRoomParticipant = {
+  participantId: string;
+  displayName: string;
+  role: "host" | "guest";
+  present: boolean;
+  typing: boolean;
+  capabilities?: RedrobGuestCapability[];
+  /** Only the host sees these. */
+  tokenId?: string;
+  expiresAt?: number;
+};
+
+export type RedrobRoomAuthorship = { messageId: string; participantId: string; displayName: string; at: number };
+
+export type RedrobRoomView = {
+  room: { roomId: string; workspaceId: string; sessionId: string; host: { participantId: string; displayName: string }; createdAt: number };
+  me: { participantId: string; displayName: string };
+  participants: RedrobRoomParticipant[];
+  authorship: RedrobRoomAuthorship[];
+};
+
+export type RedrobRoomKnock = { knockId: string; participant: { participantId: string; displayName: string }; endpointId: string; createdAt: number };
+
+function roomPath(workspaceId: string, sessionId: string): string {
+  return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/room`;
+}
+
 export type RedrobWorkspaceExportWarning = {
   id: string;
   label: string;
@@ -1372,6 +1403,49 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       });
       return response.profile;
     },
+    /** The chat's live room, or null when none is open. */
+    getRoom: async (workspaceId: string, sessionId: string): Promise<RedrobRoomView | null> => {
+      const payload = await requestJson<RedrobRoomView | { room: null }>(baseUrl, roomPath(workspaceId, sessionId), { token, hostToken, timeoutMs: timeouts.config });
+      return payload.room ? payload : null;
+    },
+    endRoom: (workspaceId: string, sessionId: string): Promise<{ ok: boolean }> =>
+      requestJson(baseUrl, roomPath(workspaceId, sessionId), { token, hostToken, method: "DELETE", timeoutMs: timeouts.config }),
+    roomHeartbeat: (workspaceId: string, sessionId: string, state: { typing?: boolean } = {}): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/heartbeat`, { token, hostToken, method: "POST", body: state, timeoutMs: timeouts.config }),
+    leaveRoom: (workspaceId: string, sessionId: string): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/leave`, { token, hostToken, method: "POST", timeoutMs: timeouts.config }),
+    listRoomKnocks: async (workspaceId: string, sessionId: string): Promise<RedrobRoomKnock[]> =>
+      (await requestJson<{ knocks: RedrobRoomKnock[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/knocks`, { token, hostToken, timeoutMs: timeouts.config })).knocks,
+    answerRoomKnock: (
+      workspaceId: string,
+      sessionId: string,
+      knockId: string,
+      answer: { allow: boolean; capabilities?: RedrobGuestCapability[] },
+    ): Promise<{ ok: boolean; status: "allowed" | "denied" }> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/knocks/${encodeURIComponent(knockId)}`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: answer,
+        timeoutMs: timeouts.config,
+      }),
+    revokeRoomInvites: (workspaceId: string, sessionId: string): Promise<{ ok: boolean }> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/invites`, { token, hostToken, method: "DELETE", timeoutMs: timeouts.config }),
+    setGuestCapabilities: (workspaceId: string, sessionId: string, tokenId: string, capabilities: RedrobGuestCapability[]): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/guests/${encodeURIComponent(tokenId)}`, {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: { capabilities },
+        timeoutMs: timeouts.config,
+      }),
+    removeGuest: (workspaceId: string, sessionId: string, tokenId: string): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/guests/${encodeURIComponent(tokenId)}`, {
+        token,
+        hostToken,
+        method: "DELETE",
+        timeoutMs: timeouts.config,
+      }),
     // The memory bank is global, not workspace-scoped: it replaced an
     // organization-scoped hosted store that followed the user across projects.
     listMemories: async (): Promise<Memory[]> => {
