@@ -167,6 +167,25 @@ describe("following the team policy from the console", () => {
     expect(await privacy()).toMatchObject({ locked: true });
   });
 
+  test("a schema v1 policy (with playbooks) is refused and reported as unsupported_version", async () => {
+    const good = standInConsole([await signed(1)]);
+    await syncTeamPolicy(config, workspace, deps(good.fetchImpl), { join: true });
+
+    const v1 = await signTestPolicy({
+      ...samplePolicy({ version: 2 }),
+      v: 1,
+      playbooks: [{ name: "weekly-update", template: "Write this week's update." }],
+    });
+    const old = standInConsole([{ status: 200, body: { version: 2, jws: v1 } }]);
+    expect(await syncTeamPolicy(config, workspace, deps(old.fetchImpl))).toEqual({
+      status: "refused",
+      code: "team_policy_unsupported_version",
+      version: 2,
+    });
+    expect(old.reports()[0]!.body).toEqual({ version: 2, ok: false, code: "team_policy_unsupported_version" });
+    expect((await readTeamPolicyState(config, workspace.id))?.version).toBe(1);
+  });
+
   test("a policy for another team is refused while this workspace follows one", async () => {
     const first = standInConsole([await signed(1)]);
     await syncTeamPolicy(config, workspace, deps(first.fetchImpl), { join: true });

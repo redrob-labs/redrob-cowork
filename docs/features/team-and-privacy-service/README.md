@@ -68,9 +68,15 @@ accept it, so teams get real policies only after K4 and C9.
 One JSON document per console account, signed by the console. The app trusts nothing about a
 policy that the signature does not cover.
 
+Schema v2 carries the privacy setting, team notes, the connector allowlist and skills. v1 also
+carried `playbooks` (opencode commands); they were retired in favour of skills. The app refuses a
+v1 policy, or any policy that still has a `playbooks` field, with `team_policy_unsupported_version`,
+and reports that code to the console. Commands a v1 policy installed are deleted on the next
+successful apply or on leaving the team.
+
 ```jsonc
 {
-  "v": 1,
+  "v": 2,
   "accountId": "acc_...",
   "version": 42,                     // only goes up; the app ignores anything not newer
   "issuedAt": "2026-10-06T00:00:00Z",
@@ -87,8 +93,7 @@ policy that the signature does not cover.
     "allow": [{ "name": "notes", "type": "remote", "url": "https://..." }],
     "allowLocalPrograms": false
   },
-  "playbooks": [{ "name": "weekly-update", "template": "..." }],
-  "skills": []
+  "skills": [{ "name": "house-style", "description": "House style", "content": "..." }]
 }
 ```
 
@@ -103,7 +108,7 @@ policy that the signature does not cover.
 1. Check the signature, that `accountId` matches the account the device key belongs to, and that
    `version` is newer than the stored one.
 2. Apply the privacy level and lock, the team notes (tagged `desk-locked`, replaced as a whole
-   set), playbooks, skills and the connector allowlist.
+   set), skills and the connector allowlist.
 3. Record `policy.applied` with the version.
 
 **Locks.** A locked setting changes only through a newer signed policy. Connectors outside the
@@ -112,8 +117,7 @@ allowlist are refused at the server's MCP routes; one that starts a local progra
 
 **Offline and membership.** There is no expiry: the last verified policy keeps applying and locks
 never fall back to unlocked. After 7 days without a successful check the app shows when it last
-checked. On a definitive "not a member" answer the app removes that team's notes, playbooks and
-skills.
+checked. On a definitive "not a member" answer the app removes that team's notes and skills.
 
 ## Console API
 
