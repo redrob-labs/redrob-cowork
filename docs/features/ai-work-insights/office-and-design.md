@@ -114,14 +114,21 @@ Cowork's #135 and #136, and Console's #224, land first.
 2. **Design runs the model as WASM in the webview**, after the spike (PR 4) confirms parity, latency and memory. Native `ort` is the fallback if it does not.
 3. **Office: Docs, Sheets and Slides first**; PDF, Markdown and Hangul later.
 
-## Before Office (PR 3) can start
+## Office's key: the engine sends the batch (decided 2026-10-08)
 
-- **The package must be on npm.** Office and Design install `@redrob-labs/work-labeller` from the registry, as they do `@redrob-labs/ui`. That needs #153 and #154 merged, then a `work-labeller-v1.0.0` tag, which `ci-work-labeller.yml` publishes with `NPM_TOKEN`.
-- **Where Office reads the Redrob Key from (open).**
-  - Sync posts with the person's key. Today Office keeps that key in `userData/ai-settings.json`, written by `redrob-connect.ts`, and its chat calls Console directly with it.
-  - But Office's `AGENTS.md` (since #24) says "Office never holds a provider key": credentials are meant to live in the bundled engine's store. The engine routes exist (#25, #26), but chat does not go through them yet.
-  - Options:
-    - (a) Read the key from `ai-settings.json`, like the editors do now.
-    - (b) Have the engine send the batch, as Cowork's server reads the key from its engine.
-  - (b) follows the rule, but waits for Office's move to the engine.
+Office's `AGENTS.md` says "Office never holds a provider key", and its `EngineIntegrationClient` has no read path for a key on purpose ("a caller that cannot read a key cannot log it, sync it, or leak it"). So Office does not post to the console itself. It hands each batch to the bundled engine, which posts it with the Redrob key it holds and answers with the console's counts. Reading the key back from the engine's `GET /provider`, as Cowork's server does, was ruled out for the same reason.
 
+| Step | Repository | Change | Status |
+| --- | --- | --- | --- |
+| E1 | redrob-code | `POST /api/insights/sessions`. Takes 1 to 500 sessions and posts them to `${CONSOLE_URL}/insights/sessions` with the engine's key. No URL from the caller; the key is never in a reply. | redrob-code#67 |
+| E2 | redrob-code | A release with E1, and Office's pin moved to it | after E1 |
+| O1 | office | **The key moves into the engine.** Connect Redrob and the Settings key field store the key with `EngineIntegrationClient.connectKey('redrob', …)`. A key already in `ai-settings.json` is moved over once, then removed from the file. | needs E2 |
+| O2 | office | **Chat calls through the engine** (`/v1/chat/completions`, LOCAL-ENGINE-API.md), since after O1 Office no longer has the key to call the console directly. The `x-redrob-session` header goes on that request. | needs O1 |
+| O3 | office | **Labels**: the recorder over `AgentLoopEvents`, the classifier in a utility process with the model downloaded on first use (`@redrob-labs/work-labeller`), and a file outbox. Sync hands each batch to E1 through the engine's loopback client, starting the engine when needed. | needs E2 and the package on npm |
+
+O1 and O2 are Office's own move to engine-held credentials, which its `AGENTS.md` already calls for; insights only needs them first. O3 does not depend on O2 for the key, only for the session header: until O2, Office's requests carry no `x-redrob-session`, so the console cannot join a session to its cost.
+
+## Still needed from outside these repositories
+
+- **The package on npm.** Merge #153 and #154, then push a `work-labeller-v1.0.0` tag; `ci-work-labeller.yml` publishes it with `NPM_TOKEN`.
+- **The model release:** `insights-model-e5-base-2026.10`.
