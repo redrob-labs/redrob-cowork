@@ -29,6 +29,11 @@ import {
   resolveSameServerMcpAppResource,
 } from "./mcp-app-host.js";
 import {
+  ARTIFACT_PREVIEW_CSP,
+  ARTIFACT_PREVIEW_SANDBOX_HTML,
+  ARTIFACT_PREVIEW_SANDBOX_SCRIPT,
+} from "./artifact-preview-sandbox.js";
+import {
   buildMcpAppSandboxCsp,
   MCP_APP_SANDBOX_PROXY_CSS,
   MCP_APP_SANDBOX_PROXY_HTML,
@@ -3401,6 +3406,18 @@ function createRoutes(
     },
   }));
   addRoute(routes, "GET", "/mcp-apps/sandbox.js", "none", async () => new Response(MCP_APP_SANDBOX_PROXY_SCRIPT, {
+    headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+  }));
+  addRoute(routes, "GET", "/artifact-preview/sandbox.html", "none", async () => new Response(ARTIFACT_PREVIEW_SANDBOX_HTML, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Security-Policy": ARTIFACT_PREVIEW_CSP,
+      "Cache-Control": "no-store",
+      "Referrer-Policy": "strict-origin",
+      "X-Content-Type-Options": "nosniff",
+    },
+  }));
+  addRoute(routes, "GET", "/artifact-preview/sandbox.js", "none", async () => new Response(ARTIFACT_PREVIEW_SANDBOX_SCRIPT, {
     headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
   }));
   addRoute(routes, "GET", "/mcp-apps/sandbox.css", "none", async () => new Response(MCP_APP_SANDBOX_PROXY_CSS, {
