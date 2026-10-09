@@ -61,7 +61,7 @@ import { opencodeConfigPath, redrobConfigPath, projectCommandsDir, projectSkills
 import { migrateLegacyGlobalConfig } from "./engine-config-migrate.js";
 import { ensureDir, exists, hashToken, shortId } from "./utils.js";
 import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles, readRawOpencodeConfig } from "./workspace-init.js";
-import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./validators.js";
+import { sanitizeCommandName, validateMcpName, validateSkillName, validateUserMcpName } from "./validators.js";
 import { TokenService } from "./tokens.js";
 import { resetManagedProviderAuthCache, syncManagedProviderAuth } from "./managed-provider-auth.js";
 import {
@@ -166,6 +166,8 @@ import {
 import { readHarnessAvailability } from "./harness-availability.js";
 import { PrivacyGate } from "./privacy/gate.js";
 import { RouteLabelSource } from "./route/label-source.js";
+import { createSkillLibrary, installLibrarySkill, libraryFilterFrom } from "./skill-library/library.js";
+import { readTeamSkillsState, startTeamSkillsSync, syncTeamSkills, type TeamSkillsSyncDeps } from "./team-skills/sync.js";
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
@@ -1303,12 +1305,17 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startTeamPolicySync(config, teamPolicySyncDeps(config), logger);
+  // Every local workspace gets its team's skills from the Console; see team-skills/sync.ts.
+  const stopTeamSkillsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startTeamSkillsSync(config, teamSkillsSyncDeps(config, reloadEvents), logger);
 
   return {
     ...server,
     stop: async () => {
       stopScheduler();
       stopTeamPolicySync();
+      stopTeamSkillsSync();
       stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
@@ -1321,6 +1328,14 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
 /** The key comes from the engine at the moment of each check; nothing here stores it. */
 function teamPolicySyncDeps(config: ServerConfig): TeamPolicySyncDeps {
   return { readKey: () => readRedrobEngineKey({ config }) };
+}
+
+/** Like the team policy's: the key comes from the engine at the moment of each check. */
+function teamSkillsSyncDeps(config: ServerConfig, reloadEvents: ReloadEventStore): TeamSkillsSyncDeps {
+  return {
+    readKey: () => readRedrobEngineKey({ config }),
+    onChange: (workspace) => reloadEvents.recordDebounced(workspace.id, "skills"),
+  };
 }
 
 function buildOpencodeProxyUrl(baseUrl: string, path: string, search: string) {
@@ -3291,6 +3306,74 @@ function createRoutes(
     const includeGlobal = ctx.url.searchParams.get("includeGlobal") === "true";
     const items = await listSkills(workspace.path, includeGlobal);
     return jsonResponse({ items });
+  });
+
+  // The Console's default skill library; a bundled copy answers when the Console cannot.
+  const skillLibrary = createSkillLibrary();
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await skillLibrary.list(libraryFilterFrom(ctx.url.searchParams)));
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library/taxonomy", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await skillLibrary.taxonomy());
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library/:name", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    const skill = name ? await skillLibrary.get(name) : null;
+    if (!skill) throw new ApiError(404, "library_skill_not_found", `No library skill named ${name}`);
+    return jsonResponse(skill);
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    validateSkillName(name);
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "skills.install",
+      summary: `Add library skill ${name}`,
+      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+    });
+    const result = await installLibrarySkill(workspace.path, skillLibrary, name);
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "skills.install",
+      target: result.path,
+      summary: `Added library skill ${name}`,
+      timestamp: Date.now(),
+    });
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills", {
+      type: "skill",
+      name,
+      action: "added",
+      path: result.path,
+    });
+    return jsonResponse({ name, path: result.path, description: result.skill.description, scope: "project" });
+  });
+
+  // Team skills: what the last check of the Console installed, and why any were left out.
+  addRoute(routes, "GET", "/workspace/:id/skills/team", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await readTeamSkillsState(config, workspace.id));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/skills/team/sync", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    if (workspace.workspaceType === "remote") {
+      throw new ApiError(400, "remote_workspace", "Team skills are installed into local workspaces only");
+    }
+    return jsonResponse(await syncTeamSkills(config, workspace, teamSkillsSyncDeps(config, ctx.reloadEvents)));
   });
 
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
