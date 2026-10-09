@@ -43,6 +43,8 @@ const WRITE_TOOL_NAMES = new Set([
   "apply_patch",
   "edit",
   "edit_file",
+  // The engine's image tool writes its picture under artifacts/ and names it in its output.
+  "image_generate",
   "multi_edit",
   "multiedit",
   "patch",
@@ -368,4 +370,23 @@ export function deriveOpenTargets(messages: UIMessage[], options: DeriveOpenTarg
   return Array.from(targets.values())
     .filter(isArtifactTarget)
     .sort((left, right) => right.confidence - left.confidence);
+}
+
+/**
+ * One token per completed file-writing tool call, so a change in it means a file was just written.
+ *
+ * The verified targets (and with them `updatedAt`, which keys the preview) were refreshed only when a
+ * turn started or ended, or when the SET of targets changed. A page the agent rewrites three times in one
+ * turn is one target throughout, so its preview showed the first version until the turn ended. Counting
+ * completed writes instead catches every write as it lands.
+ */
+export function completedWritesFingerprint(messages: UIMessage[]): string {
+  const calls: string[] = [];
+  for (const message of messages) {
+    for (const part of message.parts) {
+      if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
+      if (isWriteTool(part.toolName) || isArtifactMetadataTool(part.toolName)) calls.push(part.toolCallId);
+    }
+  }
+  return calls.join("|");
 }
