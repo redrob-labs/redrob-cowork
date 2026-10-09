@@ -18,6 +18,8 @@ import {
 } from "./classifier.js";
 
 export * from "./index.js";
+export { ensureWorkModel, MIN_FREE_BYTES, modelDirectory, modelPresent, WorkModelDownloadError, WorkModelFetcher } from "./download.js";
+export type { DownloadProgress, EnsureOptions, WorkModelState } from "./download.js";
 
 export async function loadWorkClassifier(
   directory: string,

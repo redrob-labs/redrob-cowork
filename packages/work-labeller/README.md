@@ -26,6 +26,21 @@ await recorder.sweep(Date.now());
 await syncOutbox(outbox, { readKey, fetch, baseUrl: "https://console.redrob.ai/api/backend/v1" });
 ```
 
+### Download on first use
+
+Apps that do not bundle the model (Office) fetch it when it is first needed, in the background:
+
+```ts
+import { WorkModelFetcher, WorkClassifierSource } from "@redrob-labs/work-labeller/node";
+
+const fetcher = new WorkModelFetcher(join(app.getPath("userData"), "models", "insights"));
+// After a chat finishes, never at start-up or while one streams:
+const directory = await fetcher.request(); // null until ready; retries a failure after 1 min, 5 min, 30 min, 2 h
+fetcher.onChange((state) => showInSettings(state)); // absent | downloading | ready | failed
+```
+
+The files come from the release `MANIFEST` names. Each is streamed to disk and hashed as it streams. A broken download resumes with a byte range, and a file is kept only when its SHA-256 matches. The download needs 600 MB free, and removes the folders of older revisions once the new one is ready.
+
 In a webview, use `createWorkClassifier({ model, tokenizer }, ort)` from the runtime-neutral entry, with `onnxruntime-web` and bytes your app read. The files must hash to `MANIFEST`.
 
 ## Development
