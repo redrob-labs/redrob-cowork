@@ -57,6 +57,7 @@ export type DeskRoomClient = Pick<
   | "getRoomQueue"
   | "enqueueRoomMessage"
   | "removeRoomQueued"
+  | "editRoomQueued"
 >;
 
 export type DeskConnection = {
