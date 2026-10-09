@@ -92,6 +92,27 @@ export function ImagePreview({ src, alt, className, ...props }: ImagePreviewProp
   );
 }
 
+interface MediaPreviewProps extends React.ComponentProps<"div"> {
+  src: string;
+  title: string;
+}
+
+export function AudioPreview({ src, title, className, ...props }: MediaPreviewProps) {
+  return (
+    <div className={cn("flex h-full items-center justify-center bg-muted/30 p-6", className)} {...props}>
+      <audio src={src} controls preload="metadata" aria-label={title} className="w-full max-w-md" />
+    </div>
+  );
+}
+
+export function VideoPreview({ src, title, className, ...props }: MediaPreviewProps) {
+  return (
+    <div className={cn("flex h-full items-center justify-center bg-black/90 p-3", className)} {...props}>
+      <video src={src} controls preload="metadata" aria-label={title} className="max-h-full max-w-full" />
+    </div>
+  );
+}
+
 interface PreviewUnavailableProps extends React.ComponentProps<"div"> {}
 
 export function PreviewUnavailable({ className, ...props }: PreviewUnavailableProps) {
