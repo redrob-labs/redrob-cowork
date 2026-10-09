@@ -617,6 +617,8 @@ export type RoomQueueApi = {
   /** Queues `text` in the room. False (with a toast) when the server refused it. */
   enqueue(text: string): Promise<boolean>;
   remove(itemId: string): void;
+  /** Replaces a waiting message's text. False (with a toast) when the server refused it. */
+  edit(itemId: string, text: string): Promise<boolean>;
   canChange(item: RedrobRoomQueueItem): boolean;
 };
 
@@ -656,8 +658,79 @@ export function useRoomQueue(sessionId: string | null | undefined): RoomQueueApi
         (next) => queryClient.setQueryData(key, next),
         fail,
       ),
+    edit: async (itemId, text) => {
+      try {
+        queryClient.setQueryData(key, await client.editRoomQueued(workspaceId, sessionId, itemId, text));
+        return true;
+      } catch (error) {
+        fail(error);
+        return false;
+      }
+    },
     canChange: (item) => canChangeQueued(item, room),
   };
+}
+
+function RoomQueueRow(props: { item: RedrobRoomQueueItem; queue: RoomQueueApi; me: string | null }) {
+  const { item, queue } = props;
+  const [editing, setEditing] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const name = item.author.displayName.trim() || t("desk.review_unnamed");
+  const save = async () => {
+    const text = editing?.trim() ?? "";
+    if (!text) return;
+    setSaving(true);
+    if (await queue.edit(item.id, text)) setEditing(null);
+    setSaving(false);
+  };
+  return (
+    <li className="desk-cowork__person">
+      <Avatar size="xs" name={name} seed={item.author.participantId} />
+      {editing === null ? (
+        <span className="desk-cowork__name">
+          <b>{item.author.participantId === props.me ? t("desk.cowork_you") : name}</b> {item.preview}
+        </span>
+      ) : (
+        <span className="desk-cowork__name">
+          <Input
+            id={`desk-cowork-queue-${item.id}`}
+            label={t("desk.cowork_queue_edit_label")}
+            value={editing}
+            onChange={(event) => setEditing(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void save();
+              if (event.key === "Escape") setEditing(null);
+            }}
+          />
+        </span>
+      )}
+      {queue.canChange(item) ? (
+        <div className="desk-cowork__row">
+          {editing === null ? (
+            <>
+              {item.editable ? (
+                <Button size="sm" variant="ghost" onClick={() => setEditing(item.preview)}>
+                  {t("desk.cowork_queue_edit")}
+                </Button>
+              ) : null}
+              <Button size="sm" variant="ghost" onClick={() => queue.remove(item.id)}>
+                {t("desk.cowork_queue_remove")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button size="sm" variant="primary" loading={saving} disabled={!editing.trim()} onClick={() => void save()}>
+                {t("desk.cowork_queue_save")}
+              </Button>
+              <Button size="sm" variant="ghost" disabled={saving} onClick={() => setEditing(null)}>
+                {t("common.cancel")}
+              </Button>
+            </>
+          )}
+        </div>
+      ) : null}
+    </li>
+  );
 }
 
 /** The room's waiting messages, above the composer, with who wrote each. */
@@ -668,22 +741,9 @@ export function RoomQueuePanel(props: { queue: RoomQueueApi; me: string | null }
     <section className="desk-cowork__queue" aria-label={t("desk.cowork_queue_title")}>
       <b>{t("desk.cowork_queue_title")}</b>
       <ol className="desk-cowork__people">
-        {queue.items.map((item) => {
-          const name = item.author.displayName.trim() || t("desk.review_unnamed");
-          return (
-            <li key={item.id} className="desk-cowork__person">
-              <Avatar size="xs" name={name} seed={item.author.participantId} />
-              <span className="desk-cowork__name">
-                <b>{item.author.participantId === props.me ? t("desk.cowork_you") : name}</b> {item.preview}
-              </span>
-              {queue.canChange(item) ? (
-                <Button size="sm" variant="ghost" onClick={() => queue.remove(item.id)}>
-                  {t("desk.cowork_queue_remove")}
-                </Button>
-              ) : null}
-            </li>
-          );
-        })}
+        {queue.items.map((item) => (
+          <RoomQueueRow key={item.id} item={item} queue={queue} me={props.me} />
+        ))}
       </ol>
       <p className="desk-hint">{t("desk.cowork_queue_hint")}</p>
     </section>

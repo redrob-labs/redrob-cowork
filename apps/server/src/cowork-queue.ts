@@ -21,7 +21,29 @@ export type QueueItem = {
   createdAt: number;
 };
 
-export type QueueView = Omit<QueueItem, "body">;
+/**
+ * What everyone sees of a waiting message. `editable` is false when an edit would lose something:
+ * a part that is not text, or text longer than the preview shows.
+ */
+export type QueueView = Omit<QueueItem, "body"> & { editable: boolean };
+
+function onlyText(body: Record<string, unknown>): boolean {
+  const parts = Array.isArray(body.parts) ? body.parts : [];
+  return parts.every((part) => isRecord(part) && part.type === "text" && typeof part.text === "string");
+}
+
+function fullText(body: Record<string, unknown>): string {
+  const parts = Array.isArray(body.parts) ? body.parts : [];
+  return parts
+    .filter((part): part is Record<string, unknown> => isRecord(part) && part.type === "text" && typeof part.text === "string")
+    .map((part) => String(part.text))
+    .join("\n")
+    .trim();
+}
+
+export function isEditable(item: Pick<QueueItem, "body">): boolean {
+  return onlyText(item.body) && Array.from(fullText(item.body)).length <= PREVIEW_MAX;
+}
 
 export const MAX_QUEUE = 50;
 export const PREVIEW_MAX = 280;
@@ -53,7 +75,7 @@ export class QueueError extends Error {
 const queues = new Map<string, QueueItem[]>();
 
 export function queueView(roomId: string): QueueView[] {
-  return (queues.get(roomId) ?? []).map(({ body: _body, ...rest }) => rest);
+  return (queues.get(roomId) ?? []).map(({ body, ...rest }) => ({ ...rest, editable: isEditable({ body }) }));
 }
 
 export function enqueue(roomId: string, author: RoomParticipant, body: unknown, now = Date.now()): QueueItem {
@@ -84,6 +106,9 @@ export function editQueued(roomId: string, id: string, text: string, by: RoomPar
   if (!trimmed) throw new QueueError("queue_item_invalid", "A message needs text");
   const { list, index } = find(roomId, id, by, isHost);
   const current = list[index]!;
+  // Replacing the parts with one text part would drop a file, or text the editor never saw.
+  if (!isEditable(current)) throw new QueueError("queue_item_invalid", "This message cannot be edited here; remove it and queue it again");
+  if (Array.from(trimmed).length > PREVIEW_MAX) throw new QueueError("queue_item_invalid", `Keep an edited message within ${PREVIEW_MAX} characters`);
   const body = { ...current.body, parts: [{ type: "text", text: trimmed }] };
   const next = { ...current, body, preview: promptPreview(body) };
   queues.set(roomId, list.map((item, at) => (at === index ? next : item)));

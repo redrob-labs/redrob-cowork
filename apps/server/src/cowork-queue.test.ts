@@ -52,6 +52,18 @@ describe("the queue", () => {
     expect(queueView(room)).toEqual([]);
   });
 
+  test("an edit never drops a file or text the editor did not see", () => {
+    const room = "room_000000000000000000000004";
+    const plain = enqueue(room, kim, text("short"));
+    const withFile = enqueue(room, kim, { parts: [{ type: "text", text: "see this" }, { type: "file", url: "file:///a.pdf", mime: "application/pdf" }] });
+    const long = enqueue(room, kim, text("x".repeat(400)));
+    expect(queueView(room).map((item) => item.editable)).toEqual([true, false, false]);
+    expect(() => editQueued(room, withFile.id, "changed", kim, false)).toThrow(QueueError);
+    expect(() => editQueued(room, long.id, "changed", kim, false)).toThrow(QueueError);
+    expect(() => editQueued(room, plain.id, "y".repeat(300), kim, false)).toThrow(QueueError);
+    expect(editQueued(room, plain.id, "longer now", kim, false).preview).toBe("longer now");
+  });
+
   test("drains one at a time, only when idle, and puts back a failed send", async () => {
     const room = "room_q3";
     enqueue(room, kim, text("a"));

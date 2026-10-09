@@ -20,6 +20,7 @@ import {
   clearQueue,
   editQueued,
   enqueue,
+  isEditable,
   queueView,
   removeQueued,
   scheduleDrain,
@@ -412,7 +413,7 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     announceQueue(room.roomId);
     scheduleDrain(room.roomId, () => options.queueEngine(workspace, sessionId, room), () => announceQueue(room.roomId));
     const { body: _body, ...view } = item;
-    return jsonResponse({ item: view, queue: queueView(room.roomId) }, 201);
+    return jsonResponse({ item: { ...view, editable: isEditable(item) }, queue: queueView(room.roomId) }, 201);
   });
 
   addRoute(routes, "PATCH", "/workspace/:id/sessions/:sessionId/room/queue/:itemId", "client", async (ctx) => {

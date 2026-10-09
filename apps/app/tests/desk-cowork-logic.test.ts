@@ -135,9 +135,10 @@ describe("the shared queue", () => {
         "junk",
       ]),
     ).toEqual([
-      { id: "rq_1", author: { participantId: "par_guest", displayName: "Park" }, preview: "next, the summary", createdAt: 5 },
-      { id: "rq_2", author: { participantId: "par_host", displayName: "" }, preview: "", createdAt: 0 },
+      { id: "rq_1", author: { participantId: "par_guest", displayName: "Park" }, preview: "next, the summary", createdAt: 5, editable: false },
+      { id: "rq_2", author: { participantId: "par_host", displayName: "" }, preview: "", createdAt: 0, editable: false },
     ]);
+    expect(readQueueItems([{ id: "rq_4", author: { participantId: "p" }, editable: true }])[0]?.editable).toBe(true);
   });
 
   test("its author and the host may change a waiting message, nobody else", () => {

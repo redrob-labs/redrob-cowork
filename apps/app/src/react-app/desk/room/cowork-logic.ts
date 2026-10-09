@@ -148,7 +148,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function readQueueItems(value: readonly unknown[]): RedrobRoomQueueItem[] {
   return value.flatMap((entry) => {
     if (!isRecord(entry)) return [];
-    const { id, author, preview, createdAt } = entry;
+    const { id, author, preview, createdAt, editable } = entry;
     if (typeof id !== "string" || !isRecord(author)) return [];
     const { participantId, displayName } = author;
     if (typeof participantId !== "string") return [];
@@ -158,6 +158,7 @@ export function readQueueItems(value: readonly unknown[]): RedrobRoomQueueItem[]
         author: { participantId, displayName: typeof displayName === "string" ? displayName : "" },
         preview: typeof preview === "string" ? preview : "",
         createdAt: typeof createdAt === "number" ? createdAt : 0,
+        editable: editable === true,
       },
     ];
   });

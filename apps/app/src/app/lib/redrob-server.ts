@@ -608,7 +608,14 @@ export function createRoomEventParser(onEvent: (event: RedrobRoomEvent) => void)
 }
 
 /** A message waiting in the room's shared queue, as everyone sees it (no prompt body). */
-export type RedrobRoomQueueItem = { id: string; author: { participantId: string; displayName: string }; preview: string; createdAt: number };
+export type RedrobRoomQueueItem = {
+  id: string;
+  author: { participantId: string; displayName: string };
+  preview: string;
+  createdAt: number;
+  /** False when the message has a file or more text than the preview shows: remove and requeue instead. */
+  editable?: boolean;
+};
 
 export type RedrobRoomKnock = { knockId: string; participant: { participantId: string; displayName: string }; endpointId: string; createdAt: number };
 
@@ -1530,6 +1537,16 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
           hostToken,
           method: "POST",
           body: { body: { parts: [{ type: "text", text }] } },
+          timeoutMs: timeouts.config,
+        })
+      ).queue,
+    editRoomQueued: async (workspaceId: string, sessionId: string, itemId: string, text: string): Promise<RedrobRoomQueueItem[]> =>
+      (
+        await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue/${encodeURIComponent(itemId)}`, {
+          token,
+          hostToken,
+          method: "PATCH",
+          body: { text },
           timeoutMs: timeouts.config,
         })
       ).queue,
