@@ -100,7 +100,7 @@ import { serve, type ServeResult } from "./serve-node.js";
 import { serveStaticUi } from "./static-ui.js";
 import { externalFetch, loopbackFetch } from "./server-fetch.js";
 import { registerCoreRoutes } from "./routes/core.js";
-import { registerFileRoutes } from "./routes/files.js";
+import { registerFileRoutes, resolveInboxDir } from "./routes/files.js";
 import { registerOperationRoutes } from "./routes/operations.js";
 import { addRoute, matchRoute, type AuthMode, type RequestContext, type Route } from "./routes/registry.js";
 import { registerSessionRoutes } from "./routes/sessions.js";
@@ -153,6 +153,8 @@ import {
   engineSessionIdOf,
   filterGuestEventStream,
   filterJsonResponse,
+  assertGuestFileParts,
+  guestAttachmentDir,
   planOnlyBody,
   type GuestEngineAccess,
 } from "./guest-access.js";
@@ -1088,16 +1090,16 @@ async function withRoomAuthorship(
   if (!match) return null;
   const sessionId = decodeURIComponent(match[1] ?? "");
   const room = await activeRoom(config, workspace.id, sessionId);
-  const planOnly = Boolean(actor.guest?.planOnly);
-  if (!room && !planOnly) return null;
+  // A guest's turn is always read: its files are checked, and a plan-only one is rewritten.
+  if (!room && !actor.guest) return null;
   let parsed: unknown;
   try {
     parsed = JSON.parse(await request.clone().text());
   } catch {
-    // A plan-only guest's turn must be rewritten; one that cannot be read does not go through.
-    if (planOnly) throw new ApiError(400, "invalid_payload", "A message body is required");
+    if (actor.guest) throw new ApiError(400, "invalid_payload", "A message body is required");
     return null;
   }
+  if (actor.guest) assertGuestFileParts(parsed, guestAttachmentDir(resolveInboxDir(workspace.path), sessionId));
   // Whatever agent a plan-only guest asked for, the turn runs in the read-only Plan agent.
   parsed = planOnlyBody(actor.guest, parsed, DESK_PLAN_AGENT) ?? parsed;
   const headers = new Headers(request.headers);
@@ -2487,6 +2489,7 @@ function createRoutes(
     ensureWritable,
     resolveWorkspaceWithoutBootstrap,
     resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    attachments: { inboxDir: (workspace) => resolveInboxDir(workspace.path), maxBytes: resolveInboxMaxBytes, enabled: resolveInboxEnabled },
     sessionMessages: async (workspace, sessionId) => {
       const response = await engineFetch(config, workspace, `/session/${encodeURIComponent(sessionId)}/message`, { method: "GET" });
       return response.ok ? response.json() : [];

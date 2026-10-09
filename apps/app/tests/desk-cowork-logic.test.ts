@@ -57,6 +57,7 @@ describe("guests and their rights", () => {
     expect(withCapability(["send", "stop"], "send", true)).toEqual(["send", "stop"]);
     expect(withCapability(["send", "approve", "stop"], "approve", false)).toEqual(["send", "stop"]);
     expect(withCapability([], "stop", false)).toEqual([]);
+    expect(withCapability(["send", "stop"], "attach", true)).toEqual(["send", "stop", "attach"]);
   });
 
   test("the host first, then who is here, then who is away", () => {
@@ -153,5 +154,7 @@ describe("the shared queue", () => {
     expect(coworkFailureText("queue_full")).toBe(t("desk.cowork_failed_queue_full"));
     expect(coworkFailureText("guest_capability_missing")).toBe(t("desk.cowork_failed_cannot_send"));
     expect(coworkFailureText("guest_plan_only")).toBe(t("desk.cowork_failed_plan_only"));
+    expect(coworkFailureText("guest_file_forbidden")).toBe(t("desk.cowork_failed_file"));
+    expect(coworkFailureText("file_too_large")).toBe(t("desk.cowork_failed_file_large"));
   });
 });

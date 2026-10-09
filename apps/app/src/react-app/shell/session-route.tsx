@@ -114,7 +114,7 @@ import {
   applySessionUnrevert,
 } from "@/react-app/domains/session/sync/session-sync";
 import { firstLineLocalFileParts, joinWorkspaceRelativePath, toFileUrl } from "@/react-app/domains/session/sync/prompt-file-parts";
-import { composerAttachmentsToWorkspaceFileParts } from "@/react-app/domains/session/sync/attachment-file-part";
+import { composerAttachmentsToRoomFileParts, composerAttachmentsToWorkspaceFileParts } from "@/react-app/domains/session/sync/attachment-file-part";
 import { useSessionInteractions } from "@/react-app/domains/session/sync/use-session-interactions";
 import { useModelBehavior } from "@/react-app/domains/session/surface/use-model-behavior";
 import { useSessionFindStore } from "@/react-app/domains/session/surface/find-store";
@@ -321,12 +321,16 @@ async function draftToParts(
     if (!endpoint) {
       throw new Error(t("composer.workspace_endpoint_unavailable"));
     }
-    const uploaded = await composerAttachmentsToWorkspaceFileParts({
-      attachments: draft.attachments,
-      endpoint,
-      sessionId,
-      workspaceRoot: root,
-    });
+    // A guest in a live room has no folder of the host's to name: the room takes the file and says
+    // where it went. The host refuses this unless the room is open and the guest may attach.
+    const uploaded = !root && endpoint.isRemote
+      ? await composerAttachmentsToRoomFileParts({ attachments: draft.attachments, client: endpoint.client, workspaceId: endpoint.workspaceId, sessionId })
+      : await composerAttachmentsToWorkspaceFileParts({
+          attachments: draft.attachments,
+          endpoint,
+          sessionId,
+          workspaceRoot: root,
+        });
     for (const part of uploaded) {
       if (part.type === "text") {
         parts.push(part);
@@ -1017,6 +1021,9 @@ export function SessionRoute() {
           openSettings: handleOpenSettings,
         });
       },
+      // For the room's shared queue: the same parts a send would carry, files already uploaded.
+      onBuildRoomParts: (draft: ComposerDraft, sessionId: string) =>
+        draftToParts(draft, selectedWorkspaceRoot, sessionId.trim() || selectedSessionId, selectedWorkspaceEndpoint),
       onSendDraft: async (draft: ComposerDraft, sessionId: string): Promise<SessionSendResult> => {
         const targetSessionId = sessionId.trim() || selectedSessionId;
         if (!targetSessionId) return { outcome: "cancelled", reason: "context_changed" };

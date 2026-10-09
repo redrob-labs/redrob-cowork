@@ -519,7 +519,10 @@ export type RedrobParticipantProfile = {
 
 /* ---------- Live co-working (apps/server/src/routes/room.ts) ---------- */
 
-export type RedrobGuestCapability = "send" | "approve" | "stop";
+export type RedrobGuestCapability = "send" | "approve" | "stop" | "attach";
+
+/** A file sent to a live room: where the host's server put it, for the sender to attach. */
+export type RedrobRoomAttachment = { filename: string; mime: string; bytes: number; url: string; workspacePath: string };
 
 export type RedrobRoomParticipant = {
   participantId: string;
@@ -620,6 +623,10 @@ export type RedrobRoomQueueItem = {
 };
 
 export type RedrobRoomKnock = { knockId: string; participant: { participantId: string; displayName: string }; endpointId: string; createdAt: number };
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function roomPath(workspaceId: string, sessionId: string): string {
   return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/room`;
@@ -1532,16 +1539,52 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
     getRoomQueue: async (workspaceId: string, sessionId: string): Promise<RedrobRoomQueueItem[]> =>
       (await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue`, { token, hostToken, timeoutMs: timeouts.config })).queue,
     /** Queues a text message under this person's name; the host's server sends it when the agent is free. */
-    enqueueRoomMessage: async (workspaceId: string, sessionId: string, text: string): Promise<RedrobRoomQueueItem[]> =>
+    enqueueRoomMessage: async (workspaceId: string, sessionId: string, message: string | ReadonlyArray<Record<string, unknown>>): Promise<RedrobRoomQueueItem[]> =>
       (
         await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue`, {
           token,
           hostToken,
           method: "POST",
-          body: { body: { parts: [{ type: "text", text }] } },
+          body: { body: { parts: typeof message === "string" ? [{ type: "text", text: message }] : message } },
           timeoutMs: timeouts.config,
         })
       ).queue,
+    /** Sends a file to the room's chat folder on the host. A guest needs the `attach` right. */
+    uploadRoomAttachment: async (workspaceId: string, sessionId: string, file: File): Promise<RedrobRoomAttachment> => {
+      const form = new FormData();
+      form.append("file", file);
+      const result = await requestMultipartRaw(baseUrl, `${roomPath(workspaceId, sessionId)}/attachments`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: form,
+        timeoutMs: timeouts.binary,
+      });
+      let json: unknown = null;
+      try {
+        json = result.text ? JSON.parse(result.text) : null;
+      } catch {
+        json = null;
+      }
+      const record: Record<string, unknown> = isJsonObject(json) ? json : {};
+      if (!result.ok) {
+        throw new RedrobServerError(
+          result.status,
+          typeof record.code === "string" ? record.code : "request_failed",
+          typeof record.message === "string" ? record.message : "Upload failed",
+        );
+      }
+      if (typeof record.url !== "string" || typeof record.workspacePath !== "string" || typeof record.filename !== "string") {
+        throw new RedrobServerError(502, "request_failed", "The host's answer was not an attachment");
+      }
+      return {
+        filename: record.filename,
+        mime: typeof record.mime === "string" ? record.mime : "application/octet-stream",
+        bytes: typeof record.bytes === "number" ? record.bytes : file.size,
+        url: record.url,
+        workspacePath: record.workspacePath,
+      };
+    },
     editRoomQueued: async (workspaceId: string, sessionId: string, itemId: string, text: string): Promise<RedrobRoomQueueItem[]> =>
       (
         await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue/${encodeURIComponent(itemId)}`, {

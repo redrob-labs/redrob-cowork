@@ -338,6 +338,8 @@ export type SessionSurfaceProps = {
   onModelPickerOpenChange: (open: boolean) => void;
   onModelChange: (model: ModelRef, variant?: string | null) => void;
   onSendDraft: (draft: ComposerDraft, sessionId: string) => Promise<SessionSendResult>;
+  /** The parts a draft would be sent as, files uploaded; for queueing one with attachments in a room. */
+  onBuildRoomParts?: (draft: ComposerDraft, sessionId: string) => Promise<ReadonlyArray<Record<string, unknown>>>;
   onDraftChange: (draft: ComposerDraft) => void;
   attachmentsEnabled: boolean;
   attachmentsDisabledReason: string | null;
@@ -1279,16 +1281,33 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const handleQueue = useCallback(async () => {
     const text = draft.trim();
     if (!text && attachments.length === 0) return;
-    // Attachments still need this device's upload path, so those wait in the local queue.
     if (roomQueue && text && attachments.length === 0) {
       if (await roomQueue.enqueue(text)) clearComposer();
+      return;
+    }
+    // With files, they are uploaded now (to the host, for a guest) and the message waits with them.
+    if (roomQueue && props.onBuildRoomParts) {
+      const draftToQueue = withoutRevertTarget(buildDraft(text, attachments));
+      if (!draftToQueue) return;
+      setAttachmentsUploading(true);
+      try {
+        const parts = await props.onBuildRoomParts(draftToQueue, props.sessionId);
+        if (await roomQueue.enqueue(parts)) {
+          clearComposer();
+          attachments.forEach(revokeAttachmentPreview);
+        }
+      } catch (reason) {
+        toast.error(reason instanceof Error ? reason.message : t("desk.cowork_queue_failed"));
+      } finally {
+        setAttachmentsUploading(false);
+      }
       return;
     }
     const queuedDraft = withoutRevertTarget(buildDraft(text, attachments));
     if (!queuedDraft) return;
     appendQueuedDraft(props.sessionId, queuedDraft);
     clearComposer();
-  }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.sessionId, roomQueue]);
+  }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.onBuildRoomParts, props.sessionId, roomQueue]);
 
   const removeQueuedDraft = useCallback((id: string) => {
     const target = queuedItems.find((item) => item.id === id);

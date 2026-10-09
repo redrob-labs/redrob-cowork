@@ -8,7 +8,7 @@ import { t } from "../../../i18n";
  * this only decides which pending deep links are ours to take.
  */
 
-export const GUEST_CAPABILITIES: readonly RedrobGuestCapability[] = ["send", "approve", "stop"];
+export const GUEST_CAPABILITIES: readonly RedrobGuestCapability[] = ["send", "approve", "stop", "attach"];
 
 /** `redrob://join?...` (or `redrob-dev://` in development), with the chat it names. */
 export function parseJoinLink(raw: string): { link: string; workspaceId: string; sessionId: string } | null {
@@ -74,6 +74,10 @@ export function coworkFailureText(code: string): string {
       return t("desk.cowork_failed_name");
     case "queue_full":
       return t("desk.cowork_failed_queue_full");
+    case "guest_file_forbidden":
+      return t("desk.cowork_failed_file");
+    case "file_too_large":
+      return t("desk.cowork_failed_file_large");
     case "guest_plan_only":
       return t("desk.cowork_failed_plan_only");
     case "guest_capability_missing":
@@ -94,6 +98,7 @@ export function withCapability(current: readonly RedrobGuestCapability[], capabi
 export function capabilityLabel(capability: RedrobGuestCapability): string {
   if (capability === "send") return t("desk.cowork_can_send");
   if (capability === "approve") return t("desk.cowork_can_approve");
+  if (capability === "attach") return t("desk.cowork_can_attach");
   return t("desk.cowork_can_stop");
 }
 

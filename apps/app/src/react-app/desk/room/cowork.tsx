@@ -628,8 +628,8 @@ function ConnectedMessageAuthor(props: { sessionId: string | null | undefined; m
 
 export type RoomQueueApi = {
   items: RedrobRoomQueueItem[];
-  /** Queues `text` in the room. False (with a toast) when the server refused it. */
-  enqueue(text: string): Promise<boolean>;
+  /** Queues a message (its text, or its prompt parts) in the room. False (with a toast) when refused. */
+  enqueue(message: string | ReadonlyArray<Record<string, unknown>>): Promise<boolean>;
   remove(itemId: string): void;
   /** Replaces a waiting message's text. False (with a toast) when the server refused it. */
   edit(itemId: string, text: string): Promise<boolean>;
@@ -658,9 +658,9 @@ export function useRoomQueue(sessionId: string | null | undefined): RoomQueueApi
   };
   return {
     items: query.data ?? [],
-    enqueue: async (text) => {
+    enqueue: async (message) => {
       try {
-        queryClient.setQueryData(key, await client.enqueueRoomMessage(workspaceId, sessionId, text));
+        queryClient.setQueryData(key, await client.enqueueRoomMessage(workspaceId, sessionId, message));
         return true;
       } catch (error) {
         fail(error);

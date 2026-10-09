@@ -37,7 +37,7 @@ interface RegisterFileRoutesOptions {
   scopeRank: (scope: TokenScope) => number;
 }
 
-function resolveInboxDir(workspaceRoot: string): string {
+export function resolveInboxDir(workspaceRoot: string): string {
   return join(workspaceRoot, ".opencode", "redrob", "inbox");
 }
 
