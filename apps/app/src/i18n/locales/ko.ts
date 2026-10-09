@@ -149,6 +149,7 @@ const ko = {
   "artifact.file_not_found": "이 워크스페이스에서 파일을 찾을 수 없습니다.",
   "artifact.open_failed": "이 파일을 열지 못했습니다.",
   "artifact.preview_unavailable": "미리보기를 지원하지 않는 형식입니다. 외부 앱으로 열어서 확인하세요.",
+  "artifact.preview_blocked_resources": "이 미리보기에서 외부 리소스 {count}개를 차단했습니다. 파일이 이 기기 밖으로 나가지 않도록 미리보기는 오프라인으로 실행됩니다. 외부 리소스를 불러오려면 외부 앱으로 파일을 여세요.",
   "artifact.reveal_failed": "이 파일을 파일 관리자에서 표시하지 못했습니다.",
   "artifact.save_failed": "변경 사항을 저장하지 못했습니다.",
   "artifact.show_in_folder": "폴더에서 보기",

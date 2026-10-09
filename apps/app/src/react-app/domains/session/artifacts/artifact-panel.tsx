@@ -101,6 +101,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
   const isDirectTextEdit = isTextContent(target) && target.preview === "markdown" && !isMarkdownPrimitiveEvalArtifact(target);
   const externalPath = useMemo(() => target.kind === "file" ? absoluteWorkspacePath(workspaceRoot, target.value) : target.value, [target.kind, target.value, workspaceRoot]);
   const canUseDesktopFileActions = target.kind === "file" && !isRemoteWorkspace && platform.capabilities.revealInFileManager;
+  const htmlSandbox = useMemo(() => client.artifactPreviewSandbox(window.location.origin), [client]);
 
   const { data: fileIcon } = useQuery<string | null>({
     queryKey: ["desktop-file-icon", externalPath] as const,
@@ -370,13 +371,13 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
             onSave={saveSpreadsheetContent}
           />
         ) : target.preview === "html" && data?.kind === "text" ? (
-          <HTMLPreview type="text" title={target.name} content={data.data} />
+          <HTMLPreview title={target.name} content={data.data} sandbox={htmlSandbox} />
         ) : target.preview === "image" && data?.kind === "binary" && binaryObjectUrl ? (
           <ImagePreview src={binaryObjectUrl} alt={target.name} />
         ) : target.preview === "pdf" && data?.kind === "binary" && binaryObjectUrl ? (
           <PdfPreview url={binaryObjectUrl} title={target.name} />
-        ) : data?.kind === "binary" && binaryObjectUrl && target.preview === "html" ? (
-          <HTMLPreview type="binary" title={target.name} url={binaryObjectUrl} />
+        ) : data?.kind === "binary" && target.preview === "html" ? (
+          <HTMLPreview title={target.name} content={new TextDecoder().decode(data.data)} sandbox={htmlSandbox} />
         ) : data?.kind === "text" ? (
           <PlainText content={data.data} />
         ) : (

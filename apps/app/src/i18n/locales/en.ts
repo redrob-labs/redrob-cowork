@@ -148,6 +148,7 @@ const en = {
   "artifact.file_not_found": "File not found in this workspace.",
   "artifact.open_failed": "Could not open this file.",
   "artifact.preview_unavailable": "Preview unavailable. Open externally to view this file.",
+  "artifact.preview_blocked_resources": "This preview blocked {count} outside resources. Previews run offline so your files stay on this device. Open the file externally to load them.",
   "artifact.reveal_failed": "Could not show this file in your file manager.",
   "artifact.save_failed": "Could not save changes.",
   "artifact.show_in_folder": "Show in folder",
