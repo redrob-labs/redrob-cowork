@@ -183,14 +183,14 @@ function WindowTitleBarView({ platform }: { platform: TitleBarPlatform }) {
       {platform === "linux" ? (
         <div className="window-titlebar__controls titlebar-no-drag">
           <IconButton label={t("titlebar.minimize")} size="sm" onClick={() => control("minimize")}>
-            {icons.minimize({ width: 16, height: 16, "aria-hidden": true })}
+            {icons.minus({ width: 16, height: 16, "aria-hidden": true })}
           </IconButton>
           <IconButton
             label={state.maximized ? t("titlebar.restore") : t("titlebar.maximize")}
             size="sm"
             onClick={() => control("toggleMaximize")}
           >
-            {(state.maximized ? icons.restore : icons.maximize)({ width: 16, height: 16, "aria-hidden": true })}
+            {(state.maximized ? icons.copy : icons.maximize)({ width: 16, height: 16, "aria-hidden": true })}
           </IconButton>
           <IconButton
             label={t("titlebar.close_window")}
