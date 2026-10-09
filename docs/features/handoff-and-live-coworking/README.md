@@ -212,13 +212,16 @@ the original.
    invite secret (24 hours).
 2. The host copies the invite, `redrob://join?h=<endpointId>&r=<relayUrl>&w=<workspaceId>&s=<sessionId>&k=<secret>`,
    and sends it on Slack, email or wherever.
-3. The guest opens it. Their app gets a relay token from the console (below), dials the host and
-   presents the secret inside the encrypted connection, with their display name and participant
-   id.
-4. The host sees a knock: "Kim Jiwon wants to join *Lease review*". Allow or Deny. Nothing reaches
-   the server before Allow.
-5. On Allow the server issues a guest token bound to the guest's endpoint id, the room, and the
-   capabilities the host chose. The secret is spent.
+3. The guest opens it. Their app gets a relay grant from the console (below), dials the host and
+   knocks inside the encrypted connection with the secret, their display name and participant
+   id: `POST .../room/knock`, the only room route without a token. The host's bridge names the
+   device (`x-redrob-endpoint-id`, from the QUIC connection), and a knock without it is refused.
+4. The host sees the knock: "Kim Jiwon is asking to join", with the start of the device id. Let in
+   or turn away. Before that the guest can reach only the knock and its own answer
+   (`GET .../room/knock/:knockId`, readable only from the same endpoint).
+5. On let in the server issues a guest token bound to the guest's endpoint id, the room, and the
+   capabilities the host chose. The secret is spent, and anyone else waiting on it is turned
+   away. Invites and knocks live in the server's memory: a restart voids them.
 
 ### Guest tokens
 
@@ -236,8 +239,8 @@ the original.
 ```
 
 - **Identity comes from the token, never from a header.** The host bridge sets
-  `X-Redrob-Client-Id` to the connection's authenticated endpoint id and drops any value the
-  guest sent. The server rejects a guest token arriving on a connection with a different endpoint.
+  `x-redrob-endpoint-id` to the connection's authenticated endpoint id and drops any value the
+  guest sent (and `x-redrob-host-token`). The server rejects a guest token arriving on a connection with a different endpoint.
 - **Session scope is enforced in `redrob-server`:**
   - `/opencode/*` routes are allowed only when they name the scoped session, plus a short read
     allowlist the session UI needs (providers, agents, config read).
@@ -270,18 +273,20 @@ room: `GET /workspace/:id/sessions/:sessionId/room/events`.
 | Audit | `room.joined`, `room.left`, `message.sent`, `run.stopped`, `permission.answered`, `guest.capabilities_changed` and `guest.removed` go to the existing audit log with the participant as actor |
 | Host leaves | The session lives on the host. When the host app closes, guests see "Host is offline" and can read what they have; they reconnect automatically when the host returns |
 
-### Relay tokens (console)
+### Relay grants (console)
 
-The relays accept only connections that carry a relay token, so that relay bandwidth is limited
-to console accounts. Encryption does not depend on the relays.
+The relays carry only endpoints the console has granted, so relay bandwidth is limited to console
+accounts. Encryption does not depend on the relays.
 
 | Route | Credential | What |
 | --- | --- | --- |
-| `POST /v1/relay/token` | device API key | A short-lived token (1 hour) for the device's endpoint id and account. Used by host and guest |
+| `POST /v1/relay/grants` `{ endpointId }` | device API key | Grants the endpoint relay use for an hour (`RELAY_GRANT_TTL_SECONDS`) and lists the relays. The app renews at half life. Host and guest both need one |
+| `POST /v1/relay/access` | the relays' bearer (`RELAY_ACCESS_BEARER`) | `iroh-relay`'s `access.http` check. Answers `true` only for an endpoint with a live grant on a key that is not revoked. Reads `X-Iroh-Endpoint-Id`, or `X-Iroh-NodeId`, which is what the pinned v1.3.0 relay sends |
 
-The console records issuance (account, time, endpoint id) and nothing about rooms, sessions or
-content. How the relay checks the token, whether through `iroh-relay` access control or a thin
-admission check in front of it, is settled in the R1 spike.
+The desktop app asks through its own server (`POST /cowork/relay-grant`), so the Redrob Key never
+leaves `redrob-server`. The console records grants (account, time, endpoint id) and nothing about
+rooms, sessions or content. A failed or non-`true` answer denies, so a console outage closes the
+relays to new connections.
 
 **Same account (decision 1).** v1 relies on the host's knock approval and the invite secret. A
 console-signed membership pass `{ accountId, endpointId, exp }`, verified with the pinned team
@@ -319,7 +324,7 @@ target the console's `develop`. Sizes: S is days, M is about a week, L is more.
 | L2 | `feat/cowork-room` | Room, presence, room event stream, authorship ledger with server-chosen `messageID`, cost per author | L1 | M |
 | L3 | `feat/cowork-queue-approvals` | Server-side queue for live sessions, permission arbitration, stop attribution | L2 | M |
 | R1 | `feat/p2p-transport-spike` | iroh in Electron main on all six builds; HTTP and SSE over QUIC; relay admission choice. Go or no-go | -- | M |
-| K5 | `feature/relay-tokens` (console) | `POST /v1/relay/token` on device keys | -- | S |
+| K5 | `feature/relay-tokens` (console) | `POST /v1/relay/grants` on device keys, `POST /v1/relay/access` for the relays | -- | S |
 | K6 | `feature/relay-infra` (console) | CDK for two `iroh-relay` instances with TLS and admission | R1, K5 | M |
 | L4 | `feat/cowork-bridge` | Host bridge, guest loopback proxy, `redrob://join`, knock, endpoint binding; outbound-access manifest | L1, R1, K5 | L |
 | L5 | `feat/cowork-ui` | Start co-working, invite, participants panel, author chips, presence, capability editing, remove guest, end room | L3, L4 | L |
@@ -330,6 +335,22 @@ machine over the loopback before the bridge exists. R1 runs in parallel and deci
 **Later, not in these steps:** steering through the v2 `delivery` API (HANDOFF #6), membership
 passes after K4 and C9, verified console identity, browser guests, sharing several sessions in one
 room.
+
+### As built
+
+| Step | Pull request |
+| --- | --- |
+| D0 | #134 |
+| F1, F2, F3 | #137, #138, #139 |
+| H1, H2, H3, H4 | #140, #141, #142, #143 |
+| L1, L2, L3 | #144, #145, #146 |
+| R1 | #147 ([findings](./r1-p2p-transport-spike.md)) |
+| K5, K6 | console #226, #227 (standalone CDK app in `infra/relay`, since K4 is not on `develop`) |
+| L4, L5 | #148, #150 |
+
+Left for after L5: pushing the room's event stream to the renderer (it polls while a room is
+open), guests' messages through the server queue from the composer, cost per author in the UI,
+and re-dialling a joined room after the guest's app restarts.
 
 ## Tests
 
@@ -356,8 +377,9 @@ room.
 
 ## Open questions
 
-1. AWS account and regions for the relays (K6), with K4's account the default.
-2. Whether `iroh-relay` access control can check a console token directly, or needs an admission
-   check in front (R1).
+1. ~~AWS account and regions for the relays (K6).~~ K4's account; `ap-northeast-2` and
+   `us-west-2` by default, one stack per region in `cdk.json`.
+2. ~~Whether `iroh-relay` access control can check a console token directly (R1).~~ It can:
+   `access.http` against `/v1/relay/access`.
 3. Data residency of relayed traffic: it is ciphertext, but some customers ask where it flows.
 4. Whether the LAN remote-access toggle should be deprecated once co-working ships.
