@@ -56,7 +56,12 @@ The text sent to every model, verbatim. Self-contained: all data the task needs 
   - Before each call, the runner reserves that call's worst case: its prompt plus 24,000 output tokens at list price, plus 25%. It won't start a call that could take the total past the cap.
   - A failed call that Redrob billed is recorded under `outputs/_failed/` so it still counts toward the total.
 - **Order:** every task's #1 in all three languages, then every #2, and so on. If the cap is reached, the samples missing are for lower-ranked picks.
-- **Running it:** the `model-guide-samples` workflow runs it with the repository's `REDROB_API_KEY`. Changing `capUsd` in `run-request.json` on `feat/guide-samples` starts it. It commits outputs every 30 runs.
+- **Running it:** the `model-guide-samples` workflow runs it with the repository's `REDROB_API_KEY`. Changing `capUsd` in `run-request.json` on `feat/guide-samples` starts it. It commits outputs every 30 runs. Locally: `REDROB_API_KEY=... node scripts/model-guide/samples/run.mjs --allow-data-share --deadline 540`.
+  - `--allow-data-share` opts in for models Redrob serves only with `provider_data_share` (Claude Fable 5.1). That is the account holder's consent, so it is off by default.
+  - `--deadline <s>` starts no new call after that many seconds, so a run in a time-limited shell ends cleanly.
+  - `--exclude-models a,b` leaves models for a later run.
+- **Timeouts:** Redrob ends an upstream call at 120 seconds and bills it nothing. An answer that needs longer (most Claude Fable 5.1 runs at Extra high, and some long Opus 5.5 ones) times out on every try. Such a run gets one retry and stays missing until the limit is raised.
+- **Not shown:** a run that a provider's safety filter stopped (`finish_reason: content_filter`) is kept on file so its cost counts, but `build.mjs` leaves it out, since a half answer would misrepresent the model.
 
 ## Languages
 

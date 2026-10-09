@@ -1,0 +1,25 @@
+{
+ "key": "en/hr/prepare-employment-documents/gpt-6-luna@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "rank": 4,
+ "model": "gpt-6-luna",
+ "catalogueId": "openai/gpt-6-luna",
+ "routedModel": "openai/gpt-6-luna",
+ "effort": "high",
+ "promptSha": "aee4319d02f4",
+ "output": "# Offer of Employment\n\n**November 10, 2025**\n\nDear John,\n\nBrightwater Analytics, Inc. is pleased to offer you employment on the following terms.\n\n## Position\nYou will join Brightwater Analytics, Inc. as a full-time, exempt **Software Engineer II (L4)**, working remotely from San Diego, California, and reporting to Mary Major, Engineering Manager.\n\n## Compensation\nYour annual base salary will be **[$________ per year]**, payable in accordance with the Company’s regular payroll practices and subject to applicable withholdings.\n\n## Equity\nYou will receive **3,200 restricted stock units (RSUs)**, vesting over four years with a one-year cliff, subject to the Company’s equity plan and applicable award agreement.\n\n## Signing Bonus\nYou will receive a one-time signing bonus of **$20,000**, payable in your first regular paycheck and subject to applicable withholdings. If you voluntarily resign before completing 12 months of employment, you must repay the unearned portion, calculated as $20,000 × (12 minus the number of full months worked) ÷ 12. No amount will be deducted from your final wages without your separate written authorization.\n\n## Start Date\nYour anticipated start date is **[________]**.\n\n## Benefits\nYou will be eligible for Company benefits subject to plan terms; please refer to the Benefits Guide provided with this letter.\n\n## Contingencies\nThis offer is contingent on satisfactory completion of a background check and your providing documentation establishing your identity and authorization to work in the United States as required by law.\n\n## At-Will Employment\nYour employment is at will. You or the Company may end the employment relationship at any time, with or without cause or notice.\n\n## Governing Law\nCalifornia law governs this letter and employment-related disputes. Any claim arising in California shall be brought in a court of competent jurisdiction located in California.\n\n## Acceptance\nPlease indicate your acceptance by signing below.\n\n**John Stiles:** ______________________________  **Date:** ______________\n\n**Brightwater Analytics, Inc.:** ______________________________  **Date:** ______________\n\n# Cover Note to Mary Major\n\nMary—The letter uses the approved requisition and leaves salary and start date open for your decision. Please resolve these items before it goes to John; his Nov. 7 verbal acceptance was based on terms that differ materially from the approved package, so the corrected terms should be discussed with him before sending.\n\n- **Title:** Recruiter promised Senior Software Engineer; requisition approves Software Engineer II (L4). Recommend using the approved title. A relevel/title change needs VP Engineering and Finance approval through a revised requisition.\n- **Base:** Promised $182,000; approved L4 range is $148,000–$175,000. Recommend $175,000, subject to your confirmation. An amount above the band needs VP Engineering and Finance approval.\n- **Equity:** Promised 4,000 RSUs; approved grant is 3,200. Use 3,200; 4,000 requires Compensation Committee approval.\n- **Signing bonus:** $20,000 is within the approved “up to $20,000.” The template’s full clawback is not appropriate for a California hire; the letter uses the company’s prorated approach and bars final-wage deductions absent separate written authorization. HR/Legal should confirm the wording.\n- **Start date:** Dec. 1 was promised but is not in the requisition. Please confirm whether it is approved.\n- **Non-compete / governing law:** Omit the non-compete, as requested and consistent with California law. Replace the Texas law/venue clause with California terms. Legal should confirm the state-specific language.\n\n# Signing-Bonus Example\n\nIf John voluntarily resigns after **7 full months**, he would owe the unearned 5/12 of the bonus: **$20,000 × 5 ÷ 12 = $8,333.33**.",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 840,
+  "completion_tokens": 4243,
+  "total_tokens": 5083
+ },
+ "costUsd": 0.002315775,
+ "latencyMs": 37441,
+ "requestId": "log_c1dbd9300df844758826962307d4e7fa",
+ "date": "2026-10-09"
+}

@@ -1,0 +1,25 @@
+{
+ "key": "en/investor/report-portfolio/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "investor",
+ "task": "report-portfolio",
+ "rank": 5,
+ "model": "muse-spark-1-3",
+ "catalogueId": "meta/muse-spark-1.3",
+ "routedModel": "meta/muse-spark-1.3",
+ "effort": "high",
+ "promptSha": "fa4a92a93069",
+ "output": "# Cedar Lane Ventures Fund II, L.P. — Q3 2025 Letter to Limited Partners\n*Quarter ended September 30, 2025 | 2021 vintage, $120.0M in commitments*\n\nDear Limited Partners,\n\n## 1. Summary\nFund II ended Q3 with $78.0M of paid-in capital, $9.6M in cumulative distributions, and a net asset value (NAV) of $86.4M. That is a TVPI of **1.23x, down from 1.33x last quarter**.\n\nThe decline reflects two impairments partially offset by one priced-round uplift, all applied under our valuation policy. The fund remains fully invested with no cash at quarter-end.\n\n## 2. Fund performance\nAll figures in $M. Multiples rounded to two decimals.\n\n|  | Jun 30, 2025 | Sep 30, 2025 |\n|---|---|---|\n| Paid-in capital | 78.0 | 78.0 |\n| Cumulative distributions | 9.6 | 9.6 |\n| NAV (unaudited fair value) | 94.5 | 86.4 |\n| TVPI | 1.33x | 1.23x |\n| DPI | 0.12x | 0.12x |\n| RVPI | 1.21x | 1.11x |\n\nFormulas:\n* TVPI = (NAV + Cumulative Distributions) / Paid-in Capital\n* DPI = Cumulative Distributions / Paid-in Capital\n* RVPI = NAV / Paid-in Capital\n\nCumulative distributions of $9.6M are entirely from Ione Systems, exited in 2024 at a gain to its $3.0M cost. Cumulative management fees and fund expenses to date are $6.0M and are included in paid-in capital. Paid-in capital was unchanged in Q3.\n\n## 3. Portfolio update\nMarks are Sep 30, 2025 fair value in $M:\n\n* **Arbor Pay — $30.0 (cost $12.0):** No material change in the quarter; mark held steady.\n* **Brine Robotics — $4.5 (cost $9.0):** Missed operating plan and raised an insider bridge at a 50% discount to the last round; marked down accordingly.\n* **Clearpath Bio — $0.4 (cost $8.0):** Board approved a wind-down on August 14; marked to our $0.4M estimated cash recovery.\n* **Dovetail AI — $6.0 (cost $6.0):** New investors purchased SAFEs referencing a $150M cap, with no priced round; held at cost per policy.\n* **Ember Grid — $14.0 (cost $10.0):** No material change; mark held steady.\n* **Fathom Labs — $10.5 (cost $7.0):** No material change; mark held steady.\n* **Gild Insurance — $12.0 (cost $8.0):** Closed a Series B priced round led by a new, unaffiliated investor at 1.5x our entry price; marked up to the round price.\n* **Harrow — $9.0 (cost $9.0):** No material change; held at cost.\n\n## 4. Write-downs and notable changes, told plainly\nNAV fell $8.1M in the quarter. Two positions drove it:\n\n* Clearpath Bio is winding down. We do not expect recovery beyond $0.4M, so we wrote the $8.0M June mark down by $7.6M.\n* Brine Robotics missed plan and needed emergency funding at half the prior price. We cut the mark from $9.0M to $4.5M.\n\nThat was partly offset by Gild Insurance, where an outside-led priced round supported an increase from $8.0M to $12.0M. We did not mark up Dovetail AI despite positive interest, because an unpriced SAFE alone does not establish fair value.\n\n## 5. Upcoming capital call\nA $3.0M capital call was noticed on September 26 with a due date of October 15, 2025. It is **not** included in Q3 paid-in capital or multiples. Upon funding, paid-in capital will be $81.0M, or 67.5% of commitments.\n\n## 6. Outlook\nIt was a difficult quarter on paper, with one wind-down and one interim down-valuation. Those losses are now reflected. Our focus is on supporting the leaders — Arbor Pay, Ember Grid, Fathom Labs, and newly-validated Gild — while managing Brine closely and maximizing the small Clearpath recovery. We continue to apply a consistent, evidence-based valuation approach and will keep you updated.\n\nThank you for your partnership.\n\nSincerely,  \nChief Financial Officer  \nCedar Lane Ventures\n\n---\n**Internal note to John Doe — do not send to LPs (86 words):**\n\nJohn — corrections before send:\n1. Paid-in $81.0M → $78.0M: Sep 26 $3M call due Oct 15 not paid by Sep 30, excluded.\n2. TVPI 1.43x → 1.23x; “up” → down from 1.33x at Jun 30.\n3. Clearpath $8.0M → $0.4M: Aug 14 wind-down requires impairment to estimated recovery.\n4. Dovetail $18M → $6.0M: SAFE cap without priced round cannot support write-up per policy.\n5. Retained Brine $4.5M (discount bridge = impairment) and Gild $12M (new-investor priced Series B supports markup). NAV is $86.4M, not $106M.\n",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 813,
+  "completion_tokens": 4684,
+  "total_tokens": 5497
+ },
+ "costUsd": 0.021969413,
+ "latencyMs": 30073,
+ "requestId": "log_1bd1b73b6cd14deeb5bc63a3bf441755",
+ "date": "2026-10-09"
+}

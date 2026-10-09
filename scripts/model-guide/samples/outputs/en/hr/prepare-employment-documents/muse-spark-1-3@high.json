@@ -1,0 +1,25 @@
+{
+ "key": "en/hr/prepare-employment-documents/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "rank": 2,
+ "model": "muse-spark-1-3",
+ "catalogueId": "meta/muse-spark-1.3",
+ "routedModel": "meta/muse-spark-1.3",
+ "effort": "high",
+ "promptSha": "aee4319d02f4",
+ "output": "## 1. Offer Letter — DRAFT - DO NOT SEND PENDING APPROVALS\n\n**Brightwater Analytics, Inc.**\nAustin, Texas\n\nNovember 10, 2025\n\nJohn Stiles\nSan Diego, CA\n\nDear John:\n\nWe are pleased to offer you employment with Brightwater Analytics, Inc. (the “Company”) on the following terms:\n\n**Position.** Full-time, exempt **[TITLE / LEVEL — PENDING APPROVAL]**, working remotely based in San Diego, California, reporting to Mary Major, Engineering Manager. Your duties will be as assigned by the Company.\n\n**Compensation.** Annual base salary of **[BASE SALARY — PENDING APPROVAL]**, payable in regular payroll installments, less applicable withholdings.\n\n**Equity.** **[EQUITY GRANT — PENDING APPROVAL]**, subject to the Company’s equity plan. The approved grant under REQ-2291 is 3,200 RSUs with 4-year vesting and a 1-year cliff, approved by the Compensation Committee on October 28, 2025. Any grant remains subject to plan documents and continued employment.\n\n**Signing Bonus.** You will receive a one-time signing bonus of $20,000, less applicable withholdings, payable in your first regular paycheck. If you resign voluntarily within 12 months of your start date, you must repay a pro-rated portion: ($20,000 × (12 minus full months worked) ÷ 12). No amount will be deducted from your final wages without your separate written authorization.\n\n**Start Date.** December 1, 2025, subject to satisfaction of the contingencies below.\n\n**Benefits.** You will be eligible to participate in Company employee benefit plans as described in the enclosed Benefits Guide.\n\n**Contingencies.** This offer is contingent on successful completion of a background check and your timely proof of authorization to work in the United States (Form I-9 verification).\n\n**At-Will Employment.** Your employment is at will. Either you or the Company may end it at any time, with or without cause or notice, and nothing in this letter guarantees employment for any period.\n\n**Governing Law.** This letter is governed by California law, and any controversy arising in California will be adjudicated in California in the state or federal courts located in California. For clarity, this letter does not impose a post-employment non-competition covenant.\n\n**Acceptance.** To accept, please sign below and return this letter by November 17, 2025. This offer supersedes prior verbal discussions.\n\nWe look forward to you joining the team.\n\nSincerely,\n\n_________________________\nBrightwater Analytics, Inc.\n\nAccepted:\n\n_________________________ Date: __________\nJohn Stiles\n\n---\n\n## 2. Cover Note to Mary Major\n\n**To:** Mary Major – Re: REQ-2291 – Hold Offer for John Stiles – Verbal Terms Exceed Approval\n\nDo not send attached draft until gaps below resolved. Recruiter verbally promised terms beyond REQ-2291 and template and candidate accepted Nov 7, creating expectation risk if we renege.\n\n**Mismatches and fixes:**\n1. **Title:** promised Senior Software Engineer vs. approved Software Engineer II (L4).\n2. **Base:** promised $182,000 vs. band max $175,000.\n3. **Equity:** promised 4,000 RSUs vs. Committee-approved 3,200 RSUs (Oct 28).\n4. **Non-compete:** recruiter said standard; Cal. B&P §16600 voids post-employment non-competes – must omit.\n5. **Texas law/venue:** unlawful as condition for CA-based hire under Labor Code §925; must use California.\n6. **Bonus clawback:** template full repayment vs. Company practice pro-rata + no final-pay deduction without separate authorization.\n\n**Recommendation:** Decide (a) seek exceptions to honor verbal deal or (b) re-offer at approved terms with careful renegotiation. For (a), need VP Engineering + Finance + HR/Comp for Title/Base, and new Compensation Committee approval for extra 800 RSUs. Legal/HR must clear CA language in 4-6. Please advise by Nov 12.\n\n## 3. Signing-Bonus Repayment Example\n\nIf John receives $20,000 and resigns after **7 full months**:\n\nOwed = $20,000 × (12 - 7) ÷ 12 = $20,000 × 5 ÷ 12 = **$8,333.33**\n\nPayable by personal check / wire (not deducted from final wages without separate written authorization), subject to payroll tax adjustment.\n",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 848,
+  "completion_tokens": 5968,
+  "total_tokens": 6816
+ },
+ "costUsd": 0.0277452,
+ "latencyMs": 100630,
+ "requestId": "log_e80e2ff0a80f4fc5a8bf65a2a9e2ffc9",
+ "date": "2026-10-09"
+}

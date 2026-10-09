@@ -1,0 +1,25 @@
+{
+ "key": "en/designer/review-usability/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "designer",
+ "task": "review-usability",
+ "rank": 3,
+ "model": "claude-fable-5-1",
+ "catalogueId": "claude-fable-5-1",
+ "routedModel": "claude-fable-5-1",
+ "effort": "xhigh",
+ "promptSha": "2f6d7e77bce2",
+ "output": "",
+ "cut": false,
+ "finishReason": "content_filter",
+ "filtered": true,
+ "usage": {
+  "prompt_tokens": 1084,
+  "completion_tokens": 1177,
+  "total_tokens": 2261
+ },
+ "costUsd": 0.0731745,
+ "latencyMs": 18671,
+ "requestId": "log_32f3f96af9e3473f8f379f2b4088b126",
+ "date": "2026-10-09"
+}
