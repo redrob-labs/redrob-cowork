@@ -143,9 +143,9 @@
         "renderer",
         "server"
       ],
-      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup, and the device authorization endpoints Work uses to connect a workspace without the user handling an API key.",
+      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup, the device authorization endpoints Work uses to connect a workspace without the user handling an API key, the public default skill library (/skill-library) the Skills screen browses and installs from, and the team skills (/skill-sync, with the Redrob Key) that redrob-server installs into local workspaces every 30 minutes.",
       "requirement": "required",
-      "blockedEffect": "Inference and model selection are unavailable.",
+      "blockedEffect": "Inference and model selection are unavailable. The Skills screen falls back to the skill library bundled with the app, and team skills stop updating (installed ones stay).",
       "override": null
     },
     {
