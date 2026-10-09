@@ -8,6 +8,7 @@ export {
   teamPolicyLocksPrivacy,
   TEAM_POLICY_NOTE_TAG,
   type ApplyResult,
+  type LeaveResult,
   type TeamPolicyState,
 } from "./apply.js";
 export { verifyTeamPolicyJws, TEAM_POLICY_JWS_TYPE, type VerifiedTeamPolicy } from "./jws.js";

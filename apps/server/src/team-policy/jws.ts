@@ -1,6 +1,6 @@
 import { ApiError } from "../errors.js";
 import type { PinnedKey } from "./keys.js";
-import { teamPolicySchema, type TeamPolicy } from "./policy.js";
+import { TEAM_POLICY_SCHEMA_VERSION, teamPolicySchema, type TeamPolicy } from "./policy.js";
 
 /*
  * Compact JWS verification for team policies, with WebCrypto and nothing else. The format is
@@ -94,7 +94,21 @@ export async function verifyTeamPolicyJws(token: string, keys: readonly PinnedKe
 
   // Only now, with the signature checked, is the payload read at all.
   const payloadBytes = decodeBase64Url(payloadPart, "payload");
-  const parsed = teamPolicySchema.safeParse(parseJson(payloadBytes, "payload"));
+  const payload = parseJson(payloadBytes, "payload");
+  // A policy written for another schema gets its own code rather than team_policy_invalid, so the
+  // console can tell "publish the current schema" apart from a broken document. A payload still
+  // carrying v1's playbooks is that case too, whatever its `v` says.
+  if (typeof payload === "object" && payload !== null && !Array.isArray(payload)) {
+    const schema = "v" in payload ? payload.v : undefined;
+    const playbooks = "playbooks" in payload;
+    if (schema !== TEAM_POLICY_SCHEMA_VERSION || playbooks) {
+      refuse(
+        "team_policy_unsupported_version",
+        `The policy is for schema ${String(schema)}${playbooks ? " with playbooks" : ""}; this app reads schema ${TEAM_POLICY_SCHEMA_VERSION}, which has no playbooks`,
+      );
+    }
+  }
+  const parsed = teamPolicySchema.safeParse(payload);
   if (!parsed.success) {
     refuse("team_policy_invalid", `The policy is signed but not valid: ${parsed.error.issues[0]?.message ?? "invalid"}`);
   }

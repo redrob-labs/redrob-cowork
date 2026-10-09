@@ -1,5 +1,6 @@
 import { recordAudit } from "../audit.js";
-import { buildCommandContent, deleteCommand, upsertCommand } from "../commands.js";
+// Only for removing what a schema v1 policy installed as playbooks; see legacyPlaybooks.
+import { deleteCommand } from "../commands.js";
 import { ApiError } from "../errors.js";
 import { LOCKED_MEMORY_TAG, replaceTaggedMemories } from "../local-memory-store.js";
 import { readRedrobWorkspaceConfig, writeRedrobWorkspaceConfig } from "../redrob-workspace-config-store.js";
@@ -36,17 +37,41 @@ export type TeamPolicyState = {
   left: boolean;
   policy: TeamPolicy | null;
   /** What this policy wrote to disk, so a newer one (or leaving) removes exactly that. */
-  installed: { skills: string[]; playbooks: string[] };
+  installed: { skills: string[] };
+  /**
+   * Commands a schema v1 policy installed as playbooks, read from a state stored before v2
+   * (`installed.playbooks`). Never written back: the next successful apply, or leaving, deletes
+   * these commands and stores the state without them.
+   */
+  legacyPlaybooks?: string[];
 };
+
+const names = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((name): name is string => typeof name === "string") : [];
 
 function parseState(json: string): TeamPolicyState | null {
   try {
     const value = JSON.parse(json) as unknown;
     if (!isRecord(value) || typeof value.accountId !== "string" || typeof value.version !== "number") return null;
-    return value as unknown as TeamPolicyState;
+    // Tolerates the v1 shape, installed: { skills, playbooks }, by moving playbooks to legacyPlaybooks.
+    const installed = isRecord(value.installed) ? value.installed : {};
+    const legacyPlaybooks = names(installed.playbooks);
+    const { legacyPlaybooks: _stored, ...rest } = value as unknown as TeamPolicyState;
+    return {
+      ...rest,
+      installed: { skills: names(installed.skills) },
+      ...(legacyPlaybooks.length ? { legacyPlaybooks } : {}),
+    };
   } catch {
     return null;
   }
+}
+
+/** Deletes the commands a v1 policy installed. True when there were any, so callers reload commands. */
+async function removeLegacyPlaybooks(workspace: Workspace, state: TeamPolicyState | null): Promise<boolean> {
+  const legacy = state?.legacyPlaybooks ?? [];
+  for (const name of legacy) await deleteCommand(workspace.path, name).catch(() => undefined);
+  return legacy.length > 0;
 }
 
 const stateStore = createWorkspaceKvStore<TeamPolicyState | null>({
@@ -104,7 +129,12 @@ export type ApplyOptions = {
   now?: () => number;
 };
 
-export type ApplyResult = { status: "applied" | "unchanged"; state: TeamPolicyState };
+export type ApplyResult = {
+  status: "applied" | "unchanged";
+  state: TeamPolicyState;
+  /** Whether commands left by a v1 policy's playbooks were deleted, so the commands list changed. */
+  removedLegacyCommands: boolean;
+};
 
 const conflict = (code: string, message: string): never => {
   throw new ApiError(409, code, message);
@@ -148,7 +178,9 @@ export async function applyTeamPolicy(
       conflict("team_policy_not_newer", `Version ${policy.version} is older than the applied version ${previous.version}`);
     }
     if (policy.version === previous.version && !previous.left) {
-      if (previous.payloadSha256 === verified.payloadSha256) return { status: "unchanged", state: previous };
+      if (previous.payloadSha256 === verified.payloadSha256) {
+        return { status: "unchanged", state: previous, removedLegacyCommands: false };
+      }
       conflict("team_policy_conflict", `Version ${policy.version} was already applied with different content`);
     }
   }
@@ -156,21 +188,16 @@ export async function applyTeamPolicy(
   // Validate everything that will be written before writing anything, so a bad skill name cannot
   // leave the workspace half on the old policy and half on the new one.
   const skills = policy.skills.map((skill) => buildSkillContent(skill));
-  const playbooks = policy.playbooks.map((playbook) => buildCommandContent(playbook));
 
-  const stale = previous && previous.accountId === policy.accountId ? previous.installed : { skills: [], playbooks: [] };
+  const stale = previous && previous.accountId === policy.accountId ? previous.installed : { skills: [] };
   for (const [index, skill] of skills.entries()) {
     await upsertSkill(workspace.path, { ...policy.skills[index]!, name: skill.name });
   }
-  for (const playbook of policy.playbooks) await upsertCommand(workspace.path, playbook);
   const skillNames = skills.map((skill) => skill.name);
-  const playbookNames = playbooks.map((playbook) => playbook.name);
   for (const name of stale.skills.filter((name) => !skillNames.includes(name))) {
     await deleteSkill(workspace.path, name).catch(() => undefined);
   }
-  for (const name of stale.playbooks.filter((name) => !playbookNames.includes(name))) {
-    await deleteCommand(workspace.path, name).catch(() => undefined);
-  }
+  const removedLegacyCommands = await removeLegacyPlaybooks(workspace, previous);
 
   // Memory is per machine, not per workspace, so the set replaced is this team's notes only.
   await replaceTaggedMemories(
@@ -197,7 +224,7 @@ export async function applyTeamPolicy(
     appliedAt: now,
     left: false,
     policy,
-    installed: { skills: skillNames, playbooks: playbookNames },
+    installed: { skills: skillNames },
   };
   await stateStore.set(config, workspace.id, state, now);
 
@@ -214,11 +241,18 @@ export async function applyTeamPolicy(
   });
   await notifyTeamPolicyChange(config, workspace);
 
-  return { status: "applied", state };
+  return { status: "applied", state, removedLegacyCommands };
 }
 
+export type LeaveResult = {
+  state: TeamPolicyState | null;
+  /** As ApplyResult.removedLegacyCommands. */
+  removedLegacyCommands: boolean;
+};
+
 /**
- * Leaves the team: removes the notes, playbooks and skills the policy brought and lifts the lock.
+ * Leaves the team: removes the notes and skills the policy brought (and any commands a v1 policy
+ * installed as playbooks) and lifts the lock.
  * The privacy level stays where the team set it, so leaving never silently lowers protection;
  * the person can lower it themselves afterwards.
  */
@@ -226,12 +260,12 @@ export async function leaveTeamPolicy(
   config: ServerConfig,
   workspace: Workspace,
   options: { actor?: Actor; reason?: string; now?: () => number } = {},
-): Promise<TeamPolicyState | null> {
+): Promise<LeaveResult> {
   const state = await readTeamPolicyState(config, workspace.id);
-  if (!state || state.left) return state;
+  if (!state || state.left) return { state, removedLegacyCommands: false };
 
   for (const name of state.installed.skills) await deleteSkill(workspace.path, name).catch(() => undefined);
-  for (const name of state.installed.playbooks) await deleteCommand(workspace.path, name).catch(() => undefined);
+  const removedLegacyCommands = await removeLegacyPlaybooks(workspace, state);
   await replaceTaggedMemories(config, teamNoteTag(state.accountId), []);
 
   const stored = await readRedrobWorkspaceConfig(config, workspace.id);
@@ -242,7 +276,8 @@ export async function leaveTeamPolicy(
   }));
 
   const now = options.now?.() ?? Date.now();
-  const next: TeamPolicyState = { ...state, left: true, policy: null, installed: { skills: [], playbooks: [] }, appliedAt: now };
+  const { legacyPlaybooks: _removed, ...kept } = state;
+  const next: TeamPolicyState = { ...kept, left: true, policy: null, installed: { skills: [] }, appliedAt: now };
   await stateStore.set(config, workspace.id, next, now);
   await recordAudit(workspace.path, {
     id: shortId(),
@@ -250,11 +285,11 @@ export async function leaveTeamPolicy(
     actor: options.actor ?? { type: "host" },
     action: "policy.left",
     target: `team-policy:${state.accountId}`,
-    summary: `Left the team${options.reason ? ` (${options.reason})` : ""}; its notes, playbooks and skills were removed`,
+    summary: `Left the team${options.reason ? ` (${options.reason})` : ""}; its notes and skills were removed`,
     timestamp: now,
   });
   await notifyTeamPolicyChange(config, workspace);
-  return next;
+  return { state: next, removedLegacyCommands };
 }
 
 /** What the routes report: enough for the Team screen, nothing the app should act on blindly. */
@@ -273,7 +308,6 @@ export function describeTeamPolicyState(state: TeamPolicyState | null) {
     signedWithTestKey: state.kid.startsWith(TEST_KEY_PREFIX),
     privacy: { level: policy.privacy.level, locked: policy.privacy.locked },
     notes: policy.notes.length,
-    playbooks: state.installed.playbooks,
     skills: state.installed.skills,
     connectors: policy.connectors,
   };

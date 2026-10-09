@@ -3037,7 +3037,7 @@ function createRoutes(
     if (outcome.status === "applied" || outcome.status === "removed") {
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+      if (outcome.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
     return jsonResponse({ outcome, ...(await describeTeamPolicy(workspace.id)) });
   });
@@ -3065,7 +3065,7 @@ function createRoutes(
     if (result.status === "applied") {
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+      if (result.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
     return jsonResponse({ status: result.status, ...(await describeTeamPolicy(workspace.id)) });
   });
@@ -3074,10 +3074,10 @@ function createRoutes(
     ensureWritable(config);
     requireClientScope(ctx, "owner");
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
+    const left = await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
     emitReloadEvent(ctx.reloadEvents, workspace, "config");
     emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-    emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    if (left.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     return jsonResponse(await describeTeamPolicy(workspace.id));
   });
 

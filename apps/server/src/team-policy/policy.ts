@@ -6,11 +6,16 @@ import { z } from "zod";
  * schema is strict: an unknown field is refused rather than ignored, because a field this version
  * does not understand could be one it was meant to enforce.
  *
- * Mirrored by the console's policy API (redrob-console, feature/team-policy-api). The shared
- * vectors in ./vectors/ are the contract between the two.
+ * Schema v2 carries the privacy setting, team notes, the connector allowlist and skills. v1 also
+ * carried "playbooks" (opencode commands); they were retired in favour of skills, and a v1 policy
+ * is refused as team_policy_unsupported_version (jws.ts).
+ *
+ * The console's policy API must publish this schema when it is built (its first attempt,
+ * redrob-console feature/team-policy-api, was closed unmerged). The shared vectors in ./vectors/
+ * are the contract between the two.
  */
 
-export const TEAM_POLICY_SCHEMA_VERSION = 1;
+export const TEAM_POLICY_SCHEMA_VERSION = 2;
 
 /** Generous bounds, there only so a policy cannot be used to exhaust memory or disk. */
 const LIMITS = {
@@ -21,8 +26,6 @@ const LIMITS = {
   protectedNames: 1_000,
   aliasesPerName: 10,
   connectors: 100,
-  playbooks: 100,
-  playbookLength: 20_000,
   skills: 100,
   skillLength: 50_000,
 } as const;
@@ -60,14 +63,6 @@ const connectorSchema = z
   })
   .strict();
 
-const playbookSchema = z
-  .object({
-    name: label,
-    description: z.string().max(LIMITS.nameLength).optional(),
-    template: z.string().min(1).max(LIMITS.playbookLength),
-  })
-  .strict();
-
 const skillSchema = z
   .object({
     name: label,
@@ -90,7 +85,6 @@ export const teamPolicySchema = z
     connectors: z
       .object({ allow: z.array(connectorSchema).max(LIMITS.connectors), allowLocalPrograms: z.boolean() })
       .strict(),
-    playbooks: z.array(playbookSchema).max(LIMITS.playbooks),
     skills: z.array(skillSchema).max(LIMITS.skills),
   })
   .strict();
