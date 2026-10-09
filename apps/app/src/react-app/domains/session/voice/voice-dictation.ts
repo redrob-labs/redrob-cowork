@@ -1,6 +1,6 @@
 import { desktopFetch } from "@/app/lib/desktop";
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
-import { t } from "@/i18n";
+import { currentLocale, t } from "@/i18n";
 
 export type DictationClient = Pick<RedrobServerClient, "createVoiceRealtimeSession">;
 
@@ -61,7 +61,7 @@ export async function startDictation(
 ): Promise<() => void> {
   const access = await askMicrophoneAccess();
   if (!access.granted) throw new Error(t("voice.macos_permission_denied"));
-  const realtimeSession = await client.createVoiceRealtimeSession({ sessionContext: "" });
+  const realtimeSession = await client.createVoiceRealtimeSession({ sessionContext: "", language: currentLocale() });
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
   });

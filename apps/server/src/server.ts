@@ -696,9 +696,22 @@ async function createManagedVoiceSession(config: { baseUrl: string; apiKey: stri
   };
 }
 
+/**
+ * The language speech is transcribed in, which is the app's language. It was hard-coded to English, so
+ * a Korean speaker's dictation came back as an English guess at Korean sounds. Only the languages the
+ * app ships in are accepted; anything else is English, as before, rather than relayed upstream.
+ */
+const VOICE_TRANSCRIPTION_LANGUAGES = new Set(["en", "ko"]);
+
+function voiceTranscriptionLanguage(input: unknown): string {
+  const requested = readStringField(input, "language");
+  return VOICE_TRANSCRIPTION_LANGUAGES.has(requested) ? requested : "en";
+}
+
 async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
   const model = readStringField(input, "model") || REDROB_VOICE_REALTIME_MODEL;
   const sessionContext = readStringField(input, "sessionContext").slice(0, 6_000);
+  const language = voiceTranscriptionLanguage(input);
   const response = await externalFetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
     headers: {
@@ -712,7 +725,7 @@ async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
         output_modalities: ["audio"],
         audio: {
           input: {
-            transcription: { model: REDROB_VOICE_TRANSCRIPTION_MODEL, language: "en" },
+            transcription: { model: REDROB_VOICE_TRANSCRIPTION_MODEL, language },
             turn_detection: {
               type: "server_vad",
               threshold: 0.58,
