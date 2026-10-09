@@ -1,0 +1,4 @@
+{
+ "note": "Changing this file on feat/guide-samples starts .github/workflows/model-guide-samples.yml. capUsd is the total spend allowed across every run on the branch; run.mjs never goes past $150 whatever this says.",
+ "capUsd": 2
+}
