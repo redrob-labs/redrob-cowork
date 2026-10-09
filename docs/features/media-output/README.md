@@ -16,10 +16,11 @@ beyond text, and the order they land in.
 
 ## Architecture
 
-**Images.** A first-class OpenCode plugin tool, `redrob_image_generate`, in
-`apps/server/src/opencode-plugins/`. It calls the gateway's `/v1/chat/completions` with
-`modalities: ["image", "text"]` on an image-output model from the model guide, writes the result
-under `artifacts/`, and returns it as a tool **attachment**. The engine already turns tool attachments
+**Images.** A built-in engine tool, `image_generate`, in Redrob Code (`packages/redrob/src/tool/`).
+It has to live in the engine because the Redrob key does: Cowork never reads it, and a Cowork plugin
+could only reach it by replacing the engine's `redrob` auth hook. The tool calls the gateway's
+`/v1/chat/completions` with `modalities: ["image", "text"]`, writes the result under `artifacts/`,
+and returns it as a tool **attachment**. The engine already turns tool attachments
 into chat file parts (`session-sync.ts`), and `message-list.tsx` already renders `image/*` file parts
 inline, so the picture appears in the reply and as an artifact with no new rendering code. This
 replaces the `openai-image-generation` extension, whose results only surfaced when the model happened
@@ -56,7 +57,7 @@ Each is one `<type>/<slug>` pull request into `develop`.
 | H1 | `feat/html-fence-preview`: Preview for `html` and `svg` code blocks in chat, Code/Preview toggle in the panel | 0a |
 | H2 | `feat/artifact-live-refresh`: refresh a preview when a write or edit tool completes | — |
 | H3 | `feat/html-multi-file`: relative assets beside the page resolve through the sandbox origin | 0a |
-| I1 | `feat/image-generate-tool`: `redrob_image_generate` against the gateway | console image relay |
+| I1 | Engine `feature/image-generate-tool`: `image_generate` on the engine's credential, then a `redrobCodeVersion` bump here | console image relay |
 | I2 | `feat/image-edit`: edit an image or generate from a reference | I1 |
 | V2 | `feat/read-aloud`: speaker button on replies and an optional "Speak replies" setting | console speech endpoint |
 | V3 | `feat/speech-generate-tool`: `redrob_speech_generate` writes an audio artifact | V1, V2 |
@@ -68,7 +69,7 @@ Tracked in `mckinley-and-rice/redrob-console`:
 
 - **Image relay.** The gateway served and billed image models but read only `message.content`, so the
   picture was dropped. Fixed by relaying `message.images` and accepting `modalities`.
-- **Speech.** `POST /v1/audio/speech` and a published audio-output rate. Audio output is withheld today
-  because a per-token text rate cannot price it.
+- **Speech.** `POST /v1/audio/speech` and `GET /v1/speech-models`, on OpenRouter's speech endpoint and
+  priced per character of input, so no audio-token rate is needed.
 - **Realtime.** `POST /voice/realtime/session` minting a client secret on `REDROB_API_KEY`, and a
   gateway-side SDP exchange so the renderer no longer calls `api.openai.com/v1/realtime/calls` directly.
