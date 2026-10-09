@@ -7,6 +7,7 @@
  * so the compliance rules cannot drift by someone editing markup.
  */
 import { Button } from "@/components/ui/button";
+import { t } from "@/i18n";
 
 import {
   recommendedChoice,
@@ -45,10 +46,8 @@ export function OnboardingChoiceView({ choices, busyChoiceId, error, onAct }: On
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-medium">Connect your AI</h2>
-        <p className="text-sm text-muted-foreground">
-          Use an account you already have, or Redrob&apos;s own models.
-        </p>
+        <h2 className="text-lg font-medium">{t("onboarding.connect_title")}</h2>
+        <p className="text-sm text-muted-foreground">{t("onboarding.connect_subtitle")}</p>
       </div>
 
       {error ? (
@@ -74,7 +73,7 @@ export function OnboardingChoiceView({ choices, busyChoiceId, error, onAct }: On
                   {choice.title}
                 </h3>
                 {choice.id === recommended ? (
-                  <span className="text-xs text-primary">Recommended</span>
+                  <span className="text-xs text-primary">{t("onboarding.connect_recommended")}</span>
                 ) : null}
               </div>
 
