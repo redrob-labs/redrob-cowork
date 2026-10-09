@@ -347,10 +347,10 @@ room.
 | R1 | #147 ([findings](./r1-p2p-transport-spike.md)) |
 | K5, K6 | console #226, #227 (standalone CDK app in `infra/relay`, since K4 is not on `develop`) |
 | L4, L5 | #148, #150 |
+| Follow-ups | #156 (room event stream in the app, cost by person), #157 (composer queues into the room's shared queue), #159 (joined chats reconnect after a restart) |
 
-Left for after L5: pushing the room's event stream to the renderer (it polls while a room is
-open), guests' messages through the server queue from the composer, cost per author in the UI,
-and re-dialling a joined room after the guest's app restarts.
+Still open: editing a waiting message from the composer (the route exists), queueing drafts with
+attachments in the room (they keep the local queue), and Plan-mode-only guests.
 
 ## Tests
 
