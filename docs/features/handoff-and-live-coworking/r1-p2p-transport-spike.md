@@ -52,8 +52,16 @@ listed a relay path and a selected direct IP path).
 2. **There is no Intel Mac build.** The npm package ships prebuilt binaries for macOS arm64,
    Windows x64 and arm64, and Linux x64 and arm64 (gnu and musl), but not `x86_64-apple-darwin`,
    which this app still builds.
-   - **Condition:** on Intel Macs co-working is unavailable. The app feature-detects the binding and
-     says "Co-working needs a Mac with Apple silicon" rather than failing. Handoff works everywhere.
+   - **Why:** upstream dropped Intel Macs at 1.0, citing build infrastructure
+     ([iroh-ffi#260](https://github.com/n0-computer/iroh-ffi/issues/260)); 0.35 still shipped a
+     universal build. The Rust code itself still builds for Intel (`iroh-relay` ships Intel Mac
+     binaries), and the binding type-checks for `x86_64-apple-darwin`.
+   - **What we do:** the Intel Mac release builds the binding from the tag the npm package came
+     from (`apps/desktop/scripts/build-iroh-darwin-x64.sh`, pinned by version and commit) and runs
+     the tunnel and bridge tests on it under Rosetta before packaging. CI also builds and tests it
+     natively on `macos-15-intel` until that image goes in August 2027. Intel-only bugs are ours to
+     fix; drop this when the Intel Mac app is dropped.
+   - An Intel build without the binding still says so instead of failing. Handoff works everywhere.
 3. **Relay admission is supported by `iroh-relay` itself.** Its `access` config can be `http`: for
    each endpoint that connects, the relay POSTs to a URL with `X-Iroh-Endpoint-Id` and admits it
    only on a `200` with body `true`. That is the K5 design:

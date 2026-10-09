@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 
-import { coworkAllowPath, createCoworkBridge, createJoinStore, joinKey, loadEndpointKey, platformBlocker, registerCoworkIpc } from "./bridge.mjs";
+import { coworkAllowPath, createCoworkBridge, createJoinStore, joinKey, loadEndpointKey, missingBindingReason, registerCoworkIpc } from "./bridge.mjs";
 import { buildInviteLink, parseInviteLink } from "./invite-link.mjs";
 
 let iroh = null;
@@ -88,15 +88,20 @@ describe("what a guest may reach", () => {
 });
 
 describe("platforms", () => {
-  it("Intel Macs are out, without loading the binding", async () => {
-    assert.equal(platformBlocker("darwin", "x64"), "intel_mac");
-    assert.equal(platformBlocker("darwin", "arm64"), null);
-    assert.equal(platformBlocker("win32", "x64"), null);
-    let loaded = false;
-    const bridge = createCoworkBridge({ platform: "darwin", arch: "x64", packaged: true, loadIroh: async () => ((loaded = true), iroh) });
-    assert.deepEqual(await bridge.status(), { available: false, reason: "intel_mac" });
-    await assert.rejects(bridge.host({ workspaceId: "ws", sessionId: "ses" }), { code: "intel_mac" });
-    assert.equal(loaded, false);
+  it("an Intel Mac co-works when its binding loads, and says why when it does not", async () => {
+    assert.equal(missingBindingReason("darwin", "x64"), "intel_mac");
+    assert.equal(missingBindingReason("darwin", "arm64"), "binding_missing");
+    assert.equal(missingBindingReason("win32", "x64"), "binding_missing");
+    const without = createCoworkBridge({ platform: "darwin", arch: "x64", packaged: true, loadIroh: async () => null });
+    assert.deepEqual(await without.status(), { available: false, reason: "intel_mac" });
+    await assert.rejects(without.host({ workspaceId: "ws", sessionId: "ses" }), { code: "intel_mac" });
+    assert.deepEqual(await without.rejoin(), { rejoining: 0 });
+    if (iroh) {
+      // Nothing about the platform itself is refused any more: with a binding, it is the self-check that decides.
+      const withBinding = createCoworkBridge({ platform: "darwin", arch: "x64", packaged: true, loadIroh: async () => iroh });
+      assert.equal((await withBinding.status()).available, true);
+      await withBinding.close();
+    }
   });
 
   it("a missing binding is reported, not thrown", async () => {

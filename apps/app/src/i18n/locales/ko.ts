@@ -318,7 +318,7 @@ const ko = {
   "desk.cowork_unavailable": "여기서는 같이 작업을 쓸 수 없습니다",
   "desk.cowork_unavailable_build": "이 레드롭 코워크로는 같이 작업할 수 없습니다. 최신 버전으로 업데이트하세요.",
   "desk.cowork_unavailable_check": "이 컴퓨터에서 같이 작업을 시작하지 못했습니다. 앱을 다시 시작한 뒤 해 보세요.",
-  "desk.cowork_unavailable_intel": "같이 작업에는 애플 실리콘 맥이 필요합니다.",
+  "desk.cowork_unavailable_intel": "이 버전의 레드롭 코워크는 인텔 맥에서 같이 작업할 수 없습니다. 최신 버전으로 업데이트하세요.",
   "desk.cowork_you": "나",
   "desk.handoff_banner_continued": "이어서 작업을 시작했습니다. 이제 다른 채팅과 똑같이 쓸 수 있습니다.",
   "desk.handoff_banner_fallback": "보낸 사람의 레드롭 코드 기록을 여기서 읽지 못해, 대화를 아래에 글로 옮겼습니다. 도구 기록은 함께 오지 않았습니다.",
