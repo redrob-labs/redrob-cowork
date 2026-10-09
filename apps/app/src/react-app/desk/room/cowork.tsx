@@ -561,14 +561,18 @@ export function CoworkJoinDialog(props: { link: string; onClose: () => void }) {
 /** Mounted once in the Desk layer: takes `join` invites from the desktop shell's deep links. */
 export function CoworkJoinHost() {
   const [link, setLink] = useState<string | null>(null);
+  const showToast = useFrameStore((state) => state.showToast);
   useEffect(() => {
     const bridge = coworkBridge();
     if (!bridge) return;
-    // A joined chat came back after a restart or a drop, maybe on a new port: re-read the list.
     return bridge.onEvent((event) => {
-      if (event.type === "join" && event.phase === "reconnected") window.dispatchEvent(new Event("redrob-server-settings-changed"));
+      if (event.type !== "join") return;
+      // A joined chat came back after a restart or a drop, maybe on a new port: re-read the list.
+      if (event.phase === "reconnected") window.dispatchEvent(new Event("redrob-server-settings-changed"));
+      // The host removed this guest or ended the room while it was away: stop, and say so once.
+      if (event.phase === "ended") showToast(t("desk.cowork_ended_guest_title"), t("desk.cowork_ended_guest_text"));
     });
-  }, []);
+  }, [showToast]);
   useEffect(() => {
     if (typeof window === "undefined" || !coworkBridge()) return;
     const take = () => {

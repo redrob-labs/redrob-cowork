@@ -255,6 +255,8 @@ const en = {
   "desk.cowork_costs_total": "{amount} in all, on the host's Redrob key.",
   "desk.cowork_deny": "Turn away",
   "desk.cowork_end": "End co-working",
+  "desk.cowork_ended_guest_text": "The host ended co-working on that chat or removed you, so it will not reconnect. Ask for a new invite to join again.",
+  "desk.cowork_ended_guest_title": "A shared chat has ended",
   "desk.cowork_ended_text": "Guests were removed and their invites no longer work.",
   "desk.cowork_ended_title": "Co-working ended",
   "desk.cowork_failed": "That did not work",

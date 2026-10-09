@@ -1075,6 +1075,8 @@ const coworkBridge = createCoworkBridge({
   // Joined chats survive a restart: the bridge redials them and moves the workspace if its port did.
   joinStore: createJoinStore(path.join(app.getPath("userData"), "cowork")),
   updateRemoteWorkspace: (input) => workspaceStore.updateRemoteWorkspace(input),
+  remoteToken: async (remoteWorkspaceId) =>
+    (await workspaceStore.readWorkspaceState()).workspaces.find((entry) => entry.id === remoteWorkspaceId)?.redrobToken ?? null,
   emit: (event) => emitCoworkEvent(event),
   // Two dev instances on one machine with no relay: invites carry socket addresses.
   directAddresses: !app.isPackaged && process.env.REDROB_COWORK_DIRECT_ADDRESSES === "1",
