@@ -167,9 +167,10 @@ Harness: `packages/work-labeller/bench/webview` (#154). It runs the package's ru
 | Shared package | cowork #153 | Open |
 | Download on first use, and the webview harness | cowork #154 | Open |
 | E1: engine sends insights. Also: `/v1/chat/completions` fixed (it answered 500, and streamed empty) and forwards `x-redrob-session` | redrob-code #67 | Open |
+| JS SDK regenerated (split out of #67) | redrob-code #68 | Open |
 | E2: engine release | redrob-code | After #67 |
 | O1 + O2: key in the engine, chat through it | office #134 | Open. Merge only after E2 |
-| O3: Office labels | office | Blocked: the package on npm |
+| O3: Office labels | office #142 | Draft. Blocked: the package on npm, and the model release |
 | Design spike | this section | Chromium measured; WebKit needs a Mac and a Linux desktop |
-| Design integration (PR 5) | design | Blocked: the package on npm, and WebKit measured |
+| Design integration (PR 5) | design #87 | Draft. Blocked: the package on npm, the model release, and WebKit measured. `cargo check` of `desktop/` not run here; `download.rs` tested on its own |
 
