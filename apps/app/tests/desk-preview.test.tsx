@@ -190,7 +190,7 @@ describe("the Preview routes", () => {
     expect(route("/scheduled", client)).toContain("나를 기다리는 실행 (2)");
     expect(route("/history", client)).toContain("스스로 실행");
     client.setQueryData(GUIDE_RESEARCH_KEY, await loadGuideResearch());
-    expect(route("/guide", client)).toContain("레드롭 오토");
+    expect(route("/guide", client)).toContain("새 채팅에 사용");
   });
 });
 
@@ -446,7 +446,8 @@ describe("Model Guide", () => {
     expect(html).toContain('href="/guide" aria-current="page"');
     expect(html).toContain('aria-selected="true" aria-controls="panel-profession"');
     expect(html).toContain("By price");
-    expect(html).toContain("every message goes to Redrob Auto");
+    expect(html).not.toContain("every message goes to Redrob Auto");
+    expect(html).toContain("Use for new chats");
     expect(html).toContain("Rankings as of 2026-10-08");
     expect(html).not.toContain("rr-alert");
     expect(html).not.toContain("Sample output, illustrative");

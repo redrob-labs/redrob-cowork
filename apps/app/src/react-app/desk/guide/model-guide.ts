@@ -1,8 +1,12 @@
 import type { Effort, EffortLevel, GuidePick, GuideProfession, GuideSource, GuideTool } from "@redrob-labs/ui";
 import { z } from "zod";
 
+import type { ModelRef } from "../../../app/types";
 import { t, type Language } from "../../../i18n";
-import { REDROB_BASE_URL } from "../../domains/settings/redrob-provider";
+import { REDROB_BASE_URL, REDROB_PROVIDER_ID } from "../../domains/settings/redrob-provider";
+
+/** The harness id of a pick that runs here, in Redrob Cowork. */
+const REDROB_HARNESS = "redrob-desk";
 
 /**
  * The research behind "By profession": each profession's top five tasks, and the five best models (or model
@@ -170,6 +174,36 @@ function sourceLabel(source: z.infer<typeof Source>, models: Record<string, stri
   }
 }
 
+/** The research pick each shown pick came from, so "Use this" reads ids rather than display names. */
+const SOURCE = new WeakMap<GuidePick, ResearchPick>();
+
+/** What "Use this" does with a pick: the Redrob model and level new chats start on, or why it cannot. */
+export type GuideUse =
+  | { ok: true; model: ModelRef; variant: string | null; name: string; effort: string | null }
+  | { ok: false; reason: "elsewhere"; name: string; harness: string }
+  | { ok: false; reason: "not-on-redrob"; name: string };
+
+/**
+ * The model a pick runs, as the chat's model menu names it: provider `redrob` and the model's catalogue id, at
+ * the level the reader tried or else the ranked one. A pick that runs on another product, or a model Redrob
+ * does not serve, cannot be used. A pick that runs a text model then an image model starts the chat on the
+ * text model: the chat has one model, and the levels belong to it.
+ */
+export function guideUse(research: GuideResearch, pick: GuidePick, tried: EffortLevel | null): GuideUse | null {
+  const source = SOURCE.get(pick);
+  const first = source?.steps[0];
+  if (!source || !first) return null;
+  const name = research.models[first.model] ?? first.model;
+  if (source.harness !== REDROB_HARNESS) return { ok: false, reason: "elsewhere", name, harness: named(HARNESSES, source.harness) };
+  const id = research.catalogue?.[first.model];
+  if (!id) return { ok: false, reason: "not-on-redrob", name };
+  const level = tried?.level ? source.efforts[tried.level - 1]?.[0] : undefined;
+  const effort = level ?? first.effort ?? null;
+  // "default" sends no level: the provider's own default, which is what an empty variant means.
+  const variant = effort && effort !== "default" ? effort : null;
+  return { ok: true, model: { providerID: REDROB_PROVIDER_ID, modelID: id }, variant, name, effort: variant ? effortName(variant) : null };
+}
+
 function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): GuidePick {
   const name = (model: string) => research.models[model] ?? model;
   const sources: GuideSource[] = pick.sources.map((source) => ({
@@ -182,7 +216,7 @@ function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): G
   const evidence = pick.sources.filter((source) => !["price", "monthly", "image"].includes(source.label));
   const chain = pick.steps.length > 1;
   const ranked = efforts(pick);
-  return {
+  const shown: GuidePick = {
     id: pick.id,
     ...(chain
       ? {
@@ -215,6 +249,8 @@ function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): G
     ...(pick.benchmark ? { benchmark: true } : {}),
     ...ranked,
   };
+  SOURCE.set(shown, pick);
+  return shown;
 }
 
 /** The research as ModelGuide professions, labelled in the app's language. */

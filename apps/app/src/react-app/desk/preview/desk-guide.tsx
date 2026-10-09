@@ -1,10 +1,14 @@
 /** @jsxImportSource react */
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, Tabs, icons, type TableColumn } from "@redrob-labs/ui";
-import { useState, useSyncExternalStore } from "react";
-import { useSearchParams } from "react-router";
+import { useSyncExternalStore } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 
+import type { ModelRef } from "../../../app/types";
 import { currentLocale, subscribeToLocale, t, type Language } from "../../../i18n";
+import { useLocalOptional } from "../../kernel/local-provider";
+import { markNewChatUsesDefault } from "../../kernel/model-config";
 import { desktopFetchViaMain } from "../../../app/lib/desktop";
 import {
   estimatedCostFor,
@@ -17,34 +21,49 @@ import {
 } from "../../../app/lib/redrob-pricing";
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { autoModel, guideGroups, guideModelCount, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
-import { guideLanguages, guideOutputs, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
+import {
+  guideLanguages,
+  guideOutputs,
+  guideProfessions,
+  guideUse,
+  loadGuideResearch,
+  type GuideResearch,
+  type GuideUse,
+} from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
 
-/** "Use this" in the guide: Auto picks, so it explains that instead of switching anything. */
-function AutoPicksNote() {
-  return (
-    <ProtectionStatus
-      tone="safe"
-      icon={icons.sparkle({ width: 20, height: 20, "aria-hidden": true })}
-      title={t("desk.preview_guide_use_title")}
-    >
-      {t("desk.preview_guide_use_text")}
-    </ProtectionStatus>
-  );
+/**
+ * Says what "Use this" did, as a toast beside where the person is looking rather than a note at the foot of a
+ * long page: new chats start on the pick (with a way to start one), or why this pick cannot be used here.
+ */
+export function announceUse(use: GuideUse, startChat?: () => void): void {
+  if (!use.ok) {
+    toast.warning(t("desk.guide_use_unavailable_title", { model: use.name }), {
+      description: use.reason === "elsewhere" ? t("desk.guide_use_elsewhere", { harness: use.harness }) : t("desk.guide_use_not_on_redrob"),
+    });
+    return;
+  }
+  toast.success(t("desk.guide_use_done_title", { model: use.name }), {
+    description: [use.effort ? t("desk.guide_use_done_effort", { effort: use.effort }) : null, t("desk.guide_use_done_text")]
+      .filter(Boolean)
+      .join(" "),
+    ...(startChat ? { action: { label: t("desk.guide_use_new_chat"), onClick: startChat } } : {}),
+  });
 }
 
 /**
- * "By profession": the researched top five for each task, in the language the work is done in. In Redrob Cowork
- * every message goes to Redrob Auto, so the guide shows what Auto chooses from; there is no model to pick here.
+ * "By profession": the researched top five for each task, in the language the work is done in. "Use this"
+ * starts new chats on the pick (`onChoose`); chats that exist keep their model. Without `onChoose` (a screen
+ * rendered on its own) it only says what it would do.
  */
-export function ProfessionGuideView(props: { research: GuideResearch; locale: Language }) {
-  const [explained, setExplained] = useState(false);
+export function ProfessionGuideView(props: {
+  research: GuideResearch;
+  locale: Language;
+  onChoose?: (model: ModelRef, variant: string | null) => void;
+  onStartChat?: () => void;
+}) {
   return (
     <>
-      <p className="desk-settings__note">
-        {icons.sparkle({ width: 14, height: 14, "aria-hidden": true })}
-        {t("desk.preview_guide_auto")}
-      </p>
       <ModelGuide
         professions={guideProfessions(props.research, props.locale)}
         weights={props.research.weights}
@@ -92,10 +111,14 @@ export function ProfessionGuideView(props: { research: GuideResearch; locale: La
         sourcesLabel={t("desk.guide_sources")}
         emptyTitle={t("desk.preview_guide_empty_title")}
         emptyText={t("desk.preview_guide_empty_text")}
-        useLabel={t("desk.preview_guide_use")}
-        onUse={() => setExplained(true)}
+        useLabel={t("desk.guide_use")}
+        onUse={(pick, context) => {
+          const use = guideUse(props.research, pick, context.effort);
+          if (!use) return;
+          if (use.ok) props.onChoose?.(use.model, use.variant);
+          announceUse(use, props.onStartChat);
+        }}
       />
-      {explained ? <AutoPicksNote /> : null}
     </>
   );
 }
@@ -215,6 +238,15 @@ export function GuideScreen() {
   const tab: GuideTab = params.get("tab") === "price" ? "price" : "profession";
   const setTab = (next: GuideTab) => setParams({ tab: next }, { replace: true });
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+  const local = useLocalOptional();
+  const navigate = useNavigate();
+  // New chats start on the default model; chats that exist keep theirs.
+  const chooseForNewChats = local
+    ? (model: ModelRef, variant: string | null) => {
+        local.setPrefs((current) => ({ ...current, defaultModel: model, modelVariant: variant }));
+        markNewChatUsesDefault();
+      }
+    : undefined;
   const pricing = useQuery({
     queryKey: GUIDE_QUERY_KEY,
     queryFn: () => fetchRedrobPricing(guideFetch(isDesktopRuntime())),
@@ -253,7 +285,7 @@ export function GuideScreen() {
           ) : !research.data ? (
             <EmptyState title={t("desk.guide_profession_error")} description={t("desk.settings_try_again")} />
           ) : (
-            <ProfessionGuideView research={research.data} locale={locale} />
+            <ProfessionGuideView research={research.data} locale={locale} onChoose={chooseForNewChats} onStartChat={() => navigate("/chat")} />
           )
         ) : pricing.isLoading ? (
           <Skeleton variant="text" lines={6} />
