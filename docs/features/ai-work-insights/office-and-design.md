@@ -1,6 +1,6 @@
 # Work labels for Redrob Office and Redrob Design: scope
 
-Status: proposed (2026-10-08). Decided: the model is **downloaded on first use**, not bundled in the installer.
+Status: agreed (2026-10-08). The model is **downloaded on first use**, silently, not bundled in the installer.
 
 Today only Cowork labels its sessions. Office and Design appear in the Console's insights as usage-only traffic: cost, model and language from the gateway, with no mode, kind of work, outcome or habits. This document scopes giving both apps the same labels as Cowork (see `README.md` and `model-evaluation.md`), with the same rule: the text stays on the machine, and only labels go to the Console.
 
@@ -108,8 +108,8 @@ Each app maps its own events to the package's facts. Only that mapping is app-sp
 
 Cowork's #135 and #136, and Console's #224, land first.
 
-## Decisions needed
+## Decisions (2026-10-08)
 
-1. **Asking before downloading.** Downloading 278 MB without asking matches how Cowork sends labels (no opt-in), but it is a large download on a metered connection. Options: download silently; or ask once, the first time, in Settings or a notice.
-2. **Design's inference.** WASM in the webview (recommended, after the spike), or native `ort` in Rust.
-3. **Office's other editors.** Docs, Sheets and Slides first is the proposal; the rest later.
+1. **Download silently.** There is no prompt; Settings shows the status. This matches how Cowork sends labels.
+2. **Design runs the model as WASM in the webview**, after the spike (PR 4) confirms parity, latency and memory. Native `ort` is the fallback if it does not.
+3. **Office: Docs, Sheets and Slides first**; PDF, Markdown and Hangul later.
