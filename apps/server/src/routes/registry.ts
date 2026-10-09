@@ -46,10 +46,17 @@ export function addRoute(routes: Route[], method: string, path: string, auth: Au
   routes.push({ method, regex, keys, auth, handler });
 }
 
+/**
+ * `:name` matches one segment. A trailing `/*` matches the rest of the path, slashes included, under the
+ * key `*`: what a route serving a folder's files needs, since a file can sit any depth below it.
+ */
 function pathToRegex(path: string, keys: string[]): RegExp {
-  const pattern = path.replace(/:([A-Za-z0-9_]+)/g, (_, key) => {
+  const rest = path.endsWith("/*");
+  const pattern = (rest ? path.slice(0, -2) : path).replace(/:([A-Za-z0-9_]+)/g, (_, key) => {
     keys.push(key);
     return "([^/]+)";
   });
-  return new RegExp(`^${pattern}$`);
+  if (!rest) return new RegExp(`^${pattern}$`);
+  keys.push("*");
+  return new RegExp(`^${pattern}/(.*)$`);
 }
