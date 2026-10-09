@@ -1575,6 +1575,11 @@ html[lang="ko"] {
  * the Latin face. Smoothing is left to the platform, as the preflight asks.
  */
 
+/* A Preview button only where there is a sandbox to preview in; see MarkdownBlock. */
+.markdown-content[data-redrob-code-preview-available="false"] [data-redrob-code-preview] {
+  display: none;
+}
+
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
   background: transparent !important;

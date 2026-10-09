@@ -1497,6 +1497,8 @@ const en = {
   "message.copied": "Copied",
   "message.copy": "Copy message",
   "message.copy_code_block": "Copy code block",
+  "message.preview": "Preview",
+  "message.preview_code_block": "Preview this code as it would appear",
   "message.download": "Download",
   "message.edit": "Edit message",
   "message.expand_item": "Expand {text}",
