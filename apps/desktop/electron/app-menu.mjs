@@ -219,8 +219,8 @@ export function createApplicationMenu({ appName, docsUrl, getWindow }) {
   }
 
   /*
-    On Windows and Linux the menu is never shown as a native bar: the renderer's title bar carries the same
-    File/Edit/View/Window/Help menus. It stays INSTALLED, because its accelerators (Ctrl+B, Ctrl+, and the
+    On Windows and Linux the menu is never shown: the renderer's title bar has no menus by design. It stays
+    INSTALLED, because its accelerators (Ctrl+B, Ctrl+, and the
     zoom keys) only fire while an application menu is set. Auto-hide stays off so Alt cannot bring the
     native bar back over the custom one.
   */

@@ -42,6 +42,12 @@ describe("window title bar", () => {
     expect(read("src/react-app/shell/settings-route.tsx")).not.toContain("__setTitleBarHidden");
     expect(read("src/react-app/domains/settings/pages/appearance-view.tsx")).not.toContain("WindowSection");
   });
+
+  test("the bar carries no File/Edit/View menus", () => {
+    const bar = read("src/react-app/shell/window-title-bar.tsx");
+    expect(bar).not.toContain("<Menu");
+    expect(bar).not.toContain("<nav");
+  });
 });
 
 describe("compaction threshold", () => {
@@ -181,7 +187,7 @@ describe("Korean tooltips", () => {
       "settings.compact_threshold",
       "settings.compact_threshold_desc",
       "settings.compact_threshold_tooltip",
-      "titlebar.file",
+      "titlebar.minimize",
       "titlebar.close_window",
     ]) {
       expect(en).toContain(`"${key}":`);

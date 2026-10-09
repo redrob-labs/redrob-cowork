@@ -539,7 +539,7 @@ export type DesktopCommandMap = {
   __setNativeTheme: { args: [theme: string]; result: unknown };
   __setApplicationMenuVisible: { args: [visible: boolean]; result: unknown };
   /**
-   * Run one of the title bar's window or menu actions on the calling window. `false` means the action is
+   * Run one of the title bar's window buttons on the calling window. `false` means the action is
    * not on the main process's fixed list, or there is no window.
    */
   __windowControl: { args: [action: WindowControlAction]; result: boolean };
@@ -548,22 +548,7 @@ export type DesktopCommandMap = {
 };
 
 /** The actions `__windowControl` accepts (main.mjs `WINDOW_CONTROL_ACTIONS`). */
-export type WindowControlAction =
-  | "minimize"
-  | "toggleMaximize"
-  | "toggleFullScreen"
-  | "close"
-  | "undo"
-  | "redo"
-  | "cut"
-  | "copy"
-  | "paste"
-  | "delete"
-  | "selectAll"
-  | "reload"
-  | "forceReload"
-  | "toggleDevTools"
-  | "openDocs";
+export type WindowControlAction = "minimize" | "toggleMaximize" | "close";
 
 export type WindowState = { maximized: boolean; fullScreen: boolean };
 

@@ -1610,26 +1610,13 @@ function windowState(window) {
 }
 
 /*
-  What the renderer's title bar may ask the window to do. A fixed list, so the bridge cannot be used to call
-  arbitrary BrowserWindow or webContents methods. The edit actions run on webContents so they act on whatever
-  the renderer last focused, exactly as the native menu's roles did.
+  What the renderer's title bar may ask the window to do: its three Linux buttons. A fixed list, so the
+  bridge cannot be used to call arbitrary BrowserWindow methods.
 */
 const WINDOW_CONTROL_ACTIONS = {
   minimize: (window) => window.minimize(),
   toggleMaximize: (window) => (window.isMaximized() ? window.unmaximize() : window.maximize()),
-  toggleFullScreen: (window) => window.setFullScreen(!window.isFullScreen()),
   close: (window) => window.close(),
-  undo: (window) => window.webContents.undo(),
-  redo: (window) => window.webContents.redo(),
-  cut: (window) => window.webContents.cut(),
-  copy: (window) => window.webContents.copy(),
-  paste: (window) => window.webContents.paste(),
-  delete: (window) => window.webContents.delete(),
-  selectAll: (window) => window.webContents.selectAll(),
-  reload: (window) => window.webContents.reload(),
-  forceReload: (window) => window.webContents.reloadIgnoringCache(),
-  toggleDevTools: (window) => window.webContents.toggleDevTools(),
-  openDocs: () => shell.openExternal(DOCS_PAGE_URL),
 };
 
 function applyNativeTheme(mode) {
@@ -2225,8 +2212,7 @@ const desktopCommandHandlers = {
   "__setApplicationMenuVisible": async (event, ...args) => {
       return applicationMenu.setVisible(args[0]);
   },
-  // The renderer's title bar: window buttons on Linux and the File/Edit/View/Window/Help menus everywhere
-  // but macOS. Unknown actions are refused rather than ignored, so a typo fails loudly.
+  // The renderer's title bar buttons (Linux; Windows draws its own). Unknown actions are refused.
   "__windowControl": async (event, ...args) => {
       const action = String(args[0]);
       const run = Object.hasOwn(WINDOW_CONTROL_ACTIONS, action) ? WINDOW_CONTROL_ACTIONS[action] : null;

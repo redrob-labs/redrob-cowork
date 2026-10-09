@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
-import { IconButton, Menu, icons, type MenuItem } from "@redrob-labs/ui";
+import { useEffect, useState } from "react";
+import { IconButton, icons } from "@redrob-labs/ui";
 import type { WindowControlAction, WindowState } from "@redrob/types/desktop-ipc";
 
 import { t } from "@/i18n";
@@ -21,11 +21,6 @@ export function titleBarPlatform(): TitleBarPlatform | null {
 
 function control(action: WindowControlAction) {
   void window.__REDROB_ELECTRON__?.invokeDesktop?.("__windowControl", action);
-}
-
-/** The native menu's own actions reach the renderer as window events; the title bar raises the same ones. */
-function raise(name: string, detail?: string) {
-  window.dispatchEvent(detail === undefined ? new Event(name) : new CustomEvent(name, { detail }));
 }
 
 function isWindowState(value: unknown): value is WindowState {
@@ -58,89 +53,13 @@ function useWindowState(): WindowState {
   return state;
 }
 
-type MenuSpec = { id: string; label: string; items: MenuItem[] };
-
 /**
- * The File, Edit, View, Window and Help menus the native menu bar used to show, with the same actions and
- * shortcuts (app-menu.mjs). The native menu stays installed underneath, so the shortcuts keep working; these
- * show them and make every action reachable with the mouse.
- */
-export function titleBarMenus(platform: TitleBarPlatform, state: WindowState, edit: (action: WindowControlAction) => void): MenuSpec[] {
-  const item = (id: string, label: string, onSelect: () => void, shortcut?: string): MenuItem => ({
-    id,
-    label,
-    shortcut,
-    onSelect,
-  });
-  const separator: MenuItem = { type: "separator" };
-  return [
-    {
-      id: "file",
-      label: t("titlebar.file"),
-      items: [
-        item("settings", t("titlebar.settings"), () => raise("redrob:native-menu:open-settings"), "Ctrl+,"),
-        separator,
-        item("close", t("titlebar.close_window"), () => control("close"), "Ctrl+W"),
-      ],
-    },
-    {
-      id: "edit",
-      label: t("titlebar.edit"),
-      items: [
-        item("undo", t("titlebar.undo"), () => edit("undo"), "Ctrl+Z"),
-        item("redo", t("titlebar.redo"), () => edit("redo"), platform === "windows" ? "Ctrl+Y" : "Ctrl+Shift+Z"),
-        separator,
-        item("cut", t("titlebar.cut"), () => edit("cut"), "Ctrl+X"),
-        item("copy", t("titlebar.copy"), () => edit("copy"), "Ctrl+C"),
-        item("paste", t("titlebar.paste"), () => edit("paste"), "Ctrl+V"),
-        item("delete", t("titlebar.delete"), () => edit("delete")),
-        separator,
-        item("select-all", t("titlebar.select_all"), () => edit("selectAll"), "Ctrl+A"),
-      ],
-    },
-    {
-      id: "view",
-      label: t("titlebar.view"),
-      items: [
-        item("sidebar", t("titlebar.toggle_sidebar"), () => raise("redrob:native-menu:toggle-sidebar"), "Ctrl+B"),
-        separator,
-        item("zoom-reset", t("titlebar.actual_size"), () => raise("redrob:native-menu:zoom", "reset"), "Ctrl+0"),
-        item("zoom-in", t("titlebar.zoom_in"), () => raise("redrob:native-menu:zoom", "in"), "Ctrl++"),
-        item("zoom-out", t("titlebar.zoom_out"), () => raise("redrob:native-menu:zoom", "out"), "Ctrl+-"),
-        item("fullscreen", t("titlebar.full_screen"), () => control("toggleFullScreen"), "F11"),
-        separator,
-        item("reload", t("titlebar.reload"), () => control("reload"), "Ctrl+R"),
-        item("force-reload", t("titlebar.force_reload"), () => control("forceReload"), "Ctrl+Shift+R"),
-        item("devtools", t("titlebar.developer_tools"), () => control("toggleDevTools"), "Ctrl+Shift+I"),
-      ],
-    },
-    {
-      id: "window",
-      label: t("titlebar.window"),
-      items: [
-        item("minimize", t("titlebar.minimize"), () => control("minimize")),
-        item("maximize", state.maximized ? t("titlebar.restore") : t("titlebar.maximize"), () => control("toggleMaximize")),
-        separator,
-        item("close-window", t("titlebar.close_window"), () => control("close")),
-      ],
-    },
-    {
-      id: "help",
-      label: t("titlebar.help"),
-      items: [
-        item("updates", t("titlebar.check_updates"), () => raise("redrob:native-menu:check-updates")),
-        separator,
-        item("docs", t("titlebar.docs"), () => control("openDocs")),
-      ],
-    },
-  ];
-}
-
-/**
- * The window's title bar on Windows and Linux, in place of the OS title bar and menu bar.
+ * The window's title bar on Windows and Linux, in place of the OS title bar and menu bar: the product
+ * icon, the app name and the window buttons. There are no File/Edit/View menus; the native menu stays
+ * installed underneath (app-menu.mjs) only so its shortcuts keep working.
  *
  * 40px (`--control-height-md`), so it lines up with the Windows caption buttons main.mjs asks for. The bar
- * drags the window; the menus and buttons in it opt out. On Windows the right end is left empty for the
+ * drags the window; the buttons in it opt out. On Windows the right end is left empty for the
  * caption buttons Windows draws (they keep Snap Layouts); on Linux the bar draws them itself.
  */
 export function WindowTitleBar() {
@@ -152,34 +71,11 @@ export function WindowTitleBar() {
 function WindowTitleBarView({ platform }: { platform: TitleBarPlatform }) {
   const { config } = useShellConfig();
   const state = useWindowState();
-  // Opening a menu moves focus into it. Edit actions must act on what had focus before, so it is noted when
-  // a menu is pressed and handed back before the action runs.
-  const focusBeforeMenu = useRef<HTMLElement | null>(null);
-  const noteFocus = (event: PointerEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
-    const active = document.activeElement;
-    if (active instanceof HTMLElement && !event.currentTarget.contains(active)) focusBeforeMenu.current = active;
-  };
-  const edit = (action: WindowControlAction) => {
-    focusBeforeMenu.current?.focus();
-    control(action);
-  };
-  const menus = titleBarMenus(platform, state, edit);
-
   return (
     // A double click on the bar maximises: the OS does that for a drag region, so there is no handler.
     <div className="window-titlebar titlebar-drag">
       <img src={ICON_SRC} alt="" width={16} height={16} className="window-titlebar__icon" aria-hidden="true" />
       <span className="window-titlebar__name">{config.appName}</span>
-      <nav
-        className="window-titlebar__menus titlebar-no-drag"
-        aria-label={t("titlebar.menu_bar")}
-        onPointerDownCapture={noteFocus}
-        onKeyDownCapture={noteFocus}
-      >
-        {menus.map((menu) => (
-          <Menu key={menu.id} label={menu.label} items={menu.items} variant="ghost" size="sm" />
-        ))}
-      </nav>
       {platform === "linux" ? (
         <div className="window-titlebar__controls titlebar-no-drag">
           <IconButton label={t("titlebar.minimize")} size="sm" onClick={() => control("minimize")}>

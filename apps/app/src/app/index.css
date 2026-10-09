@@ -2085,13 +2085,6 @@ select:disabled {
   flex: none;
   color: var(--ink-primary);
 }
-.window-titlebar__menus {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-inline-start: var(--space-2);
-  font-weight: 500;
-}
 .window-titlebar__controls {
   display: flex;
   align-items: center;
