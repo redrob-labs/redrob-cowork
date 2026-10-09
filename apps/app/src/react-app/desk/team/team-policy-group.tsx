@@ -145,7 +145,7 @@ export function TeamPolicyGroup() {
       const toast = next.outcome ? teamPolicyOutcomeToast(next.outcome, quiet) : null;
       if (toast) showToast(...toast);
       if (!next.outcome || next.outcome.status === "applied" || next.outcome.status === "removed") {
-        // Notes, privacy, playbooks and skills may all have changed under the screens that show them.
+        // Notes, privacy and skills may all have changed under the screens that show them.
         await queryClient.invalidateQueries();
       }
     } catch (error) {

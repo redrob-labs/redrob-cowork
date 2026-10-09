@@ -856,7 +856,6 @@ export type RedrobTeamPolicyStatus = {
   signedWithTestKey?: boolean;
   privacy?: { level: "off" | "standard" | "high" | "strict"; locked: boolean };
   notes?: number;
-  playbooks?: string[];
   skills?: string[];
   sync: {
     checkedAt: number | null;
