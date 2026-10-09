@@ -27,8 +27,11 @@ afterEach(async () => {
 
 describe("the bundled snapshot", () => {
   test("holds the Console's library and its whole taxonomy", () => {
-    expect(snapshot.skills.length).toBe(75);
-    expect(snapshot.skills.every((skill) => skill.profession === "lawyer")).toBe(true);
+    // Every profession ships five skills per task, each in every working language.
+    expect(snapshot.skills.length).toBe(snapshot.taxonomy.professions.length * 5 * 5 * snapshot.taxonomy.languages.length);
+    for (const profession of snapshot.taxonomy.professions) {
+      expect(snapshot.skills.filter((skill) => skill.profession === profession.id)).toHaveLength(25 * snapshot.taxonomy.languages.length);
+    }
     expect(snapshot.taxonomy.professions.map((profession) => profession.id)).toContain("lawyer");
     expect(snapshot.taxonomy.languages.map((language) => language.id)).toEqual(["en", "ko", "hi"]);
     for (const skill of snapshot.skills) {
@@ -40,14 +43,15 @@ describe("the bundled snapshot", () => {
 describe("filtering the library", () => {
   test("follows the Console: every filter optional, combined with AND", () => {
     const all = snapshot.skills;
-    expect(filterLibrary(all, {})).toHaveLength(75);
+    expect(filterLibrary(all, {})).toHaveLength(all.length);
+    expect(filterLibrary(all, { profession: "lawyer" })).toHaveLength(75);
     const korean = filterLibrary(all, { language: "ko" });
     expect(korean.length).toBeGreaterThan(0);
     expect(korean.every((skill) => skill.language === "ko")).toBe(true);
     const research = filterLibrary(all, { profession: "lawyer", task: "research", language: "en" });
     expect(research.length).toBeGreaterThan(0);
     expect(research.every((skill) => skill.task === "research" && skill.language === "en")).toBe(true);
-    expect(filterLibrary(all, { profession: "designer" })).toHaveLength(0);
+    expect(filterLibrary(all, { profession: "designer", q: "zzqxnomatch" })).toHaveLength(0);
   });
 
   test("q is a case-insensitive substring of the name or the description", () => {
