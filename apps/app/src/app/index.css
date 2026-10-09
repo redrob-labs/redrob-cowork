@@ -1326,6 +1326,55 @@
   color: var(--ink-primary);
 }
 
+/* Live co-working (desk/room/cowork.tsx). */
+.desk-cowork {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-cowork__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.desk-cowork__row,
+.desk-cowork__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-cowork__person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.desk-cowork__controls {
+  flex-basis: 100%;
+  padding-left: var(--space-6);
+}
+.desk-cowork__author {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-end;
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
 .desk-handoff__facts {
   display: grid;
   gap: var(--space-2);

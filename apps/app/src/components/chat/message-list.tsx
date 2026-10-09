@@ -132,6 +132,7 @@ import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
 import { DeskReviewBar, MessageReview, useReviewUi } from "@/react-app/desk/review/review-thread"
+import { MessageAuthor } from "@/react-app/desk/room/cowork"
 import { DeskHandoffBanner } from "@/react-app/desk/handoff/handoff-open"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
@@ -819,6 +820,7 @@ const UserMessage = React.memo(
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        {inDeskFrame ? <MessageAuthor sessionId={sessionId} messageId={message.id} /> : null}
         {inDeskFrame ? <MessageReview sessionId={sessionId} messageId={message.id} /> : null}
       </Message>
     )

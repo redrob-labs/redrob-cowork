@@ -29,6 +29,7 @@ import { WelcomeRoute } from "./welcome-route";
 import { DsStory } from "../desk/ds-story";
 import { SaveAsProjectAction } from "../desk/projects/project-dialog";
 import { HandoffAction } from "../desk/handoff/handoff-dialog";
+import { CoworkAction } from "../desk/room/cowork";
 import { DeskShell } from "../desk/shell/desk-shell";
 import { DeskLayer } from "../desk/shell/desk-layer";
 import { deskRoutes } from "../desk/shell/desk-routes";
@@ -46,6 +47,7 @@ function ChatRoute() {
       chatId={sessionId ?? null}
       actions={
         <>
+          <CoworkAction chatId={sessionId ?? null} />
           <HandoffAction chatId={sessionId ?? null} />
           <SaveAsProjectAction chatId={sessionId ?? null} />
         </>
