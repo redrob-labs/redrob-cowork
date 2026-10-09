@@ -152,5 +152,6 @@ describe("the shared queue", () => {
   test("the server's refusals have words", () => {
     expect(coworkFailureText("queue_full")).toBe(t("desk.cowork_failed_queue_full"));
     expect(coworkFailureText("guest_capability_missing")).toBe(t("desk.cowork_failed_cannot_send"));
+    expect(coworkFailureText("guest_plan_only")).toBe(t("desk.cowork_failed_plan_only"));
   });
 });

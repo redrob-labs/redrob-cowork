@@ -182,6 +182,7 @@ function ParticipantRow(props: {
   hostView: boolean;
   busy: boolean;
   onCapabilities: (next: RedrobGuestCapability[]) => void;
+  onPlanOnly: (next: boolean) => void;
   onRemove: () => void;
 }) {
   const { participant, me, hostView } = props;
@@ -200,6 +201,11 @@ function ParticipantRow(props: {
       <span className="desk-hint">
         {participant.typing ? t("desk.cowork_typing") : participant.present ? t("desk.cowork_here") : t("desk.cowork_away")}
       </span>
+      {participant.planOnly ? (
+        <Badge tone="info" size="sm">
+          {t("desk.cowork_plan_only")}
+        </Badge>
+      ) : null}
       {hostView && participant.role === "guest" && participant.tokenId ? (
         <div className="desk-cowork__controls">
           {GUEST_CAPABILITIES.map((capability) => (
@@ -211,6 +217,13 @@ function ParticipantRow(props: {
               onChange={(event) => props.onCapabilities(withCapability(capabilities, capability, event.currentTarget.checked))}
             />
           ))}
+          <Checkbox
+            label={t("desk.cowork_plan_only")}
+            hint={t("desk.cowork_plan_only_hint")}
+            checked={participant.planOnly === true}
+            disabled={props.busy}
+            onChange={(event) => props.onPlanOnly(event.currentTarget.checked)}
+          />
           <Button size="sm" variant="ghost" disabled={props.busy} onClick={props.onRemove}>
             {t("desk.cowork_remove")}
           </Button>
@@ -408,6 +421,7 @@ export function CoworkDialog(props: { client: DeskRoomClient; workspaceId: strin
                   hostView={hostView}
                   busy={busy}
                   onCapabilities={(next) => void run(() => client.setGuestCapabilities(workspaceId, sessionId, participant.tokenId ?? "", next))}
+                  onPlanOnly={(next) => void run(() => client.setGuestPlanOnly(workspaceId, sessionId, participant.tokenId ?? "", next))}
                   onRemove={() => void run(() => client.removeGuest(workspaceId, sessionId, participant.tokenId ?? ""))}
                 />
               ))}

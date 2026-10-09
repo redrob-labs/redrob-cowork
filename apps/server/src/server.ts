@@ -48,7 +48,7 @@ import {
   updateSchedule,
   type ScheduleEngine,
 } from "./desk-schedules.js";
-import { DESK_RUN_AGENT } from "./redrob-desk-agents.js";
+import { DESK_PLAN_AGENT, DESK_RUN_AGENT } from "./redrob-desk-agents.js";
 import { ApiError, formatError } from "./errors.js";
 import { readJsoncFile, updateJsoncTopLevel, writeJsoncFile } from "./jsonc.js";
 import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
@@ -153,6 +153,7 @@ import {
   engineSessionIdOf,
   filterGuestEventStream,
   filterJsonResponse,
+  planOnlyBody,
   type GuestEngineAccess,
 } from "./guest-access.js";
 import { engineCliTemplate } from "./engine-cli.js";
@@ -1087,17 +1088,25 @@ async function withRoomAuthorship(
   if (!match) return null;
   const sessionId = decodeURIComponent(match[1] ?? "");
   const room = await activeRoom(config, workspace.id, sessionId);
-  if (!room) return null;
+  const planOnly = Boolean(actor.guest?.planOnly);
+  if (!room && !planOnly) return null;
   let parsed: unknown;
   try {
     parsed = JSON.parse(await request.clone().text());
   } catch {
+    // A plan-only guest's turn must be rewritten; one that cannot be read does not go through.
+    if (planOnly) throw new ApiError(400, "invalid_payload", "A message body is required");
     return null;
+  }
+  // Whatever agent a plan-only guest asked for, the turn runs in the read-only Plan agent.
+  parsed = planOnlyBody(actor.guest, parsed, DESK_PLAN_AGENT) ?? parsed;
+  const headers = new Headers(request.headers);
+  headers.delete("content-length");
+  if (!room) {
+    return { request: new Request(request.url, { method: "POST", headers, body: JSON.stringify(parsed), signal: request.signal }), finish: async () => {} };
   }
   const minted = withServerMessageId(parsed, () => engineId("msg", "ascending"));
   if (!minted) return null;
-  const headers = new Headers(request.headers);
-  headers.delete("content-length");
   const next = new Request(request.url, { method: "POST", headers, body: JSON.stringify(minted.body), signal: request.signal });
   return {
     request: next,

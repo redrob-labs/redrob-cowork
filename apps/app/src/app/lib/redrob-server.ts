@@ -528,6 +528,8 @@ export type RedrobRoomParticipant = {
   present: boolean;
   typing: boolean;
   capabilities?: RedrobGuestCapability[];
+  /** Guests whose turns run only in the read-only Plan agent. */
+  planOnly?: boolean;
   /** Only the host sees these. */
   tokenId?: string;
   expiresAt?: number;
@@ -1567,6 +1569,14 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         hostToken,
         method: "PATCH",
         body: { capabilities },
+        timeoutMs: timeouts.config,
+      }),
+    setGuestPlanOnly: (workspaceId: string, sessionId: string, tokenId: string, planOnly: boolean): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/guests/${encodeURIComponent(tokenId)}`, {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: { planOnly },
         timeoutMs: timeouts.config,
       }),
     removeGuest: (workspaceId: string, sessionId: string, tokenId: string): Promise<unknown> =>

@@ -42,6 +42,7 @@ function readGuest(value: unknown): GuestGrant | null {
     capabilities,
     ...(typeof record.endpointId === "string" && record.endpointId ? { endpointId: record.endpointId } : {}),
     ...(typeof record.roomId === "string" && record.roomId ? { roomId: record.roomId } : {}),
+    ...(record.planOnly === true ? { planOnly: true } : {}),
   };
 }
 
@@ -176,11 +177,15 @@ export class TokenService {
   }
 
   /** Changes what a guest may do. Returns null when no guest token has that id. */
-  async updateGuest(id: string, patch: { capabilities?: GuestCapability[] }): Promise<Omit<TokenRecord, "hash"> | null> {
+  async updateGuest(id: string, patch: { capabilities?: GuestCapability[]; planOnly?: boolean }): Promise<Omit<TokenRecord, "hash"> | null> {
     await this.ensureLoaded();
     const record = this.tokens.find((token) => token.id === id);
     if (!record?.guest) return null;
     if (patch.capabilities) record.guest = { ...record.guest, capabilities: patch.capabilities };
+    if (patch.planOnly !== undefined) {
+      const { planOnly: _was, ...rest } = record.guest;
+      record.guest = patch.planOnly ? { ...rest, planOnly: true } : rest;
+    }
     await writeTokenStore(this.path, this.tokens);
     const { hash: _hash, ...rest } = record;
     return rest;
