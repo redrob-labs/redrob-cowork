@@ -34,7 +34,6 @@ const Pick = z.object({
   monthlyRange: z.tuple([z.number(), z.number()]),
   /** Every effort the first model runs at, cheapest first, with a month of the task at it. */
   efforts: z.array(z.tuple([z.string(), z.number()])),
-  comingSoon: z.boolean(),
   missing: z.array(z.string()),
   flags: z.array(z.string()),
   sources: z.array(Source),
@@ -46,8 +45,11 @@ export const GuideResearch = z.object({
   asOf: z.string(),
   weights: z.object({ quality: z.number(), reliability: z.number(), speed: z.number(), cost: z.number() }),
   models: z.record(z.string(), z.string()),
-  /** Tools a harness will have but does not ship yet, by harness id. */
-  planned: z.record(z.string(), z.array(z.string())),
+  /**
+   * Each ranked model's id in the Redrob catalogue, null where Redrob does not serve it. Optional: an edition
+   * Console published before the catalogue was added has none.
+   */
+  catalogue: z.record(z.string(), z.string().nullable()).optional(),
   professions: z.array(
     z.object({
       id: z.string(),
@@ -170,7 +172,6 @@ function sourceLabel(source: z.infer<typeof Source>, models: Record<string, stri
 
 function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): GuidePick {
   const name = (model: string) => research.models[model] ?? model;
-  const planned = research.planned[pick.harness] ?? [];
   const sources: GuideSource[] = pick.sources.map((source) => ({
     label: sourceLabel(source, research.models),
     value: source.value,
@@ -199,11 +200,9 @@ function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): G
     monthly: pick.monthly,
     monthlyKind: pick.monthlyKind,
     monthlyRange: pick.monthlyRange,
-    comingSoon: pick.comingSoon,
     tools: tools.map(
       (tool): GuideTool => ({
         label: named(TOOLS, tool),
-        soon: planned.includes(tool),
         missing: pick.missing.includes(tool),
       }),
     ),

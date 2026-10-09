@@ -106,16 +106,14 @@
   ]
  },
  "harnesses": {
-  "redrob-desk": {
-   "planned": [
-    "ui-ux-design",
-    "html-generation",
-    "graphic-design",
-    "image-generation",
-    "browser"
-   ]
-  },
+  "redrob-desk": {},
   "chatgpt-work": {},
   "claude-cowork": {}
+ },
+ "redrob": {
+  "note": "On Redrob Cowork a model runs only at the thinking levels Redrob serves it at (snapshots/redrob/<date>.json, from Console GET /v1/pricing), so it is ranked at its own ranked level when Redrob serves that, else at the highest served level below it. A model Redrob serves with no adjustable level runs at its provider default, read as providerDefault. A model with no Redrob id is ranked as before and cannot be switched to from the guide.",
+  "harness": "redrob-desk",
+  "providerDefault": "medium",
+  "url": "https://console.redrob.ai/api/backend/v1/pricing"
  }
 }

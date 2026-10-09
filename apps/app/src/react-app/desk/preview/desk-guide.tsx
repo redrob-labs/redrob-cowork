@@ -87,7 +87,6 @@ export function ProfessionGuideView(props: { research: GuideResearch; locale: La
           derived: t("desk.guide_kind_derived"),
           estimate: t("desk.guide_kind_estimate"),
         }}
-        comingSoonLabel={t("desk.guide_coming_soon")}
         missingLabel={t("desk.guide_missing")}
         toolsLabel={t("desk.guide_tools")}
         sourcesLabel={t("desk.guide_sources")}
