@@ -1,5 +1,5 @@
 import type { CoworkUnavailableReason } from "../../../app/lib/desktop";
-import type { RedrobGuestCapability, RedrobRoomEvent, RedrobRoomParticipant, RedrobRoomView } from "../../../app/lib/redrob-server";
+import type { RedrobGuestCapability, RedrobRoomEvent, RedrobRoomParticipant, RedrobRoomQueueItem, RedrobRoomView } from "../../../app/lib/redrob-server";
 import { t } from "../../../i18n";
 
 /**
@@ -72,6 +72,10 @@ export function coworkFailureText(code: string): string {
       return t("desk.cowork_failed_ended");
     case "invalid_payload":
       return t("desk.cowork_failed_name");
+    case "queue_full":
+      return t("desk.cowork_failed_queue_full");
+    case "guest_capability_missing":
+      return t("desk.cowork_failed_cannot_send");
     default:
       return t("desk.settings_try_again");
   }
@@ -134,4 +138,32 @@ export function roomEventEffect(event: RedrobRoomEvent): { room: boolean; knocks
     costs: event.type === "room.authorship" || event.type === "room.stopped",
     review: event.type === "review.updated",
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** The queue a `room.queue` event carries, read defensively: entries without an id or author are dropped. */
+export function readQueueItems(value: readonly unknown[]): RedrobRoomQueueItem[] {
+  return value.flatMap((entry) => {
+    if (!isRecord(entry)) return [];
+    const { id, author, preview, createdAt } = entry;
+    if (typeof id !== "string" || !isRecord(author)) return [];
+    const { participantId, displayName } = author;
+    if (typeof participantId !== "string") return [];
+    return [
+      {
+        id,
+        author: { participantId, displayName: typeof displayName === "string" ? displayName : "" },
+        preview: typeof preview === "string" ? preview : "",
+        createdAt: typeof createdAt === "number" ? createdAt : 0,
+      },
+    ];
+  });
+}
+
+/** Its author and the host may change a waiting message; the server checks the same. */
+export function canChangeQueued(item: RedrobRoomQueueItem, room: Pick<RedrobRoomView, "me" | "room">): boolean {
+  return item.author.participantId === room.me.participantId || room.me.participantId === room.room.host.participantId;
 }
