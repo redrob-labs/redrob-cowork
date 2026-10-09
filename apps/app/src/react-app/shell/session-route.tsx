@@ -13,6 +13,7 @@ import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { skillRunPrompt } from "@/react-app/desk/skills/skills";
 import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/skills/start-chat";
 import { syncCrashReports } from "@/react-app/desk/settings/crash-reports";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
@@ -368,7 +369,7 @@ async function draftToParts(
       }
       const skillMatch = segment.match(/^\[skill (.+)\]$/);
       if (skillMatch?.[1]) {
-        parts.push({ type: "text", text: `Load [skill ${skillMatch[1]}] and follow its instructions.` });
+        parts.push({ type: "text", text: skillRunPrompt(skillMatch[1]) });
         continue;
       }
       if (segment.startsWith("@")) {
@@ -418,7 +419,7 @@ async function draftToParts(
         continue;
       }
       if (part.type === "skill") {
-        parts.push({ type: "text", text: `Load [skill ${part.name}] and follow its instructions.` });
+        parts.push({ type: "text", text: skillRunPrompt(part.name) });
         continue;
       }
       if (part.type === "app") {
