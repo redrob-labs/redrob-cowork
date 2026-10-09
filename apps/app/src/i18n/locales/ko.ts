@@ -512,7 +512,7 @@ const ko = {
   "desk.guide_price_note": "가격은 미국 달러 기준이며, 보낸 글과 쓴 글의 토큰 수로 매겨집니다. 토큰은 단어의 일부입니다. 결제는 레드롭 콘솔에서 합니다.",
   "desk.guide_profession_error": "순위를 불러오지 못했습니다",
   "desk.guide_profession_lede": "직업마다 AI로 일하는 가장 좋은 다섯 가지 방법입니다. 공개 벤치마크로 순위를 매기고 각 제조사의 정가로 비용을 계산했습니다. 모든 수치에 출처가 있습니다.",
-  "desk.guide_profession_meta": "{date} 기준 순위",
+  "desk.guide_profession_meta": "{edition}판 · 매월 갱신",
   "desk.guide_range": "예상 범위",
   "desk.guide_rank": "{task} {place}위",
   "desk.guide_reads": "읽는 양",
