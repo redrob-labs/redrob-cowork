@@ -1,15 +1,18 @@
 import { randomUUID } from "node:crypto";
 
+import { z } from "zod";
+
 import { ApiError } from "./errors.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
+import { validateSkillName } from "./validators.js";
 import { createWorkspaceKvStore } from "./workspace-kv-store.js";
 
 /*
- * Scheduled playbooks. A schedule runs a playbook (a workspace command) on a calendar, inside
- * redrob-server, while the app is open: there is no service that wakes the computer. A run is
- * a new session with the playbook's prompt on the Run agent. A time that passed while the app
- * was closed is recorded as missed and skipped, not run late. A run that asks for permission
- * waits on the Scheduled screen until the person answers.
+ * Scheduled runs. A schedule runs a prompt, or a skill with optional instructions, on a
+ * calendar, inside redrob-server, while the app is open: there is no service that wakes the
+ * computer. A run is a new session with that prompt on the Run agent. A time that passed while
+ * the app was closed is recorded as missed and skipped, not run late. A run that asks for
+ * permission waits on the Scheduled screen until the person answers.
  */
 
 /** When a schedule runs: the schedule picker's value, without the file-arrives mode. */
@@ -32,18 +35,61 @@ export type ScheduleRule = {
 
 export type ScheduleRunState = "running" | "waiting" | "done" | "missed" | "failed";
 
+/** What a schedule runs: a prompt as written, or a skill with optional extra instructions. */
+export type ScheduleTarget = { kind: "prompt"; text: string } | { kind: "skill"; name: string; instructions?: string };
+
+const TEXT_LIMIT = 20_000;
+
+const targetSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("prompt"), text: z.string().trim().min(1).max(TEXT_LIMIT) }),
+  z.strictObject({ kind: z.literal("skill"), name: z.string().trim(), instructions: z.string().trim().max(TEXT_LIMIT).optional() }),
+]);
+
+/** A target from the screen, checked. Throws a 400 when it is not one. */
+export function readTarget(value: unknown): ScheduleTarget {
+  const parsed = targetSchema.safeParse(value);
+  if (!parsed.success) {
+    throw new ApiError(400, "invalid_schedule", "A schedule runs a prompt (1-20000 characters) or a skill");
+  }
+  const target = parsed.data;
+  if (target.kind === "prompt") return target;
+  validateSkillName(target.name);
+  return target.instructions ? target : { kind: "skill", name: target.name };
+}
+
+/** The prompt a run starts with. `skillExists` is asked only for a skill. */
+export async function promptForTarget(target: ScheduleTarget, skillExists: (name: string) => Promise<boolean>): Promise<string> {
+  if (target.kind === "prompt") return target.text;
+  if (!(await skillExists(target.name))) throw new Error("The skill is gone");
+  return `Use the \`${target.name}\` skill.` + (target.instructions ? `\n\n${target.instructions}` : "");
+}
+
 export type StoredSchedule = {
   id: string;
-  playbookId: string;
+  target: ScheduleTarget;
   /** How often, in words, as the picker said it. */
   label: string;
   rule: ScheduleRule;
   nextRunAt: number | null;
   enabled: boolean;
-  lastRun: { state: ScheduleRunState; at: number; sessionId?: string } | null;
+  /** `reason` says why a run failed. */
+  lastRun: { state: ScheduleRunState; at: number; sessionId?: string; reason?: string } | null;
 };
 
-export type ScheduleRun = { id: string; scheduleId: string; sessionId: string | null; at: number; state: ScheduleRunState };
+/**
+ * A schedule saved before skills, when a schedule ran a playbook (a workspace command) by id.
+ * It is turned into a prompt schedule with the command's text on the next pass.
+ */
+export type LegacySchedule = Omit<StoredSchedule, "target"> & { playbookId: string };
+
+export type ScheduleRun = {
+  id: string;
+  scheduleId: string;
+  sessionId: string | null;
+  at: number;
+  state: ScheduleRunState;
+  reason?: string;
+};
 
 /** A scheduled run stopped at a permission ask. */
 export type WaitingAsk = {
@@ -57,9 +103,9 @@ export type WaitingAsk = {
   askedAt: number;
 };
 
-export type ScheduleState = { schedules: StoredSchedule[]; runs: ScheduleRun[]; waiting: WaitingAsk[] };
+export type ScheduleState = { schedules: StoredSchedule[]; runs: ScheduleRun[]; waiting: WaitingAsk[]; legacy: LegacySchedule[] };
 
-const EMPTY: ScheduleState = { schedules: [], runs: [], waiting: [] };
+const EMPTY: ScheduleState = { schedules: [], runs: [], waiting: [], legacy: [] };
 /** The runs kept for the screen, newest last. */
 const RUNS_KEPT = 50;
 /** A one-off later than this is missed rather than run. */
@@ -77,6 +123,10 @@ function parseState(json: string): ScheduleState {
       schedules: Array.isArray(value.schedules) ? value.schedules.filter(isStoredSchedule) : [],
       runs: Array.isArray(value.runs) ? value.runs.filter(isRun) : [],
       waiting: Array.isArray(value.waiting) ? value.waiting.filter(isWaiting) : [],
+      legacy: [
+        ...(Array.isArray(value.legacy) ? value.legacy : []),
+        ...(Array.isArray(value.schedules) ? value.schedules : []),
+      ].filter(isLegacySchedule),
     };
   } catch {
     return EMPTY;
@@ -84,7 +134,16 @@ function parseState(json: string): ScheduleState {
 }
 
 function isStoredSchedule(value: unknown): value is StoredSchedule {
-  return isRecord(value) && typeof value.id === "string" && typeof value.playbookId === "string" && isRecord(value.rule);
+  return isRecord(value) && typeof value.id === "string" && targetSchema.safeParse(value.target).success && isRecord(value.rule);
+}
+function isLegacySchedule(value: unknown): value is LegacySchedule {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.playbookId === "string" &&
+    value.target === undefined &&
+    isRecord(value.rule)
+  );
 }
 function isRun(value: unknown): value is ScheduleRun {
   return isRecord(value) && typeof value.id === "string" && typeof value.scheduleId === "string";
@@ -214,22 +273,20 @@ export function readRule(value: unknown): ScheduleRule {
 export async function addSchedule(
   config: ServerConfig,
   workspaceId: string,
-  input: { playbookId: string; label: string; rule: ScheduleRule },
+  input: { target: ScheduleTarget; label: string; rule: ScheduleRule },
   now = Date.now(),
 ): Promise<ScheduleState> {
   const state = await readSchedules(config, workspaceId);
-  // One schedule per playbook in a workspace: saving again replaces it.
-  const existing = state.schedules.find((schedule) => schedule.playbookId === input.playbookId);
   const schedule: StoredSchedule = {
-    id: existing?.id ?? randomUUID(),
-    playbookId: input.playbookId,
+    id: randomUUID(),
+    target: input.target,
     label: input.label,
     rule: input.rule,
     nextRunAt: nextRunAfter(input.rule, now),
     enabled: true,
-    lastRun: existing?.lastRun ?? null,
+    lastRun: null,
   };
-  const next = { ...state, schedules: [...state.schedules.filter((entry) => entry.id !== schedule.id), schedule] };
+  const next = { ...state, schedules: [...state.schedules, schedule] };
   await writeSchedules(config, workspaceId, next);
   return next;
 }
@@ -238,15 +295,23 @@ export async function updateSchedule(
   config: ServerConfig,
   workspaceId: string,
   scheduleId: string,
-  patch: { enabled?: boolean },
+  patch: { enabled?: boolean; target?: ScheduleTarget; label?: string; rule?: ScheduleRule },
   now = Date.now(),
 ): Promise<ScheduleState> {
   const state = await readSchedules(config, workspaceId);
   if (!state.schedules.some((schedule) => schedule.id === scheduleId)) throw new ApiError(404, "not_found", "Schedule not found");
   const schedules = state.schedules.map((schedule) => {
-    if (schedule.id !== scheduleId || patch.enabled === undefined) return schedule;
-    // Turned back on, it starts from now: the times it was paused for are not owed.
-    return { ...schedule, enabled: patch.enabled, nextRunAt: patch.enabled ? nextRunAfter(schedule.rule, now) : schedule.nextRunAt };
+    if (schedule.id !== scheduleId) return schedule;
+    const changed: StoredSchedule = {
+      ...schedule,
+      enabled: patch.enabled ?? schedule.enabled,
+      target: patch.target ?? schedule.target,
+      label: patch.label ?? schedule.label,
+      rule: patch.rule ?? schedule.rule,
+    };
+    // A new rule, or turned back on, starts from now: the times it was paused for are not owed.
+    const fromNow = patch.rule !== undefined || patch.enabled === true;
+    return fromNow ? { ...changed, nextRunAt: nextRunAfter(changed.rule, now) } : changed;
   });
   const next = { ...state, schedules };
   await writeSchedules(config, workspaceId, next);
@@ -256,8 +321,8 @@ export async function updateSchedule(
 export async function removeSchedule(config: ServerConfig, workspaceId: string, scheduleId: string): Promise<ScheduleState> {
   const state = await readSchedules(config, workspaceId);
   const next = {
+    ...state,
     schedules: state.schedules.filter((schedule) => schedule.id !== scheduleId),
-    runs: state.runs,
     waiting: state.waiting.filter((ask) => ask.scheduleId !== scheduleId),
   };
   await writeSchedules(config, workspaceId, next);
@@ -267,8 +332,13 @@ export async function removeSchedule(config: ServerConfig, workspaceId: string, 
 /* ---------- The engine, as the scheduler needs it ---------- */
 
 export type ScheduleEngine = {
-  /** The playbook's prompt, or null when it no longer exists. */
-  template(workspace: WorkspaceInfo, playbookId: string): Promise<string | null>;
+  /** The prompt a run of the target starts with. Throws when it cannot run (a skill that is gone). */
+  resolvePrompt(workspace: WorkspaceInfo, target: ScheduleTarget): Promise<string>;
+  /**
+   * A workspace (then global) command's prompt, or null when it no longer exists. Only for
+   * turning schedules saved before skills, which named a playbook command, into prompt schedules.
+   */
+  legacyCommandTemplate(workspace: WorkspaceInfo, commandName: string): Promise<string | null>;
   /** Starts a session on the Run agent with the prompt. Returns its id. */
   startRun(workspace: WorkspaceInfo, input: { title: string; prompt: string }): Promise<string>;
   /** Session id to status type ("idle", "busy", "retry"). */
@@ -297,6 +367,36 @@ export async function answerWaiting(
   return next;
 }
 
+type ScheduleLogger = { log(level: "warn", message: string, fields?: Record<string, unknown>): void };
+
+/**
+ * Turns schedules saved before skills (a playbook by id) into prompt schedules with the
+ * command's text, once. A command that no longer exists drops its schedule, with a warning.
+ * A lookup that fails keeps the schedule for the next pass. Returns the state, saved when changed.
+ */
+export async function resolveLegacySchedules(
+  config: ServerConfig,
+  workspace: WorkspaceInfo,
+  engine: Pick<ScheduleEngine, "legacyCommandTemplate">,
+  logger?: ScheduleLogger,
+): Promise<ScheduleState> {
+  const state = await readSchedules(config, workspace.id);
+  if (!state.legacy.length) return state;
+  const schedules = [...state.schedules];
+  const legacy: LegacySchedule[] = [];
+  for (const old of state.legacy) {
+    const { playbookId, ...rest } = old;
+    const template = await engine.legacyCommandTemplate(workspace, playbookId).catch(() => undefined);
+    if (template === undefined) legacy.push(old);
+    else if (template === null) {
+      logger?.log("warn", "Dropped a scheduled run whose playbook is gone.", { workspaceId: workspace.id, playbookId });
+    } else schedules.push({ ...rest, target: { kind: "prompt", text: template } });
+  }
+  const next = { ...state, schedules, legacy };
+  await writeSchedules(config, workspace.id, next);
+  return next;
+}
+
 /**
  * One pass for one workspace: start what is due, record what was missed, and follow the
  * runs under way: a permission ask makes a run wait, an idle session is a finished run.
@@ -307,8 +407,9 @@ export async function tickWorkspace(
   workspace: WorkspaceInfo,
   engine: ScheduleEngine,
   now: number,
+  logger?: ScheduleLogger,
 ): Promise<ScheduleState> {
-  const state = await readSchedules(config, workspace.id);
+  const state = await resolveLegacySchedules(config, workspace, engine, logger);
   if (!state.schedules.length && !state.waiting.length) return state;
   let changed = false;
   const runs = [...state.runs];
@@ -330,14 +431,14 @@ export async function tickWorkspace(
       continue;
     }
     try {
-      const prompt = await engine.template(workspace, schedule.playbookId);
-      if (!prompt) throw new Error("The playbook is gone");
+      const prompt = await engine.resolvePrompt(workspace, schedule.target);
       const sessionId = await engine.startRun(workspace, { title: schedule.label, prompt });
       runs.push({ id: randomUUID(), scheduleId: schedule.id, sessionId, at: now, state: "running" });
       schedules.push({ ...schedule, nextRunAt, lastRun: { state: "running", at: now, sessionId } });
-    } catch {
-      runs.push({ id: randomUUID(), scheduleId: schedule.id, sessionId: null, at: now, state: "failed" });
-      schedules.push({ ...schedule, nextRunAt, lastRun: { state: "failed", at: now } });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "The run did not start";
+      runs.push({ id: randomUUID(), scheduleId: schedule.id, sessionId: null, at: now, state: "failed", reason });
+      schedules.push({ ...schedule, nextRunAt, lastRun: { state: "failed", at: now, reason } });
     }
   }
 
@@ -389,7 +490,7 @@ export async function tickWorkspace(
     }
   }
 
-  const next = { schedules, runs, waiting };
+  const next = { ...state, schedules, runs, waiting };
   if (changed) await writeSchedules(config, workspace.id, next);
   return next;
 }
@@ -398,7 +499,7 @@ export async function tickWorkspace(
 export function startScheduler(input: {
   config: ServerConfig;
   engine: ScheduleEngine;
-  logger?: { log(level: "warn", message: string, fields?: Record<string, unknown>): void };
+  logger?: ScheduleLogger;
   intervalMs?: number;
   now?: () => number;
 }): () => void {
@@ -409,8 +510,8 @@ export function startScheduler(input: {
     try {
       for (const workspace of input.config.workspaces) {
         if (workspace.workspaceType === "remote") continue;
-        await tickWorkspace(input.config, workspace, input.engine, (input.now ?? Date.now)()).catch((error: unknown) => {
-          input.logger?.log("warn", "A scheduled playbook pass failed.", {
+        await tickWorkspace(input.config, workspace, input.engine, (input.now ?? Date.now)(), input.logger).catch((error: unknown) => {
+          input.logger?.log("warn", "A scheduled run pass failed.", {
             workspaceId: workspace.id,
             error: error instanceof Error ? error.message : "unknown",
           });

@@ -41,9 +41,11 @@ import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./co
 import {
   addSchedule,
   answerWaiting,
+  promptForTarget,
   readRule,
-  readSchedules,
+  readTarget,
   removeSchedule,
+  resolveLegacySchedules,
   startScheduler,
   updateSchedule,
   type ScheduleEngine,
@@ -1258,7 +1260,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   resetManagedProviderAuthCache();
   void syncManagedProviderAuth({ config, env, logger: toManagedProviderAuthLogger(logger) }).catch(() => undefined);
 
-  // Scheduled playbooks run while this server does; REDROB_DISABLE_SCHEDULER turns them off.
+  // Scheduled runs happen while this server does; REDROB_DISABLE_SCHEDULER turns them off.
   const stopScheduler = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startScheduler({ config, engine: createScheduleEngine(config), logger });
@@ -1410,9 +1412,12 @@ export function createWorkspaceOpencodeClient(
 /** The engine calls the scheduler makes, through the workspace's own engine client. */
 function createScheduleEngine(config: ServerConfig): ScheduleEngine {
   return {
-    template: async (workspace, playbookId) => {
-      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === playbookId);
-      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === playbookId);
+    resolvePrompt: (workspace, target) =>
+      promptForTarget(target, async (name) => (await listSkills(workspace.path, true)).some((skill) => skill.name === name)),
+    // Only for schedules saved before skills, which ran a playbook command by name.
+    legacyCommandTemplate: async (workspace, commandName) => {
+      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === commandName);
+      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === commandName);
       return own?.template ?? global?.template ?? null;
     },
     startRun: async (workspace, input) => {
@@ -3818,10 +3823,10 @@ function createRoutes(
     return jsonResponse({ ok: true });
   });
 
-  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  // Scheduled runs of a prompt or a skill (desk-schedules.ts). They run here while the app is open.
   addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    return jsonResponse(await readSchedules(config, workspace.id));
+    return jsonResponse(await resolveLegacySchedules(config, workspace, createScheduleEngine(config), logger));
   });
 
   addRoute(routes, "POST", "/workspace/:id/schedules", "client", async (ctx) => {
@@ -3829,10 +3834,14 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const playbookId = typeof body.playbookId === "string" ? sanitizeCommandName(body.playbookId) : "";
-    if (!playbookId) throw new ApiError(400, "invalid_payload", "playbookId is required");
+    if (body.playbookId !== undefined) {
+      throw new ApiError(400, "invalid_payload", "playbookId is no longer supported: send a target, a prompt or a skill");
+    }
     const label = typeof body.label === "string" ? body.label.trim().slice(0, 200) : "";
-    return jsonResponse(await addSchedule(config, workspace.id, { playbookId, label, rule: readRule(body.rule) }), 201);
+    return jsonResponse(
+      await addSchedule(config, workspace.id, { target: readTarget(body.target), label, rule: readRule(body.rule) }),
+      201,
+    );
   });
 
   addRoute(routes, "PATCH", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
@@ -3840,8 +3849,18 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const enabled = typeof body.enabled === "boolean" ? body.enabled : undefined;
-    return jsonResponse(await updateSchedule(config, workspace.id, ctx.params.scheduleId, { enabled }));
+    if (body.enabled !== undefined && typeof body.enabled !== "boolean") {
+      throw new ApiError(400, "invalid_payload", "enabled must be true or false");
+    }
+    if (body.label !== undefined && typeof body.label !== "string") throw new ApiError(400, "invalid_payload", "label must be text");
+    return jsonResponse(
+      await updateSchedule(config, workspace.id, ctx.params.scheduleId, {
+        ...(typeof body.enabled === "boolean" ? { enabled: body.enabled } : {}),
+        ...(body.target !== undefined ? { target: readTarget(body.target) } : {}),
+        ...(typeof body.label === "string" ? { label: body.label.trim().slice(0, 200) } : {}),
+        ...(body.rule !== undefined ? { rule: readRule(body.rule) } : {}),
+      }),
+    );
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
