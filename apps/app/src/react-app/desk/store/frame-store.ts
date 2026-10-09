@@ -9,6 +9,8 @@ export type FrameModal =
   | { kind: "project"; chatId: string | null }
   | { kind: "feedback" }
   | { kind: "keys" }
+  /** Search places and chats (title bar search box, Ctrl+K on Desk screens). */
+  | { kind: "search" }
   /** A playbook to write: a new one, maybe from a prompt, or one to change. */
   | { kind: "playbook"; playbookId?: string; prompt?: string };
 export type ToastTone = "success" | "danger";

@@ -61,6 +61,24 @@
   app-region: no-drag;
 }
 
+/* A full-height surface that stops at the title bar (`WindowTitleBar`) rather than running under it.
+   `--app-titlebar-height` is 0 everywhere the bar is not drawn, so these are plain 100dvh/100svh there. */
+@utility h-app {
+  height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility min-h-app {
+  min-height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility h-app-svh {
+  height: calc(100svh - var(--app-titlebar-height));
+}
+@utility min-h-app-svh {
+  min-height: calc(100svh - var(--app-titlebar-height));
+}
+@utility top-app {
+  top: var(--app-titlebar-height);
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -423,7 +441,7 @@
 
   .desk-panel {
     position: fixed;
-    top: 0;
+    top: var(--app-titlebar-height);
     right: 0;
     bottom: 0;
     z-index: 50;
@@ -906,6 +924,65 @@
   line-height: 22px;
   text-align: center;
   color: var(--ink-secondary);
+}
+
+/* Search (desk/shell/search-dialog.tsx): a field and the places and chats it matches. */
+.desk-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-search__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--field-radius);
+  color: var(--ink-muted);
+}
+.desk-search__field:focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.desk-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink-primary);
+  font: var(--text-body);
+}
+.desk-search__results {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-search__result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--control-radius);
+  font: var(--text-body);
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.desk-search__result[aria-selected="true"] {
+  background: var(--surface-sunken);
+}
+.desk-search__meta,
+.desk-search__empty {
+  font: var(--text-body-sm);
+  color: var(--ink-muted);
+}
+.desk-search__empty {
+  padding: var(--space-2) var(--space-3);
 }
 
 .desk-hint {
@@ -2027,6 +2104,111 @@ select:disabled {
   }
   #root {
     min-height: 100%;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--app-titlebar-height));
   }
+
+  /* Windows and Linux draw their title bar in the renderer (WindowTitleBar); the page starts below it. */
+  :root {
+    --app-titlebar-height: 0px;
+  }
+  html.redrob-electron.redrob-platform-windows,
+  html.redrob-electron.redrob-platform-linux {
+    --app-titlebar-height: 40px;
+  }
+  body {
+    padding-top: var(--app-titlebar-height);
+  }
+}
+
+/* The title bar (react-app/shell/window-title-bar.tsx), on design-system tokens. 40px is
+   --control-height-md and the height main.mjs gives the Windows caption buttons. It sits above
+   dialogs so the window can always be moved, minimised and closed. The ground is the sidebar's
+   (sunken on light, raised on dark), so the chrome reads as one band with the menu, as Slack's does. */
+.window-titlebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 480px) 1fr;
+  align-items: center;
+  height: var(--app-titlebar-height);
+  padding-inline-start: var(--space-2);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+}
+[data-theme="dark"] .window-titlebar {
+  background: var(--surface-raised);
+}
+.window-titlebar__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-self: start;
+}
+.window-titlebar__navbtn:disabled {
+  opacity: 0.4;
+}
+.window-titlebar__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding-inline: var(--space-3) var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--control-radius);
+  background: var(--surface-base);
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard);
+}
+.window-titlebar__search:hover {
+  border-color: var(--border-strong);
+}
+.window-titlebar__search:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.window-titlebar__search-label {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.window-titlebar__kbd {
+  padding: 0 var(--space-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font: var(--text-caption);
+  color: var(--ink-muted);
+}
+.window-titlebar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: end;
+  padding-inline-end: var(--space-3);
+}
+/* GNOME-style window buttons: 24px circles on a quiet fill. */
+.window-titlebar__winbtn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  background: var(--surface-base);
+  color: var(--ink-primary);
+}
+[data-theme="dark"] .window-titlebar__winbtn {
+  background: var(--surface-sunken);
+}
+.window-titlebar__winbtn.window-titlebar__close:hover {
+  background: var(--status-danger);
+  color: var(--ink-on-brand);
+}
+/* Room for the three caption buttons Windows draws over the bar (46px each). */
+.window-titlebar__caption-space {
+  justify-self: end;
+  width: 138px;
 }

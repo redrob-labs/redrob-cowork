@@ -223,7 +223,6 @@ function reconcileSelectedWorkspaceId(
   return serverList.activeId?.trim() || desktopSelectedId || workspaces[0]?.id || "";
 }
 
-const SETTINGS_HIDE_TITLEBAR_KEY = "redrob.react.settings.hide-titlebar";
 const SETTINGS_UPDATE_AUTO_CHECK_KEY = "redrob.react.settings.update-auto-check";
 const SETTINGS_UPDATE_AUTO_DOWNLOAD_KEY = "redrob.react.settings.update-auto-download";
 
@@ -442,7 +441,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const developerMode = useFrameStore((s) => s.developerMode);
   const setDeveloperMode = useFrameStore((s) => s.setDeveloperMode);
   const [themeMode, setThemeModeState] = useState<ThemeMode>(getInitialThemeMode);
-  const [hideTitlebar, setHideTitlebar] = useState(() => readStoredBoolean(SETTINGS_HIDE_TITLEBAR_KEY, false));
   const [updateAutoCheck, setUpdateAutoCheck] = useState(() =>
     readStoredBoolean(SETTINGS_UPDATE_AUTO_CHECK_KEY, true),
   );
@@ -1074,10 +1072,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   useEffect(() => {
     setAppThemeMode(themeMode);
   }, [themeMode]);
-
-  useEffect(() => {
-    writeStoredBoolean(SETTINGS_HIDE_TITLEBAR_KEY, hideTitlebar);
-  }, [hideTitlebar]);
 
   useEffect(() => {
     writeStoredBoolean(SETTINGS_UPDATE_AUTO_CHECK_KEY, updateAutoCheck);
@@ -2137,38 +2131,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             setThemeMode={setThemeModeState}
             language={currentLocale() as Language}
             setLanguage={setLocale}
-            hideTitlebar={hideTitlebar}
-            toggleHideTitlebar={() => {
-              /*
-                The switch reaches the window now.
-
-                It used to write localStorage and nothing read it - no code anywhere consumed
-                `redrob.hideTitlebar`, so the setting was a switch wired to nothing. `frame` and
-                `titleBarStyle` are BrowserWindow CONSTRUCTION options, so the main process persists the
-                choice and applies it at startup; a restart is what makes it visible, and the toast says
-                so rather than leaving the user to wonder whether the toggle worked.
-
-                macOS reports `macos-always-hidden`: its title bar is already `hiddenInset`, so there is
-                nothing to change and claiming otherwise would be the same lie in a new place.
-              */
-              const next = !hideTitlebar;
-              setHideTitlebar(next);
-              void Promise.resolve(
-                globalThis.window?.__REDROB_ELECTRON__?.invokeDesktop?.("__setTitleBarHidden", next),
-              )
-                .then((result) => {
-                  const outcome = result as { applied?: boolean; reason?: string } | undefined;
-                  if (outcome?.applied) {
-                    toast.info(t("settings.hide_titlebar_restart"));
-                  } else if (outcome?.reason === "macos-always-hidden") {
-                    toast.info(t("settings.hide_titlebar_macos"));
-                  }
-                })
-                .catch(() => {
-                  // A desktop bridge that is not there is the browser build, where there is no title bar
-                  // to hide. The stored preference is harmless and the next desktop launch reads it.
-                });
-            }}
           />
         );
       case "updates":

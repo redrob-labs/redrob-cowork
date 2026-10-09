@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 function Page({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("relative h-dvh bg-background text-foreground", className)}
+      className={cn("relative h-app bg-background text-foreground", className)}
       {...props}
     />
   );
@@ -42,7 +42,7 @@ function PageBackground({ className, ...props }: ComponentProps<"div">) {
 function PageTitlebarRegion({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("fixed inset-x-0 top-0 z-20 h-10 mac:titlebar-drag", className)}
+      className={cn("fixed inset-x-0 top-app z-20 h-10 mac:titlebar-drag", className)}
       {...props}
     />
   );

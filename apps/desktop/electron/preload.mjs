@@ -258,6 +258,12 @@ ipcRenderer.on(NATIVE_MENU_ZOOM_EVENT, (_event, action) => {
   window.dispatchEvent(new CustomEvent(NATIVE_MENU_ZOOM_EVENT, { detail: action }));
 });
 
+// Maximised and full-screen state for the title bar (main.mjs WINDOW_STATE_EVENT).
+ipcRenderer.on("redrob:window:state", (_event, state) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("redrob:window:state", { detail: state }));
+});
+
 if (!applyShellDocumentMarkers() && typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", applyShellDocumentMarkers, { once: true });
 }
