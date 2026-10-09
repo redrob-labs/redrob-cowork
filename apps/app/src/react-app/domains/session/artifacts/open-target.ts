@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
 
 type OpenTargetKind = "url" | "file";
-export type OpenTargetPreview = "browser" | "markdown" | "sheet" | "slides" | "document" | "image" | "pdf" | "html" | "text" | "external";
+export type OpenTargetPreview = "browser" | "markdown" | "sheet" | "slides" | "document" | "image" | "audio" | "video" | "pdf" | "html" | "text" | "external";
 
 export interface TextData {
   kind: "text";
@@ -34,7 +34,9 @@ const WORKSPACE_ID_PREFIX_PATTERN = /^workspace\/(?:ws_[^/]+|\d+|[0-9a-f-]{6,})\
 const FILE_PATTERN = /(?:^|[\s"'`([{])((?:\.{1,2}[/\\]|~[/\\]|[/\\])?[\w.\-]+(?:[/\\][\w.\-]+)+\.[a-z][a-z0-9]{0,9}|[\w.\-]+\.[a-z][a-z0-9]{0,9})/gi;
 const URL_PATTERN = /https?:\/\/[^\s)\]}>"'`]+/gi;
 const SOCKET_PATTERN = /(?:ws|wss):\/\/[^\s)\]}>"'`]+/gi;
-const SIDEBAR_ARTIFACT_FILE_PREVIEWS = new Set<OpenTargetPreview>(["markdown", "sheet", "slides", "document", "image", "pdf", "html"]);
+const SIDEBAR_ARTIFACT_FILE_PREVIEWS = new Set<OpenTargetPreview>(["markdown", "sheet", "slides", "document", "image", "audio", "video", "pdf", "html"]);
+const AUDIO_EXTENSIONS = [".mp3", ".wav", ".ogg", ".oga", ".opus", ".m4a", ".aac", ".flac", ".weba"];
+const VIDEO_EXTENSIONS = [".mp4", ".m4v", ".mov", ".webm", ".ogv"];
 const MARKDOWN_LINK_PATTERN = /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
 const ASSISTANT_ARTIFACT_MENTION_PATTERN = /\b(?:artifact|created|deck|deliverable|exported|file|generated|opened|presentation|saved|slides?|updated|wrote)\b/i;
 const DISCOVERY_TOOL_NAMES = new Set(["glob", "grep", "search", "find"]);
@@ -79,6 +81,17 @@ function extname(value: string) {
   return index >= 0 ? name.slice(index) : "";
 }
 
+/**
+ * Audio or video the app can play in place, by extension. Only formats Chromium decodes: an `.mkv` or
+ * `.avi` would get a player that never starts, so those still open in the operating system's app.
+ */
+export function playableMediaPreview(value: string): "audio" | "video" | null {
+  const ext = extname(value);
+  if (AUDIO_EXTENSIONS.includes(ext)) return "audio";
+  if (VIDEO_EXTENSIONS.includes(ext)) return "video";
+  return null;
+}
+
 function classifyOpenTarget(value: string, kind: OpenTargetKind): OpenTargetPreview {
   if (kind === "url") return "browser";
   const ext = extname(value);
@@ -87,6 +100,8 @@ function classifyOpenTarget(value: string, kind: OpenTargetKind): OpenTargetPrev
   if ([".ppt", ".pptx", ".pptm", ".pot", ".potx", ".odp", ".key", ".sxi"].includes(ext)) return "slides";
   if (ext === ".docx") return "document";
   if ([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"].includes(ext)) return "image";
+  const media = playableMediaPreview(value);
+  if (media) return media;
   if (ext === ".pdf") return "pdf";
   if ([".html", ".htm"].includes(ext)) return "html";
   if ([".txt", ".log", ".json", ".jsonc", ".yaml", ".yml", ".toml", ".xml", ".ts", ".tsx", ".js", ".jsx", ".css", ".scss"].includes(ext)) return "text";

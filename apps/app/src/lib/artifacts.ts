@@ -9,7 +9,7 @@ import {
 } from "@/lib/build-in-tools";
 import { useOpenTargets } from "@/lib/target-provider";
 import { t } from "@/i18n";
-import { filePathFromFileUrl, isCollectibleArtifactTarget, isOpenableFileTarget, type OpenTarget, type OpenTargetPreview } from "@/react-app/domains/session/artifacts/open-target";
+import { filePathFromFileUrl, isCollectibleArtifactTarget, isOpenableFileTarget, playableMediaPreview, type OpenTarget, type OpenTargetPreview } from "@/react-app/domains/session/artifacts/open-target";
 
 export type ArtifactType = "website" | "markdown" | "sheet" | "slides" | "document" | "image" | "video" | "audio" | "pdf" | "html" | "text" | "unknown";
 
@@ -193,7 +193,7 @@ function openTargetFromArtifactPath(
     kind: "file",
     value: normalized,
     name,
-    preview: artifactTypeToPreview(type),
+    preview: playableMediaPreview(normalized) ?? artifactTypeToPreview(type),
     confidence: 95,
     reason: "artifact",
   };

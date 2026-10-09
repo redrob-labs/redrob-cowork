@@ -82,6 +82,24 @@ export function getSafeFileDownloadUrl(part: Pick<FileUIPart, "url">) {
   }
 }
 
+/**
+ * Whether a file part is audio or video the chat can play in place, and which. Only for a URL that
+ * stays on this machine (inline data, a blob, or a workspace file), so rendering a reply never makes
+ * a network request on its own.
+ */
+const PLAYABLE_MEDIA_PROTOCOLS = new Set(["blob:", "data:", "file:"])
+
+export function getPlayableMediaKind(part: Pick<FileUIPart, "mediaType" | "url">): "audio" | "video" | null {
+  const mime = part.mediaType?.trim().toLowerCase() ?? ""
+  const kind = mime.startsWith("audio/") ? "audio" : mime.startsWith("video/") ? "video" : null
+  if (!kind) return null
+  try {
+    return PLAYABLE_MEDIA_PROTOCOLS.has(new URL(part.url).protocol) ? kind : null
+  } catch {
+    return null
+  }
+}
+
 export function getSafeFileRevealPath(part: Pick<FileUIPart, "url">) {
   try {
     const url = new URL(part.url)
