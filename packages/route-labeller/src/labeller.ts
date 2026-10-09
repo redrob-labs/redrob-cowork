@@ -27,7 +27,7 @@ const TEMPERATURE = 0.03;
 const CANDIDATES = 4;
 
 export type LabelOptions = {
-  /** A profession the person chose (a playbook's, or their own setting). Restricts to its tasks. */
+  /** A profession the person chose (a skill's, or their own setting). Restricts to its tasks. */
   profession?: string | null;
   /** Whether the request is code, which the caller's own classifier knows better than words. */
   coding?: boolean;
