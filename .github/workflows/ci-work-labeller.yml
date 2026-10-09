@@ -1,0 +1,84 @@
+name: work-labeller
+
+# @redrob-labs/work-labeller is consumed outside this repository - by Redrob Office and Redrob Design -
+# so it is published to npm, the same way route-labeller is: checked on every pull request, published
+# when a `work-labeller-v*` tag is pushed. Not a required check.
+
+on:
+  pull_request:
+    paths:
+      - "packages/work-labeller/**"
+      - ".github/workflows/ci-work-labeller.yml"
+  push:
+    branches:
+      - main
+    tags:
+      - "work-labeller-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: packages/work-labeller
+
+jobs:
+  check:
+    name: Types, build & dry-run publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.4.0
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Types
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+      # Tokenizer parity with Hugging Face tokenizers, the heads and the labels. The model itself is
+      # measured in apps/server (docs/features/ai-work-insights/model-evaluation.md); these need no download.
+      - name: Tests
+        run: pnpm test
+      - name: Dry-run publish
+        # pnpm, not npm: publishConfig.exports swaps the workspace's src entry points for dist.
+        run: pnpm publish --dry-run --no-git-checks --access public
+
+  publish:
+    name: Publish to npm
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/work-labeller-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.4.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build
+        run: pnpm build
+      - name: Assert package.json version matches the tag
+        run: |
+          set -euo pipefail
+          want="${GITHUB_REF_NAME#work-labeller-v}"
+          have="$(node -p "require('./package.json').version")"
+          [ "$want" = "$have" ] || { echo "::error::tag says $want, package.json says $have"; exit 1; }
+      - name: Publish
+        run: pnpm publish --no-git-checks --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
