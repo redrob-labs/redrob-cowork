@@ -75,7 +75,7 @@ export const GuideResearch = z.object({
   ),
 });
 export type GuideResearch = z.infer<typeof GuideResearch>;
-type ResearchPick = z.infer<typeof Pick>;
+export type ResearchPick = z.infer<typeof Pick>;
 
 /** The working languages the research ranks, in the order the select shows them. */
 export const GUIDE_LANGUAGES = ["en", "ko", "hi"] as const;
@@ -267,15 +267,28 @@ function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): G
   return shown;
 }
 
-/** The research as ModelGuide professions, labelled in the app's language. */
-export function guideProfessions(research: GuideResearch, locale: Language): GuideProfession[] {
+/** A pick's real run, where one exists: given the research pick, its task, profession and working language. */
+export type SampleFor = (pick: ResearchPick, context: { profession: string; task: string; language: string }) => GuidePick["sample"];
+
+/** The research as ModelGuide professions, labelled in the app's language, with each pick's run where known. */
+export function guideProfessions(research: GuideResearch, locale: Language, sampleFor?: SampleFor): GuideProfession[] {
   return research.professions.map((profession) => ({
     id: profession.id,
     label: profession.label[locale],
     tasks: profession.tasks.map((task) => {
       const byLanguage = (picks: Record<string, ResearchPick[]>) =>
         Object.fromEntries(
-          Object.entries(picks).map(([language, list]) => [language, list.map((pick) => toPick(pick, task.tools, research))]),
+          Object.entries(picks).map(([language, list]) => [
+            language,
+            list.map((pick) => {
+              const shown = toPick(pick, task.tools, research);
+              const sample = pick.benchmark ? undefined : sampleFor?.(pick, { profession: profession.id, task: task.id, language });
+              if (!sample) return shown;
+              const withSample = { ...shown, sample };
+              SOURCE.set(withSample, pick);
+              return withSample;
+            }),
+          ]),
         );
       const ranked = byLanguage(task.picks);
       return {
