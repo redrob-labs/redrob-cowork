@@ -349,8 +349,9 @@ room.
 | L4, L5 | #148, #150 |
 | Follow-ups | #156 (room event stream in the app, cost by person), #157 (composer queues into the room's shared queue), #159 (joined chats reconnect after a restart) |
 
-Still open: editing a waiting message from the composer (the route exists), queueing drafts with
-attachments in the room (they keep the local queue), and Plan-mode-only guests.
+| Later follow-ups | #161 (no reconnect after removal or room end), #163 (edit a waiting message, without losing files), #164 (Plan-only guests, enforced on the server) |
+
+Still open: queueing drafts with attachments in the room (they keep the local queue).
 
 ## Tests
 
