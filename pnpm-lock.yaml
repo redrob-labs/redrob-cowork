@@ -302,6 +302,9 @@ importers:
       '@openai/codex-sdk':
         specifier: 0.155.1
         version: 0.155.1
+      '@redrob-labs/route-labeller':
+        specifier: workspace:*
+        version: link:../../packages/route-labeller
       '@redrob-labs/sdk':
         specifier: ^0.4.1
         version: 0.4.1
