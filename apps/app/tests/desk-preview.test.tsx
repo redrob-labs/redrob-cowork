@@ -1,8 +1,6 @@
 import { loadGuideResearch } from "../src/react-app/desk/guide/model-guide";
 import { GUIDE_RESEARCH_KEY } from "../src/react-app/desk/preview/desk-guide";
 import { afterEach, describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -10,39 +8,30 @@ import { MemoryRouter, Routes } from "react-router";
 import { nextScheduledRun } from "@redrob-labs/ui";
 
 import { setLocale, type Language } from "../src/i18n";
-import { RunPlayer } from "../src/react-app/desk/preview/desk-run";
 import { ScheduleDialog } from "../src/react-app/desk/scheduled/schedule-dialog";
 import { scheduledMeta } from "../src/react-app/desk/preview/desk-scheduled";
 import {
-  RUN_START,
   answerWaiting,
   deleteSchedule,
   initialScheduleValue,
   navWaitingKey,
-  nextStop,
-  playRun,
   previewKey,
-  runPath,
-  runStatus,
-  runSteps,
   saveSchedule,
   scheduleFromPicker,
   setScheduleEnabled,
-  stepState,
   type BoardActionDeps,
-  type RunProgress,
 } from "../src/react-app/desk/preview/preview";
-import { createFixtureDeskServices, resetSampleBoard } from "../src/react-app/desk/services/fixture-services";
+import { createFixtureDeskServices, resetSampleBoard, resetSampleSkills } from "../src/react-app/desk/services/fixture-services";
 import { HISTORY } from "../src/react-app/desk/services/fixtures/history";
-import { PLAYBOOKS } from "../src/react-app/desk/services/fixtures/playbooks";
+import { SKILLS } from "../src/react-app/desk/services/fixtures/skills";
 import { createDeskServices } from "../src/react-app/desk/services/real-services";
-import type { Playbook, ScheduleBoard } from "../src/react-app/desk/services/types";
+import type { ScheduleBoard } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
-import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
 
 afterEach(() => {
   setLocale("en");
   resetSampleBoard();
+  resetSampleSkills();
 });
 
 function render(node: ReactNode, path: string, client = new QueryClient()) {
@@ -63,7 +52,11 @@ function readable(html: string): string {
 async function seeded(): Promise<QueryClient> {
   const fixture = createFixtureDeskServices();
   const client = new QueryClient();
-  client.setQueryData(previewKey("preview", "playbooks"), await fixture.playbooks.list());
+  client.setQueryData(previewKey("preview", "skills"), await fixture.skills.list());
+  client.setQueryData([...previewKey("preview", "library"), {}], await fixture.skills.library({}));
+  client.setQueryData(previewKey("preview", "taxonomy"), await fixture.skills.taxonomy());
+  client.setQueryData(previewKey("preview", "team"), await fixture.skills.teamState());
+  client.setQueryData([...previewKey("preview", "skills"), "one", "first-review"], await fixture.skills.get("first-review"));
   client.setQueryData(previewKey("preview", "board"), await fixture.schedules.list());
   client.setQueryData(previewKey("preview", "history"), await fixture.history.list());
   client.setQueryData(previewKey("preview", "catalog"), await fixture.catalog.get());
@@ -72,12 +65,6 @@ async function seeded(): Promise<QueryClient> {
 
 function route(path: string, client: QueryClient) {
   return render(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, path, client);
-}
-
-function playbook(id: string): Playbook {
-  const found = PLAYBOOKS.find((entry) => entry.id === id);
-  if (!found) throw new Error(`No sample playbook ${id}`);
-  return found;
 }
 
 /** Runs `work` with `fetch` replaced by one that throws, and counts the calls. */
@@ -110,43 +97,9 @@ function boardDeps(client = new QueryClient()) {
   return { deps, toasts, client };
 }
 
-/** A manual clock: timers fire only when the test advances time. */
-function fakeClock() {
-  let now = 0;
-  let nextId = 0;
-  const pending = new Map<number, { at: number; fn: () => void }>();
-  const handles = new Map<TimerHandle, number>();
-  const timers: DeskTimers = {
-    setTimeout(fn, ms) {
-      const id = ++nextId;
-      pending.set(id, { at: now + ms, fn });
-      const handle = globalThis.setTimeout(() => {}, 1e9);
-      globalThis.clearTimeout(handle);
-      handles.set(handle, id);
-      return handle;
-    },
-    clearTimeout(handle) {
-      const id = handles.get(handle);
-      if (id !== undefined) pending.delete(id);
-    },
-  };
-  const advanceTo = (time: number) => {
-    for (;;) {
-      const due = [...pending.entries()].filter(([, timer]) => timer.at <= time).sort((a, b) => a[1].at - b[1].at)[0];
-      if (!due) break;
-      pending.delete(due[0]);
-      now = due[1].at;
-      due[1].fn();
-    }
-    now = time;
-  };
-  return { timers, advanceTo };
-}
-
 const SCREENS: ReadonlyArray<{ path: string; title: string; place: string; note: string }> = [
-  { path: "/playbooks", title: "Playbooks", place: "playbooks", note: "Preview: sample playbooks. Running them is not connected yet." },
-  { path: "/playbook/first-review", title: "Contract first review", place: "playbooks", note: "Preview: sample playbooks." },
-  { path: runPath("renewal-sweep"), title: "Contract renewal sweep", place: "playbooks", note: "Preview: a sample run." },
+  { path: "/skills", title: "Skills", place: "skills", note: "Preview: sample skills. Connect a project to use your own." },
+  { path: "/skill/first-review", title: "first-review", place: "skills", note: "Preview: sample skills." },
   { path: "/scheduled", title: "Scheduled", place: "scheduled", note: "Preview: sample schedules." },
   { path: "/history", title: "History", place: "history", note: "Preview: sample history." },
 ];
@@ -187,7 +140,7 @@ describe("the Preview routes", () => {
   test("Korean has the screens' own words in Korean", async () => {
     const client = await seeded();
     setLocale("ko");
-    expect(route("/playbooks", client)).toContain("미리 보기: 예시 플레이북입니다.");
+    expect(route("/skills", client)).toContain("미리 보기: 예시 스킬입니다.");
     expect(route("/scheduled", client)).toContain("나를 기다리는 실행 (2)");
     expect(route("/history", client)).toContain("스스로 실행");
     client.setQueryData(GUIDE_RESEARCH_KEY, await loadGuideResearch());
@@ -195,40 +148,39 @@ describe("the Preview routes", () => {
   });
 });
 
-describe("Playbooks", () => {
-  test("lists every sample playbook as a row that opens its page", async () => {
-    const html = route("/playbooks", await seeded());
-    expect(html).toContain("3 saved by your team");
-    for (const entry of PLAYBOOKS) {
-      expect(html).toContain(entry.name);
-      expect(html).toContain(`href="/playbook/${entry.id}"`);
-    }
-    expect(html).toContain("2 days to 2 hours");
-    expect(html).toContain("High impact");
+describe("Skills", () => {
+  test("lists the sample skills with where each came from, and the library's not yet added", async () => {
+    const html = route("/skills", await seeded());
+    expect(html).toContain("3 installed");
+    for (const entry of SKILLS) expect(html).toContain(`href="/skill/${entry.name}"`);
+    for (const badge of [">Team<", ">Mine<", ">Library<"]) expect(html).toContain(badge);
+    expect(html).toContain('aria-label="Add nda-review"');
+    expect(html).toContain("New skill");
+    expect(html).toContain("Review documents and contracts");
   });
 
-  test("one playbook shows its steps, where it stops, its sources as links, and Run and Schedule", async () => {
-    const html = route("/playbook/first-review", await seeded());
-    for (const step of playbook("first-review").steps) expect(html).toContain(step.label);
-    expect(html).toContain("You approve the redlines first");
-    expect(html).toContain("Harvey customer results, 2025");
-    expect(html).toContain('href="https://www.harvey.ai/blog/how-harvey-saves-lawyers-time"');
-    expect(html).toContain('rel="noopener noreferrer"');
-    expect(html).toContain("Run now");
-    expect(html).toContain("run 9 times");
+  test("a team skill shows its instructions, Run and Schedule, and says it is managed in Redrob Console", async () => {
+    const html = route("/skill/first-review", await seeded());
+    expect(html).toContain("Managed in Redrob Console");
+    expect(html).toContain("Contract first review");
+    expect(html).toContain(">Run<");
     expect(html).toContain(">Schedule<");
-    expect(html).toContain('href="/playbooks"');
+    expect(html).not.toContain(">Edit<");
+    expect(html).toContain('href="/skills"');
   });
 
-  test("an unknown playbook says so", async () => {
-    const html = route("/playbook/nope", await seeded());
-    expect(html).toContain("This playbook is not here");
+  test("an unknown skill says so", async () => {
+    const client = await seeded();
+    client.setQueryData([...previewKey("preview", "skills"), "one", "nope"], await createFixtureDeskServices().skills.get("nope"));
+    expect(route("/skill/nope", client)).toContain("This skill is not here");
   });
+});
 
-  test("the Schedule dialog starts a prompt from the playbook, with the picker and Save", () => {
+describe("Schedules on sample data", () => {
+  test("the Schedule dialog starts from a prompt, with the picker and Save", () => {
     const html = render(
       <ScheduleDialog prompt="Sweep the renewals" sampleProjectId="supplier" real={false} onClose={() => {}} now={new Date(2026, 8, 28, 10, 0)} />,
-      "/playbook/renewal-sweep",
+      "/scheduled",
     );
     expect(html).toContain("New schedule");
     expect(html).toContain("Sweep the renewals");
@@ -240,7 +192,7 @@ describe("Playbooks", () => {
   test("saving a schedule changes only the sample state, toasts, and calls nothing", async () => {
     const { deps, toasts, client } = boardDeps();
     const now = new Date(2026, 8, 28, 10, 0);
-    const value = initialScheduleValue(playbook("renewal-sweep"), now);
+    const value = initialScheduleValue({ cadence: "Every Monday, 08:00 KST" }, now);
     const target = { kind: "prompt" as const, text: "Sweep the renewals\n\nEvery contract that renews before 30 Nov." };
     const schedule = scheduleFromPicker(target, { id: "supplier", name: "Q3 supplier contracts" }, value, now);
     expect(schedule.cadence).toBe("Every Monday at 08:00 Seoul time");
@@ -299,100 +251,14 @@ describe("Playbooks", () => {
     expect(client.getQueryData(previewKey("preview", "board"))).toBeUndefined();
   });
 
-  test("a playbook triggered by a file starts the picker on a new file", () => {
-    expect(initialScheduleValue(playbook("deadline-tracker"), new Date(2026, 8, 28)).mode).toBe("event");
-    expect(initialScheduleValue(playbook("renewal-sweep"), new Date(2026, 8, 28))).toMatchObject({
+  test("a schedule run by a file arriving starts the picker on a new file", () => {
+    expect(initialScheduleValue({ cadence: "When a new file arrives" }, new Date(2026, 8, 28)).mode).toBe("event");
+    expect(initialScheduleValue({ cadence: "Every Monday, 08:00 KST" }, new Date(2026, 8, 28))).toMatchObject({
       mode: "repeat",
       date: "2026-09-28",
       time: "08:00",
       zone: "Asia/Seoul",
     });
-  });
-});
-
-describe("a playbook run", () => {
-  test("runSteps keeps the playbook's steps in order, with where it asks first", () => {
-    const steps = runSteps(playbook("first-review"));
-    expect(steps.map((step) => step.label)).toEqual(playbook("first-review").steps.map((step) => step.label));
-    expect(steps.map((step) => step.id)).toEqual([1, 2, 3, 4, 5, 6].map((n) => `first-review-${n}`));
-    expect(steps[5]?.approval).toBe("You approve the redlines first");
-    expect(nextStop(steps, 0)).toBe(5);
-    expect(nextStop(runSteps(playbook("renewal-sweep")), 4)).toBe(5);
-  });
-
-  test("steps finish 650ms apart, stop at the approval until approved, then finish", async () => {
-    const { result, fetched } = await withoutNetwork(async () => {
-      const clock = fakeClock();
-      const steps = runSteps(playbook("deadline-tracker"));
-      const seen: RunProgress[] = [];
-      let progress = RUN_START;
-      const track = (next: RunProgress) => {
-        progress = next;
-        seen.push(next);
-      };
-
-      playRun(steps, 0, track, { timers: clock.timers });
-      expect(steps.map((_step, index) => stepState(index, progress))).toEqual(["active", "todo", "todo", "todo", "todo"]);
-      clock.advanceTo(649);
-      expect(seen).toEqual([]);
-      clock.advanceTo(650);
-      expect(progress).toEqual({ done: 1, phase: "running" });
-      clock.advanceTo(1950);
-      expect(progress).toEqual({ done: 3, phase: "running" });
-      clock.advanceTo(2600);
-      // Step 4 asks first: the run waits there, and time alone moves nothing.
-      expect(progress).toEqual({ done: 3, phase: "waiting" });
-      expect(runStatus(progress)).toEqual({ state: "blocked", label: "Waiting for you" });
-      expect(steps.map((_step, index) => stepState(index, progress))).toEqual(["done", "done", "done", "active", "todo"]);
-      clock.advanceTo(60_000);
-      expect(seen).toHaveLength(4);
-
-      // Approve: the asking step is done and the rest plays on.
-      playRun(steps, progress.done + 1, track, { timers: clock.timers });
-      clock.advanceTo(60_650);
-      expect(progress).toEqual({ done: 5, phase: "running" });
-      clock.advanceTo(61_300);
-      expect(progress).toEqual({ done: 5, phase: "done" });
-      expect(runStatus(progress)).toEqual({ state: "done", label: "Done" });
-      return steps.map((_step, index) => stepState(index, progress));
-    });
-    expect(result).toEqual(["done", "done", "done", "done", "done"]);
-    expect(fetched).toBe(0);
-  });
-
-  test("a run that ends on an approval waits there, and finishes after it", () => {
-    const clock = fakeClock();
-    const steps = runSteps(playbook("first-review"));
-    let progress = RUN_START;
-    playRun(steps, 0, (next) => (progress = next), { timers: clock.timers });
-    clock.advanceTo(650 * 6);
-    expect(progress).toEqual({ done: 5, phase: "waiting" });
-    playRun(steps, 6, (next) => (progress = next), { timers: clock.timers });
-    clock.advanceTo(650 * 7);
-    expect(progress).toEqual({ done: 6, phase: "done" });
-  });
-
-  test("cancelling stops the clock", () => {
-    const clock = fakeClock();
-    let progress = RUN_START;
-    const cancel = playRun(runSteps(playbook("renewal-sweep")), 0, (next) => (progress = next), { timers: clock.timers });
-    clock.advanceTo(650);
-    cancel();
-    clock.advanceTo(60_000);
-    expect(progress).toEqual({ done: 1, phase: "running" });
-  });
-
-  test("the run screen starts on the first step, running, and calls no chat or session", async () => {
-    const html = render(<RunPlayer playbook={playbook("renewal-sweep")} />, "/run");
-    expect(html).toContain("rr-timeline");
-    expect(html).toContain('aria-current="step"');
-    expect(html).toContain("Running");
-    expect(html).toContain("Read each contract and pull out its dates and terms");
-    for (const file of ["desk-run.tsx", "preview.ts"]) {
-      const source = readFileSync(join(import.meta.dir, "../src/react-app/desk/preview", file), "utf8");
-      const imports = [...source.matchAll(/from "([^"]+)"/g)].map((match) => match[1]);
-      for (const name of imports) expect(name).not.toMatch(/chat|session|thread|opencode|redrob-server/);
-    }
   });
 });
 

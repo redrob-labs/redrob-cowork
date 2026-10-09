@@ -1,4 +1,3 @@
-import { systemTimers, type DeskTimers } from "../timers";
 import type { DeskServices } from "./desk-services";
 import { MODEL_CATALOG } from "./fixtures/catalog";
 import { CHATS } from "./fixtures/chats";
@@ -6,42 +5,13 @@ import { CONNECTORS } from "./fixtures/connectors";
 import { FILES } from "./fixtures/files";
 import { HISTORY } from "./fixtures/history";
 import { NOTES } from "./fixtures/notes";
-import { PLAYBOOKS } from "./fixtures/playbooks";
 import { PRIVACY } from "./fixtures/privacy";
 import { PROJECTS } from "./fixtures/projects";
-import { SCHEDULE_BOARD, SKILLS } from "./fixtures/schedules";
-import type { DeskResult, MemoryNote, Schedule, ScheduleBoard } from "./types";
-import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
+import { SCHEDULE_BOARD } from "./fixtures/schedules";
+import { LIBRARY, SKILL_BODIES, SKILLS, TAXONOMY } from "./fixtures/skills";
+import type { DeskResult, DeskSkill, MemoryNote, Schedule, ScheduleBoard } from "./types";
+import { matchesFilters } from "../skills/skills";
 import { scheduleName } from "../scheduled/schedules";
-
-/** The prototype's pace: one step every 650ms. */
-export const SCRIPTED_STEP_MS = 650;
-
-export type ScriptedHandlers<T> = {
-  onStep: (step: T, index: number) => void;
-  onAnswer?: () => void;
-};
-
-/**
- * Plays steps the way the prototype does: step i lands at `stepMs * (i + 1)`,
- * the answer at `stepMs * (steps.length + 1)`. Returns a cancel function.
- */
-export function runScripted<T>(
-  steps: readonly T[],
-  handlers: ScriptedHandlers<T>,
-  options: { stepMs?: number; timers?: DeskTimers } = {},
-): () => void {
-  const stepMs = options.stepMs ?? SCRIPTED_STEP_MS;
-  const timers = options.timers ?? systemTimers;
-  const handles = steps.map((step, index) => timers.setTimeout(() => handlers.onStep(step, index), stepMs * (index + 1)));
-  const { onAnswer } = handlers;
-  if (onAnswer) handles.push(timers.setTimeout(onAnswer, stepMs * (steps.length + 1)));
-  return () => handles.forEach((handle) => timers.clearTimeout(handle));
-}
-
-export type FixtureDeskServices = DeskServices & {
-  runScripted<T>(steps: readonly T[], handlers: ScriptedHandlers<T>): () => void;
-};
 
 const preview = <T>(data: T): Promise<DeskResult<T>> => Promise.resolve({ data, preview: true });
 
@@ -59,15 +29,25 @@ export function resetSampleBoard() {
   sampleBoard = copyBoard(SCHEDULE_BOARD);
 }
 
+const copySkills = (list: readonly DeskSkill[]) => list.map((skill) => ({ ...skill, tags: { ...skill.tags } }));
+
+// Shared like the board: the Skills screen, a skill's page and the skill dialog each make their own
+// services and must read the same sample skills.
+let sampleSkills = copySkills(SKILLS);
+let sampleBodies: Record<string, string> = { ...SKILL_BODIES };
+
+/** Puts the shared sample skills back as they started. For tests and stories. */
+export function resetSampleSkills() {
+  sampleSkills = copySkills(SKILLS);
+  sampleBodies = { ...SKILL_BODIES };
+}
+
 /** Sample data behind the service interface. Every result carries `preview: true`. */
-export function createFixtureDeskServices(
-  options: { stepMs?: number; timers?: DeskTimers; now?: () => number } = {},
-): FixtureDeskServices {
-  const { stepMs = SCRIPTED_STEP_MS, timers = systemTimers, now = Date.now } = options;
+export function createFixtureDeskServices(options: { now?: () => number } = {}): DeskServices {
+  const { now = Date.now } = options;
   // Per instance, so one screen's edits never leak into another test or story.
   let notes: MemoryNote[] = NOTES.map((note) => ({ ...note }));
   let privacy = { ...PRIVACY };
-  let playbooks = [...PLAYBOOKS];
   let nextNote = notes.length + 1;
 
   const editable = (id: string) => {
@@ -104,24 +84,6 @@ export function createFixtureDeskServices(
         const note = { ...editable(id), text };
         notes = notes.map((entry) => (entry.id === id ? note : entry));
         return { data: note, preview: true };
-      },
-    },
-    playbooks: {
-      list: () => preview([...playbooks]),
-      get: (id) => preview(playbooks.find((playbook) => playbook.id === id) ?? null),
-      save: async (input) => {
-        const saved = playbookFromCommand({
-          name: input.id ?? playbookSlug(input.name, now()),
-          description: input.description,
-          template: playbookTemplate(input),
-          scope: "workspace",
-        });
-        playbooks = [saved, ...playbooks.filter((playbook) => playbook.id !== saved.id)];
-        return { data: saved, preview: true };
-      },
-      remove: async (id) => {
-        playbooks = playbooks.filter((playbook) => playbook.id !== id);
-        return { data: null, preview: true };
       },
     },
     schedules: {
@@ -171,7 +133,51 @@ export function createFixtureDeskServices(
         return preview(copyBoard(sampleBoard));
       },
     },
-    skills: { list: () => preview(SKILLS.map((skill) => ({ ...skill }))) },
+    skills: {
+      list: () => preview(copySkills(sampleSkills)),
+      library: (filters = {}) => preview(LIBRARY.filter((skill) => matchesFilters(skill, filters))),
+      taxonomy: () => preview(TAXONOMY),
+      get: (name) => {
+        const installed = sampleSkills.find((skill) => skill.name === name);
+        const known = installed ?? LIBRARY.find((skill) => skill.name === name);
+        if (!known) return preview(null);
+        return preview({
+          name,
+          description: known.description,
+          tags: { ...known.tags },
+          body: sampleBodies[name] ?? "",
+          installed: installed ? { origin: installed.origin, scope: installed.scope } : null,
+        });
+      },
+      install: async (name) => {
+        const skill = LIBRARY.find((entry) => entry.name === name);
+        if (!skill) throw new Error(`No library skill ${name}`);
+        if (sampleSkills.some((entry) => entry.name === name)) throw new Error(`A skill named ${name} is already installed`);
+        sampleSkills = [...sampleSkills, { ...skill, origin: "library", scope: "project" }];
+        return { data: null, preview: true };
+      },
+      save: async (draft) => {
+        const existing = sampleSkills.find((entry) => entry.name === draft.name);
+        if (draft.editing ? existing?.origin !== "mine" : existing) throw new Error(`Cannot save ${draft.name}`);
+        const { profession, task, language } = draft;
+        const saved: DeskSkill = {
+          name: draft.name,
+          description: draft.description.trim(),
+          origin: "mine",
+          tags: { ...(profession ? { profession } : {}), ...(task ? { task } : {}), ...(language ? { language } : {}) },
+          scope: "project",
+        };
+        sampleSkills = [...sampleSkills.filter((entry) => entry.name !== saved.name), saved];
+        sampleBodies[saved.name] = draft.instructions.trim();
+        return { data: saved, preview: true };
+      },
+      remove: async (name) => {
+        if (sampleSkills.find((entry) => entry.name === name)?.origin === "team") throw new Error(`${name} is managed in Redrob Console`);
+        sampleSkills = sampleSkills.filter((entry) => entry.name !== name);
+        return { data: null, preview: true };
+      },
+      teamState: () => preview(null),
+    },
     history: { list: () => preview([...HISTORY]) },
     connectors: { list: () => preview([...CONNECTORS]) },
     privacy: {
@@ -192,6 +198,5 @@ export function createFixtureDeskServices(
         return preview(FILES.filter((file) => !query?.projectId || file.projectName === project?.name));
       },
     },
-    runScripted: (steps, handlers) => runScripted(steps, handlers, { stepMs, timers }),
   };
 }

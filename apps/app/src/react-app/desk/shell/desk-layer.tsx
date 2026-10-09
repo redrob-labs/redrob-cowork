@@ -10,7 +10,7 @@ import { isMacPlatform } from "../../../app/utils";
 import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
 import { kindsLabel, usePrivacyConfirmStore, type PrivacyConfirm } from "../privacy/privacy-send";
-import { PlaybookDialog } from "../playbooks/playbook-dialog";
+import { SkillDialog } from "../skills/skill-dialog";
 import { ProjectDialog } from "../projects/project-dialog";
 import { useDeskRunEvents } from "../run/use-desk-run-events";
 import { isDeskSettingsPath } from "../settings/settings-sections";
@@ -296,8 +296,8 @@ export function DeskLayerView(props: DeskLayerViewProps) {
       {props.modal?.kind === "project" ? (
         <ProjectDialog key={props.modal.chatId ?? "new"} chatId={props.modal.chatId} onClose={props.onCloseModal} />
       ) : null}
-      {props.modal?.kind === "playbook" ? (
-        <PlaybookDialog playbookId={props.modal.playbookId} prompt={props.modal.prompt} onClose={props.onCloseModal} />
+      {props.modal?.kind === "skill" ? (
+        <SkillDialog name={props.modal.name} instructions={props.modal.instructions} onClose={props.onCloseModal} />
       ) : null}
       <PrivacyConfirmDialog />
       <DeskToast toast={props.toast} onClose={props.onCloseToast} />

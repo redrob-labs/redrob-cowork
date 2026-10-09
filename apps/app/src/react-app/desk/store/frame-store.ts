@@ -9,8 +9,8 @@ export type FrameModal =
   | { kind: "project"; chatId: string | null }
   | { kind: "feedback" }
   | { kind: "keys" }
-  /** A playbook to write: a new one, maybe from a prompt, or one to change. */
-  | { kind: "playbook"; playbookId?: string; prompt?: string };
+  /** A skill to write: a new one, maybe from a message, or one of the person's own to change. */
+  | { kind: "skill"; name?: string; instructions?: string };
 export type ToastTone = "success" | "danger";
 /** The one thing a toast offers, usually Undo. */
 export type ToastAction = { label: string; run: () => void };

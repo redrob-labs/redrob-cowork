@@ -65,7 +65,7 @@ export function TeamReviewBody(props: { review: TeamReview }) {
       ];
   const items = [
     ...team,
-    t("desk.team_review_playbooks", { playbooks: review.playbooks, skills: review.skills }),
+    t("desk.team_review_skills", { skills: review.skills }),
     ...(review.connectors.length ? [t("desk.team_review_connectors", { names: review.connectors.map((connector) => connector.name).join(", ") })] : []),
     t("desk.team_review_changes", { count: review.changes }),
   ];
@@ -141,7 +141,7 @@ export function TeamFileGroup() {
     setBusy(true);
     try {
       const result = await applyTeamFile(client, workspaceId, reviewed);
-      // Notes, privacy and playbooks all changed under the screens that show them.
+      // Notes, privacy and skills all changed under the screens that show them.
       await queryClient.invalidateQueries();
       showToast(
         t("desk.team_used_title"),

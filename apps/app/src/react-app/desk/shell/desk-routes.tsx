@@ -7,11 +7,10 @@ import { DeskMemoryScreen } from "../memory/desk-memory";
 import { DeskPrivacyScreen } from "../privacy/desk-privacy";
 import { GuideScreen } from "../preview/desk-guide";
 import { HistoryScreen } from "../preview/desk-history";
-import { PlaybookScreen } from "../preview/desk-playbook";
-import { PlaybooksScreen } from "../preview/desk-playbooks";
-import { RunScreen } from "../preview/desk-run";
 import { ScheduledScreen } from "../preview/desk-scheduled";
 import { ProjectScreen, ProjectsScreen } from "../projects/desk-projects";
+import { SkillScreen } from "../skills/desk-skill";
+import { SkillsScreen } from "../skills/desk-skills";
 import { RouteReady } from "./route-ready";
 
 export { RouteReady };
@@ -53,10 +52,13 @@ export function deskRoutes(chat: ReactNode) {
     // The Desk Memory screen is always on; the old memory flag only gates the settings tab.
     <Route key="memory" path="/memory" element={ready(<DeskMemoryScreen />)} />,
     <Route key="memory-scope" path="/memory/:scope" element={ready(<DeskMemoryScreen />)} />,
-    // Preview screens on sample data: nothing on them sends a prompt or calls the server.
-    <Route key="playbooks" path="/playbooks" element={ready(<PlaybooksScreen />)} />,
-    <Route key="playbook" path="/playbook/:playbookId" element={ready(<PlaybookScreen />)} />,
-    <Route key="run" path="/run" element={ready(<RunScreen />)} />,
+    <Route key="skills" path="/skills" element={ready(<SkillsScreen />)} />,
+    <Route key="skill" path="/skill/:name" element={ready(<SkillScreen />)} />,
+    // Playbooks became skills: old links land on Skills.
+    <Route key="playbooks" path="/playbooks" element={<Navigate to="/skills" replace />} />,
+    <Route key="playbook" path="/playbook/:playbookId" element={<Navigate to="/skills" replace />} />,
+    <Route key="run" path="/run" element={<Navigate to="/skills" replace />} />,
+    // Screens that show sample data until a server is connected.
     <Route key="scheduled" path="/scheduled" element={ready(<ScheduledScreen />)} />,
     <Route key="history" path="/history" element={ready(<HistoryScreen />)} />,
     <Route key="guide" path="/guide" element={ready(<GuideScreen />)} />,

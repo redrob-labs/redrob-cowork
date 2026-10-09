@@ -30,13 +30,14 @@ export type ScheduleDraft = {
   value: ScheduleValue;
 };
 
-/** The fields for a schedule to change, or for a new one (with a prompt to start from). */
-export function scheduleDraft(input: { schedule?: Schedule; prompt?: string; now: Date }): ScheduleDraft {
+/** The fields for a schedule to change, or for a new one (with a prompt or a skill to start from). */
+export function scheduleDraft(input: { schedule?: Schedule; prompt?: string; skill?: string; now: Date }): ScheduleDraft {
   const { schedule } = input;
   const start = initialScheduleValue({ cadence: schedule?.cadence ?? "" }, input.now);
   const value = schedule?.rule ? { ...start, ...ruleToPickerValue(schedule.rule) } : start;
   const target = schedule?.target;
   if (target?.kind === "skill") return { kind: "skill", text: "", skill: target.name, instructions: target.instructions ?? "", value };
+  if (!target && input.skill) return { kind: "skill", text: "", skill: input.skill, instructions: "", value };
   return { kind: "prompt", text: target?.text ?? input.prompt ?? "", skill: "", instructions: "", value };
 }
 
@@ -181,6 +182,8 @@ export function ScheduleDialog(props: {
   schedule?: Schedule;
   /** A prompt to start a new schedule from. */
   prompt?: string;
+  /** A skill to start a new schedule from. */
+  skill?: string;
   sampleProjectId?: string;
   real: boolean;
   now?: Date;
@@ -198,7 +201,7 @@ export function ScheduleDialog(props: {
   });
   const skills = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000 });
   const [now] = useState(() => props.now ?? new Date());
-  const [draft, setDraft] = useState(() => scheduleDraft({ schedule: props.schedule, prompt: props.prompt, now }));
+  const [draft, setDraft] = useState(() => scheduleDraft({ schedule: props.schedule, prompt: props.prompt, skill: props.skill, now }));
   const [busy, setBusy] = useState(false);
   const project = props.real
     ? projects.data?.data.find((entry) => entry.id === workspaceId)

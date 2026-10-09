@@ -4,43 +4,8 @@ import type { Memory } from "@redrob/types/memory";
 
 import type { RedrobWorkspaceInfo } from "../src/app/lib/redrob-server";
 import type { DeskServices } from "../src/react-app/desk/services/desk-services";
-import { createFixtureDeskServices, runScripted } from "../src/react-app/desk/services/fixture-services";
+import { createFixtureDeskServices } from "../src/react-app/desk/services/fixture-services";
 import { createDeskServices, createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
-import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
-
-/** A manual clock: timers fire only when the test advances time. */
-function fakeClock() {
-  let now = 0;
-  let nextId = 0;
-  const pending = new Map<number, { at: number; fn: () => void }>();
-  const handles = new Map<TimerHandle, number>();
-  const timers: DeskTimers = {
-    setTimeout(fn, ms) {
-      const id = ++nextId;
-      pending.set(id, { at: now + ms, fn });
-      // Reuse a real handle value as the opaque token so the type stays honest.
-      const handle = globalThis.setTimeout(() => {}, 1e9);
-      globalThis.clearTimeout(handle);
-      handles.set(handle, id);
-      return handle;
-    },
-    clearTimeout(handle) {
-      const id = handles.get(handle);
-      if (id !== undefined) pending.delete(id);
-    },
-  };
-  const advanceTo = (time: number) => {
-    for (;;) {
-      const due = [...pending.entries()].filter(([, timer]) => timer.at <= time).sort((a, b) => a[1].at - b[1].at)[0];
-      if (!due) break;
-      pending.delete(due[0]);
-      now = due[1].at;
-      due[1].fn();
-    }
-    now = time;
-  };
-  return { timers, advanceTo };
-}
 
 async function everyResult(services: DeskServices) {
   return [
@@ -48,10 +13,11 @@ async function everyResult(services: DeskServices) {
     await services.chats.get("notice"),
     await services.projects.list(),
     await services.notes.list(),
-    await services.playbooks.list(),
-    await services.playbooks.get("first-review"),
     await services.schedules.list(),
     await services.skills.list(),
+    await services.skills.library(),
+    await services.skills.taxonomy(),
+    await services.skills.get("first-review"),
     await services.history.list(),
     await services.connectors.list(),
     await services.privacy.get(),
@@ -73,7 +39,7 @@ describe("desk fixture services", () => {
     expect(connectors.filter((connector) => connector.state === "connected")).toHaveLength(6);
     expect((await services.schedules.list()).data.waiting).toHaveLength(2);
     expect((await services.privacy.get()).data.level).toBe("high");
-    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(["deadline-tracker", "first-review", "weekly-report"]);
+    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(["first-review", "deadline-tracker", "weekly-report"]);
 
     const notes = (await services.notes.list()).data;
     expect(notes.length).toBe(22);
@@ -109,40 +75,6 @@ describe("desk fixture services", () => {
     expect(hanbit).toHaveLength(5);
     expect((await services.chats.get("style")).data).toMatchObject({ projectId: null, mode: "run", memory: "all" });
     expect((await services.files.list({ projectId: "seorin" })).data).toHaveLength(3);
-  });
-});
-
-describe("desk scripted runs", () => {
-  test("steps land stepMs*(i+1) apart and the answer at stepMs*(steps+1)", () => {
-    const clock = fakeClock();
-    const seen: string[] = [];
-    runScripted(["read", "check", "draft"], { onStep: (step, index) => seen.push(`${index}:${step}`), onAnswer: () => seen.push("answer") }, { stepMs: 650, timers: clock.timers });
-
-    clock.advanceTo(649);
-    expect(seen).toEqual([]);
-    clock.advanceTo(650);
-    expect(seen).toEqual(["0:read"]);
-    clock.advanceTo(1950);
-    expect(seen).toEqual(["0:read", "1:check", "2:draft"]);
-    clock.advanceTo(2599);
-    expect(seen).toHaveLength(3);
-    clock.advanceTo(2600);
-    expect(seen.at(-1)).toBe("answer");
-  });
-
-  test("the fixture service uses its stepMs, and cancel stops the run", () => {
-    const clock = fakeClock();
-    const services = createFixtureDeskServices({ stepMs: 100, timers: clock.timers });
-    const seen: number[] = [];
-    let answered = false;
-    const cancel = services.runScripted([1, 2, 3], { onStep: (step) => seen.push(step), onAnswer: () => { answered = true; } });
-
-    clock.advanceTo(200);
-    expect(seen).toEqual([1, 2]);
-    cancel();
-    clock.advanceTo(10_000);
-    expect(seen).toEqual([1, 2]);
-    expect(answered).toBe(false);
   });
 });
 

@@ -75,7 +75,7 @@ export const MODEL_CATALOG: ModelCatalog = {
               short: "Gemini 3.1 Pro",
               harness: "Gemini Enterprise for Legal",
               effort: { label: "Medium", level: 2, of: 3 },
-              why: "Built for legal teams, with your playbook and document system connected.",
+              why: "Built for legal teams, with your clause library and document system connected.",
               monthly: 19.2,
               efforts: [
                 { label: "Low", level: 1, of: 3, monthly: 11.52, place: 12 },

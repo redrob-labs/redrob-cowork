@@ -1353,23 +1353,18 @@
   list-style: none;
 }
 
-/* Preview screens (Playbooks, a run, Scheduled, History, Model Guide) on sample data. */
+/* Desk screens that can show sample data: Skills, Scheduled, History, Model Guide. */
 .desk-preview--wide {
   max-width: none;
 }
 
-.desk-preview__list,
-.desk-preview__sources {
+.desk-preview__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.desk-preview__sources {
-  gap: var(--space-2);
 }
 
 .desk-preview__wait {
@@ -1387,38 +1382,6 @@
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
-}
-
-.desk-preview__worth {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-radius: --theme(--radius-lg);
-  background: var(--surface-raised);
-}
-
-.desk-preview__impact {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: 0;
-  color: var(--ink-secondary);
-}
-
-.desk-preview__impact b {
-  font-size: 24px;
-  line-height: 32px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-primary);
-}
-
-.desk-preview__status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
 }
 
 .desk-preview__figure {
@@ -1439,6 +1402,40 @@
 .desk-preview__what span {
   font-size: 13px;
   color: var(--ink-muted);
+}
+
+/* Skills: the filters above the list, and each row's name, tags and actions. */
+.desk-skills__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.desk-skills__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-skills__name {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.desk-skills__name:hover {
+  text-decoration: underline;
+}
+
+.desk-skills__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
 }
 
 @media (max-width: 900px) {

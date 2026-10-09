@@ -334,7 +334,7 @@ describe("the new chat screen", () => {
     expect(hero).toContain('<h2 className="desk-new__line">{t("desk.new_chat_line")}</h2>');
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain('placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}');
-    expect(en["desk.composer_placeholder"]).toBe("Ask Desk to do something, or type / to run a playbook");
+    expect(en["desk.composer_placeholder"]).toBe("Ask Desk to do something, or type / to use a skill");
     const css = read("app/index.css");
     const line = css.slice(css.indexOf(".desk-new__line {"), css.indexOf("}", css.indexOf(".desk-new__line {")));
     expect(line).toContain("font-family: var(--font-serif)");

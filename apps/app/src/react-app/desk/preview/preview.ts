@@ -4,23 +4,22 @@ import { describeSchedule, icons, nextScheduledRun, type IconName, type Schedule
 
 import { t } from "../../../i18n";
 import type { DeskServices } from "../services/desk-services";
-import { runScripted } from "../services/fixture-services";
 import { PROJECTS } from "../services/fixtures/projects";
 import { createDeskServices } from "../services/real-services";
-import type { DeskResult, NewSchedule, Playbook, Project, ScheduleBoard, ScheduleTarget } from "../services/types";
+import type { DeskResult, NewSchedule, Project, ScheduleBoard, ScheduleTarget } from "../services/types";
 import { ruleFromPicker } from "../scheduled/schedules";
 import { useDeskConnection } from "../shell/desk-connection";
-import type { DeskTimers } from "../timers";
 
 /*
- * Helpers for the Playbooks, Scheduled and History screens and the sample run. Each reads
+ * Helpers for the Skills, Scheduled and History screens. Each reads
  * the Desk services, which are real where a server is connected and sample data otherwise;
  * a result says which, and the screens show the sample note only for sample data.
  */
 
 export const PREVIEW_QUERY_KEY = "desk-preview";
 
-export type PreviewPart = "playbooks" | "board" | "history" | "catalog" | "skills";
+/** `skills` is what is installed; `library`, `taxonomy` and `team` are where skills come from. */
+export type PreviewPart = "board" | "history" | "catalog" | "skills" | "library" | "taxonomy" | "team";
 
 export function previewKey(scope: string, part: PreviewPart): string[] {
   return [PREVIEW_QUERY_KEY, scope, part];
@@ -57,11 +56,6 @@ export function sampleProjectName(id: string): string {
 /** The sample project a sample schedule runs in, or the first one. */
 export function sampleProject(id: string | undefined): Project | undefined {
   return PROJECTS.find((project) => project.id === id) ?? PROJECTS[0];
-}
-
-/** Where a playbook runs: the project that keeps it, or the first one. */
-export function projectForPlaybook(playbookId: string): Project | undefined {
-  return PROJECTS.find((project) => project.playbookIds.includes(playbookId)) ?? PROJECTS[0];
 }
 
 /** "Mon 28 Sep, 08:14", in the person's language. */
@@ -147,10 +141,10 @@ function isoDay(day: Date): string {
   return `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`;
 }
 
-/** The picker's starting point, as the prototype sets it: a file-triggered playbook starts on a new file. */
-export function initialScheduleValue(playbook: Pick<Playbook, "cadence">, today: Date): ScheduleValue {
+/** The picker's starting point, as the prototype sets it: a schedule run by a file arriving starts on a new file. */
+export function initialScheduleValue(schedule: { cadence: string }, today: Date): ScheduleValue {
   return {
-    mode: /arrives|sends/.test(playbook.cadence) ? "event" : "repeat",
+    mode: /arrives|sends/.test(schedule.cadence) ? "event" : "repeat",
     date: isoDay(today),
     start: isoDay(today),
     time: "08:00",
@@ -178,71 +172,4 @@ export function scheduleFromPicker(
     nextRunAt: next ? next.getTime() : null,
     ...(rule ? { rule } : {}),
   };
-}
-
-/* ---------- A playbook run ---------- */
-
-export type RunStep = { id: string; label: string; detail?: string; approval?: string };
-export type RunPhase = "running" | "waiting" | "done" | "stopped";
-/** `done` steps are finished; the step at `done` is the one in progress or waiting. */
-export type RunProgress = { done: number; phase: RunPhase };
-
-export const RUN_START: RunProgress = { done: 0, phase: "running" };
-
-export function runSteps(playbook: Pick<Playbook, "id" | "steps">): RunStep[] {
-  return playbook.steps.map((step, index) => ({ id: `${playbook.id}-${index + 1}`, ...step }));
-}
-
-/** The first step at or after `from` that asks a person first, or the end. */
-export function nextStop(steps: readonly RunStep[], from: number): number {
-  const index = steps.findIndex((step, at) => at >= from && Boolean(step.approval));
-  return index === -1 ? steps.length : index;
-}
-
-/**
- * Plays the steps from `from` up to the next one that asks first, one every 650ms (the
- * prototype's pace), then waits there or finishes. Sample timing only: nothing runs. Returns
- * a cancel function.
- */
-export function playRun(
-  steps: readonly RunStep[],
-  from: number,
-  onProgress: (progress: RunProgress) => void,
-  options: { stepMs?: number; timers?: DeskTimers } = {},
-): () => void {
-  const stop = nextStop(steps, from);
-  return runScripted(
-    steps.slice(from, stop),
-    {
-      onStep: (_step, index) => onProgress({ done: from + index + 1, phase: "running" }),
-      onAnswer: () => onProgress({ done: stop, phase: stop < steps.length ? "waiting" : "done" }),
-    },
-    options,
-  );
-}
-
-export function stepState(index: number, progress: RunProgress): "done" | "active" | "todo" {
-  if (index < progress.done) return "done";
-  if (index === progress.done && (progress.phase === "running" || progress.phase === "waiting")) return "active";
-  return "todo";
-}
-
-export type RunStatus = { state: "running" | "blocked" | "done" | "stopped"; label: string };
-
-export function runStatus(progress: RunProgress): RunStatus {
-  switch (progress.phase) {
-    case "running":
-      return { state: "running", label: t("desk.preview_run_running") };
-    case "waiting":
-      return { state: "blocked", label: t("desk.preview_run_waiting") };
-    case "done":
-      return { state: "done", label: t("desk.preview_run_done") };
-    case "stopped":
-      return { state: "stopped", label: t("desk.preview_run_stopped") };
-  }
-}
-
-/** `/run` for one playbook. */
-export function runPath(playbookId: string): string {
-  return `/run?playbook=${encodeURIComponent(playbookId)}`;
 }
