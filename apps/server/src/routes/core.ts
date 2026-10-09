@@ -4,6 +4,7 @@ import type { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService } from "../env-file.js";
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
+import { speakWithRedrobEngine } from "../redrob-auth.js";
 import {
   createGoogleWorkspaceConnectFlowManager,
   googleWorkspaceDisconnect,
@@ -452,6 +453,17 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
       throw new ApiError(404, "env_not_found", "Environment variable not found");
     }
     return jsonResponse({ ok: true });
+  });
+
+  /* Read-aloud: the engine speaks on its own Redrob credential; see speakWithRedrobEngine. */
+  addRoute(routes, "POST", "/voice/speech", "host", async (ctx) => {
+    const body = await readJsonBody(ctx.request);
+    const text = typeof body.text === "string" ? body.text : "";
+    const voice = typeof body.voice === "string" ? body.voice : undefined;
+    const spoken = await speakWithRedrobEngine({ config }, { text, ...(voice ? { voice } : {}) });
+    return new Response(spoken.audio, {
+      headers: { "Content-Type": spoken.contentType, "Cache-Control": "no-store" },
+    });
   });
 
   addRoute(routes, "POST", "/voice/realtime/session", "host", async (ctx) => {
