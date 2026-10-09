@@ -16,7 +16,7 @@ import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project }
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand" | "getSessionSnapshot" | "listSchedules" | "addSchedule" | "updateSchedule" | "answerScheduleWaiting"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand" | "getSessionSnapshot" | "listSchedules" | "addSchedule" | "updateSchedule" | "deleteSchedule" | "answerScheduleWaiting" | "listSkills"
 >;
 
 export type RealDeskServicesDeps = {
@@ -170,9 +170,24 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         real(boardFromState(await client.updateSchedule(workspaceId, scheduleId, { enabled }), workspaceId)),
       save: async (input) => {
         if (!input.rule) throw new Error("A schedule needs a time it can run at");
-        const state = await client.addSchedule(workspaceId, { playbookId: input.playbookId, label: input.cadence, rule: input.rule });
+        const state = await client.addSchedule(workspaceId, { target: input.target, label: input.cadence, rule: input.rule });
         return real(boardFromState(state, workspaceId));
       },
+      update: async (scheduleId, patch) => {
+        if (patch.cadence !== undefined && !patch.rule) throw new Error("A schedule needs a time it can run at");
+        const state = await client.updateSchedule(workspaceId, scheduleId, {
+          ...(patch.target ? { target: patch.target } : {}),
+          ...(patch.cadence !== undefined ? { label: patch.cadence } : {}),
+          ...(patch.rule ? { rule: patch.rule } : {}),
+        });
+        return real(boardFromState(state, workspaceId));
+      },
+      remove: async (scheduleId) => real(boardFromState(await client.deleteSchedule(workspaceId, scheduleId), workspaceId)),
+    },
+    // The skills a schedule can run: the workspace's, then the person's own.
+    skills: {
+      list: async () =>
+        real((await client.listSkills(workspaceId, { includeGlobal: true })).items.map(({ name, description }) => ({ name, description }))),
     },
     // History is the chats of every project, newest first, with the steps of the latest.
     history: {

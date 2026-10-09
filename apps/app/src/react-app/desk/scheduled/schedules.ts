@@ -2,7 +2,7 @@ import type { ScheduleValue } from "@redrob-labs/ui";
 
 import type { RedrobScheduleRule, RedrobScheduleRunState, RedrobScheduleState } from "../../../app/lib/redrob-server";
 import { t } from "../../../i18n";
-import type { Schedule, ScheduleBoard, WaitingRun } from "../services/types";
+import type { Schedule, ScheduleBoard, ScheduleTarget, WaitingRun } from "../services/types";
 
 /** The picker's value as a rule the server runs on. A file arriving is not something it can watch. */
 export function ruleFromPicker(value: ScheduleValue): RedrobScheduleRule | null {
@@ -18,6 +18,29 @@ export function ruleFromPicker(value: ScheduleValue): RedrobScheduleRule | null 
     ...(value.days ? { days: value.days } : {}),
     ...(value.dom ? { dom: value.dom } : {}),
   };
+}
+
+/** A rule the server runs on as the picker's value, to start an edit from. */
+export function ruleToPickerValue(rule: RedrobScheduleRule): ScheduleValue {
+  return {
+    mode: rule.mode,
+    time: rule.time,
+    zone: rule.zone,
+    ...(rule.date ? { date: rule.date } : {}),
+    ...(rule.start ? { start: rule.start } : {}),
+    ...(rule.freq ? { freq: rule.freq } : {}),
+    ...(rule.days ? { days: [...rule.days] } : {}),
+    ...(rule.dom ? { dom: rule.dom } : {}),
+  };
+}
+
+const NAME_LIMIT = 60;
+
+/** What a schedule runs, in a few words: the skill's name, or the prompt's first line. */
+export function scheduleName(target: ScheduleTarget): string {
+  if (target.kind === "skill") return target.name;
+  const line = target.text.trim().split(/\r?\n/)[0]?.trim() ?? "";
+  return line.length > NAME_LIMIT ? `${line.slice(0, NAME_LIMIT - 1).trimEnd()}…` : line;
 }
 
 function lastRunOf(state: RedrobScheduleRunState, at: number): NonNullable<Schedule["lastRun"]> {
@@ -48,21 +71,32 @@ export function askLabel(permission: string): string {
 export function boardFromState(state: RedrobScheduleState, projectId: string): ScheduleBoard {
   const schedules: Schedule[] = state.schedules.map((schedule) => ({
     id: schedule.id,
-    playbookId: schedule.playbookId,
+    target: schedule.target,
+    name: scheduleName(schedule.target),
     projectId,
     cadence: schedule.label,
     nextRunAt: schedule.enabled ? schedule.nextRunAt : null,
     lastRun: schedule.lastRun ? lastRunOf(schedule.lastRun.state, schedule.lastRun.at) : null,
     enabled: schedule.enabled,
+    rule: schedule.rule,
   }));
-  const waiting: WaitingRun[] = state.waiting.map((ask) => ({
-    id: ask.id,
-    playbookId: state.schedules.find((schedule) => schedule.id === ask.scheduleId)?.playbookId ?? "",
-    projectId,
-    title: askLabel(ask.permission),
-    description: t("desk.scheduled_ask_text"),
-    detail: ask.patterns.join(", "),
-    askedAt: ask.askedAt,
-  }));
+  // An ask whose schedule was removed has nothing to name; it leaves with the next pass.
+  const waiting: WaitingRun[] = state.waiting.flatMap((ask) => {
+    const owner = schedules.find((schedule) => schedule.id === ask.scheduleId);
+    if (!owner) return [];
+    return [
+      {
+        id: ask.id,
+        scheduleId: owner.id,
+        target: owner.target,
+        name: owner.name,
+        projectId,
+        title: askLabel(ask.permission),
+        description: t("desk.scheduled_ask_text"),
+        detail: ask.patterns.join(", "),
+        askedAt: ask.askedAt,
+      },
+    ];
+  });
   return { schedules, waiting };
 }
