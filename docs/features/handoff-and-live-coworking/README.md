@@ -351,6 +351,7 @@ room.
 
 | Later follow-ups | #161 (no reconnect after removal or room end), #163 (edit a waiting message, without losing files), #164 (Plan-only guests, enforced on the server) |
 | Attachments | #170 (guests attach with the host's "attach" right, into the chat's own inbox folder; a guest's file parts are checked against it) |
+| Intel Macs | #171 (we build the iroh binding upstream no longer ships; tested natively on `macos-15-intel` and under Rosetta) |
 
 ## Tests
 
