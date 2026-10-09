@@ -318,7 +318,7 @@ const en = {
   "desk.cowork_unavailable": "Co-working is not available here",
   "desk.cowork_unavailable_build": "This copy of Redrob Cowork cannot co-work. Update to the latest version.",
   "desk.cowork_unavailable_check": "Co-working could not start on this computer. Restart the app and try again.",
-  "desk.cowork_unavailable_intel": "Co-working needs a Mac with Apple silicon.",
+  "desk.cowork_unavailable_intel": "This version of Redrob Cowork cannot co-work on an Intel Mac. Update to the latest version.",
   "desk.cowork_you": "You",
   "desk.handoff_banner_continued": "You continued this chat. It now works like any other.",
   "desk.handoff_banner_fallback": "Their Redrob Code could not be read here, so the conversation is below as text. Tool history did not come with it.",

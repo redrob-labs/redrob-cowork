@@ -96,10 +96,13 @@ export function createJoinStore(dir, fs = { readFile, writeFile, mkdir, chmod })
 
 export const joinKey = (entry) => `${entry.hostEndpointId}/${entry.workspaceId}/${entry.sessionId}`;
 
-/** Why co-working cannot run on this machine, or null when it might. */
-export function platformBlocker(platform, arch) {
-  if (platform === "darwin" && arch === "x64") return "intel_mac";
-  return null;
+/**
+ * Why co-working cannot run when the native binding does not load. On an Intel Mac that means a
+ * build without the binding we compile ourselves (upstream ships none; see
+ * scripts/build-iroh-darwin-x64.sh), so the app can say what would fix it.
+ */
+export function missingBindingReason(platform, arch) {
+  return platform === "darwin" && arch === "x64" ? "intel_mac" : "binding_missing";
 }
 
 /** This app's endpoint key, made once and kept in the profile, readable only by this user. */
@@ -293,7 +296,7 @@ export function createCoworkBridge(deps) {
 
   /** Reconnects every saved join, as after a restart. Loads nothing when there are none. */
   async function rejoin() {
-    if (blocker) return { rejoining: 0 };
+    if (!(await deps.loadIroh())) return { rejoining: 0 };
     const saved = await savedJoins();
     for (const entry of saved) redial(joinKey(entry));
     return { rejoining: saved.length };
@@ -303,12 +306,11 @@ export function createCoworkBridge(deps) {
   let selfCheck = null;
   let closed = false;
 
-  const blocker = platformBlocker(deps.platform, deps.arch);
+  const missingReason = missingBindingReason(deps.platform, deps.arch);
 
   async function iroh() {
-    if (blocker) throw new CoworkError(blocker, "Co-working needs a Mac with Apple silicon");
     const binding = await deps.loadIroh();
-    if (!binding) throw new CoworkError("binding_missing", "Co-working is not available in this build");
+    if (!binding) throw new CoworkError(missingReason, "Co-working is not available in this build");
     return binding;
   }
 
@@ -448,8 +450,7 @@ export function createCoworkBridge(deps) {
   /* ---------- public ---------- */
 
   async function status() {
-    if (blocker) return { available: false, reason: blocker };
-    if (!(await deps.loadIroh())) return { available: false, reason: "binding_missing" };
+    if (!(await deps.loadIroh())) return { available: false, reason: missingReason };
     const check = await runSelfCheck();
     if (!check.ok) return { available: false, reason: "self_check_failed", selfCheck: check };
     const bound = endpointPromise ? await endpointPromise.catch(() => null) : null;
