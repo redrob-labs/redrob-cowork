@@ -1,20 +1,21 @@
 import { describe, expect, test } from "bun:test";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { OrtRuntime } from "../privacy/detector.js";
 import {
   labelEmbedding,
   loadWorkClassifier,
+  MANIFEST,
   meanPool,
-  PINNED_INSIGHTS_MANIFEST_SHA256,
+  WORK_ACTIONS,
   WORK_HEAD,
   WorkClassifierSource,
+  type OrtRuntime,
   type WorkHead,
-} from "./work-classifier.js";
-import { WORK_ACTIONS } from "./vocabulary.js";
+  type WorkModelManifest,
+} from "../src/node.js";
 
 const sha = (bytes: string | Buffer) => createHash("sha256").update(bytes).digest("hex");
 
@@ -68,26 +69,28 @@ function fakeOrt(vector: number[], seen: bigint[][] = []): OrtRuntime {
   };
 }
 
+/** The manifest the tests trust: what MANIFEST is for the real model. */
+const PINNED: WorkModelManifest = {
+  id: "test/encoder",
+  revision: "0123456789abcdef",
+  license: "MIT",
+  model: { file: "model.onnx", sha256: sha("weights"), url: "https://example.test/model.onnx" },
+  tokenizer: { file: "tokenizer.json", sha256: sha(TOKENIZER), url: "https://example.test/tokenizer.json" },
+};
+
 async function modelDir(tokenizer = TOKENIZER) {
   const dir = await mkdtemp(join(tmpdir(), "work-model-"));
-  const manifest = JSON.stringify({
-    id: "test/encoder",
-    revision: "0123456789abcdef",
-    license: "MIT",
-    model: { file: "model.onnx", sha256: sha("weights") },
-    tokenizer: { file: "tokenizer.json", sha256: sha(TOKENIZER) },
-  });
-  await writeFile(join(dir, "manifest.json"), manifest);
   await writeFile(join(dir, "model.onnx"), "weights");
   await writeFile(join(dir, "tokenizer.json"), tokenizer);
-  return { dir, manifestSha: sha(manifest) };
+  return dir;
 }
 
 describe("work classifier", () => {
-  test("the pinned hash is the shipped manifest's, and the shipped head names every kind of work and family", async () => {
-    const shipped = await readFile(join(import.meta.dir, "../../../desktop/resources/insights-model/manifest.json"));
-    expect(sha(shipped)).toBe(PINNED_INSIGHTS_MANIFEST_SHA256!);
-    expect(JSON.parse(shipped.toString()).id).toBe("Xenova/multilingual-e5-base");
+  test("the package trusts e5-base from the release, and its head names every kind of work and family", () => {
+    expect(MANIFEST.id).toBe("Xenova/multilingual-e5-base");
+    for (const file of [MANIFEST.model, MANIFEST.tokenizer]) {
+      expect(file.url).toBe(`https://github.com/redrob-labs/redrob-cowork/releases/download/insights-model-e5-base-2026.10/${file.file}`);
+    }
     expect(WORK_HEAD.prefix).toBe("query: ");
     expect(WORK_HEAD.family.classes).toEqual(["code", "design", "sheet", "write", null]);
     expect(WORK_HEAD.family.w).toHaveLength(768);
@@ -115,9 +118,9 @@ describe("work classifier", () => {
   });
 
   test("reads the message with the query prefix, at most 256 tokens, and labels it", async () => {
-    const { dir, manifestSha } = await modelDir();
+    const dir = await modelDir();
     const seen: bigint[][] = [];
-    const classifier = await loadWorkClassifier(dir, fakeOrt([2, 0], seen), { expectedManifestSha256: manifestSha, head: HEAD });
+    const classifier = await loadWorkClassifier(dir, fakeOrt([2, 0], seen), { manifest: PINNED, head: HEAD });
     expect(classifier.id).toBe("test/encoder@01234567");
     expect((await classifier.label("fix")).family).toBe("code");
     expect(seen[0]).toEqual([0n, 5n, 4n, 2n]);
@@ -127,37 +130,33 @@ describe("work classifier", () => {
     expect(seen).toHaveLength(2);
   });
 
-  test("refuses a manifest that is not the pinned one, and a tokenizer that does not match its hash", async () => {
-    const { dir } = await modelDir();
-    await expect(loadWorkClassifier(dir, fakeOrt([1, 0]), { expectedManifestSha256: sha("other") })).rejects.toThrow(/pinned hash/);
-    const tampered = await modelDir(TOKENIZER.replace("fix", "fox"));
-    await expect(loadWorkClassifier(tampered.dir, fakeOrt([1, 0]), { expectedManifestSha256: tampered.manifestSha })).rejects.toThrow(/tokenizer does not match/);
+  test("refuses files that do not hash to the manifest it trusts", async () => {
+    const otherModel = { ...PINNED, model: { ...PINNED.model, sha256: sha("other weights") } };
+    await expect(loadWorkClassifier(await modelDir(), fakeOrt([1, 0]), { manifest: otherModel })).rejects.toThrow(/model file does not match/);
+    await expect(loadWorkClassifier(await modelDir(TOKENIZER.replace("fix", "fox")), fakeOrt([1, 0]), { manifest: PINNED })).rejects.toThrow(
+      /tokenizer does not match/,
+    );
   });
 
-  test("the source says why there is no model, and pointing it at another one loads nothing", async () => {
-    expect(WorkClassifierSource.fromEnvironment({}).status()).toEqual({ state: "absent", reason: "no work model is installed" });
-    const { dir } = await modelDir();
-    for (const env of [{ REDROB_INSIGHTS_MODEL_DIR: dir }, { REDROB_INSIGHTS_MODEL_DIR: dir, REDROB_DEV_MODE: "1" }]) {
-      const source = new WorkClassifierSource({
-        directory: env.REDROB_INSIGHTS_MODEL_DIR,
-        pinnedManifestSha256: PINNED_INSIGHTS_MANIFEST_SHA256,
-        allowUnpinned: "REDROB_DEV_MODE" in env,
-        loadRuntime: async () => fakeOrt([1, 0]),
-      });
-      expect(await source.label("fix the login bug")).toBeNull();
-      expect(source.status()).toMatchObject({ state: "failed", reason: expect.stringMatching(/integrity check/) });
-    }
+  test("the source says why there is no model, and a folder holding another model loads nothing", async () => {
+    expect(new WorkClassifierSource({ directory: null }).status()).toEqual({ state: "absent", reason: "no work model is installed" });
+    const dir = await modelDir();
+    const other = new WorkClassifierSource({ directory: dir, manifest: { ...PINNED, model: { ...PINNED.model, sha256: sha("other") } }, loadRuntime: async () => fakeOrt([1, 0]) });
+    expect(await other.label("fix the login bug")).toBeNull();
+    expect(other.status()).toMatchObject({ state: "failed", reason: expect.stringMatching(/integrity check/) });
+    const trusted = new WorkClassifierSource({ directory: dir, manifest: PINNED, loadRuntime: async () => fakeOrt([1, 0]) });
+    expect(trusted.status()).toEqual({ state: "not-loaded" });
+    expect(await trusted.label("fix")).not.toBeNull();
+    expect(trusted.status()).toEqual({ state: "ready", model: "test/encoder@01234567" });
   });
 
   test("a model that fails mid-run labels nothing from then on", async () => {
     let calls = 0;
-    const empty = new WorkClassifierSource({ directory: import.meta.dir, pinnedManifestSha256: null, allowUnpinned: true });
-    expect(empty.status()).toEqual({ state: "absent", reason: "the work model folder has no manifest" });
-    const { dir } = await modelDir();
+    const empty = new WorkClassifierSource({ directory: import.meta.dir, manifest: PINNED });
+    expect(empty.status()).toEqual({ state: "absent", reason: "the work model folder has no model" });
     const ready = new WorkClassifierSource({
-      directory: dir,
-      pinnedManifestSha256: null,
-      allowUnpinned: true,
+      directory: await modelDir(),
+      manifest: PINNED,
       loadRuntime: async () => fakeOrt([1, 0]),
       load: async () => ({
         id: "x",

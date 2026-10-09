@@ -134,4 +134,19 @@ describe("prepare-insights-model", () => {
     );
     assert.match(constants.insightsModelRelease, /^insights-model-/);
   });
+
+  it("ships the encoder @redrob-labs/work-labeller trusts, from the release its manifest names", async () => {
+    const shipped = JSON.parse(await readFile(path.join(DEFAULT_INSIGHTS_MODEL_DIR, "manifest.json"), "utf8"));
+    const pinned = JSON.parse(
+      await readFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../packages/work-labeller/src/manifest.json"), "utf8"),
+    );
+    const constants = JSON.parse(
+      await readFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../constants.json"), "utf8"),
+    );
+    assert.deepEqual([shipped.id, shipped.revision], [pinned.id, pinned.revision]);
+    for (const key of ["model", "tokenizer"]) {
+      assert.deepEqual(shipped[key], { file: pinned[key].file, sha256: pinned[key].sha256 });
+      assert.equal(pinned[key].url, releaseAssetUrl(constants.insightsModelRelease, pinned[key].file));
+    }
+  });
 });

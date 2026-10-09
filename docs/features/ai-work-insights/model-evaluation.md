@@ -97,7 +97,7 @@ Reusing the encoder Cowork already ships for Redrob Auto's route labels (distilu
 
 ### In the app
 
-redrob-server runs the family head in `src/insights/work-classifier.ts`: its own SentencePiece tokenizer (`unigram.ts`, which gives the same ids as Hugging Face `tokenizers` on all 1,484 training, evaluation and edge-case texts), the pinned encoder from `apps/desktop/resources/insights-model`, and `work-head.json` from `train.py`. On the 296 evaluation samples it gives the same label as the Python reference on all 296; confidences differ by under 1e-6. A label takes 4.4 ms (median), and loading the model takes under a second.
+redrob-server runs the family head in `src/insights/work-classifier.ts` (since moved to `packages/work-labeller/src/classifier.ts`): its own SentencePiece tokenizer (`unigram.ts`, which gives the same ids as Hugging Face `tokenizers` on all 1,484 training, evaluation and edge-case texts), the pinned encoder from `apps/desktop/resources/insights-model`, and `work-head.json` from `train.py`. On the 296 evaluation samples it gives the same label as the Python reference on all 296; confidences differ by under 1e-6. A label takes 4.4 ms (median), and loading the model takes under a second.
 
 ## Round 3: a tuning slice and contrastive examples (2026-10-08)
 

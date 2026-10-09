@@ -5,5 +5,5 @@
 `1ec9243030a27d1a115d5c340572074c125b58b2`, an ONNX export of
 [intfloat/multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base), licensed under the MIT License.
 
-`manifest.json` pins both files by SHA-256, and redrob-server pins `manifest.json` itself. The classifier head trained on
-top of it is `apps/server/src/insights/work-head.json`. Measurements: `docs/features/ai-work-insights/model-evaluation.md`.
+`manifest.json` pins both files by SHA-256, and must match the manifest `@redrob-labs/work-labeller` pins (`packages/work-labeller/src/manifest.json`), which is what redrob-server checks the files against. The classifier head trained on
+top of it is `packages/work-labeller/src/work-head.json`. Measurements: `docs/features/ai-work-insights/model-evaluation.md`.

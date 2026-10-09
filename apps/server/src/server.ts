@@ -168,7 +168,7 @@ import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
 import { startInsightsSync } from "./insights/sync.js";
-import { WorkClassifierSource } from "./insights/work-classifier.js";
+import { WorkClassifierSource } from "@redrob-labs/work-labeller/node";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -2943,7 +2943,7 @@ function createRoutes(
    */
   const insightsOutbox = new InsightsOutbox(config);
   const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
-  const workClassifier = WorkClassifierSource.fromEnvironment();
+  const workClassifier = new WorkClassifierSource({ directory: process.env.REDROB_INSIGHTS_MODEL_DIR?.trim() || null });
   const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
   insightsSweep.unref?.();
   const privacyGate = new PrivacyGate(config, undefined, undefined, (report) =>

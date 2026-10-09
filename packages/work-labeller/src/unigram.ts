@@ -2,7 +2,7 @@
  * The XLM-R SentencePiece tokenizer the work classifier's encoder (multilingual-e5-base) reads, as
  * Hugging Face `tokenizers` runs it from tokenizer.json: split out special tokens, the Precompiled
  * normalizer (SentencePiece's nmt_nfkc charsmap), then either a whitespace split (e5-base) or runs of
- * spaces collapsed (e5-small), Metaspace, Unigram Viterbi, then `<s> A </s>`. Ids match `tokenizers` exactly (fixtures/unigram-parity.json), because
+ * spaces collapsed (e5-small), Metaspace, Unigram Viterbi, then `<s> A </s>`. Ids match `tokenizers` exactly (test/fixtures/unigram-parity.json), because
  * the head was trained on what that library produced.
  */
 
@@ -192,7 +192,7 @@ export function unigramFromTokenizerJson(json: unknown): Unigram {
     pieces,
     unkId: parsed.model.unk_id,
     minScore,
-    charsmap: charsmap ? Buffer.from(charsmap, "base64") : null,
+    charsmap: charsmap ? Uint8Array.from(atob(charsmap), (char) => char.charCodeAt(0)) : null,
     specials,
     lstrip,
     whitespaceSplit,

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import parity from "./fixtures/unigram-parity.json" with { type: "json" };
-import { Unigram } from "./unigram.js";
+import { Unigram } from "../src/unigram.js";
 
 describe("Unigram", () => {
   const specials = new Map(Object.entries(parity.specials));
@@ -9,7 +9,7 @@ describe("Unigram", () => {
     pieces: new Map(Object.entries(parity.pieces).map(([piece, [id, score]]) => [piece, { id: id!, score: score! }])),
     unkId: parity.unkId,
     minScore: parity.minScore,
-    charsmap: Buffer.from(parity.charsmap, "base64"),
+    charsmap: Uint8Array.from(atob(parity.charsmap), (char) => char.charCodeAt(0)),
     specials,
     lstrip: new Set(parity.lstrip),
     whitespaceSplit: true,

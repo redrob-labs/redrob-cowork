@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { WORK_SAMPLES } from "./eval/work-samples.js";
-import { WORK_ACTIONS } from "./vocabulary.js";
+import { WORK_ACTIONS } from "@redrob-labs/work-labeller";
 import { WORK_PROTOTYPES } from "./work-prototypes.js";
 
 const normal = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();

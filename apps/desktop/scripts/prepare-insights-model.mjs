@@ -1,8 +1,8 @@
 /*
  * Puts the work classifier's encoder (multilingual-e5-base, about 278 MB) into resources/insights-model,
  * the same way prepare-privacy-model.mjs does for the privacy model: the tracked manifest.json, pinned
- * by redrob-server (PINNED_INSIGHTS_MANIFEST_SHA256 in apps/server/src/insights/work-classifier.ts),
- * names each file with its SHA-256, and a file is kept only when it matches. The files come from this
+ * the same pins as @redrob-labs/work-labeller's (packages/work-labeller/src/manifest.json, which
+ * redrob-server checks the files against), names each file with its SHA-256, and a file is kept only when it matches. The files come from this
  * repository's release named by constants.json `insightsModelRelease`, or a local folder
  * (REDROB_INSIGHTS_MODEL_SOURCE, e.g. a Hugging Face snapshot of the pinned revision).
  *
