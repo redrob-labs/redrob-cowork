@@ -157,6 +157,36 @@ export function readStoredDefaultModel(): ModelRef {
   }
 }
 
+const NEW_CHAT_USES_DEFAULT_KEY = "redrob.newChatUsesDefault";
+
+/**
+ * The default model was just chosen for new chats, outside any chat (the Model Guide's "Use this").
+ *
+ * A new chat normally starts on the model of the chat that is open, so a choice made in the guide would be
+ * lost the moment the person started a chat from inside another one. This marks the next new chat to start
+ * on the default instead. After that chat, the default is its model anyway, so nothing else changes.
+ */
+export function markNewChatUsesDefault(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(NEW_CHAT_USES_DEFAULT_KEY, "1");
+  } catch {
+    // ignore quota errors
+  }
+}
+
+/** True once after `markNewChatUsesDefault`, and clears the mark. */
+export function takeNewChatUsesDefault(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const marked = window.localStorage.getItem(NEW_CHAT_USES_DEFAULT_KEY) === "1";
+    if (marked) window.localStorage.removeItem(NEW_CHAT_USES_DEFAULT_KEY);
+    return marked;
+  } catch {
+    return false;
+  }
+}
+
 export function writeStoredDefaultModel(model: ModelRef): void {
   if (typeof window === "undefined") return;
   try {

@@ -212,7 +212,7 @@ describe("the guide by profession", () => {
     expect(ranked?.monthly).toBe(shown?.monthly);
   });
 
-  test("renders the language select, figure kinds and sources, and no model switch", async () => {
+  test("renders the language select, figure kinds and sources, and a switch for new chats, with no Auto notice", async () => {
     const research = await loadGuideResearch();
     const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="en" />);
     expect(html).toContain("Work in");
@@ -220,7 +220,8 @@ describe("the guide by profession", () => {
     expect(html).toContain("Estimate");
     expect(html).toContain("Sources");
     expect(html).toContain("Redrob Cowork");
-    expect(html).toContain("every message goes to Redrob Auto");
+    expect(html).not.toContain("every message goes to Redrob Auto");
+    expect(html).toContain("Use for new chats");
     expect(html).toContain("I need");
     expect(html).toContain("Anything");
     expect(html).toContain("Benchmark");

@@ -103,6 +103,7 @@ import {
   workspaceLabel,
 } from "@/react-app/shell/route-workspaces";
 import { useLocal } from "@/react-app/kernel/local-provider";
+import { takeNewChatUsesDefault } from "@/react-app/kernel/model-config";
 import { usePlatform } from "@/react-app/kernel/platform";
 import { SessionPage, type OpenSessionTab } from "@/react-app/domains/session/chat/session-page";
 import type { NewTaskComposerContext } from "@/react-app/domains/session/chat/new-task-composer";
@@ -1473,7 +1474,8 @@ export function SessionRoute() {
 
 
   const applyLastUsedModelToSession = useCallback((sessionId: string) => {
-    const previous = selectedSessionId ? getSessionModelSelection(selectedSessionId) : null;
+    // A model chosen for new chats in the guide wins over the open chat's model, once.
+    const previous = selectedSessionId && !takeNewChatUsesDefault() ? getSessionModelSelection(selectedSessionId) : null;
     const model = previous?.model ?? local.prefs.defaultModel;
     if (!model?.providerID || !model.modelID) return;
     const variant = previous ? previous.variant : (local.prefs.modelVariant ?? null);
