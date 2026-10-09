@@ -61,6 +61,24 @@
   app-region: no-drag;
 }
 
+/* A full-height surface that stops at the title bar (`WindowTitleBar`) rather than running under it.
+   `--app-titlebar-height` is 0 everywhere the bar is not drawn, so these are plain 100dvh/100svh there. */
+@utility h-app {
+  height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility min-h-app {
+  min-height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility h-app-svh {
+  height: calc(100svh - var(--app-titlebar-height));
+}
+@utility min-h-app-svh {
+  min-height: calc(100svh - var(--app-titlebar-height));
+}
+@utility top-app {
+  top: var(--app-titlebar-height);
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -423,7 +441,7 @@
 
   .desk-panel {
     position: fixed;
-    top: 0;
+    top: var(--app-titlebar-height);
     right: 0;
     bottom: 0;
     z-index: 50;
@@ -2027,6 +2045,67 @@ select:disabled {
   }
   #root {
     min-height: 100%;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--app-titlebar-height));
   }
+
+  /* Windows and Linux draw their title bar in the renderer (WindowTitleBar); the page starts below it. */
+  :root {
+    --app-titlebar-height: 0px;
+  }
+  html.redrob-electron.redrob-platform-windows,
+  html.redrob-electron.redrob-platform-linux {
+    --app-titlebar-height: 40px;
+  }
+  body {
+    padding-top: var(--app-titlebar-height);
+  }
+}
+
+/* The title bar (react-app/shell/window-title-bar.tsx), on design-system tokens. 40px is
+   --control-height-md and the height main.mjs gives the Windows caption buttons. It sits above
+   dialogs so the window can always be moved, minimised and closed. */
+.window-titlebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--app-titlebar-height);
+  padding-inline-start: var(--space-3);
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+  font: var(--text-label);
+}
+.window-titlebar__icon {
+  flex: none;
+}
+.window-titlebar__name {
+  flex: none;
+  color: var(--ink-primary);
+}
+.window-titlebar__menus {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: var(--space-2);
+  font-weight: 500;
+}
+.window-titlebar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: auto;
+  padding-inline-end: var(--space-1);
+}
+.window-titlebar__close:hover {
+  background: var(--status-danger);
+  color: var(--ink-on-brand);
+}
+/* Room for the three caption buttons Windows draws over the bar (46px each). */
+.window-titlebar__caption-space {
+  flex: none;
+  width: 138px;
+  margin-inline-start: auto;
 }

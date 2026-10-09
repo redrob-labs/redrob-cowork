@@ -1578,8 +1578,63 @@ function macosVibrancyForCurrentTheme() {
   return nativeTheme.shouldUseDarkColors ? "under-window" : "sidebar";
 }
 
+/*
+  The Windows caption buttons (minimise, maximise, close) are drawn by Windows itself over the top-right of
+  the renderer's 40px title bar (`WindowTitleBar`), which keeps Snap Layouts on the maximise button. Windows
+  cannot read the renderer's tokens, so the design system's values are written out: the strip is transparent
+  so the title bar's own ground shows, and the glyphs are `--ink-secondary` for the active theme
+  (Gray 7 on light, Gray 5 on dark).
+*/
+const TITLE_BAR_HEIGHT = 40;
+const WINDOWS_CAPTION_COLORS = {
+  light: { color: "#00000000", symbolColor: "#576071" },
+  dark: { color: "#00000000", symbolColor: "#aab0bb" },
+};
+
+function windowsCaptionOverlay() {
+  const colors = nativeTheme.shouldUseDarkColors ? WINDOWS_CAPTION_COLORS.dark : WINDOWS_CAPTION_COLORS.light;
+  return { ...colors, height: TITLE_BAR_HEIGHT };
+}
+
+function syncWindowsCaptionOverlay() {
+  if (process.platform !== "win32" || !mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.setTitleBarOverlay(windowsCaptionOverlay());
+}
+
+nativeTheme.on("updated", syncWindowsCaptionOverlay);
+
+const WINDOW_STATE_EVENT = "redrob:window:state";
+
+function windowState(window) {
+  return { maximized: window.isMaximized(), fullScreen: window.isFullScreen() };
+}
+
+/*
+  What the renderer's title bar may ask the window to do. A fixed list, so the bridge cannot be used to call
+  arbitrary BrowserWindow or webContents methods. The edit actions run on webContents so they act on whatever
+  the renderer last focused, exactly as the native menu's roles did.
+*/
+const WINDOW_CONTROL_ACTIONS = {
+  minimize: (window) => window.minimize(),
+  toggleMaximize: (window) => (window.isMaximized() ? window.unmaximize() : window.maximize()),
+  toggleFullScreen: (window) => window.setFullScreen(!window.isFullScreen()),
+  close: (window) => window.close(),
+  undo: (window) => window.webContents.undo(),
+  redo: (window) => window.webContents.redo(),
+  cut: (window) => window.webContents.cut(),
+  copy: (window) => window.webContents.copy(),
+  paste: (window) => window.webContents.paste(),
+  delete: (window) => window.webContents.delete(),
+  selectAll: (window) => window.webContents.selectAll(),
+  reload: (window) => window.webContents.reload(),
+  forceReload: (window) => window.webContents.reloadIgnoringCache(),
+  toggleDevTools: (window) => window.webContents.toggleDevTools(),
+  openDocs: () => shell.openExternal(DOCS_PAGE_URL),
+};
+
 function applyNativeTheme(mode) {
   nativeTheme.themeSource = mode;
+  syncWindowsCaptionOverlay();
 
   if (process.platform !== "darwin") {
     return true;
@@ -2170,31 +2225,19 @@ const desktopCommandHandlers = {
   "__setApplicationMenuVisible": async (event, ...args) => {
       return applicationMenu.setVisible(args[0]);
   },
-  /*
-    Hide the window's own title bar.
-    
-    The setting existed in Appearance and did nothing at all: the toggle wrote localStorage and no code
-    ever read it, so there was no path from the switch to the window.
-    
-    Electron cannot change a window's frame after construction - `frame` and `titleBarStyle` are
-    construction options - so this PERSISTS the choice where the main process reads it at startup and
-    reports that a restart is needed. Pretending to apply it live, or hiding the MENU bar instead and
-    calling that a title bar, would both be worse than saying which it is.
-    
-    macOS is already `hiddenInset` from `createMainWindow`, so there the switch has nothing to do and
-    says so rather than claiming success.
-  */
-  "__setTitleBarHidden": async (_event, ...args) => {
-      const hidden = args[0] === true;
-      if (process.platform === "darwin") {
-        return { applied: false, reason: "macos-always-hidden" };
-      }
-      try {
-        await writeTitleBarPreference(hidden);
-        return { applied: true, hidden, needsRestart: true };
-      } catch (error) {
-        return { applied: false, reason: String(error) };
-      }
+  // The renderer's title bar: window buttons on Linux and the File/Edit/View/Window/Help menus everywhere
+  // but macOS. Unknown actions are refused rather than ignored, so a typo fails loudly.
+  "__windowControl": async (event, ...args) => {
+      const action = String(args[0]);
+      const run = Object.hasOwn(WINDOW_CONTROL_ACTIONS, action) ? WINDOW_CONTROL_ACTIONS[action] : null;
+      const window = activeWindowFromEvent(event);
+      if (!run || !window) return false;
+      await run(window);
+      return true;
+  },
+  "__windowState": async (event, ...args) => {
+      const window = activeWindowFromEvent(event);
+      return window ? windowState(window) : { maximized: false, fullScreen: false };
   },
 };
 
@@ -2283,36 +2326,6 @@ async function handleDesktopInvoke(event, command, ...args) {
 }
 
 
-/**
- * The hide-title-bar preference, in a file the MAIN process can read before any window exists.
- *
- * It has to live here rather than in localStorage: `frame` and `titleBarStyle` are BrowserWindow
- * construction options, so the value is needed before the renderer that owns localStorage is running.
- * That is why the setting did nothing - the switch wrote a key in the renderer and the process that
- * creates the window had no way to see it.
- *
- * Read defensively. A missing file, bad JSON, or an unreadable directory all mean "not hidden", which is
- * the shape the app shipped with; failing to start over a cosmetic preference would be the worse bug.
- */
-function titleBarPreferencePath() {
-  return path.join(app.getPath("userData"), "window-appearance.json");
-}
-
-async function readTitleBarPreference() {
-  try {
-    const raw = await readFile(titleBarPreferencePath(), "utf8");
-    return JSON.parse(raw)?.hideTitleBar === true;
-  } catch {
-    return false;
-  }
-}
-
-async function writeTitleBarPreference(hidden) {
-  const file = titleBarPreferencePath();
-  await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, `${JSON.stringify({ hideTitleBar: hidden === true }, null, 2)}\n`, "utf8");
-}
-
 async function createMainWindow() {
   if (mainWindow) return mainWindow;
 
@@ -2325,32 +2338,20 @@ async function createMainWindow() {
       vibrancy: macosVibrancyForCurrentTheme(),
       visualEffectState: "active",
     });
-  } else if (await readTitleBarPreference()) {
+  } else if (process.platform === "win32") {
     /*
-      Windows and Linux differ here, and getting it wrong is visible.
-
-      `titleBarOverlay` is WINDOWS-ONLY. Setting `titleBarStyle: "hidden"` on Linux drops the frame but
-      ignores the overlay, so no strip is reserved and the bare minimise/maximise/close controls land on
-      top of the app's own right-hand rail - verified on xfwm4, where the close button sat exactly over the
-      browser-panel icon. So Windows gets the overlay, which reserves that strip and keeps the controls
-      reachable, and Linux gets `frame: false`.
-
-      Losing the controls entirely is acceptable on Linux and only there: this setting exists for tiling
-      window managers - its own description says so - and a tiling WM owns close, move and resize itself.
-      On Windows, where the user's only handle on the window is those three buttons, removing them would be
-      a trap rather than a preference, which is why that branch keeps them.
+      No native title bar or menu bar on Windows: the renderer draws the 40px bar (`WindowTitleBar`) and
+      Windows draws only its caption buttons over the top-right of it. `titleBarOverlay` rather than our own
+      buttons, because only real caption buttons get Snap Layouts on hover.
     */
-    Object.assign(
-      windowAppearanceOptions,
-      process.platform === "win32"
-        ? {
-            titleBarStyle: "hidden",
-            // Gray 5, the design system's neutral for icons on either ground; the
-            // overlay cannot read the renderer's tokens, so the value is written out.
-            titleBarOverlay: { color: "#00000000", symbolColor: "#aab0bb", height: 40 },
-          }
-        : { frame: false },
-    );
+    Object.assign(windowAppearanceOptions, { titleBarStyle: "hidden", titleBarOverlay: windowsCaptionOverlay() });
+  } else {
+    /*
+      Linux has no caption overlay (`titleBarOverlay` is Windows-only, and `titleBarStyle: "hidden"` there
+      reserves no strip), so the window is frameless and `WindowTitleBar` draws minimise, maximise and close
+      itself, in the design system's icons.
+    */
+    Object.assign(windowAppearanceOptions, { frame: false });
   }
 
   const bootSidecar = await readBrandIconSidecar();
@@ -2396,6 +2397,18 @@ async function createMainWindow() {
     await applyCachedBrandIcon(cachedBrandImage, bootSourceUrl);
   }
   applicationMenu.applyVisibility(mainWindow);
+
+  // The title bar shows Maximise or Restore, so it has to hear every change, including Win+Up, a double
+  // click on the bar and a drag to the screen edge, not only its own clicks.
+  const sendWindowState = () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send(WINDOW_STATE_EVENT, windowState(mainWindow));
+    }
+  };
+  mainWindow.on("maximize", sendWindowState);
+  mainWindow.on("unmaximize", sendWindowState);
+  mainWindow.on("enter-full-screen", sendWindowState);
+  mainWindow.on("leave-full-screen", sendWindowState);
 
   mainWindow.on("page-title-updated", (event) => {
     event.preventDefault();

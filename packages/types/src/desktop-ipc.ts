@@ -539,18 +539,33 @@ export type DesktopCommandMap = {
   __setNativeTheme: { args: [theme: string]; result: unknown };
   __setApplicationMenuVisible: { args: [visible: boolean]; result: unknown };
   /**
-   * Persist the hide-title-bar preference where the MAIN process reads it at startup.
-   *
-   * `applied: false` is a real answer, not a failure: on macOS the title bar is already `hiddenInset`, so
-   * there is nothing to change and `reason: "macos-always-hidden"` says which case it is. `needsRestart`
-   * is always true where it applies, because `frame` and `titleBarStyle` are BrowserWindow construction
-   * options and cannot be changed on a live window.
+   * Run one of the title bar's window or menu actions on the calling window. `false` means the action is
+   * not on the main process's fixed list, or there is no window.
    */
-  __setTitleBarHidden: {
-    args: [hidden: boolean];
-    result: { applied: boolean; hidden?: boolean; needsRestart?: boolean; reason?: string };
-  };
+  __windowControl: { args: [action: WindowControlAction]; result: boolean };
+  /** Whether the calling window is maximised or full screen, for the title bar's Maximise/Restore button. */
+  __windowState: { args: []; result: WindowState };
 };
+
+/** The actions `__windowControl` accepts (main.mjs `WINDOW_CONTROL_ACTIONS`). */
+export type WindowControlAction =
+  | "minimize"
+  | "toggleMaximize"
+  | "toggleFullScreen"
+  | "close"
+  | "undo"
+  | "redo"
+  | "cut"
+  | "copy"
+  | "paste"
+  | "delete"
+  | "selectAll"
+  | "reload"
+  | "forceReload"
+  | "toggleDevTools"
+  | "openDocs";
+
+export type WindowState = { maximized: boolean; fullScreen: boolean };
 
 export type DesktopCommandName = keyof DesktopCommandMap;
 
