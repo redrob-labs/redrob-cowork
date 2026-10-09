@@ -2,6 +2,8 @@ import { recordAudit } from "../audit.js";
 import {
   activeRoom,
   broadcast,
+  costByAuthor,
+  readCostMessages,
   closeRoomStreams,
   disconnect,
   dropPresence,
@@ -55,6 +57,8 @@ export interface RegisterRoomRoutesOptions {
   ensureWritable: (config: ServerConfig) => void;
   resolveWorkspaceWithoutBootstrap: (config: ServerConfig, id: string) => Promise<WorkspaceInfo>;
   resolveAuthor: (ctx: RequestContext) => Promise<ReviewAuthor>;
+  /** The chat's messages from the engine, for cost per author. */
+  sessionMessages: (workspace: WorkspaceInfo, sessionId: string) => Promise<unknown>;
   /** How the room's queue reaches the engine for this chat: whether it is busy, and sending. */
   queueEngine: (workspace: WorkspaceInfo, sessionId: string, room: Room) => QueueEngine;
 }
@@ -176,11 +180,18 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     const { workspace, sessionId } = await target(ctx);
     const room = await activeRoom(config, workspace.id, sessionId);
     if (!room) return jsonResponse({ room: null });
+    const authorship = await readAuthorship(config, workspace.id, sessionId);
+    // Costs read the whole chat from the engine, so only when asked (the room panel, not the poll).
+    const costs =
+      ctx.url.searchParams.get("costs") === "1"
+        ? costByAuthor(readCostMessages(await options.sessionMessages(workspace, sessionId).catch(() => [])), authorship)
+        : undefined;
     return jsonResponse({
       room,
       me: await resolveAuthor(ctx),
       participants: await participants(ctx, workspace.id, sessionId, room.roomId),
-      authorship: await readAuthorship(config, workspace.id, sessionId),
+      authorship,
+      ...(costs ? { costs } : {}),
     });
   });
 

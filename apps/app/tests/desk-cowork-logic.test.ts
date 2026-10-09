@@ -1,12 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
-import type { RedrobRoomParticipant } from "../src/app/lib/redrob-server";
+import { createRoomEventParser, type RedrobRoomEvent, type RedrobRoomParticipant, type RedrobRoomView } from "../src/app/lib/redrob-server";
 import { t } from "../src/i18n";
 import {
+  applyRoomEvent,
   coworkFailureText,
   joinedChatPath,
   parseJoinLink,
   participantsInOrder,
+  roomEventEffect,
   takeJoinLinks,
   unavailableText,
   withCapability,
@@ -70,5 +72,48 @@ describe("guests and their rights", () => {
   test("a joined chat opens in the workspace the desktop app just made active", () => {
     expect(joinedChatPath({ workspace: { activeId: "remote_1" }, sessionId: "ses_1" })).toBe("/workspace/remote_1/session/ses_1");
     expect(joinedChatPath({ workspace: null, sessionId: "ses_1" })).toBeNull();
+  });
+});
+
+describe("the room's event stream", () => {
+  const view: RedrobRoomView = {
+    room: { roomId: "room_1", workspaceId: "ws_1", sessionId: "ses_1", host: { participantId: "par_host", displayName: "Kim" }, createdAt: 1 },
+    me: { participantId: "par_host", displayName: "Kim" },
+    participants: [
+      { participantId: "par_host", displayName: "Kim", role: "host", present: true, typing: false },
+      { participantId: "par_guest", displayName: "Park", role: "guest", present: false, typing: false },
+    ],
+    authorship: [{ messageId: "msg_1", participantId: "par_host", displayName: "Kim", at: 1 }],
+  };
+
+  test("presence and authorship update the cached room in place", () => {
+    const present = applyRoomEvent(view, { type: "room.presence", present: [{ participantId: "par_guest", displayName: "Park", role: "guest", typing: true }] });
+    expect(present.participants.map((entry) => [entry.participantId, entry.present, entry.typing])).toEqual([
+      ["par_host", false, false],
+      ["par_guest", true, true],
+    ]);
+    const entry = { messageId: "msg_2", participantId: "par_guest", displayName: "Park", at: 2 };
+    const authored = applyRoomEvent(view, { type: "room.authorship", entry });
+    expect(authored.authorship.map((item) => item.messageId)).toEqual(["msg_1", "msg_2"]);
+    expect(applyRoomEvent(authored, { type: "room.authorship", entry })).toBe(authored);
+    expect(applyRoomEvent(view, { type: "room.knocks" })).toBe(view);
+  });
+
+  test("other events say what to read again", () => {
+    expect(roomEventEffect({ type: "room.knocks" })).toEqual({ room: false, knocks: true, costs: false, review: false });
+    expect(roomEventEffect({ type: "room.participants" })).toEqual({ room: true, knocks: true, costs: false, review: false });
+    expect(roomEventEffect({ type: "room.ended" }).room).toBe(true);
+    expect(roomEventEffect({ type: "review.updated" }).review).toBe(true);
+    expect(roomEventEffect({ type: "room.authorship", entry: view.authorship[0]! }).costs).toBe(true);
+  });
+
+  test("the parser splits events across chunks and skips comments and strangers", () => {
+    const seen: RedrobRoomEvent[] = [];
+    const feed = createRoomEventParser((event) => seen.push(event));
+    feed(": connected\n\nevent: room.knocks\nda");
+    expect(seen).toEqual([]);
+    feed('ta: {"type":"room.knocks"}\n\n: keep-alive\n\nevent: x\ndata: {"type":"other"}\n\n');
+    feed('event: room.ended\r\ndata: {"type":"room.ended"}\r\n\r\ndata: not json\n\n');
+    expect(seen).toEqual([{ type: "room.knocks" }, { type: "room.ended" }]);
   });
 });

@@ -2478,6 +2478,10 @@ function createRoutes(
     ensureWritable,
     resolveWorkspaceWithoutBootstrap,
     resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    sessionMessages: async (workspace, sessionId) => {
+      const response = await engineFetch(config, workspace, `/session/${encodeURIComponent(sessionId)}/message`, { method: "GET" });
+      return response.ok ? response.json() : [];
+    },
     queueEngine: (workspace, sessionId, room) => ({
       busy: async () => {
         const response = await engineFetch(config, workspace, "/session/status", { method: "GET" });
