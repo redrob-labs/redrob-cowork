@@ -204,6 +204,19 @@ export function guideUse(research: GuideResearch, pick: GuidePick, tried: Effort
   return { ok: true, model: { providerID: REDROB_PROVIDER_ID, modelID: id }, variant, name, effort: variant ? effortName(variant) : null };
 }
 
+/**
+ * Why the guide cannot start new chats on a pick, said beside its disabled button: it runs on another
+ * product, or Redrob does not serve the model. A benchmark has no button, so it needs no reason.
+ */
+function unavailable(pick: ResearchPick, research: GuideResearch): { unavailable?: string } {
+  if (pick.benchmark) return {};
+  if (pick.harness !== REDROB_HARNESS)
+    return { unavailable: t("desk.guide_unavailable_elsewhere", { harness: named(HARNESSES, pick.harness) }) };
+  const first = pick.steps[0]?.model ?? "";
+  if (research.catalogue && !research.catalogue[first]) return { unavailable: t("desk.guide_unavailable_not_on_redrob") };
+  return {};
+}
+
 function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): GuidePick {
   const name = (model: string) => research.models[model] ?? model;
   const sources: GuideSource[] = pick.sources.map((source) => ({
@@ -247,6 +260,7 @@ function toPick(pick: ResearchPick, tools: string[], research: GuideResearch): G
       .join("; "),
     sources,
     ...(pick.benchmark ? { benchmark: true } : {}),
+    ...unavailable(pick, research),
     ...ranked,
   };
   SOURCE.set(shown, pick);

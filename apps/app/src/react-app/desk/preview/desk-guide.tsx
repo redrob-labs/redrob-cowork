@@ -111,6 +111,28 @@ export function ProfessionGuideView(props: {
         sourcesLabel={t("desk.guide_sources")}
         emptyTitle={t("desk.preview_guide_empty_title")}
         emptyText={t("desk.preview_guide_empty_text")}
+        summary="glance"
+        glanceLabels={{
+          quality: t("desk.guide_glance_quality"),
+          reliability: t("desk.guide_glance_reliability"),
+          speed: t("desk.guide_glance_speed"),
+          value: t("desk.guide_glance_value"),
+          bestHere: (best) => t("desk.guide_glance_best_here", { best }),
+          estimated: t("desk.guide_flag_partly-estimated"),
+          of: (level) => t("desk.guide_glance_of", { level }),
+        }}
+        tiedLabel={t("desk.guide_tied")}
+        bestValueLabel={t("desk.guide_best_value")}
+        thinkingLabel={t("desk.guide_thinking")}
+        map
+        mapLabels={{
+          title: t("desk.guide_map_title"),
+          quality: t("desk.guide_map_quality"),
+          price: t("desk.guide_map_price"),
+          frontier: t("desk.guide_map_frontier"),
+          point: (place, model, quality, price) =>
+            t("desk.guide_map_point", { rank: place == null ? "" : t("desk.guide_map_rank", { place }), model, quality, price }),
+        }}
         useLabel={t("desk.guide_use")}
         onUse={(pick, context) => {
           const use = guideUse(props.research, pick, context.effort);

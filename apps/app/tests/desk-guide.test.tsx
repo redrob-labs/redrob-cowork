@@ -222,6 +222,11 @@ describe("the guide by profession", () => {
     expect(html).toContain("Redrob Cowork");
     expect(html).not.toContain("every message goes to Redrob Auto");
     expect(html).toContain("Use for new chats");
+    // The comparison strip in place of the effort meter, with the effort written out in the detail.
+    expect(html).toContain("rr-guide__glancehead");
+    expect(html).toMatch(/aria-label="Quality \d of 5, Reliability \d of 5, Speed \d of 5, Value \d of 5/);
+    expect(html).not.toContain("rr-model__effort");
+    expect(html).toContain("Thinking: ");
     expect(html).toContain("I need");
     expect(html).toContain("Anything");
     expect(html).toContain("Benchmark");
