@@ -132,3 +132,44 @@ O1 and O2 are Office's own move to engine-held credentials, which its `AGENTS.md
 
 - **The package on npm.** Merge #153 and #154, then push a `work-labeller-v1.0.0` tag; `ci-work-labeller.yml` publishes it with `NPM_TOKEN`.
 - **The model release:** `insights-model-e5-base-2026.10`.
+
+## Design spike: the classifier on onnxruntime-web (PR 4, 2026-10-09)
+
+Harness: `packages/work-labeller/bench/webview` (#154). It runs the package's runtime-neutral classifier on `onnxruntime-web` 1.23 (WASM), on the same 296 evaluation samples, in a page served cross-origin isolated.
+
+**Chromium** (headless Chrome 151, Linux x64, 8 cores). This is the engine of WebView2, Design's Windows webview.
+
+| WASM threads | Load (files in memory → ready) | Median label | p95 | Agrees with the Node reference | JS heap |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 1.5 s | 84 ms | 216 ms | 280 / 296 | 378 MB |
+| 2 | 1.5 s | 48 ms | 126 ms | 280 / 296 | 378 MB |
+| 4 | 1.5 s | 33 ms | 84 ms | 280 / 296 | 378 MB |
+
+- **Accuracy is unchanged.** On the 16 samples where the browser and Node disagree, the WASM kernels compute int8 matrix products slightly differently from onnxruntime-node's CPU kernels. Scored against the evaluation answers, the browser does as well:
+
+  | | Kind-of-work precision | Coverage | Family precision | Coverage |
+  | --- | --- | --- | --- | --- |
+  | Browser | 88.7% | 83.3% | 93.8% | 87.3% |
+  | Node | 88.6% | 82.6% | 93.8% | 87.0% |
+
+  The same first message can get a different label in Design than in Cowork on about 5% of messages. Neither is less accurate.
+- **Latency fits.** One label per session runs in the background after the first message, so even the 216 ms single-thread p95 does not block anything.
+  - More than one thread needs the page to be cross-origin isolated. Tauri v2 can send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` (`app.security.headers`).
+  - Design would need to check that CanvasKit, fonts and its other assets still load under `require-corp`.
+- **Memory:** about 380 MB of JS heap while loaded. The process's own figure was not measured.
+
+**WebKit was not measured.** WKWebView is Design's webview on macOS, and WebKitGTK on Linux. Playwright's WebKit build needs GTK 4, GStreamer and Vulkan libraries this sandbox doesn't have. Run the same harness with `BROWSER=webkit` on a Mac and on Linux before PR 5. Switch to native `ort` in Rust only if WebKit is far slower or the labels do worse there.
+
+## Status (2026-10-09)
+
+| Step | Where | State |
+| --- | --- | --- |
+| Shared package | cowork #153 | Open |
+| Download on first use, and the webview harness | cowork #154 | Open |
+| E1: engine sends insights. Also: `/v1/chat/completions` fixed (it answered 500, and streamed empty) and forwards `x-redrob-session` | redrob-code #67 | Open |
+| E2: engine release | redrob-code | After #67 |
+| O1 + O2: key in the engine, chat through it | office #134 | Open. Merge only after E2 |
+| O3: Office labels | office | Blocked: the package on npm |
+| Design spike | this section | Chromium measured; WebKit needs a Mac and a Linux desktop |
+| Design integration (PR 5) | design | Blocked: the package on npm, and WebKit measured |
+
