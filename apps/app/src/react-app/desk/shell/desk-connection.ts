@@ -53,6 +53,7 @@ export type DeskRoomClient = Pick<
   | "answerRoomKnock"
   | "revokeRoomInvites"
   | "setGuestCapabilities"
+  | "setGuestPlanOnly"
   | "removeGuest"
   | "getRoomQueue"
   | "enqueueRoomMessage"

@@ -74,6 +74,8 @@ export function coworkFailureText(code: string): string {
       return t("desk.cowork_failed_name");
     case "queue_full":
       return t("desk.cowork_failed_queue_full");
+    case "guest_plan_only":
+      return t("desk.cowork_failed_plan_only");
     case "guest_capability_missing":
       return t("desk.cowork_failed_cannot_send");
     default:

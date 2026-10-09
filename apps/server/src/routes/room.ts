@@ -40,7 +40,8 @@ import {
   pendingKnocks,
   revokeInvites,
 } from "../cowork-invites.js";
-import { DEFAULT_GUEST_CAPABILITIES, readCapabilities, requireCapability, type GuestCapability } from "../guest-access.js";
+import { DEFAULT_GUEST_CAPABILITIES, planOnlyBody, readCapabilities, requireCapability, type GuestCapability } from "../guest-access.js";
+import { DESK_PLAN_AGENT } from "../redrob-desk-agents.js";
 import { isParticipantId, normalizeDisplayName } from "../participant-profile.js";
 import { isSafeId, type ReviewAuthor } from "../review-store.js";
 import type { ServerConfig, WorkspaceInfo } from "../types.js";
@@ -112,6 +113,7 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
         displayName: token.guest!.participant.displayName,
         role: "guest" as const,
         capabilities: token.guest!.capabilities,
+        planOnly: token.guest!.planOnly === true,
         present: present.has(token.guest!.participant.participantId),
         typing: present.get(token.guest!.participant.participantId)?.typing ?? false,
         // Only the host manages guests, so only the host sees the token ids.
@@ -126,13 +128,21 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
   /** Mints a guest's token for the room and tells everyone. Shared by the guest list and knocks. */
   const admitGuest = async (
     ctx: RequestContext,
-    input: { workspace: WorkspaceInfo; sessionId: string; room: Room; participant: { participantId: string; displayName: string }; capabilities: GuestCapability[]; endpointId?: string },
+    input: { workspace: WorkspaceInfo; sessionId: string; room: Room; participant: { participantId: string; displayName: string }; capabilities: GuestCapability[]; endpointId?: string; planOnly?: boolean },
   ) => {
-    const { workspace, sessionId, room, participant, capabilities, endpointId } = input;
+    const { workspace, sessionId, room, participant, capabilities, endpointId, planOnly } = input;
     const issued = await ctx.tokens.create("collaborator", {
       label: `Guest: ${participant.displayName || participant.participantId}`,
       expiresAt: Date.now() + GUEST_TOKEN_MS,
-      guest: { workspaceId: workspace.id, sessionId, participant, capabilities, roomId: room.roomId, ...(endpointId ? { endpointId } : {}) },
+      guest: {
+        workspaceId: workspace.id,
+        sessionId,
+        participant,
+        capabilities,
+        roomId: room.roomId,
+        ...(endpointId ? { endpointId } : {}),
+        ...(planOnly ? { planOnly: true } : {}),
+      },
     });
     broadcast(room.roomId, { type: "room.participants" });
     await recordAudit(workspace.path, {
@@ -235,7 +245,16 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
       throw new ApiError(400, "invalid_payload", "participant and capabilities are required");
     }
     const endpointId = typeof body.endpointId === "string" && body.endpointId.trim() ? body.endpointId.trim() : undefined;
-    const issued = await admitGuest(ctx, { workspace, sessionId, room, participant: { participantId: participant.participantId as string, displayName: name.value }, capabilities, endpointId });
+    if (body.planOnly !== undefined && typeof body.planOnly !== "boolean") throw new ApiError(400, "invalid_payload", "planOnly must be true or false");
+    const issued = await admitGuest(ctx, {
+      workspace,
+      sessionId,
+      room,
+      participant: { participantId: participant.participantId as string, displayName: name.value },
+      capabilities,
+      endpointId,
+      planOnly: body.planOnly === true,
+    });
     return jsonResponse({ token: issued.token, tokenId: issued.id, expiresAt: issued.expiresAt }, 201);
   });
 
@@ -243,11 +262,15 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     ensureWritable(config);
     const { workspace, sessionId, room } = await requireRoom(ctx);
     const body = await readJsonBody(ctx.request);
-    const capabilities = readCapabilities(body.capabilities);
-    if (!capabilities) throw new ApiError(400, "invalid_payload", "capabilities must be a list of send, approve and stop");
+    const capabilities = body.capabilities === undefined ? undefined : readCapabilities(body.capabilities);
+    if (capabilities === null) throw new ApiError(400, "invalid_payload", "capabilities must be a list of send, approve and stop");
+    if (body.planOnly !== undefined && typeof body.planOnly !== "boolean") throw new ApiError(400, "invalid_payload", "planOnly must be true or false");
+    const planOnly = typeof body.planOnly === "boolean" ? body.planOnly : undefined;
+    if (!capabilities && planOnly === undefined) throw new ApiError(400, "invalid_payload", "Change capabilities, planOnly, or both");
     const guest = (await ctx.tokens.guestsFor(workspace.id, sessionId)).find((token) => token.id === ctx.params.tokenId && token.guest?.roomId === room.roomId);
     if (!guest) throw new ApiError(404, "guest_not_found", "That guest is not in this room");
-    await ctx.tokens.updateGuest(guest.id, { capabilities });
+    const updated = await ctx.tokens.updateGuest(guest.id, { ...(capabilities ? { capabilities } : {}), ...(planOnly !== undefined ? { planOnly } : {}) });
+    const now = updated?.guest;
     broadcast(room.roomId, { type: "room.participants" });
     await recordAudit(workspace.path, {
       id: shortId(),
@@ -255,10 +278,10 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
       actor: ctx.actor ?? { type: "host" },
       action: "guest.capabilities_changed",
       target: sessionId,
-      summary: `${guest.guest?.participant.displayName || "A guest"} may now: ${capabilities.join(", ") || "only read"}`,
+      summary: `${guest.guest?.participant.displayName || "A guest"} may now: ${now?.capabilities.join(", ") || "only read"}${now?.planOnly ? ", in Plan mode only" : ""}`,
       timestamp: Date.now(),
     });
-    return jsonResponse({ ok: true, capabilities });
+    return jsonResponse({ ok: true, capabilities: now?.capabilities ?? [], planOnly: now?.planOnly === true });
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/sessions/:sessionId/room/guests/:tokenId", "host", async (ctx) => {
@@ -382,7 +405,16 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
       broadcast(room.roomId, { type: "room.knocks" });
       return jsonResponse({ ok: true, status: "denied" });
     }
-    const issued = await admitGuest(ctx, { workspace, sessionId, room, participant: entry.participant, capabilities, endpointId: entry.endpointId });
+    if (body.planOnly !== undefined && typeof body.planOnly !== "boolean") throw new ApiError(400, "invalid_payload", "planOnly must be true or false");
+    const issued = await admitGuest(ctx, {
+      workspace,
+      sessionId,
+      room,
+      participant: entry.participant,
+      capabilities,
+      endpointId: entry.endpointId,
+      planOnly: body.planOnly === true,
+    });
     decideKnock(entry, { allow: true, grant: { token: issued.token, tokenId: issued.id, expiresAt: issued.expiresAt } });
     broadcast(room.roomId, { type: "room.knocks" });
     return jsonResponse({ ok: true, status: "allowed", tokenId: issued.id });
@@ -404,9 +436,11 @@ export function registerRoomRoutes(options: RegisterRoomRoutesOptions): void {
     else if (ctx.actor?.scope === "viewer") throw new ApiError(403, "forbidden", "Viewer tokens are read-only");
     const body = await readJsonBody(ctx.request);
     const author = await resolveAuthor(ctx);
+    // The queue sends later as the server, so a plan-only guest's agent is fixed now.
+    const prompt = planOnlyBody(ctx.actor?.guest, body.body, DESK_PLAN_AGENT) ?? body.body;
     let item: QueueItem;
     try {
-      item = enqueue(room.roomId, author, body.body);
+      item = enqueue(room.roomId, author, prompt);
     } catch (error) {
       return queueFailure(error);
     }

@@ -27,6 +27,8 @@ export type GuestGrant = {
   endpointId?: string;
   /** The room the guest joined (L2). */
   roomId?: string;
+  /** Turns run in the read-only Plan agent, and commands are refused. Set by the host per guest. */
+  planOnly?: boolean;
 };
 
 export function readCapabilities(value: unknown): GuestCapability[] | null {
@@ -137,6 +139,10 @@ export function assertGuestEngineRequest(guest: GuestGrant, method: string, path
       const tail = session[2] ?? "";
       if (tail === "/prompt_async" || tail === "/message" || tail === "/command") {
         requireCapability(guest, "send");
+        // A command can pick its own agent, so a plan-only guest sends messages only.
+        if (tail === "/command" && guest.planOnly) {
+          throw new ApiError(403, "guest_plan_only", "The host has limited you to Plan mode, which takes messages, not commands");
+        }
         return { kind: "action", action: "message.sent" };
       }
       if (tail === "/abort") {
@@ -258,4 +264,14 @@ export async function filterJsonResponse(response: Response, filter: (body: unkn
   const headers = new Headers(response.headers);
   headers.delete("content-length");
   return new Response(JSON.stringify(filter(body)), { status: response.status, statusText: response.statusText, headers });
+}
+
+/**
+ * A plan-only guest's prompt body, with the turn on the Plan agent whatever it asked for. Null
+ * for anyone else. Throws for a body that cannot be read, rather than letting it through as is.
+ */
+export function planOnlyBody(guest: GuestGrant | undefined, body: unknown, planAgent: string): Record<string, unknown> | null {
+  if (!guest?.planOnly) return null;
+  if (!isRecord(body)) throw new ApiError(400, "invalid_payload", "A message body is required");
+  return { ...body, agent: planAgent };
 }
