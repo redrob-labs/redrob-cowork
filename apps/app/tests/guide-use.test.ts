@@ -70,6 +70,14 @@ describe("Use for new chats", () => {
     expect(use?.ok && use.model.modelID).not.toBe("openai/gpt-5.4-image-2");
   });
 
+  test("a pick that cannot be used carries its reason, so the guide disables its button", async () => {
+    const research = await loadGuideResearch();
+    expect(find(research, (k) => k.harness === "chatgpt-work" && !k.benchmark)?.unavailable).toBe("Runs on ChatGPT Work, not in Redrob Cowork.");
+    expect(find(research, (k) => k.steps[0]?.model === "claude-haiku-5-5")?.unavailable).toBe("Redrob doesn't serve this model yet.");
+    expect(find(research, (k) => k.harness === "redrob-desk" && k.steps[0]?.model === "claude-opus-5-5")?.unavailable).toBeUndefined();
+    expect(find(research, (k) => Boolean(k.benchmark))?.unavailable).toBeUndefined();
+  });
+
   test("a pick on another product, or a model Redrob does not serve, cannot be used, and says why", async () => {
     const research = await loadGuideResearch();
     const elsewhere = find(research, (k) => k.harness === "chatgpt-work" && !k.benchmark);
