@@ -2072,7 +2072,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         timeoutMs: timeouts.config,
       }),
 
-    createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string }) =>
+    createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string; language?: string }) =>
       requestJson<{
         ok: true;
         clientSecret: string;

@@ -12,7 +12,7 @@ import { ScrollArea, ScrollAreaViewport } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { publishInspectorSlice, recordInspectorEvent } from "@/app/lib/app-inspector";
 import { useControlAction, type RedrobControlAction } from "../../../shell/control/control-provider";
-import { t } from "@/i18n";
+import { currentLocale, t } from "@/i18n";
 import { waitForDataChannelOpen } from "./voice-dictation";
 
 type VoiceStatus = "idle" | "connecting" | "listening" | "muted" | "speaking" | "error";
@@ -540,7 +540,7 @@ export function VoicePanel(props: VoicePanelProps) {
     disconnectRealtime(true);
     setRuntimeStatus("connecting", t("voice.status_minting_session"));
     const sessionContext = await loadVoiceSessionContext(client, props.workspaceId, props.sessionId);
-    const realtimeSession = await client.createVoiceRealtimeSession({ sessionContext });
+    const realtimeSession = await client.createVoiceRealtimeSession({ sessionContext, language: currentLocale() });
 
     const peer = new RTCPeerConnection();
     voiceRealtime.peer = peer;

@@ -377,6 +377,36 @@ describe("env routes", () => {
     });
   });
 
+  test("voice realtime session transcribes in the app language, and only in one the app ships in", async () => {
+    process.env.OPENAI_API_KEY = "sk-test";
+    const languages: unknown[] = [];
+    globalThis.fetch = ((input, init) => {
+      if (String(input) === "https://api.openai.com/v1/realtime/client_secrets") {
+        const body = JSON.parse(String(init?.body)) as {
+          session: { audio: { input: { transcription: { language: unknown } } } };
+        };
+        languages.push(body.session.audio.input.transcription.language);
+        return Promise.resolve(new Response(JSON.stringify({ client_secret: { value: "rt-secret", expires_at: 123 } }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }));
+      }
+      return nativeFetch(input, init);
+    }) as typeof fetch;
+
+    const { base } = await boot();
+    for (const body of [{ language: "ko" }, { language: "fr" }, {}]) {
+      const response = await fetch(`${base}/voice/realtime/session`, {
+        method: "POST",
+        headers: hostAuth(),
+        body: JSON.stringify(body),
+      });
+      expect(response.status).toBe(200);
+    }
+
+    expect(languages).toEqual(["ko", "en", "en"]);
+  });
+
   test("voice realtime session prefers Redrob Models broker when configured", async () => {
     process.env.OPENAI_API_KEY = "sk-should-not-be-used";
     const { base } = await boot();
