@@ -82,17 +82,6 @@
       "override": null
     },
     {
-      "host": "casenote.kr",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
-    },
-    {
       "host": "cdn.simpleicons.org",
       "kind": "fetched",
       "components": [
@@ -240,17 +229,6 @@
       "override": null
     },
     {
-      "host": "juro.com",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
-    },
-    {
       "host": "linear.app",
       "kind": "link-only",
       "components": [
@@ -343,17 +321,6 @@
       "requirement": "opt-in",
       "blockedEffect": "The Stripe MCP connection cannot connect when enabled.",
       "override": "MCP server URL setting"
-    },
-    {
-      "host": "nwsidebar.wsba.org",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
     },
     {
       "host": "oauth2.googleapis.com",
@@ -503,28 +470,6 @@
       "purpose": "Google profile, Calendar, and Drive API calls for Google Workspace connections.",
       "requirement": "opt-in",
       "blockedEffect": "Google profile, Calendar, and Drive actions fail for connected Google Workspace accounts.",
-      "override": null
-    },
-    {
-      "host": "www.harvey.ai",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
-    },
-    {
-      "host": "www.techuk.org",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
     },
     {

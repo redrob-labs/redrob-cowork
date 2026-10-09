@@ -27,7 +27,7 @@ function todoStep(todo: Pick<Todo, "content" | "status">): HistoryStep {
 }
 
 /**
- * A chat as a History row. A chat in Run mode, or one a playbook or a schedule started, is a
+ * A chat as a History row. A chat in Run mode, or one a skill or a schedule started, is a
  * run; the rest are chats. Who approved what and whether anything left the computer are not
  * recorded, so they stay empty and the screen leaves them out.
  */
