@@ -535,12 +535,77 @@ export type RedrobRoomParticipant = {
 
 export type RedrobRoomAuthorship = { messageId: string; participantId: string; displayName: string; at: number };
 
+export type RedrobRoomCosts = {
+  total: number;
+  authors: Array<{ participantId: string; displayName: string; cost: number; messages: number }>;
+};
+
 export type RedrobRoomView = {
   room: { roomId: string; workspaceId: string; sessionId: string; host: { participantId: string; displayName: string }; createdAt: number };
   me: { participantId: string; displayName: string };
   participants: RedrobRoomParticipant[];
   authorship: RedrobRoomAuthorship[];
+  /** Only when asked for: it reads the whole chat from the engine. */
+  costs?: RedrobRoomCosts;
 };
+
+/** What the room's event stream says. Mirrors `RoomEvent` in apps/server/src/cowork-room.ts. */
+export type RedrobRoomEvent =
+  | { type: "room.presence"; present: Array<{ participantId: string; displayName: string; role: "host" | "guest"; typing: boolean }> }
+  | { type: "room.authorship"; entry: RedrobRoomAuthorship }
+  | { type: "room.participants" }
+  | { type: "room.knocks" }
+  | { type: "review.updated" }
+  | { type: "room.queue"; queue: unknown[] }
+  | { type: "room.ask_answered"; requestId: string; by: { participantId: string; displayName: string } }
+  | { type: "room.stopped"; by: { participantId: string; displayName: string } }
+  | { type: "room.ended" };
+
+const ROOM_EVENT_TYPES = new Set([
+  "room.presence",
+  "room.authorship",
+  "room.participants",
+  "room.knocks",
+  "review.updated",
+  "room.queue",
+  "room.ask_answered",
+  "room.stopped",
+  "room.ended",
+]);
+
+function isRoomEvent(value: unknown): value is RedrobRoomEvent {
+  return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string" && ROOM_EVENT_TYPES.has(value.type);
+}
+
+/**
+ * Splits a server-sent event stream into events. Keeps what a chunk ends in for the next one;
+ * comment lines (`: keep-alive`) and anything that is not a room event are dropped.
+ */
+export function createRoomEventParser(onEvent: (event: RedrobRoomEvent) => void): (chunk: string) => void {
+  let buffer = "";
+  return (chunk) => {
+    buffer += chunk.replace(/\r\n/g, "\n");
+    let end = buffer.indexOf("\n\n");
+    while (end !== -1) {
+      const block = buffer.slice(0, end);
+      buffer = buffer.slice(end + 2);
+      const data = block
+        .split("\n")
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trimStart())
+        .join("\n");
+      if (data) {
+        try {
+          const parsed: unknown = JSON.parse(data);
+          if (isRoomEvent(parsed)) onEvent(parsed);
+        } catch {
+          // not JSON: not ours
+        }
+      }
+      end = buffer.indexOf("\n\n");
+    }
+  };
+}
 
 export type RedrobRoomKnock = { knockId: string; participant: { participantId: string; displayName: string }; endpointId: string; createdAt: number };
 
@@ -1404,9 +1469,32 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       return response.profile;
     },
     /** The chat's live room, or null when none is open. */
-    getRoom: async (workspaceId: string, sessionId: string): Promise<RedrobRoomView | null> => {
-      const payload = await requestJson<RedrobRoomView | { room: null }>(baseUrl, roomPath(workspaceId, sessionId), { token, hostToken, timeoutMs: timeouts.config });
+    getRoom: async (workspaceId: string, sessionId: string, options: { costs?: boolean } = {}): Promise<RedrobRoomView | null> => {
+      const query = options.costs ? "?costs=1" : "";
+      const payload = await requestJson<RedrobRoomView | { room: null }>(baseUrl, `${roomPath(workspaceId, sessionId)}${query}`, { token, hostToken, timeoutMs: timeouts.config });
       return payload.room ? payload : null;
+    },
+    /**
+     * Follows the room's event stream until `signal` aborts or the stream ends. Resolves when it
+     * ends, so the caller decides whether to reconnect. A fetch body reader, not EventSource,
+     * because EventSource cannot send the token.
+     */
+    followRoomEvents: async (workspaceId: string, sessionId: string, onEvent: (event: RedrobRoomEvent) => void, signal: AbortSignal): Promise<void> => {
+      const url = `${baseUrl}${roomPath(workspaceId, sessionId)}/events`;
+      const response = await resolveFetch(url)(url, { headers: buildAuthHeaders(token, hostToken, { Accept: "text/event-stream" }), signal });
+      if (!response.ok || !response.body) throw new RedrobServerError(response.status, "room_events_failed", response.statusText);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      const feed = createRoomEventParser(onEvent);
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) return;
+          feed(decoder.decode(value, { stream: true }));
+        }
+      } finally {
+        reader.releaseLock();
+      }
     },
     endRoom: (workspaceId: string, sessionId: string): Promise<{ ok: boolean }> =>
       requestJson(baseUrl, roomPath(workspaceId, sessionId), { token, hostToken, method: "DELETE", timeoutMs: timeouts.config }),

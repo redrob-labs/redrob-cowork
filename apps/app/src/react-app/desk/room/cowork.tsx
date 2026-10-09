@@ -1,11 +1,20 @@
 /** @jsxImportSource react */
 import { useEffect, useState } from "react";
+import { create } from "zustand";
 import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Avatar, Badge, Button, Checkbox, Input, Skeleton, Timestamp, icons } from "@redrob-labs/ui";
 
 import { coworkBridge, type CoworkHosted, type CoworkResult, type CoworkStatus } from "../../../app/lib/desktop";
-import { RedrobServerError, type RedrobGuestCapability, type RedrobRoomParticipant, type RedrobRoomView } from "../../../app/lib/redrob-server";
+import {
+  RedrobServerError,
+  type RedrobGuestCapability,
+  type RedrobRoomEvent,
+  type RedrobRoomParticipant,
+  type RedrobRoomView,
+} from "../../../app/lib/redrob-server";
+import { formatMessageCost } from "../../../components/chat/message-usage";
+import { reviewQueryKey } from "../review/use-session-review";
 import { t } from "../../../i18n";
 import { PROFILE_QUERY_KEY } from "../settings/profile-group";
 import { deepLinkBridgeEvent } from "../../../app/lib/deep-link-bridge";
@@ -14,6 +23,8 @@ import { DeskDialog } from "../shell/desk-dialog";
 import { useFrameStore } from "../store/frame-store";
 import { authorIndex } from "./room-logic";
 import {
+  applyRoomEvent,
+  roomEventEffect,
   GUEST_CAPABILITIES,
   capabilityLabel,
   coworkFailureText,
@@ -25,8 +36,32 @@ import {
 } from "./cowork-logic";
 
 const BUTTON_ICON = { width: 14, height: 14, "aria-hidden": true };
-/** No push to the renderer yet: the room is re-read on this beat while it is open. */
+/** While the room's event stream is down the room is re-read on this beat; while it is up, rarely. */
 const ROOM_REFETCH_MS = 5_000;
+const ROOM_REFETCH_LIVE_MS = 30_000;
+const RECONNECT_MS = [1_000, 2_000, 5_000, 10_000, 30_000];
+
+/** Chats whose room event stream is connected right now, so polling can back off. */
+const useRoomLive = create<{ live: Record<string, true>; set(key: string, live: boolean): void }>()((set, get) => ({
+  live: {},
+  set: (key, live) => {
+    if (Boolean(get().live[key]) === live) return;
+    const next = { ...get().live };
+    if (live) next[key] = true;
+    else delete next[key];
+    set({ live: next });
+  },
+}));
+
+const liveKey = (workspaceId: string | null, sessionId: string | null | undefined) => `${workspaceId ?? ""}/${sessionId ?? ""}`;
+
+export function roomCostsQueryKey(workspaceId: string | null, sessionId: string | null): readonly unknown[] {
+  return ["desk", "room-costs", workspaceId ?? "", sessionId ?? ""];
+}
+
+export function roomKnocksQueryKey(workspaceId: string | null, sessionId: string | null): readonly unknown[] {
+  return ["desk", "room-knocks", workspaceId ?? "", sessionId ?? ""];
+}
 const HEARTBEAT_MS = 15_000;
 
 export function roomQueryKey(workspaceId: string | null, sessionId: string | null): readonly unknown[] {
@@ -38,14 +73,60 @@ export function useRoom(sessionId: string | null | undefined): { room: RedrobRoo
   const client = useDeskConnection((state) => state.client);
   const workspaceId = useDeskConnection((state) => state.workspaceId);
   const enabled = Boolean(client && workspaceId && sessionId);
+  const live = useRoomLive((state) => Boolean(state.live[liveKey(workspaceId, sessionId)]));
   const query = useQuery({
     queryKey: roomQueryKey(workspaceId, sessionId ?? null),
     enabled,
     queryFn: () => (client && workspaceId && sessionId ? client.getRoom(workspaceId, sessionId) : Promise.resolve(null)),
-    refetchInterval: (state) => (state.state.data ? ROOM_REFETCH_MS : false),
+    refetchInterval: (state) => (state.state.data ? (live ? ROOM_REFETCH_LIVE_MS : ROOM_REFETCH_MS) : false),
     staleTime: 2_000,
   });
   return { room: query.data ?? null, client: enabled ? client : null, workspaceId };
+}
+
+/**
+ * Follows the room's event stream while a room is open on the chat, reconnecting with backoff.
+ * Presence and authorship update the cached room in place; anything else re-reads what changed.
+ */
+function useRoomEvents(client: DeskRoomClient | null, workspaceId: string | null, sessionId: string | null, open: boolean) {
+  const queryClient = useQueryClient();
+  const setLive = useRoomLive((state) => state.set);
+  useEffect(() => {
+    if (!client || !workspaceId || !sessionId || !open) return;
+    const controller = new AbortController();
+    const key = liveKey(workspaceId, sessionId);
+    const onEvent = (event: RedrobRoomEvent) => {
+      queryClient.setQueryData<RedrobRoomView | null>(roomQueryKey(workspaceId, sessionId), (current) => (current ? applyRoomEvent(current, event) : current));
+      const effect = roomEventEffect(event);
+      if (effect.room) void queryClient.invalidateQueries({ queryKey: roomQueryKey(workspaceId, sessionId) });
+      if (effect.knocks) void queryClient.invalidateQueries({ queryKey: roomKnocksQueryKey(workspaceId, sessionId) });
+      if (effect.costs) void queryClient.invalidateQueries({ queryKey: roomCostsQueryKey(workspaceId, sessionId) });
+      if (effect.review) void queryClient.invalidateQueries({ queryKey: reviewQueryKey(workspaceId, sessionId) });
+    };
+    void (async () => {
+      let attempt = 0;
+      while (!controller.signal.aborted) {
+        const started = Date.now();
+        try {
+          setLive(key, true);
+          await client.followRoomEvents(workspaceId, sessionId, onEvent, controller.signal);
+        } catch {
+          // dropped, refused or aborted; the loop decides
+        }
+        setLive(key, false);
+        if (controller.signal.aborted) return;
+        // Whatever happened while it was down, read it once now.
+        void queryClient.invalidateQueries({ queryKey: roomQueryKey(workspaceId, sessionId) });
+        attempt = Date.now() - started > 60_000 ? 0 : attempt + 1;
+        const wait = RECONNECT_MS[Math.min(attempt, RECONNECT_MS.length - 1)] ?? 30_000;
+        await new Promise((resolve) => setTimeout(resolve, wait));
+      }
+    })();
+    return () => {
+      controller.abort();
+      setLive(key, false);
+    };
+  }, [client, workspaceId, sessionId, open, queryClient, setLive]);
 }
 
 function unwrap<T>(result: CoworkResult<T>): T {
@@ -140,11 +221,19 @@ export function CoworkDialog(props: { client: DeskRoomClient; workspaceId: strin
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const hostView = Boolean(room && room.me.participantId === room.room.host.participantId);
+  const live = useRoomLive((state) => Boolean(state.live[liveKey(workspaceId, sessionId)]));
   const knocks = useQuery({
-    queryKey: ["desk", "room-knocks", workspaceId, sessionId],
+    queryKey: roomKnocksQueryKey(workspaceId, sessionId),
     enabled: Boolean(room && hostView),
     queryFn: () => client.listRoomKnocks(workspaceId, sessionId),
-    refetchInterval: 3_000,
+    // A knock is announced on the event stream; the beat is for when it is down.
+    refetchInterval: live ? 30_000 : 3_000,
+  });
+  const costs = useQuery({
+    queryKey: roomCostsQueryKey(workspaceId, sessionId),
+    enabled: Boolean(room),
+    queryFn: async () => (await client.getRoom(workspaceId, sessionId, { costs: true }))?.costs ?? null,
+    staleTime: 10_000,
   });
 
   const refresh = () => {
@@ -316,6 +405,24 @@ export function CoworkDialog(props: { client: DeskRoomClient; workspaceId: strin
             </ul>
           </section>
         ) : null}
+
+        {room && costs.data && costs.data.total > 0 ? (
+          <section className="desk-cowork__group" aria-labelledby="desk-cowork-costs">
+            <b id="desk-cowork-costs">{t("desk.cowork_costs_title")}</b>
+            <ul className="desk-cowork__people">
+              {costs.data.authors.map((author) => (
+                <li key={author.participantId} className="desk-cowork__person">
+                  <span className="desk-cowork__name">
+                    {author.participantId === room.me.participantId ? t("desk.cowork_you") : author.displayName.trim() || t("desk.review_unnamed")}
+                  </span>
+                  <span className="desk-hint">{t("desk.cowork_costs_messages", { count: author.messages })}</span>
+                  <b>{formatMessageCost(author.cost)}</b>
+                </li>
+              ))}
+            </ul>
+            <p className="desk-hint">{t("desk.cowork_costs_total", { amount: formatMessageCost(costs.data.total) ?? "" })}</p>
+          </section>
+        ) : null}
       </div>
     </DeskDialog>
   );
@@ -343,6 +450,7 @@ function ConnectedCoworkAction(props: { chatId: string }) {
   const { room, client, workspaceId } = useRoom(props.chatId);
   const [open, setOpen] = useState(false);
   useRoomHeartbeat(client, workspaceId, props.chatId, Boolean(room));
+  useRoomEvents(client, workspaceId, props.chatId, Boolean(room));
   // A guest's chat is on a remote workspace; only show the action there once a room is open.
   if (!client || !workspaceId) return null;
   if (!workspaceRoot && !room) return null;

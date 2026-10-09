@@ -1,5 +1,5 @@
 import type { CoworkUnavailableReason } from "../../../app/lib/desktop";
-import type { RedrobGuestCapability, RedrobRoomParticipant } from "../../../app/lib/redrob-server";
+import type { RedrobGuestCapability, RedrobRoomEvent, RedrobRoomParticipant, RedrobRoomView } from "../../../app/lib/redrob-server";
 import { t } from "../../../i18n";
 
 /**
@@ -101,4 +101,37 @@ export function participantsInOrder(list: readonly RedrobRoomParticipant[]): Red
 export function joinedChatPath(joined: { workspace: { activeId?: string | null } | null; sessionId: string }): string | null {
   const workspaceId = joined.workspace?.activeId;
   return workspaceId ? `/workspace/${encodeURIComponent(workspaceId)}/session/${encodeURIComponent(joined.sessionId)}` : null;
+}
+
+/**
+ * The cached room after an event that carries its own news: presence marks who is here and typing,
+ * an authorship entry adds a name tag. Anything else leaves the room as it is (see roomEventEffect).
+ */
+export function applyRoomEvent(room: RedrobRoomView, event: RedrobRoomEvent): RedrobRoomView {
+  if (event.type === "room.presence") {
+    const here = new Map(event.present.map((entry) => [entry.participantId, entry]));
+    return {
+      ...room,
+      participants: room.participants.map((entry) => ({
+        ...entry,
+        present: here.has(entry.participantId),
+        typing: here.get(entry.participantId)?.typing ?? false,
+      })),
+    };
+  }
+  if (event.type === "room.authorship") {
+    if (room.authorship.some((entry) => entry.messageId === event.entry.messageId)) return room;
+    return { ...room, authorship: [...room.authorship, event.entry] };
+  }
+  return room;
+}
+
+/** What else an event means must be read again. */
+export function roomEventEffect(event: RedrobRoomEvent): { room: boolean; knocks: boolean; costs: boolean; review: boolean } {
+  return {
+    room: event.type === "room.participants" || event.type === "room.ended",
+    knocks: event.type === "room.knocks" || event.type === "room.participants",
+    costs: event.type === "room.authorship" || event.type === "room.stopped",
+    review: event.type === "review.updated",
+  };
 }

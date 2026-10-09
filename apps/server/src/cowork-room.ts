@@ -141,6 +141,59 @@ export function withServerMessageId(body: unknown, mint: () => string): { body: 
   return { body: { ...body, messageID: messageId }, messageId };
 }
 
+/* ---------- Cost per author ---------- */
+
+export type AuthorCost = { participantId: string; displayName: string; cost: number; messages: number };
+
+/** An engine message as `/session/:id/message` lists it, reduced to what costs need. */
+export type CostMessage = { id: string; role: string; parentId?: string; cost?: number };
+
+/** The engine's message list, read defensively: anything without an id and a role is skipped. */
+export function readCostMessages(value: unknown): CostMessage[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    const info = isRecord(entry) && isRecord(entry.info) ? entry.info : null;
+    if (!info || typeof info.id !== "string" || typeof info.role !== "string") return [];
+    return [
+      {
+        id: info.id,
+        role: info.role,
+        ...(typeof info.parentID === "string" ? { parentId: info.parentID } : {}),
+        ...(typeof info.cost === "number" && Number.isFinite(info.cost) && info.cost >= 0 ? { cost: info.cost } : {}),
+      },
+    ];
+  });
+}
+
+/**
+ * What each person's turns cost, all of it on the host's key. An answer is credited to whoever
+ * wrote the message it answers: its `parentID` when the engine gave one, else the nearest user
+ * message before it. Turns before the room opened belong to nobody and count only in the total.
+ */
+export function costByAuthor(messages: readonly CostMessage[], ledger: readonly Authorship[]): { authors: AuthorCost[]; total: number } {
+  const byMessage = new Map(ledger.map((entry) => [entry.messageId, entry]));
+  const totals = new Map<string, AuthorCost>();
+  const entryFor = (who: Authorship) => {
+    const entry = totals.get(who.participantId) ?? { participantId: who.participantId, displayName: who.displayName, cost: 0, messages: 0 };
+    totals.set(who.participantId, entry);
+    return entry;
+  };
+  let total = 0;
+  let lastAsker: Authorship | undefined;
+  for (const message of messages) {
+    if (message.role === "user") {
+      lastAsker = byMessage.get(message.id);
+      if (lastAsker) entryFor(lastAsker).messages += 1;
+      continue;
+    }
+    const cost = message.cost ?? 0;
+    total += cost;
+    const asker = message.parentId !== undefined ? byMessage.get(message.parentId) : lastAsker;
+    if (asker && cost) entryFor(asker).cost += cost;
+  }
+  return { authors: [...totals.values()], total };
+}
+
 /* ---------- Presence ---------- */
 
 export const PRESENCE_TTL_MS = 45_000;

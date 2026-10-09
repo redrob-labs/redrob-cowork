@@ -45,6 +45,7 @@ export type DeskReviewClient = Pick<
 export type DeskRoomClient = Pick<
   RedrobServerClient,
   | "getRoom"
+  | "followRoomEvents"
   | "endRoom"
   | "roomHeartbeat"
   | "leaveRoom"
