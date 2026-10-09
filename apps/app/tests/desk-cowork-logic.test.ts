@@ -4,10 +4,12 @@ import { createRoomEventParser, type RedrobRoomEvent, type RedrobRoomParticipant
 import { t } from "../src/i18n";
 import {
   applyRoomEvent,
+  canChangeQueued,
   coworkFailureText,
   joinedChatPath,
   parseJoinLink,
   participantsInOrder,
+  readQueueItems,
   roomEventEffect,
   takeJoinLinks,
   unavailableText,
@@ -115,5 +117,39 @@ describe("the room's event stream", () => {
     feed('ta: {"type":"room.knocks"}\n\n: keep-alive\n\nevent: x\ndata: {"type":"other"}\n\n');
     feed('event: room.ended\r\ndata: {"type":"room.ended"}\r\n\r\ndata: not json\n\n');
     expect(seen).toEqual([{ type: "room.knocks" }, { type: "room.ended" }]);
+  });
+});
+
+describe("the shared queue", () => {
+  const room = {
+    room: { roomId: "room_1", workspaceId: "ws_1", sessionId: "ses_1", host: { participantId: "par_host", displayName: "Kim" }, createdAt: 1 },
+    me: { participantId: "par_guest", displayName: "Park" },
+  };
+
+  test("reads the event's list and drops what is not an item", () => {
+    expect(
+      readQueueItems([
+        { id: "rq_1", author: { participantId: "par_guest", displayName: "Park" }, preview: "next, the summary", createdAt: 5 },
+        { id: "rq_2", author: { participantId: "par_host" } },
+        { id: "rq_3" },
+        "junk",
+      ]),
+    ).toEqual([
+      { id: "rq_1", author: { participantId: "par_guest", displayName: "Park" }, preview: "next, the summary", createdAt: 5 },
+      { id: "rq_2", author: { participantId: "par_host", displayName: "" }, preview: "", createdAt: 0 },
+    ]);
+  });
+
+  test("its author and the host may change a waiting message, nobody else", () => {
+    const mine = { id: "rq_1", author: { participantId: "par_guest", displayName: "Park" }, preview: "", createdAt: 0 };
+    const theirs = { ...mine, author: { participantId: "par_other", displayName: "Lee" } };
+    expect(canChangeQueued(mine, room)).toBe(true);
+    expect(canChangeQueued(theirs, room)).toBe(false);
+    expect(canChangeQueued(theirs, { ...room, me: room.room.host })).toBe(true);
+  });
+
+  test("the server's refusals have words", () => {
+    expect(coworkFailureText("queue_full")).toBe(t("desk.cowork_failed_queue_full"));
+    expect(coworkFailureText("guest_capability_missing")).toBe(t("desk.cowork_failed_cannot_send"));
   });
 });

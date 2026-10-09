@@ -11,6 +11,7 @@ import {
   type RedrobGuestCapability,
   type RedrobRoomEvent,
   type RedrobRoomParticipant,
+  type RedrobRoomQueueItem,
   type RedrobRoomView,
 } from "../../../app/lib/redrob-server";
 import { formatMessageCost } from "../../../components/chat/message-usage";
@@ -24,6 +25,8 @@ import { useFrameStore } from "../store/frame-store";
 import { authorIndex } from "./room-logic";
 import {
   applyRoomEvent,
+  canChangeQueued,
+  readQueueItems,
   roomEventEffect,
   GUEST_CAPABILITIES,
   capabilityLabel,
@@ -57,6 +60,10 @@ const liveKey = (workspaceId: string | null, sessionId: string | null | undefine
 
 export function roomCostsQueryKey(workspaceId: string | null, sessionId: string | null): readonly unknown[] {
   return ["desk", "room-costs", workspaceId ?? "", sessionId ?? ""];
+}
+
+export function roomQueueQueryKey(workspaceId: string | null, sessionId: string | null): readonly unknown[] {
+  return ["desk", "room-queue", workspaceId ?? "", sessionId ?? ""];
 }
 
 export function roomKnocksQueryKey(workspaceId: string | null, sessionId: string | null): readonly unknown[] {
@@ -97,6 +104,8 @@ function useRoomEvents(client: DeskRoomClient | null, workspaceId: string | null
     const key = liveKey(workspaceId, sessionId);
     const onEvent = (event: RedrobRoomEvent) => {
       queryClient.setQueryData<RedrobRoomView | null>(roomQueryKey(workspaceId, sessionId), (current) => (current ? applyRoomEvent(current, event) : current));
+      // The queue event carries the whole list, as the server's queueView gives it.
+      if (event.type === "room.queue") queryClient.setQueryData(roomQueueQueryKey(workspaceId, sessionId), readQueueItems(event.queue));
       const effect = roomEventEffect(event);
       if (effect.room) void queryClient.invalidateQueries({ queryKey: roomQueryKey(workspaceId, sessionId) });
       if (effect.knocks) void queryClient.invalidateQueries({ queryKey: roomKnocksQueryKey(workspaceId, sessionId) });
@@ -587,4 +596,91 @@ function ConnectedMessageAuthor(props: { sessionId: string | null | undefined; m
       {author.participantId === room.me.participantId ? t("desk.cowork_you") : name}
     </span>
   );
+}
+
+/* ---------- The shared queue ---------- */
+
+export type RoomQueueApi = {
+  items: RedrobRoomQueueItem[];
+  /** Queues `text` in the room. False (with a toast) when the server refused it. */
+  enqueue(text: string): Promise<boolean>;
+  remove(itemId: string): void;
+  canChange(item: RedrobRoomQueueItem): boolean;
+};
+
+/**
+ * The room's shared queue for a chat, or null when no room is open: messages wait on the host's
+ * server under their author's name and are sent in order when the agent is free.
+ */
+export function useRoomQueue(sessionId: string | null | undefined): RoomQueueApi | null {
+  const { room, client, workspaceId } = useRoom(sessionId);
+  const queryClient = useQueryClient();
+  const showToast = useFrameStore((state) => state.showToast);
+  const live = useRoomLive((state) => Boolean(state.live[liveKey(workspaceId, sessionId)]));
+  const key = roomQueueQueryKey(workspaceId, sessionId ?? null);
+  const query = useQuery({
+    queryKey: key,
+    enabled: Boolean(room && client && workspaceId && sessionId),
+    queryFn: () => (client && workspaceId && sessionId ? client.getRoomQueue(workspaceId, sessionId) : Promise.resolve([])),
+    refetchInterval: live ? 30_000 : 5_000,
+  });
+  if (!room || !client || !workspaceId || !sessionId) return null;
+  const fail = (error: unknown) => {
+    showToast(t("desk.cowork_queue_failed"), coworkFailureText(failureCode(error)), "danger");
+  };
+  return {
+    items: query.data ?? [],
+    enqueue: async (text) => {
+      try {
+        queryClient.setQueryData(key, await client.enqueueRoomMessage(workspaceId, sessionId, text));
+        return true;
+      } catch (error) {
+        fail(error);
+        return false;
+      }
+    },
+    remove: (itemId) =>
+      void client.removeRoomQueued(workspaceId, sessionId, itemId).then(
+        (next) => queryClient.setQueryData(key, next),
+        fail,
+      ),
+    canChange: (item) => canChangeQueued(item, room),
+  };
+}
+
+/** The room's waiting messages, above the composer, with who wrote each. */
+export function RoomQueuePanel(props: { queue: RoomQueueApi; me: string | null }) {
+  const { queue } = props;
+  if (queue.items.length === 0) return null;
+  return (
+    <section className="desk-cowork__queue" aria-label={t("desk.cowork_queue_title")}>
+      <b>{t("desk.cowork_queue_title")}</b>
+      <ol className="desk-cowork__people">
+        {queue.items.map((item) => {
+          const name = item.author.displayName.trim() || t("desk.review_unnamed");
+          return (
+            <li key={item.id} className="desk-cowork__person">
+              <Avatar size="xs" name={name} seed={item.author.participantId} />
+              <span className="desk-cowork__name">
+                <b>{item.author.participantId === props.me ? t("desk.cowork_you") : name}</b> {item.preview}
+              </span>
+              {queue.canChange(item) ? (
+                <Button size="sm" variant="ghost" onClick={() => queue.remove(item.id)}>
+                  {t("desk.cowork_queue_remove")}
+                </Button>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+      <p className="desk-hint">{t("desk.cowork_queue_hint")}</p>
+    </section>
+  );
+}
+
+/** The panel for a chat, when a room is open on it. For the composer, which has no room of its own. */
+export function ConnectedRoomQueue(props: { queue: RoomQueueApi | null; sessionId: string }) {
+  const { room } = useRoom(props.sessionId);
+  if (!props.queue || !room) return null;
+  return <RoomQueuePanel queue={props.queue} me={room.me.participantId} />;
 }

@@ -607,6 +607,9 @@ export function createRoomEventParser(onEvent: (event: RedrobRoomEvent) => void)
   };
 }
 
+/** A message waiting in the room's shared queue, as everyone sees it (no prompt body). */
+export type RedrobRoomQueueItem = { id: string; author: { participantId: string; displayName: string }; preview: string; createdAt: number };
+
 export type RedrobRoomKnock = { knockId: string; participant: { participantId: string; displayName: string }; endpointId: string; createdAt: number };
 
 function roomPath(workspaceId: string, sessionId: string): string {
@@ -1517,6 +1520,28 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: answer,
         timeoutMs: timeouts.config,
       }),
+    getRoomQueue: async (workspaceId: string, sessionId: string): Promise<RedrobRoomQueueItem[]> =>
+      (await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue`, { token, hostToken, timeoutMs: timeouts.config })).queue,
+    /** Queues a text message under this person's name; the host's server sends it when the agent is free. */
+    enqueueRoomMessage: async (workspaceId: string, sessionId: string, text: string): Promise<RedrobRoomQueueItem[]> =>
+      (
+        await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue`, {
+          token,
+          hostToken,
+          method: "POST",
+          body: { body: { parts: [{ type: "text", text }] } },
+          timeoutMs: timeouts.config,
+        })
+      ).queue,
+    removeRoomQueued: async (workspaceId: string, sessionId: string, itemId: string): Promise<RedrobRoomQueueItem[]> =>
+      (
+        await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue/${encodeURIComponent(itemId)}`, {
+          token,
+          hostToken,
+          method: "DELETE",
+          timeoutMs: timeouts.config,
+        })
+      ).queue,
     revokeRoomInvites: (workspaceId: string, sessionId: string): Promise<{ ok: boolean }> =>
       requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/invites`, { token, hostToken, method: "DELETE", timeoutMs: timeouts.config }),
     setGuestCapabilities: (workspaceId: string, sessionId: string, tokenId: string, capabilities: RedrobGuestCapability[]): Promise<unknown> =>
