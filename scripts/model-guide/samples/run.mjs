@@ -32,6 +32,17 @@ const BASE = process.env.REDROB_BASE_URL ?? "https://console.redrob.ai/api/backe
 const MAX_OUTPUT_TOKENS = 24000;
 /** Stop after this many calls, so a CI job can commit what it has in batches. */
 const MAX_RUNS = Number(arg("--max-runs", Infinity));
+/**
+ * Some models run only when the request agrees that the provider may keep its prompts and outputs
+ * (`requiresProviderDataShare` in the catalogue). That is the account holder's consent to give, so those
+ * models are skipped unless `--allow-data-share` is passed.
+ */
+const ALLOW_DATA_SHARE = process.argv.includes("--allow-data-share");
+/**
+ * Seconds after which no new call starts; calls already in flight finish (each is bounded at 240 s per
+ * try). So a run inside a time-limited shell ends cleanly instead of being killed with paid calls open.
+ */
+const DEADLINE = Date.now() + Number(arg("--deadline", Infinity)) * 1000;
 const LANGUAGES = ["en", "ko", "hi"];
 const SYSTEM = {
   en: "You are a capable professional doing this task for a colleague. Everything you need is in the message: there are no tools, files or web access. Answer in Markdown.",
@@ -115,7 +126,12 @@ const doneKeys = new Set(done.filter((o) => !o.failed).map((o) => o.key));
 let spent = done.reduce((s, o) => s + (o.costUsd ?? 0), 0);
 let reserved = 0;
 let stopped = null;
-const todo = jobs.filter((j) => !doneKeys.has(j.key));
+const needsShare = (job) => price[job.catalogueId]?.capabilities?.requiresProviderDataShare === true;
+const held = jobs.filter((j) => !doneKeys.has(j.key) && needsShare(j) && !ALLOW_DATA_SHARE);
+if (held.length) console.log(`${held.length} runs held: their models need --allow-data-share (${[...new Set(held.map((j) => j.model))].join(", ")}).`);
+/** Models to leave for a later run, e.g. ones whose answers outlast Redrob's 120 s upstream limit. */
+const EXCLUDE = new Set((arg("--exclude-models", "") || "").split(",").filter(Boolean));
+const todo = jobs.filter((j) => !doneKeys.has(j.key) && !held.includes(j) && !EXCLUDE.has(j.model));
 console.log(`${jobs.length} runs planned, ${done.length} already written ($${spent.toFixed(2)}), ${todo.length} to go, cap $${CAP}.`);
 
 async function call(job, prompt) {
@@ -127,20 +143,26 @@ async function call(job, prompt) {
     ],
     max_completion_tokens: MAX_OUTPUT_TOKENS,
     ...(job.effort !== "default" ? { thinking: job.effort } : {}),
+    ...(ALLOW_DATA_SHARE && needsShare(job) ? { provider_data_share: true } : {}),
   };
   // A failed attempt can still be billed, so every attempt's cost is summed, retried ones included.
   let cost = 0;
   for (let attempt = 1; ; attempt++) {
     const started = Date.now();
+    // Redrob ends an upstream call at 120 s; anything still open well past that is a dead connection.
     const response = await fetch(`${BASE}/chat/completions`, {
       method: "POST",
       headers: { authorization: `Bearer ${process.env.REDROB_API_KEY}`, "content-type": "application/json" },
       body: JSON.stringify(body),
-    });
+      signal: AbortSignal.timeout(240_000),
+    }).catch((error) => ({ ok: false, status: 599, json: async () => ({ error: { message: String(error?.message ?? error) } }) }));
     const json = await response.json().catch(() => ({}));
     cost += billed(job, json);
     if (response.ok) return { json, ms: Date.now() - started, cost };
-    const retry = (response.status === 429 || response.status >= 500) && attempt < 3;
+    // Redrob ends an upstream call at 120 s. An answer that needs longer times out on every try, so a
+    // timeout gets one retry (for an unlucky slow start) and is left for the next run.
+    const tries = /timeout|aborted/i.test(JSON.stringify(json)) ? 2 : 3;
+    const retry = (response.status === 429 || response.status >= 500) && attempt < tries;
     if (!retry) return { error: `${response.status} ${JSON.stringify(json).slice(0, 300)}`, json, cost };
     await new Promise((r) => setTimeout(r, 2000 * attempt * attempt));
   }
@@ -199,6 +221,10 @@ async function runOne(job) {
       promptSha: sha(prompt),
       output: choice?.message?.content ?? "",
       cut: choice?.finish_reason === "length",
+      finishReason: choice?.finish_reason ?? null,
+      // A provider's safety filter stopped the answer, or nothing came back. Kept so its cost counts and it
+      // is not re-run on every restart, but never shown: a half answer would misrepresent the model.
+      filtered: choice?.finish_reason === "content_filter" || !(choice?.message?.content ?? "").trim(),
       usage: json.usage,
       costUsd: cost,
       latencyMs: json.redrob?.latencyMs ?? ms,
@@ -207,7 +233,7 @@ async function runOne(job) {
     };
     await mkdir(path.dirname(fileOf(job)), { recursive: true });
     await writeFile(fileOf(job), `${JSON.stringify(record, null, 1)}\n`);
-    console.log(`ok   ${job.key} $${cost.toFixed(4)} ${record.usage?.completion_tokens ?? "?"} tok${record.cut ? " CUT" : ""} | total $${spent.toFixed(2)}`);
+    console.log(`ok   ${job.key} $${cost.toFixed(4)} ${record.usage?.completion_tokens ?? "?"} tok${record.cut ? " CUT" : ""}${record.filtered ? " FILTERED" : ""} | total $${spent.toFixed(2)}`);
   } finally {
     reserved -= reserve;
   }
@@ -217,7 +243,7 @@ if (!DRY && !process.env.REDROB_API_KEY) throw new Error("REDROB_API_KEY is not 
 let next = 0;
 await Promise.all(
   Array.from({ length: CONCURRENCY }, async () => {
-    while (next < todo.length && !stopped && started < MAX_RUNS) await runOne(todo[next++]);
+    while (next < todo.length && !stopped && started < MAX_RUNS && Date.now() < DEADLINE) await runOne(todo[next++]);
   }),
 );
 const final = await written();
@@ -226,6 +252,7 @@ const summary = {
   planned: jobs.length,
   written: ran.length,
   cut: ran.filter((o) => o.cut).length,
+  filtered: ran.filter((o) => o.filtered).length,
   failedBilled: final.length - ran.length,
   spentUsd: Number(final.reduce((s, o) => s + (o.costUsd ?? 0), 0).toFixed(4)),
   capUsd: CAP,

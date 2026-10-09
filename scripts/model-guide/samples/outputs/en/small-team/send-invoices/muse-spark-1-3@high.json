@@ -1,0 +1,25 @@
+{
+ "key": "en/small-team/send-invoices/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "rank": 2,
+ "model": "muse-spark-1-3",
+ "catalogueId": "meta/muse-spark-1.3",
+ "routedModel": "meta/muse-spark-1.3",
+ "effort": "high",
+ "promptSha": "41723f2f59c4",
+ "output": "# Halyard Films — Billing — 10 March 2026\n\n## 1. INVOICE INV-0152\n\n**Halyard Films**\nhello@halyardfilms.example.com | [Address / Phone]\n\n**Bill To:**\nMarlow Bikes\nAttn: Jane Doe, ap@marlowbikes.example.com\nProject: 90-second brand film, SOW 28 Jan 2026\n\n**Invoice No:** INV-0152\n**Invoice Date:** 10 March 2026\n**Due Date:** 25 March 2026 — Net 15\n**Delivered:** 10 March 2026\n\n| Description | Qty | Rate | Amount |\n|---|---|---|---|\n| Base fee — 90-sec brand film, fixed fee | 1 | $18,000.00 | $18,000.00 |\n| CO-1 — Extra shoot day, approved Jane Doe email 20 Feb | 1.0 day | $1,400/day | $1,400.00 |\n| Drone rental at cost + 10% — $640 x 1.10 | 1 | $704.00 | $704.00 |\n| Mileage / travel at cost + 10% — $186 x 1.10 | 1 | $204.60 | $204.60 |\n| Location permit at cost + 10% — $350 x 1.10 | 1 | $385.00 | $385.00 |\n| Crew meals $212 | — | — | $0.00 — not billable per SOW |\n| CO-2 — 0.5-day cut-down requested by John Doe, Slack 3 Mar | — | — | $0.00 — not approved by Jane Doe, not billed |\n| **Subtotal** | | | **$20,693.60** |\n| Less: Deposit INV-0141 received 2 Feb | | | -$9,000.00 |\n| **TOTAL DUE** | | | **$11,693.60** |\n\nNo sales tax applies.\n\n**Payment to:** [Bank Name / Account No / Sort Code] or [Payment Link]\nPlease quote INV-0152. Remittance to hello@halyardfilms.example.com\n\n**Terms:** Net 15. Late fee 1.5% per month on overdue balances.\n\n## 2. Email to Jane Doe\n\n**To:** ap@marlowbikes.example.com\n**Subject:** Brand film delivered — Final invoice INV-0152 $11,693.60 due 25 Mar\n\nHi Jane,\n\nThe 90-second brand film was delivered today — thank you!\n\nAttached is final invoice **INV-0152 for $11,693.60, due 25 March**. It credits your $9,000 deposit (2 Feb) and includes:\n\n- Balance of $18,000 fixed fee\n- CO-1 (1 day x $1,400) per your 20 Feb approval\n- Expenses +10%: drone $704.00, mileage $204.60, permit $385.00. Meals excluded per SOW.\n\nCO-2 (30-sec cut-down, 0.5 day = $700) requested by John Doe is **not** included, as the SOW requires your written approval. Just reply approving if you'd like us to proceed — we can invoice it separately.\n\nPlease let me know if you need anything else to process payment.\n\nBest,\nHalyard Films — hello@halyardfilms.example.com\n\n## 3. Collection emails\n\nOnly INV-0133 and INV-0137 are chased. INV-0139 was paid 3 Mar and is closed.\n\n**A. Pellworth Coffee — INV-0133**\n\n**Subject:** Third reminder: INV-0133 overdue since 5 Jan — action required\n\n> Dear Accounts Team,\n>\n> Our invoice INV-0133 for $4,200 due 5 January remains unpaid despite reminders on 15 Jan and 5 Feb.\n>\n> Under your contract, 1.5% per month accrues on overdue balances. To date $126 has accrued, bringing the balance to $4,326, increasing by ~$63/month until paid.\n>\n> Please pay $4,326 by 17 March and send remittance. If already paid, please share proof.\n>\n> If we do not hear from you, we will escalate for further collection.\n>\n> Regards,\n> Halyard Films, hello@halyardfilms.example.com\n\n**B. Saltgrass Council — INV-0137**\n\n**Subject:** INV-0137 $6,750 — can we help clear AP with PO 77-3310?\n\n> Dear Finance Team,\n>\n> Thank you for six great years working together. Our invoice INV-0137 for $6,750 due 15 Feb is still showing unpaid.\n>\n> We recall Council AP rejects invoices without a PO number, and INV-0137 was sent without one. We found PO 77-3310 in our project email.\n>\n> May we re-issue INV-0137 showing PO 77-3310 today? Please confirm this is the correct PO and who to re-send to, and we will do so immediately.\n>\n> Many thanks for your help,\n> Halyard Films, hello@halyardfilms.example.com\n\n## 4. Updated AR at 10 March 2026\n\n| Invoice | Client | Balance due | Due | Status 10 Mar | Next follow-up |\n|---|---|---|---|---|---|\n| INV-0133 | Pellworth Coffee | $4,326.00 ($4,200 + $126: 2 mo x 1.5%) | 5 Jan | Overdue 64 days, no reply. 3rd reminder sent 10 Mar | 17 Mar — final notice / review escalation |\n| INV-0137 | Saltgrass Council | $6,750.00 — no late-fee clause | 15 Feb | Overdue, likely AP block (no PO). Helpful email + offer to re-issue with PO 77-3310 sent 10 Mar | 17 Mar — confirm AP received corrected invoice |\n| INV-0139 | Tern Studios | $0.00 | 28 Feb | **Paid** 3 Mar — TERN ST PMT 0193 $2,300 matched. Closed | None |\n| INV-0152 | Marlow Bikes | $11,693.60 | 25 Mar | Issued 10 Mar | 26 Mar if unpaid |\n\nNotes: $1,140 CARD PAYOUT 6 Mar is retail stock-footage sales, not AR. CO-2 $700 (0.5 x $1,400) held pending Jane Doe written approval, not invoiced.\n",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 763,
+  "completion_tokens": 5711,
+  "total_tokens": 6474
+ },
+ "costUsd": 0.026486775,
+ "latencyMs": 32946,
+ "requestId": "log_19a8e2f5f9994a2ba5ed977bed16ca6e",
+ "date": "2026-10-09"
+}

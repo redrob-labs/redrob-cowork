@@ -38,7 +38,7 @@ for (const language of await list(outputsDir)) {
         // An output whose prompt has since changed answers a different question, so it is left out.
         const { createHash } = await import("node:crypto");
         if (createHash("sha256").update(prompt).digest("hex").slice(0, 12) !== run.promptSha) continue;
-        if (!run.output?.trim()) continue;
+        if (run.filtered || !run.output?.trim()) continue;
         entry.runs[`${run.model}@${run.effort}`] = { output: run.output, date: run.date, effort: run.effort, costUsd: run.costUsd, cut: run.cut };
         runs += 1;
       }

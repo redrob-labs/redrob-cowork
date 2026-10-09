@@ -1,0 +1,25 @@
+{
+ "key": "hi/small-team/send-invoices/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "rank": 2,
+ "model": "muse-spark-1-3",
+ "catalogueId": "meta/muse-spark-1.3",
+ "routedModel": "meta/muse-spark-1.3",
+ "effort": "high",
+ "promptSha": "3d3169c6bf83",
+ "output": "## 1. Invoice INV-0152 — Saarthi Cycles\n\n**Kahaani Films, Mumbai**\nhello@kahaanifilms.example.com | GSTIN: 27ABCDE1234F1Z5 [placeholder]\nBank: [Bank Name, A/c No., IFSC, UPI ID - placeholder]\n\n**Bill To:** Saarthi Cycles\nAttn: जेन डो (ap@saarthicycles.example.com)\nProject: 90-sec brand film | SOW dated 28 Jan 2026\n\n**Invoice No: INV-0152 | Invoice Date: 10 March 2026 | Due Date: 25 March 2026 (Net 15)**\n\n| # | विवरण | Qty x Rate | Amount (₹) |\n|---|---|---|---|\n| 1 | Fixed fee — balance on delivery: ₹9,00,000 total less ₹4,50,000 billed in INV-0141 | 1 x 4,50,000 | 4,50,000 |\n| 2 | CO-1 — अतिरिक्त shoot day, Jane Doe द्वारा 20 Feb को email से approved | 1.0 day x 70,000 | 70,000 |\n| 3 | Expenses — Drone rental cost +10%: 32,000 x 1.10 | 1 x 35,200 | 35,200 |\n| 4 | Expenses — Travel cost +10%: 9,000 x 1.10 | 1 x 9,900 | 9,900 |\n| 5 | Expenses — Location permit cost +10%: 17,500 x 1.10 | 1 x 19,250 | 19,250 |\n| — | Crew meals ₹10,600 — SOW में billable नहीं, excluded | — | 0 |\n| — | CO-2 (0.5 day cut-down, John Doe ने माँगा) — Jane की written approval नहीं, billed नहीं | — | 0 |\n| | **Subtotal** | | **5,84,350** |\n| | GST @18% on 5,84,350 = 1,05,183 | | 1,05,183 |\n| | **Total (इस invoice पर देय)** | | **6,89,533** |\n\n**Memo:** Deposit INV-0141: ₹4,50,000 + GST ₹81,000 = ₹5,31,000 — 2 Feb को paid, कोई बकाया नहीं। यह invoice में दोबारा deduct नहीं किया गया। कुल project billed: ₹12,20,533 (incl. GST); कुल paid: ₹5,31,000; इस invoice से बकाया: ₹6,89,533।\n\n**Terms:** Net 15. Overdue balance पर 1.5% प्रति माह late fee। कृपया payment पर INV-0152 लिखें।\n\n## 2. Jane Doe को Email\n\n**Subject:** Brand film delivered + INV-0152 for ₹6,89,533 due 25 March\n\nHi Jane,\nBrand film आज deliver हो गई — देखने के लिए धन्यवाद। INV-0152 attached है (₹6,89,533 incl. GST, due 25 March)।\n\nCO-2 पर note: 30-sec cut-down John Doe ने 3 March को WhatsApp पर माँगा था। SOW के अनुसार change order आपके written approval से ही bill होगा, जो file में नहीं है, इसलिए उसे इस invoice में नहीं जोड़ा है।\n\nयदि आप approve करें तो 0.5 day x ₹70,000 = ₹35,000 + GST ₹6,300 = ₹41,300 का supplementary invoice भेज दूँगा। कृपया confirm करें।\n\nThanks,\nKahaani Films\n\n## 3. Collection Emails — केवल पीछा करने योग्य\n\n> Tern Studios (INV-0139) के लिए collection नहीं भेजा — 3 March को ₹1,15,000 मिल गया है, Ref में INV0193 लिखा है। Confirmation माँगा गया है, demand नहीं।\n\n**A. Bhatti Coffee Roasters — INV-0133 (Firm / Final Notice)**\n\nSubject: Final notice: INV-0133 ₹2,10,000 overdue since 5 Jan + late fee\n\nHello Team,\nINV-0133 for ₹2,10,000 due 5 January is now 64 days overdue. We sent reminders on 15 Jan and 5 Feb with no reply.\n\nPer contract, 1.5% per month applies — ~₹6,300 accrued to 10 March, accruing daily. Please pay ₹2,16,300 immediately and share UTR.\n\nIf not received by 17 March, we will escalate for legal review. To avoid further fee, please pay today.\n\nRegards, Kahaani Films\n\n*~95 शब्द*\n\n**B. Sahyadri Nagar Parishad — INV-0137 (Soft / Corrective)**\n\nSubject: Revised INV-0137 with PO 77-3310 — payment help requested\n\nRespected Sir/Madam,\nThank you for 6 years of partnership. INV-0137 for ₹3,37,500 due 15 Feb is pending.\n\nWe realised our invoice missed PO 77-3310, which your accounts requires. Sorry for the oversight. Revised copy with PO is attached, same amount, no late fee.\n\nKindly confirm receipt and advise payment timeline. We will call next week to assist with any paperwork.\n\nWith regards, Kahaani Films\n\n*~75 शब्द*\n\n## 4. Updated AR — 10 March 2026 के कदमों के बाद\n\n| Invoice | Client | राशि (GST सहित) | Due | Status 10 March | अगली follow-up |\n|---|---|---|---|---|---|\n| INV-0133 | Bhatti Coffee Roasters | ₹2,10,000 + ~₹6,300 late fee = ₹2,16,300 | 5 Jan | Overdue 64 दिन, 3rd/final notice भेजा | 17 March — phone + legal review |\n| INV-0137 Rev.1 | Sahyadri Nagar Parishad | ₹3,37,500 | 15 Feb | Defect ठीक किया: PO 77-3310 जोड़कर आज reissue, collection नहीं demand | 24 March — phone |\n| INV-0139 | Tern Studios | ₹1,15,000 | 28 Feb | 3 March को ₹1,15,000 NEFT मिला (Ref: INV0193) — allocation confirm करना है, collection रोक दिया | 13 March — confirmation न आए तो reconcile |\n| INV-0152 | Saarthi Cycles | ₹6,89,533 | 25 March | आज issued, current | 26 March यदि unpaid |\n| — | Unbilled CO-2 | ₹41,300 (₹35,000+GST) | — | Jane approval pending, AR में नहीं | Jane के reply पर |\n\nBank note: 6 March UPI ₹57,000 retail stock-footage sale AR से संबंधित नहीं — other income में लिया।\n",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 955,
+  "completion_tokens": 6176,
+  "total_tokens": 7131
+ },
+ "costUsd": 0.028813838,
+ "latencyMs": 45464,
+ "requestId": "log_b9c26a1e563449b8947c1a4db08f1317",
+ "date": "2026-10-09"
+}
