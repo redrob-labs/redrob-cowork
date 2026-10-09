@@ -82,17 +82,6 @@
       "override": null
     },
     {
-      "host": "casenote.kr",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
-    },
-    {
       "host": "cdn.simpleicons.org",
       "kind": "fetched",
       "components": [
@@ -143,9 +132,9 @@
         "renderer",
         "server"
       ],
-      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup, and the device authorization endpoints Work uses to connect a workspace without the user handling an API key.",
+      "purpose": "Redrob inference endpoint and model catalog used by the Redrob Code engine and provider setup, the device authorization endpoints Work uses to connect a workspace without the user handling an API key, the public default skill library (/skill-library) the Skills screen browses and installs from, and the team skills (/skill-sync, with the Redrob Key) that redrob-server installs into local workspaces every 30 minutes.",
       "requirement": "required",
-      "blockedEffect": "Inference and model selection are unavailable.",
+      "blockedEffect": "Inference and model selection are unavailable. The Skills screen falls back to the skill library bundled with the app, and team skills stop updating (installed ones stay).",
       "override": null
     },
     {
@@ -237,17 +226,6 @@
       "purpose": "Gmail API calls for Google Workspace message search, reading, attachments, and draft creation.",
       "requirement": "opt-in",
       "blockedEffect": "Gmail read and draft actions fail for connected Google Workspace accounts.",
-      "override": null
-    },
-    {
-      "host": "juro.com",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
     },
     {
@@ -343,17 +321,6 @@
       "requirement": "opt-in",
       "blockedEffect": "The Stripe MCP connection cannot connect when enabled.",
       "override": "MCP server URL setting"
-    },
-    {
-      "host": "nwsidebar.wsba.org",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
     },
     {
       "host": "oauth2.googleapis.com",
@@ -503,28 +470,6 @@
       "purpose": "Google profile, Calendar, and Drive API calls for Google Workspace connections.",
       "requirement": "opt-in",
       "blockedEffect": "Google profile, Calendar, and Drive actions fail for connected Google Workspace accounts.",
-      "override": null
-    },
-    {
-      "host": "www.harvey.ai",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
-      "override": null
-    },
-    {
-      "host": "www.techuk.org",
-      "kind": "link-only",
-      "components": [
-        "renderer"
-      ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
-      "requirement": "optional",
-      "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
     },
     {

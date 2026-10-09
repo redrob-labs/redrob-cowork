@@ -6,7 +6,7 @@ import { connectorsFromMcp, type DeskMcpStatusMap } from "../connectors/connecto
 import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/desk-files";
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
-import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbooks/playbooks";
+import { canEditSkill, canRemoveSkill, deskSkillFrom, skillBody, skillContent, tagsOf } from "../skills/skills";
 import { HISTORY_LIMIT, HISTORY_STEPS_LIMIT, historyEntryFrom } from "../history/history";
 import { boardFromState } from "../scheduled/schedules";
 import { useDeskComposerStore } from "../composer/composer-state";
@@ -16,7 +16,8 @@ import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project }
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
 export type DeskServerClient = Pick<
   RedrobServerClient,
-  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "listCommands" | "upsertCommand" | "deleteCommand" | "getSessionSnapshot" | "listSchedules" | "addSchedule" | "updateSchedule" | "deleteSchedule" | "answerScheduleWaiting" | "listSkills"
+  "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "getSessionSnapshot" | "listSchedules" | "addSchedule" | "updateSchedule" | "deleteSchedule" | "answerScheduleWaiting"
+  | "listSkills" | "getSkill" | "upsertSkill" | "deleteSkill" | "listLibrarySkills" | "getSkillTaxonomy" | "getLibrarySkill" | "installLibrarySkill" | "getTeamSkills"
 >;
 
 export type RealDeskServicesDeps = {
@@ -73,7 +74,6 @@ function toProject(workspace: RedrobWorkspaceInfo): Project {
     about: null,
     fileCount: null,
     chatCount: null,
-    playbookIds: [],
     active: null,
     people: [],
   };
@@ -105,16 +105,11 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
   const { client, workspaceId } = deps;
   const fallback = deps.fallback ?? createFixtureDeskServices();
 
-  const listPlaybooks = async () => {
-    const [workspace, global] = await Promise.all([
-      client.listCommands(workspaceId, "workspace"),
-      // The person's own commands are optional: a failure leaves the workspace's.
-      client.listCommands(workspaceId, "global").catch(() => ({ items: [] })),
-    ]);
-    const seen = new Set<string>();
-    return [...workspace.items, ...global.items]
-      .filter((command) => !seen.has(command.name) && Boolean(seen.add(command.name)))
-      .map(playbookFromCommand);
+  // The team's state is optional: without it a team skill is still known by its metadata.
+  const teamState = () => client.getTeamSkills(workspaceId).catch(() => null);
+  const listInstalled = async () => {
+    const [{ items }, team] = await Promise.all([client.listSkills(workspaceId, { includeGlobal: true }), teamState()]);
+    return items.map((item) => deskSkillFrom(item, team));
   };
 
   const readPrivacy = async () => readStoredPrivacy((await client.getConfig(workspaceId)).redrob);
@@ -184,10 +179,43 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
       },
       remove: async (scheduleId) => real(boardFromState(await client.deleteSchedule(workspaceId, scheduleId), workspaceId)),
     },
-    // The skills a schedule can run: the workspace's, then the person's own.
+    // Installed skills are the workspace's, then the person's own folder's; the library is the Console's.
     skills: {
-      list: async () =>
-        real((await client.listSkills(workspaceId, { includeGlobal: true })).items.map(({ name, description }) => ({ name, description }))),
+      list: async () => real(await listInstalled()),
+      library: async (filters = {}) =>
+        real((await client.listLibrarySkills(workspaceId, filters)).skills.map((skill) => ({ name: skill.name, description: skill.description, tags: tagsOf(skill) }))),
+      taxonomy: async () => {
+        const { professions, languages } = await client.getSkillTaxonomy(workspaceId);
+        return real({ professions, languages });
+      },
+      get: async (name) => {
+        const installed = (await listInstalled()).find((skill) => skill.name === name);
+        if (installed) {
+          const { content } = await client.getSkill(workspaceId, name, { includeGlobal: true });
+          return real({ name, description: installed.description, tags: installed.tags, body: skillBody(content), installed: { origin: installed.origin, scope: installed.scope } });
+        }
+        const skill = await client.getLibrarySkill(workspaceId, name).catch(() => null);
+        return real(skill ? { name, description: skill.description, tags: tagsOf(skill), body: skill.body, installed: null } : null);
+      },
+      install: async (name) => {
+        await client.installLibrarySkill(workspaceId, name);
+        return real(null);
+      },
+      save: async (draft) => {
+        const existing = (await listInstalled()).find((skill) => skill.name === draft.name);
+        // A new skill never replaces one; a change is only ever to the person's own.
+        if (draft.editing ? !existing || !canEditSkill(existing) : existing) throw new Error(`Cannot save the skill ${draft.name}`);
+        await client.upsertSkill(workspaceId, { name: draft.name, content: skillContent(draft), description: draft.description.trim() });
+        const { profession, task, language } = draft;
+        return real({ name: draft.name, description: draft.description.trim(), origin: "mine", tags: tagsOf({ profession, task, language }), scope: "project" });
+      },
+      remove: async (name) => {
+        const existing = (await listInstalled()).find((skill) => skill.name === name);
+        if (!existing || !canRemoveSkill(existing)) throw new Error(`The skill ${name} cannot be removed here`);
+        await client.deleteSkill(workspaceId, name);
+        return real(null);
+      },
+      teamState: async () => real(await teamState()),
     },
     // History is the chats of every project, newest first, with the steps of the latest.
     history: {
@@ -217,21 +245,6 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
           }),
         );
         return real(entries);
-      },
-    },
-    // Playbooks are the workspace's commands, then the person's own across workspaces.
-    playbooks: {
-      list: async () => real(await listPlaybooks()),
-      get: async (id) => real((await listPlaybooks()).find((playbook) => playbook.id === id) ?? null),
-      save: async (input) => {
-        const name = input.id ?? playbookSlug(input.name);
-        const template = playbookTemplate(input);
-        await client.upsertCommand(workspaceId, { name, description: input.description.trim(), template });
-        return real(playbookFromCommand({ name, description: input.description, template, scope: "workspace" }));
-      },
-      remove: async (id) => {
-        await client.deleteCommand(workspaceId, id);
-        return real(null);
       },
     },
     privacy: {

@@ -79,9 +79,6 @@ describe("real History", () => {
       listMcp: unused,
       getConfig: unused,
       patchConfig: unused,
-      listCommands: unused,
-      upsertCommand: unused,
-      deleteCommand: unused,
     };
     const result = await createRealDeskServices({ client, workspaceId: "ws_1" }).history.list();
     expect(result.preview).toBe(false);

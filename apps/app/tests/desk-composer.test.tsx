@@ -334,7 +334,7 @@ describe("the new chat screen", () => {
     expect(hero).toContain('<h2 className="desk-new__line">{t("desk.new_chat_line")}</h2>');
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain('placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}');
-    expect(en["desk.composer_placeholder"]).toBe("Ask Desk to do something, or type / to run a playbook");
+    expect(en["desk.composer_placeholder"]).toBe("Ask Desk to do something, or type / to use a skill");
     const css = read("app/index.css");
     const line = css.slice(css.indexOf(".desk-new__line {"), css.indexOf("}", css.indexOf(".desk-new__line {")));
     expect(line).toContain("font-family: var(--font-serif)");
@@ -346,5 +346,23 @@ describe("the new chat screen", () => {
     expect(composer).toContain("<DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>\n                    {modelControls}");
     expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}");
     expect(composer).toContain("const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;");
+  });
+});
+
+describe("skills in the composer", () => {
+  test("/ lists skills, MCP prompts and compact, and the tool menu has no Commands section", () => {
+    const composer = read("react-app/domains/session/surface/composer/composer.tsx");
+    expect(composer).toContain("commands.filter(isComposerSlashOption)");
+    expect(composer).not.toContain('["commands", t("dashboard.commands")]');
+    expect(composer).not.toContain('toolMenuSection === "commands"');
+  });
+
+  test("a skill chip is sent as a plain instruction to use that skill", () => {
+    const route = read("react-app/shell/session-route.tsx");
+    expect(route).toContain("parts.push({ type: \"text\", text: skillRunPrompt(part.name) });");
+    expect(route).not.toContain("Load [skill");
+    // The sent message shows the skill as a chip again.
+    const list = read("components/chat/message-list.tsx");
+    expect(list).toContain("Use the `[^`]+` skill\\.");
   });
 });

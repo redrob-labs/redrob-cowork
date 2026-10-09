@@ -10,7 +10,6 @@ import type { ComposerAttachment, McpServerEntry, McpStatus, McpStatusMap, Model
 import { t } from "@/i18n";
 import {
   composerConfigureSectionForMenu,
-  isLibraryCommand,
   slugifyLibraryItemName,
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
@@ -22,6 +21,7 @@ import { listRunningAppsForMention } from "./app-mentions";
 import type { ComposerMentionKind } from "./mention-encoding";
 import {
   getSlashCommandQuery,
+  isComposerSlashOption,
   skillMenuSlashCommandName,
   skillSlashCommandName,
   type ComposerSlashCommandOption,
@@ -39,7 +39,7 @@ type MentionItem = {
   label: string;
 };
 
-type ToolMenuSection = "agents" | "commands" | "skills" | "connections";
+type ToolMenuSection = "agents" | "skills" | "connections";
 
 type ComposerProps = {
   draft: string;
@@ -221,7 +221,7 @@ export function ReactSessionComposer(props: ComposerProps) {
   const [slashOpen, setSlashOpen] = useState(false);
   const [toolMenuOpen, setToolMenuOpen] = useState(false);
   const [toolMenuLayout, setToolMenuLayout] = useState<ToolMenuLayout | null>(null);
-  const [toolMenuSection, setToolMenuSection] = useState<ToolMenuSection>("commands");
+  const [toolMenuSection, setToolMenuSection] = useState<ToolMenuSection>("skills");
   const [mentionItems, setMentionItems] = useState<MentionItem[]>([]);
   const [mentionOpen, setMentionOpen] = useState(false);
   const [menuIndex, setMenuIndex] = useState(0);
@@ -625,7 +625,7 @@ export function ReactSessionComposer(props: ComposerProps) {
     return undefined;
   }, [loadSkills, slashOpen, toolMenuOpen, toolMenuSection]);
 
-  const slashItems = useMemo<ComposerSlashCommandOption[]>(() => [...commands], [commands]);
+  const slashItems = useMemo<ComposerSlashCommandOption[]>(() => commands.filter(isComposerSlashOption), [commands]);
   const slashFiltered = useMemo(() => {
     if (!slashOpen) return [];
     if (!slashQuery) return slashItems.slice(0, 8);
@@ -649,7 +649,6 @@ export function ReactSessionComposer(props: ComposerProps) {
 
   const activeMenu = slashOpen ? "slash" : mentionOpen ? "mention" : null;
   const activeItems = activeMenu === "slash" ? slashFiltered : activeMenu === "mention" ? mentionFiltered : [];
-  const toolCommandItems = commands.filter(isLibraryCommand);
   const toolSkillItems = commands.filter((command) => command.source === "skill");
   const localCommandSkillNames = new Set(toolSkillItems.map((command) => command.name));
   const skillMenuItems: SkillCard[] = [
@@ -1328,7 +1327,6 @@ export function ReactSessionComposer(props: ComposerProps) {
                         <div className="flex h-full w-[168px] shrink-0 flex-col overflow-y-auto border-r border-dls-border bg-muted/30 p-2 sm:w-[192px]">
                           {([
                             ["agents", t("composer.agents_label")],
-                            ["commands", t("dashboard.commands")],
                             ["skills", t("dashboard.skills")],
                             ["connections", t("composer.connections_mcps_label")],
                           ] as const).map(([section, label]) => {
@@ -1391,30 +1389,6 @@ export function ReactSessionComposer(props: ComposerProps) {
                                 );
                               })}
                             </div>
-                          ) : null}
-                          {toolMenuSection === "commands" ? (
-                            toolCommandItems.length > 0 ? (
-                              <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
-                                {toolCommandItems.map((command) => (
-                                  <button
-                                    key={command.id}
-                                    type="button"
-                                    className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left text-muted-foreground transition-colors hover:bg-muted/70"
-                                    onClick={() => applyCommandSelection(command)}
-                                  >
-                                    <Terminal size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
-                                    <div className="min-w-0 flex-1">
-                                      <div className="truncate text-xs font-semibold text-muted-foreground">/{command.name}</div>
-                                      {command.description ? <div className="truncate text-xs text-subtle-foreground">{command.description}</div> : null}
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="px-3 py-2 text-xs text-subtle-foreground">
-                                {!commandsLoaded && commandsLoading ? t("composer.loading_commands") : t("composer.no_commands")}
-                              </div>
-                            )
                           ) : null}
                           {toolMenuSection === "skills" ? (
                             skillMenuItems.length > 0 ? (

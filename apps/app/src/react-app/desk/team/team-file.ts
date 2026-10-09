@@ -6,7 +6,7 @@ import type { PrivacyLevel } from "../services/types";
 
 /*
  * The team file: one workspace export a teammate hands out, to set a project up the same way.
- * On top of what an export already carries (playbooks, skills, connectors, config),
+ * On top of what an export already carries (skills, connectors, config),
  * `redrob.team` holds the team's notes and a privacy level.
  *
  * A file proves nothing about who made it, so it locks nothing: the notes it brings and the
@@ -96,7 +96,6 @@ export type TeamReview = {
   /** From the server's own preview; the import must carry it back. */
   fingerprint: string;
   changes: number;
-  playbooks: number;
   skills: number;
   connectors: TeamConnector[];
   plugins: string[];
@@ -158,7 +157,6 @@ export async function reviewTeamFile(client: TeamClient, workspaceId: string, fi
     team,
     fingerprint: preview.fingerprint,
     changes: preview.summary.create + preview.summary.update + preview.summary.replace + preview.summary.delete,
-    playbooks: Array.isArray(file.commands) ? file.commands.length : 0,
     skills: Array.isArray(file.skills) ? file.skills.length : 0,
     connectors: readConnectors(opencode),
     plugins: readPlugins(opencode),

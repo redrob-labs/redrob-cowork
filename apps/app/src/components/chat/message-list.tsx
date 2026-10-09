@@ -567,7 +567,8 @@ type UserMessageProps = {
   isStreaming: boolean
 }
 
-const USER_SKILL_TOKEN_RE = /(Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
+// A skill picked in the composer is sent as "Use the `name` skill."; older chats sent the Load form.
+const USER_SKILL_TOKEN_RE = /(Use the `[^`]+` skill\.|Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
 
 function UserSkillChip(props: { name: string }) {
   return (
@@ -670,7 +671,7 @@ function renderUserTextWithSkillChips(text: string, highlightQuery: string | und
   return text.split(USER_SKILL_TOKEN_RE).map((segment) => {
     const key = `${offset}:${segment}`
     offset += segment.length
-    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/)
+    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/) ?? segment.match(/^Use the `([^`]+)` skill\.$/)
     if (skillMatch?.[1]) return <UserSkillChip key={key} name={skillMatch[1]} />
     return <React.Fragment key={key}>{renderPlainTextWithLinks(segment, highlightQuery, key)}</React.Fragment>
   })
@@ -682,7 +683,7 @@ const UserMessage = React.memo(
     // What the person wrote, with the real details where placeholders were sent.
     const placeholders = usePlaceholderMap(sessionId)
     const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
-    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    // Inside the Desk frame a prompt worth repeating can become a skill.
     const inDeskFrame = useInDeskFrame()
     const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
@@ -756,12 +757,12 @@ const UserMessage = React.memo(
                       </MessageAction>
                     ) : null}
                     {inDeskFrame && messageText ? (
-                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                      <MessageAction tooltip={t("desk.skill_save_from_message")}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("desk.playbook_save_from_message")}
-                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                          aria-label={t("desk.skill_save_from_message")}
+                          onClick={() => openModal({ kind: "skill", instructions: messageText })}
                         >
                           <BookmarkPlus />
                         </Button>
