@@ -65,6 +65,8 @@ interface HTMLPreviewProps {
   content: string;
   /** The server-hosted sandbox document. Never on the app's own origin. */
   sandbox: { url: string; expectedOrigin: string };
+  /** The page's own folder on the sandbox origin, for a page that is a file. Relative references resolve there. */
+  basePath?: string | null;
   className?: string;
 }
 
@@ -73,7 +75,7 @@ interface HTMLPreviewProps {
  * apps/server/src/artifact-preview-sandbox.ts). The page reaches no network; when it tried to, the
  * notice says so rather than leaving it looking broken.
  */
-export function HTMLPreview({ title, content, sandbox, className }: HTMLPreviewProps) {
+export function HTMLPreview({ title, content, sandbox, basePath, className }: HTMLPreviewProps) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
   const [blocked, setBlocked] = useState(0);
@@ -94,10 +96,10 @@ export function HTMLPreview({ title, content, sandbox, className }: HTMLPreviewP
     if (!ready) return;
     setBlocked(0);
     frameRef.current?.contentWindow?.postMessage(
-      { method: "redrob/artifact-preview/render", params: { html: content } },
+      { method: "redrob/artifact-preview/render", params: { html: content, ...(basePath ? { base: basePath } : {}) } },
       sandbox.expectedOrigin,
     );
-  }, [ready, content, sandbox.expectedOrigin]);
+  }, [ready, content, basePath, sandbox.expectedOrigin]);
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
