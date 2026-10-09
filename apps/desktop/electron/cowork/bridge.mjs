@@ -155,6 +155,7 @@ class CoworkError extends Error {
  * @property {{ read(): Promise<any[]>, write(entries: any[]): Promise<void> }} [joinStore]  saved joins; none kept without it
  * @property {(input: { workspaceId: string, baseUrl: string, redrobHostUrl: string }) => Promise<unknown>} [updateRemoteWorkspace]
  * @property {number[]} [redialMs]
+ * @property {(remoteWorkspaceId: string) => Promise<string | null>} [remoteToken]  the guest token kept with a remote workspace
  */
 
 /** @param {CoworkBridgeDeps} deps */
@@ -210,6 +211,19 @@ export function createCoworkBridge(deps) {
     } catch {
       proxy = await startLoopbackProxy(connection);
     }
+    // The host answered; is this guest still in? A removed guest or an ended room is not worth redialling.
+    const access = await stillInRoom(proxy, saved).catch(() => "unknown");
+    if (access === "gone") {
+      await proxy.close().catch(() => undefined);
+      try {
+        connection.close(0n, Array.from(Buffer.from("left")));
+      } catch {
+        // already closed
+      }
+      await forgetJoin(joinKey(saved)).catch(() => undefined);
+      emit({ type: "join", phase: "ended", workspaceId: saved.workspaceId, sessionId: saved.sessionId });
+      throw new CoworkError("join_ended", "The host ended co-working or removed you");
+    }
     if (proxy.port !== saved.port) {
       const hostUrl = `${proxy.url}/w/${saved.workspaceId}`;
       await deps.updateRemoteWorkspace?.({ workspaceId: saved.remoteWorkspaceId, baseUrl: hostUrl, redrobHostUrl: hostUrl });
@@ -219,6 +233,21 @@ export function createCoworkBridge(deps) {
     track(joinKey(saved), invite, connection, proxy);
     emit({ type: "join", phase: "reconnected", workspaceId: saved.workspaceId, sessionId: saved.sessionId });
     return proxy;
+  }
+
+  /**
+   * Whether the saved guest token still opens the room: "gone" when the host revoked it or the
+   * room ended, "in" when it works, "unknown" when it could not tell (the host's server is down).
+   */
+  async function stillInRoom(proxy, saved) {
+    if (!deps.remoteToken) return "unknown";
+    const token = await deps.remoteToken(saved.remoteWorkspaceId);
+    if (!token) return "gone";
+    const room = `/w/${saved.workspaceId}/workspace/${saved.workspaceId}/sessions/${saved.sessionId}/room`;
+    const answer = await guestCall(proxy, "GET", room, undefined, { authorization: `Bearer ${token}` });
+    if (answer.status === 401 || answer.status === 403) return "gone";
+    if (answer.status === 404 || (answer.status === 200 && answer.body.room === null)) return "gone";
+    return answer.status === 200 ? "in" : "unknown";
   }
 
   /** Keeps trying a saved join until it connects, is left, expires, or the bridge closes. */
@@ -231,7 +260,8 @@ export function createCoworkBridge(deps) {
         try {
           await dialSaved(saved);
           return;
-        } catch {
+        } catch (error) {
+          if (error.code === "join_ended") return;
           emit({ type: "join", phase: "disconnected", workspaceId: saved.workspaceId, sessionId: saved.sessionId });
         }
         const wait = redialMs[Math.min(attempt, redialMs.length - 1)] ?? 60_000;
@@ -463,12 +493,12 @@ export function createCoworkBridge(deps) {
     return { hosting: [...hosted] };
   }
 
-  async function guestCall(proxy, method, pathname, body) {
+  async function guestCall(proxy, method, pathname, body, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
       const data = body === undefined ? null : JSON.stringify(body);
       const request = http.request(
         `${proxy.url}${pathname}`,
-        { method, headers: data ? { "content-type": "application/json", "content-length": Buffer.byteLength(data) } : {} },
+        { method, headers: { ...extraHeaders, ...(data ? { "content-type": "application/json", "content-length": Buffer.byteLength(data) } : {}) } },
         (response) => {
           let text = "";
           response.on("data", (chunk) => (text += chunk));

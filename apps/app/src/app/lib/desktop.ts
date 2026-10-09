@@ -101,7 +101,7 @@ export type CoworkJoined = {
 };
 
 export type CoworkEvent =
-  | { type: "join"; phase: "dialing" | "waiting" | "joined" | "failed" | "disconnected" | "reconnected"; code?: string; workspaceId?: string; sessionId?: string }
+  | { type: "join"; phase: "dialing" | "waiting" | "joined" | "failed" | "disconnected" | "reconnected" | "ended"; code?: string; workspaceId?: string; sessionId?: string }
   | { type: "relay"; ok: boolean; code?: string }
   | { type: "guest-connected"; endpointId: string };
 

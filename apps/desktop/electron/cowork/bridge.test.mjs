@@ -229,6 +229,7 @@ describe("host and guest over iroh", { skip: iroh ? false : "@number0/iroh is no
         else if (entry.status === "pending") entry.decide = entry.participant.displayName === "Park Jun" ? "denied" : "allowed";
         return json(response, 200, entry.status === "allowed" ? { status: "allowed", token: "guest-token" } : { status: entry.status });
       }
+      if (pathname === ROOM && request.headers.authorization === "Bearer revoked-token") return json(response, 401, { code: "unauthorized" });
       if (pathname === ROOM) return json(response, 200, { room: { roomId: "room_1" }, authorization: request.headers.authorization ?? null });
       return json(response, 404, { code: "not_found" });
     });
@@ -323,6 +324,7 @@ describe("host and guest over iroh", { skip: iroh ? false : "@number0/iroh is no
       endpointKey: async () => guestKey,
       addRemoteWorkspace: async () => assert.fail("a rejoin adds nothing"),
       updateRemoteWorkspace: async (input) => void updated.push(input),
+      remoteToken: async () => "guest-token",
       emit: (event) => restartedEvents.push(event),
       joinStore,
       redialMs: [50],
@@ -346,6 +348,52 @@ describe("host and guest over iroh", { skip: iroh ? false : "@number0/iroh is no
       blocker.close();
       await guestBridge.leave({ hostEndpointId: saved.hostEndpointId, workspaceId: "ws_1", sessionId: "ses_1" });
     }
+  });
+
+  it("does not come back to a room it was removed from, and says so", async () => {
+    const hosted = await hostBridge.host({ workspaceId: "ws_1", sessionId: "ses_1" });
+    const restartedEvents = [];
+    const guest = (overrides) =>
+      createCoworkBridge({
+        platform: process.platform,
+        arch: process.arch,
+        packaged: false,
+        fallbackRelay: /** @type {"disabled"} */ ("disabled"),
+        bindAddr: "127.0.0.1:0",
+        directAddresses: true,
+        knockPollMs: 50,
+        scheme: "redrob",
+        localFetch,
+        loadIroh: async () => iroh,
+        serverInfo: info(guestServer),
+        endpointKey: async () => guestKey,
+        addRemoteWorkspace: async (input) => (added.push(input), { activeId: "rem_ws_1" }),
+        joinStore,
+        redialMs: [50],
+        ...overrides,
+      });
+    await guestBridge.close();
+    guestBridge = guest({});
+    await guestBridge.join({ link: hosted.link, participant: lee });
+    assert.equal((await joinStore.read()).length, 1);
+    await guestBridge.close();
+    guestBridge = guest({
+      updateRemoteWorkspace: async () => undefined,
+      // The host removed this guest while it was away: its token no longer opens the room.
+      remoteToken: async () => "revoked-token",
+      emit: (event) => restartedEvents.push(event),
+    });
+    assert.deepEqual(await guestBridge.rejoin(), { rejoining: 1 });
+    const deadline = Date.now() + 10_000;
+    while (!restartedEvents.some((event) => event.phase === "ended") && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.deepEqual(
+      restartedEvents.filter((event) => event.type === "join").map((event) => event.phase),
+      ["ended"],
+    );
+    assert.deepEqual(await joinStore.read(), [], "the join is forgotten");
+    const status = /** @type {{ joined: unknown[], reconnecting: unknown[] }} */ (await guestBridge.status());
+    assert.deepEqual(status.joined, []);
+    assert.deepEqual(status.reconnecting, [], "and it stops trying");
   });
 
   it("a denied knock fails the join and leaves nothing behind", async () => {

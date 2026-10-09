@@ -255,6 +255,8 @@ const ko = {
   "desk.cowork_costs_total": "합계: {amount}. 모두 호스트의 레드롭 키로 청구됩니다.",
   "desk.cowork_deny": "거절",
   "desk.cowork_end": "같이 작업 끝내기",
+  "desk.cowork_ended_guest_text": "호스트가 그 채팅의 같이 작업을 끝냈거나 나를 내보내서 다시 연결하지 않습니다. 다시 들어가려면 새 초대를 달라고 하세요.",
+  "desk.cowork_ended_guest_title": "같이 작업하던 채팅이 끝났습니다",
   "desk.cowork_ended_text": "손님을 내보냈고, 보낸 초대는 더 이상 쓸 수 없습니다.",
   "desk.cowork_ended_title": "같이 작업을 끝냈습니다",
   "desk.cowork_failed": "하지 못했습니다",
