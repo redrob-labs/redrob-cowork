@@ -113,3 +113,15 @@ Cowork's #135 and #136, and Console's #224, land first.
 1. **Download silently.** There is no prompt; Settings shows the status. This matches how Cowork sends labels.
 2. **Design runs the model as WASM in the webview**, after the spike (PR 4) confirms parity, latency and memory. Native `ort` is the fallback if it does not.
 3. **Office: Docs, Sheets and Slides first**; PDF, Markdown and Hangul later.
+
+## Before Office (PR 3) can start
+
+- **The package must be on npm.** Office and Design install `@redrob-labs/work-labeller` from the registry, as they do `@redrob-labs/ui`. That needs #153 and #154 merged, then a `work-labeller-v1.0.0` tag, which `ci-work-labeller.yml` publishes with `NPM_TOKEN`.
+- **Where Office reads the Redrob Key from (open).**
+  - Sync posts with the person's key. Today Office keeps that key in `userData/ai-settings.json`, written by `redrob-connect.ts`, and its chat calls Console directly with it.
+  - But Office's `AGENTS.md` (since #24) says "Office never holds a provider key": credentials are meant to live in the bundled engine's store. The engine routes exist (#25, #26), but chat does not go through them yet.
+  - Options:
+    - (a) Read the key from `ai-settings.json`, like the editors do now.
+    - (b) Have the engine send the batch, as Cowork's server reads the key from its engine.
+  - (b) follows the rule, but waits for Office's move to the engine.
+
