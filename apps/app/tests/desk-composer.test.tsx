@@ -348,3 +348,21 @@ describe("the new chat screen", () => {
     expect(composer).toContain("const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;");
   });
 });
+
+describe("skills in the composer", () => {
+  test("/ lists skills, MCP prompts and compact, and the tool menu has no Commands section", () => {
+    const composer = read("react-app/domains/session/surface/composer/composer.tsx");
+    expect(composer).toContain("commands.filter(isComposerSlashOption)");
+    expect(composer).not.toContain('["commands", t("dashboard.commands")]');
+    expect(composer).not.toContain('toolMenuSection === "commands"');
+  });
+
+  test("a skill chip is sent as a plain instruction to use that skill", () => {
+    const route = read("react-app/shell/session-route.tsx");
+    expect(route).toContain("parts.push({ type: \"text\", text: skillRunPrompt(part.name) });");
+    expect(route).not.toContain("Load [skill");
+    // The sent message shows the skill as a chip again.
+    const list = read("components/chat/message-list.tsx");
+    expect(list).toContain("Use the `[^`]+` skill\\.");
+  });
+});
