@@ -42,4 +42,13 @@ describe("artifact live refresh", () => {
     const image = deriveOpenTargets(messages).find((target) => target.value === "artifacts/a-red-square.png");
     expect(image?.preview).toBe("image");
   });
+
+  // With #174 the mp3 also previews as "audio"; on its own it is an artifact that opens in the OS app.
+  test("the engine's speech tool counts as a write, and its mp3 becomes an artifact", () => {
+    const messages = [
+      tool("c1", "speech_generate", "output-available", { text: "Hello" }, "Saved artifacts/hello.mp3: 5 characters spoken with elevenlabs/eleven-multilingual-v2 (sarah)."),
+    ];
+    expect(completedWritesFingerprint(messages)).toBe("c1");
+    expect(deriveOpenTargets(messages).map((target) => target.value)).toContain("artifacts/hello.mp3");
+  });
 });

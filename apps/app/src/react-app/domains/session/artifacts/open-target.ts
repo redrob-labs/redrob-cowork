@@ -48,6 +48,8 @@ const WRITE_TOOL_NAMES = new Set([
   "multi_edit",
   "multiedit",
   "patch",
+  // The engine's speech tool, likewise, for the mp3 it saves.
+  "speech_generate",
   "str_replace_editor",
   "write",
   "write_file",
