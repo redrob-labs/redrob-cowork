@@ -50,10 +50,10 @@ The text sent to every model, verbatim. Self-contained: all data the task needs 
 
 ## Running them
 
-`run.mjs` sends each task's prompt, unchanged, to every model the guide ranks for that task on Redrob Cowork. Each call uses the model's ranked thinking level, the language's system line, and up to 24,000 output tokens. Each run is written to `outputs/<language>/<profession>/<task>/<model>@<level>.json`, which holds the output, the token usage, the cost Redrob billed and the date.
+`run.mjs` sends each task's prompt, unchanged, to every model the guide ranks for that task on Redrob Cowork. Each call uses the model's ranked thinking level, the language's system line, and up to 48,000 output tokens. Each run is written to `outputs/<language>/<profession>/<task>/<model>@<level>.json`, which holds the output, the token usage, the cost Redrob billed and the date.
 
 - **Spend is capped at $150, the approved amount**, counted over every output already written, so a re-run continues instead of spending again.
-  - Before each call, the runner reserves that call's worst case: its prompt plus 24,000 output tokens at list price, plus 25%. It won't start a call that could take the total past the cap.
+  - Before each call, the runner reserves that call's worst case: its prompt plus 48,000 output tokens at list price, plus 25%. It won't start a call that could take the total past the cap.
   - A failed call that Redrob billed is recorded under `outputs/_failed/` so it still counts toward the total.
 - **Order:** every task's #1 in all three languages, then every #2, and so on. If the cap is reached, the samples missing are for lower-ranked picks.
 - **Running it:** the `model-guide-samples` workflow runs it with the repository's `REDROB_API_KEY`. Changing `capUsd` in `run-request.json` on `feat/guide-samples` starts it. It commits outputs every 30 runs. Locally: `REDROB_API_KEY=... node scripts/model-guide/samples/run.mjs --allow-data-share --deadline 540`.

@@ -29,7 +29,7 @@ const DRY = process.argv.includes("--dry-run");
 const CONCURRENCY = Number(arg("--concurrency", 6));
 const BASE = process.env.REDROB_BASE_URL ?? "https://console.redrob.ai/api/backend/v1";
 /** Visible answer plus thinking. A run that hits it is kept and marked cut. */
-const MAX_OUTPUT_TOKENS = 24000;
+const MAX_OUTPUT_TOKENS = 48000;
 /** Stop after this many calls, so a CI job can commit what it has in batches. */
 const MAX_RUNS = Number(arg("--max-runs", Infinity));
 /**
@@ -38,6 +38,8 @@ const MAX_RUNS = Number(arg("--max-runs", Infinity));
  * models are skipped unless `--allow-data-share` is passed.
  */
 const ALLOW_DATA_SHARE = process.argv.includes("--allow-data-share");
+/** Stream each answer (`--stream`), so a long one keeps its connection alive; see `streamOnce`. */
+const STREAM = process.argv.includes("--stream");
 /**
  * Seconds after which no new call starts; calls already in flight finish (each is bounded at 240 s per
  * try). So a run inside a time-limited shell ends cleanly instead of being killed with paid calls open.
@@ -156,12 +158,22 @@ async function call(job, prompt) {
   let cost = 0;
   for (let attempt = 1; ; attempt++) {
     const started = Date.now();
-    // Redrob ends an upstream call at 120 s; anything still open well past that is a dead connection.
+    if (STREAM) {
+      const result = await streamOnce(job, body);
+      cost += result.cost;
+      if (result.json) return { json: result.json, ms: Date.now() - started, cost };
+      // A dropped stream gets one retry; a refusal (4xx) none.
+      if (attempt >= 2 || (result.status >= 400 && result.status < 500 && result.status !== 429))
+        return { error: result.error, json: {}, cost };
+      await new Promise((r) => setTimeout(r, 3000));
+      continue;
+    }
+    // Redrob ends an upstream call at 10 minutes; anything still open well past that is a dead connection.
     const response = await fetch(`${BASE}/chat/completions`, {
       method: "POST",
       headers: { authorization: `Bearer ${process.env.REDROB_API_KEY}`, "content-type": "application/json" },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(240_000),
+      signal: AbortSignal.timeout(660_000),
     }).catch((error) => ({ ok: false, status: 599, json: async () => ({ error: { message: String(error?.message ?? error) } }) }));
     const json = await response.json().catch(() => ({}));
     cost += billed(job, json);
@@ -173,6 +185,76 @@ async function call(job, prompt) {
     if (!retry) return { error: `${response.status} ${JSON.stringify(json).slice(0, 300)}`, json, cost };
     await new Promise((r) => setTimeout(r, 2000 * attempt * attempt));
   }
+}
+
+/**
+ * One call as a stream. A long answer arrives as it is written, so the connection never sits idle long
+ * enough for a proxy to drop it, and Redrob's last chunk carries `usage` and `redrob.costUsd` as the JSON
+ * reply does. Returns the same shape as a JSON reply, or the error and an estimate of what was billed:
+ * a stream that broke after text arrived was being generated, so its visible text is charged at list
+ * price, times 1.5 for thinking that is not streamed.
+ */
+async function streamOnce(job, body) {
+  let response;
+  try {
+    response = await fetch(`${BASE}/chat/completions`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${process.env.REDROB_API_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({ ...body, stream: true, stream_options: { include_usage: true } }),
+      signal: AbortSignal.timeout(660_000),
+    });
+  } catch (error) {
+    return { status: 599, error: `599 ${String(error?.message ?? error)}`, cost: 0 };
+  }
+  if (!response.ok) {
+    const json = await response.json().catch(() => ({}));
+    return { status: response.status, error: `${response.status} ${JSON.stringify(json).slice(0, 300)}`, cost: billed(job, json) };
+  }
+  let text = "";
+  let final = null;
+  let finish = null;
+  let buffer = "";
+  const decoder = new TextDecoder();
+  try {
+    for await (const piece of response.body) {
+      buffer += decoder.decode(piece, { stream: true });
+      let at;
+      while ((at = buffer.indexOf("\n")) >= 0) {
+        const line = buffer.slice(0, at).trim();
+        buffer = buffer.slice(at + 1);
+        if (!line.startsWith("data:")) continue;
+        const data = line.slice(5).trim();
+        if (data === "[DONE]") continue;
+        let chunk;
+        try {
+          chunk = JSON.parse(data);
+        } catch {
+          continue;
+        }
+        if (chunk.error) throw new Error(chunk.error.message ?? JSON.stringify(chunk.error));
+        const delta = chunk.choices?.[0]?.delta?.content;
+        if (delta) text += delta;
+        if (chunk.choices?.[0]?.finish_reason) finish = chunk.choices[0].finish_reason;
+        if (chunk.usage || chunk.redrob) final = chunk;
+      }
+    }
+  } catch (error) {
+    const p = price[job.catalogueId];
+    const estimate = text ? (1.5 * (text.length / 3) * p.outputPricePerMillionUsd) / 1e6 : 0;
+    return { status: 599, error: `599 stream broke after ${text.length} chars: ${String(error?.message ?? error)}`, cost: estimate };
+  }
+  if (!final) {
+    const p = price[job.catalogueId];
+    const estimate = text ? (1.5 * (text.length / 3) * p.outputPricePerMillionUsd) / 1e6 : 0;
+    return { status: 599, error: `599 stream ended without usage after ${text.length} chars`, cost: estimate };
+  }
+  const json = {
+    model: final.model,
+    choices: [{ message: { role: "assistant", content: text }, finish_reason: finish ?? "stop" }],
+    usage: final.usage,
+    redrob: final.redrob,
+  };
+  return { json, cost: billed(job, json) };
 }
 
 /**

@@ -1,11 +1,11 @@
 {
  "planned": 738,
- "written": 523,
- "cut": 0,
- "filtered": 9,
- "failedBilled": 0,
- "spentUsd": 71.3748,
- "capUsd": 150,
+ "written": 572,
+ "cut": 7,
+ "filtered": 11,
+ "failedBilled": 1,
+ "spentUsd": 107.7669,
+ "capUsd": 145,
  "stopped": null,
  "complete": false
 }
