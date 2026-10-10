@@ -47,3 +47,31 @@ You are the employee relations lead at Harbor Point Medical Supply's distributio
 - Spots the retaliation sequence: the draft moved three people before the complaint, but Roe cut it to Major alone about 17 hours after HR notified him. Marks retaliation Substantiated or explains carefully why not, and doesn't accept the "operational call" explanation without testing it against seniority records.
 - Gives Miles's unnamed second-hand account little or no weight, and says why.
 - Recommends concrete remedies: reverse Major's schedule change, remove Roe from supervising her or from any scheduling decisions about her, discipline proportionate to the findings, and follow-up check-ins. Lists open items such as verifying seniority records and checking for further retaliation.
+
+## Card
+
+brief: A picker accused her supervisor of harassment and retaliation; write the investigation report, with a finding on each allegation, for operations and counsel.
+given:
+- Complaint: Mary Major's Sept 22 email describing two incidents
+- Timeline and records: 6 entries, including an expense receipt, a Slack DM and schedule-form edits
+- Interview notes: summaries from 5 people, including the complainant and the supervisor
+- Code of Conduct: harassment, retaliation and evidence-standard excerpts (4.1, 4.6, 9.2)
+asked:
+- Summary of findings
+- Scope and method
+- Allegations
+- Evidence and credibility assessment
+- Findings on the Sept 10 remark, the Sept 18 conduct and the schedule change, each labelled
+- Recommended actions, including immediate remedies for the complainant
+- Open items
+limit: Under about 1,200 words, as a Markdown report with headed sections
+hard: Accounts conflict with the records, credibility must be weighed under a preponderance standard, and uneven evidence makes each label a judgement call.
+
+## Scorecard
+
+- Roe's own receipt and Sept 19 Slack DM disprove his dinner denial; treated as an overall credibility hit
+- Sept 18 conduct Substantiated (Stiles, receipt, DM); Sept 10 remark given a label with stated reasoning
+- Retaliation: Roe narrowed the move to Major alone ~17 hours after notice; label reasoned, seniority claim tested
+- Gives Miles's unnamed, second-hand account little or no weight, and says why
+- Remedies: reverse Major's schedule change, remove Roe from her supervision or scheduling, proportionate discipline, check-ins
+- Open items include verifying seniority records and checking for further retaliation

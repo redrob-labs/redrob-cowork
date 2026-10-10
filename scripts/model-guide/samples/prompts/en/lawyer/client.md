@@ -54,3 +54,30 @@ Handle the cc and the forwarded memo appropriately. Keep it under about 1,200 wo
 - Spots that Proposal 2's general release covering "parents … and affiliates" would wipe out the separate $400,000 Pier 9 guaranty claim against Crescent Holdings, so its real value is lower. Also notes the credit risk of installments, compared with Proposal 1's immediate judgment.
 - Explains the cost-shifting consequence of rejecting the 3221 offer and failing to beat it, without overstating it: "costs" means statutory costs, not attorneys' fees.
 - Removes Richard Miles from the thread or advises against copying him, and explains the risk that sharing privileged advice and the strategy memo with a third party waives privilege. Gives a clear recommendation and counter strategy, for example accepting or countering Proposal 2 with a carve-out for Pier 9 and security for the installments.
+
+## Card
+
+brief: Email the client's CEO advising on two settlement proposals against going to trial in a contract case, and ask for her decision.
+given:
+- The case in brief: claim, counterclaim, schedule, win odds, fees and an unfiled guaranty claim
+- Supply Agreement §11.3: a damages exclusion
+- Proposal 1: a CPLR 3221 offer, with CPLR 3221 and 5004 excerpted
+- Proposal 2: a settlement letter with installments, a release and confidentiality
+- CEO's email: her assumed deadline, a counter idea, and a third party copied
+asked:
+- The real deadlines, with dates
+- Both proposals and trial compared, with expected-value arithmetic
+- What each proposal costs beyond the dollar figure
+- A recommendation and counteroffer strategy
+- What you need from her, and by when
+limit: Under about 1,200 words, an email in Markdown (subject line, then body), plain English, no case citations
+hard: A deadline must be worked out from a rule, contract and release wording change the value, privilege needs care, and the advice is a judgement call.
+
+## Scorecard
+
+- 3221 acceptance due Thursday, Nov 13, 2025, not month-end; Proposal 2 open to Nov 21; decision before Nov 13
+- §11.3 likely bars the $300,000 lost profits; trial EV ≈$0.9M with 9% interest; both offers compare well
+- Proposal 2's affiliate release would waive the $400,000 Pier 9 guaranty; installment credit risk noted
+- Rejecting the 3221 offer and not beating it shifts statutory costs, not attorneys' fees
+- Removes or warns off Richard Miles: sharing advice and the memo risks waiving privilege
+- Clear recommendation and counter, e.g. Proposal 2 with a Pier 9 carve-out and installment security

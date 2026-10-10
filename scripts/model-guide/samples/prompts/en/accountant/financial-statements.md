@@ -57,8 +57,31 @@ State any presentation judgement you make, such as how the CEO loan and the accr
 
 ## A strong answer
 
-- Net loss is $1,614k (3,460 − 5,074). Total assets of $2,634k equal liabilities of $3,228k plus a stockholders' deficit of $594k (4,200 − 3,180 − 1,614).
+- Net loss is $1,614k (3,460 − 5,074). Total assets of $2,634k equal liabilities of $3,228k plus a stockholders' deficit of $594k (4,200 − 3,180 − 1,614). An answer that books the $30k interest correction instead (loss $1,584k, deficit $564k, liabilities $3,198k) is equally right, provided the statements still tie.
 - Splits deferred revenue into $740k current and $280k noncurrent and the lease liability into $96k current and $240k noncurrent. The notes and accrued interest are noncurrent, since they are due 30 June 2026, more than 12 months after year end, and the answer says so.
 - Notices that note interest should be $90k (1,500 × 8% × 9/12), not the $120k booked, and raises the $30k difference as an open item with a proposed reclassification or correction.
 - Concludes there is substantial doubt about going concern: about 10.5 months of runway ($1,467k ÷ $140k) inside the one-year window, the customer loss and no signed term sheet. Discloses management's plans without saying the doubt is alleviated.
 - Treats the CEO loan as a related-party disclosure. Questions its classification (noncurrent, or a possible contra-equity presentation) and flags the missing board approval. The customer loss is a nonrecognized subsequent event.
+
+## Card
+
+brief: Prepare year-end US GAAP statements and short notes for a venture-backed SaaS company, and list open items for the controller.
+given:
+- Company: private, calendar year, statements to be issued 31 March 2025
+- Adjusted trial balance: 23 accounts at 31 December 2024, in $000
+- Controller's facts: 6 notes on deferred revenue, the lease, convertible notes, a CEO loan, cash burn and a customer
+asked:
+- A classified balance sheet and a statement of operations, in $000, with totals that tie
+- Short notes: going concern, revenue, leases, convertible notes, related party, subsequent events
+- Open items for the controller, including trial-balance figures that disagree with the facts
+limit: Up to about 1,200 words, in Markdown
+hard: Balances must be classified by maturity, recorded figures must be tested against the stated terms, and going concern and an unusual loan need presentation judgements.
+
+## Scorecard
+
+- Statements tie: loss $1,614k, deficit $594k as booked (or $1,584k and $564k if corrected)
+- Deferred revenue $740k current, $280k noncurrent; lease $96k/$240k; notes and accrued interest noncurrent
+- Flags note interest should be $90k (1,500 × 8% × 9/12), not $120k; proposes treating the $30k
+- Concludes substantial doubt: ~10.5 months' runway, customer loss, unsigned term sheet; doubt not alleviated
+- Discloses the CEO loan as related party, questions its classification, flags missing board approval
+- Treats the customer's non-renewal as a nonrecognized subsequent event

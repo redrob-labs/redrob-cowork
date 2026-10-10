@@ -56,3 +56,28 @@ No sales tax applies to these services. Halyard's next invoice number is INV-015
 - Doesn't chase Tern Studios. Matches the 3 Mar $2,300 deposit to INV-0139 (the reference typo "0193" is likely "0139"), marks it paid or confirms it, and flags the reference mismatch.
 - The Pellworth email is firm and cites the contractual late fee, about $126 (1.5% × 2 full months on $4,200, 64 days overdue), with a clear deadline and next step. The Saltgrass email is polite, adds no late fee (there's no clause), and re-issues the invoice with PO 77-3310.
 - The invoice is complete and professional: unique number, dates, terms, payment details, and figures that add up.
+
+## Card
+
+brief: Issue a video studio's final invoice for a delivered brand film, handle a change order, and chase the overdue accounts appropriately.
+given:
+- Marlow Bikes SOW: fixed fee, deposit, change-order rule, expense rules and payment terms
+- Marlow job file: the deposit invoice, 2 change orders and 4 expenses
+- Accounts receivable: 3 open invoices with due dates, late-fee clauses and notes
+- Bank deposits: 2 deposits since 1 March
+asked:
+- Invoice INV-0152 to Marlow Bikes, complete, showing how each line was calculated
+- An email to Jane Doe sending the invoice and handling CO-2
+- A collection email, up to 150 words, for each overdue invoice that should be chased
+- An updated AR table with each status and the next follow-up date
+limit: Up to about 1,200 words, in Markdown
+hard: Contract terms decide what is billable, payment records must be matched before chasing, and tone must fit each client and contract.
+
+## Scorecard
+
+- INV-0152 totals $11,693.60: $9,000 balance + CO-1 $1,400 + expenses $1,176 × 1.10 = $1,293.60
+- Excludes the $212 meals; due 25 March (net 15); shows the $9,000 deposit as received
+- CO-2 not billed (no Jane Doe approval); email asks her to approve $700 for 0.5 day
+- Doesn't chase Tern: matches 3 Mar $2,300 to INV-0139, flags the "0193" reference mismatch
+- Pellworth firm with ≈ $126 late fee (1.5% × 2 months × $4,200); Saltgrass polite, no fee, PO 77-3310
+- Invoice complete and professional: unique number, dates, terms, payment details, figures add up

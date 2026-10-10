@@ -47,3 +47,29 @@ You are an enterprise AE at Parcelwise, which sells returns-management software 
 - The value math is labelled and correct: $240M ÷ $96 ≈ 2.5M orders, × 22% ≈ 550,000 returns, × $14 ≈ $7.7M a year in processing cost. Parcelwise's 20–30% benchmark gives about $1.5–2.3M of potential savings. These are presented as estimates to validate, and the 15% exchange conversion is noted as upside.
 - Uses the CRM history well: the 2024 loss reason was the in-house tool and budget, and the champion has left. The new triggers that change the situation are the job posting to replace the homegrown portal, the new CEO and the resale launch. The recommended entry is John Stiles (the COO, who owns the new hire) and/or Mary Major (via the Tamarack Goods connection), with a justification.
 - Gives a concrete first move and discovery questions that test the assumptions (actual cost per return, the exchange process, the evaluation timeline, resale grading needs).
+
+## Card
+
+brief: Turn mixed research results and CRM history into an account brief for re-opening a lost apparel prospect, with value math and a first move.
+given:
+- Search results and sources: 8 items of mixed date, relevance and type
+- Parcelwise CRM: the 2024 closed-lost opportunity and the former champion
+- Parcelwise proof points: cost, exchange and grading benchmarks
+asked:
+- A company snapshot of current facts with source numbers, trusted vs discarded
+- "Why now" triggers, ranked
+- The buying committee, the entry point and how to handle the previous loss
+- A value hypothesis with the calculation, inputs labelled as Ridgeback's or Parcelwise's
+- Risks and unknowns
+- A first move (channel, person, angle) and five discovery questions
+limit: Up to about 1,200 words, in Markdown
+hard: The sources include outdated, irrelevant and generic data to sift, and the value case must keep the prospect's own figures apart from benchmarks.
+
+## Scorecard
+
+- Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2025 $240M; 2023 article treated as outdated
+- Discards source 5 (a UK company); uses Ridgeback's 22% return rate, not the 32% average
+- Value math: $240M ÷ $96 ≈ 2.5M orders × 22% × $14 ≈ $7.7M; 20–30% ≈ $1.5–2.3M
+- Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside
+- Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch
+- Enters via John Stiles and/or Mary Major (Tamarack link), justified; concrete first move; assumption-testing questions

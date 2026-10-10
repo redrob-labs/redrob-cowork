@@ -60,3 +60,29 @@ Keep the written parts under about 1,200 words. The JSON-LD doesn't count toward
 - Corrects the AI answers with an FAQ entry stating plainly that the technician app works offline and the office web app does not. The page includes a quotable fact table (price per user, QuickBooks Online, offline mode) that mirrors the comparison format in the AI overview.
 - Targets "hvac scheduling software" and "hvac dispatch software" in the title, H1 and H2s. Resolves the cannibalisation with a specific plan, such as repositioning the blog post for informational intent and linking it to the product page with exact-match anchor text.
 - The title is 60 characters or fewer and the meta description 155 or fewer, with accurate counts. The JSON-LD is valid and matches the page (price, offer, FAQ text), and the survey claim is attributed (n = 210, March 2025).
+
+## Card
+
+brief: Rewrite an HVAC software product page so it ranks better and answer engines quote it accurately, using search data and current product facts.
+given:
+- Search Console data: 7 queries with impressions, clicks, CTR and position
+- Blog post note: a second URL ranking for the main query
+- Current page excerpt: title tag, H1 and intro copy
+- Product facts: pricing, scheduling, integrations, offline, customers and a survey, as of November 2025
+- Answer-engine snapshot: 2 current AI answers, on the category and the product
+asked:
+- Title tag (≤60 characters) and meta description (≤155), with counts
+- Rewritten page: H1, intro, H2s, fact table and a 5–7 question FAQ
+- FAQPage and SoftwareApplication JSON-LD
+- Blog and internal-linking plan, at most 5 bullets
+- Rationale of at most 150 words
+limit: Written parts under about 1,200 words, in Markdown; the JSON-LD doesn't count
+hard: Existing copy and third-party answers must be checked against current facts, two pages compete, and query targeting is a judgement call.
+
+## Scorecard
+
+- Fixes price ($39 annual / $49 monthly, not "from $29"), trial not free plan, QuickBooks Online only; superlatives cut
+- Answers "hvac scheduling app free" honestly with the 14-day trial, explained in the rationale
+- FAQ: technician app works offline, office web app doesn't; fact table has price, QuickBooks Online, offline
+- Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product
+- Title ≤60, meta ≤155, counts accurate; JSON-LD valid and matches page; survey attributed (n = 210, March 2025)

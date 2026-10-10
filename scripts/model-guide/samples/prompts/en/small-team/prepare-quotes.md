@@ -57,3 +57,29 @@ You work at Bluewick IT, a five-person managed IT services company. Prepare a qu
 - The totals are correct for the prices used. Labour is 41 h × $125 = $5,125 plus 10% PM = $5,637.50. With policy pricing, the one-off total is about $18,838.50. Recurring costs are shown separately: support at 11 × $95 = $1,045/month, cloud backup at $150/month and the firewall subscription at $420/year.
 - Addresses the $15,000 budget with options or phases, and prioritises the backup appliance, cloud backup and firewall in phase 1, given the 4-month-old last backup and the patient data.
 - Uses compliant language (a BAA is offered, and the solution supports HIPAA obligations rather than "HIPAA compliant") and includes the 30-day validity and the 50% hardware deposit terms.
+
+## Card
+
+brief: Quote a dental practice's PC, network, backup and managed-support project under the IT firm's pricing policy and the client's budget.
+given:
+- Client email: the requested scope and a budget of about $15,000
+- Site survey notes: users, PCs in use, network, backup state and monitors
+- Price list: cost and list sell for 7 items
+- Labour and services: hourly rate, hours per task, project management and managed support
+- Quoting policy: margin minimum, terms and HIPAA wording rules
+asked:
+- A quote: summary, scope, one-off and recurring cost tables, totals, assumptions, exclusions and terms
+- Options or phases if the scope exceeds the budget, with a recommendation
+- A cover email to Mary Major, up to 150 words
+- An internal note to the owner, up to 100 words, on pricing or scope issues
+limit: Up to about 1,200 words, in Markdown
+hard: The request, survey and price list don't all agree with each other or with policy, and the budget forces a prioritisation call.
+
+## Scorecard
+
+- Spots ~25% markup, not margin: PC (899 − 720) ÷ 899 ≈ 19.9%; every hardware line under 25%
+- Re-prices at cost ÷ 0.75 (PC $960, AP ≈ $347, firewall $640, switch $720, backup $1,200) or flags it
+- Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained
+- Labour $5,637.50 (41 h × $125 + 10% PM); one-off ≈ $18,838.50; recurring $1,045 + $150/month, $420/year
+- Phases to the $15,000 budget, with backup appliance, cloud backup and firewall first
+- Offers a BAA, says "supports HIPAA obligations", never "HIPAA compliant"; 30-day validity, 50% hardware deposit

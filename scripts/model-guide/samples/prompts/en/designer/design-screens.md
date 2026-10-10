@@ -75,3 +75,29 @@ Available slots returned by the API for Thursday:
 - Shows the "from $280" dental price honestly (for example, "from $280, final quote at visit") and gives a reason, which is in tension with the PM's no-surprises rule.
 - The prototype runs as a single file at 375 px, works with a keyboard (visible focus, labelled controls, tap targets of at least 24 px), makes the common services quick to reach, and offers "Any available vet".
 - The rationale for one screen versus separate steps is tied to the 70% fast-path requirement.
+
+## Card
+
+brief: Design and prototype a mobile vet-appointment booking flow at 375 px from brand tokens, clinic data and API slots, meeting WCAG 2.2 AA.
+given:
+- Brand tokens: 8 colour, radius and type tokens, plus the button-colour instruction
+- Clinic hours: Monday to Saturday, 09:00–17:00, with a lunch closure
+- Services: 4 services with duration, price and who can perform them
+- Vet schedules: 2 vets and their working days
+- Thursday slots: 6 slots returned by the API
+- PM requirements: 4 rules on price, fast common services, any vet and confirmation details
+asked:
+- A single-file HTML/CSS/JS prototype using the slot data, showing only bookable slots
+- A design rationale: one screen or steps, the "from" price, and departures from brand instructions
+- A list of data problems and how the UI or API should handle each
+limit: Up to about 1,200 words of prose, in Markdown; the code may run longer
+hard: A brand instruction must be weighed against the accessibility requirement, API data must be checked against the clinic's rules, and an open-ended price tests the no-surprises goal.
+
+## Scorecard
+
+- Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained
+- Drops Miles's exotic slot, 12:30 (lunch), 11:30 dental (runs into lunch), 16:45 wellness (past 17:00)
+- Explains why each dropped slot is invalid and recommends fixing them in the API
+- Shows "from $280" honestly, e.g. with a final-quote note, and addresses the no-surprises tension
+- Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers "Any available vet"
+- Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings

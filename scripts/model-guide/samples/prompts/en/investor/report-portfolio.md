@@ -55,3 +55,30 @@ After the letter, add a short internal note to John Doe (at most 150 words) expl
 - Computes NAV of $94.5M at Jun 30 and $86.4M at Sep 30. TVPI is (94.5 + 9.6) ÷ 78.0 = 1.33x at Jun 30 and (86.4 + 9.6) ÷ 78.0 = 1.23x at Sep 30; DPI 0.12x; RVPI 1.21x at Jun 30 and 1.11x at Sep 30.
 - States plainly that TVPI fell this quarter, contradicting the draft's "1.43x … up from last quarter". Explains the Clearpath wind-down and the Brine markdown candidly and without spin.
 - The internal note lists each correction (paid-in capital, the Dovetail mark, the Clearpath mark, the performance line) with the policy reason for each.
+
+## Card
+
+brief: Write the Q3 2025 letter to Fund II's limited partners, checking the managing partner's draft performance line and proposed marks against records and policy.
+given:
+- Draft line: John Doe's TVPI and paid-in capital claim
+- Fund records: paid-in capital, a capital call notice, distributions, fees and cash
+- Portfolio and proposed marks: 8 companies with cost, Jun 30 value, proposed Sep 30 value and Q3 event
+- Valuation policy: an excerpt on write-ups and write-downs
+asked:
+- Summary
+- Fund performance table (paid-in, distributions, NAV, TVPI, DPI, RVPI) at both dates, with formulas
+- Portfolio update per company, with Sep 30 marks
+- Write-downs and notable changes
+- Upcoming capital call
+- Outlook
+- An internal note to John Doe explaining each change
+limit: Under about 1,200 words in total, internal note at most 150 words, in Markdown; multiples to two decimals
+hard: A draft must be checked against the records, a valuation policy applied to each mark, and bad news told plainly.
+
+## Scorecard
+
+- Paid-in $78.0M at both dates, not $81.0M; the $3.0M call due Oct 15 disclosed separately
+- Marks per policy: Dovetail held at $6.0M, Clearpath about $0.4M, Gild $12.0M, Brine $4.5M
+- NAV $94.5M / $86.4M; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x
+- States TVPI fell, contradicting "1.43x … up"; explains Clearpath and Brine candidly
+- Note to Doe lists paid-in, Dovetail, Clearpath and headline corrections, each with its policy reason

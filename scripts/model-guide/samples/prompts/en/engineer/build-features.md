@@ -76,3 +76,27 @@ export function priceCart(cart: Cart) {
 - Prices the sample cart with only the Plus discount applied to the $35.46 of non-alcohol items, tax only on the dish soap and the IPA, and line results that sum exactly to the totals in cents.
 - Implements fixed-discount proportional allocation with remainder handling, caps the discount at the eligible amount, and makes the date check inclusive.
 - The tests are meaningful, cover each reason code, case-insensitivity, the alcohol exclusion, HOME15 scoped to household items, and rounding at half-cent boundaries, and would pass against the code as written.
+
+## Card
+
+brief: Add promo codes to a grocery app's TypeScript cart-pricing module, following a spec with legal and tax rules, with tests.
+given:
+- Current module: pricing.ts with its types and a priceCart function
+- Spec: 8 rules from the PM, finance and legal, including a 3-code promo table
+- Sample cart: 5 items across grocery, household and alcohol, for a Plus member
+asked:
+- A new typed pricing.ts with the code table as data and a per-line breakdown in cents
+- A Vitest test file covering the rules, including rounding and allocation edge cases
+- The priced sample cart for a Plus member with fresh10 on 2025-07-02
+- A list of bugs in the current module and the spec ambiguities resolved
+limit: Up to about 1,200 words of prose, in Markdown; the code may run longer
+hard: The existing code has defects, the rules interact (eligibility, discount order, per-line tax), cent rounding must sum exactly, and the spec leaves ambiguities to resolve.
+
+## Scorecard
+
+- Lists the bugs: float dollars, member discount on alcohol, tax on groceries, whole-cart tax
+- Rejects FRESH10 with below_minimum: eligible subtotal $35.46 (cart $47.45) is under $40
+- States whether the minimum is checked before or after the member discount
+- Applies only the Plus discount to $35.46, taxes only soap and IPA; lines sum to totals in cents
+- Proportional fixed-discount allocation with remainders, capped at the eligible amount; inclusive date check
+- Passing tests cover each reason code, case-insensitivity, alcohol exclusion, HOME15 scope and half-cent rounding

@@ -57,3 +57,27 @@ Top beta ticket themes: "didn't understand the round-up setting" (41% of tickets
 - Reports the beta honestly: goal creation at 31% is below the 40% target and tickets at 22 per 1,000 exceed the limit of 15. Positives (deposit size, retention) are presented without spin, and the ticket themes are linked to fixes.
 - Ends with a clear decision request with options (for example, move the launch to mid-December or January, or a soft launch to a limited audience if Larchmont allows it, plus budget approval or descoping) and a justified recommendation.
 - Keeps to 6–8 slides with a speaker note on each. The deck reads at executive level with the bottom line first, and the note to Jane is factual and non-blaming.
+
+## Card
+
+brief: Build a steering-committee deck on a banking savings feature rated green by its team lead, with a cover email and a note to her.
+given:
+- Project facts: 1 Dec 2026 launch, 7 of 10 months elapsed, the partner bank's 4-week review rule
+- Milestones: 5 milestones with planned and forecast dates, all rated green
+- Budget: approved budget, spend to date, monthly run-rate and reported forecast
+- Beta results: 4 metrics against targets for 2,400 users, plus the top ticket themes
+asked:
+- A 6–8 slide deck: bottom line first, honest RAG status, a decision with options and a recommendation
+- A cover email, up to 120 words
+- A note to Jane Doe, up to 100 words, on any status changed and why
+limit: Up to about 1,200 words, in Markdown, slide by slide with a speaker note each
+hard: The status report must be tested against the stated rule and figures, and any bad news given plainly to executives and tactfully to its author.
+
+## Scorecard
+
+- Recomputes forecast at completion ≈ $650,000 ($455k + 3 × $65k), not $590,000: ≈ $50,000 (8%) over
+- Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green
+- Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000
+- Presents deposit size and retention without spin, and links the ticket themes to fixes
+- Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation
+- 6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming

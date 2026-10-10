@@ -59,3 +59,30 @@ Video links: use the placeholders `https://meet.example.com/<id>`.
 - Puts Richard Roe on Wed 28 Oct, because the one-session-per-day rule means Tuesday's interviewers are taken by Miles, who has no other day. Every Roe session falls within all participants' hours, and Stiles avoids his 13:00–13:30 UTC standup.
 - Arranges the accommodation (live captions, the coding prompt shared in writing, 30-minute breaks) and tells the panel only what to set up, without disclosing that Miles is hard of hearing, as he asked.
 - The candidate emails are clear, warm and correct in local time, with links and what to expect. The CRM updates reflect the scheduled stage and the dates.
+
+## Card
+
+brief: Schedule same-day final video loops for two candidates across four time zones in late October 2026, then write the emails, panel note and CRM updates.
+given:
+- Loop format: three 45-minute sessions, 15–30-minute breaks, working hours, one session per interviewer per day
+- Interviewers: 3, with locations and busy times
+- Candidates: 2, with locations and available days
+- Email from Richard Miles: his accommodation requests
+- CRM: the current stage for both candidates
+asked:
+- A schedule table per candidate in UTC and local times, with each city's UTC offset explained
+- Why these days and slots, including options ruled out
+- A confirmation email to each candidate, up to 180 words, in their own time zone
+- A panel note, up to 120 words, on logistics and the accommodation setup
+- The CRM updates in a table
+limit: Up to about 1,200 words, in Markdown
+hard: Time offsets that week need care, the constraints interlock tightly, and an accommodation must be arranged with discretion.
+
+## Scorecard
+
+- Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5
+- Richard Miles on Tue 27 Oct, from 14:00 UTC, Jane's session within 14:00–16:00 UTC
+- Miles' loop has 30-minute breaks and avoids Mary's 15:00–16:00 UTC block (e.g. 14:00, 15:15, 16:30)
+- Richard Roe on Wed 28 Oct, all sessions in everyone's hours, Stiles clear of 13:00–13:30 UTC
+- Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing
+- Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates

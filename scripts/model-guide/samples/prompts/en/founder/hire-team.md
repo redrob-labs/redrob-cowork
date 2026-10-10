@@ -53,3 +53,29 @@ Make the call that a careful founder would make, and explain it.
 - Excludes Richard Miles's comment about Mary's children from the decision, treats it as an inappropriate and legally risky remark, and sets out a follow-up (a conversation, interviewer training, documentation) without letting it bias the outcome either way.
 - Handles compensation within policy: Mary's $165K ask is above the $155K band ceiling, so the answer proposes options such as the band maximum with more equity or a sign-on bonus, or getting approval for an exception. It also notes Richard's pending reference.
 - The memo and messages are concise and professional, the final recommendation is reasoned rather than based only on the averages, and the email uses placeholders where terms are not yet decided.
+
+## Card
+
+brief: As CEO, decide between two Head of Customer Success finalists, address two interviewers' scorecard issues, and draft the next email.
+given:
+- Scorecards: 8 interviewer scorecards, 4 per candidate, with written notes
+- Backgrounds: each finalist's current employer
+- ATS summary: two averages and a recommendation
+- Other facts: salary asks, availability, references and travel
+- Comp policy: the approved base and equity band and the budgeted base
+asked:
+- A decision memo to John Doe: recommendation or prerequisite, evidence, weighting, risks, offer terms
+- A private message to John Stiles about his scorecard
+- A private message to Richard Miles about his note, and the process follow-up
+- An offer email, or an email asking for the needed step, with placeholders
+limit: Up to about 1,200 words in total
+hard: A system summary needs checking, interviewer input must be tested for reliability and propriety, and a compensation ask must be squared with policy.
+
+## Scorecard
+
+- Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated
+- Spots Stiles's Richard Roe note describing Mary's Brightpath role; if swapped, Mary ~3.56, Richard ~3.38
+- Makes confirming the scores with Stiles a prerequisite, not a guess
+- Excludes Miles's comment on Mary's children as improper and legally risky; sets a follow-up without bias
+- Keeps Mary's $165K ask (above the $155K ceiling) within policy; notes Richard's pending reference
+- Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders

@@ -52,3 +52,31 @@ The PM's draft requirements say: "Peak load is about 2,300 events/s. Delivery mu
 - Sizes storage: about 2.6M attempts per day × 2 KB ≈ 5.2 GB a day, or about 156 GB over 30 days today and roughly 470 GB at 3× growth. Picks a partitioning or TTL approach to match.
 - Solves head-of-line blocking with per-endpoint queues or concurrency limits, short timeouts, and exponential backoff with jitter over 24 hours plus circuit breaking. Addresses per-shipment ordering, for example by keying on shipment ID or including sequence numbers and timestamps.
 - Recommends a queueing option that fits the team (for example the existing managed queue, or a Postgres outbox, rather than a self-hosted log), adds HMAC signing with timestamp and replay protection, and gives a phased migration with SLOs. The slide format is followed.
+
+## Card
+
+brief: Present a redesign of a shipping API's webhook delivery system to engineering leadership, correcting the draft requirements and sizing it.
+given:
+- Current design: a cron job that polls events and POSTs to endpoints one at a time
+- Incident log: 4 problems with delays, retries, history and ordering
+- Numbers: 7 metrics on volume, growth, peak, endpoints, attempts, record size and retention
+- PM's draft requirements: peak load, delivery guarantee and retry window
+- Constraints: team and deadline, current stack and experience, and a signing requirement
+asked:
+- Problem statement and goals or non-goals, correcting the draft requirements
+- Capacity estimates for throughput and storage, with the arithmetic
+- The architecture, with a diagram on one slide
+- Delivery semantics, ordering, retries, isolation, circuit breaking, signing and replay
+- At least two queueing options, with a recommendation and trade-offs
+- Rollout and migration, observability, and the top risks
+limit: 10 to 12 slides, up to about 1,200 words, in Markdown slide format
+hard: The draft requirements must be checked against the numbers and what HTTP can guarantee, and the design must fit a small team's skills and a one-quarter deadline.
+
+## Scorecard
+
+- Computes ~23 events/s average, ~230/s peak, ~700/s peak after 3× growth; calls 2,300/s 10× high
+- Rejects exactly-once over HTTP; proposes at-least-once with stable event IDs and merchant dedup guidance
+- Sizes storage ~5.2 GB/day (2.6M × 2 KB), ~156 GB/30 days, ~470 GB at 3×; partitions or TTL
+- Per-endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking; per-shipment ordering by key or sequence
+- Recommends the managed queue or a Postgres outbox over a self-hosted log; HMAC signing with timestamp
+- Gives a phased migration with SLOs, and a speaker note on every slide

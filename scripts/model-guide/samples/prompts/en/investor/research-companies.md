@@ -52,3 +52,31 @@ Round to the nearest $1M for market figures. Keep the answer under about 1,200 w
 - Rejects the $4.2B figure because it is global, covers hauling, composting and digestion rather than software, and is quoted by the company itself.
 - Annualizes prices correctly ($149 × 12 = $1,788; Scrapless $179 × 12 = $2,148, with the 2021 $99 discarded as stale; Kitchen Ledger $2,400 plus hardware). Treats Kitchen Ledger's Series B as $14M from the primary press release, not the aggregator's $40M.
 - Draws a judgement from the data, for example that Wastewise's institutional skew suits the higher-penetration, lower-churn segment, and that its 14% churn among independent restaurants questions whether full-service belongs in SAM. Turns that into a founder question.
+
+## Card
+
+brief: Size the US market for a seed-stage kitchen food-waste tracking startup and snapshot its competitors, from supplied research of mixed quality.
+given:
+- Restaurant census and institutional review [1]–[2]: US location counts by segment
+- Company blog [3]: a market-size claim and its footnote
+- Analyst note [4]: penetration by segment and limited-service buying
+- Pricing pages and articles [5]: prices for 4 companies, from different years
+- Funding news [6]: latest rounds for 3 competitors, from mixed sources
+- Data room [7]: Wastewise live locations, segment mix and churn
+asked:
+- Bottom-up TAM, SAM and current market, with inputs, formulas and a blended price
+- A top-down cross-check on source [3]
+- Competitor table: annualized pricing, hardware, funding with confidence, implication
+- Source reliability ratings
+- Up to 5 open questions for the founders
+limit: Under about 1,200 words, as Markdown tables; market figures to the nearest $1M
+hard: Sources vary in reliability and sometimes conflict, prices need normalizing, and segment scope is a judgement call.
+
+## Scorecard
+
+- Base 281,960 full-service + 96,000 institutional = 377,960 locations; TAM about $756–813M; limited-service out of SAM
+- Current market: ≈8,459 + 10,560 ≈ 19,000 locations, about $38–41M a year
+- Rejects the $4.2B: global, covers hauling, composting and digestion, and is company-sourced
+- Annualizes BinSight $1,788, Scrapless $2,148 (2021 $99 stale), Kitchen Ledger $2,400 plus hardware
+- Kitchen Ledger's Series B is $14M from the press release, not the aggregator's $40M
+- Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question

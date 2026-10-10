@@ -51,3 +51,29 @@ You are the in-house designer at Tidewater Community Credit Union, a fictional r
 - Includes "Federally insured by NCUA" and the insurance logo at 120 px or wider, the logo at 160 px or wider with clear space, and a headline of at least 64 px on the 1080 px artboard.
 - Provides two valid SVGs at 1080 × 1080 and 1200 × 627 with a clear hierarchy (headline, rate, CTA, disclosures) and brand colours only. The landscape version is recomposed, not just scaled down.
 - The photo direction follows the guide (real members, natural light) while keeping the brief's family idea, and the copy sounds right for 22–35-year-old first-time account holders.
+
+## Card
+
+brief: Design Instagram and LinkedIn launch graphics for a credit union's new checking account from a marketing brief, within compliance and brand rules.
+given:
+- Formats: a 1080 × 1080 Instagram post and a 1200 × 627 LinkedIn image
+- Marketing brief: headline, photo idea, CTA, rate claim and target audience
+- Product sheet: 7 compliance-approved features and fees
+- Compliance rules: rate, insurance and absolute-claim requirements for ads
+- Brand guide: colours, type, logo, insurance logo and photography rules
+asked:
+- Final copy for both formats, with reasons and two alternatives if the headline changes
+- Layout and visual direction for each format, and how it adapts from square to landscape
+- An inline SVG mock-up for each format at true pixel size
+- A short note to Jane on the claims you could not use, and why
+limit: Up to about 1,200 words of prose, in Markdown; the SVGs may run longer
+hard: The brief's copy must be checked against product facts and compliance rules, brand minimums constrain the layout, and two formats need different compositions.
+
+## Scorecard
+
+- Rejects "No fees. Ever." given the $2 paper-statement and $2.50 ATM fees; offers accurate alternatives
+- Shows 2.25% APY with the up-to-$5,000 tier and full disclosure; drops "nobody else locally beats it"
+- NCUA line with insurance logo ≥120 px, logo ≥160 px with clear space, headline ≥64 px at 1080
+- Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only
+- Recomposes the landscape version rather than scaling the square one down
+- Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers

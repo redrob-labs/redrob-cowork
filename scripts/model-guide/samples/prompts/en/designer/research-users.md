@@ -59,3 +59,28 @@ Sent to users who submitted 20 or more expenses last month. Question: "What is y
 - Shows approval delays as the stronger, triangulated theme: 5 of 8 participants raise approval problems (P1, P2, P4, P6, P8), 41% of reports waiting more than 5 days, and only 18% mobile-approval adoption. Receipt capture is a real but narrower problem (6.2% need correction; crumpled receipts and multi-page folios).
 - Recommends approval-flow work (notifications, delegation, policy flags on mobile) as the big bet and tells Richard directly that receipt capture is not the top problem. Receipt-capture edge cases are scoped as a smaller follow-up.
 - Follows the slide format with a speaker note on every slide, cites evidence by ID, and states its limitations (n = 8, survey wording).
+
+## Card
+
+brief: Synthesize interviews, a survey and analytics into a readout deck answering whether receipt capture should be next quarter's big bet.
+given:
+- Stakeholder context: the product lead's question and what he has told the board
+- Interviews: 8 participants with role, company size and a key observation
+- In-app survey: n = 212, one single-choice question, 5 answer shares
+- Product analytics: 6 metrics from the last 90 days
+asked:
+- The research question and method, with honest limitations
+- Three to five themes, each backed by specific evidence
+- A direct recommendation on the big bet, plus one or two smaller follow-ups
+- What to research next to reduce the remaining uncertainty
+limit: 8 to 10 slides, up to about 1,200 words, in Markdown slide format
+hard: Each source must be checked for reliability and bias, the evidence must be triangulated, and the honest answer has to be given whatever the stakeholder expects.
+
+## Scorecard
+
+- Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked
+- Flags survey bias: only heavy submitters (20+ expenses), no approvers
+- Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption
+- Sizes receipt capture as narrower: 6.2% need correction; crumpled receipts and multi-page folios
+- Recommends approval-flow work as the big bet, tells Richard directly; receipt edge cases as follow-up
+- Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)

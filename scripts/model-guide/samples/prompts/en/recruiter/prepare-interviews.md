@@ -53,4 +53,29 @@ John Doe's form header reads "Rating (1 = poor, 5 = exceptional)".
 - Excludes John Doe's scorecard for Richard Roe because the calendar shows that interview was cancelled. Without it, Roe's SAFE average is 2.5, below the 3.0 bar. With the invalid card included it would be exactly 3.0, and the answer notices this.
 - Removes Stiles' comment about Mary Major's children from the decision and flags it as an improper, non-job-related consideration. Recommends asking every finalist the same question about on-call availability. Also flags "reminds me of me at his age" as affinity bias.
 - Advances Mary Major (overall about 3.50; SAFE about 3.17) and Jane Doe (overall about 3.40; SAFE 3.75), with the averages shown and the method reproducible.
-- The final-round plan probes each finalist's weakest area (Mary's SAFE, Jane's COMM) with the same structured questions and behavioural anchors for both.
+- The final-round plan probes each finalist's weakest areas (Mary: OPS ≈ 3.08 after rescaling, and SAFE ≈ 3.17, the one nearest the bar; Jane: COMM) with the same structured questions and behavioural anchors for both.
+
+## Card
+
+brief: Consolidate first-round panel scorecards for three candidates, pick two for the final round, and draft the final-round interview plan.
+given:
+- Process rules: 4 competencies, a 1–4 scale, a 3.0 SAFE bar, valid interviews only
+- Scorecards: 9 forms, 3 per candidate, with interviewer comments
+- Form note: the header on John Doe's rating form
+- Interview calendar: the status of the week's interviews
+asked:
+- A consolidated scorecard on the 1–4 scale, with the method for every computed column
+- An issues log of data-quality and fairness problems and the action on each
+- Who advances and why, including how to answer hiring-manager pushback
+- A final-round plan: interviewers, one structured question per competency with a "4" anchor, probes per candidate
+limit: Up to about 1,200 words, in Markdown
+hard: The scorecards hide data-validity problems and comments that would be discriminatory if acted on, and close averages need a defensible method.
+
+## Scorecard
+
+- Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)
+- Excludes Doe's card for Roe (interview cancelled): Roe's SAFE 2.5, below 3.0; notes it would be 3.0
+- Flags Stiles' remark on Mary's children as improper, ignores it, asks all finalists the same on-call question
+- Flags "reminds me of me at his age" as affinity bias
+- Advances Mary Major (≈ 3.50, SAFE ≈ 3.17) and Jane Doe (≈ 3.40, SAFE 3.75), method reproducible
+- Final round probes each finalist's weakest areas (Mary: OPS, and SAFE near the bar; Jane: COMM), same questions and anchors

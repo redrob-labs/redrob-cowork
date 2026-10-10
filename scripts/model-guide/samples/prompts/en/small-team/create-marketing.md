@@ -46,3 +46,27 @@ The goal is subscription sign-ups. Mary also wants as many locals as possible to
 - Chooses the format from the data and the two goals. The carousel has the best click-through (about 1.5% vs about 0.6% for the reel and the single photo) for sign-ups, and the reel has the best reach. The answer makes the trade-off explicit, for example a carousel as the main post with a reel to support it.
 - Both pieces carry the essentials: the 2 May launch, Saturday 8–11am pickup, $36/month for 4 loaves, the sign-up URL and the first-50 tote offer.
 - The SVG is valid and self-contained at A5 proportions, uses the brand colours, and has a clear hierarchy with legible text sizes and sufficient contrast.
+
+## Card
+
+brief: Create an Instagram post plan and an A5 counter flyer for a bakery's sourdough subscription launch from the owner's brief.
+given:
+- Owner's brief: Mary Major's launch details and claims, word for word
+- Bakery facts: loaf price, ingredient sourcing, how the gluten-free loaf is made, allergens
+- Brand: 3 colours and the font styles
+- Instagram performance: reach, likes, saves and clicks for 3 post types
+asked:
+- An Instagram plan: format and why, slide or scene list, caption up to 120 words, up to 8 hashtags
+- An A5 flyer: copy, layout by zone, visual direction and an inline SVG mock-up
+- A note to Mary, up to 120 words, on wording changed and why
+limit: Up to about 1,200 words in Markdown, excluding the SVG
+hard: The brief's claims must be checked against the bakery's facts, and the format choice balances two goals the data pulls apart.
+
+## Scorecard
+
+- Savings fixed: $36 vs $40 (4 × $10) is 10%, $4 a month, not 25% (or "$9 a loaf")
+- No "100% organic" (seed mix uncertified); uses wording like "made with certified organic flour"
+- No "gluten-free" (shared kitchen, no testing); allergen note included; note to Mary explains both risks
+- Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit
+- Both pieces carry 2 May, Saturday 8–11am pickup, $36/month for 4 loaves, URL, first-50 tote
+- SVG valid at A5 proportions, brand colours, clear hierarchy, legible text sizes, sufficient contrast

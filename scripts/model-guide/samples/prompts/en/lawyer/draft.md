@@ -50,3 +50,24 @@ Keep the whole answer under about 1,200 words. Draft tightly: concise operative 
 - Carves out Orbitmade Core with a perpetual, irrevocable, royalty-free license that is transferable with the app. Restricts open source to pre-approved permissive licenses and prohibits GPL-3.0 components in the distributed app (or requires Fernhill's written approval), explaining the copyleft risk to the source code.
 - Balances acceptance (for example 10 business days, a written rejection with reasons, two cure rounds, and deemed acceptance only after a reminder notice) and the liability cap (for example 12 months of fees or the full contract value, with exclusions for IP indemnity, confidentiality/data breach and wilful misconduct). Explains both in the cover email.
 - Requires prior written approval of subcontractors, flow-down of security and confidentiality obligations, and Orbitmade's responsibility for its subcontractors. On termination, Fernhill receives the source code and work in progress on payment of amounts due. The governing law is New York, with a stated New York venue.
+
+## Card
+
+brief: Draft a New York-law software development and IP assignment agreement for an app build, reconciling the client's term sheet with the agency's markup.
+given:
+- CEO's term sheet: 7 terms, including price, milestones, IP, acceptance and liability
+- Agency's markup: 6 positions, including pre-existing libraries, open source and a liability cap
+- Copyright Act excerpts: 17 U.S.C. §101 (work made for hire) and §204(a)
+asked:
+- The agreement: the 12 listed sections in full, remaining boilerplate by heading
+- A cover email to John Doe on positions that differ from his term sheet and decisions needed
+limit: Under about 1,200 words in total, cover email at most 200 words, in Markdown
+hard: The inputs hide an inconsistency, a statute shapes the IP structure, and both sides' positions must be balanced into signable terms.
+
+## Scorecard
+
+- Milestones total $245,000, not $250,000; gap left as placeholder or assumption and raised in the email
+- App software fits no §101(2) category: present "hereby assigns" under §204(a), work for hire only as backstop
+- Orbitmade Core licensed perpetual, irrevocable, royalty-free, transferable; GPL-3.0 barred or needs Fernhill's approval
+- Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, data, misconduct exclusions
+- Subcontractors need approval, flow-down and Orbitmade liability; source code on termination; New York law and venue

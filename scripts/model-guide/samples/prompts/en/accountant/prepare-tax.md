@@ -58,3 +58,29 @@ Flag any research note you do not rely on, and say why.
 - Uses 4,200 × $0.67 = $2,814 for the vehicle and $1,200 for the home office (240 × $5), keeps the gym out, and moves health insurance to Schedule 1.
 - Arrives at net profit of about $117,375 (141,200 − 23,825), SE tax of about $16,584.56 (117,375 × 0.9235 × 0.153) and a deductible half of about $8,292.28. Expensing the laptop under the de minimis election is justified, and Section 179 is mentioned as the alternative.
 - Flags that a 1099-NEC to John Stiles was due by 31 January 2025 (get a W-9, file late), and suggests asking Bluefin to correct its 1099-NEC.
+
+## Card
+
+brief: Prepare a 2024 Schedule C and self-employment tax workpaper for a consultant's single-member LLC, reconciling receipts and vetting research notes.
+given:
+- Taxpayer: single filer, cash method, single-member LLC
+- Information returns: 3 forms (two 1099-NEC, one 1099-K) with payer notes
+- Bank deposits: the 2024 total, 2 non-income items and the card-fee note
+- Expenses: 9 items from the bookkeeper, some without amounts
+- Research notes: 6 rules the junior pulled together
+asked:
+- A gross-receipts reconciliation tying the information returns to deposits, with methods
+- A Schedule C table with the rule for each line, and where excluded items go
+- The self-employment tax computation and the deductible half
+- Open items and risks, with a laptop recommendation and compliance steps
+limit: Up to about 1,200 words, in Markdown
+hard: Information returns overlap, the research notes must be vetted before use, several items need a rule applied or belong elsewhere, and the laptop is a judgement call.
+
+## Scorecard
+
+- Removes the $18,000 double count: receipts $141,200, tied as 147,379 − 6,000 − 1,400 + 1,221
+- Rejects note 3, deducts 50% of meals ($1,600), nets the refund (software $3,460), deducts $1,221 fees
+- Vehicle $2,814 (4,200 × $0.67), home office $1,200; gym excluded; health insurance to Schedule 1
+- Expenses the laptop under the de minimis election, with Section 179 noted; net profit about $117,375
+- SE tax about $16,584.56 (117,375 × 0.9235 × 0.153); deductible half about $8,292.28
+- Flags the late 1099-NEC to John Stiles (get a W-9) and asks Bluefin to correct its form

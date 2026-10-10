@@ -58,3 +58,28 @@ Round ROAS to two decimal places and money to the nearest dollar. Keep the answe
 - Computes channel ROAS correctly: Meta 0.98, Search 1.58, PMax 1.19 (and lower once brand cannibalisation is considered), TikTok 0.55, Affiliate 2.13, Email 14.00.
 - Shows judgement on attribution: uses the Meta holdout to argue that last-click under-credits Meta, discounts PMax for brand queries, and treats TikTok as the weakest case. Doesn't cut purely on last-click ROAS.
 - The Q4 allocation sums to $139,500, follows from the scorecard, and proposes specific tests, such as a TikTok holdout, PMax with brand exclusions, and a repeat-purchase or LTV view to complement first-order contribution.
+
+## Card
+
+brief: The CMO's board slide sums the ad platforms' own campaign results; reconcile them to store orders, score each channel and recommend the Q4 budget.
+given:
+- CMO's draft headline: conversions, revenue and ROAS
+- Ad platform exports: 6 channels with spend, conversions, revenue and date range
+- Shopify orders by GA4 last-click channel: 7 rows and a total
+- Other facts: margin, an affiliate fee, PMax brand share, a Meta holdout test, a TikTok team comment
+asked:
+- Reconciliation of platform claims against Shopify actuals
+- Channel scorecard: true cost, orders, revenue, ROAS, CAC, contribution and verdict
+- Corrected headline numbers and a one-sentence headline
+- Q4 budget reallocated within the Q3 total, with rationale
+- Caveats and next tests, at most 5 bullets
+limit: Under about 1,200 words, as Markdown tables with every formula stated; ROAS to two decimals
+hard: Self-reported figures overlap and mismatch, a cost sits outside the spend column, and attribution evidence calls for judgement beyond last-click.
+
+## Scorecard
+
+- Platforms' 2,480/$321,500 vs actual 1,640/$213,200: 840 over-attributed (~51%); 2.37× invalid; TikTok window flagged
+- True cost $139,500 with the $4,000 fee; blended ROAS ≈1.53×; contribution −$22,240
+- ROAS: Meta 0.98, Search 1.58, PMax 1.19, TikTok 0.55, Affiliate 2.13, Email 14.00
+- Uses the holdout to argue last-click under-credits Meta; discounts PMax for brand; TikTok weakest
+- Q4 plan totals $139,500, follows the scorecard; tests e.g. TikTok holdout, PMax brand exclusions, LTV view

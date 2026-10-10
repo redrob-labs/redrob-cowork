@@ -50,3 +50,28 @@ Do not invent customers, logos or metrics beyond what is given. Mark anything th
 - Fixes the TAM arithmetic: 12,000 × $48K = $576M, not $5.76B. Notes that $48K equals the current ACV ($816K ÷ 17) and treats it as a bottom-up SAM-style figure. Larger market claims are marked "[source needed]".
 - Sizes the raise from the burn plan (24 months averaging about $240K a month ≈ $5.8M, before any revenue growth), defends roughly $6M or a reasoned alternative, and notes about 8 months of current runway ($1.3M ÷ $160K).
 - The deck tells a coherent story, flags the 58% gross margin as a known risk to address, uses only the data given, and follows the slide format with speaker notes.
+
+## Card
+
+brief: Turn a CEO's draft numbers into a Series A pitch deck that survives diligence, correcting her metrics and justifying the raise.
+given:
+- Draft metrics slide: ARR, NRR, TAM, customers and the raise amount
+- Underlying data: 12 rows, as of June 2025, on MRR, one-time fees, a cohort, margin, cash, burn and pipeline
+- Post-raise plan: team growth, rising burn and the next raise's ARR target
+- Customer quote: one pilot result, used with permission
+asked:
+- A 10–12 slide deck from problem through milestones
+- Corrected metrics, defined as an investor would, with the arithmetic in speaker notes
+- A raise amount justified by the burn plan, and a view on $6M
+- A "corrections for Jane" list explaining each change
+limit: 10 to 12 slides, up to about 1,200 words, in Markdown slide format
+hard: Headline metrics must be recomputed under investor definitions, the market maths needs checking, and the raise must be sized from a burn plan without inventing data.
+
+## Scorecard
+
+- ARR $816K ($68K × 12), excluding $284K one-time fees; notes MRR growth $41K to $68K (~66%)
+- NRR 112% ($33.6K ÷ $30K); 140% includes new customers; checks $33.6K + $34.4K = $68K
+- TAM is $576M (12,000 × $48K), not $5.76B; $48K is current ACV, a SAM-style figure
+- Sizes the raise at ~$5.8M (24 months averaging ~$240K); defends ~$6M; notes ~8 months' runway
+- Flags 58% gross margin as a risk; uses only given data; marks larger claims "[source needed]"
+- Tells a coherent story with a speaker note on every slide

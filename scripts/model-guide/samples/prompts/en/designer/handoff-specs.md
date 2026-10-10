@@ -59,3 +59,28 @@ Requirements from the PM: the Annual toggle is selected by default; switching mu
 - Implements the toggle as an accessible control (radio group, or buttons with aria-pressed), with arrow or Tab keyboard support, a visible focus style and a polite live region or other sensible announcement of price changes. Annual is the default.
 - Avoids layout shift when toggling (reserved space or fixed-width price area, "Billed $X yearly" line always present), and in the stacked layout the Pro card comes first.
 - The code runs as a single file, uses CSS custom properties from the token list, and the spec table is complete enough to build from without the design file.
+
+## Card
+
+brief: Prepare the developer handoff for a pricing section's billing toggle and three plan cards, mapping design values to codebase tokens.
+given:
+- Design inspect notes: toggle, card, price, CTA, feature-list and breakpoint values
+- Design tokens: 14 codebase CSS custom properties for colour, spacing and radius
+- Plan table: 3 plans with monthly, annual and billed prices and features
+- PM requirements: default toggle, no layout shift, the billed line and CTA labels
+asked:
+- A single-file HTML/CSS/JS reference implementation using only codebase tokens, with states and responsive behaviour
+- A spec table mapping every inspect value to a token, with changes called out
+- Accessibility notes: toggle semantics and keyboard, price-change announcements, contrast
+- Open questions or inconsistencies, each with a recommended resolution
+limit: Up to about 1,200 words of prose, in Markdown; the code may run longer
+hard: The pricing copy must be checked arithmetically, design values drift from the token set, and the toggle needs accessible behaviour without layout shift.
+
+## Scorecard
+
+- Flags Pro: $15 × 12 = $180, not $190, and "Save 20%" fails (about 21% or 17%)
+- Confirms Business is consistent ($39 × 12 = $468, about 20%); proposes a fix for Pro
+- Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons
+- Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; Annual default
+- No layout shift on toggle (reserved price area, billed line always present); Pro first when stacked
+- Single-file code runs on token custom properties; spec table is complete enough to build from

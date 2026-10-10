@@ -51,3 +51,30 @@ After the deck, add a short note to Mary listing what you changed on her headlin
 - Explains the take-rate drop with the Bluepeak mix. At 12% of GMV and a 9% rate, Bluepeak pulls the blended rate down by about 0.6 points. Without Bluepeak the rate would be about 14.1%, so Bluepeak explains the whole drop from 14.0% to 13.5% and much of the gap to the 15% plan. Contribution-margin pressure and the restaurant churn are covered too.
 - Drops "On track", leads with the miss, and still credits the real positives (accounts up 26, repeat orders 61% to 66%, a large logo).
 - Gives concrete options with numbers, such as the burn needed for 18 months of runway (about $305K a month), and makes specific board asks. The slide format has a speaker note on every slide.
+
+## Card
+
+brief: Build a Q3 board deck for a catering marketplace that corrects the finance head's headline slide and explains the miss honestly.
+given:
+- KPIs: 7 metrics for Q2 actual, Q3 plan and Q3 actual
+- Context: 5 notes on a new large account, restaurant churn and terms, a late hire, repeat orders and raise timing
+- Draft headline slide: growth, accounts, runway and "On track"
+asked:
+- An honest summary up front: what went well, what missed and why
+- A KPI slide against plan and prior quarter, with formulas in speaker notes
+- A take-rate and contribution-margin bridge, including the Bluepeak effect
+- Cash and runway, with the method
+- Two or three options for the next two quarters, with trade-offs and a recommendation
+- A "decisions and asks from the board" slide
+- A short note to Mary on what changed in her headline and why
+limit: 8 to 10 slides, up to about 1,200 words, in Markdown slide format
+hard: A draft headline must be recomputed, a KPI miss needs a mix explanation, runway needs a stated method, and bad news must be balanced with real progress.
+
+## Scorecard
+
+- GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan
+- Runway ~11.7 months ($5.49M ÷ ~$470K a month), not 18; questions the Q2 2026 raise timing
+- Considers normalizing the $180K one-time working-capital effect (about 13 months)
+- Bluepeak (12% of GMV at 9%) cuts ~0.6 points; ex-Bluepeak ~14.1%; covers margin and restaurant churn
+- Drops "On track", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo
+- Options carry numbers (e.g. ~$305K a month for 18 months' runway); specific asks; notes on every slide

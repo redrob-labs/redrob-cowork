@@ -82,3 +82,27 @@ Where an expectation is ambiguous, for example how a negative half-cent should r
 - Covers boundaries correctly: a change on period_start charges the full difference; a change on period_end or before period_start raises ValueError; leap-year February has 29 days; 30- and 31-day months are tested.
 - Handles rounding deliberately, noting that Decimal ROUND_HALF_UP rounds away from zero for negatives (−0.005 becomes −0.01), so downgrade credits mirror upgrades. Picks a policy for float prices and tests for it. Today, mixing a float with a Decimal raises TypeError, and two floats fail at `.quantize`.
 - The tests are runnable, well named and parametrized, and any property test states a real invariant, such as antisymmetry between upgrade and downgrade or that the result is bounded by the full difference.
+
+## Card
+
+brief: Write pytest tests for a billing library's proration release, report what fails, and give a go/no-go with the minimal fix.
+given:
+- Release notes: v2.4.0's proration and rounding claims
+- Module: billing/proration.py with Plan, days_in_period and prorate_change
+- Plans: 3 production plans with monthly prices
+- Product expectations: 6 cases, including a 15 February example and float inputs
+asked:
+- tests/test_proration.py covering the expectations, boundaries, rounding and input types
+- For each failing test: expected value, actual value and cause
+- A go/no-go recommendation, the minimal fix, and inaccuracies in the release notes
+limit: Up to about 1,200 words of prose, in Markdown; the test code may run longer
+hard: The code must be checked against its docstring, the release notes and product expectations, boundaries and rounding need care, and ambiguous expectations need stated decisions.
+
+## Scorecard
+
+- Shows `- 1` drops the change day: 15 February gives $14.00, not $15.00; last day $0.00, not $1.00
+- Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`
+- Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months
+- Notes ROUND_HALF_UP takes −0.005 to −0.01, so downgrade credits mirror upgrades
+- Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize
+- Tests are runnable, well named and parametrized; any property test states a real invariant

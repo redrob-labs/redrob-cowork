@@ -57,3 +57,26 @@ Keep the whole answer under about 1,200 words.
 - Drops the non-compete under §16600 instead of keeping it. Replaces Texas law and Travis County venue with California law and venue (or removes the clause) under Labor Code §925, and keeps a confidentiality/IP reference.
 - Pro-rates the signing bonus by full months: after 7 months he would owe 5/12 × $20,000 = $8,333.33. States that it won't be deducted from final pay without separate written authorization.
 - Keeps the at-will statement, the contingencies and the Dec 1, 2025 start date. The letter reads as a finished document, with placeholders limited to the open decisions.
+
+## Card
+
+brief: A recruiter verbally promised a California engineer terms beyond the approved requisition; prepare the offer letter, a cover note and a bonus-repayment example.
+given:
+- Approved requisition REQ-2291: title, salary band, RSUs, signing bonus, classification and manager
+- Recruiter's notes: the verbal offer John Stiles accepted, and his non-compete request
+- Usual template: 4 clauses (signing bonus, non-competition, governing law, at-will)
+- Legal's guidance notes: two California statutes and company bonus-repayment practice
+asked:
+- The offer letter, ready to send, with the listed headed sections
+- A cover note to Mary Major: each mismatch, a recommended fix and who signs off
+- A worked signing-bonus repayment example after 7 full months
+limit: Under about 1,200 words in total, cover note at most 300 words, in Markdown
+hard: Promised terms must be checked against approvals, state law must be applied to template clauses, and the pay gap needs a judgement call.
+
+## Scorecard
+
+- Letter uses $175,000 or a placeholder, 3,200 RSUs, "Software Engineer II"; not $182,000, 4,000 or "Senior"
+- Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending
+- Non-compete dropped under §16600; California law and venue replace Texas under §925; confidentiality/IP kept
+- Repayment after 7 months: 5/12 × $20,000 = $8,333.33; no final-pay deduction without written authorization
+- Keeps at-will, contingencies and the Dec 1, 2025 start; placeholders limited to open decisions

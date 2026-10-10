@@ -47,3 +47,27 @@ You are a PM at Tallyfern, an expense-management SaaS for mid-sized companies. B
 - Classifies the accounting-export requests (rows 2, 9 and 13) as discoverability or onboarding problems, because LedgerSync already shipped, not as a build request.
 - The recommendations weigh the OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile bug fix, and treat the bank feed as a data-integrity risk even with a single account. Each call is justified.
 - The caveats cover the small, mixed-source sample: 16 rows, about 12 accounts, NPS from only 10 survey responses, and sales notes that aren't comparable with survey data.
+
+## Card
+
+brief: Synthesise a month of survey, support and sales-call feedback into themes with the revenue behind each, and recommend three to act on.
+given:
+- Feedback log: 16 rows with source, account, plan, ARR, NPS and verbatim
+- Product note: the accounting export already shipped, where it lives and which plans have it
+- Engineering sizes: rough effort for 4 possible fixes
+asked:
+- A coding table: each row's theme, problem type and any duplicate
+- A theme summary table: mentions, unique accounts, ARR, lowest NPS and plans, with methods
+- Top three recommendations in priority order, weighing revenue concentration, breadth and effort
+- Caveats about the data for the VP
+limit: Up to about 1,200 words, in Markdown
+hard: The log needs careful deduplication, holds a conflicting figure and a request that isn't what it seems, and prioritising is a judgement call.
+
+## Scorecard
+
+- Dedupes by account, method stated: mobile logout 3 ($68k), OCR 2, approvals 2 ($46k), bank feed 1 ($26k)
+- Flags Hollow Pine's ARR conflict ($96k vs $69k), picks one (e.g. OCR $170k), suggests checking the CRM
+- Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped
+- Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified
+- Treats the bank feed as a data-integrity risk despite only one account
+- Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable

@@ -47,3 +47,31 @@ Round SQLs to whole numbers. Keep it under about 1,200 words.
 - Shows that the best realistic mix (search at capacity, BuildExpo, the rest on LinkedIn) yields only about 240 SQLs for $180,000. 400 is not achievable, and 80 customers would need 400 SQLs at a 20% close rate.
 - Spots the sales-capacity ceiling of 3 × 70 = 210 SQLs, and makes a judgement call. For example: plan to about 210 SQLs and about 42 customers (about $403K of new ACV), hold back unneeded spend or ask for more AE capacity, and flag that a new segment may convert below 20%.
 - Messaging pillars map to the interview pains (materials receipts by job, fast crew reimbursement, QuickBooks sync). The timeline builds toward BuildExpo on Feb 10–12, and the deck closes with a specific ask to leadership.
+
+## Card
+
+brief: Build the Q1 2026 campaign deck for a B2B platform entering construction subcontractors, testing the CRO's targets against budget and sales capacity.
+given:
+- CRO's targets: SQLs, new customers and program budget
+- Channel benchmarks: 4 channels' cost per lead and lead-to-SQL rate, one from a sister brand
+- Segment inputs: search capacity, a trade show, sales capacity, funnel rates and contract value
+- Positioning research: the top 3 pains from 12 interviews
+asked:
+- Funnel-math slide per channel, with formulas and a total row
+- An honest view of the targets, and recommended targets
+- Channel mix and budget of $180,000 or less
+- Messaging pillars tied to the interviews
+- Timeline built around BuildExpo
+- KPIs and weekly leading indicators
+- Risks and the decision needed from leadership
+limit: 8–10 slides in Markdown (`### Slide n: title`, bullets, a speaker note), under about 1,200 words
+hard: A benchmark may not transfer, channel and sales capacity cap the plan, and the targets need an honest judgement call.
+
+## Scorecard
+
+- Excludes or heavily discounts the consumer-app Facebook benchmark; doesn't use its $60 cost per SQL
+- Cost per SQL: search ≈$386, LinkedIn ≈$778, BuildExpo ≈$1,000 (45 SQLs), syndication ≈$917
+- Search capped: 3,300 clicks × 6% = 198 leads, $16,830, ≈44 SQLs
+- Best mix yields ≈240 SQLs for $180,000: 400 SQLs and 80 customers aren't achievable
+- Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈$403K ACV)
+- Pillars match the 3 interview pains; timeline builds to BuildExpo Feb 10–12; specific leadership ask
