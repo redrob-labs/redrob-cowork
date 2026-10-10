@@ -73,3 +73,34 @@ Tracked in `mckinley-and-rice/redrob-console`:
   priced per character of input, so no audio-token rate is needed.
 - **Realtime.** `POST /voice/realtime/session` minting a client secret on `REDROB_API_KEY`, and a
   gateway-side SDP exchange so the renderer no longer calls `api.openai.com/v1/realtime/calls` directly.
+
+## Voice on Redrob
+
+Replaces the OpenAI-key Voice Mode. OpenRouter, the gateway's upstream, has no Realtime API, and the
+console runs on Vercel functions, which cannot hold a WebRTC or WebSocket session, so voice is a
+turn-based pipeline over endpoints the gateway already bills: transcribe, send to the **main agent**,
+read the reply aloud.
+
+| Decision | Choice |
+|---|---|
+| What voice is for | A conversation with the main agent, in the normal chat. Not UI control. |
+| Latency | Turn-based (roughly 2 to 4 seconds before a reply starts) is acceptable. |
+| Turn taking | Push to talk: hold, or tap to start and tap to stop. At most 60 seconds per recording, the upstream timeout. |
+| Dictation | The composer mic moves to Redrob transcription too, in both composers. |
+| Privacy | Voice and read-aloud are off at High and Strict protection: the gate labels text, and audio sent to a speech vendor cannot be labelled. |
+| Zero data retention | Not requested. |
+| Long turns | A short spoken cue when a message is sent. Speaking the first sentence early comes after the beta. |
+| Old Voice Mode | Removed once the Redrob version ships. |
+
+Beta defaults: `elevenlabs/scribe-v2` for transcription (`openai/gpt-transcribe` selectable), and
+`elevenlabs/eleven-flash-v2.5` for spoken replies, chosen for latency. A 30-clip Korean, English and
+mixed-language check picks the final defaults and voice before the beta.
+
+| # | Slice | Depends on |
+|---|---|---|
+| VM1 | Console `POST /v1/audio/transcriptions`, OpenAI compatible, billed from the vendor's reported cost plus margin | — |
+| VM2 | Engine `POST /redrob/transcribe` on its own key | VM1 |
+| VM3 | Push-to-talk dictation on Redrob in both composers, relayed at `POST /voice/transcribe` | VM2 |
+| VM4 | Voice conversation toggle: send on release, read the reply aloud when the turn ends, mic interrupts playback | VM3, read-aloud |
+| VM5 | Remove OpenAI Voice Mode: panel, realtime route, settings, broker code, strings | VM4 shipped |
+| VM6 | Beta check of models, voice and end-to-end latency | VM4 |
