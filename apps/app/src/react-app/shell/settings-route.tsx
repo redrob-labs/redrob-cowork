@@ -62,7 +62,6 @@ import { AiSettingsView } from "@/react-app/domains/settings/pages/ai-view";
 import "@/react-app/domains/settings/ollama-config";
 import "@/react-app/domains/settings/computer-use-config";
 import "@/react-app/domains/settings/browser-extension-config";
-import "@/react-app/domains/settings/redrob-voice-config";
 import { useSettingsExtensionController } from "@/react-app/domains/settings/settings-extension-controller";
 import { buildExtensionItems } from "@/react-app/domains/settings/extension-items";
 import { isRedrobWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "@/react-app/domains/settings/extension-state";
@@ -480,9 +479,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const [imageGenerationBusy, setImageGenerationBusy] = useState(false);
   const [imageGenerationStatus, setImageGenerationStatus] = useState<string | null>(null);
   const [imageGenerationError, setImageGenerationError] = useState<string | null>(null);
-  const [voiceBusy, setVoiceBusy] = useState(false);
-  const [voiceStatus, setVoiceStatus] = useState<string | null>(null);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
   const [userEnvKeys, setUserEnvKeys] = useState<string[]>([]);
   const emptyWorkspaceDisplay = useMemo<WorkspaceDisplay>(
     () => ({
@@ -976,44 +972,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       setImageGenerationBusy(false);
     }
   }, [redrobClient, runtimeWorkspaceId, selectedWorkspaceEndpoint, selectedWorkspaceRoot]);
-
-  const saveVoiceApiKey = useCallback(async (apiKey: string) => {
-    const resolvedApiKey = apiKey.trim();
-    if (!redrobClient || !resolvedApiKey) {
-      setVoiceError(t("settings.openai_api_key_required"));
-      return;
-    }
-    setVoiceBusy(true);
-    setVoiceStatus(null);
-    setVoiceError(null);
-    try {
-      await redrobClient.upsertUserEnv([{ key: "OPENAI_API_KEY", value: resolvedApiKey }]);
-      setUserEnvKeys((current) => Array.from(new Set([...current, "OPENAI_API_KEY"])));
-      setVoiceStatus("Saved OPENAI_API_KEY for Voice Mode.");
-    } catch (error) {
-      setVoiceError(describeRouteError(error));
-    } finally {
-      setVoiceBusy(false);
-    }
-  }, [redrobClient]);
-
-  const testVoiceSession = useCallback(async () => {
-    if (!redrobClient) {
-      setVoiceError(t("settings.server_not_connected"));
-      return;
-    }
-    setVoiceBusy(true);
-    setVoiceStatus(null);
-    setVoiceError(null);
-    try {
-      const session = await redrobClient.createVoiceRealtimeSession();
-      setVoiceStatus(`Realtime ready with ${session.model} (${session.tools.length} Redrob Cowork tools).`);
-    } catch (error) {
-      setVoiceError(describeRouteError(error));
-    } finally {
-      setVoiceBusy(false);
-    }
-  }, [redrobClient]);
 
   const installLocalProvider = useCallback(async (input: LocalProviderInstallInput) => {
     const client = selectedWorkspaceEndpoint?.client ?? redrobClient;
@@ -1725,13 +1683,6 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       error: imageExtensionError ?? imageGenerationError,
       onInstall: installOpenAiImageExtension,
       onTestGenerate: generateOpenAiTestImage,
-    },
-    voiceExtension: {
-      busy: voiceBusy,
-      status: voiceStatus,
-      error: voiceError,
-      onSaveApiKey: saveVoiceApiKey,
-      onTestSession: testVoiceSession,
     },
     localProvider: {
       busy: localProviderBusy,

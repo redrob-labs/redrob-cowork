@@ -44,7 +44,6 @@ interface RegisterCoreRoutesOptions {
   createWorkspaceOpencodeClient: (config: ServerConfig, workspace: WorkspaceInfo) => WorkspaceOpencodeClient;
   serializeWorkspace: (workspace: ServerConfig["workspaces"][number]) => unknown;
   resolveDevLogPath: () => string | null;
-  createOpenAiRealtimeVoiceSession: (env: EnvService, input: unknown) => Promise<unknown>;
   managedProviderAuthLogger?: {
     warn: (message: string, attributes?: Record<string, unknown>) => void;
     error: (message: string, attributes?: Record<string, unknown>) => void;
@@ -79,7 +78,6 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     createWorkspaceOpencodeClient,
     serializeWorkspace,
     resolveDevLogPath,
-    createOpenAiRealtimeVoiceSession,
     managedProviderAuthLogger,
   } = options;
   const googleWorkspaceConnectFlows = createGoogleWorkspaceConnectFlowManager(config);
@@ -483,10 +481,5 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     return jsonResponse(
       await transcribeWithRedrobEngine({ config }, { audio, format, ...(language ? { language } : {}) }),
     );
-  });
-
-  addRoute(routes, "POST", "/voice/realtime/session", "host", async (ctx) => {
-    const body = await readJsonBody(ctx.request);
-    return jsonResponse(await createOpenAiRealtimeVoiceSession(env, body));
   });
 }

@@ -38,12 +38,11 @@
       "host": "api.openai.com",
       "kind": "fetched",
       "components": [
-        "renderer",
         "server"
       ],
-      "purpose": "Direct OpenAI Realtime voice and image-generation calls when the user provides an OpenAI key.",
+      "purpose": "Direct OpenAI image-generation calls when the user provides an OpenAI key. Voice runs on Redrob.",
       "requirement": "opt-in",
-      "blockedEffect": "Direct OpenAI voice or image features fail for users who configured OpenAI.",
+      "blockedEffect": "Direct OpenAI image generation fails for users who configured OpenAI.",
       "override": null
     },
     {

@@ -2,11 +2,10 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePanelRef } from "react-resizable-panels";
-import { FileText, Globe, Mic2, MoreHorizontal, PanelRight, TextSearch, Zap } from "lucide-react";
+import { FileText, Globe, MoreHorizontal, PanelRight, TextSearch, Zap } from "lucide-react";
 
 import { resolveExtensionIconSrc } from "@/react-app/design-system/extension-icon-src";
 import { t } from "../../../../i18n";
-import { REDROB_EXTENSION_CATALOG } from "../../../../app/constants";
 import { type RedrobServerClient, type RedrobServerStatus } from "../../../../app/lib/redrob-server";
 import { getDisplaySessionTitle } from "../../../../app/lib/session-title";
 import type { BootPhase } from "../../../../app/lib/startup-boot";
@@ -87,14 +86,12 @@ import { useBootOverlayVisible } from "../../../shell/boot-state";
 import { isElectronRuntime } from "../../../../app/utils";
 import { isCollectibleArtifactTarget, isLocalhostBrowserTarget, isOpenableFileTarget, type OpenTarget } from "../artifacts/open-target";
 import type { OpenTargetOptions } from "@/lib/target-provider";
-import { VoicePanel } from "../voice/voice-panel";
 import { SidePanel } from "../panel/side-panel";
 import { getSidePanelSessionKey } from "../panel/side-panel-session";
 import { TerminalDock } from "../terminal/terminal-dock";
 import { useActivePanelTab, usePanelTabStore, useSessionPanelState } from "../panel/panel-tab-store";
 import { useWorkspaceShellLayout } from "../../../shell/workspace-shell-layout";
 import { useControlAction, type RedrobControlAction } from "../../../shell/control/control-provider";
-import { getExtensionId, isRedrobWorkExtensionEnabled, REDROB_EXTENSION_STATE_CHANGED } from "../../settings/extension-state";
 import { cn } from "@/lib/utils";
 import {
   canNavigateSelectedConversationHistory,
@@ -135,7 +132,6 @@ const STARTUP_SKELETON_ROWS = [
   { id: "middle", titleWidth: "56%", bodyWidth: "88%" },
   { id: "final", titleWidth: "36%", bodyWidth: "74%" },
 ];
-const GLOBAL_VOICE_SIDE_PANEL_KEY = "__redrob_voice__";
 const EMPTY_TRANSCRIPT_TARGETS: OpenTarget[] = [];
 const EMPTY_SESSION_TABS: WorkbenchSessionTab[] = [];
 
@@ -354,7 +350,6 @@ export function SessionPage(props: SessionPageProps) {
   const sessionSidePanel = useUiStateStore((state) => (
     state.sidePanelState[sidePanelSessionKey] ?? null
   ));
-  const voiceSidePanelOpen = useUiStateStore((state) => state.sidePanelState[GLOBAL_VOICE_SIDE_PANEL_KEY] === "voice");
   const setSidePanelState = useUiStateStore((state) => state.setSidePanelState);
   const toggleSidePanelState = useUiStateStore((state) => state.toggleSidePanelState);
   const openTab = usePanelTabStore((state) => state.openTab);
@@ -366,7 +361,6 @@ export function SessionPage(props: SessionPageProps) {
   const sessionPanelState = useSessionPanelState(sidePanelSessionKey);
   const activePanelTab = useActivePanelTab(sidePanelSessionKey);
   const [hiddenTargetRevision, setHiddenTargetRevision] = useState(0);
-  const [, setExtensionStateVersion] = useState(0);
   const hiddenAccessibleTargetIds = useMemo(
     () => readHiddenAccessibleTargetIds(props.selectedWorkspaceId, props.selectedSessionId),
     [props.selectedSessionId, props.selectedWorkspaceId, hiddenTargetRevision],
@@ -380,15 +374,9 @@ export function SessionPage(props: SessionPageProps) {
   const hasArtifactTargets = artifactTargetCount > 0;
   const hasBrowserTabs = sessionPanelState.tabs.some((tab) => tab.type === "browser");
   // In the Desk frame the old panel never shows, even if a stored state still names it.
-  const activeSidePanel = voiceSidePanelOpen ? "voice" : inDeskFrame && sessionSidePanel === "panel" ? null : sessionSidePanel;
+  const activeSidePanel = inDeskFrame && sessionSidePanel === "panel" ? null : sessionSidePanel;
   const sidePanelOpen = activeSidePanel !== null;
   const panelRailActive = activeSidePanel === "panel";
-  const voiceRailActive = activeSidePanel === "voice";
-  const voiceExtension = useMemo(
-    () => REDROB_EXTENSION_CATALOG.find((entry) => getExtensionId(entry) === "redrob-voice") ?? null,
-    [],
-  );
-  const voiceExtensionEnabled = voiceExtension ? isRedrobWorkExtensionEnabled(voiceExtension) : false;
   useReactRenderWatchdog("SessionPage", {
     selectedSessionId: props.selectedSessionId,
     selectedWorkspaceId: props.selectedWorkspaceId,
@@ -429,21 +417,14 @@ export function SessionPage(props: SessionPageProps) {
   const setCurrentSidePanel = useCallback((panel: SidePanelItem | null, target?: SidePanelTarget) => {
     const command = routeSidePanelRequest(panel, inDeskFrame, target);
     if (command) return applyFramePanelCommand(command, useFrameStore.getState());
-    setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, panel === "voice" ? "voice" : null);
-    if (panel === "voice") return;
     setSidePanelState(sidePanelSessionKey, panel);
   }, [inDeskFrame, setSidePanelState, sidePanelSessionKey]);
 
   const toggleCurrentSidePanel = useCallback((panel: SidePanelItem, target: SidePanelTarget = BROWSER_TARGET) => {
     const command = routeSidePanelRequest(panel, inDeskFrame, { ...target, toggle: true });
     if (command) return applyFramePanelCommand(command, useFrameStore.getState());
-    if (panel === "voice") {
-      toggleSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, "voice");
-      return;
-    }
-    setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, null);
     toggleSidePanelState(sidePanelSessionKey, panel);
-  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
+  }, [inDeskFrame, sidePanelSessionKey, toggleSidePanelState]);
 
   // When the agent calls a built-in browser tool, the main process opens
   // the WebContentsView and sends panel-opened; when hide_browser is called
@@ -658,9 +639,6 @@ export function SessionPage(props: SessionPageProps) {
       toggleCurrentSidePanel("panel", FILES_TARGET);
     }
   }, [artifactFileTargets, hasArtifactTargets, openTab, panelRailActive, props.selectedSessionId, selectTab, sessionPanelState, setCurrentSidePanel, toggleCurrentSidePanel]);
-  const openVoiceRailPane = useCallback(() => {
-    toggleCurrentSidePanel("voice");
-  }, [toggleCurrentSidePanel]);
   const removeAccessibleTarget = useCallback((target: OpenTarget) => {
     const nextHiddenIds = new Set(hiddenAccessibleTargetIds);
     nextHiddenIds.add(target.id);
@@ -695,50 +673,6 @@ export function SessionPage(props: SessionPageProps) {
     window.addEventListener("redrob-close-right-pane", handler);
     return () => window.removeEventListener("redrob-close-right-pane", handler);
   }, [setCurrentSidePanel]);
-  useEffect(() => {
-    const refresh = () => setExtensionStateVersion((value) => value + 1);
-    window.addEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
-    window.addEventListener("storage", refresh);
-    return () => {
-      window.removeEventListener(REDROB_EXTENSION_STATE_CHANGED, refresh);
-      window.removeEventListener("storage", refresh);
-    };
-  }, []);
-  useEffect(() => {
-    if (activeSidePanel === "voice" && !voiceExtensionEnabled) {
-      setCurrentSidePanel(null);
-    }
-  }, [activeSidePanel, setCurrentSidePanel, voiceExtensionEnabled]);
-
-  const openVoicePanelControlAction = useMemo<RedrobControlAction | null>(() => (
-    voiceExtensionEnabled ? {
-      id: "voice.panel.open",
-      label: "Open Voice Mode",
-      description: "Open the sticky Voice Mode right-side panel.",
-      effects: { data: "none", ui: "layout", external: false },
-      sideEffect: "none",
-      execute: () => {
-        setCurrentSidePanel("voice");
-        return { open: true };
-      },
-    } : null
-  ), [setCurrentSidePanel, voiceExtensionEnabled]);
-  useControlAction(openVoicePanelControlAction);
-
-  const closeVoicePanelControlAction = useMemo<RedrobControlAction | null>(() => (
-    voiceExtensionEnabled && activeSidePanel === "voice" ? {
-      id: "voice.panel.close",
-      label: "Close Voice Mode",
-      description: "Close the Voice Mode right-side panel.",
-      effects: { data: "none", ui: "layout", external: false },
-      sideEffect: "none",
-      execute: () => {
-        setCurrentSidePanel(null);
-        return { open: false };
-      },
-    } : null
-  ), [activeSidePanel, setCurrentSidePanel, voiceExtensionEnabled]);
-  useControlAction(closeVoicePanelControlAction);
   const [showDelayedSessionLoadingState, setShowDelayedSessionLoadingState] = useState(false);
 
   const selectedSessionTitle = useMemo(
@@ -1218,10 +1152,6 @@ export function SessionPage(props: SessionPageProps) {
                     <FileText className="size-4" />
                     Artifacts{artifactTargetCount > 0 ? ` (${artifactTargetCount})` : ""}
                   </DropdownMenuItem>
-                  {voiceExtensionEnabled ? (
-                    <DropdownMenuItem onClick={openVoiceRailPane}>
-                      <Mic2 className="size-4" />{t("voice.mode")}</DropdownMenuItem>
-                  ) : null}
                 </DropdownMenuContent>
               </DropdownMenu>
               {props.developerMode ? (
@@ -1541,13 +1471,6 @@ export function SessionPage(props: SessionPageProps) {
                     <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-background">
                       {props.settingsSlot}
                     </div>
-                  ) : activeSidePanel === "voice" ? (
-                    <VoicePanel
-                      client={props.redrobServerClient}
-                      workspaceId={props.runtimeWorkspaceId}
-                      sessionId={props.selectedSessionId}
-                      onClose={closeRightPane}
-                    />
                   ) : activeSidePanel === "panel" ? (
                     <SidePanel
                       sessionId={sidePanelSessionKey}
@@ -1557,7 +1480,6 @@ export function SessionPage(props: SessionPageProps) {
                       isRemoteWorkspace={props.surface?.isRemoteWorkspace ?? false}
                       onClose={closeRightPane}
                       onOpenExtensions={props.settingsSlot ? () => setCurrentSidePanel("extensions") : undefined}
-                      onOpenVoice={voiceExtensionEnabled ? openVoiceRailPane : undefined}
                     />
                   ) : null}
                   </div>
@@ -1584,13 +1506,6 @@ export function SessionPage(props: SessionPageProps) {
                       <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-background">
                         {props.settingsSlot}
                       </div>
-                    ) : activeSidePanel === "voice" ? (
-                      <VoicePanel
-                        client={props.redrobServerClient}
-                        workspaceId={props.runtimeWorkspaceId}
-                        sessionId={props.selectedSessionId}
-                        onClose={closeRightPane}
-                      />
                     ) : activeSidePanel === "panel" ? (
                       <SidePanel
                         sessionId={sidePanelSessionKey}
@@ -1600,7 +1515,6 @@ export function SessionPage(props: SessionPageProps) {
                         isRemoteWorkspace={props.surface?.isRemoteWorkspace ?? false}
                         onClose={closeRightPane}
                         onOpenExtensions={props.settingsSlot ? () => setCurrentSidePanel("extensions") : undefined}
-                        onOpenVoice={voiceExtensionEnabled ? openVoiceRailPane : undefined}
                       />
                     ) : null}
                   </div>
@@ -1608,8 +1522,8 @@ export function SessionPage(props: SessionPageProps) {
               </Sheet>
             ) : null}
           </ResizablePanelGroup>
-          {/* In the Desk frame the browser and the files are the frame's panel; only voice stays here. */}
-          {inDeskFrame && !voiceExtensionEnabled ? null : <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
+          {/* In the Desk frame the browser and the files are the frame's panel, so the rail is empty there. */}
+          {inDeskFrame ? null : <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
             {isElectronRuntime() && !inDeskFrame ? (
               <Button
                 variant="ghost"
@@ -1625,22 +1539,6 @@ export function SessionPage(props: SessionPageProps) {
                 disabled={!hasBrowserTabs}
               >
                 <Globe size={15} />
-              </Button>
-            ) : null}
-            {voiceExtensionEnabled ? (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className={cn(
-                  "rounded-xl transition-colors hover:bg-muted hover:text-foreground",
-                  voiceRailActive && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
-                )}
-                onClick={openVoiceRailPane}
-                title={t("voice.mode")}
-                aria-label={t("voice.mode")}
-                aria-pressed={voiceRailActive}
-              >
-                <Mic2 size={15} />
               </Button>
             ) : null}
             {inDeskFrame ? null : <Button

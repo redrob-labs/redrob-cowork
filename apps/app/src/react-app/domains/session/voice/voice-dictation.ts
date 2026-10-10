@@ -3,28 +3,6 @@ import { currentLocale, t } from "@/i18n";
 
 export type DictationClient = Pick<RedrobServerClient, "transcribeAudio" | "speakText">;
 
-export function waitForDataChannelOpen(channel: RTCDataChannel) {
-  if (channel.readyState === "open") return Promise.resolve();
-  return new Promise<void>((resolve, reject) => {
-    const cleanup = () => {
-      window.clearTimeout(timeout);
-      channel.removeEventListener("open", handleOpen);
-      channel.removeEventListener("close", handleClose);
-      channel.removeEventListener("error", handleError);
-    };
-    const timeout = window.setTimeout(() => {
-      cleanup();
-      reject(new Error(t("voice.realtime_channel_timeout")));
-    }, 10_000);
-    const handleOpen = () => { cleanup(); resolve(); };
-    const handleClose = () => { cleanup(); reject(new Error(t("voice.realtime_channel_closed_early"))); };
-    const handleError = () => { cleanup(); reject(new Error(t("voice.realtime_channel_failed"))); };
-    channel.addEventListener("open", handleOpen);
-    channel.addEventListener("close", handleClose);
-    channel.addEventListener("error", handleError);
-  });
-}
-
 /** Asks macOS for the microphone. Elsewhere there is nothing to ask. */
 export async function askMicrophoneAccess(): Promise<{ granted: boolean; status: string }> {
   const ask = window.__REDROB_ELECTRON__?.system?.askMicrophoneAccess;

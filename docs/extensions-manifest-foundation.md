@@ -16,7 +16,7 @@ An extension is a manifest-backed installed capability:
 
 1. Foundation PR: typed manifest model, manifest-backed built-in catalog, generic setup/resource/contribution display, Den copy shifted to extensions.
 2. Handsfree PR: add a trusted built-in extension manifest with native-binary, local MCP, macOS permission, health-check, and setup/test contributions.
-3. Voice Mode PR: add a trusted built-in extension manifest with settings, side panel, rail item, server route, Realtime secret, control-action, and test contributions.
+3. Voice Mode PR: an OpenAI Realtime voice extension. Since retired: dictation, read-aloud and the voice conversation now run in the composer on the engine's Redrob key, with no extension.
 4. Den follow-up: expose extension projections from existing plugin rows while initially supporting Claude-compatible plugin repos as the only external source adapter.
 
 ## Electron CDP Flows
@@ -29,6 +29,5 @@ Always launch these from the Electron sandbox, not a standalone browser:
 - Image Gen setup accepts `OPENAI_API_KEY`, writes plugin/config files, and can run the test action.
 - Ollama setup detects local availability, lists/pulls models, patches provider config, and reloads.
 - Handsfree setup shows macOS permission/health status, resolves the Electron-local MCP command, installs MCP config, and verifies a tool call.
-- Voice setup saves/uses an OpenAI key, mints a Realtime client secret through the local server, opens the right-side panel, and executes a semantic Redrob Cowork UI action.
 
-Den/local endpoint testing should point Electron at the target Den base URL through the existing Cloud account settings or the desktop bootstrap env/config path. OpenAI-key flows should use the Redrob Cowork env store, preferring short-lived renderer credentials for Realtime.
+Den/local endpoint testing should point Electron at the target Den base URL through the existing Cloud account settings or the desktop bootstrap env/config path. OpenAI-key flows should use the Redrob Cowork env store.
