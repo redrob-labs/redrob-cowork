@@ -2078,12 +2078,12 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       }),
 
     /** Read-aloud: mp3 of `text`, spoken by the engine on its own Redrob credential. */
-    speakText: (text: string) =>
+    speakText: (workspaceId: string, text: string) =>
       requestBinary(baseUrl, "/voice/speech", {
         token,
         hostToken,
         method: "POST",
-        body: { text },
+        body: { workspaceId, text },
         timeoutMs: timeouts.binary,
       }),
 

@@ -7,6 +7,7 @@ import {
   startReadAloud,
   stopReadAloud,
   useReadAloudStore,
+  voiceAllowedForPrivacy,
 } from "../src/react-app/domains/session/voice/read-aloud";
 
 /** A stand-in for HTMLAudioElement: records what was played and lets a test end playback. */
@@ -45,7 +46,7 @@ function fakeClient() {
   const asked: string[] = [];
   return {
     asked,
-    speakText: (text: string) => {
+    speakText: (_workspaceId: string, text: string) => {
       asked.push(text);
       return Promise.resolve({ data: new ArrayBuffer(4), contentType: "audio/mpeg", filename: null });
     },
@@ -82,7 +83,7 @@ describe("read aloud", () => {
 
   test("plays each piece in order, then goes idle", async () => {
     const client = fakeClient();
-    const reading = startReadAloud(client, "msg_1", "One. ".repeat(1_000));
+    const reading = startReadAloud(client, "ws", "msg_1", "One. ".repeat(1_000));
     for (let played = 0; played < 2; played += 1) {
       while (FakeAudio.played.length <= played) await tick();
       expect(useReadAloudStore.getState()).toMatchObject({ activeId: "msg_1" });
@@ -95,11 +96,11 @@ describe("read aloud", () => {
 
   test("starting another reply stops the first, and stop silences it", async () => {
     const client = fakeClient();
-    void startReadAloud(client, "msg_1", "First reply.");
+    void startReadAloud(client, "ws", "msg_1", "First reply.");
     while (FakeAudio.played.length < 1) await tick();
     const first = FakeAudio.played[0];
 
-    void startReadAloud(client, "msg_2", "Second reply.");
+    void startReadAloud(client, "ws", "msg_2", "Second reply.");
     expect(first.paused).toBe(true);
     while (FakeAudio.played.length < 2) await tick();
     expect(useReadAloudStore.getState().activeId).toBe("msg_2");
@@ -109,9 +110,35 @@ describe("read aloud", () => {
     expect(useReadAloudStore.getState()).toMatchObject({ activeId: null, status: "idle" });
   });
 
+  test("voice is allowed at Off and Standard privacy, and not at High or Strict", () => {
+    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "off" } })).toBe(true);
+    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "standard" } })).toBe(true);
+    expect(voiceAllowedForPrivacy({})).toBe(true);
+    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "high" } })).toBe(false);
+    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "strict" } })).toBe(false);
+  });
+
+  test("each request names the workspace, which the server checks privacy against", async () => {
+    const seen: string[] = [];
+    void startReadAloud(
+      {
+        speakText: (workspaceId) => {
+          seen.push(workspaceId);
+          return Promise.resolve({ data: new ArrayBuffer(4), contentType: "audio/mpeg", filename: null });
+        },
+      },
+      "ws_42",
+      "msg_1",
+      "Hello.",
+    );
+    while (FakeAudio.played.length < 1) await tick();
+    expect(seen).toEqual(["ws_42"]);
+  });
+
   test("a refusal from the engine is reported, not swallowed", async () => {
     await startReadAloud(
       { speakText: () => Promise.reject(new Error("Connect Redrob to generate speech")) },
+      "ws",
       "msg_1",
       "Hello.",
     );

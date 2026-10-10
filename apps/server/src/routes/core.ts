@@ -5,6 +5,7 @@ import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService }
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
 import { speakWithRedrobEngine } from "../redrob-auth.js";
+import { assertVoiceAllowed } from "../voice-privacy.js";
 import {
   createGoogleWorkspaceConnectFlowManager,
   googleWorkspaceDisconnect,
@@ -458,6 +459,10 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
   /* Read-aloud: the engine speaks on its own Redrob credential; see speakWithRedrobEngine. */
   addRoute(routes, "POST", "/voice/speech", "host", async (ctx) => {
     const body = await readJsonBody(ctx.request);
+    const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId : "";
+    if (!workspaceId) throw new ApiError(400, "workspace_required", "workspaceId is required");
+    const workspace = await resolveWorkspace(config, workspaceId);
+    await assertVoiceAllowed(config, workspace.id);
     const text = typeof body.text === "string" ? body.text : "";
     const voice = typeof body.voice === "string" ? body.voice : undefined;
     const spoken = await speakWithRedrobEngine({ config }, { text, ...(voice ? { voice } : {}) });

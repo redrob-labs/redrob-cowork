@@ -3,6 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { writeRedrobWorkspaceConfig } from "./redrob-workspace-config-store.js";
 import { registerTrustedOpencodeProcess, startServer } from "./server.js";
 import type { ServerConfig } from "./types.js";
 
@@ -97,21 +98,25 @@ async function boot(engineBaseUrl: string) {
   registerTrustedOpencodeProcess(config, { baseUrl: engineBaseUrl, identity: "redrob-speech", isAlive: () => true });
   const server = (await startServer(config)) as Served;
   stops.push(() => server.stop(true));
-  return `http://127.0.0.1:${server.port}`;
+  return { base: `http://127.0.0.1:${server.port}`, config };
 }
 
-function speak(base: string, body: unknown, headers: Record<string, string> = { "x-redrob-host-token": HOST_TOKEN }) {
+function speak(
+  base: string,
+  body: Record<string, unknown>,
+  headers: Record<string, string> = { "x-redrob-host-token": HOST_TOKEN },
+) {
   return fetch(`${base}/voice/speech`, {
     method: "POST",
     headers: { "content-type": "application/json", ...headers },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ workspaceId: "ws_1", ...body }),
   });
 }
 
 describe("read-aloud speech relay", () => {
   test("relays the text to the engine and the engine's mp3 back, carrying no Redrob key", async () => {
     const engine = startStubEngine(() => new Response(MP3, { headers: { "content-type": "audio/mpeg" } }));
-    const base = await boot(engine.baseUrl);
+    const { base } = await boot(engine.baseUrl);
 
     const response = await speak(base, { text: "  안녕하세요  ", voice: "sarah" });
     expect(response.status).toBe(200);
@@ -127,14 +132,14 @@ describe("read-aloud speech relay", () => {
 
   test("needs the host token", async () => {
     const engine = startStubEngine(() => new Response(MP3, { headers: { "content-type": "audio/mpeg" } }));
-    const base = await boot(engine.baseUrl);
+    const { base } = await boot(engine.baseUrl);
     expect((await speak(base, { text: "Hello" }, {})).status).toBe(401);
     expect(engine.requests.some((request) => request.pathname === "/redrob/speech")).toBe(false);
   });
 
   test("refuses empty or over-long text without asking the engine", async () => {
     const engine = startStubEngine(() => new Response(MP3, { headers: { "content-type": "audio/mpeg" } }));
-    const base = await boot(engine.baseUrl);
+    const { base } = await boot(engine.baseUrl);
     expect((await speak(base, { text: "   " })).status).toBe(400);
     expect((await speak(base, { text: "가".repeat(4097) })).status).toBe(400);
     expect(engine.requests.some((request) => request.pathname === "/redrob/speech")).toBe(false);
@@ -148,16 +153,37 @@ describe("read-aloud speech relay", () => {
     ];
     for (const [status, message, expected, code] of cases) {
       const engine = startStubEngine(() => Response.json({ _tag: "Error", message }, { status }));
-      const base = await boot(engine.baseUrl);
+      const { base } = await boot(engine.baseUrl);
       const response = await speak(base, { text: "Hello" });
       expect(response.status).toBe(expected);
       expect(await response.json()).toMatchObject({ code, message });
     }
   });
 
+  test("is off at High and Strict privacy, without asking the engine, and back on at Standard", async () => {
+    const engine = startStubEngine(() => new Response(MP3, { headers: { "content-type": "audio/mpeg" } }));
+    const { base, config } = await boot(engine.baseUrl);
+    for (const level of ["high", "strict"]) {
+      await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level } }));
+      const response = await speak(base, { text: "Hello" });
+      expect(response.status).toBe(403);
+      expect(await response.json()).toMatchObject({ code: "voice_off_for_privacy" });
+    }
+    expect(engine.requests.some((request) => request.pathname === "/redrob/speech")).toBe(false);
+
+    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "standard" } }));
+    expect((await speak(base, { text: "Hello" })).status).toBe(200);
+  });
+
+  test("needs a workspace, since privacy is per workspace", async () => {
+    const engine = startStubEngine(() => new Response(MP3, { headers: { "content-type": "audio/mpeg" } }));
+    const { base } = await boot(engine.baseUrl);
+    expect((await speak(base, { text: "Hello", workspaceId: "" })).status).toBe(400);
+  });
+
   test("an engine answer that is not audio is a 502, never handed to the app as audio", async () => {
     const engine = startStubEngine(() => Response.json({ ok: true }));
-    const base = await boot(engine.baseUrl);
+    const { base } = await boot(engine.baseUrl);
     const response = await speak(base, { text: "Hello" });
     expect(response.status).toBe(502);
     expect(response.headers.get("content-type")).not.toStartWith("audio/");
