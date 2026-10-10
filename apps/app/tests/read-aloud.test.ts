@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
+import { setLocale } from "../src/i18n";
+import en from "../src/i18n/locales/en";
+import ko from "../src/i18n/locales/ko";
 import {
   MAX_SPEECH_CHUNK,
+  playCue,
+  resetCues,
   speakableText,
   splitForSpeech,
   startReadAloud,
@@ -39,6 +44,8 @@ beforeEach(() => {
 
 afterEach(() => {
   stopReadAloud();
+  resetCues();
+  setLocale("en");
   Object.assign(globalThis, { Audio: realAudio });
 });
 
@@ -143,5 +150,50 @@ describe("read aloud", () => {
       "Hello.",
     );
     expect(useReadAloudStore.getState()).toMatchObject({ activeId: null, error: "Connect Redrob to generate speech" });
+  });
+
+  test("the cue is spoken once per language and then played from memory", async () => {
+    const client = fakeClient();
+    const cue = playCue(client, "ws");
+    await tick();
+    FakeAudio.played[0]?.onended?.();
+    await cue;
+    const again = playCue(client, "ws");
+    await tick();
+    FakeAudio.played[1]?.onended?.();
+    await again;
+    setLocale("ko");
+    const korean = playCue(client, "ws");
+    await tick();
+    FakeAudio.played[2]?.onended?.();
+    await korean;
+    expect(client.asked).toEqual([en["desk.voice_chat_cue"], ko["desk.voice_chat_cue"]]);
+    expect(FakeAudio.played).toHaveLength(3);
+  });
+
+  test("the answer cuts the cue off, and a cue that cannot be spoken is tried again next time", async () => {
+    const client = fakeClient();
+    const cue = playCue(client, "ws");
+    await tick();
+    const reading = startReadAloud(client, "ws", "reply-1", "The answer.");
+    expect(FakeAudio.played[0]?.paused).toBe(true);
+    await cue;
+    await tick();
+    FakeAudio.played.at(-1)?.onended?.();
+    await reading;
+
+    let refusals = 0;
+    const failing = {
+      speakText: () => {
+        refusals += 1;
+        return Promise.reject(new Error("Out of credit."));
+      },
+    };
+    resetCues();
+    await playCue(failing, "ws");
+    await playCue(failing, "ws");
+    expect(refusals).toBe(2);
+    // The cue is not a reading: it never shows on a reply's button or reports an error.
+    expect(useReadAloudStore.getState()).toMatchObject({ activeId: null, error: null });
   });
 });

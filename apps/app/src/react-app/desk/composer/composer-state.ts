@@ -46,8 +46,16 @@ export function transcriptHandler(getDraft: () => string, setDraft: (draft: stri
   };
 }
 
-/** Plan or Run, and which memory it reads, per chat. Chats with no entry use the defaults. */
-export type ChatSettings = { mode?: ChatMode; memory?: ChatMemory };
+/**
+ * Plan or Run, which memory it reads, and whether it is a voice conversation, per chat. Chats with
+ * no entry use the defaults.
+ */
+export type ChatSettings = { mode?: ChatMode; memory?: ChatMemory; talk?: boolean };
+
+/** In a voice conversation, what is said is sent, and the answer is read aloud. Off by default. */
+export function talkFor(chats: Record<string, ChatSettings>, key: string): boolean {
+  return chats[key]?.talk ?? false;
+}
 
 export function modeFor(chats: Record<string, ChatSettings>, key: string, preference: ChatMode): ChatMode {
   return chats[key]?.mode ?? preference;
@@ -63,6 +71,15 @@ export type DeskComposerState = {
   chats: Record<string, ChatSettings>;
   setMode(key: string, mode: ChatMode): void;
   setMemory(key: string, memory: ChatMemory): void;
+  setTalk(key: string, talk: boolean): void;
+  /**
+   * The chat whose spoken message is waiting for its answer to be read aloud, or null. Never
+   * kept: an answer that arrives after a restart is not one anybody is listening for.
+   */
+  awaitingReply: string | null;
+  awaitReply(key: string): void;
+  /** True once, when `sessionId` was waiting for its answer; the wait is over either way. */
+  takeReply(sessionId: string): boolean;
   /** Hands what was chosen on the new chat screen to the session it created. */
   claimNewChat(sessionId: string): void;
 };
@@ -75,18 +92,27 @@ export const DESK_COMPOSER_STORE_KEY = "redrob.desk.composer.v1";
  * choice is never kept: it belongs to a chat that does not exist yet.
  */
 export function createDeskComposerStore(options: { storage?: () => StateStorage } = {}) {
-  const initializer: StateCreator<DeskComposerState> = (set) => {
+  const initializer: StateCreator<DeskComposerState> = (set, get) => {
     const patch = (key: string, next: ChatSettings) =>
       set((state) => ({ chats: { ...state.chats, [key]: { ...state.chats[key], ...next } } }));
     return {
       chats: {},
       setMode: (key, mode) => patch(key, { mode }),
       setMemory: (key, memory) => patch(key, { memory }),
+      setTalk: (key, talk) => patch(key, { talk }),
+      awaitingReply: null,
+      awaitReply: (key) => set({ awaitingReply: key }),
+      takeReply: (sessionId) => {
+        if (get().awaitingReply !== sessionId) return false;
+        set({ awaitingReply: null });
+        return true;
+      },
       claimNewChat: (sessionId) =>
         set((state) => {
+          const awaitingReply = state.awaitingReply === NEW_CHAT_KEY ? sessionId : state.awaitingReply;
           const { [NEW_CHAT_KEY]: pending, ...rest } = state.chats;
-          if (!pending) return state;
-          return { chats: { ...rest, [sessionId]: { ...pending, ...rest[sessionId] } } };
+          if (!pending) return { awaitingReply };
+          return { awaitingReply, chats: { ...rest, [sessionId]: { ...pending, ...rest[sessionId] } } };
         }),
     };
   };

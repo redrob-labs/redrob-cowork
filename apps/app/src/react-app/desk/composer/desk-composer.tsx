@@ -20,7 +20,7 @@ import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { t } from "../../../i18n";
 import { useLocal } from "../../kernel/local-provider";
 import { RedrobServerError } from "../../../app/lib/redrob-server";
-import { voiceAllowedForPrivacy } from "../../domains/session/voice/read-aloud";
+import { playCue, stopReadAloud, voiceAllowedForPrivacy } from "../../domains/session/voice/read-aloud";
 import {
   MAX_RECORDING_MS,
   micPress,
@@ -37,8 +37,10 @@ import type { ChatMemory, ChatMode, PrivacyLevel } from "../services/types";
 import { useDeskConnection } from "../shell/desk-connection";
 import { useFrameStore } from "../store/frame-store";
 import {
+  appendTranscript,
   memoryFor,
   modeFor,
+  talkFor,
   transcriptHandler,
   useDeskComposerStore,
   type DeskCrossCheck,
@@ -61,6 +63,19 @@ export function micUnavailableReason(env: {
   if (!env.connected || env.voiceAllowed === undefined) return t("desk.mic_reason_connecting");
   if (!env.voiceAllowed) return t("desk.mic_reason_privacy");
   return null;
+}
+
+/**
+ * Where a transcript goes. In a voice conversation it is sent at once, with whatever was typed
+ * before it, when the chat can take a message; otherwise, and always outside one, it joins the draft.
+ */
+export function deliverTranscript(input: {
+  talk: boolean;
+  draft: string;
+  text: string;
+  send?: (message: string) => boolean;
+}): "sent" | "drafted" {
+  return input.talk && input.send?.(appendTranscript(input.draft, input.text)) ? "sent" : "drafted";
 }
 
 /** Whole seconds left in a recording that started at `startedAt`. */
@@ -89,6 +104,9 @@ export type DeskComposerToolsViewProps = {
   micUnavailable: string | null;
   onMicPress: () => void;
   onMicRelease: () => void;
+  /** Whether this chat is a voice conversation; null where a spoken message cannot be sent. */
+  talk: boolean | null;
+  onTalkChange: (talk: boolean) => void;
   mode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
   /** The model control, last. */
@@ -137,6 +155,25 @@ export function DeskComposerToolsView(props: DeskComposerToolsViewProps) {
           {t("desk.mic_seconds_left", { seconds: props.secondsLeft })}
         </span>
       ) : null}
+      {props.talk === null ? null : (
+        <IconButton
+          label={
+            props.micUnavailable
+              ? t("desk.voice_chat_unavailable_label", { reason: props.micUnavailable })
+              : props.talk
+                ? t("desk.voice_chat_stop")
+                : t("desk.voice_chat_start")
+          }
+          size="sm"
+          round
+          variant={props.talk ? "secondary" : "ghost"}
+          aria-pressed={props.talk}
+          disabled={Boolean(props.micUnavailable)}
+          onClick={() => props.onTalkChange(!props.talk)}
+        >
+          {props.talk ? icons.volume(MIC_ICON) : icons.volumeOff(MIC_ICON)}
+        </IconButton>
+      )}
       <ComposerMode
         label={t("desk.mode_label")}
         options={modeOptions()}
@@ -153,14 +190,21 @@ export type DeskComposerToolsProps = {
   chatKey: string;
   draft: string;
   onDraftChange: (draft: string) => void;
+  /**
+   * Sends `message` as pressing Send would, and says whether it went. Without it there is no voice
+   * conversation here, and the mic only writes into the draft.
+   */
+  onSendText?: (message: string) => boolean;
   children?: ReactNode;
 };
 
-/** The tools wired up: Plan or Run per chat, and the mic writing into the draft. */
+/** The tools wired up: Plan or Run per chat, the mic writing into the draft, or talking with Desk. */
 export function DeskComposerTools(props: DeskComposerToolsProps) {
   const { prefs } = useLocal();
   const mode = useDeskComposerStore((state) => modeFor(state.chats, props.chatKey, prefs.deskNewChatMode));
   const setMode = useDeskComposerStore((state) => state.setMode);
+  const talk = useDeskComposerStore((state) => talkFor(state.chats, props.chatKey));
+  const setTalk = useDeskComposerStore((state) => state.setTalk);
   const setVoice = useFrameStore((state) => state.setVoice);
   const showToast = useFrameStore((state) => state.showToast);
   const client = useDeskConnection((state) => state.client);
@@ -169,6 +213,12 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
   draftRef.current = props.draft;
   const onDraftChangeRef = useRef(props.onDraftChange);
   onDraftChangeRef.current = props.onDraftChange;
+  const onSendTextRef = useRef(props.onSendText);
+  onSendTextRef.current = props.onSendText;
+  const talkRef = useRef(talk);
+  talkRef.current = talk;
+  const chatKeyRef = useRef(props.chatKey);
+  chatKeyRef.current = props.chatKey;
 
   // The same question, and the same cache entry, as read-aloud's button.
   const { data: voiceAllowed } = useQuery({
@@ -223,7 +273,8 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
 
   const begin = (startedAt: number) => {
     const attempt = ++attemptRef.current;
-    showToast(t("desk.mic_toast_title"), t("desk.mic_toast_text"));
+    // In a conversation the toggle's own note already said what the mic does.
+    if (!talkRef.current) showToast(t("desk.mic_toast_title"), t("desk.mic_toast_text"));
     setLeft(secondsLeft(startedAt, startedAt));
     tickRef.current = window.setInterval(() => setLeft(secondsLeft(startedAt, Date.now())), 250);
     const started = startRecording(() => {
@@ -246,8 +297,22 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
       .then(
         (text) => {
           if (attempt !== attemptRef.current) return;
-          if (text) onTranscript(text);
           enter({ kind: "idle" });
+          if (!text) return;
+          const talking = talkRef.current && Boolean(onSendTextRef.current);
+          const delivered = deliverTranscript({
+            talk: talking,
+            draft: draftRef.current,
+            text,
+            send: onSendTextRef.current,
+          });
+          if (delivered === "sent") {
+            useDeskComposerStore.getState().awaitReply(chatKeyRef.current);
+            void playCue(client, workspaceId);
+            return;
+          }
+          onTranscript(text);
+          if (talking) showToast(t("desk.voice_chat_busy_title"), t("desk.voice_chat_busy_text"));
         },
         (error: unknown) => fail(attempt, error),
       );
@@ -271,12 +336,24 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
       micUnavailable={micUnavailable}
       onMicPress={() => {
         if (micUnavailable) return;
+        // In a conversation, talking over Desk stops it, as it would a person.
+        if (talk) stopReadAloud();
         const now = Date.now();
         apply(micPress(phaseRef.current, now), now);
       }}
       onMicRelease={() => {
         const now = Date.now();
         apply(micRelease(phaseRef.current, now), now);
+      }}
+      talk={props.onSendText ? talk : null}
+      onTalkChange={(next) => {
+        setTalk(props.chatKey, next);
+        if (next) {
+          showToast(t("desk.voice_chat_toast_title"), t("desk.voice_chat_toast_text"));
+        } else {
+          stopReadAloud();
+          useDeskComposerStore.getState().takeReply(props.chatKey);
+        }
       }}
       mode={mode}
       onModeChange={(next) => setMode(props.chatKey, next)}

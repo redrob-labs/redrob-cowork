@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
+import { currentLocale, t, type Language } from "@/i18n";
 import { readStoredPrivacy } from "@/react-app/desk/privacy/privacy-store";
 
 /**
@@ -100,11 +101,32 @@ let objectUrl: string | null = null;
 /** Bumped on every start and stop, so a reading that was superseded drops its late answers. */
 let generation = 0;
 
+/** Ends the wait on the clip that is playing, so a stopped clip settles instead of waiting forever. */
+let settle: (() => void) | null = null;
+
 function release() {
+  settle?.();
+  settle = null;
   audio?.pause();
   audio = null;
   if (objectUrl) URL.revokeObjectURL(objectUrl);
   objectUrl = null;
+}
+
+/** Plays one clip on the shared element; resolves when it has finished. */
+async function playClip(data: BlobPart, contentType: string | null | undefined, onPlaying?: () => void): Promise<void> {
+  release();
+  objectUrl = URL.createObjectURL(new Blob([data], { type: contentType ?? "audio/mpeg" }));
+  const element = new Audio(objectUrl);
+  audio = element;
+  const ended = new Promise<void>((resolve, reject) => {
+    settle = resolve;
+    element.onended = () => resolve();
+    element.onerror = () => reject(new Error(t("voice.audio_unplayable")));
+  });
+  await element.play();
+  onPlaying?.();
+  await ended;
 }
 
 export function stopReadAloud() {
@@ -135,17 +157,7 @@ export async function startReadAloud(
       const spoken = await next;
       if (run !== generation) return;
       if (index + 1 < chunks.length) next = fetchChunk(chunks[index + 1]);
-      release();
-      objectUrl = URL.createObjectURL(new Blob([spoken.data], { type: spoken.contentType ?? "audio/mpeg" }));
-      const element = new Audio(objectUrl);
-      audio = element;
-      const ended = new Promise<void>((resolve, reject) => {
-        element.onended = () => resolve();
-        element.onerror = () => reject(new Error("The audio could not be played."));
-      });
-      await element.play();
-      useReadAloudStore.setState({ status: "playing" });
-      await ended;
+      await playClip(spoken.data, spoken.contentType, () => useReadAloudStore.setState({ status: "playing" }));
       if (run !== generation) return;
     }
     release();
@@ -159,4 +171,58 @@ export async function startReadAloud(
       error: cause instanceof Error ? cause.message : String(cause),
     });
   }
+}
+
+type Spoken = Awaited<ReturnType<RedrobServerClient["speakText"]>>;
+
+/** The cue, spoken once per language and kept for the rest of the run: it is the same words every time. */
+const cues = new Map<Language, Promise<Spoken>>();
+
+/** Two soft notes, for when the cue cannot be spoken. Silent where there is no Web Audio. */
+export function playChime() {
+  if (typeof AudioContext === "undefined") return;
+  const context = new AudioContext();
+  const start = context.currentTime;
+  [660, 880].forEach((frequency, index) => {
+    const tone = context.createOscillator();
+    const gain = context.createGain();
+    tone.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, start + index * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.12, start + index * 0.12 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + index * 0.12 + 0.18);
+    tone.connect(gain).connect(context.destination);
+    tone.start(start + index * 0.12);
+    tone.stop(start + index * 0.12 + 0.2);
+  });
+  window.setTimeout(() => void context.close(), 600);
+}
+
+/**
+ * Says "Working on it" when a spoken message is sent, so a voice conversation is never silent
+ * while the answer is written. It shares the reply's speaker: the answer, or a press of the mic,
+ * cuts it off. When the words cannot be spoken, a chime says the same thing.
+ */
+export async function playCue(client: Pick<RedrobServerClient, "speakText">, workspaceId: string): Promise<void> {
+  stopReadAloud();
+  const run = generation;
+  const language = currentLocale();
+  let cue = cues.get(language);
+  if (!cue) {
+    cue = client.speakText(workspaceId, t("desk.voice_chat_cue"));
+    cues.set(language, cue);
+  }
+  try {
+    const spoken = await cue;
+    if (run !== generation) return;
+    await playClip(spoken.data, spoken.contentType);
+  } catch {
+    cues.delete(language);
+    if (run === generation) playChime();
+  }
+  if (run === generation) release();
+}
+
+/** For tests: forget every cached cue. */
+export function resetCues() {
+  cues.clear();
 }
