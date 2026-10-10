@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ComposerMode,
@@ -19,7 +19,18 @@ import {
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { t } from "../../../i18n";
 import { useLocal } from "../../kernel/local-provider";
-import { startDictation } from "../../domains/session/voice/voice-dictation";
+import { RedrobServerError } from "../../../app/lib/redrob-server";
+import { voiceAllowedForPrivacy } from "../../domains/session/voice/read-aloud";
+import {
+  MAX_RECORDING_MS,
+  micPress,
+  micRelease,
+  startRecording,
+  transcribeClip,
+  type MicPhase,
+  type MicStep,
+  type Recording,
+} from "../../domains/session/voice/voice-dictation";
 import { createDeskServices } from "../services/real-services";
 import { privacyLevelLabel } from "../shell/nav";
 import type { ChatMemory, ChatMode, PrivacyLevel } from "../services/types";
@@ -37,12 +48,30 @@ const STATUS_ICON = { width: 14, height: 14, "aria-hidden": true };
 const MIC_ICON = { width: 16, height: 16, "aria-hidden": true };
 const STALE_MS = 30_000;
 
-/** Why the mic cannot listen here, or null when it can. */
-export function micUnavailableReason(env: { desktop: boolean; media: boolean; connected: boolean }): string | null {
-  if (!env.desktop) return t("desk.mic_reason_web");
+/**
+ * Why the mic cannot listen here, or null when it can. `voiceAllowed` is the workspace's privacy
+ * answer, undefined until it is known; the server refuses a recording at High or Strict anyway.
+ */
+export function micUnavailableReason(env: {
+  media: boolean;
+  connected: boolean;
+  voiceAllowed: boolean | undefined;
+}): string | null {
   if (!env.media) return t("desk.mic_reason_device");
-  if (!env.connected) return t("desk.mic_reason_connecting");
+  if (!env.connected || env.voiceAllowed === undefined) return t("desk.mic_reason_connecting");
+  if (!env.voiceAllowed) return t("desk.mic_reason_privacy");
   return null;
+}
+
+/** Whole seconds left in a recording that started at `startedAt`. */
+export function secondsLeft(startedAt: number, now: number): number {
+  return Math.max(0, Math.ceil((MAX_RECORDING_MS - (now - startedAt)) / 1000));
+}
+
+/** What a failed recording or transcription says, in the app's language where the reason is known. */
+export function micFailureText(error: unknown): string | undefined {
+  if (error instanceof RedrobServerError && error.code === "voice_off_for_privacy") return t("desk.mic_reason_privacy");
+  return error instanceof Error ? error.message : undefined;
 }
 
 function modeOptions(): ComposerModeOption[] {
@@ -53,10 +82,13 @@ function modeOptions(): ComposerModeOption[] {
 }
 
 export type DeskComposerToolsViewProps = {
-  listening: boolean;
+  mic: MicPhase["kind"];
+  /** Seconds left while recording; shown beside the mic. */
+  secondsLeft: number | null;
   /** Set when the mic cannot listen here; the button is disabled and says why. */
   micUnavailable: string | null;
-  onMic: () => void;
+  onMicPress: () => void;
+  onMicRelease: () => void;
   mode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
   /** The model control, last. */
@@ -65,24 +97,46 @@ export type DeskComposerToolsViewProps = {
 
 /** Mic, then Plan or Run, then the model: the composer's tools inside the Desk frame. */
 export function DeskComposerToolsView(props: DeskComposerToolsViewProps) {
+  const recording = props.mic === "recording";
   const label = props.micUnavailable
     ? t("desk.mic_unavailable_label", { reason: props.micUnavailable })
-    : props.listening
+    : recording
       ? t("desk.mic_stop")
-      : t("desk.mic_start");
+      : props.mic === "transcribing"
+        ? t("desk.mic_transcribing")
+        : t("desk.mic_start");
   return (
     <span className="desk-composer-tools">
       <IconButton
         label={label}
         size="sm"
         round
-        variant={props.listening ? "secondary" : "ghost"}
-        aria-pressed={props.listening}
+        variant={recording ? "secondary" : "ghost"}
+        aria-pressed={recording}
+        aria-busy={props.mic === "transcribing"}
         disabled={Boolean(props.micUnavailable)}
-        onClick={props.onMic}
+        onPointerDown={(event) => {
+          if (event.button !== 0) return;
+          // Keep the release on this button even when the pointer drifts off it mid-hold.
+          event.currentTarget.setPointerCapture?.(event.pointerId);
+          props.onMicPress();
+        }}
+        onPointerUp={props.onMicRelease}
+        onPointerCancel={props.onMicRelease}
+        onClick={(event) => {
+          // A keyboard press has no pointer: it is a tap, which starts or stops.
+          if (event.detail !== 0) return;
+          props.onMicPress();
+          props.onMicRelease();
+        }}
       >
-        {props.listening ? icons.micOff(MIC_ICON) : icons.mic(MIC_ICON)}
+        {recording ? icons.micOff(MIC_ICON) : icons.mic(MIC_ICON)}
       </IconButton>
+      {recording && props.secondsLeft !== null ? (
+        <span className="text-xs tabular-nums text-muted-foreground" aria-hidden="true">
+          {t("desk.mic_seconds_left", { seconds: props.secondsLeft })}
+        </span>
+      ) : null}
       <ComposerMode
         label={t("desk.mode_label")}
         options={modeOptions()}
@@ -107,63 +161,123 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
   const { prefs } = useLocal();
   const mode = useDeskComposerStore((state) => modeFor(state.chats, props.chatKey, prefs.deskNewChatMode));
   const setMode = useDeskComposerStore((state) => state.setMode);
-  const listening = useFrameStore((state) => state.voice);
   const setVoice = useFrameStore((state) => state.setVoice);
   const showToast = useFrameStore((state) => state.showToast);
   const client = useDeskConnection((state) => state.client);
+  const workspaceId = useDeskConnection((state) => state.workspaceId);
   const draftRef = useRef(props.draft);
   draftRef.current = props.draft;
   const onDraftChangeRef = useRef(props.onDraftChange);
   onDraftChangeRef.current = props.onDraftChange;
-  const stopRef = useRef<(() => void) | null>(null);
 
+  // The same question, and the same cache entry, as read-aloud's button.
+  const { data: voiceAllowed } = useQuery({
+    queryKey: ["voice-allowed", workspaceId],
+    enabled: Boolean(client && workspaceId),
+    queryFn: async () =>
+      client && workspaceId ? voiceAllowedForPrivacy((await client.getConfig(workspaceId)).redrob) : false,
+    staleTime: STALE_MS,
+  });
   const micUnavailable = micUnavailableReason({
-    desktop: isDesktopRuntime(),
-    media: typeof navigator !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia) && typeof RTCPeerConnection !== "undefined",
-    connected: Boolean(client),
+    media:
+      typeof navigator !== "undefined" &&
+      Boolean(navigator.mediaDevices?.getUserMedia) &&
+      typeof MediaRecorder !== "undefined",
+    connected: Boolean(client && workspaceId),
+    voiceAllowed,
   });
 
-  // Each start gets a number; a start that finishes after Stop (or unmount) is closed at once.
+  const [mic, setMic] = useState<MicPhase["kind"]>("idle");
+  const [left, setLeft] = useState<number | null>(null);
+  const phaseRef = useRef<MicPhase>({ kind: "idle" });
+  const recordingRef = useRef<Promise<Recording> | null>(null);
+  const tickRef = useRef<number | null>(null);
+  // Each recording gets a number; anything that settles after a newer one began, or after unmount, is dropped.
   const attemptRef = useRef(0);
-  const release = () => {
-    attemptRef.current += 1;
-    stopRef.current?.();
-    stopRef.current = null;
+
+  const enter = (phase: MicPhase) => {
+    phaseRef.current = phase;
+    setMic(phase.kind);
+    setVoice(phase.kind === "recording");
+    if (phase.kind !== "recording" && tickRef.current !== null) {
+      window.clearInterval(tickRef.current);
+      tickRef.current = null;
+      setLeft(null);
+    }
   };
+  const fail = (attempt: number, error: unknown) => {
+    if (attempt !== attemptRef.current) return;
+    // Retire the attempt, so the same failure seen by a second handler is not shown twice.
+    attemptRef.current += 1;
+    enter({ kind: "idle" });
+    showToast(t("desk.mic_failed"), micFailureText(error));
+  };
+
   useEffect(() => () => {
-    release();
+    attemptRef.current += 1;
+    if (tickRef.current !== null) window.clearInterval(tickRef.current);
+    void recordingRef.current?.then((recording) => recording.cancel(), () => undefined);
+    recordingRef.current = null;
     setVoice(false);
   }, [setVoice]);
 
-  const onMic = () => {
-    if (listening) {
-      release();
-      setVoice(false);
-      return;
-    }
-    if (!client) return;
+  const begin = (startedAt: number) => {
     const attempt = ++attemptRef.current;
-    setVoice(true);
     showToast(t("desk.mic_toast_title"), t("desk.mic_toast_text"));
+    setLeft(secondsLeft(startedAt, startedAt));
+    tickRef.current = window.setInterval(() => setLeft(secondsLeft(startedAt, Date.now())), 250);
+    const started = startRecording(() => {
+      // At the limit the recording is sent as if the mic were let go.
+      if (attempt === attemptRef.current && phaseRef.current.kind === "recording") finish(attempt);
+    });
+    recordingRef.current = started;
+    started.catch((error: unknown) => fail(attempt, error));
+  };
+
+  const finish = (attempt: number) => {
+    enter({ kind: "transcribing" });
+    const started = recordingRef.current;
+    recordingRef.current = null;
+    if (!started || !client || !workspaceId) return enter({ kind: "idle" });
     const onTranscript = transcriptHandler(() => draftRef.current, (next) => onDraftChangeRef.current(next));
-    startDictation(client, onTranscript).then(
-      (stopDictation) => {
-        if (attempt === attemptRef.current) stopRef.current = stopDictation;
-        else stopDictation();
-      },
-      (error: unknown) => {
-        if (attempt !== attemptRef.current) return;
-        setVoice(false);
-        showToast(t("desk.mic_failed"), error instanceof Error ? error.message : undefined);
-      },
-    );
+    started
+      .then((recording) => recording.finish())
+      .then((clip) => (clip ? transcribeClip(client, workspaceId, clip) : null))
+      .then(
+        (text) => {
+          if (attempt !== attemptRef.current) return;
+          if (text) onTranscript(text);
+          enter({ kind: "idle" });
+        },
+        (error: unknown) => fail(attempt, error),
+      );
+  };
+
+  const apply = (step: MicStep, now: number) => {
+    if (step.action === "start") {
+      enter(step.phase);
+      begin(now);
+    } else if (step.action === "stop") {
+      finish(attemptRef.current);
+    } else {
+      phaseRef.current = step.phase;
+    }
   };
 
   return (
     <DeskComposerToolsView
-      listening={listening}
+      mic={mic}
+      secondsLeft={left}
       micUnavailable={micUnavailable}
-      onMic={onMic}
+      onMicPress={() => {
+        if (micUnavailable) return;
+        const now = Date.now();
+        apply(micPress(phaseRef.current, now), now);
+      }}
+      onMicRelease={() => {
+        const now = Date.now();
+        apply(micRelease(phaseRef.current, now), now);
+      }}
       mode={mode}
       onModeChange={(next) => setMode(props.chatKey, next)}
     >
