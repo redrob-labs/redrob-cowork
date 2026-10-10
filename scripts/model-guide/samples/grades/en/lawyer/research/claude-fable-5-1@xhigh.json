@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/research/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "384d11dedfe5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Count I covered (CFO conduct, mandatory \"shall\"); Count II likely not; Count III a reasoned close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Expect the Court to allocate",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Covers Count I under mandatory bylaws, excludes contractual Count II, and analyzes both sides of Count III with allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately covers Count I under mandatory bylaws, rejects Count II, and treats Count III as mixed/allocated."
+    }
+   ]
+  },
+  {
+   "check": "§145(f): 2023–2024 conduct predates the amendment, which can't impair his right; treatise [8] outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That statement predates the current text of §145(f) and is superseded.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies statutory protection to pre-amendment CFO conduct, notes no reservation, and rejects outdated treatise."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies §145(f) to pre-amendment conduct and identifies treatise [8] as outdated and superseded."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [1] and [6], not blog [7]; letter of credit rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pinecrest's own bylaw specifies an \"*unsecured* undertaking to repay\" [4].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects good-faith conditioning under [1] and [6], discounts blog [7], and rejects letter-of-credit security."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good faith based on [1] and [6] over [7], and rejects security since bylaw requires unsecured undertaking."
+    }
+   ]
+  },
+  {
+   "check": "Enforce in Chancery (exclusive, summary, §145(k)); fees on fees pro rata under [5]; tender undertaking, written demand",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "deliver a written demand enclosing Stiles's executed unsecured undertaking and invoices",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides exclusive summary Chancery enforcement under §145(k), proportional fees on fees under [5], and demand with undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies Chancery exclusive/summary jurisdiction under §145(k), pro rata fees on fees under [5], and tendering undertaking via demand."
+    }
+   ]
+  },
+  {
+   "check": "Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Flagged as fictional for this exercise; must be replaced with/verified against real Delaware authority before filing.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table distinguishes controlling statutes and governing bylaws, fictional cases, and unreliable or superseded secondary sources."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Source table clearly categorizes primary authorities [1]–[4], fictional cases [5]–[6], and unreliable secondary sources [7]–[8]."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017253075,
+ "date": "2026-10-10"
+}

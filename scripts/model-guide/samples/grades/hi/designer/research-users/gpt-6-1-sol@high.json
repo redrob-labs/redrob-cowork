@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/research-users/gpt-6-1-sol@high",
+ "language": "hi",
+ "profession": "designer",
+ "task": "research-users",
+ "model": "gpt-6-1-sol",
+ "effort": "high",
+ "scorecardSha": "1eba03685d00",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "single-choice सर्वे के हिस्से **104%** बनते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies inconsistent totals and explicitly withholds decisive ranking until verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the 104% sum and states percentages are unreliable until verified."
+    }
+   ]
+  },
+  {
+   "check": "Flags survey bias: only heavy submitters (20+ expenses), no approvers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "केवल पिछले महीने ≥20 खर्च submit करने वाले users। कम-frequency submitters और approvers का अनुभव इससे नहीं समझा जा सकता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly identifies heavy-submitter sampling and missing approver perspectives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly flags that the survey surveyed only heavy submitters (≥20 expenses) and omitted approvers."
+    }
+   ]
+  },
+  {
+   "check": "Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "41% expense reports पाँच दिन से अधिक approval का इंतज़ार कर रही हैं;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Across slides, cites all five approval-related participants, 41% prolonged waiting, and 18% mobile adoption as stronger evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers 5 participants (P1, P2, P4, P6, P8 across slides 3 & 4), 41% waiting 5+ days, and 18% mobile adoption."
+    }
+   ]
+  },
+  {
+   "check": "Sizes receipt capture as narrower: 6.2% need correction; crumpled thermal slips and multi-page hotel GST bills",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**6.2% फोटो में manual OCR correction** हुआ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Scopes capture narrowly, citing P3’s crumpled thermal receipt and P8’s multi-page hotel GST bill."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sizes receipt capture narrower, noting 6.2% manual OCR correction, crumpled thermal slips, and multi-page GST bills."
+    }
+   ]
+  },
+  {
+   "check": "Recommends approval-flow work as the big bet, tells Richard directly; receipt edge cases as follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बेहतर receipt capture को मुख्य दाँव न बनाएं। प्राथमिकता **approval में देरी घटाने** को दें;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Directly rejects Richard’s proposed priority, recommends approval-flow work, and scopes receipt edge cases as follow-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly recommends approval flow over receipt capture to Richard, scoping receipt edge cases as small follow-ups."
+    }
+   ]
+  },
+  {
+   "check": "Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**8 इंटरव्यू, प्रत्येक 45 मिनट:**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Every slide has a speaker note and participant citations; sample limitations are explicit, but survey-wording limitations are not discussed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes a speaker note on every slide (1-10), cites participants by ID, and states limitations (sample, survey data)."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017969963,
+ "date": "2026-10-10"
+}

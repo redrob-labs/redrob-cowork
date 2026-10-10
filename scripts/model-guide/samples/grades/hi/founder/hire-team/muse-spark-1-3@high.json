@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/hire-team/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "9a6ce3b66ec5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैरी मेजर: 55 / 16 = **3.44** (ATS में 3.6 लिखा है — गलत)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recalculates both averages and rejects the ATS recommendation as stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately recalculates Mary's average as 3.44 and Richard's as 3.50, noting ATS recommendation is wrong."
+    }
+   ]
+  },
+  {
+   "check": "Spots Stiles's Richard Roe note describing Mary's Brightpath role (feminine forms); if swapped, Mary ~3.56, Richard ~3.38",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "ब्राइटपाथ तो मैरी का employer है (रिचर्ड ऑर्बिटलाइन में हैं), और “बनेंगी” pronoun भी mismatch है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies the employer and feminine-form mismatch, but omits the swapped-score averages."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Spots the Brightpath background and feminine pronouns, but fails to compute swapped averages (~3.56 and ~3.38)."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with Stiles a prerequisite, not a guess",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "कोई नई रेटिंग की ज़रूरत नहीं, बस accuracy।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Requires clarification before offering, but requests note correction rather than confirmation of score ownership."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats confirming the scores with Stiles as a required step before proceeding with an offer."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Miles's comment on Mary's children as gender-biased and legally risky; sets a follow-up without bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह parental-status bias है। Disclosure चाहे candidate ने खुद किया हो, हम इसका इस्तेमाल नहीं कर सकते।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the discriminatory assumption, identifies legal exposure, and establishes identical travel questions and private corrective follow-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes Miles's biased comment, explains legal/parental bias risk, and sets neutral follow-up steps."
+    }
+   ]
+  },
+  {
+   "check": "Keeps Mary's ₹55 lakh ask (above the ₹52 lakh ceiling) within policy; notes Richard's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैरी से compliant travel-check + ₹52L cap के अंदर renegotiation (ESOP से top-up)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Mary's compensation within the approved ceiling and explicitly requires Richard's outstanding reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps comp within policy, notes Mary's ask exceeds the ₹52L ceiling, and notes Richard's pending reference."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "हम **[₹50L Fixed + 0.40% ESOP, vesting terms]** पर approval लेने का सोच रहे हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional, concise deliverables; recommendation considers role fit, compensation, and readiness beyond averages; email includes placeholders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Concise, professional tone throughout; recommendations are reasoned beyond simple averages; email appropriately uses placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.01818915,
+ "date": "2026-10-10"
+}

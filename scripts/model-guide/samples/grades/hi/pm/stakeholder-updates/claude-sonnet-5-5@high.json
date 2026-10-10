@@ -1,0 +1,128 @@
+{
+ "key": "hi/pm/stakeholder-updates/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "48ea9f47d3c3",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ ₹5.20 crore (₹3.64 crore + 3 × ₹52 lakh), not ₹4.72 crore: ≈ ₹40 lakh (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बचे 3 महीने × ₹52 लाख = ₹1.56 करोड़, इसलिए forecast **₹5.20 करोड़**, यानी ₹40 लाख (8.3%) ऊपर।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes completion forecast, variance, and conflict with reported ₹4.72 crore."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recomputes forecast at completion to ₹5.20 crore and notes ₹40 lakh (8.3%) over-budget."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अब: 14 नवंबर + 28 दिन = **12 दिसंबर**, 1 दिसंबर से 11 दिन बाद।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct review arithmetic; explicitly marks compliance pack and public launch Red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates earliest launch as 12 Dec after 4-week review and marks milestones Amber/Red."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "चूका: goal creation 31% (target 40%)। Tickets 22 प्रति 1,000 (target ≤15)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly reports both beta misses against their targets."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honestly reports the beta misses with the exact figures."
+    }
+   ]
+  },
+  {
+   "check": "Presents ₹2,300 first deposit and retention without spin, and links UPI round-up and deposit-delay themes to fixes",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बचे समय में round-up UX और deposit-visibility messaging ठीक।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reports deposit and retention accurately, qualifies retention population, and links both ticket themes to fixes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents positive metrics straightforwardly and links ticket themes to UX/messaging fixes in slide 6."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Recommendation: B**, साथ में Vasundhara से rolling/early review की समानांतर माँग, जिस पर योजना टिकी नहीं होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers December and January options; ends with explicit launch rebaseline and budget approval requests."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides distinct options (keep 1 Dec, mid-Dec, Jan) and recommends re-baselining to 14 Dec."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आपकी तारीख़ें सटीक थीं; बस dependencies जोड़कर status निकाला है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides each have speaker notes; bottom line comes first; Jane note explains changes constructively."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Has 7 slides with speaker notes, bottom line first, and a polite, non-blaming note to Jane."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.014604975,
+ "date": "2026-10-10"
+}
