@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, Tabs, icons, type TableColumn } from "@redrob-labs/ui";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
@@ -30,7 +30,28 @@ import {
   type GuideResearch,
   type GuideUse,
 } from "../guide/model-guide";
+import { renderMarkdownHtml } from "../../../components/markdown/markdown-primitive";
+import { loadGuideSamples, sampleKey, type GuideSamples } from "../guide/guide-samples";
+import type { SampleFor } from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
+
+const DEFAULT_PROFESSION = "lawyer";
+
+/** A model's answer as the chat renders one: markdown, sanitised, in the chat's own type. */
+function SampleOutput(props: { text: string }) {
+  return <div className="desk-guide__sample" dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(props.text, "surface") }} />;
+}
+
+/** The task's prompt, folded to its first sentence: it carries the task's data and runs to a page. */
+function SamplePrompt(props: { text: string }) {
+  const first = props.text.split(/(?<=[.?!।])\s/)[0] ?? props.text;
+  return (
+    <details className="desk-guide__prompt">
+      <summary>{first}</summary>
+      <div className="desk-guide__sample" dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(props.text, "surface") }} />
+    </details>
+  );
+}
 
 /**
  * Says what "Use this" did, as a toast beside where the person is looking rather than a note at the foot of a
@@ -61,16 +82,49 @@ export function ProfessionGuideView(props: {
   locale: Language;
   onChoose?: (model: ModelRef, variant: string | null) => void;
   onStartChat?: () => void;
+  /** Samples loaded so far, keyed `<language>/<profession>`. */
+  samples?: Record<string, GuideSamples>;
+  /** The profession and working language on screen, so the screen can load their samples. */
+  onShow?: (language: string, profession: string) => void;
 }) {
+  const [profession, setProfession] = useState(DEFAULT_PROFESSION);
+  const [language, setLanguage] = useState<string>(props.locale);
+  const samples = props.samples ?? {};
+  const show = (nextLanguage: string, nextProfession: string) => {
+    setLanguage(nextLanguage);
+    setProfession(nextProfession);
+    props.onShow?.(nextLanguage, nextProfession);
+  };
+  const sampleFor: SampleFor = (pick, at) => {
+    const task = samples[`${at.language}/${at.profession}`]?.[at.task];
+    const first = pick.steps[0];
+    const run = task && first ? task.runs[sampleKey(first.model, first.effort)] : undefined;
+    if (!task || !run) return undefined;
+    return {
+      prompt: <SamplePrompt text={task.prompt} />,
+      output: <SampleOutput text={run.output} />,
+      more: [
+        t("desk.guide_sample_more", { date: run.date }),
+        pick.steps.length > 1 ? t("desk.guide_sample_text_only") : null,
+        run.cut ? t("desk.guide_sample_cut") : null,
+      ]
+        .filter(Boolean)
+        .join(" "),
+    };
+  };
   return (
     <>
       <ModelGuide
-        professions={guideProfessions(props.research, props.locale)}
+        professions={guideProfessions(props.research, props.locale, sampleFor)}
         weights={props.research.weights}
         locale={props.locale}
-        defaultProfession="lawyer"
+        defaultProfession={DEFAULT_PROFESSION}
         languages={guideLanguages()}
         defaultLanguage={props.locale}
+        onTaskChange={(_task, next) => show(language, next)}
+        onLanguageChange={(next) => show(next, profession)}
+        promptLabel={t("desk.guide_sample_prompt")}
+        outputLabel={t("desk.guide_sample_output")}
         title={t("desk.nav_guide")}
         lede={t("desk.guide_profession_lede")}
         method={t("desk.guide_method")}
@@ -282,6 +336,14 @@ export function GuideScreen() {
     // An edition changes monthly; an hour keeps a long-open window from showing last month's.
     staleTime: 60 * 60 * 1000,
   });
+  // The samples for what the guide shows: one profession in one working language at a time.
+  const [shown, setShown] = useState<{ language: string; profession: string }>({ language: locale, profession: DEFAULT_PROFESSION });
+  const samples = useQuery({
+    queryKey: ["desk-guide", "samples", shown.language, shown.profession],
+    queryFn: () => loadGuideSamples(shown.language, shown.profession),
+    staleTime: Number.POSITIVE_INFINITY,
+    enabled: tab === "profession",
+  });
   const count = pricing.data ? guideModelCount(pricing.data) : undefined;
   const meta =
     tab === "profession"
@@ -307,7 +369,14 @@ export function GuideScreen() {
           ) : !research.data ? (
             <EmptyState title={t("desk.guide_profession_error")} description={t("desk.settings_try_again")} />
           ) : (
-            <ProfessionGuideView research={research.data} locale={locale} onChoose={chooseForNewChats} onStartChat={() => navigate("/chat")} />
+            <ProfessionGuideView
+              research={research.data}
+              locale={locale}
+              onChoose={chooseForNewChats}
+              onStartChat={() => navigate("/chat")}
+              samples={samples.data ? { [`${shown.language}/${shown.profession}`]: samples.data } : {}}
+              onShow={(language, profession) => setShown({ language, profession })}
+            />
           )
         ) : pricing.isLoading ? (
           <Skeleton variant="text" lines={6} />

@@ -1,0 +1,25 @@
+{
+ "key": "ko/engineer/review-code/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "review-code",
+ "rank": 3,
+ "model": "claude-fable-5-1",
+ "catalogueId": "claude-fable-5-1",
+ "routedModel": "claude-fable-5-1",
+ "effort": "xhigh",
+ "promptSha": "5e09eeca15cc",
+ "output": "",
+ "cut": false,
+ "finishReason": "content_filter",
+ "filtered": true,
+ "usage": {
+  "prompt_tokens": 1658,
+  "completion_tokens": 8493,
+  "total_tokens": 10151
+ },
+ "costUsd": 0.4632915,
+ "latencyMs": 116470,
+ "requestId": "log_d1c351828b4844a7bb17a1e0ad791162",
+ "date": "2026-10-09"
+}

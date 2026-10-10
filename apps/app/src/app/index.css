@@ -2030,3 +2030,20 @@ select:disabled {
     min-height: 100dvh;
   }
 }
+
+/* A model's answer in the Model Guide, as markdown inside the guide's scrolling output box. */
+.desk-guide__sample > :first-child { margin-top: 0; }
+.desk-guide__sample > :last-child { margin-bottom: 0; }
+.desk-guide__sample :is(h1, h2, h3, h4) { margin: 1em 0 0.4em; font-weight: 700; line-height: 1.3; }
+.desk-guide__sample h1 { font-size: 18px; }
+.desk-guide__sample h2 { font-size: 16px; }
+.desk-guide__sample :is(h3, h4) { font-size: 14px; }
+.desk-guide__sample :is(p, ul, ol, pre, table, blockquote) { margin: 0 0 0.75em; }
+.desk-guide__sample :is(ul, ol) { padding-left: 1.25em; }
+.desk-guide__sample ul { list-style: disc; }
+.desk-guide__sample ol { list-style: decimal; }
+.desk-guide__sample table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 13px; }
+.desk-guide__sample :is(th, td) { padding: 4px 8px; border: 1px solid var(--border-subtle); text-align: left; vertical-align: top; }
+.desk-guide__sample pre { overflow-x: auto; padding: 0.75em; border-radius: 6px; background: var(--surface-sunken); font-size: 12px; }
+.desk-guide__prompt summary { cursor: pointer; font-weight: 500; }
+.desk-guide__prompt[open] summary { margin-bottom: 0.75em; }

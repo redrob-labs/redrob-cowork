@@ -1,0 +1,25 @@
+{
+ "key": "hi/engineer/review-code/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "review-code",
+ "rank": 5,
+ "model": "claude-sonnet-5-5",
+ "catalogueId": "anthropic/claude-sonnet-5.5",
+ "routedModel": "anthropic/claude-sonnet-5.5",
+ "effort": "high",
+ "promptSha": "130a9a148c37",
+ "output": "# PR #482 Review: `GET /admin/users/export`\n\n## 1. Verdict: **Request changes** 🚫\n\nरिचर्ड, export feature की ज़रूरत सही है और आपने ORDER BY, audit और header जैसे हिस्से शुरू में ही सोच लिए, यह अच्छा है। लेकिन अभी यह endpoint किसी भी tenant के admin को किसी भी दूसरे tenant की पूरी user list दे सकता है, और उसमें `password_hash`, `mfa_secret` और `pan_number` भी हैं। `sort` parameter से SQL injection भी संभव है। \"Read-only है, इसलिए जोखिम कम है\" वाली धारणा यहाँ उलटी पड़ती है: export सबसे संवेदनशील read operations में गिना जाता है, क्योंकि सारा डेटा एक ही बार में बाहर चला जाता है। Security के लिए author का self-review काफ़ी नहीं होता; review का मक़सद ही दूसरी नज़र है, इसलिए आगे भी personal data वाले PRs में यह करते रहें। नीचे के fixes के बाद यह PR अच्छी स्थिति में होगा। Personal data वाला पहला feature होने के हिसाब से आपने ढाँचा ठीक चुना है, बस guard-rails छूटे हैं।\n\n---\n\n## 2. Review comments\n\n### 🔴 Blockers\n\n**B1. Cross-tenant data leak** (≈L44: `req.query.tenantId ?? req.user.tenantId`)\n`requireRole('admin')` केवल role देखता है, tenant नहीं। Tenant A का कोई भी admin `GET /admin/users/export?tenantId=<B की id>` भेजकर tenant B के सारे users डाउनलोड कर सकता है। Multi-tenant HR प्लेटफ़ॉर्म में यह सबसे गंभीर श्रेणी की घटना है।\n**Fix:** `tenantId` को client से कभी न लें; सिर्फ़ `req.user.tenantId` इस्तेमाल करें। (अगर internal super-admin को cross-tenant export चाहिए, तो वह अलग role और अलग route होना चाहिए।)\n\n**B2. `sort` से SQL injection** (≈L45, L49: ``ORDER BY ${sort}``)\nIdentifiers को `$n` से parameterize नहीं किया जा सकता, इसलिए यह string सीधे SQL में जा रही है। Query में एक parameter है, इसलिए pg extended protocol इस्तेमाल करेगा और stacked statements नहीं चलेंगे। फिर भी subquery से ड",
+ "cut": false,
+ "finishReason": "content_filter",
+ "filtered": true,
+ "usage": {
+  "prompt_tokens": 1622,
+  "completion_tokens": 5681,
+  "total_tokens": 7303
+ },
+ "costUsd": 0.0630567,
+ "latencyMs": 44517,
+ "requestId": "log_d633c384d709410596dcbfec7fc7668d",
+ "date": "2026-10-09"
+}
