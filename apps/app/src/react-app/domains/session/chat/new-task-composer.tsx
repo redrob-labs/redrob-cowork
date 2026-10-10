@@ -192,6 +192,13 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
     props.onRunTask(resolvePastedTextPlaceholders(props.draft, pastedText), attachments);
   };
 
+  // A spoken message on the new chat screen starts the chat, as Send does.
+  const handleSendText = (message: string) => {
+    if (context?.modelUnavailable) return false;
+    props.onRunTask(resolvePastedTextPlaceholders(message, pastedText), attachments);
+    return true;
+  };
+
   const handleUnsupportedFileLinks = (links: string[]) => {
     if (!links.length) return;
     props.onDraftChange(`${props.draft}${props.draft && !props.draft.endsWith("\n") ? "\n" : ""}${links.join("\n")}`);
@@ -203,6 +210,7 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
       mentions={mentions}
       onDraftChange={handleDraftChange}
       onSend={handleRunTask}
+      onSendText={handleSendText}
       onSteer={noop}
       onQueue={noop}
       onStop={noop}

@@ -87,6 +87,9 @@ import {
 } from "./composer-state-store";
 import { MessageList, type BlockedStatus } from "@/components/chat/message-list";
 import { getMessagesText } from "@/components/chat/utils";
+import { useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { startReadAloud, useReadAloudStore } from "../voice/read-aloud";
+import { voiceReplyStep, type VoiceReplyWait } from "../voice/voice-conversation";
 import { contextUsagePercent, latestUsage } from "@/components/chat/message-usage";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { MessageListProvider, type DispatchAction } from "@/components/chat/message-list-provider";
@@ -1250,6 +1253,47 @@ export function SessionSurface(props: SessionSurfaceProps) {
     }
   }, [attachments, buildDraft, clearComposer, draft, props.onVariantRun, props.sessionId, sendDraft]);
 
+  /*
+    A spoken message in a Desk voice conversation. Built and sent directly, as retry does, rather than
+    seeded into the draft for `handleSend`, which would race the local draft state. While a turn is
+    running the message is refused, and the mic leaves it in the draft instead.
+  */
+  const handleSendText = useCallback(
+    (message: string) => {
+      if (chatStreaming || model.transitionState !== "idle" || props.modelUnavailable) return false;
+      const sentAttachments = attachments;
+      void sendDraft(buildDraft(message, sentAttachments)).then(
+        (result) => {
+          if (result.outcome === "cancelled") return;
+          clearComposer();
+          sentAttachments.forEach(revokeAttachmentPreview);
+        },
+        () => undefined,
+      );
+      return true;
+    },
+    [attachments, buildDraft, chatStreaming, clearComposer, model.transitionState, props.modelUnavailable, sendDraft],
+  );
+
+  // When the turn a spoken message started is over, its answer is read aloud.
+  const replyWaitRef = useRef<VoiceReplyWait>({ streaming: chatStreaming, due: false });
+  useEffect(() => {
+    replyWaitRef.current = { streaming: replyWaitRef.current.streaming, due: false };
+  }, [props.sessionId]);
+  useEffect(() => {
+    const step = voiceReplyStep(replyWaitRef.current, {
+      streaming: chatStreaming,
+      messages: renderedMessages,
+      takeReply: () => useDeskComposerStore.getState().takeReply(props.sessionId),
+    });
+    replyWaitRef.current = step.wait;
+    if (!step.read) return;
+    void startReadAloud(props.client, props.workspaceId, step.read.id, step.read.text).then(() => {
+      const { error } = useReadAloudStore.getState();
+      if (error) toast.error(error);
+    });
+  }, [chatStreaming, props.client, props.sessionId, props.workspaceId, renderedMessages]);
+
   // One-step run from the empty-state hero: the route seeds this session's
   // draft and marks it for auto-send. Fire the same send path as the send
   // button once the composer is usable; if these conditions never hold
@@ -2175,6 +2219,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
           mentions={mentions}
           onDraftChange={handleComposerDraftChange}
         onSend={handleSend}
+        onSendText={handleSendText}
         onSteer={handleSteer}
         onQueue={handleQueue}
         onStop={handleAbort}
