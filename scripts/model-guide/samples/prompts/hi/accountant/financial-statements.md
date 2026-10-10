@@ -57,7 +57,7 @@ deliverable: documents
 
 ## A strong answer
 
-- Net loss is ₹1,614 lakh (3,460 − 5,074). Total assets of ₹2,634 lakh equal liabilities of ₹3,228 lakh plus negative total equity of ₹594 lakh (4,200 − 3,180 − 1,614).
+- Net loss is ₹1,614 lakh (3,460 − 5,074). Total assets of ₹2,634 lakh equal liabilities of ₹3,228 lakh plus negative total equity of ₹594 lakh (4,200 − 3,180 − 1,614). An answer that books the ₹30 lakh interest correction instead (loss ₹1,584 lakh, negative equity ₹564 lakh) is equally right, provided the statements still tie.
 - Splits deferred revenue into ₹740 lakh current and ₹280 lakh non-current and the lease liability into ₹96 lakh current and ₹240 lakh non-current. The notes and accrued interest are non-current, since they are due 30 September 2026, more than 12 months after the reporting date, and the answer says so.
 - Notices that note interest should be ₹90 lakh (1,500 × 8% × 9/12), not the ₹120 lakh booked as finance cost, and raises the ₹30 lakh difference as an open item with a proposed reclassification or correction.
 - Concludes there is a material uncertainty related to going concern under Ind AS 1: about 10.5 months of runway (₹1,467 lakh ÷ ₹140 lakh) against an assessment period of at least 12 months from the reporting date, the customer loss and no signed term sheet. Discloses management's plans without saying the uncertainty is resolved.

@@ -53,7 +53,7 @@ deliverable: spreadsheets
 - Excludes John Doe's scorecard for Richard Roe because the calendar shows that interview was cancelled. Without it, Roe's SAFE average is 2.5, below the 3.0 bar. With the invalid card included it would be exactly 3.0, and the answer notices this.
 - Removes Stiles' comment about Mary Major's marriage and children from the decision and flags it as an improper, non-job-related consideration (marital status and family responsibilities; a gendered assumption). Recommends asking every finalist the same question about on-call availability. Also flags "like me at his age" and "from our own college" as affinity bias.
 - Advances Mary Major (overall about 3.50; SAFE about 3.17) and Jane Doe (overall about 3.40; SAFE 3.75), with the averages shown and the method reproducible.
-- The final-round plan probes each finalist's weakest area (Mary's SAFE, Jane's COMM) with the same structured questions and behavioural anchors for both.
+- The final-round plan probes each finalist's weakest areas (Mary: OPS ≈ 3.08 after rescaling, and SAFE ≈ 3.17, the one nearest the bar; Jane: COMM) with the same structured questions and behavioural anchors for both.
 
 ## Card
 
