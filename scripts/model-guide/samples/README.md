@@ -52,9 +52,11 @@ different question, so the sections after it are where the page's copy lives.
   beside each model. It covers the same ground as "A strong answer", which stays as the grader's fuller
   reference: every scorecard line must be checkable against it, and every bullet there must be covered by at
   least one scorecard line.
-- Korean and Hindi files carry their own Card in their own language, matching their adapted data. Their
-  Scorecard stays in English, like "A strong answer", so one set of checks grades all three languages; the app
-  shows a translated Scorecard where it has one.
+- Korean and Hindi files carry their own Card, written in their own language and matching their adapted data
+  (won and K-IFRS, rupees and Ind AS). Card keys (`brief:`, `given:` ...) stay in English.
+- Their `## Scorecard` stays in English, like "A strong answer", with their own figures, so one grader and one
+  set of instructions serve all three languages. They add `## Scorecard, shown`: the same lines, in the same
+  order and number, in their own language. That is what the guide displays; line n of each is the same check.
 
 ### Rules for a prompt
 

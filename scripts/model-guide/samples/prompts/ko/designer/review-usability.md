@@ -60,3 +60,35 @@ deliverable: web
 - Covers mobile and error-prevention issues: input types and autocomplete (email, tel, cc-number, cc-exp, cc-csc; 1.3.5), a card maxlength of 16 that blocks 19-digit cards, small targets (2.5.8) and the timer overlay. Suggests ways to catch email typos.
 - Declines the pre-ticked newsletter box: under Korea's 개인정보 보호법 marketing consent must be a separate, optional consent that is not pre-selected (and 정보통신망법 requires prior opt-in for advertising messages), pre-ticked consent is not valid under GDPR in the EU, and it is a dark pattern. Proposes an honest unticked opt-in.
 - The corrected HTML runs, keeps the fields, includes a timer warning and an extend option announced to assistive technology, and keeps the orange by using dark text or a darker shade for contrast.
+
+## Card
+
+brief: 예매 결제 단계의 예매자 정보 화면을 리뷰하고 Lighthouse 주장과 수신 동의 사전 체크에 답합니다.
+given:
+- 엔지니어의 말: Lighthouse 점수 주장과 마케팅팀의 수신 동의 사전 체크 요청
+- 현재 마크업: "예매자 정보" 화면의 일부 생략한 HTML·CSS와 타이머 주석
+- 맥락: 모바일 트래픽 68%, 고객센터 불만 2가지, 한국과 EU 고객 공용
+asked:
+- 우선순위를 매긴 발견 사항 표: 문제, 영향받는 사용자, 심각도, WCAG 2.2 성공 기준, 수정 방안
+- Lighthouse 주장에 대한 박영수 님 답변과, 사전 체크된 체크박스에 대한 결정과 근거
+- 같은 필드와 브랜드 오렌지를 유지한 단일 HTML/CSS/JS 수정본
+limit: 설명은 약 2,500자 이내, Markdown; 코드는 더 길어도 됨
+hard: 자동 점수를 수동 검토와 저울질해야 하고, 짧은 마크업에 심각도가 다른 결함이 많이 숨어 있으며, 비즈니스 요청이 법적·윤리적 한계에 부딪힙니다.
+
+## Scorecard
+
+- Explains Lighthouse 100 doesn't prove conformance; cites the unextendable 2-minute timer (2.2.1) and CAPTCHA (1.1.1)
+- Flags placeholder-only labels, colour-only error, unlinked hint, removed focus outline and clickable div
+- Flags contrast failures: #a0a0a0 hint at about 2.6:1 and white on #ff7a00
+- Covers input types and autocomplete (1.3.5), 16-digit card maxlength, small targets, timer overlay, email typos
+- Declines the pre-ticked box (개인정보 보호법, 정보통신망법, GDPR; a dark pattern); proposes an unticked opt-in
+- Corrected HTML runs, keeps fields, adds an announced timer warning and extend option, keeps orange accessibly
+
+## Scorecard, shown
+
+- Lighthouse 100점이 적합성을 증명하지 않음을 설명하고, 연장할 수 없는 2분 타이머(2.2.1)와 보안문자(1.1.1)를 예로 든다
+- 플레이스홀더만 있는 레이블, 색으로만 표시한 오류, 연결되지 않은 힌트, 제거된 포커스 표시, 클릭 가능한 div를 지적한다
+- 명도 대비 미달을 지적한다: 약 2.6:1인 #a0a0a0 힌트, #ff7a00 위 흰색 글자
+- 입력 타입과 autocomplete(1.3.5), 카드 번호 maxlength 16, 작은 터치 영역, 타이머 오버레이, 이메일 오타를 다룬다
+- 사전 체크를 거부하고(개인정보 보호법, 정보통신망법, GDPR, 다크 패턴) 체크되지 않은 선택 동의를 제안한다
+- 수정한 HTML이 동작하고 필드를 유지하며, 보조기기에 안내되는 타이머 경고와 연장 기능을 넣고 오렌지를 접근 가능하게 유지한다

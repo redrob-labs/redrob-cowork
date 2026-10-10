@@ -54,3 +54,36 @@ deliverable: spreadsheets
 - Flags E03 (5 at 62% goal attainment, an anchor of 1, with no valid justification) and E02 (5 at 96%, an anchor of 3, two levels above with no note). Identifies 박영수's leniency pattern in the manager table.
 - Handles the one-level deviations with judgement: E10's 4 has a justification and can stand for discussion, and E09 looks under-rated at 3 against a 104% anchor of 4.
 - The recommended plan totals no more than ₩30,282,000, keeps every merit % inside its rating's range, and every merit amount equals base × %.
+
+## Card
+
+brief: 캘리브레이션 회의 전에 팀장 평가와 인상안을 등급 가이드·예산과 대조해 워크북을 만듭니다.
+given:
+- HRBP 요약: 인상안 합계와 예산에 대한 한 줄 판단
+- 평가 등급 가이드: 등급 5단계의 기준과 인상률 범위, 조정·휴직·예산 규칙
+- 팀장 제출안: 팀장 3명, 직원 12명의 연봉, 등급, 목표 달성률, 동료평가, 인상률, 의견
+asked:
+- 캘리브레이션 표: 직원별 권고 등급, 인상률, 인상액
+- 예산 표: 연봉 총액, 예산, 제출안과 권고안 합계
+- 팀장별 패턴 표: 제출 등급 평균과 기준 등급 평균
+- 진행 가이드: 최대 8개 항목
+limit: 약 2,500자 이내, 계산 열마다 산식을 밝힌 Markdown 표
+hard: 요약의 주장을 검증하고 휴직 규정을 적용하며 등급 조정의 타당성을 판단하고, 예산과 인상률 범위를 함께 지켜야 합니다.
+
+## Scorecard
+
+- Payroll ₩865,200,000; budget ₩30,282,000; submitted ₩31,423,000 (3.63%), ₩1,141,000 over; HRBP's "3.4%" called wrong
+- E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised; §19③ 불리한 처우
+- Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified
+- Shows 박영수's leniency in the manager table: average submitted 4.75 vs anchor 3.25
+- E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)
+- Recommended plan totals ≤ ₩30,282,000, every merit % inside its range, merit amount = base × %
+
+## Scorecard, shown
+
+- 연봉 총액 865,200,000원, 예산 30,282,000원, 제출안 31,423,000원(3.63%)으로 1,141,000원 초과, HRBP의 "3.4%"는 오류
+- E07은 확정적 규정 위반: 비례 조정 목표 103%(기준 등급 4)로 평가하고 인상률 상향, 제19조 제3항의 불리한 처우
+- E03(5 대 기준 1)과 E02(5 대 기준 3, 사유 없음)를 근거 없는 조정으로 표시
+- 팀장별 표에서 박영수의 관대화 경향 제시: 제출 평균 4.75 대 기준 평균 3.25
+- 사유가 있는 E10의 4는 논의용으로 유지 가능, E09는 과소 평가(3 대 기준 4)로 표시
+- 권고안 합계 30,282,000원 이하, 모든 인상률이 등급 범위 안, 인상액 = 기본 연봉 × 인상률

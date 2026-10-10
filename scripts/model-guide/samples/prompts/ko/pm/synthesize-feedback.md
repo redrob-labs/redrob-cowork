@@ -47,3 +47,36 @@ deliverable: spreadsheets
 - Classifies the accounting-export requests (rows 2, 9 and 13) as discoverability or onboarding problems, because the export (Jangbu-yeondong) already shipped, not as a build request.
 - The recommendations weigh the OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile bug fix, and treat the card feed as a data-integrity risk even with a single account. Each call is justified.
 - The caveats cover the small, mixed-source sample: 16 rows, about 12 accounts, NPS from only 10 survey responses, and sales notes that aren't comparable with survey data.
+
+## Card
+
+brief: 설문·문의·영업 메모 한 달 치를 주제별 매출과 함께 종합하고 대응할 세 가지를 권고한다.
+given:
+- 피드백 기록: 출처, 고객사, 플랜, ARR, NPS, 원문이 담긴 16행
+- 제품 메모: 이미 출시된 회계 프로그램 내보내기 기능의 위치와 제공 플랜
+- 개발팀 추정: 대응 후보 4가지의 대략적 공수
+asked:
+- 코딩 표: 행별 주제, 문제 유형, 중복 여부
+- 주제 요약 표: 언급 수, 고유 고객사 수와 ARR, 최저 NPS, 플랜, 계산 방법
+- 매출 집중도·영향 범위·공수를 저울질한 우선순위별 상위 세 가지 권고안
+- VP가 알아야 할 데이터상 주의 사항
+limit: 약 2,500자 이내, Markdown
+hard: 기록은 신중한 중복 제거가 필요하고, 서로 어긋나는 수치와 겉보기와 다른 요청이 있으며, 우선순위는 판단의 문제다.
+
+## Scorecard
+
+- Dedupes by account, method stated: mobile logout 3 (₩68M), OCR 2, approvals 2 (₩46M), card feed 1 (₩26M)
+- Flags Solsup Logistics' ARR conflict (₩96M vs ₩69M), picks one (e.g. OCR ₩170M), suggests checking the CRM
+- Codes accounting-export rows 2, 9 and 13 as discoverability, since Jangbu-yeondong already shipped
+- Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified
+- Treats the card feed as a data-integrity risk despite only one account
+- Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable
+
+## Scorecard, shown
+
+- 고객사 기준 중복 제거, 방법 명시: 모바일 로그아웃 3곳(6,800만 원), OCR 2곳, 결재 2곳(4,600만 원), 카드 연동 1곳(2,600만 원)
+- 솔숲물류 ARR 불일치(9,600만 대 6,900만 원)를 지적하고 하나를 택하며(예: OCR 1억 7,000만 원) CRM 확인 권고
+- 회계 내보내기 요청(2, 9, 13행)을 발견성 문제로 분류: 장부연동은 이미 출시됨
+- OCR 재계약 리스크(Enterprise 2곳)와 저렴하고 영향이 넓은 모바일 수정을 저울질하고 각 판단을 정당화
+- 카드 내역 연동은 고객사 1곳뿐이어도 데이터 무결성 리스크로 다룸
+- 주의 사항: 16행, 약 12개 고객사, 설문 응답 10건뿐인 NPS, 설문과 비교하기 어려운 영업 메모

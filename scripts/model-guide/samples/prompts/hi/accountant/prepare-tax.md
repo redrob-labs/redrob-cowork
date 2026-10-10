@@ -58,3 +58,38 @@ deliverable: spreadsheets
 - Under the regular provisions uses ₹42,000 for the car (1,10,000 × 4,200/11,000), ₹86,400 for the home office (24% of ₹3,60,000 rent) and ₹24,000 laptop depreciation (40% halved for under 180 days; not expensed). Keeps the gym out, moves health insurance to 80D (₹25,000 cap, old regime only), and disallows 30% of the subcontractor fee (₹1,08,000) under 40(a)(ia), giving profit of ₹48,45,440 with a tax audit required.
 - Recommends 44ADA: deemed profit ₹28,24,000, new-regime tax ₹5,37,200 + 4% cess ₹21,488 = ₹5,58,688, less TDS ₹4,74,000 = ₹84,688 payable plus interest under sections 234B/234C. Compares this with about ₹11,89,377 on the regular basis, and notes the old regime with 80D (about ₹6,78,288) is worse.
 - Flags that ₹36,000 TDS under 194J should have been deducted from John Stiles's fees (Jane's prior-year receipts exceeded ₹50 lakh): deposit it with section 201(1A) interest and file the TDS return. Suggests AIS feedback for the duplicated ₹7,20,000.
+
+## Card
+
+brief: एक UX कंसल्टेंट proprietor का AY 2025-26 का आयकर वर्कपेपर बनाएँ: प्राप्तियाँ मिलाएँ, रिसर्च नोट्स परखें और धारा 44ADA से तुलना करें।
+given:
+- करदाता: निवासी proprietor, GST में पंजीकृत, cash basis, पिछले वर्ष ₹61 लाख प्राप्तियाँ और टैक्स ऑडिट
+- 26AS / AIS: धारा 194J की 2 प्रविष्टियाँ और PayFlow की सेटलमेंट रिपोर्ट, भुगतानकर्ता नोट्स सहित
+- बिज़नेस बैंक खाता: FY 2024-25 की कुल जमा, आय न होने वाली 2 जमाएँ और PayFlow शुल्क का नोट
+- खर्च: बुककीपर के 9 मद, कुछ बिना राशि के
+- रिसर्च नोट्स: जूनियर के जुटाए 6 नियम
+asked:
+- 26AS/AIS को बैंक जमा से मिलाने वाली सकल प्राप्तियों की समाधान तालिका, हर पंक्ति की पद्धति सहित
+- सामान्य प्रावधानों पर "व्यवसाय या पेशे से लाभ" की तालिका, हर मद का नियम, और बाहर रखी मदें कहाँ जाती हैं
+- धारा 44ADA से तुलना, और नई कर व्यवस्था में कर, उपकर, TDS क्रेडिट और शेष देय कर
+- Open items और जोखिम, लैपटॉप के treatment पर सिफ़ारिश और बाकी compliance कदमों सहित
+limit: लगभग 1,200 शब्दों के भीतर, Markdown
+hard: सूचना-स्रोत आपस में overlap करते हैं, रिसर्च नोट्स इस्तेमाल से पहले परखने हैं, कई मदों पर नियम लगाना या उन्हें कहीं और ले जाना है, और कराधान की पद्धति चुनना judgement है।
+
+## Scorecard
+
+- Removes the ₹7,20,000 double count: receipts ₹56,48,000 = 54,33,440 − 2,50,000 − 42,000 + 32,560 + 4,74,000
+- Rejects note 1: 44ADA limit ₹75 lakh (cash ≤ 5%), subject to specified profession; software ₹1,52,400; fees ₹32,560
+- Regular basis: car ₹42,000, home office ₹86,400, laptop depreciation ₹24,000 (not expensed); gym out; insurance to 80D
+- Disallows 30% of John's fee (₹1,08,000) under 40(a)(ia); profit ₹48,45,440, tax audit required
+- Recommends 44ADA: deemed ₹28,24,000, tax ₹5,58,688 with cess, ₹84,688 payable plus 234B/234C; regular ~₹11,89,377
+- Old regime with 80D (~₹6,78,288) worse; flags ₹36,000 missed 194J TDS on John (201(1A), TDS return); AIS feedback
+
+## Scorecard, shown
+
+- ₹7,20,000 की दोहरी गिनती हटाता है: सकल प्राप्तियाँ ₹56,48,000 = 54,33,440 − 2,50,000 − 42,000 + 32,560 + 4,74,000
+- नोट 1 को अस्वीकार करता है: 44ADA की सीमा ₹75 लाख (नकद ≤ 5%), specified profession होने की शर्त पर; सॉफ़्टवेयर ₹1,52,400; शुल्क ₹32,560
+- सामान्य प्रावधानों पर: कार ₹42,000, घर से ऑफ़िस ₹86,400, लैपटॉप पर मूल्यह्रास ₹24,000 (पूरा खर्च नहीं); जिम बाहर; हेल्थ इंश्योरेंस 80D में
+- 40(a)(ia) के तहत जॉन की फ़ीस का 30% (₹1,08,000) अस्वीकार करता है; लाभ ₹48,45,440, टैक्स ऑडिट ज़रूरी
+- 44ADA की सिफ़ारिश: अनुमानित लाभ ₹28,24,000, उपकर सहित कर ₹5,58,688, TDS के बाद ₹84,688 देय और 234B/234C ब्याज; सामान्य आधार पर लगभग ₹11,89,377
+- 80D के साथ पुरानी व्यवस्था (लगभग ₹6,78,288) बदतर; जॉन की फ़ीस पर छूटा ₹36,000 का 194J TDS (201(1A) ब्याज, TDS रिटर्न) बताता है; AIS feedback सुझाता है

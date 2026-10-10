@@ -65,3 +65,37 @@ deliverable: none
 - On job protection: section 12 of the Maternity Benefit Act protects her against dismissal or adverse changes during the 26 weeks; the old 12-month handbook rule is irrelevant.
 - Treats manager notice as a judgement call: 30 days' notice means telling her manager by mid-January for a mid-February start, which fits her plan; but if she wants to start up to 8 weeks early (from 22 December 2025), notice is needed by about 22 November. HR keeps the matter confidential until then.
 - The internal note flags that the superseded (and non-compliant) handbook is still on the intranet, and that PB-2025-04 does not say whether the 4 company weeks after the statutory 26 weeks are job-protected; it routes that question to Legal instead of promising protection.
+
+## Card
+
+brief: फ़रवरी में delivery की उम्मीद कर रही कर्मचारी के leave planning पर चार सवालों का जवाब दीजिए, और source सामग्री की कमियाँ internal note में बताइए।
+given:
+- कर्मचारी रिकॉर्ड: जेन डो का कार्यस्थल, joining की तारीख, शेड्यूल, ली गई PL और चुने गए benefits
+- उनका ईमेल: expected delivery date, eligibility की उनकी समझ और 4 सवाल
+- Handbook v2023 और Policy Bulletin PB-2025-04: maternity leave के दो प्रावधान
+- Leave policy धारा 6.1: PL accrual की दर और साल के अंत का carry forward
+- Benefits guide: FBP childcare reimbursement में बदलाव के नियम और सीमा
+- Legal का leave law सारांश: Maternity Benefit Act की पात्रता, अवधि, notice और नौकरी की सुरक्षा
+asked:
+- जेन को ईमेल जवाब: हर सवाल पर योजना लायक तारीखें और संख्याएँ, PL का हिसाब सहित
+- HR policy owner के लिए internal note: source सामग्री में क्या ठीक करना ज़रूरी है
+limit: पूरा उत्तर लगभग 1,200 शब्दों के भीतर, internal note अधिकतम 150 शब्द, Markdown
+hard: Sources आपस में टकराते हैं और उनकी प्राथमिकता तय करनी है, policy और क़ानून को उनकी तारीखों पर लागू करना है, और कुछ सवाल policy खुले छोड़ती है।
+
+## Scorecard
+
+- Applies PB-2025-04, not the superseded handbook: 26 weeks at 100% (80-day test met) plus 4 company weeks
+- PL: 8.5 days (or 7.25 if March doesn't count), reading stated; only 5 carry forward, 3.5 (or 2.25) lapse
+- FBP: change only within 30 days of birth (~18 Mar 2026), re-elect in April; ₹1,00,000 per child, shared
+- Job protected under Maternity Benefit Act s.12 for the 26 weeks; the old 12-month handbook rule is irrelevant
+- Manager notice: by mid-January for a mid-February start; by ~22 Nov if starting 8 weeks early (22 Dec); confidential
+- Note flags superseded, non-compliant handbook still posted; protection for the 4 company weeks after 26 routed to Legal
+
+## Scorecard, shown
+
+- पुरानी handbook नहीं, PB-2025-04 लागू: 100% पर 26 सप्ताह (80 दिन की शर्त पूरी) और कंपनी के 4 सप्ताह
+- PL: 8.5 दिन (मार्च न गिनें तो 7.25), कौन-सी व्याख्या ली यह बताया; केवल 5 carry forward, 3.5 (या 2.25) lapse
+- FBP: केवल जन्म के 30 दिनों के भीतर बदलाव (लगभग 18 मार्च 2026), अप्रैल में नया election; ₹1,00,000 प्रति बच्चा, साझा सीमा
+- Maternity Benefit Act धारा 12 के तहत 26 सप्ताह में नौकरी सुरक्षित; handbook का पुराना 12 महीने वाला नियम अप्रासंगिक
+- Manager को notice: फ़रवरी के मध्य की शुरुआत के लिए जनवरी के मध्य तक; 8 सप्ताह पहले (22 दिसंबर) शुरू करें तो लगभग 22 नवंबर तक; गोपनीयता
+- Note: पुरानी, क़ानून से असंगत handbook अब भी intranet पर; 26 सप्ताह के बाद कंपनी के 4 सप्ताह की सुरक्षा का सवाल Legal को

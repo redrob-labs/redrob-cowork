@@ -55,3 +55,37 @@ deliverable: spreadsheets
 - Arrives at adjusted live ARR of about ₹1,520.60 lakh (₹15.21 crore; −₹579.40 lakh, or −27.6%), or ₹1,652.60 lakh including C8. The bridge ties exactly to ₹2,100 lakh.
 - Flags C4 (₹240 lakh, terminable for convenience after 30 Sep 2025) and C5 (renewal due June 2026) as at-risk. Computes the top-3 concentration (C1 + C2 + C4 = ₹860 lakh ≈ 56.6%), with C1 about 23.7% of adjusted ARR.
 - Translates the result into price: at 6.0×, ₹21.00 crore implies ₹126.0 crore against about ₹91.2 crore on adjusted ARR, a gap of about ₹34.8 crore. Recommends how to handle it, such as a re-price, an earn-out tied to C3 or C8, or an escrow.
+
+## Card
+
+brief: ARR multiple पर कीमत वाले अधिग्रहण में management के ARR schedule को contracts और billing से reconcile कर diligence-adjusted ARR निकालिए।
+given:
+- Management के दावे: 30 जून 2025 को ARR ₹21.00 crore और deck की ARR परिभाषा
+- Management ARR schedule: 10 customers, C1–C10, ₹ लाख में
+- Contract abstracts और billing data: हर customer की शर्तें, fees और invoices, साथ में C9 के लिए USD दर
+asked:
+- Reconciliation table: हर customer का adjusted ARR, adjustment, issue category और आधार
+- Bridge: management ARR से adjusted live ARR तक, contracted-but-not-live की अलग line
+- अगले 12 महीनों में जोखिम वाले customers का risk-weighted view
+- Adjusted ARR में top 3 customers का concentration
+- Investment committee summary: अधिकतम 6 bullets, 6.0× पर purchase price का असर सहित
+limit: लगभग 1,200 शब्दों के भीतर, हर formula के साथ Markdown tables
+hard: हर line को दी गई परिभाषा पर परखना है, कई treatments judgement calls हैं, और नतीजे को कीमत तक ले जाना है।
+
+## Scorecard
+
+- C1 ₹360 lakh (−₹60); C2 ₹260 lakh (−₹50); C3 ₹0 (−₹275); C9 ₹102.60 lakh at ₹85.50 (−₹17.40)
+- C8 ₹0 live, ₹132 lakh separate; C6 ₹144 lakh (alt. ₹180 lakh); C10 ₹66 lakh (management's ₹75 lakh)
+- Adjusted live ARR ₹1,520.60 lakh (−₹579.40 lakh, −27.6%), ₹1,652.60 lakh with C8; bridge ties to ₹2,100 lakh
+- At risk: C4 (₹240 lakh, terminable for convenience after 30 Sep 2025) and C5 (renews June 2026)
+- Top-3 concentration (C1, C2, C4 = ₹860 lakh) ≈56.6% of adjusted ARR; C1 ≈23.7%
+- At 6.0×: ₹126.0 crore vs ≈₹91.2 crore, a ≈₹34.8 crore gap; recommends re-price, earn-out or escrow
+
+## Scorecard, shown
+
+- C1 ₹360 लाख (−₹60); C2 ₹260 लाख (−₹50); C3 ₹0 (−₹275); C9 ₹85.50 की दर पर ₹102.60 लाख (−₹17.40)
+- C8 live ARR में ₹0, ₹132 लाख अलग; C6 ₹144 लाख (विकल्प ₹180 लाख); C10 ₹66 लाख (management का ₹75 लाख)
+- Adjusted live ARR ₹1,520.60 लाख (−₹579.40 लाख, −27.6%), C8 सहित ₹1,652.60 लाख; bridge ₹2,100 लाख से मिलता है
+- जोखिम में: C4 (₹240 लाख, 30 सितंबर 2025 के बाद convenience पर terminable) और C5 (जून 2026 में renewal)
+- Top-3 concentration (C1, C2, C4 = ₹860 लाख) adjusted ARR का ≈56.6%; C1 ≈23.7%
+- 6.0× पर: ₹126.0 crore बनाम ≈₹91.2 crore, ≈₹34.8 crore का अंतर; re-price, earn-out या escrow की सिफ़ारिश

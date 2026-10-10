@@ -49,3 +49,40 @@ deliverable: documents
 - Spots the retaliation sequence: the draft moved three people before the complaint, but 박영수 cut it to 이영희 alone about 17 hours after HR notified him. Marks retaliation 인정 or explains carefully why not, and doesn't accept the "운영상 판단" explanation without testing it against seniority records. Recognises this as a prohibited 불리한 처우 under 남녀고용평등법 §14⑥, not only a policy breach.
 - Gives 강○○'s unnamed second-hand account little or no weight, and says why.
 - Recommends concrete remedies consistent with §14③·⑤: reverse 이영희's shift change (taking her wishes into account), remove 박영수 from supervising her or from any scheduling decisions about her, discipline proportionate to the findings, follow-up check-ins, and confidentiality under §14⑦. Lists open items such as verifying seniority records and checking for further retaliation.
+
+## Card
+
+brief: 직속 반장을 성희롱과 보복으로 신고한 사건의 조사 보고서를 혐의별 판정과 함께 작성합니다.
+given:
+- 신고 메일: 이영희가 9월 22일 보낸 두 사건 신고
+- 경과 및 기록: 법인카드 결제, 카카오톡 메시지, 근무조 변경 초안 수정 등 6건
+- 면담 요지: 신고인과 행위자를 포함한 5명의 진술
+- 적용 규정: 남녀고용평등법 제14조 요약과 윤리강령 4.1, 4.6, 9.2
+asked:
+- 조사 결과 요약
+- 조사 범위와 방법
+- 신고 내용(혐의)
+- 증거 및 진술 신빙성 평가
+- 9월 10일 발언, 9월 18일 행위, 근무조 변경을 통한 보복에 대한 혐의별 판정과 근거
+- 권고 조치(피해자 즉시 보호 조치 포함)
+- 미결 사항
+limit: 약 2,500자 이내, 섹션 제목이 있는 Markdown 보고서
+hard: 진술이 기록과 어긋나 증거의 우월 기준으로 신빙성을 따져야 하고, 증거가 고르지 않아 혐의마다 판단이 필요합니다.
+
+## Scorecard
+
+- 박영수's own card charge, expense claim and Sept 19 KakaoTalk disprove his denial; overall credibility hit
+- Sept 18 conduct 인정 (김철수, card record, KakaoTalk); Sept 10 remark given a label with stated reasoning
+- Retaliation: cut to 이영희 alone ~17 hours after notice; seniority claim tested; 불리한 처우 under §14⑥
+- Gives 강○○'s unnamed, second-hand account little or no weight, and says why
+- Remedies (§14③⑤⑦): reverse shift per her wishes, remove 박영수 from her scheduling, proportionate discipline, check-ins, confidentiality
+- Open items include verifying seniority records and checking for further retaliation
+
+## Scorecard, shown
+
+- 박영수 본인의 법인카드 결제·경비 정산과 9월 19일 카카오톡이 회식 불참 주장을 반박, 전반적 신빙성 하락으로 평가
+- 9월 18일 행위는 '인정'(김철수 목격, 카드 기록, 카카오톡), 9월 10일 발언은 근거를 밝혀 판정
+- 보복: 신고 통보 약 17시간 뒤 이영희만 이동하도록 수정, 선임 주장을 검증, 제14조 제6항의 불리한 처우
+- 강○○의 익명 전언 진술은 거의 또는 전혀 반영하지 않고 그 이유를 밝힘
+- 조치(제14조 제3·5·7항): 본인 의사를 반영한 근무조 원상회복, 박영수를 일정 결정에서 배제, 비례적 징계, 후속 면담, 비밀 유지
+- 미결 사항에 선임 기록 확인과 추가 보복 여부 점검 포함

@@ -55,3 +55,35 @@ deliverable: documents
 - Carves out 오빗메이드 코어 with a perpetual, irrevocable, royalty-free license that is transferable with the app. Restricts open source to pre-approved permissive licenses and prohibits GPL-3.0 components in the distributed app (or requires Fernhill's written approval), explaining the copyleft risk to the source code.
 - Balances acceptance (for example 10 business days, a written rejection with reasons, two cure rounds, and deemed acceptance only after a reminder notice) and the liability cap (for example 12 months of fees or the full contract value, with exclusions for IP indemnity, confidentiality/personal-data breach and 고의·중과실). Explains both in the cover email.
 - Treats the overseas QA subcontracting as a personal-data issue: a written 위탁 clause meeting 개인정보 보호법 §26①, Fernhill's prior written consent for any 재위탁 (§26⑥), no real user health data in QA without meeting §23 and the §28조의8 cross-border requirements (synthetic or pseudonymised data instead), flow-down of security and confidentiality, and 오빗메이드's responsibility for its subcontractors. On termination, Fernhill receives the source code and work in progress on payment of amounts due. Governing law is Korean, with 서울중앙지방법원 as the agreed court.
+
+## Card
+
+brief: 텀시트와 개발사 의견을 조율해, 한국 법이 준거법인 앱 개발·지식재산권 양도 계약서를 작성합니다.
+given:
+- 대표이사 텀시트: 대금, 마일스톤, 지식재산권, 검수, 책임, 데이터, 일정 등 7개 조건
+- 개발사 수정 의견: 기존 라이브러리, 오픈소스, 검수, 책임 상한, 해외 재위탁, 유인 금지 등 6개 입장
+- 저작권법 발췌: 제2조 제31호, 제9조, 제45조, 제14조, 제54조
+- 개인정보 보호법 발췌: 제23조, 제26조, 제28조의8
+asked:
+- 계약서: 지정된 12개 조항은 완전한 문장으로, 나머지 일반 조항은 제목만
+- 홍길동 대표에게 보내는 메일: 텀시트와 다르게 정한 입장, 이유, 남은 결정 사항
+limit: 전체 약 2,500자 이내, 대표 메일은 약 400자 이내, Markdown
+hard: 입력 자료에 불일치가 숨어 있고 법령이 권리·개인정보 구조를 좌우하며, 양측 입장을 서명 가능한 조건으로 조율해야 합니다.
+
+## Scorecard
+
+- Milestones total ₩2억 9,400만, not ₩3억; ₩600만 gap left as placeholder or assumption, raised in the email
+- Not 업무상저작물 (§9): present assignment incl. 2차적저작물작성권, 저작인격권 non-exercise, §54 registration help
+- 오빗메이드 코어 licensed perpetual, irrevocable, royalty-free, transferable; GPL-3.0 barred or needs 펀힐's approval
+- Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, data, 고의·중과실 exclusions
+- Overseas QA: §26① 위탁 terms, consent for 재위탁 (§26⑥), no real health data without §23/§28조의8
+- Subcontractor flow-down and 오빗메이드 liability; source code on termination; Korean law, 서울중앙지방법원
+
+## Scorecard, shown
+
+- 마일스톤 합계 2억 9,400만원(3억원 아님), 600만원 차이는 자리표시자나 전제로 처리하고 메일에서 제기
+- 업무상저작물에 의존하지 않음(제9조): 2차적저작물작성권을 포함한 양도, 저작인격권 불행사, 제54조 등록 협조
+- 오빗메이드 코어는 영구·취소 불가·무상·양도 가능 라이선스, GPL-3.0은 금지하거나 펀힐 서면 승인 필요
+- 균형 잡힌 검수(예: 10영업일, 서면 사유, 보완 기회)와 지식재산권·개인정보·고의·중과실 예외가 있는 책임 상한
+- 해외 QA: 제26조 제1항 위탁 문서, 재위탁 사전 동의(제26조 제6항), 제23조·제28조의8 충족 없이 실제 건강 데이터 사용 금지
+- 재위탁사에 의무 전가와 오빗메이드 책임, 해지 시 소스 코드 인도, 대한민국 법·서울중앙지방법원

@@ -55,3 +55,38 @@ deliverable: documents
 - Computes NAV of ₩94.5B at Jun 30 and ₩86.4B at Sep 30. TVPI is (945 + 96) ÷ 780 = 1.33x at Jun 30 and (864 + 96) ÷ 780 = 1.23x at Sep 30; DPI 0.12x; RVPI 1.21x at Jun 30 and 1.11x at Sep 30 (all in 억원).
 - States plainly that TVPI fell this quarter, contradicting the draft's "1.43배 … 전 분기 대비 상승". Explains the 클리어패스 wind-down and the 브라인 markdown candidly and without spin.
 - The internal note lists each correction (paid-in capital, the 도브테일 mark, the 클리어패스 mark, the performance line) with the policy reason for each.
+
+## Card
+
+brief: 2호 조합의 3분기 LP 서한을 쓰면서 대표 펀드매니저의 성과 문구와 평가액을 검증합니다.
+given:
+- 문구 초안: 홍길동의 납입 출자금과 TVPI 주장
+- 조합 장부: 납입 출자금, 출자 요청 통지, 누적 분배금, 관리보수, 현금
+- 포트폴리오 및 평가액 제안: 8개사의 투자원가, 6/30 공정가치, 9/30 제안 공정가치, 3분기 이벤트
+- 가치평가 정책: 평가 상향·하향 기준 발췌
+asked:
+- 요약
+- 조합 성과 표(납입 출자금, 분배금, NAV, TVPI, DPI, RVPI): 두 기준일, 산식 포함
+- 포트폴리오 현황: 회사별 설명과 9월 30일 평가액
+- 평가 하향 및 주요 변동 사항
+- 예정된 출자 요청
+- 전망
+- 홍길동에게 보내는 내부 메모: 바꾼 점별 설명
+limit: 전체 약 2,500자 이내, 내부 메모는 약 300자 이내, Markdown, 배수는 소수점 둘째 자리
+hard: 초안을 장부와 대조하고 평가액마다 가치평가 정책을 적용해야 하며, 나쁜 소식을 숨김없이 전해야 합니다.
+
+## Scorecard
+
+- Paid-in ₩78.0B (780억원) at both dates, not ₩81.0B; the ₩3.0B call due Oct 15 disclosed separately
+- Marks per policy: 도브테일AI held at ₩6.0B, 클리어패스바이오 about ₩0.4B, 길드 ₩12.0B, 브라인 ₩4.5B
+- NAV ₩94.5B / ₩86.4B; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x
+- States TVPI fell, contradicting "1.43배 … 상승"; explains 클리어패스 and 브라인 candidly
+- Note to 홍길동 lists paid-in, 도브테일, 클리어패스 and headline corrections, each with its policy reason
+
+## Scorecard, shown
+
+- 납입 출자금은 두 기준일 모두 780억원(810억원 아님), 10월 15일 기한의 30억원 출자 요청은 별도 섹션에 공시
+- 정책에 따른 평가: 도브테일AI는 원가 60억원 유지, 클리어패스바이오 약 4억원, 길드 120억원, 브라인 45억원
+- NAV 945억원 / 864억원, TVPI 1.33배 / 1.23배, DPI 0.12배, RVPI 1.21배 / 1.11배
+- TVPI가 하락했음을 밝혀 "1.43배 … 상승" 문구를 바로잡고, 클리어패스와 브라인을 숨김없이 설명
+- 홍길동 메모에 납입 출자금, 도브테일, 클리어패스, 성과 문구 정정을 정책 근거와 함께 하나씩 기재

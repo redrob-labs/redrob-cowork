@@ -58,3 +58,36 @@ deliverable: documents
 - Rejects instruction 4. Boot-up and VPN login time for 근로시간 관리 대상자 is paid working time under §50③, with a clear timekeeping rule.
 - Narrows "work from anywhere": domestic locations allowed within limits; overseas only with pre-approval and only in Japan or Singapore, for the immigration, tax and permanent-establishment reasons given.
 - The note to the CEO lists each departure (stipend, VPN time, abroad, attendance radius) and the decision needed, and flags the 취업규칙 procedure (§94 consent where unfavourable, §93 filing) before the effective date. The by-location table matches the headcount data, for example that 대전·충청 and 광주·전라 have no office and 부산 is covered by the collective agreement.
+
+## Card
+
+brief: 충돌하는 공지 세 개를 대체할 하이브리드·원격근무 규정과 대표이사 메모를 작성합니다.
+given:
+- 근무지별 인원: 근무지 5곳의 인원, 근로시간 관리 대상자 수, 사무실
+- 대표이사 지시: 번호 붙은 5개 항목
+- 기존 공지: 발췌 3건(거주 시·도, 사무실 출근, 통신비)
+- 노무 자문 메모: 근로기준법 제50조·제93조·제94조·제96조, 부산 단체협약, 지원금 과세, 해외 근무
+asked:
+- 지정된 9개 섹션 제목을 갖춘 규정
+- 근무지별 적용 사항을 보여 주는 짧은 표
+- 대표이사에게 보내는 메모: 지시와 다르게 정한 부분, 이유, 필요한 결정
+limit: 전체 약 2,500자 이내, 대표이사 메모는 약 400자 이내, Markdown
+hard: 지시가 노동법·단체협약과 부딪히고 기존 공지를 정리해야 하며, 일부 지시는 판단이 필요합니다.
+
+## Scorecard
+
+- One rule set expressly supersedes notices A–C: attendance days, "near an office" defined, 시·도 move approval kept
+- ₩50,000 stipend kept; 부산 CBA's 50% up to ₩60,000 prevails (§96①); others may need §94① consent
+- Rejects "no more receipts": documentation required; stipend noted as taxable wage income
+- Rejects instruction 4: boot-up and VPN login time is paid working time (§50③), with a timekeeping rule
+- Domestic remote within limits; abroad only pre-approved, in Japan or Singapore, for immigration, tax, PE reasons
+- CEO note lists each departure, decision, §94/§93 procedure; table matches headcount (대전·충청, 광주·전라 no office; 부산 CBA)
+
+## Scorecard, shown
+
+- 하나의 규정으로 공지 A~C를 명시적으로 대체: 출근 일수, '사무실 근처' 정의, 시·도 이주 승인 유지
+- 월 5만원 지원금 유지, 부산은 단체협약의 50%·최대 6만원이 우선(제96조 제1항), 그 외는 제94조 제1항 동의가 필요할 수 있음
+- "영수증은 그만"을 그대로 받지 않음: 증빙 요건 명시, 지원금은 근로소득으로 과세됨을 밝힘
+- 지시 4 거부: PC 부팅·VPN 접속 시간은 근로시간(제50조 제3항), 근태 기록 규칙 명시
+- 국내 원격은 한도 내 허용, 해외는 사전 승인 후 일본·싱가포르만, 비자·세금·고정사업장 위험이 이유
+- 대표 메모에 지시와 다른 점, 필요한 결정, 제94조·제93조 절차 기재, 근무지 표는 인원 자료와 일치(대전·충청, 광주·전라 사무실 없음, 부산 단체협약)

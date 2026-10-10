@@ -47,3 +47,36 @@ deliverable: spreadsheets
 - Under the full plan, cash runs out in July 2027 (about ₹4.9 lakh left at the end of June 2027), about 15 months, not 23. The second licence payment in April 2027 is a cliff (about ₹26.9 lakh of burn that month).
 - Works back from the board policy: the raise must close by about December 2026 (about ₹95.8 lakh left, roughly 6.5 months of ₹14.6 lakh burn; by January 2027 the ₹81.8 lakh left is under 6 × ₹14.1 lakh), so fundraising has to start by about July 2026, within three months and far earlier than John's September 2027. The answer says this plainly.
 - MRR is computed correctly (opening × 0.98 + new MRR). Formulas are stated for every column, and the alternative scenario is modelled with a quantified runway effect (for example, delaying the CSM to January 2027 saves about ₹3 lakh but cash still runs out in July 2027; dropping the AE stretches it only to about August 2027 while MRR grows more slowly), with a clear, justified recommendation.
+
+## Card
+
+brief: एक analytics स्टार्टअप का 18 महीने का cash budget बनाएँ, co-founder का runway अनुमान सुधारें, और hiring व fundraising का समय तय करें।
+given:
+- जॉन का अनुमान: पेरोल, डेटा लाइसेंस, opex, राजस्व, burn और 23 महीने का runway
+- तथ्य और मान्यताएँ: नकद, MRR, churn, margin, पेरोल, hires, opex और लाइसेंस की 11 पंक्तियाँ
+- बोर्ड की नीति: close पर 6 महीने का नकद; raise में लगभग 5 महीने
+asked:
+- अप्रैल 2026 से सितंबर 2027 की मासिक तालिका, हर कॉलम के फ़ॉर्मूले के साथ
+- जॉन की गलतियों का मिलान, हर एक का मासिक burn पर प्रभाव सहित
+- नकद ख़त्म होने का महीना, और fundraising शुरू करने का आख़िरी महीना
+- Hiring और fundraising पर सिफ़ारिश, कम से कम एक model किए विकल्प के साथ
+limit: लगभग 1,200 शब्दों के भीतर, Markdown
+hard: एक सरल अनुमान में कई modelling गलतियाँ छिपी हैं, नकद का समय खर्च के समय से अलग है, और बोर्ड की नीति से उलटा चलकर समय-सीमा निकालनी है।
+
+## Scorecard
+
+- Names John's errors: unburdened payroll without hires, licence spread instead of paid in April, revenue not gross profit
+- April 2026 net burn about ₹26,21,900 (12,07,500 + 3,80,000 + 14,40,000 − 4,05,600)
+- Burn settles near ₹14.5–15.8 lakh a month June–December 2026, easing as MRR grows
+- Cash runs out in July 2027 (~₹4.9 lakh end-June, ~15 months), with the April 2027 licence as a cliff
+- Raise must close by about December 2026 (~₹95.8 lakh left), so fundraising starts by about July 2026
+- MRR = opening × 0.98 + new; formulas for every column; quantified alternative and justified recommendation
+
+## Scorecard, shown
+
+- जॉन की गलतियाँ बताता है: बिना बोझ और बिना नए hires का पेरोल, अप्रैल में एकमुश्त चुकने वाले लाइसेंस को बाँटना, gross profit की जगह राजस्व
+- अप्रैल 2026 का net burn लगभग ₹26,21,900 (12,07,500 + 3,80,000 + 14,40,000 − 4,05,600)
+- जून–दिसंबर 2026 में burn लगभग ₹14.5–15.8 लाख प्रति माह पर टिकता है और MRR बढ़ने के साथ घटता है
+- नकद जुलाई 2027 में ख़त्म होता है (जून के अंत में ~₹4.9 लाख, ~15 महीने), और अप्रैल 2027 का लाइसेंस एक cliff है
+- Raise लगभग दिसंबर 2026 तक close होना चाहिए (~₹95.8 लाख बचे), इसलिए fundraising लगभग जुलाई 2026 तक शुरू हो
+- MRR = शुरुआती × 0.98 + नया; हर कॉलम का फ़ॉर्मूला; मात्रात्मक विकल्प और तर्कसंगत सिफ़ारिश

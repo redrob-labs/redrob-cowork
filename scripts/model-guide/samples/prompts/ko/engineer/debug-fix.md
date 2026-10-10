@@ -83,3 +83,40 @@ ValueError: Invalid isoformat string: '2025-03-10T04:59:59Z'
 - Fixes the business logic to subtract `refunded_amount`, exclude `cancelled`, and deal with fully refunded orders consistently, and reconciles the staging figure: $185.00 = 25 + 60 + 20 + 30 + 50.
 - Explains the 3.10 crash (`fromisoformat` accepts "Z" only from 3.11) and parses robustly. Also explains that the mutable-default `_cache`, keyed only by date in a long-lived process, serves stale totals for today, and removes it or keys it properly with invalidation.
 - The fixed code gives $100.00 for 9 March (A2 25 + A3 45 + A4 30), and the tests cover DST start and end and the midnight boundary.
+
+## Card
+
+brief: 마트 일별 순매출이 재무팀 수치와 어긋나고 배치가 실패한 원인을 찾아 Python 모듈을 고치고 테스트합니다.
+given:
+- 재무팀 티켓: 3월 9일 불일치, 배치 실패, 재무팀의 순매출 정의
+- 모듈: 장시간 실행 워커에서 도는 Python 3.10 day_bounds·daily_revenue 함수
+- 호출 방식: 대시보드가 15분마다 오늘과 어제에 대해 호출
+- 테스트 매장 주문: 3월 9~10일 전후 주문 6건, JSON
+- 오류 로그: 실패한 실행의 트레이스백 1건
+- 스테이징 메모: $185.00은 Python 3.12 환경에서 나온 수치
+asked:
+- 근본 원인 분석: 결함별 증상과 일부 날짜에만 나타나는 이유
+- Python 3.10과 호환되는 수정 모듈(정당화 없이 시그니처 유지)
+- 주어진 주문, 서머타임 종료일, 현지 자정 정각 주문을 포함한 pytest 회귀 테스트
+- 수정된 코드 기준 3월 9일 계산 내역
+- 캐시 유지 여부와 이유를 한 문장으로
+limit: 설명은 약 2,500자 이내, Markdown; 코드는 더 길어도 됨
+hard: 서로 독립적인 여러 결함이 하나의 증상으로 합쳐지고, 특정 날짜나 런타임에서만 드러나며, 코드의 로직이 업무 정의와 다릅니다.
+
+## Scorecard
+
+- DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November
+- Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight
+- Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)
+- Explains the 3.10 crash (fromisoformat accepts "Z" only from 3.11) and parses robustly
+- Removes or properly keys the date-only mutable-default cache that serves stale totals for today
+- Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight
+
+## Scorecard, shown
+
+- 서머타임 버그: +24시간이면 3월 9일이 05:00Z가 아닌 06:00Z에 끝나 A5가 포함되며, 25시간인 11월 2일도 언급한다
+- 종료 시점을 다음 현지 자정으로 계산해 반열린 구간 [start, end)를 쓰고, 자정 정각 A2의 이중 집계를 설명한다
+- refunded_amount를 빼고 cancelled를 제외하며 전액 환불을 처리하고, $185.00(25+60+20+30+50)을 맞춘다
+- 3.10에서의 실패(fromisoformat은 3.11부터 "Z"를 받음)를 설명하고 견고하게 파싱한다
+- 날짜만 키로 쓰는 가변 기본값 캐시가 오늘 합계를 낡은 값으로 내므로 제거하거나 제대로 키를 잡는다
+- 수정 코드가 3월 9일 $100.00(A2 25, A3 45, A4 30)을 내고, 테스트가 서머타임과 자정 경계를 다룬다

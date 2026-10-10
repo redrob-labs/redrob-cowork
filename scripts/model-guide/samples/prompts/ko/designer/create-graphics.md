@@ -51,3 +51,38 @@ deliverable: graphics
 - Includes the 신협 deposit-protection sentence and mark at 120 px or wider, the review number (심의필), the logo at 160 px or wider with clear space, and a headline of at least 64 px on the 1080 px artboard.
 - Provides two valid SVGs at 1080 × 1080 and 1200 × 627 with a clear hierarchy (headline, rate, CTA, disclosures) and brand colours only. The landscape version is recomposed, not just scaled down.
 - The photo direction follows the guide (real members, natural light) while keeping the brief's family idea, and the copy sounds right for 22–35-year-old first-time account holders.
+
+## Card
+
+brief: 신협 새 입출금통장 출시용 인스타그램·링크드인 그래픽을 준법·브랜드 기준에 맞춰 디자인합니다.
+given:
+- 포맷: 인스타그램 피드 1080 × 1080, 링크드인 링크 이미지 1200 × 627
+- 마케팅 브리프: 헤드라인, 사진 아이디어, CTA, 금리 주장, 타깃 고객
+- 상품설명서: 준법감시 승인을 받은 수수료·금리·개설 조건 7개 항목
+- 광고 준법 기준: 금리 표기, 예금자보호 문구와 마크, 심의필 번호, 단정적 표현 제한
+- 브랜드 가이드: 색상, 서체, 로고, 예금자보호 마크, 사진 규칙
+asked:
+- 두 포맷의 최종 카피(헤드라인을 바꾸면 이유와 대안 2가지)
+- 포맷별 레이아웃과 비주얼 방향, 정사각형에서 가로형으로 바뀌는 방식
+- 포맷별 실제 픽셀 크기의 인라인 SVG 목업
+- 쓸 수 없었던 주장과 그 이유를 이영희 님에게 설명하는 짧은 메모
+limit: 설명은 약 2,500자 이내, Markdown; SVG는 더 길어도 됨
+hard: 브리프의 카피를 상품 사실과 준법 기준에 대조해야 하고, 브랜드 최소 크기가 레이아웃을 제약하며, 두 포맷에 서로 다른 구성이 필요합니다.
+
+## Scorecard
+
+- Rejects "수수료 없음. 평생." given ₩2,000 paper-statement and ₩1,000 ATM fees; offers accurate alternatives
+- Shows "연 2.25%(세전)" with the ₩5,000,000 tier and rate-change disclosure; drops "이 동네 최고"
+- Deposit-protection sentence and mark ≥120 px, 심의필 number, logo ≥160 px with clear space, headline ≥64 px
+- Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only
+- Recomposes the landscape version rather than scaling the square one down
+- Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers
+
+## Scorecard, shown
+
+- 종이 명세서 2,000원과 타행 ATM 1,000원 수수료가 있으므로 "수수료 없음. 평생."을 거부하고 정확한 대안을 낸다
+- "연 2.25%(세전)"을 500만원 이하 잔액 구간, 금리 변동 고지와 함께 표시하고 "이 동네 최고" 주장은 뺀다
+- 예금자보호 문구와 마크 120px 이상, 심의필 번호, 여백을 둔 로고 160px 이상, 헤드라인 64px 이상
+- 1080 × 1080과 1200 × 627의 유효한 SVG 두 개, 명확한 위계, 브랜드 색상만 사용
+- 가로형은 정사각형을 줄이지 않고 새로 구성한다
+- 사진은 자연광 속 실제 조합원으로 하되 가족 아이디어를 살리고, 카피는 22~35세 첫 통장 고객에게 맞춘다

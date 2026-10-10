@@ -45,3 +45,37 @@ Team backlog को RICE से score करती है: Reach = प्रत�
 - Doesn't schedule F2 before F5. Recognises that F2 (20 weeks) can't fit alongside F3 + F5 + F1 within 48, and tells the VP Sales so plainly, with the conditions under which F2 could lead instead.
 - Every quarter stays at or under 24 engineer-weeks, and H2 at or under 48, with the totals shown. A typical valid plan is F3 + F5 + F6 + F1 plus either F4 (45 weeks) or F7 (42 weeks).
 - Makes and justifies the F4 versus F7 call explicitly, for example total R×I×C (357 vs 300) against effort and confidence, rather than ranking mechanically.
+
+## Card
+
+brief: RICE backlog से एक SaaS squad का H2 2026 roadmap हर quarter 24 engineer-weeks में बनाएँ और stakeholders को trade-offs समझाएँ।
+given:
+- Capacity: हर quarter 24 engineer-weeks, H2 के लिए 48, बिना कारण बताए दो quarters में बाँटना नहीं
+- RICE की परिभाषा: reach, impact, confidence और effort के scale
+- Backlog export: RICE inputs और notes के साथ 7 items
+- Stakeholders की राय: VP Sales, Head of Customer Success और Engineering Manager के कथन
+asked:
+- Normalised effort, RICE score और formulas के साथ scored backlog table; जिसे score न मिले वह अलग
+- Quarter के अनुसार H2 plan, हर quarter और पूरे H2 का capacity check
+- Cut list, हर item का एक-पंक्ति कारण
+- रिचर्ड रो और मैरी मेजर के लिए memo (अधिकतम 250 शब्द), मुख्य trade-off के नाम के साथ
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Backlog में पकड़ने लायक एक असंगति है, deadlines और dependencies score से ऊपर हैं, और आख़िरी capacity slot का फ़ैसला करीबी है।
+
+## Scorecard
+
+- Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated
+- Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8
+- Schedules F3 SSO in Q3 (before 31 Oct; ₹1.5 crore ARR) and F5 before 31 Dec, despite RICE
+- F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could
+- Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7
+- Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence
+
+## Scorecard, shown
+
+- F7 के 45 engineer-days को 9 weeks में बदलता है: RICE ≈ 33.3, 6.7 नहीं; RICE formula बताया गया
+- बाकी score सही: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8
+- RICE से परे F3 SSO को Q3 में (31 अक्टूबर से पहले, ₹1.5 crore ARR) और F5 को 31 दिसंबर से पहले रखता है
+- F2 को F5 से पहले नहीं रखता; VP Sales को बताता है कि F2, F3, F5 और F1 के साथ नहीं समाता, और कब समा सकता है
+- हर quarter ≤ 24 और H2 ≤ 48 weeks, totals सहित; जैसे F3, F5, F6, F1 और साथ में F4 या F7
+- F4 बनाम F7 का फ़ैसला साफ़ justify करता है, जैसे R × I × C 357 बनाम 300, effort और confidence के मुकाबले

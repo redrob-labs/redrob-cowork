@@ -63,3 +63,38 @@ deliverable: spreadsheets
 - The forecast excludes the disputed Jajaknamu Dental invoice (or shows it as an upside case) and the unconfirmed nursery refund, applies the ₩11,200,000 payroll from 16 Apr, includes the ₩75,000 monthly interest and the ₩1,345,000 VAT payment, and puts Haetsal about 10 days late. Without the mower, cash bottoms out at about ₩2.1M in the week of 29 Apr and ends near ₩12.0M.
 - With an ₩18,000,000 cash purchase on 15 Apr, the balance goes deeply negative (about −₩15.9M in the week of 29 Apr). Even the remaining ₩15,000,000 of the credit line wouldn't fully cover it. The recommendation is not to pay cash, and suggests equipment financing, deferring, or leasing.
 - Every computed column states its method, and the arithmetic is consistent week to week.
+
+## Card
+
+brief: 조경 업체의 3월 계좌를 대사·요약하고 8주 현금 흐름을 예측해 잔디깎이 현금 구매를 조언한다.
+given:
+- 3월 은행 거래 내역: 기초 잔액, 거래 13건, 기말 잔액
+- 회계 앱: 장부 잔액과 항목 4건에 관한 메모
+- 청구서 메모: 부가세 처리와 납부일, 마이너스통장 조건
+- 미수금: 결제 기한과 비고가 있는 청구서 3건
+- 4~5월 현금 흐름: 급여, 고정비, 카드 매출, 청구 예정 공사, 대기 중인 환불
+asked:
+- 모든 조정 항목과 장부 수정 사항을 담은 은행 대사 표
+- 3월 요약: 매출, 비용 항목, 매출이나 사업 비용이 아닌 항목과 이유
+- 4월 1일(수)부터 주 단위 8주 현금 흐름 예측, 잔디깎이 구매 시·미구매 시, 가정과 제외 항목 명시
+- 박영수 대표께 드리는 잔디깎이 권고와 대안(약 400자 이내)
+limit: 약 2,500자 이내, Markdown
+hard: 기록에 조정 항목과 잘못된 분류가 숨어 있고, 예측에는 어떤 유입을 언제 반영할지 판단이 필요하다.
+
+## Scorecard
+
+- Reconciles the ₩1,385,000 gap: duplicate nursery +₩3,150,000, bank fee +₩35,000, cheque #448 −₩1,800,000; adjusted ₩19,486,000
+- Streamflix recoded as owner draw; March revenue ₩13,450,000, excluding the ₩10M draw and ₩1,345,000 VAT
+- Forecast excludes Jajaknamu and the nursery refund; ₩11.2M payroll from 16 Apr, interest, VAT, Haetsal ~10 days late
+- Without the mower, cash bottoms ≈ ₩2.1M in the week of 29 Apr and ends near ₩12.0M
+- Mower in cash gives ≈ −₩15.9M that week, beyond ₩15M credit; advises financing, deferring or leasing
+- Every computed column states its method, and the weekly arithmetic is consistent
+
+## Scorecard, shown
+
+- 차액 1,385,000원 대사: 묘목상사 중복 +3,150,000원, 수수료 +35,000원, 수표 #448 −1,800,000원, 조정 후 19,486,000원
+- 스트림플릭스는 대표 인출금으로 재분류, 3월 매출 13,450,000원(1,000만 원 인출액과 부가세 1,345,000원 제외)
+- 예측에서 자작나무치과와 묘목상사 환불 제외, 4월 16일부터 급여 1,120만 원, 이자·부가세 반영, 햇살마을 약 10일 지연
+- 미구매 시 현금 최저 약 210만 원(4월 29일 주), 기말 약 1,200만 원
+- 현금 구매 시 그 주 약 −1,590만 원으로 잔여 한도 1,500만 원 초과: 금융·연기·리스 권고
+- 계산 열마다 방법을 밝히고 주별 계산이 일관됨

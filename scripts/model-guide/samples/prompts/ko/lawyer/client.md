@@ -56,3 +56,40 @@ deliverable: none
 - Spots that Proposal 2's general release covering "모회사 … 계열회사" would wipe out the separate ₩4억 피어9 guaranty claim against 크레센트홀딩스, so its real value is about ₩9.5억, below Proposal 1 and trial. Also notes the credit risk of installments over 9 months, compared with Proposal 1's enforceable, judgment-equivalent title.
 - Explains the cost position without overstating it: if the case goes to judgment, costs follow the outcome, but recoverable attorney fees are capped by the 대법원규칙 (about ₩2,000만 here), so most of the ₩1.5억 is not recoverable either way; Proposal 1 leaves each side bearing its own costs.
 - Removes 박영수 from the thread or advises against copying him, and explains that Korean law has no general privilege: the consultant has no right to refuse testimony and the shared strategy memo loses its confidentiality protection. Gives a clear recommendation and counter strategy, for example: let Proposal 1 stand by default, while countering Proposal 2 before Nov 17 at ₩13.5억 or more with a 피어9 carve-out and security for the installments (e.g. a parent guarantee or an enforceable instrument); treats the ₩16억 counter as above the risk-adjusted value.
+
+## Card
+
+brief: 소송 중인 두 합의안을 판결까지 가는 경우와 비교해 의뢰인 대표에게 조언하고 결정을 요청합니다.
+given:
+- 사건 개요: 청구, 반소, 재판 일정, 승소 가능성, 변호사 비용, 소송 전인 연대보증 채권
+- 자재공급계약 제11.3조: 손해배상 배제 조항
+- 합의안 1: 법원의 화해권고결정과 민사소송법 제226조·제231조, 상법 제54조, 소송촉진법 제3조
+- 합의안 2: 분할 지급, 포괄적 권리 포기, 비밀유지를 담은 상대방 대리인 서신
+- 이영희 대표의 메일: 기한에 대한 이해, 역제안 생각, 참조에 넣은 외부 컨설턴트
+- 참고 조문: 민사소송법 제315조와 비밀 보호에 관한 설명
+asked:
+- 실제 기한과 날짜
+- 두 합의안과 판결까지 가는 경우의 비교, 기대값 계산
+- 각 합의안이 금액 외에 치르게 하는 비용
+- 권고 의견과 역제안 전략
+- 대표에게 필요한 것과 그 기한
+limit: 약 2,500자 이내, 제목과 본문을 갖춘 Markdown 이메일, 쉬운 말, 판례 인용 없음
+hard: 조문으로 기한을 계산해야 하고 계약과 권리 포기 문구가 가치를 바꾸며, 비밀 보호에 주의가 필요하고 조언은 판단의 문제입니다.
+
+## Scorecard
+
+- 이의신청 due Nov 17, 2025, not month-end; silence accepts ₩12억; Proposal 2 to Nov 21; decide ~Nov 13
+- §11.3 likely bars the ₩3억 lost profits; trial EV ≈₩11.6억 with interest; Proposal 1's certain ₩12억 compares well
+- Proposal 2's affiliate release waives the ₩4억 피어9 guaranty (worth ≈₩9.5억); installment credit risk noted
+- Costs follow judgment, but recoverable fees are capped at about ₩2,000만; most of ₩1.5억 unrecoverable
+- Removes or warns off 박영수: no general privilege, so the shared memo loses confidentiality protection
+- E.g. let Proposal 1 stand; counter Proposal 2 before Nov 17 with 피어9 carve-out, security; ₩16억 too high
+
+## Scorecard, shown
+
+- 이의신청 기한은 이번 달 말이 아닌 2025년 11월 17일, 아무것도 안 하면 12억원 수락, 합의안 2는 11월 21일까지, 결정은 11월 13일경까지
+- 제11.3조로 일실이익 3억원은 배제될 가능성이 크고, 이자 포함 판결 기대값 약 11.6억원, 합의안 1의 확정 12억원이 유리
+- 합의안 2의 계열사 포함 권리 포기는 피어9 연대보증 4억원을 소멸시킴(실질 약 9.5억원), 분할 지급의 신용 위험 지적
+- 소송비용은 패소자 부담이지만 회수 가능한 변호사보수는 약 2,000만원 한도라 1.5억원 대부분은 회수 불가
+- 박영수를 수신에서 빼거나 경고: 일반적인 비밀 특권이 없어 전달된 메모는 비밀 보호를 잃음
+- 예: 합의안 1을 그대로 두고 11월 17일 전에 피어9 제외·분할금 담보 조건으로 합의안 2에 역제안, 16억원은 과다

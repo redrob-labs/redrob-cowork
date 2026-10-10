@@ -59,3 +59,36 @@ Growth को एक दशमलव और burn multiples को दो दश�
 - Computes the rest correctly: Ledgerly 100% growth and 1.50 burn multiple; Fleetwise 2.50 (also failing on gross margin and hardware); Quorum HR 58.6% growth and 1.18, with ARR above the range; Northbeam 1.27, failing on NRR and round size; Tallow 111.1% and 1.60; Corvid 105.9% and 1.50, failing on geography.
 - Ledgerly is in the top three. The other picks are reasoned, for example Tallow (passes every criterion, with its 40% concentration and renewal date listed as the first diligence question) and Parcel Lane on recurring figures.
 - Takes a clear position on waivers. For example, Corvid's geography is the most waivable gap: the Pune engineering team likely gives it the "Indian connection" SEBI requires, but it would need an overseas-limit allocation, or the investment could be conditioned on the reverse flip. Northbeam fails two criteria, so one waiver can't rescue it despite the relationship.
+
+## Card
+
+brief: 8 inbound Series A companies को fund के criteria पर screen कीजिए, founders के आँकड़े सुधारिए, और सोमवार के लिए तीन चुनिए।
+given:
+- Fund criteria: 8 thresholds, जिन्हें केवल कोई partner waive कर सकता है
+- Legal team का note: विदेशी company में निवेश के लिए SEBI overseas limit और "Indian connection"
+- Pipeline: 8 companies के founder-reported ARR, net burn, NRR, gross margin और round size
+- Data rooms और first calls के notes: खास companies पर 5 notes
+asked:
+- Screening table: corrected recurring ARR, YoY growth, burn multiple, हर criterion पर pass/fail और fail की संख्या
+- Ranking: top तीन, हर एक का तर्क और first meeting के तीन सवाल
+- Near-misses: waiver की चर्चा लायक अधिकतम तीन companies
+limit: लगभग 1,200 शब्दों के भीतर, Markdown tables, growth एक दशमलव और burn multiples दो दशमलव तक
+hard: Founders के आँकड़े notes से सुधारने हैं, कुछ नतीजे ठीक threshold पर हैं, और waivers पर judgement call चाहिए।
+
+## Scorecard
+
+- Parcel Lane corrected to ₹28 crore: growth 86.7% (not 160%), burn multiple 2.00 (26 ÷ 13), a borderline pass
+- Sentinel Docs corrected to ₹13.2 crore: fails the ₹15 crore ARR floor; burn multiple 2.50
+- Ledgerly 100%/1.50; Fleetwise 2.50, fails margin and hardware; Quorum 58.6%/1.18, ARR above range
+- Northbeam 1.27, fails NRR and round size; Tallow 111.1%/1.60; Corvid 105.9%/1.50, fails geography
+- Top three include Ledgerly; other picks reasoned, e.g. Tallow with its 40% concentration as first question
+- Waivers: Corvid most waivable (Pune team's "Indian connection", overseas limit or reverse flip); Northbeam fails two
+
+## Scorecard, shown
+
+- Parcel Lane सुधरकर ₹28 crore: growth 86.7% (160% नहीं), burn multiple 2.00 (26 ÷ 13), सीमा पर pass
+- Sentinel Docs सुधरकर ₹13.2 crore: ₹15 crore की ARR सीमा पर fail; burn multiple 2.50
+- Ledgerly 100%/1.50; Fleetwise 2.50, margin और hardware पर fail; Quorum 58.6%/1.18, ARR range से ऊपर
+- Northbeam 1.27, NRR और round size पर fail; Tallow 111.1%/1.60; Corvid 105.9%/1.50, geography पर fail
+- Top तीन में Ledgerly; बाकी चुनाव तर्कसंगत, जैसे Tallow, 40% concentration को पहले सवाल के रूप में रखकर
+- Waivers: Corvid सबसे waivable (पुणे team से "Indian connection", overseas limit या reverse flip); Northbeam दो पर fail

@@ -47,3 +47,36 @@ deliverable: spreadsheets
 - Moves Hangang Chemical (to Q3) and Tidemark (to a 2027-realistic date) out of Q1, and flags Tidemark's ₩280,000k as an unqualified placeholder.
 - The weighted values use Amount × stage probability. The Q1 weighted forecast drops from ₩207,000k (as exported: 84,000 + 31,500 + 37,500 + 26,000 + 28,000) to ₩123,000k (Basaem ₩84,000k + Eastbrook ₩39,000k), with Basaem as Commit.
 - The hygiene list covers the past-dated close, the duplicate, the currency mismatch, the guessed amount and the premature Closed Won.
+
+## Card
+
+brief: 이번 주 활동으로 센서 영업 CRM을 정리하고 1분기 전망을 세워 팀장의 수주 질문에 답한다.
+given:
+- 단계별 확률: 6단계, 천 원 단위 원화 금액 필드, 유로 환율
+- CRM 내보내기: 단계·금액·마감일·다음 단계가 있는 영업 기회 7건
+- 이번 주 활동: 메모, 이메일, 캘린더 7건
+asked:
+- 가중 금액(천 원)과 "변경 사항 / 사유"를 더한 CRM 표, 공식과 재계산 과정
+- 확정·최선·파이프라인별 1분기 전망 전후 비교와 범주 정의
+- 발견해서 바로잡은 CRM 관리 문제
+- 김철수 님께 보내는 회신(약 250자 이내)
+limit: 약 2,500자 이내, Markdown
+hard: 활동 내역을 CRM과 건별로 대조해야 하고, 팀장의 기대 섞인 질문에 분명히 답해야 한다.
+
+## Scorecard
+
+- Solbong stays Negotiation, close ≈ 3 April (out of Q1), O-105 merged; Kim told "not in Q1"
+- Hwangjo re-priced to ₩42,000k (63,000 ÷ 45 × 30) with close date 10 April
+- Eastbrook €52,000 converted to ₩78,000k and kept in Q1 for the 26 March decision
+- Hangang moved to Q3; Tidemark to a 2027-realistic date, ₩280,000k flagged as unqualified placeholder
+- Weighted = Amount × probability; Q1 falls from ₩207,000k to ₩123,000k, Basaem as Commit
+- Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won
+
+## Scorecard, shown
+
+- 솔봉식품은 협상 단계 유지, 마감 약 4월 3일(1분기 제외), O-105 병합, 김철수 님께 "1분기 아님"
+- 황조제분은 42,000천 원(63,000 ÷ 45 × 30)으로 재산정, 마감일 4월 10일
+- Eastbrook 52,000유로를 78,000천 원으로 환산하고 3월 26일 결정을 근거로 1분기 유지
+- 한강화학은 3분기로, 타이드마크는 2027년 현실적 날짜로 이동, 280,000천 원은 근거 없는 임시값으로 표시
+- 가중 금액 = 금액 × 확률, 1분기 전망 207,000천 원 → 123,000천 원, 바다샘은 확정(Commit)
+- 관리 문제: 지난 마감일, 중복, 통화 불일치, 추정 금액, 성급한 수주 처리

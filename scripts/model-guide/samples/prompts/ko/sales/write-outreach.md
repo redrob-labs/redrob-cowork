@@ -49,3 +49,38 @@ deliverable: none
 - Represents the case study accurately: 60% fewer *near-misses* over 6 months and impacts down from 9 to 4. It doesn't say "60% fewer accidents" or "guaranteed", and the note to marketing explains why the hook overclaims (and risks being an exaggerated ad under 표시광고법).
 - The Lee Young-hee sequence finally answers her Stackwise question honestly (the integration is in beta), uses the Pyeongtaek DC trigger, and offers a low-friction call to action such as the 30-day pilot at one site. The follow-ups vary in content.
 - Every email respects its character limit, is specific and contains no invented facts.
+
+## Card
+
+brief: 승인된 정보와 조사 자료로 연락처 3명에게 지게차 안전 영업 연락을 쓰고 마케팅 문구에 답한다.
+given:
+- 승인된 제품 정보: 가격, 무료 파일럿, 고객 사례, WMS 연동 현황
+- 마케팅팀 제안 문구: 한 줄 주장
+- CRM 기록: 연락처 3명의 회사 정보와 메모
+- 조사 자료: 최근 뉴스·웹 검색 결과 4건
+asked:
+- 이영희 님께 보내는 3통의 이메일 시퀀스(0·3·8일 차, 각 약 300자 이내)
+- 박영수 님께 보내는 첫 연락 이메일(약 270자 이내)
+- 김철수 님에 대한 계획: 할 것과 하지 않을 것, 그 이유
+- 마케팅팀 제안 문구에 대한 의견 메모(약 200자 이내)
+- 잠재 고객별 접근 방향과 CTA의 근거(약 300자 이내)
+limit: 약 2,500자 이내, Markdown
+hard: 연락 규칙, 관련성을 확인해야 할 조사 자료, 과장된 문구를 다루면서도 구체적이고 설득력 있어야 한다.
+
+## Scorecard
+
+- No email to Kim Cheol-su (unsubscribed; 정보통신망법 Art. 50); phone or no outreach, not exploiting the violation finding
+- Park Young-su email omits the Bukcheon Logistics fine; uses second-shift hiring and safety-first culture
+- Cites 60% fewer near-misses over 6 months and impacts 9 → 4; never "accidents" or "guaranteed"
+- Note to marketing explains why the hook overclaims (exaggerated-ad risk under 표시광고법)
+- Lee sequence answers Stackwise honestly (beta), uses the Pyeongtaek DC, offers the 30-day pilot; follow-ups vary
+- Every email within its character limit, specific, with no invented facts
+
+## Scorecard, shown
+
+- 김철수 님께 이메일 발송 안 함(수신 거부, 정보통신망법 제50조), 전화 또는 연락 보류, 위반 적발을 악용하지 않음
+- 박영수 님 이메일에 북천로지스 과태료 언급 없음, 야간조 채용과 안전 최우선 문화를 활용
+- 아차사고 6개월간 60% 감소, 충돌 9건 → 4건으로 정확히 인용, "사고"나 "보장" 표현 없음
+- 마케팅 메모에서 제안 문구가 과장인 이유 설명(표시광고법상 과장 광고 위험)
+- 이영희 님 시퀀스: 스택와이즈 연동은 베타라고 정직하게 답하고 평택 센터 활용, 30일 파일럿 제안, 후속 메일마다 새 내용
+- 모든 이메일이 글자 수 제한 안에서 구체적이며 지어낸 사실 없음

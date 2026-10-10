@@ -58,3 +58,38 @@ deliverable: spreadsheets
 - Splits retail roughly into volume (5,700 fewer transactions × ₩10,000 = −₩57,000,000) and price/mix (about +₩13,300,000), totalling −₩43,700,000.
 - Explains the ingredient overrun as about ₩28,000,000 above 28% of actual revenue (₩284,900,000), consistent with the flour repricing, and names the labor overtime driver (1.5× premium; may also flag the 주 52시간 limit as a constraint on covering vacancies with overtime).
 - Recommendations follow from the data. The answer notices that growing wholesale volume lowers margin while retail traffic is falling, and keeps the sign convention consistent throughout.
+
+## Card
+
+brief: 베이커리 대표를 위해 3분기 예산 대비 실적 차이 분석과 정상화 EBITDA를 만들고 경리 요약을 검증합니다.
+given:
+- 경리 담당자 요약: EBITDA 미달 금액과 그 원인
+- 2025년 3분기 손익: 10개 항목의 예산과 실적
+- 운영 데이터: 도매 식빵 판매량, 소매 거래 건수와 객단가의 예산과 실적
+- 팀 메모: 보험료, 밀가루 단가, 인력 결원, 광고 캠페인, 판매가, 수도광열비에 관한 메모 6개
+asked:
+- 매출총이익·EBITDA 소계를 포함한 차이 분석표와 부호 규칙, 산식
+- 예산→실적 EBITDA 브리지와, 조정 내역을 보인 정상화 EBITDA
+- 소매 매출 차이의 가격/물량 분해와 그 방법
+- 이영희 대표를 위한 코멘트: 시점 차이와 실질 성과 차이 구분
+- 우선순위를 매긴 권고 3가지(소매 가격 추가 인상 대 도매 물량 확대 의견 포함)
+limit: 약 2,500자 이내, Markdown
+hard: 요약 수치를 검증해야 하고, 이번 분기에 속하지 않는 비용이 섞여 있을 수 있으며, 시점 차이와 성과를 구분하고 가격 대 물량 판단을 내려야 합니다.
+
+## Scorecard
+
+- Gross profit ₩453,200,000 vs ₩402,100,000; EBITDA ₩227,300,000 vs ₩163,800,000, a ₩63,500,000 miss, not ₩53,500,000
+- Treats ₩27,000,000 of insurance as prepaid (선급비용): normalized EBITDA ₩190,800,000, ₩36,500,000 below budget
+- Calls the ₩18,500,000 marketing underspend timing, not a saving
+- Splits retail −₩43,700,000 into volume −₩57,000,000 (5,700 × ₩10,000) and price/mix about +₩13,300,000
+- Ties ingredients ~₩28,000,000 over 28% of actual revenue (₩284,900,000) to flour repricing; names overtime (1.5×) behind labor
+- Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout
+
+## Scorecard, shown
+
+- 매출총이익 예산 4억 5,320만원 대 실적 4억 210만원, EBITDA 2억 2,730만원 대 1억 6,380만원으로 미달액은 5,350만원이 아니라 6,350만원
+- 보험료 중 2,700만원을 선급비용으로 보아 정상화 EBITDA 1억 9,080만원, 예산 대비 3,650만원 미달
+- 광고선전비 1,850만원 과소 집행은 절감이 아니라 시점 차이로 본다
+- 소매 −4,370만원을 물량 −5,700만원(5,700건 × 10,000원)과 가격/믹스 약 +1,330만원으로 분해한다
+- 원재료비가 실적 매출의 28%(2억 8,490만원)보다 약 2,800만원 많은 것을 밀가루 단가 인상과 연결하고, 인건비 원인으로 연장근로(1.5배)를 든다
+- 권고가 데이터에서 나온다: 소매 방문이 줄어드는데 도매 성장은 마진을 낮추며, 부호 규칙을 끝까지 일관되게 지킨다

@@ -57,3 +57,37 @@ Kahaani का अगला invoice number INV-0152 है।
 - Doesn't chase Tern Studios. Matches the 3 Mar ₹1,15,000 deposit to INV-0139 (the reference "INV0193" is likely a typo for "INV0139"), marks it paid or confirms it, and flags the reference mismatch.
 - The Bhatti Coffee Roasters email is firm and cites the contractual late fee, about ₹6,300 (1.5% × 2 full months on ₹2,10,000, 64 days overdue), with a clear deadline and next step. The Sahyadri Nagar Parishad email is polite, adds no late fee (there's no clause), and re-issues the invoice with PO 77-3310.
 - The invoice is complete and professional: unique number, dates, GST line, terms, payment details, and figures that add up.
+
+## Card
+
+brief: Deliver हुई brand film के लिए video studio का final invoice जारी करें, एक change order संभालें, और overdue accounts का उचित पीछा करें।
+given:
+- Saarthi Cycles SOW: fixed fee, deposit, change-order नियम, expense नियम, GST और payment terms
+- Saarthi job file: deposit invoice, 2 change orders और 4 expenses
+- Accounts receivable: due dates, late-fee clauses और notes के साथ 3 open invoices
+- Bank में जमा: 1 मार्च से 2 deposits
+asked:
+- Saarthi Cycles के लिए पूरा Invoice INV-0152, हर line की गणना के साथ
+- जेन डो को invoice भेजने और CO-2 संभालने वाला email
+- जिस overdue invoice का पीछा करना है, उसके लिए collection email, हर एक अधिकतम 150 शब्द
+- हर invoice के status और अगली follow-up तारीख़ के साथ updated AR table
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Contract की शर्तें तय करती हैं कि क्या billable है, पीछा करने से पहले भुगतान records मिलाने हैं, और लहजा हर client और contract के अनुसार होना चाहिए।
+
+## Scorecard
+
+- INV-0152 totals ₹6,89,533: ₹4,50,000 balance + CO-1 ₹70,000 + expenses ₹58,500 × 1.10 = ₹64,350, plus 18% GST ₹1,05,183
+- Excludes the ₹10,600 meals; due 25 March (net 15); shows the INV-0141 deposit (₹5,31,000) as received
+- CO-2 not billed (no Jane Doe approval); email asks her to approve ₹35,000 + GST for 0.5 day
+- Doesn't chase Tern: matches 3 Mar ₹1,15,000 to INV-0139, flags the "INV0193" reference mismatch
+- Bhatti firm with ≈ ₹6,300 late fee (1.5% × 2 months × ₹2,10,000); Parishad polite, no fee, PO 77-3310
+- Invoice complete and professional: unique number, dates, GST line, terms, payment details, figures add up
+
+## Scorecard, shown
+
+- INV-0152 का total ₹6,89,533: ₹4,50,000 बाकी + CO-1 ₹70,000 + expenses ₹58,500 × 1.10 = ₹64,350, और 18% GST ₹1,05,183
+- ₹10,600 के meals बाहर; due 25 मार्च (net 15); INV-0141 का deposit (₹5,31,000) मिला हुआ दिखाता है
+- CO-2 bill नहीं (जेन डो की approval नहीं); email में 0.5 दिन के ₹35,000 + GST की approval माँगता है
+- Tern का पीछा नहीं: 3 मार्च के ₹1,15,000 को INV-0139 से मिलाता है, "INV0193" reference का फ़र्क flag करता है
+- Bhatti को सख़्त email, ≈ ₹6,300 late fee (1.5% × 2 माह × ₹2,10,000); Parishad को विनम्र, fee नहीं, PO 77-3310
+- Invoice पूरा और professional: unique number, तारीखें, GST line, terms, payment details, आँकड़े सही जुड़ते हैं

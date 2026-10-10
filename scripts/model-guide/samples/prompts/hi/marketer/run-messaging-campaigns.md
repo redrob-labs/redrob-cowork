@@ -53,3 +53,37 @@ deliverable: spreadsheets
 - Tailors by segment: price-led for A, convenience and skip-a-week for B, and a quality-led message for C built on the new menus and the 35% fall in complaints. D-Pune gets a "अब हम आपके शहर में deliver करते हैं" message.
 - Forecasts with the correct base: 4,772 × 3.4% ≈ 162 plus (17,363 − 4,772) × 2.1% ≈ 264, about 427 reactivations, at an incentive cost of about ₹1,70,800 at ₹400 each.
 - SMS texts respect the right limit for their encoding (160 GSM-7 / 70 Unicode, with accurate counts), include the brand name and "Reply STOP to opt out", use the DLT header/template, and are scheduled within 10:00–21:00 IST, correctly converted to 04:30–15:30 UTC for the scheduler. Every sequence has an exit-on-reactivation condition.
+
+## Card
+
+brief: Cancel कर चुके meal-kit subscribers के लिए जनवरी का win-back campaign CRM में load होने लायक बनाइए, suppression, coverage, offer-cost और SMS नियमों के भीतर।
+given:
+- CRM export: cancel reason के अनुसार 5 segments, contacts और email व SMS opt-ins सहित
+- CRM team के notes: suppression की संख्या, पुणे तक नया coverage, opt-in overlap और UTC scheduler
+- Business rules: manager का offer, finance ceiling, कीमतें, stacking, TRAI/DLT SMS नियम, QA report और पिछली reactivation rates
+asked:
+- Audience table: हर segment के eligible email और SMS contacts, formulas सहित
+- Sequence plan: हर touch की एक row, IST और UTC send window सहित
+- Offer table: हर segment का offer और लागत, manager का प्रस्ताव सहित
+- Forecast: अपेक्षित reactivations और कुल incentive cost, formulas सहित
+- CRM team के लिए QA checklist, अधिकतम 6 items
+limit: लगभग 1,200 शब्दों के भीतर, Markdown tables
+hard: Raw संख्याओं को कई नियमों से छानना है, offer को cost ceiling पर परखना है, और messages को segment, SMS नियमों और time zone के अनुसार ढालना है।
+
+## Scorecard
+
+- Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Pune only), E 2,985; total 17,363
+- Eligible SMS 4,772, with D reduced to 52; rest of D excluded
+- Rejects manager's offer: 50% of ₹1,600 = ₹800 before dessert, over ₹450; e.g. 25% off (₹400), unstacked
+- Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Pune delivery for D
+- Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₹1,70,800
+- SMS ≤160 GSM-7 / ≤70 Unicode, accurate counts, brand, STOP, DLT; 10:00–21:00 IST = 04:30–15:30 UTC; exit on reactivation
+
+## Scorecard, shown
+
+- Eligible email: A 7,720, B 4,790, C 1,620, D 248 (केवल पुणे), E 2,985; कुल 17,363
+- Eligible SMS 4,772, D घटकर 52; D का बाकी हिस्सा बाहर
+- Manager का offer अस्वीकार: ₹1,600 का 50% = dessert से पहले ही ₹800, ₹450 से ऊपर; जैसे 25% off (₹400), stacking नहीं
+- Segment के अनुसार: A के लिए कीमत, B के लिए सुविधा, C के लिए नए menus और 35% कम शिकायतें, D के लिए पुणे में delivery
+- Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; लागत ≈₹1,70,800
+- SMS ≤160 GSM-7 / ≤70 Unicode, सही counts, brand, STOP, DLT; 10:00–21:00 IST = 04:30–15:30 UTC; reactivation पर exit

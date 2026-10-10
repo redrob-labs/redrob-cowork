@@ -67,3 +67,35 @@ Cap को राशि में बताइए। उत्तर लगभ�
 - Notices that the carve-out cross-refers to a non-existent §10.4, so even the IP indemnity falls under the ₹36 lakh cap. Also notes that 9.2 excludes breach-notification costs (which Riverbend must incur under s.8(6)), and that the 10.2 customer indemnity is broad and uncapped.
 - Flags the renewal (3-year terms, 120 days' notice, +9%), the 99.5% SLA with credits as the sole remedy, the Bengaluru venue, and the exit terms (30-day deletion, paid export), each with redlines tied to the playbook.
 - Gets the law right. The Bengaluru clause is likely valid, because Calyx's registered office is there so those courts are competent under CPC s.20, and choosing one competent court does not offend s.28; the law therefore doesn't fix the venue, which must be negotiated to Mumbai. The Consumer Protection Act's "unfair contract" route is unlikely to be available because a hospital buying scheduling software for its business acts for a commercial purpose under s.2(7), so the memo calendars the non-renewal deadline and negotiates the clause rather than relying on the statute.
+
+## Card
+
+brief: Hospital system शुक्रवार तक एक nurse-scheduling SaaS vendor का MSA sign करना चाहता है; playbook के मुक़ाबले शर्तें जाँचकर review memo लिखिए।
+given:
+- Deal के तथ्य: platform जो रोज़ का patient census import करता है, और order form की term और fees
+- Riverbend contracting playbook: liability cap से exit तक 7 SaaS स्थितियाँ
+- MSA के अंश: परिभाषा, DPA, SLA, liability, indemnity, renewal, law/venue और exit clauses
+- क़ानून: DPDP Act धारा 8(2), 8(5), 8(6) और penalty, CPC धारा 20, Contract Act धारा 28, Consumer Protection Act धारा 2(46) और 2(7)
+asked:
+- Bottom line: sign या अभी नहीं, और क्यों
+- Issues table: clause, issue, risk, redline और fallback
+- शुक्रवार की call पर जीतने के पाँच बिंदु, प्राथमिकता क्रम में
+- क़ानूनी प्रावधानों पर notes: हर एक Riverbend की मदद करता है या नहीं, और कैसे
+limit: लगभग 1,200 शब्दों के भीतर, headed sections वाला Markdown memo, cap राशि में
+hard: Clauses परिभाषाओं और cross-references से जुड़े हैं, data protection का दायित्व लागू होता है, और क़ानूनों की पहुँच पर judgement चाहिए।
+
+## Scorecard
+
+- DPA is the blocker: patient data, Fiduciary liable (s.8(5)), s.8(2) needs contract, Exhibit C omitted; don't sign or go live
+- Cap ₹36 lakh (3 months, implementation excluded) vs playbook ₹1.92 crore year 1, ₹4.32 crore super-cap; ₹250 crore penalty
+- Carve-out cites non-existent §10.4, so IP indemnity capped; 9.2 excludes s.8(6) notification costs; 10.2 broad, uncapped
+- Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Bengaluru venue and exit terms
+- Bengaluru clause likely valid (CPC s.20, s.28), so negotiate Mumbai; CPA unavailable (commercial purpose), calendar non-renewal
+
+## Scorecard, shown
+
+- DPA सबसे बड़ी रुकावट: patient data, Fiduciary ज़िम्मेदार (धारा 8(5)), धारा 8(2) में contract ज़रूरी, Exhibit C ग़ायब; sign या go-live नहीं
+- Cap ₹36 लाख (3 महीने, implementation बाहर) बनाम playbook के अनुसार पहले वर्ष ₹1.92 crore और ₹4.32 crore super-cap; ₹250 crore penalty
+- Carve-out अस्तित्वहीन §10.4 का हवाला देता है, इसलिए IP indemnity भी capped; 9.2 धारा 8(6) के notification costs बाहर करता है; 10.2 व्यापक, uncapped
+- Renewal (3 वर्ष, 120 दिन, +9%), 99.5% sole-remedy SLA, बेंगलुरु venue और exit शर्तों पर redlines
+- बेंगलुरु clause संभवतः वैध (CPC धारा 20, धारा 28), इसलिए मुंबई के लिए negotiate; CPA उपलब्ध नहीं (commercial purpose), non-renewal date calendar

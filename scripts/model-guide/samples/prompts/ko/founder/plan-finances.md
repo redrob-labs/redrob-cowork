@@ -47,3 +47,36 @@ deliverable: spreadsheets
 - Under the full plan, cash runs out around March 2027 (about ₩17.7M left at the end of February), about 14–15 months, not 23. The second license payment in January 2027 is a cliff.
 - Works back from the board policy: the raise must close by about August 2026 (about ₩772,000,000 left, roughly 6 months of burn), so fundraising has to start around March or April 2026, almost immediately and far earlier than mid-2027. The answer says this plainly.
 - MRR is computed correctly (opening × 0.98 + new MRR). Formulas are stated for every column, and the alternative scenario is modelled with a quantified runway effect (for example, no AE runs out around April 2027; delaying the CS hire to October still runs out around March 2027) and a clear, justified recommendation.
+
+## Card
+
+brief: 분석 스타트업의 18개월 현금 예산을 세워 공동창업자의 런웨이 추정을 바로잡고 채용·투자 시점을 정합니다.
+given:
+- 공동창업자 추정: 인건비, 데이터 라이선스, 운영비, 매출, 번레이트, 런웨이 약 23개월
+- 사실관계와 가정: 현금, MRR, 이탈, 매출총이익률, 인건비, 채용, 운영비, 라이선스에 관한 11개 항목
+- 이사회 정책: 클로징 시 최소 6개월치 현금, 유치에 약 5개월 소요
+asked:
+- 2026년 1월~2027년 6월 월별 표와 각 열의 산식
+- 홍길동 님 추정의 오류 조정 내역과 각 오류의 월 번레이트 영향
+- 현금이 바닥나는 달과 투자 유치를 시작해야 하는 가장 늦은 달
+- 채용·투자 유치 권고와 최소 하나의 대안 시나리오 모델링
+limit: 약 2,500자 이내, Markdown
+hard: 단순한 추정에 여러 모델링 오류가 숨어 있고, 현금 유출 시점이 비용 인식 시점과 다르며, 이사회 정책을 거꾸로 계산해 기한을 정해야 합니다.
+
+## Scorecard
+
+- Names the errors: unburdened payroll without hires, license spread instead of paid in January, revenue not gross profit
+- January 2026 net burn about ₩202,155,000 (96,075,000 + 28,500,000 + 108,000,000 − 30,420,000)
+- Burn settles near ₩116,000,000–₩127,000,000 a month mid-2026, easing as MRR grows
+- Cash runs out around March 2027 (~₩17,700,000 left end-February), with the January 2027 license as a cliff
+- Raise must close by about August 2026 (~₩772,000,000 left), so fundraising starts March–April 2026
+- MRR = opening × 0.98 + new; column formulas; quantified alternative (e.g. no AE: April 2027); justified recommendation
+
+## Scorecard, shown
+
+- 오류를 짚는다: 부대비용과 신규 채용이 빠진 인건비, 1월 일시 지급인 라이선스의 월할, 매출총이익 대신 매출 차감
+- 2026년 1월 순현금유출 약 202,155,000원(96,075,000 + 28,500,000 + 108,000,000 − 30,420,000)
+- 2026년 중반 번레이트가 월 약 1억 1,600만~1억 2,700만원에 자리 잡고 MRR 증가에 따라 서서히 줄어든다
+- 2027년 3월경 현금이 바닥나며(2월 말 약 1,770만원), 2027년 1월 라이선스 지급이 절벽이다
+- 2026년 8월경까지 클로징해야 하므로(잔액 약 7억 7,200만원) 2026년 3~4월에 투자 유치를 시작해야 한다
+- MRR = 기초 × 0.98 + 신규, 열별 산식, 정량화한 대안(예: AE 미채용 시 2027년 4월), 근거 있는 권고

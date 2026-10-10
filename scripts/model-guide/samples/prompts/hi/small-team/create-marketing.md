@@ -46,3 +46,36 @@ deliverable: graphics
 - Chooses the format from the data and the two goals. The carousel has the best click-through (about 1.5% vs about 0.6% for the reel and the single photo) for sign-ups, and the reel has the best reach. The answer makes the trade-off explicit, for example a carousel as the main post with a reel to support it.
 - Both pieces carry the essentials: the 2 May launch, Saturday 8–11am pickup, ₹900/month for 4 loaves (UPI AutoPay), the sign-up URL and the first-50 tote offer.
 - The SVG is valid and self-contained at A5 proportions, uses the brand colours, and has a clear hierarchy with legible text sizes and sufficient contrast.
+
+## Card
+
+brief: Owner के brief से bakery के sourdough subscription launch के लिए Instagram post plan और A5 counter flyer बनाएँ।
+given:
+- Owner का brief: launch के ब्योरे और दावे, मैरी मेजर के शब्दों में
+- Bakery से तथ्य: loaf की कीमत, सामग्री का स्रोत, "gluten-free" loaf कैसे बनता है, allergens
+- Brand: 3 रंग और fonts
+- Instagram performance: 3 post types की reach, likes, saves और clicks
+asked:
+- Instagram plan: format और कारण, slide या scene list, caption (अधिकतम 120 शब्द), अधिकतम 8 hashtags
+- A5 flyer: copy, zone के अनुसार layout, visual direction और inline SVG mock-up
+- मैरी के लिए note (अधिकतम 120 शब्द): कौन-से शब्द बदले और क्यों
+limit: SVG छोड़कर लगभग 1,200 शब्द, markdown में
+hard: Brief के दावों को bakery के तथ्यों से परखना है, और format का चुनाव उन दो लक्ष्यों के बीच संतुलन है जिन्हें data अलग दिशाओं में खींचता है।
+
+## Scorecard
+
+- Savings fixed: ₹900 vs ₹1,000 (4 × ₹250) is 10%, ₹100 a month, not 25% (or "₹225 a loaf")
+- No "100% organic" (seed mix uncertified); uses wording like "made with certified organic flour"
+- No "gluten-free" (shared kitchen, no testing); allergen note included; note to Mary explains both risks
+- Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit
+- Both pieces carry 2 May, Saturday 8–11am pickup, ₹900/month for 4 loaves (UPI AutoPay), URL, first-50 tote
+- SVG valid at A5 proportions, brand colours, clear hierarchy, legible text sizes, sufficient contrast
+
+## Scorecard, shown
+
+- बचत ठीक: ₹900 बनाम ₹1,000 (4 × ₹250) यानी 10%, ₹100 प्रति माह, 25% नहीं (या "₹225 प्रति loaf")
+- "100% organic" नहीं (seed mix certified नहीं); "certified organic flour से बना" जैसे शब्द
+- "Gluten-free" नहीं (साझा kitchen, कोई testing नहीं); allergen note शामिल; मैरी को note दोनों जोखिम समझाता है
+- Data से format: carousel का click-through सबसे अच्छा (≈ 1.5% बनाम ≈ 0.6%), reel की reach सबसे ज़्यादा; trade-off साफ़
+- दोनों में 2 मई, शनिवार सुबह 8–11 pickup, 4 loaves के ₹900/महीना (UPI AutoPay), URL, पहले 50 को tote
+- A5 अनुपात में valid SVG, brand रंग, साफ़ hierarchy, पढ़ने योग्य text size, पर्याप्त contrast

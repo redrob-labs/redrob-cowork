@@ -56,3 +56,34 @@ deliverable: graphics
 - Aligns the requirements with the leveling guide: no B.E./B.Tech, ITI/diploma or equivalent hands-on experience preferred, 0–2 years of wind experience with training provided, and GWO training within 90 days paid by Pawanshakti. The "2+ years" requirement is gone, because it belongs to the Technician II level.
 - Keeps the genuine physical, height and driving-licence requirements, stated plainly, and adds an equal-opportunity and reasonable-accommodation statement (welcoming applicants of any gender, caste, religion or marital status, and persons with disabilities in line with the RPwD Act, 2016). Drops "rockstar" and "work hard, play hard".
 - The SVG is valid and self-contained at 1080×1080. It shows the role, the location, the ₹3.3–4.2 lakh range, one or two benefits and the apply URL, with legible type and adequate contrast, and it is consistent with the revised posting.
+
+## Card
+
+brief: Site manager के wind-technician job ad को सटीक, inclusive और approved CTC range वाला बनाकर दोबारा लिखें, फिर उसका square recruiting graphic बनाएँ।
+given:
+- Draft posting: रिचर्ड रो का ad, requirements और pay सहित
+- HR leveling guide: Technician I की शिक्षा, certification, अनुभव और communication की शर्तें
+- Compensation sheet: Technician I और II की approved वार्षिक CTC ranges
+- Job से जुड़े तथ्य: shift, शारीरिक माँगें, driving licence, benefits और apply करने का तरीका
+asked:
+- संशोधित job posting, अधिकतम 450 शब्द
+- Change log table: मूल text, संशोधित text और हर बदलाव का कारण
+- 1080×1080 graphic: image की copy, zone के अनुसार layout, visual direction और inline SVG mock-up
+limit: SVG छोड़कर लगभग 1,200 शब्द, markdown में
+hard: Draft में बहिष्कारी भाषा के साथ ऐसी requirements और pay हैं जो official sources से टकराती हैं, जबकि कुछ असली requirements बनी रहनी चाहिए।
+
+## Scorecard
+
+- Removes "young, energetic लड़का", "fresh graduates", "bachelors"; replaces "convent-educated" English with Hindi or English radio safety communication
+- Uses ₹3.3–4.2 lakh a year and flags the draft's ₹3.0–3.6 lakh as off-sheet and breaking pay-range policy
+- Drops B.E./B.Tech and "2+ years"; states ITI/diploma, 0–2 years with training, paid GWO within 90 days
+- Keeps height, lifting and driving-licence requirements; adds equal-opportunity (RPwD Act) and accommodation statements; drops "rockstar" slogans
+- SVG valid at 1080×1080: role, location, ₹3.3–4.2 lakh, benefits, apply URL; legible and consistent with posting
+
+## Scorecard, shown
+
+- "Young, energetic लड़का", "fresh graduates", "bachelors" हटाता है; "convent-educated" English की जगह radio पर हिंदी या अंग्रेज़ी safety communication
+- ₹3.3–4.2 लाख प्रति वर्ष लिखता है, draft के ₹3.0–3.6 लाख को sheet से बाहर और pay-range policy का उल्लंघन बताता है
+- B.E./B.Tech और "2+ साल" हटाता है; ITI/diploma, training के साथ 0–2 साल, 90 दिन में paid GWO
+- ऊँचाई, वज़न और driving licence की शर्तें रखता है; equal-opportunity (RPwD Act) और accommodation statement जोड़ता है; "rockstar" नारे हटाता है
+- 1080×1080 पर valid SVG: role, location, ₹3.3–4.2 लाख, benefits, apply URL; पढ़ने योग्य और posting से मेल खाता

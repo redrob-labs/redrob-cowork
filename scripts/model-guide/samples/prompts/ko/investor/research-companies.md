@@ -52,3 +52,40 @@ deliverable: spreadsheets
 - Rejects the ₩4.2조 figure because it is global, covers hauling, composting and digestion rather than software, and is quoted by the company itself.
 - Annualizes prices correctly (빈사이트 ₩190,000 × 12 = ₩2,280,000; 스크랩리스 ₩230,000 × 12 = ₩2,760,000, with the 2021 ₩129,000 discarded as stale; 키친레저 ₩3,000,000 plus a one-off ₩2,000,000 hardware kit). Treats 키친레저's Series B as ₩140억 from the primary press release, not the aggregator's ₩400억.
 - Draws a judgement from the data, for example that 웨이스트와이즈's institutional skew suits the higher-penetration, lower-churn segment, and that its 14% churn among independent restaurants questions whether full-service belongs in SAM. Turns that into a founder question.
+
+## Card
+
+brief: 음식물 쓰레기 측정 스타트업의 국내 시장 규모와 경쟁 현황을 신뢰도가 다른 자료로 정리합니다.
+given:
+- 외식업 사업체 현황 [1]과 단체급식 리뷰 [2]: 세그먼트별 국내 사업장 수
+- 회사 블로그 [3]: 시장 규모 주장과 그 각주
+- 애널리스트 노트 [4]: 세그먼트별 보급률과 한정 서비스 업체의 구매 성향
+- 가격 페이지 및 기사 [5]: 4개사 가격, 출처 연도가 서로 다름
+- 투자 유치 뉴스 [6]: 경쟁사 3곳의 최근 라운드, 출처가 섞여 있음
+- 데이터룸 [7]: 웨이스트와이즈 운영 매장, 세그먼트 구성, 이탈률
+asked:
+- 상향식 TAM, SAM, 현재 시장: 입력값, 산식, 혼합 가격
+- 출처 [3]에 대한 하향식 교차 검증
+- 경쟁사 표: 연 환산 가격, 하드웨어 모델, 투자 유치와 신뢰도, 시사점
+- 출처별 신뢰도 평가
+- 창업자에게 물을 질문 최대 5개
+limit: 약 2,500자 이내, Markdown 표, 시장 수치는 1억원 단위
+hard: 출처마다 신뢰도가 다르고 서로 어긋나기도 하며, 가격을 같은 기준으로 맞춰야 하고 세그먼트 범위는 판단이 필요합니다.
+
+## Scorecard
+
+- Base 281,960 full-service + 52,000 institutional = 333,960 locations; TAM about ₩8,683–9,184억; limited-service out of SAM
+- Current market: ≈8,459 + 5,720 ≈ 14,200 locations, about ₩369–390억 a year
+- Rejects the ₩4.2조: global, covers hauling, composting and digestion, and is company-sourced
+- Annualizes 빈사이트 ₩2,280,000, 스크랩리스 ₩2,760,000 (2021 ₩129,000 stale), 키친레저 ₩3,000,000 plus hardware
+- 키친레저's Series B is ₩140억 from the press release, not the aggregator's ₩400억
+- Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question
+
+## Scorecard, shown
+
+- 풀서비스 281,960곳 + 집단급식소 52,000곳 = 333,960곳, TAM 약 8,683억~9,184억원, 한정 서비스는 SAM에서 제외
+- 현재 시장: 약 8,459곳 + 5,720곳 ≈ 14,200곳, 연 약 369억~390억원
+- 4조 2천억원은 글로벌 수치이고 수거·퇴비화·혐기성 소화를 포함하며 회사 자체 인용이므로 배제
+- 연 환산: 빈사이트 2,280,000원, 스크랩리스 2,760,000원(2021년 129,000원은 낡은 수치), 키친레저 3,000,000원 + 하드웨어
+- 키친레저 시리즈 B는 큐레이션 기사의 400억원이 아니라 보도자료의 140억원
+- 집단급식소 중심 구성과 개인 식당 이탈률 14%를 SAM 범위와 연결하고, 이를 창업자 질문으로 이어 감

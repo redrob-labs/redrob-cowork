@@ -60,3 +60,35 @@ deliverable: web
 - Covers mobile and error-prevention issues: input types and autocomplete (email, tel, cc-number, cc-exp, cc-csc; 1.3.5), a card maxlength of 16 that blocks 19-digit cards, small targets (2.5.8) and the timer overlay. Suggests ways to catch email typos.
 - Declines the pre-ticked newsletter box, since pre-ticked consent is not valid under the GDPR in the EU or under India's DPDP Act, 2023 (consent needs a clear affirmative action), and is a dark pattern, and proposes an honest unticked opt-in.
 - The corrected HTML runs, sets `lang="hi"`, keeps the fields, includes a timer warning and an extend option announced to assistive technology, and keeps the orange by using dark text or a darker shade for contrast.
+
+## Card
+
+brief: टिकटिंग checkout के "आपका विवरण" स्टेप की usability और accessibility review करें, Lighthouse दावे का जवाब दें, पहले से टिक बॉक्स पर निर्णय लें।
+given:
+- इंजीनियर का नोट: Lighthouse स्कोर का दावा और मार्केटिंग की पहले से टिक बॉक्स की माँग
+- मौजूदा markup: "आपका विवरण" स्टेप का छोटा किया HTML और CSS, टाइमर वाली टिप्पणी के साथ
+- संदर्भ: 68% मोबाइल ट्रैफ़िक, सपोर्ट की 2 तरह की शिकायतें, भारत और EU में उपयोग
+asked:
+- प्राथमिकता क्रम में findings तालिका: समस्या, किसे प्रभावित करती है, गंभीरता, WCAG 2.2 criterion और समाधान
+- Lighthouse पर रिचर्ड को जवाब, और पहले से टिक न्यूज़लेटर बॉक्स पर निर्णय, तर्क सहित
+- वही fields और ब्रांड का नारंगी रखते हुए सुधारा हुआ single-file HTML/CSS/JS संस्करण
+limit: गद्य लगभग 1,200 शब्दों के भीतर, Markdown; कोड इससे लंबा हो सकता है
+hard: एक automated स्कोर को manual review से तौलना है, छोटे markup में अलग-अलग गंभीरता की कई कमियाँ छिपी हैं, और एक business माँग कानूनी व नैतिक सीमाओं से टकराती है।
+
+## Scorecard
+
+- Explains Lighthouse 100 doesn't prove conformance; cites the unextendable 2-minute timer (2.2.1) and CAPTCHA (1.1.1)
+- Flags placeholder-only labels, colour-only error, unlinked hint, removed focus outline, clickable div; small Devanagari text
+- Flags contrast failures: #a0a0a0 hint at about 2.6:1 and white on #ff7a00
+- Covers input types and autocomplete (1.3.5), maxlength 16 blocking 19-digit cards, small targets, timer overlay, email typos
+- Declines the pre-ticked box as invalid consent under GDPR and the DPDP Act, 2023, and a dark pattern; unticked opt-in
+- Corrected HTML runs, lang="hi", keeps fields, announced timer warning and extend option, keeps orange accessibly
+
+## Scorecard, shown
+
+- बताता है कि Lighthouse 100 conformance साबित नहीं करता; न बढ़ सकने वाले 2 मिनट के टाइमर (2.2.1) और CAPTCHA (1.1.1) का उदाहरण देता है
+- केवल placeholder वाले labels, सिर्फ़ रंग से दिखती error, field से न जुड़ा hint, हटाई गई focus outline और क्लिक होने वाला div पकड़ता है; छोटा देवनागरी टेक्स्ट भी
+- Contrast की विफलताएँ बताता है: #a0a0a0 वाला hint लगभग 2.6:1 पर, और #ff7a00 पर सफ़ेद
+- Input types और autocomplete (1.3.5), 19 अंकों वाले कार्ड रोकने वाला maxlength 16, छोटे targets, टाइमर overlay और ईमेल की typos cover करता है
+- पहले से टिक बॉक्स को GDPR और DPDP Act, 2023 के तहत अमान्य सहमति और dark pattern मानकर मना करता है; बिना टिक का opt-in देता है
+- सुधारा HTML चलता है, lang="hi" है, fields वही हैं, टाइमर चेतावनी और बढ़ाने का विकल्प घोषित होते हैं, नारंगी accessible ढंग से बना रहता है

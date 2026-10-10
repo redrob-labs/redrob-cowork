@@ -58,3 +58,38 @@ deliverable: spreadsheets
 - Splits retail roughly into volume (5,700 fewer bills × ₹100 = −₹5,70,000) and price/mix (about +₹1,33,000), totalling −₹4,37,000.
 - Explains the ingredient overrun as about ₹2,80,000 above 28% of actual revenue (₹31,29,000 vs ₹28,49,000), consistent with the flour repricing, and names the labour overtime driver.
 - Recommendations follow from the data. The answer notices that growing wholesale volume lowers margin while retail traffic is falling, and keeps the sign convention consistent throughout.
+
+## Card
+
+brief: बेंगलुरु की एक बेकरी की मालिक के लिए Q2 की budget-versus-actual variance रिपोर्ट बनाएँ, EBITDA normalize करें और बुककीपर का सारांश जाँचें।
+given:
+- बुककीपर का सारांश: EBITDA में बताई गई कमी और उसका कारण
+- Q2 FY 2025-26 का P&L: 10 मदों का बजट और वास्तविक
+- परिचालन डेटा: होलसेल loaves, रिटेल bills और औसत बिल, बजट और वास्तविक
+- टीम के नोट्स: बीमा, आटा, स्टाफ़, मार्केटिंग, कीमतों और बिजली-गैस पर 6 नोट
+asked:
+- Gross profit और EBITDA subtotal वाली variance तालिका, sign convention और फ़ॉर्मूलों सहित
+- बजट से वास्तविक EBITDA तक का bridge, और adjustment दिखाता normalized EBITDA
+- रिटेल राजस्व variance का price/volume विभाजन, पद्धति सहित
+- जेन के लिए टिप्पणी, timing अंतर को वास्तविक प्रदर्शन से अलग करते हुए
+- प्राथमिकता क्रम में तीन सिफ़ारिशें, रिटेल कीमत बनाम होलसेल वॉल्यूम की राय सहित
+limit: लगभग 1,200 शब्दों के भीतर, Markdown
+hard: एक सारांश आंकड़े को सत्यापित करना है, कुछ खर्च शायद इस तिमाही के नहीं हैं, timing को प्रदर्शन से अलग करना है, और कीमत बनाम वॉल्यूम पर judgement चाहिए।
+
+## Scorecard
+
+- Gross profit ₹45,32,000 vs ₹40,21,000; EBITDA ₹22,73,000 vs ₹16,38,000, a ₹6,35,000 miss, not ₹5,35,000
+- Treats ₹2,70,000 of insurance as prepaid: normalized EBITDA ₹19,08,000, ₹3,65,000 below budget
+- Calls the ₹1,85,000 marketing underspend timing, not a saving
+- Splits retail −₹4,37,000 into volume −₹5,70,000 (5,700 × ₹100) and price/mix about +₹1,33,000
+- Ties ingredients ~₹2,80,000 over 28% of actual revenue (₹28,49,000) to flour repricing; names 2× overtime behind labour
+- Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout
+
+## Scorecard, shown
+
+- Gross profit बजट ₹45,32,000 बनाम वास्तविक ₹40,21,000; EBITDA ₹22,73,000 बनाम ₹16,38,000, यानी कमी ₹6,35,000 है, ₹5,35,000 नहीं
+- बीमे के ₹2,70,000 को prepaid मानता है: normalized EBITDA ₹19,08,000, बजट से ₹3,65,000 कम
+- मार्केटिंग के ₹1,85,000 कम खर्च को बचत नहीं, timing अंतर बताता है
+- रिटेल −₹4,37,000 को volume −₹5,70,000 (5,700 × ₹100) और price/mix लगभग +₹1,33,000 में बाँटता है
+- सामग्री का वास्तविक राजस्व के 28% (₹28,49,000) से लगभग ₹2,80,000 ज़्यादा होना आटे की बढ़ी कीमत से जोड़ता है; श्रम के पीछे 2× ओवरटाइम बताता है
+- सिफ़ारिशें डेटा से निकलती हैं: रिटेल ट्रैफ़िक घटते समय होलसेल वृद्धि margin घटाती है; sign convention शुरू से अंत तक एक जैसा

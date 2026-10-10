@@ -75,3 +75,38 @@ deliverable: web
 - Shows the "₹3,500 से" dental price honestly (for example, "₹3,500 से, अंतिम कीमत जाँच के बाद") and gives a reason, which is in tension with the PM's no-surprises rule.
 - The prototype runs as a single file at 375 px, sets `lang="hi"`, works with a keyboard (visible focus, labelled controls, tap targets of at least 24 px), makes the common services quick to reach, and offers "कोई भी उपलब्ध डॉक्टर".
 - The rationale for one screen versus separate steps is tied to the 70% fast-path requirement.
+
+## Card
+
+brief: ब्रांड टोकन, क्लिनिक डेटा और API स्लॉट से 375 px पर पशु क्लिनिक का मोबाइल अपॉइंटमेंट-बुकिंग फ़्लो WCAG 2.2 AA के अनुसार डिज़ाइन और प्रोटोटाइप करें।
+given:
+- ब्रांड टोकन: रंग, radius और टाइप के 8 टोकन, और बटन के रंग का निर्देश
+- क्लिनिक का समय: सोमवार से शनिवार 09:00–17:00, लंच के लिए बंद
+- सेवाएँ: 4 सेवाएँ, उनकी अवधि, कीमत और कौन कर सकता है
+- डॉक्टर: 2 डॉक्टर और उनके कार्यदिवस
+- गुरुवार के स्लॉट: API से लौटे 6 स्लॉट
+- PM की आवश्यकताएँ: कीमत, आम सेवाओं की तेज़ राह, कोई भी डॉक्टर और पुष्टि के विवरण पर 4 नियम
+asked:
+- स्लॉट डेटा इस्तेमाल करता single-file HTML/CSS/JS प्रोटोटाइप, केवल बुक हो सकने वाले स्लॉट के साथ
+- डिज़ाइन rationale: एक स्क्रीन या स्टेप्स, "से" वाली कीमत, और ब्रांड निर्देशों से हटना
+- मिली डेटा समस्याओं की सूची, और UI या API हर एक को कैसे संभाले
+limit: गद्य लगभग 1,200 शब्दों के भीतर, Markdown; कोड इससे लंबा हो सकता है
+hard: एक ब्रांड निर्देश को accessibility की आवश्यकता से तौलना है, API डेटा को क्लिनिक के नियमों से परखना है, और खुली कीमत "कोई सरप्राइज़ नहीं" लक्ष्य की परीक्षा लेती है।
+
+## Scorecard
+
+- Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained
+- Drops Miles's exotic slot, 13:30 (lunch), 12:00 dental (runs into lunch), 16:45 wellness (past 17:00)
+- Explains why each dropped slot is invalid and recommends fixing them in the API
+- Shows "₹3,500 से" honestly, e.g. with a final-price note, and addresses the no-surprises tension
+- Prototype runs at 375 px, lang="hi", keyboard-usable (focus, labels, ≥24 px targets), offers "कोई भी उपलब्ध डॉक्टर"
+- Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings
+
+## Scorecard, shown
+
+- #7FD1AE पर सफ़ेद टेक्स्ट (लगभग 1.8:1) को AA में फ़ेल बताता है; गहरा टेक्स्ट या गहरा shade इस्तेमाल करता है और कारण बताता है
+- माइल्स का एक्ज़ॉटिक स्लॉट, 13:30 (लंच), 12:00 की दाँतों की सफ़ाई (लंच में जाती है) और 16:45 की वेलनेस जाँच (17:00 के बाद) हटाता है
+- बताता है कि हटाया गया हर स्लॉट क्यों अमान्य है, और उन्हें API में ठीक करने की सलाह देता है
+- "₹3,500 से" को ईमानदारी से दिखाता है, जैसे अंतिम कीमत वाले नोट के साथ, और "कोई सरप्राइज़ नहीं" से टकराव को संबोधित करता है
+- प्रोटोटाइप 375 px पर चलता है, lang="hi" है, keyboard से चलता है (focus, labels, ≥24 px targets), "कोई भी उपलब्ध डॉक्टर" देता है
+- एक स्क्रीन या स्टेप्स का चुनाव 70% वेलनेस और टीकाकरण बुकिंग की तेज़ राह से जोड़ता है

@@ -83,3 +83,40 @@ ValueError: Invalid isoformat string: '2025-03-09T18:29:59Z'
 - Fixes the business logic to subtract `refunded_amount`, exclude `cancelled`, and deal with fully refunded orders consistently, and reconciles the staging figure: ₹3,700.00 = 500 + 1,200 + 400 + 600 + 1,000.
 - Explains the 3.10 crash (`fromisoformat` accepts "Z" only from 3.11) and parses robustly. Also explains that the mutable-default `_cache`, keyed only by date in a long-lived process, serves stale totals for today, and removes it or keys it properly with invalidation.
 - The fixed code gives ₹2,000.00 for 9 March (A2 500 + A3 900 + A4 600), and the tests cover the IST midnight boundary, the 00:00–00:30 IST window and the `+05:30` offset.
+
+## Card
+
+brief: ग्रॉसरी चेन का दैनिक राजस्व finance से न मिलने और job के crash होने का कारण ढूँढें, फिर Python module को tests के साथ ठीक करें।
+given:
+- Finance टिकट: 9 मार्च का बेमेल, crash, और finance की राजस्व परिभाषा
+- Module: long-lived worker में Python 3.10 के day-bounds और daily-revenue functions
+- कॉल पैटर्न: डैशबोर्ड आज और कल के लिए हर 15 मिनट पर कॉल करता है
+- टेस्ट स्टोर के orders: 9 मार्च के आसपास के 6 orders, JSON में
+- Error log: फ़ेल हुए run का एक traceback
+- Staging नोट: ₹3,700.00 का आंकड़ा Python 3.12 से आया
+asked:
+- Root-cause analysis: हर defect, उससे समझ आने वाला लक्षण, और वह कुछ ही दिनों पर क्यों दिखता है
+- ठीक किया गया module, Python 3.10 compatible, signatures वही जब तक कारण न हो
+- दिए गए orders वाले pytest regression tests, IST मध्यरात्रि, 00:00–00:30 IST और +05:30 offset सहित
+- ठीक किए गए कोड में 9 मार्च का विस्तृत हिसाब
+- Cache रहे या नहीं, इस पर एक वाक्य
+limit: गद्य लगभग 1,200 शब्दों के भीतर, Markdown; कोड इससे लंबा हो सकता है
+hard: कई स्वतंत्र defects मिलकर एक लक्षण बनाते हैं, वे केवल कुछ तारीखों या runtimes पर दिखते हैं, और कोड का logic business परिभाषा से अलग है।
+
+## Scorecard
+
+- Offset bug: IST is +05:30, not +5; 9 March spans 19:00Z–19:00Z, pulling in A5 (00:15 IST)
+- Uses Asia/Kolkata local midnights; explains it shows only on days with 00:00–00:30 IST orders
+- Half-open [start, end) instead of <= end; explains A2 at 19:00Z counted on both 8 and 9 March
+- Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles ₹3,700.00 (500+1,200+400+600+1,000)
+- Explains the 3.10 crash ("Z" only from 3.11), parses robustly; removes or properly keys the stale date-only cache
+- Fixed code gives ₹2,000.00 for 9 March (A2 500, A3 900, A4 600); tests cover midnight, 00:00–00:30, +05:30
+
+## Scorecard, shown
+
+- Offset bug: IST +05:30 है, +5 नहीं; 9 मार्च 19:00Z से 19:00Z तक चलता है और A5 (00:15 IST) शामिल हो जाता है
+- Asia/Kolkata की स्थानीय मध्यरात्रियाँ इस्तेमाल करता है; बताता है कि गलती केवल 00:00–00:30 IST वाले orders के दिनों पर दिखती है
+- <= end की जगह half-open [start, end); बताता है कि 19:00Z वाला A2 8 और 9 मार्च दोनों में गिना गया
+- refunded_amount घटाता है, cancelled को छोड़ता है, पूरे refund संभालता है; ₹3,700.00 (500+1,200+400+600+1,000) का मिलान करता है
+- 3.10 का crash समझाता है ("Z" केवल 3.11 से), मज़बूती से parse करता है; केवल तारीख से key की गई पुरानी cache हटाता है या सही key देता है
+- ठीक किया कोड 9 मार्च के लिए ₹2,000.00 देता है (A2 500, A3 900, A4 600); tests मध्यरात्रि, 00:00–00:30 और +05:30 cover करते हैं

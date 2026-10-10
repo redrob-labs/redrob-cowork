@@ -60,3 +60,40 @@ Footnote 4: "FY2023-24 से AWS hosting costs (FY2023-24 में ₹9 crore;
 - Computes FY2023-24 ARR growth of 60% and a burn multiple of 90 ÷ 42 ≈ 2.14, and runway of about 10 months (₹80 crore ÷ ₹8 crore). Notes the falling cohort NRR (124% → 112% → 103%).
 - Treats BrightSmile (18% of ARR, considering an in-house build) as a top risk, with a specific mitigant or condition, for example a multi-year renewal before closing or a valuation adjustment.
 - Gives a clear recommendation consistent with the analysis, for example invest with conditions, or pass at these terms. Diligence items tie back to the issues found, such as hosting costs, the BrightSmile contract and support quality.
+
+## Card
+
+brief: Dental software company में प्रस्तावित ₹150 crore के Series B का IC memo लिखिए, deal lead के ownership दावे और management के metrics को परखते हुए।
+given:
+- Deal lead का अनुरोध: एक पंक्ति की सिफ़ारिश और ownership का दावा
+- Financial summary: 3 अवधियों के ARR, revenue, cost of revenue, gross margin और net burn, साथ में footnote 4
+- Cohort NRR: 3 cohorts, साथ में logo churn और सबसे बड़े customer का हिस्सा
+- Reference calls: 3 सारांश
+- Term sheet अंश: राशि, pre-money, ESOP pool, liquidation preference और board seat
+- अन्य तथ्य: मौजूदा ESOP pool, cash और मासिक net burn
+asked:
+- Recommendation, शुरुआत में एक paragraph में
+- Company और thesis, अधिकतम 3 bullets
+- Key metrics table, ज़रूरत पर restated, formulas सहित
+- Valuation और terms: ownership और effective pre-money
+- Key risks और mitigants
+- Signing से पहले बंद होने वाले diligence items
+- हमें क्या मानना होगा
+limit: लगभग 1,200 शब्दों के भीतर, पाँच मिनट में पढ़ा जा सकने वाला Markdown memo
+hard: Term sheet की बनावट असली economics छिपाती है, एक cost classification metric को बेहतर दिखाता है, और recommendation एक judgement call है।
+
+## Scorecard
+
+- Ownership ₹150 crore ÷ ₹750 crore = 20%, not 25%; pool ₹18 → ₹75 crore; effective pre-money ≈₹543 crore
+- FY2023-24 gross margin restated ≈73.7% (72.4% if all ₹9 crore moved); LTM ≈74%; reclassification flagged
+- FY2023-24 ARR growth 60%, burn multiple ≈2.14 (90 ÷ 42), runway ≈10 months; cohort NRR 124% → 112% → 103%
+- BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition
+- Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support
+
+## Scorecard, shown
+
+- Ownership ₹150 crore ÷ ₹750 crore = 20%, 25% नहीं; pool ₹18 → ₹75 crore; effective pre-money ≈₹543 crore
+- FY2023-24 का gross margin restated ≈73.7% (पूरे ₹9 crore हटाएँ तो 72.4%); LTM ≈74%; reclassification को flag किया
+- FY2023-24 ARR growth 60%, burn multiple ≈2.14 (90 ÷ 42), runway ≈10 महीने; cohort NRR 124% → 112% → 103%
+- BrightSmile (ARR का 18%, अपना platform बनाने पर विचार) बड़ा जोखिम, ठोस mitigant या शर्त के साथ
+- विश्लेषण से मेल खाती स्पष्ट सिफ़ारिश; diligence items hosting, BrightSmile और support से जुड़े

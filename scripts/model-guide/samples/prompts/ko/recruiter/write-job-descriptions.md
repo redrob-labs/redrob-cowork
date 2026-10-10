@@ -56,3 +56,34 @@ deliverable: graphics
 - Aligns the requirements with the leveling guide: no bachelor's degree, 0–2 years of wind experience with training provided, and GWO training within 90 days paid by Bukpung Energy. The "2+ years" requirement is gone, because it belongs to the Technician II level.
 - Keeps the genuine physical, height and driving requirements, stated plainly, and adds an equal-opportunity and reasonable-accommodation statement (e.g. for applicants with disabilities). Drops "에이스" hype and "work hard, play hard".
 - The SVG is valid and self-contained at 1080×1080. It shows the role, the location, the ₩42M–50M range, one or two benefits and the apply URL, with legible type and adequate contrast, and it is consistent with the revised posting.
+
+## Card
+
+brief: 현장 소장의 풍력 기술원 공고를 정확하고 포용적이며 법규에 맞게 고치고 SNS 채용 이미지를 만든다.
+given:
+- 공고 초안: 김철수 님이 쓴 자격 요건과 급여
+- 인사팀 직급 가이드: 기술원 I의 학력, 교육, 경력, 의사소통 요건
+- 보상표: 기술원 I·II의 승인된 연봉 범위
+- 직무 정보: 근무 형태, 신체 요건, 운전면허, 복리후생, 지원 방법
+asked:
+- 수정한 채용공고(약 950자 이내)
+- 변경 내역 표: 원문, 수정 문구, 변경 사유
+- 1080×1080 SNS 이미지: 이미지 문구, 영역별 레이아웃, 비주얼 방향, 인라인 SVG 목업
+limit: SVG 제외 약 2,500자 이내, Markdown
+hard: 초안에 배제적인 표현과 공식 자료와 어긋나는 요건·급여가 섞여 있고, 실제 요건은 남겨야 한다.
+
+## Scorecard
+
+- Removes "young, energetic man" and "recent graduates"; replaces "native Korean speaker" with Korean radio safety communication
+- Uses ₩42M–50M and flags the draft's ₩38M–45M as off-sheet, a 채용절차법 misleading-posting risk
+- Drops the degree and "2+ years"; states 0–2 years with training and paid GWO within 90 days
+- Keeps height, lifting and driving requirements; adds equal-opportunity and accommodation statements; drops "에이스" hype
+- SVG valid at 1080×1080: role, location, ₩42M–50M, benefits, apply URL; legible and consistent with posting
+
+## Scorecard, shown
+
+- "젊고 패기 넘치는 남자", "갓 졸업한 분" 삭제, "한국어 원어민"은 무전 안전 소통 요건으로 대체
+- 4,200만~5,000만 원 사용, 초안의 3,800만~4,500만 원은 보상표 불일치·채용절차법상 거짓 광고 위험으로 지적
+- 학위와 "2년 이상" 삭제, 경력 0~2년, 직무 교육, 90일 내 회사 부담 GWO 명시
+- 높이·운반·운전 요건 유지, 평등 기회·편의 제공 문구 추가, "에이스" 같은 과장 문구 삭제
+- 1080×1080 SVG 유효: 직무, 근무지, 4,200만~5,000만 원, 복리후생, 지원 URL, 가독성과 공고 일치

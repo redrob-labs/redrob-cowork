@@ -59,3 +59,37 @@ deliverable: presentations
 - Shows approval delays as the stronger, triangulated theme: 5 of 8 participants raise approval problems (P1, P2, P4, P6, P8), 41% of reports waiting more than 5 days, and only 18% mobile-approval adoption. Receipt capture is a real but narrower problem (6.2% need correction; crumpled receipts and multi-page hotel receipts).
 - Recommends approval-flow work (notifications, delegation/대결, policy flags on mobile) as the big bet and tells 박영수 directly that receipt capture is not the top problem. Receipt-capture edge cases are scoped as a smaller follow-up.
 - Follows the slide format with a speaker note on every slide, cites evidence by ID, and states its limitations (n = 8, survey wording).
+
+## Card
+
+brief: 인터뷰·설문·분석 데이터를 종합해 영수증 인식이 다음 분기 핵심 과제인지 답하는 리드아웃 덱을 만듭니다.
+given:
+- 이해관계자 맥락: 제품 리드의 질문과 그가 이미 이사회에 보고한 내용
+- 인터뷰: 참가자 8명의 직무, 회사 규모, 주요 발언·관찰
+- 인앱 설문: n = 212, 단일 선택 질문 1개, 응답 비율 5개
+- 제품 분석: 최근 90일 지표 6개
+asked:
+- 리서치 질문과 방법, 솔직한 한계
+- 구체적 근거로 뒷받침한 주제 3~5개
+- 다음 분기 핵심 과제에 대한 직접적인 권고와 작은 후속 과제 1~2개
+- 남은 불확실성을 줄이기 위해 다음에 조사할 내용
+limit: 슬라이드 8~10장, 약 2,500자 이내, Markdown 슬라이드 형식
+hard: 각 출처의 신뢰성과 편향을 따져 보고 근거를 교차 검증해야 하며, 이해관계자의 기대와 관계없이 솔직한 답을 내야 합니다.
+
+## Scorecard
+
+- Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked
+- Flags survey bias: only heavy submitters (20+ expenses), no approvers
+- Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption
+- Sizes receipt capture as narrower: 6.2% need correction; crumpled receipts and multi-page hotel receipts
+- Recommends approval-flow work (notifications, 대결, mobile policy flags), tells 박영수 directly; receipt edge cases as follow-up
+- Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)
+
+## Scorecard, shown
+
+- 단일 선택 질문의 응답 비율 합이 104%임을 알아차리고, 확인 전까지 수치를 신뢰하지 않는다
+- 설문 편향을 지적한다: 경비 20건 이상 제출자에게만 발송, 결재자는 없음
+- 결재를 더 강한 주제로 보인다: 참가자 8명 중 5명, 5일 초과 대기 41%, 모바일 결재 이용 18%
+- 영수증 인식은 더 좁은 문제로 본다: 수정 필요 6.2%, 구겨진 영수증과 여러 장짜리 호텔 영수증
+- 결재 흐름 개선(알림, 대결, 모바일 규정 위반 표시)을 권고하고 박영수 님에게 직접 말하며, 영수증 예외 사례는 후속 과제로 둔다
+- 슬라이드마다 발표자 노트, ID로 근거 인용, 한계(n = 8, 설문 문항) 명시

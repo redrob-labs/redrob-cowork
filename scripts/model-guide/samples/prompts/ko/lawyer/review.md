@@ -67,3 +67,36 @@ deliverable: documents
 - Notices that the carve-out cross-refers to a non-existent §10.4, so even the IP defence falls under the ₩4,500만 cap. Also notes that 9.2 excludes breach-notification costs, and that the 10.2 customer indemnity is broad and uncapped.
 - Flags the renewal (3-year terms, 120 days' notice, +9%), the 99.5% SLA with credits as the sole remedy, the 대전 venue, and the exit terms (30-day deletion, paid export), each with redlines tied to the guideline.
 - Gets the statutes right. 민사소송법 §29 makes the written 대전 venue clause valid on its face, so it doesn't help Riverbend; the clause must be negotiated. 약관규제법 may help, since the MSA appears to be a standard form: §14 could void an unfairly burdensome venue, and §12 could void the silent 3-year auto-renewal absent a separate reminder notice. But whether the clauses stay "약관" is uncertain, and anything Riverbend negotiates becomes an individually agreed term under §4 that the Act no longer polices. So the memo calendars the renewal deadline and fixes the clauses in negotiation rather than relying on the statute.
+
+## Card
+
+brief: 병원 네트워크가 금요일까지 서명하려는 SaaS 계약을 내부 가이드라인과 비교해 검토 메모를 씁니다.
+given:
+- 거래 조건: 플랫폼이 가져오는 환자 재원 정보, 주문서상 계약기간과 대금
+- 리버벤드 SaaS 계약 가이드라인: 책임 상한부터 종료까지 7개 기준
+- 개인정보 보호법 요약: 제26조 제1항과 제23조 민감정보
+- MSA 발췌: 정의, 처리위탁, SLA, 책임, 면책, 갱신, 준거법·관할, 종료 조항
+- 법령: 민사소송법 제29조와 약관규제법 제2조·제4조·제12조·제14조
+asked:
+- 결론: 서명 또는 아직 서명 불가, 그 이유
+- 쟁점 표: 조항, 쟁점, 위험도, 수정 문안, 수용 가능한 대안
+- 금요일 협상에서 관철할 다섯 가지, 우선순위 순
+- 두 법령이 리버벤드에 도움이 되는지, 된다면 어떻게
+limit: 약 2,500자 이내, 섹션 제목이 있는 Markdown 메모, 책임 상한은 금액으로 계산
+hard: 조항이 정의와 상호 참조로 얽혀 있고 규제 요건이 적용되며, 두 법령의 적용 범위는 판단이 필요합니다.
+
+## Scorecard
+
+- 처리위탁 agreement is the blocker: 민감정보 shared, Exhibit C omitted, §26①; don't sign or go live first
+- Cap is ₩4,500만 (3 months, implementation excluded) vs guideline ₩2억 4천만 in year 1, ₩5억 4천만 super-cap
+- Carve-out cites non-existent §10.4, so IP defence is capped; 9.2 excludes notification costs; 10.2 broad, uncapped
+- Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, 대전 venue and exit terms
+- §29 makes 대전 venue valid; 약관규제법 §§12, 14 may help, but §4 limits it; calendar and negotiate
+
+## Scorecard, shown
+
+- 개인정보 처리위탁 계약이 선결 과제: 민감정보 제공, 별첨 C 생략, 제26조 제1항 요건, 체결 전 서명·가동 불가
+- 책임 상한은 4,500만원(3개월, 구축비 제외)으로, 가이드라인의 1년차 2억 4천만원과 별도 상한 5억 4천만원에 못 미침
+- 존재하지 않는 제10.4조를 예외로 들어 지식재산권 방어도 상한에 걸림, 9.2는 유출 통지 비용 배제, 10.2는 광범위하고 상한 없음
+- 갱신(3년, 120일, +9%), 유일한 구제수단인 99.5% SLA, 대전 관할, 종료 조건에 가이드라인 기준 수정 문안 제시
+- 제29조로 대전 관할은 유효, 약관규제법 제12조·제14조는 도움이 될 수 있으나 제4조로 한계, 기한 관리와 협상으로 해결

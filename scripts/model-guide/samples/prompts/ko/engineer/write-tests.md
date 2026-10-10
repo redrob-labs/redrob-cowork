@@ -82,3 +82,36 @@ def prorate_change(
 - Covers boundaries correctly: a change on period_start charges the full difference; a change on period_end or before period_start raises ValueError; leap-year February has 29 days; 30- and 31-day months are tested.
 - Handles rounding deliberately, noting that Decimal ROUND_HALF_UP rounds away from zero for negatives (−0.5 becomes −1), so downgrade credits mirror upgrades; the half-won cases need custom test plans, since the production price differences never produce an exact .5. Picks a policy for float prices and tests for it. Today, mixing a float with a Decimal raises TypeError, and two floats fail at `.quantize`.
 - The tests are runnable, well named and parametrized, and any property test states a real invariant, such as antisymmetry between upgrade and downgrade or that the result is bounded by the full difference.
+
+## Card
+
+brief: 결제 라이브러리 일할 계산 릴리스를 pytest로 검증하고 실패 내용, go/no-go, 최소 수정을 제시합니다.
+given:
+- 릴리스 노트: v2.4.0의 일할 계산과 반올림 관련 주장
+- 모듈: Plan, days_in_period, prorate_change가 있는 billing/proration.py
+- 요금제: 운영 중인 요금제 3개와 월 가격
+- 프로덕트팀 기대 동작: 2월 15일 예시와 float 입력을 포함한 6가지
+asked:
+- 기대 동작, 경계값, 반올림, 입력 타입을 다루는 tests/test_proration.py
+- 실패하는 각 테스트의 기대값, 실제값, 원인
+- go/no-go 권고와 근거, 최소한의 코드 수정, 릴리스 노트의 부정확한 부분
+limit: 설명은 약 2,500자 이내, Markdown; 테스트 코드는 더 길어도 됨
+hard: 코드를 docstring, 릴리스 노트, 기대 동작과 대조해야 하고, 경계값과 반올림에 주의가 필요하며, 모호한 기대 동작은 결정을 밝혀야 합니다.
+
+## Scorecard
+
+- Shows `- 1` drops the change day: 15 February gives ₩14,000, not ₩15,000; last day ₩0, not ₩1,000
+- Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`
+- Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months
+- Notes ROUND_HALF_UP takes −0.5 to −1, mirroring upgrades; half-won cases need custom test plans
+- Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize
+- Tests are runnable, well named and parametrized; any property test states a real invariant
+
+## Scorecard, shown
+
+- `- 1`이 변경 당일을 빼서 2월 15일에 15,000원이 아닌 14,000원, 마지막 날에 1,000원이 아닌 0원이 됨을 보인다
+- no-go를 권고한다: 릴리스 노트의 핵심 수정이 코드에 없고, 최소 수정은 `- 1` 제거다
+- 주기 첫날(차액 전체), period_end와 시작일 이전의 ValueError, 29일인 2월, 30일·31일 달을 테스트한다
+- ROUND_HALF_UP이 −0.5를 −1로 만들어 환급이 업그레이드와 대칭임을 짚고, 0.5원 사례에는 별도 테스트용 요금제가 필요하다
+- float 가격 정책을 정해 테스트하고, float와 Decimal 혼합 시 TypeError, float 둘이면 .quantize에서 실패함을 지적한다
+- 테스트가 실행 가능하고 이름이 명확하며 parametrize를 쓰고, 속성 테스트는 실제 불변식을 명시한다

@@ -53,4 +53,38 @@ John Doe 님의 평가표 머리글에는 "Rating (1 = poor, 5 = exceptional)"�
 - Excludes John Doe's scorecard for Kim Cheol-su because the calendar shows that interview was cancelled. Without it, Kim's SAFE average is 2.5, below the 3.0 bar. With the invalid card included it would be exactly 3.0, and the answer notices this.
 - Removes Stiles' comment about Lee Young-hee's children from the decision and flags it as an improper, non-job-related consideration (sex and family-status discrimination under 남녀고용평등법 Art. 7; 채용절차법 Art. 4-3 bars even collecting marital status and similar non-job information). Recommends asking every finalist the same question about on-call availability. Also flags "reminds me of me when I was young" as affinity bias.
 - Advances Lee Young-hee (overall about 3.50; SAFE about 3.17) and Park Young-su (overall about 3.40; SAFE 3.75), with the averages shown and the method reproducible.
-- The final-round plan probes each finalist's weakest area (Lee's SAFE, Park's COMM) with the same structured questions and behavioural anchors for both.
+- The final-round plan probes each finalist's weakest areas (Lee: OPS ≈ 3.08 after rescaling, and SAFE ≈ 3.17, the one nearest the bar; Park: COMM) with the same structured questions and behavioural anchors for both.
+
+## Card
+
+brief: 후보자 3명의 1차 패널 평가표를 취합해 최종 면접 2명을 정하고 최종 면접 계획을 세운다.
+given:
+- 프로세스 규칙: 역량 4가지, 1~4점 척도, SAFE 3.0 기준, 실제 진행된 면접만 반영
+- 평가표: 후보자당 3장씩 9장과 면접관 코멘트
+- 양식 메모: John Doe 평가표의 머리글
+- 면접 일정: 해당 주간 면접별 진행 상태
+asked:
+- 1~4점 척도 통합 평가표와 계산된 모든 열의 방법
+- 데이터 품질·공정성 문제와 각 조치를 담은 이슈 로그
+- 최종 면접 진출자와 근거, 채용 책임자 반발 시 대응
+- 최종 면접 계획: 면접관, 역량별 구조화 질문과 4점 기준, 후보자별 확인 사항
+limit: 약 2,500자 이내, Markdown
+hard: 평가표에 유효성 문제와 그대로 반영하면 차별이 되는 코멘트가 숨어 있고, 근소한 평균 차이에는 방어 가능한 방법이 필요하다.
+
+## Scorecard
+
+- Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)
+- Excludes Doe's card for Kim (interview cancelled): Kim's SAFE 2.5, below 3.0; notes it would be 3.0
+- Flags Stiles' remark on Lee's children as improper, ignores it, asks all finalists the same on-call question
+- Flags "reminds me of me when I was young" as affinity bias
+- Advances Lee Young-hee (≈ 3.50, SAFE ≈ 3.17) and Park Young-su (≈ 3.40, SAFE 3.75), method reproducible
+- Final round probes each finalist's weakest areas (Lee: OPS, and SAFE near the bar; Park: COMM), same questions and anchors
+
+## Scorecard, shown
+
+- John Doe의 1~5점을 공식을 밝혀 1~4점으로 환산(예: 5 → 4, 4 → 3.25)
+- 취소된 면접의 Doe 평가표(김철수) 제외: SAFE 2.5로 3.0 미달, 포함하면 3.0이 됨을 지적
+- 이영희 자녀에 관한 Stiles 코멘트를 부적절하다고 지적·배제하고 진출자 모두에게 같은 당직 질문
+- "내 젊었을 때를 보는 것 같다"를 친밀감 편향으로 지적
+- 이영희(약 3.50, SAFE 약 3.17)와 박영수(약 3.40, SAFE 3.75) 진출, 재현 가능한 방법
+- 최종 면접에서 후보자별 약점 확인(이영희: OPS와 기준에 가까운 SAFE, 박영수: COMM), 같은 질문과 기준

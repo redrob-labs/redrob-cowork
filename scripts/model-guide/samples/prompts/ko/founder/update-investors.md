@@ -51,3 +51,39 @@ deliverable: presentations
 - Explains the take-rate drop with the 청봉손해보험 mix. At 12% of GMV and a 9% rate, it pulls the blended rate down by about 0.6 points. Without it the rate would be about 14.1%, so it explains the whole drop from 14.0% to 13.5% and much of the gap to the 15% plan. Contribution-margin pressure and the restaurant churn are covered too.
 - Drops "계획대로 진행 중", leads with the miss, and still credits the real positives (accounts up 26, repeat orders 61% to 66%, a large logo).
 - Gives concrete options with numbers, such as the burn needed for 18 months of runway (about ₩305M a month), and makes specific board asks. The slide format has a speaker note on every slide.
+
+## Card
+
+brief: 케이터링 마켓플레이스의 3분기 이사회 덱을 만들며 재무 총괄의 헤드라인을 바로잡고 미달을 솔직히 설명합니다.
+given:
+- KPI: 지표 7개의 2분기 실적, 3분기 계획, 3분기 실적
+- 맥락: 대형 신규 고객, 식당 이탈과 정산 주기, 채용 지연, 재주문율, 다음 라운드 시점에 관한 메모 5개
+- 헤드라인 슬라이드 초안: 성장률, 고객 수, 런웨이, "계획대로 진행 중"
+asked:
+- 맨 앞의 솔직한 요약: 잘된 것, 미달한 것과 그 이유
+- 계획·전분기 대비 KPI 슬라이드, 산식은 발표자 노트에
+- 청봉손해보험 효과를 포함한 수수료율·공헌이익률 브리지
+- 계산 방법을 포함한 현금과 런웨이
+- 향후 2개 분기에 대한 옵션 2~3가지와 트레이드오프, 권고안
+- "이사회 결정 및 요청 사항" 슬라이드
+- 이영희 님의 헤드라인에서 무엇을 왜 바꿨는지 정리한 짧은 메모
+limit: 슬라이드 8~10장, 약 2,500자 이내, Markdown 슬라이드 형식
+hard: 헤드라인 초안을 다시 계산해야 하고, KPI 미달을 믹스로 설명해야 하며, 런웨이 계산 방법을 밝히고 나쁜 소식과 실제 진전을 균형 있게 전해야 합니다.
+
+## Scorecard
+
+- GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan
+- Runway ~11.7 months (₩5.49B ÷ ~₩470M a month), not 18; questions the Q2 2026 raise timing
+- Considers normalizing the ₩180M one-time working-capital effect (about 13 months)
+- 청봉손해보험 (12% of GMV at 9%) cuts ~0.6 points; ex-청봉 ~14.1%; covers margin and restaurant churn
+- Drops "계획대로 진행 중", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo
+- Options carry numbers (e.g. ~₩305M a month for 18 months' runway); specific asks; notes on every slide
+
+## Scorecard, shown
+
+- GMV 전분기 대비 +10.7%(+17% 아님), 순매출 +6.8%(+11% 아님), 계획 대비 각각 7%, 16% 미달
+- 런웨이는 18개월이 아니라 약 11.7개월(54.9억원 ÷ 월 약 4.7억원)이며, 2026년 2분기 라운드 일정에 의문을 제기한다
+- 일회성 운전자본 1억 8,000만원을 정상화할지 검토한다(약 13개월)
+- 청봉손해보험(GMV의 12%, 수수료율 9%)이 약 0.6%p를 끌어내리고 제외 시 약 14.1%, 공헌이익률과 식당 이탈도 다룬다
+- "계획대로 진행 중"을 빼고 미달로 시작하되, 고객 +26곳, 재주문율 61%→66%, 대형 고객 확보를 인정한다
+- 옵션에 수치를 붙이고(예: 런웨이 18개월에 필요한 월 약 3억 500만원), 구체적인 요청을 하며, 슬라이드마다 노트를 단다

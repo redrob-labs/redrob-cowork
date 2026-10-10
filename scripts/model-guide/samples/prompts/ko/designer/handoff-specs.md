@@ -59,3 +59,37 @@ PM 요구사항: 연간 토글이 기본 선택. 전환 시 레이아웃 이동(
 - Implements the toggle as an accessible control (radio group, or buttons with aria-pressed), with arrow or Tab keyboard support, a visible focus style and a polite live region or other sensible announcement of price changes. Annual is the default.
 - Avoids layout shift when toggling (reserved space or fixed-width price area, "연 X원 결제" line and "VAT 별도" always present), and in the stacked layout the Pro card comes first.
 - The code runs as a single file, uses CSS custom properties from the token list, and the spec table is complete enough to build from without the design file.
+
+## Card
+
+brief: 요금제 섹션의 결제 토글과 카드 3개를 코드베이스 토큰에 맞춰 개발 핸드오프로 정리합니다.
+given:
+- 디자인 인스펙트 노트: 토글, 카드, 가격, CTA, 기능 목록, 브레이크포인트 값
+- 디자인 토큰: 색상·간격·반경에 대한 코드베이스 CSS 커스텀 속성 14개
+- 요금제 표: 3개 요금제의 월간·연간 표시가, 연간 결제액, 기능(VAT 별도)
+- PM 요구사항: 기본 토글, 레이아웃 이동 금지, 연간 결제액과 VAT 표기, CTA 문구
+asked:
+- 코드베이스 토큰만 쓴 단일 HTML/CSS/JS 레퍼런스 구현(상태와 반응형 동작 포함)
+- 인스펙트 노트의 모든 값을 토큰에 매핑하고 바꾼 값을 표시한 개발자용 스펙 표
+- 접근성 노트: 토글의 시맨틱과 키보드 동작, 가격 변경 시 스크린리더 안내, 명도 대비
+- PM과 디자이너에게 확인할 미결 질문과 불일치, 각각의 권장 해결안
+limit: 설명은 약 2,500자 이내, Markdown; 코드는 더 길어도 됨
+hard: 가격 문구를 산술로 검증해야 하고, 디자인 값이 토큰 체계에서 벗어나 있으며, 토글은 레이아웃 이동 없이 접근 가능하게 동작해야 합니다.
+
+## Scorecard
+
+- Flags Pro: ₩15,000 × 12 = ₩180,000, not ₩190,000, and "20% 할인" fails (about 21% or 17%)
+- Confirms Business is consistent (₩39,000 × 12 = ₩468,000, about 20%); proposes a fix for Pro
+- Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons
+- Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; 연간 default
+- No layout shift on toggle ("연 X원 결제" and "VAT 별도" always present); Pro first when stacked
+- Single-file code runs on token custom properties; spec table is complete enough to build from
+
+## Scorecard, shown
+
+- Pro는 15,000원 × 12 = 180,000원이지 190,000원이 아니며, "20% 할인"도 맞지 않음(약 21% 또는 17%)을 지적한다
+- Business는 일관됨(39,000원 × 12 = 468,000원, 약 20%)을 확인하고 Pro 수정안을 제시한다
+- #2F6FEB를 --primary-600(#2F6FED)으로, 14px·10px 간격을 토큰으로 바꾸고 이유를 밝힌다
+- 접근 가능한 토글(라디오 그룹 또는 aria-pressed), 키보드 지원, 포커스 표시, 가격 변경 안내, 연간 기본 선택
+- 토글 전환 시 레이아웃 이동이 없고("연 X원 결제"와 "VAT 별도" 상시 표시), 세로 배치에서 Pro 카드가 먼저 온다
+- 단일 파일 코드가 토큰 커스텀 속성으로 동작하고, 스펙 표만으로 구현할 수 있다

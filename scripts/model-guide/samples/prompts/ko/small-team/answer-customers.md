@@ -53,3 +53,36 @@ deliverable: none
 - For the wholesale request, calculates ₩25,800 per mug (₩38,000 × 60% + ₩3,000), or ₩1,548,000 for 60, and doesn't accept ₩20,000 without flagging it to the owner. It flags that 1 May is impossible (6-week lead time; 60 mugs take 1.5 weeks of the 40-a-week capacity) and offers alternatives, such as a later date or a partial or stock order.
 - Identifies message 4 as phishing (a lookalike domain and urgency). No reply, no clicking, and a note to report it and check the real store admin directly.
 - Honours Park Young-su's replacement or refund, because he reported the damage with a photo via Instagram DM on 27 Mar, within 7 days of delivery. The reply apologises for the missed DM.
+
+## Card
+
+brief: 도예 공방 공용 문의함의 문의 5건을 정책에 따라 분류·답장하고 대표가 결정할 사항을 정리한다.
+given:
+- 운영 정책: 클래스 취소, 배송 파손, 단체·B2B 조건, 머그 소비자가
+- 클래스 일정: 일시와 예약 현황이 있는 클래스 4개
+- 예약·주문 시스템 메모: 플랫폼 발신 주소, 반송된 메일, 주문 1건, 읽지 않은 DM
+- 문의함: 문의 5건
+asked:
+- 분류 표: 유형, 우선순위, 조치, 대표 결정 필요 여부
+- 답장이 필요한 문의별 바로 보낼 답장(각 약 300자 이내)
+- 내부 메모: 시스템 수정 사항과 대표 승인 사항, 금액 포함
+limit: 약 2,500자 이내, Markdown
+hard: 문의를 여러 채널의 정책과 기록에 대조해야 하고, 하나는 겉보기와 다르며, 일부 요청은 요청대로 들어줄 수 없다.
+
+## Scorecard
+
+- Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)
+- Kim Cheol-su gets a full ₩70,000 refund or free reschedule (studio cancelled); bounced email noted, address fixed
+- Wholesale at ₩25,800 a mug (₩1,548,000 for 60); ₩20,000 flagged to the owner, not accepted
+- Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives
+- Message 4 is phishing (lookalike domain, urgency): no reply, no click, report it, check real admin
+- Honours Park Young-su's replacement or refund (photo DM 27 Mar, within 7 days); apologises for missed DM
+
+## Scorecard, shown
+
+- 꽉 찬 4월 18일(토) 수업에 추가하지 않고 세 명 모두 4월 23일(목) 18:30 수업(남은 3자리) 제안
+- 김철수 님께 70,000원 전액 환불 또는 무료 일정 변경(공방 사정 취소), 반송 메일 확인·주소 수정
+- 단체 단가는 머그당 25,800원(60개 1,548,000원), 20,000원은 수락하지 않고 대표에게 보고
+- 5월 1일은 불가능함을 설명(제작 기간 6주, 생산 능력 1.5주 소요)하고 대안 제시
+- 4번은 피싱(유사 도메인, 긴급성): 답장·클릭 금지, 신고, 실제 스토어 관리자 화면 확인
+- 박영수 님께 교환 또는 환불(3월 27일 사진 DM, 7일 이내), 놓친 DM에 사과

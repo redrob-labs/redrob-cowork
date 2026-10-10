@@ -50,3 +50,37 @@ deliverable: presentations
 - Fixes the TAM arithmetic: 12,000 × ₩48M = ₩576B (5,760억원), not ₩5.76T (5.76조원). Notes that ₩48M equals the current ACV (₩816M ÷ 17) and treats it as a bottom-up SAM-style figure. Larger market claims are marked "[출처 필요]".
 - Sizes the raise from the burn plan (24 months averaging about ₩240M a month ≈ ₩5.8B, before any revenue growth), defends roughly ₩6B or a reasoned alternative, and notes about 8 months of current runway (₩1.3B ÷ ₩160M).
 - The deck tells a coherent story, flags the 58% gross margin as a known risk to address, uses only the data given, and follows the slide format with speaker notes.
+
+## Card
+
+brief: 대표의 초안 수치를 실사를 견디는 시리즈 A IR 덱으로 바꾸며 지표를 바로잡고 투자 금액을 근거 짓습니다.
+given:
+- 핵심 지표 슬라이드 초안: ARR, NRR, TAM, 고객사 수, 투자 유치 금액
+- 기초 데이터: 2025년 6월 기준 MRR, 일회성 매출, 코호트, 이익률, 현금, 번레이트, 파이프라인 등 12개 항목
+- 투자 후 계획: 인원 증가, 번레이트 증가, 다음 라운드의 ARR 목표
+- 고객 인용: 사용 허락을 받은 파일럿 결과 1건
+asked:
+- 문제부터 마일스톤까지 슬라이드 10~12장의 시리즈 A 덱
+- 투자자 방식으로 정의한 수정 지표, 계산 과정은 발표자 노트에
+- 번레이트 계획에 근거한 투자 금액과 60억원이 적절한지에 대한 의견
+- 바꾼 사항을 쉬운 말로 설명하는 "이영희 대표님께 드리는 수정 사항" 목록
+limit: 슬라이드 10~12장, 약 2,500자 이내, Markdown 슬라이드 형식
+hard: 헤드라인 지표를 투자자 정의로 다시 계산하고 시장 규모 계산을 검증해야 하며, 데이터를 지어내지 않고 번레이트 계획으로 투자 금액을 산정해야 합니다.
+
+## Scorecard
+
+- ARR ₩816M (₩68M × 12), excluding ₩284M one-time fees; notes MRR growth ₩41M to ₩68M (~66%)
+- NRR 112% (₩33.6M ÷ ₩30M); 140% includes new customers; checks ₩33.6M + ₩34.4M = ₩68M
+- TAM is ₩576B (12,000 × ₩48M), not ₩5.76T; ₩48M is current ACV, a SAM-style figure
+- Sizes the raise at ~₩5.8B (24 months averaging ~₩240M); defends ~₩6B; notes ~8 months' runway
+- Flags 58% gross margin as a risk; uses only given data; marks larger claims "[출처 필요]"
+- Tells a coherent story with a speaker note on every slide
+
+## Scorecard, shown
+
+- ARR은 8억 1,600만원(6,800만원 × 12)으로 일회성 2억 8,400만원을 제외하고, MRR 4,100만원→6,800만원(약 66%) 성장을 언급한다
+- NRR 112%(3,360만원 ÷ 3,000만원), 140%는 신규 고객을 포함한 수치이며, 3,360만원 + 3,440만원 = 6,800만원을 확인한다
+- TAM은 5.76조원이 아니라 5,760억원(12,000곳 × 4,800만원)이고, 4,800만원은 현재 ACV로 SAM 성격의 수치다
+- 투자 금액을 약 58억원(24개월 평균 월 약 2억 4,000만원)으로 산정해 약 60억원을 뒷받침하고, 현재 런웨이 약 8개월을 짚는다
+- 매출총이익률 58%를 리스크로 표시하고, 주어진 데이터만 쓰며, 더 큰 시장 주장에는 "[출처 필요]"를 단다
+- 슬라이드마다 발표자 노트를 달고 일관된 이야기를 전한다

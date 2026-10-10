@@ -57,8 +57,40 @@ deliverable: documents
 
 ## A strong answer
 
-- Net loss is ₩1,614m (3,460 − 5,074). Total assets of ₩2,634m equal liabilities of ₩3,228m plus a capital deficit (자본잠식) of ₩594m (4,200 − 3,180 − 1,614).
+- Net loss is ₩1,614m (3,460 − 5,074). Total assets of ₩2,634m equal liabilities of ₩3,228m plus a capital deficit (자본잠식) of ₩594m (4,200 − 3,180 − 1,614). An answer that books the ₩30m interest correction instead (loss ₩1,584m, deficit ₩564m, liabilities ₩3,198m) is equally right, provided the statements still tie.
 - Splits the contract liability into ₩740m current and ₩280m noncurrent and the lease liability into ₩96m current and ₩240m noncurrent. The convertible notes and accrued interest are noncurrent under K-IFRS 1001, since they are due 30 June 2026, more than 12 months after the reporting date, and the answer says so (it may also flag the K-IFRS 1032 liability/equity or embedded-derivative assessment of the conversion feature as an open item).
 - Notices that note interest should be ₩90m (1,500 × 8% × 9/12), not the ₩120m booked, and raises the ₩30m difference as an open item with a proposed reclassification or correction.
 - Concludes there is a material uncertainty about going concern (K-IFRS 1001.25): about 10.5 months of runway (₩1,467m ÷ ₩140m) inside the 12-month assessment window, the customer loss and no signed term sheet. Discloses management's plans without saying the uncertainty is resolved.
 - Treats the CEO loan as a related-party disclosure (K-IFRS 1024). Questions its classification (noncurrent, or a possible deduction from equity) and flags the missing board approval under 상법 제398조 (and the 가지급금 인정이자 tax exposure). The customer loss is a non-adjusting event after the reporting period (K-IFRS 1010).
+
+## Card
+
+brief: 벤처 투자를 받은 SaaS 기업의 K-IFRS 연말 재무제표와 주석을 작성하고 미결 사항을 정리합니다.
+given:
+- 회사: 비상장, 12월 결산, K-IFRS 자발적 적용, 발행승인 예정일 2025년 3월 31일
+- 수정후시산표: 2024년 12월 31일 기준 23개 계정, 백만원 단위
+- 재무팀장 사실관계: 계약부채, 리스, 전환사채, 대표이사 대여금, 현금 소진, 최대 고객에 관한 6개 항목
+asked:
+- 유동/비유동 구분 재무상태표와 포괄손익계산서(백만원 단위, 합계 일치)
+- 간결한 주석: 계속기업, 수익 및 계약부채, 리스, 전환사채, 특수관계자, 보고기간후사건
+- 이영희 님에게 확인할 미결 사항 목록(시산표와 사실관계의 불일치와 처리 제안 포함)
+limit: 약 2,500자 이내, Markdown
+hard: 잔액을 만기에 따라 분류하고 기록된 수치를 계약 조건과 대조해야 하며, 계속기업과 특이한 대여금에 표시 판단이 필요합니다.
+
+## Scorecard
+
+- Statements tie: loss ₩1,614m, deficit ₩594m as booked (or ₩1,584m and ₩564m if interest corrected)
+- Contract liability ₩740m current, ₩280m noncurrent; lease ₩96m/₩240m; notes and accrued interest noncurrent (K-IFRS 1001)
+- Flags note interest should be ₩90m (1,500 × 8% × 9/12), not ₩120m; proposes treating the ₩30m
+- Material uncertainty on going concern (K-IFRS 1001.25): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved
+- CEO loan as related party (K-IFRS 1024); questions classification; flags missing 상법 제398조 approval, 인정이자 exposure
+- Treats the customer's non-renewal as a non-adjusting event after the reporting period (K-IFRS 1010)
+
+## Scorecard, shown
+
+- 재무제표가 일치한다: 장부대로면 당기순손실 1,614백만원·자본잠식 594백만원(이자를 수정하면 1,584백만원·564백만원)
+- 계약부채 유동 740·비유동 280백만원, 리스부채 유동 96·비유동 240백만원, 전환사채와 미지급이자는 비유동(K-IFRS 1001)
+- 전환사채 이자는 120백만원이 아니라 90백만원(1,500 × 8% × 9/12)임을 지적하고 차이 30백만원의 처리를 제안한다
+- 계속기업 관련 중요한 불확실성(K-IFRS 1001.25): 런웨이 약 10.5개월, 고객 이탈, 미서명 텀시트, 불확실성이 해소됐다고 쓰지 않는다
+- 대표이사 대여금을 특수관계자로 공시하고(K-IFRS 1024) 분류를 검토하며, 상법 제398조 승인 누락과 인정이자 위험을 지적한다
+- 최대 고객의 갱신 거절을 수정을 요하지 않는 보고기간후사건(K-IFRS 1010)으로 처리한다

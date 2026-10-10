@@ -61,3 +61,38 @@ deliverable: spreadsheets
 - Puts the ₩350,000 chargeback back into patient receivables (환자 미수금, 박영수), not into expense, and books card fees and the bank fee to expense (지급수수료) and the interest to income (이자수익).
 - Treats #2019 (more than 90 days old) under the policy: void it, credit the payable to the payee (미지급금), and do not take it back into income.
 - Journal entries balance and use sensible accounts, and the review note is constructive and specific.
+
+## Card
+
+brief: 치과의원 3월 은행계정조정표 초안을 검토해 잡비로 처리하려던 차이를 규명하고 수정분개를 제안합니다.
+given:
+- 은행 거래내역서: 기말 은행 잔액과 은행 측 항목 5건
+- 총계정원장 당좌예금: 3월 31일 조정 전 장부 잔액
+- 원장 상세 발췌: 3월 전표 4건과 은행 측 공단 입금 내역에 대한 메모
+- 기발행 미인출수표: 담당 직원 목록의 수표 3장
+- 의원 내부 규정: 90일 경과 수표 처리 규정과 건당 100만원 중요성 기준
+asked:
+- 수정 후 은행 잔액과 수정 후 장부 잔액을 대비한 조정표와 각 행의 방법
+- 4,527,000원의 내역을 설명하는 표와 잡비로 처리하면 안 되는 이유
+- 수정분개 제안(차지백 항목의 계정 포함)
+- 수표 #2019에 대한 권고와 조정표 양쪽 영향, 김철수 님에게 남길 두 줄 검토 의견
+limit: 약 2,500자 이내, Markdown
+hard: 설명되지 않은 차이를 끼워 맞추지 말고 원천까지 추적해야 하며, 미인출수표에 내부 규정을 적용하고 각 항목을 올바른 쪽과 계정에 넣어야 합니다.
+
+## Scorecard
+
+- Splits ₩4,527,000 into a duplicated ₩4,500,000 NHIS (공단) deposit and a ₩27,000 transposition on #2038
+- Rejects the miscellaneous-expense (잡비) plug
+- Reconciles both sides to ₩86,562,050, moving to ₩86,972,050 if #2019 is voided
+- Returns the ₩350,000 chargeback to 박영수's patient receivable; fees to 지급수수료, interest to 이자수익
+- Voids #2019 to a payable to the payee (미지급금) under the 90-day policy, not back to income
+- Journal entries balance, and the review note to 김철수 is specific and constructive
+
+## Scorecard, shown
+
+- 4,527,000원을 공단 입금 4,500,000원 중복 기록과 수표 #2038의 27,000원 자리바꿈 오류로 나눈다
+- 잡비로 끼워 맞추는 처리를 거부한다
+- 양쪽을 86,562,050원으로 맞추고, #2019를 무효 처리하면 양쪽 모두 86,972,050원이 됨을 보인다
+- 차지백 350,000원은 박영수 환자 미수금으로 되돌리고, 수수료는 지급수수료, 이자는 이자수익으로 처리한다
+- 90일 규정에 따라 #2019를 무효 처리해 수취인에 대한 미지급금으로 재분류하고 수익으로 환입하지 않는다
+- 수정분개는 차대가 일치하고, 김철수 님에 대한 검토 의견은 구체적이고 건설적이다

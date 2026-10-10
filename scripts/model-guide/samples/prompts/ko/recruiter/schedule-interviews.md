@@ -61,3 +61,39 @@ deliverable: none
 - Shows the KST record times with the correct calendar date, noticing that the evening-UTC sessions roll over to the next day in Seoul.
 - Arranges the accommodation (live captions, the coding prompt shared in writing, 30-minute breaks) and tells the panel only what to set up, without disclosing that Park is hard of hearing, as he asked.
 - The candidate emails are clear, warm and correct in local time, with links and what to expect. The CRM updates reflect the scheduled stage and the dates.
+
+## Card
+
+brief: 4개 시간대에 걸친 후보자 2명의 최종 화상 면접을 10월 말에 잡고 안내문과 CRM을 정리한다.
+given:
+- 면접 형식: 45분 세션 3개, 15~30분 휴식, 현지 근무 시간, 면접관당 하루 1세션
+- 면접관: 3명의 근무지와 일정
+- 후보자: 2명의 거주지와 가능 일정
+- 박영수 님의 이메일: 편의 제공 요청
+- CRM: 두 후보자의 현재 단계
+asked:
+- 후보자별 일정 표: UTC, 현지 시각, 본사 기록용 KST, 도시별 UTC 오프셋과 이유
+- 날짜와 시간대를 고른 이유와 배제한 선택지
+- 후보자 현지 시간으로 쓴 확정 안내 이메일(각 약 380자 이내)
+- 진행 방식과 편의 제공 준비를 담은 패널 안내 메모(약 250자 이내)
+- CRM 업데이트(단계, 날짜, 메모) 표
+limit: 약 2,500자 이내, Markdown
+hard: 그 주의 시차 계산에 주의가 필요하고 제약이 촘촘히 얽혀 있으며, 편의 제공은 신중하게 준비해야 한다.
+
+## Scorecard
+
+- Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5; Seoul UTC+9
+- Park on Tue 27 Oct: from 14:00 UTC, Lee by 16:00, Mary clear of 15:00–16:00, 30-minute breaks
+- Kim Cheol-su on Wed 28 Oct, all sessions within 13:00–16:00 UTC, Hong clear of 13:00–13:30 UTC
+- KST record dates roll over: e.g. Park 23:00 Tue – 02:15 Wed, Kim 22:00 Wed – 00:45 Thu
+- Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing
+- Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates
+
+## Scorecard, shown
+
+- 오프셋: 베를린 UTC+1, 리스본 UTC+0(EU 10월 25일 전환), 뉴욕 UTC−4, 시카고 UTC−5, 서울 UTC+9
+- 박영수는 10월 27일(화): 14:00 UTC 이후 시작, 이영희는 16:00 전, Mary의 15:00~16:00 회피, 30분 휴식
+- 김철수는 10월 28일(수): 모든 세션이 13:00~16:00 UTC 안, 홍길동은 13:00~13:30 UTC 회피
+- KST 기록의 날짜 넘김 반영: 예) 박영수 화 23:00 ~ 수 02:15, 김철수 수 22:00 ~ 목 00:45
+- 실시간 자막, 코딩 문제 서면 공유, 30분 휴식 준비, 패널에게 난청 사실은 알리지 않음
+- 현지 시각이 정확한 따뜻한 이메일에 링크와 진행 안내, CRM에 일정 확정 단계와 날짜 반영

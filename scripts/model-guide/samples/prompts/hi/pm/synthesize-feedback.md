@@ -47,3 +47,36 @@ deliverable: spreadsheets
 - Classifies the accounting-export requests (rows 2, 9 and 13) as discoverability or onboarding problems, because LedgerSync already shipped, not as a build request.
 - The recommendations weigh the OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile bug fix, and treat the bank feed as a data-integrity risk even with a single account. Each call is justified.
 - The caveats cover the small, mixed-source sample: 16 rows, about 12 accounts, NPS from only 10 survey responses, and sales notes that aren't comparable with survey data.
+
+## Card
+
+brief: एक महीने के survey, support और sales-call feedback को themes में बाँटें, हर theme के पीछे का revenue बताएँ, और तीन पर काम सुझाएँ।
+given:
+- Feedback log: source, account, plan, ARR (₹ lakh), NPS और verbatim वाली 16 rows
+- Product note: पहले से ship हुआ accounting export, कहाँ है और किन plans पर उपलब्ध है
+- Engineering अनुमान: 4 संभावित fixes का मोटा effort
+asked:
+- Coding table: हर row की theme, समस्या का प्रकार और duplicate है या नहीं
+- Theme summary table: mentions, unique accounts, ARR, सबसे कम NPS और plans, method सहित
+- Priority क्रम में शीर्ष तीन recommendations, revenue concentration, breadth और effort तौलकर
+- VP के लिए data से जुड़े caveats
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Log को सावधानी से deduplicate करना है, उसमें एक परस्पर-विरोधी आँकड़ा और एक ऐसी माँग है जो जैसी दिखती है वैसी नहीं, और priority तय करना judgement call है।
+
+## Scorecard
+
+- Dedupes by account, method stated: mobile logout 3 (₹68 lakh), OCR 2, approvals 2 (₹46 lakh), bank feed 1 (₹26 lakh)
+- Flags Deodar Logistics' ARR conflict (₹96 vs ₹69 lakh), picks one (e.g. OCR ₹170 lakh), suggests checking the CRM
+- Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped
+- Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified
+- Treats the bank feed as a data-integrity risk despite only one account
+- Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable
+
+## Scorecard, shown
+
+- Account के आधार पर deduplicate, method सहित: mobile logout 3 (₹68 lakh), OCR 2, approvals 2 (₹46 lakh), bank feed 1 (₹26 lakh)
+- Deodar Logistics के ARR का टकराव (₹96 बनाम ₹69 lakh) पकड़ता है, एक चुनता है (जैसे OCR ₹170 lakh), CRM जाँचने को कहता है
+- Accounting export वाली rows 2, 9 और 13 को discoverability मानता है, क्योंकि LedgerSync पहले से ship है
+- OCR के renewal risk (दो Enterprise accounts) को सस्ते, व्यापक mobile fix के मुकाबले तौलता है, हर फ़ैसला justify
+- सिर्फ़ एक account होने पर भी bank feed को data-integrity risk मानता है
+- Caveats: 16 rows, लगभग 12 accounts, NPS सिर्फ़ 10 survey जवाबों से, sales notes तुलनीय नहीं

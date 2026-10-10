@@ -55,3 +55,37 @@ deliverable: spreadsheets
 - Arrives at adjusted live ARR of ₩1,530,800,000 (−₩569,200,000, or −27.1%), or ₩1,662,800,000 including C8. The bridge ties exactly to ₩2,100,000,000.
 - Flags C4 (₩240,000,000, terminable for convenience after Sep 30, 2025) and C5 (renewal due Jun 2026) as at-risk. Computes the top-3 concentration (C1 + C2 + C4 = ₩860,000,000, about 56.2%), with C1 about 23.5% of adjusted ARR.
 - Translates the result into price: at 6.0×, ₩21억 implies ₩126억 against about ₩91.8억 on adjusted ARR, a gap of about ₩34.2억. Recommends how to handle it in Korean SPA terms, such as a re-price, an earn-out tied to C3 or C8, an escrow/holdback, or a 특정 손해배상(special indemnity) for the C3 and C4 exposures.
+
+## Card
+
+brief: ARR 배수로 가격을 정하는 인수 건에서 ARR 명세를 계약·청구 자료와 대사해 조정 ARR을 냅니다.
+given:
+- 회사 주장: 2025년 6월 30일 기준 ARR 21억원과 IR 자료의 ARR 정의
+- 회사 ARR 명세: 고객 10곳(C1~C10)
+- 계약 요약 및 청구 데이터: 10곳 각각의 조건, 금액, 청구 내역
+asked:
+- 대사표: 고객별 조정 ARR, 조정액, 이슈 유형, 조정 근거
+- 회사 ARR에서 조정 후 서비스 중 ARR까지의 브리지, 계약 체결·미개시 ARR은 별도 행
+- 향후 12개월 안에 위험이 있는 고객에 대한 위험 가중 관점
+- 상위 3개 고객 집중도
+- 투자심의위원회용 요약 최대 6개 항목, 6.0배 기준 인수가격 영향 포함
+limit: 약 2,500자 이내, 계산 수치마다 산식을 밝힌 Markdown 표
+hard: 항목마다 명시된 정의에 비춰 검증해야 하고 여러 처리가 판단의 문제이며, 결과를 가격까지 이어 가야 합니다.
+
+## Scorecard
+
+- C1 ₩360,000,000 (−₩60,000,000); C2 ₩260,000,000 (−₩50,000,000); C3 ₩0 (−₩275,000,000); C9 ₩112,800,000 (−₩7,200,000)
+- C8 ₩0 live, ₩132,000,000 separate; C6 ₩144,000,000 (alt. ₩180,000,000); C10 ₩66,000,000 (management's ₩75,000,000)
+- Adjusted live ARR ₩1,530,800,000 (−₩569,200,000, −27.1%), ₩1,662,800,000 with C8; bridge ties to ₩2,100,000,000
+- At risk: C4 (₩240,000,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)
+- Top-3 concentration (C1, C2, C4) ≈56.2% of adjusted ARR; C1 ≈23.5%
+- At 6.0×: ₩126억 vs ≈₩91.8억, a ≈₩34.2억 gap; recommends re-price, earn-out, escrow or special indemnity
+
+## Scorecard, shown
+
+- C1 360,000,000원(−60,000,000원), C2 260,000,000원(−50,000,000원), C3 0원(−275,000,000원), C9 112,800,000원(−7,200,000원)
+- C8은 서비스 중 ARR 0원에 132,000,000원 별도 표시, C6 144,000,000원(대안 180,000,000원), C10 66,000,000원(회사 75,000,000원)
+- 조정 후 서비스 중 ARR 1,530,800,000원(−569,200,000원, −27.1%), C8 포함 시 1,662,800,000원, 브리지는 2,100,000,000원과 일치
+- 위험 고객: C4(240,000,000원, 2025년 9월 30일 이후 임의 해지 가능)와 C5(2026년 6월 갱신)
+- 상위 3개 고객(C1, C2, C4) 집중도는 조정 ARR의 약 56.2%, C1은 약 23.5%
+- 6.0배 기준 126억원 대 약 91.8억원으로 약 34.2억원 차이, 가격 재조정·언아웃·에스크로·특정 손해배상 권고

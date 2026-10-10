@@ -49,3 +49,38 @@ deliverable: spreadsheets
 - Analyses the platforms with valid splits separately. Web activation rises from 25.0% to 27.0% (z ≈ 2.5, p ≈ 0.01). Android goes from 20.0% to 22.0% (z ≈ 1.3, not significant).
 - Notes that paid conversion is essentially flat (4.10% vs about 4.20% overall; web 4.5% vs 4.6%), that the test was stopped early at day 9 of 14, and that 48-hour activation is only a proxy for retention and revenue.
 - Recommends a specific path, such as not shipping on the pooled result, fixing logging, and rerunning or extending to the full 14 days (optionally starting web-first), with a stated decision criterion. Formulas are shown.
+
+## Card
+
+brief: 9일 차에 중단된 온보딩 A/B 테스트를 점검·분석하고 배포 여부를 권고한다.
+given:
+- 테스트 설계: 50:50 배정, 14일 계획 중 9일 차 중단, 활성화·유료 전환 정의
+- PM 주장: 활성화율 23.0% → 26.0%, 상대 13% 상승
+- 전체 결과: 그룹 2개의 배정 사용자, 활성화, 유료 전환 수
+- 플랫폼별 결과: 그룹별 웹·iOS·Android의 같은 수치
+- 개발팀 공지: 테스트 중 발생한 iOS 크래시와 수정 내역
+asked:
+- 전체 및 플랫폼별 50:50 배정 비율 검정과 사용한 방법·결과
+- 활성화·유료 전환 결과 표: 비율, 절대·상대 차이, 유의성, 계산 열별 공식
+- 신뢰할 수치와 신뢰하지 않을 수치, 그 이유
+- 김철수 님께 드리는 권고(약 400자 이내)와 판단을 바꿀 조건
+limit: 약 2,500자 이내, Markdown, 계산 열마다 공식 명시
+hard: 상승 폭을 믿기 전에 숨은 데이터 품질 문제를 찾아 원인을 짚고, 배포 판단을 정당화해야 한다.
+
+## Scorecard
+
+- Detects sample ratio mismatch: 10,000 vs 9,200, χ² ≈ 33, traced to iOS (2,500 vs 1,700) crash
+- Rejects the pooled +13% lift and the iOS 20% → 26% lift as biased samples
+- Web activation 25.0% → 27.0% significant (z ≈ 2.5); Android 20.0% → 22.0% not (z ≈ 1.3)
+- Notes paid is flat (4.10% vs ≈ 4.20%; web 4.5% vs 4.6%), stop at day 9, proxy metric
+- Doesn't ship on the pooled result; fixes logging, reruns or extends to 14 days, with a decision criterion
+- Shows the formula behind every computed column (rates, differences, z-test, χ²)
+
+## Scorecard, shown
+
+- 표본 비율 불일치 발견: 10,000 대 9,200, χ² ≈ 33, 원인은 iOS(2,500 대 1,700) 크래시
+- 전체 +13% 상승과 iOS 20% → 26% 상승을 편향된 표본으로 보고 배제
+- 웹 활성화 25.0% → 27.0%는 유의(z ≈ 2.5), Android 20.0% → 22.0%는 유의하지 않음(z ≈ 1.3)
+- 유료 전환은 사실상 변화 없음(4.10% 대 약 4.20%, 웹 4.5% 대 4.6%), 9일 차 중단, 대리 지표임을 지적
+- 전체 결과로 배포하지 않음: 로깅 수정 후 재실험 또는 14일까지 연장, 판단 기준 제시
+- 계산된 모든 열의 공식 제시(비율, 차이, z-검정, χ²)

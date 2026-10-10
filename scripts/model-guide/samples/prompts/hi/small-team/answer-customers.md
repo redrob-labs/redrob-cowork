@@ -53,3 +53,36 @@ deliverable: none
 - For the wholesale request, calculates ₹560 per mug (₹850 × 60% + ₹50), or ₹33,600 for 60, and doesn't accept ₹430 without flagging it to Jane. It flags that 1 May is impossible (6-week lead time; 60 mugs take 1.5 weeks of the 40-a-week capacity) and offers alternatives, such as a later date or a partial or stock order.
 - Identifies message 4 as phishing (a lookalike domain, urgency and a KYC lure). No reply, no clicking, and a note to report it and check the real store admin directly.
 - Honours John Stiles' replacement or refund, because he reported the damage with a photo via WhatsApp on 27 Mar, within 7 days of delivery. The reply apologises for the missed message.
+
+## Card
+
+brief: Pottery studio के shared inbox के पाँच messages triage करें, policies के अनुसार जवाब draft करें, और owner के फ़ैसले वाली बातें बताएँ।
+given:
+- Policies: class cancellation, shipping में टूट-फूट, wholesale शर्तें और retail mug की कीमत
+- Class calendar: तारीख़ और bookings के साथ 4 classes
+- Booking और order notes: platform का असली sender address, bounce हुआ email, एक order और unread WhatsApp message
+- Inbox: 5 messages
+asked:
+- Triage table: category, priority, action और क्या जेन को फ़ैसला करना है
+- जिन messages को जवाब चाहिए, उनके भेजने-लायक जवाब, हर एक अधिकतम 150 शब्द
+- Internal notes: system fixes और ज़रूरी approvals, आँकड़ों के साथ
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Messages को अलग-अलग channels के policies और records से मिलाना है, एक message वैसा नहीं जैसा दावा करता है, और कुछ माँगें जैसी माँगी गईं वैसी पूरी नहीं हो सकतीं।
+
+## Scorecard
+
+- Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)
+- Richard Roe gets a full ₹1,800 refund or free reschedule (studio cancelled); bounced email noted, address fixed
+- Wholesale at ₹560 a mug (₹33,600 for 60); ₹430 flagged to Jane, not accepted
+- Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives
+- Message 4 is phishing (lookalike domain, urgency, KYC lure): no reply, no click, report it, check real admin
+- Honours John Stiles' replacement or refund (WhatsApp photo 27 Mar, within 7 days); apologises for missed message
+
+## Scorecard, shown
+
+- शनि 18 अप्रैल को overbook नहीं करता; तीनों को गुरु 23 अप्रैल 18:30 की class (3 seats बाकी) offer
+- रिचर्ड रो को पूरा ₹1,800 refund या मुफ़्त reschedule (studio ने cancel किया); bounce हुआ email पकड़ा, address ठीक
+- Wholesale ₹560 प्रति mug (60 के ₹33,600); ₹430 जेन के सामने रखता है, स्वीकार नहीं करता
+- बताता है कि 1 मई असंभव है (6 सप्ताह lead time; 1.5 सप्ताह की capacity); विकल्प देता है
+- Message 4 phishing है (मिलता-जुलता domain, जल्दबाज़ी, KYC का लालच): जवाब नहीं, click नहीं, report करें, असली admin जाँचें
+- जॉन स्टाइल्स को replacement या refund (27 मार्च का WhatsApp photo, 7 दिन के भीतर); छूटे message के लिए माफ़ी

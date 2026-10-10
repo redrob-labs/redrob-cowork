@@ -47,3 +47,40 @@ SQL은 정수로 반올림하세요. 분량은 약 2,500자 이내로 하세요.
 - Shows that the best realistic mix (search at capacity, BuildExpo, the rest ≈ ₩118,170,000 on 리멤버 for about 152 SQLs) yields only about 240 SQLs for ₩180,000,000. 400 is not achievable, and 80 customers would need 400 SQLs at a 20% close rate.
 - Spots the sales-capacity ceiling of 3 × 70 = 210 SQLs, and makes a judgement call. For example: plan to about 210 SQLs and about 42 customers (about ₩403,200,000 of new ACV), hold back unneeded spend or ask for more AE capacity, and flag that a new segment may convert below 20%.
 - Messaging pillars map to the interview pains (materials receipts by site, fast crew expense settlement, accounting integration). The timeline builds toward BuildExpo on Feb 10–12, plans follow-up around the Feb 16–18 설 holiday, and the deck closes with a specific ask to leadership.
+
+## Card
+
+brief: 전문건설업체 시장에 진출하는 B2B 플랫폼의 1분기 캠페인 덱을 만들고 CRO 목표를 검증합니다.
+given:
+- CRO 목표: SQL, 신규 고객, 프로그램 예산
+- 채널 벤치마크: 채널 4개의 CPL과 리드 → SQL 전환율, 하나는 자매 브랜드 수치
+- 세그먼트 입력값: 검색광고 용량, 전시회, 영업 처리 능력, 퍼널 전환율, 계약금액
+- 포지셔닝 조사: 인터뷰 12건의 핵심 고충 3가지
+asked:
+- 채널별 퍼널 계산 슬라이드: 산식과 합계 행 포함
+- CRO 목표에 대한 솔직한 판단과 권고 목표
+- 1억 8천만원 이하의 채널 믹스와 예산 배분
+- 인터뷰 결과에 연결된 메시지 축
+- 빌드엑스포 중심 일정
+- KPI와 매주 점검할 선행 지표
+- 위험 요인과 경영진에게 필요한 결정
+limit: 슬라이드 8~10장(`### Slide n: 제목`, 글머리 기호, 발표자 노트), 약 2,500자 이내, Markdown
+hard: 옮겨 쓸 수 없는 벤치마크가 있고 채널 용량과 영업 역량이 계획을 제한하며, 목표에는 솔직한 판단이 필요합니다.
+
+## Scorecard
+
+- Excludes or heavily discounts the consumer-app Instagram benchmark; doesn't use its ₩60,000 cost per SQL
+- Cost per SQL: 네이버 ≈₩386,000, 리멤버 ≈₩778,000, BuildExpo ≈₩1,000,000 (45 SQLs), syndication ≈₩917,000
+- Search capped: 3,300 clicks × 6% = 198 leads, ₩16,830,000, ≈44 SQLs
+- Best mix yields ≈240 SQLs for ₩180,000,000: 400 SQLs and 80 customers aren't achievable
+- Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈₩403,200,000 ACV)
+- Pillars match the 3 interview pains; timeline builds to BuildExpo Feb 10–12, 설 follow-up; specific leadership ask
+
+## Scorecard, shown
+
+- 소비자 앱인 인스타그램 벤치마크는 제외하거나 크게 할인, SQL당 60,000원을 쓰지 않음
+- SQL당 비용: 네이버 약 386,000원, 리멤버 약 778,000원, 빌드엑스포 약 1,000,000원(SQL 45건), 신디케이션 약 917,000원
+- 검색 용량 상한: 클릭 3,300회 × 6% = 리드 198건, 16,830,000원, SQL 약 44건
+- 최선의 믹스로도 1억 8천만원에 SQL 약 240건: SQL 400건과 신규 고객 80곳은 달성 불가
+- 영업 처리 한도 3 × 70 = SQL 210건, 예: SQL 약 210건, 고객 약 42곳(신규 연간 계약 약 403,200,000원)으로 계획
+- 메시지 축은 인터뷰 고충 3가지와 일치, 일정은 2월 10~12일 빌드엑스포와 설 연휴 후속 조치 반영, 경영진 요청은 구체적

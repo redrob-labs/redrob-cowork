@@ -55,3 +55,38 @@ deliverable: presentations
 - Doesn't offer 30%. Stays within the AE's 20% authority, or explicitly says that anything more needs VP approval and gives a rationale.
 - Corrects the labour savings to about ₹5,04,000/year (9,000 × 35% × 4 min ÷ 60 × ₹200 × 12), not ₹20 lakh. Treats the upsell estimate (about ₹5.11 crore/year gross at ₹90 × 2,160 rooms × 365 × 72%) as revenue, not profit, extrapolated from one property's pilot. Revises "payback in under a month" accordingly.
 - Says honestly that the "on-premise" requirement is not met (the product is cloud-only, with India data residency in the Mumbai region) and doesn't claim full RFP compliance.
+
+## Card
+
+brief: Hotel group की COO और CFO के लिए pricing, ROI और RFP compliance वाला proposal deck बनाएँ, सहकर्मी के draft दावों को जाँचते हुए।
+given:
+- RFP सारांश: portfolio का आकार, 5 requirements और commercial preferences
+- Discovery notes: होटलों की संख्या, call volume, staff लागत और pain points
+- Cabana Connect तथ्य: deployment, security, integrations, deflection benchmark और pilot upsell नतीजा
+- Price book और discount policy: per-room और implementation कीमतें, discounts और approval सीमाएँ
+- जॉन डो के draft दावे: बचत, payback, compliance और discount पर 4 दावे
+asked:
+- 8–10 slides का deck: समस्या, solution, RFP compliance, ROI, pricing और next steps
+- Pricing table: list, discounts, net annual, implementation और 3 साल का total, method सहित
+- ROI slide, गणना और labelled assumptions के साथ
+- जॉन डो और VP Sales के लिए internal note (अधिकतम 150 शब्द)
+limit: लगभग 1,200 शब्दों के भीतर, markdown में, slide by slide और हर slide पर speaker note
+hard: Sources आपस में मेल नहीं खाते, सहकर्मी के दावे जाँचने हैं, discount की approval सीमाएँ लागू हैं, और compliance ईमानदारी से बतानी है।
+
+## Scorecard
+
+- Prices 12 live properties, 2,160 rooms; flags "14 hotels"; offers 2027 openings (~300 rooms) as add-on
+- List ₹77,76,000/year; 15% discount gives ₹66,09,600/year net; implementation ₹9,00,000
+- 3-year subscription ₹1,98,28,800, or ₹2,07,28,800 including implementation, all before GST
+- No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale
+- Labour savings ≈ ₹5,04,000/year, not ₹20 lakh; upsell ≈ ₹5.11 crore/year is gross pilot-based revenue; payback revised
+- States the on-premise requirement is unmet (cloud-only, India data in Mumbai); no full-compliance claim
+
+## Scorecard, shown
+
+- 12 चालू properties, 2,160 rooms की कीमत; "14 होटल" का फ़र्क बताता है; 2027 वाले (~300 rooms) add-on के रूप में
+- List ₹77,76,000/वर्ष; 15% discount के बाद net ₹66,09,600/वर्ष; implementation ₹9,00,000
+- 3 साल का subscription ₹1,98,28,800, implementation सहित ₹2,07,28,800, सब GST से पहले
+- 30% offer नहीं: AE की 20% सीमा में रहता है, या rationale के साथ VP approval की बात करता है
+- Labour बचत ≈ ₹5,04,000/वर्ष, ₹20 लाख नहीं; upsell ≈ ₹5.11 crore/वर्ष pilot पर आधारित gross revenue; payback संशोधित
+- बताता है कि on-premise requirement पूरी नहीं (केवल cloud, Mumbai में India data); पूरी compliance का दावा नहीं

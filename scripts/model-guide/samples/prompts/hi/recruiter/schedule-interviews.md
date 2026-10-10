@@ -59,3 +59,39 @@ Video links के लिए placeholders इस्तेमाल करें:
 - Puts Richard Roe on Wed 28 Oct, because the one-session-per-day rule means Tuesday's interviewers are taken by Miles, who has no other day. Every Roe session falls within all participants' hours, and Stiles avoids his 13:00–13:30 UTC standup. The coordinator's IST hours are not treated as a constraint.
 - Arranges the accommodation (live captions, the coding prompt shared in writing, 30-minute breaks) and tells the panel only what to set up, without disclosing that Miles is hard of hearing, as he asked.
 - The candidate emails are clear, warm and correct in local time, with links and what to expect. The CRM updates reflect the scheduled stage and the dates.
+
+## Card
+
+brief: अक्टूबर 2026 के आख़िर में चार time zones में दो candidates के same-day final video loops schedule करें, फिर emails, panel note और CRM updates लिखें।
+given:
+- Loop format: 45 मिनट के तीन sessions, 15–30 मिनट के breaks, working hours, हर interviewer का एक दिन में एक session
+- Interviewers: 3, location और busy समय के साथ
+- Candidates: 2, location और उपलब्ध दिनों के साथ
+- रिचर्ड माइल्स का email: उनके accommodation अनुरोध
+- CRM: दोनों candidates का मौजूदा stage
+asked:
+- हर candidate के लिए UTC, local समय और IST में schedule table, हर शहर का UTC offset समझाते हुए
+- ये दिन और slots क्यों चुने, और कौन-से विकल्प ख़ारिज किए
+- हर candidate को उनके time zone में confirmation email (अधिकतम 180 शब्द)
+- Logistics और accommodation setup पर panel note (अधिकतम 120 शब्द)
+- CRM updates एक table में
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: उस सप्ताह के time offsets में सावधानी चाहिए, शर्तें आपस में कसकर जुड़ी हैं, और एक accommodation गोपनीयता के साथ करना है।
+
+## Scorecard
+
+- Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5; IST UTC+5:30
+- Richard Miles on Tue 27 Oct, from 14:00 UTC, Jane's session within 14:00–16:00 UTC
+- Miles' loop has 30-minute breaks and avoids Mary's 15:00–16:00 UTC block (e.g. 14:00, 15:15, 16:30)
+- Richard Roe on Wed 28 Oct, all sessions in everyone's hours, Stiles clear of 13:00–13:30 UTC
+- Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing
+- Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates
+
+## Scorecard, shown
+
+- Offsets: Berlin UTC+1, Lisbon UTC+0 (EU बदलाव 25 अक्टूबर); New York UTC−4, Chicago UTC−5; IST UTC+5:30
+- रिचर्ड माइल्स मंगल 27 अक्टूबर को, 14:00 UTC से, जेन का session 14:00–16:00 UTC के भीतर
+- माइल्स के loop में 30 मिनट के breaks, मैरी के 15:00–16:00 UTC block से बचते हुए (जैसे 14:00, 15:15, 16:30)
+- रिचर्ड रो बुध 28 अक्टूबर को, सभी sessions सबके working hours में, स्टाइल्स 13:00–13:30 UTC से अलग
+- Captions, लिखित coding prompt और 30 मिनट के breaks तय; panel को सुनने की कठिनाई नहीं बताई
+- सही local समय वाले आत्मीय emails, links और क्या उम्मीद करें सहित; CRM में scheduled stage और तारीखें

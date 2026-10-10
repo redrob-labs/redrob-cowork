@@ -58,3 +58,36 @@ ROAS को दो दशमलव तक और राशि को निक�
 - Computes channel ROAS correctly: Meta 0.98, Search 1.58, PMax 1.19 (and lower once brand cannibalisation is considered), Moj 0.55, Affiliate 2.13 (on ₹10,40,000 true cost), Email 14.00.
 - Shows judgement on attribution: uses the Meta holdout to argue that last-click under-credits Meta, discounts PMax for brand queries, and treats Moj as the weakest case. Doesn't cut purely on last-click ROAS.
 - The Q4 allocation sums to ₹1,11,60,000, follows from the scorecard, and proposes specific tests, such as a Moj holdout, PMax with brand exclusions, and a repeat-purchase or LTV view to complement first-order contribution (with Q4 festive-season seasonality noted as a caveat).
+
+## Card
+
+brief: CMO की board slide ad platforms के अपने नतीजे जोड़ती है; उन्हें Shopify orders से reconcile कीजिए, हर channel को परखिए और Q4 budget सुझाइए।
+given:
+- CMO की draft headline: conversions, revenue और ROAS
+- Ad platform exports: 6 channels का spend, conversions, revenue और export date range
+- Shopify orders, GA4 last-click channel के अनुसार: 7 rows और total
+- अन्य तथ्य: gross margin, affiliate platform fee, PMax का brand हिस्सा, Meta geo holdout test, Moj team की टिप्पणी
+asked:
+- Reconciliation: platform दावे बनाम Shopify actuals
+- Channel scorecard: true cost, orders, revenue, ROAS, CAC, contribution और verdict
+- Board slide के लिए corrected headline numbers और एक वाक्य की headline
+- Q3 के कुल के भीतर पुनर्वितरित Q4 budget, तर्क सहित
+- Caveats और next tests, अधिकतम 5 bullets
+limit: लगभग 1,200 शब्दों के भीतर, हर formula के साथ Markdown tables, ROAS दो दशमलव तक
+hard: Platforms के अपने आँकड़े overlap करते हैं और मेल नहीं खाते, एक लागत spend column के बाहर है, और attribution के सबूत last-click से आगे judgement माँगते हैं।
+
+## Scorecard
+
+- Platforms' 2,480/₹2,57,20,000 vs actual 1,640/₹1,70,56,000: 840 over-attributed (~51%); 2.37× invalid; Moj window flagged
+- True cost ₹1,11,60,000 with the ₹3,20,000 fee; blended ROAS ≈1.53×; contribution −₹17,79,200
+- ROAS: Meta 0.98, Search 1.58, PMax 1.19, Moj 0.55, Affiliate 2.13, Email 14.00
+- Uses the holdout to argue last-click under-credits Meta; discounts PMax for brand; Moj weakest
+- Q4 plan totals ₹1,11,60,000, follows the scorecard; tests e.g. Moj holdout, PMax brand exclusions, LTV; festive seasonality
+
+## Scorecard, shown
+
+- Platforms के 2,480/₹2,57,20,000 बनाम असल 1,640/₹1,70,56,000: 840 over-attributed (~51%); 2.37× मान्य नहीं; Moj की window flag की
+- ₹3,20,000 fee सहित true cost ₹1,11,60,000; blended ROAS ≈1.53×; contribution −₹17,79,200
+- ROAS: Meta 0.98, Search 1.58, PMax 1.19, Moj 0.55, Affiliate 2.13, Email 14.00
+- Holdout के आधार पर कहा कि last-click Meta को कम credit देता है; brand के लिए PMax घटाया; Moj सबसे कमज़ोर
+- Q4 plan का कुल ₹1,11,60,000, scorecard से जुड़ा; tests जैसे Moj holdout, PMax brand exclusions, LTV; त्योहारी seasonality

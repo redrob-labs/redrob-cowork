@@ -76,3 +76,36 @@ export function priceCart(cart: Cart) {
 - Prices the sample cart with only the Plus discount applied to the ₩35,460 of non-alcohol items (per-line half-up: 299 + 325 + 425 + 725 = ₩1,774; or ₩1,773 if computed on the total and allocated, as a stated choice), VAT extracted only from the dish soap (₩734 of ₩8,075) and the makgeolli (₩1,090 of ₩11,990), a total of ₩45,676, and line results that sum exactly to the totals in won.
 - Implements fixed-discount proportional allocation with remainder handling, caps the discount at the eligible amount, and makes the date check inclusive in Asia/Seoul.
 - The tests are meaningful, cover each reason code, case-insensitivity, the alcohol exclusion, HOME15 scoped to household items, and rounding at half-won boundaries, and would pass against the code as written.
+
+## Card
+
+brief: 장보기 앱 장바구니 가격 모듈에 법무·부가세 규칙을 지키는 프로모션 코드를 테스트와 함께 구현합니다.
+given:
+- 현재 모듈: 타입과 priceCart 함수가 있는 pricing.ts
+- 스펙: PM·재무·법무의 규칙 8개(프로모션 코드 3개 표 포함)
+- 샘플 장바구니: grocery·household·alcohol에 걸친 상품 5개, Plus 멤버
+asked:
+- 코드 표를 데이터로 두고 라인별 내역과 합계를 원 단위 정수로 반환하는 새 pricing.ts
+- 반올림과 배분의 경계 사례를 포함한 Vitest 테스트 파일
+- Plus 멤버가 2025-07-02에 fresh10으로 결제한 샘플 장바구니 결과 표
+- 현재 모듈의 버그 목록과, 해결한 스펙상의 모호한 점과 선택한 방식
+limit: 설명은 약 2,500자 이내, Markdown; 코드는 더 길어도 됨
+hard: 기존 코드에 결함이 있고, 규칙들(적용 대상, 할인 순서, 라인별 부가세)이 맞물리며, 원 단위 반올림이 정확히 합산되어야 하고, 스펙의 모호한 점을 정해야 합니다.
+
+## Scorecard
+
+- Lists bugs: fractional won, member discount on alcohol, VAT added on top, VAT on groceries, whole-cart VAT
+- Rejects FRESH10 with below_minimum: eligible ₩35,460 (cart ₩47,450) is under ₩40,000; states minimum-check order
+- Applies only the Plus discount to ₩35,460: ₩1,774 per line (or ₩1,773 allocated, as a stated choice)
+- Extracts VAT only from soap (₩734 of ₩8,075) and makgeolli (₩1,090); total ₩45,676; lines sum exactly
+- Proportional fixed-discount allocation with remainders, capped at the eligible amount; inclusive Asia/Seoul date check
+- Passing tests cover each reason code, case-insensitivity, alcohol exclusion, HOME15 scope and half-won rounding
+
+## Scorecard, shown
+
+- 버그를 나열한다: 원 미만 소수점, 주류에 적용된 멤버 할인, 부가세 포함가에 부가세 가산, 면세 식료품 과세, 장바구니 전체 기준 부가세
+- FRESH10을 below_minimum으로 거절한다: 적용 대상 35,460원(장바구니 47,450원)이 40,000원 미만, 최소 금액 확인 순서를 밝힌다
+- Plus 할인만 35,460원에 적용한다: 라인별 1,774원(합계 기준 배분이면 1,773원, 선택을 명시)
+- 부가세는 주방세제(8,075원 중 734원)와 막걸리(1,090원)에서만 분리하고, 총액 45,676원, 라인 합이 정확히 일치한다
+- 정액 할인을 잔액 처리와 함께 금액 비례로 배분하고 적용 대상 금액으로 상한을 두며, 유효기간은 Asia/Seoul 기준 해당일 포함
+- 통과하는 테스트가 사유 코드별, 대소문자 무시, 주류 제외, HOME15 범위, 0.5원 경계 반올림을 다룬다

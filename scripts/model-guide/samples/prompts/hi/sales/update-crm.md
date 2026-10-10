@@ -47,3 +47,36 @@ deliverable: spreadsheets
 - Moves Haritha (to Q2 FY2026-27, Jul–Sep, or later) and Tatrekha (to a 2027-realistic date) out of the quarter, and flags Tatrekha's ₹1,75,00,000 as an unqualified placeholder.
 - The weighted values use Amount × stage probability. The quarter's weighted forecast drops from ₹1,13,61,000 (as exported) to ₹77,46,000 (Tapti ₹52,50,000 + Eastbrook ₹24,96,000), with Tapti as Commit.
 - The hygiene list covers the past-dated close, the duplicate, the currency mismatch, the guessed amount and the premature Closed Won.
+
+## Card
+
+brief: इस हफ़्ते की activity से sensor कंपनी का CRM साफ़ करें, इस quarter का forecast बनाएँ, और एक "won" deal पर manager के सवाल का जवाब दें।
+given:
+- Stage probabilities: 6 stages, INR amount field और EUR की forecasting rate
+- CRM export: stage, amount, close date और next step के साथ 7 opportunities
+- इस हफ़्ते की activity: 7 notes, emails और calendar entries
+asked:
+- Weighted (₹) और "Changed / why" के साथ updated CRM table, formulas और दोबारा गणना सहित
+- Updates से पहले और बाद का quarter forecast, Commit, Best case और Pipeline के अनुसार, परिभाषाओं सहित
+- मिली और ठीक की गई CRM hygiene समस्याएँ
+- जॉन स्टाइल्स को जवाब (अधिकतम 120 शब्द)
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Activity को CRM से record दर record मिलाना है, और manager के उम्मीद भरे सवाल का सीधा जवाब देना है।
+
+## Scorecard
+
+- Devdaru stays Negotiation, close ≈ 3 April (out of quarter), O-105 merged; Stiles told "not this quarter"
+- Kesri re-priced to ₹25,80,000 (38,70,000 ÷ 45 × 30) with close date 10 April
+- Eastbrook €52,000 converted to ₹49,92,000 and kept in the quarter for the 26 March decision
+- Haritha moved to Q2 FY2026-27 or later; Tatrekha to a 2027-realistic date, ₹1,75,00,000 flagged as placeholder
+- Weighted = Amount × probability; quarter falls from ₹1,13,61,000 to ₹77,46,000, Tapti as Commit
+- Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won
+
+## Scorecard, shown
+
+- Devdaru Negotiation में ही, close ≈ 3 अप्रैल (quarter से बाहर), O-105 merge; स्टाइल्स को "इस quarter में नहीं"
+- Kesri की नई कीमत ₹25,80,000 (38,70,000 ÷ 45 × 30), close date 10 अप्रैल
+- Eastbrook के €52,000 को ₹49,92,000 में बदलकर 26 मार्च के फ़ैसले के लिए quarter में रखा
+- Haritha को Q2 FY2026-27 या बाद में; Tatrekha को 2027 के यथार्थ date पर, ₹1,75,00,000 placeholder के रूप में flag
+- Weighted = Amount × probability; quarter ₹1,13,61,000 से घटकर ₹77,46,000, Tapti Commit में
+- Hygiene सूची: बीती close date, duplicate, currency mismatch, अंदाज़े वाला amount, समय से पहले Closed Won
