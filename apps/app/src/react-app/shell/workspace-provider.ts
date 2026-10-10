@@ -38,6 +38,11 @@ export function WorkspaceProvider({
   return React.createElement(WorkspaceContext.Provider, { value }, children);
 }
 
+/** The same, or null outside a provider, for components that also render where no workspace is open. */
+export function useOptionalWorkspace() {
+  return React.use(WorkspaceContext);
+}
+
 export function useWorkspace() {
   const context = React.use(WorkspaceContext);
 
