@@ -131,7 +131,14 @@ const held = jobs.filter((j) => !doneKeys.has(j.key) && needsShare(j) && !ALLOW_
 if (held.length) console.log(`${held.length} runs held: their models need --allow-data-share (${[...new Set(held.map((j) => j.model))].join(", ")}).`);
 /** Models to leave for a later run, e.g. ones whose answers outlast Redrob's 120 s upstream limit. */
 const EXCLUDE = new Set((arg("--exclude-models", "") || "").split(",").filter(Boolean));
-const todo = jobs.filter((j) => !doneKeys.has(j.key) && !held.includes(j) && !EXCLUDE.has(j.model));
+/** Runs already seen to time out in an earlier log, so a pass moves on instead of retrying them first. */
+const skipLog = arg("--skip-timed-out", null);
+const timedOut = new Set();
+if (skipLog) {
+  const text = await readFile(skipLog, "utf8").catch(() => "");
+  for (const m of text.matchAll(/^FAIL (\S+): 50\d .*timeout/gm)) timedOut.add(m[1]);
+}
+const todo = jobs.filter((j) => !doneKeys.has(j.key) && !held.includes(j) && !EXCLUDE.has(j.model) && !timedOut.has(j.key));
 console.log(`${jobs.length} runs planned, ${done.length} already written ($${spent.toFixed(2)}), ${todo.length} to go, cap $${CAP}.`);
 
 async function call(job, prompt) {
