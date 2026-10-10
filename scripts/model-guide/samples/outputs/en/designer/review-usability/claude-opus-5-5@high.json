@@ -1,0 +1,25 @@
+{
+ "key": "en/designer/review-usability/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "review-usability",
+ "rank": 1,
+ "model": "claude-opus-5-5",
+ "catalogueId": "anthropic/claude-opus-5.5",
+ "routedModel": "anthropic/claude-opus-5.5",
+ "effort": "high",
+ "promptSha": "2f6d7e77bce2",
+ "output": "",
+ "cut": true,
+ "finishReason": "length",
+ "filtered": true,
+ "usage": {
+  "prompt_tokens": 1084,
+  "completion_tokens": 32000,
+  "total_tokens": 33084
+ },
+ "costUsd": 0.6765528,
+ "latencyMs": 294039,
+ "requestId": "log_ed9adad1bd554abab6cc6e9d256be564",
+ "date": "2026-10-10"
+}
