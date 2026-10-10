@@ -1,0 +1,6 @@
+{
+ "key": "probe/en/designer/design-screens/claude-opus-5-5@high",
+ "failed": true,
+ "costUsd": 0.5086284,
+ "note": "A manual call on 2026-10-10 to check the raised upstream timeout (234 s, cut at 24,000 tokens). Recorded so the cap counts it."
+}

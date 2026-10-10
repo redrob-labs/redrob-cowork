@@ -1,0 +1,25 @@
+{
+ "key": "en/pm/plan-roadmap/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "rank": 4,
+ "model": "claude-sonnet-5-5",
+ "catalogueId": "anthropic/claude-sonnet-5.5",
+ "routedModel": "anthropic/claude-sonnet-5.5",
+ "effort": "high",
+ "promptSha": "1a5f25a7ae2d",
+ "output": "# Tidewater Dispatch: H2 2026 Roadmap\n\n## 1. Scored backlog\n\n**Formulas**\n- **Effort (eng-weeks)** = submitted effort ÷ 5 if given in engineer-days, otherwise unchanged. Engineering's convention is 5-day weeks.\n- **RICE** = (Reach × Impact × Confidence) ÷ Effort (eng-weeks).\n\n| Rank | ID | Item | Reach | Impact | Conf. | Effort (eng-wks) | RICE |\n|---|---|---|---|---|---|---|---|\n| 1 | F6 | Invoice PDF redesign | 600 | 0.5 | 90% | 3 | **90.0** |\n| 2 | F1 | Offline mode | 420 | 2 | 80% | 16 | **42.0** |\n| 3 | F7 | Skills matching | 250 | 2 | 60% | **9** (45 days ÷ 5) | **33.3** |\n| 4 | F4 | Self-booking portal | 510 | 1 | 70% | 12 | **29.8** |\n| 5 | F2 | Route optimisation v2 | 300 | 3 | 50% | 20 | **22.5** |\n| 6 | F3 | SAML SSO | 35 | 1 | 100% | 6 | **5.8** |\n| n/a | F5 | Map provider migration | — | — | — | 8 | **not scored** |\n\n**Handling the exceptions**\n- **F7:** The 45 was in engineer-days, so I converted it to 9 weeks. Treating it as 45 weeks would have made it unaffordable and cut it wrongly. I'll confirm this with the squad lead.\n- **F5:** It has no Reach, Impact or Confidence, so RICE can't score it. It is an unscored **mandatory** item, committed before ranking because it is deadline-driven (the map contract ends 31 Dec, and renewal costs +40%). It also blocks F2.\n- **F3:** It has a score, but the low score is misleading. It carries a contractual deadline (31 Oct) and an exit clause on $180k ARR, so I committed it before ranking too.\n\n## 2. H2 plan\n\nMandatory items (F3 and F5) total 14 weeks, leaving 34 weeks for ranked work.\n\n| Quarter | Item | Effort | Rationale |\n|---|---|---|---|\n| **Q3** | F3 SAML SSO | 6 | Done by 30 Sep, giving a month of buffer before 31 Oct |\n| | F5 Map migration | 8 | Early, de-risks the 31 Dec deadline, and unblocks F2 |\n| | F7 Skills matching | 9 | Fits the 10 weeks left in Q3 |\n| | **Q3 used / available** | **23 / 24** | 1 spare |\n| **Q4** | F1 Offline mode | 16 | Top churn-interview request |\n| | F6 Invoice PDF redesign | 3 | Highest RICE, cheap |\n| | **Q4 used / available** | **19 / 24** | 5 spare |\n| **H2** | **Total** | **42 / 48** | **6 weeks (12.5%) held as buffer** |\n\nNo item is split across quarters. The buffer is deliberate: F7 has 60% confidence and F1 is a 16-week build.\n\n## 3. Cut list\n\n| ID | Item | Reason |\n|---|---|---|\n| F2 | Route optimisation v2 | Needs 20 weeks and only unblocks after F5. Lowest RICE of the ranked items at 50% confidence. Fitting it in would displace F1 and F7, and it would ship in late December at best. First candidate for H1 2027. |\n| F4 | Self-booking portal | At 12 weeks it doesn't fit Q3's 10 spare weeks. In Q4 it can't sit alongside F1 (28 > 24). Its RICE of 29.8 is below F7's 33.3. |\n\n## 4. Memo\n\n**To:** Richard Roe, Mary Major\n**Re:** H2 2026 roadmap\n\nBoth of your top concerns are covered, with one trade-off for Richard.\n\n**Mary:** SAML SSO is committed in Q3 and finishes by 30 September, a month ahead of Brightwell's 31 October deadline. It is protected, and nothing else gets to displace it.\n\n**Richard:** Route optimisation v2 isn't in H2. It needs 20 engineer-weeks and depends on the map migration (F5), which must be done anyway, and the contract ends 31 December. The squad has 48 weeks in H2. After SSO and the migration, 34 remain. Putting F2 in would push out offline mode, our most requested feature in churn interviews, or skills matching. F2 would also land in late December, too late to help H2 pitches. Because F5 finishes in Q3, F2 is first in line for H1 2027. You can pitch it as \"next on the roadmap, with the map foundation already built.\"\n\n**The trade-off:** The last slot was contested between F2 (large, 50% confidence) and F7/F4. I chose F7 because it scores higher per week and fits Q3's gap, while F4 doesn't fit there.\n\n**What would change my mind:**\n- Named enterprise deals contingent on F2, with ARR exceeding what offline mode protects. Then I'd swap F2 into Q4 for F1.\n- Evidence that F2's confidence is well above 50%.\n- Skills matching's estimate turning out to be materially larger than 9 weeks. Then F7 drops out.\n\nIf Q4's 5 spare weeks stay unused, I'd spend up to 3 on an F2 discovery spike to firm up its estimate.",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 1088,
+  "completion_tokens": 6389,
+  "total_tokens": 7477
+ },
+ "costUsd": 0.0693693,
+ "latencyMs": 47127,
+ "requestId": "log_90da52e403414200bb04921b35604920",
+ "date": "2026-10-09"
+}

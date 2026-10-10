@@ -1,0 +1,25 @@
+{
+ "key": "en/founder/sell-customers/gpt-6-astra@default",
+ "language": "en",
+ "profession": "founder",
+ "task": "sell-customers",
+ "rank": 5,
+ "model": "gpt-6-astra",
+ "catalogueId": "gpt-6-astra",
+ "routedModel": "gpt-6-astra",
+ "effort": "default",
+ "promptSha": "0ddca0585ed4",
+ "output": "## 1. Three-email sequence\n\n*Send follow-ups only if Mary hasn’t replied.*\n\n### Email 1 — Tuesday, 16 September 2025\n**Subject:** Your float-pool question\n\nHi Mary,\n\nYour question at our September 3 webinar stuck with me: hours spent texting to fill call-outs, while overtime keeps climbing.\n\nI founded ShiftBay to help clinics replace that scramble. An open shift goes to qualified, available staff by app; the first eligible person to accept gets it, within credential and overtime rules. Float-pool nurses can cover across sites.\n\nWith three new Riverbend clinics this year, I thought this might be worth a look.\n\nWould you be open to a 20-minute demo next week focused on filling a call-out from your float pool?\n\n— Founder, ShiftBay\n\n### Email 2 — Tuesday, 23 September 2025\n**Subject:** What six clinics groups actually saw\n\nHi Mary,\n\nA little evidence behind my last note: across our six customers, overtime hours fell 18% on average after six months.\n\nNorthfield Clinics, with nine sites, saw a 40% reduction and a median call-out fill time of 22 minutes. That’s our strongest overtime result, not the typical outcome. Pinegate Health saw a 12% reduction over the same period.\n\nNorthfield is willing to discuss its experience directly, including what changed operationally—not just the numbers.\n\nWould an introduction to Northfield be useful?\n\n— Founder, ShiftBay\n\n### Email 3 — Tuesday, 30 September 2025\n**Subject:** Timing around your scheduling renewal\n\nHi Mary,\n\nOne timing thought before I leave this with you: your current scheduling contract renews November 30, 2026, with 90 days’ cancellation notice. That puts the notice deadline at September 1, 2026—not this fall.\n\nThere’s no reason to manufacture a Friday decision. ShiftBay implementation takes about six weeks, and we can import data from your current suite’s export format. Evaluation and rollout would still need room ahead of renewal.\n\nWould you prefer I reconnect in June, leaving time to evaluate before the notice deadline?\n\n— Founder, ShiftBay\n\n## 2. LinkedIn connection note\n\nHi Mary—I’m the founder of ShiftBay. Your float-pool question at our September 3 webinar stuck with me, especially the hours spent texting to fill call-outs. I’d like to connect and stay in touch.\n\n## 3. Note to John\n\nJohn—\n\n- **Used the demo ask:** Email one asks for a focused, 20-minute demo next week, tied to Mary’s actual float-pool question.\n- **Rejected leading with 40%:** Northfield’s result is real, but it’s our strongest result—not representative. I led with Mary’s problem and put the 40% example alongside the six-customer average of 18% in the follow-up. Only reference-approved customers are named.\n- **Rejected 30% off by Friday:** That exceeds my authority; anything above 15% requires CFO approval, and no exception has been granted. There’s also no genuine Friday deadline. I’d reserve any discount discussion for a substantive multi-year proposal, within the 15% limit.\n- **Used the real buying timeline:** Renewal is in November **2026**, not 2025. The September 1, 2026 notice deadline supports thoughtful evaluation, not artificial urgency.",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 636,
+  "completion_tokens": 973,
+  "total_tokens": 1609
+ },
+ "costUsd": 0.0577605,
+ "latencyMs": 16480,
+ "requestId": "log_d3bd7b6b86cb4ac6bd4b980df4ccf34e",
+ "date": "2026-10-09"
+}

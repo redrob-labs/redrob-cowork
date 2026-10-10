@@ -1,0 +1,25 @@
+{
+ "key": "hi/engineer/review-code/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "review-code",
+ "rank": 1,
+ "model": "claude-opus-5-5",
+ "catalogueId": "anthropic/claude-opus-5.5",
+ "routedModel": "anthropic/claude-opus-5.5",
+ "effort": "high",
+ "promptSha": "130a9a148c37",
+ "output": "",
+ "cut": false,
+ "finishReason": "content_filter",
+ "filtered": true,
+ "usage": {
+  "prompt_tokens": 1622,
+  "completion_tokens": 348,
+  "total_tokens": 1970
+ },
+ "costUsd": 0.0141204,
+ "latencyMs": 8572,
+ "requestId": "log_33888b6824334c40b7aa78214ae671b8",
+ "date": "2026-10-09"
+}

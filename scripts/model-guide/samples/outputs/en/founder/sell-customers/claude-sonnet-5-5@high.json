@@ -1,0 +1,25 @@
+{
+ "key": "en/founder/sell-customers/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "founder",
+ "task": "sell-customers",
+ "rank": 4,
+ "model": "claude-sonnet-5-5",
+ "catalogueId": "anthropic/claude-sonnet-5.5",
+ "routedModel": "anthropic/claude-sonnet-5.5",
+ "effort": "high",
+ "promptSha": "0ddca0585ed4",
+ "output": "# Outreach plan: Riverbend Family Health (Mary Major)\n\n## 1. Email sequence\n\n### Email 1: Tuesday, 16 September 2025\n**Subject:** Your float-pool question\n\nHi Mary,\n\nAt our 3 September webinar you asked about float-pool nurses and said you burn hours every week filling call-outs by text, with overtime your fastest-growing cost. With three new clinics this year, I'd guess that's getting harder.\n\nShiftBay pushes an open shift by app to qualified, available staff. The first to accept gets it, within credential and overtime rules. Float pools work across sites.\n\nAcross our six customers, overtime hours fell 18% on average after six months. The range was 8% to 40%, depending on the group.\n\nCould I show you a 20-minute demo built around a float-pool scenario from your clinics? I have time any day in the next two weeks.\n\nBest,\n[Your name]\nFounder, ShiftBay\n\n---\n\n### Email 2: Tuesday, 23 September 2025\n**Subject:** Two clinic groups you can call\n\nHi Mary,\n\nRather than ask for a demo again, here is something more useful. Two customers have agreed to speak with you directly.\n\n- **Northfield Clinics (9 clinics):** overtime hours down 40% after six months, with call-outs filled in a median of 22 minutes.\n- **Pinegate Health (5 clinics):** overtime hours down 12%.\n\nNorthfield is our best result, not our typical one. Pinegate is closer to what many groups see. How much you gain depends on how much of your overtime comes from unfilled call-outs, and I'd rather you hear that from peers than from me.\n\nIf you tell me which one you'd like to talk to, I'll make the introduction.\n\nBest,\n[Your name]\n\n---\n\n### Email 3: Tuesday, 7 October 2025\n**Subject:** Closing the loop\n\nHi Mary,\n\nThis is my last note for now. I know you're busy opening clinics and hiring.\n\nIf you ever look at options, setup takes about six weeks. We import data from your current vendor's export, so nothing has to change overnight, and there's no deadline on our side.\n\nWould a conversation be worth having now, later, or not at all? A one-word reply is plenty. If you say \"later,\" I'll check back in the new year and won't chase you before then.\n\nBest,\n[Your name]\n\n---\n\n## 2. LinkedIn connection note (about 255 characters)\n\n> Hi Mary, I'm the founder of ShiftBay. Your float-pool question at our 3 Sept webinar was a sharp one. I'd like to connect and share what we've seen at clinic groups filling call-outs by app instead of text. No pitch attached. – [Your name]\n\n---\n\n## 3. Note to John\n\nJohn, here is what I used from your advice and what I didn't.\n\n**Used (adapted): the demo ask.** Email 1 asks for a demo, but a short, specific one built around her float-pool question, with a window of two weeks rather than \"next week.\" She has had no previous touch from us, so a tailored 20 minutes is an easier yes.\n\n**Adapted: the overtime result.** I led with her problem and used the 18% average, giving the 8–40% range. The 40% is Northfield alone, and the other five customers sit between 8% and 15%. A clinical operations VP will likely ask for references. If she hears 40% and then speaks to a customer with 12%, we lose her trust. Northfield's 40% appears in Email 2, labeled as our best case, and it comes with Pinegate's 12%. Those are the only two customers we can name.\n\n**Rejected: 30% off if she signs by Friday.**\n- I can offer up to 15% for a multi-year contract, at my discretion. Anything above that needs CFO approval, and it has never been granted. I can't promise 30%.\n- The deadline has no basis. Her contract renews 30 November 2026 and requires 90 days' notice, so her cutoff is around 1 September 2026, nearly a year away. She has no reason to rush, and manufactured urgency would damage credibility with a buyer we want to keep for years.\n- She hasn't seen the product yet, so discounting now gives away margin before we know there's a fit.\n\nIf she gets to a serious evaluation, I'll bring up the 15% multi-year option then, as part of a normal negotiation.",
+ "cut": false,
+ "finishReason": "stop",
+ "filtered": false,
+ "usage": {
+  "prompt_tokens": 968,
+  "completion_tokens": 3670,
+  "total_tokens": 4638
+ },
+ "costUsd": 0.0405678,
+ "latencyMs": 30641,
+ "requestId": "log_bf5a9829894547c8a82e5fcc4d2f0932",
+ "date": "2026-10-09"
+}
