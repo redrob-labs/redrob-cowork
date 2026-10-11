@@ -52,6 +52,7 @@ describe("RedrobWorkSessionCreateTool", () => {
           onRevertToUserMessage={noop}
           onForkAtMessage={noop}
           onEditUserMessage={noop}
+          onRetryMessage={noop}
         >
           <RedrobWorkSessionCreateTool part={sessionCreatePart()} />
         </MessageListProvider>

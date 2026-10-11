@@ -132,6 +132,7 @@ describe("session error resilience", () => {
         onRevertToUserMessage={() => undefined}
         onForkAtMessage={() => undefined}
         onEditUserMessage={() => undefined}
+        onRetryMessage={() => undefined}
       >
         <MessageList messages={[message]} status="ready" />
       </MessageListProvider>,

@@ -15,13 +15,15 @@ const session: SearchableSession = {
   updatedAt: 1,
 };
 
-function textMessage(id: string, role: "user" | "assistant", text: string) {
+function userTextMessage(id: string, text: string) {
   return {
     info: {
       id,
-      role,
+      role: "user",
       sessionID: session.sessionId,
       time: { created: 1 },
+      agent: "build",
+      model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
     },
     parts: [
       {
@@ -38,7 +40,7 @@ function textMessage(id: string, role: "user" | "assistant", text: string) {
 describe("session search", () => {
   test("includes the matching message id", async () => {
     const searcher = createSessionSearcher(async () => [
-      textMessage("msg-user", "user", "Find this exact phrase"),
+      userTextMessage("msg-user", "Find this exact phrase"),
     ]);
     const matches: SessionSearchMatch[] = [];
     const run = searcher.search({
