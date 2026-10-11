@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/run-messaging-campaigns/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "a7d314316f9d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (대전·세종 only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**17,363** | 18,735 − 615 − D 권역 밖 757",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "세그먼트별 이메일 수와 합계가 정확하며 제외 목록과 대전·세종 배송 권역을 적용했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates eligible email recipients by segment (A: 7,720, B: 4,790, C: 1,620, D: 248, E: 2,985) totaling 17,363."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**4,772** | 4,940 − D 권역 밖 168",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "문자 합계가 정확하고 D는 대전·세종 52명만 포함했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 4,772 eligible SMS recipients with D reduced to 52 and out-of-region D excluded."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of ₩64,000 = ₩32,000 before dessert, over ₩18,000; e.g. 25% off (₩16,000), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "32,000 + 3,000×박스 수 (무기한), 최소 35,000원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "매니저 제안을 한도 초과로 거절하고, 중복 없는 16,000원 이하 혜택을 제시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the manager's offer with cost calculation exceeding ₩18,000, proposing compliant single discounts up to 25%."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, 새벽배송 for D",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "신메뉴 출시만 알리고, 품질을 단정하는 표현은 쓰지 않습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "A 가격, B 편의성, D 새벽배송은 맞춤화했지만 C 메시지에 불만 35% 감소를 활용하지 않았습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Messages are properly tailored to price for A, flexibility for B, new menu/QA report for C, and dawn delivery for D."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₩6,830,000",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "4,772×3.4% + 12,591×2.1% = 426.7",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "예측 대상과 약 427명은 정확하지만, 할인율을 달리하여 총비용은 기준의 약 683만원과 다릅니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 427 reactivations using the correct channel split formula, with segment-level benefit costs."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤90 bytes, counts accurate, \"(광고)\", brand, 080 opt-out; email subjects \"(광고)\"; 08:00–21:00; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "(광고)라더앤바인 다시 만나요! 첫 박스 25%할인 1/16까지 ldv.kr/wb 무료거부 080-000-0000 **(86바이트)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "문자 바이트 수와 필수 표시가 정확하며 이메일 광고 표시, 주간 발송, 재구독 시 자동 제외를 명시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SMS is exactly 86 bytes with required elements, email subjects use (광고), send times are daytime, and exit condition is set."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029114925,
+ "date": "2026-10-11"
+}

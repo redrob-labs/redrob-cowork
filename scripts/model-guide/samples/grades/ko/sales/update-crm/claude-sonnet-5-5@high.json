@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/update-crm/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "sales",
+ "task": "update-crm",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "944281c9ce3d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Solbong stays Negotiation, close ≈ 3 April (out of Q1), O-105 merged; Kim told \"not in Q1\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "마감일을 4/3로 옮기고 협상(75%) 단계로 유지했습니다. 중복 건(O-105)은 병합했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "협상 유지, 4월 3일 이월, 중복 병합과 1분기 수주 제외를 모두 명시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly keeps Solbong in Negotiation, sets close to 04-03, merges O-105, and tells Kim not in Q1."
+    }
+   ]
+  },
+  {
+   "check": "Hwangjo re-priced to ₩42,000k (63,000 ÷ 45 × 30) with close date 10 April",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "63,000÷45=1,400/개, ×30=42,000. 기존 마감일 2/27은 이미 지났고 고객 결정 시한은 4/10.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "수량 감소에 따른 42,000천 원 재산정과 4월 10일 마감일이 정확합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 42,000 correctly with explicit formula and sets close date to 04-10."
+    }
+   ]
+  },
+  {
+   "check": "Eastbrook €52,000 converted to ₩78,000k and kept in Q1 for the 26 March decision",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "52,000×1,500원=78,000,000원=78,000천 원.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "환산이 정확하며, 3월 26일 결정 확인과 3월 31일 마감으로 1분기에 유지했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Converts €52,000 to ₩78,000k and retains Q1 close date (03-31) for 3/26 decision."
+    }
+   ]
+  },
+  {
+   "check": "Hangang moved to Q3; Tidemark to a 2027-realistic date, ₩280,000k flagged as unqualified placeholder",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "예산 없음, 2027년 투자 검토 단계. 금액은 고객 확인 없는 내 추정치.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "한강화학은 9월 30일, 타이드마크는 2027년 6월 30일로 이동하고 추정 금액을 표시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Hangang moved to Q3 (09-30), Tidemark moved to 2027-06-30 and flagged as unverified estimate."
+    }
+   ]
+  },
+  {
+   "check": "Weighted = Amount × probability; Q1 falls from ₩207,000k to ₩123,000k, Basaem as Commit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **합계** | **557,000** | **207,000** | **190,000** | **123,000** | |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "금액×단계확률 공식을 적용했고, 가중 전망 감소와 바다샘 Commit 분류가 정확합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates weighted forecast dropping from 207,000 to 123,000 with Basaem as Commit."
+    }
+   ]
+  },
+  {
+   "check": "Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**솔봉식품 수주 오인 (O-104):** \"수주!!\" 메모는 구두 선정일 뿐 PO도 서명도 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "관리 문제 목록에 과거 마감일, 중복, 통화 오류, 추정 금액, 성급한 수주 판단이 모두 포함됐습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All 5 required hygiene issues are explicitly identified and addressed."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019276688,
+ "date": "2026-10-11"
+}

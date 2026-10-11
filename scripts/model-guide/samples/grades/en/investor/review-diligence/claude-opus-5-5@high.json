@@ -1,0 +1,128 @@
+{
+ "key": "en/investor/review-diligence/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "investor",
+ "task": "review-diligence",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "0d3bf4d1124d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "C1 $360,000 (−$60,000); C2 $260,000 (−$50,000); C3 $0 (−$275,000); C9 $87,600 (−$32,400)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CAD 120,000 × 0.73 USD/CAD = $87,600.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four customers have the required adjusted ARR and adjustment amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusts C1 to $360k, C2 to $260k, C3 to $0, and C9 to $87.6k."
+    }
+   ]
+  },
+  {
+   "check": "C8 $0 live, $132,000 separate; C6 $144,000 (alt. $180,000); C10 $66,000 (management's $75,000)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "$0 (not contracted)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "C8 and C6 are correct; C10’s $66,000 appears only as an alternative, not adjusted ARR."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly handles C8, C6 ($144k with $180k alt), and analyzes C10 at $66k vs management's $75k."
+    }
+   ]
+  },
+  {
+   "check": "Adjusted live ARR $1,505,600 (−$594,400, −28.3%), $1,637,600 with C8; bridge ties to $2,100,000",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Adjusted live ARR** | **1,439,600**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Bridge ties to $2,100,000, but live ARR, reduction, percentage, and total including C8 differ from required figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Bridge ties, but excludes C10 from base live ARR, arriving at $1,439,600 rather than $1,505,600 ($1,637,600 with C8)."
+    }
+   ]
+  },
+  {
+   "check": "At risk: C4 ($240,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Termination for convenience on 90 days' notice, exercisable after 9/30/25.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags C4’s $240,000 termination exposure and C5’s $198,000 June 2026 renewal exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately lists C4 and C5 with reasons, ARR at stake, and timing."
+    }
+   ]
+  },
+  {
+   "check": "Top-3 concentration (C1, C2, C4) ≈57.1% of adjusted ARR; C1 ≈23.9%",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**59.7%** (860,000 / 1,439,600)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies correct top three, but incorrect denominator produces 59.7% and 25.0%, rather than 57.1% and 23.9%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Identifies C1, C2, C4 correctly, but concentration percentages differ (59.7%/25.0% vs ~57.1%/23.9%) due to base ARR choice."
+    }
+   ]
+  },
+  {
+   "check": "At 6.0×: $12.6M vs ≈$9.03M, a ≈$3.57M gap; recommends re-price, earn-out or escrow",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "The adjusted live basis is **$8.64M**, a reduction of **$3.96M**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct $12.60M management price and re-pricing/earn-out recommendations; adjusted price and gap differ from required figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recommends re-pricing and earn-out, but price gap is $3.96M on $8.64M ARR rather than $3.57M on ~$9.03M."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.064969801,
+ "date": "2026-10-11"
+}

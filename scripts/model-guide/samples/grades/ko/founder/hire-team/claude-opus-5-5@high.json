@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/hire-team/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "41a0a7ce9c5b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: 이영희 3.44 (13.75 ÷ 4), 박영수 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "직접 계산하면 이영희 3.44(55/16), 박영수 3.50(56/16)입니다. ATS의 \"이영희 3.6, 추천: 이영희\"는 틀렸으므로",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both averages and rejects the ATS recommendation as stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "재계산된 평균(3.44, 3.50)과 ATS 추천 오류를 정확히 지적했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Spots the Senior CSM's 박영수 note describing 이영희's 밝은길소프트 role; if swapped, 이영희 ~3.56, 박영수 ~3.38",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "두 후보의 행이 바뀐 것이라면 이영희 3.56, 박영수 3.38로 순위가 뒤집힙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the employer mismatch and correctly calculates averages if the Senior CSM rows were swapped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CSM 의견의 회사명 혼선과 전도 시 점수(~3.56, ~3.38)를 명시했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with the Senior CSM a prerequisite, not a guess",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "오늘은 오퍼를 내지 않습니다. 아래 확인을 [수요일]까지 마치고 [금요일]에 결정하겠습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Makes verification prerequisite to an offer and explicitly asks the Senior CSM to confirm score attribution."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "추측 대신 시니어 CSM에게 사실 확인을 선결 과제로 요구했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the Head of Sales's children comment as improper, legally risky (남녀고용평등법, 채용절차법); unbiased follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "채용절차법·남녀고용평등법상 문제가 될 소지가 있어 결정에서 완전히 배제합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the children remark, identifies legal risk, and specifies equal travel questions, documentation, and interviewer training."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "관련 법령을 명시해 배제하고 후속 조치(교육, 중립적 출장 확인)를 제시했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Keeps 이영희's ₩120,000,000 ask (above the ₩110,000,000 ceiling) within policy; notes 박영수's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이영희 후보의 희망연봉(1억 2,000만원)이 승인 범위 상한(1억 1,000만원)을 넘습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Caps Lee’s salary within policy, offers permitted equity, and notes Park’s pending reference as a decision condition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "상한선 내 연봉 및 스톡옵션 보완안과 박영수의 미완료 평판조회를 명시했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "조직 구축은 박영수(CS 팀 3명→15명), 고객 전략은 이영희(갱신 플레이북)가 강점이고, 여기에 평판조회 결과를 더합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional, concise deliverables discuss role-specific evidence and practical risks; the preliminary email appropriately uses placeholders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "전문적이고 간결하며 플레이스홀더를 적절히 활용한 이메일을 작성했습니다."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020220112999999998,
+ "date": "2026-10-11"
+}

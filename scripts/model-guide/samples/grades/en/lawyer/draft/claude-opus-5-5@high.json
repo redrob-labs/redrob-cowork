@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/draft/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "draft",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "618c96e604c9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Milestones total $245,000, not $250,000; gap left as placeholder or assumption and raised in the email",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "The fixed fee is **$250,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Milestones total $245,000, but neither agreement nor email identifies or resolves the $5,000 gap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "The milestones add up to $245,000 while stating $250,000, but the gap is not addressed or raised."
+    }
+   ]
+  },
+  {
+   "check": "App software fits no §101(2) category: present \"hereby assigns\" under §204(a), work for hire only as backstop",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Orbitmade **hereby irrevocably assigns** to Fernhill all right, title and interest in the Deliverables.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Present assignment, limited work-for-hire backstop, personnel assignments, further assurances, and signature requirement address statutory ownership requirements."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes §101 non-applicability, provides a present assignment under §204(a), and keeps work for hire as a backstop."
+    }
+   ]
+  },
+  {
+   "check": "Orbitmade Core licensed perpetual, irrevocable, royalty-free, transferable; GPL-3.0 barred or needs Fernhill's approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The license is perpetual, irrevocable, worldwide, royalty-free and non-exclusive. It is sublicensable to contractors and transferable with the App.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Core license meets required terms; copyleft requires written consent, SleepWave is rejected, and email explains source-disclosure risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Licenses Orbitmade Core with the required terms and expressly bars SleepWave (GPL-3.0) without consent."
+    }
+   ]
+  },
+  {
+   "check": "Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, data, misconduct exclusions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "is subject to a separate cap of [$______ / 3x the Fee].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Acceptance is balanced and IP/misconduct are uncapped, but data liability remains capped and confidentiality lacks an exclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides balanced acceptance with cure rounds and reminder notice, and caps liability with IP, data, and misconduct carveouts."
+    }
+   ]
+  },
+  {
+   "check": "Subcontractors need approval, flow-down and Orbitmade liability; source code on termination; New York law and venue",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Orbitmade may use only the Subcontractors and countries approved in Schedule D [offshore QA: name and country].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Schedule approval, protective flow-downs, agency responsibility, termination source-code delivery, and New York law and venue are provided."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Requires subcontractor approval, flow-down, and liability; provides source code on termination; specifies NY law and venue."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025384537999999998,
+ "date": "2026-10-11"
+}

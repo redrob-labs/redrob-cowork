@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/hire-team/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "41a0a7ce9c5b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: 이영희 3.44 (13.75 ÷ 4), 박영수 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실측은 이영희 55/16=3.44, 박영수 56/16=3.50. ATS 추천 불채택.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both averages and rejects the erroneous ATS recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recomputed the averages (3.44 and 3.50) and identified the ATS recommendation as incorrect."
+    }
+   ]
+  },
+  {
+   "check": "Spots the Senior CSM's 박영수 note describing 이영희's 밝은길소프트 role; if swapped, 이영희 ~3.56, 박영수 ~3.38",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "밝은길은 이영희님 현직장이고 박영수님은 궤도페이입니다. 혼동이 있으셨을까요?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies the employer mismatch but omits the potential score swap and its recalculated averages."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Spots the mix-up regarding 밝은길소프트, but misses calculating the swapped scores (~3.56 and ~3.38)."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with the Senior CSM a prerequisite, not a guess",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "1) 박영수 2차 평판조회 완료 2) 시니어 CSM 정정 확인",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Requires clarification before proceeding, but does not explicitly require confirming candidate attribution of numerical scores."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats confirming the scores with the Senior CSM as an explicit prerequisite before deciding."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the Head of Sales's children comment as improper, legally risky (남녀고용평등법, 채용절차법); unbiased follow-up",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "직무무관 가족사항으로 반영·기록 불가하며 차별 리스크가 큽니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Excludes the remark, recognizes legal risk, and provides unbiased follow-up, but omits the relevant statutes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes comment as legally risky and unrelated, and outlines clear follow-up without bias."
+    }
+   ]
+  },
+  {
+   "check": "Keeps 이영희's ₩120,000,000 ask (above the ₩110,000,000 ceiling) within policy; notes 박영수's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "박 - 평판 1건 미완, 입사 6주 공백, 시니어CSM이 소속사 혼동. 이 - 희망 1.2억이 상한 1.1억 초과",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes Lee’s above-ceiling request, proposes only in-policy compensation, and requires Park’s pending reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses 이영희 exceeding the 1.1억 ceiling and notes 박영수's pending reference check."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "박의 `3명→15명 확장+SQL 최고`가 당사 과제에 직결.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides concise professional deliverables, role-based reasoning beyond averages, and a procedural email with placeholders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Memo and messages are concise and professional, recommendation is well-reasoned, and placeholders are used."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.015546563,
+ "date": "2026-10-11"
+}

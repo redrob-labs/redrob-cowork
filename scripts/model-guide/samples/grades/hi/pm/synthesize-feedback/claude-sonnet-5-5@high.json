@@ -1,0 +1,128 @@
+{
+ "key": "hi/pm/synthesize-feedback/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "847a28ee5aec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 (₹68 lakh), OCR 2, approvals 2 (₹46 lakh), bank feed 1 (₹26 lakh)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Unique accounts:** account name से dedupe।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States account-level deduplication and correctly reports mobile 3/₹68 lakh, OCR 2, approvals 2/₹46 lakh, bank 1/₹26 lakh."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly dedupes by account and calculates ARR for all themes, clearly stating deduplication method."
+    }
+   ]
+  },
+  {
+   "check": "Flags Deodar Logistics' ARR conflict (₹96 vs ₹69 lakh), picks one (e.g. OCR ₹170 lakh), suggests checking the CRM",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "इसलिए OCR का ARR range में दिया है: ₹143 lakh (69+74) से ₹170 lakh (96+74)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags ₹96 versus ₹69 conflict and requests billing verification, but never selects an ARR figure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies transposition/conflict, presents range (including ₹170 lakh), and recommends checking billing data."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Accounting export पहले से शिप है (मार्च, सभी plans, Settings › Integrations)। तीनों Starter accounts इसे ढूँढ नहीं पा रहे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Codes rows 2, 9 and 13 as discoverability and explains the feature already shipped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly codes rows 2, 9, and 13 as discoverability."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ARR में #1 से छोटा है, पर लगभग मुफ़्त है और सबसे व्यापक है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies OCR using two Enterprise accounts and renewal risk, versus mobile’s broader reach and two-week effort."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Thoroughly contrasts OCR renewal risk and Enterprise revenue against the cheap, broad mobile session bug fix."
+    }
+   ]
+  },
+  {
+   "check": "Treats the bank feed as a data-integrity risk despite only one account",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "पर यह सिर्फ़ एक account (₹26 lakh) है और effort अज्ञात है (partner-dependent), इसलिए इस पर commit नहीं कर सकते।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Acknowledges recurrence and low NPS, but does not treat missing bank transactions as a data-integrity risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discusses bank feed reliability/data issues and explains handling of the single account and partner dependency."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "16 entries असल में 12 unique accounts",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Covers small sample and account count, but omits ten survey responses and sales-note comparability caveat."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Mentions 12 accounts and small sample, but misses explicit callout of 10 survey NPS responses vs sales notes comparability."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018500475000000002,
+ "date": "2026-10-11"
+}

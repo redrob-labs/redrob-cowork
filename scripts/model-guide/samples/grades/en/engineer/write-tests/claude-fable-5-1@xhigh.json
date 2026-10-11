@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/write-tests/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "engineer",
+ "task": "write-tests",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "793b11e59955",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Shows `- 1` drops the change day: 15 February gives $14.00, not $15.00; last day $0.00, not $1.00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the product's own example yields **$14.00, not $15.00**, and a last-day switch charges **$0.00**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies exclusion of the change day and gives expected last-day $1.00 in the failure table."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the -1 bug, giving $14.00 for Feb 15 and $0.00 on the last day."
+    }
+   ]
+  },
+  {
+   "check": "Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**NO-GO.** The headline fix in the release notes is not in the code.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends no-go and supplies the minimal fix removing the subtraction of one day."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends no-go and specifies removing - 1 as the minimal fix."
+    }
+   ]
+  },
+  {
+   "check": "Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "def test_first_day_charges_full_difference(period, n):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests full first-day difference, invalid dates, leap-year February, and 30/31-day months with correct expectations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests first day full difference, outside boundaries with ValueError, leap year, and 30/31-day periods."
+    }
+   ]
+  },
+  {
+   "check": "Notes ROUND_HALF_UP takes −0.005 to −0.01, so downgrade credits mirror upgrades",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Negative half-cent → away from zero** (`-0.035 → -0.04`).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains half-up negative ties and tests negative half-cent rounding and downgrade symmetry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains that ROUND_HALF_UP rounds half-cents away from zero, preserving upgrade/downgrade symmetry."
+    }
+   ]
+  },
+  {
+   "check": "Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Floats are rejected** with `TypeError` at `Plan` construction",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Chooses and tests rejection; identifies two-float quantize failure, but omits mixed float–Decimal TypeError."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Picks and tests a float policy and identifies .quantize AttributeError, but glosses over float-Decimal TypeError."
+    }
+   ]
+  },
+  {
+   "check": "Tests are runnable, well named and parametrized; any property test states a real invariant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "1. prorate(old,new) == -prorate(new,old)        credit mirrors charge, incl. rounding",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable, clearly named, parametrized tests; optional Hypothesis test explicitly states meaningful invariants."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests are well-structured, runnable, and parametrized; property test defines clear invariants."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.033669563,
+ "date": "2026-10-11"
+}

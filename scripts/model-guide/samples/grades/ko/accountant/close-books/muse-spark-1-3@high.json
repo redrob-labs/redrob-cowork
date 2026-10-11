@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/close-books/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "f8aa5edd2fee",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits ₩4,527,000 into a duplicated ₩4,500,000 NHIS (공단) deposit and a ₩27,000 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 4,500,000 | DEP0314·DEP0315, 지급번호 77310 중복 계상. 은행은 1건만 입금 |\n| 27,000 | #2038 실제결제 1,974,000 > 장부 1,947,000 과소 기록 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "공단 중복 입금과 수표 금액 전기 오류로 차액을 정확히 구분했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly breaks down the ₩4,527,000 into the duplicate deposit and the check transposition error."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the miscellaneous-expense (잡비) plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "잡비 처리 불가",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "잡비로 차액을 메우는 처리를 명확히 거부하고 원인계정 정정을 요구했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly rejects plugging the discrepancy to miscellaneous expense."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to ₩86,562,050, moving to ₩86,972,050 if #2019 is voided",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "| **수정후 장부잔액** | **86,972,050** | 92,760,360+422,060-6,210,370, 일치 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "무효 처리 후 양쪽 잔액은 정확하지만, 무효 전 조정잔액 86,562,050원을 제시하지 않았습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both sides reconcile to ₩86,972,050 reflecting the voided check #2019."
+    }
+   ]
+  },
+  {
+   "check": "Returns the ₩350,000 chargeback to 박영수's patient receivable; fees to 지급수수료, interest to 이자수익",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 3/31 | 미수금-환자 박영수 350,000 | 당좌예금 350,000 | 카드 차지백, 환자에게 재청구. 잡비·할인 금지 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "차지백은 환자 미수금, 두 수수료는 지급수수료, 예금이자는 이자수익으로 정확히 처리했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reclassifies chargeback to patient receivable, card/bank fees to 지급수수료, and interest to 이자수익."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to a payable to the payee (미지급금) under the 90-day policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "장부는 현금 +410,000·미지급금 +410,000으로 수익환입 없이 유지·수취인 연락 요망.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "90일 규정에 따라 수표를 무효화하고 수취인 채무를 미지급금으로 유지했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly voids check #2019 to 미지급금 without recognizing income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to 김철수 is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "차액 452.7만원은 증빙 명확한 오류이니 잡비로 메우지 마세요.\n> 중복·과소 정정 반영하면 양쪽 86,972,050원으로 일치합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "모든 분개의 차대변이 일치하며, 검토 의견은 오류 원인과 필요한 조치를 구체적으로 안내합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All journal entries balance and the two-line review note is specific and constructive."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023191613,
+ "date": "2026-10-11"
+}

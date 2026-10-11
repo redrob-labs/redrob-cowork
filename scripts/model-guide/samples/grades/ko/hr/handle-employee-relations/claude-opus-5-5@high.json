@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/handle-employee-relations/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "420461a2f6f1",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "박영수's own card charge, expense claim and Sept 19 KakaoTalk disprove his denial; overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "핵심 사실 2건에서 진술이 객관 기록과 상충하여 신빙성을 낮게 평가했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "본인 카드 결제·정산·카카오톡으로 회식 불참 주장을 반박하고 전반적 신빙성을 낮게 평가했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly connects the denial to card, expense, and message, noting overall credibility damage."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct 인정 (김철수, card record, KakaoTalk); Sept 10 remark given a label with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### 5.2 9월 18일 행위: 인정",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "김철수 목격과 카드·메시지를 종합해 인정했으며, 9월 10일도 당일 전언과 신빙성 평가로 인정했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sept 18 found substantiated citing witnesses and objective records; Sept 10 reasoned and labeled."
+    }
+   ]
+  },
+  {
+   "check": "Retaliation: cut to 이영희 alone ~17 hours after notice; seniority claim tested; 불리한 처우 under §14⑥",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "HR 통보 약 17시간 뒤, 피신고인이 직접 초안을 수정해 신고인만 남겼습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "보복을 인정하고 제14조 제6항을 적용했습니다. 선임 설명의 모순을 검토하고 인사기록 확인을 남겼습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes 17-hour timeline, tests seniority defense, and identifies breach of §14⑥."
+    }
+   ]
+  },
+  {
+   "check": "Gives 강○○'s unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "회식에 불참했고, 진술은 출처를 밝히지 않은 전문(傳聞)이자 평판에 관한 내용이므로 판정에 반영하지 않았습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "익명 출처의 간접 전언과 평판이라는 이유로 증거 가중치를 배제했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly gives it no weight and explains it is unnamed hearsay/reputation."
+    }
+   ]
+  },
+  {
+   "check": "Remedies (§14③⑤⑦): reverse shift per her wishes, remove 박영수 from her scheduling, proportionate discipline, check-ins, confidentiality",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "박영수를 신고인에 대한 근무 편성, 평가, 업무 지시 권한에서 배제하고 결재선을 변경합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "의사에 따른 원상회복·권한 배제·징계 회부·비밀유지는 있으나, 정기 확인과 비례적 징계 기준이 없습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers reversal per wishes, removing 박영수 from scheduling, discipline, reporting/check-in channel, and confidentiality."
+    }
+   ]
+  },
+  {
+   "check": "Open items include verifying seniority records and checking for further retaliation",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "정○○·최○○의 선임 여부 및 근무조 배정 기준에 관한 인사 기록 확인",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "선임 기록 검증은 미결 사항에 포함했으나, 추가 보복 여부 확인은 없습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Lists verifying seniority records and checking for further harm/retaliation/leaks under open items."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0185661,
+ "date": "2026-10-11"
+}

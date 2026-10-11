@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/review-diligence/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "investor",
+ "task": "review-diligence",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "7a2b49fbb2ea",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "C1 ₩360,000,000 (−₩60,000,000); C2 ₩260,000,000 (−₩50,000,000); C3 ₩0 (−₩275,000,000); C9 ₩112,800,000 (−₩7,200,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| C9 아이언우드 | 120,000,000 | 112,800,000 | -7,200,000 | 환율 | 12,000,000엔×940원÷100엔 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "C1, C2, C3, and C9 adjusted ARR and deductions all match."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusted C1, C2, C3, and C9 to the specified amounts."
+    }
+   ]
+  },
+  {
+   "check": "C8 ₩0 live, ₩132,000,000 separate; C6 ₩144,000,000 (alt. ₩180,000,000); C10 ₩66,000,000 (management's ₩75,000,000)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "ARR＝1,464.8＋66＝1,530.8; 6배 가격 +396",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "C8 and C6 treatments match; C10 ₩66 million appears only as an alternative, with zero in the base case."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculated ₩66M and ₩75M as alternatives, but adopted ₩0 in the primary table."
+    }
+   ]
+  },
+  {
+   "check": "Adjusted live ARR ₩1,530,800,000 (−₩569,200,000, −27.1%), ₩1,662,800,000 with C8; bridge ties to ₩2,100,000,000",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "2,100－60－50－275－36－132－7.2－75＝1,464.8",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Bridge reconciles, but base ARR and reduction are incorrect; correct live ARR appears alternatively, and C8-inclusive total is absent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Base bridge reached ₩1,464.8M; ₩1,530.8M was only noted in C10 alternative, and ₩1,662.8M was omitted."
+    }
+   ]
+  },
+  {
+   "check": "At risk: C4 (₩240,000,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2025.9.30 이후 임의해지권 및 90일 통지 조항으로 장기 계약기간이 매출을 보장하지 않음",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags C4’s ₩240 million termination exposure and C5’s ₩198 million June 2026 renewal exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identified both C4 and C5 with reasons and exposed ARR amounts."
+    }
+   ]
+  },
+  {
+   "check": "Top-3 concentration (C1, C2, C4) ≈56.2% of adjusted ARR; C1 ≈23.5%",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "| C1·C2·C4 | 360＋260＋240＝860 | 860÷1,464.8＝**58.7%** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies correct top three and aggregate ARR, but uses incorrect denominator; C1’s individual concentration is omitted."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Computed top-3 concentration (58.7% due to base ARR), but omitted C1 individual concentration."
+    }
+   ]
+  },
+  {
+   "check": "At 6.0×: ₩126억 vs ≈₩91.8억, a ≈₩34.2억 gap; recommends re-price, earn-out, escrow or special indemnity",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "회사 기준 21×6＝**126억원** → 조정 기준 14.648×6＝**87.888억원**; **38.112억원 하락**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct company valuation, but adjusted valuation and gap are wrong; negotiation protections are discussed only generically."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Valuation reflects ₩87.9억 instead of ₩91.8억; lacks specific SPA mechanisms like earn-out, escrow, or special indemnity."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.032588588,
+ "date": "2026-10-11"
+}

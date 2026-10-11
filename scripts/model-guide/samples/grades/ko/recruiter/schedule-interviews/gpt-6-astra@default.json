@@ -1,0 +1,128 @@
+{
+ "key": "ko/recruiter/schedule-interviews/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "recruiter",
+ "task": "schedule-interviews",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "6b42193ad8c9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5; Seoul UTC+9",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "리스본 UTC+0(WET), 베를린 UTC+1(CET), 뉴욕 UTC−4(EDT), 시카고 UTC−5(CDT).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five offsets are correct, with European and American DST transition dates correctly explained."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies all offsets, DST change dates, and KST UTC+9."
+    }
+   ]
+  },
+  {
+   "check": "Park on Tue 27 Oct: from 14:00 UTC, Lee by 16:00, Mary clear of 15:00–16:00, 30-minute breaks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 코딩 / Mary Major | 10/27 16:30–17:15 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Park is scheduled Tuesday from 14:00 UTC, Lee finishes before 16:00, Mary avoids her conflict, and breaks are 30 minutes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly schedules Park on 27 Oct with 30-min breaks, starting 14:00 UTC, avoiding conflicts."
+    }
+   ]
+  },
+  {
+   "check": "Kim Cheol-su on Wed 28 Oct, all sessions within 13:00–16:00 UTC, Hong clear of 13:00–13:30 UTC",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "| 시스템 설계 / 이영희 | 10/28 12:00–12:45 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Kim is scheduled Wednesday and Hong avoids standup, but Lee's session falls outside the specified 13:00–16:00 UTC window."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Scheduled on Wed 28 Oct within participants' working hours, Hong avoids standup."
+    }
+   ]
+  },
+  {
+   "check": "KST record dates roll over: e.g. Park 23:00 Tue – 02:15 Wed, Kim 22:00 Wed – 00:45 Thu",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 코딩 / Mary Major | 10/27 16:30–17:15 | 11:30–12:15 | 뉴욕 12:30–13:15 | 10/28 01:30–02:15 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Park's KST rollover is correct; Kim's earlier schedule correctly remains on October 28. All KST conversions include dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rolls over KST dates across midnight for Park's late sessions."
+    }
+   ]
+  },
+  {
+   "check": "Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "박영수 님 전 세션은 실시간 자막을 활성화하고 사전 작동 점검 바랍니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides captions, written coding prompts, and 30-minute breaks without disclosing hearing loss to the panel."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accommodations arranged and communicated to panel without mentioning he is hard of hearing."
+    }
+   ]
+  },
+  {
+   "check": "Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 김철수 | 최종 면접 – 일정 확정 | 2026-10-28 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Emails are courteous, use correct candidate-local times, include links and expectations; CRM records scheduled stages and dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Warm emails with correct local times and placeholder links; CRM shows scheduled stage and dates."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.06307533800000001,
+ "date": "2026-10-11"
+}

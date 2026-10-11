@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/financial-statements/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "2f3e638b1754",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss $1,614k, deficit $594k as booked (or $1,584k and $564k if corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Total liabilities and stockholders' deficit** | **2,634**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Statements tie at $2,634k, with $1,614k net loss and $594k stockholders' deficit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Statements tie, showing net loss of $1,614k and total stockholders' deficit of $(594)k."
+    }
+   ]
+  },
+  {
+   "check": "Deferred revenue $740k current, $280k noncurrent; lease $96k/$240k; notes and accrued interest noncurrent",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "*Deferred revenue* — split 740 / 280 per Mary's analysis of post-2025 service periods.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly splits deferred revenue and lease liabilities; classifies notes and accrued interest as noncurrent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly splits deferred revenue (740/280), lease liability (96/240), and classifies notes and accrued interest as noncurrent."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be $90k (1,500 × 8% × 9/12), not $120k; proposes treating the $30k",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Nine months at 8% on $1,500k is exactly $90k; with no other debt and no cash interest, $30k of expense is unexplained.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the $30k discrepancy and proposes correction or reclassification after investigating its offset."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the calculation and proposes treatments for the $30k difference."
+    }
+   ]
+  },
+  {
+   "check": "Concludes substantial doubt: ~10.5 months' runway, customer loss, unsigned term sheet; doubt not alleviated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "so these plans do not alleviate the substantial doubt.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Cash and burn imply 10.5 months; identifies fourth-quarter exhaustion, customer loss, unsigned financing, and unalleviated substantial doubt."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly concludes substantial doubt exists and is not alleviated, noting runway, customer non-renewal, and unsigned term sheet."
+    }
+   ]
+  },
+  {
+   "check": "Discloses the CEO loan as related party, questions its classification, flags missing board approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The loan is unsecured, non-interest-bearing and has no stated repayment date; it has not been approved by the Board.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses related-party loan, explains noncurrent classification, considers alternatives, and flags missing board approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses CEO loan as related party, discusses and questions its balance sheet classification, and flags lack of board approval."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a nonrecognized subsequent event",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "This is a non-recognized subsequent event; it is considered in the going-concern assessment (note a).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats customer nonrenewal as nonrecognized and incorporates it into going-concern assessment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly classifies the customer's non-renewal as a nonrecognized subsequent event."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016271325,
+ "date": "2026-10-11"
+}

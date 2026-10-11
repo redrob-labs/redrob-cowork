@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/answer-customers/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "2ac515d9d488",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; ₩5,520,000 invoice is an error, corrected by ₩720,000 to ₩4,800,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "계약 단가 40,000원은 2027년 2월 28일까지 보장됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct protection date, erroneous ₩5,520,000 invoice, ₩720,000 correction, and ₩4,800,000 revised charge are all stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies price protection date, invoice error, correction amount (₩720,000), and correct fee (₩4,800,000)."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ ₩480,000; claim within 30 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "정정된 이용료 기준: `4,800,000원 × 10% = 480,000원`.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 220 of 40,320 minutes, 99.454% uptime, 10% credit, and timely claim; appropriately flags month-end confirmation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 220 mins downtime out of 40,320 mins (99.454%), 10% credit (₩480,000), and confirms timely claim."
+    }
+   ]
+  },
+  {
+   "check": "Explains degraded time isn't downtime vs \"9 hours\", invites her records; no full refund; goodwill labelled, justified",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "고객이 보고한 9시간과 상태 페이지의 차이는 지점별 이용 불가 시간·증상을 확인할 것.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains excluded degradation and denies full refund, but does not invite the customer to share records. No goodwill offered."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Differentiates degraded performance from outage and denies full refund, but omits an explicit invitation for customer records."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "메디스크라이브 연동은 파트너의 별도 개발·검증이 필요하며, 현재 호환을 보장할 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly distinguishes FHIR R4, absent HL7 v2, and absent native integration, but offers no concrete follow-up assistance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Accurately explains FHIR R4 support and lack of HL7 v2/native integration, but offers no concrete next step."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at ₩40,000 under §3.3: 135 seats, ₩5,400,000 a month from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "총 `135 × 40,000원 = 5,400,000원/월`. 추가 좌석에도 가격 보장 적용.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms March addition of 15 seats at ₩40,000, totaling 135 seats and ₩5,400,000 monthly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies ₩40,000 to 15 added seats, totalling 135 seats and ₩5,400,000 per month."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "잘못된 청구와 출퇴근 기록 이용에 불편을 드린 점 사과드립니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accountable, empathetic tone; internal memo clearly assigns correction, credit, and additional-seat actions with amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Professional and empathetic tone maintained, and internal note clearly details each action with specific amounts."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0235179,
+ "date": "2026-10-11"
+}

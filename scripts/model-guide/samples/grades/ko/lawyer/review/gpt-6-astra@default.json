@@ -1,0 +1,110 @@
+{
+ "key": "ko/lawyer/review/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "577797990b7d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "처리위탁 agreement is the blocker: 민감정보 shared, Exhibit C omitted, §26①; don't sign or go live first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "수정합의 및 완성된 별첨 C 서명 전에는 환자 정보를 제공하지 않는다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "누락된 별첨 C, 민감정보 및 제26조 요건을 확인하고 부속서 서명 전 정보 제공을 금지한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies missing Exhibit C and sensitive data under §26, advising against signing or sharing data."
+    }
+   ]
+  },
+  {
+   "check": "Cap is ₩4,500만 (3 months, implementation excluded) vs guideline ₩2억 4천만 in year 1, ₩5억 4천만 super-cap",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "첫해 구축비 포함 **2억 4천만원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "현행 4,500만원, 첫해 기준 2억 4천만원, 개인정보 별도 상한 5억 4천만원을 정확히 계산한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates the ₩45M cap excluding implementation against the ₩240M guideline and ₩540M super-cap."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP defence is capped; 9.2 excludes notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "없는 10.4 인용으로 예외 불명확",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "잘못된 인용과 통지비용 배제는 지적하지만, IP 방어의 상한 적용 및 고객 보전의 무상한성을 명시하지 않는다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes missing §10.4 capping defense, §9.2 excluding notification costs, and overly broad §10.2 indemnity."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, 대전 venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "갱신은 1년, 거절 통지는 만료 60일 전까지, 인상률은 3% 이하로 한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "갱신, SLA, 관할, 종료 조건 모두 가이드라인에 맞춘 구체적 수정안을 제시한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides redlines covering renewal terms, 99.9% non-exclusive SLA, Seoul venue, and 60-day free exit."
+    }
+   ]
+  },
+  {
+   "check": "§29 makes 대전 venue valid; 약관규제법 §§12, 14 may help, but §4 limits it; calendar and negotiate",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "사후 무효 주장에 의존하지 말고, 제4조에 따라 우선하는 **실제 개별 협상·서명 합의**로 수정한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "대전 관할의 유효성과 약관법상 조건부 구제를 설명하지만, 갱신 기한 일정 등록과 개별합의의 약관법 적용 제한을 누락한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly analyzes §29, §§12, 14, §4, and negotiating, but omits calendaring the renewal deadline."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026751375,
+ "date": "2026-10-11"
+}

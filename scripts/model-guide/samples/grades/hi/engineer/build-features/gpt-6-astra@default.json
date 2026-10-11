@@ -1,0 +1,128 @@
+{
+ "key": "hi/engineer/build-features/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "build-features",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "754a8b61a1c0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Lists the bugs: float rupees, member discount on formula, GST added to inclusive MRP, GST on groceries, whole-cart tax",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Floating-point रुपये और unrounded cart-level discount इस्तेमाल होते थे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Lists all five bugs, including formula discounts, inclusive-MRP double taxation, grocery GST, and missing per-line taxation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately lists all key bugs from the original code."
+    }
+   ]
+  },
+  {
+   "check": "Rejects FRESH10 with below_minimum: eligible ₹863.50 (cart ₹1,312.50) is under ₹1,000; states the minimum's check order",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Minimum की जाँच **membership से पहले**, उस promo के eligible items के subtotal पर होती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects FRESH10 as below_minimum; correctly states ₹863.50 eligible, ₹1,312.50 total, and pre-membership minimum checking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects FRESH10 as below_minimum, gives the ₹863.50 eligible amount, and states the check order."
+    }
+   ]
+  },
+  {
+   "check": "Applies only the Plus discount, ₹43.18 on ₹863.50 (bananas ₹2.325 → ₹2.33); payable ₹1,269.32",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **कुल** | **1,312.50** | **43.18** | **0.00** | **1,269.32** | **101.10** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct Plus-only discount and payable; per-line half-up calculation rounds bananas’ ₹2.325 discount to ₹2.33."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies the ₹43.18 Plus discount with banana half-paisa rounding and total payable ₹1,269.32."
+    }
+   ]
+  },
+  {
+   "check": "GST only from dish soap (₹32.61 on ₹213.75) and formula (₹68.49), ₹101.10; lines sum exactly in paise",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| डिशवॉश लिक्विड × 2 | 225.00 | 11.25 | 0.00 | 213.75 | 32.61 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Soap GST ₹32.61 and formula GST ₹68.49 total ₹101.10; integer-paise line amounts reconcile exactly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "GST is calculated only on soap and formula, totaling ₹101.10, summing exactly in paise."
+    }
+   ]
+  },
+  {
+   "check": "Proportional fixed-discount allocation with remainders, capped at the eligible amount; inclusive IST date check",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const target = Math.min(requestedPaise, basisTotal);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Implements capped proportional allocation, largest-line signed remainder corrections, and inclusive expiry using normalized IST dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Implements proportional allocation with remainders, caps at eligible amount, and enforces inclusive IST dates."
+    }
+   ]
+  },
+  {
+   "check": "Passing tests cover each reason code, case-insensitivity, formula exclusion, HOME15 scope and half-paisa rounding",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "it('rounds percent promo half-up per line', () => {",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests cover all rejection reasons, case-insensitivity, formula exclusion, HOME15 scope, and half-paisa rounding; expectations match implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests comprehensively cover all reason codes, case insensitivity, formula exclusion, HOME15 scope, and half-paisa rounding."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.040511363,
+ "date": "2026-10-11"
+}

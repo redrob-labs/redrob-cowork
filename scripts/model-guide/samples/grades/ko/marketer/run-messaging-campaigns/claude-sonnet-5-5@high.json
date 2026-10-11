@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/run-messaging-campaigns/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "a7d314316f9d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (대전·세종 only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**17,363**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All segment email counts correctly apply suppressions and restrict D to eligible Daejeon–Sejong customers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates eligible email recipients for each segment and total (17,363)."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**4,772**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SMS counts are correct, including D reduced to 52 and other D customers excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reduces segment D SMS to 52, excluding non-service areas, for 4,772 total."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of ₩64,000 = ₩32,000 before dessert, over ₩18,000; e.g. 25% off (₩16,000), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "❌ 중복 적용 불가, 50% 할인만으로도 초과",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates ₩32,000 before dessert, rejects stacking, and offers benefits within the ₩18,000 ceiling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects manager offer with exact math exceeding the ₩18,000 cap, proposing unstacked alternatives."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, 새벽배송 for D",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "C: 9월부터 메뉴가 새로워졌어요",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Addresses price, convenience, new menus, and expanded dawn delivery, but omits the 35% complaint reduction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Tailors angles for A, B, and D, and mentions C's new menu, but omits the 35% complaint decrease."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₩6,830,000",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**427** | **5,591,400원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct forecast bases and reactivation total; cost differs from the checklist because segment benefits vary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly forecasts 427 reactivations using the past rates, and sums segment-specific benefit costs."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤90 bytes, counts accurate, \"(광고)\", brand, 080 opt-out; email subjects \"(광고)\"; 08:00–21:00; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "바이트는 71·72로 90 이내여야 하며",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both byte counts are accurate; advertising labels, brand, opt-out, daytime scheduling, and reactivation exits are included."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Complies with all SMS byte limits, legal identifiers, opt-out, daytime hours, and reactivation exit condition."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030204563,
+ "date": "2026-10-11"
+}

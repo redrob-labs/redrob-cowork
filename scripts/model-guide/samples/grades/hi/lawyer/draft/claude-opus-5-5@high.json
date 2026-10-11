@@ -1,0 +1,128 @@
+{
+ "key": "hi/lawyer/draft/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "draft",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "5f89194cc3bc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Milestones total ₹1.96 crore, not ₹2 crore (₹4 lakh gap); placeholder or assumption, raised in the email",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Milestones का योग ₹1.96 crore है, ₹2 crore नहीं। ₹4 लाख कहाँ रखें?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Draft flags the ₹4 lakh gap with resolution placeholders; email requests the allocation decision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identified the gap in both the draft and the cover email."
+    }
+   ]
+  },
+  {
+   "check": "No work for hire (s.17: agency owns); signed \"hereby assigns\" per s.19: worldwide, full term, 19(4) lapse disapplied",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसलिए Orbitmade, धारा 19 के तहत, सभी Developed IP Fernhill को assign करता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Present written assignment identifies works and rights, specifies worldwide full-term ownership, and expressly disapplies section 19(4)."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disapplies work for hire under s.17, assigns worldwide for full term, and waives s.19(4)."
+    }
+   ]
+  },
+  {
+   "check": "Orbitmade Core licensed perpetual, irrevocable, royalty-free, worldwide, transferable; GPL-3.0 barred or needs Fernhill's approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "perpetual, irrevocable, worldwide, royalty-free और non-exclusive है;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Core licence is transferable with the app; SleepWave is rejected and copyleft requires prior written approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Licenses Orbitmade Core appropriately and expressly bars SleepWave GPL-3.0."
+    }
+   ]
+  },
+  {
+   "check": "Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, personal-data, misconduct exclusions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Clause 6 के उल्लंघन और Clause 8.1(b) के लिए अलग super-cap लागू होगा: [कुल Fees का 2x / ₹●]।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Acceptance is balanced and IP/misconduct are uncapped, but personal-data liability remains capped rather than excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides balanced acceptance rounds and a liability cap carving out IP, data, and misconduct."
+    }
+   ]
+  },
+  {
+   "check": "DPDP s.8(2) contract: instructions, safeguards, prompt breach notice, deletion; subcontractors approved, none in s.16 countries",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "धारा 16(1) के तहत प्रतिबंधित किसी देश में transfer किसी भी स्थिति में नहीं होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes instructed processing, safeguards, 24-hour breach notice, deletion, approved subcontractors, flow-down obligations, and restricted-country transfer prohibition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fully incorporates DPDP s.8(2) requirements, safeguards, prompt notice, deletion, and s.16 cross-border limits."
+    }
+   ]
+  },
+  {
+   "check": "Source code on termination; Indian law, Mumbai seat (courts or arbitration); narrow non-solicit, s.27 caveat noted",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Term के दौरान और उसके [12] महीने बाद तक,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Source-code handover, Indian law, Mumbai arbitration, and narrow non-solicitation are included; section 27 enforceability caveat is missing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes source code, Indian law, and Mumbai seat, but omits the Section 27 enforceability caveat."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026766863000000002,
+ "date": "2026-10-11"
+}

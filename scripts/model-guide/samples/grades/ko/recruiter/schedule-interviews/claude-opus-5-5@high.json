@@ -1,0 +1,128 @@
+{
+ "key": "ko/recruiter/schedule-interviews/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "recruiter",
+ "task": "schedule-interviews",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "6b42193ad8c9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5; Seoul UTC+9",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "베를린 UTC+1(CET), 리스본 UTC+0(WET)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five offsets and the EU, US, and Seoul daylight-saving explanations are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies all city offsets and the EU daylight saving transition on Oct 25."
+    }
+   ]
+  },
+  {
+   "check": "Park on Tue 27 Oct: from 14:00 UTC, Lee by 16:00, Mary clear of 15:00–16:00, 30-minute breaks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "박영수: 10월 27일(화), 세션 사이 휴식 30분",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tuesday sessions start at 14:00 UTC, finish Lee before 16:00, avoid Mary's conflict, and provide 30-minute breaks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Schedules Park on Oct 27 starting at 14:00 UTC with 30-minute breaks and avoids conflicts."
+    }
+   ]
+  },
+  {
+   "check": "Kim Cheol-su on Wed 28 Oct, all sessions within 13:00–16:00 UTC, Hong clear of 13:00–13:30 UTC",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "김철수: 10월 28일(수), 세션 사이 휴식 15분",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Wednesday sessions run 13:00–15:45 UTC; Hong starts at 15:00, avoiding his standup."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Schedules Kim on Oct 28 from 13:00 to 15:45 UTC, avoiding Hong's standup."
+    }
+   ]
+  },
+  {
+   "check": "KST record dates roll over: e.g. Park 23:00 Tue – 02:15 Wed, Kim 22:00 Wed – 00:45 Thu",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2026-10-27 23:00–10-28 02:15 KST",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both schedules and CRM correctly show KST dates rolling into the following day."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly shows KST dates rolling over past midnight to the following calendar day."
+    }
+   ]
+  },
+  {
+   "check": "Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "모든 세션에 실시간 자막을 켜고, 코딩 문제는 글로도 함께 공유하며, 세션 사이에 30분 휴식을 둡니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All requested accommodations are arranged; the panel receives preparation instructions without the hearing-related reason."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Configures captions, written prompt, and 30-minute breaks without disclosing hearing impairment."
+    }
+   ]
+  },
+  {
+   "check": "Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최종 면접 – 일정 확정",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Emails are welcoming, correctly localized, and include links and expectations; CRM records scheduled stages and correct dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both candidate emails use local times with links, and the CRM accurately updates stage and dates."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030436088,
+ "date": "2026-10-11"
+}

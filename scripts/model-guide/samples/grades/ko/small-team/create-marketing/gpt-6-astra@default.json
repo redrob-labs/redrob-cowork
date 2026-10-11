@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/create-marketing/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "create-marketing",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "03c5cceff2e0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Savings fixed: ₩36,000 vs ₩40,000 (4 × ₩10,000) is 10%, ₩4,000 a month, not 25% (or \"₩9,000 a loaf\")",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "매장가 합계 40,000원 대비 4,000원, 10% 할인",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly states the monthly saving and replaces the erroneous 25% claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly corrects 25% discount to 10% based on 40,000 vs 36,000."
+    }
+   ]
+  },
+  {
+   "check": "No \"100% 유기농\" (seed mix uncertified); uses wording like \"유기농 인증 밀가루 사용\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "미인증 씨앗 믹스가 있어 ‘전부 100% 유기농’은 ‘유기농 인증 밀가루 사용’으로 한정했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits the organic claim to certified flour and explains the uncertified seed mix."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids '100% 유기농' and specifies organic certified flour."
+    }
+   ]
+  },
+  {
+   "check": "No \"글루텐프리\" (shared kitchen, no testing); allergen note included; note to the owner explains both risks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "‘글루텐프리’는 검증되지 않아 제외하고 밀 교차접촉 가능성을 안내했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes gluten-free claims, includes all listed allergens, and explains certification limitations and cross-contact risks to the owner."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Omits '글루텐프리', includes allergen note, and explains risks in note to owner."
+    }
+   ]
+  },
+  {
+   "check": "Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "도달 대비 클릭도 약 1.52%로 릴스(0.59%)보다 높았습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly compares click-through rates, acknowledges reels’ superior reach, and prioritizes carousel conversions with supplementary sharing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states trade-off between carousel click-through rate and reel reach using data."
+    }
+   ]
+  },
+  {
+   "check": "Both pieces carry 2 May, Saturday 8–11am pickup, ₩36,000/month for 4 loaves, URL, first-50 tote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "게시 전 프로필 링크를 `https://gurisot.example.com/subscribe`로 설정합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both deliverables include all essential details; Instagram directs applicants to the specified profile URL."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both Instagram plan and flyer include all five essential details."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at A5 proportions, brand colours, clear hierarchy, legible Korean text sizes, sufficient contrast",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "width=\"148mm\" height=\"210mm\" viewBox=\"0 0 420 595\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Self-contained valid A5 SVG uses brand colours, clear hierarchy, readable Korean text, and strong text contrast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SVG is valid at A5 viewBox, uses brand colors, has clear hierarchy and legible text."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022422749999999998,
+ "date": "2026-10-11"
+}

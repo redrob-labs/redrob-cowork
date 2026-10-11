@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/create-proposals/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "create-proposals",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "1049ac47a2b0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Prices 12 live properties, 2,160 rooms; flags \"14 hotels\"; offers 2027 openings (~300 rooms) as add-on",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "दायरा: गोवा, जयपुर, उदयपुर और केरल की 12 properties, 2,160 rooms",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Prices 12 properties correctly and offers 2027 additions, but never explicitly flags the discovery claim of 14 hotels."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Prices 12 properties/2,160 rooms and offers the two 2027 properties as an add-on."
+    }
+   ]
+  },
+  {
+   "check": "List ₹77,76,000/year; 15% discount gives ₹66,09,600/year net; implementation ₹9,00,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**₹66,09,600** (₹255/room/माह)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct list price, additive 15% discount, net annual subscription, and ₹9,00,000 implementation, with methods."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates list price, 15% discount net subscription, and implementation correctly."
+    }
+   ]
+  },
+  {
+   "check": "3-year subscription ₹1,98,28,800, or ₹2,07,28,800 including implementation, all before GST",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**₹2,07,28,800**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct three-year subscription and total including implementation; GST explicitly additional."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both 3-year subscription and total contract value match the required amounts exactly."
+    }
+   ]
+  },
+  {
+   "check": "No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मेरी सलाह है कि इसे offer न करें। Proposal में 15% (volume + multi-year) रखा गया है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects 30%, explains the 20% authority limit, and proposes an authorized 15% discount."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the 30% discount offer and stays within the 15%/20% AE limit."
+    }
+   ]
+  },
+  {
+   "check": "Labour savings ≈ ₹5,04,000/year, not ₹20 lakh; upsell ≈ ₹5.11 crore/year is gross pilot-based revenue; payback revised",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सही आँकड़ा लगभग 1.75 महीने है, और यह gross upsell revenue पर आधारित है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects labour savings to ₹5,04,000; labels ₹5.11 crore as pilot-based gross revenue and revises payback with assumptions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects labour savings to ₹5,04,000, notes upsell is gross pilot revenue, and updates payback."
+    }
+   ]
+  },
+  {
+   "check": "States the on-premise requirement is unmet (cloud-only, India data in Mumbai); no full-compliance claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Cabana Connect केवल cloud पर चलता है; on-premise version उपलब्ध नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly marks on-premise unmet, identifies Mumbai India residency, and rejects full compliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states on-premise is not supported, notes Mumbai cloud residency, and disproves full compliance."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020311725000000003,
+ "date": "2026-10-11"
+}

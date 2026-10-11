@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/research-companies/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "research-companies",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "2cc3437528d5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Base 281,960 full-service + 52,000 institutional = 333,960 locations; TAM about ₩8,683–9,184억; limited-service out of SAM",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "풀서비스 281,960개 + 집단급식 52,000개 = 333,960개",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct base and limited-service exclusion from SAM, but TAM includes limited-service and incorrectly reaches 19,435억원."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Accurately calculated 333,960 locations and ₩9,017억, but designated it as SAM rather than TAM."
+    }
+   ]
+  },
+  {
+   "check": "Current market: ≈8,459 + 5,720 ≈ 14,200 locations, about ₩369–390억 a year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "14,179×270만원 | **383억원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly applies segment penetration rates and annual price; locations and market value fall within accepted ranges."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 14,179 locations and ₩383억."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the ₩4.2조: global, covers hauling, composting and digestion, and is company-sourced",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "글로벌 수거·퇴비화·소화 포함 관리시장으로, 국내 측정 SW와 지역·밸류체인·BM이 모두 다름.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects geographic and activity mismatches, but does not explicitly identify company sourcing as a credibility concern."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies global scope, non-software waste management, and company marketing nature."
+    }
+   ]
+  },
+  {
+   "check": "Annualizes 빈사이트 ₩2,280,000, 스크랩리스 ₩2,760,000 (2021 ₩129,000 stale), 키친레저 ₩3,000,000 plus hardware",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "경상 300만원+초기 200만원=1년차 500만원, 2025",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Annualizes all three correctly, separates hardware, uses current Scrapless pricing, and flags the 2021 article as stale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly annualizes all competitor prices and notes the 2021 figure is stale."
+    }
+   ]
+  },
+  {
+   "check": "키친레저's Series B is ₩140억 from the press release, not the aggregator's ₩400억",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "140억 Series B, 25.3.12보도자료·리드명시(상). 큐레이션 400억(하, 오기)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the primary release’s 140억원 and rejects the aggregator’s conflicting 400억원."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accepts ₩140억 from the press release and rejects the aggregator's ₩400억."
+    }
+   ]
+  },
+  {
+   "check": "Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "한정서비스 본부탑재 외 풀서비스 개인점 이탈 14%의 코호트·NRR과 급식 유지율은?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Questions restaurant churn and institutional skew, but does not connect these findings to SAM inclusion or exclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Formulates founder questions on churn and institutional skew, but does not explicitly link them to SAM scope."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027451725,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/hr/handle-employee-relations/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "d53735231202",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Roe's own receipt and Sept 19 Slack DM disprove his dinner denial; treated as an overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Roe’s credibility is materially undermined by a demonstrably inaccurate denial of dinner attendance contradicted by his own expense submission and message",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Receipt and DM contradict attendance denial; report explicitly applies this contradiction to Roe’s overall credibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly notes the receipt and DM disprove Roe's denial and treats this as an overall credibility hit."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct Substantiated (Stiles, receipt, DM); Sept 10 remark given a label with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### Allegation 2 — Sept. 18 dinner conduct — Substantiated",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Dinner finding relies on Stiles, receipt, and DM; scrubs remark is separately substantiated with contemporaneous disclosure and credibility reasoning."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Substantiates the Sept 18 conduct citing Stiles, receipt, and DM; labels and reasons the Sept 10 remark."
+    }
+   ]
+  },
+  {
+   "check": "Retaliation: Roe narrowed the move to Major alone ~17 hours after notice; label reasoned, seniority claim tested",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "HR notified Roe Sept. 22 at 4:00 p.m. with anti-retaliation reminder; edit occurred Sept. 23 at 9:10 a.m.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies approximately 17-hour sequence, substantiates retaliation, challenges seniority rationale, and requests records to test it further."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes the timing (~17 hours), substantiates retaliation with reasoning, and challenges the operational/seniority claim."
+    }
+   ]
+  },
+  {
+   "check": "Gives Miles's unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "His statement that “everyone knows Richard talks like that” based on an unnamed coworker is general reputation/hearsay and was given little weight.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly discounts Miles’s account because it is unnamed, second-hand reputation evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly accords Miles's account little weight and explains that it is unnamed hearsay."
+    }
+   ]
+  },
+  {
+   "check": "Remedies: reverse Major's schedule change, remove Roe from her supervision or scheduling, proportionate discipline, check-ins",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Major should not be supervised alone or have schedule/duty decisions made solely by Roe",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Reversal, discipline, and check-ins are concrete; joint supervision or scheduling still permits Roe’s involvement rather than removing him."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends reversing the shift change, removing Roe from supervision/scheduling, proportionate discipline, and follow-up check-ins."
+    }
+   ]
+  },
+  {
+   "check": "Open items include verifying seniority records and checking for further retaliation",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Obtain seniority records for Major, Lin, Ortiz and documented Fri–Mon staffing need to further test operational rationale.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Open items require seniority verification; recommendations also require retaliation monitoring through schedule and evaluation checks for 6–12 months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Seniority verification is included in Open items, but checking for further retaliation is not explicitly included there."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023050124999999998,
+ "date": "2026-10-11"
+}

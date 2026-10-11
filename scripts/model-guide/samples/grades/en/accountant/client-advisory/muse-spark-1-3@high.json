@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/client-advisory/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "f022cea92ecc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit $453,200 vs $402,100; EBITDA $227,300 vs $163,800, a $63,500 miss, not $53,500",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Miss is **$63,500, not $53,500**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Gross profit and EBITDA subtotals are correct; explicitly corrects the bookkeeper’s error."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates GP and EBITDA figures correctly, identifies the $63,500 miss, and corrects the bookkeeper."
+    }
+   ]
+  },
+  {
+   "check": "Treats $27,000 of insurance as prepaid: normalized EBITDA $190,800, $36,500 below budget",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Normalized Q3 EBITDA                     172,300",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies $27,000 prepaid insurance, but improperly accrues deferred marketing; normalized EBITDA should be $190,800."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Treats $27,000 as prepaid, but also deducts deferred marketing in normalized EBITDA, getting $172,300 instead of $190,800."
+    }
+   ]
+  },
+  {
+   "check": "Calls the $18,500 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Marketing: Q3 underspend of $18,500 is pure deferral",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly treats the underspend as timing, not a saving, and identifies Q4 spending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly calls out the $18,500 marketing underspend as timing rather than a true saving."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −$43,700 into volume −$57,000 (5,700 × $10) and price/mix about +$13,300",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "* Volume: (55,300 - 61,000) x $10.00 = **-57,000 U**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct method and volume variance; price contribution is $13,272, with the $28 rounding difference explained."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately splits the retail variance into -$57,000 volume and approximately +$13,300 price/mix."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~$28,000 over 28% of actual revenue to flour repricing; names overtime behind labor",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Budget was 28% of revenue; actual is 312,900 / 1,017,500 = 30.8%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Links ingredients to flour repricing and labor to overtime, but omits the approximately $28,000 flex-budget ingredient overrun."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Links ingredient overrun to the 28% benchmark and flour repricing, and identifies overtime behind direct labor."
+    }
+   ]
+  },
+  {
+   "check": "Notes wholesale growth lowers margin while retail traffic falls; keeps one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "With wholesale margin ~12pts below retail, swapping retail for wholesale dollars hurts gross profit even before costs.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes adverse wholesale mix and falling retail traffic; table signs and EBITDA-impact bridge are consistently distinguished."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes adverse margin impact of wholesale growth vs retail drop, and maintains a consistent sign convention."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017971538000000002,
+ "date": "2026-10-11"
+}

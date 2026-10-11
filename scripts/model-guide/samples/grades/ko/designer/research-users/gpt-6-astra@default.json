@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/research-users/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "designer",
+ "task": "research-users",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "6dc4368dbbf3",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "단일 선택 설문 비율의 합이 **104%**입니다. 원자료·집계 검증 전 비율과 순위를 확정적으로 쓰지 않습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Detects the invalid total and withholds reliance on percentages and rankings pending verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the 104% sum for a single-choice question and treats it as unverified."
+    }
+   ]
+  },
+  {
+   "check": "Flags survey bias: only heavy submitters (20+ expenses), no approvers",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "설문은 지난달 20건 이상 제출한 고빈도 사용자만 포함합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags heavy-submitter bias but does not explicitly identify approvers’ exclusion or resulting approval-side underrepresentation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Noticed the heavy-submitter bias (20+ expenses), but omitted that approvers were completely missing from the sample."
+    }
+   ]
+  },
+  {
+   "check": "Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "모바일 결재 화면을 한 번 이상 연 결재자는 18%뿐입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prioritizes approvals, cites all five relevant participants across slides, and includes 41% prolonged waits and 18% mobile adoption."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers 5 of 8 participants (P1, P2, P4, P6, P8 across slides 3 & 4), 41% 5+ days, and 18% mobile adoption."
+    }
+   ]
+  },
+  {
+   "check": "Sizes receipt capture as narrower: 6.2% need correction; crumpled receipts and multi-page hotel receipts",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "P3: 구겨진 영수증 인식 두 번 실패 후 직접 입력. P8: 호텔 영수증 첫 장만 인식.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Scopes OCR to specific failure cases, reports 6.2% correction rate, and acknowledges unmeasured recovery burden."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately sizes receipt capture: 6.2% manual correction, mentioning crumpled and multi-page receipts."
+    }
+   ]
+  },
+  {
+   "check": "Recommends approval-flow work (notifications, 대결, mobile policy flags), tells 박영수 directly; receipt edge cases as follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "박영수 님의 이사회 업데이트: “OCR 불만 신호는 유지하되, 추가 근거에 따라 다음 분기는 결재 병목 해소를 우선한다.”",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Directly recommends approvals over OCR, includes notifications, delegation and mobile policy flags, and scopes receipt fixes as follow-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends approval-flow work (notifications, policy flags, delegation), addresses 박영수 directly, and scopes receipt edge cases as follow-up."
+    }
+   ]
+  },
+  {
+   "check": "Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "방법: 8명×45분 인터뷰, 인앱 설문 212명, 최근 90일 제품 분석을 교차 검토.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All nine slides have speaker notes; evidence uses participant IDs; limitations include small sample and single-choice survey validity."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Has speaker notes on every slide and cites participant IDs, but does not explicitly critique survey question wording."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016187588000000003,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/debug-fix/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "6b518c12a7a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "시카고의 3월 9일은 DST 시작으로 **23시간**입니다. 잘못된 구간에 다음 날 주문 A5까지 포함됩니다. DST 종료일은 **25시간**이므로 반대로 마지막 한 시간을 누락합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains A5 inclusion and 25-hour fall-back; supplied UTC bounds establish why adding 24 hours incorrectly ends at 06:00Z."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the 23-hour DST start pulling in A5 and notes the 25-hour fall-back day."
+    }
+   ]
+  },
+  {
+   "check": "Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "다음 날 자정 정각 주문까지 포함해 이웃 날짜에 중복 집계합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses half-open comparisons, and identifies midnight duplication; A2 discussion and adjacent-day tests demonstrate the boundary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses next local midnight and half-open interval, explaining midnight double-counting generally, but omits specifically noting A2's double-counting."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "스테이징의 $185는 **A2 25 + A3 60 + A6 20 + A4 30 + A5 50**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles $185; code subtracts refunds, excludes cancelled orders, and tests fully refunded orders contributing zero."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles $185.00 exactly, excludes cancelled orders, and properly deducts refunded amounts."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (fromisoformat accepts \"Z\" only from 3.11) and parses robustly",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Python 3.12에서는 지원하므로 스테이징의 $185와 운영 실패는 모순이 아닙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains Python 3.10 failure and robustly normalizes Z, but omits that native Z support began in Python 3.11."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains Python 3.10 fromisoformat limitation with 'Z' and implements robust parsing."
+    }
+   ]
+  },
+  {
+   "check": "Removes or properly keys the date-only mutable-default cache that serves stale totals for today",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "장시간 워커에서 새 주문·환불·취소가 반영되지 않으며, 같은 날짜를 조회하는 다른 매장의 결과까지 섞입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains mutable-default cache staleness and cross-store contamination, removes caching, and tests updates and store isolation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains why the mutable default cache causes stale/cross-store data and removes it."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "assert daily_revenue(orders, date(2025, 3, 9)) == Decimal(\"100.00\")",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly includes A2 $25, A3 $45, A4 $30; tests supplied orders, both DST transitions, and exact midnight boundaries."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $100.00 for 9 March and tests cover DST transitions and midnight boundaries."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.06325541300000001,
+ "date": "2026-10-11"
+}

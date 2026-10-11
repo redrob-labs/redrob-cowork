@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/answer-policy-questions/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "5871f94d7fe2",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not the superseded handbook: 26 weeks at 100% (80-day test met) plus 4 company weeks",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "HR attendance records से 80 दिनों की शर्त की पुष्टि करेगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Applies bulletin and correctly states paid 26 plus four weeks, but leaves Jane’s established 80-day eligibility conditional."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies PB-2025-04 with the 80-day test, 26 weeks at 100%, and 4 company transition weeks."
+    }
+   ]
+  },
+  {
+   "check": "PL: 8.5 days (or 7.25 if March doesn't count), reading stated; only 5 carry forward, 3.5 (or 2.25) lapse",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "चूँकि आपकी joining 3 मार्च को हुई, मार्च पूरा कैलेंडर महीना नहीं था।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly excludes March; correctly calculates 7.25 days, five carried forward, and 2.25 lapsing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly calculates 7.25 days using the stated reading, with 5 carried forward and 2.25 lapsing."
+    }
+   ]
+  },
+  {
+   "check": "FBP: change only within 30 days of birth (~18 Mar 2026), re-elect in April; ₹1,00,000 per child, shared",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "अगले वित्त वर्ष की शुरुआत **1 अप्रैल 2026** है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct birth window, March deadline, and shared limit; does not explicitly instruct April re-election."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately covers the 30-day window from birth (~18 March), April re-election, and ₹1,00,000 shared limit."
+    }
+   ]
+  },
+  {
+   "check": "Job protected under Maternity Benefit Act s.12 for the 26 weeks; the old 12-month handbook rule is irrelevant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Maternity Benefit Act के तहत अनुपस्थिति के दौरान dismissal/discharge करना या सेवा की शर्तों में आपके अहित में बदलाव करना अवैध है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains statutory maternity protection and rejects the obsolete 12-month eligibility rule."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms statutory job protection under the Act and dismisses the old 12-month rule."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: by mid-January for a mid-February start; by ~22 Nov if starting 8 weeks early (22 Dec); confidential",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "जानकारी को गोपनीय रखने की प्रक्रिया क्या है—यह source में नहीं बताया गया।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct notice dates, but defers manager-notification arrangements and confidentiality rather than assuring confidential handling until notice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides precise notice dates for both early and due-date leave starts and addresses confidentiality."
+    }
+   ]
+  },
+  {
+   "check": "Note flags superseded, non-compliant handbook still posted; protection for the 4 company weeks after 26 routed to Legal",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Intranet पर Handbook v2023 §7.2 हटाएँ या स्पष्ट “superseded” banner और PB-2025-04 का लिंक लगाएँ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags obsolete handbook, but not its non-compliance; note does not explicitly route four-week protection to Legal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Internal note flags the outdated handbook still posted and routes job protection for extended leave to Legal."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022497562999999998,
+ "date": "2026-10-11"
+}

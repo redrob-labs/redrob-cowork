@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/create-graphics/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "designer",
+ "task": "create-graphics",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "64eaf056c1d5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"수수료 없음. 평생.\" given ₩2,000 paper-statement and ₩1,000 ATM fees; offers accurate alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"수수료 없음. 평생.\"은 사실과 다릅니다. 종이 명세서는 월 2,000원, 타행 ATM 출금은 5회째부터 건당 1,000원입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the inaccurate claim, explains both fees, and supplies accurate alternatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the absolute claim based on specific fees and provides viable alternative headlines."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"연 2.25%(세전)\" with the ₩5,000,000 tier and rate-change disclosure; drops \"이 동네 최고\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "금리는 가입 후 시장 상황에 따라 변동될 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes the exact rate, ₩5,000,000 tier, and change disclosure; explicitly rejects the unsupported local-best claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes the tier, 세전, rate-change disclosure, and drops the unsupported local claim in memo."
+    }
+   ]
+  },
+  {
+   "check": "Deposit-protection sentence and mark ≥120 px, 심의필 number, logo ≥160 px with clear space, headline ≥64 px",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "로고(180px, 여백은 'ㅎ' 높이 이상)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes protection sentence, 136px mark, review number, 180px logo with stated clearance, and 88px square headline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Meets all sizing requirements: headline 88px, logo 180px with clear space, mark 136px, full text, 심의필."
+    }
+   ]
+  },
+  {
+   "check": "Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "fill=\"#E3D8C6\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides correctly sized valid SVGs and hierarchy, but both use an unapproved colour."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both SVGs are valid, correctly dimensioned, have clear hierarchy, and stick to brand palette."
+    }
+   ]
+  },
+  {
+   "check": "Recomposes the landscape version rather than scaling the square one down",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "세로 쌓기를 좌우 분할로 바꿉니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Landscape relocates the photo, logo, and content into a distinct side-by-side composition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Completely reorganizes the layout for landscape rather than merely downscaling."
+    }
+   ]
+  },
+  {
+   "check": "Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "가족 사진은 타깃(사회초년생)과 맞지 않아 이렇게 제안합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses real members, natural light, and suitable first-timer copy, but explicitly replaces the requested family."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses real members and natural light, but explicitly removes the family concept requested in the brief."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.034819838000000006,
+ "date": "2026-10-11"
+}

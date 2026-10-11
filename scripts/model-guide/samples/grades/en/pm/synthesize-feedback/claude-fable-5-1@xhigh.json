@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/synthesize-feedback/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "dc689fd84412",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 ($68k), OCR 2, approvals 2 ($46k), bank feed 1 ($26k)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ARR = each unique account counted once, regardless of how many rows it generated.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States account deduplication and correctly reports mobile 3/$68k, OCR 2, approvals 2/$46k, and bank feed 1/$26k."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly dedupes accounts and ARR for mobile ($68k, 3), OCR (2), approvals ($46k, 2), and bank feed ($26k, 1)."
+    }
+   ]
+  },
+  {
+   "check": "Flags Hollow Pine's ARR conflict ($96k vs $69k), picks one (e.g. OCR $170k), suggests checking the CRM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Hollow Pine appears as $96k (survey) and $69k (sales call). I used **$69k**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags conflicting ARR, chooses $69k, computes OCR at $143k, and recommends CRM verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the Hollow Pine ARR discrepancy, selects $69k (noting $170k alternative), and advises checking the CRM."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Why \"discoverability\" for rows 2, 9, 13: LedgerSync shipped in March on every plan.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly codes all three export requests as discoverability rather than missing functionality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly codes rows 2, 9, and 13 as discoverability because LedgerSync is already live."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "on sequencing it should ship first because it's small enough to run in parallel with OCR.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies OCR priority using Enterprise revenue and renewal risk, while prioritizing quick delivery of the broader mobile fix."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly weighs the concentrated enterprise renewal risk against the broad, low-effort mobile session bug fix."
+    }
+   ]
+  },
+  {
+   "check": "Treats the bank feed as a data-integrity risk despite only one account",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "missing transactions are silent until month-end, so this is likely under-reported.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes missing-transaction risk despite one account; recommends aggregator escalation and checking other accounts for gaps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats missing bank feed transactions as an under-reported integrity risk requiring investigation despite affecting only one account."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**NPS covers only 9 of 16 rows**, and Corvid's two scores may be two different people.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Covers 16 rows, 12 accounts, and channel bias, but incorrectly counts nine rather than ten survey responses."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes 16 rows, 12 accounts, and sales note comparability, but miscounts survey responses with NPS as 9 instead of 10."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023639175,
+ "date": "2026-10-11"
+}

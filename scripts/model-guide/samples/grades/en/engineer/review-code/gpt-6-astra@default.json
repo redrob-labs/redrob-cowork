@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/review-code/gpt-6-astra@default",
+ "language": "en",
+ "profession": "engineer",
+ "task": "review-code",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "ca04397b3b18",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Requests changes; blockers: cross-tenant export via ?tenantId= (IDOR) and SQL injection via ORDER BY ${sort}",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "This implementation lets an admin select another tenant, inject SQL through sorting, and export secrets unintentionally.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requests changes and explicitly identifies cross-tenant query overrides and interpolated ORDER BY as blockers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Requests changes and classifies both cross-tenant export and SQL injection as blockers."
+    }
+   ]
+  },
+  {
+   "check": "Fixes them by always using req.user.tenantId and allow-listing sort columns",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const tenantId = req.user.tenantId;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Handler rejects tenant overrides, uses session tenant exclusively, and maps validated sorts to fixed identifiers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixes both vulnerabilities by using req.user.tenantId and allow-listing sort columns."
+    }
+   ]
+  },
+  {
+   "check": "Flags SELECT * leaking password_hash, mfa_secret, date_of_birth, salary_band; requires explicit columns; flags stack-trace leak",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Every export includes `password_hash` and `mfa_secret`, enabling offline password attacks and potentially compromising MFA.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Also flags DOB, salary, and stack disclosure; requires explicit approved columns and generic client errors."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly flags the leaked sensitive columns, requires explicit column selection, and flags stack trace disclosure."
+    }
+   ]
+  },
+  {
+   "check": "Catches missing CSV escaping, formula injection via full_name, and the rows[0] crash for empty tenants",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Commas, quotes, and newlines corrupt the CSV structure.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies malformed CSV, editable-name formula injection, and empty rows[0] failure; provides concrete fixes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies missing CSV escaping, formula injection via full_name, and the empty tenant rows[0] crash."
+    }
+   ]
+  },
+  {
+   "check": "Flags the un-awaited auditLog (compliance) and 140,000 rows in memory against the streaming convention",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The promise is neither awaited nor handled.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains compliance failure, awaits auditing before bytes, and flags 140,000-row buffering against streaming convention."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the un-awaited auditLog compliance risk and memory buffering exceeding the 10,000-row streaming convention."
+    }
+   ]
+  },
+  {
+   "check": "Revised handler and tests cover cross-tenant, sort injection, formula escaping and audit; tone is constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Force audit rejection and confirm zero CSV bytes; successful auditing must precede the first byte.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Revised handler and three tests cover tenant isolation, sort injection, formula escaping, auditing, and streaming; tone remains constructive."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Revised code and tests thoroughly cover tenant isolation, sort injection, formula neutralization, and auditing with a constructive tone."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019893825,
+ "date": "2026-10-11"
+}

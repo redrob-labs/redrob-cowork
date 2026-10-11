@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/design-systems/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "design-systems",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "fc18241b2c4a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Computes ~23 events/s average, ~230/s peak, ~700/s peak after 3× growth; calls 2,300/s 10× high",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**현재:** 2M ÷ 86,400 ≈ 23 eps(평균), ×10 = 231 eps(피크)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct current and future rates; explicitly identifies 2,300 eps as tenfold overestimated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes average and peak for both current and 3× growth, noting 2,300 is 10× high."
+    }
+   ]
+  },
+  {
+   "check": "Rejects exactly-once over HTTP; proposes at-least-once with stable event IDs and merchant dedup guidance",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**exactly-once는 HTTP로 보장할 수 없음.** at-least-once로 보내고, 머천트가 이벤트 ID로 중복을 제거하도록 함",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once, provides deduplication guidance, and preserves event IDs during replay."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects exactly-once over HTTP and proposes at-least-once with event ID deduplication guidance."
+    }
+   ]
+  },
+  {
+   "check": "Sizes storage ~5.2 GB/day, ~156 GB/30 days, ~470 GB at 3×; partitions or TTL; minimises recipient PII",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "이력 페이로드는 암호화해 저장하고 로그에서는 마스킹. 30일이 지난 파티션은 드롭해 파기",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct 156GB and 468GB totals and retention; omits current 5.2GB/day and recipient PII minimisation in stored payloads."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates storage sizes, applies partitioning/TTL, and addresses PII masking and retention."
+    }
+   ]
+  },
+  {
+   "check": "Per-endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking; per-shipment ordering by key or sequence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "대신 배송 건별 `sequence`와 `occurred_at`을 페이로드에 넣어, 머천트가 오래된 이벤트를 버릴 수 있게 함",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides endpoint concurrency isolation, shorter timeouts, jittered approximately 24-hour retries, circuit breakers, and acceptable shipment sequence guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes concurrency limits, shorter timeouts, 24h jittered backoff, circuit breaking, and per-shipment sequence ordering."
+    }
+   ]
+  },
+  {
+   "check": "Recommends the managed queue or a Postgres outbox over a self-hosted log; HMAC signing with timestamp",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**서명:** `HMAC-SHA256(timestamp + \".\" + body)`, 엔드포인트별 시크릿, `Soporo-Signature: t=…,v1=…` 헤더",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends managed MQ with PostgreSQL outbox over self-hosted Kafka; includes timestamped HMAC and replay protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends managed MQ + Postgres outbox over Kafka, and defines HMAC signing with a timestamp."
+    }
+   ]
+  },
+  {
+   "check": "Gives a phased migration with SLOs, and a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**9~11주:** 엔드포인트 단위 플래그로 5% → 25% → 100% 전환.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes phased migration, explicit SLOs and alerts, and speaker notes on all twelve slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a phased rollout schedule, concrete SLOs, and a speaker note on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025025438,
+ "date": "2026-10-11"
+}

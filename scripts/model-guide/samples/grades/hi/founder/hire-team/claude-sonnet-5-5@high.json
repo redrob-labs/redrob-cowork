@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/hire-team/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "9a6ce3b66ec5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैरी का औसत **3.44** आता है, रिचर्ड रो का 3.50",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both averages and rejects the ATS recommendation as unsupported."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recalculates Mary's average to 3.44 and Richard's to 3.50, identifying the ATS recommendation as flawed."
+    }
+   ]
+  },
+  {
+   "check": "Spots Stiles's Richard Roe note describing Mary's Brightpath role (feminine forms); if swapped, Mary ~3.56, Richard ~3.38",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "स्टाइल्स के दोनों कार्ड अदल-बदल मानें | 3.56 | 3.38",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies Brightpath and feminine wording as mismatched; correctly calculates the swapped-score alternative."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notices Brightpath and feminine phrasing, and provides the recomputed averages (3.56 and 3.38) if swapped."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with Stiles a prerequisite, not a guess",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आज किसी को offer नहीं जा रहा। गुरुवार तक दो चीज़ें साफ़ होंगी",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Makes Stiles’s scorecard confirmation a prerequisite and requests corrected, evidence-backed records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly holds off on making an offer until Stiles clarifies the scorecards."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Miles's comment on Mary's children as gender-biased and legally risky; sets a follow-up without bias",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "ग़लत है और कानूनी रूप से जोखिम भरा भी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Excludes the comment, acknowledges legal risk, and sets unbiased follow-up, but does not identify its gender-biased nature."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disregards Miles's comment as legally risky and biased, and standardizes the travel question across both finalists."
+    }
+   ]
+  },
+  {
+   "check": "Keeps Mary's ₹55 lakh ask (above the ₹52 lakh ceiling) within policy; notes Richard's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैरी के लिए अधिकतम ₹52 लाख।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Mary within the ceiling unless an exception is approved; explicitly requires Richard’s outstanding reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Caps Mary's offer at the policy ceiling of ₹52 lakh and notes Richard's pending second reference."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह ईमेल offer नहीं है। Compensation और शर्तों पर चर्चा अगले चरण में होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional, concise deliverables explain role-related evidence and risks beyond averages; email uses placeholders for unresolved details."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Memo and messages are professional and well-reasoned; the email uses appropriate placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020665838,
+ "date": "2026-10-11"
+}

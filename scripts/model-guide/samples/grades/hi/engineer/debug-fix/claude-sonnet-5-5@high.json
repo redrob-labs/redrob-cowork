@@ -1,0 +1,128 @@
+{
+ "key": "hi/engineer/debug-fix/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "a81989cb94a0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offset bug: IST is +05:30, not +5; 9 March spans 19:00Z–19:00Z, pulling in A5 (00:15 IST)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "9 मार्च में A5 (00:15 IST, यानी 10 मार्च का) गलती से शामिल हुआ: **+₹1,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies +05:30 versus +5, states the erroneous 19:00Z window, and explains A5's inclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies IST is +05:30 and explains A5 (00:15 IST) was erroneously included."
+    }
+   ]
+  },
+  {
+   "check": "Uses Asia/Kolkata local midnights; explains it shows only on days with 00:00–00:30 IST orders",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "IST में DST नहीं होता, इसलिए fixed `+05:30` offset सुरक्षित है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct local midnights and affected half-hour explanation, but uses a fixed offset rather than Asia/Kolkata."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Constructs IST midnights and explains the issue only shows on days with orders between 00:00 and 00:30 IST."
+    }
+   ]
+  },
+  {
+   "check": "Half-open [start, end) instead of <= end; explains A2 at 19:00Z counted on both 8 and 9 March",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "अगली मध्यरात्रि का order दो दिनों में गिना जाता है (double-count)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Implements half-open bounds and explains double-counting, but omits A2's specific inclusion on both March 8 and 9."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies inclusive upper bound causing double-counting and switches to a half-open interval."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles ₹3,700.00 (500+1,200+400+600+1,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A2 500 + A3 1,200 (refund नहीं घटा) + A6 400 (cancelled) + A4 600 + A5 1,000 (गलत दिन)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles ₹3,700; subtracts refunds, excludes cancelled orders, and tests fully refunded orders contributing zero."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunded amounts, excludes cancelled orders, and reconciles the staging figure of 3,700."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (\"Z\" only from 3.11), parses robustly; removes or properly keys the stale date-only cache",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.10 का `fromisoformat` `Z` suffix नहीं समझता (3.11+ समझता है)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains version-specific crash, normalizes Z robustly, rejects naive timestamps, and removes the stale date-only cache."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the Python 3.10 'Z' parser issue, robustly handles it, and removes the buggy date-only cache."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives ₹2,000.00 for 9 March (A2 500, A3 900, A4 600); tests cover midnight, 00:00–00:30, +05:30",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**कुल = 500 + 900 + 600 = ₹2,000.00**, जो finance के आंकड़े से मेल खाता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct code and itemized A2/A3/A4 total; tests cover exact midnight, the first half-hour, and +05:30 timestamps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixed code produces 2,000.00 and regression tests cover exact midnight, 00:00–00:30 window, and +05:30 offset."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024440062999999998,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,110 @@
+{
+ "key": "hi/lawyer/review/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "adb68155f371",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "DPA is the blocker: patient data, Fiduciary liable (s.8(5)), s.8(2) needs contract, Exhibit C omitted; don't sign or go live",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "DPA के बिना go-live या data import नहीं होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "DPA को blocker बनाया; patient data, omitted Exhibit C और धाराओं 8(2), 8(5) की जिम्मेदारी स्पष्ट की।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies DPA as blocker, cites s.8(2), s.8(5), omitted Exhibit C, and advises not signing/sharing data."
+    }
+   ]
+  },
+  {
+   "check": "Cap ₹36 lakh (3 months, implementation excluded) vs playbook ₹1.92 crore year 1, ₹4.32 crore super-cap; ₹250 crore penalty",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Data-protection super-cap: **₹4.32 crore**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "₹36 लाख cap, implementation exclusion, ₹1.92 crore year-one minimum और ₹250 crore penalty सही बताए।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates ₹36 lakh cap, compares with ₹1.92 crore Y1, ₹4.32 crore super-cap, and ₹250 crore DPDP penalty."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity capped; 9.2 excludes s.8(6) notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "10.2 इतना व्यापक है कि vendor की गलती भी cover हो जाती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Missing §10.4 और notification-cost exclusion पहचाने; broad customer indemnity बताया, लेकिन उसे uncapped नहीं बताया।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers phantom §10.4 capping indemnities, §9.2 excluding s.8(6) notification costs, and broad customer indemnity under 10.2."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Bengaluru venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Renewal fees may increase by no more than 3%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Renewal, SLA, Bengaluru venue और exit के सभी deviations पर playbook-aligned redlines दिए।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides specific redlines for renewal terms, 99.5% SLA with sole remedy, Bengaluru venue, and exit/data export terms."
+    }
+   ]
+  },
+  {
+   "check": "Bengaluru clause likely valid (CPC s.20, s.28), so negotiate Mumbai; CPA unavailable (commercial purpose), calendar non-renewal",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Bengaluru courts सक्षम हैं, क्योंकि Calyx का registered office वहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Venue validity, Mumbai negotiation और commercial-purpose CPA exclusion सही हैं; non-renewal deadline calendar करने का निर्देश गायब है।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly analyzes CPC s.20, s.28, and CPA commercial purpose bar, but omits calendaring the non-renewal deadline."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024883950000000002,
+ "date": "2026-10-11"
+}

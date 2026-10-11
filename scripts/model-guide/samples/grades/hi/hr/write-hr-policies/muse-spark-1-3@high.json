@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/write-hr-policies/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "93afd76bbb3e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" (e.g. 50 km), state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह Policy Memo A (2023), Memo B (2024) और Memo C (2024) की जगह लेती है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expressly supersedes all memos; establishes 50 km proximity, Tuesday–Thursday attendance, and 60-day state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Supersedes Memos A-C, sets 50 km radius, Tue-Thu office attendance, and 60-day state move approval."
+    }
+   ]
+  },
+  {
+   "check": "₹1,500 stipend kept, \"no bills\" rejected: bill-based phone/internet route (Rule 3(7)(ix)) and documented expense claims",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "phone/mobile/internet का bill-आधारित reimbursement: वास्तविक खर्च का 50%, अधिकतम ₹1,000/माह",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps taxable ₹1,500 stipend, explains bill-based reimbursement’s tax exemption, and requires documented necessary-work expense claims."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains ₹1,500 stipend, retains bill-based reimbursement under tax rules, and requires documented expense claims."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: shift staff's boot-up and VPN login is working time, overtime at twice the rate; timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Shift-based/hourly साथी अपनी rostered + login time को timekeeping system में दर्ज करेंगे; manager सत्यापित करेगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Counts required boot-up and VPN login as paid working time, requires timekeeping, and provides at least double-rate overtime."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects instruction 4, treats boot-up/login as paid working time with double overtime rate and timekeeping rules."
+    }
+   ]
+  },
+  {
+   "check": "India moves within limits, with state payroll consequences; abroad only pre-approved, UAE or Singapore, for immigration, tax, PE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "केवल UAE और Singapore के लिए, हर बार पूर्व-मंज़ूरी ज़रूरी है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits temporary India work, retains state-move approval and payroll consequences, and restricts overseas work for immigration, withholding, PE risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Permits limited India travel with payroll consequences, restricts abroad to pre-approved UAE/Singapore citing immigration, tax, and PE."
+    }
+   ]
+  },
+  {
+   "check": "Effective date allows 21 days' notice to affected shift-based workers for the changes (IR Code s.40)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "प्रभावित workers को Industrial Relations Code, 2020 की धारा 40 के तहत **21 दिन का notice** दिया जाएगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requires statutory notice for affected workers and sets a deferred effective date for allowance, hours, and shift changes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Specifies a 21-day notice period under IR Code s.40 prior to the effective date."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision; state table matches headcount (Tamil Nadu, Delhi no office; Delhi no PT)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**आपसे चाहिए:** (a) bill-आधारित ₹1,000 जारी रखने, (b) login-time को paid मानने, (c) विदेश को UAE/Singapore तक सीमित रखने",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "State table is accurate; CEO note covers major departures and approvals but omits attendance-radius departure and decision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note covers departures and decisions; state table matches headcount, remote status for TN/Delhi, and Delhi's PT exemption."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020658225,
+ "date": "2026-10-11"
+}

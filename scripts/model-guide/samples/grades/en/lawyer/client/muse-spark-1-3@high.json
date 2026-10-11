@@ -1,0 +1,128 @@
+{
+ "key": "en/lawyer/client/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "client",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "1538df0724e5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "3221 acceptance due Thursday, Nov 13, 2025, not month-end; Proposal 2 open to Nov 21; decision before Nov 13",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Action needed by Nov 12: $1.2M court offer expires Nov 13, $1.35M private offer expires Nov 21",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies both deadlines, Thursday acceptance deadline, and requests a decision before November 13."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies both deadlines, refutes month-end, and requests a decision prior to November 13."
+    }
+   ]
+  },
+  {
+   "check": "§11.3 likely bars the $300,000 lost profits; trial EV ≈$0.9M with 9% interest; both offers compare well",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "~$918,000 net in your pocket",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes lost profits, correctly weights 9% interest, and compares both offers against approximately $918,000 trial value."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Analyzes §11.3, calculates trial EV around $0.9M including 9% interest, and compares both settlement proposals favorably."
+    }
+   ]
+  },
+  {
+   "check": "Proposal 2's affiliate release would waive the $400,000 Pier 9 guaranty; installment credit risk noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It gives away the $400,000 Pier 9 claim for free.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the parent-guaranty release and installment collection risk, contrasting Proposal 1’s judgment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies that the affiliate release extinguishes the Pier 9 claim and notes installment credit risk."
+    }
+   ]
+  },
+  {
+   "check": "Rejecting the 3221 offer and not beating it shifts statutory costs, not attorneys' fees",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "we lose our right to court costs after Nov 3 and we must pay Crescent's court costs after Nov 3.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly describes statutory cost shifting; separately distinguishes court costs from attorney fees and notes no fee shifting."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately clarifies that 3221 shifts statutory court costs, not attorneys' fees."
+    }
+   ]
+  },
+  {
+   "check": "Removes or warns off Richard Miles: sharing advice and the memo risks waiving privilege",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Copying Richard, an outside business consultant, and forwarding him my October strategy memo likely waived attorney-client privilege for that memo.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Richard, explains privilege risk, and instructs Mary not to forward advice or include him in legal strategy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes Richard Miles from the email chain and explains the risk of waiving privilege."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation and counter, e.g. Proposal 2 with a Pier 9 carve-out and installment security",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Expressly carve out and preserve the Pier 9 $400,000 guarantee against Crescent Holdings, Inc.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly recommends a $1.6 million counter, preserving Pier 9, with secured installments as a fallback."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends countering based on Proposal 2 with a Pier 9 carve-out and security/consent judgment for installments."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021543113000000003,
+ "date": "2026-10-11"
+}

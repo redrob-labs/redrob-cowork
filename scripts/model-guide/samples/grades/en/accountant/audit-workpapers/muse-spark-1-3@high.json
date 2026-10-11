@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/audit-workpapers/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "audit-workpapers",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "b15ad6f5c950",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3 attribute failures in 10, plus 1 circumvention indicator.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies item 2’s unapproved 5.33% variance, item 5’s late approval, and item 7’s wrong approver."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies and explains all three deviations missed by Richard."
+    }
+   ]
+  },
+  {
+   "check": "Treats items 4 and 8 as correctly exempt from the PO requirement",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Utilities and professional services with signed engagement letter: exempt from PO.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Marks items 4 and 8 as passes with valid PO exemptions; signature confirmation is a reasonable follow-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recognizes items 4 and 8 as valid exemptions passing the testing attributes."
+    }
+   ]
+  },
+  {
+   "check": "Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "With ≥3 deviations already in 10 (≈30% observed vs 10% tolerable)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies 10 versus 25 required and rejects extension because even 3/25 exceeds tolerance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes 10 of 25 tested and 3 deviations in 10 already exceed the 10% tolerable rate."
+    }
+   ]
+  },
+  {
+   "check": "Flags BW-7731 and BW-7732 ($49,400 combined) as a likely split to avoid CFO approval; proposes follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "combined $49,400 clearly requires CFO.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies both Brightwell invoices as probable splitting and proposes investigation and population-wide split analytics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies both invoices, notes combined amount avoiding CFO approval, and proposes investigative follow-up."
+    }
+   ]
+  },
+  {
+   "check": "Concludes no reliance, more substantive testing, deficiency at least significant with material weakness considered",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "At least a **significant deficiency**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Withdraws reliance, expands substantive testing, considers material weakness and fraud, and requires written governance communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Concludes no reliance, increases substantive testing, and evaluates deficiency as significant or material weakness."
+    }
+   ]
+  },
+  {
+   "check": "Includes a tickmark legend, a review trail and specific management-letter recommendations",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Prepared:** Audit Senior (re-performance) | **Period:** H1 2024 interim testing",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes workpaper reference, reviewer re-performance trail, attribute-level results, tickmark legend, and specific actionable management recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes a clear tickmark legend, an audit review trail of Richard's work, and actionable recommendations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019151213,
+ "date": "2026-10-11"
+}

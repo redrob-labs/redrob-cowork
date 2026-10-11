@@ -140,7 +140,7 @@ function verified(quote, answer) {
 
 async function grade(grader, a) {
   let cost = 0;
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
     const response = await fetch(`${BASE}/chat/completions`, {
       method: "POST",
       headers: { authorization: `Bearer ${process.env.REDROB_API_KEY}`, "content-type": "application/json" },
@@ -158,13 +158,13 @@ async function grade(grader, a) {
     const json = await response.json().catch(() => ({}));
     cost += billed(grader.id, json);
     if (!response.ok) {
-      if (attempt === 2 || !(response.status === 429 || response.status >= 500)) return { error: `${response.status} ${JSON.stringify(json).slice(0, 200)}`, cost };
+      if (attempt === 3 || !(response.status === 429 || response.status >= 500)) return { error: `${response.status} ${JSON.stringify(json).slice(0, 200)}`, cost };
       continue;
     }
     const lines = parse(json.choices?.[0]?.message?.content ?? "", a.lines.length);
     if (lines) return { lines, cost };
   }
-  return { error: "no usable verdicts after 2 tries", cost };
+  return { error: "no usable verdicts after 3 tries", cost };
 }
 
 function merge(a, results) {

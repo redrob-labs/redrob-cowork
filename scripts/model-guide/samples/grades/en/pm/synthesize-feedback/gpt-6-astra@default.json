@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/synthesize-feedback/gpt-6-astra@default",
+ "language": "en",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "dc689fd84412",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 ($68k), OCR 2, approvals 2 ($46k), bank feed 1 ($26k)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Deduplicate by account name within each theme.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States account-level deduplication and correctly reports mobile 3/$68k, OCR 2, approvals 2/$46k, and bank feed 1/$26k."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly dedupes by account and lists all requested figures and themes with the calculation method stated."
+    }
+   ]
+  },
+  {
+   "check": "Flags Hollow Pine's ARR conflict ($96k vs $69k), picks one (e.g. OCR $170k), suggests checking the CRM",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Hollow Pine is inconsistent: **$96k in the survey versus $69k in sales notes**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags conflict and recommends reconciliation, but uses a range rather than selecting one figure; does not explicitly recommend CRM verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags the conflict and advises reconciling ARR, but provides a range instead of picking one figure or specifying CRM."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "LedgerSync already exists on every plan. Treat these as discoverability problems provisionally",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly codes rows 2, 9, and 13 as discoverability and recognizes the existing feature."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Classifies rows 2, 9, and 13 as discoverability problems because LedgerSync is already live."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A **one-quarter** build is much more expensive than the mobile fix, which keeps OCR second rather than first in delivery priority.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies mobile first through breadth and low effort, and OCR second through concentrated Enterprise ARR and explicit renewal risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly contrasts the concentrated Enterprise renewal risk of OCR against the broad, lightweight mobile session fix."
+    }
+   ]
+  },
+  {
+   "check": "Treats the bank feed as a data-integrity risk despite only one account",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Breadth is limited to one account, but incomplete financial data is a serious core-workflow failure.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes missing transactions as a serious financial-data risk despite one account and prioritizes investigation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly prioritizes the bank feed issue as a critical data integrity problem despite affecting only one account."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Channel selection, account size and repeat reporting can distort apparent prevalence.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Reports 16 rows and 12 accounts, but omits ten survey responses and explicit sales-versus-survey comparability caveat."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Notes sample distortion and channel mix, but omits the specific numbers (16 rows, 12 accounts, 10 NPS responses)."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022005900000000002,
+ "date": "2026-10-11"
+}

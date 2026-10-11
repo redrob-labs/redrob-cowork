@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/prepare-employment-documents/gpt-6-luna@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "c129384e0b50",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Letter uses ₹38,00,000 or placeholder, 3,200 options, \"Software Engineer II\"; not ₹40,00,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आपको **Software Engineer II (L4)** के पद पर full-time, permanent कर्मचारी के रूप में नियुक्त किया जाएगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, an in-band CTC placeholder, and 3,200 options; unapproved promises appear only in the cover note."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Software Engineer II, a CTC placeholder in band, and 3,200 options."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the CTC gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹40 लाख देने के लिए requisition में संशोधन और **VP Engineering तथा Finance की मंज़ूरी** चाहिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends an in-band offer, identifies exception approvals, and requires candidate acceptance of revised terms before issuance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends sign-offs for band exception and informs the candidate before issuing the letter."
+    }
+   ]
+  },
+  {
+   "check": "Post-employment non-compete dropped (s.27), exclusivity and confidentiality/IP kept; Indian law and Pune courts replace Texas",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "इस प्रस्ताव में नौकरी समाप्त होने के बाद लागू होने वाली कोई non-compete शर्त नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops post-employment non-compete and adopts Indian law/Pune courts, but omits in-employment exclusivity and confidentiality/IP protections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Dropped non-compete and replaced venue with Pune/India, but failed to include exclusivity and confidentiality/IP clauses."
+    }
+   ]
+  },
+  {
+   "check": "At-will replaced: 30 days' notice in probation, 60 days after confirmation (or salary in lieu)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Probation के दौरान दोनों पक्ष 30 दिन का notice या उसके बदले वेतन दे सकते हैं;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces at-will with bilateral 30-day probation and 60-day post-confirmation notice or salary in lieu."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly replaced at-will with 30/60 days notice or salary in lieu."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × ₹4,00,000 ≈ ₹1,66,667 (s.74); no full-and-final deduction without written authorization",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**₹4,00,000 × 5/12 = ₹1,66,666.67**, अर्थात लगभग **₹1,66,667**, धारा 74 के अधीन उचित मुआवज़े तक।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct calculation and section 74 limitation; cover note expressly prohibits settlement deduction without separate written authorization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₹1,66,667 under Section 74 and bars automatic deduction from full-and-final settlement."
+    }
+   ]
+  },
+  {
+   "check": "Keeps contingencies, 6-month probation and 1 Dec 2025 start (feasible after 28 Nov); placeholders only for open decisions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "भुगतान का समय: **[Finance/Payroll से पुष्टि के बाद भरें]**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps contingencies, six-month probation, and feasible start date, but unnecessarily reopens bonus payment timing already specified in the template."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps all required contingencies, 6-month probation, 1 Dec 2025 start, and uses placeholders appropriately."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022526175000000002,
+ "date": "2026-10-11"
+}

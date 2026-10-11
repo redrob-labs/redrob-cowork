@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/prepare-tax/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "128fda5c8ba7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes the ₹7,20,000 double count: receipts ₹56,48,000 = 54,33,440 − 2,50,000 − 42,000 + 32,560 + 4,74,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**सकल पेशेवर प्राप्तियाँ** | **56,48,000** | 51,41,440",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Bluefin duplication and reconciles deposits using personal transfer, refund, gateway fees, and TDS."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes the ₹7,20,000 double count and ties receipts to ₹56,48,000 and bank deposits."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 1: 44ADA limit ₹75 lakh (cash ≤ 5%), subject to specified profession; software ₹1,52,400; fees ₹32,560",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Finance Act 2023 ने FY 2023-24 से सीमा ₹75 लाख कर दी है (नकद ≤5% की शर्त पर)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects outdated limit, flags specified-profession eligibility, and correctly deducts ₹1,52,400 software and ₹32,560 fees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects note 1 with ₹75L threshold, nets software refund to ₹1,52,400, and deducts ₹32,560 fee."
+    }
+   ]
+  },
+  {
+   "check": "Regular basis: car ₹42,000, home office ₹86,400, laptop depreciation ₹24,000 (not expensed); gym out; insurance to 80D",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसे खर्च नहीं, पूँजीगत संपत्ति मानें और 40% कंप्यूटर ब्लॉक में डालें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly computes car ₹42,000, rent ₹86,400, depreciation ₹24,000; excludes gym and assigns insurance to old-regime 80D."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes car, home office, laptop depreciation (capitalised), excludes gym, and allocates health insurance to 80D."
+    }
+   ]
+  },
+  {
+   "check": "Disallows 30% of John's fee (₹1,08,000) under 40(a)(ia); profit ₹48,45,440, tax audit required",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "TDS न काटने पर 40(a)(ia) के तहत 30% = ₹1,08,000 अस्वीकार्य",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct disallowance, ₹48,45,440 regular profit, and mandatory regular-basis tax audit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disallows ₹1,08,000 under 40(a)(ia), arrives at ₹48,45,440 profit, and notes tax audit is mandatory."
+    }
+   ]
+  },
+  {
+   "check": "Recommends 44ADA: deemed ₹28,24,000, tax ₹5,58,688 with cess, ₹84,688 payable plus 234B/234C; regular ~₹11,89,377",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**शेष देय (234B/234C ब्याज से पहले)** | | **84,688**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends 44ADA with correct deemed profit, tax including cess, TDS credit, interest flags, and regular-basis comparison."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends 44ADA, gives deemed profit ₹28,24,000, tax ₹5,58,688, balance ₹84,688 plus 234B/C, and compares regular tax."
+    }
+   ]
+  },
+  {
+   "check": "Old regime with 80D (~₹6,78,288) worse; flags ₹36,000 missed 194J TDS on John (201(1A), TDS return); AIS feedback",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "₹27,99,000 पर कर ₹5,61,288 बनता है। नई व्यवस्था लगभग ₹2,600 सस्ती है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Old-regime tax and savings are incorrect; correctly flags ₹36,000 TDS, 201(1A) interest, Form 26Q, and AIS feedback."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags missed 194J TDS, 201(1A), and AIS feedback, but miscalculates old regime tax (₹5,61,288 vs ~₹6,78,288)."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.033865124999999996,
+ "date": "2026-10-11"
+}

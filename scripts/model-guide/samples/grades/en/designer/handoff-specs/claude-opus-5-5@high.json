@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/handoff-specs/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "handoff-specs",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "abed990b417f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags Pro: $15 × 12 = $180, not $190, and \"Save 20%\" fails (about 21% or 17%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$15 × 12 = $180, not $190.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the mismatch, calculates 21% and 17% savings, and explicitly calls the badge false with $190 billing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly calculates $15 × 12 = $180 and notes 17% vs 21% / Save 20% failure."
+    }
+   ]
+  },
+  {
+   "check": "Confirms Business is consistent ($39 × 12 = $468, about 20%); proposes a fix for Pro",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Business checks out ($39 × 12 = $468, a 20% saving).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms Business consistency and recommends fixing Pro billing to $180 annually."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms Business math and proposes $180/yr or 'Save up to 20%' fix for Pro."
+    }
+   ]
+  },
+  {
+   "check": "Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The 14px card gap and 10px feature-row gap aren't on the scale. **Recommendation:** use 16px and 8px.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Maps gaps to space-4 and space-2, explains off-scale normalization, and corrects the primary hex to primary-600."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maps hex to --primary-600, 14px to --space-4 (16), 10px to --space-2 (8), giving clear reasons."
+    }
+   ]
+  },
+  {
+   "check": "Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; Annual default",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Tab lands on the checked option (Annual by default).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Implements native grouped radios, keyboard support, visible focus, Annual default, and polite announcements when billing changes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Radio group, default checked on annual, keyboard support, focus-visible styles, and aria-live status updates."
+    }
+   ]
+  },
+  {
+   "check": "No layout shift on toggle (reserved price area, billed line always present); Pro first when stacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "min-height: var(--line-height-sm);             /* reserved: no layout shift */",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reserves billed-line height, retains its element, uses tabular prices, and implements Pro-first stacking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reserves height on billed line to prevent layout shift and reorders Pro first when stacked."
+    }
+   ]
+  },
+  {
+   "check": "Single-file code runs on token custom properties; spec table is complete enough to build from",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "PROPOSED tokens: NOT yet in the codebase",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Runnable single-file implementation and detailed spec table, but numerous added tokens violate the codebase-only constraint."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Complete single-file implementation using codebase tokens and a comprehensive spec table."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0347634,
+ "date": "2026-10-11"
+}

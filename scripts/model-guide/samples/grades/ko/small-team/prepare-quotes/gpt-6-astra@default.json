@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/prepare-quotes/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "prepare-quotes",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "e0128e89afe0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Spots 25% markup, not margin: PC (1,125,000 − 900,000) ÷ 1,125,000 = 20.0%; every hardware line at 20%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "하드웨어 정가는 매출총이익률 20%로 최소 25% 정책에 미달하여 원가÷0.75로 조정했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies all listed hardware margins as 20%, below the required 25%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies that list prices have a 20% margin, failing the 25% policy."
+    }
+   ]
+  },
+  {
+   "check": "Re-prices at cost ÷ 0.75 (PC ₩1.2M, AP ₩400k, firewall ₩800k, switch ₩960k, backup ₩1.6M) or flags it",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "원가÷0.75로 조정했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five hardware unit prices correctly follow cost divided by 0.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Re-prices all hardware items exactly at cost ÷ 0.75."
+    }
+   ]
+  },
+  {
+   "check": "Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실제 PC는 12대이며 영상 2대는 승인 없이 교체 불가합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Full scope replaces ten staff PCs; two imaging PCs remain unchanged pending vendor approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quotes 10 staff PCs, excludes 2 imaging PCs pending vendor approval, and explains the 10 vs 12 count."
+    }
+   ]
+  },
+  {
+   "check": "Labour ₩4,510,000 (41 h + 10% PM); one-off ₩21,070,000; recurring ₩880,000 + ₩180,000/month, ₩500,000/year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**일회성 비용은 2,107만 원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tables correctly show ₩4,510,000 labour, ₩21,070,000 one-off, and ₩880,000/₩180,000 monthly plus ₩500,000 annually."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Labor (41 h + 10% PM = 4.51M) included in one-off 21.07M; recurring support 880k, cloud 180k, firewall 500k/yr accurately broken down."
+    }
+   ]
+  },
+  {
+   "check": "Phases to the ₩17M budget, with backup appliance, cloud backup and firewall first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**PC 6대 우선 교체안을 추천합니다.** 네트워크·백업은 전부 구축하고, 상태가 양호한 직원용 PC 4대는 추후 교체합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended phase fits the project budget and prioritises backup appliance, cloud backup, and firewall over full PC replacement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends a phased plan under 17M prioritizing backup appliance, cloud backup, and firewall."
+    }
+   ]
+  },
+  {
+   "check": "Offers an entrustment contract, \"supports PIPA obligations\", never \"compliant/certified\"; 30-day validity, 50% hardware deposit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "개인정보보호법 제26조에 따른 개인정보 처리 업무 위탁 계약을 체결합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers entrustment, supports legal obligations without guarantees, and includes 30-day validity and 50% hardware deposit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes entrustment contract, required compliance disclaimer wording, 30-day validity, and 50% hardware deposit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023759138,
+ "date": "2026-10-11"
+}

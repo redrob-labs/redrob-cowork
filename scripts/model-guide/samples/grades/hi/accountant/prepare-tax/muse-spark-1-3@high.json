@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/prepare-tax/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "128fda5c8ba7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes the ₹7,20,000 double count: receipts ₹56,48,000 = 54,33,440 − 2,50,000 − 42,000 + 32,560 + 4,74,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**सकल प्राप्ति से मिलान** | **56,48,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Bluefin duplication and correctly reconciles bank deposits, private transfer, refund, gateway fees, and TDS."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly eliminates ₹7,20,000 duplication and reconciles gross receipts of ₹56,48,000 to bank deposits."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 1: 44ADA limit ₹75 lakh (cash ≤ 5%), subject to specified profession; software ₹1,52,400; fees ₹32,560",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹75 लाख तब जब वर्ष में नकद प्राप्ति कुल सकल का **5% से अधिक न हो**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects outdated note, conditions eligibility on specified profession, and correctly calculates software ₹1,52,400 and fees ₹32,560."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects note 1 with the 75L/5% cash rule, nets software to ₹1,52,400, and deducts ₹32,560 gateway fees."
+    }
+   ]
+  },
+  {
+   "check": "Regular basis: car ₹42,000, home office ₹86,400, laptop depreciation ₹24,000 (not expensed); gym out; insurance to 80D",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इस वर्ष केवल ₹24,000 ह्रास लें, WDV ₹96,000 आगे ले जाएँ। पूर्ण ₹1,20,000 खर्च न लें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct car and home-office deductions, laptop depreciation, gym exclusion, and insurance treatment under old-regime 80D."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates car (₹42,000), home office (₹86,400), laptop depreciation (₹24,000), excludes gym, and reallocates health insurance to 80D."
+    }
+   ]
+  },
+  {
+   "check": "Disallows 30% of John's fee (₹1,08,000) under 40(a)(ia); profit ₹48,45,440, tax audit required",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "न काटने पर 30% = 1,08,000 अस्वीकृत, 70% स्वीकृत",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly disallows ₹1,08,000, calculates profit ₹48,45,440, and requires audit under regular provisions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly disallows ₹1,08,000 under 40(a)(ia), arrives at ₹48,45,440 profit, and notes mandatory audit under 44AB."
+    }
+   ]
+  },
+  {
+   "check": "Recommends 44ADA: deemed ₹28,24,000, tax ₹5,58,688 with cess, ₹84,688 payable plus 234B/234C; regular ~₹11,89,377",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**84,688** + धारा 234B/C ब्याज अलग से",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends 44ADA with correct deemed profit, tax including cess, TDS-adjusted liability, interest, and approximate regular-basis tax."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends 44ADA (profit ₹28,24,000), computes ₹5,58,688 tax with cess, ₹84,688 payable plus 234B/C, and compares to regular ~₹11.89L."
+    }
+   ]
+  },
+  {
+   "check": "Old regime with 80D (~₹6,78,288) worse; flags ₹36,000 missed 194J TDS on John (201(1A), TDS return); AIS feedback",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "PAN लें, 26Q में सुधार/विलंब शुल्क, धारा 201(1A) ब्याज; आगे मासिक कटौती प्रक्रिया बनाएँ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags John's TDS default, interest and return compliance; omits ₹36,000, explicit deposit, old-regime comparison, and AIS feedback."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Mentions 194J default, 201(1A), and 26Q, but misses the ₹36,000 figure, AIS feedback, and old regime comparison."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031156913,
+ "date": "2026-10-11"
+}

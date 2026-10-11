@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/write-hr-policies/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "a218491fdd4f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes notices A–C: attendance days, \"near an office\" defined, 시·도 move approval kept",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "다른 시·도로 이사하거나 사무실 50km 기준이 달라지는 이사를 할 때는 30일 전까지 인사팀에 신청합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "공지 통합과 50km·주 3일 기준은 명확하지만, 기존 60일 전 이주 승인 요건을 30일 신청으로 바꿨습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Expressly supersedes notices A–C, defines near office as 50km, sets 30 days approval for move."
+    }
+   ]
+  },
+  {
+   "check": "₩50,000 stipend kept; 부산 CBA's 50% up to ₩60,000 prevails (§96①); others may need §94① consent",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "지원금 대신 통신비 실비(청구액의 50%, 최대 6만원, 증빙 필요)를 받고 싶은 직원은 분기 단위로 선택할 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "5만원 지원금과 실비 선택권을 유지하고, 부산 단체협약 우선 및 불리한 변경의 제94조 동의를 명시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps ₩50,000, 부산 CBA prevails, and notes §94① consent for disadvantageous changes."
+    }
+   ]
+  },
+  {
+   "check": "Rejects \"no more receipts\": documentation required; stipend noted as taxable wage income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "지원금은 근로소득이므로 원천징수 후 지급합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "정액 지원금 과세를 명시하고, 통신비 실비 증빙과 별도 업무 경비 청구를 유지했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies stipend as taxable income and retains documentation requirement via reimbursement option."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: boot-up and VPN login time is paid working time (§50③), with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "근무 시작은 업무용 PC 부팅, 필수 시스템 로그인, VPN 접속 중 가장 먼저 시작한 시점입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "필수 준비시간을 유급 근로시간으로 포함하고 시작·종료 및 실제 근로 기록 기준을 정했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects CEO instruction, treating boot-up and VPN login as paid working time with clear timekeeping rules."
+    }
+   ]
+  },
+  {
+   "check": "Domestic remote within limits; abroad only pre-approved, in Japan or Singapore, for immigration, tax, PE reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "회사의 현지 법인이나 EOR이 있는 일본과 싱가포르에서만 가능합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "국내 승인·기간 제한과 해외 사전 승인을 규정하고, 비자·세무·고정사업장 위험을 설명했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Domestic limited, abroad restricted to Japan and Singapore with pre-approval for visa, tax, and PE concerns."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure, decision, §94/§93 procedure; table matches headcount (대전·충청, 광주·전라 no office; 부산 CBA)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "② 주 3일 출근을 위한 동의 절차를 진행할지",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "메모에 주요 변경과 결정은 있으나 반경·제93조 신고가 빠졌고, 표에도 인원수가 없습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note covers departures, decisions, §94/§93 procedure, and summary table reflects location specifics accurately."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019133625,
+ "date": "2026-10-11"
+}

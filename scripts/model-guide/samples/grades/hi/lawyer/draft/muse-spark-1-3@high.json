@@ -1,0 +1,128 @@
+{
+ "key": "hi/lawyer/draft/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "draft",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "5f89194cc3bc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Milestones total ₹1.96 crore, not ₹2 crore (₹4 lakh gap); placeholder or assumption, raised in the email",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "[Confirm: totals ₹1.96cr — allocate balance ₹4L to M4?]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies ₹4 lakh gap, leaves allocation for confirmation, and raises discrepancy in email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identified the ₹4L gap, inserted a placeholder suggestion, and raised it in the cover email."
+    }
+   ]
+  },
+  {
+   "check": "No work for hire (s.17: agency owns); signed \"hereby assigns\" per s.19: worldwide, full term, 19(4) lapse disapplied",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ss.19(5)-19(6) defaults expressly excluded; s.19(4) lapse disapplied by agreement.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses present assignment, identifies works and rights, specifies worldwide perpetual duration, and rejects contractor work-for-hire reliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects work-for-hire, uses present assignment satisfying s.19 with worldwide territory, full term, and s.19(4) disapplied."
+    }
+   ]
+  },
+  {
+   "check": "Orbitmade Core licensed perpetual, irrevocable, royalty-free, worldwide, transferable; GPL-3.0 barred or needs Fernhill's approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Grants Fernhill perpetual, irrevocable, worldwide, royalty-free, transferable, sub-licensable licence",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Core licence has required attributes; SleepWave is blocked unless Fernhill approves, with proprietary-source disclosure risk addressed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Core license includes all required terms; GPL-3.0 library is barred pending Fernhill's express approval."
+    }
+   ]
+  },
+  {
+   "check": "Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, personal-data, misconduct exclusions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "except: IP/ confidentiality breach, data breach, fraud/wilful misconduct, breach of law, indemnities, and non-payment.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ten-business-day criteria-based acceptance includes reasoned rejection and cure rounds; fee-based cap includes required exclusions. Email explains both."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drafts balanced acceptance procedure and liability cap carved out for IP, data breach, and wilful misconduct."
+    }
+   ]
+  },
+  {
+   "check": "DPDP s.8(2) contract: instructions, safeguards, prompt breach notice, deletion; subcontractors approved, none in s.16 countries",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "No sub-processing/subcontracting of Services or Personal Data without Fernhill prior written consent",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes documented instructions, safeguards, 24-hour breach notice, deletion, approved subcontractors, flow-down, responsibility, and restricted-country prohibition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers DPDP s.8(2) contract mandates: instructions, safeguards, breach notice, deletion, subcontractor consent, and s.16 cross-border restrictions."
+    }
+   ]
+  },
+  {
+   "check": "Source code on termination; Indian law, Mumbai seat (courts or arbitration); narrow non-solicit, s.27 caveat noted",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Neither shall, during term + **12 months**, solicit for employment employees materially involved, save general ads and unsolicited applications.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides termination source code, Indian law and Mumbai arbitration, and narrow non-solicitation; omits section 27 enforceability caveat."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes source code on termination, Indian law, and Mumbai seat, but fails to note the Section 27 caveat."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022477613,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,110 @@
+{
+ "key": "en/investor/report-portfolio/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "investor",
+ "task": "report-portfolio",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "32e3fdc99b8a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Paid-in $78.0M at both dates, not $81.0M; the $3.0M call due Oct 15 disclosed separately",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Paid-in capital was unchanged at $78.0M, and distributions were unchanged at $9.6M.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both dates use $78.0M; the separate capital-call section discloses $3.0M due October 15 and excludes it from Q3."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses $78.0M for both dates and discloses the upcoming $3.0M capital call separately."
+    }
+   ]
+  },
+  {
+   "check": "Marks per policy: Dovetail held at $6.0M, Clearpath about $0.4M, Gild $12.0M, Brine $4.5M",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Clearpath Bio | 8.0 | 8.0 | 0.4 |\n| Dovetail AI | 6.0 | 6.0 | 6.0 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four required marks are correct, with policy-consistent explanations for Dovetail, Clearpath, Gild and Brine."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly marks Dovetail at $6.0M, Clearpath at $0.4M, Gild at $12.0M, and Brine at $4.5M."
+    }
+   ]
+  },
+  {
+   "check": "NAV $94.5M / $86.4M; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **TVPI** | **1.33x** | **1.23x** |\n| **DPI** | **0.12x** | **0.12x** |\n| **RVPI** | **1.21x** | **1.11x** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "NAV is correctly $94.5M/$86.4M; all multiples and stated formulas are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All requested metrics and multiples match the exact values at Jun 30 and Sep 30."
+    }
+   ]
+  },
+  {
+   "check": "States TVPI fell, contradicting \"1.43x … up\"; explains Clearpath and Brine candidly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Net of these changes, TVPI is 1.23x, down 0.10x from last quarter.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly contradicts the draft's increase and candidly explains Clearpath's wind-down and Brine's missed plan and discounted bridge."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states TVPI declined and explains both Clearpath's wind-down and Brine's bridge markdown candidly."
+    }
+   ]
+  },
+  {
+   "check": "Note to Doe lists paid-in, Dovetail, Clearpath and headline corrections, each with its policy reason",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The corrected figure is 1.23x, down from 1.33x, so \"up from last quarter\" is wrong.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Internal note explains paid-in timing, SAFE policy, wind-down impairment and corrected headline calculations; it stays under 150 words."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Note explicitly covers paid-in capital, Dovetail, Clearpath, and the headline TVPI claim with policy rationales."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021716100000000002,
+ "date": "2026-10-11"
+}

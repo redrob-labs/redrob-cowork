@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/financial-statements/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "11545c8d384d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss ₩1,614m, deficit ₩594m as booked (or ₩1,584m and ₩564m if interest corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "결손금(기초 3,180+당기손실 1,614)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reports booked loss 1,614 and capital deficit 594; assets 2,634 equal liabilities plus equity."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "손익계산서 손실 1,614백만원 및 재무상태표 자본잠식 594백만원으로 대차가 정확히 일치함."
+    }
+   ]
+  },
+  {
+   "check": "Contract liability ₩740m current, ₩280m noncurrent; lease ₩96m/₩240m; notes and accrued interest noncurrent (K-IFRS 1001)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "12개월 이후 상환 → 원금·미지급이자(90) 모두 비유동.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly splits contract liabilities 740/280 and leases 96/240; classifies notes and accrued interest noncurrent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "계약부채, 리스부채, 전환사채 및 미지급이자의 유동/비유동 구분을 K-IFRS 제1001호에 맞게 반영함."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be ₩90m (1,500 × 8% × 9/12), not ₩120m; proposes treating the ₩30m",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "전환사채 1,500×8%×9/12=90이나 이자비용 120.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags 30 difference, requests verification of possible lease interest, and proposes correction if erroneous."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "전환사채 이자 90백만원과 시산표상 120백만원의 차이 30백만원을 지적하고 처리 방안을 제시함."
+    }
+   ]
+  },
+  {
+   "check": "Material uncertainty on going concern (K-IFRS 1001.25): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "계속기업에 중대한 불확실성 존재",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies 10.5-month runway, customer loss, unsigned financing, and unresolved material uncertainty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "10.5개월 런웨이, 고객 이탈, 텀시트 미서명을 반영하여 계속기업 불확실성을 적절히 공시함."
+    }
+   ]
+  },
+  {
+   "check": "CEO loan as related party (K-IFRS 1024); questions classification; flags missing 상법 제398조 approval, 인정이자 exposure",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "상법398 이사회승인 未득, 무효·변제·손배 리스크 주석.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Discloses related-party loan, classification judgment and missing approval, but omits deemed-interest tax exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "특수관계자 공시, 분류 판단, 상법 제398조는 다루었으나 가지급금 인정이자 세무 리스크 언급이 누락됨."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a non-adjusting event after the reporting period (K-IFRS 1010)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "25.2.12 최대고객 25.5월 비갱신 통보는 조정前 비조정사건.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats customer non-renewal as a non-adjusting subsequent event under K-IFRS 1010."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "고객의 계약 미갱신 통보를 K-IFRS 제1010호에 따른 비조정사건으로 올바르게 분류함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023370112999999998,
+ "date": "2026-10-11"
+}

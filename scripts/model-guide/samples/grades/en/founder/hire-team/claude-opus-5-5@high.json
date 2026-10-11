@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/hire-team/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "8cdcb3c4e19d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Mary's average is 55/16 = **3.44**, not 3.6. Richard's 3.50 is correct.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both averages and explicitly rejects the ATS recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recomputes Mary's average as 3.44, confirms Richard's 3.50, and identifies the ATS error."
+    }
+   ]
+  },
+  {
+   "check": "Spots Stiles's Richard Roe note describing Mary's Brightpath role; if swapped, Mary ~3.56, Richard ~3.38",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Stiles's scores swapped | 3.56 | 3.38 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies Brightpath as Mary's employer and correctly calculates the swapped-score scenario."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Spots the Brightpath mix-up in Stiles's note and computes the swapped averages (3.56 and 3.38)."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with Stiles a prerequisite, not a guess",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "His input stays out until he confirms which candidate he's describing.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requires Stiles's confirmation before deciding and requests verification against original interview notes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats confirming the scores with Stiles as a mandatory prerequisite before deciding."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Miles's comment on Mary's children as improper and legally risky; sets a follow-up without bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It isn't job-related, it's an unfair assumption about her, and it creates real legal risk for us.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the comment, documents exclusion, coaches Miles, and applies identical travel questions to both candidates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes the improper comment due to legal risk and tests travel identically across both candidates."
+    }
+   ]
+  },
+  {
+   "check": "Keeps Mary's $165K ask (above the $155K ceiling) within policy; notes Richard's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$165k: $10k above band, $15k above plan",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers Mary within approved base and equity limits, requires approval for exceptions, and notes Richard's pending reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Caps Mary's base at the $155k band limit with max equity, and notes Richard's pending reference."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The decision will come from specific evidence and practical terms.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional, organized deliverables justify delaying beyond averages; candidate email uses placeholders for unresolved details."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tone is professional and concise; recommendation looks beyond averages; email properly uses placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017051999999999998,
+ "date": "2026-10-11"
+}

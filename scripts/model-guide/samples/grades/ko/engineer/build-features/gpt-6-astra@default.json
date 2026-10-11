@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/build-features/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "build-features",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "eec7ca092fb7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Lists bugs: fractional won, member discount on alcohol, VAT added on top, VAT on groceries, whole-cart VAT",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "멤버십 할인·세금을 장바구니 단위로 계산하며 원 단위 반올림과 라인별 내역이 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies all five bugs, including unrounded fractional amounts, alcohol discounts, and incorrect VAT treatment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All five bugs are clearly identified and listed in section 4."
+    }
+   ]
+  },
+  {
+   "check": "Rejects FRESH10 with below_minimum: eligible ₩35,460 (cart ₩47,450) is under ₩40,000; states minimum-check order",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "주류 제외 대상 금액이 **35,460원**으로 최소 40,000원에 미달합니다. 반환 사유는 `below_minimum`입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly rejects the ₩47,450 sample cart and explicitly checks the minimum before membership discounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects FRESH10 with below_minimum on ₩35,460 non-alcohol total and states minimum check order."
+    }
+   ]
+  },
+  {
+   "check": "Applies only the Plus discount to ₩35,460: ₩1,774 per line (or ₩1,773 allocated, as a stated choice)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **합계** | **47,450** | **1,774** | **0** | **45,676** | **1,824** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies only Plus discounts to non-alcohol lines; per-line half-up discounts correctly total ₩1,774."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies 5% Plus discount per non-alcohol line totaling ₩1,774."
+    }
+   ]
+  },
+  {
+   "check": "Extracts VAT only from soap (₩734 of ₩8,075) and makgeolli (₩1,090); total ₩45,676; lines sum exactly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 주방세제 1L × 2 | 8,500 | 425 | 0 | 8,075 | 734 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Soap VAT is ₩734, alcohol VAT ₩1,090, groceries exempt; line totals exactly sum to ₩45,676."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Extracts VAT only from soap (₩734) and makgeolli (₩1,090); total ₩45,676; lines sum exactly."
+    }
+   ]
+  },
+  {
+   "check": "Proportional fixed-discount allocation with remainders, capped at the eligible amount; inclusive Asia/Seoul date check",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const target = Math.min(requested, baseTotal);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Implements capped proportional allocation with remainder adjustment and inclusive expiration using Asia/Seoul dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Implements proportional allocation with largest-remainder adjustments, capped at base total, and inclusive Asia/Seoul checks."
+    }
+   ]
+  },
+  {
+   "check": "Passing tests cover each reason code, case-insensitivity, alcohol exclusion, HOME15 scope and half-won rounding",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "it('정률 프로모션도 라인별 half-up 반올림한다', () => {",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests cover all rejection reasons, case-insensitivity, alcohol exclusion, HOME15 scope, and half-won rounding; expectations match implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests comprehensively cover all four reason codes, case normalization, alcohol exclusion, HOME15 scope, and half-up rounding."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.041399138,
+ "date": "2026-10-11"
+}

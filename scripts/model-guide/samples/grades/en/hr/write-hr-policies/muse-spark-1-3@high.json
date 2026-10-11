@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/write-hr-policies/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "fa5b3785cf3a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" defined, state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It replaces Memo A (2023), Memo B (2024), and Memo C (2024).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expressly supersedes all memos, defines a 50-mile radius, requires Tuesday–Thursday attendance, and retains 60-day state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Expressly supersedes all three memos, defines 50 miles for office proximity, sets Tue–Thu attendance, and preserves move approval."
+    }
+   ]
+  },
+  {
+   "check": "$50 stipend kept, with a CA/IL claim route above it (§2802, 820 ILCS 115/9.5) and documentation",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Everyone** in hybrid or remote work receives a $50/month home-office stipend via payroll.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides documented CA/IL excess-expense claims, but excludes onsite employees from the required universal stipend."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps the $50 stipend, provides excess claim mechanisms for CA and IL, and specifies receipt documentation."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: non-exempt boot-up and VPN login time is paid work, with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "including booting up, logging into the VPN and other required systems",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly requires recording and paying this time and prohibits off-clock work."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects unpaid boot-up/login time, treating it as compensable work with clear timekeeping requirements."
+    }
+   ]
+  },
+  {
+   "check": "US remote stays limited; abroad only with pre-approval, in Canada or the UK, for immigration, tax, PE reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "work abroad is limited to Canada and the UK",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits US stays, requires overseas pre-approval, restricts countries, and explains immigration, tax-withholding, and permanent-establishment risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Limits US remote stays to 4 weeks and requires pre-approval for abroad work, restricted to Canada/UK for stated legal risks."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision needed; state table matches headcount (NY, WA have no office)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Please approve (a) the CA/IL top-up process and (b) the Canada/UK-only abroad limit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "CEO note covers departures and attendance radius, requests decisions, and table correctly reflects state headcounts and office locations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The note details departures and requested decisions, and the state summary accurately reflects headcounts and remote-only states."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018306225,
+ "date": "2026-10-11"
+}

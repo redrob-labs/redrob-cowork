@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/handoff-specs/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "designer",
+ "task": "handoff-specs",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "24eaf39440f4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags Pro: ₹789 × 12 = ₹9,468, not ₹9,990, and \"20% बचाएँ\" fails (about 21% or 17%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹789×12 = ₹9,468, ₹9,990 नहीं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags the Pro mismatch and separately calculates both savings rates, disproving the 20% claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately flags the calculation mismatch and both percentage discrepancies for Pro."
+    }
+   ]
+  },
+  {
+   "check": "Confirms Business is consistent (₹1,999 × 12 = ₹23,988, 20%); proposes a fix for Pro",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Business बचत लगभग **20.01%**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Business display and annual bill are consistent; proposes correcting either Pro’s monthly display or annual bill."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms Business is consistent at 20% and provides clear options to resolve Pro."
+    }
+   ]
+  },
+  {
+   "check": "Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "`(--space-2 + --space-3)/2` = 10px",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Normalizes blue and the card gap, but retains 10px through arithmetic and gives no card-gap normalization reason."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maps hex to canonical token and maps 14px and 10px gaps to token-based values."
+    }
+   ]
+  },
+  {
+   "check": "Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; Annual default",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`fieldset`/`legend` और समान `name` वाले radios इस्तेमाल हों।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Native radios provide keyboard support; annual defaults selected, visible focus exists, and a polite status announces prices."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accessible radio group, annual default, visible focus styles, and polite live region announcements."
+    }
+   ]
+  },
+  {
+   "check": "No layout shift on toggle (reserved price area, \"सालाना बिल\" line always present); Pro first when stacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "दोनों price variants जगह सुरक्षित रखते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Overlaid variants reserve price and billing-copy dimensions; stacked DOM order puts Pro first."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CSS grid stacking prevents layout shift; JS reorders Pro first when stacked."
+    }
+   ]
+  },
+  {
+   "check": "Single-file code runs on token custom properties; spec table is complete enough to build from",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "≥1040: तीन कॉलम; नीचे Pro, Starter, Business",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable single-file implementation uses supplied custom properties; detailed spec covers dimensions, states, responsive behavior, and disclosed visual substitutions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a runnable single-file implementation using tokens, paired with a comprehensive spec table."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.035175788,
+ "date": "2026-10-11"
+}

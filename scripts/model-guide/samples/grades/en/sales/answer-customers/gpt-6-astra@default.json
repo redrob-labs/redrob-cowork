@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/answer-customers/gpt-6-astra@default",
+ "language": "en",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "3181382aa2b6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; $5,520 invoice is an error, corrected by $720 to $4,800",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "February should be **120 × $40 = $4,800**, not $5,520. I’ll request a **$720 billing correction** today.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies the billing error, $720 correction, and price protection through 28 February 2027."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the price protection end date and calculates the $720 correction to $4,800."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ $480; claim within 30 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Using February’s 40,320 minutes and this incident’s 220 downtime minutes gives **99.454% uptime**, qualifying for a **10% credit: $480**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct calculation and credit; internal note confirms the claim arrived 17 days after the incident, within 30 days."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates uptime percentage, credit amount, and confirms the claim is timely within 30 days."
+    }
+   ]
+  },
+  {
+   "check": "Explains degraded time isn't downtime vs \"9 hours\"; no full-month refund; goodwill labelled and justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The SLA counts core unavailability, but excludes degradation.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains the nine-hour discrepancy, invites investigation, denies full-month refund entitlement, and explicitly declines inventing discretionary goodwill."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Distinguishes core downtime from degradation, denies full-month refund per contract, and justifies not issuing discretionary goodwill."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Any partner-built Mediscribe connection requires discovery and validation.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately states FHIR R4 availability and absent HL7 v2/native Mediscribe integration; directs Support toward discovery and validation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "States API and lack of HL7/Mediscribe support clearly, but does not offer an actionable next step."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at $40 under §3.3: 135 seats, $5,400 a month from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Effective **1 March**, that means **135 seats × $40 = $5,400 per month**, an increase of **$600**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms all 15 additional seats at the protected $40 rate and cites §3.3 internally."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 15 extra seats at $40, bringing total to 135 seats and $5,400/month from March."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I’m sorry for the billing error and the disruption to your clinics. Here are direct answers to all four points.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accountable, empathetic, restrained tone; internal actions specify the $720 correction, $480 credit, and $600 monthly seat increase."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains an empathetic, accountable tone, and internal note clearly details each action with specific dollar figures."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020069438000000002,
+ "date": "2026-10-11"
+}

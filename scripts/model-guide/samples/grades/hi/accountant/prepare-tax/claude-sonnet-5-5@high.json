@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/prepare-tax/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "128fda5c8ba7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes the ₹7,20,000 double count: receipts ₹56,48,000 = 54,33,440 − 2,50,000 − 42,000 + 32,560 + 4,74,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹7.2 लाख PayFlow से दो बार गिना जा रहा था",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes duplication and reconciles ₹56,48,000 using all five required bank adjustments."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reconciles ₹56,48,000 by reversing the ₹7,20,000 double count and adjusting non-business deposits, TDS, and fees."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 1: 44ADA limit ₹75 lakh (cash ≤ 5%), subject to specified profession; software ₹1,52,400; fees ₹32,560",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "AY 2024-25 से 44ADA की सीमा ₹75 लाख है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects outdated note, states cash threshold and profession condition, and correctly deducts software ₹1,52,400 and fees ₹32,560."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects note 1, states the ₹75L threshold and specified profession condition, and lists software net ₹1,52,400 and fees ₹32,560."
+    }
+   ]
+  },
+  {
+   "check": "Regular basis: car ₹42,000, home office ₹86,400, laptop depreciation ₹24,000 (not expensed); gym out; insurance to 80D",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसे खर्च न करें। ₹1,20,000 पर पूँजीकरण करें और 20% (आधी दर) से ₹24,000 मूल्यह्रास लें",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct laptop depreciation, car ₹42,000, office ₹86,400, gym exclusion, and old-regime-only 80D treatment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates car ₹42,000, home office ₹86,400, laptop depreciation ₹24,000, excludes gym, and moves insurance to 80D."
+    }
+   ]
+  },
+  {
+   "check": "Disallows 30% of John's fee (₹1,08,000) under 40(a)(ia); profit ₹48,45,440, tax audit required",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "धारा 40(a)(ia): बिना TDS का 30% (₹1,08,000) अस्वीकार्य",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct disallowance and ₹48,45,440 regular profit; explicitly requires regular-basis tax audit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disallows 30% under section 40(a)(ia) (₹1,08,000), arriving at ₹48,45,440 profit and noting tax audit is mandatory."
+    }
+   ]
+  },
+  {
+   "check": "Recommends 44ADA: deemed ₹28,24,000, tax ₹5,58,688 with cess, ₹84,688 payable plus 234B/234C; regular ~₹11,89,377",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**चुनी गई पद्धति: 44ADA**, जिससे कर लगभग ₹6.3 लाख कम होता है और ऑडिट बचता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct deemed profit, both tax comparisons, cess, TDS credit, payable balance, and 234B/234C exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends 44ADA with ₹28,24,000 profit, ₹5,58,688 tax with cess, ₹84,688 payable plus 234B/234C, vs ₹11,89,377 regular."
+    }
+   ]
+  },
+  {
+   "check": "Old regime with 80D (~₹6,78,288) worse; flags ₹36,000 missed 194J TDS on John (201(1A), TDS return); AIS feedback",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹3.6 लाख पर ₹36,000 TDS काटना था।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct old-regime pre-cess equivalent; flags 201(1A), 26Q correction, and AIS feedback."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates old regime with 80D as worse, flags missing ₹36,000 TDS under 194J with 201(1A)/returns, and suggests AIS feedback."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029631,
+ "date": "2026-10-11"
+}

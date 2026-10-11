@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/financial-statements/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "11545c8d384d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss ₩1,614m, deficit ₩594m as booked (or ₩1,584m and ₩564m if interest corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "결손금 (기초 3,180 + 당기순손실 1,614) | (4,794) |\n| **자본총계** | **(594)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reports loss 1,614 and capital deficit 594; assets 2,634 equal liabilities 3,228 plus equity."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Statements tie with net loss of ₩1,614m and deficit of ₩594m."
+    }
+   ]
+  },
+  {
+   "check": "Contract liability ₩740m current, ₩280m noncurrent; lease ₩96m/₩240m; notes and accrued interest noncurrent (K-IFRS 1001)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "현금이자 지급이 없고 원금과 함께 2026.6.30 만기에 지급되므로 보고기간 후 12개월 이후 결제입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly splits contract liabilities 740/280 and leases 96/240; classifies notes and accrued interest noncurrent with maturity rationale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Contract liabilities, lease liabilities, notes, and accrued interest are correctly split and classified."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be ₩90m (1,500 × 8% × 9/12), not ₩120m; proposes treating the ₩30m",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이자비용 120 중 90은 전환사채 이자입니다. 나머지 30은 리스이자로 추정하며 내역을 확인해 주십시오.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates note interest as 90 and proposes allocating the remaining 30 to lease interest, subject to verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies ₩90m note interest and proposes treating the remaining ₩30m as lease interest."
+    }
+   ]
+  },
+  {
+   "check": "Material uncertainty on going concern (K-IFRS 1001.25): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이는 계속기업 능력에 유의적 의문을 제기할 수 있는 중요한 불확실성입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies unresolved material uncertainty, 10.5-month runway, customer loss, and unsigned financing; requests forecasts and management plans."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses ~10.5 months runway, customer loss, unsigned term sheet, and unresolved material uncertainty."
+    }
+   ]
+  },
+  {
+   "check": "CEO loan as related party (K-IFRS 1024); questions classification; flags missing 상법 제398조 approval, 인정이자 exposure",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "법인세법상 인정이자와 지급이자 손금불산입도 확인해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses related-party loan, explains provisional noncurrent classification, questions recovery, and flags missing Article 398 approval and tax exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses CEO loan as related party, questions classification, notes missing approval and deemed interest exposure."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a non-adjusting event after the reporting period (K-IFRS 1010)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "보고기간 후 발생한 비조정사건입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats the February customer non-renewal notice as non-adjusting and discloses potential financial impact."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly treats customer non-renewal as a non-adjusting event under K-IFRS 1010."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028443713,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/optimize-search/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "0cffc551fe31",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Fixes price ($39 annual / $49 monthly, not \"from $29\"), trial not free plan, QuickBooks Online only; superlatives cut",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pricing is $39 per user per month billed annually, or $49 month-to-month.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct prices, trial-only availability, Online-only integration, and removal of unsupported superlatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixes pricing, specifies trial instead of free plan, limits QuickBooks to Online, and removes superlatives."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"hvac scheduling app free\" honestly with the 14-day trial, explained in the rationale",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "\"hvac scheduling app free\" has no honest answer, since there is no free plan.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "FAQ honestly offers the trial, but rationale incorrectly calls the query unanswerable and omits explaining the trial alternative."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses the query honestly via the 14-day trial in an FAQ and explains the decision in the rationale."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, QuickBooks Online, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Offline mode** | Technician mobile app: yes. Office web app: no",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes technician offline support from office connectivity; fact table includes both prices, QuickBooks Online, and offline support."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ details offline technician app vs online web app, and the glance table lists price, QuickBooks Online, and offline."
+    }
+   ]
+  },
+  {
+   "check": "Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Add a link high in the blog post with the anchor \"HVAC scheduling software\" pointing to the product page",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Title, H1, and H2s target scheduling and dispatch; blog becomes informational with an exact-match product link."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Targets both terms across title, H1, and H2s, while repositioning the blog to informational with exact-match linking."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤60, meta ≤155, counts accurate; JSON-LD valid and matches page; survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "In a March 2025 survey of 210 Fieldnote customers, dispatchers reported cutting scheduling time from 9 to 4 hours a week.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Title and meta counts are accurate at 47 and 146; JSON-LD matches copy, and survey attribution includes sample and date."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Character counts are exact and within limits, JSON-LD is valid and matches copy, and survey attribution is complete."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023307374999999998,
+ "date": "2026-10-11"
+}

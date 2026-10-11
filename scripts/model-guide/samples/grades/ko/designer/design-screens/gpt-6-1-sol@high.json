@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/design-screens/gpt-6-1-sol@high",
+ "language": "ko",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-1-sol",
+ "effort": "high",
+ "scorecardSha": "086b8168274f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "흰색/민트 대비는 약 **1.8:1**로 AA 본문 기준 4.5:1에 미달하며",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the contrast failure and explains retaining mint while replacing white button text with dark ink."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately identifies the AA failure of white on mint and switches to dark ink text."
+    }
+   ]
+  },
+  {
+   "check": "Drops 박영수's exotic slot, 12:30 (lunch), 11:30 scaling (runs into lunch), 16:45 check-up (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "조건을 충족하는 시간은 **이영희 원장·특수동물 진료 11:00**, **박영수 수의사·건강검진 진료 14:00**뿐입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The implemented eligibility, lunch-overlap, and closing-time filters remove all four invalid slots."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly drops all four invalid slots in both prototype logic and text."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "확정 API가 자격·시간·가격·가용성을 원자적으로 재검증.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains each invalid slot individually and recommends API eligibility and full-interval validation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains why each dropped slot is invalid and recommends API validation fixes."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"280,000원부터\" honestly, e.g. with a final-price note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최소 금액에 동의하는 것만으로 가격 불확실성이 해소되지는 않으므로, 최종 견적 없이는 확정하지 않습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Displays 280,000원부터 honestly and prevents confirmation without a final quote, addressing price surprises."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honestly addresses the starting price and the tension with the no-surprises rule."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"아무 수의사나 가능\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "네이티브 라디오, 키보드 조작, 단계 이동 시 제목 포커스, 요약 변경 알림, 44px 이상 클릭 영역",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file prototype supports 375px, labelled keyboard controls, visible focus, sufficient targets, and the any-veterinarian option."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Prototype fits 375px, includes visible focus and large tap targets, and supports 'any vet'."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% check-up and vaccination bookings",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "별도 상세 화면 없이 선택할 수 있으며, 수의사 단계의 첫 선택지는 “아무 수의사나 가능”입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains compact focused steps and prioritizes the two common services with direct selection and any-veterinarian routing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Ties step-by-step layout decisions and card design directly to the fast path."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.03596565,
+ "date": "2026-10-11"
+}

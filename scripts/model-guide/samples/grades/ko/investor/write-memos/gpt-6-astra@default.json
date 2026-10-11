@@ -1,0 +1,110 @@
+{
+ "key": "ko/investor/write-memos/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "investor",
+ "task": "write-memos",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "17060d377cf2",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Ownership ₩150억 ÷ ₩750억 = 20%, not 25%; pool ₩18억 → ₩75억; effective pre-money ≈₩543억",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "기존 완전희석 주식 기준 실질 pre-money는 약 541.2억원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly gives 20% ownership and ₩75억 target pool, but omits ₩18억 starting pool and differs from ≈₩543억."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies 20% ownership, analyzes the option pool expansion, and calculates effective pre-money."
+    }
+   ]
+  },
+  {
+   "check": "FY2024 gross margin restated ≈73.7% (72.4% if all ₩9억 moved); LTM ≈74.0%; reclassification flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 조정 매출총이익률 | 76.7%³ | **73.7%** | **74.0%** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly restates both margins using 85% production hosting and flags reported margins as understating operating costs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately restates FY2024 and LTM gross margins to 73.7% and 74.0% and flags AWS reclassification."
+    }
+   ]
+  },
+  {
+   "check": "FY2024 ARR growth 60%, burn multiple ≈2.14, runway ≈10 months; cohort NRR 124% → 112% → 103%",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "현금 런웨이: `80/8=10개월`",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Includes 60% ARR growth, ten-month runway and all cohort NRR figures, but omits the 2.14 burn multiple."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes FY24 ARR growth, runway, and cohort NRR, but omits the burn multiple calculation (~2.14)."
+    }
+   ]
+  },
+  {
+   "check": "브라이트스마일 (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "브라이트스마일 ARR 18%, **25.2억원** 집중. 자체 구축 검토",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies concentration and in-house build risk; proposes long-term contracting, diversification and a full-loss stress test."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats BrightSmile as a primary risk and outlines specific mitigants including contract review and stress-testing."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation consistent with the analysis; diligence items tie to hosting, 브라이트스마일 and support",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "몰래리티헬스 시리즈 B 150억원 투자를 조건부 추천하되, 현 텀시트 그대로의 집행은 보류합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clear conditional recommendation matches analysis; diligence explicitly covers hosting classification, BrightSmile contracts and support-related retention."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clear recommendation consistent with findings; diligence items directly address hosting costs, customer support, and BrightSmile."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023970712999999998,
+ "date": "2026-10-11"
+}

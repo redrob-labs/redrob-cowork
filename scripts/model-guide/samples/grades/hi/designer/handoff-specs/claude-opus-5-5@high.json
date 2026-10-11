@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/handoff-specs/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "designer",
+ "task": "handoff-specs",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "24eaf39440f4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags Pro: ₹789 × 12 = ₹9,468, not ₹9,990, and \"20% बचाएँ\" fails (about 21% or 17%)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "789 × 12 = 9,468 ≠ 9,990.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags Pro’s billing mismatch, but never identifies the incorrect savings badge or the 21%/17% figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags the 12-month multiplication mismatch for Pro, but does not analyze the 20% discount discrepancy."
+    }
+   ]
+  },
+  {
+   "check": "Confirms Business is consistent (₹1,999 × 12 = ₹23,988, 20%); proposes a fix for Pro",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "PM की पुष्टि के बिना ship न करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Requests confirmation but proposes no Pro correction and does not confirm Business’s arithmetic or 20% savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Does not confirm Business pricing consistency or propose a fix for Pro (section 4 was truncated)."
+    }
+   ]
+  },
+  {
+   "check": "Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "⚠️ 10 → `--space-3` (12)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Maps the blue to primary-600 and gaps to space-4/space-3, explaining detached swatch and off-scale spacing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly maps the hex color and 14px/10px gaps to design tokens with explanations."
+    }
+   ]
+  },
+  {
+   "check": "Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; Annual default",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<input type=\"radio\" name=\"billing\" value=\"annual\" checked>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Native grouped radios provide keyboard support; annual defaults, visible focus, and status announcements are implemented."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses a radio group with visible focus, live-region price announcements, and annual selected by default."
+    }
+   ]
+  },
+  {
+   "check": "No layout shift on toggle (reserved price area, \"सालाना बिल\" line always present); Pro first when stacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "min-height: calc(2 * var(--leading-sm));",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reserves billing-note space, retains the note in both modes, uses tabular prices, and puts Pro first when stacked."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reserves billing note space to prevent layout shift and uses order: -1 to stack Pro first."
+    }
+   ]
+  },
+  {
+   "check": "Single-file code runs on token custom properties; spec table is complete enough to build from",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "TOKEN GAPS: ये codebase में नहीं हैं। नाम प्रस्तावित हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Runnable single-file implementation and detailed spec, but introduces non-codebase tokens instead of using only supplied tokens."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a valid, runnable single-file reference implementation using CSS tokens alongside a comprehensive spec table."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.037355325,
+ "date": "2026-10-11"
+}

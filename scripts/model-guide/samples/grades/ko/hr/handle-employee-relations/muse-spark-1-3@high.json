@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/handle-employee-relations/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "420461a2f6f1",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "박영수's own card charge, expense claim and Sept 19 KakaoTalk disprove his denial; overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "객관 기록과 배치되는 진술로 전반적 신빙성 낮음.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses his card charge, expense claim, and KakaoTalk to contradict nonattendance and reduce overall credibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly notes that the card and expense records contradict his denial and undermine his overall credibility."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct 인정 (김철수, card record, KakaoTalk); Sept 10 remark given a label with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "법인카드 기록, 김철수의 직접 목격(팔 두름, 자리 이동), 다음 날 박영수 발신 메시지가 상호 부합한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Substantiates September 18 using all three sources; labels September 10 substantiated with contemporaneous disclosure and consistent testimony."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Finds the Sept 18 conduct substantiated citing the witnesses and records, and provides reasoned labeling for Sept 10."
+    }
+   ]
+  },
+  {
+   "check": "Retaliation: cut to 이영희 alone ~17 hours after notice; seniority claim tested; 불리한 처우 under §14⑥",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "HR이 9월 22일 신고 사실과 보복금지를 통보한 다음 날 09:10 박영수가 초안 3명 중 이영희만 남기고 승인하였다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies timing, sole targeting, and §14⑥ violation, but does not test the seniority explanation against seniority records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Analyzes the timing, tests 박영수's operational/seniority justification, and classifies it as prohibited retaliation under §14⑥."
+    }
+   ]
+  },
+  {
+   "check": "Gives 강○○'s unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "출처 불명의 전문(傳聞)에 해당하여 독립 증거 가치 낮음.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly discounts the account because it is hearsay from an unidentified source."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives the account little weight and explains that it is unverified second-hand hearsay."
+    }
+   ]
+  },
+  {
+   "check": "Remedies (§14③⑤⑦): reverse shift per her wishes, remove 박영수 from her scheduling, proportionate discipline, check-ins, confidentiality",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "박영수와 근무 공간·라인 분리, 접촉 금지 지시.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides wishes-based reversal, discipline, monitoring, and confidentiality, but lacks explicit scheduling-authority removal and follow-up check-ins."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends shift reversal per victim's wishes, separation/removal of supervisor, discipline, monitoring, and confidentiality under relevant clauses."
+    }
+   ]
+  },
+  {
+   "check": "Open items include verifying seniority records and checking for further retaliation",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Open items omit seniority-record verification and further-retaliation checks; general monitoring elsewhere does not supply these outstanding inquiries."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "The open items section omits verifying actual seniority records and monitoring for further retaliation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031055325,
+ "date": "2026-10-11"
+}

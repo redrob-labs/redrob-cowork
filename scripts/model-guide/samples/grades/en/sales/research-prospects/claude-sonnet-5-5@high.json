@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/research-prospects/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "22d74b135781",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2025 $240M; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Jane Doe (ex-CFO) became CEO in Jan 2026. Founder Richard Roe is now Executive Chair.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct current leadership and $240M FY2025 revenue; explicitly treats 2023 leadership and revenue as superseded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Captures Doe as CEO, Roe as Executive Chair, FY2025 $240M, and notes the 2023 article is superseded."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a UK company); uses Ridgeback's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ridgeback's 22% is its own number, so I won't pitch return-rate reduction.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses Ridgeback's 22% and explicitly discards the UK company as a name collision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly discards the UK company and uses Ridgeback's 22% return rate while discarding the 32% benchmark."
+    }
+   ]
+  },
+  {
+   "check": "Value math: $240M ÷ $96 ≈ 2.5M orders × 22% × $14 ≈ $7.7M; 20–30% ≈ $1.5–2.3M",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Cost: 550,000 × $14 = **$7.7M/year**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows correct order, return, processing-cost calculations and $1.54–2.31M benchmark savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates orders, returns, total processing cost of $7.7M, and savings of $1.54M–$2.31M accurately."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Parcelwise benchmarks (our case studies):** 20–30% return-processing cost reduction, and about 15% of refunds converted to exchanges.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labels company inputs, benchmarks and assumptions; caveats establish estimates requiring validation and distinguish exchange upside."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly labels sources, notes caveats/estimates to validate, and models 15% exchange conversion as upside."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Then say that the resale launch and the evaluation change the question.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses budget and in-house loss, departed champion, replacement hiring, new CEO and resale as changed circumstances."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the CRM loss and departed champion are countered by the job post, new CEO, and resale launch."
+    }
+   ]
+  },
+  {
+   "check": "Enters via John Stiles and/or Mary Major (Tamarack link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Channel and person:** A short, personalised email to Mary Major, with a LinkedIn connection note the same day.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies Mary through role and Tamarack connection; provides concrete outreach and five questions testing costs, exchanges, timeline and grading."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends Mary Major with justification, provides a concrete first move and draft message, and lists five assumption-testing questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019645763,
+ "date": "2026-10-11"
+}

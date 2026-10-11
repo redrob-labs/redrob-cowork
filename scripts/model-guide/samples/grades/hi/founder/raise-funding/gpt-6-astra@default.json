@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/raise-funding/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "founder",
+ "task": "raise-funding",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "893d0e715439",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "ARR ₹8.16 crore (₹68 lakh × 12), excluding ₹2.84 crore one-time fees; notes MRR ₹41 lakh to ₹68 lakh (~66%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ARR = ₹68 लाख recurring MRR × 12 = ₹8.16 करोड़; इसमें एक-बार की फ़ीस शामिल नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct ARR, excludes ₹2.84 crore one-time fees, and shows ₹41–68 lakh MRR growth of 65.9%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates ARR at ₹8.16 crore, excludes one-time fees, and notes ~66% MRR growth."
+    }
+   ]
+  },
+  {
+   "check": "NRR 112% (₹33.6 lakh ÷ ₹30 lakh); 140% includes new customers; checks ₹33.6 + ₹34.4 = ₹68 lakh",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "NRR 140% → 112%: केवल वही शुरुआती cohort गिनें, नए ग्राहक नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects cohort NRR, explains excluding new customers, and reconciles ₹33.6 + ₹34.4 = ₹68 lakh."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates NRR as 112%, explains 140% includes new revenue, and verifies the ₹68 lakh sum."
+    }
+   ]
+  },
+  {
+   "check": "TAM is ₹5,760 crore (12,000 × ₹48 lakh), not ₹57,600 crore; ₹48 lakh is current ACV, a SAM-style figure",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "SAM/SOM को geography, delivery volume, return logistics और willingness-to-pay से छाँटें; अभी संख्या न दें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Corrects arithmetic and identifies current customer average, but labels the estimate TAM rather than SAM-style."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects TAM to ₹5,760 crore and notes ₹48 lakh is based on current average customer ACV."
+    }
+   ]
+  },
+  {
+   "check": "Sizes the raise at ~₹57.6 crore (24 months averaging ~₹2.4 crore); defends ~₹60 crore; notes ~8 months' runway",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "नियोजित खर्च = [(1.6 + 3.2) ÷ 2] × 24 = 57.6",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates ₹57.6 crore need, defends ₹60 crore with cash buffer, and notes 8.1 months current runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sizes raise at ₹57.6 crore, defends ₹60 crore with buffer, and notes ~8.1 months current runway."
+    }
+   ]
+  },
+  {
+   "check": "Flags 58% gross margin as a risk; uses only given data; marks larger claims \"[स्रोत आवश्यक]\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Accounting margin को fleet cash return न समझें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses supplied data and marks unsupported claims, but does not clearly flag 58% gross margin itself as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses only given data and marks claims [स्रोत आवश्यक], but caveats gross margin rather than explicitly flagging it as a risk."
+    }
+   ]
+  },
+  {
+   "check": "Tells a coherent story with a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Speaker note: प्रतिस्पर्धी तुलना customer interviews, quotes और operational data से भरें; integrated offering अपने-आप defensibility नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Coherent 12-slide story covering required topics, with a speaker note on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents a 12-slide coherent narrative with a dedicated speaker note on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025720275,
+ "date": "2026-10-11"
+}

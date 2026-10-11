@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/answer-policy-questions/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "5871f94d7fe2",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not the superseded handbook: 26 weeks at 100% (80-day test met) plus 4 company weeks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "26 सप्ताह maternity leave, 100% fixed salary पर।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies the superseding bulletin, recognizes the 80-day test as met, and grants four additional paid company weeks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies PB-2025-04, 80-day test, 26 weeks at 100%, and 4 additional weeks."
+    }
+   ]
+  },
+  {
+   "check": "PL: 8.5 days (or 7.25 if March doesn't count), reading stated; only 5 carry forward, 3.5 (or 2.25) lapse",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बाकी **2.25 दिन** 31 दिसंबर को lapse होंगे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly excludes March and correctly calculates 7.25 remaining days, five carried forward, and 2.25 lapsing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States reading (excluding March), gives 7.25 total, 5 carry forward, and 2.25 lapse."
+    }
+   ]
+  },
+  {
+   "check": "FBP: change only within 30 days of birth (~18 Mar 2026), re-elect in April; ₹1,00,000 per child, shared",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "जन्म 16 फ़रवरी को हुआ तो आपकी आख़िरी तारीख **18 मार्च 2026** होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects an immediate change; gives birth-event deadline, April election, and ₹1,00,000 per-child shared limit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers 30 days from birth (~18 March), April re-election, ₹1,00,000 cap per child, and sharing."
+    }
+   ]
+  },
+  {
+   "check": "Job protected under Maternity Benefit Act s.12 for the 26 weeks; the old 12-month handbook rule is irrelevant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह सुरक्षा 26 सप्ताह की maternity leave पर लागू है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains section 12 dismissal and adverse-change protections and explicitly rejects the obsolete twelve-month eligibility rule."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States s.12 protection for the 26 weeks and clarifies handbook rule no longer applies."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: by mid-January for a mid-February start; by ~22 Nov if starting 8 weeks early (22 Dec); confidential",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "यानी जनवरी तक रुकने का मतलब है कि leave फ़रवरी की शुरुआत से ही शुरू हो पाएगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct early-start deadline and confidentiality, but omits mid-January notice for mid-February and misleadingly restricts February starts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers ~22 Nov notice for 22 Dec start, January timelines, and confirms confidentiality."
+    }
+   ]
+  },
+  {
+   "check": "Note flags superseded, non-compliant handbook still posted; protection for the 4 company weeks after 26 routed to Legal",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "intranet पर अब भी है और PB-2025-04 से टकराती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags outdated posted handbook, but not statutory noncompliance; Legal routing for company-leave protection appears only in employee email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Note flags outdated handbook on intranet and routes job protection for the 4 company weeks to Legal."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019134938,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/design-systems/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "engineer",
+ "task": "design-systems",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "d494dc3e01d4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Computes ~23 events/s average, ~230/s peak, ~700/s peak after 3× growth; calls 2,300/s 10× high",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The draft's 2,300/s is 100× the average, not 10×.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates 23/s average, 231/s peak, and 694/s future peak; correctly identifies the draft's tenfold overestimate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 23/s average, 231/s peak, ~694/s at 3× growth, and notes 2,300/s is 10× too high."
+    }
+   ]
+  },
+  {
+   "check": "Rejects exactly-once over HTTP; proposes at-least-once with stable event IDs and merchant dedup guidance",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We promise **at-least-once** with a stable `event_id` for merchant dedupe.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once over HTTP, explains ambiguous timeouts, and provides stable IDs and merchant deduplication guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once over HTTP and specifies at-least-once with a stable event ID for merchant deduplication."
+    }
+   ]
+  },
+  {
+   "check": "Sizes storage ~5.2 GB/day (2.6M × 2 KB), ~156 GB/30 days, ~470 GB at 3×; partitions or TTL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Today | 2.6M | 5.2 | 156 GB |\n| 18 months | 7.8M | 15.6 | 468 GB |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly sizes daily and retained storage at both scales; specifies daily attempt partitions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computes storage for today and 18 months, specifying daily partitions."
+    }
+   ]
+  },
+  {
+   "check": "Per-endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking; per-shipment ordering by key or sequence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Isolation:** the scheduler enforces a cap of 10 in flight per endpoint.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes shorter timeouts, jittered backoff until 24-hour expiry, endpoint breakers, and ordering gates per endpoint and shipment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides per-endpoint isolation, 10s timeouts, jittered backoff over 24h, circuit breaking, and per-shipment ordering."
+    }
+   ]
+  },
+  {
+   "check": "Recommends the managed queue or a Postgres outbox over a self-hosted log; HMAC signing with timestamp",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Signing:** `Parcelly-Signature: t=<unix>,v1=HMAC_SHA256(secret, t + \".\" + body)`.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends the existing managed queue with Postgres state over self-hosted Kafka; includes timestamped HMAC and replay protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends Postgres plus managed queue over Kafka and details HMAC signing with timestamp."
+    }
+   ]
+  },
+  {
+   "check": "Gives a phased migration with SLOs, and a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Weeks 11–13:** migrate in batches of 5%, 25% and 100%, with the top 1,200 endpoints last.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides shadowing, load testing, canary, staged migration, rollback, explicit SLOs, and speaker notes on all eleven slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes a phased migration plan, defined SLOs, and a speaker note on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025039350000000002,
+ "date": "2026-10-11"
+}

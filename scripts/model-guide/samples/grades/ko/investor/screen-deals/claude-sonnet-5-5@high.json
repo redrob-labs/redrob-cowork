@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/screen-deals/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "screen-deals",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "fbcba62ef998",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "파슬레인 corrected to ₩28억: growth 86.7% (not 160%), burn multiple 2.00, a borderline pass",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "39→28 (−11 구축비) | 160.0%→**86.7%** | 1.08→26÷13 = **2.00**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects recurring ARR, growth and burn multiple; explicitly marks the burn threshold as a borderline pass."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrected ARR to ₩28억, growth to 86.7%, burn multiple to 2.00, and marked borderline pass."
+    }
+   ]
+  },
+  {
+   "check": "센티넬독스 corrected to ₩13.2억: fails the ₩15억 ARR floor; burn multiple 2.50",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "24→13.2 ((2.0−0.9)×12) | 300.0%→120.0% | 1.00→18÷7.2 = **2.50**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly removes annualized pilot revenue, calculates burn, and fails both ARR and burn criteria."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrected ARR to ₩13.2억, noted burn multiple 2.50, and correctly marked ARR as failing."
+    }
+   ]
+  },
+  {
+   "check": "레저리 100%/1.50; 플릿와이즈 2.50, fails margin and hardware; 쿼럼HR 58.6%/1.18, ARR above range",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "쿼럼HR(ARR 46억원, 성장 58.6%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All specified calculations are correct; FleetWise fails hardware, margin and burn, while QuorumHR fails ARR and growth."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculated figures and identified failures for Leisurely, Fleetwise, and QuorumHR."
+    }
+   ]
+  },
+  {
+   "check": "노스빔 1.27, fails NRR and round size; 탤로우 111.1%/1.60; 코비드 105.9%/1.50, fails geography",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "NRR (104%), 라운드 규모 (60억원)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All three companies’ calculations are correct; Northbeam fails two criteria and Covid fails geography."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculated figures and identified relevant criteria failures for Northbeam, Tallow, and Covid Security."
+    }
+   ]
+  },
+  {
+   "check": "Top three include 레저리; other picks reasoned, e.g. 탤로우 with its 40% concentration as first question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최대 고객 계약의 갱신 협의 상태, 계약 조건, 의사결정자는 누구입니까?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Selects Ledgerly, Tallow and Parcelane with sound reasoning; Tallow’s first question addresses its concentrated customer’s renewal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes Leisurely in top three, alongside Tallow and Parcelane, addressing Tallow's 40% concentration in question 1."
+    }
+   ]
+  },
+  {
+   "check": "Waivers: 코비드 geography only if the reverse flip counts toward 주목적 투자; 노스빔 fails two, so no rescue",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "조합 규약상 주목적 투자 비율은 파트너 재량으로 면제할 수 없으므로, 역플립 완료를 투자 선행 조건으로 두고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Protects the fund’s mandatory domestic-investment requirement, conditions Covid on completed reverse flip, and rejects Northbeam’s two-failure waiver."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly addresses Covid Security's reverse flip/주목적 투자 constraint and rejects Northbeam for failing two criteria."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02333205,
+ "date": "2026-10-11"
+}

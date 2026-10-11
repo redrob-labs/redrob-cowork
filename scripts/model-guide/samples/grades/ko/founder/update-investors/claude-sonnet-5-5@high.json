@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/update-investors/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "f63d34461ace",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| GMV(억) | 42.0 | 50.0 | 46.5 | −7.0% | +10.7% |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports both growth rates and plan shortfalls: 10.7%, 6.8%, 7.0%, and 16.3%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly shows GMV +10.7% QoQ (-7.0% vs plan) and net revenue +6.8% QoQ (-16.3% vs plan)."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months (₩5.49B ÷ ~₩470M a month), not 18; questions the Q2 2026 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "현 번레이트면 2026년 2분기말 현금은 12.6억(2.7개월분)이라 계획한 라운드 시점에 너무 빠듯합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates 11.7 months using ₩5.49B and ₩470M monthly burn; explicitly questions planned fundraising timing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 11.7 months runway, rejects 18 months, and notes the squeeze on the Q2 2026 raise timing."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the ₩180M one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "정산 일회성 제외 시 13.4개월입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Normalizes the ₩180M working-capital outflow and provides the correct adjusted runway and formula."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly calculates runway normalizing the 180M won working capital effect (13.4 months)."
+    }
+   ]
+  },
+  {
+   "check": "청봉손해보험 (12% of GMV at 9%) cuts ~0.6 points; ex-청봉 ~14.1%; covers margin and restaurant churn",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "청봉 할인 **−3,350만원** (수수료율 −0.72pt): 청봉 GMV 5.58억원이 9%로 계약.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Covers ex-client 14.1%, margin, and restaurant churn, but omits the approximately 0.6-point mix drag versus ex-client pricing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies ex-청봉 take rate at 14.1%, effect of 청봉, margin impact, and restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"계획대로 진행 중\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**잘된 것**: GMV 전분기 대비 +10.7%, 고객 +26곳(236곳), 6개월 이상 고객 재주문율 61%→66%, 청봉손해보험 계약 확보.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects on-track claim and credits all positives, but opens with successes rather than the miss."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops '계획대로 진행 중', details the misses, and credits account growth (+26), repeat rate (61% to 66%), and 청봉."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~₩305M a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**결정 1**: 4분기 번레이트 상한 분기 10억원 승인, 세부 절감안은 2주 내 제출.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Quantifies options and tradeoffs, recommends a combination, supplies specific board asks, and includes notes on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides numbered options, mentions 3.05억 burn, outlines specific board decisions, and includes speaker notes on all slides."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026419575,
+ "date": "2026-10-11"
+}

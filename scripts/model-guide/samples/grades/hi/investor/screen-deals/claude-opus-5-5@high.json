@@ -1,0 +1,128 @@
+{
+ "key": "hi/investor/screen-deals/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "investor",
+ "task": "screen-deals",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "5bf77040dd6f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Parcel Lane corrected to ₹28 crore: growth 86.7% (not 160%), burn multiple 2.00 (26 ÷ 13), a borderline pass",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**39 → 28** | **86.7%** (reported 160.0%) | **2.00** (reported 1.08)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct recurring ARR, growth and burn; formulas imply 26 ÷ 13, and threshold pass is explicitly identified."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly updates Parcel Lane ARR to ₹28 crore, showing 86.7% growth and 2.00 burn multiple."
+    }
+   ]
+  },
+  {
+   "check": "Sentinel Docs corrected to ₹13.2 crore: fails the ₹15 crore ARR floor; burn multiple 2.50",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**24 → 13.2** | **120.0%** (reported 300.0%) | **2.50** (reported 1.00)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects annualized recurring revenue to ₹13.2 crore and explicitly fails ARR floor and burn criterion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusts ARR to ₹13.2 crore, notes it fails the ARR floor, and calculates burn multiple 2.50."
+    }
+   ]
+  },
+  {
+   "check": "Ledgerly 100%/1.50; Fleetwise 2.50, fails margin and hardware; Quorum 58.6%/1.18, ARR above range",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ledgerly | 32 → 32 | 100.0% | 1.50",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ledgerly figures correct; Fleetwise fails hardware, margin and burn; Quorum correctly shows 58.6%, 1.18 and excessive ARR."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates Ledgerly (100%/1.50), Fleetwise (2.50, fails hardware/margin), and Quorum (58.6%/1.18, ARR 46 above range)."
+    }
+   ]
+  },
+  {
+   "check": "Northbeam 1.27, fails NRR and round size; Tallow 111.1%/1.60; Corvid 105.9%/1.50, fails geography",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Northbeam | 21 → 21 | 110.0% | 1.27",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All figures correct: Northbeam fails NRR and round; Tallow shows 111.1%/1.60; Corvid shows 105.9%/1.50 and geography failure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates Northbeam (1.27, fails NRR/round size), Tallow (111.1%/1.60), and Corvid (105.9%/1.50, fails geography)."
+    }
+   ]
+  },
+  {
+   "check": "Top three include Ledgerly; other picks reasoned, e.g. Tallow with its 40% concentration as first question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सबसे बड़े customer का renewal किस stage पर है?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Selects Ledgerly, Tallow and Parcel Lane with sound reasoning; Tallow’s first question addresses concentrated customer renewal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Selects Ledgerly, Tallow, and Parcel Lane, with Tallow's 40% concentration probed in the first question."
+    }
+   ]
+  },
+  {
+   "check": "Waivers: Corvid most waivable (Pune team's \"Indian connection\", overseas limit or reverse flip); Northbeam fails two",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "जेन डो एक criterion waive करने को तैयार हैं, पर यहाँ दो fail हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corvid is strongest waiver candidate, with Pune connection, overseas allocation and reverse-flip caveats; Northbeam cannot pass with one waiver."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Highlights Corvid's Pune connection/overseas limit/reverse flip, and correctly notes Northbeam fails two criteria."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022454775,
+ "date": "2026-10-11"
+}

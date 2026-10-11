@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/prepare-tax/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "2417b33b0c58",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes the $18,000 double count: receipts $141,200, tied as 147,379 − 6,000 − 1,400 + 1,221",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "1099s double-count $18,000 paid by Bluefin *through* PayFlow.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes duplicate receipts and correctly reconciles $141,200 to deposits after transfer, refund, and fee adjustments."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly eliminates the $18,000 overlap and ties 147,379 − 6,000 − 1,400 + 1,221 to $141,200."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 3, deducts 50% of meals ($1,600), nets the refund (software $3,460), deducts $1,221 fees",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "For 2024, §274(n)(1) restores 50%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects note 3; deducts $1,600 meals, $3,460 net software, and $1,221 processing fees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects note 3, deducts 50% meals ($1,600), nets software to $3,460, and deducts $1,221 PayFlow fees."
+    }
+   ]
+  },
+  {
+   "check": "Vehicle $2,814 (4,200 × $0.67), home office $1,200; gym excluded; health insurance to Schedule 1",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Health insurance $7,800 — Not Schedule C.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly deducts $2,814 mileage and $1,200 home office; excludes gym and assigns insurance to Schedule 1."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes vehicle ($2,814) and home office ($1,200), excludes gym, and moves health insurance to Schedule 1."
+    }
+   ]
+  },
+  {
+   "check": "Expenses the laptop under the de minimis election, with Section 179 noted; net profit about $117,375",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Recommendation — laptop $2,400: elect de minimis safe harbor and expense currently.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expenses laptop with election requirements, mentions Section 179 alternative, and computes $117,375 net profit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Expenses the laptop under de minimis safe harbor, discusses Section 179 as alternative, and reaches $117,375 net profit."
+    }
+   ]
+  },
+  {
+   "check": "SE tax about $16,584.56 (117,375 × 0.9235 × 0.153); deductible half about $8,292.28",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**SE tax — Schedule SE** | **15.3% x $108,396** | **16,585**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SE tax and $8,292 deductible half match required amounts with acceptable whole-dollar rounding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates SE tax as $16,585 ($108,396 × 15.3%) and the deductible half as $8,292."
+    }
+   ]
+  },
+  {
+   "check": "Flags the late 1099-NEC to John Stiles (get a W-9) and asks Bluefin to correct its form",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Obtain Form W-9 now; file/ furnish 2024 Form 1099-NEC ($9,000) by Jan. 31, 2025.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Requests W-9 and identifies filing deadline, but does not explicitly recommend late filing or ask Bluefin to correct its form."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags the late 1099-NEC and W-9 for Stiles, but omits asking Bluefin to issue a corrected 1099-NEC."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023269838,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/prepare-employment-documents/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "c129384e0b50",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Letter uses ₹38,00,000 or placeholder, 3,200 options, \"Software Engineer II\"; not ₹40,00,000, 4,000 or \"Senior\"",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "[TITLE TO CONFIRM: Recruiter promised “Senior Software Engineer” — not approved.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct approved terms appear, but the letter also includes prohibited title, CTC and option figures in internal annotations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Software Engineer II, placeholder for compensation within approved band, and 3,200 options."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the CTC gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "या तो ≤₹38L पर negotiate करें या VP Engineering + Finance से band-exception approval लें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Offers alternatives without choosing a resolution; does not require informing the candidate before sending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recommends band exception or negotiation, but omits noting the candidate must be informed before sending."
+    }
+   ]
+  },
+  {
+   "check": "Post-employment non-compete dropped (s.27), exclusivity and confidentiality/IP kept; Indian law and Pune courts replace Texas",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "During employment you will work exclusively for the Company and maintain confidentiality; no post-employment non-compete is imposed.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops non-compete with section 27 explanation and replaces Texas jurisdiction; retains exclusivity and confidentiality but omits IP protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Post-employment non-compete is dropped, exclusivity/confidentiality retained, and Indian law/Pune courts replace Texas."
+    }
+   ]
+  },
+  {
+   "check": "At-will replaced: 30 days' notice in probation, 60 days after confirmation (or salary in lieu)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "During probation, 30 days’ notice by either side; after confirmation, 60 days’ notice or salary in lieu",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces at-will with the required probation and post-confirmation notice periods."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Replaces at-will with 30 days during probation and 60 days post-confirmation or salary in lieu."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × ₹4,00,000 ≈ ₹1,66,667 (s.74); no full-and-final deduction without written authorization",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹4,00,000 × 5 / 12 = **₹1,66,667** (लगभग)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct repayment calculation; references section 74 and prohibits settlement deductions without separate written authorization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₹1,66,667 correctly and notes written authorization is required for full-and-final deduction."
+    }
+   ]
+  },
+  {
+   "check": "Keeps contingencies, 6-month probation and 1 Dec 2025 start (feasible after 28 Nov); placeholders only for open decisions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**1 December 2025 (Monday)**, subject to contingencies below and production of relieving letter for last day 28 November 2025.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Preserves start date, contingencies and probation, but unnecessary placeholders and internal instructions prevent a finished candidate-facing letter."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains all contingencies, 6-month probation, and 1 December 2025 start date with appropriate placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021569888,
+ "date": "2026-10-11"
+}

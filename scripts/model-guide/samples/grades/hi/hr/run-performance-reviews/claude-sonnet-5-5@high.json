@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/run-performance-reviews/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "ca76c34bee7d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll ₹2,47,20,000; budget ₹22,24,800; submitted ₹23,19,800 (9.38%), ₹95,000 over; HRBP's \"8.8%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "HRBP summary में लिखा \"8.8%, कोई समस्या नहीं\" सही नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Payroll, budget, submitted total, 9.38%, and ₹95,000 overage are all correct; explicitly rejects the summary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates payroll (247.200L), budget (22.248L), submitted (23.198L, 9.38%, 0.95L over), and refutes the 8.8% claim."
+    }
+   ]
+  },
+  {
+   "check": "E07 a firm policy issue: rated on pro-rated 103% (anchor 4), not marked down for maternity leave; merit 9–11%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E07 में rating 2 मान्य नहीं है, क्योंकि leave नियम के अनुसार rating pro-rated goals पर होनी चाहिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats E07 as firm policy issue; uses 103%, anchor and recommendation 4, with 10% merit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies E07 as a policy issue, uses pro-rated 103% (anchor 4), assigns 10% (within 9–11%)."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E02 और E03 में rating 5 मान्य नहीं है, क्योंकि यह anchor से एक level से ज़्यादा ऊपर है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly flags both as policy issues; identifies missing E02 justification and inadequate E03 attitude justification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3) as policy issues without valid justification."
+    }
+   ]
+  },
+  {
+   "check": "Manager table: Roe 4.75 submitted vs 3.25 anchor; Major 3.0 vs 3.5; Stiles 3.0 vs 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| रिचर्ड रो | Platform | 4.75 | 3.25 | **+1.50** | 11.958 | 7.520 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All manager averages match: Roe 4.75/3.25, Major 3.00/3.50, Stiles 3.00/3.00."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exact averages given for all three managers: Roe 4.75 vs 3.25, Major 3.00 vs 3.50, Stiles 3.00 vs 3.00."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Billing migration का note एक level ऊपर जाने का आधार है। चर्चा में validate हो, तब तक band के निचले सिरे पर।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains E10 at 4 pending discussion; flags E09’s unsupported underrating and recommends 4."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps E10's 4 for discussion and flags E09 as under-rated (3 vs anchor 4) needing justification."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ ₹22,24,800, every merit % inside its range, merit ₹ = fixed salary × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Recommended कुल merit** | **20.188** | **8.17%** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "₹20,18,800 is within budget; every recommended percentage fits its rating range, and all salary-times-percentage amounts reconcile."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Total ₹20.188L is under budget ₹22.248L, all merit percentages fit rating bands, and formula is verified."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020643788,
+ "date": "2026-10-11"
+}

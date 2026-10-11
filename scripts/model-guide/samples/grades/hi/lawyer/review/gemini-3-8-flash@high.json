@@ -1,0 +1,110 @@
+{
+ "key": "hi/lawyer/review/gemini-3-8-flash@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "gemini-3-8-flash",
+ "effort": "high",
+ "scorecardSha": "adb68155f371",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 3,
+ "of": 5,
+ "lines": [
+  {
+   "check": "DPA is the blocker: patient data, Fiduciary liable (s.8(5)), s.8(2) needs contract, Exhibit C omitted; don't sign or go live",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "धारा 8(5) व 8(6):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "DPA is first and blocks signing/data sharing, but section 8(5) processor-safeguards responsibility is conflated with notification duties."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies DPA omission, DPDP Act ss. 8(2) & 8(5), Fiduciary liability, and advises not to sign."
+    }
+   ]
+  },
+  {
+   "check": "Cap ₹36 lakh (3 months, implementation excluded) vs playbook ₹1.92 crore year 1, ₹4.32 crore super-cap; ₹250 crore penalty",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹1,92,00,000",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies ₹36 lakh excluding implementation, ₹1.92 crore general cap, ₹4.32 crore super-cap, and ₹250 crore exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately quantifies ₹36 lakh, ₹1.92 crore year 1, ₹4.32 crore super-cap, and ₹250 crore penalty."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity capped; 9.2 excludes s.8(6) notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "ग्राहक का डेटा दायित्व असीमित है। Section 10.4 गायब है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies missing cross-reference, notification-cost exclusion and unlimited customer indemnity, but never explicitly concludes the IP indemnity is capped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies phantom §10.4 capping indemnity, s.8(6) breach notification exclusion, and uncapped customer indemnity."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Bengaluru venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Courts at Mumbai shall have exclusive jurisdiction.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides playbook-aligned primary redlines for renewal, uptime and persistent-failure remedies, Mumbai venue, free export and 60-day retention."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides specific redlines for renewal, SLA 99.9%, venue (Mumbai), and exit terms."
+    }
+   ]
+  },
+  {
+   "check": "Bengaluru clause likely valid (CPC s.20, s.28), so negotiate Mumbai; CPA unavailable (commercial purpose), calendar non-renewal",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Calyx का बेंगलुरु क्लॉज अवैध नहीं है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly explains competent-court exclusivity and commercial-purpose consumer exclusion, but omits calendaring the non-renewal deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly analyzes CPC s.20/ICA s.28 and CPA commercial purpose exclusion, but omits calendaring the non-renewal deadline."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021950513,
+ "date": "2026-10-11"
+}

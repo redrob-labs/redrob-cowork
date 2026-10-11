@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/run-performance-reviews/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "ca76c34bee7d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll ₹2,47,20,000; budget ₹22,24,800; submitted ₹23,19,800 (9.38%), ₹95,000 over; HRBP's \"8.8%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह 9% budget से **₹0.950 लाख अधिक** है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Payroll, budget, submitted total and 9.38% are correct; explicitly rejects HRBP’s 8.8% claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All payroll, budget, submitted amounts, percentages, excess, and HRBP summary errors are accurately stated."
+    }
+   ]
+  },
+  {
+   "check": "E07 a firm policy issue: rated on pro-rated 103% (anchor 4), not marked down for maternity leave; merit 9–11%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pro-rated 103% पर anchor 4 बनता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats maternity-leave penalty as firm policy issue; recommends rating 4 and 11% merit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies E07 as a policy issue, anchors at 4 on pro-rated goals, and sets merit to 11%."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसके अलावा तीन submissions में policy उल्लंघन हैं: E02, E03 और E07।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly flags E02’s unsupported two-level deviation and E03’s four-level deviation; rejects attitude justification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both E02 and E03 are correctly flagged as policy issues without valid justifications."
+    }
+   ]
+  },
+  {
+   "check": "Manager table: Roe 4.75 submitted vs 3.25 anchor; Major 3.0 vs 3.5; Stiles 3.0 vs 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| रिचर्ड रो (Platform) | 4.75 | 3.25 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All three managers’ submitted and anchor averages match the required figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Manager averages for submitted vs anchor ratings match the required figures exactly."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E09 को कम (−1, बिना note) और E10 को अधिक (+1, justified)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags E09 as under-rated and retains E10’s justified rating 4 while inviting discussion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "E10's justified +1 is accepted for discussion, while E09 is flagged as under-rated without a note."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ ₹22,24,800, every merit % inside its range, merit ₹ = fixed salary × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Recommended कुल merit | 20.910 | **8.46%** (₹1.338 लाख की headroom) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended ₹20,91,000 is within budget; all merit percentages meet ranges and amounts equal salary times percentage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Total is under budget, all merit percentages fall within policy ranges, and calculations are exact."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024321675,
+ "date": "2026-10-11"
+}

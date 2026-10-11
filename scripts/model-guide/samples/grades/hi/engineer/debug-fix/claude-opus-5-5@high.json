@@ -1,0 +1,128 @@
+{
+ "key": "hi/engineer/debug-fix/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "a81989cb94a0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offset bug: IST is +05:30, not +5; 9 March spans 19:00Z–19:00Z, pulling in A5 (00:15 IST)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A5 (10 मार्च 00:15 IST) 9 मार्च में गिना गया: **+₹1,000**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the incorrect five-hour offset, shifted 19:00Z boundaries, and erroneous inclusion of A5."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies IST offset error, window shift, and pulling in A5 at 00:15 IST."
+    }
+   ]
+  },
+  {
+   "check": "Uses Asia/Kolkata local midnights; explains it shows only on days with 00:00–00:30 IST orders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "असर सिर्फ़ उन दिनों पर होता है जब ठीक आधी रात के बाद के पहले 30 मिनट में orders आए हों।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Builds both local midnights using Asia/Kolkata and explains the affected early-midnight order window."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Asia/Kolkata for local midnights and notes the bug only appears on days with 00:00–00:30 IST orders."
+    }
+   ]
+  },
+  {
+   "check": "Half-open [start, end) instead of <= end; explains A2 at 19:00Z counted on both 8 and 9 March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A2 (19:00Z) पुराने कोड में 8 और 9 मार्च दोनों में आता है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains boundary double-counting and replaces the inclusive end with start <= ts < end."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly switches to half-open interval and explains double-counting of A2 at 19:00Z."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles ₹3,700.00 (500+1,200+400+600+1,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**₹2,000 + ₹1,000 (A5) + ₹400 (A6) + ₹300 (A3 का refund) = ₹3,700**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Equivalent staging reconciliation; code subtracts refunds, excludes cancellations, and tests fully refunded orders contributing zero."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancellations, and reconciles the ₹3,700 staging total."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (\"Z\" only from 3.11), parses robustly; removes or properly keys the stale date-only cache",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.10 में `datetime.fromisoformat` `Z` suffix नहीं समझता। यह support 3.11 में आया।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains version-specific crash, normalizes Z timestamps, and removes the stale date-only cache with justification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the 3.10 Z-suffix crash, parses robustly, and removes the problematic mutable date-only cache."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives ₹2,000.00 for 9 March (A2 500, A3 900, A4 600); tests cover midnight, 00:00–00:30, +05:30",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**कुल: 500 + 900 + 600 = ₹2,000.00**, जो finance से मेल खाता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct code and itemized A2/A3/A4 accounting; tests cover midnight, early-midnight orders, and +05:30 timestamps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Produces ₹2,000.00 for March 9 and includes tests for midnight, 00:00–00:30 IST, and +05:30 timestamps."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028562888,
+ "date": "2026-10-11"
+}

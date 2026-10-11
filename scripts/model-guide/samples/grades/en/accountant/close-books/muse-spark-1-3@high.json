@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/close-books/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "f642027076c5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits $4,527.00 into a duplicated $4,500.00 Coastline deposit and a $27.00 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GL CK2038 $1,947.00 vs bank cleared $1,974.00; under-recorded by $27",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the $27 check error and separately attributes $4,500 to the duplicated Coastline EFT."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the duplicate $4,500 deposit and the $27 recording error on check #2038."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the Miscellaneous Expense plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "never plug a difference to Miscellaneous Expense - every reconciling difference must be traced to source documents.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the plug and requires supported corrections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects plugging the difference to Miscellaneous Expense and explains why."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to $86,562.05, moving to $86,972.05 if #2019 is voided",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "adjusted bank +$410 vs John's draft ($86,562.05 to $86,972.05).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reconciles both sides after voiding and explains the $410 increase from the pre-void balance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows both the pre-void balance of $86,562.05 and reconciles both sides to $86,972.05 post-void."
+    }
+   ]
+  },
+  {
+   "check": "Returns the $350.00 NSF to R. Miles's receivable; fees to expense, interest to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Accounts Receivable - Patient R. Miles",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Debits patient receivables $350, expenses both fees, and credits interest income $12.06."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly debits AR for the NSF check, expenses fees, and credits interest income."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to Unclaimed Property Payable under the 90-day policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Void #2019 $410.00 dated 11/14/2024 and reclassify to Unclaimed Property Payable.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies the 90-day policy, preserves the liability, and explicitly rejects recognizing income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies the 90-day policy by voiding to Unclaimed Property Payable rather than income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to John is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Please match check and EFT amounts exactly and flag any check >90 days for void to Unclaimed Property Payable before finalizing the rec.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All entries balance with sensible accounts; the two-line review note gives specific, constructive corrective guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All journal entries balance with debits equaling credits, and the two-line review note is constructive and specific."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018384713,
+ "date": "2026-10-11"
+}

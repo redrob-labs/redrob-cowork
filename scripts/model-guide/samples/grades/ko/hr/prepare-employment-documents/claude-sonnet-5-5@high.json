@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/prepare-employment-documents/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "7cbb61cd17d4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Letter uses ₩100,000,000 or placeholder, 3,200 RSUs, \"소프트웨어 엔지니어 II\"; not ₩105,000,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "소프트웨어 엔지니어 II (L4), 정규직, 주 40시간 근무입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, a base-pay placeholder, and 3,200 RSUs; unauthorized terms appear only in the memo."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Used a placeholder for base pay, 3,200 RSUs, and '소프트웨어 엔지니어 II'."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "밴드 내 금액으로 확정하거나, 예외 또는 레벨 상향을 VP와 재무가 승인해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies approvers and requires candidate notification before sending, but does not choose an exception or an approved-limit bridge."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses the gap with approval options and insists on notifying the candidate first."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped (민법 §103, policy), 직무발명/confidentiality kept; Korean law and court replace Texas (국제사법 §§43, 48)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "비밀유지·직무발명 조항으로 대체했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Drops non-compete for policy and invalidity risk, retains replacement protections, and substitutes Korean law and courts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops non-compete for IP/confidentiality and replaces Texas jurisdiction with Korean law and courts."
+    }
+   ]
+  },
+  {
+   "check": "At-will replaced: just cause, 30 days' notice or pay in lieu, optional probation (§23①, §26)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "수습기간을 포함하여 회사는 정당한 이유 없이 해고하지 않으며, 해고 시 근로기준법에 따라 30일 전에 예고하거나 30일분 이상의 통상임금을 지급합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces at-will with just cause and statutory notice or payment; probation remains an open decision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Replaces at-will with just cause, 30 days' notice or pay in lieu, and optional probation."
+    }
+   ]
+  },
+  {
+   "check": "Keeps contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2025년 12월 1일(월)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves the start date, checks, and documentation contingencies; placeholders concern unresolved terms and execution details."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps contingencies and the Dec 1, 2025 start date, with limited placeholders."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × ₩12,000,000 = ₩5,000,000, claimed separately, no pay deduction (§43)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "반환액 = 1,200만원 × (12 − 7) ÷ 12 = **500만원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct prorated repayment, separately claimed without wage or severance deductions; memo cites Sections 20 and 43."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₩5,000,000 pro-rated, claimed separately without deduction from pay or severance."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021408975,
+ "date": "2026-10-11"
+}

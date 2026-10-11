@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/research-prospects/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "76b833eaf28a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2024-25 ₹480 crore; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**CEO: जेन डो** (14 जनवरी 2026 से)। पहले CFO थीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes current CEO, Executive Chair and ₹480 crore revenue; explicitly treats the 2023 leadership and revenue as outdated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes current leadership and FY24-25 revenue, while explicitly marking the 2023 article as outdated."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a different Manali firm); uses Shikhar's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Returns/वर्ष = 30 लाख × 22% = **6.6 लाख returns**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discards the Manali rental firm as a different entity and uses Shikhar’s 22%, not the industry average."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discards Source 5 as a separate entity and relies on Shikhar's 22% rate over the 32% industry benchmark."
+    }
+   ]
+  },
+  {
+   "check": "Value math: ₹480 crore ÷ ₹1,600 ≈ 30 lakh orders × 22% × ₹200 ≈ ₹13.2 crore; 20–30% ≈ ₹2.6–4.0 crore",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Cost saving** = ₹13.2 crore × 20–30% = **₹2.6–4.0 crore/वर्ष**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 30 lakh orders, 6.6 lakh returns, ₹13.2 crore costs and ₹2.6–4.0 crore savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates the exact math matching the required figures."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion upside; COD RTO flagged as unknown",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**COD RTO:** यह 22% से बाहर है और शायद अपने-आप में बड़ा pain point है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labels company inputs and benchmarks, qualifies estimates for validation, includes 15% exchange upside and flags excluded COD RTO."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly labels inputs, treats figures as hypotheses to validate, adds 15% exchange upside, and notes COD RTO."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2024 की हार का कारण था \"in-house tool से संतुष्ट\", और वह कारण अब लागू नहीं दिखता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses budget, in-house satisfaction and departed champion using replacement evaluation, new CEO and resale launch triggers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses the 2024 loss and former champion using the job posting, resale launch, and new CEO triggers."
+    }
+   ]
+  },
+  {
+   "check": "Enters via John Stiles and/or Mary Major (Kesariya Goods link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Channel:** Kesariya Goods account team/CSM से **मैरी मेजर को warm intro**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies Mary and COO entry, specifies outreach and message, and asks five substantive assumption-testing questions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends entry via Major and Stiles with justification, provides a concrete outreach plan, and assumption-testing discovery questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022070475,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/create-proposals/gpt-6-astra@default",
+ "language": "en",
+ "profession": "sales",
+ "task": "create-proposals",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "38f2c7a7cd89",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Prices 12 live properties, 2,160 rooms; flags \"14 hotels\"; offers 2027 openings (~300 rooms) as add-on",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Working assumption: price the RFP portfolio now and treat the two openings as additional scope, subject to confirmation.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prices 12 properties and 2,160 rooms, reconciles 14 hotels, and separately prices the approximately 300-room 2027 expansion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Prices the 12 live properties, flags the 14-hotel discrepancy, and treats the 2027 openings as add-on scope."
+    }
+   ]
+  },
+  {
+   "check": "List €155,520/year; 15% discount gives €132,192/year net; implementation €18,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Net annual subscription** | €155,520 − €15,552 − €7,776 | **€132,192** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct list price, additive 15% discount, net annual subscription, and €18,000 implementation fee."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes exact list price (€155,520), 15% discount (€132,192 net), and implementation fee (€18,000)."
+    }
+   ]
+  },
+  {
+   "check": "3-year subscription €396,576, or €414,576 including implementation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Three-year total contract value** | (€132,192 × 3) + €18,000 | **€414,576** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct three-year total including implementation, with calculation shown."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows €414,576 3-year TCV including implementation, explicitly showing the 3-year subscription component (€132,192 × 3)."
+    }
+   ]
+  },
+  {
+   "check": "No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Quote the policy-based **15% additive discount**. John’s proposed 30% exceeds AE authority and requires VP Sales approval;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers only 15%, explicitly identifies 30% as exceeding AE authority, and requires VP approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the 30% discount, adheres to 15% within AE authority, and flags VP approval rules."
+    }
+   ]
+  },
+  {
+   "check": "Labour savings ≈ €60,480/year, not €250k; upsell ≈ €624k/year is gross pilot-based revenue; payback revised",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Remove “payback in under a month”: timing, incremental contribution and cash realization are unvalidated. The pilot extrapolation is revenue, not profit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects labour value to €60,480, identifies €624,413 as pilot-extrapolated revenue, and withdraws unsupported payback."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects labour savings to €60,480, treats upsell as gross pilot revenue (€624k), and removes under-a-month payback."
+    }
+   ]
+  },
+  {
+   "check": "States the on-premise requirement is unmet (cloud-only, EU data in Frankfurt); no full-compliance claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Cabana Connect is cloud-only and cannot provide on-premise deployment. Frankfurt residency supports the EU storage requirement but does not resolve the on-premise gap.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly discloses unmet on-premise requirement, distinguishes Frankfurt residency, and rejects full compliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly notes on-premise is unmet, explains cloud-only with Frankfurt residency, and refutes full compliance."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0215061,
+ "date": "2026-10-11"
+}

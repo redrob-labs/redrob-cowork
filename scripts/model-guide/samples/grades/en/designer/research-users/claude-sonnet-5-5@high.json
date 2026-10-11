@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/research-users/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "research-users",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "3bc765a1a623",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "Receipt capture is a real pain and the top single survey answer (34%).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Never notices the 104% total; treats survey shares as valid and makes statistical comparisons."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Does not notice the survey percentages sum to 104% (34+27+22+9+12)."
+    }
+   ]
+  },
+  {
+   "check": "Flags survey bias: only heavy submitters (20+ expenses), no approvers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Survey excludes approvers.** It reached heavy submitters only",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly flags heavy-submitter sampling and exclusion of approvers; specifies the 20+ threshold elsewhere."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly flags the survey sampling bias regarding heavy submitters and lack of approvers."
+    }
+   ]
+  },
+  {
+   "check": "Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "5 of 8 interviewees raised approvals (P1, P2, P4, P6, P8).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prioritizes approvals, citing all five participants, 41% waiting over five days, and 18% mobile adoption."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly synthesizes 5 of 8 participants, 41% waiting 5+ days, and 18% mobile adoption."
+    }
+   ]
+  },
+  {
+   "check": "Sizes receipt capture as narrower: 6.2% need correction; crumpled receipts and multi-page folios",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Only 6.2% of photos needed manual correction",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Frames capture as narrower and identifies P3's crumpled receipts and P8's multi-page folios."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sizes receipt capture via 6.2% correction rate and mentions crumpled receipts and multi-page folios."
+    }
+   ]
+  },
+  {
+   "check": "Recommends approval-flow work as the big bet, tells Richard directly; receipt edge cases as follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Short answer: not as the main bet.** Make the **approval workflow**, especially the approver experience, the big bet.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Directly answers Richard, recommends notifications, delegation and mobile policy flags, and scopes receipt fixes as follow-ups."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly tells Richard no, recommends approval workflow as big bet, and scopes receipt edge cases as follow-up."
+    }
+   ]
+  },
+  {
+   "check": "Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Interviews are 8 people.** They suggest themes but give no prevalence",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All ten slides have speaker notes; evidence uses participant IDs; limitations cover sample size and single-choice survey wording."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes speaker notes on all 10 slides and IDs, mentions n=8 limitations, but misses survey wording limitations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.013868925,
+ "date": "2026-10-11"
+}

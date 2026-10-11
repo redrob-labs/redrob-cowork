@@ -1,0 +1,128 @@
+{
+ "key": "en/marketer/plan-campaigns/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "marketer",
+ "task": "plan-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "7202cf8284b6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Excludes or heavily discounts the consumer-app Facebook benchmark; doesn't use its $60 cost per SQL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the data comes from a consumer budgeting app and doesn't transfer to construction buyers.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes Facebook and explicitly rejects applying its consumer-app economics to construction buyers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies that the Facebook benchmark comes from a consumer app and excludes it from the mix."
+    }
+   ]
+  },
+  {
+   "check": "Cost per SQL: search ≈$386, LinkedIn ≈$778, BuildExpo ≈$1,000 (45 SQLs), syndication ≈$917",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Paid search | $16,830 | 198 | 44 | $386 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly gives search $386, LinkedIn $778, BuildExpo $1,000 with 45 SQLs, and syndication $917."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All channel cost per SQL figures and BuildExpo SQLs match the target benchmarks precisely."
+    }
+   ]
+  },
+  {
+   "check": "Search capped: 3,300 clicks × 6% = 198 leads, $16,830, ≈44 SQLs",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "search = clicks × CPC (3,300 × $5.10)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Caps search at 3,300 clicks and correctly reports 198 leads, $16,830 spend, and 44 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately caps search at 3,300 clicks, yielding 198 leads, $16,830 spend, and 44 SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Best mix yields ≈240 SQLs for $180,000: 400 SQLs and 80 customers aren't achievable",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Even with all $180K:** about 241 SQLs, still above AE capacity.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly estimates approximately 240 SQLs at full budget and explains why 400 SQLs and 80 customers are infeasible."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states that full budget yields ~241 SQLs and that 400 SQLs/80 customers are not achievable."
+    }
+   ]
+  },
+  {
+   "check": "Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈$403K ACV)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3 AEs × 70 = 210 SQLs, and 210 × 20% = 42 wins.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies sales ceiling and recommends 210 SQLs, up to 42 customers, and approximately $403K annual recurring revenue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies sales capacity ceiling of 210 SQLs and plans for 210 SQLs and 42 customers ($403K ARR)."
+    }
+   ]
+  },
+  {
+   "check": "Pillars match the 3 interview pains; timeline builds to BuildExpo Feb 10–12; specific leadership ask",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Feb 10–12 (show):** scan and qualify every lead, with demos on site.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Maps all three interview pains, schedules pre-show and post-show activity, and requests specific target, budget, and reserve approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Pillars match the 3 interview pains, timeline centers on BuildExpo Feb 10-12, and asks for specific decision."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018116963,
+ "date": "2026-10-11"
+}

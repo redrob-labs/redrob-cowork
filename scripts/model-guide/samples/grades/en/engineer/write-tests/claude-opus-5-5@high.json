@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/write-tests/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "engineer",
+ "task": "write-tests",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "793b11e59955",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Shows `- 1` drops the change day: 15 February gives $14.00, not $15.00; last day $0.00, not $1.00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| `product_example` | 15.00 | 14.00 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the excluded change day and reports February’s $14.00 and last-day $0.00 versus expected $15.00 and $1.00."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the -1 cause and gives both the 15.00 vs 14.00 and 1.00 vs 0.00 figures."
+    }
+   ]
+  },
+  {
+   "check": "Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Deleting `- 1` alone fixes Cause A, which is the release blocker.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly recommends NO-GO because the headline fix is absent and identifies removing the subtraction as the minimal fix."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends no-go due to the missing headline fix and identifies deleting -1 as the minimal fix."
+    }
+   ]
+  },
+  {
+   "check": "Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "def test_first_day_charges_full_difference(period):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests full-difference period starts, rejected end/before-start dates, leap February, and 30- and 31-day months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests cover period start, ValueError before start and at period_end, 29-day February, and 30/31-day months."
+    }
+   ]
+  },
+  {
+   "check": "Notes ROUND_HALF_UP takes −0.005 to −0.01, so downgrade credits mirror upgrades",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Away from zero, so −0.005 → −0.01. This is Python's `ROUND_HALF_UP`.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains negative half-up rounding and tests half-cent cases and upgrade/downgrade symmetry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes that ROUND_HALF_UP rounds −0.005 to −0.01 so credits mirror charges."
+    }
+   ]
+  },
+  {
+   "check": "Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Accept.** Convert with `Decimal(repr(x))`, never `Decimal(x)`. Ints are accepted too.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests float acceptance and explicitly identifies mixed float/Decimal TypeError and two-float failure at quantize."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Picks an acceptance policy, tests it, and documents TypeError and quantize AttributeError on float inputs."
+    }
+   ]
+  },
+  {
+   "check": "Tests are runnable, well named and parametrized; any property test states a real invariant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "#   (a) antisymmetry: prorate(b -> a) == -prorate(a -> b)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable, clearly named, parametrized pytest tests; Hypothesis dependency is disclosed and genuine invariants are stated and tested."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests are valid pytest code, well structured and parametrized, and the Hypothesis test asserts real invariants."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029602125,
+ "date": "2026-10-11"
+}

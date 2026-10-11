@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/plan-roadmap/gpt-6-astra@default",
+ "language": "en",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "b21b55aef6f0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F7 = 45 ÷ 5 = 9 engineer-weeks",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly normalises F7, scores it 33.33, and states the RICE formula with decimal confidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly converts 45 days to 9 weeks, calculates RICE as 33.33, and states the formula."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**90.00**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All other scores are correct: F6 90, F1 42, F4 29.75, F2 22.5, F3 5.83."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All RICE scores match the required values exactly."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (clear of 31 Oct) and F5 before 31 Dec, regardless of RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Start SSO first and target production acceptance with Brightwell by 30 September",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Schedules SSO in Q3 and mandatory map migration in Q4 before December, overriding RICE for both deadlines."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Schedules F3 in Q3 (targeting 30 September) and F5 in Q4 before 31 December regardless of RICE."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That would require explicitly displacing other discretionary work—not risking SSO or map continuity.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Defers F2 until its prerequisite; explains the 50-week incompatibility and conditions for reconsideration directly to Sales."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is not scheduled before F5, and VP Sales is told it cannot fit and when it could."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**42 / 48 eng-weeks**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 at 22/24, Q4 at 20/24, and H2 at 42/48, without splitting items."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both quarters and H2 totals are within limits and explicitly shown with valid item selections."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F4 offers broader reach and greater total confidence-adjusted impact, so this is an explicit efficiency-and-risk choice",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly chooses F7 over F4, balancing higher efficiency and three-week savings against F4’s greater reach and adjusted impact."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly justifies choosing F7 over F4 by comparing RICE efficiency, effort savings, and total impact."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019214738,
+ "date": "2026-10-11"
+}

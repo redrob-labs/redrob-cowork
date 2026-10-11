@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/client-advisory/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "cff26609e680",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit ₩453,200,000 vs ₩402,100,000; EBITDA ₩227,300,000 vs ₩163,800,000, a ₩63,500,000 miss, not ₩53,500,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "EBITDA 미달은 **6,350만원**(예산 2억 2,730만원 → 실적 1억 6,380만원)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct gross profit and EBITDA figures; explicitly corrects the bookkeeper’s ₩53.5 million shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies gross profit, EBITDA figures, and the ₩63.5M miss vs the bookkeeper's ₩53.5M."
+    }
+   ]
+  },
+  {
+   "check": "Treats ₩27,000,000 of insurance as prepaid (선급비용): normalized EBITDA ₩190,800,000, ₩36,500,000 below budget",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2,700만원은 선급비용으로 재분류해 월 300만원씩 상각해야",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reclassifies ₩27 million as prepaid; reports normalized EBITDA ₩190.8 million, ₩36.5 million below budget."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly treats ₩27M as prepaid expense, yielding normalized EBITDA of ₩190.8M (₩36.5M below budget)."
+    }
+   ]
+  },
+  {
+   "check": "Calls the ₩18,500,000 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**광고선전비 −1,850만원 유리 — 시점.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies marketing underspend as timing and rejects interpreting it as genuine savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the ₩18.5M marketing underspend as a timing difference rather than a real saving."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −₩43,700,000 into volume −₩57,000,000 (5,700 × ₩10,000) and price/mix about +₩13,300,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**물량**: (55,300 − 61,000) × 10,000원 = **−5,700만원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates volume loss ₩57 million and residual price/mix gain ₩13.3 million, totaling −₩43.7 million."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly breaks down retail variance into volume (−₩57M) and price/mix (+₩13.3M) totaling −₩43.7M."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~₩28,000,000 over 28% of actual revenue (₩284,900,000) to flour repricing; names overtime (1.5×) behind labor",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "매출 연동(28%) 기준 2억 8,490만원 대비 **+2,800만원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Connects flexible-budget ingredient overrun to flour repricing and identifies vacancy-covering overtime at 1.5× as a labor driver."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Connects the ₩28M overrun above 28% of actual revenue to flour prices and cites 1.5× overtime."
+    }
+   ]
+  },
+  {
+   "check": "Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**\"도매 물량을 더 밀어붙일지\" → 단가 조정 없이는 비추천.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendations address wholesale margin dilution and retail traffic decline; variance signs and EBITDA-impact signs are explicitly distinguished."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Follows data thoroughly regarding wholesale margin and falling retail traffic, with consistent sign conventions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026987625,
+ "date": "2026-10-11"
+}

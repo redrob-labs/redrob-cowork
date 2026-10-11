@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/client-advisory/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "cff26609e680",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit ₩453,200,000 vs ₩402,100,000; EBITDA ₩227,300,000 vs ₩163,800,000, a ₩63,500,000 miss, not ₩53,500,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "미달은 **5,350만원이 아닌 6,350만원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Gross profit and EBITDA figures are correct; explicitly corrects the bookkeeper’s understated shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates gross profit and EBITDA for budget/actual and identifies the ₩63.5M shortfall."
+    }
+   ]
+  },
+  {
+   "check": "Treats ₩27,000,000 of insurance as prepaid (선급비용): normalized EBITDA ₩190,800,000, ₩36,500,000 below budget",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "나머지 27.0은 선급보험료(자산)로 환입해야 함.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies prepaid insurance, normalizes EBITDA to ₩190.8 million, and states the ₩36.5 million budget shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly treats ₩27M as prepaid insurance and calculates normalized EBITDA of ₩190.8M (₩36.5M below budget)."
+    }
+   ]
+  },
+  {
+   "check": "Calls the ₩18,500,000 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "-18.5는 성과 아닌 이연.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats the ₩18.5 million advertising underspend as timing rather than genuine savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the marketing underspend as a timing difference rather than permanent savings."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −₩43,700,000 into volume −₩57,000,000 (5,700 × ₩10,000) and price/mix about +₩13,300,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "(55,300-61,000)×10,000 = **-57.0 유리→불리**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct volume decomposition and approximately ₩13.3 million price contribution reconcile to the ₩43.7 million retail decline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly separates retail sales variance into −₩57.0M volume and +₩13.3M price effects."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~₩28,000,000 over 28% of actual revenue (₩284,900,000) to flour repricing; names overtime (1.5×) behind labor",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "동부점 2명 결원을 1.5배 연장근로로 충당.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Names flour repricing and overtime premium, but omits the ₩284.9 million flexible benchmark and ₩28 million ingredient overrun."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Identifies flour repricing and 1.5x overtime, but omits the ~₩28M overrun against 28% of actual revenue."
+    }
+   ]
+  },
+  {
+   "check": "Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "저마진 도매 확대는 총이익 희석+연장근로 유발.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendations address falling retail traffic and wholesale margin dilution; variance signs and EBITDA bridge effects are correctly applied."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sound recommendations based on margins and elasticity, maintaining consistent sign convention throughout."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025952588,
+ "date": "2026-10-11"
+}

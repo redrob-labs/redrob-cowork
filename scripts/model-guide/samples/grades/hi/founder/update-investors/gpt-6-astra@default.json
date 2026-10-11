@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/update-investors/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "d1bd72749628",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GMV वृद्धि **17% से 10.7%**, राजस्व वृद्धि **11% से 6.8%**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects growth figures; KPI table also shows GMV 7.0% and revenue 16.3% below plan."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computes GMV (+10.7% QoQ, -7.0% vs plan) and net revenue (+6.8% QoQ, -16.3% vs plan)."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months (₹54.90 crore ÷ ~₹4.7 crore a month), not 18; questions the Q1 FY27 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Reported-burn runway:** मासिक burn ₹4.70 करोड़; runway **11.7 महीने**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct runway methodology; flags weak closing-delay cushion and offers earlier financing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 11.7 months runway and notes cushion is tight for the Q1 FY27 round."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the ₹1.8 crore one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹1.8 करोड़ working-capital step-up हटाने का sensitivity case: मासिक burn ₹4.10 करोड़; runway **13.4 महीने**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly normalizes working capital and appropriately cautions that the adjustment does not restore cash."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Evaluates normalizing the ₹1.8 crore working capital impact to arrive at ~13.4 months runway."
+    }
+   ]
+  },
+  {
+   "check": "Neelshikhar (12% of GMV at 9%) cuts ~0.6 points; ex-Neelshikhar ~14.1%; covers margin and restaurant churn",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "योजना 15.00% → नीलशिखर discount −0.72 pp → अन्य कारोबार −0.78 pp → वास्तविक **13.50%**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Valid plan-based bridge, ex-logo rate, margin and churn coverage; omits approximately 0.6-point dilution explaining the QoQ decline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ex-Neelshikhar take rate at 14.11%, analyzes contribution margin and addresses restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"On track\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "छह महीने से सक्रिय accounts में repeat orders **61% से 66%**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Leads with misses, rejects On track, credits retention and logo; account growth is acknowledged but +26 not explicitly credited."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops 'On track', leads with misses, and highlights positive account growth, logo, and repeat orders."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~₹3.05 crore a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**अनुमोदन:** Q3–Q4 में ₹12 करोड़ quarterly burn ceiling; 30 दिनों में revised budget, breach forecast पर तत्काल escalation।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Quantified burn and bridge options, trade-offs, recommendation, specific board asks, and speaker notes on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes quantified options, specific board requests on slide 9, and speaker notes across all slides."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023912963000000002,
+ "date": "2026-10-11"
+}

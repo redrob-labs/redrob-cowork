@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/create-marketing/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "small-team",
+ "task": "create-marketing",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "f354ab1015a6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Savings fixed: $36 vs $40 (4 × $10) is 10%, $4 a month, not 25% (or \"$9 a loaf\")",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Four counter loaves are $40, so $36 saves $4.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects the savings to $4 monthly, 10%, and $9 per loaf."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly corrects the savings to $4 / 10% ($9 a loaf) instead of 25%."
+    }
+   ]
+  },
+  {
+   "check": "No \"100% organic\" (seed mix uncertified); uses wording like \"made with certified organic flour\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The seed mix on two loaves isn't certified, so a blanket organic claim isn't true.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces the unsupported blanket claim with certified-organic-flour wording."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes the blanket '100% organic' claim and specifies certified organic flour."
+    }
+   ]
+  },
+  {
+   "check": "No \"gluten-free\" (shared kitchen, no testing); allergen note included; note to Mary explains both risks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Without a separate facility and testing, \"gluten-free\" is a legal and safety risk. I've added the allergen line.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Avoids gluten-free marketing, warns coeliacs, lists all supplied allergens, and explains both organic and gluten-related risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids 'gluten-free', includes allergen warning, and explains legal and safety risks to Mary."
+    }
+   ]
+  },
+  {
+   "check": "Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "So: Reel for reach, carousel for sign-ups.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly balances reach against sign-ups using correct carousel and Reel click-through rates and reach figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses performance metrics to justify carousel for conversion and reel for reach."
+    }
+   ]
+  },
+  {
+   "check": "Both pieces carry 2 May, Saturday 8–11am pickup, $36/month for 4 loaves, URL, first-50 tote",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Sign up through the link in our bio",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Both include other essentials, but Instagram never supplies the actual subscription URL."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both the Instagram plan and flyer include all five required promotional details."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at A5 proportions, brand colours, clear hierarchy, legible text sizes, sufficient contrast",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "font-size=\"12\" letter-spacing=\"3\" fill=\"#B87333\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Valid self-contained A5 SVG with brand hierarchy, but small copper masthead and cream step numerals lack sufficient contrast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid SVG formatted to A5 viewBox with brand colours, clear hierarchy, and legible contrast."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028907025,
+ "date": "2026-10-11"
+}

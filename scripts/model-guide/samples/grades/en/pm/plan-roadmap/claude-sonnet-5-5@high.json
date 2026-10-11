@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/plan-roadmap/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "b21b55aef6f0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**9** (45 days ÷ 5) | **33.3**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly normalises F7 to nine weeks, scores it 33.3, and states the RICE formula."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States formula and correctly converts F7 to 9 weeks with RICE 33.3."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**29.8**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All other scores are correct; F4’s 29.75 is acceptably rounded to 29.8."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All scores are correctly calculated."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (clear of 31 Oct) and F5 before 31 Dec, regardless of RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Mandatory items (F3 and F5) total 14 weeks, leaving 34 weeks for ranked work.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Commits both deadline-driven items regardless of RICE and schedules both in Q3."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both F3 and F5 are scheduled in Q3, ahead of their respective deadlines."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Putting F2 in would push out offline mode, our most requested feature in churn interviews, or skills matching.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Respects dependency and offers H1 2027 or replacing F1, but incorrectly implies dropping only F7 would suffice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is scheduled after F5 (in H1 2027) and trade-offs/conditions are explained to the VP Sales."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**42 / 48**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 at 23/24, Q4 at 19/24, and H2 at 42/48, with no split items."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quarterly limits (23, 19 ≤ 24) and H2 total (42 ≤ 48) are clearly shown."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "I chose F7 because it scores higher per week and fits Q3's gap, while F4 doesn't fit there.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explicitly compares RICE and local fit, but omits substantive value/confidence comparison and feasible rearrangement accommodating F4."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly justifies choosing F7 over F4 using capacity fit across quarters and RICE."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024440325,
+ "date": "2026-10-11"
+}

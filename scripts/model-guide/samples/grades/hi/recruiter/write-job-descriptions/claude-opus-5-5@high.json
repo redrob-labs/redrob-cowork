@@ -1,0 +1,110 @@
+{
+ "key": "hi/recruiter/write-job-descriptions/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "recruiter",
+ "task": "write-job-descriptions",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f7d1610e5b9b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Removes \"young, energetic लड़का\", \"fresh graduates\", \"bachelors\"; replaces \"convent-educated\" English with Hindi or English radio safety communication",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Radio पर हिंदी **या** अंग्रेज़ी में safety निर्देश समझने और देने की क्षमता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes age, gender, marital-status and schooling preferences; replaces fluent English with job-related bilingual radio communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Biased terms were removed and radio communication in Hindi/English replaced convent-educated English."
+    }
+   ]
+  },
+  {
+   "check": "Uses ₹3.3–4.2 lakh a year and flags the draft's ₹3.0–3.6 lakh as off-sheet and breaking pay-range policy",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Accuracy, Company policy:** Approved range यही है। ₹3.0 लाख न्यूनतम सीमा से नीचे था।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses approved ₹3.3–4.2 lakh annual CTC and identifies the draft range as below approved company-policy limits."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses ₹3.3–4.2 lakh CTC and explicitly flags the draft's range as violating company policy."
+    }
+   ]
+  },
+  {
+   "check": "Drops B.E./B.Tech and \"2+ years\"; states ITI/diploma, 0–2 years with training, paid GWO within 90 days",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "### ज़रूरी योग्यताएँ\n- ITI (Electrician/Fitter), diploma, या इनके बराबर hands-on electrical/mechanical अनुभव। **Degree ज़रूरी नहीं है।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct experience, training and paid GWO deadline, but makes preferred ITI/diploma/equivalent qualifications mandatory."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops degree and 2+ years; includes ITI/diploma, 0–2 years with training, and paid GWO in 90 days."
+    }
+   ]
+  },
+  {
+   "check": "Keeps height, lifting and driving-licence requirements; adds equal-opportunity (RPwD Act) and accommodation statements; drops \"rockstar\" slogans",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "अगर आपको किसी reasonable accommodation की ज़रूरत है, तो हमें बताएँ। हम आपके साथ मिलकर विकल्प देखेंगे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Retains physical and licence requirements, removes slogans, and adds inclusion and accommodation; omits RPwD Act alignment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains physical/licence criteria, includes disability equal-opportunity and accommodation statements, and removes rockstar slogans."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at 1080×1080: role, location, ₹3.3–4.2 lakh, benefits, apply URL; legible and consistent with posting",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1080 1080\" width=\"1080\" height=\"1080\" role=\"img\" aria-labelledby=\"t d\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained square SVG includes role, location, approved pay, benefits and application URL with legible, contrasting text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SVG is valid, self-contained, and displays role, location, salary range, benefits, and apply URL clearly."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027795075000000002,
+ "date": "2026-10-11"
+}

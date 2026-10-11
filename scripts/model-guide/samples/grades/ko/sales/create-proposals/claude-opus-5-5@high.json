@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/create-proposals/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "sales",
+ "task": "create-proposals",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f20ad6fa3bad",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Prices 12 live properties, 2,160 rooms; flags \"14 hotels\"; offers 2027 openings (~300 rooms) as add-on",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "신규 개관 2곳(약 300실, 2027년 2분기)은 옵션으로 별도 제시",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prices 12 live hotels and 2,160 rooms, explicitly reconciles 14 hotels, and offers future openings separately."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly prices 12 live properties, notes the 14-hotel discrepancy, and offers the new openings as options."
+    }
+   ]
+  },
+  {
+   "check": "List ₩207,360,000/year; 15% discount gives ₩176,256,000/year net; implementation ₩24,000,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 연간 순 구독료 | 정가 × 85% | 176,256,000 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct list price, additive 10% and 5% discounts, net subscription, and ₩24 million implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly calculates the list price, 15% combined discount net subscription, and implementation fees."
+    }
+   ]
+  },
+  {
+   "check": "3-year subscription ₩528,768,000, or ₩552,768,000 including implementation (VAT extra)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **3년 총 계약 금액** | 176,256,000 × 3 + 24,000,000 | **552,768,000** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct three-year total including implementation; explicitly excludes VAT."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates the correct 3-year total contract value including implementation (VAT extra)."
+    }
+   ]
+  },
+  {
+   "check": "No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "30% 할인은 승인 권한(20%)을 넘습니다. 현재 기본 할인은 15%이고, 추가 할인은 VP 판단이 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers only 15%, identifies 20% authority limit, and does not offer 30%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the 30% offer, uses 15% standard discounts, and flags VP approval requirements."
+    }
+   ]
+  },
+  {
+   "check": "Labour savings ≈ ₩63M/year, not ₩300M; upsell ≈ ₩851M/year is gross pilot-based revenue; payback revised",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "업셀 매출: 567,648박 × 1,500원 = **연 약 8.5억 원**(매출 기준)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects labour benefit to ₩63 million, qualifies pilot revenue, and replaces one-month payback with margin-dependent analysis."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects labour savings to ₩63M, treats ₩851M upsell as gross revenue, and revises payback."
+    }
+   ]
+  },
+  {
+   "check": "States the on-premise requirement is unmet (cloud-only, data in Seoul region); no full-compliance claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "❌ **온프레미스 구축: 미충족** (게스트톡은 클라우드 전용)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly acknowledges unmet on-premise requirement and Seoul data residency; rejects full-compliance claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies on-premise as unmet while noting cloud-only and Seoul region data storage."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018633038,
+ "date": "2026-10-11"
+}

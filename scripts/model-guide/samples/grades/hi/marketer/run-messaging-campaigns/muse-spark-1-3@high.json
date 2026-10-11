@@ -1,0 +1,128 @@
+{
+ "key": "hi/marketer/run-messaging-campaigns/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "fc59e85a1fd9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Pune only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**17,363**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five eligible email counts and total correctly apply suppression and Pune-only coverage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All segment email counts and total match the required numbers after suppression and coverage exclusions."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बाकी D coverage से बाहर — exclude।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Eligible SMS totals 4,772, including only 52 Pune contacts from D; remaining D contacts are excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Eligible SMS is correctly computed as 4,772, with segment D properly reduced to 52."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of ₹1,600 = ₹800 before dessert, over ₹450; e.g. 25% off (₹400), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`0.50×1600=800 + 75×n`",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the manager’s excessive offer and provides single, non-stacking segment offers within ₹450."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects manager's offer as exceeding ₹450 cap and sets segment offers within budget."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Pune delivery for D",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Travel में pause करें। Pune में delivery फिर शुरू।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses A’s price, B’s flexibility, C’s new menus and 35% complaint reduction, and D’s Pune coverage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately tailors each message and incentive to the specific cancellation reason of each segment."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₹1,70,800",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**~₹1,60,328**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct bases and approximately 427 reactivations; differentiated offers produce ₹160,328 rather than the checklist’s approximately ₹170,800."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Forecast correctly applies reactivation rates to email-only and email+SMS cohorts, giving 427 reactivations and valid cost."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤160 GSM-7 / ≤70 Unicode, accurate counts, brand, STOP, DLT; 10:00–21:00 IST = 04:30–15:30 UTC; exit on reactivation",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "lv.in/cb Reply STOP to opt out (97)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "SMS compliance, scheduling conversions, and global reactivation exits are present; second SMS is 96 characters, not 97."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Meets length constraints with accurate counts, includes brand and STOP, follows DLT/timing rules, and includes reactivation exit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0265776,
+ "date": "2026-10-11"
+}

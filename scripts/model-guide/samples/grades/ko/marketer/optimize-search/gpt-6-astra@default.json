@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/optimize-search/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "868c01474ff0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Fixes price (₩39,000 annual / ₩49,000 monthly, not \"월 29,000원부터\"), trial not free plan, 장부온 클라우드 only",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "사용자당 월 39,000원(연간 결제) 또는 월 49,000원(월간 결제), 부가가치세 별도",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects both prices, distinguishes the trial from a free plan, and limits integration to 장부온 클라우드."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects the price, clarifies trial vs free plan, and restricts integration to 장부온 클라우드."
+    }
+   ]
+  },
+  {
+   "check": "Cuts unsubstantiated \"업계 1위\" and \"가장 똑똑한\" under 표시광고법 §§3, 5",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실증 자료 없는 ‘업계 1위’와 추천 순위는 제외하고, 설문 수치는 출처·한계를 붙여 법무 기준을 반영했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes both unsupported superlatives and explains the substantiation-based legal rationale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes unsubstantiated superlatives citing legal substantiation requirements."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"에어컨 일정관리 앱 무료\" honestly with the 14-day trial, explained in the rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "‘무료 앱’은 상시 무료 의도로 공략하지 않고 체험 조건만 설명합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ clearly states no free plan and a 14-day trial; rationale explains the deliberate targeting choice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses free app queries truthfully via the 14-day trial and explains the rationale."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, 장부온 클라우드, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "필드노트 기사용 모바일 앱은 오프라인에서도 작동하며, 인터넷에 연결되면 동기화됩니다. 사무실용 웹 앱은 인터넷 연결이 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes mobile and web connectivity; fact table includes prices, cloud integration, and offline scope."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clarifies offline capability by app type in FAQ and summarizes price, integration, and offline in table."
+    }
+   ]
+  },
+  {
+   "check": "Targets 설치 일정관리 and 기사 배차 queries in title, H1, H2s; blog made informational, exact-match link",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "블로그의 도구 선택 문단에서 **“에어컨 설치 일정관리 프로그램 필드노트”**를 앵커로 제품 페이지에 연결합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Title/H1 target installation scheduling, H2 targets dispatch; blog becomes informational and links using the exact target phrase."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Targets key terms in headings, separates blog intent to guide, and adds exact-match internal link."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤30, meta ≤80, counts accurate; JSON-LD valid and matches page; survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "*출처: 필드노트 고객 설문, n=210, 2025년 3월.*",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Counts are accurate at 23 and 56; valid JSON-LD matches page facts, KRW offers, and FAQs; survey attributed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Lengths and counts are accurate, JSON-LD is valid and consistent, and survey is properly cited."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02917215,
+ "date": "2026-10-11"
+}

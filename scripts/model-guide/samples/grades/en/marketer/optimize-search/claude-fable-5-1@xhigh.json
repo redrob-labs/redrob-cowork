@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/optimize-search/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "0cffc551fe31",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Fixes price ($39 annual / $49 monthly, not \"from $29\"), trial not free plan, QuickBooks Online only; superlatives cut",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Fieldnote costs $39 per user per month billed annually, or $49 per user per month month-to-month. There is no free plan.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects both prices, distinguishes trial from free plan, limits integration to QuickBooks Online, and removes superlatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixes pricing, specifies trial instead of free plan, restricts to QuickBooks Online, and removes superlatives."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"hvac scheduling app free\" honestly with the 14-day trial, explained in the rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "there is no free plan, so ranking for it buys bounces and misleads; one honest FAQ answers it instead.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ honestly offers a 14-day trial; rationale explains avoiding free-plan targeting while answering the query."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ honestly addresses the query with the 14-day trial and the rationale explains the choice."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, QuickBooks Online, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The Fieldnote office web app, which dispatchers use, requires an internet connection.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes offline technician access from online-only office access; fact table includes both prices, QuickBooks Online, and offline availability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ clarifies offline behavior for mobile vs. web, and fact table lists price, QuickBooks Online, and offline."
+    }
+   ]
+  },
+  {
+   "check": "Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "## Schedule and dispatch from one board",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Title and H1 target both queries; blog repositioning and exact-match linking are explicit, but H2s lack HVAC software targeting."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keywords targeted in title, H1, H2s; blog is repositioned as how-to guide with exact-match link."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤60, meta ≤155, counts accurate; JSON-LD valid and matches page; survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Dispatcher scheduling time 9 → 4 hours/week (customer survey, n = 210, March 2025)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Title and meta counts are accurate and within limits; valid JSON-LD matches page facts and FAQs; survey attribution is complete."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Title and meta fit length limits with accurate counts, JSON-LD is valid and consistent, survey is attributed."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027758849999999998,
+ "date": "2026-10-11"
+}

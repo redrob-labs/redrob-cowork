@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/update-crm/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "update-crm",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "4a6b8d9cd568",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Devdaru stays Negotiation, close ≈ 3 April (out of quarter), O-105 merged; Stiles told \"not this quarter\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैंने O-104 की close date 3 अप्रैल की और duplicate O-105 हटा दी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Devdaru remains Negotiation, moves outside Q4, duplicate is removed, and Stiles is explicitly told not to mark Won."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Devdaru stays Negotiation, date moved to 3 April, O-105 removed, Stiles clearly advised against counting it this quarter."
+    }
+   ]
+  },
+  {
+   "check": "Kesri re-priced to ₹25,80,000 (38,70,000 ÷ 45 × 30) with close date 10 April",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Amount ₹38,70,000→₹25,80,000, close date 27 फ़रवरी→10 अप्रैल।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recalculates 30 sensors at ₹86,000 each and moves the close date to 10 April."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculated ₹25,80,000 and updated close date to 10 April 2026."
+    }
+   ]
+  },
+  {
+   "check": "Eastbrook €52,000 converted to ₹49,92,000 and kept in the quarter for the 26 March decision",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "52,000 × 96 = **₹49,92,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct EUR conversion; Eastbrook remains in Q4 with the 26 March board decision identified."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Converted to ₹49,92,000 and kept in quarter with 2026-03-31 close date for 26 March decision."
+    }
+   ]
+  },
+  {
+   "check": "Haritha moved to Q2 FY2026-27 or later; Tatrekha to a 2027-realistic date, ₹1,75,00,000 flagged as placeholder",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "1,75,00,000 (अपुष्ट अंदाज़ा) | 2027-03-31",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Haritha moves to September 2026; Tatrekha moves to March 2027 with its amount explicitly flagged as unqualified."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Haritha moved to Q2 FY26-27 (September), Tatrekha moved to 2027, and amount flagged as placeholder."
+    }
+   ]
+  },
+  {
+   "check": "Weighted = Amount × probability; quarter falls from ₹1,13,61,000 to ₹77,46,000, Tapti as Commit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**1,13,61,000** | | **1,19,92,000** | **77,46,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses amount times stage probability, calculates both quarter totals correctly, and assigns Tapti to Commit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Formula stated, weighted forecast correctly drops from ₹1,13,61,000 to ₹77,46,000 with Tapti under Commit."
+    }
+   ]
+  },
+  {
+   "check": "Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Devdaru को समय से पहले \"WON\" लिखा था।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Hygiene list explicitly covers premature Won, past close date, duplicate, currency mismatch, and guessed amount."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All five required hygiene issues are explicitly identified and addressed."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021665963,
+ "date": "2026-10-11"
+}

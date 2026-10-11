@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/design-screens/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "742571b5816a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 1,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "टोकन मौजूद है, पर primary पर लेबल के लिए नहीं: सिर्फ़ 1.77:1",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies insufficient white contrast and substitutes dark ink text for accessibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies ~1.77:1 contrast failure and swaps to dark ink text (8.2:1) with CSS comment explanation."
+    }
+   ]
+  },
+  {
+   "check": "Drops Miles's exotic slot, 13:30 (lunch), 12:00 dental (runs into lunch), 16:45 wellness (past 17:00)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "if (start < toMin(CLINIC.open) || end > toMin(CLINIC.close))",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Includes eligibility and closing-time checks, but lunch filtering is truncated and the prototype cannot execute."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Begins slot validation logic for vet and clinic closing, but code cuts off before finishing lunch checks."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "यह डॉक्टर यह सेवा नहीं देते",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides eligibility and closing-time rejection reasons, but omits both lunch explanations and API correction recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Section 3 listing data issues and API recommendations is omitted entirely due to output truncation."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"₹3,500 से\" honestly, e.g. with a final-price note, and addresses the no-surprises tension",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "price:3500, priceFrom:true",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Stores a starting-price flag but never displays the price or addresses final pricing and no-surprises tension."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Data structure has priceFrom, but explanation resolving the tension with the PM's no-surprises rule is missing."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, lang=\"hi\", keyboard-usable (focus, labels, ≥24 px targets), offers \"कोई भी उपलब्ध डॉक्टर\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "<html lang=\"hi\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Includes responsive styling, focus indicators and sizable controls, but truncated JavaScript prevents operation; any-doctor option is absent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Sets lang=\"hi\" and 375 px responsive styles, but JavaScript cuts off mid-code so the prototype cannot run."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "No rationale connects progressive sections or separate steps to the 70% common-service fast path."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Design rationale explaining the layout choice and fast path for common services was not provided."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028189613000000002,
+ "date": "2026-10-11"
+}

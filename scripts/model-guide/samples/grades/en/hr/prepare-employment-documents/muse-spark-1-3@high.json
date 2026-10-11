@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/prepare-employment-documents/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "8e4daadb4377",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 1,
+ "partial": 4,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Letter uses $175,000 or a placeholder, 3,200 RSUs, \"Software Engineer II\"; not $182,000, 4,000 or \"Senior\"",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "The approved grant under REQ-2291 is 3,200 RSUs",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Base placeholder is acceptable, but title and actual equity offer remain placeholders rather than Software Engineer II and 3,200 RSUs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses placeholders and approved grant details instead of unauthorized higher figures or Senior title."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Decide (a) seek exceptions to honor verbal deal or (b) re-offer at approved terms with careful renegotiation.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies sign-offs but offers alternatives without choosing a resolution or explicitly requiring candidate notification before sending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Presents two options rather than taking a definitive position, though it identifies sign-offs and warns against sending."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped under §16600; California law and venue replace Texas under §925; confidentiality/IP kept",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Cal. B&P §16600 voids post-employment non-competes – must omit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops non-compete and replaces Texas law and venue under §925, but omits confidentiality/IP reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Properly drops non-compete and updates governing law to California, but omits confidentiality/IP language."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × $20,000 = $8,333.33; no final-pay deduction without written authorization",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Owed = $20,000 × (12 - 7) ÷ 12 = $20,000 × 5 ÷ 12 = **$8,333.33**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct prorated repayment; separately prohibits final-wage deduction without separate written authorization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates $8,333.33 and notes no deduction from final wages without separate written authorization."
+    }
+   ]
+  },
+  {
+   "check": "Keeps at-will, contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Offer Letter — DRAFT - DO NOT SEND PENDING APPROVALS",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps at-will, contingencies, and December 1 start, but unfinished title/equity placeholders replace already-approved terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains at-will employment, background/I-9 contingencies, the Dec 1 start date, and restricts placeholders to open items."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0222537,
+ "date": "2026-10-11"
+}

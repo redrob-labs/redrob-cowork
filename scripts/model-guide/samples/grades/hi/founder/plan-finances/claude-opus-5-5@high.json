@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/plan-finances/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "plan-finances",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f2296cb55a40",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Names John's errors: unburdened payroll without hires, licence spread instead of paid in April, revenue not gross profit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Gross profit की जगह पूरा राजस्व घटाया गया",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies missing payroll burden and hires, April upfront licence timing, and revenue versus gross profit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies unburdened payroll, missing hires, revenue vs gross profit, and licence timing."
+    }
+   ]
+  },
+  {
+   "check": "April 2026 net burn about ₹26,21,900 (12,07,500 + 3,80,000 + 14,40,000 − 4,05,600)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "26,21,900",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "April net burn and its payroll, opex, licence, and gross-profit components are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exact match with ₹26,21,900 net burn in April 2026."
+    }
+   ]
+  },
+  {
+   "check": "Burn settles near ₹14.5–15.8 lakh a month June–December 2026, easing as MRR grows",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "असली burn, अक्टूबर 2026",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Monthly table correctly shows approximately ₹14.5–15.8 lakh burn during June–December, easing with MRR growth."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Matches the range of ₹14.5–15.8 lakh across June–December 2026 and tracks subsequent decline."
+    }
+   ]
+  },
+  {
+   "check": "Cash runs out in July 2027 (~₹4.9 lakh end-June, ~15 months), with the April 2027 licence as a cliff",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "जून 2027 के अंत में केवल ₹4,93,648 बचते हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies July exhaustion, approximately 15 months of runway, and the April 2027 licence cliff."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies cash running out in July 2027 with ~₹4.9 lakh left at end-June and notes the licence cliff."
+    }
+   ]
+  },
+  {
+   "check": "Raise must close by about December 2026 (~₹95.8 lakh left), so fundraising starts by about July 2026",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Fundraising शुरू करने का आख़िरी महीना: अगस्त 2026",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "December close and ₹95.8 lakh cash are correct, but latest fundraising start is July, not August."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Names December 2026 close (~₹95.8 lakh left) and starting 5 months earlier (July/August 2026)."
+    }
+   ]
+  },
+  {
+   "check": "MRR = opening × 0.98 + new; formulas for every column; quantified alternative and justified recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "शुरुआती MRR (t−1) × 0.98 + नया MRR (t−1)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides all column formulas, quantified alternative scenarios and runway effects, and a justified hiring and fundraising recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides correct MRR formula, formulas for each column, models quantified alternative scenarios, and gives justified recommendation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02080365,
+ "date": "2026-10-11"
+}

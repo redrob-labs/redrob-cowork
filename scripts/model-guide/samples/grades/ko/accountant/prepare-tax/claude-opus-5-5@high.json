@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/prepare-tax/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "47e703208d5c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes ₩18,000,000 double count: receipts ₩141,200,000 = 144,062,500 − 6,000,000 − 1,400,000 + 1,221,000 + 3,316,500",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**141,200,000** | 블루핀 카드결제 18,000,000원 중복 제거",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly removes duplicate receipts and reconciles deposits using transfers, refund, fees, and withholding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly removes 18,000,000 duplicate and ties receipts of 141,200,000 to deposits of 144,062,500."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 3 (pre-2023 brackets); software ₩3,460,000 net of refund; deducts ₩1,221,000 fees, ₩3,200,000 meals within limit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**메모 3: 신뢰 불가.** 2022년 블로그 자료로, 2023년 귀속부터 개정된 세율이 반영되지 않았습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects obsolete brackets; correctly deducts net software, PG fees, and meals within the calculated limit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects note 3, net software is 3,460,000, deducts 1,221,000 fees and 3,200,000 meals within limit."
+    }
+   ]
+  },
+  {
+   "check": "Vehicle ₩2,814,000 (4,200/11,000), home office ₩1,200,000 (12/84); gym excluded; 국민연금 to 연금보험료공제",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**국민연금 5,400,000원:** 필요경비가 아니라 종합소득공제(연금보험료공제)에 반영합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Vehicle and home-office deductions are correct; excludes gym and treats pension as an income deduction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates vehicle 2,814,000, rent 1,200,000, excludes gym, and moves pension to deductions."
+    }
+   ]
+  },
+  {
+   "check": "Business income ₩115,775,000, tax base ₩108,875,000, computed tax ₩22,666,250 (35% − 15,440,000), determined ₩22,596,250",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "산출세액(108,875,000 × 35% − 15,440,000) | 22,666,250",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Business income, tax base, computed tax, and determined tax all match."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates business income 115,775,000, tax base 108,875,000, computed tax 22,666,250, and determined tax 22,596,250."
+    }
+   ]
+  },
+  {
+   "check": "Payable ₩19,581,250 after ₩3,015,000 withheld; local tax ~₩1,958,125; laptop expensed as PC, depreciation as alternative",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**납부할 소득세** | **19,581,250**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct withholding and payable tax; local tax reasonably rounded. Recommends laptop immediate expensing and discusses five-year depreciation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes payable tax 19,581,250, local tax, and recommends laptop expensing with depreciation as alternative."
+    }
+   ]
+  },
+  {
+   "check": "Flags unwithheld 3.3% (₩297,000) on 박영수's ₩9,000,000, unfiled 지급명세서, 가산세; asks 블루핀헬스 to correct",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "원천세 270,000원 + 지방소득세 27,000원을 원천징수이행상황신고와 함께 납부",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags withholding, late simplified statements, and penalties, but omits annual payment statement and Bluefin correction request."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags 박영수's 3.3% withholding and penalties, but omits asking 블루핀헬스 to correct its payment statement."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027359063,
+ "date": "2026-10-11"
+}

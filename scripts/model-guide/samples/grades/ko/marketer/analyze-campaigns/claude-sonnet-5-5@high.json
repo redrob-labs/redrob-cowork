@@ -1,0 +1,110 @@
+{
+ "key": "ko/marketer/analyze-campaigns/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "analyze-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "78c8a6f1f891",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Platforms' 2,480/₩321,500,000 vs actual 1,640/₩213,200,000: 840 over-attributed (~51%); 2.37× invalid; 카카오모먼트 window flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**합계** | **2,480** | **1,640** | **840** | **51.2%** | **321,500,000** | **213,200,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct reconciliation; replaces misleading 2.37 ROAS and explicitly flags Kakao’s mismatched reporting window."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "정확한 수치 비교, 840건(51.2%) 과대 집계 명시, 2.37배 오류 및 카카오 기간 문제를 지적함."
+    }
+   ]
+  },
+  {
+   "check": "True cost ₩139,500,000 with the ₩4,000,000 fee; blended ROAS ≈1.53×; contribution −₩22,240,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**139,500,000** | **1,640** | **213,200,000** | **1.53** | **85,061** | **−22,240,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes the affiliate fee and correctly calculates total cost, blended ROAS, and negative contribution."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "제휴 이용료 400만원을 포함한 실제 비용 1억 3,950만원, 통합 ROAS 1.53배, 총 공헌이익 −2,224만원을 정확히 산출함."
+    }
+   ]
+  },
+  {
+   "check": "ROAS: 메타 0.98, 네이버 검색 1.58, PMax 1.19, 카카오모먼트 0.55, 제휴 2.13, CRM 14.00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "손익분기 ROAS 1.82를 넘긴 채널은 제휴와 CRM뿐입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All six channel ROAS figures match the required values in the performance table."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "모든 채널의 ROAS를 소수점 둘째 자리까지 정확히 계산함."
+    }
+   ]
+  },
+  {
+   "check": "Uses the holdout to argue last-click under-credits 메타; discounts PMax for brand; 카카오모먼트 weakest",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ROAS 0.98이나 홀드아웃에서 주문 +14%로 실제 효과 확인. 전면 중단 대신 축소",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses Meta’s holdout against last-click cuts, discounts branded PMax conversions, and sharply reduces weakest-ROAS Kakao."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "메타 홀드아웃 결과 반영, PMax 브랜드 잠식 할인, 카카오 최저 성과 판단을 모두 적절히 제시함."
+    }
+   ]
+  },
+  {
+   "check": "Q4 plan totals ₩139,500,000, follows the scorecard; tests e.g. 카카오모먼트 holdout, PMax brand exclusions, LTV view",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "4분기 예산 제안 (총액 139,500,000원 유지)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Allocations including conditional reserve total correctly, follow performance evidence, and include brand-exclusion, holdout, and LTV considerations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "예산 총액 139.5백만원 유지, 성과표 기반 재배분, PMax 브랜드 제외 및 LTV 관점 테스트를 제안함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025002075,
+ "date": "2026-10-11"
+}

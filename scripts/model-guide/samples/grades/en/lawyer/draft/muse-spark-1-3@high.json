@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/draft/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "draft",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "618c96e604c9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Milestones total $245,000, not $250,000; gap left as placeholder or assumption and raised in the email",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Milestones total $245k, not $250k — where to put $5k?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Agreement leaves allocation of the $5,000 gap open; email expressly requests the decision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Leaves the $5,000 gap as a placeholder note and raises it for decision in the cover email."
+    }
+   ]
+  },
+  {
+   "check": "App software fits no §101(2) category: present \"hereby assigns\" under §204(a), work for hire only as backstop",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Agency hereby irrevocably assigns to Fernhill all right, title, and interest, including copyrights, patents, and trade secrets",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Present assignment and further assurances secure ownership; qualified work-for-hire language is supplemented, and email identifies statutory ineligibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes present assignment under §204(a) alongside work-for-hire language, noting §101(2) in the email."
+    }
+   ]
+  },
+  {
+   "check": "Orbitmade Core licensed perpetual, irrevocable, royalty-free, transferable; GPL-3.0 barred or needs Fernhill's approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "a perpetual, irrevocable, worldwide, royalty-free, transferable, sublicensable license",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Core license has required rights; GPL requires prior written consent, and email explains proprietary-source disclosure risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Grants required license terms for Core and bars GPL-3.0 without prior written consent."
+    }
+   ]
+  },
+  {
+   "check": "Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, data, misconduct exclusions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Excluded Claims (uncapped): Agency IP indemnity, breach of confidentiality/data security, infringement/misappropriation, and either party's gross negligence or willful misconduct.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ten-business-day objective review, detailed rejection and cure balance acceptance; full-fee cap has required exclusions. Email explains both."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a balanced 10-day testing and cure procedure, capping liability with the required carve-outs."
+    }
+   ]
+  },
+  {
+   "check": "Subcontractors need approval, flow-down and Orbitmade liability; source code on termination; New York law and venue",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Agency promptly delivers all completed and work-in-progress Work Product, whether paid or not",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Work Product includes all code; subcontractor approval, flow-down, agency responsibility, and New York law and venue are provided."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers subcontractor approval/liability/flow-down, delivery of work product/code upon termination, and New York governing law/venue."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020696813,
+ "date": "2026-10-11"
+}

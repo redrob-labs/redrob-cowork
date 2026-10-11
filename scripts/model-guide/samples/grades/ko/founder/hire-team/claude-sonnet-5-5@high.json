@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/hire-team/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "41a0a7ce9c5b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: 이영희 3.44 (13.75 ÷ 4), 박영수 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "원점수는 55/16 = **3.44**, 박영수는 56/16 = **3.50**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "평균을 정확히 재계산하고 ATS의 평균과 추천 근거 오류를 지적했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "정확하게 평균(3.44, 3.50)을 재계산하고 ATS 추천이 잘못되었음을 지적했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Spots the Senior CSM's 박영수 note describing 이영희's 밝은길소프트 role; if swapped, 이영희 ~3.56, 박영수 ~3.38",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| C. CSM 입력 뒤바뀜 가정 | 3.56 | 3.38 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "밝은길소프트 경력의 후보 불일치를 발견하고 점수 교환 시 평균도 정확히 제시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "직장 불일치를 포착하고 전도 시 점수(3.56, 3.38)를 명시했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with the Senior CSM a prerequisite, not a guess",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**4) 오퍼 전 필수 확인 (이번 주)**\n1. CSM에게 어느 후보 이야기였는지 확인합니다 (오늘).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "CSM 확인과 필요한 평가표 정정을 오퍼 전 필수 절차로 설정했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "추측으로 넘기지 않고 CSM 확인을 오퍼 발송 전 필수 절차로 두었습니다."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the Head of Sales's children comment as improper, legally risky (남녀고용평등법, 채용절차법); unbiased follow-up",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "가족·양육 상황은 평가 대상이 아니고, 법적으로도 문제될 소지가 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "의견 배제, 동일한 출장 확인과 후속 조치는 제시했지만 관련 두 법률을 특정하지 않았습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "해당 발언을 배제하고 법적 문제 지적 및 양측 공통 검증 등 편향 없는 후속 조치를 마련했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Keeps 이영희's ₩120,000,000 ask (above the ₩110,000,000 ceiling) within policy; notes 박영수's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이영희를 택하면 범위 초과 승인이 별도로 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "이영희 희망 연봉의 상한 초과와 예외 승인 필요성을 명시하고 박영수의 미완료 평판조회를 확인 조건으로 삼았습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "이영희의 연봉 상한 초과에 대한 예외 승인 필요성을 명시하고 박영수의 미완료 평판조회를 확인했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "기준은 평판으로 확인된 조직 구축 실적과 처우 적합성이며",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "평균 외 근거와 전문적인 메시지, 이메일 플레이스홀더는 갖췄으나 전체 분량이 요청한 약 2,500자를 상당히 초과합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "형식이 전문적이고 수치 외 역량과 조건을 고려하여 추천했으며 이메일에 플레이스홀더를 사용했습니다."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024020063,
+ "date": "2026-10-11"
+}

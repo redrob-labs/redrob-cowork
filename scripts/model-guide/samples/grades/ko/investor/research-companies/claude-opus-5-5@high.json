@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/research-companies/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "research-companies",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "2cc3437528d5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Base 281,960 full-service + 52,000 institutional = 333,960 locations; TAM about ₩8,683–9,184억; limited-service out of SAM",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "TAM | 풀서비스 + 한정서비스 + 급식소.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct 333,960-location SAM and limited-service exclusion, but TAM includes limited-service and reaches ₩19,327억 instead of approximately ₩8,967억."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates the 333,960 locations (281,960 + 52,000) yielding ₩8,967억, correctly excluding limited-service."
+    }
+   ]
+  },
+  {
+   "check": "Current market: ≈8,459 + 5,720 ≈ 14,200 locations, about ₩369–390억 a year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "풀서비스 281,960 × 3% = 8,459곳 → 227억<br>급식소 52,000 × 11% = 5,720곳 → 154억",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct penetration calculations and combined annual market of ₩381억."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computes penetration (8,459 and 5,720 locations) totaling ₩381억."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the ₩4.2조: global, covers hauling, composting and digestion, and is company-sourced",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "[3]의 4.2조원은 글로벌 수거·퇴비화·혐기성 소화 시장입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects geographic and product-scope mismatch; source-reliability table also flags company self-interest."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the ₩4.2조 figure citing global geography, non-software scope (hauling/composting/digestion), and company-sourced nature."
+    }
+   ]
+  },
+  {
+   "check": "Annualizes 빈사이트 ₩2,280,000, 스크랩리스 ₩2,760,000 (2021 ₩129,000 stale), 키친레저 ₩3,000,000 plus hardware",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "(빈사이트 228만 + 키친레저 300만 + 스크랩리스 276만 + 웨이스트와이즈 270만) ÷ 4",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct annual prices; competitor table separates ₩200만원 one-time hardware and identifies the 2021 price as stale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly annualizes 빈사이트, 스크랩리스 (noting 2021 is stale), and 키친레저 with hardware."
+    }
+   ]
+  },
+  {
+   "check": "키친레저's Series B is ₩140억 from the press release, not the aggregator's ₩400억",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "140억 시리즈 B, 2025.3 보도자료 (상)<br>스타트업와이어의 400억은 1차 출처와 불일치 (하)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses primary-release ₩140억 and explicitly discounts the aggregator’s conflicting ₩400억."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies Series B as ₩140억 from the press release and discounts the aggregator's ₩400억."
+    }
+   ]
+  },
+  {
+   "check": "Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "SAM 중 개인 풀서비스는 이탈이 집중되는 구간입니다[7]. 실질 SAM은 8,967억원보다 작습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Connects restaurant churn to narrower SAM and asks segment-specific churn; institutional skew is quantified but not linked to SAM scope."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Connects the 14% restaurant churn to SAM and formulates a direct founder question."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025232024999999998,
+ "date": "2026-10-11"
+}

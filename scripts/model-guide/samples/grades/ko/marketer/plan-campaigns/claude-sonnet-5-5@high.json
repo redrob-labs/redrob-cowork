@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/plan-campaigns/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "plan-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "1ed96f053d39",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Excludes or heavily discounts the consumer-app Instagram benchmark; doesn't use its ₩60,000 cost per SQL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "인스타그램은 소비자용 자매 브랜드 수치라 건설업체에 적용할 수 없어 제외했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the noncomparable consumer-app benchmark and does not use its cost per SQL."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly excludes the Instagram benchmark due to consumer app origin."
+    }
+   ]
+  },
+  {
+   "check": "Cost per SQL: 네이버 ≈₩386,000, 리멤버 ≈₩778,000, BuildExpo ≈₩1,000,000 (45 SQLs), syndication ≈₩917,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "44 (198×22%) | 382,500원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four costs are correct; search’s slight difference reflects dividing spend by rounded SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates cost per SQL and volumes across all four channels."
+    }
+   ]
+  },
+  {
+   "check": "Search capped: 3,300 clicks × 6% = 198 leads, ₩16,830,000, ≈44 SQLs",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "16.83M (3,300클릭×5,100원) | 198 (3,300×6%) | 44 (198×22%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly caps quarterly search clicks, spend, leads, and rounded SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Search is capped at 3,300 clicks, 198 leads, 44 SQLs, ₩16.83M."
+    }
+   ]
+  },
+  {
+   "check": "Best mix yields ≈240 SQLs for ₩180,000,000: 400 SQLs and 80 customers aren't achievable",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "남은 118.17M을 모두 리멤버에 써도 SQL이 약 152건 늘어나 총 약 241건입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows approximately 240 SQLs at full budget and explicitly rejects feasibility of 400 SQLs and 80 customers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes best mix yields ~241 SQLs and CRO targets are unachievable."
+    }
+   ]
+  },
+  {
+   "check": "Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈₩403,200,000 ACV)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3명 × 70건 = 210 SQL. 계약 전환율 20%를 적용하면 고객은 최대 42곳입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies sales ceiling and recommends 200 SQLs, 40 customers, and ₩384 million annual contract value."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 210 SQL sales ceiling and recommends ~200 SQLs/40 customers."
+    }
+   ]
+  },
+  {
+   "check": "Pillars match the 3 interview pains; timeline builds to BuildExpo Feb 10–12, 설 follow-up; specific leadership ask",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "목표를 SQL 200건·고객 40곳으로 조정할지, 400건을 유지하고 +124M과 AE 3명 추가를 승인할지",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Maps all three interview pains, schedules Expo preparation and post-Seollal follow-up, and requests specific leadership decisions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Matches interview pains, details timeline around BuildExpo/설, and includes specific asks."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021487463,
+ "date": "2026-10-11"
+}

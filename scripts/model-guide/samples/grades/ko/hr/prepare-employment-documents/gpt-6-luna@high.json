@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/prepare-employment-documents/gpt-6-luna@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "7cbb61cd17d4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Letter uses ₩100,000,000 or placeholder, 3,200 RSUs, \"소프트웨어 엔지니어 II\"; not ₩105,000,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "직무·레벨: 소프트웨어 엔지니어 II (L4)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, an in-band salary placeholder, and 3,200 RSUs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "승인된 직책(L4), 주식 수(3,200주), 밴드 내 연봉 자리표시자를 정확히 사용함."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "밴드 내 확정액을 정해 오퍼에 넣고, 상한 초과는 엔지니어링 VP·재무의 재결재를 받아야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies the gap and exception approvers, but never requires informing the candidate before sending revised terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "결재권자와 상한 초과 해결책은 제시했으나, 발송 전 후보자에게 사전 안내/설명해야 한다는 점이 누락됨."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped (민법 §103, policy), 직무발명/confidentiality kept; Korean law and court replace Texas (국제사법 §§43, 48)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "경업금지는 회사 방침상 제외하고 비밀유지·직무발명 약정으로 대체합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Drops non-compete, retains protective agreements, and replaces Texas provisions with Korean law and statutory jurisdiction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "경업금지를 제외하고 비밀유지·직무발명으로 대체하였으며, 준거법 및 관할을 한국 법령으로 수정함."
+    }
+   ]
+  },
+  {
+   "check": "At-will replaced: just cause, 30 days' notice or pay in lieu, optional probation (§23①, §26)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "회사는 정당한 이유와 법정 절차에 따라 근로관계를 종료하며, 해고 예고는 법정 예외를 제외하고 30일 전 예고 또는 30일분 이상의 통상임금 지급",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces at-will with just cause and compliant notice or payment; leaves probation terms for confirmation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "임의고용을 배제하고 정당한 이유, 30일 전 예고(수당), 수습 자리표시자를 반영함."
+    }
+   ]
+  },
+  {
+   "check": "Keeps contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "평판·경력 조회는 관련 법령에 따른 동의를 받아 실시하며, 입사일까지 회사가 요청하는 입사 서류를 제출해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes checks, required documents, December 1 start, and explained placeholders for unresolved decisions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "입사일과 채용 조건(평판조회, 서류)을 유지하고 미확정 사항에만 자리표시자를 적용함."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × ₩12,000,000 = ₩5,000,000, claimed separately, no pay deduction (§43)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "12,000,000원 × (12−7) ÷ 12 = 5,000,000원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly prorates repayment; letter requires separate collection without wage or retirement-benefit deductions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "500만원 계산, 임금 공제 배제 및 별도 청구 명시를 모두 충족함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023378774999999997,
+ "date": "2026-10-11"
+}

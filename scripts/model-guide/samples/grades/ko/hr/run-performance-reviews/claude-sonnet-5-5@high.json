@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/run-performance-reviews/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "a2f161de171a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll ₩865,200,000; budget ₩30,282,000; submitted ₩31,423,000 (3.63%), ₩1,141,000 over; HRBP's \"3.4%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 제출안 합계 | 31,423,000 | **3.63% (1,141,000원 초과)** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Payroll, budget, submitted total, percentage, and overage are correct; explicitly rejects the HRBP summary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All figures match exactly, and the HRBP summary is explicitly called out as wrong."
+    }
+   ]
+  },
+  {
+   "check": "E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised; §19③ 불리한 처우",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E07은 법정 휴직자 평가 규정을 어겼습니다. 이 셋은 협의 대상이 아니라 시정 대상입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses prorated 103%, mandates grade 4 and increased merit, and identifies legally prohibited parental-leave disadvantage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies pro-rated 103% (anchor 4), raises merit, and flags the legal issue of 불리한 처우."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E02, E03은 팀장 조정 한도(1단계)를 초과했고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly flags both as violations, with anchors 3 and 1; rejects absent or inadequate justification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly flags E03 (anchor 1 vs 5) and E02 (anchor 3 vs 5) as unjustified policy violations."
+    }
+   ]
+  },
+  {
+   "check": "Shows 박영수's leniency in the manager table: average submitted 4.75 vs anchor 3.25",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 박영수 | 4.75 | 3.25 | **+1.50** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct averages and positive deviation clearly identify Park's leniency pattern."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately displays Park Young-soo's submitted average of 4.75 vs anchor 3.25 in the manager table."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E09는 사유가 제출되면 3등급도 가능합니다. E10은 서면 사유가 확인되면 4등급이 유지됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags E09's unsupported downgrade and recommends 4; conditionally retains E10's justified one-level upgrade for discussion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats E10 as standing for discussion based on justification, and flags E09 as under-rated (3 vs anchor 4)."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ ₩30,282,000, every merit % inside its range, merit amount = base × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 권고안 합계 | 28,567,000 | 3.30% (잔여 1,715,000원) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended total is correct and within budget; every merit rate satisfies its grade range and amounts equal base times rate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The recommended total is ₩28,567,000 (≤ ₩30,282,000), individual % are within range, and formulas match."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020710725,
+ "date": "2026-10-11"
+}

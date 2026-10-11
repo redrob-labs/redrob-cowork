@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/research/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "384d11dedfe5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Count I covered (CFO conduct, mandatory \"shall\"); Count II likely not; Count III a reasoned close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Yes for Count I; No for Count II; Likely Yes (or allocated) for Count III.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains mandatory CFO coverage, separate contractual duties, and competing Count III nexus arguments with allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly analyzes Count I as covered, Count II as uncovered, and Count III as a reasoned close call requiring allocation."
+    }
+   ]
+  },
+  {
+   "check": "§145(f): 2023–2024 conduct predates the amendment, which can't impair his right; treatise [8] outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That is outdated and directly contradicted by current §145(f) **[2]**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies statutory protection to 2023–2024 conduct, notes no authorization for impairment, and rejects the outdated treatise."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies §145(f) to pre-amendment conduct and identifies treatise [8] as outdated and contradicted by the statute."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [1] and [6], not blog [7]; letter of credit rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**No to both.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects good-faith screening under [1] and [6], discredits [7], and enforces the expressly unsecured undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good faith based on [1] and [6] (dismissing [7]), and rejects letter of credit since undertaking is unsecured."
+    }
+   ]
+  },
+  {
+   "check": "Enforce in Chancery (exclusive, summary, §145(k)); fees on fees pro rata under [5]; tender undertaking, written demand",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Sue in **Delaware Court of Chancery, which has exclusive jurisdiction and may decide advancement summarily**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Cites §145(k), seeks proportional fees on fees under [5], and recommends immediate undertaking tender and advancement demand."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers Chancery exclusive/summary jurisdiction under §145(k), pro rata fees on fees under [5], and tendering undertaking/written demand."
+    }
+   ]
+  },
+  {
+   "check": "Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| [8] 2004 treatise | Outdated secondary | **Low/superseded.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table distinguishes controlling statutes and bylaws, explicitly fictional case summaries, and unreliable or superseded secondary sources."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The table clearly distinguishes primary authorities ([1]–[4]), fictional cases ([5]–[6]), and unreliable secondary sources ([7]–[8])."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019306088,
+ "date": "2026-10-11"
+}

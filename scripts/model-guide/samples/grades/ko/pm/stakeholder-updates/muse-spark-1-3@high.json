@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/stakeholder-updates/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "a1ad2842cc6a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ ₩865M (₩610M + 3 × ₩85M), not ₩790M: ≈ ₩65M (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "잔여 3개월 유지 시 총 8.65억, 8.1% 초과",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes completion forecast and identifies the ₩65M overrun and conflict with ₩790M."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately recomputes forecast at ₩865M, flags reported ₩790M, and notes ~₩65M (8.1%) overrun."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "11/14 제출 + 4주 심사 = 12/12 완료, 12/1과 충돌",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies earliest launch and changes schedule status from green to red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies 14 Nov + 4 weeks gives 12 Dec, making 1 Dec impossible, and changes RAG from green."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "미달: 목표생성 31%(목표 40%), 문의 22건/천명(목표 15건)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately reports both beta misses against their targets."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly reports both missed beta metrics with actuals vs targets."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size (₩115,000 vs ₩100,000) and retention without spin; links ticket themes to fixes",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "노트: 핵심 가치는 확인됐고, 입구 막힘만 풀면 됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Positive metrics are accurate, but commentary overstates validation; ticket themes mostly receive diagnoses rather than concrete fixes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents deposit and retention honestly, and links ticket themes (e.g., onboarding, descoping 잔돈모으기) to fixes."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "권고: A를 기준으로 B 병행하는 투트랙, C는 차선책",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers mid-December, negotiated timing, and descoping options; ends with explicit launch, negotiation, and budget decisions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents 3 concrete options (delay to 12/15, negotiation, descoping) and requests specific decisions with a clear recommendation."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Hong Gil-dong is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "지적이 아닌 지원 확보 목적이니, 원장연동 10/10 사수 방안 함께 준비해주시겠습니까?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides each include notes, lead with the conclusion, and provide a factual, constructive memo."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly 7 slides with speaker notes, bottom line upfront, and a constructive non-blaming memo to Hong."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.015147299999999999,
+ "date": "2026-10-11"
+}

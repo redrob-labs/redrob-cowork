@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/close-books/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "f8aa5edd2fee",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits ₩4,527,000 into a duplicated ₩4,500,000 NHIS (공단) deposit and a ₩27,000 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "공단 입금 중복 기록 4,500,000원과 CK2038 전위 오류 27,000원으로 완전히 설명되므로",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies both errors and their amounts, totaling ₩4,527,000."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly splits the ₩4,527,000 into the duplicated ₩4,500,000 deposit and the ₩27,000 transposition error."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the miscellaneous-expense (잡비) plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "잡비 처리 대신 위 정정분개로 바로잡으십시오.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the plug and explains its accounting and control consequences."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects treating the difference as miscellaneous expense (잡비)."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to ₩86,562,050, moving to ₩86,972,050 if #2019 is voided",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**수정 후 장부 잔액** | **86,972,050**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both sides correctly reconcile after voiding #2019; explains the ₩410,000 increase on each side."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both sides reconcile to ₩86,972,050 with #2019 voided, and the ₩410,000 effect is clearly explained."
+    }
+   ]
+  },
+  {
+   "check": "Returns the ₩350,000 chargeback to 박영수's patient receivable; fees to 지급수수료, interest to 이자수익",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "잡비가 아니라 진료수익 차감 계정(매출환입·취소)으로 처리합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Fees and interest are correct, but chargeback reduces revenue instead of immediately restoring 박영수’s patient receivable."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Debited 진료수익 차감 instead of patient receivable (미수금) immediately, though fees and interest are correct."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to a payable to the payee (미지급금) under the 90-day policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "분개 7로 현금을 복원하고 미지급금으로 재분류합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Voids the overdue check under policy, retains the payee liability, and explicitly prohibits income recognition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Voids #2019 to 미지급금 pursuant to the 90-day policy without taking it into income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to 김철수 is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이번 건의 입력 경위와 4월분 입금 내역을 확인해 주십시오.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Entries balance; the two-line review identifies corrections and specific follow-up actions constructively."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All journal entries balance and the two-line review note is specific and constructive."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017765213000000002,
+ "date": "2026-10-11"
+}

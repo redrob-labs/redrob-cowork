@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/research-prospects/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "5e66e350abeb",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Lee Young-hee CEO (Jan 2026), Kim Cheol-su Chair, FY2025 ₩240B; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CEO는 이영희(CFO 출신)이며 2026년 1월 선임됐습니다. 창업자 김철수는 이사회 의장입니다. [1]\n- 2025 회계연도 순매출은 2,400억 원으로 18% 성장했습니다. [1]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct current leadership and revenue; explicitly limits the outdated 2023 article to historical context."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly states current CEO, Chair, FY2025 revenue, and marks 2023 article as outdated."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a different Busan company); uses Ridgeback's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "[5]: 사명이 다른 부산 도매업체로, 동명이사인 별개 법인입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the unrelated company and consistently uses Ridgeback’s 22%, retaining 32% only as industry context."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discards source 5 as a separate entity and utilizes Ridgeback's 22% return rate over the industry average."
+    }
+   ]
+  },
+  {
+   "check": "Value math: ₩240B ÷ ₩120,000 = 2.0M orders × 22% × ₩12,000 ≈ ₩5.28B; 20–30% ≈ ₩1.06–1.58B",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**비용 절감**: 52.8억 × 20~30% = **약 10.6억~15.8억 원/년** (절감률은 *리턴핏 벤치마크*)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates two million orders, 440,000 returns, ₩5.28B costs, and approximately ₩1.06–1.58B savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exact calculation matches all steps and figures specified in the checklist."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "반품 전체를 환불로 가정한 상한값입니다.\n  - 실제 환불 비중과 마진을 반영하면 줄어듭니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labels company inputs and benchmarks, flags estimation uncertainties, and presents 15% conversion as conditional upside."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Inputs are clearly labeled as company figures or benchmarks, framed as estimates, and 15% conversion is included."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기존 챔피언 Richard Miles는 퇴사했으므로 관계를 새로 구축합니다. 2024년 이력은 숨기지 않되 \"그때와 조건이 달라졌다\"는 틀로 다룹니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Connects reopening to replacement hiring, resale launch, and new CEO; recognizes departed champion and changed buying conditions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly addresses the 2024 loss and former champion using the new job post, resale launch, and new CEO."
+    }
+   ]
+  },
+  {
+   "check": "Enters via Park Young-su and/or Hong Gil-dong (Tamarack link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "홍길동 VP를 통해 박영수 COO를 소개받습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies Tamarack-linked entry, specifies outreach channels and message, and asks five questions testing costs, processes, timing, and grading."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends Hong and Park with clear justification, outlines a concrete first move, and provides 5 assumption-testing questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023869913,
+ "date": "2026-10-11"
+}

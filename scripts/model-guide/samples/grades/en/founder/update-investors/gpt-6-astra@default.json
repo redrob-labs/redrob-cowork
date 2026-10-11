@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/update-investors/gpt-6-astra@default",
+ "language": "en",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "e327cd5aece8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**+10.7% QoQ / −7.0% vs plan**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports GMV growth and plan miss, plus revenue growth of 6.8% and plan miss of 16.3%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides exact growth figures (+10.7% QoQ, +6.8% QoQ) and compares against plan (-7.0% and -16.3%)."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months ($5.49M ÷ ~$470K a month), not 18; questions the Q2 2026 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Q3 average monthly burn: **$470,000**; static runway from September 30: **11.7 months**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the correct cash-to-monthly-burn method and explicitly challenges Q2 2026 financing timing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~11.7 months ($5.49M / $470K) and highlights risk to Q2 2026 raise timing."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the $180K one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Excluding the approximately $180,000 working-capital step-up: **$410,000/month**, implying **13.4 months**—a sensitivity, not the base case.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly normalizes the working-capital effect and distinguishes adjusted runway from the observed-burn base case."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly normalizes the $180K working capital impact to show ~13.4 months runway."
+    }
+   ]
+  },
+  {
+   "check": "Bluepeak (12% of GMV at 9%) cuts ~0.6 points; ex-Bluepeak ~14.1%; covers margin and restaurant churn",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Blended bridge: **15.00% plan → 14.11% non-Bluepeak rate → 13.50% including Bluepeak**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows approximately 0.61-point Bluepeak dilution, its 12% share and 9% rate, contribution pressure, and restaurant churn."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows ex-Bluepeak at 14.11% (a ~0.6 pp drag), and analyzes margin compression and restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"On track\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**What worked:** GMV grew 10.7% QoQ; active accounts reached 236; repeat orders among accounts active ≥6 months rose from 61% to 66%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects “On track” and credits positives, but leads with growth; the 26-account increase is only implicit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops 'On track', leads with misses on Slide 1 while crediting accounts, repeat orders, and Bluepeak."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~$305K a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Approve the **≤$350,000 monthly burn target by January**, subject to a costed implementation plan within two weeks.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides quantified options, trade-offs, a recommendation, specific board approvals, and speaker notes on all nine slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Supplies quantified options, specific asks on Slide 9, and includes speaker notes on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019646024999999998,
+ "date": "2026-10-11"
+}

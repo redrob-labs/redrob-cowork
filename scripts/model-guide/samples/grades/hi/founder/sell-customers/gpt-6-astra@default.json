@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/sell-customers/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "founder",
+ "task": "sell-customers",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "7dee6985bfdc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't present 40% as typical (uses the 18% average or credits Uttarayan); names only Uttarayan and Devdar",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "हमारे छह ग्राहकों में छह महीने बाद ओवरटाइम घंटे औसतन 18% घटे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the 18% average, attributes 40% specifically to Uttarayan, and names only Uttarayan and Devdar."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses the 18% average, clearly attributes 40% to Uttarayan, and names only Uttarayan and Devdar."
+    }
+   ]
+  },
+  {
+   "check": "Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बहु-वर्षीय कॉन्ट्रैक्ट पर अधिकतम 15%; उससे ऊपर CFO की मंज़ूरी चाहिए, जो कभी नहीं मिली।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects unauthorized 30%, premature discounting, and false urgency; offers no discount outside policy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the 30% discount, citing company policy limits and prematurity."
+    }
+   ]
+  },
+  {
+   "check": "Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery or demo call",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "90 दिन के notice के हिसाब से cancellation की तारीख़ 1 सितंबर 2026 बनती है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct renewal and notice dates support long-cycle planning; requests short demo and planning calls, not immediate signature."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately references the 2026 renewal and 1 September notice, and asks for a short discovery/demo call."
+    }
+   ]
+  },
+  {
+   "check": "Personalizes to WhatsApp call-outs, overtime, float pool, 3 new clinics and 11 open nursing roles",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "आपके तीन नए क्लिनिकों के साथ",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Personalizes WhatsApp call-outs, overtime, float pool, and clinic growth, but omits the 11 open nursing roles."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Personalizes to WhatsApp, overtime, float pools, and 3 new clinics, but omits the 11 open nursing roles."
+    }
+   ]
+  },
+  {
+   "check": "Each email adds new value rather than just following up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "पहले call-out भरने में लगने वाला समय और ओवरटाइम घंटे baseline के रूप में दर्ज किए जा सकते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Emails add workflow explanation, contextualized results and reference access, then renewal planning, baselines, and implementation information."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Each email introduces distinct value (product workflow, peer proof/reference offer, renewal baseline planning) rather than generic follow-ups."
+    }
+   ]
+  },
+  {
+   "check": "Each email under 150 words, one CTA, sensible send day; LinkedIn ≤300 characters; founder's tone",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "क्या अगले हफ़्ते 20 मिनट का demo देखना चाहेंगी, जिसमें एक last-minute call-out भरकर दिखाऊँ?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Each email is under 150 words with one CTA; dates are sensible, LinkedIn is under 300 characters, tone founder-like."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Emails are under 150 words with single CTAs and spaced send dates; LinkedIn note is well under 300 characters."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020783175,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/pm/analyze-metrics/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "pm",
+ "task": "analyze-metrics",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "09517f26aab7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Detects sample ratio mismatch: 10,000 vs 9,200, χ² ≈ 33, traced to Android (2,500 vs 1,700) crash",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह gap पूरी तरह **Android** से आ रहा है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reports overall χ² 33.3 and Android mismatch, linking missing assignments to pre-logging crashes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies SRM with χ² ≈ 33.3 and links it to Android crash."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the pooled +13% lift and the Android 20% → 26% lift as biased samples",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**भरोसा न करें: Android Activation +6.0pp और कुल +3.0pp।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects pooled and Android lifts as causal evidence because of differential attrition and survivorship bias."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects both the pooled and Android activation lifts due to bias."
+    }
+   ]
+  },
+  {
+   "check": "Web activation 25.0% → 27.0% significant (z ≈ 2.5); iOS 20.0% → 22.0% not (z ≈ 1.3)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Web | 25.00% [1,500/6,000] | 27.00% [1,620/6,000] | +2.00 pp | +8.0% | 2.50 | 0.012 * |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports significant Web activation and nonsignificant iOS activation, with matching rates and z-statistics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates Web (significant, z=2.50) and iOS (not significant, z=1.34) activation results."
+    }
+   ]
+  },
+  {
+   "check": "Notes paid is flat (4.10% vs ≈ 4.20%; web 4.5% vs 4.6%), stop at day 9, proxy metric",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Activation proxy ऊपर, revenue flat",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reports flat overall and Web paid rates, day-nine stopping, and activation’s proxy status with longer-follow-up caveats."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes flat paid rates (4.10% vs 4.20%, web 4.5% vs 4.6%), day 9 stop, and proxy metric."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't ship on the pooled result; fixes logging, reruns or extends to 14 days, with a decision criterion",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "SRM guardrail के साथ पहले से तय 14-दिन का clean re-test चलाएँ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects rollout and specifies clean retest and decision criteria, but never explicitly requires fixing pre-crash assignment logging."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Advises against shipping pooled result, recommends 14-day re-test, and specifies clear decision criteria."
+    }
+   ]
+  },
+  {
+   "check": "Shows the formula behind every computed column (rates, differences, z-test, χ²)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$z=(p_t-p_c)/SE_{pool}$, two-sided $p=2(1-\\Phi(|z|))$",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides formulas for rates, absolute and relative differences, pooled z-tests, chi-square, expected counts, and confidence intervals."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly provides mathematical formulas for rates, differences, z-test, and χ²."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020873475,
+ "date": "2026-10-11"
+}

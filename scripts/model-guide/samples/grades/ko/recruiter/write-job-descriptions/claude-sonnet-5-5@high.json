@@ -1,0 +1,110 @@
+{
+ "key": "ko/recruiter/write-job-descriptions/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "recruiter",
+ "task": "write-job-descriptions",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "3b1590724e03",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Removes \"young, energetic man\" and \"recent graduates\"; replaces \"native Korean speaker\" with Korean radio safety communication",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "무전으로 안전과 직결되는 지시를 한국어로 정확히 듣고 전달할 수 있는 분",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes gendered, age-coded and recent-graduate preferences; replaces native-speaker requirement with job-related Korean radio communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes the discriminatory gender/age phrases and specifies Korean radio communication for safety."
+    }
+   ]
+  },
+  {
+   "check": "Uses ₩42M–50M and flags the draft's ₩38M–45M as off-sheet, a 채용절차법 misleading-posting risk",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "법규: 채용절차법상 거짓 광고 금지. 승인 범위 준수",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses ₩42M–50M and identifies the draft range as inconsistent with approval and risking prohibited false advertising."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies the ₩42M–50M range and cites misleading advertising under 채용절차법."
+    }
+   ]
+  },
+  {
+   "check": "Drops the degree and \"2+ years\"; states 0–2 years with training and paid GWO within 90 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GWO 기본 안전 교육(BST) 필수. 미이수자는 입사 후 90일 이내 이수 (비용 회사 부담)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes degree and two-plus-years requirements; states 0–2 years, job training, and company-funded GWO within 90 days."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops degree and 2+ years, sets 0–2 years with training, and covers GWO within 90 days."
+    }
+   ]
+  },
+  {
+   "check": "Keeps height, lifting and driving requirements; adds equal-opportunity and accommodation statements; drops \"에이스\" hype",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "합리적 편의 문의 안내 문구는 회사 정책 확인 후 추가할 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps physical and driving requirements, removes hype, and includes nondiscrimination language; accommodation statement is deferred rather than included."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Keeps physical/driving criteria and drops hype, but omits a full reasonable-accommodation statement from the posting."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at 1080×1080: role, location, ₩42M–50M, benefits, apply URL; legible and consistent with posting",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "지원 careers.example.com/cheongsol-tech1",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Self-contained 1080-square SVG includes role, location, correct salary, GWO benefit and application URL with legible, contrasting text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid 1080×1080 SVG containing role, location, ₩42M–50M salary, benefits, and apply URL."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022847475,
+ "date": "2026-10-11"
+}

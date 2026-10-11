@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/create-marketing/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "create-marketing",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "03c5cceff2e0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Savings fixed: ₩36,000 vs ₩40,000 (4 × ₩10,000) is 10%, ₩4,000 a month, not 25% (or \"₩9,000 a loaf\")",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "정가 40,000원보다 4,000원 저렴해요(10% 할인).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates the four-loaf total, monthly saving, and discount percentage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly corrects the savings to 10% (4,000 KRW off 40,000 KRW, or 9,000 KRW/loaf)."
+    }
+   ]
+  },
+  {
+   "check": "No \"100% 유기농\" (seed mix uncertified); uses wording like \"유기농 인증 밀가루 사용\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "유기농 인증 밀가루 사용",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits the organic claim to certified flour and discloses uncertified seed mixes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes the 100% claim and specifies certified organic flour with a seed mix footnote."
+    }
+   ]
+  },
+  {
+   "check": "No \"글루텐프리\" (shared kitchen, no testing); allergen note included; note to the owner explains both risks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "같은 주방·오븐에서 굽고 검사도 없어 보장할 수 없습니다. 대신 알레르기 안내를 넣었습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes the gluten-free claim, includes allergens, and explains certification and shared-kitchen risks to the owner."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes gluten-free claims, lists allergens, and explains both risks in the owner memo."
+    }
+   ]
+  },
+  {
+   "check": "Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "캐러셀 41÷2,700 ≈ **1.5%**, 릴스 38÷6,400 ≈ 0.6%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses correct click-through figures, prioritizes carousel conversions, and explicitly acknowledges reels’ superior reach."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Compares carousel conversion (1.5%) vs reel reach explicitly based on data to choose carousel."
+    }
+   ]
+  },
+  {
+   "check": "Both pieces carry 2 May, Saturday 8–11am pickup, ₩36,000/month for 4 loaves, URL, first-50 tote",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**\"한 달\" → \"4주(4회)\":** 5주 달과 헷갈리지 않게 했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Both pieces include other essentials, but replace monthly pricing with a materially different four-week subscription period."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both Instagram and flyer content include date, pickup window, price/quantity, URL, and tote gift."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at A5 proportions, brand colours, clear hierarchy, legible Korean text sizes, sufficient contrast",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "viewBox=\"0 0 420 595\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Self-contained, valid A5 SVG uses brand colours, clear hierarchy, readable Korean sizing, and appropriate text contrast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG at A5 ratio using brand colors, clear hierarchy, and legible Korean text."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029911613000000004,
+ "date": "2026-10-11"
+}

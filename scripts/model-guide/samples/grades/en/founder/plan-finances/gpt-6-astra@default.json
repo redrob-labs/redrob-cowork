@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/plan-finances/gpt-6-astra@default",
+ "language": "en",
+ "profession": "founder",
+ "task": "plan-finances",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "ed26ce87c2f9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Names John's errors: unburdened payroll without hires, license spread instead of paid in January, revenue not gross profit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "John’s arithmetic works for his inputs, but those inputs omit material costs and cash timing.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciliation identifies omitted payroll burden and hires, January license payments, and revenue versus gross profit, quantifying each effect."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies John's omissions regarding payroll burden, new hires, gross margin, and annual license timing."
+    }
+   ]
+  },
+  {
+   "check": "January 2026 net burn about $269,540 (128,100 + 38,000 + 144,000 − 40,560)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Jan 2026 | 52,000 | 52,000 | 40,560 | 128,100 | 38,000 | 144,000 | 269,540 | 2,130,460 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "January burn is correctly calculated as $269,540 using all specified components."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computes January 2026 net burn as $269,540 from the specified components."
+    }
+   ]
+  },
+  {
+   "check": "Burn settles near $155,000–$170,000 a month mid-2026, easing as MRR grows",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Jul 2026 | 80,311 | 80,311 | 62,643 | 187,067 | 44,000 | 0 | 168,424 | 1,191,343 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Mid-2026 burn falls within the expected range and subsequently eases as MRR grows."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows burn settling in the $155k–$170k range mid-2026 and declining thereafter."
+    }
+   ]
+  },
+  {
+   "check": "Cash runs out around March 2027 (14–15 months), with the January 2027 license as a cliff",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Cash remains positive through **February 2027**, at just **$23,555**, and turns negative in **March 2027**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct exhaustion month; table shows January 2027's $144,000 license payment and resulting $279,506 burn cliff."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly pinpoints cash running out in March 2027, modeling the second January license payment."
+    }
+   ]
+  },
+  {
+   "check": "Raise must close by about August 2026 (~$1.03M left), so fundraising starts March–April 2026",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Therefore, the latest month-end close is **August 2026**, requiring first meetings by **March 2026**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct deadline, supported by August cash of $1,028,687 and 6.32 months of then-current burn."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates August 2026 close with ~$1.03M cash and a March 2026 fundraising start."
+    }
+   ]
+  },
+  {
+   "check": "MRR = opening × 0.98 + new; formulas for every column; quantified alternative and justified recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Extends runway by only **one calendar month**, to **April 2027**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct MRR recurrence and all column formulas; quantified no-AE alternative supports the justified earlier-fundraising recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States all column formulas, models a quantified alternative scenario, and provides a well-reasoned recommendation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028210613000000002,
+ "date": "2026-10-11"
+}

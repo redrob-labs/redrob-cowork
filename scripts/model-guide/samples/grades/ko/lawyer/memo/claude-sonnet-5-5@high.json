@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/memo/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "4a4a04f44b9a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "8.2(a) rep claim expired Apr 30, 2024; 8.2(c) survives under 8.6 to Apr 30, 2028; timely",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제3.14조 진술·보장 청구는 2024. 4. 30. 존속기간이 끝나 이미 실효되었으므로 근거로 삼을 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "진술·보장 청구 만료와 독립 조세청구의 2028년 외곽기한을 구별하고, 현재 청구가 적시라고 결론냅니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "진술·보장 만료와 제8.6조 존속기간(2028년) 및 청구의 적시성을 정확히 명시했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Answers §184②: 8.6 is a survival period, not an extended limitation; §64 runs from Aug 4, 2025 (§166①)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "가장 보수적으로 종결일(2021. 4. 30.)로 보면 2026. 4. 30.에 만료합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "존속기간과 시효를 구별하지만, 부과일부터의 시효 기산을 확정하지 않고 잘못된 종결일 기산을 병기합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "민법 제184조 제2항, 존속기간의 법적 성격 및 부과 시점 기산 상사시효를 바르게 설명했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Notice 91 days after Aug 4 misses 30 days; bars recovery only for actual prejudice (e.g. §68① window)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "통지 지연(약 91일)만으로 면책되지는 않습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "30일 위반, 실제 불이익 범위의 면책, 심판청구 기회 상실 및 불복 여부 확인을 다룹니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "91일 지연 사실, 실제 불이익 요건, 심판청구 기간 도과 가능성을 충실히 검토했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable ₩6억 6,200만 (2019, 2020, Jan–Apr 2021), not pro-rata ₩1억 667만; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "회수 가능액은 11억 2천만원이 아니라 6억 6,200만원(본세)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "장부마감 배분에 따라 2021년 종결 전 1억 1,200만원을 포함하고 종결 후 세액을 제외합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "장부마감 기준 1~4월분 반영 및 종결 후 세액 제외로 6억 6,200만원을 정확히 산출했습니다."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares ₩4억 6,340만 and ₩1억 9,860만",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "공제금액(2.5억)과 에스크로 상한은 적용되지 않고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "에스크로 해제 사실에도 독립 청구를 인정하며, 두 매도인의 분할 부담액을 정확히 계산합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "제한 규정 배제와 분할책임에 따른 매도인별 부담액을 정확히 계산했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Amend the ₩11억 2천만 notice to an 8.2(c) claim for ₩6억 6,200만; preserve the assessment challenge",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "청구액을 6억 6,200만원(본세)으로 감액하고, 근거를 제8.2조 (c)호와 제8.6조로 명시합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "통지 정정은 정확하지만, 기존 불복 여부 확인에 그치고 가능한 부과처분 불복 보전을 명시적으로 권고하지 않습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "통지 정정 권고 및 부과처분 불복 절차 확인·보존 권고를 모두 포함했습니다."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028926188,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/update-investors/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "d1bd72749628",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**GMV +17% को +10.7% किया।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports both QoQ growth rates and plan misses of 7.0% GMV and 16.3% revenue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly states GMV +10.7% QoQ (−7.0% vs plan) and net revenue +6.8% QoQ (−16.3% vs plan)."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months (₹54.90 crore ÷ ~₹4.7 crore a month), not 18; questions the Q1 FY27 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Runway लगभग 11.7 महीने है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses ₹54.90 crore divided by ₹4.70 crore monthly burn; explicitly flags inadequate cash at the planned raise."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~11.7 months runway using ₹4.70 cr/month burn and directly flags risk to Q1 FY27 raise timing."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the ₹1.8 crore one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "54.90 ÷ (12.30 ÷ 3)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes ₹1.8 crore working-capital outflow and calculates normalized runway of 13.4 months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly calculates runway normalizing out the ₹1.8 crore working capital hit (~13.4 months)."
+    }
+   ]
+  },
+  {
+   "check": "Neelshikhar (12% of GMV at 9%) cuts ~0.6 points; ex-Neelshikhar ~14.1%; covers margin and restaurant churn",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "नीलशिखर का 9% पर mix प्रभाव: **−60 bps**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows ex-Neelshikhar rate of 14.11%, explains contribution-margin pressure, and addresses restaurant churn."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows ex-Neelshikhar at 14.1%, Neelshikhar mix effect of −60 bps, and addresses margin and restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"On track\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सक्रिय accounts 210 से बढ़कर 236 हुए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Leads with the miss, rejects On track, and credits 26 additional accounts, improved repeats, and the enterprise logo."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops 'On track', leads with misses, and highlights +26 accounts, 61% to 66% repeats, and the logo."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~₹3.05 crore a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**B. Insiders से bridge (₹15–20 करोड़ convertible) और working capital credit line**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides quantified options, trade-offs, recommendations, specific board decisions and asks, and speaker notes on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Options are fully quantified, board asks are specific, and every slide includes a speaker note."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025906125000000002,
+ "date": "2026-10-11"
+}

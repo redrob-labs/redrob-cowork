@@ -1,0 +1,128 @@
+{
+ "key": "ko/recruiter/prepare-interviews/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "recruiter",
+ "task": "prepare-interviews",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "c1c73b0ec1fc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "환산식은 `1 + (점수−1)×3/4`이며, 3→2.5, 4→3.25, 5→4.0입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States the correct linear conversion from Doe’s 1–5 scale to the standard 1–4 scale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States the linear rescaling formula and values correctly."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Doe's card for Kim (interview cancelled): Kim's SAFE 2.5, below 3.0; notes it would be 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "김철수 SAFE는 3.33(환산 시 3.0)으로 **통과 판정이 뒤집힙니다.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the cancelled interview, reports valid SAFE 2.50, and identifies 3.0 if the invalid converted card were included."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes Kim's cancelled card, shows SAFE 2.50, and notes it would be 3.0."
+    }
+   ]
+  },
+  {
+   "check": "Flags Stiles' remark on Lee's children as improper, ignores it, asks all finalists the same on-call question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "코멘트를 평가에서 제외하고 법무·HR에 보고합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags the children remark as discriminatory, excludes it, and specifies the same on-call question for all finalists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags Stiles' remark as improper, ignores it, and asks all finalists the on-call question."
+    }
+   ]
+  },
+  {
+   "check": "Flags \"reminds me of me when I was young\" as affinity bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**친밀성 편향.** Stiles가 김철수에 대해 \"내 젊었을 때를 보는 것 같다\"고 썼습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the resemblance remark as affinity bias and rejects it as competency evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the phrase as affinity bias."
+    }
+   ]
+  },
+  {
+   "check": "Advances Lee Young-hee (≈ 3.50, SAFE ≈ 3.17) and Park Young-su (≈ 3.40, SAFE 3.75), method reproducible",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "## 3. 추천: **박영수, 이영희**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Advances both required finalists with correct overall and SAFE averages, using an explicit reproducible calculation method."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Advances Lee (3.50, SAFE 3.17) and Park (3.40, SAFE 3.75) with reproducible calculation."
+    }
+   ]
+  },
+  {
+   "check": "Final round probes each finalist's weakest areas (Lee: OPS, and SAFE near the bar; Park: COMM), same questions and anchors",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "## 4. 최종 면접 계획 (두 후보 동일, 표준 1~4점 양식, 토의 전 독립 채점)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides common structured questions and four-point anchors, with targeted probes for Lee’s OPS/SAFE and Park’s COMM."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses same questions/anchors and targets Lee's OPS/SAFE and Park's COMM."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020484713,
+ "date": "2026-10-11"
+}

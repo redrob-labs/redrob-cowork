@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/send-invoices/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "158190ffee34",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "INV-0152 totals $11,693.60: $9,000 balance + CO-1 $1,400 + expenses $1,176 × 1.10 = $1,293.60",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**TOTAL DUE** | | | **$11,693.60**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct balance, approved change order, and marked-up expenses produce the required total."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correct total of $11,693.60 calculated with $9,000 balance, CO-1 $1,400, and marked-up expenses of $1,293.60."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the $212 meals; due 25 March (net 15); shows the $9,000 deposit as received",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It credits your $9,000 deposit (2 Feb)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows deposit received, excludes meals, and sets the correct net-15 due date of 25 March."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Meals excluded, net 15 due date of 25 March correctly applied, deposit credited."
+    }
+   ]
+  },
+  {
+   "check": "CO-2 not billed (no Jane Doe approval); email asks her to approve $700 for 0.5 day",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CO-2 (30-sec cut-down, 0.5 day = $700)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes CO-2 for missing Jane approval and asks her to approve it in writing for separate billing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CO-2 excluded from invoice; email asks Jane Doe to approve $700 for 0.5 day."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't chase Tern: matches 3 Mar $2,300 to INV-0139, flags the \"0193\" reference mismatch",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Paid** 3 Mar — TERN ST PMT 0193 $2,300 matched. Closed",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly matches payment and avoids chasing Tern, but does not explicitly flag the invoice-reference mismatch."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tern not chased; matched to 3 Mar deposit and notes the '0193' reference mismatch."
+    }
+   ]
+  },
+  {
+   "check": "Pellworth firm with ≈ $126 late fee (1.5% × 2 months × $4,200); Saltgrass polite, no fee, PO 77-3310",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "May we re-issue INV-0137 showing PO 77-3310 today?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Pellworth treatment is correct; Saltgrass is polite and fee-free but only offers reissue instead of issuing the corrected invoice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Pellworth firm with $126 fee; Saltgrass polite with PO 77-3310 and no late fee."
+    }
+   ]
+  },
+  {
+   "check": "Invoice complete and professional: unique number, dates, terms, payment details, figures add up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Payment to:** [Bank Name / Account No / Sort Code] or [Payment Link]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional invoice includes unique number, parties, dates, terms, payment instructions, and consistent figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Invoice is complete, professional, includes terms and payment details, and math adds up."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0148176,
+ "date": "2026-10-11"
+}

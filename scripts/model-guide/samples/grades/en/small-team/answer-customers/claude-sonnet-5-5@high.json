@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/answer-customers/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "answer-customers",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "335e8939629c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That's enough for all three of you if you'd like to move your booking there.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Declines adding to full Saturday class and offers all three Thursday 23 April at 18:30, with three seats available."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly prevents overbooking Saturday and offers moving all three to the Thursday evening class."
+    }
+   ]
+  },
+  {
+   "check": "Richard Roe gets a full $65 refund or free reschedule (studio cancelled); bounced email noted, address fixed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "He gets the full $65 back or a free reschedule, his choice.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognises studio cancellation, apologises for bounced notice, and requests email confirmation before correcting records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Offers the full $65 refund or reschedule, notes the bounced email, and fixes the address."
+    }
+   ]
+  },
+  {
+   "check": "Wholesale at $23.40 a mug ($1,404 for 60); $18 flagged to Jane, not accepted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$23.40 per mug × 60 = $1,404",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct logo-inclusive wholesale pricing; rejects $18 and explicitly flags any price exception for Jane's approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates wholesale pricing at $23.40 ($1,404 total), rejects $18, and flags it to Jane."
+    }
+   ]
+  },
+  {
+   "check": "Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We also can't meet 1 May. Our lead time is six weeks",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers late-May delivery and calculates 60 mugs require 1.5 weeks at stated capacity."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 1 May as impossible, notes capacity and lead time, and offers late-May/alternative options."
+    }
+   ]
+  },
+  {
+   "check": "Message 4 is phishing (lookalike domain, urgency): no reply, no click, report it, check real admin",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Do not click or reply. Report it and delete it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies phishing and mismatched domain, prohibits engagement, reports it, and advises checking Shopfront directly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies phishing, instructs not to click or reply, and advises reporting and checking real admin directly."
+    }
+   ]
+  },
+  {
+   "check": "Honours John Stiles' replacement or refund (photo DM 27 Mar, within 7 days); apologises for missed DM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Your message and photo reached us on 27 March and we missed them.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Apologises for missed DM, recognises timely photo report, and offers free replacement or full $34 refund."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Apologises for the missed DM and honours both the replacement and refund options."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018099375,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/sell-customers/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "founder",
+ "task": "sell-customers",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "89c2edef0fdb",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't present 40% as typical (uses the 18% average or credits Northfield); names only Northfield and Pinegate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Across our six customers, overtime hours fell 18% on average over the first six months.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Attributes 40% specifically to Northfield, gives the 18% average, and names only authorized customers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Cites 18% average, attributes 40% specifically to Northfield, and names only Northfield and Pinegate."
+    }
+   ]
+  },
+  {
+   "check": "Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "My discretion ends at 15% for multi-year.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects unauthorized 30% and artificial Friday urgency; defers pricing until discussion and keeps discounts within policy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects 30% discount and Friday deadline, adhering strictly to the 15% policy for later discussion."
+    }
+   ]
+  },
+  {
+   "check": "Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery call",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Your contract renews on 30 November 2026 with 90 days' notice, so your real decision point is around 1 September 2026",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly frames the long evaluation window; opens with a 20-minute discovery call rather than requesting a signature."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately notes the renewal date and notice window; outreach proposes short discovery/scoping calls."
+    }
+   ]
+  },
+  {
+   "check": "Personalizes to text-message call-outs, overtime, float pool, 3 new clinics and 11 RN roles",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "You also said filling call-outs by text burns hours every week and overtime is your fastest-growing cost.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses text-message call-outs, overtime, float-pool operations, three new clinics, and eleven open RN roles across the sequence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Integrates text call-outs, overtime, float pools, 3 new clinics, and 11 open RN positions."
+    }
+   ]
+  },
+  {
+   "check": "Each email adds new value rather than just following up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Implementation takes about six weeks and we import from your current tool's export",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Emails add operational explanation, transparent customer evidence and references, then contract timing and implementation planning."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Each email introduces distinct substance: technical workflow, benchmark data/references, and contract timeline/phased demo."
+    }
+   ]
+  },
+  {
+   "check": "Each email under 150 words, one CTA, sensible send day; LinkedIn ≤300 characters; founder's tone",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Would you give me 20 minutes to walk me through how your float pool works today?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Emails stay under 150 words with focused asks and sensible dates; LinkedIn meets its limit; tone is candid and founder-led."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Emails are under 150 words with single CTAs and sensible cadences; LinkedIn note is 245 characters."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027549638,
+ "date": "2026-10-11"
+}

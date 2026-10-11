@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/plan-campaigns/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "plan-campaigns",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "1ed96f053d39",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Excludes or heavily discounts the consumer-app Instagram benchmark; doesn't use its ₩60,000 cost per SQL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "인스타(12,000원·20%) 제외: 자매 B2C 가계부 수치로 전문건설 타깃과 무관, 저품질 양산 위험",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the noncomparable consumer benchmark and does not use its cost per SQL."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly excludes the consumer Instagram benchmark."
+    }
+   ]
+  },
+  {
+   "check": "Cost per SQL: 네이버 ≈₩386,000, 리멤버 ≈₩778,000, BuildExpo ≈₩1,000,000 (45 SQLs), syndication ≈₩917,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 네이버검색 | 1,683만 | 198 | 44 | 38.3만 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four channel costs are correct; search’s slight difference results from rounding SQLs to 44."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates or approximates all four channel costs per SQL and trade show SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Search capped: 3,300 clicks × 6% = 198 leads, ₩16,830,000, ≈44 SQLs",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "검색상한: 월 클릭 1,100×CPC 5,100원×CVR 6%=월 66리드·15 SQL이 최대",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Monthly capacity and table together correctly establish quarterly 198 leads, ₩16.83 million spending, and 44 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly caps search at 198 leads, ₩16,830,000 budget, and 44 SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Best mix yields ≈240 SQLs for ₩180,000,000: 400 SQLs and 80 customers aren't achievable",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "예산을 다 써도 230여건이 한계라 목표 하향이 유일한 해법입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly rejects 400 SQLs and 80 customers, but misses the optimal mix yielding approximately 240 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states 400 SQLs/80 customers are unachievable, noting max capacity around 230+ SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈₩403,200,000 ACV)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "영업한계: AE 3명×70건=210건, 400건 처리 시 6명 필요, 방치 시 전환율 급락",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies capacity ceiling and recommends 209–210 SQLs, 42 customers, approximately ₩403 million annual revenue, with reserved budget."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies sales ceiling of 210 SQLs and plans for ~210 SQLs and 42 customers."
+    }
+   ]
+  },
+  {
+   "check": "Pillars match the 3 interview pains; timeline builds to BuildExpo Feb 10–12, 설 follow-up; specific leadership ask",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2월 10~12 expo→16~18 설연휴 휴지기→19~28 300스캔 24시간 내 AE 분배·5회 터치",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All three interview pains anchor messaging; schedule includes expo preparation and holiday follow-up, with specific leadership approvals."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Aligns pillars with interview pains, builds timeline around BuildExpo and 설, and makes specific asks."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0205233,
+ "date": "2026-10-11"
+}

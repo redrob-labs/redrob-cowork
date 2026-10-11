@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/update-crm/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "sales",
+ "task": "update-crm",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "3ffb903cc6e5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Pinecrest stays Negotiation, close ≈ 3 April (out of Q1), O-105 merged; Stiles told \"not in Q1\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I've moved it to 3 April at Negotiation (75%).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Pinecrest remains Negotiation outside Q1; O-105 is merged, and John is explicitly told not to count it as won."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Pinecrest stays at Negotiation, close moved to 3 April, O-105 merged, and Stiles is clearly told no."
+    }
+   ]
+  },
+  {
+   "check": "Kestrel re-priced to $31,000 (46,500 ÷ 45 × 30) with close date 10 April",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| O-102 | Kestrel Mills | Proposal | **31,000** | **2026-04-10** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recalculates 46,500 × 30/45 to $31,000 and updates close to 10 April."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly re-priced to $31,000 with close date updated to 10 April 2026."
+    }
+   ]
+  },
+  {
+   "check": "Eastbrook €52,000 converted to $56,160 and kept in Q1 for the 26 March decision",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| O-106 | Eastbrook Packaging GmbH | Proposal | **56,160** | 2026-03-31 | Send 3-year option before 26 Mar board |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Converts €52,000 at 1.08 to $56,160 and retains Q1 close with the 26 March decision noted."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly converted to $56,160 and retained in Q1 for the 26 March decision."
+    }
+   ]
+  },
+  {
+   "check": "Harrow moved to Q3; Tidemark to a 2027-realistic date, $210,000 flagged as unqualified placeholder",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| O-107 | Tidemark Ports | Discovery | 210,000 *(unvalidated)* | **2027-03-31** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Harrow moves to August 2026; Tidemark moves to 2027, with its guessed amount explicitly flagged as unqualified."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Harrow moved to August (Q3), Tidemark moved to 2027 and flagged as an unvalidated guess."
+    }
+   ]
+  },
+  {
+   "check": "Weighted = Amount × probability; Q1 falls from $161,750 to $91,080, Bayfront as Commit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Change:** weighted Q1 falls by $70,670 (161,750 − 91,080).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses Amount × stage probability, reports both correct Q1 totals, and assigns Bayfront to Commit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Weighted calculation stated; Q1 weighted drops from $161,750 to $91,080 with Bayfront as Commit."
+    }
+   ]
+  },
+  {
+   "check": "Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I reworded the note to \"verbal award, PO pending\" and kept the stage at Negotiation.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Hygiene list explicitly addresses the past close date, duplicate, currency mismatch, guessed amount, and premature Won claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The hygiene list explicitly covers all five specified issues."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020488388,
+ "date": "2026-10-11"
+}

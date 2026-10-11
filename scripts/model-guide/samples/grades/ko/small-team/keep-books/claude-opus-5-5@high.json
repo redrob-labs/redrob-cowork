@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/keep-books/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "keep-books",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "acbb859f6f08",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Reconciles the ₩1,385,000 gap: duplicate nursery +₩3,150,000, bank fee +₩35,000, cheque #448 −₩1,800,000; adjusted ₩19,486,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **조정 후 장부 잔액** | **19,486,000** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reconciles the ₩1,385,000 gap with duplicate payment, bank fee and outstanding cheque; both adjusted balances agree."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reconciles all items to reach ₩19,486,000 on both sides."
+    }
+   ]
+  },
+  {
+   "check": "Streamflix recoded as owner draw; March revenue ₩13,450,000, excluding the ₩10M draw and ₩1,345,000 VAT",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**매출(공급가액): 13,450,000원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct revenue, VAT liability and borrowing exclusions; Streamflix is explicitly recoded as owner draw."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recodes Streamflix to owner draw, correctly states March revenue, and excludes borrowing and VAT."
+    }
+   ]
+  },
+  {
+   "check": "Forecast excludes Jajaknamu and the nursery refund; ₩11.2M payroll from 16 Apr, interest, VAT, Haetsal ~10 days late",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "- 묘목 환불: **오늘 요청 시** 늦어도 4/15(영업일 10일) 입금",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Excludes disputed receivable and correctly schedules payroll, VAT and Haetsal; includes unconfirmed refund and uses incorrect interest amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Forecast improperly includes the unrequested ₩3.15M nursery refund in week 3 inflows."
+    }
+   ]
+  },
+  {
+   "check": "Without the mower, cash bottoms ≈ ₩2.1M in the week of 29 Apr and ends near ₩12.0M",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "| W8 5/20~26 | 2,500 | 1,165 | 13,838 | 15,173 | −4,162 | −2,827 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Baseline minimum is ₩5.288M and ending cash ₩15.173M, not approximately ₩2.1M and ₩12.0M."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "By including the refund, cash bottoms at ₩5.3M instead of ≈ ₩2.1M, ending at ₩15.2M instead of ≈ ₩12.0M."
+    }
+   ]
+  },
+  {
+   "check": "Mower in cash gives ≈ −₩15.9M that week, beyond ₩15M credit; advises financing, deferring or leasing",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "- 환불이 지연되면 한도를 초과합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Recommends against cash purchase and offers alternatives, but baseline understates deficit and incorrectly shows remaining credit sufficient."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recommends leasing/financing, but due to refund inclusion calculates trough at −₩12.7M rather than ≈ −₩15.9M."
+    }
+   ]
+  },
+  {
+   "check": "Every computed column states its method, and the weekly arithmetic is consistent",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "- 기초 잔액은 수표 #448 결제분을 차감한 금액입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Weekly arithmetic is consistent and assumptions explain components, but computed-column formulas and aggregation methods are not fully stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Weekly arithmetic is completely consistent, but computed columns do not explicitly state their formulas/methods."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027729450000000003,
+ "date": "2026-10-11"
+}

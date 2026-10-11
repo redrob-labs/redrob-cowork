@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/draft/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "draft",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "a7ddbe597da9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Milestones total ₩2억 9,400만, not ₩3억; ₩600만 gap left as placeholder or assumption, raised in the email",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "결정 필요: 마일스톤 합계 2.94억/3억 불일치",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The contract leaves reconciliation as a placeholder; the email identifies the totals, exposing the ₩6 million gap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately flags the ₩600만 milestone discrepancy in both the contract placeholder and the cover email."
+    }
+   ]
+  },
+  {
+   "check": "Not 업무상저작물 (§9): present assignment incl. 2차적저작물작성권, 저작인격권 non-exercise, §54 registration help",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "오빗메이드는 저작인격권 불행사에 동의하며 제54조 등록에 협력한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expressly assigns economic rights including derivative rights, rejects automatic employment-work ownership, and provides non-exercise and registration cooperation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects statutory works-for-hire, providing present assignment, derivative works rights, moral rights waiver, and registration assistance."
+    }
+   ]
+  },
+  {
+   "check": "오빗메이드 코어 licensed perpetual, irrevocable, royalty-free, transferable; GPL-3.0 barred or needs 펀힐's approval",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "영구·무상·전세계·서브라이선스 가능한 이용을 허락한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Core license lacks express irrevocability and transferability. GPL inclusion appropriately requires prior written approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly licenses Orbitmade Core and restricts GPL copyleft libraries pending prior written approval."
+    }
+   ]
+  },
+  {
+   "check": "Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, data, 고의·중과실 exclusions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "고의·중과실, 비밀·개인정보 위반, 제5조·제8조 위반에는 적용하지 아니하고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ten-business-day acceptance, reasoned rejection and cure rounds balance testing; the full-price cap excludes IP, data and serious misconduct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Balances acceptance terms and caps liability at contract price while carving out IP, data/confidentiality, and willful misconduct."
+    }
+   ]
+  },
+  {
+   "check": "Overseas QA: §26① 위탁 terms, consent for 재위탁 (§26⑥), no real health data without §23/§28조의8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "베트남 협력사에 대한 재위탁·국외이전은 펀힐의 사전 서면 동의와 제26조제6항·제28조의8 요건 충족을 조건으로 한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requires processing limits, statutory written safeguards, sensitive-data consent, prior subcontracting consent and lawful overseas transfer."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers §26 written terms, prior consent under §26⑥, and restricts real health data under §23/§28-8."
+    }
+   ]
+  },
+  {
+   "check": "Subcontractor flow-down and 오빗메이드 liability; source code on termination; Korean law, 서울중앙지방법원",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "해지 시 오빗메이드는 기수령 대금 상당 완성분 및 진행 중 작업물·소스코드·문서를 인도하고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides termination deliverables, Korean law and Seoul Central District Court, but omits subcontractor flow-down and developer responsibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Addresses termination source code transfer, Korean law, and Seoul Central District Court, but omits subcontractor flow-down/liability."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026750063,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/small-team/create-marketing/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "create-marketing",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "8710103e9f37",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Savings fixed: ₹900 vs ₹1,000 (4 × ₹250) is 10%, ₹100 a month, not 25% (or \"₹225 a loaf\")",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "4 × ₹250 = ₹1,000 होता है, इसलिए ₹900 पर छूट 10% बनती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly replaces 25% with 10%, and both pieces state ₹100 monthly savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 10% savings (₹100 off ₹1,000) instead of Mary's 25%."
+    }
+   ]
+  },
+  {
+   "check": "No \"100% organic\" (seed mix uncertified); uses wording like \"made with certified organic flour\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"100% organic\" की जगह \"certified organic आटा\":",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits the claim to certified organic flour and explains that the seed mix is uncertified."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids 100% organic claim due to uncertified seed mix and uses certified organic flour instead."
+    }
+   ]
+  },
+  {
+   "check": "No \"gluten-free\" (shared kitchen, no testing); allergen note included; note to Mary explains both risks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "loaf उसी kitchen में बनता है और testing नहीं होती।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects gluten-free claims, includes all listed allergens, and explains certification limitations and coeliac safety risks to Mary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Omits gluten-free, includes allergens, and explains both legal testing and health risks to Mary."
+    }
+   ]
+  },
+  {
+   "check": "Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Sign-ups मुख्य लक्ष्य है, इसलिए carousel चुना।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates approximately 1.5% versus 0.6% click-through and explicitly uses higher-reach reels for awareness."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses data to justify carousel for click rate (1.5% vs 0.6%) and reel for reach."
+    }
+   ]
+  },
+  {
+   "check": "Both pieces carry 2 May, Saturday 8–11am pickup, ₹900/month for 4 loaves (UPI AutoPay), URL, first-50 tote",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "पहले 50 sign-ups को मुफ़्त tote bag! Sign up: link in bio 👆",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Both pieces include other essentials, but Instagram never supplies the actual subscription URL."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both Instagram and flyer include date, pickup window, price/loaves, AutoPay, URL, and tote bag offer."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at A5 proportions, brand colours, clear hierarchy, legible text sizes, sufficient contrast",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "viewBox=\"0 0 420 595\" width=\"420\" height=\"595\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid, self-contained A5 SVG uses brand colours, clear hierarchy, legible text sizes, and appropriate text contrast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SVG is valid at A5 proportions, applies brand colours, and has legible text hierarchy and good contrast."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027742313,
+ "date": "2026-10-11"
+}

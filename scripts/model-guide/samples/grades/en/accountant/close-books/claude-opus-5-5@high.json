@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/close-books/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f642027076c5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits $4,527.00 into a duplicated $4,500.00 Coastline deposit and a $27.00 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the $4,527 was a $4,500 duplicate posting of Coastline EFT 77310 plus a $27 transposition on #2038",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies both errors and their amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the $4,500 duplicate deposit and the $27 transposition on check #2038."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the Miscellaneous Expense plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Why this must not go to Miscellaneous Expense:",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the plug and explains that it would misstate expenses and receivables."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects plugging the difference to Miscellaneous Expense with clear justifications."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to $86,562.05, moving to $86,972.05 if #2019 is voided",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Adjusted bank balance | 86,562.05 | 86,972.05 | +410.00 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both bank and book balances agree before and after voiding; reconciling calculations are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles to both $86,562.05 and $86,972.05 depending on check #2019 void status."
+    }
+   ]
+  },
+  {
+   "check": "Returns the $350.00 NSF to R. Miles's receivable; fees to expense, interest to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Accounts Receivable – Patients (R. Miles)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Debits patient receivables for NSF, expenses both fees, and credits interest income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly debits patient A/R for NSF, expenses fees, and credits interest to income."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to Unclaimed Property Payable under the 90-day policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Recommendation: void #2019 and reclassify it to Unclaimed Property Payable (AJE 7).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies the 90-day policy, preserves the liability, and explicitly prohibits crediting income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Voids check #2019 to Unclaimed Property Payable and notes it cannot be taken to income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to John is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Please also age the outstanding-check list each month against the 90-day policy",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All journal entries balance with sensible accounts; the review note gives specific, constructive corrective actions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All journal entries balance and the review note provides constructive, specific guidance."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019498238,
+ "date": "2026-10-11"
+}

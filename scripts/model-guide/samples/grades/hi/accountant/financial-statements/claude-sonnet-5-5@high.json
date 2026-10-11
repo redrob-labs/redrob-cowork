@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/financial-statements/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "24960896308c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss ₹1,614 lakh, negative equity ₹594 lakh as booked (or ₹1,584 lakh and ₹564 lakh if interest corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**वर्ष की हानि = कुल comprehensive हानि** (OCI शून्य) | **(1,614)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Loss is ₹1,614 lakh, equity is negative ₹594 lakh, and balance-sheet totals tie at ₹2,634 lakh."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Net loss is ₹1,614 lakh, negative equity is ₹(594) lakh, and balance sheet ties at ₹2,634 lakh."
+    }
+   ]
+  },
+  {
+   "check": "Deferred revenue ₹740 lakh current, ₹280 lakh non-current; lease ₹96/₹240 lakh; notes and accrued interest non-current",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**लीज़ देनदारी:** 96 वर्तमान और 240 गैर-वर्तमान।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct deferred-revenue and lease splits; notes and accrued interest are non-current with maturity-based explanations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correct split for deferred revenue (740/280), lease (96/240), and notes with accrued interest classified as non-current."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be ₹90 lakh (1,500 × 8% × 9/12), not ₹120 lakh; proposes treating the ₹30 lakh",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "लीज़ amortisation schedule से 30 की पुष्टि। न मिले तो अंतर की जाँच।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates note interest at ₹90 lakh, flags the ₹30 lakh difference, and proposes verifying treatment as lease interest."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies note interest is 90 vs finance cost 120, and proposes treating the 30 lakh difference (lease interest)."
+    }
+   ]
+  },
+  {
+   "check": "Material uncertainty on going concern (Ind AS 1): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ind AS 1.25 के तहत **material uncertainty** का स्पष्ट प्रकटीकरण हो",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies 10.5-month runway, customer loss, unsigned financing, and unresolved material uncertainty; requests a twelve-month forecast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies ~10.5 months runway, customer loss, unsigned term sheet, and concludes material uncertainty under Ind AS 1."
+    }
+   ]
+  },
+  {
+   "check": "CEO loan as related party (Ind AS 24, Schedule III); questions classification, recoverability; flags missing board approval, section 185",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "चुकौती की कोई तारीख नहीं है, यानी यह मांग पर देय माना जाएगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Related-party disclosure, recoverability and section 185 are addressed, but classification assumes demand repayment without verifying contractual terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers Ind AS 24/Schedule III, classification, recoverability/ECL, lack of board approval, and section 185 issues."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a non-adjusting event under Ind AS 10",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह **non-adjusting event** है (Ind AS 10), क्योंकि निर्णय रिपोर्टिंग तिथि के बाद का है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats customer non-renewal as non-adjusting and proposes disclosure of its nature and estimated financial effect."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly classifies customer non-renewal as a non-adjusting event under Ind AS 10."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0237615,
+ "date": "2026-10-11"
+}

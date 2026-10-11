@@ -1,0 +1,128 @@
+{
+ "key": "en/hr/answer-policy-questions/gpt-6-astra@default",
+ "language": "en",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "df559050c3fc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not the superseded handbook: eligible for 16 weeks' paid leave at 100%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "16 weeks of paid parental leave at 100% of base pay",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies the superseding July 2025 policy and confirms Jane meets its six-month eligibility requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies PB-2025-04 granting 16 weeks of paid leave at 100%."
+    }
+   ]
+  },
+  {
+   "check": "PTO: 8.5 days (or 7.25 if March does not count), states the reading; only 5 carry over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Because you started March 3, March was not a completed calendar month of service.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly excludes March; correctly calculates 7.25 days at year-end, five carried over, and 2.25 forfeited."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States reading excluding March, computes 7.25 balance, and notes only 5 days carry over."
+    }
+   ]
+  },
+  {
+   "check": "FSA can't change now; 30 days after the birth (about March 18, 2026); $7,500 is a household limit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The **2026 household limit is $7,500**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains no immediate pregnancy-based change, birth-triggered 30-day window, March 18 deadline, and household limit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly explains election timing after birth (March 18) and notes the $7,500 household limit."
+    }
+   ]
+  },
+  {
+   "check": "Not FMLA-eligible (about 11 months' service), but NY PFL-eligible and job-protected, topped up to 100%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "You will not meet the service requirement on February 16; your first anniversary is **March 3, 2026**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly distinguishes initial FMLA ineligibility from NY PFL eligibility, 12-week job protection, and company top-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly explains NY PFL eligibility with top-up to 100% and FMLA ineligibility."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: 30 days means telling her manager by mid-January; her timing works, HR keeps it confidential",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Waiting until early January would fit that timing; waiting until the end of January would not.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Gives correct January 17 notice target but leaves manager notification unresolved and omits HR confidentiality assurance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains the 30-day notice and mid-January deadline, but fails to confirm HR will keep it confidential."
+    }
+   ]
+  },
+  {
+   "check": "Internal note flags the superseded handbook still posted, and weeks 13–16 job protection, routed to Legal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ask Legal to validate the leave-protection guidance and Benefits to supply enrollment instructions.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Internal note flags the posted superseded handbook and protection beyond NY PFL’s 12 weeks, routing protection guidance to Legal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the outdated intranet handbook and routes weeks 13–16 job protection to Legal."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018698924999999998,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/design-screens/gpt-6-luna@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "8e2ba1f3f5ec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "white text on `#7FD1AE` does not meet WCAG AA contrast.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the contrast failure and explains using dark ink labels on the mint background."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly flags contrast failure and switches to ink text on the primary mint colour."
+    }
+   ]
+  },
+  {
+   "check": "Drops Miles's exotic slot, 12:30 (lunch), 11:30 dental (runs into lunch), 16:45 wellness (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "only offers Mary’s 11:00 exotic check-up and Richard’s 2:00 wellness exam.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The filtering code excludes all four invalid slots and retains exactly the two valid slots."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Filters out all four invalid slots in the prototype and rationale."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The API should return current valid availability or an explicit no-availability result.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains each invalid slot and recommends valid availability from the API."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains each dropped slot and notes the API should return valid availability."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"from $280\" honestly, e.g. with a final-quote note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A real dental booking should require an estimate and owner agreement before confirmation",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves the starting price and requires an agreed estimate to avoid price surprises."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents 'from $280' honestly with a starting-price notice and addresses the tension with final pricing."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"Any available vet\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<strong>Any available vet</strong>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file responsive prototype has native labelled buttons, visible focus, sufficiently large targets, and the any-vet option."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Runs cleanly at 375 px, has visible focus and touch targets ≥24 px, and includes 'Any available vet'."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Wellness exams and vaccinations appear first and are marked popular.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Prioritizes common services, but does not explain how separate steps provide their fastest booking path."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the step choice and prioritises the 70% wellness/vaccination bookings at the top."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024225075,
+ "date": "2026-10-11"
+}

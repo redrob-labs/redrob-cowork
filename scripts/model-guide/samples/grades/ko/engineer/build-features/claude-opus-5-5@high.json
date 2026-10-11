@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/build-features/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "build-features",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "eec7ca092fb7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Lists bugs: fractional won, member discount on alcohol, VAT added on top, VAT on groceries, whole-cart VAT",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "부동소수점 소수 원이 발생하고(2,372.5 등) 반올림 규칙이 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies fractional won, alcohol membership discounts, added VAT, grocery taxation, and missing per-line VAT calculation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All 5 required bugs are listed clearly in section 4."
+    }
+   ]
+  },
+  {
+   "check": "Rejects FRESH10 with below_minimum: eligible ₩35,460 (cart ₩47,450) is under ₩40,000; states minimum-check order",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "따라서 결과는 `rejected / below_minimum`이며, 결제는 멤버십 할인만 적용해 진행합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly compares eligible ₩35,460 against ₩40,000, states cart ₩47,450, and explicitly checks minimum before membership discounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects FRESH10 with below_minimum and states the minimum-check order (before member discount)."
+    }
+   ]
+  },
+  {
+   "check": "Applies only the Plus discount to ₩35,460: ₩1,774 per line (or ₩1,773 allocated, as a stated choice)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "expect(r.lines.map((l) => l.memberDiscount)).toEqual([299, 325, 425, 0, 725]);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies only Plus discounts to non-alcohol lines, totaling ₩1,774 with per-line half-up rounding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies per-line half-up Plus discount totaling ₩1,774 to ₩35,460 non-alcohol items."
+    }
+   ]
+  },
+  {
+   "check": "Extracts VAT only from soap (₩734 of ₩8,075) and makgeolli (₩1,090); total ₩45,676; lines sum exactly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "subtotal: 47_450, memberDiscount: 1_774, promoDiscount: 0, total: 45_676,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table and tests show soap VAT ₩734, alcohol VAT ₩1,090, no grocery VAT, and exactly reconciled totals."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "VAT correctly extracted only from soap (734) and makgeolli (1,090), total 45,676, and lines sum exactly."
+    }
+   ]
+  },
+  {
+   "check": "Proportional fixed-discount allocation with remainders, capped at the eligible amount; inclusive Asia/Seoul date check",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const amount = Math.min(def.value, sum(weights)); // 적용 대상 금액 초과 불가",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Implements capped proportional allocation, largest-line remainder handling, and inclusive expiration checks using Asia/Seoul dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Implements proportional allocation with remainders, caps discount at eligible amount, and checks Asia/Seoul date inclusively."
+    }
+   ]
+  },
+  {
+   "check": "Passing tests cover each reason code, case-insensitivity, alcohol exclusion, HOME15 scope and half-won rounding",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "expect(r.lines.map((l) => l.promoDiscount)).toEqual([638, 0, 0]);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests cover all rejection reasons, case-insensitivity, alcohol exclusion, HOME15 scope, half-won rounding, and pass against implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Test file comprehensively covers all reason codes, case-insensitivity, alcohol exclusion, HOME15 scope, and half-won rounding."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.039186788,
+ "date": "2026-10-11"
+}

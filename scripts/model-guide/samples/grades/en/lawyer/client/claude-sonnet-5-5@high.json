@@ -1,0 +1,128 @@
+{
+ "key": "en/lawyer/client/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "client",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "1538df0724e5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "3221 acceptance due Thursday, Nov 13, 2025, not month-end; Proposal 2 open to Nov 21; decision before Nov 13",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We'll treat **Wed, Nov 12** as our working deadline.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies November 13 and November 21 expirations and requests instructions by November 10."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the Nov 13 and Nov 21 deadlines and requests a decision prior to Nov 13."
+    }
+   ]
+  },
+  {
+   "check": "§11.3 likely bars the $300,000 lost profits; trial EV ≈$0.9M with 9% interest; both offers compare well",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Net: about $0.92M.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes lost profits under §11.3, correctly calculates interest-inclusive trial value, and compares both offers favorably before release adjustments."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes lost profits under §11.3, calculates trial EV at ~$0.92M, and compares offers favorably."
+    }
+   ]
+  },
+  {
+   "check": "Proposal 2's affiliate release would waive the $400,000 Pier 9 guaranty; installment credit risk noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "As drafted, we would give up that claim for free.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the $400,000 Pier 9 guaranty release and explicitly warns of unsecured installment credit risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes that the affiliate release waives the Pier 9 guaranty and highlights installment credit risk."
+    }
+   ]
+  },
+  {
+   "check": "Rejecting the 3221 offer and not beating it shifts statutory costs, not attorneys' fees",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Those are modest statutory costs, not legal fees.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly distinguishes statutory costs from fees, but omits equal judgments triggering shifting and loss of Harborview’s post-offer costs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately explains that failing to beat the offer shifts statutory costs, not legal fees."
+    }
+   ]
+  },
+  {
+   "check": "Removes or warns off Richard Miles: sharing advice and the memo risks waiving privilege",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Sharing our privileged memo with an outside consultant may have waived the privilege over it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Richard, warns against further sharing, explains waiver risk, and requests details about prior disclosures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes Richard from the email thread and explains the risk of waiving attorney-client privilege."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation and counter, e.g. Proposal 2 with a Pier 9 carve-out and installment security",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Counter at $1.6M, as you suggested.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly recommends negotiating Proposal 2 with a Pier 9 carve-out, accelerated secured payments, and explicit negotiating limits."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends countering based on Proposal 2 with an express Pier 9 carve-out and security for installment payments."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020638013,
+ "date": "2026-10-11"
+}

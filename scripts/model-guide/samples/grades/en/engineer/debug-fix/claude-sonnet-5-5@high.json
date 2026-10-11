@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/debug-fix/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "6b518c12a7a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "On 2 November 2025 (fall back) the day is 25 h, so the window stops 1 h early",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies erroneous 06:00Z end versus correct 05:00Z, A5 inclusion, and the 25-hour November day."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly explains the DST bug ending at 06:00Z pulling in A5, and notes 25-hour 2 November."
+    }
+   ]
+  },
+  {
+   "check": "Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It is then counted in both adjacent days.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses half-open bounds, and explains midnight double-counting applicable to A2."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses [start, end), and explains midnight double counting."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "a \"refunded\" order now contributes `amount − refunded_amount`, normally 0, rather than being dropped by status.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancelled orders, handles full refunds, and explicitly reconciles 185 as 25+60+20+30+50."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancelled, handles fully refunded, and reconciles $185 (25+60+20+30+50)."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (fromisoformat accepts \"Z\" only from 3.11) and parses robustly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.11+ accepts `Z`, so staging (3.12) worked and production (3.10) did not.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains the version-dependent crash and normalizes trailing Z before parsing, rejecting naive timestamps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains Python 3.10 Z parsing limitation vs 3.11+ and implements robust parsing."
+    }
+   ]
+  },
+  {
+   "check": "Removes or properly keys the date-only mutable-default cache that serves stale totals for today",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"Today\" is frozen at its first 15-minute value.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains mutable-default lifetime, stale date-only totals and cross-store contamination; removes cache with justified signature change."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes the mutable default cache and explains stale totals for today and across stores."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Total = 25 + 45 + 30 = $100.00**, matching finance.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Code and breakdown correctly count A2, A3 and A4; tests cover both DST transitions and exact midnight."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Yields $100.00 with A2 25, A3 45, A4 30; tests cover DST transition days and midnight."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030475463,
+ "date": "2026-10-11"
+}

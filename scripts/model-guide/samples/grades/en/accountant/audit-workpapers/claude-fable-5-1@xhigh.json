@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/audit-workpapers/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "accountant",
+ "task": "audit-workpapers",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "b15ad6f5c950",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Item 2 — Alder Logistics (observation, open).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies items 5 and 7, but treats item 2 as pending rather than an unapproved-variance deviation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Identified the 5.3% variance on item 2, but treated it as an open observation rather than a deviation."
+    }
+   ]
+  },
+  {
+   "check": "Treats items 4 and 8 as correctly exempt from the PO requirement",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "EL exempt — signed engagement letter | U exempt — utility",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Results table correctly treats item 4 as engagement-letter exempt and item 8 as utility exempt."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both items 4 and 8 are explicitly recognized as properly exempt from the PO requirement."
+    }
+   ]
+  },
+  {
+   "check": "Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Three deviations in ten items exceeds the 10% TDR on any extension.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies 10 tested versus 25 required, inadequacy, and deviations exceeding tolerance; rejects extension to rescue reliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly flags 10 items tested versus 25 required and notes 3 deviations already exceed the 10% TDR."
+    }
+   ]
+  },
+  {
+   "check": "Flags BW-7731 and BW-7732 ($49,400 combined) as a likely split to avoid CFO approval; proposes follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Two POs (4410/4411) and two invoices (BW-7731/7732)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the $49,400 apparent split avoiding CFO approval and proposes targeted investigation and population-wide split analytics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the $49,400 split purchase avoiding CFO review and details substantive follow-up actions."
+    }
+   ]
+  },
+  {
+   "check": "Concludes no reliance, more substantive testing, deficiency at least significant with material weakness considered",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "at minimum a **significant deficiency**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects reliance, increases substantive testing, considers material weakness with justification, and proposes governance communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Concludes no reliance, shifts to substantive testing, and assesses significant deficiency with material weakness considered."
+    }
+   ]
+  },
+  {
+   "check": "Includes a tickmark legend, a review trail and specific management-letter recommendations",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Prepared: R. Roe (staff) | Re-performed and completed: Audit Senior",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes preparer/reperformance trail, item-level results, tickmark legend, and specific actionable management-letter recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes tickmarks, preparer/reviewer trail, and specific management letter recommendations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02369955,
+ "date": "2026-10-11"
+}

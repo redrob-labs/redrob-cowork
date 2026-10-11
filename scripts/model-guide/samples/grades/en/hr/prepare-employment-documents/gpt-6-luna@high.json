@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/prepare-employment-documents/gpt-6-luna@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "8e4daadb4377",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Letter uses $175,000 or a placeholder, 3,200 RSUs, \"Software Engineer II\"; not $182,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Software Engineer II (L4)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, 3,200 RSUs, and a salary placeholder, not unauthorized promised terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses the approved title, approved equity count, and a placeholder for salary within authorized limits."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Recommend $175,000, subject to your confirmation. An amount above the band needs VP Engineering and Finance approval.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends the band maximum, identifies exception approvers, and requires discussing corrected terms with John before sending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends resolving base at $175k or obtaining sign-offs, and instructs talking to candidate before sending."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped under §16600; California law and venue replace Texas under §925; confidentiality/IP kept",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Omit the non-compete, as requested and consistent with California law. Replace the Texas law/venue clause with California terms.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops the non-compete and uses California law and venue, but omits any confidentiality/IP reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Drops non-compete and adopts California law/venue, but omits retaining a confidentiality/IP protection clause."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × $20,000 = $8,333.33; no final-pay deduction without written authorization",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$20,000 × 5 ÷ 12 = $8,333.33",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct repayment calculation; letter prohibits final-wage deductions without separate written authorization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $8,333.33 correctly and notes final-wage deduction requires separate written authorization."
+    }
+   ]
+  },
+  {
+   "check": "Keeps at-will, contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Your anticipated start date is **[________]**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps at-will and both contingencies, but unnecessarily leaves the required December 1, 2025 start date unresolved."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Keeps at-will and contingencies, but blanks out the Dec 1 start date into a placeholder."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018874013000000002,
+ "date": "2026-10-11"
+}

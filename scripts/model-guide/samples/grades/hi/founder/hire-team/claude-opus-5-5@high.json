@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/hire-team/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "9a6ce3b66ec5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "55/16 = **3.44** | 56/16 = **3.50**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both averages and rejects the ATS recommendation as unsupported by recorded scores."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recomputes averages as 3.44 and 3.50, correctly noting the ATS recommendation is based on flawed data."
+    }
+   ]
+  },
+  {
+   "check": "Spots Stiles's Richard Roe note describing Mary's Brightpath role (feminine forms); if swapped, Mary ~3.56, Richard ~3.38",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "57/16 = **3.56** | 54/16 = **3.38**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies Brightpath and feminine wording as misattribution clues; correctly calculates the swapped-score scenario."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies feminine phrasing and Brightpath reference in Stiles's note, calculating swapped averages as 3.56 and 3.38."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with Stiles a prerequisite, not a guess",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इस समय किसी को offer न दें। दो कदम पूरे होने बाकी हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly requires Stiles’s score confirmation before deciding, rather than assuming a swap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly makes confirming Stiles's scores a prerequisite before making an offer."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Miles's comment on Mary's children as gender-biased and legally risky; sets a follow-up without bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "उस पर अनुमान लगाना भेदभाव है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the motherhood-based stereotype, identifies legal risk, documents exclusion, and requires identical travel questions and interviewer training."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes Miles's comment as biased and legally risky, setting up standardized follow-up on travel requirements."
+    }
+   ]
+  },
+  {
+   "check": "Keeps Mary's ₹55 lakh ask (above the ₹52 lakh ceiling) within policy; notes Richard's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹52 लाख fixed (बैंड का ऊपरी छोर, बजट से ₹2 लाख ज़्यादा, जिसके लिए तुम्हारी मंज़ूरी चाहिए)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Mary within the ceiling with permitted ESOPs and budget approval; requires Richard’s outstanding reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Caps Mary at the ₹52 lakh ceiling with ESOPs and notes Richard's pending reference."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आख़िरी फ़ैसला सही data, references और व्यावहारिक बातों पर टिकेगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional, reasonably concise deliverables address substantive evidence, compensation, timing, and risks; the next-step email includes placeholders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Memo and messages are concise and professional, recommendation is well reasoned, and email properly uses placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020693925000000002,
+ "date": "2026-10-11"
+}

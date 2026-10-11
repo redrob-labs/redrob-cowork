@@ -1,0 +1,128 @@
+{
+ "key": "hi/investor/screen-deals/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "investor",
+ "task": "screen-deals",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "5bf77040dd6f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Parcel Lane corrected to ₹28 crore: growth 86.7% (not 160%), burn multiple 2.00 (26 ÷ 13), a borderline pass",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "39 → **28 ✓** | 160.0% → **86.7% ✓** | 1.08 → **2.00 ✓**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects recurring ARR, growth and burn multiple; explicitly identifies the exact-threshold burn multiple as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrected ARR to ₹28 crore, YoY growth to 86.7%, and burn multiple to 2.00."
+    }
+   ]
+  },
+  {
+   "check": "Sentinel Docs corrected to ₹13.2 crore: fails the ₹15 crore ARR floor; burn multiple 2.50",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "24 → **13.2 ✗** | 300.0% → **120.0% ✓** | 1.00 → **2.50 ✗**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly removes the pilot fee, fails the ARR floor, and calculates 2.50 burn multiple."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrected ARR to ₹13.2 crore (failing threshold) with a burn multiple of 2.50."
+    }
+   ]
+  },
+  {
+   "check": "Ledgerly 100%/1.50; Fleetwise 2.50, fails margin and hardware; Quorum 58.6%/1.18, ARR above range",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Quorum HR | 46 ✗ | 58.6% ✗ | 1.18 ✓ |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All specified calculations and failures for Ledgerly, Fleetwise and Quorum are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes figures and identifies Fleetwise and Quorum HR failures."
+    }
+   ]
+  },
+  {
+   "check": "Northbeam 1.27, fails NRR and round size; Tallow 111.1%/1.60; Corvid 105.9%/1.50, fails geography",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Corvid Security | 35 ✓ | 105.9% ✓ | 1.50 ✓ | ✓ | ✗ |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Northbeam, Tallow and Corvid calculations and criterion failures all match the checklist."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All metrics and fail determinations match the checklist criteria exactly."
+    }
+   ]
+  },
+  {
+   "check": "Top three include Ledgerly; other picks reasoned, e.g. Tallow with its 40% concentration as first question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**सोमवार की तीन meetings: Ledgerly, Parcel Lane और Tallow।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ranks three clean passes with reasoned explanations; Tallow’s first question addresses its concentrated customer’s imminent renewal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Top three correctly picked, well reasoned, and Tallow's first question targets the 40% concentration renewal."
+    }
+   ]
+  },
+  {
+   "check": "Waivers: Corvid most waivable (Pune team's \"Indian connection\", overseas limit or reverse flip); Northbeam fails two",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Note का “Indian connection अनिवार्य” हिस्सा अद्यतन नहीं है: SEBI ने अगस्त 2022 में यह शर्त हटा दी थी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly prioritizes Corvid, requires overseas allocation, and rejects Northbeam’s single waiver, but contradicts the supplied Indian-connection requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies Corvid as the primary waiver candidate (referencing Pune team/overseas limit/reverse flip) and notes Northbeam fails two."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022183088,
+ "date": "2026-10-11"
+}

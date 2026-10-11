@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/create-graphics/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "designer",
+ "task": "create-graphics",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "64eaf056c1d5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"수수료 없음. 평생.\" given ₩2,000 paper-statement and ₩1,000 ATM fees; offers accurate alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "“수수료 없음”**은 종이 명세서·일부 ATM 출금 수수료 때문에, **“평생”**은 지속 보장 근거가 없어 사용할 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the misleading claim, discloses both fees, and supplies accurate fee-specific alternatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the phrase due to fees and lack of lifelong guarantee, offering accurate alternatives."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"연 2.25%(세전)\" with the ₩5,000,000 tier and rate-change disclosure; drops \"이 동네 최고\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "잔액 500만원 이하분 연 2.25%(세전)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both formats show the correct tier, tax qualifier, and full rate-change disclosure; unsupported local superiority is explicitly rejected."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows 연 2.25%(세전) with the 5 million KRW tier, rate change disclosure, and explains why '동네 최고' was dropped."
+    }
+   ]
+  },
+  {
+   "check": "Deposit-protection sentence and mark ≥120 px, 심의필 number, logo ≥160 px with clear space, headline ≥64 px",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "준법감시인 심의필 [승인번호 삽입]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Protection wording and minimum sizes are present, but review number remains a placeholder and logo clearance awaits verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Meets all specific compliance and branding dimensions: sentence, mark width ≥120, 심의필, logo width ≥160, headline ≥64."
+    }
+   ]
+  },
+  {
+   "check": "Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "width=\"1200\" height=\"627\" viewBox=\"0 0 1200 627\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides valid, correctly sized SVGs with readable hierarchy and exclusively approved brand colours."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides two valid SVGs at the requested dimensions using strictly the approved brand colours and clear hierarchy."
+    }
+   ]
+  },
+  {
+   "check": "Recomposes the landscape version rather than scaling the square one down",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "헤드라인·금리·사진을 가로로 나누고 CTA는 헤드라인 아래에 배치합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Landscape uses three horizontal content zones and a dedicated footer rather than shrinking the square composition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recomposes the landscape layout into a horizontal multi-column structure rather than simply scaling down the square."
+    }
+   ]
+  },
+  {
+   "check": "Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "젊은 가족 구도는 실제 조합원 가족 섭외 시 적용하며, 과장된 환호보다 편안한 일상을 담습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Specifies real members aged 22–35, natural-light family photography, and approachable first-account copy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Specifies real members, natural light, kitchen table family scene, and tailors the copy to 22-35 first-time customers."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024106163,
+ "date": "2026-10-11"
+}

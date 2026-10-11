@@ -1,0 +1,128 @@
+{
+ "key": "en/lawyer/client/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "client",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "1538df0724e5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "3221 acceptance due Thursday, Nov 13, 2025, not month-end; Proposal 2 open to Nov 21; decision before Nov 13",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Last day to accept Proposal 1",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly gives November 13 and November 21 deadlines and requests a final decision November 12."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly states all deadlines and asks for a decision by Nov 12, ahead of Nov 13."
+    }
+   ]
+  },
+  {
+   "check": "§11.3 likely bars the $300,000 lost profits; trial EV ≈$0.9M with 9% interest; both offers compare well",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "They come out essentially even.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly excludes lost profits and calculates $0.92M trial EV, but presents both offers as equivalent rather than favorable."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes §11.3 bars lost profits, calculates trial EV at ~$0.92M with 9% interest, and compares both offers."
+    }
+   ]
+  },
+  {
+   "check": "Proposal 2's affiliate release would waive the $400,000 Pier 9 guaranty; installment credit risk noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That quietly wipes out your $400K Pier 9 guarantee claim.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the affiliate release’s effect on Pier 9 and explicitly warns about unsecured installment payment risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the waiver of the $400k Pier 9 guaranty and highlights installment credit risk."
+    }
+   ]
+  },
+  {
+   "check": "Rejecting the 3221 offer and not beating it shifts statutory costs, not attorneys' fees",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That is typically a few thousand dollars, not legal fees.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains post-offer statutory cost shifting if Harborview fails to beat the offer, distinguishing costs from attorneys’ fees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately notes that CPLR 3221 cost-shifting applies to court costs, not attorneys' fees."
+    }
+   ]
+  },
+  {
+   "check": "Removes or warns off Richard Miles: sharing advice and the memo risks waiving privilege",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I've taken Richard Miles off this reply on purpose.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Richard and warns that copying him or forwarding the strategy memo risks privilege waiver."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes Miles and clearly explains the privilege waiver risk regarding communications and the memo."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation and counter, e.g. Proposal 2 with a Pier 9 carve-out and installment security",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$1.6M",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly recommends countering Proposal 2 with a Pier 9 carve-out, limited release, accelerated payments, and installment security."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends countering Proposal 2 at $1.6M with a Pier 9 carve-out and security protections."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019902488000000003,
+ "date": "2026-10-11"
+}

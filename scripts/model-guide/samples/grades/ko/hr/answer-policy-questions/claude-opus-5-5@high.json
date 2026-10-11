@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/answer-policy-questions/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "5e5f759e7ee8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 1,
+ "partial": 5,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not superseded 취업규칙 §7.2: 16 weeks at 100%; 출산전후휴가 needs no service",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "통상임금 100%의 유급 육아지원휴가를 최대 16주",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly applies PB-2025-04 and six-month eligibility, but omits that statutory maternity leave has no service requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Applies PB-2025-04 and 16 weeks at 100%, but omits that statutory maternity leave requires no service."
+    }
+   ]
+  },
+  {
+   "check": "연차: 4 days now, max 7 (11−4) by Feb 2, 2026; can't save 10; lapses Mar 2",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "아쉽게도 10일은 어렵고, **최대 6일**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct current balance and expiry, but presents six days as the maximum rather than seven available by February."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies 4 days now, max 7 remaining, explains 10 cannot be saved, and notes lapse on March 2."
+    }
+   ]
+  },
+  {
+   "check": "보육지원 can't change now; 30 days after the birth (about Mar 18, 2026); ₩3,000,000 is per household",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "예정일에 출산하시면 **3월 17일까지** 신청하시면 됩니다. 2026년 한도는 **가구당 연 300만원**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct change restriction and household cap, but gives March 17 rather than the expected March 18 deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains that changes cannot be made now, gives the 30-day post-birth timeline, and notes the per-household limit."
+    }
+   ]
+  },
+  {
+   "check": "출산전후휴가 protected (§74⑥, §23②); 육아휴직 6-month test met; company leave concurrent, topped up to 100%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "출산휴가 기간과 그 후 30일(예시 기준 **5/18까지**) 동안은 해고가 금지됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains statutory return and dismissal protections, established six-month service, concurrent company leave, and supplementation to 100%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers statutory return/dismissal protections, 6-month eligibility, concurrent company leave, and 100% top-up."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: 30 days means telling her manager by mid-January (about Jan 16); her timing works, kept confidential",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "2/16에 육아지원휴가를 시작하려면 **1/16(금)까지** 신청하셔야 해요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides the January deadline and accommodates January notice, but makes no confidentiality commitment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains the 30-day notice and mid-January timing, but omits that HR will maintain confidentiality."
+    }
+   ]
+  },
+  {
+   "check": "Note flags superseded 취업규칙 still posted (amend, §93 filing); weeks 13–16 protection routed to 법무/노무",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "육아지원휴가 단독 기간의 복귀 보장",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags outdated posting and unresolved protection, but omits formal rule amendment, §93 filing, and referral to legal/labor specialists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags the superseded rule and post-leave job protection, but omits 취업규칙 formal amendment/§93 filing and routing to legal/labor."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.036926663,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/run-messaging-campaigns/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "a7d314316f9d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (대전·세종 only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "17,363 | 18,735-615-757(배송불가)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All segment email counts and total correctly apply suppression and delivery coverage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correct counts for all segments (A 7,720, B 4,790, C 1,620, D 248, E 2,985; total 17,363)."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "4,772 | 4,940-168(배송불가)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct SMS total, D restricted to 52, and remaining D recipients excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Eligible SMS is 4,772, with D correctly reduced to 52 and rest excluded."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of ₩64,000 = ₩32,000 before dessert, over ₩18,000; e.g. 25% off (₩16,000), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "32,000+3,000×N≥35,000",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the over-budget stacked offer; proposed benefits individually remain within ₩18,000."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects manager's offer with calculation showing it exceeds ₩18,000, offers within ceiling (25%)."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, 새벽배송 for D",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "품질불만35%감소·대전세종확대",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes price messaging, flexible skipping, new menus and complaint reduction, and expanded dawn delivery."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tailors messages: price for A, skip/convenience for B, new menus & 35% fewer complaints for C, dawn delivery for D."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₩6,830,000",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "427 | 5,143,000원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct forecast bases and total; cost matches its differentiated benefits, not the checklist’s approximately ₩6,830,000."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Forecasts 427 reactivations with correct formula; cost calculated accurately based on chosen segment benefits."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤90 bytes, counts accurate, \"(광고)\", brand, 080 opt-out; email subjects \"(광고)\"; 08:00–21:00; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "(광고)라더앤바인 재구독혜택확인 무료수신거부080-000-0000 [56B]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SMS count is accurate; required advertising labels, brand, opt-out, daytime scheduling, and immediate reactivation exits are included."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SMS ≤90B with byte count, (광고), brand, 080 number; email has (광고); 08-21h respected; exit on reactivation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019807724999999998,
+ "date": "2026-10-11"
+}

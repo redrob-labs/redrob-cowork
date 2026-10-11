@@ -1,0 +1,128 @@
+{
+ "key": "hi/small-team/keep-books/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "keep-books",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "92c54c9531de",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Reconciles the ₹68,090 gap: duplicate Nursery +₹1,57,500, bank charges +₹590, cheque #448 −₹90,000; corrected cash ₹9,55,961",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Adjusted book balance** | **9,55,961** ✅",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reconciles all three items and the ₹68,090 gap; corrected cash is ₹9,55,961."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reconciles the difference with all three items to ₹9,55,961."
+    }
+   ]
+  },
+  {
+   "check": "Streamflix recoded as owner drawing; March revenue ₹6,10,000, excluding the ₹5,00,000 OD draw and ₹1,09,800 output GST",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Streamflix | 649 | रिचर्ड का personal खर्च है, इसलिए owner's drawings",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recodes Streamflix correctly, reports ₹6,10,000 revenue, and excludes OD principal and output GST."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recodes Streamflix as drawings, calculates March revenue as ₹6,10,000, and excludes the OD draw and output GST."
+    }
+   ]
+  },
+  {
+   "check": "Forecast excludes Muskaan and Nursery refund; includes OD interest, GST, ₹5,60,000 wages from 16 Apr, Gulmohar ~10 days late",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Includes required exclusions, GST, increased wages and delayed Gulmohar, but uses ₹3,205/₹3,699 interest instead of ₹3,750 each."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly excludes both items, incorporates OD interest, GST payments, wages, and delayed Gulmohar receipt."
+    }
+   ]
+  },
+  {
+   "check": "Without the mower, cash bottoms ≈ ₹59,000 in the week of 29 Apr and ends near ₹4.1 lakh",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**59,807** | **1,68,557** | **4,87,307** | **4,14,057**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Without mower, minimum is ₹59,807 in week of 29 April; ending cash is ₹4,14,057."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Cash bottoms at ₹59,807 in the week of 29 Apr and finishes near ₹4.14 lakh."
+    }
+   ]
+  },
+  {
+   "check": "Mower in cash gives ≈ −₹8.4 lakh that week, beyond the ₹7,50,000 OD headroom; advises financing, deferring or leasing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सप्ताह के अंत के हिसाब से भी लगभग ₹90,000 से टूटती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows −₹8,40,193, exceeding ₹7,50,000 headroom, and recommends financing, deferral or leasing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies negative balance of ~₹8.4 lakh, exceeding OD headroom, and advises financing, deferring, or leasing."
+    }
+   ]
+  },
+  {
+   "check": "Every computed column states its method, and the weekly arithmetic is consistent",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "OD ब्याज ₹3,699 (1 मई)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Weekly arithmetic is consistent, but May interest and computed balance methods are not explicitly stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Every column details its breakdown and the weekly arithmetic across both tables is exact and consistent."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.032379113,
+ "date": "2026-10-11"
+}

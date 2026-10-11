@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/debug-fix/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "6b518c12a7a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "DST-end day (2 Nov 2025, 25 h): window is 1 h too short",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies erroneous 06:00Z versus correct 05:00Z end, A5 inclusion, and November’s 25-hour day."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the 23h DST start pulling in A5, the 06:00Z end, and notes the 25h day on 2 Nov."
+    }
+   ]
+  },
+  {
+   "check": "Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "An order stamped at exactly local midnight is counted in **both** adjacent days",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses half-open bounds, and explains midnight duplication; A2-specific tests verify the fix."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Computes the next local midnight, applies [start, end), and explains midnight orders being counted in adjacent days."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A2 $25 + A3 $60 + A6 $20 + A4 $30 + A5 $50 = **$185**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles staging total; code subtracts refunds, excludes cancellations, and correctly nets full refunds to zero."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancelled, handles full refunds netting to zero, and reconciles the exact $185 breakdown."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (fromisoformat accepts \"Z\" only from 3.11) and parses robustly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.10 rejects the `Z` designator (accepted from 3.11)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains crash and normalizes trailing Z to +00:00; rejects naive timestamps explicitly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the Python 3.10 vs 3.11 fromisoformat difference and implements robust parsing replacing 'Z'."
+    }
+   ]
+  },
+  {
+   "check": "Removes or properly keys the date-only mutable-default cache that serves stale totals for today",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"today\" is frozen at the first 15-minute tick after midnight (typically $0) and never refreshed",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains stale totals and cross-store contamination, removes cache, and justifies signature change."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains how the date-only cache serves stale/frozen totals for today across stores and removes it."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "assert daily_revenue(ORDERS, date(2025, 3, 9)) == Decimal(\"100.00\")",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct code and breakdown yield A2 25, A3 45, A4 30; tests cover both DST transitions and midnight."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Produces $100.00 for 9 March with A2, A3, A4; includes tests for DST start/end and midnight boundaries."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0331128,
+ "date": "2026-10-11"
+}

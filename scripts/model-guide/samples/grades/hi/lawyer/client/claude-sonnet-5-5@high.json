@@ -1,0 +1,128 @@
+{
+ "key": "hi/lawyer/client/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "client",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "d0c7905c77b0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Proposal 1 lapses (s.6(2)) after Thursday, 13 Nov 2025, not month-end; Proposal 2 to 21 Nov; decide before 13 Nov",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**गुरुवार 13 नवंबर 2025** तक। उसके बाद धारा 6 के तहत प्रस्ताव अपने-आप समाप्त हो जाता है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct expiry dates; requests instructions November 10 and acceptance November 12, before Proposal 1 expires."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately states the deadlines under s.6(2) and asks for instructions well before 13 November."
+    }
+   ]
+  },
+  {
+   "check": "§11.3 likely bars the ₹2.5 crore lost profits; trial EV ≈₹9.1 crore with 9% interest; both offers compare well",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹2.5 crore के lost profit को मैंने शून्य माना है, क्योंकि धारा 11.3 में \"lost profits\" का स्पष्ट बहिष्कार है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes lost profits; approximately ₹9.2 crore EV reasonably matches ₹9.1 crore. Both headline offers exceed trial EV."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies §11.3, calculates trial EV at ≈₹9.2 crore, and compares offers favorably."
+    }
+   ]
+  },
+  {
+   "check": "Proposal 2's affiliate release waives the ₹3.35 crore Pier 9 guarantee (worth ≈₹7.95 crore); instalment credit risk noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "उसके release में \"holding company, subsidiaries and affiliates\" शामिल हैं, यानी Crescent Holdings, और उसकी guarantee वाला Pier 9 का ₹3.35 crore।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies guarantee waiver; ₹7.6 crore additionally discounts instalments from ₹7.95 crore. Explicitly identifies unsecured payment risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Spots that the release extinguishes the ₹3.35 crore Pier 9 guarantee and notes instalment credit risks."
+    }
+   ]
+  },
+  {
+   "check": "Costs: amended s.35 may include legal fees and weigh a refused reasonable offer, but is discretionary, not automatic",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Section 35 के तहत अदालत \"reasonable offer\" को costs में देख सकती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly describes discretionary settlement-offer consequences, but omits that amended commercial costs can include legal fees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Notes court's discretion regarding reasonable offers under s.35, but omits that commercial costs include legal fees."
+    }
+   ]
+  },
+  {
+   "check": "Removes or warns off Richard Miles: sharing advice and the memo risks losing confidentiality and privilege",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बाहरी consultant को forward करने से privilege टूटने का वास्तविक जोखिम है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Richard, explains privilege and confidentiality risks, and requests containment of the forwarded memo."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes Richard Miles and warns that forwarding privileged legal advice risks waiving confidentiality and privilege."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation and counter, e.g. accept Proposal 1, or Proposal 2 with Pier 9 carve-out and instalment security",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "लिखित विस्तार न मिले तो हम प्रस्ताव 1 स्वीकार कर लेंगे और compromise petition का मसौदा साथ भेज देंगे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly recommends Proposal 1 absent extension; conditions counter on preserving it and demands decree, costs, and Pier 9 carve-out."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives a clear, structured recommendation to secure Proposal 1 and conditions for countering."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024842213000000002,
+ "date": "2026-10-11"
+}

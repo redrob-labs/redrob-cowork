@@ -1,0 +1,128 @@
+{
+ "key": "hi/investor/review-diligence/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "investor",
+ "task": "review-diligence",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "b3ca67defbe7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "C1 ₹360 lakh (−₹60); C2 ₹260 lakh (−₹50); C3 ₹0 (−₹275); C9 ₹102.60 lakh at ₹85.50 (−₹17.40)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "102.60 − 120.00 = −17.40",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "C1, C2, C3 और C9 के सभी adjusted figures और deductions सही हैं।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All four core adjustments and the FX conversion at ₹85.50 are correctly calculated."
+    }
+   ]
+  },
+  {
+   "check": "C8 ₹0 live, ₹132 lakh separate; C6 ₹144 lakh (alt. ₹180 lakh); C10 ₹66 lakh (management's ₹75 lakh)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "(b) Q1 FY26 का 3-महीने औसत: (4.75+5.50+6.25)/3 = 5.50 × 12",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "C8 और C6 सही; C10 का ₹66 विकल्प सही है, लेकिन base case गलत रूप से शून्य लेता है।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "C8 and C6 are handled properly, but C10 was set to ₹0 in base rather than ₹66 lakh."
+    }
+   ]
+  },
+  {
+   "check": "Adjusted live ARR ₹1,520.60 lakh (−₹579.40 lakh, −27.6%), ₹1,652.60 lakh with C8; bridge ties to ₹2,100 lakh",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "+66 → 1,520.60",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "सही live total विकल्प में है; मुख्य bridge, reduction प्रतिशत और C8-सहित total अपेक्षित figures से अलग हैं।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Due to excluding C10 from base, arrives at ₹1,454.60 lakh and ₹1,586.60 lakh instead of ₹1,520.60 lakh and ₹1,652.60 lakh."
+    }
+   ]
+  },
+  {
+   "check": "At risk: C4 (₹240 lakh, terminable for convenience after 30 Sep 2025) and C5 (renews June 2026)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Contract 30 जून 2026 को expire होता है, यानी 12 महीने की window के अंत पर renewal event है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "C4 के ₹240 लाख termination exposure और C5 के जून 2026 renewal risk दोनों स्पष्ट हैं।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies both C4 (₹240 lakh) and C5 (₹198 lakh) as at-risk customers with correct reasons."
+    }
+   ]
+  },
+  {
+   "check": "Top-3 concentration (C1, C2, C4 = ₹860 lakh) ≈56.6% of adjusted ARR; C1 ≈23.7%",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**860 / 1,454.60**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Top-three customers और ₹860 लाख सही; गलत denominator से 59.1% और C1 का 24.8% निकलता है।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies top 3 customers and total (₹860 lakh); percentages reflect its base ARR."
+    }
+   ]
+  },
+  {
+   "check": "At 6.0×: ₹126.0 crore vs ≈₹91.2 crore, a ≈₹34.8 crore gap; recommends re-price, earn-out or escrow",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Adjusted live ARR पर यह ₹87.28 crore है, यानी **₹38.72 crore कम**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "₹126 करोड़ और earn-out/holdback recommendation सही; अपेक्षित ₹91.2 करोड़ valuation तथा ₹34.8 करोड़ gap नहीं दिए।"
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recommends earn-outs and holdbacks, but valuation figures differ (₹87.28 crore / ₹38.72 crore gap) due to ARR base."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030319538,
+ "date": "2026-10-11"
+}

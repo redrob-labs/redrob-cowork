@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/create-marketing/gpt-6-astra@default",
+ "language": "en",
+ "profession": "small-team",
+ "task": "create-marketing",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "f354ab1015a6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Savings fixed: $36 vs $40 (4 × $10) is 10%, $4 a month, not 25% (or \"$9 a loaf\")",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "four $10 loaves cost $40, so $36 saves $4: **10%, not 25%**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct calculation and saving; promotional copy consistently uses 10%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately corrects the savings claim to 10% ($36 vs $40)."
+    }
+   ]
+  },
+  {
+   "check": "No \"100% organic\" (seed mix uncertified); uses wording like \"made with certified organic flour\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Made with certified-organic flour.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the supported flour claim rather than claiming every ingredient or finished loaf is organic."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids '100% organic' and uses 'made with certified-organic flour'."
+    }
+   ]
+  },
+  {
+   "check": "No \"gluten-free\" (shared kitchen, no testing); allergen note included; note to Mary explains both risks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Allergens on site: wheat, sesame, milk, eggs, tree nuts.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects gluten-free claims, discloses shared equipment, includes allergens, and explains organic substantiation and gluten-safety concerns to Mary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids GF claim, includes allergen note, and explains risks in note to Mary."
+    }
+   ]
+  },
+  {
+   "check": "Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Its click-to-reach ratio was approximately **1.5%**, versus **0.6%** for both the Reel and single photo.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Selects carousel for sign-ups and explicitly proposes the higher-reach Reel for supporting awareness."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly compares carousel click-through to reel reach using the data."
+    }
+   ]
+  },
+  {
+   "check": "Both pieces carry 2 May, Saturday 8–11am pickup, $36/month for 4 loaves, URL, first-50 tote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Launching 2 May: Crumb & Copper’s weekend sourdough subscription brings you four Saturday loaves each month for $36",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Instagram and flyer both include launch date, pickup time, monthly quantity and price, subscription URL, and first-50 tote offer."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both Instagram plan and flyer include all required details."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at A5 proportions, brand colours, clear hierarchy, legible text sizes, sufficient contrast",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "viewBox=\"0 0 420 595\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained A5 SVG uses brand colours, clear hierarchy, readable text, and charcoal-on-cream contrast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SVG is valid, uses brand colors, correct viewBox, and legible layout."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018469763,
+ "date": "2026-10-11"
+}

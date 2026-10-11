@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/send-invoices/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "d13ec389feea",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "INV-0152 totals ₩14,198,800: ₩10,000,000 + CO-1 ₩1,500,000 + expenses ₩1,280,000 × 1.10, plus 10% VAT",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**14,198,800**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct balance, CO-1, eligible expenses plus handling, supply subtotal, and VAT produce the required total."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates supply value of ₩12,908,000, VAT of ₩1,290,800, and total of ₩14,198,800."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the ₩230,000 meals; due 25 March (15 days); shows the ₩11,000,000 deposit as received",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**결제 기한:** 2026-03-25 (발행일 + 15일)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Also explicitly excludes meals and records the ₩11,000,000 deposit received, without deducting it twice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes meals of ₩230,000, sets due date to March 25, and shows ₩11,000,000 deposit as received."
+    }
+   ]
+  },
+  {
+   "check": "CO-2 not billed (no Lee Young-hee approval); email asks her to approve ₩750,000 for 0.5 day",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "승인해 주시면 750,000원(0.5일 × 1,500,000원) + 부가세 75,000원 = **825,000원**으로 별도 청구서를 발행하겠습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes unapproved CO-2 and requests Lee’s written approval for ₩750,000 plus VAT."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes CO-2 due to lack of written approval and asks Lee Young-hee to approve ₩750,000 for 0.5 day."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't chase Jebi Studio: matches 3 Mar ₩2,500,000 to INV-0139, flags the \"0193\" reference mismatch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "적요 \"0193\"은 존재하지 않는 번호(현재 발행 번호는 0152까지)이므로 0139의 오기로 판단해 완납 처리했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Matches the March 3 ₩2,500,000 payment to INV-0139, flags the reference mismatch, and explicitly avoids collection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Does not chase Jebi Studio, matches payment to INV-0139, and notes the '0193' reference typo."
+    }
+   ]
+  },
+  {
+   "check": "Hanjan Coffee firm with ≈ ₩138,000 late fee (1.5% × 2 months × ₩4.6M); Solseom County polite, no fee, 77-3310",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3월 5일 기준 2개월분 138,000원(4,600,000 × 1.5% × 2)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Hanjan receives firm contractual-interest notice and deadline; Solseom receives polite corrected invoice with 77-3310 and no fee."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Hanjan Coffee email is firm citing ₩138,000 late fee; Solseom County email is polite without late fee and includes 77-3310."
+    }
+   ]
+  },
+  {
+   "check": "Invoice complete and professional: unique number, dates, terms, VAT line, payment details, figures add up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**입금 안내:** [은행명] [계좌번호] 예금주 돛줄필름. 입금자명에 \"INV-0152\"를 기재해 주세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes issuer, customer, unique number, dates, itemized calculations, VAT, payment details, and contractual terms; figures reconcile."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Contains unique invoice number, dates, payment terms, VAT breakdown, payment details, and accurate math."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019815338000000002,
+ "date": "2026-10-11"
+}

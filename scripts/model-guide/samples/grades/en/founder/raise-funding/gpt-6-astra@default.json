@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/raise-funding/gpt-6-astra@default",
+ "language": "en",
+ "profession": "founder",
+ "task": "raise-funding",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "239329a2865a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "ARR $816K ($68K × 12), excluding $284K one-time fees; notes MRR growth $41K to $68K (~66%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "June 2025 subscription MRR: **$68K**, up **65.9%** from January’s $41K.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly computes $816K ARR, excludes $284K one-time fees, and shows approximately 66% MRR growth."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes $816K ARR, excludes one-time fees, and notes the 65.9% MRR growth."
+    }
+   ]
+  },
+  {
+   "check": "NRR 112% ($33.6K ÷ $30K); 140% includes new customers; checks $33.6K + $34.4K = $68K",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**NRR: 140% → 112%.** Only the original cohort counts; confirm churned customers remain in the calculation at zero.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct calculation and MRR reconciliation, but does not explicitly explain that 140% includes new-customer revenue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Computes 112% NRR, verifies cohort split equals $68K, and clarifies that new customers must be excluded."
+    }
+   ]
+  },
+  {
+   "check": "TAM is $576M (12,000 × $48K), not $5.76B; $48K is current ACV, a SAM-style figure",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "At **$48K annual revenue per customer**, the top-down opportunity is **$576M annually**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct arithmetic and current ACV; calls it top-down rather than identifying it as a bottom-up SAM-style figure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects TAM from $5.76B to $576M using current ACV as a SAM-style figure."
+    }
+   ]
+  },
+  {
+   "check": "Sizes the raise at ~$5.8M (24 months averaging ~$240K); defends ~$6M; notes ~8 months' runway",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "average burn = ($160K + $320K) ÷ 2 = $240K; $240K × 24 = $5.76M",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates planned burn, explains existing cash and buffer, defends $6M, and reports 8.1 months' runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~$5.76M burn, defends the $6M ask, and notes 8.1 months of runway."
+    }
+   ]
+  },
+  {
+   "check": "Flags 58% gross margin as a risk; uses only given data; marks larger claims \"[source needed]\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Recurring gross margin: **58%, including crate depreciation**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses supplied data and sources larger claims, but does not explicitly flag 58% gross margin as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses given data and marks claims [source needed], but fails to explicitly flag 58% gross margin as a risk."
+    }
+   ]
+  },
+  {
+   "check": "Tells a coherent story with a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "*Speaker note: Build a sourced competitor matrix and collect win/loss evidence before presenting differentiation as a proven advantage.*",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Coherent 12-slide narrative covers required topics, with a speaker note on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents a coherent 12-slide deck with a one-line speaker note on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0263718,
+ "date": "2026-10-11"
+}

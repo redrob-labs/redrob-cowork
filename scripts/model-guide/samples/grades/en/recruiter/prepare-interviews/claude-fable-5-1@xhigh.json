@@ -1,0 +1,128 @@
+{
+ "key": "en/recruiter/prepare-interviews/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "recruiter",
+ "task": "prepare-interviews",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "8265cbe1fa2d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`new = 1 + (old − 1) × 0.75`: 5→4.00, 4→3.25, 3→2.50.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States the correct linear conversion formula and corresponding converted ratings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states the linear rescaling formula and values."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Doe's card for Roe (interview cancelled): Roe's SAFE 2.5, below 3.0; notes it would be 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Roe fails the SAFE gate (2.50) on valid data",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the cancelled interview and explicitly notes hypothetical inclusion would yield SAFE 3.00."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes Doe's cancelled card, notes Roe's SAFE is 2.50, and points out it would be 3.00."
+    }
+   ]
+  },
+  {
+   "check": "Flags Stiles' remark on Mary's children as improper, ignores it, asks all finalists the same on-call question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The on-call requirement will be stated identically to every finalist, and each confirms whether they can meet it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags the children remark as improper, removes it from consideration, and applies the same availability test to all finalists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the comment as non-job-related discrimination risk, strikes it, and standardises the on-call question."
+    }
+   ]
+  },
+  {
+   "check": "Flags \"reminds me of me at his age\" as affinity bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"reminds me of me at his age\" is the textbook description of affinity bias",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the hiring manager's similarity remark as affinity bias."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies Stiles' comment as affinity bias."
+    }
+   ]
+  },
+  {
+   "check": "Advances Mary Major (≈ 3.50, SAFE ≈ 3.17) and Jane Doe (≈ 3.40, SAFE 3.75), method reproducible",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Advance: Jane Doe and Mary Major. Do not advance: Richard Roe.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct advances, competency averages, SAFE scores, and overall scores; reproducible averaging and conversion methods provided."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly advances both candidates with the exact SAFE and overall scores via a reproducible method."
+    }
+   ]
+  },
+  {
+   "check": "Final round probes each finalist's weakest areas (Mary: OPS, and SAFE near the bar; Jane: COMM), same questions and anchors",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Mary Major** — OPS is her lowest (3.08)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Targets Mary's OPS and near-threshold SAFE and Jane's COMM, with identical structured questions and shared scoring anchors."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Probes Jane's COMM and Mary's OPS and borderline SAFE, using identical core questions and anchors."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018929138,
+ "date": "2026-10-11"
+}

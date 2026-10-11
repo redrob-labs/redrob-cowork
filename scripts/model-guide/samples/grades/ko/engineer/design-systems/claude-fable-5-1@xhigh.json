@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/design-systems/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "design-systems",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "fc18241b2c4a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Computes ~23 events/s average, ~230/s peak, ~700/s peak after 3× growth; calls 2,300/s 10× high",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "2M/86,400=23/s, ×10=231/s. 100배 계산 오류",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct current and future throughput, but incorrectly calls 2,300/s a 100× error rather than 10×."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "처리량 수치는 정확히 계산했으나, 10배 오류인 2,300/s를 100배 오류로 잘못 지적함."
+    }
+   ]
+  },
+  {
+   "check": "Rejects exactly-once over HTTP; proposes at-least-once with stable event IDs and merchant dedup guidance",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "at-least-once. 중복은 `Soporo-Event-Id`(UUID)로 머천트가 멱등 처리, 샘플 코드 제공",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once over HTTP and provides stable event IDs with merchant deduplication guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "HTTP상 exactly-once를 거부하고 stable ID를 통한 멱등 at-least-once를 제시함."
+    }
+   ]
+  },
+  {
+   "check": "Sizes storage ~5.2 GB/day, ~156 GB/30 days, ~470 GB at 3×; partitions or TTL; minimises recipient PII",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "현재: 2,000,000 × 1.3 × 2 KB = 5.2 GB/일 × 30일 = 156 GB",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly sizes current and future storage; daily partitions, retention deletion, masking, and thin payloads address PII."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "저장 용량을 정확히 추정하고 일 단위 파티션 DROP 및 PII 마스킹을 제시함."
+    }
+   ]
+  },
+  {
+   "check": "Per-endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking; per-shipment ordering by key or sequence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "격리: 엔드포인트별 in-flight ≤10, 토큰 버킷(기본 50/s).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes endpoint isolation, 10-second timeouts, jittered backoff within 24 hours, circuit breaking, shipment keys, and sequence guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "격리, 단기 타임아웃, 지터 백오프, 서킷 브레이커, shipment_id 및 sequence 순서 보장을 제시함."
+    }
+   ]
+  },
+  {
+   "check": "Recommends the managed queue or a Postgres outbox over a self-hosted log; HMAC signing with timestamp",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`Soporo-Signature: t=<unix>,v1=HMAC-SHA256(secret, t+\".\"+body)`, 허용 오차 5분(리플레이 방지)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends existing managed queue with PostgreSQL outbox over Kafka; specifies timestamped HMAC and replay protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "자체 운영 로그 대신 기존 관리형 큐와 PG 아웃박스를 권고하고 타임스탬프 기반 HMAC 서명을 설계함."
+    }
+   ]
+  },
+  {
+   "check": "Gives a phased migration with SLOs, and a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "7~9주: 엔드포인트별 플래그 1%→10%→50%→100%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides phased migration, shadow testing, rollback, SLOs, alerts, and speaker notes on all twelve slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "단계별 마이그레이션과 구체적 SLO를 명시하고 12개 슬라이드 전체에 발표자 노트를 작성함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02890755,
+ "date": "2026-10-11"
+}

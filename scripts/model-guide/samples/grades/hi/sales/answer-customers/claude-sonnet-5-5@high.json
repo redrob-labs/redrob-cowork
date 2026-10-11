@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/answer-customers/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "4326bce43941",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; ₹1,10,400 invoice is an error, corrected by ₹14,400 to ₹96,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आपकी कीमत §3.2 के तहत 28 फ़रवरी 2027 तक ₹800 प्रति seat पर fixed है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct protection end date; commits to correcting the ₹14,400 overcharge to ₹96,000, including GST adjustment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies §3.2 price protection until 28 Feb 2027 and corrects invoice by ₹14,400 to ₹96,000."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ ₹9,600; claim within 30 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Credit = 10% × ₹96,000 (सही fee पर, बिल हुई राशि पर नहीं) = **₹9,600**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 220/40,320 downtime, 99.454% uptime, and confirms the February 20 claim meets the 30-day deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 220 downtime minutes out of 40,320 (99.45%), 10% credit of ₹9,600, and notes it is within 30 days."
+    }
+   ]
+  },
+  {
+   "check": "Explains 105 degraded minutes aren't downtime vs \"9 hours\"; no full-month refund; goodwill labelled and justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Degraded (12:45–14:30, 105 मिनट) SLA की परिभाषा में नहीं आता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes degraded time, requests logs concerning nine hours, denies full refund, and explains why no additional goodwill is promised."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains degraded time is not downtime, addresses the 9-hour claim, denies full refund, and justifies goodwill stance."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैं API documentation भेज सकता हूँ और आपके CMO व IT टीम के साथ एक छोटी technical call रख सकता हूँ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately states FHIR R4 availability, no HL7 v2 or native Mediscribe integration, and offers technical follow-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately clarifies FHIR R4 API support, no HL7 v2, no native Mediscribe integration, and offers a technical call."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at ₹800 under §3.3: 135 seats, ₹1,08,000 a month before GST from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मार्च से 135 seats × ₹800 = **₹1,08,000/माह** + GST",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms all 15 additional seats receive the original ₹800 price under §3.3, with correct March totals."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 15 extra seats at ₹800 under §3.3, totalling 135 seats and ₹1,08,000/month before GST from March."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह हमारी गलती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accountable and empathetic without grovelling; internal note itemizes correction, SLA credit, combined adjustment, and March billing amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Professional, empathetic tone without grovelling, and internal note details specific actions with exact figures."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0168714,
+ "date": "2026-10-11"
+}

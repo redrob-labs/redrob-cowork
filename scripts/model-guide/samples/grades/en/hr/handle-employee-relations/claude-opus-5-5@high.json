@@ -1,0 +1,128 @@
+{
+ "key": "en/hr/handle-employee-relations/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "d53735231202",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Roe's own receipt and Sept 19 Slack DM disprove his dinner denial; treated as an overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Because of these contradictions, his denials were given reduced weight.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Receipt and Slack contradict dinner denial; the report explicitly reduces Roe's overall credibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies the receipt and Slack DM disproving the denial, using them to reduce his overall credibility."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct Substantiated (Stiles, receipt, DM); Sept 10 remark given a label with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### Allegation 2: Sept 18 conduct (Substantiated)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Dinner finding relies on Stiles, receipt and DM; September 10 is substantiated with corroboration and credibility reasoning."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both allegations are labeled Substantiated with clear, reasoned analysis citing Stiles, the receipt, and the DM."
+    }
+   ]
+  },
+  {
+   "check": "Retaliation: Roe narrowed the move to Major alone ~17 hours after notice; label reasoned, seniority claim tested",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That was about 17 hours before his edit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains post-notice narrowing to Major, substantiates retaliation, challenges seniority rationale and calls for record verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Finds retaliation substantiated, highlights the ~17-hour timeline, and critically tests the seniority rationale."
+    }
+   ]
+  },
+  {
+   "check": "Gives Miles's unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "His statement (\"everyone knows Richard talks like that\") is general and comes from a source he declined to name.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly assigns no weight because the account is general and its source unnamed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives Miles's statement no weight and explicitly explains why (general and unnamed source)."
+    }
+   ]
+  },
+  {
+   "check": "Remedies: reverse Major's schedule change, remove Roe from her supervision or scheduling, proportionate discipline, check-ins",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Restore Ms. Major to Tue–Sat nights now, with no loss of hours, pay or differential.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Reversal, removal of authority and findings-based discipline are recommended, but follow-up check-ins are absent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Reverses schedule, removes authority, and recommends discipline, but omits scheduled proactive follow-up check-ins with Major."
+    }
+   ]
+  },
+  {
+   "check": "Open items include verifying seniority records and checking for further retaliation",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Check seniority records for Major, Lin and Ortiz.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Open items include seniority verification, but not checking for further retaliation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Lists verifying seniority records and addressing further retaliation / climate checks under open items."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.01652175,
+ "date": "2026-10-11"
+}

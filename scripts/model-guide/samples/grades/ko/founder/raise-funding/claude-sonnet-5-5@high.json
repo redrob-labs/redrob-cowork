@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/raise-funding/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "raise-funding",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "577c8e479fcc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "ARR ₩816M (₩68M × 12), excluding ₩284M one-time fees; notes MRR growth ₩41M to ₩68M (~66%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "MRR 4,100만 → 6,800만원(1~6월, +66%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates ARR as ₩816M, excludes ₩284M one-time fees, and reports approximately 66% MRR growth."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates ARR as 8.16억원 excluding 2.84억원 one-time fees, and notes MRR growth from 41M to 68M (+66%)."
+    }
+   ]
+  },
+  {
+   "check": "NRR 112% (₩33.6M ÷ ₩30M); 140% includes new customers; checks ₩33.6M + ₩34.4M = ₩68M",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "NRR = 3,360만÷3,000만 = 112%(신규 3,440만 제외)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct cohort NRR and exclusion of new customers; omits MRR reconciliation and explanation of inflated 140%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculates NRR 112% and notes 140% likely included new customers, but omits the explicit check that 33.6M + 34.4M = 68M."
+    }
+   ]
+  },
+  {
+   "check": "TAM is ₩576B (12,000 × ₩48M), not ₩5.76T; ₩48M is current ACV, a SAM-style figure",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "TAM **5,760억원** = 국내 지역 마트 12,000곳 × ACV 4,800만원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Corrects arithmetic and derives current ACV, but retains TAM labeling rather than identifying a SAM-style estimate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects TAM to 5,760억원, identifies 48M ACV, notes bottom-up SAM distinction, and uses [출처 필요]."
+    }
+   ]
+  },
+  {
+   "check": "Sizes the raise at ~₩5.8B (24 months averaging ~₩240M); defends ~₩6B; notes ~8 months' runway",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "24개월분 최소치는 57.6−13 = 약 44.6억이라 60억은 약 5개월 버퍼를 더한 적정 수준입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates ₩5.76B burn, reasonably accounts for existing cash, defends ₩6B, and notes eight-month current runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 24-month burn at ~57.6억원 (~5.8B), defends 60억원 with buffer, and notes 8 months runway."
+    }
+   ]
+  },
+  {
+   "check": "Flags 58% gross margin as a risk; uses only given data; marks larger claims \"[출처 필요]\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "반복 매출 총이익률 58%(상자 감가상각 포함)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses supplied data and labels major external claims, but does not flag 58% gross margin as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Presents 58% gross margin and uses [출처 필요], but does not clearly flag the 58% margin itself as a risk/concern to address."
+    }
+   ]
+  },
+  {
+   "check": "Tells a coherent story with a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "> 발표자 노트: 채용 계획은 직무별로 보강하세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Eleven slides form a coherent narrative, cover requested topics, and each includes a speaker note."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Follows slide format with a coherent story and includes a speaker note on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018132713,
+ "date": "2026-10-11"
+}

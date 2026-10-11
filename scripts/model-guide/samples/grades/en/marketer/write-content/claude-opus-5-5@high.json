@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/write-content/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "431d66feb3cc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Doesn't lead with \"40%\" (best site, HVAC not bill); e.g. median 18% HVAC (~7% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pilot sites cut HVAC energy use by a median 18%.¹",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces the misleading 40% bill claim with median HVAC savings and includes the required footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids the 40% claim, uses HVAC energy rather than bill, and anchors to the median 18% with footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: $149 launch (list $179, through Jan 31, 2026) plus $8/month per location subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$149 launch price (list $179) + $8/month per location for Corbel Cloud. Launch price ends Jan 31, 2026.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly discloses launch and list prices, expiration date, and the per-location subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states the $149 launch price, $179 list, Jan 31 2026 end date, and required $8/month subscription."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives; sentence case",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Your thermostat, off your to-do list",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All constrained asset lines meet their limits with accurate counts; copy uses sentence case without superlatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All assets meet their respective length limits with accurate counts, sentence case throughout, and no superlatives."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1200\" height=\"630\" viewBox=\"0 0 1200 630\" font-family=\"Inter, 'Helvetica Neue', Arial, sans-serif\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid, self-contained SVG uses all three brand colours and includes H1, subhead, CTA, and footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG using the specified brand palette and including H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Also: the Doe & Daughters quote is a total-bill claim, so it needs the footnote.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains claim and subscription changes and mentions the quote, but omits the 44-of-48 ease result from the note."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes and mentions the quote, but fails to mention the 44-of-48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.037440375,
+ "date": "2026-10-11"
+}

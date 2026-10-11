@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/client-advisory/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "f531c6732682",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit ₹45,32,000 vs ₹40,21,000; EBITDA ₹22,73,000 vs ₹16,38,000, a ₹6,35,000 miss, not ₹5,35,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "EBITDA बजट से **₹6,35,000 कम** रहा, **₹5,35,000 नहीं**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Gross profit and EBITDA totals are correct; explicitly corrects the bookkeeper’s understatement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates gross profit and EBITDA, and corrects bookkeeper's ₹5,35,000 to ₹6,35,000 miss."
+    }
+   ]
+  },
+  {
+   "check": "Treats ₹2,70,000 of insurance as prepaid: normalized EBITDA ₹19,08,000, ₹3,65,000 below budget",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Normalized Q2 EBITDA** | **17,23,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies ₹2,70,000 prepaid insurance, but subtracts marketing timing, giving incorrect normalized EBITDA and budget shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Treats ₹2,70,000 as prepaid, but also adjusts marketing underspend yielding ₹17,23,000 instead of ₹19,08,000."
+    }
+   ]
+  },
+  {
+   "check": "Calls the ₹1,85,000 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**मार्केटिंग -₹1.85L (F):** केवल timing, बचत नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats the underspend as timing and identifies the deferred Q3 campaign."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies the ₹1,85,000 marketing underspend as a timing shift rather than actual savings."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −₹4,37,000 into volume −₹5,70,000 (5,700 × ₹100) and price/mix about +₹1,33,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**कुल:** +1,32,720 – 5,70,000 = **-₹4,37,280 U** (₹280 rounding अंतर)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct price/volume decomposition, methodology, and rounding reconciliation to reported retail revenue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately breaks down retail variance into -₹5,70,000 volume and +₹1,32,720 price."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~₹2,80,000 over 28% of actual revenue (₹28,49,000) to flour repricing; names 2× overtime behind labour",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "अगस्त से 2 बेकर कम → 2× ओवरटाइम।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies flour repricing and overtime, but omits ₹28,49,000 flexible ingredient budget and approximately ₹2,80,000 excess."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Names flour price and 2× overtime, but uses budget variance (₹2.45L) instead of comparing to 28% of actual revenue (~₹2.80L)."
+    }
+   ]
+  },
+  {
+   "check": "Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "होलसेल margin रिटेल से ~12 pp कम है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prioritizes retail traffic recovery over lower-margin wholesale growth; variance signs and EBITDA bridge impacts are appropriately applied."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommendations follow data on wholesale margin and falling retail traffic, with consistent sign convention."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027644925,
+ "date": "2026-10-11"
+}

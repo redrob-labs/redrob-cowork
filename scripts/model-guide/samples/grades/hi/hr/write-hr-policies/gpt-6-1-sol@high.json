@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/write-hr-policies/gpt-6-1-sol@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "gpt-6-1-sol",
+ "effort": "high",
+ "scorecardSha": "93afd76bbb3e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" (e.g. 50 km), state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह policy लागू होने पर Memo A, B और C की जगह लेगी",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expressly supersedes all memos; sets Tuesday–Thursday attendance, 50 km proximity, and retains advance state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Expressly supersedes Memos A-C, sets 3-day attendance, 50 km radius, and retains 60-day state-move approval."
+    }
+   ]
+  },
+  {
+   "check": "₹1,500 stipend kept, \"no bills\" rejected: bill-based phone/internet route (Rule 3(7)(ix)) and documented expense claims",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Counsel के बताए नियम 3(7)(ix) के अनुसार qualifying bill-based reimbursement taxable perquisite नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps taxable ₹1,500 stipend alongside bill-based phone/internet reimbursement and documented necessary-business-expense claims."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains ₹1,500 stipend, adds bill-based phone/internet route under Rule 3(7)(ix), and covers documented claims."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: shift staff's boot-up and VPN login is working time, overtime at twice the rate; timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "जरूरी laptop boot-up, VPN/system login, checks और handover **paid working time** हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects unpaid preparation; requires actual time records and overtime at least twice the normal rate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects unpaid login, classifies boot-up/VPN as paid working time, specifies double-rate overtime, and gives timekeeping rules."
+    }
+   ]
+  },
+  {
+   "check": "India moves within limits, with state payroll consequences; abroad only pre-approved, UAE or Singapore, for immigration, tax, PE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अभी केवल **UAE और Singapore** में requests विचारार्थ स्वीकार होंगी",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits domestic travel and requires payroll compliance; overseas work needs prior approval addressing immigration, withholding, and permanent-establishment risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Limits moves within India with state payroll checks, restricts abroad to UAE/Singapore with pre-approval for tax/PE/immigration."
+    }
+   ]
+  },
+  {
+   "check": "Effective date allows 21 days' notice to affected shift-based workers for the changes (IR Code s.40)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**कम-से-कम 21 दिन का notice** पूरा होने के बाद होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Effective date follows notice to affected workers for allowances, hours, shift-working, and other Third Schedule changes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sets effective date allowing 21 days' notice under IR Code Third Schedule rules."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision; state table matches headcount (Tamil Nadu, Delhi no office; Delhi no PT)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "कृपया **₹1,500 stipend के साथ मौजूदा ₹1,000 तक reimbursement का अतिरिक्त budget**, 50 km attendance सीमा, restricted overseas process और notice-compliant rollout मंज़ूर करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "CEO note covers departures and approvals; table matches all headcounts, office availability, and Delhi’s absence of professional tax."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note lists each departure and decision requested; table accurately reflects state headcounts, remote status, and no PT in Delhi."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016610475,
+ "date": "2026-10-11"
+}

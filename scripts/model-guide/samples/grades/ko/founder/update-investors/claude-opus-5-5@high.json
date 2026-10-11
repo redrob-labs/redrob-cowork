@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/update-investors/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f63d34461ace",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GMV 46.5억: 계획 대비 −7.0%, 전분기 대비 +10.7%\n- 수수료율 13.5%: 계획 대비 −1.5%p, 전분기 대비 −0.5%p\n- 순매출 6.28억: 계획 대비 −16.3%, 전분기 대비 +6.8%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports both growth rates and both plan shortfalls."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates QoQ growth rates (+10.7%, +6.8%) and gaps against plan (−7.0%, −16.3%)."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months (₩5.49B ÷ ~₩470M a month), not 18; questions the Q2 2026 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "런웨이가 약 11.7개월이라 2026년 2분기 라운드 일정이 위험합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct runway, monthly-burn calculation, and explicit concern about Q2 2026 fundraising timing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates runway at ~11.7 months, refutes 18 months, and questions Q2 2026 raise timing."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the ₩180M one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "운전자본 1.8억을 제외하면 13.4개월입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly normalizes the working-capital effect and provides the correct calculation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly calculates normalized runway of 13.4 months excluding the ₩180M working capital impact."
+    }
+   ]
+  },
+  {
+   "check": "청봉손해보험 (12% of GMV at 9%) cuts ~0.6 points; ex-청봉 ~14.1%; covers margin and restaurant churn",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "청봉 외 수수료율 = (13.5%−12%×9%)÷88% = 14.1%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct ex-client rate and margin bridge; omits approximately 0.6-point dilution and explicit restaurant departures over delayed settlements."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers ex-청봉 rate (~14.1%), take-rate/margin bridge, and restaurant churn (supply reduction)."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"계획대로 진행 중\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### Slide 1: 요약 — 성장했지만 계획 미달, 런웨이 약 12개월",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Leads with underperformance, removes on-track claim, and credits 26 accounts, improved repeat orders, and the major win."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes '계획대로 진행 중', leads with misses, and highlights the three positive achievements."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~₩305M a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**결정 2:** 브리지 20억 협의 착수 승인. 투자사별 참여 의향은 2주 내 회신 요청",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Quantified options and trade-offs, concrete board approvals, and speaker notes on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Options include quantified metrics, slide 9 contains concrete asks, and every slide includes speaker notes."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023622638,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/write-hr-policies/gpt-6-luna@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "93afd76bbb3e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" (e.g. 50 km), state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह पहले के Memo A, B और C की जगह लेती है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expressly supersedes all memos; sets 50 km threshold, Tuesday–Thursday attendance, and retains state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Expressly supersedes Memos A–C, sets 50 km radius, Tuesday–Thursday attendance, and retains 60-day state move approval."
+    }
+   ]
+  },
+  {
+   "check": "₹1,500 stipend kept, \"no bills\" rejected: bill-based phone/internet route (Rule 3(7)(ix)) and documented expense claims",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "₹1,500 का flat monthly home-office stipend नहीं दिया जाएगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides bill-based phone/internet reimbursement and documented business claims, but explicitly rejects the required ₹1,500 stipend."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Explicitly rejects the ₹1,500 stipend instead of keeping it alongside bill-based claims."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: shift staff's boot-up and VPN login is working time, overtime at twice the rate; timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "VPN login करना या अन्य required login पूरा करना working time है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Counts required startup/login as work, requires accurate timekeeping, and guarantees overtime at least twice the normal rate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly treats boot-up/VPN login as paid working time and overtime at double rate with timekeeping rules."
+    }
+   ]
+  },
+  {
+   "check": "India moves within limits, with state payroll consequences; abroad only pre-approved, UAE or Singapore, for immigration, tax, PE",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "विदेश से काम केवल **UAE या Singapore** में",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Requires approvals and state payroll compliance, but omits overseas tax-withholding and permanent-establishment risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Restricts to UAE/Singapore with pre-approval, but omits permanent establishment (PE) and tax risk rationale."
+    }
+   ]
+  },
+  {
+   "check": "Effective date allows 21 days' notice to affected shift-based workers for the changes (IR Code s.40)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बदलाव लागू करने से पहले आवश्यक **21 दिन का notice** दिया जाएगा; तब तक मौजूदा व्यवस्था लागू रहेगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves existing conditions until affected workers receive 21 days’ notice before allowance, hours, or shift changes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides 21 days' notice to affected workers under IR Code s.40 prior to effective date."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision; state table matches headcount (Tamil Nadu, Delhi no office; Delhi no PT)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "कृपया इस ढाँचे और publication date को मंज़ूर करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "State table is accurate and decisions requested, but CEO note omits the paid boot-up/VPN departure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "State table matches headcount, but the CEO note omits the departure regarding VPN login/boot-up pay."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025838925,
+ "date": "2026-10-11"
+}

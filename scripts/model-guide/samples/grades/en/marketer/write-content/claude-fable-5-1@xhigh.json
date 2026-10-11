@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/write-content/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "431d66feb3cc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Doesn't lead with \"40%\" (best site, HVAC not bill); e.g. median 18% HVAC (~7% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The median pilot site cut HVAC energy use by 18%.¹",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Leads with staff control, not 40%; uses the defensible median HVAC reduction with the required footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids leading with 40%, uses the median 18% HVAC reduction, and includes the required footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: $149 launch (list $179, through Jan 31, 2026) plus $8/month per location subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Launch price through Jan 31, 2026 (list $179). Corbel Cloud is $8 per location per month and is required for schedules and alerts.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows $149 launch pricing, $179 list price, launch deadline, and the required $8 monthly per-location subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately presents the $149 launch price, list price, end date, and required $8/month subscription."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives; sentence case",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "¹ Based on a 2025 pilot of 48 small-business sites. Results vary.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Some counts are inaccurate, and the marketing note exceeds 120 words. Asset copy meets limits; no superlatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All elements meet character/word limits with accurate counts, sentence case, and no superlatives."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<rect width=\"1200\" height=\"630\" fill=\"#F7F5F0\"/>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid, self-contained 1200×630 SVG uses all three brand colours and includes H1, subhead, CTA, and footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The SVG is valid, self-contained, uses the specified brand palette, and includes H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "We lead with control (which 44 of 48 sites confirmed)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes and mentions the ease result, but omits the customer quote as stronger proof."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes and cites the 44-of-48 result, but fails to mention the customer quote."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.034402987999999995,
+ "date": "2026-10-11"
+}

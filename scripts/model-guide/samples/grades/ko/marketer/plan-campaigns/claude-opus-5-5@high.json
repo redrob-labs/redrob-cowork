@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/plan-campaigns/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "plan-campaigns",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "1ed96f053d39",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Excludes or heavily discounts the consumer-app Instagram benchmark; doesn't use its ₩60,000 cost per SQL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "인스타그램은 제외합니다. 소비자용 가계부 앱의 수치라 B2B에 적용할 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly excludes the noncomparable consumer-app benchmark."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly excludes Instagram due to it being a consumer app benchmark."
+    }
+   ]
+  },
+  {
+   "check": "Cost per SQL: 네이버 ≈₩386,000, 리멤버 ≈₩778,000, BuildExpo ≈₩1,000,000 (45 SQLs), syndication ≈₩917,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 빌드엑스포 | 4,500만 | 300 | 45 | 100.0만 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All channel costs are correct using rounded SQL counts; minor differences from reference reflect rounding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates cost per SQL across Naver, Remember, BuildExpo, and syndication."
+    }
+   ]
+  },
+  {
+   "check": "Search capped: 3,300 clicks × 6% = 198 leads, ₩16,830,000, ≈44 SQLs",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "검색은 클릭 3,300회(월 1,100회 × 3개월) × 전환율 6%로 계산했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Caps search at 3,300 clicks and correctly reports 198 leads, ₩16,830,000 spend, and 44 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly caps search at 198 leads, 44 SQLs, and ₩16,830,000."
+    }
+   ]
+  },
+  {
+   "check": "Best mix yields ≈240 SQLs for ₩180,000,000: 400 SQLs and 80 customers aren't achievable",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "남는 311 SQL을 리멤버로 채우면 광고비 2억 4,192만원이 들어 총 3억 375만원이 됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly rejects 400 SQLs and 80 customers, but omits the optimized ₩180 million ceiling of approximately 240 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows 400 SQLs is unachievable under budget and that max spend yields ~237 SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈₩403,200,000 ACV)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "210 SQL × 계약 전환율 20% = **고객 42곳**, 연간 계약금액 기준 약 4억 320만원입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies 3 × 70 capacity, recommends 210 SQLs and 42 customers, and correctly calculates annual contract value."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies sales ceiling of 210 SQLs, recommending 210 SQLs, 42 customers, and ₩403.2M ACV."
+    }
+   ]
+  },
+  {
+   "check": "Pillars match the 3 interview pains; timeline builds to BuildExpo Feb 10–12, 설 follow-up; specific leadership ask",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "목표를 **SQL 210건·고객 42곳(코호트)으로 조정할지** 승인",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes all three interview pains, BuildExpo preparation and dates, holiday-aware follow-up, and specific leadership approvals."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Aligns messaging with 3 pains, builds timeline around BuildExpo and 설, and includes specific asks."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02485455,
+ "date": "2026-10-11"
+}

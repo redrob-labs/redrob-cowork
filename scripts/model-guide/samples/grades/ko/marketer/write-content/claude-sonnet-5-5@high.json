@@ -1,0 +1,110 @@
+{
+ "key": "ko/marketer/write-content/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "ca32bb65e829",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "No \"40%\" lead (one site, HVAC not bill; §§3, 5); median 18% 냉난방 energy (~7.2% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "그래서 \"냉난방 에너지 18% 감소\"와 필수 각주를 썼습니다. 전체 전기요금으로 환산하면 약 7%라",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the misleading lead, uses the HVAC median with required footnotes, and distinguishes total-bill savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Replaces misleading 40% claim with median 18% HVAC energy reduction and includes required footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: ₩199,000 launch (list ₩239,000, through Jan 31, 2026) plus ₩9,900/month per location subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기기 199,000원(~2026.1.31, 정가 239,000원)과 구독 월 9,900원/매장을",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides launch price, list price, full expiry date, and monthly per-location subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately specifies launch price, validity through Jan 31, list price, and mandatory monthly subscription."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "결과는 다를 수 있습니다. | 56 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Main ad copy meets limits, without superlatives; Meta footnote is 61 characters, not 56, and memo exceeds approximately 250."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All character counts are strictly within limits, correctly counted, and free of superlatives."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1200\" height=\"630\" viewBox=\"0 0 1200 630\" font-family=\"Pretendard, sans-serif\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG uses all required colors, typography fallback, hierarchy, actual headline, subhead, CTA, and footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG using the specified brand palette and carrying H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "② 199,000원은 1/31까지의 출시가이고 핵심 기능에 월 9,900원 구독이 필수라,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Memo explains claim and pricing corrections, but omits legal-rule rationale and referrals to the quote and ease result."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "The note explains the claim and price changes, but omits the customer quote and 44-of-48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.035284725,
+ "date": "2026-10-11"
+}

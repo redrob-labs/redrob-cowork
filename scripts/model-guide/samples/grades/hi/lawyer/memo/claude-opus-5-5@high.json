@@ -1,0 +1,128 @@
+{
+ "key": "hi/lawyer/memo/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "6a810dfa37b7",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "8.2(a) rep claim lost: survival ended 30 Apr 2024, and Article 55 runs from closing; s.28 can't rescue it",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "इसे केवल वैकल्पिक दावे के रूप में सुरक्षित रखें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies both expired periods, but preserves the representation claim instead of concluding section 28 cannot rescue it."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the representation claim survival ended 30 April 2024, Article 55 runs from closing, and s.28 cannot rescue it."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) accrued with the 4 Aug 2025 demand; timely, within 8.6's 30 Apr 2028; 8.6 can't extend limitation",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Appeal लंबित रहने पर दायित्व absolute होने की तारीख और आगे खिसक सकती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly finds timeliness and contractual deadline, but equivocates on accrual and incorrectly suggests appeal or refusal could postpone it."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly notes accrual with the 4 Aug 2025 demand, timely within limits/8.6, and that 8.6 cannot extend statutory limitation."
+    }
+   ]
+  },
+  {
+   "check": "Notice 91 days after 4 Aug misses 30 days; bars recovery only for actual prejudice (s.107 window ~4 Nov)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Sellers केवल \"to the extent actually prejudiced\" राहत पा सकते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies late notice, actual-prejudice limitation, and the approximately 4 November appeal deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly notes notice missed the 30-day deadline, bars recovery only for actual prejudice, and highlights the section 107 window around 4 Nov."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable ₹5.90 crore (₹2.60 + ₹2.90 + ₹0.40), not pro-rata ₹26.67 lakh; ₹5.30 crore post-closing excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "दावा ₹11.20 crore से घटाकर **₹5.90 crore tax** करें",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct closing-of-books allocation includes ₹0.40 crore for April and excludes ₹5.30 crore post-closing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes ₹5.90 crore (2.60 + 2.90 + 0.40), explicitly excludes ₹5.30 crore post-closing, and uses closing-of-the-books."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares ₹4.13 crore and ₹1.77 crore",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Founders LLP ₹4.13 crore, मैरी मेजर ₹1.77 crore।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct several allocations; expressly excludes deductible and escrow cap and treats released escrow as unavailable security only."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly states 8.2(c) is free of deductible and escrow cap/released escrow, and calculates several shares as ₹4.13 cr and ₹1.77 cr."
+    }
+   ]
+  },
+  {
+   "check": "Amend the ₹11.20 crore notice to an 8.2(c) claim for ₹5.90 crore; appeal now with condonation and pre-deposit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यदि नहीं, तो condonation application और statutory pre-deposit के साथ तुरंत दायर करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends immediate appeal with condonation and pre-deposit, and revises notice to ₹5.90 crore under 8.2(c)."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends amending the claim notice to ₹5.90 cr under 8.2(c) and filing the appeal immediately with condonation and pre-deposit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021499275,
+ "date": "2026-10-11"
+}

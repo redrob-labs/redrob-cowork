@@ -1,0 +1,128 @@
+{
+ "key": "hi/lawyer/research/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "99a4a8d8a08a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Count I covered (CFO conduct, Deed's mandatory \"shall\"); Count II likely not; Count III a reasoned close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Count I** पर अधिकार स्पष्ट है।\n   - **Count II** पर अधिकार लगभग निश्चित रूप से नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats advancement as mandatory for CFO conduct, excludes personal consulting obligations, and reasons through Count III with allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly covers Count I, rejects Count II, and treats Count III as a reasoned close call with allocation."
+    }
+   ]
+  },
+  {
+   "check": "Right rests on Deed [1], not unilaterally changeable (s.62, clause 11); 2023–2024 conduct predates August 2025 resolutions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "एकतरफ़ा परिवर्तन इसके दायरे में नहीं आता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Relies on the Deed, section 62, signed-amendment requirement, and protection for conduct preceding August 2025."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly grounds right in Deed, cites s.62 and clause 11, and notes conduct predates amendment."
+    }
+   ]
+  },
+  {
+   "check": "Counter noted: Articles alone may not be enforceable by an officer (s.10); treatise [8] outdated, s.201 has no 2013 equivalent",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "मेरी समझ में 2013 Act में धारा 201 का सीधा समकक्ष नहीं है, पर यह verify करना होगा",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Recognizes outdated section 201 and member-only articles binding, but does not clearly identify the officer-enforcement counterargument."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly addresses s.10 limitation and notes treatise [8] is outdated with no 2013 Act equivalent."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [1] cl. 3.2 and [6], not blog [7]; letter of credit rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Letter of credit की माँग प्रत्यक्ष contract-भंग है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects good-faith screening under clause 3.2 and [6], discounts the blog, and requires only an unsecured undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good-faith condition using cl. 3.2 and [6] over blog [7], and rejects letter of credit."
+    }
+   ]
+  },
+  {
+   "check": "Bengaluru arbitration (cl. 14), s.9 interim relief (or s.17); costs pro rata under s.31A/[5]; tender undertaking, written request",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "written request और unsecured undertaking तुरंत भेजें। इसी से 30-दिन की अवधि शुरू होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides Bengaluru arbitration, sections 9/17 relief, proportionate fees under section 31A/[5], and the request-and-undertaking procedure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers Bengaluru arbitration, s.9/s.17 interim relief, pro rata fees under s.31A/[5], and tendering written request/undertaking."
+    }
+   ]
+  },
+  {
+   "check": "Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "निम्न / अप्रचलित",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table distinguishes primary documents and statutes, explicitly fictional cases, and low-reliability secondary sources."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The table clearly distinguishes primary materials [1]–[4], fictional cases [5]–[6], and unreliable secondary sources [7]–[8]."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027912674999999998,
+ "date": "2026-10-11"
+}

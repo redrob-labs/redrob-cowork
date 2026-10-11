@@ -1,0 +1,128 @@
+{
+ "key": "hi/small-team/keep-books/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "keep-books",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "92c54c9531de",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Reconciles the ₹68,090 gap: duplicate Nursery +₹1,57,500, bank charges +₹590, cheque #448 −₹90,000; corrected cash ₹9,55,961",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "घटाएँ: Nursery Supply का duplicate payment (10 मार्च), जो vendor से receivable बनेगा | (1,57,500)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both reconciliation sides correctly explain the ₹68,090 gap and reach corrected cash ₹9,55,961."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately reconciles the gap using duplicate charge, bank charges, and unpresented cheque to ₹9,55,961."
+    }
+   ]
+  },
+  {
+   "check": "Streamflix recoded as owner drawing; March revenue ₹6,10,000, excluding the ₹5,00,000 OD draw and ₹1,09,800 output GST",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Revenue (GST से पहले): ₹6,10,000.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct revenue; explicitly excludes OD borrowing and output GST, and recodes Streamflix as owner's drawings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recodes Streamflix, states revenue as ₹6,10,000, and explicitly excludes OD draw and output GST."
+    }
+   ]
+  },
+  {
+   "check": "Forecast excludes Muskaan and Nursery refund; includes OD interest, GST, ₹5,60,000 wages from 16 Apr, Gulmohar ~10 days late",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "OD ₹5 लाख पर स्थिर रहेगा, ब्याज current account से जाएगा (3,205 + 1 मई को 3,699)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "All other required assumptions included, but interest payments should be ₹3,750 each, not ₹3,205 and ₹3,699."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Forecast properly excludes Muskaan and Nursery refund, while incorporating OD interest, GST, increased wages, and late Gulmohar payment."
+    }
+   ]
+  },
+  {
+   "check": "Without the mower, cash bottoms ≈ ₹59,000 in the week of 29 Apr and ends near ₹4.1 lakh",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "5 (29 अप्रैल–5 मई) | 5,14,756 | 1,25,000 | 5,79,949 | 59,807",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Without mower, weekly minimum is ₹59,807 and final balance ₹4,14,057, both within the required approximations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Without the mower, closing cash reaches ₹59,807 in week 5 and finishes at ₹4,14,057."
+    }
+   ]
+  },
+  {
+   "check": "Mower in cash gives ≈ −₹8.4 lakh that week, beyond the ₹7,50,000 OD headroom; advises financing, deferring or leasing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सप्ताह 5 के अंत पर कमी ₹8,40,193 है, यानी लगभग ₹90,000 limit से ऊपर।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies cash-purchase shortfall exceeding ₹7,50,000 headroom and recommends financing, deferral, or leasing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies cash falling to −₹8.40 lakh (exceeding ₹7.5L OD headroom) and recommends financing, leasing, or deferring."
+    }
+   ]
+  },
+  {
+   "check": "Every computed column states its method, and the weekly arithmetic is consistent",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "| सप्ताह | Opening | Inflows | Outflows | Closing |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Weekly arithmetic is consistent, but calculation methods and component breakdowns are not stated for every computed column."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Weekly column arithmetic (Opening + Inflows − Outflows = Closing) is mathematically consistent throughout both scenarios."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026344238,
+ "date": "2026-10-11"
+}

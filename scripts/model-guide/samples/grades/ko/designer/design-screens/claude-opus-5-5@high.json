@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/design-screens/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "086b8168274f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "#7FD1AE 위 대비가 1.8:1이라 버튼 레이블에는 쓰지 않음",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags inadequate white-text contrast and substitutes dark ink text, explicitly explaining the departure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 1.8:1 contrast failure and defines ink text (--color-on-primary) for the primary button."
+    }
+   ]
+  },
+  {
+   "check": "Drops 박영수's exotic slot, 12:30 (lunch), 11:30 scaling (runs into lunch), 16:45 check-up (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const SLOTS = AUDIT.filter(a => !a.reason).map(({raw}) => {",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Validation correctly excludes the unauthorized exotic slot, both lunch conflicts, and the appointment ending after closing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately filters out all four invalid slots based on doctor capability, lunch overlap, and closing time."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "return `${hhmm(s)}–${hhmm(e)} — 점심시간과 겹침`;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Validation explains all four exclusions, but no recommendation to correct the API appears."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains slot errors in code strings, but lacks the API fix recommendations due to truncation."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"280,000원부터\" honestly, e.g. with a final-price note, and addresses the no-surprises tension",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "표시 금액은 최소 금액이며, 최종 금액은 진료 후 안내됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Honestly preserves the starting price and discloses uncertainty, but does not address the conflict with no-surprises pricing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Shows the base price honestly with notices and acknowledgement, but the rationale addressing tension was truncated."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"아무 수의사나 가능\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "아무 수의사나 가능",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Responsive styling, keyboard controls, focus indicators, and the option exist, but the truncated script prevents a runnable prototype."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes all required a11y features and 'any vet', but prototype is truncated mid-script and does not run."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% check-up and vaccination bookings",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "자주 찾는 진료",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Prioritizes common services within separate steps, but gives no rationale connecting that choice to the 70% fast path."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Deliverable 2 was completely cut off, so the one-screen-versus-steps rationale tying to the fast path is absent."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0423192,
+ "date": "2026-10-11"
+}

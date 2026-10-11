@@ -1,0 +1,128 @@
+{
+ "key": "en/hr/answer-policy-questions/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "df559050c3fc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not the superseded handbook: eligible for 16 weeks' paid leave at 100%",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "The policy doesn't say whether those last 4 weeks are job-protected or paid at the full 100% from the company.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly applies the bulletin initially, but later incorrectly casts doubt on guaranteed full pay for weeks 13–16."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies PB-2025-04 granting 16 weeks of paid leave at 100% base pay."
+    }
+   ]
+  },
+  {
+   "check": "PTO: 8.5 days (or 7.25 if March does not count), states the reading; only 5 carry over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The policy doesn't say whether a partial first month counts. Payroll will confirm your exact balance.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows both acceptable readings, correct arithmetic and forfeitures, and the five-day carryover cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows both readings (8.5 and 7.25 days) and confirms only 5 carry over."
+    }
+   ]
+  },
+  {
+   "check": "FSA can't change now; 30 days after the birth (about March 18, 2026); $7,500 is a household limit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "your 30-day window runs through **about March 18, 2026**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly denies a current mid-year change, identifies the birth window, and states the $7,500 household limit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains no mid-year change now, 30-day post-birth window to March 18, and household limit."
+    }
+   ]
+  },
+  {
+   "check": "Not FMLA-eligible (about 11 months' service), but NY PFL-eligible and job-protected, topped up to 100%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "If your leave starts before then, you likely **won't** have FMLA protection.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies the March 3 service threshold, NY PFL eligibility and protection, concurrency, and company top-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies she is not FMLA-eligible, but is NY PFL-eligible with job protection and top-up."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: 30 days means telling her manager by mid-January; her timing works, HR keeps it confidential",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "You can keep it to HR until you're ready to tell your manager.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Allows January disclosure, gives a practical January 16 notice deadline, and permits confidential handling through HR."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms January timing satisfies 30 days' notice and that HR will keep it confidential."
+    }
+   ]
+  },
+  {
+   "check": "Internal note flags the superseded handbook still posted, and weeks 13–16 job protection, routed to Legal",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "It doesn't say whether those weeks are job-protected.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Internal note flags the outdated handbook and protection gap, but routes that gap to Legal only in the employee email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags the outdated handbook and weeks 13–16 protection, but does not route that issue to Legal in the note."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031053749999999998,
+ "date": "2026-10-11"
+}

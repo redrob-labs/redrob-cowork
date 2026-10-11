@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/review-code/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "review-code",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "74847d577ddb",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Requests changes; blockers: cross-tenant export via ?tenantId= (IDOR) and SQL injection via ORDER BY ${sort}",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A사 관리자가 `?tenantId=B`로 B사 사용자를 내려받을 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requests changes and identifies both cross-tenant export and SQL injection as blockers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Requests changes and explicitly identifies cross-tenant IDOR and sort SQL injection as blockers."
+    }
+   ]
+  },
+  {
+   "check": "Fixes them by always using req.user.tenantId and allow-listing sort columns",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const tenantId = req.user.tenantId;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Handler uses the authenticated tenant exclusively and maps sort inputs through a fixed allow-list."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Enforces req.user.tenantId and maps sort against an explicit allow-list."
+    }
+   ]
+  },
+  {
+   "check": "Flags SELECT * leaking password_hash, mfa_secret, resident_reg_no_enc, date_of_birth, salary_band; requires explicit columns; stack-trace leak",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "비밀번호 해시, MFA 비밀, 암호화된 주민번호까지 반출됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags authentication secrets, encrypted resident numbers, explicit columns, and stack leaks, but omits birth-date and salary-band exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags SELECT * leaking sensitive fields, requires explicit columns, and notes stack trace leakage."
+    }
+   ]
+  },
+  {
+   "check": "Catches missing CSV escaping, formula injection via full_name, the rows[0] crash, Korean garbling without UTF-8 BOM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "한글 Excel 호환용 UTF-8 BOM과 CRLF도 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies CSV quoting, formula injection, empty-result crash, and Korean Excel compatibility; implements corresponding fixes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Catches CSV escaping, formula injection, Excel UTF-8 BOM, and 0-row crash on rows[0]."
+    }
+   ]
+  },
+  {
+   "check": "Flags the un-awaited auditLog (개인정보 보호법 access record) and 140,000 rows in memory against streaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "첫 바이트 전 감사 기록을 `await`하고 실패하면 반출을 차단하세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats missing audit records as blocking and addresses 140,000-row memory usage through cursor streaming."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags un-awaited auditLog and 140,000 rows in memory violating the streaming convention."
+    }
+   ]
+  },
+  {
+   "check": "Revised handler and tests cover cross-tenant, sort injection, formula escaping and audit; tone is constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "시작 감사 Promise를 지연·실패시켜 CSV 바이트가 먼저 나가지 않는지 검증합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Handler and tests cover tenant isolation, sort injection, formula escaping, and audit guarantees; tone is constructive."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Revised code and tests thoroughly cover cross-tenant, sort injection, formula escaping, and audit with constructive tone."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018777675,
+ "date": "2026-10-11"
+}

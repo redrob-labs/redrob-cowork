@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/memo/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "c8f70aff2127",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Rep claim under 8.2(a) expired Apr 30, 2024; 8.2(c) survives to Apr 30, 2028 under §8106(c); timely",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The outside date is seven years from Closing, April 30, 2028.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Distinguishes expired representation claim from timely independent indemnity; applies §8106(c) and appropriately flags the unverified tax limitations period."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies rep expiration date, survival under 8.2(c) to 2028 via §8106(c), and timeliness."
+    }
+   ]
+  },
+  {
+   "check": "Notice ~91 days after Aug 4 misses 30 days, but bars recovery only to the extent of actual prejudice",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The §8.7 notice was late (91 days against a 30-day requirement), but that excuses the Sellers only to the extent of actual prejudice.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies late notice and limits relief to actual prejudice, including potentially lost appeal rights."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly notes the 91-day timing versus 30 days and the actual prejudice standard."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable $662,000 ($260,000 + $290,000 + $112,000), not pro-rata $106,667; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Only Pre-Closing Taxes are covered. That is all of 2019 and 2020 and January–April 2021, which totals $662,000.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table correctly totals $260,000, $290,000, and actual $112,000 straddle allocation; excludes all post-closing tax."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $662,000 using closing-of-the-books and explicitly excludes post-closing taxes."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares $463,400 and $198,600",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Liability is several: $463,400 from Tessaline Founders LLC and $198,600 from Mary Major.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct shares; expressly excludes Deductible and escrow cap and explains direct collection despite released escrow."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes 8.2(c) is free of deductible/escrow cap and correctly calculates each seller's several share."
+    }
+   ]
+  },
+  {
+   "check": "Amend the $1,120,000 notice to an 8.2(c) claim for $662,000; preserve the assessment appeal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Demand $662,000, itemized by period, with several amounts of $463,400 from Tessaline Founders LLC and $198,600 from Mary Major.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Directs withdrawal of full demand, correction under §8.2(c), and protection of protest rights through deadline checks and seller participation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends amending the notice to $662,000 under 8.2(c) and preserving/participating in the assessment protest."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022520400000000003,
+ "date": "2026-10-11"
+}

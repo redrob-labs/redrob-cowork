@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/synthesize-feedback/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "dc689fd84412",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 ($68k), OCR 2, approvals 2 ($46k), bank feed 1 ($26k)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I deduplicated by account name.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Method stated; mobile, OCR, approvals and bank-feed account counts and required ARR totals are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly deduplicates each theme (mobile: 3/$68k, OCR: 2, approvals: 2/$46k, bank feed: 1/$26k) and states the method."
+    }
+   ]
+  },
+  {
+   "check": "Flags Hollow Pine's ARR conflict ($96k vs $69k), picks one (e.g. OCR $170k), suggests checking the CRM",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "I used the lower **$69k** so the headline isn't inflated.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags both figures, selects $69k and requests Finance confirmation, but does not specify checking CRM."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the conflict, picks $69k (noting $170k OCR alternative), and suggests verifying with Finance."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Rows 2, 9 and 13 are coded as discoverability, not feature gaps, because LedgerSync has shipped on every plan since March.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly classifies all three as discoverability based on the shipped integration."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately categorizes rows 2, 9, and 13 as discoverability due to LedgerSync having shipped."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I ranked it second only because the OCR stakes and lead time are higher.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies OCR's Enterprise renewal exposure against mobile's broader reach and two-week effort; proposes immediate parallel mobile work."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Thoroughly weighs OCR's enterprise renewal risk against mobile's low effort and broad reach with solid justification."
+    }
+   ]
+  },
+  {
+   "check": "Treats the bank feed as a data-integrity risk despite only one account",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Customer Success should also contact Fennel now, since a week-late reconciliation every month is a core-function failure.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Recognizes serious single-account pain and proposes investigation, but does not identify missing transactions as a data-integrity risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats bank feed as a core-function failure and acute pain requiring an engineering spike despite only one account."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "The log has 16 rows and 12 accounts, with no denominator of total customers or total feedback.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Covers sample size and channel bias, but omits ten survey responses and only indirectly addresses sales-survey comparability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Mentions 16 rows, 12 accounts, and sales note comparability/bias, but omits that NPS comes from only 10 survey responses."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026392275,
+ "date": "2026-10-11"
+}

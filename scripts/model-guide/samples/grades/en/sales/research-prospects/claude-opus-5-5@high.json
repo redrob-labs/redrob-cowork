@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/research-prospects/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "22d74b135781",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2025 $240M; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It is outdated. Roe is no longer CEO and $180M is superseded by $240M.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies Jane Doe's January appointment, Roe's Executive Chair role, FY2025 revenue, and outdated 2023 facts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Captures all current leadership facts and revenue figures, explicitly treating the 2023 blog as outdated."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a UK company); uses Ridgeback's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "This is a different entity: a UK camping-equipment retailer incorporated 2009.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discards the UK namesake and uses Ridgeback's 22% rate rather than the industry average."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discards the UK entity and explicitly uses Ridgeback's 22% return rate over the 32% industry benchmark."
+    }
+   ]
+  },
+  {
+   "check": "Value math: $240M ÷ $96 ≈ 2.5M orders × 22% × $14 ≈ $7.7M; 20–30% ≈ $1.5–2.3M",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Savings at 20–30% = **~$1.54M–$2.31M/yr**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows the complete correct calculation: 2.5 million orders, 550,000 returns, $7.7 million cost, and benchmark savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates the exact math matching all required intermediate and final figures."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Present it as a hypothesis to validate together, not a promise.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labels Ridgeback inputs, Parcelwise benchmarks, and assumptions; includes 15% exchange conversion upside and validation caveats."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly labels sources and benchmarks, frames figures as hypotheses to validate, and models 15% exchange conversion as upside."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The people, the leadership and the need have all changed.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses budget and in-house loss, departed champion, replacement hiring, CEO transition, and resale launch."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses the 2024 loss and departed champion using the replacement job posting, new CEO, and resale launch."
+    }
+   ]
+  },
+  {
+   "check": "Enters via John Stiles and/or Mary Major (Tamarack link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Send a personalised LinkedIn note to Mary Major, followed by email, ideally with a warm intro from Tamarack.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies Mary-to-John entry, provides concrete outreach and messaging, and asks five relevant assumption-testing discovery questions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends Major/Stiles with solid justification, writes a concrete outreach draft, and includes five assumption-testing discovery questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019557038,
+ "date": "2026-10-11"
+}

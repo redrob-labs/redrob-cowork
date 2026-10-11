@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/write-content/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "431d66feb3cc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Doesn't lead with \"40%\" (best site, HVAC not bill); e.g. median 18% HVAC (~7% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Median 18% less HVAC energy use in a 48-site pilot.¹",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the defensible median HVAC reduction, not a 40% bill claim, with the required footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids the 40% headline, uses the median 18% HVAC energy reduction, and includes the required footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: $149 launch (list $179, through Jan 31, 2026) plus $8/month per location subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$149 launch price (list $179) + $8/month per location for Corbel Cloud. Through Jan 31, 2026.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes launch price, list price, expiration date, and per-location subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states launch price, list price, promotional end date, and monthly subscription per location."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives; sentence case",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "THERMALYN PRO · LAUNCHING DECEMBER 1",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Creative limits are met, but SVG uses capitals, prefixed footnote count is inaccurate, and some lines lack counts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All character and word counts are strictly within limits and accurate; follows sentence case without superlatives."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1200\" height=\"630\" viewBox=\"0 0 1200 630\" font-family=\"Inter, Helvetica, Arial, sans-serif\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG uses all three brand colours and includes H1, subhead, CTA, footnote, and clear hierarchy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG using specified dimensions, exact brand hex codes, H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "I left out Jane's $210 quote. It comes from one site and doesn't say what was reduced.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains claim and subscription changes, but omits the 44-of-48 ease result and dismisses the quote rather than recommending it."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes and addresses the quote, but fails to mention the 44-of-48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.039004613,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/plan-roadmap/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "92c11c18f665",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| F7 | 250 | 2 | 60% | 45일 | 9 | 300 | **33.3** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Converts 45 days to 9 weeks and states RICE through the value and normalized-effort formulas."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly converted 45 days to 9 weeks, calculated RICE as 33.3, and stated the formula."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| F4 | 510 | 1 | 70% | 12주 | 12 | 357 | **29.8** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All scores are correct; F4’s 29.8 is an acceptable rounding of 29.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All other RICE scores match the required values exactly (with F4 rounded to 29.8)."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (clear of 31 Oct, Hanbit contract) and F5 before 31 Dec, regardless of RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "먼저 F3와 F5에 14주를 배정했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reserves mandatory capacity regardless of RICE; schedules SSO in Q3 and F5 before year-end, explaining contractual risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F3 is scheduled in Q3 before October 31, and F5 is scheduled before December 31."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Q4에서 F5를 뺀 잔여 용량은 16주로 F2의 20주보다 작고, F2를 넣으려면 F1 전체를 빼야 합니다. 2027년 1분기 1순위 후보입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Respects F5 dependency, explains F1 displacement, and tells Sales Q1 timing and reduced-scope conditions for reconsideration."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is not scheduled before F5, and conditions to accommodate F2 are communicated clearly."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **하반기** | 5개 항목 | 45 | **45 / 48** (버퍼 3) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 22/24, Q4 23/24, and H2 45/48; scheduled items fit without splitting."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Each quarter is ≤ 24 weeks and H2 total is 45/48 weeks, with totals explicitly shown."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "점수는 F7이 높지만, 총가치는 F4가 357로 F7의 300보다 크고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly favors F4’s total value over F7’s higher RICE, comparing feasible alternatives and F1 release timing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly justifies choosing F4 over F7 citing total value (357 vs 300) and packaging fit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022463438000000002,
+ "date": "2026-10-11"
+}
