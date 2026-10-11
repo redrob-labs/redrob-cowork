@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/update-crm/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "sales",
+ "task": "update-crm",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "3ffb903cc6e5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Pinecrest stays Negotiation, close ≈ 3 April (out of Q1), O-105 merged; Stiles told \"not in Q1\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I've kept it at Negotiation (75%) with a 3 April close, which makes it Q2 Commit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Pinecrest remains Negotiation outside Q1; O-105 is merged, and John is told it is not yet won."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Pinecrest kept at Negotiation with 3 April close, O-105 merged, and Stiles clearly told not in Q1."
+    }
+   ]
+  },
+  {
+   "check": "Kestrel re-priced to $31,000 (46,500 ÷ 45 × 30) with close date 10 April",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "O-102: $46,500 ÷ 45 = $1,033.33 per sensor.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recalculates the reduced scope to $31,000 and sets the close date to 10 April."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Re-priced to $31,000 using unit price math and close date set to 2026-04-10."
+    }
+   ]
+  },
+  {
+   "check": "Eastbrook €52,000 converted to $56,160 and kept in Q1 for the 26 March decision",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "O-106: €52,000 × 1.08 = **$56,160**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct conversion; Eastbrook remains in Q1 with a 26 March close aligned to its board decision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Converted €52,000 to $56,160 and kept in Q1 with close date 2026-03-26."
+    }
+   ]
+  },
+  {
+   "check": "Harrow moved to Q3; Tidemark to a 2027-realistic date, $210,000 flagged as unqualified placeholder",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The $210k was my own guess, so it is removed until sized.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Harrow moves to Q3; Tidemark moves to March 2027, with its guessed amount explicitly flagged and zeroed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Harrow moved to Q3 (2026-09-30), Tidemark to 2027-03-31, and $210k flagged as guessed placeholder."
+    }
+   ]
+  },
+  {
+   "check": "Weighted = Amount × probability; Q1 falls from $161,750 to $91,080, Bayfront as Commit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Weighted ($) = Amount ($) × stage probability.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the correct formula and Q1 totals of $161,750 before and $91,080 after; Bayfront is Commit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Weighted formula stated, Q1 weighted drops from $161,750 to $91,080, with Bayfront as the only Commit."
+    }
+   ]
+  },
+  {
+   "check": "Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Premature win (O-104).**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The hygiene list explicitly covers premature win, past-due close date, duplicate, currency mismatch, and guessed amount."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly lists past-due close date, duplicate, currency mismatch, guessed amount, and premature win."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0224784,
+ "date": "2026-10-11"
+}

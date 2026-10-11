@@ -61,3 +61,38 @@ deliverable: spreadsheets
 - Puts the bounced ₹3,500.00 back into patient receivables (Richard Miles), not into expense, and books the bank charges and MDR to expense and the sweep-FD interest to income.
 - Treats #2019 (more than 3 months old, so stale) under the policy: void it, credit Stale Cheques Payable, and do not take it back into income.
 - Journal entries balance and use sensible accounts, and the review note is constructive and specific.
+
+## Card
+
+brief: डेंटल प्रैक्टिस के मार्च year-end BRS ड्राफ़्ट की review करें, जिस अंतर को स्टाफ़ विविध व्यय में डालना चाहता है उसे समझाएँ और adjusting entries दें।
+given:
+- बैंक स्टेटमेंट: अंतिम बैंक शेष और बैंक की ओर की 5 मदें
+- GL नकद शेष: 31 मार्च का असमायोजित शेष
+- GL विवरण अंश: मार्च की 4 entries, और बैंक में दिखने वाले NEFT पर एक नोट
+- बकाया चेक: जॉन की सूची के 3 चेक
+- प्रैक्टिस की नीति: 3 महीने से पुराने चेकों का नियम और ₹10,000 प्रति मद materiality
+asked:
+- समायोजित बैंक शेष से समायोजित बही शेष तक की समाधान तालिका, हर पंक्ति की पद्धति सहित
+- ₹45,270.00 को समझाने वाली तालिका, और यह विविध व्यय में क्यों न जाए
+- प्रस्तावित adjusting journal entries, बाउंस चेक की राशि कहाँ जाएगी सहित
+- चेक #2019 पर सिफ़ारिश, BRS के दोनों पक्षों पर प्रभाव सहित, और जॉन के लिए दो पंक्तियों का review नोट
+limit: लगभग 1,200 शब्दों के भीतर, Markdown
+hard: बिना समझाए अंतर को plug करने के बजाय उसके स्रोतों तक पहुँचना है, बकाया चेकों पर नीति लागू करनी है, और हर मद को सही पक्ष और खाते में रखना है।
+
+## Scorecard
+
+- Splits ₹45,270.00 into a duplicated ₹45,000.00 Sagartat NEFT receipt and a ₹270.00 transposition on #2038
+- Rejects the Miscellaneous Expense plug
+- Reconciles both sides to ₹8,65,620.50, moving to ₹8,69,720.50 if #2019 is voided
+- Returns the ₹3,500.00 bounced cheque to Richard Miles's receivable; charges and MDR to expense, FD interest to income
+- Voids #2019 to Stale Cheques Payable under the 3-month policy, not back to income
+- Journal entries balance, and the review note to John is specific and constructive
+
+## Scorecard, shown
+
+- ₹45,270.00 को सागरतट की ₹45,000.00 NEFT प्राप्ति की दोहरी entry और चेक #2038 पर ₹270.00 की transposition गलती में बाँटता है
+- विविध व्यय में plug करने को अस्वीकार करता है
+- दोनों पक्षों को ₹8,65,620.50 पर मिलाता है, और #2019 रद्द होने पर दोनों ₹8,69,720.50 हो जाते हैं
+- बाउंस हुए ₹3,500.00 को रिचर्ड माइल्स के receivable में वापस डालता है; बैंक शुल्क और MDR व्यय में, FD ब्याज आय में
+- 3 महीने की नीति के तहत #2019 को रद्द कर Stale Cheques Payable में डालता है, आय में वापस नहीं लेता
+- Journal entries संतुलित हैं, और जॉन के लिए review नोट विशिष्ट और रचनात्मक है

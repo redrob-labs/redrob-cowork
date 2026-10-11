@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/create-graphics/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "create-graphics",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "31b6ca288e87",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"No fees. Ever.\" given the $2 paper-statement and $2.50 ATM fees; offers accurate alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Paper statements cost $2 a month and out-of-network ATM withdrawals cost $2.50.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the absolute claim, explains both fees, and offers two accurate alternative headlines."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects the absolute claim based on fees and provides accurate alternative headlines."
+    }
+   ]
+  },
+  {
+   "check": "Shows 2.25% APY with the up-to-$5,000 tier and full disclosure; drops \"nobody else locally beats it\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2.25% APY on balances up to $5,000; 0.10% APY on balances above $5,000.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both SVGs include tiers and full APY disclosure; explicitly rejects the unsupported local comparison."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes the 2.25% APY up to $5,000 tier with full disclosure and omits the unsubstantiated claim."
+    }
+   ]
+  },
+  {
+   "check": "NCUA line with insurance logo ≥120 px, logo ≥160 px with clear space, headline ≥64 px at 1080",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "NCUA logo (140 px wide, minimum 120)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both formats include insurance wording and sufficiently sized logos; layouts reserve clear space, and Instagram headline is 92 px."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Meets all size requirements: NCUA logo ≥120 px, brand logo ≥160 px with clear space, headline ≥64 px."
+    }
+   ]
+  },
+  {
+   "check": "Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "<rect x=\"700\" y=\"0\" width=\"500\" height=\"524\" fill=\"#CFE8E2\"/>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Two correctly dimensioned SVGs provide clear hierarchy, but both use an unapproved placeholder colour, #CFE8E2."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both SVGs are valid, correctly dimensioned, visually well-structured, and strictly adhere to the brand palette."
+    }
+   ]
+  },
+  {
+   "check": "Recomposes the landscape version rather than scaling the square one down",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The layout becomes two columns plus a footer band.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Landscape independently rearranges photo, rate badge, CTA, and disclosures rather than shrinking the square."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recomposes the landscape layout into a two-column and footer structure rather than scaling."
+    }
+   ]
+  },
+  {
+   "check": "Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The photo should be a real member family in natural kitchen light, with no stock clichés and a signed release.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps the family concept and specifies authentic natural-light photography; straightforward, approachable copy suits first-time account holders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directs real members in natural light, retains the family concept, and tailors tone to young first-time holders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031082888000000003,
+ "date": "2026-10-11"
+}

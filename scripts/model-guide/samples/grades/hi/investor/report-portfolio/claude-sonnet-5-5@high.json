@@ -1,0 +1,110 @@
+{
+ "key": "hi/investor/report-portfolio/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "investor",
+ "task": "report-portfolio",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "8bf485622369",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Paid-in ₹780 crore at both dates, not ₹810 crore; the ₹30 crore drawdown due 15 Oct disclosed separately",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Paid-in capital दोनों तारीखों पर **₹780 crore** है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses ₹780 crore at both dates and separately discloses ₹30 crore drawdown due 15 October."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly sets paid-in capital to ₹780 crore for both dates and discloses the upcoming drawdown separately."
+    }
+   ]
+  },
+  {
+   "check": "Marks per policy: Dovetail held at ₹60 crore cost, Clearpath about ₹4 crore, Gild ₹120 crore, Brine ₹45 crore",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Dovetail ₹180 → ₹60 crore।** Convertible notes policy में write-up का आधार नहीं हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly marks Dovetail ₹60, Clearpath ₹4, Gild ₹120, and Brine ₹45 crore with policy explanations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Marks each portfolio company precisely in line with the valuation policy."
+    }
+   ]
+  },
+  {
+   "check": "NAV ₹945 / ₹864 crore; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**TVPI 1.33x से घटकर 1.23x** हुआ। DPI 0.12x पर स्थिर रहा और RVPI 1.21x से घटकर 1.11x हुआ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table correctly reports both NAVs, all multiples, and their formulas."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates all performance metrics (NAV, TVPI, DPI, RVPI) accurately for both dates."
+    }
+   ]
+  },
+  {
+   "check": "States TVPI fell, contradicting \"1.43x … better than last quarter\"; explains Clearpath and Brine candidly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "पिछली तिमाही के मुक़ाबले fund का मूल्य घटा है। TVPI 1.33x से 1.23x हुआ है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly reports deterioration and candidly explains Clearpath’s near-total loss and Brine’s discounted bridge impairment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states TVPI decreased and candidly details the write-downs in Clearpath and Brine."
+    }
+   ]
+  },
+  {
+   "check": "Note to Doe lists paid-in, Dovetail, Clearpath and headline corrections, each with its policy reason",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Clearpath ₹80 → ₹4 crore।** Wind-down मंज़ूर है, वसूली ₹4 crore है। इसे अपरिवर्तित रखना policy के विरुद्ध होता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Internal note lists paid-in, Dovetail, Clearpath, and headline corrections, each with the appropriate rationale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Lists paid-in, Dovetail, Clearpath, and headline corrections along with clear policy rationales in the note to Doe."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0209139,
+ "date": "2026-10-11"
+}

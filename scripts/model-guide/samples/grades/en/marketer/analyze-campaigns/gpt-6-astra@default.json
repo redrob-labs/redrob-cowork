@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/analyze-campaigns/gpt-6-astra@default",
+ "language": "en",
+ "profession": "marketer",
+ "task": "analyze-campaigns",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "47ceb49ddb45",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Platforms' 2,480/$321,500 vs actual 1,640/$213,200: 840 over-attributed (~51%); 2.37× invalid; TikTok window flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**840 (51.2%)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct platform and Shopify totals, excess orders and revenue; rejects draft ROAS and flags TikTok’s mismatched window."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly reconciles platform claims vs Shopify actuals, notes ~51% excess, TikTok window issue, and invalid 2.37×."
+    }
+   ]
+  },
+  {
+   "check": "True cost $139,500 with the $4,000 fee; blended ROAS ≈1.53×; contribution −$22,240",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$117,260 margin dollars − $139,500 cost",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes the $4,000 fee and correctly reports $139,500 cost, 1.53× blended ROAS, and −$22,240 contribution."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates true cost of $139,500, blended ROAS of 1.53×, and contribution of −$22,240 correctly."
+    }
+   ]
+  },
+  {
+   "check": "ROAS: Meta 0.98, Search 1.58, PMax 1.19, TikTok 0.55, Affiliate 2.13, Email 14.00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Meta | $42,000 | 330 | $41,250 | 0.98× |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All six channel ROAS figures match the checklist, including fee-adjusted affiliate ROAS."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All channel ROAS figures match the required values exactly."
+    }
+   ]
+  },
+  {
+   "check": "Uses the holdout to argue last-click under-credits Meta; discounts PMax for brand; TikTok weakest",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Maintain while validating the 14% holdout lift. Last click may under-credit demand later converted through search, email or direct.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses Meta’s holdout, discounts PMax’s brand capture, and assigns weakest-performing TikTok a test-only budget."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Meta holdout, discounts PMax for brand query capture, and treats TikTok as weakest channel."
+    }
+   ]
+  },
+  {
+   "check": "Q4 plan totals $139,500, follows the scorecard; tests e.g. TikTok holdout, PMax brand exclusions, LTV view",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Test Search brand/nonbrand separation and PMax brand exclusions; measure total-store changes rather than shifts in channel credit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Allocation sums to $139,500, follows channel economics and incrementality evidence, and proposes specific attribution and incrementality tests."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Total equals $139,500, reflects scorecard performance, and proposes tests including PMax brand exclusions and incrementality audits."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0203868,
+ "date": "2026-10-11"
+}

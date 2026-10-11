@@ -55,3 +55,38 @@ deliverable: presentations
 - Doesn't offer 30%. Stays within the AE's 20% authority, or explicitly says that anything more needs VP approval and gives a rationale.
 - Corrects the labour savings to about ₩63,000,000/year (9,000 × 35% × 4 min ÷ 60 × ₩25,000 × 12), not ₩300M. Treats the upsell estimate (about ₩851M/year gross at ₩1,500 × 2,160 rooms × 365 × 72%) as revenue, not profit, extrapolated from one property's pilot. Revises "payback in one month" accordingly (labour savings alone don't even cover the ₩176M net annual subscription).
 - Says honestly that the "on-premise" requirement is not met (the product is cloud-only, with Korean data residency in the Seoul region) and doesn't claim full RFP compliance.
+
+## Card
+
+brief: 호텔 그룹 COO·CFO용 제안 발표 자료를 가격·ROI·RFP 충족과 함께 만들고 동료 초안을 검증한다.
+given:
+- RFP 요약: 포트폴리오 규모, 요구사항 5개, 상업 조건
+- 디스커버리 메모: 호텔 수, 전화 건수, 인건비, 불편 사항
+- 게스트톡 사실 정보: 구축 방식, 보안, 연동, 전환율 벤치마크, 파일럿 업셀 결과
+- 가격표와 할인 정책: 객실당·호텔당 가격, 할인, 승인 한도
+- 김철수 님 초안의 주장: 절감액, 회수 기간, 충족 여부, 할인에 관한 4가지
+asked:
+- 8~10장 발표 자료: 고객 문제, 솔루션, RFP 충족 현황, ROI, 가격, 다음 단계
+- 가격 표: 정가, 할인, 연간 순 구독료, 구축비, 3년 총액과 줄별 계산 방법
+- 계산 과정과 가정을 밝힌 ROI 슬라이드
+- 김철수 님과 영업 VP에게 보내는 내부 메모(약 300자 이내)
+limit: 약 2,500자 이내, Markdown, 슬라이드별 발표자 노트 포함
+hard: 출처끼리 어긋나고, 동료의 주장을 검증해야 하며, 할인 승인 한도를 지키고 충족 여부를 정직하게 밝혀야 한다.
+
+## Scorecard
+
+- Prices 12 live properties, 2,160 rooms; flags "14 hotels"; offers 2027 openings (~300 rooms) as add-on
+- List ₩207,360,000/year; 15% discount gives ₩176,256,000/year net; implementation ₩24,000,000
+- 3-year subscription ₩528,768,000, or ₩552,768,000 including implementation (VAT extra)
+- No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale
+- Labour savings ≈ ₩63M/year, not ₩300M; upsell ≈ ₩851M/year is gross pilot-based revenue; payback revised
+- States the on-premise requirement is unmet (cloud-only, data in Seoul region); no full-compliance claim
+
+## Scorecard, shown
+
+- 운영 중인 12곳·2,160실로 가격 산정, "14곳" 불일치 지적, 2027년 개관 2곳(약 300실)은 추가 옵션
+- 정가 연 2억 736만 원, 15% 할인 후 연 순액 1억 7,625만 6,000원, 구축비 2,400만 원
+- 3년 구독료 5억 2,876만 8,000원, 구축비 포함 5억 5,276만 8,000원(부가세 별도)
+- 30% 할인 제시 안 함: 영업 대표 한도 20% 이내, 또는 VP 승인이 필요함을 근거와 함께 명시
+- 인건비 절감은 연 약 6,300만 원(3억 원 아님), 업셀 연 약 8억 5,100만 원은 파일럿 기반 매출총액, 회수 기간 수정
+- 온프레미스 요구 미충족(클라우드 전용, 서울 리전 저장)을 밝히고 전부 충족한다고 주장하지 않음

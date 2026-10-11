@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/plan-finances/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "plan-finances",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "41dd5ca29218",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Names the errors: unburdened payroll without hires, license spread instead of paid in January, revenue not gross profit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "라이선스 월할 처리 → 실제로는 1월 일시 지급",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies omitted payroll burden and hires, January license payments, and revenue incorrectly substituted for gross profit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies unburdened payroll/new hires, annual license timing, and revenue vs gross profit."
+    }
+   ]
+  },
+  {
+   "check": "January 2026 net burn about ₩202,155,000 (96,075,000 + 28,500,000 + 108,000,000 − 30,420,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "|26.01|39,000,000|30,420,000|96,075,000|28,500,000|108,000,000|202,155,000|1,597,845,000|",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "January net burn is exactly ₩202,155,000, with all components correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly matches ₩202,155,000 for January 2026 net burn with correct components."
+    }
+   ]
+  },
+  {
+   "check": "Burn settles near ₩116,000,000–₩127,000,000 a month mid-2026, easing as MRR grows",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "|07|60,233,317|46,981,987|140,300,000|33,000,000|0|126,318,013|893,507,618|",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Monthly table shows midyear burn around ₩116–127 million, subsequently declining as MRR grows."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows mid-2026 burn settling between ₩116M and ₩127M, declining as MRR expands."
+    }
+   ]
+  },
+  {
+   "check": "Cash runs out around March 2027 (~₩17,700,000 left end-February), with the January 2027 license as a cliff",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**현금 소진: 2027년 3월.** 2월 말 잔액 1,767만원으로는 3월 유출 9,404만원을 감당할 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct depletion month and February balance; table captures the January 2027 license-payment cliff."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies cash-out in March 2027 (~₩17.7M end-Feb) and notes 2027.01 license cliff."
+    }
+   ]
+  },
+  {
+   "check": "Raise must close by about August 2026 (~₩772,000,000 left), so fundraising starts March–April 2026",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**투자 유치 착수 마감: 2026년 4월 초.** 클로징까지 5개월이 걸리기 때문입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly sets August 2026 closing with approximately ₩772 million remaining and March–April fundraising initiation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly sets closing around August 2026 (~₩772M remaining) and fundraising kickoff in March–April 2026."
+    }
+   ]
+  },
+  {
+   "check": "MRR = opening × 0.98 + new; column formulas; quantified alternative (e.g. no AE: April 2027); justified recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기초 MRR(t) = 기초 MRR(t−1) × 0.98 + 전월 신규 MRR",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct recurrence and column calculations; quantified no-AE alternative extends runway to April 2027, supporting justified recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States correct MRR formula, all column formulas, models quantified alternatives (e.g. B no AE runs out 2027.4), and provides clear recommendation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020434838,
+ "date": "2026-10-11"
+}

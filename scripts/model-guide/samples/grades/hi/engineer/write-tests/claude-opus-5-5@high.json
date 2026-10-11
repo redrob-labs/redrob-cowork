@@ -1,0 +1,128 @@
+{
+ "key": "hi/engineer/write-tests/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "write-tests",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "06fac165123e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Shows `- 1` drops the change day: 15 February gives ₹140.00, not ₹150.00; last day ₹0.00, not ₹10.00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| `test_product_example…` | 150.00 | 140.00 | day (14/29, 15/29 नहीं) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies change-day exclusion and correctly reports ₹140 versus ₹150, and last-day ₹0 versus ₹10."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies that `- 1` drops the change day, resulting in ₹140 instead of ₹150 and ₹0 instead of ₹10."
+    }
+   ]
+  },
+  {
+   "check": "Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**निष्कर्ष:** v2.4.0 **NO-GO** है। Code बदलाव वाले दिन को बचे हुए दिनों से बाहर रखता है (`- 1`)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends no-go, rejects the headline release claim, and explicitly removes minus one in the minimal fix."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends no-go due to the bug and identifies removing `- 1` as the minimal fix."
+    }
+   ]
+  },
+  {
+   "check": "Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "pytest.param(*FEB_2024, date(2024, 1, 31), id=\"day-before-start\"),\n        pytest.param(*FEB_2024, date(2024, 3, 1), id=\"equals-period-end\"),",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests full first-day differences, both invalid boundaries, leap February, and 30- and 31-day periods."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests period start, period boundaries, leap-year Feb, 30/31-day months, and ValueError at/outside boundaries."
+    }
+   ]
+  },
+  {
+   "check": "Notes ROUND_HALF_UP takes −0.005 to −0.01, so downgrade credits mirror upgrades",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Half **away from zero**: −145.005 → **−145.01**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains negative half-up rounding away from zero and tests matching upgrade and downgrade magnitudes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains that ROUND_HALF_UP takes -0.005 to -0.01 to ensure downgrade credits mirror upgrades."
+    }
+   ]
+  },
+  {
+   "check": "Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Floats आज भी काम नहीं करते: दोनों float हों तो `AttributeError` आता है, एक float हो तो `TypeError`।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Chooses explicit float rejection, tests mixed and both-float prices, and identifies the quantize failure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Chooses policy (reject float with TypeError), tests it, and notes current behavior (AttributeError vs TypeError)."
+    }
+   ]
+  },
+  {
+   "check": "Tests are runnable, well named and parametrized; any property test states a real invariant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "# Invariant: f(a→b) == -f(b→a)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable pytest tests have clear names and useful parametrization; optional Hypothesis tests express valid invariants."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests are well-structured, runnable, parametrized, and property tests specify valid mathematical invariants."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02748375,
+ "date": "2026-10-11"
+}

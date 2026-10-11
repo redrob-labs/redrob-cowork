@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/create-proposals/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "sales",
+ "task": "create-proposals",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "38f2c7a7cd89",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Prices 12 live properties, 2,160 rooms; flags \"14 hotels\"; offers 2027 openings (~300 rooms) as add-on",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Scope: 12 properties / 2,160 rooms today, with a path to 14 / ~2,460 by Q2 2027",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prices current portfolio, explicitly reconciles 14 hotels, and offers two 2027 openings as a priced expansion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Prices 12 properties/2,160 rooms, flags 14 hotels, and includes the two 2027 properties as an add-on."
+    }
+   ]
+  },
+  {
+   "check": "List €155,520/year; 15% discount gives €132,192/year net; implementation €18,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Investment: €132,192/yr net subscription; 3-year TCV €414,576",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Pricing table correctly shows €155,520 list, additive 15% discount, €132,192 net, and €18,000 implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All pricing figures and discounts match the requirements exactly."
+    }
+   ]
+  },
+  {
+   "check": "3-year subscription €396,576, or €414,576 including implementation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **3-year total contract value** | **€414,576** | (€132,192 × 3) + €18,000 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct three-year total including implementation, with calculation shown."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 3-year subscription and total contract value including implementation."
+    }
+   ]
+  },
+  {
+   "check": "No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "If Richard pushes for 30%, hold at 15% — it is the policy rate and the ROI does not depend on the discount.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects 30%, prices within AE authority, and explains why further discount is unnecessary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the 30% offer and sticks to 15%, staying within AE authority."
+    }
+   ]
+  },
+  {
+   "check": "Labour savings ≈ €60,480/year, not €250k; upsell ≈ €624k/year is gross pilot-based revenue; payback revised",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "× €1.10 = **€624,413/yr** (gross revenue)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects labour to €60,480, labels pilot extrapolation gross revenue, and revises payback with margin and capacity caveats."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects labour savings to €60,480, labels upsell as pilot gross revenue, and revises payback."
+    }
+   ]
+  },
+  {
+   "check": "States the on-premise requirement is unmet (cloud-only, EU data in Frankfurt); no full-compliance claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Does not meet:** \"on-premise deployment\" — Cabana Connect is cloud-only, multi-tenant",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly discloses unmet on-premise requirement, identifies Frankfurt EU hosting, and rejects full compliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly discloses that the on-premise requirement is unmet and proposes EU hosting alternative."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016310438,
+ "date": "2026-10-11"
+}

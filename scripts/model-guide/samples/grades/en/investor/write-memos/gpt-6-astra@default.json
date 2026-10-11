@@ -1,0 +1,110 @@
+{
+ "key": "en/investor/write-memos/gpt-6-astra@default",
+ "language": "en",
+ "profession": "investor",
+ "task": "write-memos",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "06c37eaf0d73",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Ownership $15M ÷ $75M = 20%, not 25%; pool $1.8M → $7.5M; effective pre-money ≈$54.3M",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Effective pre-money = $60M ÷ 1.10857 = **$54.12M**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Corrects ownership to 20% and derives comparable effective pre-money, but omits the explicit $1.8M-to-$7.5M pool bridge."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects ownership to 20%, models option-pool dilution, and calculates effective pre-money at ≈$54.12M."
+    }
+   ]
+  },
+  {
+   "check": "FY2024 gross margin restated ≈73.7% (72.4% if all $0.9M moved); LTM ≈74%; reclassification flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Restated gross margin = gross profit ÷ revenue | 76.7%* | **73.7%** | **74.0%** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reallocates production hosting, restates both margins, and flags reporting quality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Restates FY2024 gross margin to 73.7% and LTM to 74.0%, flagging the AWS reclassification."
+    }
+   ]
+  },
+  {
+   "check": "FY2024 ARR growth 60%, burn multiple ≈2.14, runway ≈10 months; cohort NRR 124% → 112% → 103%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Reported cohort NRR is **124% / 112% / 103%** for 2022 / 2023 / 2024 cohorts.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Also correctly calculates FY2024 ARR growth of 60%, burn multiple of 2.14×, and runway of 10 months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly computes ARR growth of 60%, burn multiple of 2.14x, runway of 10 months, and notes cohort NRR decay."
+    }
+   ]
+  },
+  {
+   "check": "BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Direct CTO diligence, contract review and a retention plan; model full loss without assuming immediate cost reductions.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile’s 18% concentration and insourcing threat, with concrete diligence, retention planning, and downside modeling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile as a top risk with specific diligence mitigants and condition requirements."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Invest with conditions—not an unconditional approval of the circulated terms.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendation matches identified risks; diligence addresses hosting, BrightSmile, and support backlog and staffing economics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a clear recommendation, with diligence items directly addressing hosting, BrightSmile, and support issues."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021731588000000003,
+ "date": "2026-10-11"
+}

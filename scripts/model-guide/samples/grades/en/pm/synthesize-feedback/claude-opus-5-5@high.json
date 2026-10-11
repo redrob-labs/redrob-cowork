@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/synthesize-feedback/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "dc689fd84412",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 ($68k), OCR 2, approvals 2 ($46k), bank feed 1 ($26k)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Unique accounts:** distinct account names within the theme.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States account-level deduplication and correctly reports mobile 3/$68k, OCR 2, approvals 2/$46k, and bank feed 1/$26k."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly dedupes unique accounts and ARR for each theme and clearly states the deduplication method."
+    }
+   ]
+  },
+  {
+   "check": "Flags Hollow Pine's ARR conflict ($96k vs $69k), picks one (e.g. OCR $170k), suggests checking the CRM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I show the range and rank on the conservative $69k.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags $96k versus $69k, selects $69k for ranking, and requests billing verification, equivalent to checking CRM."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the transposition, shows the range while picking the conservative figure, and advises confirming with billing."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since LedgerSync already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Discoverability (LedgerSync exists)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Codes rows 2, 9, and 13 as discoverability and recommends surfacing the existing integration rather than building export."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly classifies all three accounting export rows as discoverability issues because LedgerSync has shipped."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Where a fix is cheap and broad, it goes first because it doesn't displace anything.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies mobile first by breadth and two-week effort, and OCR second by two Enterprise accounts and explicit renewal risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly weighs the concentrated enterprise OCR renewal risk against the cheap, broad mobile session bug fix."
+    }
+   ]
+  },
+  {
+   "check": "Treats the bank feed as a data-integrity risk despite only one account",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Customers may not notice missing data until reconciliation, so the true breadth could be larger than one account.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes missing-transaction integrity risk despite one account; recommends aggregator diagnostics and cross-account telemetry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats missing bank transactions as a silent data-integrity risk and recommends proactive telemetry checks."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "The data covers 16 rows, 12 accounts and one month.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Covers sample size, partial survey-only NPS, and differing source biases, but omits the ten survey responses."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Notes 16 rows, 12 accounts, and source incomparability, but omits the specific count of 10 survey responses."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027573525,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/write-hr-policies/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "93afd76bbb3e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" (e.g. 50 km), state-move approval kept",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Shift-based कर्मचारियों पर मंगल–गुरु का नियम अपने-आप लागू नहीं होता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Supersedes all memos, defines 50 km and retains approval, but exempts nearby shift staff from mandatory attendance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly supersedes Memos A–C, sets 3 days attendance within 50 km, and retains 60-day state move approval."
+    }
+   ]
+  },
+  {
+   "check": "₹1,500 stipend kept, \"no bills\" rejected: bill-based phone/internet route (Rule 3(7)(ix)) and documented expense claims",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "stipend की जगह आप चाहें तो phone/internet के असली bills पर reimbursement चुन सकते हैं, **अधिकतम ₹1,500/माह**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains the stipend option, explains tax treatment, provides bill-based reimbursement and documented necessary-expense claims."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps ₹1,500 stipend while adding bill-based phone/internet reimbursement and documented expense claim options."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: shift staff's boot-up and VPN login is working time, overtime at twice the rate; timekeeping rule",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "यह समय क़ानूनन working time है, इसलिए इसका भुगतान होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Pays boot-up/login and double-rate overtime, but gives no explicit requirement to record actual working time."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects CEO's instruction 4, counts boot-up/login as working time, provides 2x overtime, and details timekeeping rules."
+    }
+   ]
+  },
+  {
+   "check": "India moves within limits, with state payroll consequences; abroad only pre-approved, UAE or Singapore, for immigration, tax, PE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह मंज़ूरी फ़िलहाल सिर्फ़ **UAE और Singapore** के लिए मिल सकती है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits domestic travel, addresses state payroll changes, and requires overseas approval with immigration, withholding and PE safeguards."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Limits India moves with payroll updates, requires pre-approval for UAE/Singapore citing immigration, tax, and PE risks."
+    }
+   ]
+  },
+  {
+   "check": "Effective date allows 21 days' notice to affected shift-based workers for the changes (IR Code s.40)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "वे लिखित सूचना के **21 दिन बाद** लागू होंगे",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Allowance, hours and shift changes take effect only after affected shift staff receive 21 days’ written notice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Specifies effective date providing 21 days' notice for shift-based staff changes under IR Code."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision; state table matches headcount (Tamil Nadu, Delhi no office; Delhi no PT)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "साथ में effective date भी, जो notice से कम से कम 21 दिन बाद होनी चाहिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "State table is accurate; CEO note omits attendance-radius departure and seeks decisions only on reimbursement and effective date."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note details departures and requested decisions; state table accurately reflects headcount, office presence, and Delhi PT exemption."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024218250000000004,
+ "date": "2026-10-11"
+}

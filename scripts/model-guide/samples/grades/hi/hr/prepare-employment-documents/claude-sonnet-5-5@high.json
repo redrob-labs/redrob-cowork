@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/prepare-employment-documents/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "c129384e0b50",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Letter uses ₹38,00,000 or placeholder, 3,200 options, \"Software Engineer II\"; not ₹40,00,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "पद: Software Engineer II (L4); पूर्णकालिक, स्थायी नियुक्ति।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, 3,200 options and a CTC placeholder, not unauthorized promised terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Software Engineer II, a placeholder for CTC, and 3,200 options without using the unapproved terms."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the CTC gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹38 लाख offer करें। ₹40 लाख के लिए लिखित अपवाद चाहिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends band maximum, identifies VP Engineering/Finance exception approval, and requires informing John before sending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends ₹38L or an exception with VP Eng/Finance sign-off, and insists on informing the candidate first."
+    }
+   ]
+  },
+  {
+   "check": "Post-employment non-compete dropped (s.27), exclusivity and confidentiality/IP kept; Indian law and Pune courts replace Texas",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "नौकरी समाप्त होने के बाद कोई non-compete प्रतिबंध नहीं होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops non-compete under section 27; retains exclusivity/confidentiality and Indian law/Pune courts, but omits IP protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops post-employment non-compete while retaining exclusivity/confidentiality, and applies Indian law with Pune court jurisdiction."
+    }
+   ]
+  },
+  {
+   "check": "At-will replaced: 30 days' notice in probation, 60 days after confirmation (or salary in lieu)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Confirmation के बाद 60 दिन का notice लगेगा, या उसके बदले salary दी जा सकती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Replaces at-will with bilateral 30-day probation notice and 60-day post-confirmation notice or salary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly replaces at-will employment with 30-day notice during probation and 60-day notice after confirmation."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × ₹4,00,000 ≈ ₹1,66,667 (s.74); no full-and-final deduction without written authorization",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "वापसी = ₹4,00,000 × 5 ÷ 12 = **₹1,66,666.67 (लगभग ₹1,66,667)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct calculation and written-authorization safeguard, but omits section 74’s reasonable-compensation limit and introduces gross/net uncertainty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates the exact pro-rated repayment amount and specifies no full-and-final deduction without separate written authorization."
+    }
+   ]
+  },
+  {
+   "check": "Keeps contingencies, 6-month probation and 1 Dec 2025 start (feasible after 28 Nov); placeholders only for open decisions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Brightwater ESOP Plan 2023 के तहत **[3,200]** options का grant",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps contingencies, six-month probation and feasible December 1 start, but unnecessarily brackets the already approved option count."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes all required contingencies, 6-month probation, and 1 December 2025 start date with appropriate placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020451638,
+ "date": "2026-10-11"
+}

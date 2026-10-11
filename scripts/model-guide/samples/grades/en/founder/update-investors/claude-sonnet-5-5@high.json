@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/update-investors/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "e327cd5aece8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GMV rose 10.7% QoQ to $4.65M.\n  - Net revenue rose 6.8% to $627,750.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct growth figures; scorecard also shows GMV 7.0% and revenue 16.3% below plan."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately corrects the QoQ growth rates and includes the 7% and 16% misses against plan."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months ($5.49M ÷ ~$470K a month), not 18; questions the Q2 2026 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A Q2 2026 round would then start with under six months of runway.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates 11.7 months using $470K monthly burn, rejects 18 months, and questions fundraising timing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 11.7 months runway, corrects the 18 months claim, and notes the squeeze on the Q2 2026 raise."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the $180K one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "burn is $1.23M a quarter, giving 13.4 months (about November 2026). I'm not banking on this.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly normalizes the $180K working-capital effect and distinguishes this sensitivity from the base case."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Considers normalizing the $180K working capital adjustment, yielding ~13.4 months."
+    }
+   ]
+  },
+  {
+   "check": "Bluepeak (12% of GMV at 9%) cuts ~0.6 points; ex-Bluepeak ~14.1%; covers margin and restaurant churn",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Bluepeak dilution = 12% × (14.11% − 9%) = 0.61 pts",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct Bluepeak dilution and ex-Bluepeak rate; also provides contribution-margin bridges and discusses restaurant departures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates the ~0.6 pt cut and 14.11% ex-Bluepeak rate, while covering margin impacts and restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"On track\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**\"On track\" → removed.** We missed plan on GMV, revenue, take rate, margin, accounts and burn.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Clearly flags misses and credits account growth and repeat orders, but presents Bluepeak only negatively, not as a logo win."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops 'On track', leads with misses, and credits the +26 accounts, 61% to 66% repeat rate, and Bluepeak logo."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~$305K a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Authorise** me to negotiate a standby bridge of up to $1.5M with existing investors.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Three quantified options include trade-offs; board asks are specific, and all nine slides have speaker notes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quantifies options and 18-month burn rate, includes specific board asks, and has speaker notes on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025883287999999997,
+ "date": "2026-10-11"
+}

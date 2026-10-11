@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/audit-workpapers/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "audit-workpapers",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "76bcf37eb34e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "#2 단가차이 재승인 누락(5.33%초과)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies all three deviations correctly, including late approval and approval by the wrong authority."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies all three deviations missed by the staff auditor."
+    }
+   ]
+  },
+  {
+   "check": "Treats items 4 and 8 as correctly exempt from the PO requirement",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "4 새온누리 3,150만 면제",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats both legal advisory services and city gas as valid PO exemptions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies items 4 and 8 as legitimate PO requirement exemptions."
+    }
+   ]
+  },
+  {
+   "check": "Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "10건 중 4건(40%) 이탈",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies 10 versus 25 and excessive deviations, but incorrectly counts suspected splitting as a confirmed fourth deviation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes 10 tested versus 25 required and that deviations already exceed 10% tolerable rate."
+    }
+   ]
+  },
+  {
+   "check": "Flags CS-7731 and CS-7732 (₩49,400,000 combined) as a likely split to avoid CFO approval; proposes follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CS-7731 2,480만+CS-7732 2,460만=4,940만.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags likely CFO-approval circumvention and proposes management inquiry, supporting-document review, and population-wide split detection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies split transaction avoiding CFO approval and proposes CAAT follow-up scanning."
+    }
+   ]
+  },
+  {
+   "check": "Concludes no reliance, more substantive testing; deficiency at least significant, material weakness considered, reported to 감사/감사위원회",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "ISA 265따라 미비점 지배기구 서면보고.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects reliance, expands substantive testing, and reports to governance; omits significant-deficiency classification and material-weakness consideration."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Concludes no reliance and increases substantive testing, but omits explicit classification as significant deficiency/material weakness."
+    }
+   ]
+  },
+  {
+   "check": "Includes a tickmark legend, a review trail and specific management-letter recommendations",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ⓢ=원장 추가조회(CS-7731/7732)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes tickmark definitions, senior reperformance and source references, plus specific workflow, variance, splitting, and monitoring recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes tickmark legend, senior review context, and specific management letter recommendations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0232491,
+ "date": "2026-10-10"
+}

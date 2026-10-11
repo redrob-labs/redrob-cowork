@@ -50,3 +50,40 @@ deliverable: documents
 - Identifies the 청수케미칼 invoices CS-7731 and CS-7732 (₩49,400,000 combined, same goods, same day, same approval) as a likely split to avoid CFO approval, and recommends follow-up, such as a duplicate or split-invoice scan of the population.
 - Concludes the control cannot be relied on, says substantive testing of expenses and disbursements must increase, and gives a reasoned classification of the deficiency (at least a significant deficiency, considered for material weakness) to communicate to those charged with governance (감사/감사위원회).
 - The workpaper has a tickmark legend, a clear review trail and specific management-letter recommendations.
+
+## Card
+
+brief: 제조사 감사에서 1년차 스태프의 지출 승인 통제 테스트를 재수행해 감사조서를 완성합니다.
+given:
+- 회사 전결규정: 금액 구간별 전결권자, 3-way 매칭, 단가 차이 5% 재승인 규정, PO 요건 제외 대상
+- 모집단과 계획: 상반기 지출 1,240건(89억 6,000만원), 필요한 표본 크기와 추출 방식
+- 테스트 결과: 표본 10건의 승인자, 승인일, 3-way 매칭 여부
+- 스태프 결론: "예외사항 없음"
+- 거래처 원장 발췌: 3월 4일 지급분 중 한 거래처의 세금계산서 2건
+asked:
+- 목적
+- 모집단과 표본(표본이 충분한지 여부 포함)
+- 테스트한 속성과 결과표(틱마크 범례 포함)
+- 예외사항과 근본 원인
+- 통제에 대한 결론과 감사계획에 미치는 영향
+- 경영진 서한(Management Letter) 제안 사항
+limit: 약 2,500자 이내, Markdown 감사조서
+hard: 스태프의 깨끗한 결론을 규정에 비추어 건별로 다시 테스트해야 하고, 표본 설계와 원장 발췌를 따져 봐야 하며, 미비점 분류에 근거 있는 판단이 필요합니다.
+
+## Scorecard
+
+- Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)
+- Treats items 4 and 8 as correctly exempt from the PO requirement
+- Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate
+- Flags CS-7731 and CS-7732 (₩49,400,000 combined) as a likely split to avoid CFO approval; proposes follow-up
+- Concludes no reliance, more substantive testing; deficiency at least significant, material weakness considered, reported to 감사/감사위원회
+- Includes a tickmark legend, a review trail and specific management-letter recommendations
+
+## Scorecard, shown
+
+- 스태프가 놓친 이탈 3건을 찾는다: 2번(단가 차이 5.33%, 재승인 없음), 5번(지급 후 승인), 7번(전결권자 오류)
+- 4번과 8번은 PO 요건 제외 대상으로 올바르게 판단한다
+- 필요한 25건 중 10건만 테스트했고, 10건 중 이탈 3건으로 이미 허용이탈률 10%를 넘었음을 지적한다
+- CS-7731과 CS-7732(합계 4,940만원)를 CFO 승인을 피하려는 분할로 의심하고 후속 절차를 제안한다
+- 통제 의존 불가, 실증절차 확대, 미비점은 최소 유의적 미비점(중요한 취약점 검토)으로 감사 또는 감사위원회에 보고한다고 결론짓는다
+- 틱마크 범례, 검토 흔적, 구체적인 경영진 서한 권고를 갖춘다

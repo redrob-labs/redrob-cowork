@@ -57,3 +57,37 @@ deliverable: documents
 - Doesn't chase Jebi Studio. Matches the 3 Mar ₩2,500,000 deposit to INV-0139 (the reference typo "0193" is likely "0139"), marks it paid or confirms it, and flags the reference mismatch.
 - The Hanjan Coffee email is firm and cites the contractual late fee, about ₩138,000 (1.5% × 2 full months on ₩4,600,000, 64 days overdue), with a clear deadline and next step. The Solseom County email is polite, adds no late fee (there's no clause), and re-issues the invoice with contract number 77-3310.
 - The invoice is complete and professional: unique number, dates, terms, VAT line, payment details, and figures that add up.
+
+## Card
+
+brief: 납품한 브랜드 필름의 최종 청구서를 발행하고 변경 요청을 처리하며 연체 미수금을 알맞게 독촉한다.
+given:
+- 바람개비자전거 계약서: 고정 대금, 선금, 변경 요청 규칙, 경비 규칙, 결제 조건
+- 작업 파일: 선금 청구서, 변경 요청 2건, 경비 4건
+- 미수금 현황: 결제 기한, 지연이자 조항, 비고가 있는 청구서 3건
+- 입금 내역: 3월 1일 이후 입금 2건
+asked:
+- 줄별 계산 방법을 보여 주는 바람개비자전거 앞 INV-0152 완성본
+- 청구서를 보내며 CO-2를 처리하는 이영희 님께의 짧은 이메일
+- 실제로 독촉할 연체 청구서별 수금 이메일(각 약 300자 이내)
+- 청구서별 상태와 다음 후속 조치 날짜를 담은 미수금 표
+limit: 약 2,500자 이내, Markdown
+hard: 계약 조건이 청구 가능 범위를 정하고, 독촉 전에 입금 기록을 대조해야 하며, 거래처와 계약에 맞는 어조가 필요하다.
+
+## Scorecard
+
+- INV-0152 totals ₩14,198,800: ₩10,000,000 + CO-1 ₩1,500,000 + expenses ₩1,280,000 × 1.10, plus 10% VAT
+- Excludes the ₩230,000 meals; due 25 March (15 days); shows the ₩11,000,000 deposit as received
+- CO-2 not billed (no Lee Young-hee approval); email asks her to approve ₩750,000 for 0.5 day
+- Doesn't chase Jebi Studio: matches 3 Mar ₩2,500,000 to INV-0139, flags the "0193" reference mismatch
+- Hanjan Coffee firm with ≈ ₩138,000 late fee (1.5% × 2 months × ₩4.6M); Solseom County polite, no fee, 77-3310
+- Invoice complete and professional: unique number, dates, terms, VAT line, payment details, figures add up
+
+## Scorecard, shown
+
+- INV-0152 합계 14,198,800원: 잔금 10,000,000원 + CO-1 1,500,000원 + 경비 1,280,000원 × 1.10에 부가세 10%
+- 식대 230,000원 제외, 결제 기한 3월 25일(15일), 선금 11,000,000원 수령 표시
+- CO-2는 청구하지 않음(이영희 님 승인 없음), 0.5일 750,000원 승인을 이메일로 요청
+- 제비스튜디오는 독촉하지 않음: 3월 3일 2,500,000원을 INV-0139와 대조, "0193" 적요 불일치 지적
+- 한잔커피는 단호하게 지연이자 약 138,000원(1.5% × 2개월 × 460만 원), 솔섬군청은 정중하게 이자 없이 계약번호 77-3310 기재
+- 청구서가 완전하고 전문적: 고유 번호, 날짜, 조건, 부가세, 입금 안내, 합계 일치

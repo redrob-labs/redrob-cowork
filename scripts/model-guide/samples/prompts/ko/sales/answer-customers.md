@@ -58,3 +58,38 @@ deliverable: none
 - Answers the integration question honestly: there is a FHIR R4 API, but no HL7 v2 interface and no native Mediscribe EMR integration. A sensible next step is offered, such as a technical call.
 - Confirms the 15 extra seats at ₩40,000 under §3.3: 135 seats and ₩5,400,000 a month (VAT extra) from March.
 - The tone is accountable and empathetic without grovelling or blame, and the internal note lists each action with an amount.
+
+## Card
+
+brief: 화난 의원 고객의 가격 인상·장애 환불·연동·추가 석 문의에 정직하게 답하고 내부 조치를 정리한다.
+given:
+- 고객 이메일: 청구서, 2월 3일 장애, HL7·EMR 연동, 15석 추가에 관한 4가지
+- 계약서 발췌: 2025년 3월 1일 개시, 이용료, 가격 보장, 추가 석 단가
+- 가격 변경 안내: 2026년 2월 1일부터 적용되는 새 정가
+- SLA 발췌: 가동률 공식, 크레딧 구간, 요청 규칙
+- 상태 페이지: 서울 리전 2월 3일 장애 경과
+- 제품 문서: 제공 API와 연동 범위
+asked:
+- 이영희 님께 보내는 회신 이메일(약 800자 이내): 네 가지 모두 수치로 답변
+- 빌링팀·고객지원팀 내부 메모: 정정과 크레딧, 각각의 계산 근거
+- 계약 문구를 넘어선 판단과 그 이유(약 300자 이내)
+limit: 약 2,500자 이내, Markdown
+hard: 계약서·SLA·상태 페이지를 고객 주장에 정확히 적용해야 하고, 선의의 보상 여부를 판단해 정당화해야 한다.
+
+## Scorecard
+
+- §3.2 fixes price until 28 Feb 2027; ₩5,520,000 invoice is an error, corrected by ₩720,000 to ₩4,800,000
+- 220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ ₩480,000; claim within 30 days
+- Explains degraded time isn't downtime vs "9 hours", invites her records; no full refund; goodwill labelled, justified
+- FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step
+- 15 extra seats at ₩40,000 under §3.3: 135 seats, ₩5,400,000 a month from March
+- Accountable, empathetic tone without grovelling; internal note lists each action with an amount
+
+## Scorecard, shown
+
+- 제3.2조로 2027년 2월 28일까지 단가 고정: 552만 원 청구는 오류, 72만 원 정정해 480만 원
+- 다운타임 220분 ÷ 40,320분으로 가동률 약 99.45%: 10% 크레딧 약 48만 원, 30일 이내 요청
+- 성능 저하는 다운타임이 아님을 "9시간"과 비교해 설명, 기록 공유 요청, 전액 환불 없음, 선의 보상은 명시·정당화
+- FHIR R4 API는 있음, HL7 v2와 메디스크라이브 기본 연동은 없음, 다음 단계 제안
+- 제3.3조에 따라 추가 15석은 석당 40,000원: 3월부터 135석, 월 540만 원
+- 책임감 있고 공감하되 저자세가 아닌 어조, 내부 메모는 조치별 금액 명시

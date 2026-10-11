@@ -1,0 +1,128 @@
+{
+ "key": "hi/engineer/design-systems/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "design-systems",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "9c5e09a5422f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Computes ~23 events/s average, ~230/s peak, ~700/s peak after 3× growth; calls 2,300/s 10× high (or stated headroom)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**2,300 events/s दिए आँकड़ों से समर्थित नहीं**; अलग headroom requirement हो तो स्पष्ट करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes 23.1 average, 231.5 current peak, and 694.4 future peak; correctly challenges the draft figure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~23 avg, ~231 peak, ~694 at 3×, and challenges the 2,300/s figure as headroom."
+    }
+   ]
+  },
+  {
+   "check": "Rejects exactly-once over HTTP; proposes at-least-once with stable event IDs and merchant dedup guidance",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अनुबंध: **at-least-once attempts**, merchant-side idempotency; सफल receipt की गारंटी नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once, defines immutable event IDs, and explicitly instructs merchants to deduplicate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects exactly-once over HTTP, specifies at-least-once, stable event IDs, and merchant deduplication guidance."
+    }
+   ]
+  },
+  {
+   "check": "Sizes storage ~5.2 GB/day (26 lakh × 2 KB), ~156 GB/30 days, ~470 GB at 3×; partitions or TTL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "History: `20 लाख × 1.3 × 30 × 2 KB = 156 GB`; भविष्य: **468 GB**, decimal units।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct calculation implies 5.2 GB/day; gives correct retention totals and daily partitions dropped on expiry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 156 GB for 30 days, 468 GB for 3× growth, and specifies daily table partitioning."
+    }
+   ]
+  },
+  {
+   "check": "Per-endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking; per-shipment (AWB) ordering by key or sequence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ordering scope: **endpoint + shipment**; एक active live delivery, बाकी shipments parallel।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes endpoint isolation, short timeouts, jittered exponential retries bounded by 24 hours, circuit breaking, and shipment sequencing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking, and shipment-level ordering."
+    }
+   ]
+  },
+  {
+   "check": "Recommends the managed queue or a Postgres outbox over a self-hosted log; HMAC signing with timestamp, replay protection",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**सिफ़ारिश: managed queue + PostgreSQL scheduling ledger**; provider-specific FIFO या 24-hour delayed-message support पर निर्भर नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects self-hosted log operational burden; specifies HMAC, fresh timestamps, verification tolerance, and event-ID replay protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends managed queue with PostgreSQL over distributed log, and details HMAC signing with timestamp tolerance."
+    }
+   ]
+  },
+  {
+   "check": "Gives a phased migration with SLOs, and a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Weeks 10–12: internal → 1% → 10% → 50% → 100% endpoint cohorts।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides shadow testing, phased cutover and rollback, measurable SLOs, and a speaker note on all twelve slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides phased migration, quantitative SLOs, and speaker notes across all 12 slides."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024456338,
+ "date": "2026-10-11"
+}

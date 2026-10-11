@@ -1,0 +1,128 @@
+{
+ "key": "hi/recruiter/prepare-interviews/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "recruiter",
+ "task": "prepare-interviews",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "56e209590023",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`1 + (x−1) × 3/4`, यानी 3→2.5, 4→3.25, 5→4।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States the correct linear rescaling formula and conversions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rescales John Doe's 1–5 scores using an explicit formula."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Doe's card for Roe (interview cancelled): Roe's SAFE 2.5, below 3.0; notes it would be 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसे गिनने पर रो का SAFE औसत ठीक 3.0 हो जाता (3, 2, 4 rescaled), यानी gate पास।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the cancelled interview, reports valid SAFE 2.50, and identifies the invalid-card average as exactly 3.0."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes cancelled interview, calculates SAFE as 2.5, and notes it would be 3.0."
+    }
+   ]
+  },
+  {
+   "check": "Flags Stiles' remark on Mary's marriage and children as improper, ignores it, asks all finalists the same on-call question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Comment को निर्णय से **हटाया**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags family-based assumptions as improper, excludes them, and supplies the same on-call question for all finalists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disregards comment as improper and standardizes the on-call question for all finalists."
+    }
+   ]
+  },
+  {
+   "check": "Flags \"like me at his age\" and \"from our own college\" as affinity bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**रो पर स्टाइल्स की affinity bias:** \"उसकी उम्र में मैं भी ऐसा ही था\", \"हमारे ही college से\", \"culture fit\"।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies both age-based similarity and shared college as affinity bias."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies and flags affinity bias in Stiles's comments."
+    }
+   ]
+  },
+  {
+   "check": "Advances Mary Major (≈ 3.50, SAFE ≈ 3.17) and Jane Doe (≈ 3.40, SAFE 3.75), method reproducible",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Final round (2 slots): जेन डो और मैरी मेजर।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Advances both with correct overall and SAFE averages; rescaling, valid-card selection, and averaging methods are reproducible."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Advances Jane (3.40, SAFE 3.75) and Mary (3.50, SAFE 3.17) with reproducible method."
+    }
+   ]
+  },
+  {
+   "check": "Final round probes weakest areas (Mary: OPS ≈ 3.08, SAFE nearest the bar; Jane: COMM), same questions and anchors",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "OPS सबसे कमज़ोर कड़ी है (3.08)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Probes Mary's OPS and borderline SAFE, Jane's COMM, and provides shared structured questions with score-4 anchors."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Probes their weakest areas using standardized questions and behavioural anchors."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021514237999999998,
+ "date": "2026-10-11"
+}

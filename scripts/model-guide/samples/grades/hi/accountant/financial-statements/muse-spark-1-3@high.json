@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/financial-statements/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "24960896308c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss ₹1,614 lakh, negative equity ₹594 lakh as booked (or ₹1,584 lakh and ₹564 lakh if interest corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**कुल इक्विटी** | | **(594)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Loss is ₹1,614 lakh; assets and liabilities plus negative equity both total ₹2,634 lakh."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Statements tie with net loss of ₹1,614 lakh and negative equity of ₹594 lakh."
+    }
+   ]
+  },
+  {
+   "check": "Deferred revenue ₹740 lakh current, ₹280 lakh non-current; lease ₹96/₹240 lakh; notes and accrued interest non-current",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "current 740, non-current 280",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct deferred revenue and lease splits; notes and accrued interest are non-current with the maturity rationale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Deferred revenue is split 740/280, lease liability 96/240, and notes with accrued interest are non-current."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be ₹90 lakh (1,500 × 8% × 9/12), not ₹120 lakh; proposes treating the ₹30 lakh",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**वित्त लागत 120 का break-up:** 90 कन्वर्टिबल + शेष लीज़? Lessor schedule व rate से मिलान करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Calculates ₹90 lakh and investigates ₹30 lakh, but assumes lease interest without explicitly proposing correction if unsupported."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₹90 lakh note interest, flags total ₹120 lakh finance cost, and proposes treating ₹30 lakh as lease interest."
+    }
+   ]
+  },
+  {
+   "check": "Material uncertainty on going concern (Ind AS 1): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "नकद 1,467 बनाम burn ~140/माह (~10.5 माह runway)। Series A केवल बातचीत में, हस्ताक्षरित नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicit unresolved material uncertainty includes customer loss, unsigned financing, runway, and forecasts extending beyond twelve months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies material uncertainty on going concern citing 10.5 months' runway, customer loss, and unsigned term sheet."
+    }
+   ]
+  },
+  {
+   "check": "CEO loan as related party (Ind AS 24, Schedule III); questions classification, recoverability; flags missing board approval, section 185",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "बोर्ड अनुमोदन नहीं – Companies Act s.185 उल्लंघन का विधिक मत लें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Addresses related party, classification, ECL and approval; omits Schedule III no-repayment-terms disclosure and body-corporate exemption concern."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses CEO loan under Ind AS 24, questions classification/recoverability, and notes missing approval and section 185."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a non-adjusting event under Ind AS 10",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "12.5.2025 को 18% राजस्व वाले ग्राहक का अगस्त 2025 से non-renewal – **non-adjusting**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats non-renewal as an Ind AS 10 non-adjusting event and requires nature and financial-impact disclosure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly classifies the customer's contract non-renewal as an Ind AS 10 non-adjusting event."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0244902,
+ "date": "2026-10-11"
+}

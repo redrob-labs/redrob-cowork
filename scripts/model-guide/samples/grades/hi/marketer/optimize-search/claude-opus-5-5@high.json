@@ -1,0 +1,110 @@
+{
+ "key": "hi/marketer/optimize-search/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "bf1cfe95ed21",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Fixes price (₹799 annual / ₹999 monthly + GST, not \"from ₹499\"), trial not free plan, TallyPrime only; unsubstantiated claims cut",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹799/user/माह (वार्षिक) या ₹999 (month-to-month), + 18% GST",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects both prices, GST, trial and TallyPrime restrictions; removes unsupported leadership claims."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately updates pricing, free trial status, specifies TallyPrime only, and cuts unsubstantiated claims."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"ac service app free\" honestly with the 14-day trial (ASCI I.4), explained in the rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "free plan नहीं है, इसलिए title या H1 में \"free\" लिखना implication से गुमराह करना होता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ honestly offers a 14-day trial, not a free plan; rationale explains misleading implications."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clarifies the 14-day trial without misleading free claims, fully justified in the rationale."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, TallyPrime, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Fieldnote का technician mobile app offline चलता है और network मिलते ही data sync कर देता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes technician offline access from office connectivity; fact table includes price, TallyPrime and offline limitations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ clearly separates offline mobile app and online web app; fact table includes price, TallyPrime, and offline details."
+    }
+   ]
+  },
+  {
+   "check": "Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "AC Service Scheduling Software: dispatch, AMC visits और billing एक जगह",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Blog repositioning and exact-match linking are clear, but dispatch-software targeting is incomplete across title, H1 and H2s."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Targets queries in headings/title, refocuses blog post as informational, and plans exact-match internal linking."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤60, meta ≤155, Unicode counts accurate; JSON-LD valid, matches page (799, INR); survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Fieldnote के customer survey (मार्च 2025, 210 customers)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Unicode counts are accurate and within limits; JSON-LD matches prices and FAQs; survey attribution includes sample and date."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Title and meta satisfy length limits, JSON-LD is valid and consistent (799 INR), and survey is properly cited."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02959425,
+ "date": "2026-10-11"
+}

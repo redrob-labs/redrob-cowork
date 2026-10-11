@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/stakeholder-updates/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "a1ad2842cc6a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ ₩865M (₩610M + 3 × ₩85M), not ₩790M: ≈ ₩65M (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "집행액 6억 1,000만 원 + 잔여 3개월 × 8,500만 원 = **8억 6,500만 원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recalculates ₩865M, identifies the ₩65M overrun, and challenges the reported ₩790M forecast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates ₩865M, contrasting with ₩790M and noting the ₩65M overrun."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "🔴 **출시 일정**: 제출이 2주 지연되었고, 4주 검토를 반영하면 출시가 최소 11일 늦어집니다",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates December 12 earliest launch and treats the delayed compliance-to-launch schedule as red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Catches earliest launch is 12/12 due to 4-week review; sets schedule to red."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "약점: 목표 생성 비율 31%(목표 40%), 1,000명당 문의 22건(기준 15건 이하)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly reports both beta misses against their correct targets."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honestly reports both beta misses against their targets."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size (₩115,000 vs ₩100,000) and retention without spin; links ticket themes to fixes",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "강점: 첫 입금액 11만 5,000원(목표 대비 +15%), 4주 차 리텐션 64%(+4%p)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately presents positive metrics alongside weaknesses; links ticket themes to settings UX improvements and deposit-delay disclosures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents positives objectively and links top ticket themes to fixes/improvements."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "② 예산 최대 1억 1,000만 원 증액, 또는 집행 감축안 지시 (이영희 CFO)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ends with assigned approval requests, recommends December 15, and provides January and budget-reduction alternatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents options (12/1, 12/15, Jan 2027) with budget/scope impacts and clearly recommends 12/15."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Hong Gil-dong is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "7억 9,000만 원 전망에 근거(감축 계획 등)가 있다면 알려 주세요. 반영하겠습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides each have speaker notes, lead with the conclusion, and include a factual, constructive memo."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Contains 7 slides with speaker notes, BLUF, and a constructive note to Hong Gil-dong."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017994638,
+ "date": "2026-10-11"
+}

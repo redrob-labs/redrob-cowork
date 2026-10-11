@@ -52,3 +52,38 @@ deliverable: documents
 - Computes the recoverable amount with the closing-of-the-books allocation: ₩2억 6천만 + ₩2억 9천만 + ₩1억 1,200만 = ₩6억 6,200만 (not the pro-rata ₩1억 667만 for January–April). Excludes the post-closing May–December 2021 and 2022 tax, which is Juniper's own liability.
 - Notes that the 8.2(c) claim isn't subject to the Deductible, the Escrow cap or the released escrow. Splits the liability severally per 8.4: ₩4억 6,340만 (Founders LLC) and ₩1억 9,860만 (이영희).
 - Recommends withdrawing or amending the ₩11억 2천만 notice so it claims under 8.2(c) for ₩6억 6,200만, plus any related 가산세 or interest if documented and allocable, and preserving any available challenge to the assessment.
+
+## Card
+
+brief: 인수 대상 회사의 부가가치세 부과액을 매도인에게서 얼마나 회수할 수 있는지 객관적으로 검토합니다.
+given:
+- 사실관계: 거래종결, 매매대금, 에스크로, 매도인 지분, 연도별 부과세액, 청구와 회신
+- SPA 발췌: 조세 진술, 걸치는 기간 배분, 존속, 손해배상, 제한, 제3자 청구 통지, 정의
+- 법령: 상법 제64조, 민법 제166조·제184조, 국세기본법 제68조
+asked:
+- 질의 사항
+- 결론 요약
+- 사실관계
+- 검토: 청구 기간, 통지 항변, 회수 가능 금액, 매도인별 회수
+- 권고 사항: 청구 통지 정정 방법 포함
+- 회수 가능 금액과 매도인별 부담액 계산 표
+limit: 약 2,500자 이내, 섹션 제목이 있는 Markdown 메모
+hard: 상대방 항변을 계약과 법령에 비춰 검증하고 걸치는 기간을 배분해야 하며, 불이익 여부는 판단의 문제입니다.
+
+## Scorecard
+
+- 8.2(a) rep claim expired Apr 30, 2024; 8.2(c) survives under 8.6 to Apr 30, 2028; timely
+- Answers §184②: 8.6 is a survival period, not an extended limitation; §64 runs from Aug 4, 2025 (§166①)
+- Notice 91 days after Aug 4 misses 30 days; bars recovery only for actual prejudice (e.g. §68① window)
+- Recoverable ₩6억 6,200만 (2019, 2020, Jan–Apr 2021), not pro-rata ₩1억 667만; post-closing tax excluded
+- 8.2(c) free of Deductible, escrow cap and released escrow; several shares ₩4억 6,340만 and ₩1억 9,860만
+- Amend the ₩11억 2천만 notice to an 8.2(c) claim for ₩6억 6,200만; preserve the assessment challenge
+
+## Scorecard, shown
+
+- 8.2(a) 진술·보장 청구는 2024년 4월 30일 만료, 8.2(c)는 8.6에 따라 2028년 4월 30일까지 존속해 기한 내
+- 제184조 제2항 반박: 8.6은 존속기간 약정이지 시효 연장이 아니며, 상사시효는 2025년 8월 4일부터 진행(제166조 제1항)
+- 통지는 8월 4일부터 91일 뒤라 30일 기한을 넘겼지만, 실제 불이익(예: 제68조 제1항 심판청구 기간) 범위에서만 면책
+- 회수 가능액 6억 6,200만원(2019년, 2020년, 2021년 1~4월), 기간 안분 1억 667만원 아님, 종결 후 세액 제외
+- 8.2(c)는 공제금액·에스크로 상한·해제된 에스크로와 무관, 분할책임 4억 6,340만원과 1억 9,860만원
+- 11억 2천만원 통지를 8.2(c)에 따른 6억 6,200만원 청구로 정정, 부과처분 불복 가능성 보전

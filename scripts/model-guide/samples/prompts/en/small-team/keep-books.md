@@ -63,3 +63,29 @@ You do the books for Greenward Landscaping, a small crew owned by Richard Miles.
 - The forecast excludes the disputed Birchwood invoice (or shows it as an upside case) and the unconfirmed Nursery refund, applies the $11,200 payroll from 16 Apr, and puts Hollis about 10 days late. Without the mower, cash bottoms out at about $2,100 in the week of 29 Apr and ends near $12,000.
 - With an $18,000 cash purchase on 15 Apr, the balance goes deeply negative (about −$15,900 in the week of 29 Apr). Even the remaining $15,000 of credit line wouldn't fully cover it. The recommendation is not to pay cash, and suggests equipment financing, deferring, or leasing.
 - Every computed column states its method, and the arithmetic is consistent week to week.
+
+## Card
+
+brief: Reconcile a landscaper's March bank account, summarise March, forecast eight weeks of cash, and advise on paying cash for an $18,000 mower.
+given:
+- March bank statement: opening balance, 13 transactions and closing balance
+- Bookkeeping app: the book balance and notes on 4 entries
+- Invoice notes: sales tax on inv 2034 and the line-of-credit terms
+- Open receivables: 3 invoices with due dates and payment notes
+- April–May cash items: payroll, recurring costs, receipts, an invoiced job and a pending refund
+asked:
+- A bank-to-book reconciliation table with every reconciling item and the corrections needed
+- A March summary: revenue, cost categories, and non-revenue or non-business items with reasons
+- An 8-week weekly cash forecast from Wed 1 Apr, with and without the mower, assumptions stated
+- A recommendation on the mower, up to 200 words, with alternatives
+limit: Up to about 1,200 words, in Markdown, with methods for computed columns
+hard: The records hide reconciling items and misclassifications, and the forecast needs judgement on which inflows to count and when.
+
+## Scorecard
+
+- Reconciles the $1,385 gap: duplicate Nursery +$3,150, bank fee +$35, outstanding check #448 −$1,800
+- Streamflix recoded as owner draw; March revenue $13,450, excluding the $10,000 draw and $360 sales tax
+- Forecast excludes Birchwood and the Nursery refund, uses $11,200 payroll from 16 Apr, Hollis ~10 days late
+- Without the mower, cash bottoms ≈ $2,100 in the week of 29 Apr and ends near $12,000
+- Mower in cash gives ≈ −$15,900 that week, beyond $15,000 credit; advises financing, deferring or leasing
+- Every computed column states its method, and the weekly arithmetic is consistent

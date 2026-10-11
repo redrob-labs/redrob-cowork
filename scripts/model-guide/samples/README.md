@@ -22,7 +22,41 @@ The text sent to every model, verbatim. Self-contained: all data the task needs 
 ## A strong answer
 
 - 3 to 6 bullets a reviewer (or a later grader) checks the answer against. Never sent to the model.
+
+## Card
+
+brief: One sentence, at most 25 words: the situation and the ask, in plain words.
+given:
+- Bank statement: ending balance and 5 bank-side items
+- 3 to 6 lines: each input the model was given, as "Name: what it holds", with counts where they help
+asked:
+- A reconciliation table, with the method for each line
+- One line per deliverable the prompt asks for, in its order
+limit: Up to about 1,200 words, in Markdown
+hard: One sentence on what makes it hard, without giving away an answer
+
+## Scorecard
+
+- 3 to 6 checks, one line each (at most ~18 words), that an answer passes or fails
+- Each names the figure or decision it checks, so a grader and a reader can verify it from the answer
 ```
+
+`## Prompt` is the only part a model ever sees; changing it would leave every recorded answer answering a
+different question, so the sections after it are where the page's copy lives.
+
+- **Card** is the task as the guide shows it, above the scorecard. `given` lists only what is in the prompt,
+  in the order it appears; `asked` mirrors the prompt's own deliverables; `hard` names the kinds of difficulty
+  (a planted inconsistency, a policy to apply, a judgement call), never the specific trap, because the
+  scorecard is where specifics belong.
+- **Scorecard** is what each answer is graded on, pass / partial / miss per line, and what the guide shows
+  beside each model. It covers the same ground as "A strong answer", which stays as the grader's fuller
+  reference: every scorecard line must be checkable against it, and every bullet there must be covered by at
+  least one scorecard line.
+- Korean and Hindi files carry their own Card, written in their own language and matching their adapted data
+  (won and K-IFRS, rupees and Ind AS). Card keys (`brief:`, `given:` ...) stay in English.
+- Their `## Scorecard` stays in English, like "A strong answer", with their own figures, so one grader and one
+  set of instructions serve all three languages. They add `## Scorecard, shown`: the same lines, in the same
+  order and number, in their own language. That is what the guide displays; line n of each is the same check.
 
 ### Rules for a prompt
 

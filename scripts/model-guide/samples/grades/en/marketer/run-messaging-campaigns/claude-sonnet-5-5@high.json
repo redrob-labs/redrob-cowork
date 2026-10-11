@@ -1,0 +1,128 @@
+{
+ "key": "en/marketer/run-messaging-campaigns/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "77c1059302d0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Denver only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "18,735 − 615 − 757 = 17,363.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five segment email counts are correct, with suppression applied and only Denver retained from D."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates eligible email contacts for all segments and the total of 17,363 after suppressions and coverage."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Total** | **17,363** | Sum | **4,772** | Sum |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SMS counts correctly total 4,772, including only 52 Denver contacts from D; other D contacts are excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 4,772 eligible SMS contacts, keeping only the 52 Denver contacts for Segment D."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of $64 = $32 before dessert, over $18; e.g. 25% off ($16), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "0.50 × 64 = $32 + $3 per box.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the manager’s over-budget proposal and provides nonstacking segment offers costing no more than $16."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects manager's offer with clear arithmetic showing it exceeds $18, and recommends an unstacked 25% ($16) offer."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Denver for D",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "The 35% drop in quality complaints is not built in, so C may beat forecast.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Tailors price, convenience, new recipes and Denver messaging, but the 35% improvement appears only in forecast commentary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Tailors messages for A, B, and D, but omits the 35% fewer complaints fact from C's messaging."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈$6,800",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Total** | Sum | **≈ 427** | **≈ $5,500** (≈ $12.88 per reactivation) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct audience split and reactivations; the lower incentive total correctly reflects its compliant segment-specific offers rather than uniform $16."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Matches the 427 reactivation forecast exactly; cost correctly reflects the candidate's tiered segment offers."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤160 characters with brand and \"Reply STOP to opt out\", 8 a.m.–9 p.m. local; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Larder & Vine: we saved your seat! Your welcome-back offer is ready: lardervine.com/back Reply STOP to opt out.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All SMS texts are under 160 characters, contain required wording, use compliant local windows, and exit on reactivation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All SMS messages are ≤160 characters, include brand and STOP opt-out, fit within local hours, and exit on reactivation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030594638,
+ "date": "2026-10-11"
+}

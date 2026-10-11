@@ -1,0 +1,110 @@
+{
+ "key": "en/recruiter/write-job-descriptions/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "recruiter",
+ "task": "write-job-descriptions",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "61859785d8e4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Removes \"young, energetic guy\" and \"recent graduates\"; replaces \"native English speaker\" with English radio safety communication",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ability to follow and give safety-critical instructions in English over radio",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes age-coded and gendered preferences and replaces native-speaker requirement with job-related English radio communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes the age/gender language and replaces native speaker with radio safety communication."
+    }
+   ]
+  },
+  {
+   "check": "Uses $31–38/hour and flags the draft's $28–34 as off-sheet and breaking pay transparency",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "State pay-transparency law requires a good-faith range; approved comp sheet is $31–38.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses $31–38/hour; change log identifies the draft range as inconsistent with approved compensation and pay-transparency requirements."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses $31–38/hour and flags that the draft's range violates pay transparency."
+    }
+   ]
+  },
+  {
+   "check": "Drops the degree and \"2+ years\"; states 0–2 years with training and paid GWO within 90 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GWO Basic Safety Training, or completion within 90 days of hire (Northgale pays for it)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes degree and two-year minimum; states 0–2 years, training provided, and employer-paid GWO within 90 days."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops the degree and 2+ years requirement, specifying 0–2 years and paid GWO within 90 days."
+    }
+   ]
+  },
+  {
+   "check": "Keeps height, lifting and driving requirements; adds EEO and accommodation statements; drops \"rockstar\" slogans",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Reasonable accommodations are available for qualified applicants with disabilities.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains tower climbing, harness, lifting and licence requirements; includes EEO and accommodations; removes both slogans."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains physical and driving specs, removes rockstar slogans, and adds EEO and accommodation text."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at 1080×1080: role, location, $31–38/hour, benefits, apply URL; legible and consistent with posting",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<text x=\"100\" y=\"562\" font-size=\"56\" font-weight=\"800\" fill=\"#0B2A4A\">$31–38 per hour</text>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained 1080×1080 SVG includes role, location, approved pay, benefits and application URL with legible, contrasting text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The valid 1080×1080 SVG clearly includes the role, site, pay range, benefits, and application link."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0223734,
+ "date": "2026-10-11"
+}

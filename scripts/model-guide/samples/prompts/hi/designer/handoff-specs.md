@@ -59,3 +59,37 @@ PM की आवश्यकताएँ: वार्षिक टॉगल ड
 - Implements the toggle as an accessible control (radio group, or buttons with aria-pressed), with arrow or Tab keyboard support, a visible focus style and a polite live region or other sensible announcement of price changes. Annual is the default.
 - Avoids layout shift when toggling (reserved space or fixed-width price area, the "सालाना बिल" line always present), and in the stacked layout the Pro card comes first.
 - The code runs as a single file, uses CSS custom properties from the token list, and the spec table is complete enough to build from without the design file.
+
+## Card
+
+brief: एक फ़ॉर्म-बिल्डर के प्राइसिंग सेक्शन के बिलिंग टॉगल और तीन प्लान कार्ड का developer handoff तैयार करें, डिज़ाइन values को codebase टोकन से map करते हुए।
+given:
+- डिज़ाइन inspect नोट्स: टॉगल, कार्ड, कीमत, CTA, feature list और breakpoint की values
+- डिज़ाइन टोकन: रंग, spacing और radius की 14 codebase CSS custom properties
+- प्लान तालिका: 3 प्लान की मासिक, वार्षिक और सालाना बिल कीमतें और सुविधाएँ (GST रहित)
+- PM की आवश्यकताएँ: डिफ़ॉल्ट टॉगल, layout shift नहीं, सालाना बिल वाली पंक्ति और CTA लेबल
+asked:
+- केवल codebase टोकन वाला single-file HTML/CSS/JS reference implementation, states और responsive व्यवहार सहित
+- हर inspect value को टोकन से map करती spec तालिका, बदली गई values अलग से बताते हुए
+- Accessibility नोट्स: टॉगल की semantics और keyboard, कीमत बदलने की घोषणा, contrast
+- खुले प्रश्न या असंगतियाँ, हर एक के सुझाए समाधान के साथ
+limit: गद्य लगभग 1,200 शब्दों के भीतर, Markdown; कोड इससे लंबा हो सकता है
+hard: प्राइसिंग कॉपी को गणित से जाँचना है, डिज़ाइन values टोकन सेट से भटकी हुई हैं, और टॉगल को बिना layout shift के accessible व्यवहार चाहिए।
+
+## Scorecard
+
+- Flags Pro: ₹789 × 12 = ₹9,468, not ₹9,990, and "20% बचाएँ" fails (about 21% or 17%)
+- Confirms Business is consistent (₹1,999 × 12 = ₹23,988, 20%); proposes a fix for Pro
+- Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons
+- Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; Annual default
+- No layout shift on toggle (reserved price area, "सालाना बिल" line always present); Pro first when stacked
+- Single-file code runs on token custom properties; spec table is complete enough to build from
+
+## Scorecard, shown
+
+- Pro में ₹789 × 12 = ₹9,468 है, ₹9,990 नहीं, और "20% बचाएँ" सही नहीं बैठता (लगभग 21% या 17%)
+- पुष्टि करता है कि Business सुसंगत है (₹1,999 × 12 = ₹23,988, 20%); Pro के लिए समाधान सुझाता है
+- #2F6FEB को --primary-600 (#2F6FED) से, और 14px व 10px के gaps को टोकन से map करता है, कारण सहित
+- Accessible टॉगल (radio group या aria-pressed), keyboard सपोर्ट, दिखता focus, कीमत बदलने की घोषणा; वार्षिक डिफ़ॉल्ट
+- टॉगल पर layout shift नहीं (कीमत के लिए आरक्षित जगह, "सालाना बिल" पंक्ति हमेशा मौजूद); stacked लेआउट में Pro पहले
+- Single-file कोड टोकन custom properties पर चलता है; spec तालिका इतनी पूरी है कि उससे बनाया जा सके

@@ -58,3 +58,39 @@ cc और forward किए गए memo को उचित ढंग से स
 - Spots that Proposal 2's release covering the "holding company … and affiliates" would wipe out the separate ₹3.35 crore Pier 9 guarantee claim against Crescent Holdings, so its real value is nearer ₹7.95 crore. Also notes the credit risk of instalments, compared with Proposal 1's immediate compromise decree.
 - Explains the cost consequence without overstating it: in a commercial suit, costs can include legal fees and the court may weigh an unreasonably refused reasonable offer under amended section 35, but this is discretionary, not an automatic penalty.
 - Removes Richard Miles from the thread or advises against copying him, and explains the risk that sharing privileged advice and the strategy memo with a third party loses its confidentiality and privilege protection. Gives a clear recommendation and counter strategy, for example accepting Proposal 1 or countering Proposal 2 with a carve-out for Pier 9 and security (e.g. post-dated cheques or a bank guarantee) for the instalments.
+
+## Card
+
+brief: Contract के commercial suit में client की CEO को दो settlement प्रस्तावों बनाम trial पर सलाह का ईमेल लिखिए, और उनसे निर्णय माँगिए।
+given:
+- मामला संक्षेप में: दावा, प्रतिदावा, case management order, जीत की संभावना, fees और अलग Pier 9 guarantee दावा
+- Supply Agreement धारा 11.3: damages exclusion
+- प्रस्ताव 1: Order XXIII Rule 3 CPC compromise का पत्र, साथ में Contract Act धारा 6 और CPC धारा 34, 35 के अंश
+- प्रस्ताव 2: किस्तों, mutual release, गोपनीयता और non-disparagement वाला पत्र
+- मैरी मेजर का ईमेल: deadline की उनकी धारणा, counter का विचार, और cc किया गया बाहरी consultant
+asked:
+- असली deadlines, तारीखों के साथ
+- दोनों प्रस्तावों और trial की तुलना, expected-value हिसाब सहित
+- हर प्रस्ताव की राशि के अलावा Harborview की क़ीमत
+- सिफ़ारिश और counteroffer की रणनीति
+- उनसे ठीक-ठीक क्या चाहिए, और कब तक
+limit: लगभग 1,200 शब्दों के भीतर, Markdown ईमेल (subject line, फिर body), सीधी हिंदी, कोई case citation नहीं
+hard: प्रस्ताव की अपनी शर्त और क़ानून से deadline निकालनी है, contract और release की भाषा मूल्य बदलती है, privilege में सावधानी चाहिए, और सलाह एक judgement call है।
+
+## Scorecard
+
+- Proposal 1 lapses (s.6(2)) after Thursday, 13 Nov 2025, not month-end; Proposal 2 to 21 Nov; decide before 13 Nov
+- §11.3 likely bars the ₹2.5 crore lost profits; trial EV ≈₹9.1 crore with 9% interest; both offers compare well
+- Proposal 2's affiliate release waives the ₹3.35 crore Pier 9 guarantee (worth ≈₹7.95 crore); instalment credit risk noted
+- Costs: amended s.35 may include legal fees and weigh a refused reasonable offer, but is discretionary, not automatic
+- Removes or warns off Richard Miles: sharing advice and the memo risks losing confidentiality and privilege
+- Clear recommendation and counter, e.g. accept Proposal 1, or Proposal 2 with Pier 9 carve-out and instalment security
+
+## Scorecard, shown
+
+- प्रस्ताव 1 गुरुवार, 13 नवंबर 2025 के बाद lapse (धारा 6(2)), महीने के अंत तक नहीं; प्रस्ताव 2 21 नवंबर तक; निर्णय 13 नवंबर से पहले
+- धारा 11.3 से ₹2.5 crore का lost profit संभवतः बाहर; 9% ब्याज सहित trial EV ≈₹9.1 crore; दोनों प्रस्ताव तुलना में अच्छे
+- प्रस्ताव 2 का affiliates वाला release ₹3.35 crore का Pier 9 guarantee दावा ख़त्म करेगा (असल मूल्य ≈₹7.95 crore); किस्तों का credit risk
+- Costs: संशोधित धारा 35 में legal fees और ठुकराए गए उचित प्रस्ताव पर विचार संभव, पर यह विवेकाधीन है, स्वचालित नहीं
+- रिचर्ड माइल्स को thread से हटाया या सावधान किया: सलाह और memo साझा करने से गोपनीयता और privilege खोने का जोखिम
+- स्पष्ट सिफ़ारिश और counter, जैसे प्रस्ताव 1 स्वीकार, या Pier 9 carve-out और किस्तों की security के साथ प्रस्ताव 2

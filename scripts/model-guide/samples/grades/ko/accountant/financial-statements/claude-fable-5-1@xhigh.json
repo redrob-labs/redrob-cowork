@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/financial-statements/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "11545c8d384d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss ₩1,614m, deficit ₩594m as booked (or ₩1,584m and ₩564m if interest corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**당기순손실** | **(1,614)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Loss is 1,614, equity deficit is 594, and assets equal liabilities plus equity at 2,634."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The statements tie correctly with net loss of ₩1,614m and total deficit/equity of (₩594m)."
+    }
+   ]
+  },
+  {
+   "check": "Contract liability ₩740m current, ₩280m noncurrent; lease ₩96m/₩240m; notes and accrued interest noncurrent (K-IFRS 1001)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "계약부채 740/280, 리스부채 96/240 분할(정상영업주기 12개월 가정).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct splits; notes and accrued interest are noncurrent, with repayment timing and classification reasons explained."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly splits contract liabilities, lease liabilities, and presents convertible notes and accrued interest as noncurrent."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be ₩90m (1,500 × 8% × 9/12), not ₩120m; proposes treating the ₩30m",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "당기 리스 이자비용 30(이자비용 120 중 전환사채 90 제외분, 확인 중).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates note interest as 90 and proposes attributing the remaining 30 to lease interest, pending confirmation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates CB interest as ₩90m and proposes treating the remaining ₩30m as lease interest."
+    }
+   ]
+  },
+  {
+   "check": "Material uncertainty on going concern (K-IFRS 1001.25): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이는 계속기업 존속능력에 유의적 의문을 제기하는 **중요한 불확실성**에 해당합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses approximately ten months’ runway, customer loss, unsigned financing, and unresolved material uncertainty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses material uncertainty on going concern citing runway, customer loss, and unsigned term sheet without resolving it."
+    }
+   ]
+  },
+  {
+   "check": "CEO loan as related party (K-IFRS 1024); questions classification; flags missing 상법 제398조 approval, 인정이자 exposure",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "세무상 가지급금 인정이자·지급이자 손금불산입",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses related-party loan, explains provisional current classification and possible noncurrent reclassification, and flags missing approval and tax exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses CEO loan under related parties, questions its classification, and notes lack of approval and 인정이자 tax exposure."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a non-adjusting event after the reporting period (K-IFRS 1010)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "보고기간 후 발생한 상황이므로 **수정을 요하지 않는 사건**으로 금액을 조정하지 않았으나, 계속기업 평가에 반영했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly treats customer non-renewal as non-adjusting and incorporates it into going-concern assessment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly classifies customer non-renewal as a non-adjusting event after the reporting period."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025581938,
+ "date": "2026-10-11"
+}

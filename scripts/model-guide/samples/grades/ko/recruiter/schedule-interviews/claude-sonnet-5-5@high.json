@@ -1,0 +1,128 @@
+{
+ "key": "ko/recruiter/schedule-interviews/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "recruiter",
+ "task": "schedule-interviews",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "6b42193ad8c9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5; Seoul UTC+9",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "베를린 CET **UTC+1**, 리스본 WET **UTC+0**: 유럽 서머타임이 10/25(일)에 종료됨",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five offsets and European versus US daylight-saving transition dates are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All offsets and DST change explanations match the specified week perfectly."
+    }
+   ]
+  },
+  {
+   "check": "Park on Tue 27 Oct: from 14:00 UTC, Lee by 16:00, Mary clear of 15:00–16:00, 30-minute breaks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "그래서 Mary → 이영희 → 홍길동 순서로 정했고, 휴식은 요청대로 30분입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Park starts Tuesday at 14:00 UTC; Lee finishes by 16:00, Mary avoids her conflict, and breaks are 30 minutes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Starts at 14:00 UTC, Lee ends by 16:00, Mary avoids busy block, 30-minute breaks used."
+    }
+   ]
+  },
+  {
+   "check": "Kim Cheol-su on Wed 28 Oct, all sessions within 13:00–16:00 UTC, Hong clear of 13:00–13:30 UTC",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "| 채용 책임자 | 홍길동 | 15:30–16:15 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Kim is scheduled Wednesday and Hong avoids standup, but the final session extends beyond 16:00 UTC."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Scheduled Wed 28 Oct, Hong avoids standup, and all participants are within working hours."
+    }
+   ]
+  },
+  {
+   "check": "KST record dates roll over: e.g. Park 23:00 Tue – 02:15 Wed, Kim 22:00 Wed – 00:45 Thu",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "10/27 23:00 ~ 10/28 02:15",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All KST conversions and rollover dates correctly reflect the proposed sessions, including Kim’s later finish."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rolls over past midnight into next calendar day for both candidates in KST."
+    }
+   ]
+  },
+  {
+   "check": "Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "모든 세션에서 실시간 자막을 켜 주세요. 코딩 문제는 말씀과 함께 공유 문서나 채팅에 글로 올려 주세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides captions, written coding prompts, and 30-minute breaks without revealing hearing loss to the panel."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sets up captions, written prompt, 30-minute breaks, and conceals hearing condition from panel."
+    }
+   ]
+  },
+  {
+   "check": "Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최종 면접 – 일정 확정",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both emails are warm, provide correct local schedules, links, and expectations; CRM includes scheduled stages and dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Warm candidate emails include local times and links; CRM reflects scheduled stage and dates."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.062221425999999996,
+ "date": "2026-10-11"
+}

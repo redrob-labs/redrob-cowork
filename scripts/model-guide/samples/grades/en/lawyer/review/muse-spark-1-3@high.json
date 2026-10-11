@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/review/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "dfe7be3b2901",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "BAA is the blocker: PHI shared, Exhibit C omitted; don't sign or go live with census data until signed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We cannot share any census data until a negotiated BAA is attached and executed.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies PHI and omitted Exhibit C as the blocking issue; prohibits signature and census sharing pending executed BAA."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies BAA as the blocker and advises not sharing census data until executed."
+    }
+   ]
+  },
+  {
+   "check": "Cap is $45,000 (3 months, implementation excluded) vs playbook $240,000 in year 1 and $540,000 super-cap",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$45k vs. $240k Year-1 floor and $540k super-cap.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates all three figures and explains implementation fees are excluded from the draft cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately quantifies the current cap ($45k), Year 1 playbook cap ($240k), and super-cap ($540k)."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity is capped; 9.2 excludes notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "10.3 makes Sec. 10 “entire liability” (caps indemnities); 10.2 makes us indemnify for *any* claim from Customer Data.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags phantom cross-reference and notification exclusion, but misattributes indemnity capping and never identifies customer indemnity as uncapped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the missing 10.4 cross-reference capping indemnities, 9.2 exclusion of notification costs, and uncapped broad 10.2 indemnity."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Delaware venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "99.9% with termination-for-chronic-failure (credits not sole remedy); 60-day retention with free standard-format export; correct venue to New York County.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides playbook-aligned redlines for renewal, SLA, venue, and exit, identifying each defective existing term."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides redlines and acceptable fallbacks for renewal, 99.5% sole-remedy SLA, Delaware venue, and exit terms."
+    }
+   ]
+  },
+  {
+   "check": "§5-1401 met ($600,000+): NY law holds, venue not fixed; §5-903's reach to SaaS uncertain, so calendar and negotiate",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "A SaaS subscription to access ShiftPilot is almost certainly *not* within that narrow category",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct threshold and law-versus-venue distinction; overstates SaaS exclusion and omits an explicit instruction to calendar the deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes $600k satisfies §5-1401 without fixing venue, and that SaaS likely falls outside §5-903, advising negotiation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024155250000000003,
+ "date": "2026-10-11"
+}

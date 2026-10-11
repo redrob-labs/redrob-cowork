@@ -1,0 +1,128 @@
+{
+ "key": "ko/recruiter/prepare-interviews/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "recruiter",
+ "task": "prepare-interviews",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "c1c73b0ec1fc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`환산점수 = 1 + (원점수 − 1) × 3/4`",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States the correct endpoint-preserving formula and gives correct converted scores."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly states the rescaling formula and gives the transformed values."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Doe's card for Kim (interview cancelled): Kim's SAFE 2.5, below 3.0; notes it would be 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "환산 기준 3.00이 되어 기준을 통과하게 됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the cancelled interview, reports Kim’s valid SAFE as 2.50, and identifies invalid inclusion yielding 3.00."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes Kim's cancelled interview, shows SAFE is 2.50 (< 3.0), and notes it would be 3.00 if included."
+    }
+   ]
+  },
+  {
+   "check": "Flags Stiles' remark on Lee's children as improper, ignores it, asks all finalists the same on-call question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "해당 코멘트는 평가 근거에서 배제하고, 회의록에 비반영 사실을 남깁니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags sex/family-based judgment as improper, excludes it, and supplies an identical on-call question for both finalists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags Stiles' remark as improper/illegal, excludes it from consideration, and asks both candidates the same on-call question."
+    }
+   ]
+  },
+  {
+   "check": "Flags \"reminds me of me when I was young\" as affinity bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "김철수 님 코멘트(\"내 젊었을 때를 보는 것 같다\", \"조직 문화에 딱 맞음\")는 유사성 편향에 해당함",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the remark as affinity bias and excludes it from competency evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies Stiles' comment about Kim as affinity/similarity bias."
+    }
+   ]
+  },
+  {
+   "check": "Advances Lee Young-hee (≈ 3.50, SAFE ≈ 3.17) and Park Young-su (≈ 3.40, SAFE 3.75), method reproducible",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최종 면접 진출자 추천: **이영희, 박영수**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Advances the correct finalists with correct overall and SAFE averages and reproducible conversion and averaging methods."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Advances both candidates with exact averages (Lee: 3.50 overall, 3.17 SAFE; Park: 3.40 overall, 3.75 SAFE)."
+    }
+   ]
+  },
+  {
+   "check": "Final round probes each finalist's weakest areas (Lee: OPS, and SAFE near the bar; Park: COMM), same questions and anchors",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "두 후보에게 동일한 질문과 순서를 적용합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides shared structured questions and four-point anchors, targeting Lee’s OPS and SAFE and Park’s COMM."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Probes weakest areas (Park: COMM; Lee: OPS, SAFE) with identical structured questions and 4-point anchors."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016635938,
+ "date": "2026-10-11"
+}

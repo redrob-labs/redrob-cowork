@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/memo/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "c8f70aff2127",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Rep claim under 8.2(a) expired Apr 30, 2024; 8.2(c) survives to Apr 30, 2028 under §8106(c); timely",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "The standalone Pre-Closing Tax indemnity (§8.2(c)) survives under §8.6 until at least April 30, 2028.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly distinguishes claims and invokes §8106(c), but “at least” contradicts the seven-year maximum, correctly described later."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies rep claim expired Apr 30, 2024, and 8.2(c) survives up to Apr 30, 2028 under §8106(c)."
+    }
+   ]
+  },
+  {
+   "check": "Notice ~91 days after Aug 4 misses 30 days, but bars recovery only to the extent of actual prejudice",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Juniper gave it on November 3, about 61 days late.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates lateness, equivalent to 91 days after receipt, and limits relief to actual prejudice, including lost appeal rights."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies late notice (~91 days after Aug 4 / ~61 days overdue) and correctly applies actual prejudice standard."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable $662,000 ($260,000 + $290,000 + $112,000), not pro-rata $106,667; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Total** | **$1,120,000** | **$662,000** | **$463,400** | **$198,600**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly totals $260,000, $290,000 and $112,000 using closing-of-the-books allocation; excludes all post-closing tax."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $662,000 correctly using closing-of-the-books allocation ($260k+$290k+$112k) and excludes post-closing taxes."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares $463,400 and $198,600",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Founders LLC owes **$463,400** and Mary Major owes **$198,600**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct several shares; expressly excludes Deductible and escrow cap and explains released escrow does not limit recovery."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 8.2(c) is free of deductible/cap/escrow release and correctly computes several shares."
+    }
+   ]
+  },
+  {
+   "check": "Amend the $1,120,000 notice to an 8.2(c) claim for $662,000; preserve the assessment appeal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Send a corrected or supplemental claim notice now.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends invoking §8.2(c), demanding $662,000, withdrawing post-closing amounts, and preserving assessment appeal through a protective protest."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Advises amending notice to 8.2(c) for $662k and addressing/preserving assessment appeal/protest rights."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021300825,
+ "date": "2026-10-11"
+}

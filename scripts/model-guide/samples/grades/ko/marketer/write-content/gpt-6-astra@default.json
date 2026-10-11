@@ -1,0 +1,110 @@
+{
+ "key": "ko/marketer/write-content/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "ca32bb65e829",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "No \"40%\" lead (one site, HVAC not bill; §§3, 5); median 18% 냉난방 energy (~7.2% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "냉난방 에너지 사용량 중앙값 18% 감소*",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses substantiated median HVAC-energy savings, not total-bill savings, with the required footnote; rejects the 40% lead."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Replaced 40% lead with median 18% HVAC energy reduction and included the mandatory footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: ₩199,000 launch (list ₩239,000, through Jan 31, 2026) plus ₩9,900/month per location subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "스케줄·알림 필수 구독: 매장당 월 9,900원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes launch price, list price, January 31, 2026 deadline, and mandatory monthly per-location subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately includes promotional price, regular price, end date, and monthly cloud subscription fee."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "써멀린 프로 공식 출시 | 12자",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Limits are respected and superlatives avoided, but this title has 13 characters; launch announcement count is also incorrect."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All character counts are exact, within required limits, and no prohibited superlatives were used."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "font-family=\"Pretendard, sans-serif\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG uses all three brand colors, clear hierarchy, H1, subhead, single CTA, and required footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid inline SVG mockup includes specified brand colors, H1, subhead, CTA button, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "199,000원은 출시 기념가임을 밝히고 종료일·정가·필수 구독료를 병기했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains claim and price corrections, but omits the customer quote and 44-of-48 ease result."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price modifications well, but fails to mention the customer quote or 44/48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.033243262999999995,
+ "date": "2026-10-11"
+}

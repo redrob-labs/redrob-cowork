@@ -1,0 +1,128 @@
+{
+ "key": "hi/marketer/plan-campaigns/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "plan-campaigns",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "1eb53bf3ff99",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Excludes or heavily discounts the consumer-app Facebook benchmark; doesn't use its ₹2,400 cost per SQL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसलिए B2B forecast में इसका इस्तेमाल नहीं किया गया।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Consumer-app benchmark is excluded from forecasting; Facebook testing receives no forecast SQL credit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes the consumer Facebook benchmark and explains why ₹2,400 cost/SQL is inapplicable."
+    }
+   ]
+  },
+  {
+   "check": "Cost per SQL: search ≈₹15,455, LinkedIn ≈₹31,111, expo ≈₹40,000 (45 SQLs), syndication ≈₹36,667",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Paid search (1,100 clicks × ₹204 × 3 महीने) | 6,73,200 | 198 | 22% | 44 | 15,300 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All channel costs are correct; search uses rounded 44 SQLs, yielding ₹15,300 rather than unrounded ₹15,455."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates the cost per SQL across all required channels, matching expected benchmarks."
+    }
+   ]
+  },
+  {
+   "check": "Search capped: 3,300 clicks × 6% = 198 leads, ₹6,73,200, ≈44 SQLs",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Paid search (1,100 clicks × ₹204 × 3 महीने) | 6,73,200 | 198 | 22% | 44 | 15,300 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly caps quarterly search at 3,300 clicks, ₹6,73,200, 198 leads, and 44 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately caps search at 198 leads, ₹6,73,200 spend, and 44 SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Best mix (remaining ₹47,26,800 on LinkedIn, ≈152 SQLs) yields ≈240 SQLs: 400 SQLs and 80 customers unachievable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "यह इस budget और sales capacity पर संभव नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly rejects 400 SQLs/80 customers, but omits optimal ₹47,26,800 LinkedIn allocation and approximately 240-SQL budget ceiling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Proves 400 SQLs/80 customers are unachievable, but omits the exact ~240 SQL mix calculation for ₹72L."
+    }
+   ]
+  },
+  {
+   "check": "Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈₹1.61 crore new ACV)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "sales capacity, यानी 3 AEs × 70 = **210 SQLs/तिमाही**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes ceiling, recommends conservative 180-SQL/36-customer commitment with 197-SQL plan, reserves funds, and flags conversion uncertainty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 210 SQL capacity ceiling and plans realistic SQL/customer targets accordingly."
+    }
+   ]
+  },
+  {
+   "check": "Pillars match challans by site, UPI crew reimbursement, Tally sync; timeline builds to expo 10–12 Feb; specific leadership ask",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Expo:** ₹18,00,000 की commitment को इसी हफ़्ते मंज़ूरी, ताकि booth और pre-booking समय पर हो सके।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All three interview-backed pillars appear; timeline builds toward February 10–12 Expo; leadership receives specific approval requests."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Matches all three interview pain points, builds timeline to expo, and provides specific asks."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028288838,
+ "date": "2026-10-11"
+}

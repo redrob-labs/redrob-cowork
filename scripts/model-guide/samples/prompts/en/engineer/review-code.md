@@ -87,3 +87,27 @@ Be direct but constructive. Richard is a mid-level engineer, and this is his fir
 - Catches CSV problems: no quoting or escaping of commas, quotes and newlines, and CSV/formula injection through the user-editable `full_name` (for example a value starting with `=`). Also notes `rows[0]` crashing when a tenant has no users.
 - Notes the un-awaited `auditLog` (the audit record can be lost silently, a compliance failure; it should be awaited, and ideally written before data is sent) and that loading 140,000 rows into memory breaks the streaming convention.
 - The revised handler and tests address these issues (cross-tenant attempt, sort injection, formula escaping, audit written), and the tone is constructive, with priorities clear.
+
+## Card
+
+brief: Review a pull request adding a CSV user export to a multi-tenant HR platform: verdict, ranked comments, revised handler and tests.
+given:
+- PR description: the author's risk claim, test scope and the largest tenant's size
+- Diff: a new Express handler for GET /admin/users/export
+- Codebase context: 5 facts on role checks, audit logging, user columns, editable names and streaming
+asked:
+- A verdict, with a one-paragraph summary for Richard
+- Review comments by severity, each with line, problem, failure scenario and fix
+- A revised handler addressing the blockers and majors
+- Two or three tests required before merging
+limit: Up to about 1,200 words of prose, in Markdown; the code may run longer
+hard: A change called low risk must be checked for security, privacy, correctness and scale problems, ranked by severity, and explained in a way that suits a mid-level author.
+
+## Scorecard
+
+- Requests changes; blockers: cross-tenant export via ?tenantId= (IDOR) and SQL injection via ORDER BY ${sort}
+- Fixes them by always using req.user.tenantId and allow-listing sort columns
+- Flags SELECT * leaking password_hash, mfa_secret, date_of_birth, salary_band; requires explicit columns; flags stack-trace leak
+- Catches missing CSV escaping, formula injection via full_name, and the rows[0] crash for empty tenants
+- Flags the un-awaited auditLog (compliance) and 140,000 rows in memory against the streaming convention
+- Revised handler and tests cover cross-tenant, sort injection, formula escaping and audit; tone is constructive

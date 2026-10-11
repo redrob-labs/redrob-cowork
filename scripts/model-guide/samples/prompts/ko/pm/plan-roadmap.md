@@ -45,3 +45,37 @@ deliverable: spreadsheets
 - Doesn't schedule F2 before F5. Recognises that F2 (20 weeks) can't fit alongside F3 + F5 + F1 within 48, and tells the VP Sales so plainly, with the conditions under which F2 could lead instead.
 - Every quarter stays at or under 24 engineer-weeks, and H2 at or under 48, with the totals shown. A typical valid plan is F3 + F5 + F6 + F1 plus either F4 (45 weeks) or F7 (42 weeks).
 - Makes and justifies the F4 versus F7 call explicitly, for example total R×I×C (357 vs 300) against effort and confidence, rather than ranking mechanically.
+
+## Card
+
+brief: RICE 백로그로 분기당 24 엔지니어-주 안에서 하반기 로드맵을 짜고 트레이드오프를 설명한다.
+given:
+- 용량: 분기당 24 엔지니어-주, 하반기 48, 항목은 원칙적으로 분기에 나누지 않음
+- RICE 정의: Reach, Impact, Confidence, Effort의 척도
+- 백로그: 항목 7개의 RICE 입력값과 비고
+- 이해관계자 의견: 영업 VP, 고객성공 총괄, 엔지니어링 매니저의 발언
+asked:
+- 정규화한 Effort, RICE 점수, 공식을 담은 백로그 평가 표, 점수를 매길 수 없는 항목은 별도 처리
+- 분기별 하반기 계획 표와 분기별·하반기 용량 점검
+- 하반기에 들어가지 못한 항목과 항목별 한 줄 사유
+- 김철수 님과 이영희 님께 보내는 메모(약 500자 이내): 핵심 트레이드오프와 판단을 바꿀 조건
+limit: 약 2,500자 이내, Markdown
+hard: 백로그 속 불일치를 잡아내야 하고, 점수보다 우선하는 기한과 의존 관계, 마지막 용량을 둔 접전이 있다.
+
+## Scorecard
+
+- Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated
+- Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8
+- Schedules F3 SSO in Q3 (clear of 31 Oct, Hanbit contract) and F5 before 31 Dec, regardless of RICE
+- F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could
+- Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7
+- Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence
+
+## Scorecard, shown
+
+- F7의 45 엔지니어-일을 9주로 환산: RICE ≈ 33.3(6.7 아님), RICE 공식 명시
+- 나머지 점수 정확: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8
+- RICE와 무관하게 F3 SSO는 3분기(한빛 계약의 10월 31일 전 여유 있게), F5는 12월 31일 전 배치
+- F2를 F5보다 앞에 두지 않음: F3·F5·F1과 함께 들어갈 수 없다는 점과 가능 조건을 영업 VP에게 설명
+- 분기 ≤ 24주, 하반기 ≤ 48주, 합계 제시: 예) F3, F5, F6, F1에 F4 또는 F7 추가
+- F4 대 F7 판단을 명시적으로 정당화: 예) R × I × C 357 대 300을 Effort·Confidence와 비교

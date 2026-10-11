@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/analyze-metrics/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "analyze-metrics",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "5a6ade9d261e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Detects sample ratio mismatch: 10,000 vs 9,200, χ² ≈ 33, traced to iOS (2,500 vs 1,700) crash",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Build 5.2.0 crashed before the assignment event was logged, so users who crashed on the checklist never entered the checklist arm.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct overall χ²=33.3 and iOS χ²=152.4; identifies missing iOS users and pre-logging crash."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately detects overall SRM with χ² ≈ 33.3 and traces it to the iOS crash."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the pooled +13% lift and the iOS 20% → 26% lift as biased samples",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Overall activation (+3.0pp / +13%).** It includes the biased iOS arm.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects both pooled and iOS activation lifts because of survivor selection bias."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly rejects the pooled +13% lift and iOS lift as biased due to survivor filtering."
+    }
+   ]
+  },
+  {
+   "check": "Web activation 25.0% → 27.0% significant (z ≈ 2.5); Android 20.0% → 22.0% not (z ≈ 1.3)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Android alone is not significant.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tables correctly report Web 25%→27%, z=2.50, p=.012; Android 20%→22%, z=1.35, p=.18."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies Web activation as significant (z = 2.50) and Android as not significant (z = 1.35)."
+    }
+   ]
+  },
+  {
+   "check": "Notes paid is flat (4.10% vs ≈ 4.20%; web 4.5% vs 4.6%), stop at day 9, proxy metric",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Activation is a proxy. Without a paid lift, \"activation is up\" doesn't show revenue impact.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct paid rates and flat interpretation; explicitly notes stopping on day 9 of 14 and proxy limitations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes flat paid conversion across segments, early stoppage at day 9, and activation as a proxy metric."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't ship on the pooled result; fixes logging, reruns or extends to 14 days, with a decision criterion",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Re-run iOS on build 5.2.1 or later only, with the assignment event logged before the checklist renders.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects pooled rollout, fixes logging, reruns iOS, and sets full-14-day activation and paid-harm decision criteria."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends against shipping pooled result, fixing logging, rerunning, and sets clear decision criteria."
+    }
+   ]
+  },
+  {
+   "check": "Shows the formula behind every computed column (rates, differences, z-test, χ²)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "With two arms this is the same as z = (n_T − n_C)/√(N·0.25).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Required primary formulas are supplied, but the claimed equivalent SRM z formula is incorrect by a factor of two."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states mathematical formulas for rates, differences, z-test, and χ² goodness-of-fit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0230685,
+ "date": "2026-10-11"
+}

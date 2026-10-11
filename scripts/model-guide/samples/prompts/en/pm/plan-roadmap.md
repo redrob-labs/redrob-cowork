@@ -45,3 +45,28 @@ The team scores the backlog with RICE: Reach = accounts affected per quarter, Im
 - Doesn't schedule F2 before F5. Recognises that F2 (20 weeks) can't fit alongside F3 + F5 + F1 within 48, and tells the VP Sales so plainly, with the conditions under which F2 could lead instead.
 - Every quarter stays at or under 24 engineer-weeks, and H2 at or under 48, with the totals shown. A typical valid plan is F3 + F5 + F6 + F1 plus either F4 (45 weeks) or F7 (42 weeks).
 - Makes and justifies the F4 versus F7 call explicitly, for example total R×I×C (357 vs 300) against effort and confidence, rather than ranking mechanically.
+
+## Card
+
+brief: Plan a SaaS squad's H2 2026 roadmap from a RICE backlog within 24 engineer-weeks per quarter, and explain the trade-offs to stakeholders.
+given:
+- Capacity: 24 engineer-weeks per quarter, 48 for H2, no splitting across quarters by default
+- RICE definitions: the scales for reach, impact, confidence and effort
+- Backlog export: 7 items with RICE inputs and notes
+- Stakeholder input: quotes from the VP Sales, Head of Customer Success and Engineering Manager
+asked:
+- A scored backlog table with normalised effort, RICE scores and formulas; unscorable items handled separately
+- An H2 plan by quarter with a capacity check per quarter and for H2
+- A cut list with a one-line reason each
+- A memo, up to 250 words, to Richard Roe and Mary Major naming the key trade-off
+limit: Up to about 1,200 words, in Markdown
+hard: The backlog has an inconsistency to catch, deadlines and dependencies that override scores, and a close call for the last capacity slot.
+
+## Scorecard
+
+- Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated
+- Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8
+- Schedules F3 SSO in Q3 (clear of 31 Oct) and F5 before 31 Dec, regardless of RICE
+- F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could
+- Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7
+- Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence

@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/close-books/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "f642027076c5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits $4,527.00 into a duplicated $4,500.00 Coastline deposit and a $27.00 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "a duplicate posting of the Coastline EFT ($4,500.00) and a transposition on check #2038 ($27.00).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies both errors and their exact amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies and splits both components of the $4,527.00 difference."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the Miscellaneous Expense plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Nothing is unexplained, so nothing goes to Miscellaneous Expense.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the plug and explains why identifiable errors require targeted corrections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly and thoroughly rejects plugging the difference to Miscellaneous Expense."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to $86,562.05, moving to $86,972.05 if #2019 is voided",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Before void (John's bank figure / book after entries 1–6) | 86,562.05 | 86,562.05",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows both sides agreeing before void and increasing by $410 to $86,972.05 afterward."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles both sides to $86,562.05 before void and $86,972.05 after voiding check #2019."
+    }
+   ]
+  },
+  {
+   "check": "Returns the $350.00 NSF to R. Miles's receivable; fees to expense, interest to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Accounts Receivable – Patients (R. Miles) | 350.00",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reinstates the patient receivable, expenses both fees, and credits interest income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Returns NSF to patient receivable, books bank/merchant fees to expense, and interest to income."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to Unclaimed Property Payable under the 90-day policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Unclaimed Property Payable | | 410.00 | Former hygienist expense reimbursement; pending reissue or escheat",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Voids the stale check under the 90-day policy and preserves the obligation as a liability, not income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Voids check #2019 to Unclaimed Property Payable under policy rather than taking it to income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to John is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Before booking any difference, match EFT reference numbers to the statement and compare cleared check amounts to the register",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All journal entries balance with sensible accounts; review note provides specific, constructive reconciliation and stale-check guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Journal entries balance properly and the review note to John is specific and constructive."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0159747,
+ "date": "2026-10-11"
+}

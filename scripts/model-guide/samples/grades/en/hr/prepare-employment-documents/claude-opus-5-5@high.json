@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/prepare-employment-documents/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "8e4daadb4377",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Letter uses $175,000 or a placeholder, 3,200 RSUs, \"Software Engineer II\"; not $182,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "You will be employed as a **[Software Engineer II (L4)]**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, $175,000 and 3,200 RSUs; higher promised terms appear only in the cover note."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses the approved title, salary, and equity rather than the recruiter's verbal numbers."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Offer $175,000. Otherwise get a band exception, or a re-level that fits $182k.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends the band maximum, identifies VP Engineering and Finance sign-offs, and requires resetting candidate expectations before sending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends offering approved salary or obtaining band exception sign-offs, and resets expectations with John prior to sending."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped under §16600; California law and venue replace Texas under §925; confidentiality/IP kept",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Removed from the letter. The recruiter's statement was incorrect and should be corrected with John.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops non-compete under §16600 and substitutes California law and courts under §925, but omits confidentiality/IP."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Drops non-compete and updates governing law to California, but omits retaining a confidentiality/IP protection clause."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × $20,000 = $8,333.33; no final-pay deduction without written authorization",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Amount owed** | $20,000 × 5 ÷ 12 | **$8,333.33** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly prorates repayment after seven full months and prohibits final-pay deduction without separate written authorization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates exactly $8,333.33 owed after 7 months and requires separate written authorization for final wage deduction."
+    }
+   ]
+  },
+  {
+   "check": "Keeps at-will, contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "[Street address]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Preserves at-will employment, contingencies and December 1 start, but administrative placeholders leave the letter unfinished beyond open decisions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains at-will terms, contingencies, and December 1 start date with placeholders appropriately limited to open decisions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020937263,
+ "date": "2026-10-11"
+}

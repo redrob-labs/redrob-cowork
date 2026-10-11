@@ -54,3 +54,27 @@ State the formula behind each computed column (for example, merit $ = base × me
 - Flags E03 (5 at 62% goal attainment, an anchor of 1, with no valid justification) and E02 (5 at 96%, an anchor of 3, two levels above with no note). Identifies Richard Roe's leniency pattern in the manager table.
 - Handles the one-level deviations with judgement: E10's 4 has a justification and can stand for discussion, and E09 looks under-rated at 3 against a 104% anchor of 4.
 - The recommended plan totals no more than $43,260, keeps every merit % inside its rating's range, and every merit $ equals base × %.
+
+## Card
+
+brief: Managers submitted ratings and merit proposals before calibration; build the workbook, check them against the rating guide and budget, and prepare discussion points.
+given:
+- HRBP summary: a one-line claim about proposals against budget
+- Rating guide: 5 rating anchors with merit ranges, plus deviation, leave and budget rules
+- Manager submissions: 12 employees under 3 managers, with salary, rating, attainment, peer score, merit and notes
+asked:
+- Calibration table, one row per employee, with recommended rating, merit % and merit $
+- Budget table: payroll, budget, submitted and recommended totals
+- Manager-pattern table: average submitted and anchor rating per manager
+- Discussion guide of at most 8 bullets
+limit: Under about 1,200 words, as Markdown tables with each formula stated
+hard: A summary claim must be checked, a leave policy applied, rating deviations judged, and the plan must fit both budget and ranges.
+
+## Scorecard
+
+- Payroll $1,236,000; budget $43,260; submitted $44,890 (3.63%), $1,630 over; HRBP's "3.4%" called wrong
+- E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised to match
+- Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified
+- Shows Roe's leniency in the manager table: average submitted 4.75 vs anchor 3.25
+- E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)
+- Recommended plan totals ≤ $43,260, every merit % inside its range, merit $ = base × %

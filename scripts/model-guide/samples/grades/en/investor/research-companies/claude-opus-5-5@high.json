@@ -1,0 +1,128 @@
+{
+ "key": "en/investor/research-companies/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "investor",
+ "task": "research-companies",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "eb36e25ac283",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Base 281,960 full-service + 96,000 institutional = 377,960 locations; TAM about $756–813M; limited-service out of SAM",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "763,800 × $2,100 | **$1,604M**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct 377,960-location base and limited-service SAM exclusion, but TAM wrongly includes limited-service and exceeds the required range."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 377,960 locations for SAM, yields $794M (within $756–813M), and excludes limited-service."
+    }
+   ]
+  },
+  {
+   "check": "Current market: ≈8,459 + 10,560 ≈ 19,000 locations, about $38–41M a year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Current market (total)** | 19,019 penetrated locations | Sum | **$40M**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 8,459 full-service and 10,560 institutional locations, totaling approximately 19,000 and $40M annually."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately breaks down 8,459 FSR and 10,560 institutional locations to reach ~19,019 locations and $40M."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the $4.2B: global, covers hauling, composting and digestion, and is company-sourced",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Its $4.2B figure covers hauling, composting and anaerobic digestion",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the figure for its services scope, global geography, and company-marketing provenance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly identifies all three flaws: physical waste services vs software, global scope, and company marketing source."
+    }
+   ]
+  },
+  {
+   "check": "Annualizes BinSight $1,788, Scrapless $2,148 (2021 $99 stale), Kitchen Ledger $2,400 plus hardware",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The 2021 figure of $99 is discarded as stale.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly annualizes BinSight to $1,788 and Scrapless to $2,148; separates Kitchen Ledger’s $2,400 subscription and $1,500 hardware."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Annualizes BinSight to $1,788, Scrapless to $2,148 noting 2021 is stale, and notes Kitchen Ledger's $2,400 plus hardware."
+    }
+   ]
+  },
+  {
+   "check": "Kitchen Ledger's Series B is $14M from the press release, not the aggregator's $40M",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$14M Series B, Mar 2025 (**high**: company press release). The $40M aggregator figure is likely wrong",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the primary press release’s $14M Series B and rejects the conflicting aggregator figure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Chooses the $14M press release figure over the aggregator's $40M figure."
+    }
+   ]
+  },
+  {
+   "check": "Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "what are institutional churn and net revenue retention on their own, and should independents be deprioritized?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Institutional skew supports SAM inclusion and churn prompts a founder question, but restaurant churn does not inform stated SAM scope."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Connects the institutional skew and 14% independent FSR churn to SAM priorities and asks founders about deprioritizing them."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027698475,
+ "date": "2026-10-10"
+}

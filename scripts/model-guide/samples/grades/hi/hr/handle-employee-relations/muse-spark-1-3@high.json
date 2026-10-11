@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/handle-employee-relations/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "d4e5e23c2caa",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Roe's own ₹18,450 dinner bill (9 attendees) and 19 Sept Slack DM disprove his denial; overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Respondent की अनुपस्थिति का दावा दस्तावेज़ों से खंडित होता है, जिससे उनकी समग्र विश्वसनीयता प्रभावित हुई।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies Roe’s own ₹18,450 nine-attendee bill and Slack DM as contradicting his denial, damaging overall credibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disproves Roe's denial using the expense bill and Slack DM, finding his credibility severely undermined."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct Substantiated (policy 4.1 / s.2(n); Stiles, bill, DM); Sept 10 remark labelled with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Allegation 2 — 18 सितंबर का आचरण — Substantiated",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Supports September 18 with Stiles, bill and DM under policy/statute; September 10 is labelled and reasoned."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly labels Sept 18 as Substantiated under Policy 4.1/s.2(n) citing evidence, and gives reasoned findings for Sept 10."
+    }
+   ]
+  },
+  {
+   "check": "Victimisation: Roe cut the move to Major alone ~17 hours after service; label reasoned (4.6, s.3(2)); seniority tested",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "scheduler से non-consultation, और लिखित seniority/operational औचित्य की अनुपस्थिति — सभी retaliatory inference को पुष्ट करते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Reasons substantiated victimisation using chronology and relevant provisions, but does not test seniority against records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes temporal proximity (<24 hrs), tests seniority justification against lack of records/scheduler consultation, labels Substantiated under 4.6 and s.3(2)."
+    }
+   ]
+  },
+  {
+   "check": "Gives Miles's unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "anonymous hearsay, नाम बताने से इनकार। कम weight; चरित्र-टिप्पणी पर निर्भर नहीं किया गया।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discounts Miles’s account because it is unnamed hearsay, not firsthand evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives Miles's statement low weight and explains it is anonymous hearsay and uncorroborated character evidence."
+    }
+   ]
+  },
+  {
+   "check": "Remedies: reverse shift, Rule 8 relief (Roe off her supervision; move respondent, not her), proportionate action, check-ins",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Complainant और गवाहों के विरुद्ध किसी भी retaliation की निगरानी; उल्लंघन पर अलग misconduct माना जाए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Recommends shift reversal, written-request relief, respondent reassignment and disciplinary action, but no concrete follow-up check-ins."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends reversing the shift, Rule 8 interim relief removing Roe from supervision/moving Roe, proportionate sanctions, and retaliation monitoring."
+    }
+   ]
+  },
+  {
+   "check": "Open items: verify seniority records, check for further victimisation, employer acts on recommendations within 60 days",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Employer धारा 13(4) के अधीन 60 दिनों में कार्रवाई कर IC को सूचित करे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Includes the 60-day duty and retaliation monitoring elsewhere, but omits verifying seniority records as an open item."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Mentions 60-day action and victimisation protection, but fails to include verifying seniority records under open items."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026508038,
+ "date": "2026-10-11"
+}

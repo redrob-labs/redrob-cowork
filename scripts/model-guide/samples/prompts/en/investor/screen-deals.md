@@ -57,3 +57,26 @@ Round growth to one decimal place and burn multiples to two. Keep the answer und
 - Computes the rest correctly: Ledgerly 100% growth and 1.50 burn multiple; Fleetwise 2.50 (also failing on gross margin and hardware); Quorum HR 58.6% growth and 1.18, with ARR above the range; Northbeam 1.27, failing on NRR and round size; Tallow 111.1% and 1.60; Corvid 105.9% and 1.50, failing on geography.
 - Ledgerly is in the top three. The other picks are reasoned, for example Tallow (passes every criterion, with its 40% concentration and renewal date listed as the first diligence question) and Parcel Lane on recurring figures.
 - Takes a clear position on waivers. For example, Corvid's geography is the most waivable gap if the US expansion is real, while Northbeam fails two criteria, so one waiver can't rescue it despite the relationship.
+
+## Card
+
+brief: Screen eight inbound Series A companies against the fund's criteria, correcting founder-reported figures, and recommend three for Monday's partner meeting.
+given:
+- Fund criteria: 8 thresholds, waivable only by a partner
+- Pipeline: 8 companies' founder-reported ARR, burn, NRR, gross margin and round size
+- Data-room and first-call notes: 5 notes on specific companies
+asked:
+- Screening table: corrected ARR, growth, burn multiple and pass/fail per criterion
+- Ranking of the top three, each with a rationale and three questions
+- Up to three near-misses worth a waiver discussion
+limit: Under about 1,200 words, as Markdown tables; growth to one decimal, burn multiples to two
+hard: Founder-reported numbers need correcting from the notes, some results sit on a threshold, and waivers call for judgement.
+
+## Scorecard
+
+- Parcel Lane corrected to $2.8M: growth 86.7% (not 160%), burn multiple 2.00, a borderline pass
+- Sentinel Docs corrected to $1.32M: fails the $1.5M ARR floor; burn multiple 2.50
+- Ledgerly 100%/1.50; Fleetwise 2.50, fails margin and hardware; Quorum 58.6%/1.18, ARR above range
+- Northbeam 1.27, fails NRR and round size; Tallow 111.1%/1.60; Corvid 105.9%/1.50, fails geography
+- Top three include Ledgerly; other picks reasoned, e.g. Tallow with its 40% concentration as first question
+- Clear waiver view, e.g. Corvid's geography waivable; Northbeam fails two, so one waiver can't rescue it

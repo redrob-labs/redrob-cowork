@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/memo/gpt-6-astra@default",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "c8f70aff2127",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Rep claim under 8.2(a) expired Apr 30, 2024; 8.2(c) survives to Apr 30, 2028 under §8106(c); timely",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "The state tax limitations dates are missing, so timeliness cannot be resolved conclusively.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly distinguishes claims and invokes §8106(c), but treats April 2028 as an outside limit and does not conclude timeliness."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Distinguishes the expired 8.2(a) representation claim from 8.2(c) surviving up to April 30, 2028 under §8106(c)."
+    }
+   ]
+  },
+  {
+   "check": "Notice ~91 days after Aug 4 misses 30 days, but bars recovery only to the extent of actual prejudice",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The November 3 notice came 91 days after receipt—61 days late.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates lateness and explains that only actual prejudice reduces recovery, including a lost appeal opportunity."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes notice was 91 days after receipt, missing the 30-day deadline, but requires actual prejudice."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable $662,000 ($260,000 + $290,000 + $112,000), not pro-rata $106,667; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Section 6.9 requires closing-of-the-books allocation of straddle-period sales taxes—not daily proration.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table correctly totals $260,000, $290,000, and $112,000 as $662,000 and excludes post-closing taxes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $662,000 using closing-of-the-books allocation ($260k + $290k + $112k) and excludes post-closing taxes."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares $463,400 and $198,600",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Assuming timeliness and no prejudicial reduction, Founders LLC owes **$463,400** and Mary Major owes **$198,600**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct several shares; expressly excludes deductible and escrow cap and explains escrow release does not extinguish direct recovery."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes 8.2(c) avoids deductible/caps and released escrow, correctly allocating several shares of $463,400 and $198,600."
+    }
+   ]
+  },
+  {
+   "check": "Amend the $1,120,000 notice to an 8.2(c) claim for $662,000; preserve the assessment appeal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Identify Sections 8.2(c), 8.6, and 6.9; reduce the covered-tax demand to $662,000;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends correcting the notice to the independent indemnity amount and preserving assessment challenges and contest deadlines."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends amending notice to an 8.2(c) claim for $662,000 and preserving assessment challenges and appeal deadlines."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020253975,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/plan-finances/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "founder",
+ "task": "plan-finances",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "41dd5ca29218",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Names the errors: unburdened payroll without hires, license spread instead of paid in January, revenue not gross profit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "월 900만원 대신 1월 일시 지급.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies payroll burden and hires, January license payment, and gross profit rather than revenue; quantifies corrections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the missing burden, omitting hires, lump-sum license timing, and revenue vs gross profit."
+    }
+   ]
+  },
+  {
+   "check": "January 2026 net burn about ₩202,155,000 (96,075,000 + 28,500,000 + 108,000,000 − 30,420,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실제 현금유출은 **202,155,000원**이다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "January burn matches the required payroll, operating expense, license, and gross-profit calculation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Precisely matches the expected January 2026 net burn of ₩202,155,000 and components."
+    }
+   ]
+  },
+  {
+   "check": "Burn settles near ₩116,000,000–₩127,000,000 a month mid-2026, easing as MRR grows",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "|26.07|60233317|60233317|46981987|140300000|33000000|0|126318013|893507618|",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Monthly table shows approximately ₩116–127 million mid-2026 burn, declining thereafter as MRR grows."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Burn settles in the ₩116,000,000–₩126,360,635 range mid-2026, gradually decreasing as MRR grows."
+    }
+   ]
+  },
+  {
+   "check": "Cash runs out around March 2027 (~₩17,700,000 left end-February), with the January 2027 license as a cliff",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**현금 고갈은 2027년 3월**이다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table confirms ₩17,666,404 remaining in February and the ₩108 million January 2027 license cliff."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies cash exhaustion in March 2027 with ~₩17.7M remaining at end-February 2027."
+    }
+   ]
+  },
+  {
+   "check": "Raise must close by about August 2026 (~₩772,000,000 left), so fundraising starts March–April 2026",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**최종 클로징 2026년 8월, 첫 미팅은 늦어도 3월**이다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly tests August and September cash against six months of burn and works backward five months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly determines closing by August 2026 (~₩771.5M remaining) and kickoff by March 2026."
+    }
+   ]
+  },
+  {
+   "check": "MRR = opening × 0.98 + new; column formulas; quantified alternative (e.g. no AE: April 2027); justified recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "고갈 시점: **2027년 4월**, 약 1개월 연장",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides correct MRR recurrence, all column formulas, quantified hiring-delay alternative, explicit assumptions, and justified recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States MRR formula and all column formulas, models a quantified alternative scenario, and provides justified recommendations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019470938,
+ "date": "2026-10-11"
+}

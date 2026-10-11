@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/write-outreach/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "sales",
+ "task": "write-outreach",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "3df64e8313ec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "No email to Kim Cheol-su (unsubscribed; 정보통신망법 Art. 50); phone or no outreach, not exploiting the violation finding",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이메일 발송(개인 메일, 자동 시퀀스, 뉴스레터 포함). 2026-02-11 수신 거부는 유효.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prohibits email, permits respectful phone outreach, identifies legal risk, and avoids exploiting the inspection finding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Complies with opt-out by avoiding email, suggests phone contact without exploiting the violation finding."
+    }
+   ]
+  },
+  {
+   "check": "Park Young-su email omits the Bukcheon Logistics fine; uses second-shift hiring and safety-first culture",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2교대 야간조 지게차 운전원 12명 채용 공고와 \"안전이 최우선인 회사\"라는 첫 문구를 봤습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses hiring and safety culture; omits the unrelated Bukcheon Logistics fine from Park’s email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Omits Bukcheon Logistics fine and leverages the 2nd-shift hiring and safety-first culture."
+    }
+   ]
+  },
+  {
+   "check": "Cites 60% fewer near-misses over 6 months and impacts 9 → 4; never \"accidents\" or \"guaranteed\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "6개월간 **기록된 아차사고가 60%** 줄었고, 충돌은 첫 12개월에 9건→4건이었습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately distinguishes near-misses from collisions and rejects accident-reduction guarantees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately quotes 60% fewer near-misses and 9 to 4 collisions, avoiding 'accidents' or 'guaranteed'."
+    }
+   ]
+  },
+  {
+   "check": "Note to marketing explains why the hook overclaims (exaggerated-ad risk under 표시광고법)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**\"보장합니다\"는 결과 보증**이라 표시광고법상 허위·과장 광고 소지가 있고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains the unsupported guarantee, incorrect accident metric, and exaggerated-advertising risk under 표시광고법."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the hook's overclaim and identifies the legal risk under the 표시광고법."
+    }
+   ]
+  },
+  {
+   "check": "Lee sequence answers Stackwise honestly (beta), uses the Pyeongtaek DC, offers the 30-day pilot; follow-ups vary",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "평택 오픈 전에 기존 센터 한 곳에서 지게차 10대, 30일 무료 파일럿으로 실제 데이터를 먼저 보실 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses Stackwise beta, uses Pyeongtaek expansion, offers the pilot, and varies follow-up value."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honestly discloses beta status, leverages Pyeongtaek news, offers the pilot, and varies the sequence."
+    }
+   ]
+  },
+  {
+   "check": "Every email within its character limit, specific, with no invented facts",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "신입 운전원이 야간에 투입되는 첫 몇 달은 보행자 접촉 위험이 가장 높은 시기입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Emails are specific, but multiple exceed character limits and introduce unsupported peak-risk claims."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All emails adhere closely to the character limits, are specific, and contain no fabricated facts."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024063638,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/answer-customers/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "answer-customers",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "2287ae76fb8d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "현재 3자리가 남아 있어 세 분이 함께 오실 수 있어요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Does not add a Saturday seat; offers all three Thursday 23 April at 18:30."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sat 18 Apr is not overbooked, and the 3-seat Thu 23 Apr evening class is offered."
+    }
+   ]
+  },
+  {
+   "check": "Kim Cheol-su gets a full ₩70,000 refund or free reschedule (studio cancelled); bounced email noted, address fixed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "요청하신 대로 수강료 70,000원 전액 환불을 진행하겠습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes studio cancellation, apologizes for bounced notice, and arranges verified email correction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives a full ₩70,000 refund due to studio cancellation, notes bounced email, and requests correct address."
+    }
+   ]
+  },
+  {
+   "check": "Wholesale at ₩25,800 a mug (₩1,548,000 for 60); ₩20,000 flagged to the owner, not accepted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "개당 25,800원, 총 1,548,000원입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct wholesale pricing; flags the requested discount for owner approval rather than accepting it."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₩25,800/mug (₩1,548,000 total), rejects ₩20,000 without owner approval, and flags discrepancy to owner."
+    }
+   ]
+  },
+  {
+   "check": "Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "60개는 주 40개 생산 능력 기준 **최소 2개 주차**가 필요하나",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects May 1 and proposes schedule adjustment, but gives two calendar weeks rather than 1.5 weeks of capacity."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States 1 May is impossible due to 6-week lead time/capacity and suggests adjusting dates/budget."
+    }
+   ]
+  },
+  {
+   "check": "Message 4 is phishing (lookalike domain, urgency): no reply, no click, report it, check real admin",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "답장·링크 클릭 금지, 신고·격리. 공식 관리자 화면에서 계정 상태 확인",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides correct phishing precautions and identifies sender mismatch, but omits urgency as a phishing indicator."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies phishing, advises no reply/clicks, reporting, and checking real admin interface."
+    }
+   ]
+  },
+  {
+   "check": "Honours Park Young-su's replacement or refund (photo DM 27 Mar, within 7 days); apologises for missed DM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "배송 후 7일 이내에 알려 주셨으므로 무료 교환 또는 환불이 가능합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Honors the March 27 photo DM, offers free replacement or refund, and apologizes for the missed response."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Apologises for the missed DM and honours replacement or refund based on 27 March photo notification."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019878338000000002,
+ "date": "2026-10-11"
+}

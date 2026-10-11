@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/stakeholder-updates/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "beb3252399e6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ $650,000 ($455k + 3 × $65k), not $590,000: ≈ $50,000 (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3 months × $65k = $195k, so **$650k at completion** (+$50k).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes $650k, identifies $50k/8% overrun, and challenges the reported $590k."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately recomputes the forecast to $650k ($50k / 8% over budget) and calls out the unsupported $590k figure."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pack 14 Nov + 4 weeks = about 12 Dec, after 1 Dec",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies earliest launch around 12 December and marks compliance pack and launch red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the 12 Dec earliest date and correctly flips the milestones from green to red."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "goal creation (31% vs 40%) and support tickets (22 vs 15 per 1,000) missed target.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately reports both beta misses; the deck explicitly shows the ticket target as ≤15."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly and honestly presents both beta misses alongside their targets."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size and retention without spin, and links the ticket themes to fixes",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Value is proven for those who engage.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct figures and theme-linked fixes, but claims proven value and comparative improvement beyond the evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents the strong metrics objectively and maps the two ticket drivers directly to concrete fixes."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Recommendation: Option C.** Please approve:",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides December and January options, recommends January with justification, and requests a specific launch date and budget ceiling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides distinct schedule and budget options and makes an explicit recommendation."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "If you assumed a ramp-down, let's document it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Eight slides have speaker notes and open with the bottom line; Jane's note explains changes factually and constructively."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Features exactly 8 slides with notes, leads with the bottom line, and addresses Jane constructively."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018528825,
+ "date": "2026-10-11"
+}

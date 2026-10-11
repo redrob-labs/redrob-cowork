@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/prepare-tax/glm-5-3@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "glm-5-3",
+ "effort": "high",
+ "scorecardSha": "47e703208d5c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 1,
+ "partial": 5,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes ₩18,000,000 double count: receipts ₩141,200,000 = 144,062,500 − 6,000,000 − 1,400,000 + 1,221,000 + 3,316,500",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "카드매출 중 미신고분(40,700,000 − 18,000,000 = 22,700,000) = **141,200,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes duplicate card revenue and correctly reconciles deposits using transfers, refund, fees, and withholding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "₩18,000,000 중복을 제외하고 입금액을 정확히 조정하여 총수입금액 141,200,000원을 도출함."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 3 (pre-2023 brackets); software ₩3,460,000 net of refund; deducts ₩1,221,000 fees, ₩3,200,000 meals within limit",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "다만 세율구간은 2020년 이후 미변경이라 아래 계산에 사용하되,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Software, fees, and meals are correct, but it uses obsolete brackets instead of rejecting note 3."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "비용 항목들은 맞게 처리했으나, 2023년 개정세율을 파악하지 못하고 구 세율표를 그대로 계산에 사용함."
+    }
+   ]
+  },
+  {
+   "check": "Vehicle ₩2,814,000 (4,200/11,000), home office ₩1,200,000 (12/84); gym excluded; 국민연금 to 연금보험료공제",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "면적비율 안분(140만원/년) 적용.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Expense table correctly treats vehicle, home office, gym, and pension, but later contradicts the home-office amount."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "차량비, 자택 사무실, 헬스장 제외, 국민연금 소득공제 대체 처리가 모두 정확함."
+    }
+   ]
+  },
+  {
+   "check": "Business income ₩115,775,000, tax base ₩108,875,000, computed tax ₩22,666,250 (35% − 15,440,000), determined ₩22,596,250",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "산출세액: 108,875,000×35% − 14,900,000 | 23,206,250",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Business income and tax base are correct; obsolete progressive deduction makes computed and determined taxes incorrect."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "소득금액과 과표는 맞으나 개정 전 누진공제액을 적용하여 산출세액과 결정세액이 틀림."
+    }
+   ]
+  },
+  {
+   "check": "Payable ₩19,581,250 after ₩3,015,000 withheld; local tax ~₩1,958,125; laptop expensed as PC, depreciation as alternative",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "보수적 대안은 5년 정액 감가상각",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct withholding and laptop treatment, including depreciation alternative; income tax payable and local tax are incorrect."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "노트북 처리는 정확히 권고했으나 세액 계산 오류로 납부할 소득세 및 지방소득세 금액이 틀림."
+    }
+   ]
+  },
+  {
+   "check": "Flags unwithheld 3.3% (₩297,000) on 박영수's ₩9,000,000, unfiled 지급명세서, 가산세; asks 블루핀헬스 to correct",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "지급명세서 미제출·증빙불비 가산세(지출액 2%) 리스크.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Mentions filing and penalties, but omits ₩297,000 withholding and Bluefin correction; filing guidance is materially inaccurate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "박영수 지급명세서 미제출 및 가산세를 지적했으나 3.3%(29.7만원) 및 블루핀 수정 요청 누락."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.032525588,
+ "date": "2026-10-11"
+}

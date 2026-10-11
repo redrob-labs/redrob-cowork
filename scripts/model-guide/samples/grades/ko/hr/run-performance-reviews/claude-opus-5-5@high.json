@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/run-performance-reviews/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "a2f161de171a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll ₩865,200,000; budget ₩30,282,000; submitted ₩31,423,000 (3.63%), ₩1,141,000 over; HRBP's \"3.4%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "요약의 3.4%와 다르며, **예산 3.5%를 1,141,000원 초과**합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Payroll, budget, submitted total, percentage, and excess are correct; explicitly corrects the HRBP summary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All four payroll/budget/submitted figures are exact, and the HRBP summary is refuted."
+    }
+   ]
+  },
+  {
+   "check": "E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised; §19③ 불리한 처우",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E07: 휴직 기간을 포함해 평가했으므로 비례 평가 규정 위반이며, 남녀고용평등법 제19조 제3항 위반 소지가 있습니다. 4등급 반영이 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats E07 as a firm policy violation, uses prorated 103%, raises rating and merit, and identifies statutory risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly identifies pro-rated 103% (anchor 4), policy/legal violation under §19③, and raises merit."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E02·E03: 5등급은 한 단계 조정 범위를 넘으므로 불가합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly flags both as violations, with anchors 3 and 1 and inadequate justification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags both E03 (anchor 1) and E02 (anchor 3, no note) as unauthorized adjustments."
+    }
+   ]
+  },
+  {
+   "check": "Shows 박영수's leniency in the manager table: average submitted 4.75 vs anchor 3.25",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 박영수(플랫폼) | 4.75 | 3.25 | **+1.50** | 5.50% |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Manager table correctly shows submitted and anchor averages; discussion explicitly identifies leniency."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Manager table shows submitted average 4.75 vs anchor 3.25 for 박영수."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| E09 | 3 | 4 | −1 | 사유 필요 | 4 · 3.5% *(논의용)*",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags E09's unexplained underrating; retains E10's justified 4 subject to evidence review."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Allows E10's justified 4 for discussion and flags E09 as under-rated against anchor 4."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ ₩30,282,000, every merit % inside its range, merit amount = base × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 권고안 합계 | 28,245,000 | 3.26% (2,037,000 여유) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended total is correct and within budget; every rate meets its rating range and every amount equals base times rate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommended total ₩28,245,000 ≤ budget, all merit rates within band, calculations exact."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025251188,
+ "date": "2026-10-11"
+}

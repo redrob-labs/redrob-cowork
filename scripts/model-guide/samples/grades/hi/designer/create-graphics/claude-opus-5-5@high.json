@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/create-graphics/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "designer",
+ "task": "create-graphics",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "3a6e359e0a4f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"कोई फ़ीस नहीं. कभी नहीं.\" given ₹50 paper-statement and ₹23 ATM charges; offers accurate alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "कागज़ी स्टेटमेंट पर ₹50 प्रति माह और दूसरे बैंक के ATM पर 5 मुफ़्त लेन-देन के बाद ₹23 प्रति निकासी लगते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the absolute claim, explains both charges, and offers two alternatives focused on minimum-balance fees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects the absolute claim due to paper-statement and ATM charges, offering two compliant alternative headlines."
+    }
+   ]
+  },
+  {
+   "check": "Shows 7.00% \"प्रति वर्ष\" with the ₹1 lakh tier and full disclosure; drops the unsupported \"शहर में कोई और\" claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ब्याज दरें परिवर्तनशील हैं; ब्याज दैनिक शेष पर गणना कर तिमाही जमा किया जाता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both SVGs include annual rates, both tiers and full disclosure; the unsupported comparison is explicitly rejected."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes 7.00% प्रति वर्ष with the ₹1 lakh tier, full disclosure, and drops the unsupported city comparison claim."
+    }
+   ]
+  },
+  {
+   "check": "DICGC ₹5 lakh line, badge ≥120 px, logo ≥160 px with clear space, headline ≥64 px; matras not clipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Clear space 24 px माना गया है, जो इस आकार पर \"न\" की अनुमानित ऊँचाई है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes insurance wording, compliant badge/logo widths, clear space and 84px square headlines; matras have adequate room."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes ₹5 lakh DICGC line, badge ≥120 px, logo ≥160 px with clear space, headline ≥64 px with ample spacing."
+    }
+   ]
+  },
+  {
+   "check": "Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Instagram 1080×1080, LinkedIn 1200×627",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides two valid, correctly sized SVGs with labelled placeholders, clear hierarchy and the prescribed brand colours."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both SVGs have correct dimensions, valid syntax, clear hierarchy, and use only approved brand colours."
+    }
+   ]
+  },
+  {
+   "check": "Recomposes the landscape version rather than scaling the square one down",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ऊँचाई लगभग आधी रह जाती है, इसलिए स्टैक दो कॉलम में बदल जाता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Landscape uses a left photo, right content column, horizontal rate card and full-width disclosure strip."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recomposes the landscape version into a two-column and bottom-strip layout rather than scaling down the square."
+    }
+   ]
+  },
+  {
+   "check": "Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "युवा दंपति या साथ रहने वाले दोस्त भी उतने ही उपयुक्त हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Real members, natural light and first-timer copy are specified, but a happy young family is not firmly retained."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Follows photo guidelines (real members, natural light, family/household dining table) and addresses 22–35 first-time account holders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.035069475,
+ "date": "2026-10-11"
+}

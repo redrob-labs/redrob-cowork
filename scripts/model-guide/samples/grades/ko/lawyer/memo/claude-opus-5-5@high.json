@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/memo/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "4a4a04f44b9a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "8.2(a) rep claim expired Apr 30, 2024; 8.2(c) survives under 8.6 to Apr 30, 2028; timely",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제8.6조에 따라 최장 2028. 4. 30.까지 존속하므로 기간 내 청구입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Separately identifies the April 30, 2024 representation expiry and timely independent tax indemnity claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "(a)호 만료일, (c)호의 2028년 4월 30일 존속 및 기한 내 청구임을 정확히 명시함."
+    }
+   ]
+  },
+  {
+   "check": "Answers §184②: 8.6 is a survival period, not an extended limitation; §64 runs from Aug 4, 2025 (§166①)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제8.6조는 소멸시효를 연장하는 약정이 아닙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains contractual survival and applies the five-year commercial limitation from the August 4, 2025 assessment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "민법 제184조 제2항에 대해 존속기간 약정 및 2025년 8월 4일 기산 5년 소멸시효 법리를 명확히 제시함."
+    }
+   ]
+  },
+  {
+   "check": "Notice 91 days after Aug 4 misses 30 days; bars recovery only for actual prejudice (e.g. §68① window)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "의무가 면제되는 것은 매도인이 실제로 불이익을 입은 범위에 한정됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies late notice, limits relief to actual prejudice, and discusses the appeal deadline and confirming an appeal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "30일 도과 사실과 실제 불이익 범위 면제 원칙, 국세기본법상 90일 불복 기한 연계를 정확히 검토함."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable ₩6억 6,200만 (2019, 2020, Jan–Apr 2021), not pro-rata ₩1억 667만; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "11억 2천만원이 아니라 **6억 6,200만원**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the closing-of-books allocation of ₩112 million for January–April 2021 and excludes post-closing taxes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "장부마감 기준 1~4월분 1억 1,200만원을 반영하여 종결 후 조세를 제외하고 6억 6,200만원을 정확히 산출함."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares ₩4억 6,340만 and ₩1억 9,860만",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "매도인별로는 파운더스 4억 6,340만원, 이영희 1억 9,860만원입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct several allocation; excludes deductible and escrow cap, notes escrow release, and applies the purchase-price ceiling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "공제액·에스크로 상한 배제 및 매도인별 분할책임(70%, 30%) 액수를 정확히 명시함."
+    }
+   ]
+  },
+  {
+   "check": "Amend the ₩11억 2천만 notice to an 8.2(c) claim for ₩6억 6,200만; preserve the assessment challenge",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "청구 근거를 제8.2조 (c)호로 특정하고, (a)호 청구는 철회",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends correcting the notice to ₩662 million under 8.2(c), checking any appeal, and pursuing available assessment challenges."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "통지를 8.2조 (c)호 6.62억원으로 정정하고 불복 등 처분 다툼을 보존하도록 적절히 권고함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025708463,
+ "date": "2026-10-11"
+}

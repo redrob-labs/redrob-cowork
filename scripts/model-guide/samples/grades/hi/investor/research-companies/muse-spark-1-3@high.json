@@ -1,0 +1,128 @@
+{
+ "key": "hi/investor/research-companies/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "investor",
+ "task": "research-companies",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "469c20fb1d01",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Base 281,960 full-service + 96,000 institutional = 377,960; TAM ≈₹2,268–2,457 crore; QSR/cloud kitchens out of SAM",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**TAM:** सभी organised outlets 7,42,000 [1] + institutional 96,000 [2] = 8,38,000 — long-term theoretical universe।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct 377,960-location SAM and QSR exclusion, but TAM incorrectly includes all organised outlets, yielding ₹5,342 crore."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculates 377,960 locations (₹2,409 cr) and excludes QSR/cloud, but labels this as SAM rather than TAM."
+    }
+   ]
+  },
+  {
+   "check": "Current market: ≈8,459 + 10,560 ≈ 19,019 locations, about ₹114–124 crore a year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "19,019 = 8,459 + 10,560 (नीचे देखें)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct penetration-derived locations and ₹121 crore annual market at the stated blended price."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 19,019 current locations and ₹121 crore annual market size."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the ₹35,000 crore: global, covers hauling, composting and digestion, and is company-sourced",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Marketing claim; geography (global) + category (hauling/biogas) mismatch।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects company-blog claim; identifies global scope and hauling, composting, and biogas rather than India software."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects ₹35,000 cr as global, covering hauling/composting/biogas, and self-reported/marketing."
+    }
+   ]
+  },
+  {
+   "check": "Annualizes ex-GST: BinSight ₹53,988, Scrapless ₹65,988 (2021 ₹2,499 stale), Kitchen Ledger ₹72,000 plus ₹45,000 kit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹72,000 software + ₹45,000 one-time kit (2025 page) [5]; Yr-1 TCO ~₹1,17,000",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct ex-GST annual prices for all three competitors, separate hardware cost, and rejection of stale Scrapless pricing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Annualizes BinSight (₹53,988), Scrapless (₹65,988, 2021 stale), and Kitchen Ledger (₹72,000 plus ₹45,000 kit) ex-GST."
+    }
+   ]
+  },
+  {
+   "check": "Kitchen Ledger's Series B is ₹115 crore from the press release, not the aggregator's ₹330 crore",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹115 cr Series B (12 Mar 2025 press release, Orchard Lane) — High;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses primary-release ₹115 crore and explicitly disregards aggregator ₹330 crore."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Relies on ₹115 crore press release figure and dismisses aggregator's ₹330 crore claim."
+    }
+   ]
+  },
+  {
+   "check": "Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Full-service में chain vs independent split क्या है — 14% logo churn किस ticket-size/tenure पर, और institutional NRR/gross retention क्या है?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Connects institutional skew and churn to retention diligence, but does not reconsider full-service inclusion in SAM."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Turns churn and institutional skew into founder questions, but omits linking them back to SAM scope."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029863313000000002,
+ "date": "2026-10-10"
+}

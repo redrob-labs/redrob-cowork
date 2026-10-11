@@ -64,3 +64,38 @@ Blog post `/hi/blog/ac-service-scheduling-guide` भी "ac service scheduling s
 - Corrects the AI answers with an FAQ entry stating plainly that the technician app works offline and the office web app does not. The page includes a quotable fact table (price per user, TallyPrime, offline mode) that mirrors the comparison format in the AI overview.
 - Targets "ac service scheduling software" and "ac service dispatch software" in the title, H1 and H2s. Resolves the cannibalisation with a specific plan, such as repositioning the blog post for informational intent and linking it to the product page with exact-match anchor text.
 - The title is 60 characters or fewer and the meta description 155 or fewer, with accurate counts (Devanagari counted by Unicode characters, including matras). The JSON-LD is valid and matches the page (price 799, priceCurrency INR, offer, FAQ text), and the survey claim is attributed (n = 210, March 2025).
+
+## Card
+
+brief: AC service businesses के field-service app का हिंदी product page दोबारा लिखिए, ताकि वह बेहतर rank करे और AI answer engines उसे सही-सही quote करें।
+given:
+- Google Search Console: 7 queries के impressions, clicks, CTR और position
+- Blog post का note: मुख्य query पर rank करने वाला दूसरा URL
+- मौजूदा page का अंश: title tag, H1 और intro copy
+- Product facts (नवंबर 2025 तक): pricing, scheduling, integrations, offline, customers और survey
+- ASCI Code के अंश: सच्चाई, गुमराह न करना और leadership claims
+- Answer engines का snapshot: category और product पर 2 मौजूदा AI जवाब
+asked:
+- Title tag (≤60 characters) और meta description (≤155), counts सहित
+- दोबारा लिखा page: H1, intro, H2 sections, "Fieldnote एक नज़र में" fact table और 5–7 सवालों का FAQ
+- FAQPage और SoftwareApplication JSON-LD
+- Blog post और internal linking की योजना, अधिकतम 5 bullets
+- Rationale, अधिकतम 150 शब्द
+limit: लिखित हिस्से लगभग 1,200 शब्दों के भीतर, Markdown, JSON-LD इस सीमा में नहीं
+hard: मौजूदा copy और बाहरी जवाबों को मौजूदा तथ्यों और ASCI नियमों पर जाँचना है, दो pages आपस में टकराते हैं, और queries चुनना judgement call है।
+
+## Scorecard
+
+- Fixes price (₹799 annual / ₹999 monthly + GST, not "from ₹499"), trial not free plan, TallyPrime only; unsubstantiated claims cut
+- Answers "ac service app free" honestly with the 14-day trial (ASCI I.4), explained in the rationale
+- FAQ: technician app works offline, office web app doesn't; fact table has price, TallyPrime, offline
+- Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product
+- Title ≤60, meta ≤155, Unicode counts accurate; JSON-LD valid, matches page (799, INR); survey attributed (n = 210, March 2025)
+
+## Scorecard, shown
+
+- कीमत सुधारी (वार्षिक ₹799 / मासिक ₹999 + GST, "₹499 से" नहीं), free plan नहीं trial, केवल TallyPrime; ASCI पर न टिकने वाले दावे हटाए
+- "ac service app free" का ईमानदार जवाब 14 दिन के trial से (ASCI I.4), rationale में समझाया
+- FAQ: technician app offline चलता है, office web app नहीं; fact table में कीमत, TallyPrime और offline
+- Title, H1 और H2s में scheduling और dispatch queries; blog को informational बनाया, product page पर exact-match link
+- Title ≤60, meta ≤155, Unicode counts सही; JSON-LD valid और page से मेल (799, INR); survey का स्रोत (n = 210, मार्च 2025)

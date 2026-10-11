@@ -1,0 +1,110 @@
+{
+ "key": "en/recruiter/write-job-descriptions/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "recruiter",
+ "task": "write-job-descriptions",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "61859785d8e4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Removes \"young, energetic guy\" and \"recent graduates\"; replaces \"native English speaker\" with English radio safety communication",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Ability to follow and give safety-critical instructions in English over radio",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes age-coded and gendered preferences and replaces native-speaker language with job-related English radio communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly removes discriminatory terms and specifies functional English radio communication for safety."
+    }
+   ]
+  },
+  {
+   "check": "Uses $31–38/hour and flags the draft's $28–34 as off-sheet and breaking pay transparency",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The state pay-transparency law requires a good-faith range. The draft range didn't match this quarter's approved range.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses $31–38/hour and identifies the off-sheet draft range as a pay-transparency compliance issue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Adopts $31–38/hour and notes the draft's range violated the pay transparency law and compensation sheet."
+    }
+   ]
+  },
+  {
+   "check": "Drops the degree and \"2+ years\"; states 0–2 years with training and paid GWO within 90 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GWO Basic Safety Training, or completion within 90 days of hire (paid by Northgale)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Drops degree and minimum experience requirements; permits zero experience, prefers up to two years, and provides training."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Eliminates degree and 2+ years requirements, noting 0–2 years with training and paid GWO in 90 days."
+    }
+   ]
+  },
+  {
+   "check": "Keeps height, lifting and driving requirements; adds EEO and accommodation statements; drops \"rockstar\" slogans",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "If you need a reasonable accommodation to apply, interview or perform the job, contact recruiting@example.com.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains height, lifting, and valid-license requirements; adds EEO and accommodation statements; removes both slogans."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains physical/driving requirements, adds EEO and accommodation language, and removes 'rockstar' and 'work hard, play hard'."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at 1080×1080: role, location, $31–38/hour, benefits, apply URL; legible and consistent with posting",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1080 1080\" width=\"1080\" height=\"1080\" role=\"img\" aria-labelledby=\"t d\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained square SVG includes role, location, approved pay, benefits, and application URL with legible, contrasting text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "SVG is valid, sized at 1080x1080, and clearly displays role, location, pay, benefits, and apply URL."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023581949999999997,
+ "date": "2026-10-11"
+}

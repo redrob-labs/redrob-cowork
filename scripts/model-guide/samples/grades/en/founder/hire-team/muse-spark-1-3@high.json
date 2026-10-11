@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/hire-team/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "8cdcb3c4e19d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Mary: 3.5 strategy, 3.5 team, 3.25 data, 3.5 execution = **~3.44 overall**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both overall averages and explicitly identifies the ATS math and recommendation as flawed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately recalculates both averages and notes that the ATS recommendation is mathematically flawed."
+    }
+   ]
+  },
+  {
+   "check": "Spots Stiles's Richard Roe note describing Mary's Brightpath role; if swapped, Mary ~3.56, Richard ~3.38",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "His Richard note — “loved hearing about her time running CS at Brightpath” — describes Mary’s current role at Brightpath.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies the mismatched note but omits swapped-score averages and assumes contamination rather than establishing its scope."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Spots the Brightpath mix-up, but omits calculating the hypothetical swapped averages (~3.56 and ~3.38)."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with Stiles a prerequisite, not a guess",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "First clean the record and confirm she will accept a band-compliant package.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Delays formal offer for cleanup, but selects Mary by selectively discounting unconfirmed scores rather than making confirmation prerequisite to selection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats correcting Stiles's score mix-up as a prerequisite step rather than guessing his final scores."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Miles's comment on Mary's children as improper and legally risky; sets a follow-up without bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We can’t factor family/caregiver status into hiring — it’s biased and creates legal risk, even when scores are high.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly excludes the remark, addresses Miles privately, documents exclusion, and proposes identical job-related travel questions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the legal risk, excludes the improper comment, and sets an unbiased follow-up process."
+    }
+   ]
+  },
+  {
+   "check": "Keeps Mary's $165K ask (above the $155K ceiling) within policy; notes Richard's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$155,000 base (top of approved $135-155k band, not her $165k ask)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Mary's proposed compensation within policy, identifies budget impact, and notes Richard's pending second reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps Mary's offer within the approved band and explicitly notes Richard's pending second reference."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "SQL is valuable but less critical for a Head than renewal/process, and you/CTO can coach it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides concise professional deliverables, reasons beyond averages, addresses risks and terms, and uses placeholders in the email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Memo and messages are professional and well-reasoned; email effectively uses placeholders for undecided terms."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02124465,
+ "date": "2026-10-11"
+}

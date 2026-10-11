@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/close-books/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f8aa5edd2fee",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits ₩4,527,000 into a duplicated ₩4,500,000 NHIS (공단) deposit and a ₩27,000 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "미조정 4,527,000원은 77310 이중기장(4,500,000원)과 #2038 전위 오류(27,000원)이니, 잡비 처리 대신 위 분개로 정정해 주세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies the duplicated NHIS deposit and the check transposition totaling ₩4,527,000."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the ₩4,500,000 duplicate NHIS deposit and the ₩27,000 transposition on check #2038."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the miscellaneous-expense (잡비) plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "원인이 모두 식별 가능한 오류입니다. 잡비로 처리하면 공단미수금(또는 수익)과 외상매입금이 왜곡되고, 비용이 과대계상되어 필요경비 부인 위험이 생깁니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the plug and explains the resulting account distortions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly rejects using miscellaneous expense, citing materiality, identifiability of errors, and compliance risks."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to ₩86,562,050, moving to ₩86,972,050 if #2019 is voided",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**수정 후 장부 잔액** | **86,972,050**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both sides correctly reconcile to the permitted post-void balance; the ₩410,000 effect is explicitly explained."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles both sides, appropriately presenting the ₩86,972,050 adjusted balance with check #2019 voided."
+    }
+   ]
+  },
+  {
+   "check": "Returns the ₩350,000 chargeback to 박영수's patient receivable; fees to 지급수수료, interest to 이자수익",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "외상매출금(환자미수금, 박영수) | 350,000",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Restores Park’s patient receivable; assigns both fees to 지급수수료 and interest to 이자수익."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Returns chargeback to patient receivables, card/bank fees to 지급수수료, and interest to 이자수익."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to a payable to the payee (미지급금) under the 90-day policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "금액(410,000원)이 중요성 기준 미만이더라도 내부 규정에 따라 무효 처리합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Voids the stale check, recognizes the payee obligation as 미지급금, and explicitly prohibits income reversal before legal review."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Voids check #2019 to accounts payable (미지급금) and explicitly prohibits recognizing it as income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to 김철수 is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "90일이 지난 #2019는 미지급금으로 재분류하고, 앞으로 차이가 9의 배수이거나 같은 번호의 입금이 중복되면 먼저 원장을 대사해 주세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Entries balance with sensible accounts; the two-line review gives specific corrections and constructive preventive guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All proposed journal entries balance, and the two-line note to Kim Chul-soo is specific and constructive."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0234045,
+ "date": "2026-10-11"
+}

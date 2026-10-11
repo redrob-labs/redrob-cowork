@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/design-screens/gpt-6-astra@default",
+ "language": "en",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "8e2ba1f3f5ec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Primary buttons retain mint backgrounds but use `#1D2B33` labels, approximately **8:1** contrast.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies white-on-mint’s 1.8:1 AA failure and explains the accessible dark-label override."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates the 1.8:1 contrast failure and swaps to dark ink text."
+    }
+   ]
+  },
+  {
+   "check": "Drops Miles's exotic slot, 12:30 (lunch), 11:30 dental (runs into lunch), 16:45 wellness (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Show **Mary’s exotic check-up, 11:00–11:45**, and **Richard’s wellness exam, 14:00–14:30**, only for matching selections.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Full-duration and qualification filtering removes all four invalid slots, leaving exactly the two valid records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly drops all four invalid slots in both analysis and prototype filtering logic."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Server must enforce qualifications, schedules, full-duration fit, price and inventory atomically.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The table explains each rejected slot; server-side enforcement addresses the underlying API validity problems."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the exact rule failure for each dropped slot and advises server-side validation."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"from $280\" honestly, e.g. with a final-quote note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Production needs an exact clinic quote accepted before confirmation; until then, confirmation is blocked.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Displays the starting price honestly and resolves no-surprises tension by requiring an accepted exact quote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly addresses the tension with the no-surprises requirement and requires an explicit quote."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"Any available vet\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Controls have at least 48 px-high interactive areas; focus is visible, step changes focus the heading, and summary changes are announced.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file responsive prototype supports 375 px, labelled native controls, visible keyboard focus, large targets, and Any available vet."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Prototype handles 375 px width, provides accessible controls/focus, and includes 'Any available vet'."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Wellness and vaccination appear first; **Any available vet** is preselected to remove an unnecessary decision.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Connects separate short steps with prioritized common services and a default vet preference that speeds the dominant booking path."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Justifies separate steps while optimizing the flow for the top 70% of bookings."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029967,
+ "date": "2026-10-11"
+}

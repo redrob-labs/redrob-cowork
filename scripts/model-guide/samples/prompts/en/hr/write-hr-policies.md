@@ -54,3 +54,26 @@ After the policy, add a note to the CEO of at most 200 words. It should explain 
 - Rejects instruction 4. Boot-up and VPN login time for non-exempt employees is treated as paid work, with a clear timekeeping rule.
 - Narrows "work from anywhere": US locations allowed within limits; overseas only with pre-approval and only in Canada or the UK, for the immigration, tax and permanent-establishment reasons given.
 - The note to the CEO lists each departure (stipend, VPN time, abroad, attendance radius) and the decision needed. The by-state table matches the headcount data, for example that New York and Washington have no office.
+
+## Card
+
+brief: The CEO wants one hybrid and remote work policy replacing three conflicting memos; write it, plus a note explaining where you departed from instructions.
+given:
+- Headcount by state: 5 states, with non-exempt counts and offices
+- CEO's instructions: 5 numbered points
+- Existing memos: 3 excerpts (state of hire, office attendance, phone and internet)
+- Counsel's research notes: California and Illinois reimbursement law, federal wage-hour guidance, working abroad
+asked:
+- The policy, with the 9 listed headed sections
+- A short table of what applies by state
+- A note to the CEO on departures from the instructions and the decision needed
+limit: Under about 1,200 words in total, CEO note at most 200 words, in Markdown
+hard: Instructions collide with state and federal law, old memos must be reconciled, and some instructions call for a judgement call.
+
+## Scorecard
+
+- One rule set expressly supersedes Memos A–C: attendance days, "near an office" defined, state-move approval kept
+- $50 stipend kept, with a CA/IL claim route above it (§2802, 820 ILCS 115/9.5) and documentation
+- Rejects instruction 4: non-exempt boot-up and VPN login time is paid work, with a timekeeping rule
+- US remote stays limited; abroad only with pre-approval, in Canada or the UK, for immigration, tax, PE reasons
+- CEO note lists each departure and decision needed; state table matches headcount (NY, WA have no office)

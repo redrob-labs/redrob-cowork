@@ -53,3 +53,27 @@ You help run Kiln & Thistle, a four-person pottery studio that sells handmade ce
 - For the wholesale request, calculates $23.40 per mug ($34 × 60% + $3), or $1,404 for 60, and doesn't accept $18 without flagging it to Jane. It flags that 1 May is impossible (6-week lead time; 60 mugs take 1.5 weeks of the 40-a-week capacity) and offers alternatives, such as a later date or a partial or stock order.
 - Identifies message 4 as phishing (a lookalike domain and urgency). No reply, no clicking, and a note to report it and check the real store admin directly.
 - Honours John Stiles' replacement or refund, because he reported the damage with a photo via Instagram on 27 Mar, within 7 days of delivery. The reply apologises for the missed DM.
+
+## Card
+
+brief: Triage a pottery studio's shared inbox of five messages, draft replies under its policies, and flag what the owner must decide.
+given:
+- Policies: class cancellations, shipping damage, wholesale terms and the retail mug price
+- Class calendar: 4 classes with dates and bookings
+- Booking and order notes: the platform's sender address, a bounced email, an order and an unread DM
+- Inbox: 5 messages
+asked:
+- A triage table: category, priority, action and whether Jane must decide
+- Ready-to-send replies, up to 150 words each, for every message that needs one
+- Internal notes: system fixes and approvals needed, with figures
+limit: Up to about 1,200 words, in Markdown
+hard: Messages must be checked against policies and records across channels, one isn't what it claims, and some requests can't be met as asked.
+
+## Scorecard
+
+- Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)
+- Richard Roe gets a full $65 refund or free reschedule (studio cancelled); bounced email noted, address fixed
+- Wholesale at $23.40 a mug ($1,404 for 60); $18 flagged to Jane, not accepted
+- Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives
+- Message 4 is phishing (lookalike domain, urgency): no reply, no click, report it, check real admin
+- Honours John Stiles' replacement or refund (photo DM 27 Mar, within 7 days); apologises for missed DM

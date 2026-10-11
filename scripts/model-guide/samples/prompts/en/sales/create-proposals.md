@@ -55,3 +55,29 @@ You are the account executive at Cabana Connect, a SaaS guest-messaging platform
 - Doesn't offer 30%. Stays within the AE's 20% authority, or explicitly says that anything more needs VP approval and gives a rationale.
 - Corrects the labour savings to about €60,480/year (9,000 × 35% × 4 min ÷ 60 × €24), not €250k. Treats the upsell estimate (about €624k/year gross at €1.10 × 2,160 rooms × 365 × 72%) as revenue, not profit, extrapolated from one property's pilot. Revises "payback in under a month" accordingly.
 - Says honestly that the "on-premise" requirement is not met (the product is cloud-only, with EU data residency in Frankfurt) and doesn't claim full RFP compliance.
+
+## Card
+
+brief: Build a proposal deck for a hotel group's COO and CFO, with pricing, ROI and RFP compliance, checking a colleague's draft claims.
+given:
+- RFP summary: portfolio size, 5 requirements and commercial preferences
+- Discovery notes: hotel count, call volumes, labour cost and pain points
+- Cabana Connect facts: deployment, security, integrations, a deflection benchmark and a pilot upsell result
+- Price book and discount policy: per-room and implementation prices, discounts and approval limits
+- John Doe's draft claims: 4 claims on savings, payback, compliance and discount
+asked:
+- An 8–10 slide deck: problem, solution, RFP compliance, ROI, pricing and next steps
+- A pricing table: list, discounts, net annual, implementation and 3-year total, with methods
+- An ROI slide with the calculation shown and assumptions labelled
+- An internal note, up to 150 words, to John Doe and the VP Sales
+limit: Up to about 1,200 words, in Markdown, slide by slide with a speaker note each
+hard: Sources disagree, a colleague's claims need checking, discount authority limits apply, and compliance must be stated honestly.
+
+## Scorecard
+
+- Prices 12 live properties, 2,160 rooms; flags "14 hotels"; offers 2027 openings (~300 rooms) as add-on
+- List €155,520/year; 15% discount gives €132,192/year net; implementation €18,000
+- 3-year subscription €396,576, or €414,576 including implementation
+- No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale
+- Labour savings ≈ €60,480/year, not €250k; upsell ≈ €624k/year is gross pilot-based revenue; payback revised
+- States the on-premise requirement is unmet (cloud-only, EU data in Frankfurt); no full-compliance claim

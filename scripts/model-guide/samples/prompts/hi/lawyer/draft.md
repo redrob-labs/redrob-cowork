@@ -54,3 +54,35 @@ deliverable: documents
 - Carves out Orbitmade Core with a perpetual, irrevocable, royalty-free, worldwide license that is transferable with the app. Restricts open source to pre-approved permissive licenses and prohibits GPL-3.0 components in the distributed app (or requires Fernhill's written approval), explaining the copyleft risk to the source code.
 - Balances acceptance (for example 10 business days, a written rejection with reasons, two cure rounds, and deemed acceptance only after a reminder notice) and the liability cap (for example 12 months of fees or the full contract value, with exclusions for IP indemnity, confidentiality/personal-data breach and wilful misconduct). Explains both in the cover email.
 - Makes the agreement the "valid contract" required by DPDP s.8(2): processing only on Fernhill's instructions, security safeguards, breach notice to Fernhill without delay so it can notify the Board and users, deletion on exit. Requires prior written approval of subcontractors and their countries (none in a restricted country under s.16), flow-down of obligations, and Orbitmade's responsibility for its subcontractors. On termination, Fernhill receives the source code and work in progress on payment of amounts due. Indian law governs, with a stated Mumbai seat (courts or arbitration under the Arbitration and Conciliation Act, 1996). Keeps the non-solicit narrow, noting its enforceability after the term is uncertain under section 27 of the Contract Act.
+
+## Card
+
+brief: भारतीय क़ानून से शासित app development और IP assignment agreement draft कीजिए, CEO के term sheet और agency के markup में तालमेल बिठाते हुए।
+given:
+- CEO का term sheet: price, milestones, IP, acceptance, liability, data और timeline सहित 7 terms
+- Agency का markup: pre-existing libraries, open source, acceptance, liability cap, विदेशी subcontractors और non-solicitation पर 6 स्थितियाँ
+- Copyright Act, 1957 के अंश: धारा 17 और 19
+- DPDP Act, 2023 के अंश: धारा 8(2), 8(5) और 16(1)
+asked:
+- Agreement: बताए गए 12 sections पूरे, बाकी boilerplate केवल heading से
+- जॉन डो के लिए cover email: term sheet से अलग स्थितियाँ, उनके कारण और अभी लेने वाले निर्णय
+limit: पूरा उत्तर लगभग 1,200 शब्दों के भीतर, cover email अधिकतम 200 शब्द, Markdown
+hard: Inputs में एक असंगति छिपी है, क़ानून IP और data की संरचना तय करते हैं, और दोनों पक्षों की स्थितियों को हस्ताक्षर-योग्य शर्तों में संतुलित करना है।
+
+## Scorecard
+
+- Milestones total ₹1.96 crore, not ₹2 crore (₹4 lakh gap); placeholder or assumption, raised in the email
+- No work for hire (s.17: agency owns); signed "hereby assigns" per s.19: worldwide, full term, 19(4) lapse disapplied
+- Orbitmade Core licensed perpetual, irrevocable, royalty-free, worldwide, transferable; GPL-3.0 barred or needs Fernhill's approval
+- Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, personal-data, misconduct exclusions
+- DPDP s.8(2) contract: instructions, safeguards, prompt breach notice, deletion; subcontractors approved, none in s.16 countries
+- Source code on termination; Indian law, Mumbai seat (courts or arbitration); narrow non-solicit, s.27 caveat noted
+
+## Scorecard, shown
+
+- Milestones का कुल ₹1.96 crore, ₹2 crore नहीं (₹4 लाख का अंतर); placeholder या मान्यता, email में उठाया
+- "Work for hire" नहीं (धारा 17: agency पहली owner); धारा 19 के अनुसार signed "hereby assigns": worldwide, पूरी अवधि, 19(4) का lapse लागू नहीं
+- Orbitmade Core का perpetual, irrevocable, royalty-free, worldwide, transferable license; GPL-3.0 वर्जित या Fernhill की मंज़ूरी ज़रूरी
+- संतुलित acceptance (जैसे 10 business days, लिखित कारण, cure rounds) और IP, personal-data, misconduct के अपवादों वाला cap
+- DPDP धारा 8(2) का contract: निर्देशों पर processing, safeguards, तुरंत breach notice, deletion; subcontractors मंज़ूर, धारा 16 वाले देशों में नहीं
+- Termination पर source code; भारतीय क़ानून, मुंबई seat (courts या arbitration); सीमित non-solicit, धारा 27 की चेतावनी

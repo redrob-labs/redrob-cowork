@@ -59,3 +59,37 @@ deliverable: presentations
 - Shows approval delays as the stronger, triangulated theme: 5 of 8 participants raise approval problems (P1, P2, P4, P6, P8), 41% of reports waiting more than 5 days, and only 18% mobile-approval adoption. Receipt capture is a real but narrower problem (6.2% need correction; crumpled thermal slips and multi-page hotel GST invoices).
 - Recommends approval-flow work (notifications, delegation, policy flags on mobile) as the big bet and tells Richard directly that receipt capture is not the top problem. Receipt-capture edge cases are scoped as a smaller follow-up.
 - Follows the slide format with a speaker note on every slide, cites evidence by ID, and states its limitations (n = 8, survey wording).
+
+## Card
+
+brief: इंटरव्यू, सर्वे और analytics को एक readout deck में संश्लेषित करें जो बताए कि क्या receipt capture अगली तिमाही का बड़ा दाँव होना चाहिए।
+given:
+- Stakeholder संदर्भ: प्रोडक्ट लीड का प्रश्न और वे बोर्ड को क्या बता चुके हैं
+- इंटरव्यू: 8 प्रतिभागी, भूमिका, कंपनी का आकार और मुख्य कथन
+- इन-ऐप सर्वे: n = 212, एक single-choice प्रश्न, 5 उत्तरों के हिस्से
+- प्रोडक्ट analytics: पिछले 90 दिनों के 6 मीट्रिक
+asked:
+- रिसर्च प्रश्न और पद्धति, ईमानदार सीमाओं के साथ
+- तीन से पाँच themes, हर एक विशिष्ट साक्ष्य से समर्थित
+- बड़े दाँव पर सीधी सिफ़ारिश, और एक या दो छोटे follow-ups
+- बची अनिश्चितता कम करने के लिए आगे की रिसर्च
+limit: 8 से 10 स्लाइड, लगभग 1,200 शब्दों के भीतर, Markdown स्लाइड फ़ॉर्मैट
+hard: हर स्रोत की विश्वसनीयता और bias परखनी है, साक्ष्यों को triangulate करना है, और stakeholder की उम्मीद जो भी हो, ईमानदार उत्तर देना है।
+
+## Scorecard
+
+- Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked
+- Flags survey bias: only heavy submitters (20+ expenses), no approvers
+- Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption
+- Sizes receipt capture as narrower: 6.2% need correction; crumpled thermal slips and multi-page hotel GST bills
+- Recommends approval-flow work as the big bet, tells Richard directly; receipt edge cases as follow-up
+- Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)
+
+## Scorecard, shown
+
+- Single-choice प्रश्न के उत्तरों का जोड़ 104% है, यह पकड़ता है और जाँच होने तक आंकड़ों को अविश्वसनीय मानता है
+- सर्वे का bias बताता है: केवल भारी submitters (20+ खर्च), कोई approver नहीं
+- Approvals को ज़्यादा मज़बूत theme दिखाता है: 8 में से 5 प्रतिभागी, 41% रिपोर्टें 5+ दिन से रुकी, मोबाइल approval केवल 18% ने अपनाया
+- Receipt capture को सीमित समस्या आँकता है: 6.2% में सुधार की ज़रूरत; मुड़ी-तुड़ी थर्मल पर्चियाँ और कई पेज वाले होटल GST बिल
+- Approval-flow के काम को बड़ा दाँव सुझाता है और रिचर्ड को सीधे बताता है; receipt के edge cases छोटे follow-up हैं
+- हर स्लाइड पर speaker note, ID से साक्ष्य, सीमाएँ स्पष्ट (n = 8, सर्वे की भाषा)

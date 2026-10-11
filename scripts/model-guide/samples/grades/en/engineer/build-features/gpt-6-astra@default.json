@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/build-features/gpt-6-astra@default",
+ "language": "en",
+ "profession": "engineer",
+ "task": "build-features",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "8d1b4188092b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Lists the bugs: float dollars, member discount on alcohol, tax on groceries, whole-cart tax",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Discounts and tax are calculated at cart level rather than per line.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Lists all four bugs: floating-point dollars, alcohol membership discounts, grocery taxation, and cart-level taxation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately lists all four required bugs."
+    }
+   ]
+  },
+  {
+   "check": "Rejects FRESH10 with below_minimum: eligible subtotal $35.46 (cart $47.45) is under $40",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`FRESH10` is **rejected: `below_minimum`**. The eligible subtotal is **3,546¢ ($35.46)**; alcohol does not count toward the 4,000¢ minimum.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly rejects the promo using $35.46 eligible subtotal; the table shows $47.45 cart subtotal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects FRESH10 with below_minimum and calculates the $35.46 eligible non-alcohol subtotal against $40."
+    }
+   ]
+  },
+  {
+   "check": "States whether the minimum is checked before or after the member discount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Minimums use the eligible subtotal **before membership**; promo amounts use eligible values **after membership**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly states the minimum is checked before membership discounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states that the minimum is checked before the member discount."
+    }
+   ]
+  },
+  {
+   "check": "Applies only the Plus discount to $35.46, taxes only soap and IPA; lines sum to totals in cents",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Total** | **4,745** | **178** | **0** | **4,567** | **166** | **4,733** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct per-line Plus discounts exclude alcohol; only soap and IPA incur tax, and all totals reconcile."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies Plus discount only to non-alcohol lines ($35.46), taxes only soap and IPA, and lines sum to totals."
+    }
+   ]
+  },
+  {
+   "check": "Proportional fixed-discount allocation with remainders, capped at the eligible amount; inclusive date check",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const target = Math.min(requestedCents, available);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Implements capped proportional allocation, largest-line remainder corrections with bounds, and inclusive expiry comparison."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Implements proportional allocation capped at eligible amounts, handles remainders, and uses inclusive date checks."
+    }
+   ]
+  },
+  {
+   "check": "Passing tests cover each reason code, case-insensitivity, alcohol exclusion, HOME15 scope and half-cent rounding",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "it('rounds tax half-up per line, not on the aggregate taxable amount', () => {",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Meaningful tests cover every rejection reason, case-insensitivity, alcohol exclusion, HOME15 scope, and half-cent rounding; expectations match implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests comprehensively cover all four reason codes, case insensitivity, alcohol exclusion, HOME15 scope, and half-cent rounding."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.034114238,
+ "date": "2026-10-11"
+}

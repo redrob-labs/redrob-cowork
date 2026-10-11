@@ -54,3 +54,37 @@ deliverable: web
 - Excludes tobacco and pharmacy items from substitution (refund only) in the requirements and edge cases.
 - Success metrics include the 23% door-rejection baseline and a guardrail on shopper time (34-minute median), plus a response-rate metric.
 - The prototype is a self-contained HTML file that renders on its own, shows every required element including the timeout default and ₹ prices, and uses accessible patterns (buttons, labels, contrast).
+
+## Card
+
+brief: Grocery app में in-app substitution approvals का PRD और mobile prototype लिखें, response window और default चुनें, stakeholder माँगें निपटाएँ।
+given:
+- मौजूदा data: out-of-stock, दरवाज़े पर rejection और shopper समय पर पिछले 90 दिन के 4 metrics
+- Pilot नतीजे: 1,200 approval requests पर ग्राहक के जवाब देने के समय का cumulative share
+- Stakeholders की राय: Ops Lead और Finance की माँगें
+- Customer Terms §7.3: substitute की कीमत पर published वादा
+- Compliance note: licences के तहत substitute न हो सकने वाले items
+asked:
+- PRD: problem, baselines सहित goals और metrics, non-goals, user stories, requirements, edge cases, open questions
+- ग्राहक की approval screen का single-file HTML/CSS prototype, सभी बताए गए elements के साथ
+- Design rationale (अधिकतम 150 शब्द)
+limit: Code छोड़कर लगभग 1,200 शब्द markdown में, और एक self-contained HTML file
+hard: Stakeholder माँगों को data और published terms पर परखना है, licence की सीमाएँ लागू करनी हैं, और timing default justify करना है।
+
+## Scorecard
+
+- Rejects "median under a minute": only 38% respond within 1 minute; the median is 1–3 minutes
+- Picks a window (e.g. 3–5 minutes) and a no-response default, justified by the cumulative pilot data
+- Flags the MRP/shelf-price request as breaching Terms §7.3; caps at the ordered price or escalates to Legal
+- Excludes tobacco and pharmacy items from substitution (refund only) in requirements and edge cases
+- Metrics include the 23% door-rejection baseline, a 34-minute shopper-time guardrail and a response rate
+- Prototype is self-contained HTML, shows every required element including the timeout default and ₹ prices, and is accessible
+
+## Scorecard, shown
+
+- "Median एक मिनट से कम" को खारिज करता है: 1 मिनट में सिर्फ़ 38% जवाब देते हैं; median 1–3 मिनट के बीच है
+- एक window (जैसे 3–5 मिनट) और जवाब न मिलने पर default चुनता है, cumulative pilot data से justify
+- MRP/shelf price की माँग को Terms §7.3 का उल्लंघन बताता है; order की गई कीमत तक सीमा या Legal को escalate
+- Tobacco और pharmacy items को requirements और edge cases में substitution से बाहर रखता है (सिर्फ़ refund)
+- Metrics में 23% door-rejection baseline, 34 मिनट का shopper-time guardrail और response rate शामिल
+- Prototype self-contained HTML है, timeout default और ₹ कीमतों सहित हर ज़रूरी element दिखाता है, और accessible है

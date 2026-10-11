@@ -53,3 +53,38 @@ deliverable: none
 - Excludes Richard Miles's comment about Mary's children from the decision, treats it as an inappropriate, gender-biased and legally risky remark (gender discrimination in recruitment, for example under the Code on Wages, 2019), and sets out a follow-up (a conversation, interviewer training, documentation) without letting it bias the outcome either way.
 - Handles compensation within policy: Mary's ₹55 lakh ask is above the ₹52 lakh band ceiling, so the answer proposes options such as the band maximum with more ESOPs or a joining bonus, or getting approval for an exception. It also notes Richard's pending reference.
 - The memo and messages are concise and professional, the final recommendation is reasoned rather than based only on the averages, and the email uses placeholders where terms are not yet decided.
+
+## Card
+
+brief: CEO के रूप में Head of Customer Success के दो finalists में से चुनें, दो interviewers के scorecard मुद्दे संभालें और अगला email लिखें।
+given:
+- Scorecards: 8 interviewer scorecards, हर उम्मीदवार के 4, लिखित नोट्स के साथ
+- पृष्ठभूमि: हर finalist की मौजूदा कंपनी
+- ATS सारांश: दो औसत और एक सिफ़ारिश
+- अन्य तथ्य: फ़िक्स्ड CTC की माँग, नोटिस पीरियड, references और ट्रैवल
+- Comp नीति: मंज़ूर CTC और ESOP बैंड, और बजट में माना गया CTC
+asked:
+- जॉन डो को decision memo: सिफ़ारिश या ज़रूरी पूर्व-कदम, साक्ष्य, scores का तौल, जोखिम, offer की शर्तें
+- जॉन स्टाइल्स को उनके scorecard पर छोटा निजी संदेश
+- रिचर्ड माइल्स को उनके नोट पर छोटा निजी संदेश, और प्रक्रिया में आगे का कदम
+- Offer email, या ज़रूरी कदम माँगने वाला email, placeholders के साथ
+limit: कुल लगभग 1,200 शब्दों के भीतर
+hard: सिस्टम के सारांश को जाँचना है, interviewers के input की विश्वसनीयता और औचित्य परखना है, और CTC की माँग को नीति से मिलाना है।
+
+## Scorecard
+
+- Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated
+- Spots Stiles's Richard Roe note describing Mary's Brightpath role (feminine forms); if swapped, Mary ~3.56, Richard ~3.38
+- Makes confirming the scores with Stiles a prerequisite, not a guess
+- Excludes Miles's comment on Mary's children as gender-biased and legally risky; sets a follow-up without bias
+- Keeps Mary's ₹55 lakh ask (above the ₹52 lakh ceiling) within policy; notes Richard's pending reference
+- Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders
+
+## Scorecard, shown
+
+- औसत दोबारा निकालता है: मैरी 3.44 (13.75 ÷ 4), रिचर्ड 3.50; ATS की सिफ़ारिश जैसी लिखी है वैसी गलत है
+- पकड़ता है कि रिचर्ड रो पर स्टाइल्स का नोट मैरी की ब्राइटपाथ भूमिका बताता है (स्त्रीलिंग रूप); अदला-बदली हुई हो तो मैरी ~3.56, रिचर्ड ~3.38
+- स्टाइल्स से scores की पुष्टि को अनुमान नहीं, पूर्व-शर्त बनाता है
+- मैरी के बच्चों पर माइल्स की टिप्पणी को लैंगिक पक्षपात वाली और कानूनी जोखिम भरी मानकर फ़ैसले से बाहर रखता है; बिना पक्षपात follow-up तय करता है
+- मैरी की ₹55 लाख की माँग (₹52 लाख की ऊपरी सीमा से ज़्यादा) को नीति के भीतर संभालता है; रिचर्ड का बाकी reference नोट करता है
+- Memo और संदेश संक्षिप्त और पेशेवर; सिफ़ारिश केवल औसत पर नहीं, तर्क पर; email में placeholders

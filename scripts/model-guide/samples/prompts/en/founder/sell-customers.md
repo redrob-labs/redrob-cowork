@@ -57,3 +57,27 @@ Keep each email under 150 words, written as a founder rather than a marketing te
 - Uses the timing sensibly: the competitor contract renews 30 November 2026 with 90 days' notice (by about 1 September 2026), so this is a long-cycle evaluation. The CTA is a short discovery or demo call, not an immediate signature.
 - Personalizes to her webinar question (call-outs by text message, overtime, float pool) and Riverbend's growth (3 new clinics, 11 open RN roles), with each email adding new value rather than "just following up".
 - Each email is under 150 words with one CTA and a sensible send day. The LinkedIn note is 300 characters or fewer, and the tone is a founder's, not a pushy marketing voice.
+
+## Card
+
+brief: Write a founder's three-email outreach sequence, a LinkedIn note and a reply to an advisor for a 14-clinic health system prospect.
+given:
+- CRM record: account, contact, webinar question, current contract, pain, public info and touches
+- Offer: 4 capabilities and the discount policy
+- Proof points: results from 6 customers, and which ones can be named
+- Advisor's request: an opening claim, a discount offer and a demo ask
+asked:
+- A three-email sequence with subject, body and send day, starting 16 September 2025
+- A LinkedIn connection note of 300 characters or fewer
+- A note to John on which advice you used or rejected, and why
+limit: Each email under 150 words; up to about 1,200 words in total
+hard: Proof points must be used honestly, the advisor's advice must be weighed against policy and the buyer's timing, and the outreach must be personal yet brief.
+
+## Scorecard
+
+- Doesn't present 40% as typical (uses the 18% average or credits Northfield); names only Northfield and Pinegate
+- Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy
+- Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery call
+- Personalizes to text-message call-outs, overtime, float pool, 3 new clinics and 11 RN roles
+- Each email adds new value rather than just following up
+- Each email under 150 words, one CTA, sensible send day; LinkedIn ≤300 characters; founder's tone

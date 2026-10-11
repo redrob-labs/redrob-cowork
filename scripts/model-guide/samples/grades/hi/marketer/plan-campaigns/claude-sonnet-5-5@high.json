@@ -1,0 +1,128 @@
+{
+ "key": "hi/marketer/plan-campaigns/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "plan-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "1eb53bf3ff99",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Excludes or heavily discounts the consumer-app Facebook benchmark; doesn't use its ₹2,400 cost per SQL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसलिए सिर्फ छोटा test, और plan में 0 SQLs।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Consumer-app Facebook benchmark is explicitly rejected; its test contributes no forecast SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discounts consumer Facebook benchmark and assigns zero SQLs to it."
+    }
+   ]
+  },
+  {
+   "check": "Cost per SQL: search ≈₹15,455, LinkedIn ≈₹31,111, expo ≈₹40,000 (45 SQLs), syndication ≈₹36,667",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Paid search | 6,73,200 | 198 | 44 | 15,300 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Search cost uses rounded SQLs correctly; LinkedIn, expo’s 45 SQLs, and syndication costs match benchmarks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Computes or states the cost per SQL across search, LinkedIn, expo (45 SQLs), and syndication."
+    }
+   ]
+  },
+  {
+   "check": "Search capped: 3,300 clicks × 6% = 198 leads, ₹6,73,200, ≈44 SQLs",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Paid search leads = clicks × 6% (3,300 × 0.06)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Search is explicitly capacity-capped at 3,300 clicks, ₹6,73,200, 198 leads, and 44 SQLs."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly caps search at 3,300 clicks, 198 leads, ₹6,73,200, and 44 SQLs."
+    }
+   ]
+  },
+  {
+   "check": "Best mix (remaining ₹47,26,800 on LinkedIn, ≈152 SQLs) yields ≈240 SQLs: 400 SQLs and 80 customers unachievable",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "कुल **≈240 SQLs ≈ 48 customers**,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Allocates remaining ₹47,26,800 to LinkedIn and rejects 400/80; 151 versus 152 is a minor rounding discrepancy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Demonstrates remaining budget yields ~151 LinkedIn SQLs (~240 total), proving 400 unachievable."
+    }
+   ]
+  },
+  {
+   "check": "Sales ceiling 3 × 70 = 210 SQLs; e.g. plan ≈210 SQLs, ≈42 customers (≈₹1.61 crore new ACV)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3 AEs × 70 = **210 SQLs/तिमाही**, यानी अधिकतम 42 customers।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies sales ceiling and recommends capacity-safe 195 SQLs, 39 customers, approximately ₹1.50 crore ACV, with gated reserve."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 210 SQL ceiling and plans near it (195–210 SQLs, 39–42 customers)."
+    }
+   ]
+  },
+  {
+   "check": "Pillars match challans by site, UPI crew reimbursement, Tally sync; timeline builds to expo 10–12 Feb; specific leadership ask",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**10–12 फ़रवरी: BuildTech India Expo, मुंबई।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All three interview-backed pillars appear; timeline builds toward expo, and leadership receives specific target, budget, and capacity asks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Matches all three pillars, anchors timeline around Feb 10–12 expo, and includes specific asks."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023314725,
+ "date": "2026-10-11"
+}

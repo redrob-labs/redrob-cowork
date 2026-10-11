@@ -57,3 +57,35 @@ deliverable: spreadsheets
 - Computes the rest correctly: 레저리 100% growth and 1.50 burn multiple; 플릿와이즈 2.50 (also failing on gross margin and hardware); 쿼럼HR 58.6% growth and 1.18, with ARR above the range; 노스빔 1.27, failing on NRR and round size; 탤로우 111.1% and 1.60; 코비드 105.9% and 1.50, failing on geography.
 - 레저리 is in the top three. The other picks are reasoned, for example 탤로우 (passes every criterion, with its 40% concentration and renewal date listed as the first diligence question) and 파슬레인 on recurring figures.
 - Takes a clear position on waivers. For example, 코비드's geography is the most waivable gap only if the Korean entity/reverse flip is real and the investment can still count toward the fund's 주목적 투자 requirement (otherwise it eats into the overseas-investment allowance), while 노스빔 fails two criteria, so one waiver can't rescue it despite the relationship.
+
+## Card
+
+brief: 시리즈 A 유입 8곳을 펀드 기준으로 스크리닝하고, 수치를 보정해 파트너 회의에 올릴 세 곳을 추천합니다.
+given:
+- 펀드 투자 기준: 8개 조건, 파트너만 면제 가능
+- 파이프라인: 8개사의 창업자 제공 ARR, 순소진액, NRR, 매출총이익률, 유치 희망 금액
+- 데이터룸 및 첫 통화 메모: 특정 회사에 관한 메모 5건
+asked:
+- 스크리닝 표: 보정한 반복 ARR, 성장률, 번 멀티플, 기준별 통과/탈락
+- 상위 세 곳 순위: 각각의 근거와 첫 미팅 질문 3개
+- 기준 면제를 논의할 만한 아쉬운 탈락 최대 세 곳
+limit: 약 2,500자 이내, Markdown 표, 성장률은 소수점 첫째 자리, 번 멀티플은 둘째 자리
+hard: 창업자 제공 수치를 메모로 보정해야 하고 기준선에 걸친 결과가 있으며, 면제 여부는 판단이 필요합니다.
+
+## Scorecard
+
+- 파슬레인 corrected to ₩28억: growth 86.7% (not 160%), burn multiple 2.00, a borderline pass
+- 센티넬독스 corrected to ₩13.2억: fails the ₩15억 ARR floor; burn multiple 2.50
+- 레저리 100%/1.50; 플릿와이즈 2.50, fails margin and hardware; 쿼럼HR 58.6%/1.18, ARR above range
+- 노스빔 1.27, fails NRR and round size; 탤로우 111.1%/1.60; 코비드 105.9%/1.50, fails geography
+- Top three include 레저리; other picks reasoned, e.g. 탤로우 with its 40% concentration as first question
+- Waivers: 코비드 geography only if the reverse flip counts toward 주목적 투자; 노스빔 fails two, so no rescue
+
+## Scorecard, shown
+
+- 파슬레인 반복 ARR 28억원으로 보정: 성장률 86.7%(160% 아님), 번 멀티플 2.00으로 경계선 통과
+- 센티넬독스 13.2억원으로 보정: ARR 하한 15억원 미달, 번 멀티플 2.50
+- 레저리 100%/1.50, 플릿와이즈 2.50(이익률·하드웨어 탈락), 쿼럼HR 58.6%/1.18(ARR 범위 초과)
+- 노스빔 1.27(NRR·라운드 규모 탈락), 탤로우 111.1%/1.60, 코비드 105.9%/1.50(소재지 탈락)
+- 상위 세 곳에 레저리 포함, 나머지 선택도 근거 제시(예: 탤로우, 첫 질문은 최대 고객 40% 집중)
+- 면제 의견: 코비드 소재지는 역플립이 주목적 투자로 인정될 때만 가능, 노스빔은 두 기준 탈락이라 면제 하나로 불가

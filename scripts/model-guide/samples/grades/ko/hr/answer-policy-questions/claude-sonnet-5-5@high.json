@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/answer-policy-questions/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "5e5f759e7ee8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not superseded 취업규칙 §7.2: 16 weeks at 100%; 출산전후휴가 needs no service",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "새 기준은 휴가 개시일 기준 **근속 6개월 이상**이며 최대 **16주**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Applies the replacement policy, but questions 16-week coverage and omits that statutory maternity leave has no service requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Applies PB-2025-04 correctly, but omits mentioning that statutory maternity leave requires no service period."
+    }
+   ]
+  },
+  {
+   "check": "연차: 4 days now, max 7 (11−4) by Feb 2, 2026; can't save 10; lapses Mar 2",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "앞으로 쓸 수 있는 총량은 **최대 7.0일**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates four days now and seven maximum, rejects saving ten, and gives March 2 expiry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates current and future accrual, explains 10 days is impossible, and identifies expiry date."
+    }
+   ]
+  },
+  {
+   "check": "보육지원 can't change now; 30 days after the birth (about Mar 18, 2026); ₩3,000,000 is per household",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "예정일 출산이면 **2026-02-16~03-18**이 변경 기간입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects changing now, gives the post-birth deadline, and correctly states the household ₩3,000,000 cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly states change cannot happen now, calculates the 30-day window after birth, and notes household limit."
+    }
+   ]
+  },
+  {
+   "check": "출산전후휴가 protected (§74⑥, §23②); 육아휴직 6-month test met; company leave concurrent, topped up to 100%",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "시작 30일 전까지 신청하고, 6개월 근속 요건은 충족하십니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains statutory protection and childcare-leave eligibility, but incorrectly treats company leave’s overlap with maternity leave as unresolved."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers legal protections under Article 74(6) and 23(2), parental leave eligibility, and 100% pay top-up."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: 30 days means telling her manager by mid-January (about Jan 16); her timing works, kept confidential",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "**1월은 너무 늦습니다.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Incorrectly rejects January notice instead of allowing approximately January 16 for February 16 commencement; confidentiality is omitted."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Wrongly states January is too late (based on Feb 16 birth) and fails to address HR confidentiality."
+    }
+   ]
+  },
+  {
+   "check": "Note flags superseded 취업규칙 still posted (amend, §93 filing); weeks 13–16 protection routed to 법무/노무",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "인트라넷에 구판 제7.2조(12개월·12주)가 그대로 게시되어 직원이 오인했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags outdated posting, but omits §93 filing and legal/labor review of protection for the remaining company-leave weeks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags the superseded rule on intranet, but omits Article 93 filing and weeks 13–16 protection check with 법무/노무."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027729974999999997,
+ "date": "2026-10-11"
+}

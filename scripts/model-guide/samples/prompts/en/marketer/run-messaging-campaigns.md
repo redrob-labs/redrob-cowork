@@ -53,3 +53,28 @@ Keep the answer under about 1,200 words.
 - Tailors by segment: price-led for A, convenience and skip-a-week for B, and a quality-led message for C built on the new menus and the 35% fall in complaints. D-Denver gets a "we deliver to you now" message.
 - Forecasts with the correct base: 4,772 × 3.4% ≈ 162 plus (17,363 − 4,772) × 2.1% ≈ 264, about 427 reactivations, at an incentive cost of about $6,800 at $16 each.
 - SMS texts are 160 characters or fewer, include the brand name and "Reply STOP to opt out", and are scheduled within 8 a.m.–9 p.m. local time for each zone. Every sequence has an exit-on-reactivation condition.
+
+## Card
+
+brief: Build a January win-back campaign for lapsed meal-kit subscribers, ready for CRM loading, within suppression, coverage, offer-cost and SMS rules.
+given:
+- CRM export: 5 segments by cancel reason, with contacts and email and SMS opt-ins
+- CRM team notes: suppression counts, new Denver coverage, opt-in overlap and time zones
+- Business rules: manager's offer, finance ceiling, prices, stacking, SMS rules, QA report, reactivation rates
+asked:
+- Audience table: eligible email and SMS contacts per segment, with formulas
+- Sequence plan, one row per touch
+- Offer table per segment, including the manager's proposal
+- Forecast of reactivations and total incentive cost, with formulas
+- QA checklist of at most 6 items
+limit: Under about 1,200 words, as Markdown tables
+hard: Raw counts must be filtered by several rules, an offer tested against a cost ceiling, and messages fitted to each segment and to SMS rules.
+
+## Scorecard
+
+- Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Denver only), E 2,985; total 17,363
+- Eligible SMS 4,772, with D reduced to 52; rest of D excluded
+- Rejects manager's offer: 50% of $64 = $32 before dessert, over $18; e.g. 25% off ($16), unstacked
+- Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Denver for D
+- Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈$6,800
+- SMS ≤160 characters with brand and "Reply STOP to opt out", 8 a.m.–9 p.m. local; exit on reactivation

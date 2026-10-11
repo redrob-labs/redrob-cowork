@@ -1,0 +1,128 @@
+{
+ "key": "en/investor/review-diligence/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "investor",
+ "task": "review-diligence",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "0d3bf4d1124d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "C1 $360,000 (−$60,000); C2 $260,000 (−$50,000); C3 $0 (−$275,000); C9 $87,600 (−$32,400)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CAD 120,000 × 0.73 = 87,600.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly adjusts C1, C2, C3 and C9, including all four adjustment amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates and justifies the core adjustments for C1, C2, C3, and C9."
+    }
+   ]
+  },
+  {
+   "check": "C8 $0 live, $132,000 separate; C6 $144,000 (alt. $180,000); C10 $66,000 (management's $75,000)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Base case is $0, because nothing is contracted.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "C8 and C6 are correct; C10's $66,000 appears only as an alternative, not the required base case."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Treats C8 and C6 correctly, but assigns C10 to $0 in the base schedule, presenting $66k only as an alternative."
+    }
+   ]
+  },
+  {
+   "check": "Adjusted live ARR $1,505,600 (−$594,400, −28.3%), $1,637,600 with C8; bridge ties to $2,100,000",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Adjusted = 2,100,000 − 660,400. This is 31.4% below management.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Bridge ties to management, but excluding C10 produces incorrect live ARR, reduction percentage and total including C8."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Bridge ties, but totals ($1,439,600 live / $1,571,600 total) differ from $1,505,600 / $1,637,600 due to excluding C10."
+    }
+   ]
+  },
+  {
+   "check": "At risk: C4 ($240,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Customer may terminate on 90 days' notice at any time after 30 Sep 2025.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags C4's $240,000 termination exposure and C5's $198,000 June 2026 renewal exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly flags C4 ($240k) and C5 ($198k) as the key at-risk ARR."
+    }
+   ]
+  },
+  {
+   "check": "Top-3 concentration (C1, C2, C4) ≈57.1% of adjusted ARR; C1 ≈23.9%",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Top 3** | **860,000** | **59.7%**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies correct top three, but incorrect denominator yields 59.7% instead of 57.1% and C1 25.0% instead of 23.9%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Identifies top 3 correctly (C1, C2, C4), but percentages differ slightly due to the lower adjusted ARR base."
+    }
+   ]
+  },
+  {
+   "check": "At 6.0×: $12.6M vs ≈$9.03M, a ≈$3.57M gap; recommends re-price, earn-out or escrow",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "At 6.0× the headline price falls from $12.6M to $8.64M, a reduction of $3.96M.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Management price and earn-out/holdback recommendations are correct; adjusted price and gap differ from required $9.03M and $3.57M."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recommends appropriate structural protections, but valuation figures differ from ≈$9.03M / $3.57M gap due to ARR baseline."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028666838,
+ "date": "2026-10-11"
+}

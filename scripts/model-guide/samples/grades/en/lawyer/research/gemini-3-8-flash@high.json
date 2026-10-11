@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/research/gemini-3-8-flash@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "gemini-3-8-flash",
+ "effort": "high",
+ "scorecardSha": "384d11dedfe5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Count I covered (CFO conduct, mandatory \"shall\"); Count II likely not; Count III a reasoned close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Stiles should receive advancement (or allocated advancement).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Covers Count I mandatorily, excludes personal-contract Count II, and analyzes both sides of Count III with allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies Count I as covered, Count II as excluded, and Count III as a reasoned close call subject to allocation."
+    }
+   ]
+  },
+  {
+   "check": "§145(f): 2023–2024 conduct predates the amendment, which can't impair his right; treatise [8] outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The conduct in Count I occurred in 2023–2024",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies §145(f) and the absence of reserved impairment authority; correctly treats the contrary treatise as obsolete."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies §145(f) to pre-amendment conduct and notes in the table that treatise [8] is obsolete."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [1] and [6], not blog [7]; letter of credit rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pinecrest cannot unilaterally impose an extra-contractual requirement such as a letter of credit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects good-faith screening using [1] and [6], rejects blog [7], and requires only the bylaw’s unsecured undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good-faith requirement citing [1] and [6] while rejecting [7], and rejects security/letter of credit."
+    }
+   ]
+  },
+  {
+   "check": "Enforce in Chancery (exclusive, summary, §145(k)); fees on fees pro rata under [5]; tender undertaking, written demand",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Send an immediate demand letter to Pinecrest enclosing a signed, **unsecured undertaking**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends written demand and undertaking, exclusive summary Chancery enforcement under §145(k), and proportionate fees on fees under [5]."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Specifies exclusive summary jurisdiction in Chancery under §145(k), proportional fees on fees under [5], and tendering an unsecured undertaking/demand."
+    }
+   ]
+  },
+  {
+   "check": "Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Binding case authority confirming that good faith is irrelevant to the advancement stage.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Distinguishes statutes, bylaws, and unreliable secondary sources, but mislabels fictional case summaries as binding precedent rather than identifying them."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The table clearly distinguishes primary authority ([1]–[4]), case law ([5]–[6]), and unreliable secondary sources ([7]–[8])."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024221663,
+ "date": "2026-10-11"
+}

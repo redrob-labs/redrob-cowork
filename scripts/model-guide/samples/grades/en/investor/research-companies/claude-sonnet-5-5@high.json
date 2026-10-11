@@ -1,0 +1,128 @@
+{
+ "key": "en/investor/research-companies/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "investor",
+ "task": "research-companies",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "eb36e25ac283",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Base 281,960 full-service + 96,000 institutional = 377,960 locations; TAM about $756–813M; limited-service out of SAM",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**SAM** | FS + Institutional | 281,960 + 96,000 = 377,960 locations",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct base and limited-service exclusion from SAM, but TAM includes limited-service and is $1,604M instead of approximately $794M."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculates 377,960 locations and $794M and excludes limited-service, but labels this figure as SAM rather than TAM."
+    }
+   ]
+  },
+  {
+   "check": "Current market: ≈8,459 + 10,560 ≈ 19,000 locations, about $38–41M a year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "19,019 locations | 19,019 × $2,100 | **$40M**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct segment penetration counts, combined locations, and annual current-market value."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 8,459 FS + 10,560 institutional = 19,019 locations, totaling $40M."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the $4.2B: global, covers hauling, composting and digestion, and is company-sourced",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The $4.2B figure is global and authored by Wastewise itself. Its footnote shows it covers hauling, composting and anaerobic digestion",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the figure for geographic, category, and company-source mismatches."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects $4.2B for being global, covering hauling/composting/digestion, and being self-reported."
+    }
+   ]
+  },
+  {
+   "check": "Annualizes BinSight $1,788, Scrapless $2,148 (2021 $99 stale), Kitchen Ledger $2,400 plus hardware",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Kitchen Ledger: $2,400.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly annualizes BinSight and Scrapless, excludes stale 2021 pricing, and separately identifies Kitchen Ledger’s $1,500 hardware kit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly annualizes BinSight, Scrapless (discarding 2021 $99), and Kitchen Ledger with hardware kit."
+    }
+   ]
+  },
+  {
+   "check": "Kitchen Ledger's Series B is $14M from the press release, not the aggregator's $40M",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$14M Series B, led by Orchard Lane, Mar 2025",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the primary press release’s $14M and explicitly rejects the conflicting aggregator figure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accepts the $14M press release figure over the aggregator's $40M."
+    }
+   ]
+  },
+  {
+   "check": "Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Why do independent full-service restaurants leave, and is that segment worth pursuing?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Connects institutional focus and weak full-service retention to segment strategy, then questions full-service inclusion in the target market."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Connects churn and segment skew to SAM viability and frames it as a founder question."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025956263,
+ "date": "2026-10-11"
+}

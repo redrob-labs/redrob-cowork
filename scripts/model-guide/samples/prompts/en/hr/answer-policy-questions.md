@@ -56,8 +56,33 @@ Deliver two artifacts in markdown: (1) the email reply to Jane, warm and plain-s
 ## A strong answer
 
 - Catches that Handbook v2023 is superseded: Jane is eligible for 16 weeks of paid parental leave at 100% because she will have more than 6 months of service by the time leave starts. Does not tell her to rely on PTO or FMLA.
-- Gets the PTO numbers right: 10 completed months (March through December) × 1.25 = 12.5 days accrued, minus 4 used = 8.5 days. Only 5 carry over, so she cannot carry 10 days, and 3.5 days are forfeited unless she uses them by December 31.
+- Gets the PTO numbers right and says which reading of "completed calendar month" it uses. Counting March (hired March 3): 10 months × 1.25 = 12.5 days, minus 4 used = 8.5, so 3.5 forfeited. Not counting March: 9 × 1.25 = 11.25 − 4 = 7.25, so 2.25 forfeited. Either way only 5 carry over, so she cannot carry 10 days.
 - Explains that she cannot change the Dependent Care FSA now. The birth is the qualifying event, so she has 30 days after it (about March 18, 2026, if the baby arrives on the due date). The 2026 limit is a household limit.
 - On job protection: she won't meet FMLA's 12-month test when leave starts (about 11 months of service), but she is eligible for NY PFL (well past 26 weeks), which is job-protected. NY PFL runs concurrently with the company leave and is topped up to 100%.
 - Treats manager notice as a judgement call: 30 days' notice means telling her manager by mid-January for a mid-February start. Her January timing works, and HR keeps the matter confidential until then.
 - The internal note flags that the superseded handbook is still on the intranet. It also flags that PB-2025-04 doesn't say whether weeks 13–16 (after NY PFL's 12 weeks run out) are job-protected, and routes that question to Legal instead of promising protection.
+
+## Card
+
+brief: An employee due in February asks HR four questions about planning her parental leave; reply to her, and note policy fixes internally.
+given:
+- Employee record: Jane Doe's location, hire date, schedule, PTO used and benefits
+- Her email: due date, her reading of eligibility, and 4 questions
+- Handbook v2023 and Policy Bulletin PB-2025-04: two parental-leave provisions
+- PTO policy: accrual rate and year-end carryover
+- Benefits guide: Dependent Care FSA change rules and the 2026 limit
+- Legal's leave law summary: FMLA and NY Paid Family Leave eligibility
+asked:
+- An email reply to Jane answering each question with dates and numbers, PTO arithmetic shown
+- An internal note to the HR policy owner on what in the sources needs fixing
+limit: Under about 1,200 words in total, internal note at most 150 words, in Markdown
+hard: Sources conflict and must be ranked, policy and leave law must be applied to her dates, and some questions the policy leaves open.
+
+## Scorecard
+
+- Applies PB-2025-04, not the superseded handbook: eligible for 16 weeks' paid leave at 100%
+- PTO: 8.5 days (or 7.25 if March does not count), states the reading; only 5 carry over
+- FSA can't change now; 30 days after the birth (about March 18, 2026); $7,500 is a household limit
+- Not FMLA-eligible (about 11 months' service), but NY PFL-eligible and job-protected, topped up to 100%
+- Manager notice: 30 days means telling her manager by mid-January; her timing works, HR keeps it confidential
+- Internal note flags the superseded handbook still posted, and weeks 13–16 job protection, routed to Legal

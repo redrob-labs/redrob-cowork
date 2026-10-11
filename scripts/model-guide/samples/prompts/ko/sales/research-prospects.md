@@ -47,3 +47,38 @@ deliverable: none
 - The value math is labelled and correct: ₩240B ÷ ₩120,000 = 2.0M orders, × 22% = 440,000 returns, × ₩12,000 ≈ ₩5.28B a year in processing cost. Returnfit's 20–30% benchmark gives about ₩1.06–1.58B of potential savings. These are presented as estimates to validate, and the 15% exchange conversion is noted as upside.
 - Uses the CRM history well: the 2024 loss reason was the in-house tool and budget, and the champion has left. The new triggers that change the situation are the job posting to replace the homegrown portal, the new CEO and the resale launch. The recommended entry is Park Young-su (the COO, who owns the new hire) and/or Hong Gil-dong (via the Tamarack Goods connection), with a justification.
 - Gives a concrete first move and discovery questions that test the assumptions (actual cost per return, the manual KakaoTalk exchange process, the evaluation timeline, resale grading needs).
+
+## Card
+
+brief: 뒤섞인 조사 결과와 CRM 이력으로 실주 고객사 재공략 브리프를 쓰고 가치 계산과 첫 접근을 제시한다.
+given:
+- 검색 결과 및 출처: 날짜·관련성·유형이 제각각인 8건
+- 리턴핏 CRM: 2024년 실주 영업 기회와 당시 챔피언
+- 리턴핏 근거 자료: 비용 절감, 교환 전환, 검수·등급 분류 사례
+asked:
+- 출처 번호를 붙인 현재 회사 개요, 신뢰하는 사실과 버리는 사실 구분
+- 순위를 매긴 "왜 지금인가" 계기 요인
+- 구매 의사결정 그룹, 진입 지점, 이전 실주 이력 대응
+- 릿지백 수치와 리턴핏 벤치마크를 구분한 가치 가설과 계산
+- 리스크와 불확실성
+- 첫 접근(채널, 대상자, 메시지 방향)과 디스커버리 질문 5개
+limit: 약 2,500자 이내, Markdown
+hard: 오래되거나 무관하거나 일반적인 자료를 걸러야 하고, 가치 계산에서 고객사 자체 수치와 벤치마크를 구분해야 한다.
+
+## Scorecard
+
+- Current facts: Lee Young-hee CEO (Jan 2026), Kim Cheol-su Chair, FY2025 ₩240B; 2023 article treated as outdated
+- Discards source 5 (a different Busan company); uses Ridgeback's 22% return rate, not the 32% average
+- Value math: ₩240B ÷ ₩120,000 = 2.0M orders × 22% × ₩12,000 ≈ ₩5.28B; 20–30% ≈ ₩1.06–1.58B
+- Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside
+- Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch
+- Enters via Park Young-su and/or Hong Gil-dong (Tamarack link), justified; concrete first move; assumption-testing questions
+
+## Scorecard, shown
+
+- 현재 사실: 이영희 CEO(2026년 1월), 김철수 이사회 의장, 2025 회계연도 2,400억 원, 2023년 기사는 과거 정보
+- 출처 5(부산의 다른 회사) 배제, 업계 평균 32% 대신 릿지백 자체 반품률 22% 사용
+- 가치 계산: 2,400억 원 ÷ 12만 원 = 200만 건 × 22% × 12,000원 ≈ 52.8억 원, 20~30% ≈ 10.6억~15.8억 원
+- 입력값 출처 표시, 검증할 추정치로 제시, 교환 전환 15%는 추가 효과로 언급
+- 2024년 실주와 떠난 챔피언을 새 계기로 다룸: 대체 솔루션 채용 공고, 신임 CEO, 리세일 출시
+- 박영수 및/또는 홍길동(타마랙 인연)으로 진입하고 근거 제시, 구체적 첫 접근, 가정을 검증하는 질문

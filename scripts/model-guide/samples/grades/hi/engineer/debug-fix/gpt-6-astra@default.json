@@ -1,0 +1,128 @@
+{
+ "key": "hi/engineer/debug-fix/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "a81989cb94a0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offset bug: IST is +05:30, not +5; 9 March spans 19:00Z–19:00Z, pulling in A5 (00:15 IST)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यहाँ A5 गलत जुड़ता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the incorrect +05:00 offset, gives the old 19:00Z–19:00Z window, and explains A5's erroneous inclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the offset error and notes that A5 is incorrectly pulled into 9 March."
+    }
+   ]
+  },
+  {
+   "check": "Uses Asia/Kolkata local midnights; explains it shows only on days with 00:00–00:30 IST orders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "STORE_TZ = ZoneInfo(\"Asia/Kolkata\")",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Builds successive local midnights and converts to UTC; explains errors depend on orders in the first 30 minutes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Asia/Kolkata midnights and explains the bug only surfaces on days with orders in boundary windows."
+    }
+   ]
+  },
+  {
+   "check": "Half-open [start, end) instead of <= end; explains A2 at 19:00Z counted on both 8 and 9 March",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "adjacent दिनों के windows में साझा boundary वाला order दो बार गिना जा सकता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly fixes and explains inclusive-end double counting, but never explicitly identifies A2 as counted on both March 8 and 9."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Switches to [start, end) and explains double-counting, but omits explicitly identifying A2 at 19:00Z on both days."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles ₹3,700.00 (500+1,200+400+600+1,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹500 + ₹1,200 + ₹400 + ₹600 + ₹1,000 = ₹3,700",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles staging total; code subtracts refunds, excludes cancelled orders, and handles fully refunded orders consistently."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancellations, and reconciles the staging figure of ₹3,700.00 accurately."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (\"Z\" only from 3.11), parses robustly; removes or properly keys the stale date-only cache",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.10 में `fromisoformat()` trailing `Z` स्वीकार नहीं करता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains version-dependent crash, normalizes Z, rejects naive timestamps, and removes the stale date-only cache with justification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the 3.10 Z parsing crash, parses robustly, and removes the stale date-only cache."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives ₹2,000.00 for 9 March (A2 500, A3 900, A4 600); tests cover midnight, 00:00–00:30, +05:30",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**₹500 + ₹900 + ₹600**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct code yields ₹2,000 from A2, A3, A4; regression tests cover midnight, early IST orders, and +05:30 timestamps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Yields ₹2,000.00 and includes tests for IST midnight, the 00:00–00:30 window, and +05:30 offset."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.034156763,
+ "date": "2026-10-11"
+}

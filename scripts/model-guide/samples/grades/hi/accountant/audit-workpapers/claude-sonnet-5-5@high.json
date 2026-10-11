@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/audit-workpapers/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "audit-workpapers",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "57bfcf56c7d6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**#2:** प्रमाण आने तक इसे खुला रखा है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies items 5 and 7, but treats item 2’s missing reapproval as unresolved rather than a deviation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies all three deviations missed by Richard."
+    }
+   ]
+  },
+  {
+   "check": "Treats items 4 and 8 as correctly exempt from the PO requirement",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E = नीति के अनुसार PO से छूट",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly applies the PO exemption to legal services in item 4 and electricity in item 8."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly treats items 4 and 8 as exempt from the PO requirement under policy."
+    }
+   ]
+  },
+  {
+   "check": "Flags 10 tested against 25 required (SA 530); 3 deviations in 10 already exceed the 10% tolerable rate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**आवश्यक sample:** 25 (फ़र्म तालिका: TDR 10%, अपेक्षित deviation 0)। **टेस्ट हुए: 10।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags undersampling, reports 3/10 as 30%, and concludes deviations exceed tolerance; declines extension to rescue reliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags sample shortfall and notes deviations already exceed tolerable deviation rate."
+    }
+   ]
+  },
+  {
+   "check": "Flags UK-7731 and UK-7732 (₹19,76,000 combined) as a likely split to avoid CFO approval; proposes follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "दोनों राशियाँ ₹10 लाख की सीमा से ठीक नीचे हैं, इसलिए जानबूझकर विभाजन का संकेत है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies both invoices and ₹19.76 lakh total; proposes document follow-up and population-wide split/duplicate analytics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags invoice splitting to bypass CFO limit and proposes audit follow-up."
+    }
+   ]
+  },
+  {
+   "check": "No reliance (SA 330), more substantive work; at least significant deficiency (SA 265), IFC material weakness considered, to TCWG",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**कमी का वर्गीकरण (judgement):** मैं इसे **Significant deficiency (SA 265)** मान रहा हूँ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Withdraws reliance, increases substantive work, and informs TCWG; does not explicitly consider IFC material weakness."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Concludes no reliance, increases substantive testing, classifies deficiency under SA 265/IFC, and communicates to TCWG."
+    }
+   ]
+  },
+  {
+   "check": "Includes a tickmark legend, a review trail and specific management-letter recommendations",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Reperformance/समीक्षा:** ऑडिट सीनियर | **स्थिति:** मैनेजर समीक्षा हेतु ड्राफ़्ट",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes tickmark legend, identifiable review status and outstanding evidence, plus specific ERP, approval-limit, variance, and anti-splitting recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes clear tickmarks, an audit review trail, and structured management letter points."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029004413,
+ "date": "2026-10-11"
+}

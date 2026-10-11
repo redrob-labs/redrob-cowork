@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/create-graphics/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "designer",
+ "task": "create-graphics",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "3a6e359e0a4f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"कोई फ़ीस नहीं. कभी नहीं.\" given ₹50 paper-statement and ₹23 ATM charges; offers accurate alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "“कोई फ़ीस नहीं. कभी नहीं.” सही नहीं है—कागज़ी स्टेटमेंट और निर्धारित सीमा के बाद दूसरे बैंक के ATM से निकासी पर शुल्क लगता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the absolute claim because charges apply and offers two accurate zero-balance alternatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly rejects the absolute claim due to stated fees and provides two compliant alternative headlines."
+    }
+   ]
+  },
+  {
+   "check": "Shows 7.00% \"प्रति वर्ष\" with the ₹1 lakh tier and full disclosure; drops the unsupported \"शहर में कोई और\" claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "“शहर में कोई और इससे ज़्यादा नहीं देता” हटाया: अद्यतन, सत्यापन योग्य तुलनात्मक प्रमाण उपलब्ध नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both ads show annual rates, both tiers, and the complete interest disclosure; unsupported comparison is explicitly removed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes 7.00% प्रति वर्ष with the ₹1 lakh slab, the full compliance disclosure, and drops the comparative claim."
+    }
+   ]
+  },
+  {
+   "check": "DICGC ₹5 lakh line, badge ≥120 px, logo ≥160 px with clear space, headline ≥64 px; matras not clipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "वास्तविक लोगो लगाते समय उसके “न” की ऊँचाई जितना clear space चारों ओर सुरक्षित रखना होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes exact insurance line, 132px badge placeholders, 160px logos, 64px headlines, and adequate spacing for matras."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes required insurance line, 132 px badge, 160 px logo with clear space, 64 px headline, and ample vertical spacing."
+    }
+   ]
+  },
+  {
+   "check": "Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "width=\"1080\" height=\"1080\" viewBox=\"0 0 1080 1080\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides valid SVGs at both required dimensions, clear hierarchy, readable copy, and only brand colours."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both SVGs are valid, correctly dimensioned (1080×1080, 1200×627), have clear hierarchy, and strictly use brand palette hex codes."
+    }
+   ]
+  },
+  {
+   "check": "Recomposes the landscape version rather than scaling the square one down",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "वर्गाकार डिज़ाइन को छोटा करके फिट नहीं करेंगे: सामग्री को क्षैतिज रूप से पुनर्व्यवस्थित करेंगे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Landscape SVG actually recomposes headline, central rate, family photo, and full-width disclosures rather than scaling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reorganizes the landscape layout into a three-column structure rather than simply scaling down the square graphic."
+    }
+   ]
+  },
+  {
+   "check": "Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सहमति-प्राप्त युवा सदस्य परिवार, रसोई की डाइनिंग टेबल पर सहज बातचीत; प्राकृतिक रोशनी, गर्म लेकिन वास्तविक वातावरण।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains the family with real-member, natural-light direction; approachable new-start copy and online KYC suit young first-time account holders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains the family photo in natural light with real members, tailoring the messaging to young first-time account holders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028146825,
+ "date": "2026-10-11"
+}

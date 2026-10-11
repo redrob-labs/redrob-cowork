@@ -58,3 +58,38 @@ deliverable: spreadsheets
 - Uses 7,370,000 × 4,200/11,000 = ₩2,814,000 for the vehicle and ₩1,200,000 for the home office (8,400,000 × 12/84), keeps the gym out, and moves 국민연금 to 연금보험료공제 rather than expenses.
 - Arrives at business income of ₩115,775,000 (141,200,000 − 25,425,000), a tax base of ₩108,875,000 (after ₩1,500,000 basic and ₩5,400,000 pension deductions), computed tax of ₩22,666,250 (×35% − 15,440,000; the old table would give ₩23,206,250), determined tax of ₩22,596,250 after the ₩70,000 standard credit, income tax payable of ₩19,581,250 after ₩3,015,000 withheld, and local income tax of about ₩1,958,125 (2,259,625 − 301,500). Expensing the laptop under the PC immediate-expensing rule is justified, and depreciation (5-year useful life) is mentioned as the alternative.
 - Flags that 3.3% (₩297,000) should have been withheld on the ₩9,000,000 paid to 박영수, with monthly 간이지급명세서 and the annual 지급명세서 (due 10 March 2025) not filed: file late and expect penalties (가산세). Suggests asking 블루핀헬스 to correct its 지급명세서.
+
+## Card
+
+brief: UX 컨설턴트의 2024년 귀속 종합소득세 워크페이퍼를 작성하며 수입금액을 맞추고 리서치 메모를 검증합니다.
+given:
+- 납세자: 면세 인적용역 개인사업자, 1인 세대, 복식부기의무자, 중간예납 없음
+- 수입 자료: 사업소득 지급명세서 2건과 신용카드 매출자료 1건, 지급처 메모
+- 사업용 계좌: 2024년 입금 합계, 소득이 아닌 입금 2건, PG 수수료 메모
+- 비용: 기장 담당자가 정리한 9개 항목(금액이 없는 항목 포함)
+- 리서치 메모: 주니어가 정리한 규정 6개
+asked:
+- 수입 자료와 계좌 입금액을 맞추는 총수입금액 조정표와 각 행의 방법
+- 항목별 금액과 적용 규정을 담은 필요경비 표, 제외 항목이 반영되는 곳
+- 종합소득세 계산: 사업소득금액부터 납부할 소득세와 지방소득세까지
+- 미결 사항과 리스크 목록(노트북 처리 권고와 남은 신고·납부 의무 포함)
+limit: 약 2,500자 이내, Markdown
+hard: 수입 자료가 서로 겹치고 리서치 메모는 쓰기 전에 검증해야 하며, 여러 항목에 규정을 적용하거나 다른 곳으로 옮겨야 하고, 노트북 처리는 판단이 필요합니다.
+
+## Scorecard
+
+- Removes ₩18,000,000 double count: receipts ₩141,200,000 = 144,062,500 − 6,000,000 − 1,400,000 + 1,221,000 + 3,316,500
+- Rejects note 3 (pre-2023 brackets); software ₩3,460,000 net of refund; deducts ₩1,221,000 fees, ₩3,200,000 meals within limit
+- Vehicle ₩2,814,000 (4,200/11,000), home office ₩1,200,000 (12/84); gym excluded; 국민연금 to 연금보험료공제
+- Business income ₩115,775,000, tax base ₩108,875,000, computed tax ₩22,666,250 (35% − 15,440,000), determined ₩22,596,250
+- Payable ₩19,581,250 after ₩3,015,000 withheld; local tax ~₩1,958,125; laptop expensed as PC, depreciation as alternative
+- Flags unwithheld 3.3% (₩297,000) on 박영수's ₩9,000,000, unfiled 지급명세서, 가산세; asks 블루핀헬스 to correct
+
+## Scorecard, shown
+
+- 1,800만원 이중 계상을 제거한다: 총수입금액 141,200,000원 = 144,062,500 − 6,000,000 − 1,400,000 + 1,221,000 + 3,316,500
+- 메모 3(2023년 이전 세율표)을 거부하고, 소프트웨어는 환불 차감 후 3,460,000원, 수수료 1,221,000원과 식사비 3,200,000원을 한도 내에서 공제한다
+- 차량 2,814,000원(4,200/11,000), 자택 사무실 1,200,000원(12/84), 헬스장 제외, 국민연금은 연금보험료공제로 옮긴다
+- 사업소득금액 115,775,000원, 과세표준 108,875,000원, 산출세액 22,666,250원(35% − 15,440,000), 결정세액 22,596,250원
+- 원천징수 3,015,000원 차감 후 납부할 소득세 19,581,250원, 지방소득세 약 1,958,125원, 노트북은 즉시상각하고 감가상각은 대안으로 든다
+- 박영수 님 지급액 9,000,000원의 3.3%(297,000원) 미원천징수, 지급명세서 미제출과 가산세를 지적하고 블루핀헬스에 정정을 요청한다

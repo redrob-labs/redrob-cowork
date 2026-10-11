@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/research/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "c75c2fa491ba",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Claim 1 covered (CFO conduct, mandatory \"지급하여야 한다\"); Claim 2 likely not; Claim 3 close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "정관 제40조[4]에 따라 청구 1은 전액, 청구 3은 안분 대상이며, 청구 2는 제외됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes mandatory advancement, excludes personal consulting duties, and analyzes Claim 3’s competing grounds with allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Claim 1 is mandatory, Claim 2 excluded, and Claim 3 is treated as a close call requiring allocation under [5]."
+    }
+   ]
+  },
+  {
+   "check": "민법 §687 via 상법 §382② treated as a supporting argument only, with the counter-argument noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "회사가 이사를 상대로 낸 소송의 방어비용이 \"위임사무 처리 비용\"에 해당하는지 다툼이 있을 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats §687, citing [1]–[2], as supplementary and identifies the principal-versus-agent defense-cost counterargument."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats it as supplementary and clearly notes the counter-argument regarding whether defensive litigation against the principal is '위임사무 처리 비용'."
+    }
+   ]
+  },
+  {
+   "check": "Amendment can't strip his right for 2023–2024 conduct under [6]; treatise [8] outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "권리는 행위 당시 정관에 따라 정해집니다[6].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Protects pre-amendment rights, notes no impairment reservation, and discounts the outdated treatise."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States amendment cannot strip rights for pre-amendment conduct under [6], and rejects [8] as outdated."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [4] and [6], not blog [7]; bank guarantee rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "선의 여부는 반환 단계에서 판단하고[6], 정관 문언이 \"무담보\"입니다[4].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects both conditions using [4] and [6], and explains why the blog is unreliable."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good faith based on [4] and [6] (dismissing [7]), and rejects bank guarantee due to unsecured undertaking in [4]."
+    }
+   ]
+  },
+  {
+   "check": "Enforce: payment claim in district court plus §300② 가처분 (high bar); fees pro rata under [5], §109 cap",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "그러나 정관이 \"최대한\"으로 권리를 부여했으므로 승소 비율만큼 그 이상을 회수할 수 있습니다[5].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Covers enforcement, district court, injunction threshold, and proportional fees, but adds unsupported recovery above the statutory cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers district court action, §300② 가처분 with strict bar, and pro rata fees recovery noting §109 caps."
+    }
+   ]
+  },
+  {
+   "check": "Tender unsecured undertaking, written demand; source table separates [1]–[4], fictional [5]–[6], unreliable [7]–[8]",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "무담보 반환 약정서를 즉시 송부하고, 청구별 안분안을 담아 선지급 이행을 최고합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends tender and formal demand; table distinguishes primary sources, fictional cases, and unreliable secondary sources."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends tendering unsecured undertaking and written demand, and source table clearly categorizes [1]-[4], fictional [5]-[6], and [7]-[8]."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019828199999999997,
+ "date": "2026-10-11"
+}

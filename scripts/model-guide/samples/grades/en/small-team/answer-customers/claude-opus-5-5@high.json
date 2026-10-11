@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/answer-customers/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "answer-customers",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "335e8939629c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Thu 23 Apr 18:30 has exactly 3 spots. Offer to move her two places to Thursday and add her sister.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Saturday within capacity and offers all three the Thursday evening class."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Refuses overbooking Saturday and offers to move all three to the Thursday evening class."
+    }
+   ]
+  },
+  {
+   "check": "Richard Roe gets a full $65 refund or free reschedule (studio cancelled); bounced email noted, address fixed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Offer a full $65 refund or a free move to 25 Apr, his choice. Fix his email on file.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognises studio cancellation, apologises for bounced notice, and instructs correction using his incoming email address."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives full refund or reschedule, notes bounced notice, and updates the email address on file."
+    }
+   ]
+  },
+  {
+   "check": "Wholesale at $23.40 a mug ($1,404 for 60); $18 flagged to Jane, not accepted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Her offer:** $18/unit, or $1,080. That's **$324 below** policy, or $5.40/unit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly quotes $23.40 per mug and $1,404 total; flags the rejected $18 offer for Jane."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quotes $23.40/mug ($1,404 total), rejects $18, and flags the pricing decision to Jane."
+    }
+   ]
+  },
+  {
+   "check": "Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "60 mugs need about 1.5 weeks of the 40-mugs-a-week wholesale capacity.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects 1 May, explains six-week lead time and capacity, and offers later delivery or existing stock."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains 1 May is impossible, notes lead time and kiln capacity, and offers unbranded mugs as an alternative."
+    }
+   ]
+  },
+  {
+   "check": "Message 4 is phishing (lookalike domain, urgency): no reply, no click, report it, check real admin",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "If anyone already clicked the link, change the Shopfront password, turn on two-factor authentication",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies phishing, prohibits clicking/replying, and reports it; direct admin checking is conditional on someone having clicked."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies phishing, instructs not to click or reply, reports it, and advises checking admin directly."
+    }
+   ]
+  },
+  {
+   "check": "Honours John Stiles' replacement or refund (photo DM 27 Mar, within 7 days); apologises for missed DM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Your Instagram message and photo from 27 March reached us, and we missed it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Apologises for missed DM, recognises timely photo report, and offers free replacement or full refund."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Apologises for missing the 27 March Instagram DM and honours the replacement or refund."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020672925,
+ "date": "2026-10-11"
+}

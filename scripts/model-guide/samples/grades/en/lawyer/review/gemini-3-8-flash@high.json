@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/review/gemini-3-8-flash@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "gemini-3-8-flash",
+ "effort": "high",
+ "scorecardSha": "dfe7be3b2901",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 3,
+ "of": 5,
+ "lines": [
+  {
+   "check": "BAA is the blocker: PHI shared, Exhibit C omitted; don't sign or go live with census data until signed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Execute BAA / Exhibit C (Absolute Blocker):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies census data as PHI, omitted Exhibit C, and prohibits signing before an executed BAA."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies the omitted BAA as an absolute blocker to signing and sharing census PHI."
+    }
+   ]
+  },
+  {
+   "check": "Cap is $45,000 (3 months, implementation excluded) vs playbook $240,000 in year 1 and $540,000 super-cap",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "12-month trailing/payable cap ($180,000 minimum)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly calculates $45,000 and $540,000, but omits the required $240,000 year-one cap and retains the restrictive Fees definition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Quantifies the $45,000 cap and $540,000 super-cap, but calculates 12-month fees as $180,000 instead of $240,000 for year 1."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity is capped; 9.2 excludes notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Section 10.2 requires Riverbend to indemnify Calyx broadly for \"Customer Data.\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags phantom carve-out, capped vendor indemnities, and excluded notification costs, but does not identify customer indemnity as uncapped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the missing §10.4 capping indemnities, §9.2's notification cost exclusion, and §10.2's broad uncapped customer indemnity."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Delaware venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses all four issues with playbook-aligned redlines, including renewal limits, uptime and chronic-failure remedies, New York County, and free export."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides redlines and fallbacks for renewal terms, the 99.5% sole-remedy SLA, Delaware venue, and exit terms."
+    }
+   ]
+  },
+  {
+   "check": "§5-1401 met ($600,000+): NY law holds, venue not fixed; §5-903's reach to SaaS uncertain, so calendar and negotiate",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "New York courts routinely hold that SaaS arrangements, cloud software access, and intellectual property licenses are intangible services",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct $600,000 threshold and negotiation advice; overstates SaaS exclusion, omits calendaring, and misleadingly invokes §5-1402 for venue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly evaluates both statutes, noting §5-1401's threshold is met and §5-903's applicability to SaaS is doubtful."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02316405,
+ "date": "2026-10-11"
+}

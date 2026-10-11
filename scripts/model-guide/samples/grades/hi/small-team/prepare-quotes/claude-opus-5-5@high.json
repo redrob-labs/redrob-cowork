@@ -1,0 +1,128 @@
+{
+ "key": "hi/small-team/prepare-quotes/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "prepare-quotes",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "227916b226e3",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Spots ~25% markup, not margin: PC (59,900 − 48,000) ÷ 59,900 ≈ 19.9%; every hardware line under 25%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "List prices पर hardware margin सिर्फ़ 20% बनता है, और PC पर 19.9%।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies every hardware list price as below the required 25% gross margin, including the PC’s 19.9%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies that list prices reflect markup rather than the required 25% margin."
+    }
+   ]
+  },
+  {
+   "check": "Re-prices at cost ÷ 0.75 (PC ₹64,000, AP ₹20,000, firewall ₹48,000, switch ₹56,000, backup ₹88,000) or flags it",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "PC ₹64,000, AP ₹20,000, firewall ₹48,000, switch ₹56,000, appliance ₹88,000।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reprices every hardware item correctly at cost divided by 0.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Re-prices all hardware items exactly to cost ÷ 0.75 in the quote table and note."
+    }
+   ]
+  },
+  {
+   "check": "Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Site पर 12 PCs हैं। 2 imaging PCs को vendor sign-off बाकी होने तक बाहर रखा है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Quotes 10 staff PCs and explicitly excludes both imaging PCs pending vendor approval, explaining the count discrepancy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quotes 10 PCs, excludes the 2 imaging PCs pending vendor sign-off, and explains the 10 vs 12 count."
+    }
+   ]
+  },
+  {
+   "check": "Labour ₹67,650 (41 h × ₹1,500 + 10% PM); one-off ₹9,59,650 + GST; recurring ₹16,500 + ₹9,000/month, ₹30,000/year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Labour | 55,275 | 12,375 | 67,650 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labour, one-off total, GST, monthly support and cloud backup, and annual firewall subscription are all correctly calculated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates labour at ₹67,650, one-off at ₹9,59,650 + GST, and all recurring costs correctly."
+    }
+   ]
+  },
+  {
+   "check": "Phases to the ₹8 lakh + GST budget, with backup appliance, cloud backup and firewall first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Phase 1:** ₹7,55,275 + GST, budget के भीतर। इसमें backups, firewall, switch, Wi-Fi और 7 PCs शामिल हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends an affordable first phase containing backup appliance, cloud backup and firewall, prioritising the four-month backup gap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Creates a phased rollout under ₹8 lakh + GST prioritising backups, security/firewall, and network infrastructure."
+    }
+   ]
+  },
+  {
+   "check": "Offers a DPA, says \"supports DPDP Act obligations\", never \"DPDP compliant\"; 30-day validity, 50% hardware deposit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Go-live से पहले Neelkanth और client के बीच DPA sign होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers DPA, uses obligations-support language without compliance claims, and includes 30-day validity and 50% hardware deposit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Complies fully with DPDP phrasing rules, offers a DPA, and includes 30-day validity and 50% hardware deposit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024861374999999998,
+ "date": "2026-10-11"
+}

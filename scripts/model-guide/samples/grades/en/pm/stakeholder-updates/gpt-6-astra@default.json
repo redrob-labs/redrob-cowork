@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/stakeholder-updates/gpt-6-astra@default",
+ "language": "en",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "beb3252399e6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ $650,000 ($455k + 3 × $65k), not $590,000: ≈ $50,000 (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That is **$50,000 / 8.3% over budget**, and **$60,000 above** the reported $590,000 forecast.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly computes $650,000 from spending plus three remaining months and flags the reported forecast discrepancy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recomputes the forecast at completion to $650,000 and notes it is $50,000 (8.3%) over budget."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Public launch: RED** — 14 November + four weeks = **12 December at the earliest**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct review calculation; both final compliance submission and public launch are explicitly red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the 12 December earliest launch date due to the 4-week review and marks both milestones red."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Support: 22 tickets per 1,000 users versus ≤15**, approximately **47% above** the ceiling.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Honestly reports both support excess and goal creation at 31% versus 40%, identifying the adoption shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately and honestly presents the beta misses against their targets."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size and retention without spin, and links the ticket themes to fixes",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Improve round-up explanations and deposit-status visibility, then retest against the existing adoption and support targets.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reports deposit and retention comparisons with appropriate caveats and connects both ticket themes to targeted fixes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reports deposit size and retention objectively and links ticket themes directly to concrete fixes."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Approve Option B:** withdraw the 1 December commitment and use **15 December as the provisional planning target**, subject to the launch gate.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ends with explicit launch and budget approvals, alternative launch approaches, and a justified gated mid-December recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides clear launch and budget options and explicitly recommends a gated replan to 15 December."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "These changes reflect baseline variance, not team effort.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides each include speaker notes; bottom line opens the deck, and Jane’s note is factual and constructive."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Contains 7 slides with speaker notes opening with the bottom line; the note to Jane is factual and non-blaming."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017105025,
+ "date": "2026-10-11"
+}

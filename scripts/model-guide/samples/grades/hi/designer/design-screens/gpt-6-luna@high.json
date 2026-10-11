@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/design-screens/gpt-6-luna@high",
+ "language": "hi",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "742571b5816a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सफ़ेद `#FFFFFF` टेक्स्ट के बजाय गहरा `#1D2B33` टेक्स्ट इस्तेमाल किया है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies insufficient white-on-green contrast and explains the AA-driven switch to dark text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies AA contrast failure of white on #7FD1AE and switches to dark ink text #1D2B33."
+    }
+   ]
+  },
+  {
+   "check": "Drops Miles's exotic slot, 13:30 (lunch), 12:00 dental (runs into lunch), 16:45 wellness (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const validSlots = apiSlots.filter(isBookable);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Eligibility, lunch-overlap, and closing-time checks remove all four invalid slots, leaving only two bookable slots."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly filters out Miles exotic, 13:30 lunch, 12:00 dental (lunch overlap), and 16:45 wellness slots."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "API को स्लॉट की पूरी अवधि पर लंच और क्लिनिक समय की जाँच करनी चाहिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains all four invalid slots and recommends API eligibility and full-duration validation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains why each invalid slot fails constraints and recommends fixing validation in the API."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"₹3,500 से\" honestly, e.g. with a final-price note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अंतिम कोटेशन उपलब्ध और उपयोगकर्ता को दिखाए जाने तक बुकिंग की पुष्टि रोकना आवश्यक है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Displays the starting price honestly and blocks confirmation without a final quote, resolving the no-surprises tension."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Displays starting price clearly, adds explanatory note, and addresses tension with PM's no-surprises rule."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, lang=\"hi\", keyboard-usable (focus, labels, ≥24 px targets), offers \"कोई भी उपलब्ध डॉक्टर\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<html lang=\"hi\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file prototype fits 375px, uses labelled native buttons, visible keyboard focus, sufficiently large targets, and the any-doctor option."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sets lang='hi', works at 375 px, provides keyboard focus and accessible targets, and offers any doctor."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "वेलनेस जाँच और टीकाकरण कार्ड पहले रखे हैं; एक टैप में सेवा चुनी जा सकती है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Connects progressive sections and reduced navigation with prioritized, one-tap access to the two high-volume services."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Connects the progressive single-screen choice to streamlining the flow for the top 70% common services."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.032659463,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/debug-fix/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "6b518c12a7a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3/9: 다음 날 00:00~01:00 CDT 주문(A5 $50)이 섞여 들어옴.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the erroneous extra hour and A5 inclusion; bounds tests establish 05:00Z and November’s 25-hour day."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the DST +24h issue pulling in A5 and notes 2 November."
+    }
+   ]
+  },
+  {
+   "check": "Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "# A2(00:00:00 CST 3/9 정각)는 3/8 에 들어가지 않는다",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses half-open bounds, and explains midnight double-counting with an explicit A2 regression."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses next local midnight with a half-open interval and explains double-counting at midnight."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`25(A2) + 60(A3, 환불 미차감) + 20(A6, 취소) + 30(A4) + 50(A5, 3/10 00:20 CDT)`",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles $185; code subtracts refunds, excludes cancelled orders, and tests fully refunded orders yielding zero."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles $185.00, subtracts refunded_amount, excludes cancelled, and handles refunds correctly."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (fromisoformat accepts \"Z\" only from 3.11) and parses robustly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3.10 의 fromisoformat 은 'Z' 접미사를 거부하므로 '+00:00' 로 정규화한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains the version-dependent crash and normalizes Z; rejects timezone-naive timestamps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately explains the Python 3.10 vs 3.11/3.12 difference and implements robust parsing."
+    }
+   ]
+  },
+  {
+   "check": "Removes or properly keys the date-only mutable-default cache that serves stale totals for today",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "15분 갱신이 첫 호출값에 고정(당일 매출·늦은 환불 미반영), 같은 날짜의 다른 매장이 첫 매장 값을 받음",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains stale and cross-store results, removes the mutable-default cache, and tests fresh calculations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Details issues with the date-only mutable-default cache and removes it."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**합계 $100.00** — 재무팀과 일치.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly includes A2 $25, A3 $45, A4 $30; executable tests cover both DST transitions and midnight boundaries."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $100.00 for 9 March with breakdown, and test suite covers DST and midnight."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028361288000000002,
+ "date": "2026-10-11"
+}

@@ -58,3 +58,36 @@ Policy के बाद CEO के लिए अधिकतम 200 शब्द
 - Rejects instruction 4. Boot-up and VPN login time for shift-based staff is treated as working time, counted toward hours and paid at twice the normal rate where it creates overtime, with a clear timekeeping rule.
 - Narrows "work from anywhere": locations within India allowed within limits (with the state-specific payroll consequences of a longer move); overseas only with pre-approval and only in the UAE or Singapore, for the immigration, tax and permanent-establishment reasons given.
 - Sets an effective date that allows 21 days' notice to affected shift-based workers for the allowance and hours changes (IR Code s.40). The note to the CEO lists each departure (stipend, VPN time, abroad, attendance radius, effective date) and the decision needed. The by-state table matches the headcount data, for example that Tamil Nadu and Delhi have no office and Delhi has no professional tax.
+
+## Card
+
+brief: CEO तीन परस्पर विरोधी memos की जगह एक Hybrid and Remote Work Policy चाहते हैं; policy और निर्देशों से हटने पर CEO note लिखिए।
+given:
+- राज्यवार headcount: 5 राज्य, shift-based staff की संख्या और offices
+- CEO के निर्देश: 5 numbered points
+- मौजूदा memos: 3 अंश (hiring वाला राज्य, office attendance, phone और internet)
+- Employment counsel के research notes: Income-tax Rules नियम 3(7)(ix), Code on Wages और OSH Code, IR Code धारा 40, राज्य-विशेष दायित्व और विदेश से काम
+asked:
+- Policy, बताए गए 9 headed sections के साथ
+- राज्यवार क्या लागू है, इसकी छोटी table
+- CEO के लिए note: निर्देशों से कहाँ हटे, क्यों, और कौन-सा फ़ैसला चाहिए
+limit: पूरा उत्तर लगभग 1,200 शब्दों के भीतर, CEO note अधिकतम 200 शब्द, Markdown
+hard: निर्देश tax और labour codes से टकराते हैं, पुराने memos में तालमेल बिठाना है, और कुछ निर्देशों पर judgement call चाहिए।
+
+## Scorecard
+
+- One rule set expressly supersedes Memos A–C: attendance days, "near an office" (e.g. 50 km), state-move approval kept
+- ₹1,500 stipend kept, "no bills" rejected: bill-based phone/internet route (Rule 3(7)(ix)) and documented expense claims
+- Rejects instruction 4: shift staff's boot-up and VPN login is working time, overtime at twice the rate; timekeeping rule
+- India moves within limits, with state payroll consequences; abroad only pre-approved, UAE or Singapore, for immigration, tax, PE
+- Effective date allows 21 days' notice to affected shift-based workers for the changes (IR Code s.40)
+- CEO note lists each departure and decision; state table matches headcount (Tamil Nadu, Delhi no office; Delhi no PT)
+
+## Scorecard, shown
+
+- एक ही नियम-व्यवस्था Memos A–C को स्पष्ट रूप से हटाती है: attendance के दिन, "office के पास" (जैसे 50 km), राज्य बदलने की मंज़ूरी बरक़रार
+- ₹1,500 stipend बरक़रार, "अब कोई bills नहीं" अस्वीकार: bill-आधारित phone/internet reimbursement (नियम 3(7)(ix)) और documented expense claims
+- निर्देश 4 अस्वीकार: shift staff का boot-up और VPN login working time है, overtime दोगुनी दर पर; timekeeping नियम
+- भारत में अन्य जगह से काम सीमा में, राज्य के payroll असर सहित; विदेश केवल पूर्व-मंज़ूरी से, UAE या Singapore, immigration, tax, PE कारणों से
+- Effective date ऐसी कि प्रभावित shift-based workers को बदलावों का 21 दिन का notice मिले (IR Code धारा 40)
+- CEO note में हर बदलाव और ज़रूरी फ़ैसला; राज्य table headcount से मेल खाती है (तमिलनाडु, दिल्ली में office नहीं; दिल्ली में PT नहीं)

@@ -1,0 +1,128 @@
+{
+ "key": "hi/marketer/run-messaging-campaigns/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "fc59e85a1fd9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Pune only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "18,735 − 615 − 757 = 17,363",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five eligible email counts and total are correct; D is restricted to Pune."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates eligible email contacts per segment and total (17,363)."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "D में केवल पुणे PIN वाले contacts हों (248 email, 52 SMS)।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Eligible SMS totals 4,772, including only 52 Pune contacts from D; remaining D contacts are excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately reduces D SMS to 52, excludes rest of D, total 4,772."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of ₹1,600 = ₹800 before dessert, over ₹450; e.g. 25% off (₹400), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सिर्फ़ 50% off (₹800) ही ceiling से ऊपर है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the manager’s proposal with correct arithmetic and supplies capped, nonstacking offers below ₹450."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects manager's offer with arithmetic and proposes unstacked offers within ₹450."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Pune delivery for D",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "C: \"New recipes since September, 25% off.\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Addresses A’s price, C’s new recipes, and Pune delivery; omits 35% fewer complaints and meaningful B convenience messaging."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Tailors messages across segments, but omits the 35% reduction in complaints for segment C."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₹1,70,800",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "औसत incentive लागत ≈ ₹322 प्रति reactivated customer (137,625 ÷ 427)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct channel-based forecast totals 427; ₹137,625 is consistent with chosen offers but differs from checklist’s ₹170,800."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 427 reactivations and total incentive cost based on segment-specific offers."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤160 GSM-7 / ≤70 Unicode, accurate counts, brand, STOP, DLT; 10:00–21:00 IST = 04:30–15:30 UTC; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "SMS केवल 10:00–21:00 IST (04:30–15:30 UTC) के बीच हों।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "GSM-7 counts 118 and 106 are accurate; brand, STOP, DLT, UTC conversions, and pre-touch reactivation suppression are provided."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Follows character limits, DLT, brand, STOP, send window (IST/UTC), and exit conditions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0335601,
+ "date": "2026-10-11"
+}

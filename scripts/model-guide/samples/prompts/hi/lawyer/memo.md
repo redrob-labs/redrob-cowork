@@ -54,3 +54,38 @@ deliverable: documents
 - Computes the recoverable amount with the closing-of-the-books allocation: ₹2.60 crore + ₹2.90 crore + ₹0.40 crore = ₹5.90 crore (not a one-month pro-rata ₹26.67 lakh for April 2021). Excludes the post-closing May 2021–March 2022 and FY2022-23 tax (₹5.30 crore), which is Juniper's own liability.
 - Notes that the 8.2(c) claim isn't subject to the Deductible, the Escrow cap or the released escrow. Splits the liability severally: ₹4.13 crore (Founders LLP) and ₹1.77 crore (Mary Major).
 - Recommends withdrawing or amending the ₹11.20 crore notice so it claims under 8.2(c) for ₹5.90 crore, plus related interest and penalties attributable to those periods if documented, and preserving the appeal immediately (filing within the condonable period with a condonation application and the pre-deposit).
+
+## Card
+
+brief: Share Purchase Agreement के तहत buyer, sellers से GST demand की राशि वसूल सकता है या नहीं, और कितनी, इस पर वस्तुनिष्ठ memo लिखिए।
+given:
+- तथ्य: closing, purchase price, escrow, sellers के हिस्से, वर्षवार GST demand, appeal की अवधि, claim notice और जवाब
+- SPA के अंश: tax representation, straddle allocation, survival, indemnity, limitations, third-party claims और परिभाषाएँ
+- क़ानून: Limitation Act धारा 3 और Article 55, Arbitration Act धारा 43(1), Contract Act धारा 124 और 28, और GC team का सारांश
+asked:
+- Question Presented
+- Brief Answer
+- Facts (संक्षिप्त)
+- Analysis: timeliness, notice defence, वसूली योग्य राशि, हर seller से वसूली
+- Recommendations, claim notice सुधारने के तरीके सहित
+- वसूली योग्य राशि और हर seller के हिस्से की table
+limit: लगभग 1,200 शब्दों के भीतर, headed sections वाला Markdown memo, मान्यताएँ बताते हुए
+hard: दूसरे पक्ष के बचावों को contract और limitation law पर परखना है, straddle period का बँटवारा करना है, और prejudice एक judgement call है।
+
+## Scorecard
+
+- 8.2(a) rep claim lost: survival ended 30 Apr 2024, and Article 55 runs from closing; s.28 can't rescue it
+- 8.2(c) accrued with the 4 Aug 2025 demand; timely, within 8.6's 30 Apr 2028; 8.6 can't extend limitation
+- Notice 91 days after 4 Aug misses 30 days; bars recovery only for actual prejudice (s.107 window ~4 Nov)
+- Recoverable ₹5.90 crore (₹2.60 + ₹2.90 + ₹0.40), not pro-rata ₹26.67 lakh; ₹5.30 crore post-closing excluded
+- 8.2(c) free of Deductible, escrow cap and released escrow; several shares ₹4.13 crore and ₹1.77 crore
+- Amend the ₹11.20 crore notice to an 8.2(c) claim for ₹5.90 crore; appeal now with condonation and pre-deposit
+
+## Scorecard, shown
+
+- 8.2(a) का representation दावा ख़त्म: survival 30 अप्रैल 2024 को समाप्त, और Article 55 closing से चलता है; धारा 28 नहीं बचाती
+- 8.2(c) का दावा 4 अगस्त 2025 की demand से उत्पन्न; समय पर, 8.6 की 30 अप्रैल 2028 की सीमा के भीतर; 8.6 limitation नहीं बढ़ा सकती
+- Notice 4 अगस्त के 91 दिन बाद, 30 दिन की शर्त चूकी; वसूली केवल वास्तविक prejudice की हद तक रुकती है (धारा 107 की अवधि ~4 नवंबर)
+- वसूली योग्य ₹5.90 crore (₹2.60 + ₹2.90 + ₹0.40), pro-rata ₹26.67 लाख नहीं; closing के बाद का ₹5.30 crore बाहर
+- 8.2(c) पर Deductible, escrow cap या release हुआ escrow लागू नहीं; अलग-अलग हिस्से ₹4.13 crore और ₹1.77 crore
+- ₹11.20 crore का notice सुधारकर 8.2(c) के तहत ₹5.90 crore का दावा; condonation और pre-deposit के साथ तुरंत appeal

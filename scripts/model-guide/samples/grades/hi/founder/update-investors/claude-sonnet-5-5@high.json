@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/update-investors/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "d1bd72749628",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GMV ₹46.50 करोड़ (+10.7% QoQ)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports 10.7% GMV growth, 6.8% revenue growth, and 7%/16.3% plan misses."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects GMV and net revenue growth and identifies the 7% and 16% misses against plan."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months (₹54.90 crore ÷ ~₹4.7 crore a month), not 18; questions the Q1 FY27 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Runway = 54.90 ÷ (14.10÷3 = ₹4.70 cr/माह) = **11.7 माह**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct runway methodology; explicitly flags thin cash cushion and risk of closing the round in Q1 FY27."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~11.7 months runway, corrects the 18 months claim, and questions Q1 FY27 timing."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the ₹1.8 crore one-time working-capital effect (about 13 months)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "तब underlying burn ≈ ₹12.3 cr।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Considers removing ₹1.8 crore from burn, but omits the resulting approximately 13-month normalized runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Normalizes the ₹1.8 cr effect to calculate underlying burn (₹12.3 cr), but omits the resulting ~13-month runway figure."
+    }
+   ]
+  },
+  {
+   "check": "Neelshikhar (12% of GMV at 9%) cuts ~0.6 points; ex-Neelshikhar ~14.1%; covers margin and restaurant churn",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Q1 (14.0%) → वास्तविक:** core +0.11 pt; नीलशिखर −0.61 pt।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 14.1% ex-Neelshikhar rate and 0.61-point impact; discusses margin pressure and restaurant churn."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates ~0.6 pt cut, ex-Neelshikhar take rate (~14.1%), and addresses margin impacts and churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"On track\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "हम \"on track\" नहीं कह रहे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops the claim and credits all positives, including +26 accounts, but opens with successes rather than the miss."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly drops 'on track', leads with misses, and credits account growth (+26), repeat orders (61% to 66%), and logo."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~₹3.05 crore a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**अनुमोदन:** Q3–Q4 के लिए net burn cap ₹11.5 cr/तिमाही, और FY26 की संशोधित योजना।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides quantified options, trade-offs, recommendation, specific board asks, and notes on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Options include specific numbers, Board asks are concrete, and every slide contains a speaker note."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027789300000000003,
+ "date": "2026-10-11"
+}

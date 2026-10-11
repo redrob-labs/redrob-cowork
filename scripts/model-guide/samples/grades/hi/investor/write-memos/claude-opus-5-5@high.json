@@ -1,0 +1,110 @@
+{
+ "key": "hi/investor/write-memos/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "investor",
+ "task": "write-memos",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "9049e2176fc0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Ownership ₹150 crore ÷ ₹750 crore = 20%, not 25%; pool ₹18 → ₹75 crore; effective pre-money ≈₹543 crore",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Effective pre-money = 600 − 59 = ₹541 crore।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct 20% ownership; uses a precise alternative pool calculation but does not show the requested ₹18→₹75 crore bridge."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies 20% ownership, details the option pool expansion, and calculates effective pre-money around ₹541–543 crore."
+    }
+   ]
+  },
+  {
+   "check": "FY2023-24 gross margin restated ≈73.7% (72.4% if all ₹9 crore moved); LTM ≈74%; reclassification flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Production hosting COGS है, R&D नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Restates FY24 margin to 73.7% and LTM to 74.0%, with formulas; flags reporting quality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Restates FY24 gross margin to 73.7% and LTM to 74.0%, clearly flagging AWS production hosting reclassification."
+    }
+   ]
+  },
+  {
+   "check": "FY2023-24 ARR growth 60%, burn multiple ≈2.14 (90 ÷ 42), runway ≈10 months; cohort NRR 124% → 112% → 103%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Cohort NRR में लगातार गिरावट है: 124% → 112% → 103%।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly gives 60% ARR growth, 2.1x burn multiple, ten-month runway, and declining cohort NRR."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computes 60% ARR growth, ~2.1x burn multiple, 10-month runway, and notes the falling cohort NRR trend."
+    }
+   ]
+  },
+  {
+   "check": "BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Valuation ex-BrightSmile ARR पर; multi-year renewal की स्थिति जाँचें;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies 18% concentration and potential in-house build; proposes a specific valuation mitigant and renewal diligence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags BrightSmile concentration and in-house build as a top risk with specific valuation and diligence mitigants."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Invest with conditions. मौजूदा terms पर sign नहीं करना चाहिए।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendation follows the analysis; signing diligence explicitly addresses hosting classification, BrightSmile contracts, and support metrics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clear recommendation consistent with findings; diligence items directly address hosting, BrightSmile, and support quality."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024255263,
+ "date": "2026-10-11"
+}

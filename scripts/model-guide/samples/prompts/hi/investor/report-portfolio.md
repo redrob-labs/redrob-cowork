@@ -55,3 +55,38 @@ Letter के बाद जॉन डो के लिए एक छोटा in
 - Computes NAV of ₹945 crore at 30 June and ₹864 crore at 30 September. TVPI is (945 + 96) ÷ 780 = 1.33x at 30 June and (864 + 96) ÷ 780 = 1.23x at 30 September; DPI 0.12x; RVPI 1.21x at 30 June and 1.11x at 30 September.
 - States plainly that TVPI fell this quarter, contradicting the draft's "1.43x … better than last quarter". Explains the Clearpath wind-down and the Brine markdown candidly and without spin.
 - The internal note lists each correction (paid-in capital, the Dovetail mark, the Clearpath mark, the performance line) with the policy reason for each.
+
+## Card
+
+brief: Fund II के investors के लिए Q2 FY2025-26 letter लिखिए, managing partner की draft performance line और प्रस्तावित marks को records और policy से मिलाते हुए।
+given:
+- जॉन डो की draft line: paid-in capital और TVPI का दावा
+- Fund records: paid-in capital, drawdown notice, distributions, fees और cash
+- Portfolio और प्रस्तावित marks: 8 companies की cost, 30 जून FMV, प्रस्तावित 30 सितंबर FMV और तिमाही की घटना
+- Valuation policy: SEBI AIF Regulations और IPEV के अनुरूप write-up और write-down का अंश
+asked:
+- Summary
+- Fund performance table (paid-in capital, distributions, NAV, TVPI, DPI, RVPI) दोनों तारीखों पर, formulas सहित
+- Portfolio update: हर company पर एक-दो वाक्य, 30 सितंबर marks के साथ
+- Write-downs और notable changes
+- आगामी drawdown
+- Outlook
+- जॉन डो के लिए internal note: हर बदलाव का कारण
+limit: पूरा उत्तर लगभग 1,200 शब्दों के भीतर, internal note अधिकतम 150 शब्द, Markdown, multiples दो दशमलव तक
+hard: Draft को records से मिलाना है, हर mark पर valuation policy लागू करनी है, और बुरी ख़बर साफ़ शब्दों में बतानी है।
+
+## Scorecard
+
+- Paid-in ₹780 crore at both dates, not ₹810 crore; the ₹30 crore drawdown due 15 Oct disclosed separately
+- Marks per policy: Dovetail held at ₹60 crore cost, Clearpath about ₹4 crore, Gild ₹120 crore, Brine ₹45 crore
+- NAV ₹945 / ₹864 crore; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x
+- States TVPI fell, contradicting "1.43x … better than last quarter"; explains Clearpath and Brine candidly
+- Note to Doe lists paid-in, Dovetail, Clearpath and headline corrections, each with its policy reason
+
+## Scorecard, shown
+
+- दोनों तारीखों पर paid-in ₹780 crore, ₹810 crore नहीं; 15 अक्टूबर को due ₹30 crore का drawdown अलग से बताया
+- Policy के अनुसार marks: Dovetail ₹60 crore cost पर, Clearpath लगभग ₹4 crore, Gild ₹120 crore, Brine ₹45 crore
+- NAV ₹945 / ₹864 crore; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x
+- साफ़ कहा कि TVPI गिरा, "1.43x … पिछली तिमाही से बेहतर" के उलट; Clearpath और Brine को बिना लाग-लपेट समझाया
+- डो के लिए note में paid-in, Dovetail, Clearpath और headline के सुधार, हर एक का policy कारण

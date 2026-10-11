@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/research-prospects/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "5e66e350abeb",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Lee Young-hee CEO (Jan 2026), Kim Cheol-su Chair, FY2025 ₩240B; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2026년 1월 CFO 출신 **이영희 CEO** 선임, 창업자 김철수는 이사회 의장으로 이동했다.[1]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses current leadership and FY2025 ₩240B revenue; explicitly relegates the 2023 article to historical context."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately reflects current leadership and FY2025 revenue while treating 2023 figures as outdated."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a different Busan company); uses Ridgeback's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "부산 캠핑용품 도매업체 ‘릿지백아웃도어’는 법인 동일성이 입증되지 않아 제외한다.[5]",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes source 5 and uses Ridgeback’s 22% return rate, treating 32% only as industry context."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discards source 5 and explicitly rejects the 32% industry rate in favor of Ridgeback's 22%."
+    }
+   ]
+  },
+  {
+   "check": "Value math: ₩240B ÷ ₩120,000 = 2.0M orders × 22% × ₩12,000 ≈ ₩5.28B; 20–30% ≈ ₩1.06–1.58B",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "52.8억 × 20~30% = **연 10.56~15.84억 원 절감 잠재력**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates two million orders, 440,000 returns, ₩5.28B costs, and ₩1.056–1.584B potential savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Executes the exact calculation yielding ₩5.28B cost and ₩1.06–1.58B savings."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**리턴핏 벤치마크:** 처리 비용 20~30% 절감, 환불 건의 약 15%를 교환으로 전환.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labels company inputs and vendor benchmarks, frames calculations as unvalidated scenarios, and quantifies exchange upside with caveats."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Inputs are clearly labelled, framed as hypotheses to validate, with 15% exchange upside calculated."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "퇴사한 Richard Miles는 현재 챔피언에서 제외한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses the 2024 budget/tool loss and departed champion, using replacement hiring, CEO change, and resale as new triggers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly addresses the 2024 loss and departed champion using the job posting, new CEO, and resale."
+    }
+   ]
+  },
+  {
+   "check": "Enters via Park Young-su and/or Hong Gil-dong (Tamarack link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**채널·대상:** 홍길동 VP에게 개인화 이메일. 내부 타마랙굿즈 담당자에게 관계를 확인한 뒤 가능하면 소개를 요청한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies Hong and Park as entry points, proposes concrete outreach, and asks five questions testing operational and purchasing assumptions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends entering via Hong Gil-dong, provides a concrete first outreach, and includes assumption-testing discovery questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021428925,
+ "date": "2026-10-11"
+}

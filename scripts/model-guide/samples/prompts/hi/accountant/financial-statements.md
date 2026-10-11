@@ -57,8 +57,40 @@ deliverable: documents
 
 ## A strong answer
 
-- Net loss is ₹1,614 lakh (3,460 − 5,074). Total assets of ₹2,634 lakh equal liabilities of ₹3,228 lakh plus negative total equity of ₹594 lakh (4,200 − 3,180 − 1,614).
+- Net loss is ₹1,614 lakh (3,460 − 5,074). Total assets of ₹2,634 lakh equal liabilities of ₹3,228 lakh plus negative total equity of ₹594 lakh (4,200 − 3,180 − 1,614). An answer that books the ₹30 lakh interest correction instead (loss ₹1,584 lakh, negative equity ₹564 lakh) is equally right, provided the statements still tie.
 - Splits deferred revenue into ₹740 lakh current and ₹280 lakh non-current and the lease liability into ₹96 lakh current and ₹240 lakh non-current. The notes and accrued interest are non-current, since they are due 30 September 2026, more than 12 months after the reporting date, and the answer says so.
 - Notices that note interest should be ₹90 lakh (1,500 × 8% × 9/12), not the ₹120 lakh booked as finance cost, and raises the ₹30 lakh difference as an open item with a proposed reclassification or correction.
 - Concludes there is a material uncertainty related to going concern under Ind AS 1: about 10.5 months of runway (₹1,467 lakh ÷ ₹140 lakh) against an assessment period of at least 12 months from the reporting date, the customer loss and no signed term sheet. Discloses management's plans without saying the uncertainty is resolved.
 - Treats the CEO loan as an Ind AS 24 related-party disclosure (and a Schedule III disclosure of loans to directors without repayment terms). Questions its classification and recoverability, flags the missing board approval and a likely section 185 Companies Act issue (the private-company exemption is doubtful with body-corporate shareholders). The customer loss is a non-adjusting event under Ind AS 10.
+
+## Card
+
+brief: एक venture-backed SaaS कंपनी के 31 मार्च 2025 के Ind AS वित्तीय विवरण और संक्षिप्त नोट्स तैयार करें, और कंट्रोलर के लिए open items सूचीबद्ध करें।
+given:
+- कंपनी: unlisted, Ind AS स्वेच्छा से अपनाया, Schedule III Division II, बोर्ड अनुमोदन 30 जून 2025
+- Adjusted trial balance: 31 मार्च 2025 के 23 खाते, ₹ लाख में
+- कंट्रोलर मैरी मेजर के तथ्य: आस्थगित राजस्व, लीज़, कन्वर्टिबल नोट्स, CEO ऋण, cash burn और सबसे बड़े ग्राहक पर 6 बिंदु
+asked:
+- वर्तमान/गैर-वर्तमान वर्गीकरण वाली balance sheet और statement of profit and loss, ₹ लाख में, totals मिलते हुए
+- संक्षिप्त नोट्स: going concern, राजस्व, लीज़, कन्वर्टिबल नोट्स, related party, रिपोर्टिंग अवधि के बाद की घटनाएँ
+- मैरी के सामने उठाए जाने वाले open items, trial balance और तथ्यों के बेमेल और प्रस्तावित treatment सहित
+limit: लगभग 1,200 शब्दों के भीतर, Markdown
+hard: शेषों को परिपक्वता के आधार पर वर्गीकृत करना है, दर्ज आंकड़ों को बताई गई शर्तों से परखना है, और going concern व एक असामान्य ऋण पर प्रस्तुति के judgement चाहिए।
+
+## Scorecard
+
+- Statements tie: loss ₹1,614 lakh, negative equity ₹594 lakh as booked (or ₹1,584 lakh and ₹564 lakh if interest corrected)
+- Deferred revenue ₹740 lakh current, ₹280 lakh non-current; lease ₹96/₹240 lakh; notes and accrued interest non-current
+- Flags note interest should be ₹90 lakh (1,500 × 8% × 9/12), not ₹120 lakh; proposes treating the ₹30 lakh
+- Material uncertainty on going concern (Ind AS 1): ~10.5 months' runway, customer loss, unsigned term sheet; not resolved
+- CEO loan as related party (Ind AS 24, Schedule III); questions classification, recoverability; flags missing board approval, section 185
+- Treats the customer's non-renewal as a non-adjusting event under Ind AS 10
+
+## Scorecard, shown
+
+- विवरण मिलते हैं: जैसा दर्ज है उस पर शुद्ध घाटा ₹1,614 लाख और ऋणात्मक कुल इक्विटी ₹594 लाख (ब्याज सुधारने पर ₹1,584 लाख और ₹564 लाख)
+- आस्थगित राजस्व ₹740 लाख वर्तमान, ₹280 लाख गैर-वर्तमान; लीज़ ₹96/₹240 लाख; नोट्स और उपार्जित ब्याज गैर-वर्तमान
+- बताता है कि नोट्स पर ब्याज ₹120 लाख नहीं, ₹90 लाख (1,500 × 8% × 9/12) होना चाहिए, और ₹30 लाख के treatment का प्रस्ताव देता है
+- Going concern पर material uncertainty (Ind AS 1): लगभग 10.5 महीने का runway, ग्राहक का जाना, बिना हस्ताक्षर का term sheet; अनिश्चितता को हल हुआ नहीं बताता
+- CEO ऋण को related party (Ind AS 24, Schedule III) मानता है; वर्गीकरण और वसूली पर सवाल, बोर्ड अनुमोदन की कमी और धारा 185 का मुद्दा उठाता है
+- सबसे बड़े ग्राहक के नवीनीकरण न करने को Ind AS 10 के तहत non-adjusting event मानता है

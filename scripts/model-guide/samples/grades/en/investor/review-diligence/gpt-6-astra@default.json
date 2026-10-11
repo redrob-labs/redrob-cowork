@@ -1,0 +1,128 @@
+{
+ "key": "en/investor/review-diligence/gpt-6-astra@default",
+ "language": "en",
+ "profession": "investor",
+ "task": "review-diligence",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "0d3bf4d1124d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "C1 $360,000 (−$60,000); C2 $260,000 (−$50,000); C3 $0 (−$275,000); C9 $87,600 (−$32,400)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CAD 120,000 × 0.73 USD/CAD = **$87,600**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four customers have the correct adjusted ARR, adjustments, and supporting bases."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately adjusts C1 to $360k, C2 to $260k, C3 to $0, and C9 to $87.6k."
+    }
+   ]
+  },
+  {
+   "check": "C8 $0 live, $132,000 separate; C6 $144,000 (alt. $180,000); C10 $66,000 (management's $75,000)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "ARR **+$66,000**, to **$1,505,600**; value **+$396,000**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "C8 and C6 are correct; C10’s $66,000 is only an alternative, with $0 used in the primary reconciliation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly handles C8, evaluates C6 at $144k (alt. $180k), and details C10 at $66k (and $75k)."
+    }
+   ]
+  },
+  {
+   "check": "Adjusted live ARR $1,505,600 (−$594,400, −28.3%), $1,637,600 with C8; bridge ties to $2,100,000",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**$1,439,600 + $132,000 = $1,571,600**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Bridge ties, and $1,505,600 appears as an alternative; primary total, reduction, percentage, and combined C8 total differ."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Base case excludes C10 entirely ($1,439,600), though $1,505,600 is identified under the C10 alternative. Bridge ties correctly."
+    }
+   ]
+  },
+  {
+   "check": "At risk: C4 ($240,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Contract expires June 30, 2026, at the end of the forward 12-month window; renewal exposure, not evidence of churn.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies C4’s termination right and C5’s renewal exposure, with $240,000 and $198,000 at stake."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly flags C4 ($240k convenience termination) and C5 ($198k renewal in June 2026)."
+    }
+   ]
+  },
+  {
+   "check": "Top-3 concentration (C1, C2, C4) ≈57.1% of adjusted ARR; C1 ≈23.9%",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "$860,000 ÷ $1,439,600 = **59.74%**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct top-three customers, but incorrect denominator produces 59.74% and C1 25.01%, rather than 57.1% and 23.9%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly identifies C1, C2, and C4, but percentages differ due to using $1,439,600 as the base denominator."
+    }
+   ]
+  },
+  {
+   "check": "At 6.0×: $12.6M vs ≈$9.03M, a ≈$3.57M gap; recommends re-price, earn-out or escrow",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**$12,600,000** to **$8,637,600**: a **$3,962,400 reduction**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Management valuation is correct; adjusted valuation and gap differ, and no explicit re-price, earn-out, or escrow recommendation appears."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculates valuation gap using base ARR, notes price reduction, but omits earn-out or escrow structures."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028951650000000002,
+ "date": "2026-10-11"
+}

@@ -50,3 +50,40 @@ deliverable: documents
 - Identifies the Ujjwal Chemicals invoices UK-7731 and UK-7732 (₹19,76,000 combined, same goods, same day, same approval) as a likely split to avoid CFO approval, and recommends follow-up, such as a duplicate or split-invoice scan of the population.
 - Concludes the control cannot be relied on (SA 330), says substantive testing of expenses and disbursements must increase, and gives a reasoned classification of the deficiency (at least a significant deficiency under SA 265, considered for material weakness in internal financial controls reporting under section 143(3)(i) of the Companies Act, 2013) to communicate to those charged with governance.
 - The workpaper has a tickmark legend, a clear review trail and specific management-letter recommendations.
+
+## Card
+
+brief: एक manufacturer के वैधानिक ऑडिट में पहले साल के आर्टिकल असिस्टेंट के भुगतान-अनुमोदन कंट्रोल टेस्ट को दोबारा करके वर्किंग पेपर पूरा करें।
+given:
+- अनुमोदन नीति: invoice राशि के अनुसार अनुमोदन स्तर, three-way match, 5% मूल्य-अंतर का नियम और PO से छूट
+- Population और प्लान: H1 के 1,240 भुगतान (₹35.84 करोड़), SA 530 के अनुसार ज़रूरी sample size और आइटम चुनने का तरीका
+- टेस्ट परिणाम: 10 sampled भुगतानों के अनुमोदक, अनुमोदन की तारीख और 3-way match की स्थिति
+- रिचर्ड का निष्कर्ष: "कोई exception नहीं मिला"
+- वेंडर लेजर अंश: 4 मई के पेमेंट रन में एक वेंडर के 2 invoice
+asked:
+- उद्देश्य
+- Population और sample, sample पर्याप्त है या नहीं सहित
+- टेस्ट किए गए attributes और tickmark legend के साथ परिणाम तालिका
+- Exceptions और उनका root cause
+- कंट्रोल पर निष्कर्ष और ऑडिट प्लान पर उसका प्रभाव
+- प्रस्तावित management letter बिंदु
+limit: लगभग 1,200 शब्दों के भीतर, Markdown वर्किंग पेपर
+hard: असिस्टेंट के साफ़ निष्कर्ष को नीति के आधार पर आइटम-दर-आइटम दोबारा परखना है, sample design और लेजर अंश की जाँच करनी है, और deficiency का तर्कसंगत वर्गीकरण करना है।
+
+## Scorecard
+
+- Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)
+- Treats items 4 and 8 as correctly exempt from the PO requirement
+- Flags 10 tested against 25 required (SA 530); 3 deviations in 10 already exceed the 10% tolerable rate
+- Flags UK-7731 and UK-7732 (₹19,76,000 combined) as a likely split to avoid CFO approval; proposes follow-up
+- No reliance (SA 330), more substantive work; at least significant deficiency (SA 265), IFC material weakness considered, to TCWG
+- Includes a tickmark legend, a review trail and specific management-letter recommendations
+
+## Scorecard, shown
+
+- रिचर्ड से छूटे तीन deviations पकड़ता है: आइटम 2 (5.33% मूल्य-अंतर, नया अनुमोदन नहीं), आइटम 5 (भुगतान के बाद अनुमोदन), आइटम 7 (गलत स्तर)
+- आइटम 4 और 8 को PO की शर्त से सही रूप से मुक्त मानता है
+- बताता है कि 25 की ज़रूरत (SA 530) के मुकाबले केवल 10 टेस्ट हुए, और 10 में 3 deviations पहले ही 10% tolerable rate से ऊपर हैं
+- UK-7731 और UK-7732 (कुल ₹19,76,000) को CFO अनुमोदन से बचने के लिए किया गया संभावित split मानता है और follow-up सुझाता है
+- कंट्रोल पर निर्भरता नहीं (SA 330), substantive testing बढ़ाना; deficiency कम से कम significant (SA 265), IFC में material weakness पर विचार, TCWG को सूचना
+- Tickmark legend, review trail और विशिष्ट management-letter सिफ़ारिशें शामिल करता है

@@ -1,0 +1,110 @@
+{
+ "key": "hi/lawyer/review/muse-spark-1-3@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "adb68155f371",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "DPA is the blocker: patient data, Fiduciary liable (s.8(5)), s.8(2) needs contract, Exhibit C omitted; don't sign or go live",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**DPA गायब है (Exhibit C blank)।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Makes signed DPA a blocker; identifies patient data, sections 8(2)/8(5), and Riverbend’s continuing responsibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the DPA as the key blocker under DPDP ss. 8(2) and 8(5), advising not to sign."
+    }
+   ]
+  },
+  {
+   "check": "Cap ₹36 lakh (3 months, implementation excluded) vs playbook ₹1.92 crore year 1, ₹4.32 crore super-cap; ₹250 crore penalty",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "General cap **₹36L → ₹1.44 cr (Year-1 ₹1.92 cr)**; data-breach super-cap **₹4.32 cr**;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly quantifies all caps, excludes implementation from current Fees, and compares exposure with the ₹250 crore penalty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Precisely calculates ₹36L cap, ₹1.92 cr / ₹4.32 cr playbook caps, and compares to ₹250 cr penalty."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity capped; 9.2 excludes s.8(6) notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "IP indemnity भी ₹36L में capped।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies nonexistent cross-reference, capped IP, notification-cost exclusion, and broad customer indemnity, but omits its uncapped characterization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes missing §10.4 capping IP indemnity, s.8(6) notification costs exclusion in 9.2, and broad customer indemnity."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Bengaluru venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3yr/120d/9% → **1yr/60d/≤3%**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides playbook-aligned redlines for renewal, SLA, Mumbai venue, and free export with 60-day retrieval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides specific redlines for renewal, 99.5% sole-remedy SLA, Bengaluru venue, and exit terms matching the playbook."
+    }
+   ]
+  },
+  {
+   "check": "Bengaluru clause likely valid (CPC s.20, s.28), so negotiate Mumbai; CPA unavailable (commercial purpose), calendar non-renewal",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Bengaluru (defendant residence) सक्षम है, अतः exclusive Bengaluru स्वतः void नहीं होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly explains venue validity and CPA commercial-purpose exclusion, but does not calendar the non-renewal deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Accurately analyzes CPC s.20, s.28, and CPA commercial purpose exclusion, but omits calendaring non-renewal."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027827363,
+ "date": "2026-10-11"
+}

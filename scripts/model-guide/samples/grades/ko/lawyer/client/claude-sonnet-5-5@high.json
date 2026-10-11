@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/client/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "client",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "b8c6b6b2d4aa",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "이의신청 due Nov 17, 2025, not month-end; silence accepts ₩12억; Proposal 2 to Nov 21; decide ~Nov 13",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이날까지 이의가 없으면 결정이 12억 조건 그대로 확정됩니다. 크레센트 제안의 유효기간(11월 21일)은 이보다 늦습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct November 17 deadline, silence effect, November 21 offer expiry, and decision requests around November 13."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All relevant dates, deadline implications, and internal decision dates (Nov 13/14) are accurately stated."
+    }
+   ]
+  },
+  {
+   "check": "§11.3 likely bars the ₩3억 lost profits; trial EV ≈₩11.6억 with interest; Proposal 1's certain ₩12억 compares well",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "0.65 × (18.5 + 이자 2.3~4.0) − 반소 0.3 × 5 − 추가 변호사비 1.5 + 비용회수 0.65 × 0.2 ≈ 10.6~11.8억입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes lost profits under §11.3; interest-inclusive range encompasses the benchmark and supports the certain ₩12억 settlement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly applies clause 11.3, builds an interest-inclusive EV model, and compares it favorably to the ₩12억 settlement."
+    }
+   ]
+  },
+  {
+   "check": "Proposal 2's affiliate release waives the ₩4억 피어9 guaranty (worth ≈₩9.5억); installment credit risk noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "크레센트홀딩스 연대보증도 포함됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the ₩4억 guaranty release, discounts net value to ₩9.2억, and warns of unsecured installment default."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Spots affiliate release of the ₩4억 guarantee, computes real value (~₩9.2억), and identifies credit risk."
+    }
+   ]
+  },
+  {
+   "check": "Costs follow judgment, but recoverable fees are capped at about ₩2,000만; most of ₩1.5억 unrecoverable",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "추가 변호사비 1.5 + 비용회수 0.65 × 0.2",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Models limited fee recovery but omits judgment-based cost allocation, the Supreme Court cap, and explicit substantial unrecoverability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes statutory cap on recoverable fees (₩2,000만) vs ₩1.5억 expense and Proposal 1's cost-bearing term."
+    }
+   ]
+  },
+  {
+   "check": "Removes or warns off 박영수: no general privilege, so the shared memo loses confidentiality protection",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "우리 법에는 미국식 변호사-의뢰인 특권이 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes Park, explains his lack of testimonial protection, and warns that sharing undermines memo confidentiality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes consultant from thread, cites lack of privilege and witness refusal rights, and warns of loss of confidentiality."
+    }
+   ]
+  },
+  {
+   "check": "E.g. let Proposal 1 stand; counter Proposal 2 before Nov 17 with 피어9 carve-out, security; ₩16억 too high",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이 사건만 해결하고 피어9는 제외, 15억을 12/31까지 일시금으로 받는 안",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Defaults to Proposal 1, counters before November 17, preserves Pier9, replaces installments with lump payment, and rejects ₩16억 case-only."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends letting Proposal 1 stand, provides counter-proposal strategies with carve-out/security before Nov 17, and analyzes ₩16억."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02173815,
+ "date": "2026-10-11"
+}

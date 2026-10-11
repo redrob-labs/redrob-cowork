@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/sell-customers/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "founder",
+ "task": "sell-customers",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "89c2edef0fdb",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't present 40% as typical (uses the 18% average or credits Northfield); names only Northfield and Pinegate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Our lowest result was 8%, and our best was 40% at Northfield Clinics. Pinegate Health (5 clinics) saw 12%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly identifies Northfield as the best result, gives the 18% average, and names only approved customers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses the 18% average, attributes 40% to Northfield, and only names Northfield and Pinegate."
+    }
+   ]
+  },
+  {
+   "check": "Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I'll hold the 15% in reserve for the actual negotiation. I won't open with a discount.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects unauthorized 30%, explains the premature and unrealistic Friday deadline, and reserves policy-compliant discounting for negotiation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Firmly rejects the 30% discount and Friday deadline, noting policy and reserving discounts for later."
+    }
+   ]
+  },
+  {
+   "check": "Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery call",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Her current contract renews on 30 November 2026 and needs 90 days' notice, so her real decision date is about 1 September 2026.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "John’s note uses correct dates and a long-cycle plan; outreach requests short exploratory calls rather than immediate signature."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly accounts for the contract renewal and notice period, while CTAs request a short 20-minute call."
+    }
+   ]
+  },
+  {
+   "check": "Personalizes to text-message call-outs, overtime, float pool, 3 new clinics and 11 RN roles",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "You've opened three new clinics this year and have RN roles open.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Personalizes call-out texts, overtime, float pool, and clinic growth, but omits the specific 11 open RN roles."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Mentions text call-outs, overtime, float pools, and 3 new clinics, but omits the specific count of 11 RN roles."
+    }
+   ]
+  },
+  {
+   "check": "Each email adds new value rather than just following up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Implementation takes about six weeks. We import directly from your current system's export format",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Emails progress from call-out workflow to contextualized results and references, then implementation and switching considerations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Each email introduces distinct value: workflow mechanics, honest benchmarks and references, and switching/implementation logistics."
+    }
+   ]
+  },
+  {
+   "check": "Each email under 150 words, one CTA, sensible send day; LinkedIn ≤300 characters; founder's tone",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Would a 20-minute call help you judge whether this fits how Riverbend handles call-outs?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All emails are under 150 words with one CTA and sensible dates; LinkedIn is under 300 characters; tone is founder-like."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All emails are under 150 words with single CTAs; LinkedIn is under 300 characters in founder tone."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030956888000000002,
+ "date": "2026-10-11"
+}

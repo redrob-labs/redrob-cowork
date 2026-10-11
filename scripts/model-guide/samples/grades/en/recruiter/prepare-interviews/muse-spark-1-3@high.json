@@ -1,0 +1,128 @@
+{
+ "key": "en/recruiter/prepare-interviews/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "recruiter",
+ "task": "prepare-interviews",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "8265cbe1fa2d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rescales John Doe's 1–5 ratings to 1–4 with a stated formula (e.g. 5 → 4, 4 → 3.25)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Converted = 1 + (Raw-1) x 0.75",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States the correct linear rescaling formula and correctly maps 5 to 4 and 4 to 3.25."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States the exact linear rescaling formula and values correctly."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Doe's card for Roe (interview cancelled): Roe's SAFE 2.5, below 3.0; notes it would be 3.0",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "If counted, Richard SAFE would falsely rise to 3.33",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly excludes the cancelled interview and reports SAFE 2.50, but incorrectly gives 3.33 instead of 3.00 with inclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Excludes Doe's scorecard and gets 2.50, but states SAFE would rise to 3.33 (raw) rather than 3.0 (rescaled)."
+    }
+   ]
+  },
+  {
+   "check": "Flags Stiles' remark on Mary's children as improper, ignores it, asks all finalists the same on-call question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Struck comment from consideration. Scores retained. Referred for coaching.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags improper family-status bias, ignores the comment, and supplies an identical on-call question for both finalists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags Stiles' comment as improper/bias, ignores it, and tests on-call identically for all finalists."
+    }
+   ]
+  },
+  {
+   "check": "Flags \"reminds me of me at his age\" as affinity bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Affinity bias — Stiles on Richard Roe:",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the resemblance remark as affinity bias and discounts it."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies Stiles' comment as affinity bias."
+    }
+   ]
+  },
+  {
+   "check": "Advances Mary Major (≈ 3.50, SAFE ≈ 3.17) and Jane Doe (≈ 3.40, SAFE 3.75), method reproducible",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Recommendation: Advance Jane Doe + Mary Major (2 slots)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Advances both correct candidates, reports correct overall and SAFE averages, and provides reproducible calculations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Advances Jane and Mary with the correct averages and fully reproducible calculations."
+    }
+   ]
+  },
+  {
+   "check": "Final round probes each finalist's weakest areas (Mary: OPS, and SAFE near the bar; Jane: COMM), same questions and anchors",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Re-test SAFE with trailer scenario above; probe excursion documentation in detail.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses common questions and anchors, probes Jane’s COMM and Mary’s SAFE, but omits targeted probing of Mary’s weakest competency, OPS."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Has identical questions and anchors; probes Jane's COMM and Mary's SAFE, but misses probing Mary's lowest area, OPS."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024155513,
+ "date": "2026-10-11"
+}

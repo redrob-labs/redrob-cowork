@@ -58,3 +58,38 @@ deliverable: none
 - Answers the integration question honestly: there is a FHIR R4 API, but no HL7 v2 interface and no native Mediscribe integration. A sensible next step is offered, such as a technical call.
 - Confirms the 15 extra seats at ₹800 under §3.3: 135 seats and ₹1,08,000 a month (before GST) from March.
 - The tone is accountable and empathetic without grovelling or blame, and the internal note lists each action with an amount.
+
+## Card
+
+brief: नाराज़ clinic ग्राहक ने बढ़ी कीमत, outage refund, integrations और नई seats उठाई हैं; ईमानदार जवाब दें और Billing व Support को बताएँ क्या ठीक करना है।
+given:
+- ग्राहक का email: invoice, 3 फ़रवरी का outage, HL7/HIS integration और 15 और seats पर 4 बातें
+- Contract excerpt: 1 मार्च 2025 से fees, price protection और अतिरिक्त seats की कीमत
+- Price change notice: 1 फ़रवरी 2026 से नया list price
+- SLA excerpt: uptime formula, credit के स्तर और दावे के नियम
+- Status page: Mumbai region में 3 फ़रवरी के incident की timeline
+- Product docs: उपलब्ध API और integrations
+asked:
+- मैरी मेजर को reply email (अधिकतम 400 शब्द), चारों बातों का आँकड़ों सहित जवाब
+- Billing और Support के लिए internal note: corrections और credits, गणना सहित
+- Contract से आगे के किसी judgement call पर अधिकतम 150 शब्द
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Contract, SLA और status page के ब्योरे ग्राहक के दावों पर सटीक लागू करने हैं, और कोई goodwill gesture सोच-समझकर justify करना है।
+
+## Scorecard
+
+- §3.2 fixes price until 28 Feb 2027; ₹1,10,400 invoice is an error, corrected by ₹14,400 to ₹96,000
+- 220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ ₹9,600; claim within 30 days
+- Explains 105 degraded minutes aren't downtime vs "9 hours"; no full-month refund; goodwill labelled and justified
+- FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step
+- 15 extra seats at ₹800 under §3.3: 135 seats, ₹1,08,000 a month before GST from March
+- Accountable, empathetic tone without grovelling; internal note lists each action with an amount
+
+## Scorecard, shown
+
+- §3.2 से कीमत 28 फ़रवरी 2027 तक fixed; ₹1,10,400 का invoice गलती है, ₹14,400 घटाकर ₹96,000 किया जाए
+- 40,320 में से 220 मिनट downtime ≈ 99.45% uptime: 10% credit ≈ ₹9,600; दावा 30 दिन के भीतर
+- समझाता है कि 105 मिनट degraded समय downtime नहीं, "9 घंटे" से फ़र्क; पूरे महीने का refund नहीं; goodwill साफ़ बताया और justify
+- FHIR R4 API है; HL7 v2 नहीं, Mediscribe से native integration नहीं; अगला कदम सुझाता है
+- §3.3 के तहत ₹800 पर 15 अतिरिक्त seats: मार्च से 135 seats, GST से पहले ₹1,08,000 प्रति माह
+- ज़िम्मेदार, सहानुभूतिपूर्ण लहजा, गिड़गिड़ाए बिना; internal note में हर कार्रवाई राशि सहित

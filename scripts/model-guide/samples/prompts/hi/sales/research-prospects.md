@@ -47,3 +47,38 @@ deliverable: none
 - The value math is labelled and correct: ₹480 crore ÷ ₹1,600 ≈ 30 lakh orders, × 22% ≈ 6.6 lakh returns, × ₹200 ≈ ₹13.2 crore a year in processing cost. Parcelwise's 20–30% benchmark gives about ₹2.6–4.0 crore of potential savings. These are presented as estimates to validate, the 15% exchange conversion is noted as upside, and COD RTO (excluded from the 22%) is flagged as an unknown rather than folded in.
 - Uses the CRM history well: the 2024 loss reason was the in-house tool and budget, and the champion has left. The new triggers that change the situation are the job posting to replace the homegrown portal, the new CEO and the resale launch. The recommended entry is John Stiles (the COO, who owns the new hire) and/or Mary Major (via the Kesariya Goods connection), with a justification.
 - Gives a concrete first move and discovery questions that test the assumptions (actual cost per return, the exchange process, COD/RTO volume, the evaluation timeline, resale grading needs).
+
+## Card
+
+brief: मिले-जुले research नतीजों और CRM इतिहास से एक खोए हुए D2C apparel prospect को फिर खोलने का account brief बनाएँ, value गणना और पहले कदम के साथ।
+given:
+- Search results और sources: अलग-अलग तारीख़, प्रासंगिकता और प्रकार के 8 items
+- Parcelwise CRM: 2024 की closed-lost opportunity और पुराना champion
+- Parcelwise proof points: लागत, exchange और grading के benchmarks
+asked:
+- मौजूदा तथ्यों का company snapshot, source numbers सहित, भरोसेमंद बनाम ख़ारिज
+- "Why now" triggers, rank करके
+- Buying committee, entry point और पिछली हार को कैसे संभालें
+- गणना सहित value hypothesis, inputs को Shikhar के या Parcelwise के रूप में label करके
+- Risks और unknowns
+- पहला कदम (channel, व्यक्ति, angle) और पाँच discovery questions
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Sources में पुराना, अप्रासंगिक और सामान्य data छाँटना है, और value case में prospect के अपने आँकड़े benchmarks से अलग रखने हैं।
+
+## Scorecard
+
+- Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2024-25 ₹480 crore; 2023 article treated as outdated
+- Discards source 5 (a different Manali firm); uses Shikhar's 22% return rate, not the 32% average
+- Value math: ₹480 crore ÷ ₹1,600 ≈ 30 lakh orders × 22% × ₹200 ≈ ₹13.2 crore; 20–30% ≈ ₹2.6–4.0 crore
+- Inputs labelled, figures framed as estimates to validate; 15% exchange conversion upside; COD RTO flagged as unknown
+- Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch
+- Enters via John Stiles and/or Mary Major (Kesariya Goods link), justified; concrete first move; assumption-testing questions
+
+## Scorecard, shown
+
+- मौजूदा तथ्य: जेन डो CEO (जनवरी 2026), रो Executive Chair, FY2024-25 ₹480 crore; 2023 का लेख पुराना माना
+- Source 5 (मनाली की दूसरी firm) ख़ारिज; 32% औसत नहीं, Shikhar का अपना 22% return rate
+- Value गणना: ₹480 crore ÷ ₹1,600 ≈ 30 लाख orders × 22% × ₹200 ≈ ₹13.2 crore; 20–30% ≈ ₹2.6–4.0 crore
+- Inputs labelled, आँकड़े जाँचने योग्य अनुमान के रूप में; 15% exchange conversion upside; COD RTO unknown के रूप में
+- 2024 की हार और गए हुए champion को नए triggers से संभालता है: replacement job post, नई CEO, resale launch
+- जॉन स्टाइल्स और/या मैरी मेजर (Kesariya Goods संबंध) से entry, justify; ठोस पहला कदम; assumptions परखने वाले सवाल

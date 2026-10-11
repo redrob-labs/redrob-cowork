@@ -1,0 +1,128 @@
+{
+ "key": "hi/designer/review-usability/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "designer",
+ "task": "review-usability",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "e577982a2e3b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Explains Lighthouse 100 doesn't prove conformance; cites the unextendable 2-minute timer (2.2.1) and CAPTCHA (1.1.1)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "100 Lighthouse एक उपयोगी automated signal है, WCAG AA का प्रमाण नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects automated-score conformance claim; identifies unextendable timer under 2.2.1 and inaccessible CAPTCHA under 1.1.1."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains automated tools do not prove conformance and covers 2.2.1 (timer) and 1.1.1 (CAPTCHA) in findings."
+    }
+   ]
+  },
+  {
+   "check": "Flags placeholder-only labels, colour-only error, unlinked hint, removed focus outline, clickable div; small Devanagari text",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Placeholder ही field पहचान है; hints जुड़े नहीं हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags all listed form defects and small text/link readability issues, while distinguishing small fonts from automatic WCAG failures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags placeholders as labels, colour-only errors, unlinked hints, focus removal, clickable div, and small text/targets."
+    }
+   ]
+  },
+  {
+   "check": "Flags contrast failures: #a0a0a0 hint at about 2.6:1 and white on #ff7a00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "सफेद पृष्ठभूमि पर hint लगभग **2.6:1**, button text लगभग **2.6:1** हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies both supplied color combinations as contrast failures with approximately correct ratios."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately flags contrast failures for both the hint text at 2.6:1 and white text on orange button."
+    }
+   ]
+  },
+  {
+   "check": "Covers input types and autocomplete (1.3.5), maxlength 16 blocking 19-digit cards, small targets, timer overlay, email typos",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Spaces स्वीकारें; 19-digit PAN तक जगह; numeric keyboards; पर्याप्त spacing।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Covers autocomplete and types, card length, target sizing, timer overlay, and explicit email typo suggestions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers input types, autocomplete (1.3.5), 19-digit cards, target size, timer overlay, and email typo detection."
+    }
+   ]
+  },
+  {
+   "check": "Declines the pre-ticked box as invalid consent under GDPR and the DPDP Act, 2023, and a dark pattern; unticked opt-in",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "भारत के लिए लागू privacy/marketing आवश्यकताएँ कानूनी टीम सत्यापित करे; दोनों बाजारों में एक स्पष्ट opt-in रखें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects preselection and explains EU affirmative consent, but omits explicit GDPR, DPDP Act invalidity, and dark-pattern classification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Declines pre-ticked box under GDPR and mandates unticked opt-in, but omits India's DPDP Act, 2023 and dark pattern framing."
+    }
+   ]
+  },
+  {
+   "check": "Corrected HTML runs, lang=\"hi\", keeps fields, announced timer warning and extend option, keeps orange accessibly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<html lang=\"hi\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable single-file prototype preserves fields, announces timer warning/extensions, and uses accessible orange styling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The runnable single-file prototype includes lang=\"hi\", all fields, accessible timer alerts and extension, and accessible orange styling."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.042596924999999994,
+ "date": "2026-10-11"
+}

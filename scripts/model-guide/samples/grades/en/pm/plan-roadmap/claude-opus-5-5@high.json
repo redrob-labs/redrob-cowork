@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/plan-roadmap/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "b21b55aef6f0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F7 was submitted in engineer-days, so 45 ÷ 5 = **9**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly normalises F7 to nine weeks, scores it 33.3, and states the RICE formula."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly converted 45 days to 9 weeks, giving RICE 33.3, and stated the formula."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Its RICE score of 5.8 (35 × 1 × 100% ÷ 6)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All other scores are correct; F4’s 29.8 is acceptable rounding of 29.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All RICE scores match the required figures (F4 is rounded to 29.8, F3 is 5.8)."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (clear of 31 Oct) and F5 before 31 Dec, regardless of RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F3 and F5 are reserved first: 14 of 48 weeks.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Schedules SSO in Q3 targeting August and migration in Q4 targeting mid-November, prioritising both obligations regardless of RICE."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F3 is scheduled in Q3 before 31 Oct, and F5 is scheduled in Q4 before 31 Dec."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Fitting its 20 weeks would mean dropping Offline Mode",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains incompatibility to Sales, respects migration dependency, and identifies Q1 2027 plus evidence that could change priorities."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is not scheduled before F5, and VP Sales is told why it can't fit and when."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **H2 total** | | **45 / 48** | 3 wks slack (6%) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 at 22/24, Q4 at 23/24, and H2 at 45/48; no items split."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quarter and H2 totals are explicitly shown and strictly within limits (22, 23, 45)."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It lost the last slot to F4 on total value (300 vs 357).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly chooses F4 over F7 using total value, effort constraints, reach, and confidence-related reliability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly compares and justifies F4 over F7 using total value (357 vs 300), reach, and confidence."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02038575,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/write-hr-policies/gpt-6-luna@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "fa5b3785cf3a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" defined, state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It replaces prior memos on office attendance, remote work, relocation, and home-office expenses.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Supersedes all three memos, defines near as 50 miles, requires Tuesday–Thursday attendance, and retains 60-day state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Consolidates memos into one policy, sets Tue–Thu attendance, defines 50 miles, and preserves 60-day relocation approval."
+    }
+   ]
+  },
+  {
+   "check": "$50 stipend kept, with a CA/IL claim route above it (§2802, 820 ILCS 115/9.5) and documentation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "submit a claim for the uncovered amount through the company’s expense process, with reasonable supporting documentation such as a bill or receipt.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps $50 for everyone and provides documented shortfall claims consistent with California and Illinois requirements."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps the $50 stipend, requires documentation, and establishes an expense shortfall claim route for CA and IL."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: non-exempt boot-up and VPN login time is paid work, with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Required system login and boot-up time must be recorded and paid for non-exempt employees.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects unpaid setup time and clearly requires clocking in before required setup and recording all work."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects CEO instruction 4, treating boot-up and VPN login time as compensable work with clear timekeeping instructions."
+    }
+   ]
+  },
+  {
+   "check": "US remote stays limited; abroad only with pre-approval, in Canada or the UK, for immigration, tax, PE reasons",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "overseas work may be approved only in Canada or the UK, where the company has an entity or employer-of-record.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Limits combined stays to four weeks and requires approvals, but does not identify immigration, tax, and permanent-establishment risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Limits US/abroad stays with pre-approval to Canada/UK, but omits the tax, immigration, and permanent-establishment reasons."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision needed; state table matches headcount (NY, WA have no office)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Please confirm the 50-mile boundary and authorize reimbursement claims above the stipend; the location and timekeeping safeguards are necessary for compliance.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "CEO note covers all four departures and requests decisions; state table accurately matches headcounts, non-exempt counts, and offices."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note outlines departures and requested decisions; the state table accurately reflects headcount and office locations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022072313000000003,
+ "date": "2026-10-10"
+}

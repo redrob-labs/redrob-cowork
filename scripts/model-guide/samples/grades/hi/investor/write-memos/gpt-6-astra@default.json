@@ -1,0 +1,110 @@
+{
+ "key": "hi/investor/write-memos/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "investor",
+ "task": "write-memos",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "9049e2176fc0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Ownership ₹150 crore ÷ ₹750 crore = 20%, not 25%; pool ₹18 → ₹75 crore; effective pre-money ≈₹543 crore",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**हमारी fully diluted ownership:** ₹150 ÷ ₹750 = **20%**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct ownership and pool mechanics; exact dilution calculation gives ₹541.24 crore, substantively equivalent to the reference’s approximate ₹543 crore."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 20% ownership, ₹75 crore pool value, and effective pre-money (~₹541–543 crore)."
+    }
+   ]
+  },
+  {
+   "check": "FY2023-24 gross margin restated ≈73.7% (72.4% if all ₹9 crore moved); LTM ≈74%; reclassification flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "AWS reclassification gross margin घटाता है, लेकिन कुल operating expense या net burn नहीं बदलता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Restates margins to 73.7% and 74.0%, moves production hosting into costs, and flags reporting quality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly restates gross margins to 73.7% and 74.0%, flagging the hosting reclassification."
+    }
+   ]
+  },
+  {
+   "check": "FY2023-24 ARR growth 60%, burn multiple ≈2.14 (90 ÷ 42), runway ≈10 months; cohort NRR 124% → 112% → 103%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "90 ÷ (112−70) = **2.14x**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly provides 60% ARR growth, 2.14x burn multiple, ten-month runway, and declining cohort NRR figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates FY24 ARR growth (60%), burn multiple (2.14x), runway (10 months), and lists cohort NRR."
+    }
+   ]
+  },
+  {
+   "check": "BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CTO/COO diligence; contracts, renewal और termination rights की समीक्षा; paid renewal/extension और insourcing downside case।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile’s 18% concentration and insourcing as major risks, with specific renewal and contractual mitigants."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile concentration and insourcing risk with specific diligence and contractual mitigants."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "निवेश की **सशर्त सिफ़ारिश** है, लेकिन वर्तमान terms पर signing की नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Conditional recommendation matches analysis; diligence addresses hosting allocation, BrightSmile retention, and support quality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a clear conditional recommendation with diligence items addressing hosting, BrightSmile, and support issues."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030907012999999997,
+ "date": "2026-10-11"
+}

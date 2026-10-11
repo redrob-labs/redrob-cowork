@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/answer-policy-questions/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "5e5f759e7ee8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 4,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not superseded 취업규칙 §7.2: 16 weeks at 100%; 출산전후휴가 needs no service",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "6개월 이상이면 최대 16주, 통상임금 100%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies PB-2025-04 over the old rule and expressly states statutory maternity leave has no service requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies PB-2025-04 (16 weeks at 100%) and notes 출산전후휴가 has no service requirement."
+    }
+   ]
+  },
+  {
+   "check": "연차: 4 days now, max 7 (11−4) by Feb 2, 2026; can't save 10; lapses Mar 2",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "2026년 3월 3일(입사 1년 도달일)까지",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly calculates four available now and seven maximum, but gives March 3 rather than March 2 expiry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 4 days currently, max 7 days, cannot save 10, and expires at 1 year."
+    }
+   ]
+  },
+  {
+   "check": "보육지원 can't change now; 30 days after the birth (about Mar 18, 2026); ₩3,000,000 is per household",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2026년 2월 16일 출생하면 3월 18일까지",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects changing now, gives the birth-triggered deadline, and correctly identifies the ₩3,000,000 household cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly explains no change now, 30-day window after birth (~Mar 18), and per-household limit."
+    }
+   ]
+  },
+  {
+   "check": "출산전후휴가 protected (§74⑥, §23②); 육아휴직 6-month test met; company leave concurrent, topped up to 100%",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "회사 휴가와 겹치는 기간에는 공지상 차액을 보전합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains statutory protection, concurrency and top-up, but does not explicitly confirm the 육아휴직 six-month eligibility test."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately details job protections (§74⑥, §23②), 6-month requirement satisfied, and concurrent 100% top-up."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: 30 days means telling her manager by mid-January (about Jan 16); her timing works, kept confidential",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "여유 있게 **1월 16일까지** 제출 권장",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides the correct practical application deadline, but does not commit to confidentiality or manager notification by then."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Covers 30-day notice and mid-January timing, but omits that HR keeps her notice confidential."
+    }
+   ]
+  },
+  {
+   "check": "Note flags superseded 취업규칙 still posted (amend, §93 filing); weeks 13–16 protection routed to 법무/노무",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "법정휴가 밖 기간의 급여·신분보호가 불명확합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags stale posting and routes extra-period protection to legal review, but omits formal rule amendment and §93 filing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Flags posted superseded rule and routes weeks 13–16 protection to legal, but misses §93 filing."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029051399999999998,
+ "date": "2026-10-11"
+}

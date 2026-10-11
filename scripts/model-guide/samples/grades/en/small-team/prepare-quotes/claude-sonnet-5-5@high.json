@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/prepare-quotes/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "prepare-quotes",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "aced8a614656",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Spots ~25% markup, not margin: PC (899 − 720) ÷ 899 ≈ 19.9%; every hardware line under 25%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "List prices on all hardware are below our 25% margin floor (PC 19.9%, AP 23.3%, firewall 23.7%, switch 22.7%, backup appliance 24.4%).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies every hardware margin shortfall, including the PC's 19.9% margin."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately identifies that list prices are below the 25% margin floor and calculates PC margin at 19.9%."
+    }
+   ]
+  },
+  {
+   "check": "Re-prices at cost ÷ 0.75 (PC $960, AP ≈ $347, firewall $640, switch $720, backup $1,200) or flags it",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I repriced to 25% or better.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tables correctly use policy prices: PC $960, AP $347, firewall $640, switch $720, backup $1,200."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Re-prices hardware lines correctly using cost ÷ 0.75 floor."
+    }
+   ]
+  },
+  {
+   "check": "Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "You have 12 PCs in use, because the two imaging PCs also need replacing.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Ten staff replacements span both phases, but imaging replacement is asserted as necessary and included in the baseline full scope."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 12 PCs vs 10 staff workstations and excludes imaging PCs pending vendor sign-off."
+    }
+   ]
+  },
+  {
+   "check": "Labour $5,637.50 (41 h × $125 + 10% PM); one-off ≈ $18,838.50; recurring $1,045 + $150/month, $420/year",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "The full scope is **$21,446.00** one-off",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Recurring figures and phased arithmetic are correct, but the required ten-PC full-scope total and $5,637.50 labour are absent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recurring costs are correct, but the full 10-staff-PC one-off total ($18,838.50) is replaced by Phase 1/Option A figures."
+    }
+   ]
+  },
+  {
+   "check": "Phases to the $15,000 budget, with backup appliance, cloud backup and firewall first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We recommend **Phase 1 at $14,927.25**, which fits the budget and fixes the most urgent risks first.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended phase fits $15,000 and includes backup appliance, encrypted cloud backup, and firewall, prioritizing stale-backup risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Phases under $15,000 budget with backup appliance, cloud backup, and firewall prioritized in Phase 1."
+    }
+   ]
+  },
+  {
+   "check": "Offers a BAA, says \"supports HIPAA obligations\", never \"HIPAA compliant\"; 30-day validity, 50% hardware deposit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Bluewick will sign a Business Associate Agreement. The backup design supports Juniper Lane's HIPAA obligations.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers a BAA, avoids claiming HIPAA compliance, and includes 30-day validity and a correct 50% hardware deposit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Offers BAA, uses 'supports HIPAA obligations', avoids 'HIPAA compliant', includes 30-day validity and 50% hardware deposit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018123263,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/research/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "384d11dedfe5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Count I covered (CFO conduct, mandatory \"shall\"); Count II likely not; Count III a reasoned close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "In my view it is probably not covered, but we should claim it and expect the court to allocate fees.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Covers mandatory Count I, excludes contractual Count II, and analyzes both sides of Count III with allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly classifies Count I as covered, Count II as not covered, Count III as a close call with allocation."
+    }
+   ]
+  },
+  {
+   "check": "§145(f): 2023–2024 conduct predates the amendment, which can't impair his right; treatise [8] outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Changing \"shall\" to \"may, in the Board's sole discretion\" plainly impairs a mandatory right.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies §145(f) to pre-amendment conduct, notes no authorization for impairment, and rejects the treatise as outdated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Applies §145(f) correctly to pre-amendment conduct and notes the 2004 treatise is outdated."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [1] and [6], not blog [7]; letter of credit rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "A letter-of-credit demand adds a condition the contract does not allow.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects good-faith conditioning under [1] and [6], discredits [7], and enforces the unsecured undertaking requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good faith based on [1] and [6] over [7], and rejects letter of credit since undertaking is unsecured."
+    }
+   ]
+  },
+  {
+   "check": "Enforce in Chancery (exclusive, summary, §145(k)); fees on fees pro rata under [5]; tender undertaking, written demand",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The Court of Chancery has exclusive jurisdiction over advancement actions and may decide them summarily [3].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes exclusive summary enforcement, proportional fees on fees, and a formal demand accompanied by an unsecured undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies Chancery exclusive/summary jurisdiction, pro rata fees on fees, and recommends formal demand tendering the undertaking."
+    }
+   ]
+  },
+  {
+   "check": "Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Not citable (fictional)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Table distinguishes statutory and contractual primary sources, fictional case summaries, and unreliable or superseded secondary sources."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The table clearly differentiates primary authorities, fictional cases, and unreliable/superseded secondary sources."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020332463000000002,
+ "date": "2026-10-11"
+}

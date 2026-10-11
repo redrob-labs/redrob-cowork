@@ -47,3 +47,27 @@ You are the sales rep at Gridpoint Sensors, which sells industrial IoT vibration
 - Moves Harrow (to Q3) and Tidemark (to a 2027-realistic date) out of Q1, and flags Tidemark's $210,000 as an unqualified placeholder.
 - The weighted values use Amount × stage probability. The Q1 weighted forecast drops from $161,750 (as exported) to $91,080 (Bayfront $63,000 + Eastbrook $28,080), with Bayfront as Commit.
 - The hygiene list covers the past-dated close, the duplicate, the currency mismatch, the guessed amount and the premature Closed Won.
+
+## Card
+
+brief: Clean up a sensor seller's CRM from this week's activity, build a Q1 forecast, and answer the manager's question about a won deal.
+given:
+- Stage probabilities: 6 stages, the USD amount field and the EUR rate
+- CRM export: 7 opportunities with stage, amount, close date and next step
+- This week's activity: 7 notes, emails and calendar entries
+asked:
+- An updated CRM table with Weighted ($) and "Changed / why", formulas and recalculations shown
+- A Q1 forecast before and after, by Commit, Best case and Pipeline, with definitions
+- The CRM hygiene issues found and fixed
+- A reply to John Stiles, up to 120 words
+limit: Up to about 1,200 words, in Markdown
+hard: The activity must be reconciled against the CRM record by record, and the manager's hopeful question answered plainly.
+
+## Scorecard
+
+- Pinecrest stays Negotiation, close ≈ 3 April (out of Q1), O-105 merged; Stiles told "not in Q1"
+- Kestrel re-priced to $31,000 (46,500 ÷ 45 × 30) with close date 10 April
+- Eastbrook €52,000 converted to $56,160 and kept in Q1 for the 26 March decision
+- Harrow moved to Q3; Tidemark to a 2027-realistic date, $210,000 flagged as unqualified placeholder
+- Weighted = Amount × probability; Q1 falls from $161,750 to $91,080, Bayfront as Commit
+- Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won

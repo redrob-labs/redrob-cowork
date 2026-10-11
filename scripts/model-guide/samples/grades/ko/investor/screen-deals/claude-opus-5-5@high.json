@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/screen-deals/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "screen-deals",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "fbcba62ef998",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "파슬레인 corrected to ₩28억: growth 86.7% (not 160%), burn multiple 2.00, a borderline pass",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "번 멀티플 2.00은 기준과 같아 경계선상에서 통과(*)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects recurring ARR to 28억, growth to 86.7%, and burn multiple to 2.00; identifies borderline passage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusted ARR to ₩28억, growth to 86.7%, burn multiple to 2.00, noting borderline pass."
+    }
+   ]
+  },
+  {
+   "check": "센티넬독스 corrected to ₩13.2억: fails the ₩15억 ARR floor; burn multiple 2.50",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ARR(13.2억), 번 멀티플(2.50)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly annualizes recurring revenue to 13.2억 and marks ARR floor and burn multiple failures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusted ARR to ₩13.2억, marked ARR floor failure, and calculated burn multiple as 2.50."
+    }
+   ]
+  },
+  {
+   "check": "레저리 100%/1.50; 플릿와이즈 2.50, fails margin and hardware; 쿼럼HR 58.6%/1.18, ARR above range",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "✗(단말기)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All calculations match; Fleetwise fails hardware, margin, and burn, while QuorumHR fails ARR and growth."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computed all metrics and identified failures for Ledgerly, Fleetwise, and QuorumHR."
+    }
+   ]
+  },
+  {
+   "check": "노스빔 1.27, fails NRR and round size; 탤로우 111.1%/1.60; 코비드 105.9%/1.50, fails geography",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "✗(싱가포르)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All three companies’ calculations match; Northbeam fails NRR and round size, and Covid fails geography."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculated figures for Northbeam, Tallow, and Covid Security, noting relevant criteria failures."
+    }
+   ]
+  },
+  {
+   "check": "Top three include 레저리; other picks reasoned, e.g. 탤로우 with its 40% concentration as first question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최대 고객의 갱신 협상은 어디까지 진행됐고, 레퍼런스 콜이 가능한가요?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ranks Leisurely, Tallow, and Parslane with sound rationales; Tallow’s first question addresses concentrated-customer renewal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Selected Ledgerly, Tallow, and Parcelane with sound reasoning and prioritized Tallow's customer concentration."
+    }
+   ]
+  },
+  {
+   "check": "Waivers: 코비드 geography only if the reverse flip counts toward 주목적 투자; 노스빔 fails two, so no rescue",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "지표는 상위 수준이므로 역플립 완료를 조건으로 재검토할 것을 권합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly rejects Northbeam’s two failures, but does not explicitly require reverse-flip eligibility for 주목적 투자 classification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Appropriately evaluated waivers for Covid Security around the flip/mandate and rejected Northbeam for two failures."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021595088,
+ "date": "2026-10-11"
+}

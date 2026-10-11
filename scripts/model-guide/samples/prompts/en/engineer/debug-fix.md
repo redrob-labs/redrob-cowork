@@ -83,3 +83,31 @@ Note that the $185.00 figure came from a staging run on Python 3.12.
 - Fixes the business logic to subtract `refunded_amount`, exclude `cancelled`, and deal with fully refunded orders consistently, and reconciles the staging figure: $185.00 = 25 + 60 + 20 + 30 + 50.
 - Explains the 3.10 crash (`fromisoformat` accepts "Z" only from 3.11) and parses robustly. Also explains that the mutable-default `_cache`, keyed only by date in a long-lived process, serves stale totals for today, and removes it or keys it properly with invalidation.
 - The fixed code gives $100.00 for 9 March (A2 25 + A3 45 + A4 30), and the tests cover DST start and end and the midnight boundary.
+
+## Card
+
+brief: Find why a grocery chain's daily-revenue figures disagree with finance and the job crashed once, then fix the Python module with tests.
+given:
+- Finance ticket: the 9 March mismatch, the crash and finance's revenue definition
+- Module: Python 3.10 day-bounds and daily-revenue functions in a long-lived worker
+- Call pattern: the dashboard calls it every 15 minutes for today and yesterday
+- Test-store orders: 6 orders around 9 and 10 March, as JSON
+- Error log: one traceback from the failed run
+- Staging note: the $185.00 figure came from Python 3.12
+asked:
+- A root-cause analysis: each defect, the symptom it explains, and why only on some days
+- The fixed module, Python 3.10 compatible, with signatures kept unless justified
+- Pytest regression tests with the given orders, the DST-end day and exact local midnight
+- A worked breakdown of 9 March under the fixed code
+- One sentence on whether the cache should stay
+limit: Up to about 1,200 words of prose, in Markdown; the code may run longer
+hard: Several independent defects combine into one symptom, they surface only on certain dates or runtimes, and the code's logic differs from the business definition.
+
+## Scorecard
+
+- DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November
+- Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight
+- Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)
+- Explains the 3.10 crash (fromisoformat accepts "Z" only from 3.11) and parses robustly
+- Removes or properly keys the date-only mutable-default cache that serves stale totals for today
+- Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight

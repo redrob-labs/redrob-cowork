@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/create-proposals/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "create-proposals",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "1049ac47a2b0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Prices 12 live properties, 2,160 rooms; flags \"14 hotels\"; offers 2027 openings (~300 rooms) as add-on",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "RFP में 12 properties हैं, discovery में 14। Pricing 12 पर है। 2 नई properties अलग add-on हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prices 2,160 rooms across 12 properties; flags discrepancy and excludes approximately 300 Q2 2027 rooms as optional add-ons."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Prices 12 properties/2,160 rooms, flags discrepancy, and treats 2027 openings as an add-on."
+    }
+   ]
+  },
+  {
+   "check": "List ₹77,76,000/year; 15% discount gives ₹66,09,600/year net; implementation ₹9,00,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "77,76,000 − 11,66,400 (15%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct list subscription, additive 15% discount, ₹66,09,600 net annual subscription, and ₹9,00,000 implementation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates list, 15% discount to net annual subscription, and implementation accurately."
+    }
+   ]
+  },
+  {
+   "check": "3-year subscription ₹1,98,28,800, or ₹2,07,28,800 including implementation, all before GST",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "66,09,600 × 3 + 9,00,000",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct ₹2,07,28,800 three-year TCV including implementation; explicitly excludes GST."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "States 3-year TCV including implementation of ₹2,07,28,800 before GST."
+    }
+   ]
+  },
+  {
+   "check": "No 30% offer: stays within the 20% AE authority, or flags VP approval with a rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "30% के लिए VP approval चाहिए। प्रस्ताव 15% पर है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers authorized 15%, explains volume and term discounts, and requires VP approval for 30% or implementation concessions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects 30%, uses 15% within AE authority, and notes VP approval requirement."
+    }
+   ]
+  },
+  {
+   "check": "Labour savings ≈ ₹5,04,000/year, not ₹20 lakh; upsell ≈ ₹5.11 crore/year is gross pilot-based revenue; payback revised",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Upsell revenue पर लगभग 1.8 महीने, और वह gross है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects labour to ₹5.04 lakh; labels ₹5.11 crore pilot extrapolation as revenue; revises payback with explicit gross-revenue basis."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₹5.04 lakh labour savings, ₹5.11 crore gross upsell revenue, and revises payback."
+    }
+   ]
+  },
+  {
+   "check": "States the on-premise requirement is unmet (cloud-only, India data in Mumbai); no full-compliance claim",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**पूरी नहीं:** On-premise deployment। हम केवल cloud (multi-tenant) हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies unmet on-premise requirement, Mumbai India residency, and avoids claiming full RFP compliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states on-premise is unmet, details cloud-only with Mumbai data residency, and avoids full-compliance claim."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020503875,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/client-advisory/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "f531c6732682",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit ₹45,32,000 vs ₹40,21,000; EBITDA ₹22,73,000 vs ₹16,38,000, a ₹6,35,000 miss, not ₹5,35,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "EBITDA बजट ₹22,73,000 था और वास्तविक ₹16,38,000 रहा। कमी **₹6,35,000** है, ₹5,35,000 नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both gross-profit subtotals and EBITDA figures are correct; explicitly corrects the bookkeeper’s understatement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates Gross Profit and EBITDA for budget and actual, identifying the ₹6,35,000 shortfall."
+    }
+   ]
+  },
+  {
+   "check": "Treats ₹2,70,000 of insurance as prepaid: normalized EBITDA ₹19,08,000, ₹3,65,000 below budget",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Normalized EBITDA** | **15,99,000** (margin 15.7%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies prepaid insurance and ₹19,08,000 accrual EBITDA, but additional marketing adjustment produces incorrect normalized EBITDA."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats ₹2,70,000 as prepaid, showing ₹19,08,000 normalized EBITDA (₹3,65,000 below budget)."
+    }
+   ]
+  },
+  {
+   "check": "Calls the ₹1,85,000 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**मार्केटिंग (+₹1,85,000):** यह बचत नहीं है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the underspend as campaign timing rather than a saving."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states that the ₹1,85,000 marketing underspend is a timing difference, not a saving."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −₹4,37,000 into volume −₹5,70,000 (5,700 × ₹100) and price/mix about +₹1,33,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "कीमत से ₹1.33 लाख मिले, पर volume से ₹5.7 लाख गए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct budget-price volume methodology yields −₹5,70,000 volume and +₹1,33,000 price/mix, reconciling to −₹4,37,000."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately splits retail variance into volume (-₹5,70,000) and price (+₹1,33,000)."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~₹2,80,000 over 28% of actual revenue (₹28,49,000) to flour repricing; names 2× overtime behind labour",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "सामग्री अब राजस्व का 30.8% है, बजट 28% था।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Links ingredients to flour repricing and labour to 2× overtime, but omits ₹28,49,000 flexible baseline and ₹2,80,000 overrun."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Links ingredients exceeding 28% of revenue to flour repricing and identifies 2x overtime behind labor variance."
+    }
+   ]
+  },
+  {
+   "check": "Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "होलसेल में ज़्यादा volume का मतलब कम-margin राजस्व बढ़ाना है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prioritizes retail traffic recovery and wholesale pricing over volume growth; favorable-positive sign convention remains consistent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommendations follow data, noting wholesale's lower margin vs retail traffic loss, maintaining consistent sign convention."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022298587999999998,
+ "date": "2026-10-11"
+}

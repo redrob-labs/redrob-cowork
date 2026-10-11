@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/answer-customers/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "3181382aa2b6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; $5,520 invoice is an error, corrected by $720 to $4,800",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "through 28 February 2027.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies protection end date and commits to a $720 correction, reducing February’s invoice to $4,800."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies §3.2 protection through 28 Feb 2027 and credits $720 back to $4,800."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ $480; claim within 30 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Downtime (core unavailable, US‑East) 13:05–16:45 UTC = 220 min.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 99.454% uptime over 40,320 minutes, a $480 credit, and confirms the timely request."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 99.45% uptime across 40,320 minutes, applies the 10% ($480) credit, and notes the 30-day window."
+    }
+   ]
+  },
+  {
+   "check": "Explains degraded time isn't downtime vs \"9 hours\"; no full-month refund; goodwill labelled and justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The SLA makes credits the sole remedy, so I can't offer a full month, and I'd rather say so plainly.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes degraded time, addresses the nine-hour discrepancy, invites records, and declines full-month reimbursement. No goodwill credit is offered."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains why degraded time is excluded, rejects the full-month refund, and justifies adhering to SLA remedies."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We do not support HL7 v2, and we have no native EHR integrations, Mediscribe included.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately describes the FHIR R4 API and integration limitations; offers a solutions-engineer call with the CMO."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly details FHIR R4, denies HL7 v2 and native integrations, and offers a call with solutions engineering."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at $40 under §3.3: 135 seats, $5,400 a month from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "§3.3 covers this: 15 × $40 = $600/month; March becomes 135 × $40 = $5,400.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms fifteen additional seats at the protected rate and the correct March monthly total."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 15 additional seats at $40 per §3.3, totaling 135 seats at $5,400 per month."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The 5 January price change applied only to new contracts and renewals and should never have touched your account.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accountable, respectful tone acknowledges error and disruption; internal bullets specify billing correction, SLA credit, total, and March charges."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains an accountable, professional tone, and provides a clear internal note listing every action and dollar amount."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018141113,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/update-investors/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "e327cd5aece8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GMV $4.65M (+10.7% QoQ, −7% vs plan); net revenue $627.8k (+6.8% QoQ, −16% vs plan).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reports both growth rates and plan misses; KPI table provides more precise revenue variance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Contains all four growth and vs plan figures accurately."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months ($5.49M ÷ ~$470K a month), not 18; questions the Q2 2026 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "At Q3 burn ($470k/mo): 11.7 months",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct cash-based runway calculation; explicitly challenges waiting for the planned Q2 2026 round."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 11.7 months and questions the Q2 2026 round timing given only one quarter cash left."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the $180K one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "At underlying burn ($410k/mo): 13.4 months",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Subtracts the $180k one-time working-capital effect and presents normalized runway alongside reported runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly calculates runway normalizing out the $180k working capital effect (13.4 months)."
+    }
+   ]
+  },
+  {
+   "check": "Bluepeak (12% of GMV at 9%) cuts ~0.6 points; ex-Bluepeak ~14.1%; covers margin and restaurant churn",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Bluepeak mix: −0.6pt (12% of GMV at 9% vs 14.1% core).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly quantifies Bluepeak dilution and ex-Bluepeak take rate; also addresses contribution-margin pressure and restaurant departures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately covers -0.6pt Bluepeak effect, 14.1% ex-Bluepeak, contribution margin, and restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"On track\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "236 active accounts (+26); repeat-order rate for 6‑month‑plus accounts up from 61% to 66%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Leads with plan misses, removes “On track,” and credits account growth, repeat orders, and Bluepeak."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops 'On track', leads with miss, credits 236 (+26) accounts, repeat orders 61% to 66%, and Bluepeak logo."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~$305K a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "18 months would require $305k/mo, 35% below today.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides quantified options, a recommendation, specific approval requests and deadlines, and speaker notes on all nine slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes specific numbers (e.g. $305k/mo), concrete board asks, and speaker notes on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020503088,
+ "date": "2026-10-11"
+}

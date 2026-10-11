@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/stakeholder-updates/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "beb3252399e6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ $650,000 ($455k + 3 × $65k), not $590,000: ≈ $50,000 (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The run-rate is $65k/month with 3 months left, so the forecast is **~$650k** (+$50k).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes $650k, identifies the $590k conflict, and reports approximately 8% over budget."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates $650,000 forecast at completion vs $590,000 reported, noting the $50k (8%) overrun."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Larchmont review: 4 weeks, so 14 Nov + 28 days = **12 Dec** earliest launch.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies earliest launch and changes schedule to Red and delayed compliance delivery to Amber."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly calculates the 12 Dec earliest launch date from the 4-week review and marks schedule Red."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Missed:** goal creation 31% (target 40%); support tickets 22 per 1,000 (target ≤15).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly and accurately reports both beta misses."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly and accurately reports both beta misses against their targets."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size and retention without spin, and links the ticket themes to fixes",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Beat target:** average first deposit $86 (target $75); week-4 retention 64% (target 60%).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately presents positive metrics; links ticket themes to round-up UX and deposit-display fixes, while acknowledging uncertainty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately shares positive metrics without spin and links both ticket drivers to concrete fixes."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Ask:** approve B, the $685k ceiling, and Richard to open the pre-review conversation with Larchmont this week.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ends with explicit approval request, December and January options, funding implications, and a justified December recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents clear options including mid-December and January with budget impacts, providing a specific recommendation."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The reason is the dependency chain: the pack (14 Nov) plus Larchmont's 4-week review means launch can't be before 12 Dec",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides have speaker notes and open with the bottom line; Jane’s note explains changes factually and constructively."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly 7 slides with speaker notes, bottom line upfront, and a constructive, non-blaming note to Jane."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017841074999999998,
+ "date": "2026-10-11"
+}

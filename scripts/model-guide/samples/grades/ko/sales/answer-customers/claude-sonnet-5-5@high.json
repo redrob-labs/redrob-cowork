@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/answer-customers/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "2ac515d9d488",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; ₩5,520,000 invoice is an error, corrected by ₩720,000 to ₩4,800,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "정상 금액은 480만 원이며 차액 **72만 원**(120석×6,000원)을 정정합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies billing error and correction; price protection through February 2027 is equivalent to February 28."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies §3.2 price freeze to Feb 2027 and corrects ₩5,520,000 by ₩720,000 to ₩4,800,000."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ ₩480,000; claim within 30 days",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "정정액 합계는 **768,000원**(72만 원+4만 8천 원)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct calculation and timely claim appear elsewhere, but the customer email retains contradictory credit figures and an incorrect total."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 220 mins / 40,320 mins = 99.45% uptime, 10% credit of ₩480,000, and notes 30-day window."
+    }
+   ]
+  },
+  {
+   "check": "Explains degraded time isn't downtime vs \"9 hours\", invites her records; no full refund; goodwill labelled, justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "9시간 중단이라고 보시는 근거(지점별 로그 등)를 보내 주시면 확인 후 재산정하겠습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes degraded service, requests evidence of nine hours, and rejects full refund. No goodwill gesture is offered."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains degraded time exclusion, denies full refund, and invites logs to verify her 9-hour claim."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "직원·근무·지점 데이터용 **FHIR R4 API**는 제공하며, 파트너사가 이를 이용해 연동을 개발할 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly denies HL7 v2 and native Mediscribe integration, confirms FHIR R4, and offers a technical meeting."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately covers FHIR R4, lack of HL7 v2 / Mediscribe integration, and offers a technical meeting."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at ₩40,000 under §3.3: 135 seats, ₩5,400,000 a month from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제3.3조에 따라 석당 4만 원입니다. 3월부터 135석, 월 **540만 원**(추가분 60만 원)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct additional-seat rate, contractual basis, March seat total, and monthly charge; VAT exclusion is stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 15 extra seats at ₩40,000 under §3.3 for 135 seats and ₩5,400,000/month."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "죄송합니다. 위 2번 항목을 정정해 다시 적습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Accountable tone and itemized internal amounts are present, but unfinished arithmetic and conflicting email totals undermine professionalism."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains an accountable, professional tone and includes a detailed internal memo itemising amounts."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018414899999999998,
+ "date": "2026-10-11"
+}

@@ -54,3 +54,37 @@ deliverable: web
 - Excludes age-restricted (alcohol, tobacco) and pharmaceutical items from substitution (refund only) in the requirements and edge cases.
 - Success metrics include the 23% door-rejection baseline and a guardrail on shopper time (34-minute median), plus a response-rate metric.
 - The prototype is a self-contained HTML file that renders on its own, shows every required element including the timeout default and KRW prices, and uses accessible patterns (buttons, labels, contrast).
+
+## Card
+
+brief: 장보기 앱의 대체 상품 승인 PRD와 모바일 프로토타입을 만들고 대기 시간과 기본값을 정한다.
+given:
+- 현재 데이터: 최근 90일 품절, 문 앞 거절, 쇼퍼 소요 시간 지표 4개
+- 파일럿 결과: 승인 요청 1,200건의 누적 고객 응답 시간
+- 이해관계자 의견: 운영 리드와 재무의 요청
+- 고객 이용약관 제7조 3항: 게시 중인 대체 상품 가격 약속
+- 컴플라이언스 메모: 판매 인허가상 대체할 수 없는 상품
+asked:
+- PRD: 문제, 기준값을 포함한 목표·성공 지표, 비목표, 사용자 스토리, 기능 요구사항, 예외 상황, 미결 질문
+- 요구된 요소를 모두 담은 고객용 승인 화면의 단일 파일 HTML/CSS 프로토타입
+- 프로토타입 디자인 근거(약 300자 이내)
+limit: 코드 제외 약 2,500자 이내, Markdown, 자체 완결형 HTML 파일 1개
+hard: 이해관계자 요청을 데이터와 게시된 약관으로 검증하고 인허가 제한을 적용하며, 대기 시간 기본값을 정당화해야 한다.
+
+## Scorecard
+
+- Rejects "median under a minute": only 38% respond within 1 minute; the median is 1–3 minutes
+- Picks a window (e.g. 3–5 minutes) and a no-response default, justified by the cumulative pilot data
+- Flags the shelf-price request as breaching Terms Article 7(3); caps at the ordered price or escalates to Legal
+- Excludes alcohol, tobacco and pharmaceuticals from substitution (refund only) in requirements and edge cases
+- Metrics include the 23% door-rejection baseline, a 34-minute shopper-time guardrail and a response rate
+- Self-contained HTML prototype shows every required element, incl. timeout default and KRW prices; accessible
+
+## Scorecard, shown
+
+- "중앙값 1분 미만" 주장 반박: 1분 이내 응답은 38%뿐이며 중앙값은 1~3분 사이
+- 누적 파일럿 데이터로 대기 시간(예: 3~5분)과 무응답 기본값을 정하고 근거 제시
+- 판매가 청구 요청이 약관 제7조 3항 위반임을 지적: 주문 상품 가격을 상한으로 두거나 법무에 상정
+- 주류·담배·의약품은 대체 대상에서 제외(환불만)하고 요구사항과 예외 상황에 반영
+- 지표에 문 앞 거절 23% 기준값, 쇼퍼 소요 시간 34분 가드레일, 응답률 포함
+- 자체 완결형 HTML 프로토타입이 타임아웃 기본값과 원화 가격 등 필수 요소를 모두 보여 주고 접근성 확보

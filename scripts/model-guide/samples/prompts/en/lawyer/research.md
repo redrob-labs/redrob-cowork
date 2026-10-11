@@ -49,3 +49,28 @@ Pinecrest's refusal letter: "Advancement is reserved for officers who acted in g
 - Rejects the good-faith condition, relying on [1] and [6] rather than the blog post [7], since good faith goes to indemnification. Rejects the letter-of-credit demand because the bylaw calls for an unsecured undertaking.
 - On enforcement: an action in the Court of Chancery, which has exclusive jurisdiction and can decide summarily under §145(k). Seeks fees on fees in proportion to success under [5]. Recommends tendering the undertaking promptly and making a formal written demand.
 - The source table separates primary authority ([1]–[4]) from the fictional case summaries ([5]–[6]) and the unreliable secondary sources ([7]–[8]).
+
+## Card
+
+brief: A former CFO's company sued him and refuses to advance his defense costs; summarize the research on four questions about his rights and enforcement.
+given:
+- Partner's questions: 4, on entitlement, the bylaw amendment, conditions and enforcement
+- Facts: Stiles's roles and dates and the complaint's 3 counts
+- Refusal letter: Pinecrest's three stated grounds
+- Search results given in the prompt: 8 sources (statute excerpts, bylaws, a blog post, a treatise)
+- Case summaries [5]–[6]: two Delaware rulings, fictional for this exercise
+asked:
+- Short answers to the four questions
+- Analysis citing the numbered sources, with a view and the strongest counter on close calls
+- A source-reliability table
+- Next steps
+limit: Under about 1,200 words, in Markdown
+hard: Sources are of uneven reliability, a statute must be applied to dated conduct, and mixed-capacity claims need a judgement call.
+
+## Scorecard
+
+- Count I covered (CFO conduct, mandatory "shall"); Count II likely not; Count III a reasoned close call, allocated
+- §145(f): 2023–2024 conduct predates the amendment, which can't impair his right; treatise [8] outdated
+- Good-faith condition rejected on [1] and [6], not blog [7]; letter of credit rejected, undertaking unsecured
+- Enforce in Chancery (exclusive, summary, §145(k)); fees on fees pro rata under [5]; tender undertaking, written demand
+- Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]

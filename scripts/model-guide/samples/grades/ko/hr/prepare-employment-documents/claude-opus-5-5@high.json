@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/prepare-employment-documents/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "7cbb61cd17d4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Letter uses ₩100,000,000 or placeholder, 3,200 RSUs, \"소프트웨어 엔지니어 II\"; not ₩105,000,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "소프트웨어 엔지니어 II (L4), 정규직",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses the approved title, 3,200 RSUs, and a salary placeholder, not unauthorized promised terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses SWE II, placeholder for base salary, and 3,200 RSUs without exceeding approved terms."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "밴드 예외 승인 또는 1억원 이하로 재협상",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies approvers and requires prior candidate communication, but leaves the salary strategy undecided rather than taking a clear position."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses the base gap with approval paths and specifies notifying candidate before sending."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped (민법 §103, policy), 직무발명/confidentiality kept; Korean law and court replace Texas (국제사법 §§43, 48)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "조항 삭제, 비밀유지·직무발명 계약으로 대체.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Drops non-compete under company policy, retains protective agreements, and replaces Texas law and venue with Korean law and institutions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops non-compete, keeps IP/confidentiality, and replaces Texas law/venue with Korean law and courts."
+    }
+   ]
+  },
+  {
+   "check": "At-will replaced: just cause, 30 days' notice or pay in lieu, optional probation (§23①, §26)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "30일 전에 예고하거나 30일분 이상의 통상임금을 지급합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requires justified dismissal, written notice, and statutory notice or pay; probation also requires reasonable grounds."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Replaces at-will with just cause, 30 days' notice/pay in lieu, and a probation clause."
+    }
+   ]
+  },
+  {
+   "check": "Keeps contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2025년 12월 1일(월)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves the start date and screening/document contingencies; remaining placeholders identify unresolved terms or administrative details."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains contingencies and Dec 1, 2025 start date, keeping placeholders limited to open decisions."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × ₩12,000,000 = ₩5,000,000, claimed separately, no pay deduction (§43)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "12,000,000원 × (12 − 7) ÷ 12 = 12,000,000원 × 5/12",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates ₩5,000,000, requires separate collection, prohibits wage/severance deductions, and references §43 in the memo."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates 5,000,000 KRW repayment and specifies separate claim without deduction."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022751138,
+ "date": "2026-10-11"
+}

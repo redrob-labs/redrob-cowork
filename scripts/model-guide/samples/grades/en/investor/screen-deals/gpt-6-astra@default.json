@@ -1,0 +1,128 @@
+{
+ "key": "en/investor/screen-deals/gpt-6-astra@default",
+ "language": "en",
+ "profession": "investor",
+ "task": "screen-deals",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "8ce81cf76346",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Parcel Lane corrected to $2.8M: growth 86.7% (not 160%), burn multiple 2.00, a borderline pass",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the ARR misclassification and exactly 2.00× burn multiple demand scrutiny.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects ARR to $2.8M, computes 86.7% growth and 2.00 burn, and recognizes the borderline pass."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusts ARR to $2.8M, calculating 86.7% growth and 2.00 burn multiple as a pass."
+    }
+   ]
+  },
+  {
+   "check": "Sentinel Docs corrected to $1.32M: fails the $1.5M ARR floor; burn multiple 2.50",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**ARR:** $1.32M below $1.5M; **burn:** 2.50× above 2.00×",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly removes the pilot fee, annualizes recurring revenue, and fails both ARR and burn criteria."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusts Sentinel Docs to $1.32M ARR, failing the floor, with a 2.50 burn multiple."
+    }
+   ]
+  },
+  {
+   "check": "Ledgerly 100%/1.50; Fleetwise 2.50, fails margin and hardware; Quorum 58.6%/1.18, ARR above range",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**F** — hardware-dependent",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ledgerly, Fleetwise and Quorum calculations are correct; hardware, margin, ARR and growth failures are correctly identified."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All three companies have correct calculations and accurately identified failed criteria."
+    }
+   ]
+  },
+  {
+   "check": "Northbeam 1.27, fails NRR and round size; Tallow 111.1%/1.60; Corvid 105.9%/1.50, fails geography",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Tallow passes all criteria, including 111.1% growth and a 1.60× burn multiple",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Northbeam and Corvid figures also match; Northbeam fails NRR and round size, while Corvid fails geography."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates all metrics accurately and identifies Northbeam's two failures and Corvid's geography failure."
+    }
+   ]
+  },
+  {
+   "check": "Top three include Ledgerly; other picks reasoned, e.g. Tallow with its 40% concentration as first question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "What evidence supports renewal of the largest customer, including usage, executive sponsorship and procurement status?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ranks Ledgerly, Parcel Lane and Tallow with reasoned rationales; Tallow’s first question addresses its concentrated customer’s renewal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes Ledgerly in top 3 with reasoned picks; addresses Tallow's 40% concentration as the primary diligence question."
+    }
+   ]
+  },
+  {
+   "check": "Clear waiver view, e.g. Corvid's geography waivable; Northbeam fails two, so one waiver can't rescue it",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Jane’s contemplated single waiver is insufficient.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly supports conditional geography-waiver discussion for Corvid and explains that Northbeam’s two failures cannot receive a single waiver."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives clear waiver views, noting Corvid is waivable and Northbeam requires two waivers so one cannot rescue it."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02109975,
+ "date": "2026-10-11"
+}

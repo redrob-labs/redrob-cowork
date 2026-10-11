@@ -1,0 +1,128 @@
+{
+ "key": "en/hr/run-performance-reviews/gpt-6-astra@default",
+ "language": "en",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "39d97e5892e6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll $1,236,000; budget $43,260; submitted $44,890 (3.63%), $1,630 over; HRBP's \"3.4%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**The HRBP summary is incorrect:** submitted merit totals **$44,890 (3.63% of payroll)**, exceeding the **$43,260** budget by **$1,630**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct payroll, budget, submitted total, percentage, and excess; explicitly rejects the HRBP summary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All figures correct (including payroll $1,236,000 in budget table) and HRBP summary explicitly called incorrect."
+    }
+   ]
+  },
+  {
+   "check": "E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised to match",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| E07 | 2 | 4 | −2 | Policy issue | 4 | 4.0% | $3,520 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses pro-rated 103%, identifies a firm leave-policy issue, and raises rating and merit appropriately."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identified as a firm policy issue, uses 103% pro-rated anchor (4), and raises merit to 4.0% ($3,520)."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Firm issue:** four-level deviation is prohibited; “Great attitude” cannot support rating 5.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags both E03 and E02 as prohibited deviations, correctly showing anchors 1 and 3."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both E02 and E03 flagged as policy issues/unjustified deviations from anchors."
+    }
+   ]
+  },
+  {
+   "check": "Shows Roe's leniency in the manager table: average submitted 4.75 vs anchor 3.25",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Richard Roe | Platform | 4 | 4.75 | 3.25 | +1.50 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct averages expose Roe’s leniency; discussion guide explicitly questions the pattern."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Manager-pattern table shows submitted 4.75 vs anchor 3.25 for Roe."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Written billing-migration justification supports permitted one-level deviation; validate impact.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains E10’s justified 4 for discussion and flags E09’s unsupported downgrade from anchor 4."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "E10 stands with valid justification noted, and E09 is flagged as under-rated needing justification."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ $43,260, every merit % inside its range, merit $ = base × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The recommended plan totals **$40,285 (3.26%)**, leaving **$2,975** unallocated.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended total is within budget; every rate fits its rating band and every dollar award equals base times rate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Total $40,285 is within $43,260 budget, all merit % fall within policy ranges, and merit $ = base × %."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016346138,
+ "date": "2026-10-11"
+}

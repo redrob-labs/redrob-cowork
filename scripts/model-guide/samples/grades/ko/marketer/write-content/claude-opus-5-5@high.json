@@ -1,0 +1,110 @@
+{
+ "key": "ko/marketer/write-content/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "ca32bb65e829",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "No \"40%\" lead (one site, HVAC not bill; §§3, 5); median 18% 냉난방 energy (~7.2% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실제 절감률은 냉난방 에너지 기준 중앙값 18%입니다(전체 요금 환산 약 7%).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the defensible HVAC-energy median, distinguishes total bills, and supplies the required pilot disclaimer."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids 40% lead, uses median 18% 냉난방 energy with the required footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: ₩199,000 launch (list ₩239,000, through Jan 31, 2026) plus ₩9,900/month per location subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "출시 기념가 199,000원(정가 239,000원, ~2026.1.31) · 코벨 클라우드 매장당 월 9,900원 별도",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses launch price, regular price, deadline, and monthly per-location subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately includes launch price, list price, deadline, and monthly subscription fee."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "출시가 199,000원(26.1.31까지), 구독 매장당 월 9,900원 별도 | 44 / 45",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Copy meets limits without promotional superlatives, but this description has 43 characters; Meta body has 57, not 58."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All character limits respected and accurately counted without superlatives."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1200\" height=\"630\" viewBox=\"0 0 1200 630\" font-family=\"Pretendard, sans-serif\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG includes all three brand colors, required copy, footnote, and clear hierarchy with font fallback."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG using all three brand colors, containing H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "스케줄·알림 기능을 내세우므로 구독료(매장당 월 9,900원)를 병기했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Memo explains claim and price corrections, but does not point to the customer quote or 44-of-48 ease result."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes well, but omitted mentioning the quote and the 44-of-48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026235563,
+ "date": "2026-10-11"
+}

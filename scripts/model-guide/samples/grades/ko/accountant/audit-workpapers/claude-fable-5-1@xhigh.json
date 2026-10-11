@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/audit-workpapers/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "audit-workpapers",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "76bcf37eb34e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "PO 1,200만 vs 세금계산서 1,264만(+5.33%). 재승인 기록 없이 \"일치\"로 처리됨",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "세 가지 누락 이탈인 재승인 부재, 지급 후 승인, 승인권자 오류를 모두 정확히 식별했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the three deviations missed by the staff accountant."
+    }
+   ]
+  },
+  {
+   "check": "Treats items 4 and 8 as correctly exempt from the PO requirement",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "✓* 위임계약서 면제",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "4번 서면 위임계약 전문용역과 8번 도시가스를 PO 면제 대상으로 올바르게 처리했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats items 4 and 8 as valid PO exemptions."
+    }
+   ]
+  },
+  {
+   "check": "Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**결과: 10건 중 4건 이탈(40%)** vs 허용이탈률 10%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "25건 대비 10건의 부족과 허용률 초과는 지적했으나, 의심 분할거래를 확정 이탈로 산입해 3건을 4건으로 표시했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags 10 tested vs 25 required and notes deviations exceed tolerable rate."
+    }
+   ]
+  },
+  {
+   "check": "Flags CS-7731 and CS-7732 (₩49,400,000 combined) as a likely split to avoid CFO approval; proposes follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**전결한도 회피 목적의 분할발주 정황**(KSA 240 부정위험 지표).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "두 거래의 합계 49,400,000원과 CFO 승인 회피 정황을 식별하고 연간 거래 전수검토를 제안했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies likely split to avoid CFO approval and proposes specific follow-up procedures."
+    }
+   ]
+  },
+  {
+   "check": "Concludes no reliance, more substantive testing; deficiency at least significant, material weakness considered, reported to 감사/감사위원회",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "지배기구(감사/감사위원회)에 서면 커뮤니케이션 예정.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "통제의존 철회, 실증절차 확대, 유의적 미비점 분류, 중요한 취약점 재평가 및 지배기구 보고를 명시했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Concludes no reliance, increases substantive testing, classifies deficiency appropriately, and reports to governance."
+    }
+   ]
+  },
+  {
+   "check": "Includes a tickmark legend, a review trail and specific management-letter recommendations",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**틱마크 범례**: ✓ 속성 충족 ✗ 이탈 N/A 해당없음",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "틱마크 범례, 재수행·검토 기록과 보완 요청, 구체적인 시스템·모니터링 개선 권고를 포함했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes a tickmark legend, review trail/coaching notes, and specific management letter recommendations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024576825,
+ "date": "2026-10-11"
+}

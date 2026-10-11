@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/update-investors/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "founder",
+ "task": "update-investors",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "f63d34461ace",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "GMV +10.7% QoQ (not +17%), net revenue +6.8% (not +11%); 7% and 16% below plan",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "GMV +10.7%(계획 −7%), 순매출 +6.8%(계획 −16%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects both growth rates and reports both plan shortfalls; KPI table provides precise revenue variance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies GMV +10.7% QoQ, net revenue +6.8% QoQ, and misses vs plan (−7%, −16%)."
+    }
+   ]
+  },
+  {
+   "check": "Runway ~11.7 months (₩5.49B ÷ ~₩470M a month), not 18; questions the Q2 2026 raise timing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "54.9/14.1×3=11.7",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct cash-to-burn calculation replaces 18 months and explicitly challenges the Q2 2026 fundraising timetable."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates runway at 11.7 months and challenges the Q2 2026 fundraising timeline."
+    }
+   ]
+  },
+  {
+   "check": "Considers normalizing the ₩180M one-time working-capital effect (about 13 months)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "일회성 제외 12.3억 기준 4.5분기 ≈ **13.4개월**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the ₩180M working-capital outflow and correctly calculates normalized runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Normalizes the 180M KRW working capital impact, showing runway extends to ~13.4 months."
+    }
+   ]
+  },
+  {
+   "check": "청봉손해보험 (12% of GMV at 9%) cuts ~0.6 points; ex-청봉 ~14.1%; covers margin and restaurant churn",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "청봉 희석=12%×(14.1%−9%)=0.61%p",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly derives dilution and ex-client take rate; discusses contribution-margin pressure and restaurant departures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quantifies the −0.6%p drag, calculates ex-청봉 rate at 14.1%, and addresses margins and restaurant churn."
+    }
+   ]
+  },
+  {
+   "check": "Drops \"계획대로 진행 중\", leads with the miss, credits +26 accounts, repeat orders 61% to 66%, the logo",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "활성 고객 236곳(+26곳), 6개월+ 고객 재주문율 61%→66%, 청봉손해보험 수주",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Opening acknowledges plan misses while crediting all three positives; explicitly deletes the misleading on-track claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops '계획대로 진행 중', leads with misses, and credits account growth (+26), repeat rate, and the logo."
+    }
+   ]
+  },
+  {
+   "check": "Options carry numbers (e.g. ~₩305M a month for 18 months' runway); specific asks; notes on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "4분기 순현금유출 상한 12.0억 승인 — 항목별 절감 계획 11월 15일까지 서면 보고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides quantified options, tradeoffs, recommendation, specific approvals and deadlines, with speaker notes on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Options carry concrete figures, specific board decisions/requests are listed, and every slide includes speaker notes."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029684812999999997,
+ "date": "2026-10-11"
+}

@@ -65,3 +65,36 @@ Customer quote (उपयोग के लिए approved): *"गर्मिय
 - Every line respects its limit, and the counts shown are accurate. No superlatives; Latin-script words in sentence case.
 - The SVG is valid and self-contained, uses `#1F4D3A`, `#F2A93B` and `#F7F5F0`, declares a Devanagari-capable font (Noto Sans Devanagari) and carries the H1, subhead, CTA and footnote, with a clear hierarchy.
 - The note to product marketing explains the claim and price changes in terms of the pilot data and the ASCI/legal rules, and points to the quote and the 44-of-48 ease result as stronger proof.
+
+## Card
+
+brief: Small businesses के AC controller के तीन assets का हिंदी launch creative लिखिए, brief के claim और कीमत को pilot data और ASCI नियमों पर परखते हुए।
+given:
+- Product marketing का brief: headline idea, कीमत, audience और मुख्य फ़ायदे
+- Pilot results: 48 sites के 5 metrics और एक approved customer quote
+- Price sheet: MRP, launch price और ज़रूरी subscription
+- Brand और legal rules: voice, colours, typefaces, ASCI Code, footnote और कीमत के नियम
+- ज़रूरी assets: 3 assets और उनकी सीमाएँ
+asked:
+- हर asset की copy, हर पंक्ति के आगे count के साथ
+- Hero और Meta ad के लिए layout और visual direction
+- Landing-page hero (1200×630) का inline SVG mock-up
+- Product marketing के लिए note, अधिकतम 120 शब्द: brief में बदलाव और उनके कारण
+limit: लिखित हिस्से लगभग 1,200 शब्दों के भीतर, Markdown, SVG इस सीमा में नहीं
+hard: Brief के दावों को data और ASCI नियमों पर जाँचना है, हर पंक्ति की सख़्त सीमा है, और ईमानदार proof चुनना judgement call है।
+
+## Scorecard
+
+- No "40% bill" lead (best site, AC energy not bill; ASCI); e.g. median 18% AC use (~7% of bill), legible footnote
+- Price: ₹9,999 launch (MRP ₹11,999, through 30 Apr 2026) plus ₹499/month per outlet subscription
+- Every line within its limit, Unicode counts accurate; no superlatives; Latin-script words in sentence case
+- SVG valid, self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`, Noto Sans Devanagari; carries H1, subhead, CTA, footnote
+- Note explains claim and price changes; points to the quote and the 44-of-48 ease result
+
+## Scorecard, shown
+
+- "Bill 40% घटाइए" से शुरुआत नहीं (सबसे अच्छी site, bill नहीं AC की बिजली; ASCI); जैसे AC खपत में median 18% (bill का ~7%), पढ़ने लायक footnote
+- कीमत: launch price ₹9,999 (MRP ₹11,999, 30 अप्रैल 2026 तक) और ₹499 प्रति outlet प्रति माह subscription
+- हर पंक्ति अपनी सीमा में, Unicode counts सही; कोई superlative नहीं; Latin script के शब्द sentence case में
+- SVG valid और self-contained, `#1F4D3A`, `#F2A93B`, `#F7F5F0` और Noto Sans Devanagari; H1, subhead, CTA और footnote सहित
+- Note में claim और कीमत के बदलाव समझाए; quote और 48 में से 44 के "आसान" नतीजे को proof बताया

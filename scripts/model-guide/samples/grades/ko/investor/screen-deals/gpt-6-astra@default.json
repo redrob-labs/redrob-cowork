@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/screen-deals/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "investor",
+ "task": "screen-deals",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "fbcba62ef998",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "파슬레인 corrected to ₩28억: growth 86.7% (not 160%), burn multiple 2.00, a borderline pass",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "번 멀티플이 상한인 2.00이고 ARR 분류 오류가 있어 매출 품질 검증을 우선해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects ARR to 28, calculates 86.7% growth and 2.00 burn, and explicitly identifies the borderline pass."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusted ARR to 28, growth to 86.7%, burn multiple to 2.00, and passed all criteria."
+    }
+   ]
+  },
+  {
+   "check": "센티넬독스 corrected to ₩13.2억: fails the ₩15억 ARR floor; burn multiple 2.50",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 센티넬독스 | **24→13.2** | 120.0% | 2.50 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly removes annualized pilot revenue, reports 13.2 ARR and 2.50 burn, and marks ARR floor failure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusted ARR to 13.2, noted failure on ARR floor, and calculated burn multiple as 2.50."
+    }
+   ]
+  },
+  {
+   "check": "레저리 100%/1.50; 플릿와이즈 2.50, fails margin and hardware; 쿼럼HR 58.6%/1.18, ARR above range",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 쿼럼HR | 46 | 58.6% | 1.18 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All figures correct; flags Quorum’s ARR and growth failures and Fleetwise’s hardware, margin, and burn failures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computed metrics for Ledgerly, Fleetwise (hardware, margin, burn failures), and QuorumHR (ARR above range, growth failure)."
+    }
+   ]
+  },
+  {
+   "check": "노스빔 1.27, fails NRR and round size; 탤로우 111.1%/1.60; 코비드 105.9%/1.50, fails geography",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 코비드시큐리티 | 35 | 105.9% | 1.50 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates all three companies’ metrics and identifies Northbeam’s NRR/round failures and Covid’s geography failure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculated metrics: Northbeam 1.27 (fails NRR, round), Tallow 111.1%/1.60, Covid 105.9%/1.50 (fails geography)."
+    }
+   ]
+  },
+  {
+   "check": "Top three include 레저리; other picks reasoned, e.g. 탤로우 with its 40% concentration as first question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "① 최대 고객의 갱신 의향·해지 조항·현재 협상 상태는 무엇인가요?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Selects Ledgerly, Parslane, and Tallow with sound reasoning; Tallow’s first question addresses its concentration and renewal risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Selected Ledgerly, Parcelane, and Tallow, focusing first diligence question on Tallow's 40% concentration and renewal."
+    }
+   ]
+  },
+  {
+   "check": "Waivers: 코비드 geography only if the reverse flip counts toward 주목적 투자; 노스빔 fails two, so no rescue",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실제 구조 전환과 주목적 비율 영향을 확인한 뒤 재심사해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Conditions Covid reconsideration on actual restructuring and fund compliance; rejects Northbeam’s rescue because one waiver cannot cover two failures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discussed Covid's reverse flip and 주목적 impact; rejected Northbeam waiver because it fails two criteria."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022849050000000003,
+ "date": "2026-10-11"
+}

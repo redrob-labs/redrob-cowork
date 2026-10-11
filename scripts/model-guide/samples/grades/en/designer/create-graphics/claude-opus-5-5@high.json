@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/create-graphics/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "create-graphics",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "31b6ca288e87",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"No fees. Ever.\" given the $2 paper-statement and $2.50 ATM fees; offers accurate alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Easy Checking charges $2/month for paper statements and $2.50 per out-of-network ATM withdrawal.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the false absolute claim and offers accurate maintenance-fee and overdraft-fee alternatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the phrase citing both fees, and provides accurate alternatives."
+    }
+   ]
+  },
+  {
+   "check": "Shows 2.25% APY with the up-to-$5,000 tier and full disclosure; drops \"nobody else locally beats it\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "*Rate applies to balances up to $5,000; balances above $5,000 earn 0.10% APY.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both graphics include tiers, APY definition, and rate-change disclosure; unsupported local superiority claim is explicitly rejected."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes the tier, full required APY disclosures, and drops the unsupported local superiority claim."
+    }
+   ]
+  },
+  {
+   "check": "NCUA line with insurance logo ≥120 px, logo ≥160 px with clear space, headline ≥64 px at 1080",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "headline (76 px, above the 64 px minimum)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both SVGs include the insurance line, sufficiently wide logo placeholders, and marked brand-logo clear space; square headline meets minimum."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Meets all sizing rules: NCUA logo ≥120 px, brand logo ≥160 px with clear space, headline ≥64 px."
+    }
+   ]
+  },
+  {
+   "check": "Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1200\" height=\"627\" viewBox=\"0 0 1200 627\" font-family=\"Arial, Helvetica, sans-serif\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides valid SVGs at both required dimensions, using brand colours, labelled placeholders, legible copy, and clear hierarchy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both SVGs are valid, correctly dimensioned, have clear hierarchy, and strictly use brand colours."
+    }
+   ]
+  },
+  {
+   "check": "Recomposes the landscape version rather than scaling the square one down",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "What changes:** the stack becomes side by side.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Landscape moves branding top-left, copy left, and photo and rate right rather than shrinking the square composition."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recomposes the landscape design into a split two-column layout instead of scaling."
+    }
+   ]
+  },
+  {
+   "check": "Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Real members (with signed releases) at a kitchen table in morning window light.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains the young family, specifies authentic natural-light photography, and uses approachable first-account copy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains the family scene with real members in natural light and tailors copy to first-time account holders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027679574999999998,
+ "date": "2026-10-11"
+}

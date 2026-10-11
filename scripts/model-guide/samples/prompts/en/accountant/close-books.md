@@ -61,3 +61,29 @@ Practice policy: checks outstanding more than 90 days are voided and reclassifie
 - Puts the NSF $350.00 back into patient accounts receivable (R. Miles), not into expense, and books card fees and the bank fee to expense and the interest to income.
 - Treats #2019 (more than 90 days old) under the policy: void it, credit Unclaimed Property Payable, and do not take it back into income.
 - Journal entries balance and use sensible accounts, and the review note is constructive and specific.
+
+## Card
+
+brief: Review a staff accountant's March bank reconciliation, explain the difference he wants to plug to expense, and propose the adjusting entries.
+given:
+- Bank statement: ending balance and 5 bank-side items
+- GL cash balance: the unadjusted balance at 31 March
+- GL detail excerpt: 4 March entries, with a note on what the bank shows
+- Outstanding checks: 3 checks on the staff accountant's list
+- Practice policy: the stale-check rule and $1,000 materiality per item
+asked:
+- A reconciliation table, adjusted bank to adjusted book, with the method for each row
+- A table explaining the $4,527.00 and why it should not go to Miscellaneous Expense
+- Proposed adjusting journal entries, including where the NSF item belongs
+- A recommendation on check #2019 with its effect on both sides, and a review note for John
+limit: Up to about 1,200 words, in Markdown
+hard: An unexplained difference must be traced to its sources rather than plugged, a policy applies to the outstanding checks, and each item needs the right side and account.
+
+## Scorecard
+
+- Splits $4,527.00 into a duplicated $4,500.00 Coastline deposit and a $27.00 transposition on #2038
+- Rejects the Miscellaneous Expense plug
+- Reconciles both sides to $86,562.05, moving to $86,972.05 if #2019 is voided
+- Returns the $350.00 NSF to R. Miles's receivable; fees to expense, interest to income
+- Voids #2019 to Unclaimed Property Payable under the 90-day policy, not back to income
+- Journal entries balance, and the review note to John is specific and constructive

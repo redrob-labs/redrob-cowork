@@ -56,3 +56,26 @@ You are the in-house recruiter at Northgale Renewables, which operates onshore w
 - Aligns the requirements with the leveling guide: no bachelor's degree, 0–2 years of wind experience with training provided, and GWO training within 90 days paid by Northgale. The "2+ years" requirement is gone, because it belongs to the Technician II level.
 - Keeps the genuine physical, height and driving requirements, stated plainly, and adds an equal-opportunity and reasonable-accommodation statement. Drops "rockstar" and "work hard, play hard".
 - The SVG is valid and self-contained at 1080×1080. It shows the role, the location, the $31–38/hour range, one or two benefits and the apply URL, with legible type and adequate contrast, and it is consistent with the revised posting.
+
+## Card
+
+brief: Rewrite a site manager's wind-technician job ad to be accurate, inclusive and pay-transparent, then design a square recruiting graphic for it.
+given:
+- Draft posting: Richard Roe's ad, with requirements and pay
+- HR leveling guide: Technician I education, certification, experience and communication requirements
+- Compensation sheet: approved hourly ranges for Technician I and II
+- Job facts: schedule, physical demands, licence, benefits and how to apply
+asked:
+- The revised job posting, up to 450 words
+- A change log table: original text, revised text and the reason for each change
+- A 1080×1080 graphic: on-image copy, layout by zone, visual direction and an inline SVG mock-up
+limit: Up to about 1,200 words in Markdown, excluding the SVG
+hard: The draft mixes exclusionary wording with requirements and pay that conflict with the official sources, while some real requirements must stay.
+
+## Scorecard
+
+- Removes "young, energetic guy" and "recent graduates"; replaces "native English speaker" with English radio safety communication
+- Uses $31–38/hour and flags the draft's $28–34 as off-sheet and breaking pay transparency
+- Drops the degree and "2+ years"; states 0–2 years with training and paid GWO within 90 days
+- Keeps height, lifting and driving requirements; adds EEO and accommodation statements; drops "rockstar" slogans
+- SVG valid at 1080×1080: role, location, $31–38/hour, benefits, apply URL; legible and consistent with posting

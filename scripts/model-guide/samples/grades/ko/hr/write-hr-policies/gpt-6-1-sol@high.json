@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/write-hr-policies/gpt-6-1-sol@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "gpt-6-1-sol",
+ "effort": "high",
+ "scorecardSha": "a218491fdd4f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes notices A–C: attendance days, \"near an office\" defined, 시·도 move approval kept",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "채용 시 정한 시·도에 계속 거주할 의무는 없다. 이주 예정일 30일 전 인사팀에 신고하며",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Supersedes A–C and defines attendance, but replaces required 60-day move approval with 30-day notification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Supersedes notices A-C and defines office attendance, but replaces move approval with 30-day advance reporting."
+    }
+   ]
+  },
+  {
+   "check": "₩50,000 stipend kept; 부산 CBA's 50% up to ₩60,000 prevails (§96①); others may need §94① consent",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "서울·판교·대전·충청·광주·전라는 기존 통신비 실비를 지원금으로 대체한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps stipend, Busan reimbursement and adverse-change consent, but omits other employees’ documented claims route above the stipend."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains 50,000 stipend, preserves Busan CBA telecom reimbursement, and notes consent required for adverse changes."
+    }
+   ]
+  },
+  {
+   "check": "Rejects \"no more receipts\": documentation required; stipend noted as taxable wage income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "근로소득으로 원천징수한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies stipend as taxable employment income; retains receipt requirements for Busan communications reimbursement and separate expense settlement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Requires receipts for Busan telecom and business expenses, and notes the stipend is taxable wage income."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: boot-up and VPN login time is paid working time (§50③), with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "업무에 필수적인 PC 부팅·시스템 로그인·VPN 접속부터 근로시간으로 계산한다. 접속 전 준비시간은 사후 입력·보정한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Counts mandatory startup and login as paid working time, with recording and correction rules."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects CEO instruction, treating boot-up and VPN time as paid working hours with a logging rule."
+    }
+   ]
+  },
+  {
+   "check": "Domestic remote within limits; abroad only pre-approved, in Japan or Singapore, for immigration, tax, PE reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "해외 근무는 현재 회사의 현지 법인 또는 EOR이 있는 **일본·싱가포르만** 허용한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits temporary domestic work and requires overseas preapproval, restricted to Japan/Singapore with immigration, tax and PE review."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Restricts domestic and abroad remote work, limiting overseas to Japan/Singapore with approval for tax and PE reasons."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure, decision, §94/§93 procedure; table matches headcount (대전·충청, 광주·전라 no office; 부산 CBA)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "50km 기준, 부산 추가예산, 불이익 변경 동의 추진 및 절차 완료 후 시행일을 승인해 주세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Table and most departures/decisions are covered; CEO note omits filing procedure and its additional move-approval departure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Note details CEO departures, required approvals, and §94/§93 procedures; table accurately reflects all regional headcounts."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.033704213,
+ "date": "2026-10-11"
+}

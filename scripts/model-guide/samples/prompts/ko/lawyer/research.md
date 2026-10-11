@@ -49,3 +49,39 @@ deliverable: none
 - Rejects the good-faith condition, relying on [4] and [6] rather than the blog post [7], since good faith goes to repayment at the end of the case. Rejects the bank-guarantee demand because the 정관 calls for an unsecured undertaking.
 - On enforcement: a claim for payment in the competent district court (e.g. 서울중앙지방법원, the company's seat), combined with an application for a 임시의 지위를 정하는 가처분 under 민사집행법 §300② given the ongoing need to fund the defence, noting the high bar for a payment-type injunction. Seeks the costs of the advancement fight in proportion to success under [5], noting that ordinary 소송비용 recovery of attorney fees is capped under 민사소송법 §109. Recommends tendering the unsecured undertaking promptly and making a formal written demand.
 - The source table separates primary authority ([1]–[4]) from the fictional case summaries ([5]–[6]) and the unreliable secondary sources ([7]–[8]).
+
+## Card
+
+brief: 회사에 피소된 전 CFO가 방어 비용 선지급을 거부당한 사안에서 네 가지 질문을 리서치합니다.
+given:
+- 파트너의 질문: 선지급 권리, 정관 개정, 조건, 권리 실현에 관한 4개
+- 사실관계: 김철수의 지위와 기간, 소장의 청구 3개
+- 거부 서신: 파인크레스트가 든 세 가지 근거
+- 조사 결과 [1]~[4]: 상법·민법·민사집행법·민사소송법 조문과 정관 제40조
+- 판례 요약 [5]~[6]: 이 과제를 위한 가상 사례 2건
+- 블로그 글 [7]과 단행본 발췌 [8]: 2차 자료
+asked:
+- 네 질문에 대한 짧은 답
+- 번호 붙은 출처를 인용한 검토, 판단이 갈리는 문제는 견해와 가장 강한 반론
+- 출처 신뢰도 표
+- 다음 단계
+limit: 약 2,500자 이내, Markdown
+hard: 출처의 신뢰도가 고르지 않고 정관 개정을 행위 시점에 맞춰 적용해야 하며, 자격이 섞인 청구는 판단이 필요합니다.
+
+## Scorecard
+
+- Claim 1 covered (CFO conduct, mandatory "지급하여야 한다"); Claim 2 likely not; Claim 3 close call, allocated
+- 민법 §687 via 상법 §382② treated as a supporting argument only, with the counter-argument noted
+- Amendment can't strip his right for 2023–2024 conduct under [6]; treatise [8] outdated
+- Good-faith condition rejected on [4] and [6], not blog [7]; bank guarantee rejected, undertaking unsecured
+- Enforce: payment claim in district court plus §300② 가처분 (high bar); fees pro rata under [5], §109 cap
+- Tender unsecured undertaking, written demand; source table separates [1]–[4], fictional [5]–[6], unreliable [7]–[8]
+
+## Scorecard, shown
+
+- 청구 1은 해당(CFO 직무 행위, "지급하여야 한다"는 의무 규정), 청구 2는 해당하지 않을 가능성, 청구 3은 경계 사례로 안분
+- 상법 제382조 제2항을 통한 민법 제687조는 보조 논거로만 쓰고 반론도 함께 제시
+- 2023~2024년 행위에 대한 권리는 정관 개정으로 박탈할 수 없음([6]), 단행본 [8]은 낡은 자료
+- 선의 조건은 블로그 [7]이 아닌 [4]와 [6]으로 반박, 은행 지급보증 요구 거부, 반환 약정은 무담보
+- 실현: 지방법원에 지급 청구와 제300조 제2항 가처분(요건 엄격), 분쟁 비용은 [5]에 따라 승소 비율, 제109조 한도
+- 무담보 반환 약정서 제출과 서면 청구, 출처 표는 [1]~[4], 가상 사례 [5]~[6], 신뢰도 낮은 [7]~[8]을 구분

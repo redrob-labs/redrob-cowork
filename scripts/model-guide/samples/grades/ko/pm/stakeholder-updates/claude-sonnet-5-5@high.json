@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/stakeholder-updates/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "a1ad2842cc6a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ ₩865M (₩610M + 3 × ₩85M), not ₩790M: ≈ ₩65M (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "12월 1일까지 이 속도가 이어지면 약 8.65억 원(+6,500만 원)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recalculates completion cost and overrun, and explicitly challenges the reported ₩790M forecast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recomputes forecast to 8.65억 원 (+6,500만 원 over 8억 원) and contrasts with 7.9억 원."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제출 11월 14일 + 검토 4주 = **12월 12일 이후**에 검토가 끝납니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the earliest review completion and marks compliance submission and launch red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates earliest completion after 12 Dec and changes compliance pack and launch to red."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "목표 생성률은 31%로 목표 40%에 못 미칩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Honestly reports both creation shortfall and tickets exceeding the 15-per-1,000 limit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honestly reports goal creation (31% vs 40%) and ticket rate (22 vs 15)."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size (₩115,000 vs ₩100,000) and retention without spin; links ticket themes to fixes",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "출시 전 잔돈 모으기 온보딩 개선과 입금 반영 시간 원인 확인이 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately presents deposit and retention results, linking ticket themes to onboarding improvement and delay investigation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reports deposit and retention without spin and links ticket themes to onboarding and time fixes in the speaker note."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "출시일을 **12월 14일 이후**로 재설정해 주십시오.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers timing and descoping alternatives, recommends mid-December, and ends with explicit launch and budget approval requests."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents options (maintain, mid-Dec launch, descoping) and clearly recommends Option B with decision requests."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Hong Gil-dong is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "의존 관계를 함께 점검하면 다음에는 더 일찍 위험을 알릴 수 있습니다. 발표 전에 같이 숫자를 확인해요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides each include notes; conclusion comes first, and Hong’s memo explains changes factually and constructively."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly 7 slides with speaker notes, bottom line upfront, and note to Hong Gil-dong is constructive and non-blaming."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.015922988,
+ "date": "2026-10-11"
+}

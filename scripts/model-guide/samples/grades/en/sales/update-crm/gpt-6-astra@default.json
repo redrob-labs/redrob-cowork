@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/update-crm/gpt-6-astra@default",
+ "language": "en",
+ "profession": "sales",
+ "task": "update-crm",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "3ffb903cc6e5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Pinecrest stays Negotiation, close ≈ 3 April (out of Q1), O-105 merged; Stiles told \"not in Q1\"",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Keep the $38,000 opportunity in Negotiation, remove it from Q1, and confirm a Q2 signature date. O-105 is a duplicate to merge.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct stage, duplicate treatment, and Q1 exclusion; close date is TBD rather than approximately 3 April."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps Pinecrest in Negotiation, moves close timing out of Q1 to Q2, merges O-105, and tells Stiles no."
+    }
+   ]
+  },
+  {
+   "check": "Kestrel re-priced to $31,000 (46,500 ÷ 45 × 30) with close date 10 April",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Kestrel revised amount:** $46,500 × 30 ÷ 45 = **$31,000**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct repricing calculation and 10 April close date, appropriately marked provisional."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly re-prices Kestrel to $31,000 and sets the close date to 10 April."
+    }
+   ]
+  },
+  {
+   "check": "Eastbrook €52,000 converted to $56,160 and kept in Q1 for the 26 March decision",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Eastbrook USD amount:** €52,000 × 1.08 USD/EUR = **$56,160**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct conversion; retained in Q1 with follow-up tied to the 26 March board decision."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Converts €52,000 to $56,160 and keeps the opportunity in Q1 for the March decision."
+    }
+   ]
+  },
+  {
+   "check": "Harrow moved to Q3; Tidemark to a 2027-realistic date, $210,000 flagged as unqualified placeholder",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "TBD; 2027 capital-plan exploration",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Flags speculative amount and removes unsupported dates, but supplies neither a Q3 Harrow close nor a realistic 2027 Tidemark date."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Harrow moved to August (Q3), Tidemark aligned to 2027, and $210,000 flagged as an unqualified placeholder."
+    }
+   ]
+  },
+  {
+   "check": "Weighted = Amount × probability; Q1 falls from $161,750 to $91,080, Bayfront as Commit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Total Q1** | **430,500** | **161,750** | **140,160** | **91,080** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct weighting formula, before-and-after weighted totals, and Bayfront Commit classification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Defines weighted formula, shows Q1 weighted dropping from $161,750 to $91,080, and puts Bayfront in Commit."
+    }
+   ]
+  },
+  {
+   "check": "Hygiene list: past close date, duplicate, currency mismatch, guessed amount, premature Closed Won",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Stale or unsupported close dates:** Updated Bayfront and Kestrel; cleared unsupported dates for Harrow, Pinecrest and Tidemark.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Hygiene list covers stale close dates, duplicate, currency mismatch, speculative amount, and premature win claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "List clearly covers past close dates, duplicate, currency mismatch, guessed amount, and premature Closed Won."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02115225,
+ "date": "2026-10-11"
+}

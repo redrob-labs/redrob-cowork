@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/sell-customers/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "sell-customers",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "e0e1e29b505f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't present 40% as typical (18% average or credits 솔마루의원 네트워크); names only it and 잣나무헬스",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "다만 이는 가장 좋은 결과입니다. 저희 고객사 6곳 평균은 18%이고 범위는 8~40%입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly attributes 40% to 솔마루, distinguishes the 18% average, and names no unapproved customers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly credits Solmaru with 40%, states 18% average, and only names consented Solmaru."
+    }
+   ]
+  },
+  {
+   "check": "Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제 재량은 다년 계약 시 최대 15%입니다. 그 이상은 CFO 승인이 필요한데 승인된 전례가 없습니다. 지킬 수 없는 약속입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects unauthorized, unkeepable discount and artificial urgency; avoids premature contract or discount discussions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects 30% discount by Friday citing policy limits and prematurity."
+    }
+   ]
+  },
+  {
+   "check": "Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery call",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "플로팅 간호인력의 자격 요건과 주 52시간 규칙이 14곳 구조에서 어떻게 돌아가는지 15분이면 보여드릴 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Offers a short demo and recognizes ample time, but omits renewal date and September 2026 notice deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "CTA is a short 15-min demo, but the specific 2026 renewal/notice dates were not explicitly utilized."
+    }
+   ]
+  },
+  {
+   "check": "Personalizes to text and group-chat call-outs, overtime, float pool, 3 new clinics and 11 nurse roles",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "매주 몇 시간씩 문자와 단톡방을 쓰신다고 하셨는데, 계속 기억에 남았습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Addresses text/group-chat staffing, overtime and floating nurses, but omits three new clinics and eleven nurse vacancies."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Mentions webinar details (text/group-chat, float pool), but misses the 3 new clinics and 11 nurse roles."
+    }
+   ]
+  },
+  {
+   "check": "Each email adds new value rather than just following up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "도입은 약 6주 걸리고, 지금 쓰시는 도구의 내보내기 파일로 데이터 이관이 가능합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Sequence adds staffing workflow, calibrated customer evidence, then implementation, migration and compliance details."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Email 1 asks a discovery question, Email 2 shares case study/proof, Email 3 offers demo and migration info."
+    }
+   ]
+  },
+  {
+   "check": "Each email ≤~320 characters, one CTA, send days avoiding 3–9 October holidays; LinkedIn ≤300 characters; founder's tone",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "① 9월 16일(화) 발송",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Bodies and LinkedIn meet approximate limits; each email has one substantive CTA, founder tone, and holiday-safe September dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All emails are under ~320 characters, single CTA, dates avoid Oct 3-9 holidays, LinkedIn ≤300 chars, founder tone."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017001863,
+ "date": "2026-10-11"
+}

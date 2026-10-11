@@ -82,3 +82,36 @@ Production में plans:
 - Covers boundaries correctly: a change on period_start charges the full difference; a change on period_end or before period_start raises ValueError; leap-year February has 29 days; 30- and 31-day months are tested.
 - Handles rounding deliberately, noting that Decimal ROUND_HALF_UP rounds away from zero for negatives (−0.005 becomes −0.01), so downgrade credits mirror upgrades. Picks a policy for float prices and tests for it. Today, mixing a float with a Decimal raises TypeError, and two floats fail at `.quantize`.
 - The tests are runnable, well named and parametrized, and any property test states a real invariant, such as antisymmetry between upgrade and downgrade or that the result is bounded by the full difference.
+
+## Card
+
+brief: एक billing library की proration release के लिए pytest tests लिखें, बताएँ क्या फ़ेल होता है, और न्यूनतम fix के साथ go/no-go दें।
+given:
+- Release notes: v2.4.0 के proration और rounding दावे
+- Module: Plan, days_in_period और prorate_change वाला billing/proration.py
+- Plans: production के 3 plans, मासिक कीमतों के साथ
+- Product की अपेक्षाएँ: 15 फ़रवरी का उदाहरण और float inputs सहित 6 cases
+asked:
+- अपेक्षाओं, boundaries, rounding और input types को cover करती tests/test_proration.py
+- हर फ़ेल test के लिए: अपेक्षित मान, वास्तविक मान और कारण
+- Go/no-go सिफ़ारिश, न्यूनतम code fix, और release notes की गलतियाँ
+limit: गद्य लगभग 1,200 शब्दों के भीतर, Markdown; test code इससे लंबा हो सकता है
+hard: कोड को उसके docstring, release notes और product अपेक्षाओं से परखना है, boundaries और rounding में सावधानी चाहिए, और अस्पष्ट अपेक्षाओं पर लिए निर्णय बताने हैं।
+
+## Scorecard
+
+- Shows `- 1` drops the change day: 15 February gives ₹140.00, not ₹150.00; last day ₹0.00, not ₹10.00
+- Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`
+- Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months
+- Notes ROUND_HALF_UP takes −0.005 to −0.01, so downgrade credits mirror upgrades
+- Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize
+- Tests are runnable, well named and parametrized; any property test states a real invariant
+
+## Scorecard, shown
+
+- दिखाता है कि `- 1` बदलाव वाले दिन को छोड़ देता है: 15 फ़रवरी पर ₹150.00 की जगह ₹140.00, आख़िरी दिन ₹10.00 की जगह ₹0.00
+- No-go की सिफ़ारिश करता है: release notes का मुख्य fix कोड में नहीं है; न्यूनतम fix `- 1` हटाना है
+- Period की शुरुआत (पूरा अंतर), period_end और शुरुआत से पहले ValueError, 29 दिन की फ़रवरी, 30/31 दिन के महीने टेस्ट करता है
+- बताता है कि ROUND_HALF_UP −0.005 को −0.01 बनाता है, इसलिए downgrade credit upgrade का सटीक उलटा होता है
+- Float कीमतों की नीति चुनकर उसे टेस्ट करता है; float-Decimal मिलाने पर TypeError और दो floats पर .quantize में विफलता बताता है
+- Tests चलने योग्य, अच्छे नामों वाले और parametrized हैं; कोई भी property test असली invariant बताता है

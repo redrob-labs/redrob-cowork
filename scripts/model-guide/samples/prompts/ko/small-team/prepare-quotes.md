@@ -57,3 +57,38 @@ deliverable: documents
 - The totals are correct for the prices used. Labour is 41 h × ₩100,000 = ₩4,100,000 plus 10% PM = ₩4,510,000. With policy pricing, hardware is ₩16,560,000 and the one-off total is ₩21,070,000 (VAT extra). Recurring costs are shown separately: support at 11 × ₩80,000 = ₩880,000/month, cloud backup at ₩180,000/month and the firewall subscription at ₩500,000/year.
 - Addresses the ₩17M budget with options or phases, and prioritises the backup appliance, cloud backup and firewall in phase 1, given the 4-month-old last backup and the patient data.
 - Uses compliant language (a personal-information processing entrustment contract is offered, and the solution supports the clinic's PIPA / Medical Service Act obligations rather than being "PIPA compliant/certified") and includes the 30-day validity and the 50% hardware deposit terms.
+
+## Card
+
+brief: 치과의원의 PC·네트워크·백업·유지보수 견적을 가격 정책과 고객 예산에 맞춰 작성한다.
+given:
+- 고객 이메일: 요청 범위와 약 1,700만 원(부가세 별도) 예산
+- 현장 실사 메모: 사용자 수, 사용 중인 PC, 네트워크, 백업 상태, 모니터
+- 가격표: 품목 7개의 원가와 정가
+- 인건비 및 서비스: 시간당 단가, 작업별 시간, 프로젝트 관리, 월 유지보수
+- 견적 정책: 최소 이익률, 계약 조건, 개인정보보호법 관련 표현 규칙
+asked:
+- 견적서: 요약, 작업 범위, 일회성·반복 비용 표, 합계, 가정·제외 사항, 계약 조건
+- 범위가 예산을 넘으면 선택안이나 단계별 안과 추천안
+- 이영희 실장께 보내는 안내 이메일(약 300자 이내)
+- 대표에게 보내는 가격·범위 문제 내부 메모(약 200자 이내)
+limit: 약 2,500자 이내, Markdown
+hard: 요청, 실사, 가격표가 서로 또는 정책과 맞지 않고, 예산 때문에 우선순위를 정해야 한다.
+
+## Scorecard
+
+- Spots 25% markup, not margin: PC (1,125,000 − 900,000) ÷ 1,125,000 = 20.0%; every hardware line at 20%
+- Re-prices at cost ÷ 0.75 (PC ₩1.2M, AP ₩400k, firewall ₩800k, switch ₩960k, backup ₩1.6M) or flags it
+- Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained
+- Labour ₩4,510,000 (41 h + 10% PM); one-off ₩21,070,000; recurring ₩880,000 + ₩180,000/month, ₩500,000/year
+- Phases to the ₩17M budget, with backup appliance, cloud backup and firewall first
+- Offers an entrustment contract, "supports PIPA obligations", never "compliant/certified"; 30-day validity, 50% hardware deposit
+
+## Scorecard, shown
+
+- 정가가 이익률이 아닌 25% 마크업임을 지적: PC (1,125,000 − 900,000) ÷ 1,125,000 = 20.0%, 하드웨어 전 품목 20%
+- 원가 ÷ 0.75로 재산정(PC 120만 원, AP 40만 원, 방화벽 80만 원, 스위치 96만 원, 백업 160만 원) 또는 보고
+- 직원용 PC 10대 견적, 영상 PC는 업체 승인 전까지 제외 또는 선택 항목, 10대 대 12대 설명
+- 인건비 4,510,000원(41시간 + PM 10%), 일회성 21,070,000원, 반복 월 880,000원 + 180,000원, 연 500,000원
+- 1,700만 원 예산에 맞춰 단계화, 백업 어플라이언스·클라우드 백업·방화벽을 1단계로
+- 처리 위탁 계약 제시, "보호 의무 이행 지원"으로 표현하고 "인증·준수 보장" 없음, 유효기간 30일, 하드웨어 선금 50%

@@ -1,0 +1,128 @@
+{
+ "key": "en/marketer/run-messaging-campaigns/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "77c1059302d0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Denver only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **Total** | **17,363** | **4,772** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five eligible email counts are correct; suppression and Denver-only coverage are applied correctly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates eligible email numbers for all segments, including Denver-only D (248), totaling 17,363."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Segment D uses Denver ZIPs only (52).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Eligible SMS totals 4,772, including only 52 Denver contacts from D; remaining D contacts are excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates eligible SMS at 4,772, isolates Denver to 52, and excludes non-Denver D contacts."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of $64 = $32 before dessert, over $18; e.g. 25% off ($16), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The manager's proposal fails on the first box alone, because 50% off is $32 against an $18 ceiling.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the unaffordable proposal and supplies non-stackable alternatives costing no more than $18."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the manager's proposal with cost math and offers unstacked options within the $18 ceiling (e.g., 25% off = $16)."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Denver for D",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "For segment C, the \"new recipes, complaints down 35%\" proof point does the persuading rather than a deeper discount.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses A's price concerns, B's convenience needs, C's menus and quality improvement, and D's Denver coverage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All segments are appropriately tailored: price for A, convenience for B, new recipes/complaints for C, and Denver for D."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈$6,800",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "| **Total** | **12,591** | **4,772** | **426.66** | **427** | **$14.24 avg** | **$6,078.60** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct forecast bases and reactivations; incentive cost differs from approximately $6,800 because segment offers vary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately applies the 3.4% and 2.1% rates to the SMS and email-only pools yielding 427 reactivations with cost calculated."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤160 characters with brand and \"Reply STOP to opt out\", 8 a.m.–9 p.m. local; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Sync reactivation status before every send so reactivated contacts leave the sequence.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SMS texts meet length, brand, opt-out, and local-time requirements; QA applies reactivation exits before every send."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All SMS messages are ≤160 characters, include brand and opt-out, send within local windows, and specify reactivation exit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024473925,
+ "date": "2026-10-10"
+}

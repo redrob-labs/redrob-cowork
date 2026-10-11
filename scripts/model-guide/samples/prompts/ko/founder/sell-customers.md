@@ -57,3 +57,36 @@ deliverable: none
 - Uses the timing sensibly: the competitor contract renews 30 November 2026 with 90 days' notice (by about 1 September 2026), so this is a long-cycle evaluation. The CTA is a short discovery or demo call, not an immediate signature.
 - Personalizes to her webinar question (call-outs by text message and group chat, overtime, float pool) and the group's growth (3 new clinics, 11 open nurse roles), with each email adding new value rather than "just following up".
 - Each email is under about 320 Korean characters with one CTA and a sensible send day (ideally avoiding the 개천절/추석/한글날 holidays, 3–9 October 2025). The LinkedIn note is 300 characters or fewer, and the tone is a founder's, not a pushy marketing voice.
+
+## Card
+
+brief: 외래 의원 14곳을 둔 의료법인 고객에게 보낼 창업자의 이메일 3통, 링크드인 메시지, 자문 답신을 씁니다.
+given:
+- CRM 기록: 고객사, 담당자, 웨비나 질문, 현재 계약, 고충, 공개 정보, 이전 접촉
+- 제공 가능한 것: 기능 3가지와 할인 정책
+- 도입 사례: 6개 고객사의 결과와 실명 공개 동의 여부
+- 영업 자문의 조언: 첫 문장 주장, 할인 제안, 데모 요청
+asked:
+- 2025년 9월 16일(화)에 시작하는 이메일 3통 시퀀스: 제목, 본문, 발송 예정일
+- 300자 이내 링크드인 1촌 신청 메시지
+- 김철수 님 조언 중 받아들인 것과 거절한 것, 그 이유를 담은 짧은 메모
+limit: 이메일 본문 각 약 320자 이내, 전체 약 2,500자 이내
+hard: 도입 사례를 정직하게 써야 하고, 자문의 조언을 할인 정책과 고객의 일정에 비추어 판단해야 하며, 개인화하면서도 짧아야 합니다.
+
+## Scorecard
+
+- Doesn't present 40% as typical (18% average or credits 솔마루의원 네트워크); names only it and 잣나무헬스
+- Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy
+- Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery call
+- Personalizes to text and group-chat call-outs, overtime, float pool, 3 new clinics and 11 nurse roles
+- Each email adds new value rather than just following up
+- Each email ≤~320 characters, one CTA, send days avoiding 3–9 October holidays; LinkedIn ≤300 characters; founder's tone
+
+## Scorecard, shown
+
+- 40%를 일반적인 결과로 내세우지 않고(평균 18% 사용 또는 솔마루의원 네트워크 사례로 명시), 솔마루의원 네트워크와 잣나무헬스만 실명으로 쓴다
+- 금요일까지 30% 할인 제안을 거부한다: 15% 정책 위반, 신뢰성 없음, 시기상조, 할인은 나중에 정책 안에서
+- 2026년 11월 30일 갱신일과 2026년 9월 1일경 해지 통보 기한을 활용하고, CTA는 짧은 탐색 통화로 둔다
+- 문자·단톡방으로 대체 인력 구하기, 연장근로, 플로팅 인력, 신규 의원 3곳, 간호사 채용공고 11건에 맞춰 개인화한다
+- 이메일마다 단순한 후속 연락이 아니라 새로운 가치를 더한다
+- 이메일 본문 각 약 320자 이내, CTA 하나, 10월 3~9일 연휴를 피한 발송일, 링크드인 300자 이내, 창업자다운 어조

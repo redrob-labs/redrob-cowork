@@ -1,0 +1,128 @@
+{
+ "key": "hi/lawyer/research/gemini-3-8-flash@high",
+ "language": "hi",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "gemini-3-8-flash",
+ "effort": "high",
+ "scorecardSha": "99a4a8d8a08a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Count I covered (CFO conduct, Deed's mandatory \"shall\"); Count II likely not; Count III a reasoned close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अतः रक्षा-व्यय का उचित विभाजन (allocation) होना चाहिए, और इस हिस्से का अग्रिम भुगतान मिलना चाहिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Count I is mandatory and covered; Count II excluded; Count III receives competing nexus arguments and allocation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Count I is covered, Count II is not, and Count III is treated as a mixed claim subject to allocation."
+    }
+   ]
+  },
+  {
+   "check": "Right rests on Deed [1], not unilaterally changeable (s.62, clause 11); 2023–2024 conduct predates August 2025 resolutions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "भारतीय संविदा अधिनियम, 1872 की धारा 62 `[3]` के अनुसार किसी अनुबंध में बदलाव दोनों पक्षों की सहमति से ही हो सकता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Relies on independent Deed, section 62 and clause 11; identifies pre-amendment conduct and rejects unilateral resolutions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Relying on the Deed, s.62, and clause 11, it notes conduct predates the August 2025 amendment."
+    }
+   ]
+  },
+  {
+   "check": "Counter noted: Articles alone may not be enforceable by an officer (s.10); treatise [8] outdated, s.201 has no 2013 equivalent",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "धारा 10(1) `[3]` के तहत AoA कंपनी और सदस्यों को बाँधता है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies membership limitation and outdated treatise, but omits officer-enforcement counterargument and absence of a 2013 section 201 equivalent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes s.10 binding members/company and explains that treatise [8] on s.201 of 1956 Act is outdated under 2013 Act."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [1] cl. 3.2 and [6], not blog [7]; letter of credit rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Deed का खंड 3.2 `[1]` स्पष्ट रूप से कहता है कि advancement का भुगतान मुक़दमे के merits पर निर्भर नहीं करेगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses clauses 3.2 and 3.1 and case [6]; rejects blog, good-faith condition and secured undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects good faith based on cl. 3.2 and [6] over [7], and rejects LC in favor of unsecured undertaking."
+    }
+   ]
+  },
+  {
+   "check": "Bengaluru arbitration (cl. 14), s.9 interim relief (or s.17); costs pro rata under s.31A/[5]; tender undertaking, written request",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pinecrest को 30 दिनों के भीतर Count I और Count III (आनुपातिक) के वकीलों के बिलों का भुगतान करने का नोटिस दें",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides Bengaluru sole arbitration, sections 9/17 relief, proportionate enforcement costs, written demand and unsecured undertaking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers Bengaluru arbitration, s.9/s.17 interim relief, s.31A/[5] pro rata costs, and tendering the undertaking/notice."
+    }
+   ]
+  },
+  {
+   "check": "Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**अत्यधिक विश्वसनीय।** \"By reason of\", mixed claims allocation और fees-on-fees पर सीधा सिद्धांत।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Distinguishes contracts, statutes and unreliable secondary sources, but presents fictional cases as genuine judicial authorities."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The table clearly distinguishes primary sources [1]–[4], case precedents [5]–[6], and unreliable secondary sources [7]–[8]."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02780505,
+ "date": "2026-10-10"
+}

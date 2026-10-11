@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/write-hr-policies/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "a218491fdd4f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes notices A–C: attendance days, \"near an office\" defined, 시·도 move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "전 임직원에게 적용하며, 시행일에 공지 A·B·C를 대체합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Defines 50km proximity, Tuesday–Thursday attendance, and retains 60-day approval for 시·도 moves."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "A~C 공지를 대체하고 50km 기준, 출근일, 60일 전 승인 규정을 모두 명시함."
+    }
+   ]
+  },
+  {
+   "check": "₩50,000 stipend kept; 부산 CBA's 50% up to ₩60,000 prevails (§96①); others may need §94① consent",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "부산은 단협 제31조가 있어 실비를 유지합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps ₩50,000 stipend, optional documented reimbursement, 부산’s superior agreement, and consent procedures for unfavorable changes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "5만원 유지, 부산 단협 우선 적용, 불리한 변경에 대한 과반수 동의 필요성을 반영함."
+    }
+   ]
+  },
+  {
+   "check": "Rejects \"no more receipts\": documentation required; stipend noted as taxable wage income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기존 통신비 실비 방식(월 청구액의 50%, 최대 6만원, 증빙 제출)을 원하면 신청해 유지할 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains receipt-based claims and explicitly treats the fixed stipend as taxable employment income subject to withholding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "영수증 청구 방식을 존치하고 지원금의 근로소득 과세를 명시하여 지시를 적절히 수정함."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: boot-up and VPN login time is paid working time (§50③), with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "부팅·접속을 시작한 시각부터 기록합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly pays essential boot-up and login time under §50③ and records time from preparation’s start."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "지시 4를 거부하고 제50조 제3항에 따른 유급 인정 및 구체적 근태 기록 규칙을 마련함."
+    }
+   ]
+  },
+  {
+   "check": "Domestic remote within limits; abroad only pre-approved, in Japan or Singapore, for immigration, tax, PE reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "승인 국가는 회사가 현지 법인이나 EOR을 둔 **일본·싱가포르**로 제한합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits domestic flexibility to 20 days; requires overseas preapproval and addresses immigration, tax, and PE risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "국내외 4주 한도, 일본·싱가포르 사전승인 제한, 비자·세무·PE 리스크를 명시함."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure, decision, §94/§93 procedure; table matches headcount (대전·충청, 광주·전라 no office; 부산 CBA)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "근로자 과반수 동의와 신고가 필요하고, 부산은 노조 협의가 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Memo covers most departures and decisions, but omits radius; table lacks headcounts, and consent procedure omits majority-union priority."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "대표이사 메모에 불일치 항목, 결정 사항, 법적 절차를 기재하고 근무지 표도 정확함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0240492,
+ "date": "2026-10-11"
+}

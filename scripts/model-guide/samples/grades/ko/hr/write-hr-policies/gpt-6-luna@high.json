@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/write-hr-policies/gpt-6-luna@high",
+ "language": "ko",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "a218491fdd4f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes notices A–C: attendance days, \"near an office\" defined, 시·도 move approval kept",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "국내 이사는 60일 전 승인 대상이 아니다. 직원은 이사 예정일 전에 인사팀에 알린다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Supersedes A–C and defines attendance and proximity, but explicitly removes required 시·도 move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "It supersedes notices A–C and defines attendance/radius, but explicitly abolishes instead of keeping the move approval requirement."
+    }
+   ]
+  },
+  {
+   "check": "₩50,000 stipend kept; 부산 CBA's 50% up to ₩60,000 prevails (§96①); others may need §94① consent",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이 지원금은 기존 통신비 실비 지급을 대체하지 않는다. 기존 지급 대상자는 통신비 월 청구액의 50%(최대 6만 원)를 증빙 제출 후 청구할 수 있다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps ₩50,000 plus existing reimbursements, preserves 부산 CBA priority, and requires consent for unfavorable changes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The ₩50k stipend is kept, 부산 단협 prevails, and consent requirements for replacing benefits are addressed."
+    }
+   ]
+  },
+  {
+   "check": "Rejects \"no more receipts\": documentation required; stipend noted as taxable wage income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "전 직원에게 매월 재택근무 지원금 5만 원을 영수증 없이 지급하며, 세법상 근로소득으로 원천징수한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies taxable wage income and retains documented reimbursement claims, rejecting blanket elimination of receipts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "It notes the stipend is taxable income and preserves receipt-based documentation for reimbursement."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: boot-up and VPN login time is paid working time (§50③), with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "업무에 필수인 PC 부팅, 시스템 로그인, VPN 접속 등은 근로시간으로 기록하며 무급으로 처리하지 않는다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly treats essential startup and login as paid working time and requires actual work and break records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "It clearly rejects instruction 4, treating boot-up/VPN time as paid working time with a recording rule."
+    }
+   ]
+  },
+  {
+   "check": "Domestic remote within limits; abroad only pre-approved, in Japan or Singapore, for immigration, tax, PE reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "해외근무는 연간 합계 4주 이내로, 일본 또는 싱가포르에서만 가능하다. 출국 전에 회사의 서면 승인을 받아야 하며,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Restricts domestic locations through approval and safety requirements; overseas approval considers immigration, tax, and permanent-establishment risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Domestic remote is bounded, abroad is restricted to pre-approved travel in Japan/Singapore for tax, visa, and PE reasons."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure, decision, §94/§93 procedure; table matches headcount (대전·충청, 광주·전라 no office; 부산 CBA)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "추가 지급 예산을 승인할지, 동의 및 부산 단체협약 변경을 거쳐 대체 지급을 추진할지 결정해 주십시오.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Table matches headcounts and CBA; CEO note omits VPN, overseas, radius departures, and filing procedure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Table matches headcount, but CEO memo omits departures regarding overseas work and VPN/boot-up time, and omits §93 filing."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023843925000000002,
+ "date": "2026-10-10"
+}

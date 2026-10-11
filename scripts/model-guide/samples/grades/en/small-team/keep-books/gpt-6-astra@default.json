@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/keep-books/gpt-6-astra@default",
+ "language": "en",
+ "profession": "small-team",
+ "task": "keep-books",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "f4fded430b72",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Reconciles the $1,385 gap: duplicate Nursery +$3,150, bank fee +$35, outstanding check #448 −$1,800",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Corrected books: $21,686 − $3,150 − $35 = $18,501**, matching the bank balance less the outstanding check.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly bridges the $1,385 gap using all three items and provides the required book corrections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reconciles the $1,385 discrepancy with all three reconciling items."
+    }
+   ]
+  },
+  {
+   "check": "Streamflix recoded as owner draw; March revenue $13,450, excluding the $10,000 draw and $360 sales tax",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Streamflix:** reclassify $22 from Software to owner drawings/personal expenditure. No cash adjustment.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recodes Streamflix correctly and reports $13,450 revenue, excluding borrowing and sales tax."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recodes Streamflix to drawings and reports March revenue as $13,450, excluding the draw and tax."
+    }
+   ]
+  },
+  {
+   "check": "Forecast excludes Birchwood and the Nursery refund, uses $11,200 payroll from 16 Apr, Hollis ~10 days late",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Request Nursery’s refund today; assume $3,150 arrives **15 April**, the conservative end of ten business days, excluding weekends.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly excludes Birchwood and schedules increased payroll and late Hollis, but includes the unconfirmed Nursery refund."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly handles Birchwood, payroll, and Hollis, but includes rather than excludes the Nursery refund."
+    }
+   ]
+  },
+  {
+   "check": "Without the mower, cash bottoms ≈ $2,100 in the week of 29 Apr and ends near $12,000",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**5,276** | **7,451** | **13,826** | **15,161**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Reports an April 29 weekly low of $5,276 and ending cash $15,161, overstated by the assumed refund."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Identifies 29 Apr as the trough, but figures ($5,276 and $15,161) differ due to including the refund."
+    }
+   ]
+  },
+  {
+   "check": "Mower in cash gives ≈ −$15,900 that week, beyond $15,000 credit; advises financing, deferring or leasing",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "With the mower, that shortfall becomes **$21,749**—exceeding the assumed $15,000 unused credit line by **$6,749**, before additional interest.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects cash purchase and suggests alternatives, but substitutes a May daily shortfall for the required April weekly deficit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Recommends deferring/financing/leasing and notes credit line breach, but trough figure is −$12,724 instead of −$15,900."
+    }
+   ]
+  },
+  {
+   "check": "Every computed column states its method, and the weekly arithmetic is consistent",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "All figures in dollars; columns are seven-day weeks beginning Wednesday. Outflows are shown as positive amounts.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Detailed timing assumptions explain weekly allocations; opening balances, inflows, outflows, closing balances, and mower adjustments are arithmetically consistent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculations and row arithmetic are completely consistent week to week."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0326844,
+ "date": "2026-10-11"
+}

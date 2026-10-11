@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/synthesize-feedback/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "5699745d66a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 (₩68M), OCR 2, approvals 2 (₩46M), card feed 1 (₩26M)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "고유 고객사: 고객사명 기준으로 중복을 제거했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States account-level deduplication; mobile, OCR, approvals, and card-feed counts and ARR totals are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "고유 고객사 수, ARR, 중복 제거 방식이 모두 정확하게 명시되었습니다."
+    }
+   ]
+  },
+  {
+   "check": "Flags Solsup Logistics' ARR conflict (₩96M vs ₩69M), picks one (e.g. OCR ₩170M), suggests checking the CRM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "솔숲물류는 #1(9,600만)과 #4(6,900만) 값이 달라 보수적으로 6,900만을 적용했고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags conflicting ARR, selects ₩69M, and requests billing-system verification, an equivalent authoritative check."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "불일치를 지적하고 수치를 선택(최대 1.7억 병기)했으며 시스템 확인을 제안했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since Jangbu-yeondong already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "장부연동은 3월에 전 플랜으로 출시되었으므로 #2·#9·#13은 기능 부재가 아니라 발견성 문제로 분류했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly classifies all three rows as discoverability because the feature already shipped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "기출시 사실을 바탕으로 2, 9, 13번을 발견성으로 정확히 분류했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "매출 집중도(OCR) > 영향 범위·공수 효율(세션)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies OCR through two Enterprise accounts and renewal risk, versus the broad, two-week mobile fix."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "엔터프라이즈 재계약 위험과 공수가 적고 영향이 넓은 모바일 버그를 비교하여 정당화했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Treats the card feed as a data-integrity risk despite only one account",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "개발 착수 대신 업체 에스컬레이션과 전체 고객 누락 로그 점검부터 진행합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Treats missing transactions as a potentially wider integrity risk and recommends investigation despite one reported account."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "1개 고객사임에도 거래 누락에 따른 전체 데이터 신뢰성 위험과 외부 연동 이슈를 짚었습니다."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "NPS는 설문 행에만 있어 문의·영업 미팅 고객의 만족도는 알 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Includes 16 rows and 12 accounts, but omits ten survey responses and explicit sales-note comparability limitations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "16건, 12개사, 채널 간 비교 한계는 언급했으나 NPS 응답이 10건이라는 구체적 수치는 누락했습니다."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025126500000000003,
+ "date": "2026-10-11"
+}

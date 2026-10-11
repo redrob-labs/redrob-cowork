@@ -57,3 +57,36 @@ deliverable: none
 - Uses the timing sensibly: the competitor contract renews 30 November 2026 with 90 days' notice (by about 1 September 2026), so this is a long-cycle evaluation. The CTA is a short discovery or demo call, not an immediate signature.
 - Personalizes to her webinar question (call-outs handled over WhatsApp, overtime, float pool) and Nadeetat's growth (3 new clinics, 11 open nursing roles), with each email adding new value rather than "just following up".
 - Each email is under 150 words with one CTA and a sensible send day. The LinkedIn note is 300 characters or fewer, and the tone is a founder's, not a pushy marketing voice.
+
+## Card
+
+brief: 14 क्लिनिक वाली एक हेल्थ चेन के लिए founder का तीन ईमेल वाला outreach sequence, एक LinkedIn नोट और sales advisor को जवाब लिखें।
+given:
+- CRM रिकॉर्ड: account, संपर्क, webinar का सवाल, मौजूदा कॉन्ट्रैक्ट, परेशानी, सार्वजनिक जानकारी और पिछला संपर्क
+- पेशकश: 3 क्षमताएँ और छूट नीति
+- Proof points: 6 ग्राहकों के परिणाम, और किनके नाम इस्तेमाल हो सकते हैं
+- Advisor का सुझाव: शुरुआती दावा, छूट का ऑफ़र और demo की माँग
+asked:
+- तीन ईमेल का sequence: subject, body और भेजने का दिन, मंगलवार 16 सितंबर 2025 से
+- 300 या कम अक्षरों का LinkedIn connection note
+- जॉन के लिए नोट: कौन-सी सलाह इस्तेमाल की या ठुकराई, और क्यों
+limit: हर ईमेल 150 शब्दों से कम; कुल लगभग 1,200 शब्दों के भीतर
+hard: Proof points को ईमानदारी से इस्तेमाल करना है, advisor की सलाह को नीति और खरीदार के समय से तौलना है, और outreach निजी होते हुए भी छोटी रहनी है।
+
+## Scorecard
+
+- Doesn't present 40% as typical (uses the 18% average or credits Uttarayan); names only Uttarayan and Devdar
+- Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy
+- Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery or demo call
+- Personalizes to WhatsApp call-outs, overtime, float pool, 3 new clinics and 11 open nursing roles
+- Each email adds new value rather than just following up
+- Each email under 150 words, one CTA, sensible send day; LinkedIn ≤300 characters; founder's tone
+
+## Scorecard, shown
+
+- 40% को सामान्य परिणाम नहीं बताता (18% औसत लेता है या उत्तरायण का नाम देता है); केवल उत्तरायण और देवदार के नाम लेता है
+- शुक्रवार तक 30% छूट को ठुकराता है: 15% नीति का उल्लंघन, भरोसे लायक नहीं, जल्दबाज़ी; छूट बाद में, नीति के भीतर
+- 30 नवंबर 2026 के renewal और लगभग 1 सितंबर 2026 के notice का उपयोग करता है; CTA एक छोटी discovery या demo कॉल है
+- WhatsApp पर call-outs, ओवरटाइम, float pool, 3 नए क्लिनिक और नर्सिंग के 11 खुले पदों के हिसाब से निजी बनाता है
+- हर ईमेल केवल follow-up नहीं, कुछ नया मूल्य जोड़ता है
+- हर ईमेल 150 शब्दों से कम, एक CTA, समझदार भेजने का दिन; LinkedIn ≤300 अक्षर; founder का लहजा

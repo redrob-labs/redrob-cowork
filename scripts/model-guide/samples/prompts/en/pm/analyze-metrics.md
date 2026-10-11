@@ -49,3 +49,29 @@ You are a product analyst at Fernwork, a project-management SaaS with a 14-day f
 - Analyses the platforms with valid splits separately. Web activation rises from 25.0% to 27.0% (z ≈ 2.5, p ≈ 0.01). Android goes from 20.0% to 22.0% (z ≈ 1.3, not significant).
 - Notes that paid conversion is essentially flat (4.10% vs about 4.20% overall; web 4.5% vs 4.6%), that the test was stopped early at day 9 of 14, and that 48-hour activation is only a proxy for retention and revenue.
 - Recommends a specific path, such as not shipping on the pooled result, fixing logging, and rerunning or extending to the full 14 days (optionally starting web-first), with a stated decision criterion. Formulas are shown.
+
+## Card
+
+brief: An onboarding-checklist A/B test was stopped early and the PM wants to ship; check the data, analyse results, and advise him.
+given:
+- Test setup: intended 50/50 split, 14-day plan stopped on day 9, activation and paid definitions
+- PM's claim: activation up from 23.0% to 26.0%, a 13% relative lift
+- Overall results: users, activated and paid for 2 variants
+- Platform results: the same counts for web, iOS and Android in each variant
+- Engineering note: an iOS crash during the test and its fix
+asked:
+- A split check against 50/50, overall and by platform, with the test used and its result
+- A results table for activation and paid: rates, differences, significance, with formulas
+- An interpretation of which numbers to trust and why
+- A recommendation to John Stiles, up to 200 words, with what would change it
+limit: Up to about 1,200 words, in Markdown, with the formula for each computed column
+hard: A planted data-quality problem must be detected and traced before any lift is trusted, then a ship decision justified.
+
+## Scorecard
+
+- Detects sample ratio mismatch: 10,000 vs 9,200, χ² ≈ 33, traced to iOS (2,500 vs 1,700) crash
+- Rejects the pooled +13% lift and the iOS 20% → 26% lift as biased samples
+- Web activation 25.0% → 27.0% significant (z ≈ 2.5); Android 20.0% → 22.0% not (z ≈ 1.3)
+- Notes paid is flat (4.10% vs ≈ 4.20%; web 4.5% vs 4.6%), stop at day 9, proxy metric
+- Doesn't ship on the pooled result; fixes logging, reruns or extends to 14 days, with a decision criterion
+- Shows the formula behind every computed column (rates, differences, z-test, χ²)

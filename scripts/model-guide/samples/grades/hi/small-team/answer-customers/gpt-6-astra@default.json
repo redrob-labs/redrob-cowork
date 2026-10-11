@@ -1,0 +1,128 @@
+{
+ "key": "hi/small-team/answer-customers/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "answer-customers",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "c2e9d7bb7739",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "23 अप्रैल, 18:30 में ठीक 3 जगह उपलब्ध हैं; तीनों को उस दिन आने का विकल्प दें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Saturday within capacity and offers all three the Thursday evening session with exactly three available seats."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Refuses to overbook Saturday and offers the Thursday evening class with 3 spots for all three."
+    }
+   ]
+  },
+  {
+   "check": "Richard Roe gets a full ₹1,800 refund or free reschedule (studio cancelled); bounced email noted, address fixed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹1,800 का पूरा UPI refund दें; उनकी इच्छा हो तो मुफ़्त reschedule। सही email लें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes studio cancellation, apologizes for bounced notice, and requests confirmed email correction rather than guessing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Offers full ₹1,800 refund or free reschedule, notes the bounce, and requests the correct address."
+    }
+   ]
+  },
+  {
+   "check": "Wholesale at ₹560 a mug (₹33,600 for 60); ₹430 flagged to Jane, not accepted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹560 प्रति mug, कुल ₹33,600 quote करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates logo-inclusive wholesale pricing and flags any discount from the rejected ₹430 offer for Jane’s approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ₹560/mug (₹33,600 total), rejects ₹430 in reply, and flags exception approval to Jane."
+    }
+   ]
+  },
+  {
+   "check": "Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Wholesale kiln capacity **40 mugs/सप्ताह**: 60 mugs = **1.5 सप्ताह की nominal capacity**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects pre-opening delivery under six-week lead time, calculates capacity correctly, and offers a later delivery alternative."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies 1 May as impossible due to 6-week lead time and 1.5 weeks kiln capacity; proposes later date."
+    }
+   ]
+  },
+  {
+   "check": "Message 4 is phishing (lookalike domain, urgency, KYC lure): no reply, no click, report it, check real admin",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Link न खोलें, जवाब न दें, details न भरें। Phishing के रूप में report/quarantine करें;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies suspicious KYC/payment email and mismatched domain; prohibits engagement, reports it, and checks official admin independently."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly flags phishing; instructs not to click or reply, to report it, and check real admin."
+    }
+   ]
+  },
+  {
+   "check": "Honours John Stiles' replacement or refund (WhatsApp photo 27 Mar, within 7 days); apologises for missed message",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आपने **27 मार्च को WhatsApp पर photo सहित** समस्या बताई थी—25 मार्च की delivery के सिर्फ़ दो दिन बाद।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Honors timely photo claim across channels, offers free replacement or refund, and apologizes for missing the message."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honours replacement or refund based on the timely 27 March WhatsApp photo and apologises for the missed message."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02024925,
+ "date": "2026-10-10"
+}

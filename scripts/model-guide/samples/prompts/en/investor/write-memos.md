@@ -60,3 +60,32 @@ Write for partners who will read it in five minutes. Keep it under about 1,200 w
 - Computes FY2024 ARR growth of 60% and a burn multiple of 9.0 ÷ 4.2 ≈ 2.14, and runway of about 10 months. Notes the falling cohort NRR (124% → 112% → 103%).
 - Treats BrightSmile (18% of ARR, considering an in-house build) as a top risk, with a specific mitigant or condition, for example a multi-year renewal before closing or a valuation adjustment.
 - Gives a clear recommendation consistent with the analysis, for example invest with conditions, or pass at these terms. Diligence items tie back to the issues found, such as hosting costs, the BrightSmile contract and support quality.
+
+## Card
+
+brief: Write the IC memo on a proposed $15M Series B in a dental software company, testing the deal lead's ownership claim and management's metrics.
+given:
+- Deal lead's ask: a one-line recommendation and ownership claim
+- Financial summary: ARR, revenue, cost of revenue, margin and burn for 3 periods, with a footnote
+- Cohort NRR: 3 cohorts, plus logo churn and the largest customer's share
+- Reference calls: 3 summaries
+- Term sheet excerpt: amount, pre-money, option pool, preference and board seat
+- Other facts: current option pool, cash and monthly burn
+asked:
+- Recommendation, in one paragraph up front
+- Company and thesis, at most 3 bullets
+- Key metrics table, restated where needed, with formulas
+- Valuation and terms: ownership and effective pre-money
+- Key risks and mitigants
+- Diligence items to close before signing
+- What we'd need to believe
+limit: Under about 1,200 words, as a Markdown memo readable in five minutes
+hard: Term-sheet mechanics hide the real economics, a reporting choice flatters a metric, and the recommendation is a judgement call.
+
+## Scorecard
+
+- Ownership $15M ÷ $75M = 20%, not 25%; pool $1.8M → $7.5M; effective pre-money ≈$54.3M
+- FY2024 gross margin restated ≈73.7% (72.4% if all $0.9M moved); LTM ≈74%; reclassification flagged
+- FY2024 ARR growth 60%, burn multiple ≈2.14, runway ≈10 months; cohort NRR 124% → 112% → 103%
+- BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition
+- Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support

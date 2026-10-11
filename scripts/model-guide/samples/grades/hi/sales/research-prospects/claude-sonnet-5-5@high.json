@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/research-prospects/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "76b833eaf28a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2024-25 ₹480 crore; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CEO जेन डो (पहले CFO), जनवरी 2026 से। रिचर्ड रो Executive Chair",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses current leadership and ₹480 crore revenue; explicitly treats the 2023 leadership and revenue as outdated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly notes current leadership, FY24-25 revenue, and marks 2023 article as outdated."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a different Manali firm); uses Shikhar's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अलग entity है; केवल नाम मिलता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the Manali entity and uses Shikhar’s 22%, keeping 32% solely as industry context."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discards source 5 and explicitly chooses Shikhar's 22% over industry's 32%."
+    }
+   ]
+  },
+  {
+   "check": "Value math: ₹480 crore ÷ ₹1,600 ≈ 30 lakh orders × 22% × ₹200 ≈ ₹13.2 crore; 20–30% ≈ ₹2.6–4.0 crore",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "20–30% × ₹13.2 crore = **₹2.6–4.0 crore/वर्ष**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 30 lakh orders, 6.6 lakh returns, ₹13.2 crore processing costs, and benchmark savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exact calculation matching the checklist and reference benchmark numbers."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion upside; COD RTO flagged as unknown",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Parcelwise benchmarks:** लागत में 20–30% कमी; refunds का ~15% exchanges में बदलना।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labels inputs and assumptions, qualifies estimates, identifies exchange upside, and flags excluded COD RTO."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Labels inputs, notes estimates/cautions, calculates 15% exchange upside, and flags COD RTO."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "माइल्स चले गए, इसलिए इसे net-new मानें और पुराना deck दोबारा न भेजें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses budget/in-house loss and departed champion; replacement hiring, new CEO, and resale provide reopening triggers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses 2024 loss and departed champion via the hiring trigger, new CEO, and resale launch."
+    }
+   ]
+  },
+  {
+   "check": "Enters via John Stiles and/or Mary Major (Kesariya Goods link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मैरी मेजर को **छोटा, personalised email + LinkedIn connection**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies Mary through Kesariya, adds COO outreach, specifies messaging, and asks five substantive assumption-testing questions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Enters via Mary Major (justified by Kesariya link), gives concrete outreach steps and discovery questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017430263,
+ "date": "2026-10-11"
+}

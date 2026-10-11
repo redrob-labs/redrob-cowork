@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/send-invoices/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "158190ffee34",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "INV-0152 totals $11,693.60: $9,000 balance + CO-1 $1,400 + expenses $1,176 × 1.10 = $1,293.60",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**$11,693.60** | $20,693.60 – $9,000.00",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct balance due; approved change order and marked-up expenses are calculated correctly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates the total balance due as $11,693.60 with all line items and 10% markup."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the $212 meals; due 25 March (net 15); shows the $9,000 deposit as received",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Crew meals ($212):** meals are not billable under the SOW.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes meals, gives 25 March due date, and credits the $9,000 deposit received."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets due date to 25 March, and credits the $9,000 deposit."
+    }
+   ]
+  },
+  {
+   "check": "CO-2 not billed (no Jane Doe approval); email asks her to approve $700 for 0.5 day",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We've scoped this as **CO-2: 0.5 day, $700**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Does not bill CO-2 and explicitly requests Jane's written approval by email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Leaves CO-2 off the invoice and asks Jane Doe to approve $700 for 0.5 day."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't chase Tern: matches 3 Mar $2,300 to INV-0139, flags the \"0193\" reference mismatch",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "It was paid in full on 3 March (TERN ST PMT 0193, $2,300).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Matches payment and avoids chasing Tern, but never explicitly flags the invoice-reference mismatch."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Matches the payment and avoids chasing, but does not explicitly flag the reference number mismatch/typo."
+    }
+   ]
+  },
+  {
+   "check": "Pellworth firm with ≈ $126 late fee (1.5% × 2 months × $4,200); Saltgrass polite, no fee, PO 77-3310",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Two full months have now passed (2 × $63), so **$126** in late fees has accrued.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Pellworth receives firm contractual-fee notice; Saltgrass receives polite reissue with PO 77-3310 and no fee."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Pellworth is firm with $126 fee; Saltgrass is polite, adds no fee, and adds PO 77-3310."
+    }
+   ]
+  },
+  {
+   "check": "Invoice complete and professional: unique number, dates, terms, payment details, figures add up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Please quote **INV-0152** as the payment reference.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional invoice includes unique number, dates, bill-to, payment details, terms, and correctly reconciled figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The invoice is complete with all required fields, payment details, terms, and accurate math."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031423875,
+ "date": "2026-10-11"
+}

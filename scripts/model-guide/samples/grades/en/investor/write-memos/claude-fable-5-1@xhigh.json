@@ -1,0 +1,110 @@
+{
+ "key": "en/investor/write-memos/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "investor",
+ "task": "write-memos",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "06c37eaf0d73",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Ownership $15M ÷ $75M = 20%, not 25%; pool $1.8M → $7.5M; effective pre-money ≈$54.3M",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "60.0 − 5.9",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct 20% ownership and $7.5M target pool, but top-up and effective pre-money differ from required $5.7M and $54.3M."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies 20% ownership, $7.5M post-money pool, and computes effective pre-money at ~$54.1M (approx. $54.3M)."
+    }
+   ]
+  },
+  {
+   "check": "FY2024 gross margin restated ≈73.7% (72.4% if all $0.9M moved); LTM ≈74%; reclassification flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the reclassification manufactured the improvement story.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Restates FY2024 gross margin to 73.7% and LTM to 74.0%, correctly flagging production-hosting reclassification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Restates FY2024 gross margin to 73.7% and LTM to 74.0%, flagging the reclassification issue."
+    }
+   ]
+  },
+  {
+   "check": "FY2024 ARR growth 60%, burn multiple ≈2.14, runway ≈10 months; cohort NRR 124% → 112% → 103%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "8.0 cash / 0.8 monthly burn → ~Jul-2026",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows 60% FY2024 ARR growth, approximately 2.14x burn multiple, ten-month runway, and all three cohort NRR figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes all required metrics: FY2024 60% growth, 2.1x burn multiple, 10 months runway, and declining cohort NRR."
+    }
+   ]
+  },
+  {
+   "check": "BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "renewal as closing condition, or price/ratchet on ex-BrightSmile ARR; meet the CTO directly.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile’s 18% concentration and potential in-house build as a leading risk with specific closing and valuation mitigants."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile risk and conditions deal on renewal or repricing on ex-BrightSmile ARR."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Invest with conditions — do not approve as currently structured.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendation follows identified risks; pre-signing diligence explicitly covers hosting allocation, BrightSmile’s contract and CTO, and support metrics."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a clear conditional recommendation, with diligence items covering hosting invoices, BrightSmile contract, and support metrics."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0271173,
+ "date": "2026-10-11"
+}

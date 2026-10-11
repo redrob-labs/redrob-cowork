@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/raise-funding/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "founder",
+ "task": "raise-funding",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "577c8e479fcc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "ARR ₩816M (₩68M × 12), excluding ₩284M one-time fees; notes MRR growth ₩41M to ₩68M (~66%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "증가율=(6,800만−4,100만)÷4,100만=65.9%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct ARR calculation excludes one-time fees; also reports January–June MRR growth accurately."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates ARR of ₩816M excluding one-time fees, and notes the ~66% MRR growth."
+    }
+   ]
+  },
+  {
+   "check": "NRR 112% (₩33.6M ÷ ₩30M); 140% includes new customers; checks ₩33.6M + ₩34.4M = ₩68M",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "NRR=3,360만÷3,000만=112%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct cohort NRR and excludes new customers, but omits reconciliation to total MRR and explanation of erroneous 140%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculates NRR 112% and excludes new customers, but does not explicitly verify that ₩33.6M + ₩34.4M = ₩68M."
+    }
+   ]
+  },
+  {
+   "check": "TAM is ₩576B (12,000 × ₩48M), not ₩5.76T; ₩48M is current ACV, a SAM-style figure",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "잠재 TAM 5,760억원(0.576조원)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct arithmetic and current ACV, but retains TAM labeling rather than identifying this as a SAM-style estimate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects TAM arithmetic to ₩576B and explains the ₩48M ACV assumption."
+    }
+   ]
+  },
+  {
+   "check": "Sizes the raise at ~₩5.8B (24 months averaging ~₩240M); defends ~₩6B; notes ~8 months' runway",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "60억원 요청은 약 15.4억원의 버퍼를 포함해 설명 가능",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates 57.6억원 burn, deducts cash transparently, justifies 60억원 with buffer, and reports 8.1-month runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sizes raise at ₩57.6B burn, defends ₩6B with buffer, and notes ~8.1 months runway."
+    }
+   ]
+  },
+  {
+   "check": "Flags 58% gross margin as a risk; uses only given data; marks larger claims \"[출처 필요]\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "반복 매출 총이익률 **58%**, 상자 감가상각 포함",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses provided data and marks unsupported claims, but does not explicitly flag 58% gross margin as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses given data and marks missing claims with [출처 필요], but fails to flag 58% gross margin as a risk."
+    }
+   ]
+  },
+  {
+   "check": "Tells a coherent story with a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "발표자 노트: 통합 제공은 제품 설명이며, 경쟁 우위나 방어력이 입증됐다는 뜻은 아닙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Coherent twelve-slide narrative covers requested topics, with a speaker note on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents a coherent 12-slide narrative with a speaker note on every slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026299875,
+ "date": "2026-10-11"
+}

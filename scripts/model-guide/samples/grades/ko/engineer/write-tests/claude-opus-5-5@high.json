@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/write-tests/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "write-tests",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "b9db34c3a698",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Shows `- 1` drops the change day: 15 February gives ₩14,000, not ₩15,000; last day ₩0, not ₩1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| product_example_upgrade | 15000 | 14000 | A |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains change-day exclusion and correctly reports February 15 and last-day expected versus actual charges."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly shows 15 Feb gives 14,000 vs 15,000, last day 0 vs 1,000, and points to `- 1`."
+    }
+   ]
+  },
+  {
+   "check": "Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "remaining = (period_end - change_date).days                 # -1 제거",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends NO-GO because the headline fix is absent and explicitly removes the erroneous subtraction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends no-go because the headline fix is missing, and minimal fix removes `- 1`."
+    }
+   ]
+  },
+  {
+   "check": "Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "def test_first_day_charges_full_difference(period, old, new, expected):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests full first-day charges, invalid dates, leap February, and both 30- and 31-day months correctly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests period_start (full diff), outside period (ValueError at end/before), 29-day Feb, and 30/31 months."
+    }
+   ]
+  },
+  {
+   "check": "Notes ROUND_HALF_UP takes −0.5 to −1, mirroring upgrades; half-won cases need custom test plans",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "음수 0.5원은 -1로 반올림합니다(0에서 멀어지는 방향).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains negative half-up symmetry and uses custom plans to test positive and negative half-won boundaries."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes ROUND_HALF_UP maps -0.5 to -1 mirroring upgrades, and defines custom test plans for half-won cases."
+    }
+   ]
+  },
+  {
+   "check": "Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Decimal과 float를 섞은 경우(old-float, new-float)는 우연히 TypeError가 나서 통과합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Chooses and tests float rejection; identifies mixed-type TypeError and two-float failure at quantize."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Picks TypeError policy, tests it, notes mixed float/Decimal raises TypeError and floats fail at quantize."
+    }
+   ]
+  },
+  {
+   "check": "Tests are runnable, well named and parametrized; any property test states a real invariant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "(2) 반대칭: prorate(new, old) == -prorate(old, new)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests are runnable, descriptive, and parametrized; optional property testing checks an exact oracle and genuine antisymmetry."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests are runnable, well-named, parametrized, and Hypothesis test states true invariants (exact oracle, antisymmetry)."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024467888,
+ "date": "2026-10-11"
+}

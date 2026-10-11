@@ -55,3 +55,28 @@ Where the treatment is a judgement call (for example C6 and C10), state the alte
 - Arrives at adjusted live ARR of about $1,505,600 (−$594,400, or −28.3%), or $1,637,600 including C8. The bridge ties exactly to $2,100,000.
 - Flags C4 ($240,000, terminable for convenience after Sep 30, 2025) and C5 (renewal due Jun 2026) as at-risk. Computes the top-3 concentration, with C1 about 23.9% of adjusted ARR.
 - Translates the result into price: at 6.0×, $2.1M implies $12.6M against about $9.03M on adjusted ARR, a gap of about $3.57M. Recommends how to handle it, such as a re-price, an earn-out tied to C3 or C8, or an escrow.
+
+## Card
+
+brief: Reconcile an acquisition target's ARR schedule to contract and billing data, and produce a diligence-adjusted ARR for a deal priced on ARR.
+given:
+- Management's claims: ARR of $2.1M at June 30, 2025 and the deck's ARR definition
+- Management ARR schedule: 10 customers, C1–C10
+- Contract abstracts and billing data: terms, fees and invoices for each of the 10
+asked:
+- Reconciliation table per customer: adjusted ARR, adjustment, category and basis
+- Bridge from management ARR to adjusted live ARR, plus contracted-but-not-live
+- Risk-weighted view of customers at risk in the next 12 months
+- Top-3 customer concentration
+- IC summary of at most 6 bullets, including the price effect at 6.0×
+limit: Under about 1,200 words, as Markdown tables with each formula stated
+hard: Each line must be tested against a stated definition, several treatments are judgement calls, and the result must be carried through to price.
+
+## Scorecard
+
+- C1 $360,000 (−$60,000); C2 $260,000 (−$50,000); C3 $0 (−$275,000); C9 $87,600 (−$32,400)
+- C8 $0 live, $132,000 separate; C6 $144,000 (alt. $180,000); C10 $66,000 (management's $75,000)
+- Adjusted live ARR $1,505,600 (−$594,400, −28.3%), $1,637,600 with C8; bridge ties to $2,100,000
+- At risk: C4 ($240,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)
+- Top-3 concentration (C1, C2, C4) ≈57.1% of adjusted ARR; C1 ≈23.9%
+- At 6.0×: $12.6M vs ≈$9.03M, a ≈$3.57M gap; recommends re-price, earn-out or escrow

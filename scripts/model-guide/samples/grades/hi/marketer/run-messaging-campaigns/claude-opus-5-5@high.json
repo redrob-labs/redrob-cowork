@@ -1,0 +1,128 @@
+{
+ "key": "hi/marketer/run-messaging-campaigns/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "run-messaging-campaigns",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "fc59e85a1fd9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Eligible email: A 7,720, B 4,790, C 1,620, D 248 (Pune only), E 2,985; total 17,363",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**17,363** | 18,735 − 615 − 757",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five segment email counts and total correctly apply suppression and Pune-only coverage."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All segment counts and the total of 17,363 eligible emails are completely correct."
+    }
+   ]
+  },
+  {
+   "check": "Eligible SMS 4,772, with D reduced to 52; rest of D excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**4,772** | 4,940 − 168",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SMS counts are correct, including only 52 Pune contacts from D and excluding its remaining contacts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately reduces D SMS to 52, excludes rest of D, and reaches 4,772."
+    }
+   ]
+  },
+  {
+   "check": "Rejects manager's offer: 50% of ₹1,600 = ₹800 before dessert, over ₹450; e.g. 25% off (₹400), unstacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹800 (50% × ₹1,600) + ₹75 × हर box = पहले box पर ही ₹875",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the manager’s excessive offer and supplies capped, nonstacking alternatives within ₹450."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows manager's offer exceeds ₹450 ceiling and adopts compliant unstacked ₹400/₹300 offers."
+    }
+   ]
+  },
+  {
+   "check": "Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, Pune delivery for D",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "B: \"Free dessert on your first 4 boxes\"",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "A and Pune messaging are tailored; C mentions new recipes but omits 35% improvement; B lacks convenience messaging."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Tailors A, B, and D, and mentions new recipes for C, but omits 35% fewer complaints."
+    }
+   ]
+  },
+  {
+   "check": "Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₹1,70,800",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**≈ 427** | **≈ ₹1,46,940**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Reactivation bases and totals are correct; differentiated offers yield a different cost from the checklist’s ₹1,70,800."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly calculates 427 reactivations (162 + 264), but calculates cost as ₹1,46,940 using ₹300/₹400 offers."
+    }
+   ]
+  },
+  {
+   "check": "SMS ≤160 GSM-7 / ≤70 Unicode, accurate counts, brand, STOP, DLT; 10:00–21:00 IST = 04:30–15:30 UTC; exit on reactivation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "15:30 UTC (21:00 IST) से पहले deliver हो जाएँ और 04:30 UTC (10:00 IST) से पहले कोई SMS न जाए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "SMS lengths, counts, brand, STOP, DLT checks, scheduling conversions, and global exit-on-reactivation are addressed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Complies with GSM-7 lengths, LRDVIN DLT header, STOP text, brand name, UTC/IST timing, and exit logic."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.03711435,
+ "date": "2026-10-11"
+}

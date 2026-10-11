@@ -1,0 +1,128 @@
+{
+ "key": "hi/sales/answer-customers/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "4326bce43941",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; ₹1,10,400 invoice is an error, corrected by ₹14,400 to ₹96,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Overcharge: ₹14,400 + ₹2,592 GST = **₹16,992**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly protects ₹800 through 28 February 2027 and commits to correcting February’s invoice to ₹96,000."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies price protection until 28 Feb 2027, notes overcharge of ₹14,400, and corrects to ₹96,000."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ ₹9,600; claim within 30 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Uptime = 40,100 ÷ 40,320 = 99.4544%, यानी \"<99.9%\" tier → 10%",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 220 minutes, ₹9,600 credit, and accepts the timely request within 30 days."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 220 mins of 40,320, 99.45% uptime, 10% credit (₹9,600), and validates claim within 30 days."
+    }
+   ]
+  },
+  {
+   "check": "Explains 105 degraded minutes aren't downtime vs \"9 hours\"; no full-month refund; goodwill labelled and justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "SLA के अनुसार degraded समय downtime में नहीं गिना जाता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the 105-minute degraded interval, investigates the nine-hour discrepancy, rejects full refund, and explains declining goodwill."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains degraded time vs downtime, addresses the 9-hour claim, denies full-month refund, and justifies the credit position."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "हमारा FHIR R4 API staff, shift और location data देता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms FHIR R4, denies HL7 v2 and native Mediscribe integration, and offers a technical call."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately covers FHIR R4, denies HL7 v2 and native Mediscribe integration, and offers a technical call next step."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at ₹800 under §3.3: 135 seats, ₹1,08,000 a month before GST from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**4. मार्च से 15 और seats: हाँ, ₹800 पर (§3.3)।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms 135 seats at ₹1,08,000 monthly before GST from March, with correct incremental charge."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 15 seats at ₹800 under §3.3, resulting in 135 seats and ₹1,08,000/month before GST from March."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आपकी नाराज़गी जायज़ है। चारों बातों का सीधा जवाब नीचे है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accountable, empathetic tone; internal notes provide actionable corrections, credits, calculations, and March billing amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tone is accountable and empathetic without grovelling, and internal note clearly lists bulleted actions with exact amounts."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017131013,
+ "date": "2026-10-11"
+}

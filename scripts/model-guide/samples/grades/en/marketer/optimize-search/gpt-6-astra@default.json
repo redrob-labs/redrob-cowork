@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/optimize-search/gpt-6-astra@default",
+ "language": "en",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "0cffc551fe31",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Fixes price ($39 annual / $49 monthly, not \"from $29\"), trial not free plan, QuickBooks Online only; superlatives cut",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Fieldnote costs **$39 per user per month, billed annually**, or **$49 per user per month, billed monthly**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct prices, trial-only offer, Online-only integration, and removal of unsupported superlatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixes price to $39/$49, states no free plan / 14-day trial, specifies QuickBooks Online only, and cuts superlatives."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"hvac scheduling app free\" honestly with the 14-day trial, explained in the rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I deliberately avoid targeting “hvac scheduling app free” as a free-product promise: Fieldnote offers only a trial.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly discloses the 14-day trial and no free plan; rationale explains the honest targeting choice."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clarifies no free plan/trial only and clearly explains the rationale for not promising a free product."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, QuickBooks Online, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Fieldnote’s technician mobile app works offline and syncs when an internet connection returns. Fieldnote’s office web app requires an internet connection.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes mobile and office access; fact table includes both prices, QuickBooks Online limitations, and offline availability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes technician vs office app offline status; table includes price, QuickBooks Online, and offline info."
+    }
+   ]
+  },
+  {
+   "check": "Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Link from the guide to the product page with descriptive anchor text such as “Fieldnote HVAC scheduling and dispatch software.”",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Targets scheduling and dispatch and repositions blog informationally, but proposed anchor lacks the required exact-match phrase."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Targets scheduling and dispatch across title/H1/H2s, repositions blog to informational, and links to product."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤60, meta ≤155, counts accurate; JSON-LD valid and matches page; survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "In a **March 2025 customer survey of 210 respondents**, dispatchers reported that weekly scheduling time fell from **9 hours to 4 hours**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Metadata counts are accurate at 47 and 145; valid JSON-LD matches visible copy; survey attribution includes sample and date."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Character limits and counts correct; valid JSON-LD matches page; survey attributed to 210 respondents in March 2025."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020178638,
+ "date": "2026-10-11"
+}

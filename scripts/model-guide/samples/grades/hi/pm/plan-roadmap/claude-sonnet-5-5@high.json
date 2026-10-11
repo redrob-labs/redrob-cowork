@@ -1,0 +1,128 @@
+{
+ "key": "hi/pm/plan-roadmap/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "a7275ebd3f34",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F7 के लिए 45 engineer-days ÷ 5 = **9 weeks**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly normalises F7, scores it 33.3, and states the RICE formula."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Converts F7 to 9 weeks, states formula, and calculates RICE as 33.3."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| F4 | Self-booking portal + WhatsApp | 510 | 1 | 70% | 12 wk | 12 | **29.75** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five other RICE scores are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All RICE scores match the required values exactly."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (before 31 Oct; ₹1.5 crore ARR) and F5 before 31 Dec, despite RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F3 Q3 में सबसे पहले है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Schedules SSO in Q3 and migration early Q4; explicitly recognises contractual ARR risk and map deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Schedules F3 in Q3 before 31 Oct and F5 in Q4 before 31 Dec."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F5 को Q3 में लाकर F2 Q4 में रखा जा सकता है, पर Offline mode और Self-booking दोनों बाहर होंगे।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Respects dependency, tells Sales F2 displaces offline mode, and offers H1 2027 or a conditional H2 alternative."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is not scheduled before F5; VP Sales is told why and when it could fit."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **H2 कुल** | F1, F3, F4, F5, F6 | **45** | **48** | **3** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 22/24, Q4 23/24, and H2 45/48; no item spans quarters."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quarter and H2 capacity limits are respected and totals are explicitly shown."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसलिए हमने कुल मूल्य चुना, प्रति-सप्ताह दक्षता नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly chooses F4’s broader reach over F7’s higher efficiency, comparing effort and explaining why both cannot fit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly justifies choosing F4 over F7 based on total impact value over efficiency."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022401749999999998,
+ "date": "2026-10-11"
+}

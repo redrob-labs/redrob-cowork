@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/prepare-quotes/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "prepare-quotes",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "e0128e89afe0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Spots 25% markup, not margin: PC (1,125,000 − 900,000) ÷ 1,125,000 = 20.0%; every hardware line at 20%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "가격표의 하드웨어 정가는 마진이 20%뿐입니다(원가×1.25).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the hardware list prices as 25% markup yielding only 20% margin."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies that list prices reflect a 25% markup resulting in only a 20% margin."
+    }
+   ]
+  },
+  {
+   "check": "Re-prices at cost ÷ 0.75 (PC ₩1.2M, AP ₩400k, firewall ₩800k, switch ₩960k, backup ₩1.6M) or flags it",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "최소 25% 정책에 따라 원가÷0.75로 재산정했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five hardware unit prices correctly implement cost divided by 0.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Re-prices all hardware items using cost ÷ 0.75 in the itemized table and notes."
+    }
+   ]
+  },
+  {
+   "check": "Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실사 결과 PC는 12대이고 고객은 10대로 요청했습니다. 영상 PC 2대는 업체 승인이 필요해 제외했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Quotes ten staff PCs overall, phases seven then three, and excludes imaging replacements pending vendor approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the 10 vs 12 count and excludes the 2 imaging PCs pending vendor approval."
+    }
+   ]
+  },
+  {
+   "check": "Labour ₩4,510,000 (41 h + 10% PM); one-off ₩21,070,000; recurring ₩880,000 + ₩180,000/month, ₩500,000/year",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "요청하신 전체 범위(PC 10대 교체, 네트워크, 백업)는 일회성 비용이 **21,070,000원**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Full total and recurring charges are correct; full-scope 41-hour labour and ₩4,510,000 subtotal are not stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Total one-off and recurring costs are correct, but the ₩4,510,000 full labour figure is not explicitly stated."
+    }
+   ]
+  },
+  {
+   "check": "Phases to the ₩17M budget, with backup appliance, cloud backup and firewall first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**백업:** 백업 어플라이언스와 국내 리전 암호화 클라우드 백업 구성, 복원 테스트",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended ₩16,645,000 phase includes appliance, cloud backup, firewall, networking, and seven PCs, prioritizing stale-backup risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents a phased plan under ₩17M prioritizing backup and firewall over non-critical PCs."
+    }
+   ]
+  },
+  {
+   "check": "Offers an entrustment contract, \"supports PIPA obligations\", never \"compliant/certified\"; 30-day validity, 50% hardware deposit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "본 솔루션은 의료기관의 개인정보보호법·의료법상 보호 의무 이행을 지원합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers Article 26 entrustment contract, avoids compliance guarantees, and includes 30-day validity and correct 50% hardware deposit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Complies with PIPA wording, offers entrustment contract, and includes 30-day validity and 50% deposit."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031250888,
+ "date": "2026-10-11"
+}

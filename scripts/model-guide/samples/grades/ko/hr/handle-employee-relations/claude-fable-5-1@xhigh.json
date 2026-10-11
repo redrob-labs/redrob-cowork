@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/handle-employee-relations/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "420461a2f6f1",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "박영수's own card charge, expense claim and Sept 19 KakaoTalk disprove his denial; overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "검증 가능한 두 쟁점에서 기록과 다른 진술을 하여 전반적 신빙성이 낮음.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses his card charge, expense claim, message, and eyewitness evidence to contradict denial and reduce overall credibility."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "박영수의 카드 결제, 정산, 카톡 메시지가 진술을 반박하며 전반적 신빙성이 낮다고 명시함."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct 인정 (김철수, card record, KakaoTalk); Sept 10 remark given a label with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### 9월 18일 행위 — 인정",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Substantiates September 18 using eyewitness, card, and message evidence; reasonably labels September 10 substantiated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "9월 18일 행위를 김철수 진술, 카드 내역, 카톡으로 인정하고 9월 10일 발언도 근거와 함께 인정으로 판정함."
+    }
+   ]
+  },
+  {
+   "check": "Retaliation: cut to 이영희 alone ~17 hours after notice; seniority claim tested; 불리한 처우 under §14⑥",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "\"선임이라 남겼다\"는 설명은 원안 작성자 의견과 다르며 신고인만 남긴 이유를 설명하지 못한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies post-notice targeting and statutory retaliation, but rejects seniority explanation without testing records; verification remains pending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "HR 통보 익일 수정, 선임 주장 검토, 법 제14조 제6항 불리한 처우 해당을 정확히 분석함."
+    }
+   ]
+  },
+  {
+   "check": "Gives 강○○'s unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "출처를 밝히지 않은 전문(傳聞)으로, 사실 인정 근거에서 제외함.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the account because its source is unnamed and it is hearsay."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "출처 불명의 전문임을 이유로 증거 가치를 배제함."
+    }
+   ]
+  },
+  {
+   "check": "Remedies (§14③⑤⑦): reverse shift per her wishes, remove 박영수 from her scheduling, proportionate discipline, check-ins, confidentiality",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "징계 절차 종료 시까지 박영수의 이영희에 대한 지휘·평가·스케줄 승인 권한 정지 및 지휘 라인 분리",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides wishes-sensitive shift restoration, authority removal, findings-based disciplinary referral, scheduled monitoring, and statutory confidentiality."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "근무조 원복, 박영수 권한 정지/분리, 징계, 모니터링, 비밀유지 등 요구된 조치를 모두 권고함."
+    }
+   ]
+  },
+  {
+   "check": "Open items include verifying seniority records and checking for further retaliation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "정○○·최○○: 선임 여부 및 변경 통보 여부 확인.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Leaves seniority verification pending and separately schedules 30-, 60-, and 90-day checks for further retaliation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "선임 여부 확인을 미결 사항에 포함하고 추가 보복 모니터링 조치를 명시함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020375512999999998,
+ "date": "2026-10-11"
+}

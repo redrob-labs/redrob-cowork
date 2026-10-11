@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/answer-customers/claude-fable-5-1@xhigh",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "answer-customers",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "2287ae76fb8d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't overbook Sat 18 Apr; offers all three the Thu 23 Apr 18:30 class (3 seats left)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "4월 23일(목) 저녁 6시 30분 물레 입문에 딱 3자리가 남아 있어서, 고객님 두 분과 동생분까지 함께 오실 수 있어요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps Saturday at capacity and offers all three remaining Thursday evening seats."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly declines adding to the full Saturday class and offers the 3 open seats on Thursday evening."
+    }
+   ]
+  },
+  {
+   "check": "Kim Cheol-su gets a full ₩70,000 refund or free reschedule (studio cancelled); bounced email noted, address fixed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "① 70,000원 전액 환불",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Offers full refund or free rescheduling for studio cancellation, notes bounced notice, and requests verified email correction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Offers full ₩70,000 refund or free reschedule, noting the bounced email and updating the address."
+    }
+   ]
+  },
+  {
+   "check": "Wholesale at ₩25,800 a mug (₩1,548,000 for 60); ₩20,000 flagged to the owner, not accepted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제안 20,000원(총 1,200,000원) vs 정책 25,800원(총 1,548,000원), 차액 348,000원.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates correct wholesale pricing and flags requested discount for owner approval without accepting it."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates standard price of ₩25,800 (₩1,548,000 total) and flags the ₩20,000 offer to the owner."
+    }
+   ]
+  },
+  {
+   "check": "Says 1 May is impossible (6-week lead time; 1.5 weeks of capacity); offers alternatives",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "납기 5/1 불가(6주 → 5/26경, 가마 용량 주 40개로 2주 소요).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects May 1 and offers late-May delivery, but incorrectly states two weeks of capacity instead of 1.5."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains 1 May is impossible due to lead time and offers alternatives and timeline adjustments."
+    }
+   ]
+  },
+  {
+   "check": "Message 4 is phishing (lookalike domain, urgency): no reply, no click, report it, check real admin",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "답장·클릭 금지, 삭제·신고, 팀 공지. 공식 사이트에 직접 로그인해 계정 상태 확인",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies phishing and lookalike domain; prohibits replies and clicks, requires reporting and direct official account checking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies phishing, advises no reply or click, reporting it, and checking the real admin directly."
+    }
+   ]
+  },
+  {
+   "check": "Honours Park Young-su's replacement or refund (photo DM 27 Mar, within 7 days); apologises for missed DM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "3월 27일 인스타그램으로 보내 주신 사진과 메시지를 저희가 확인하지 못해 2주 넘게 기다리게 했어요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Apologises for missed photo DM and honours timely damage claim with free replacement or full refund."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Apologises for the missed 27 March DM and honours the free replacement or refund."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022237688,
+ "date": "2026-10-11"
+}

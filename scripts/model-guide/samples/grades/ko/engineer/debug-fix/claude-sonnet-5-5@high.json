@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/debug-fix/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "6b518c12a7a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "서머타임 종료일(11/2, 25시간)에는 반대로 마지막 1시간 주문이 누락됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies A5 inclusion from the extra hour, gives correct 05:00Z endpoint, and notes November’s 25-hour day."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies the DST 23h/24h issue pulling in A5, and mentions 25h on 2 November."
+    }
+   ]
+  },
+  {
+   "check": "Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "다음 날 현지 자정 정각 주문이 두 날짜에 모두 잡힙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses half-open bounds, and identifies A2 as the midnight order affected by double-counting."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses next local midnight for end and half-open [start, end), explaining midnight double-counting."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기존 합계는 25+60+20+30+50 = **185**입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles staging total; code excludes cancelled orders and subtracts refunds, including full refunds."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancelled, and reconciles $185 (25+60+20+30+50)."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (fromisoformat accepts \"Z\" only from 3.11) and parses robustly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.10의 `fromisoformat`은 `Z` 접미사를 파싱하지 못합니다. 3.11 이상은 가능합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains version-specific crash and normalizes Z to +00:00 before parsing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately explains the Python 3.10 vs 3.11 fromisoformat difference with 'Z' and handles it."
+    }
+   ]
+  },
+  {
+   "check": "Removes or properly keys the date-only mutable-default cache that serves stale totals for today",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"오늘\" 값은 첫 호출 값에 고정되어 15분 갱신이 의미 없고, 사후 환불도 반영되지 않습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains stale totals and cross-store contamination; removes mutable-default cache with justified signature change."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains stale data for today and removes the mutable default cache."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "합계는 25 + 45 + 30 = **$100.00**으로 재무팀 값과 일치합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct A2/A3/A4 calculation; pytest covers supplied orders, DST start/end, and exact local midnight boundaries."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixed code gives $100.00 (A2 25, A3 45, A4 30) and tests cover DST start/end and midnight."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.057216600000000006,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/founder/hire-team/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "founder",
+ "task": "hire-team",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "8cdcb3c4e19d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes averages: Mary 3.44 (13.75 ÷ 4), Richard 3.50; the ATS recommendation is wrong as stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The table gives Mary 55/16 = 3.44, not the 3.6 the ATS shows. Roe's 3.5 is correct.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes both averages and rejects the inconsistent ATS recommendation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly recomputes Mary as 3.44 and Richard as 3.50, identifying the ATS recommendation as wrong."
+    }
+   ]
+  },
+  {
+   "check": "Spots Stiles's Richard Roe note describing Mary's Brightpath role; if swapped, Mary ~3.56, Richard ~3.38",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Mary leads on scores (3.56 vs 3.38)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the Brightpath mismatch and correctly calculates averages if Stiles's rows were swapped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the Brightpath note mismatch and correctly calculates the swapped averages (3.56 vs 3.38)."
+    }
+   ]
+  },
+  {
+   "check": "Makes confirming the scores with Stiles a prerequisite, not a guess",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Two things must happen first, and both can be done in 48 hours:",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly requires Stiles's confirmation before deciding or issuing an offer."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly establishes confirming scores with Stiles as a required prerequisite before deciding."
+    }
+   ]
+  },
+  {
+   "check": "Excludes Miles's comment on Mary's children as improper and legally risky; sets a follow-up without bias",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It's unfair to her, and it creates legal exposure for the company. I'm not assuming bad intent, but I'm disregarding that comment entirely.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes the improper remark, documents follow-up and training, and assesses travel consistently for both finalists."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Disregards the remark as improper and legally risky, setting unbiased follow-up on travel for both finalists."
+    }
+   ]
+  },
+  {
+   "check": "Keeps Mary's $165K ask (above the $155K ceiling) within policy; notes Richard's pending reference",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I'd offer the top of the band, not her ask.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Caps Mary's base at $155,000 with compliant equity and requires completion of Roe's pending reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Caps Mary's base at the $155k band ceiling and explicitly notes Richard's pending second reference."
+    }
+   ]
+  },
+  {
+   "check": "Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "He is tied or ahead on scores, in budget, and has direct team-building proof.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides concise professional deliverables, substantive conditional reasoning, risks, offer terms, and a next-step email with placeholders."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The memo and messages are concise and well-reasoned; the email appropriately uses placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016641188,
+ "date": "2026-10-11"
+}

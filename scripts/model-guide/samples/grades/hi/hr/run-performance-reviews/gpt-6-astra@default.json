@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/run-performance-reviews/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "ca76c34bee7d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll ₹2,47,20,000; budget ₹22,24,800; submitted ₹23,19,800 (9.38%), ₹95,000 over; HRBP's \"8.8%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "submitted merit **₹23,19,800, यानी payroll का 9.384%** है—8.8% नहीं। यह 9% budget से **₹95,000 अधिक** है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Payroll, budget, submitted total, percentage and overspend are correct; explicitly rejects the HRBP summary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All figures (payroll ₹2,47,20,000, budget ₹22,24,800, submitted ₹23,19,800, overspend ₹95,000) and the 8.8% error are correctly identified."
+    }
+   ]
+  },
+  {
+   "check": "E07 a firm policy issue: rated on pro-rated 103% (anchor 4), not marked down for maternity leave; merit 9–11%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Protected leave के बजाय काम की अवधि के pro-rated goals 103% लागू होंगे। Policy correction अनिवार्य; उचित अलग justification के अभाव में 4।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "E07 is a firm policy correction to anchor 4, with 10% merit and no maternity-leave penalty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly flags as policy issue, uses pro-rated 103% anchor 4, and assigns merit within 9–11% (10%)."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies anchors 3 and 1, unjustified multi-level uplifts, and mandatory correction for both employees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags E03 (anchor 1) and E02 (anchor 3) as policy issues with no valid justification."
+    }
+   ]
+  },
+  {
+   "check": "Manager table: Roe 4.75 submitted vs 3.25 anchor; Major 3.0 vs 3.5; Stiles 3.0 vs 3.0",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| रिचर्ड रो | 4 | 4.75 | 3.25 | +1.50 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All manager averages match: Roe 4.75/3.25, Major 3.00/3.50, and Stiles 3.00/3.00."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly matches the submitted and anchor averages for Roe, Major, and Stiles."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Original goals से बाहर billing migration नेतृत्व का लिखित कारण है; अनुमत one-level uplift बरकरार।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Retains E10’s justified 4 for discussion and flags E09’s unsupported downgrade from anchor 4."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags E09 as under-rated (Needs justification) and allows E10's justified rating of 4 to stand."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ ₹22,24,800, every merit % inside its range, merit ₹ = fixed salary × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Recommended कुल merit | **₹20,94,400** | **8.472%** | **Budget और सभी rating-wise ranges के भीतर** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Total is within ₹22,24,800; every merit percentage fits its recommended rating, and all employee amounts calculate correctly."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Total is ₹20,94,400 (under ₹22,24,800), each merit % is in range, and calculated as salary × %."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019488263,
+ "date": "2026-10-11"
+}

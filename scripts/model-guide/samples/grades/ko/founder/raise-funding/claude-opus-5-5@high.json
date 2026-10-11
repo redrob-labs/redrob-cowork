@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/raise-funding/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "founder",
+ "task": "raise-funding",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "577c8e479fcc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "ARR ₩816M (₩68M × 12), excluding ₩284M one-time fees; notes MRR growth ₩41M to ₩68M (~66%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "ARR = 6월 반복 MRR 6,800만 × 12 = 8.16억원이며, 일회성 2.84억원은 제외했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct ARR and exclusions; shows January–June MRR growth with an equivalent monthly compound growth calculation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates ARR of ₩816M excluding one-time fees and notes MRR growth from ₩41M to ₩68M."
+    }
+   ]
+  },
+  {
+   "check": "NRR 112% (₩33.6M ÷ ₩30M); 140% includes new customers; checks ₩33.6M + ₩34.4M = ₩68M",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "NRR 140% → 112%.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct cohort calculation and suspected new-customer contamination, but omits the explicit ₩33.6M + ₩34.4M reconciliation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Calculates NRR as 112% and mentions new customer revenue, but omits the explicit ₩33.6M + ₩34.4M = ₩68M reconciliation."
+    }
+   ]
+  },
+  {
+   "check": "TAM is ₩576B (12,000 × ₩48M), not ₩5.76T; ₩48M is current ACV, a SAM-style figure",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "TAM(하향식): 12,000곳 × 4,800만원 = **5,760억원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct arithmetic and current ACV caveat, but incorrectly labels this bottom-up SAM-style estimate as top-down TAM."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects TAM from ₩5.76T to ₩576B and explains ₩48M ACV makes it a SAM-style figure."
+    }
+   ]
+  },
+  {
+   "check": "Sizes the raise at ~₩5.8B (24 months averaging ~₩240M); defends ~₩6B; notes ~8 months' runway",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "60억원은 적절하다고 판단합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates ₩5.76B burn over 24 months, defends ₩6B with buffer, and identifies eight months’ current runway."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~₩5.76B burn, defends the ₩6B target with buffer, and notes ~8 months of current runway."
+    }
+   ]
+  },
+  {
+   "check": "Flags 58% gross margin as a risk; uses only given data; marks larger claims \"[출처 필요]\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "반복 매출 매출총이익률 58%(상자 감가상각 포함)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses supplied data and marks broader claims for sourcing, but never flags the 58% gross margin as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses given data and tags claims with [출처 필요], but does not flag 58% gross margin as a risk."
+    }
+   ]
+  },
+  {
+   "check": "Tells a coherent story with a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "발표자 노트: 핵심 채용 직무를 명시합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides a coherent twelve-slide story covering required topics, with a speaker note on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Delivers a coherent 12-slide presentation deck with clear speaker notes on each slide."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029148263,
+ "date": "2026-10-11"
+}

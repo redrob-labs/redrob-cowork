@@ -1,0 +1,128 @@
+{
+ "key": "hi/recruiter/schedule-interviews/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "recruiter",
+ "task": "schedule-interviews",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "dd3a1b79117a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Offsets: Berlin UTC+1, Lisbon UTC+0 (EU change 25 Oct); New York UTC−4, Chicago UTC−5; IST UTC+5:30",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Berlin: CET, UTC+1; Lisbon: WET, UTC+0।** यूरोप में DST रविवार **25 अक्टूबर** को समाप्त हो चुका होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All five offsets, DST transition explanations, and local/IST conversions are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies all UTC offsets and explains the EU and US DST transition dates."
+    }
+   ]
+  },
+  {
+   "check": "Richard Miles on Tue 27 Oct, from 14:00 UTC, Jane's session within 14:00–16:00 UTC",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| System design | जेन डो | 14:00–14:45 | 09:00–09:45 | 15:00–15:45 | 10:00–10:45 | 19:30–20:15 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Miles is scheduled Tuesday 27 October starting 14:00 UTC; Jane finishes within her available window."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Schedules Richard Miles on Tue 27 Oct starting at 14:00 UTC with Jane's session in the 14:00–16:00 UTC window."
+    }
+   ]
+  },
+  {
+   "check": "Miles' loop has 30-minute breaks and avoids Mary's 15:00–16:00 UTC block (e.g. 14:00, 15:15, 16:30)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Breaks:** Chicago समय 09:45–10:15 और 11:00–11:30 — दोनों ठीक **30 मिनट**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both breaks are 30 minutes; Mary’s 16:30–17:15 UTC session avoids her 15:00–16:00 block."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses 30-minute breaks and places Mary at 16:30 UTC, avoiding her 15:00–16:00 UTC conflict."
+    }
+   ]
+  },
+  {
+   "check": "Richard Roe on Wed 28 Oct, all sessions in everyone's hours, Stiles clear of 13:00–13:30 UTC",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### रिचर्ड रो — बुधवार, 28 अक्टूबर",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Wednesday sessions respect all attendees’ working hours; Stiles starts 14:00 UTC, after standup."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Roe is scheduled on Wed 28 Oct within working hours, and Stiles is scheduled at 14:00 UTC, avoiding standup."
+    }
+   ]
+  },
+  {
+   "check": "Sets up captions, a written coding prompt and 30-minute breaks; panel not told he's hard of hearing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इन setup निर्देशों का कारण न पूछें या साझा करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Panel receives captions, written coding prompt, and 30-minute break instructions without disclosure of hearing difficulty."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sets up captions, written coding prompt, 30-minute breaks, and explicitly instructs panel not to ask/share reasons."
+    }
+   ]
+  },
+  {
+   "check": "Warm emails in correct local time, with links and what to expect; CRM shows scheduled stage, dates",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| रिचर्ड रो | Onsite – scheduled | 26 अक्टूबर 2026 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both emails are warm, correctly timed, linked, and explain sessions; CRM records scheduled stages and interview dates."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Candidate emails have warm tone, links, and correct local times; CRM shows scheduled stage and dates."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023074538,
+ "date": "2026-10-11"
+}

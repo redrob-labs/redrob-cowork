@@ -46,3 +46,36 @@ deliverable: graphics
 - Chooses the format from the data and the two goals. The carousel has the best click-through (about 1.5% vs about 0.6% for the reel and the single photo) for sign-ups, and the reel has the best reach. The answer makes the trade-off explicit, for example a carousel as the main post with a reel to support it.
 - Both pieces carry the essentials: the 2 May launch, Saturday 8–11am pickup, ₩36,000/month for 4 loaves, the sign-up URL and the first-50 tote offer.
 - The SVG is valid and self-contained at A5 proportions, uses the brand colours, and has a clear hierarchy with legible Korean text sizes and sufficient contrast.
+
+## Card
+
+brief: 빵집 사워도우 정기구독 출시용 인스타그램 게시물 계획과 A5 카운터 전단을 만든다.
+given:
+- 사장님 요청 원문: 이영희 님의 출시 내용과 주장
+- 빵집 관련 사실: 판매가, 원료 인증, 글루텐프리 빵 제조 환경, 알레르기 유발 원료
+- 브랜드: 색상 3가지와 서체
+- 인스타그램 성과: 게시물 유형 3가지의 도달, 좋아요, 저장, 링크 클릭
+asked:
+- 인스타그램 계획: 형식과 이유, 슬라이드·장면 목록, 캡션(약 250자 이내), 해시태그 최대 8개
+- A5 전단: 문구, 영역별 레이아웃, 비주얼 방향, 인라인 SVG 목업
+- 바꾼 표현과 이유를 담은 사장님께 드리는 메모(약 250자 이내)
+limit: SVG 제외 약 2,500자 이내, Markdown
+hard: 요청 속 주장을 빵집의 사실과 대조해야 하고, 데이터가 서로 다른 쪽을 가리키는 두 목표 사이에서 형식을 골라야 한다.
+
+## Scorecard
+
+- Savings fixed: ₩36,000 vs ₩40,000 (4 × ₩10,000) is 10%, ₩4,000 a month, not 25% (or "₩9,000 a loaf")
+- No "100% 유기농" (seed mix uncertified); uses wording like "유기농 인증 밀가루 사용"
+- No "글루텐프리" (shared kitchen, no testing); allergen note included; note to the owner explains both risks
+- Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit
+- Both pieces carry 2 May, Saturday 8–11am pickup, ₩36,000/month for 4 loaves, URL, first-50 tote
+- SVG valid at A5 proportions, brand colours, clear hierarchy, legible Korean text sizes, sufficient contrast
+
+## Scorecard, shown
+
+- 할인 표현 수정: 36,000원 대 40,000원(4 × 10,000원)은 10%, 월 4,000원, 25% 아님(또는 "한 덩이 9,000원")
+- "100% 유기농" 표현 없음(씨앗 믹스 미인증), "유기농 인증 밀가루 사용" 같은 표현 사용
+- "글루텐프리" 표현 없음(공용 주방, 검사 없음), 알레르기 안내 포함, 사장님 메모에 두 위험 설명
+- 데이터로 형식 선택: 캐러셀 클릭률 최고(약 1.5% 대 약 0.6%), 릴스 도달 최고, 트레이드오프 명시
+- 두 결과물 모두 5월 2일, 토요일 오전 8~11시 픽업, 4덩이 월 36,000원, URL, 선착순 50명 에코백
+- A5 비율의 유효한 SVG, 브랜드 색상, 명확한 위계, 읽기 쉬운 한글 크기, 충분한 대비

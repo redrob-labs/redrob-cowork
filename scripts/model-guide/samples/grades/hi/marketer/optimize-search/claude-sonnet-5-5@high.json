@@ -1,0 +1,110 @@
+{
+ "key": "hi/marketer/optimize-search/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "bf1cfe95ed21",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Fixes price (₹799 annual / ₹999 monthly + GST, not \"from ₹499\"), trial not free plan, TallyPrime only; unsubstantiated claims cut",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹799 प्रति user प्रति माह (वार्षिक billing) या ₹999 (month-to-month); 18% GST अतिरिक्त",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Corrects both prices, GST, trial-only availability and TallyPrime support; removes unsupported superiority claims."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly updates pricing, states trial rather than free plan, restricts to TallyPrime, and removes unsubstantiated claims."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"ac service app free\" honestly with the 14-day trial (ASCI I.4), explained in the rationale",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "\"ac service app free\": free plan नहीं है, इसलिए यह traffic गलत उम्मीद लेकर आता।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ honestly offers the 14-day card-free trial; rationale explains avoiding misleading free-plan expectations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately answers the free app query with the 14-day trial and justifies the decision in the rationale."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, TallyPrime, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Technician mobile app: हाँ। Office web app: नहीं, connection ज़रूरी",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ clearly distinguishes offline technician app from online-only office app; fact table includes prices, TallyPrime and offline limitations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ explicitly distinguishes offline mobile app from online office web app, and the fact table covers price, TallyPrime, and offline."
+    }
+   ]
+  },
+  {
+   "check": "Targets scheduling and dispatch queries in title, H1, H2s; blog made informational, exact-match link to product",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "AC Service Scheduling Software – AMC व Dispatch | Fieldnote",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Scheduling appears in title and H1, but full dispatch query and scheduling-focused H2 are missing; blog repositioning/linking is correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Targets scheduling and dispatch across title and headers, and shifts blog to informational intent with exact-match link."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤60, meta ≤155, Unicode counts accurate; JSON-LD valid, matches page (799, INR); survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "मार्च 2025 के customer survey (n = 210)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Unicode counts are accurate at 59 and 147; JSON-LD matches page prices and FAQ; survey attribution is complete."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Character counts (59 and 147) are exact, JSON-LD is valid with 799 INR, and survey attribution is fully included."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.03359685,
+ "date": "2026-10-11"
+}

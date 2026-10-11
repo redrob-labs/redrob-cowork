@@ -1,0 +1,128 @@
+{
+ "key": "ko/sales/write-outreach/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "sales",
+ "task": "write-outreach",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "3df64e8313ec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "No email to Kim Cheol-su (unsubscribed; 정보통신망법 Art. 50); phone or no outreach, not exploiting the violation finding",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "영업 이메일·자동 시퀀스·자료 메일을 보내거나 다른 주소로 우회하지 않습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Respects the opt-out, uses permitted phone contact, and explicitly avoids exploiting the accident or violation reports."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "김철수 님에게 이메일을 보내지 않고 허용된 전화를 이용하며, 위반 보도를 악용하지 않습니다."
+    }
+   ]
+  },
+  {
+   "check": "Park Young-su email omits the Bukcheon Logistics fine; uses second-shift hiring and safety-first culture",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "북천냉장 채용 페이지의 ‘안전이 최우선’이라는 문구와 2교대 지게차 운전원 12명 채용 공고를 봤습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses verified hiring and safety-culture hooks; the email omits the unrelated company's fine."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "무관한 북천로지스 과태료를 배제하고, 야간조 채용과 안전 최우선 문화를 적절히 활용했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Cites 60% fewer near-misses over 6 months and impacts 9 → 4; never \"accidents\" or \"guaranteed\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기록된 아차사고가 6개월간 60% 감소했고, 충돌은 첫 12개월 동안 9건에서 4건으로 줄었습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accurately states both outcomes and timeframes, explicitly denying any guarantee of equivalent results."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "6개월 아차사고 60%와 충돌 9건→4건을 정확히 제시하고 보장 표현을 쓰지 않았습니다."
+    }
+   ]
+  },
+  {
+   "check": "Note to marketing explains why the hook overclaims (exaggerated-ad risk under 표시광고법)",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "60%는 ‘사고’가 아니라 특정 센터에서 **기록된 아차사고의 6개월 감소율**이며, 보장 근거는 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains the unsupported claims but omits exaggerated-advertising risk under 표시광고법."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "과장 이유(아차사고, 보장 불가)는 잘 짚었으나 표시광고법상 부당광고 위험 언급이 누락되었습니다."
+    }
+   ]
+  },
+  {
+   "check": "Lee sequence answers Stackwise honestly (beta), uses the Pyeongtaek DC, offers the 30-day pilot; follow-ups vary",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "든든 센스의 스택와이즈 WMS 연동은 **API 방식의 베타**이며, 운영 고객은 약 3곳입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Answers integration honestly, uses Pyeongtaek expansion, offers the 30-day pilot, and varies follow-ups with evaluation guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "스택와이즈 베타를 정직하게 밝히고, 평택 센터 트리거와 30일 무료 파일럿을 차별화해 제안했습니다."
+    }
+   ]
+  },
+  {
+   "check": "Every email within its character limit, specific, with no invented facts",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "현재 점검 방식과 보완할 부분을 듣는 15분 통화가 가능하실까요?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four emails fit their respective limits, use specific verified details, and introduce no invented facts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "모든 이메일이 글자 수 제한을 준수하며 사실 왜곡 없이 구체적입니다."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02589615,
+ "date": "2026-10-11"
+}

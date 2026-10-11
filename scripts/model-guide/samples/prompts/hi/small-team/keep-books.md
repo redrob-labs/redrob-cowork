@@ -64,3 +64,38 @@ deliverable: spreadsheets
 - The forecast starts from ₹9,55,961, excludes the disputed Muskaan Dental invoice (or shows it as an upside case) and the unrequested Nursery refund, includes OD interest of ₹3,750 on 1 Apr and 1 May and both GST payments, applies the ₹5,60,000 wages from 16 Apr, and puts Gulmohar about 10 days late (week of 22 Apr). Without the mower, cash bottoms out at about ₹59,000 in the week of 29 Apr and ends near ₹4.1 lakh (week of 20 May).
 - With a ₹9,00,000 cash purchase on 15 Apr, the balance goes deeply negative (about −₹8.4 lakh in the week of 29 Apr). Even the remaining ₹7,50,000 of OD limit wouldn't fully cover it. The recommendation is not to pay cash, and suggests equipment financing, deferring, or leasing.
 - Every computed column states its method, and the arithmetic is consistent week to week.
+
+## Card
+
+brief: Landscaping business के मार्च bank account का reconciliation करें, मार्च का summary दें, 8 सप्ताह का cash forecast बनाएँ, और ₹9,00,000 के mower को cash में ख़रीदने पर सलाह दें।
+given:
+- मार्च का bank statement: opening balance, 13 transactions और closing balance
+- Bookkeeping app: book balance और 4 entries पर notes
+- Invoice notes: तीनों invoices पर GST, मार्च का net GST और OD की शर्तें
+- Open receivables: due dates और भुगतान notes के साथ 3 invoices
+- अप्रैल–मई के cash items: wages, नियमित खर्च, receipts, एक invoiced job, GST और pending refund
+asked:
+- हर reconciling item और ज़रूरी corrections के साथ bank से book reconciliation table
+- मार्च summary: revenue, cost categories, और revenue या business expense न होने वाले items, कारण सहित
+- बुध 1 अप्रैल से 8 सप्ताह का साप्ताहिक cash forecast, mower के साथ और बिना, assumptions सहित
+- Mower पर recommendation (अधिकतम 200 शब्द), विकल्पों के साथ
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Records में reconciling items और गलत classification छिपे हैं, और forecast में यह judgement चाहिए कि कौन-से inflows कब गिनें।
+
+## Scorecard
+
+- Reconciles the ₹68,090 gap: duplicate Nursery +₹1,57,500, bank charges +₹590, cheque #448 −₹90,000; corrected cash ₹9,55,961
+- Streamflix recoded as owner drawing; March revenue ₹6,10,000, excluding the ₹5,00,000 OD draw and ₹1,09,800 output GST
+- Forecast excludes Muskaan and Nursery refund; includes OD interest, GST, ₹5,60,000 wages from 16 Apr, Gulmohar ~10 days late
+- Without the mower, cash bottoms ≈ ₹59,000 in the week of 29 Apr and ends near ₹4.1 lakh
+- Mower in cash gives ≈ −₹8.4 lakh that week, beyond the ₹7,50,000 OD headroom; advises financing, deferring or leasing
+- Every computed column states its method, and the weekly arithmetic is consistent
+
+## Scorecard, shown
+
+- ₹68,090 के अंतर का reconciliation: duplicate Nursery +₹1,57,500, bank charges +₹590, cheque #448 −₹90,000; सही cash ₹9,55,961
+- Streamflix को owner's drawing में recode; मार्च revenue ₹6,10,000, ₹5,00,000 OD draw और ₹1,09,800 output GST को छोड़कर
+- Forecast में Muskaan और Nursery refund नहीं, OD ब्याज और GST शामिल, 16 अप्रैल से ₹5,60,000 wages, Gulmohar ~10 दिन देर से
+- बिना mower के cash 29 अप्रैल वाले सप्ताह में ≈ ₹59,000 तक गिरता है और ≈ ₹4.1 लाख पर खत्म होता है
+- Mower cash में लेने पर उस सप्ताह ≈ −₹8.4 लाख, बचे ₹7,50,000 OD से भी ज़्यादा; financing, टालना या lease सुझाता है
+- हर computed column का method बताया गया, और साप्ताहिक गणना सुसंगत है

@@ -1,0 +1,110 @@
+{
+ "key": "hi/investor/write-memos/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "investor",
+ "task": "write-memos",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "9049e2176fc0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Ownership ₹150 crore ÷ ₹750 crore = 20%, not 25%; pool ₹18 → ₹75 crore; effective pre-money ≈₹543 crore",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**हमारी ownership:** ₹37.5 cr / ₹750 cr = **5.0%**, pool top-up के बाद।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct round ownership, but invents a smaller allocation; pool starts at ₹16.2 rather than ₹18 crore."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies 20% ownership, sizes the pool expansion, and calculates effective pre-money (~₹541 cr)."
+    }
+   ]
+  },
+  {
+   "check": "FY2023-24 gross margin restated ≈73.7% (72.4% if all ₹9 crore moved); LTM ≈74%; reclassification flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "असली margin FY23 से FY24 में **घटा** (76.7% → 73.7%), बढ़ा नहीं। Reclassification से \"81% तक सुधार\" की कहानी बनी है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly restates FY2023-24 at 73.7% and LTM at 74.0%, and flags misleading reclassification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately restates FY24 margin to 73.7%, LTM to 74.0%, and flags the accounting reclassification."
+    }
+   ]
+  },
+  {
+   "check": "FY2023-24 ARR growth 60%, burn multiple ≈2.14 (90 ÷ 42), runway ≈10 months; cohort NRR 124% → 112% → 103%",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "| Runway (मौजूदा) | – | – | 10 महीने | ₹80 cr / ₹8 cr प्रति माह |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct growth, runway and cohort NRR; omits computable FY2023-24 burn multiple of 90/42 ≈2.14."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes 60% growth, 10 months runway, and cohort NRR, but omits FY24 burn multiple (90 ÷ 42 = 2.14)."
+    }
+   ]
+  },
+  {
+   "check": "BrightSmile (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "BrightSmile की शर्त पूरी न हो तो मेरी सिफ़ारिश **pass** होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies 18% concentration and in-house build threat; requires multi-year renewal or commitment before signing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies BrightSmile concentration as a primary risk with multi-year renewal as a mandatory closing condition."
+    }
+   ]
+  },
+  {
+   "check": "Clear recommendation consistent with the analysis; diligence items tie to hosting, BrightSmile and support",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Invest with conditions: term sheet पर signing तब तक नहीं, जब तक नीचे के चार gating items बंद न हों।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clear conditional recommendation; diligence addresses hosting classification, BrightSmile contracts and support through targeted customer calls."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Gives a clear conditional recommendation, tying diligence directly to hosting, BrightSmile, and support quality."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023978063,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/debug-fix/gpt-6-astra@default",
+ "language": "en",
+ "profession": "engineer",
+ "task": "debug-fix",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "6b518c12a7a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "DST bug: +24h ends 9 March at 06:00Z, not 05:00Z, pulling in A5; notes 25-hour 2 November",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "On 9 March, the window extends an hour into 10 March, incorrectly including A5. On 2 November, it misses the final hour.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies both DST failures; correct March bounds and 25-hour November tests establish the precise endpoints."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the DST bounds issue, inclusion of A5, and the 25-hour November date."
+    }
+   ]
+  },
+  {
+   "check": "Uses next local midnight for the end and a half-open [start, end); explains A2 double-counted at midnight",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Includes orders at the following day’s midnight, potentially counting them on both days.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Computes next local midnight, uses half-open bounds, and identifies A2 as midnight; tests prevent its previous-day inclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Uses next local midnight and half-open bounds, explaining the midnight defect, but doesn't specifically mention A2."
+    }
+   ]
+  },
+  {
+   "check": "Subtracts refunded_amount, excludes cancelled, handles full refunds; reconciles $185.00 (25+60+20+30+50)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "On a cache miss in Python 3.12, the original code totals **25 + 60 + 20 + 30 + 50 = $185**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reconciles staging total; corrected arithmetic subtracts refunds, excludes cancelled orders, and handles full refunds consistently."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Subtracts refunds, excludes cancelled, handles full refunds, and correctly reconciles $185.00."
+    }
+   ]
+  },
+  {
+   "check": "Explains the 3.10 crash (fromisoformat accepts \"Z\" only from 3.11) and parses robustly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Python 3.10’s `datetime.fromisoformat` rejects A4’s trailing `Z`; Python 3.12 accepts it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly explains the runtime-dependent crash and normalizes trailing Z for Python 3.10; rejects offsetless timestamps."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains Python 3.10 ISO parsing limitations with 'Z' and implements a robust parsing helper."
+    }
+   ]
+  },
+  {
+   "check": "Removes or properly keys the date-only mutable-default cache that serves stale totals for today",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The first result for a date persists across refreshes, ignoring new orders, refunds, cancellations, and even different stores.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains stale and cross-store results; replaces mutable default with None and disables caching, with regression tests."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the stale mutable-default cache issue and removes its caching behavior."
+    }
+   ]
+  },
+  {
+   "check": "Fixed code gives $100.00 for 9 March (A2 25, A3 45, A4 30); tests cover DST, midnight",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "assert daily_revenue(orders, date(2025, 3, 9)) == Decimal(\"100\")",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct code and breakdown yield A2 25, A3 45, A4 30; tests cover both DST transitions and midnight."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixed code yields $100.00 for 9 March with A2, A3, A4; tests cover DST and midnight."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029435700000000002,
+ "date": "2026-10-11"
+}

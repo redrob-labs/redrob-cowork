@@ -58,3 +58,29 @@ You are John Doe, the account manager at Brightquill, a SaaS workforce-schedulin
 - Answers the integration question honestly: there is a FHIR R4 API, but no HL7 v2 interface and no native Mediscribe integration. A sensible next step is offered, such as a technical call.
 - Confirms the 15 extra seats at $40 under §3.3: 135 seats and $5,400 a month from March.
 - The tone is accountable and empathetic without grovelling or blame, and the internal note lists each action with an amount.
+
+## Card
+
+brief: An angry clinic customer raises a price jump, an outage refund, integrations and extra seats; reply honestly and tell Billing and Support what to fix.
+given:
+- Customer email: 4 points on the invoice, the 3 Feb outage, HL7/EHR integration and 15 more seats
+- Contract excerpt: fees, price protection and added-seat pricing, from 1 March 2025
+- Price change notice: the new list price from 1 February 2026
+- SLA excerpt: uptime formula, credit tiers and claim rules
+- Status page: the 3 Feb incident timeline in US-East
+- Product docs: the available API and integrations
+asked:
+- A reply email to Mary Major, up to 400 words, answering all four points with figures
+- An internal note to Billing and Support: corrections and credits, with calculations
+- Up to 150 words on any judgement call beyond the contract
+limit: Up to about 1,200 words, in Markdown
+hard: Contract, SLA and status-page details must be applied precisely to a customer's claims, and any goodwill gesture judged and justified.
+
+## Scorecard
+
+- §3.2 fixes price until 28 Feb 2027; $5,520 invoice is an error, corrected by $720 to $4,800
+- 220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ $480; claim within 30 days
+- Explains degraded time isn't downtime vs "9 hours"; no full-month refund; goodwill labelled and justified
+- FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step
+- 15 extra seats at $40 under §3.3: 135 seats, $5,400 a month from March
+- Accountable, empathetic tone without grovelling; internal note lists each action with an amount

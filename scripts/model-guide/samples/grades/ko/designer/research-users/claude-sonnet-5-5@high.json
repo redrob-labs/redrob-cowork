@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/research-users/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "designer",
+ "task": "research-users",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "6dc4368dbbf3",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Notices survey shares total 104% for a single-choice question; treats them as unreliable until checked",
+   "verdict": "miss",
+   "agreed": true,
+   "quote": "설문에서는 OCR이 1위(34%)지만 결재 대기(27%)와 사실상 비슷합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "miss",
+     "reason": "Does not notice the 104% total and uses unchecked survey shares as reliable evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "miss",
+     "reason": "Does not notice that the survey shares sum to 104% or question their reliability."
+    }
+   ]
+  },
+  {
+   "check": "Flags survey bias: only heavy submitters (20+ expenses), no approvers",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "설문: 다작 제출자만 대상이고 결재자는 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly flags heavy-submitter sampling and exclusion of approvers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly flags the survey bias of sampling only heavy submitters and omitting approvers."
+    }
+   ]
+  },
+  {
+   "check": "Shows approvals as the stronger theme: 5 of 8 participants, 41% waiting 5+ days, 18% mobile adoption",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "인터뷰 5/8명(P1, P2, P4, P6, P8)이 결재 문제를 언급했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prioritizes approvals and supports them with five participants, 41% prolonged waits, and 18% mobile adoption."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly demonstrates approvals as the stronger theme citing 5/8 participants, 41%, and 18% mobile adoption."
+    }
+   ]
+  },
+  {
+   "check": "Sizes receipt capture as narrower: 6.2% need correction; crumpled receipts and multi-page hotel receipts",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실패는 특정 유형에 몰립니다. 구겨진 영수증(P3), 여러 장짜리 호텔 영수증(P8)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Frames OCR as narrower, citing 6.2% corrections and both receipt edge cases."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sizes receipt capture as narrower citing 6.2%, crumpled receipts (P3), and multi-page receipts (P8)."
+    }
+   ]
+  },
+  {
+   "check": "Recommends approval-flow work (notifications, 대결, mobile policy flags), tells 박영수 directly; receipt edge cases as follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**핵심 과제: 결재 속도.** ① 신뢰할 수 있는 알림·리마인더 ② 모바일 결재에 규정 위반 표시 노출 ③ 대결 지정",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Directly rejects OCR as the core priority, recommends all three approval improvements, and scopes multipage OCR as follow-up."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends approval-flow improvements, addresses 박영수's question, and designates receipt edge cases as follow-up."
+    }
+   ]
+  },
+  {
+   "check": "Speaker note on every slide, evidence cited by ID, limitations stated (n = 8, survey wording)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "단일 선택이라 빈도와 심각도를 구분하지 못합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Every slide has a speaker note; participant IDs, n=8 limitations, and single-choice wording limitations are stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes speaker notes on every slide, cites participants by ID, and states interview and survey limitations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018416738000000002,
+ "date": "2026-10-11"
+}

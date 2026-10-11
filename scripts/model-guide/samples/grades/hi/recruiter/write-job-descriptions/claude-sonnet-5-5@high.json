@@ -1,0 +1,110 @@
+{
+ "key": "hi/recruiter/write-job-descriptions/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "recruiter",
+ "task": "write-job-descriptions",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "f7d1610e5b9b",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Removes \"young, energetic लड़का\", \"fresh graduates\", \"bachelors\"; replaces \"convent-educated\" English with Hindi or English radio safety communication",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Radio पर safety-critical निर्देश समझना और देना (हिंदी या अंग्रेज़ी में)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes age, gender, graduate and marital-status preferences; replaces schooling and fluent-English filters with job-related bilingual radio communication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes biased demographic terms and specifies safety radio communication in Hindi or English."
+    }
+   ]
+  },
+  {
+   "check": "Uses ₹3.3–4.2 lakh a year and flags the draft's ₹3.0–3.6 lakh as off-sheet and breaking pay-range policy",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Approved range से मेल नहीं था।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses the approved annual range and flags the mismatch, but does not explicitly identify the pay-range policy violation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses approved ₹3.3–4.2 lakh CTC and notes in change log that ₹3.0–3.6 lakh violated approved pay range."
+    }
+   ]
+  },
+  {
+   "check": "Drops B.E./B.Tech and \"2+ years\"; states ITI/diploma, 0–2 years with training, paid GWO within 90 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "joining के 90 दिन के भीतर पूरी करनी होगी, **खर्च Pawanshakti उठाएगी।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Removes degree and 2+ years requirements; includes preferred vocational qualifications, equivalent experience, 0–2 years, training and paid GWO."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes B.E./B.Tech and 2+ years; includes ITI/diploma, 0–2 years with training, and company-paid GWO within 90 days."
+    }
+   ]
+  },
+  {
+   "check": "Keeps height, lifting and driving-licence requirements; adds equal-opportunity (RPwD Act) and accommodation statements; drops \"rockstar\" slogans",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "आवेदन प्रक्रिया में सहायता चाहिए तो recruiting@example.com पर लिखें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps physical and licence requirements and removes slogans; includes EEO, but omits RPwD reference and explicit reasonable accommodations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains physical/license requirements, provides disability EEO and accommodation text, and removes rockstar phrasing."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at 1080×1080: role, location, ₹3.3–4.2 lakh, benefits, apply URL; legible and consistent with posting",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1080 1080\" width=\"1080\" height=\"1080\" role=\"img\" aria-label=\"Wind Turbine Technician I, Rann Ridge, CTC 3.3 से 4.2 लाख प्रति वर्ष\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained square SVG includes role, location, approved pay, benefits and application URL with legible, contrasting text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid 1080×1080 SVG includes role, location, salary range, benefits, and application URL."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026787863000000002,
+ "date": "2026-10-11"
+}

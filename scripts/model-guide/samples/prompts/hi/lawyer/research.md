@@ -49,3 +49,39 @@ Pinecrest का इनकार पत्र: "Advancement केवल good fa
 - Rejects the good-faith condition, relying on [1] (clause 3.2) and [6] rather than the blog post [7], since good faith goes to final indemnification. Rejects the letter-of-credit demand because the Deed calls for an unsecured undertaking.
 - On enforcement: arbitration seated in Bengaluru under clause 14, with an urgent section 9 petition to the Bengaluru commercial court for interim relief (or section 17 once the tribunal is constituted). Seeks costs, including fees of the advancement fight, in proportion to success under section 31A and [5]. Recommends tendering the unsecured undertaking promptly and making a formal written request that starts the 30-day clock.
 - The source table separates primary materials ([1]–[4]) from the fictional case summaries ([5]–[6]) and the unreliable secondary sources ([7]–[8]).
+
+## Card
+
+brief: कंपनी ने पूर्व CFO पर मुक़दमा कर उनके defence costs का advance रोका है; उनके अधिकारों और enforcement पर चार सवालों का research summary लिखिए।
+given:
+- Partner के सवाल: हक़, articles amendment, शर्तों और enforcement पर 4
+- तथ्य: स्टाइल्स की भूमिकाएँ और तारीखें, और वाद के 3 counts
+- इनकार पत्र: Pinecrest के तीन कारण
+- Research sources [1]–[4]: Deed of Indemnity, Articles और special resolution, Companies Act व Contract Act और Arbitration Act के अंश
+- Case summaries [5]–[6]: दो High Court फ़ैसले, इस अभ्यास के लिए काल्पनिक
+- Blog post [7] और treatise अंश [8]: secondary sources
+asked:
+- चारों सवालों के छोटे जवाब
+- Numbered sources के हवाले से analysis, close calls पर राय और सबसे मज़बूत विरोधी तर्क
+- Source-reliability table
+- Next steps
+limit: लगभग 1,200 शब्दों के भीतर, Markdown
+hard: Sources की विश्वसनीयता असमान है, contract और amendment को आचरण की तारीखों पर लागू करना है, और mixed-capacity दावों पर judgement call चाहिए।
+
+## Scorecard
+
+- Count I covered (CFO conduct, Deed's mandatory "shall"); Count II likely not; Count III a reasoned close call, allocated
+- Right rests on Deed [1], not unilaterally changeable (s.62, clause 11); 2023–2024 conduct predates August 2025 resolutions
+- Counter noted: Articles alone may not be enforceable by an officer (s.10); treatise [8] outdated, s.201 has no 2013 equivalent
+- Good-faith condition rejected on [1] cl. 3.2 and [6], not blog [7]; letter of credit rejected, undertaking unsecured
+- Bengaluru arbitration (cl. 14), s.9 interim relief (or s.17); costs pro rata under s.31A/[5]; tender undertaking, written request
+- Source table separates primary [1]–[4], fictional cases [5]–[6] and unreliable secondary [7]–[8]
+
+## Scorecard, shown
+
+- Count I covered (CFO के रूप में आचरण, Deed का अनिवार्य "shall"); Count II संभवतः नहीं; Count III तर्कसहित close call, allocation के साथ
+- हक़ Deed [1] पर टिका, जिसे एकतरफ़ा नहीं बदला जा सकता (धारा 62, खंड 11); 2023–2024 का आचरण अगस्त 2025 के resolutions से पहले का
+- विरोधी तर्क दर्ज: केवल Articles officer द्वारा लागू न हो सकें (धारा 10); treatise [8] पुराना, धारा 201 का 2013 Act में समकक्ष नहीं
+- Good faith की शर्त [1] खंड 3.2 और [6] के आधार पर अस्वीकार, blog [7] पर नहीं; letter of credit अस्वीकार, undertaking unsecured
+- बेंगलुरु arbitration (खंड 14), धारा 9 की interim राहत (या धारा 17); धारा 31A/[5] के तहत सफलता के अनुपात में costs; undertaking और लिखित अनुरोध
+- Source table में primary [1]–[4], काल्पनिक cases [5]–[6] और अविश्वसनीय secondary [7]–[8] अलग

@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/financial-statements/muse-spark-1-3@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "financial-statements",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "2f3e638b1754",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Statements tie: loss $1,614k, deficit $594k as booked (or $1,584k and $564k if corrected)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Accumulated deficit: $(3,180) at 1 Jan 2024 + $(1,614) net loss = $(4,794).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct loss, $594k stockholders' deficit, and balanced statements totaling $2,634k."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Statements tie with net loss of $1,614k and stockholders' deficit of $594k."
+    }
+   ]
+  },
+  {
+   "check": "Deferred revenue $740k current, $280k noncurrent; lease $96k/$240k; notes and accrued interest noncurrent",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Interest is payable only at maturity 30 June 2026 (>12 months from balance sheet date), so not a current obligation under ASC 210.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct deferred revenue and lease splits; both convertible principal and accrued interest are noncurrent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly classifies deferred revenue, lease liabilities, and places notes and accrued interest in non-current liabilities."
+    }
+   ]
+  },
+  {
+   "check": "Flags note interest should be $90k (1,500 × 8% × 9/12), not $120k; proposes treating the $30k",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "8% x $1,500k x 9/12 = $90k expected. TB shows expense $120k but accrued interest $90k and facts state no cash paid.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the $30k discrepancy and proposes reconciliation and reversal of excess expense pending support."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates $90k interest, flags the $30k discrepancy, and proposes reversing the excess expense."
+    }
+   ]
+  },
+  {
+   "check": "Concludes substantial doubt: ~10.5 months' runway, customer loss, unsigned term sheet; doubt not alleviated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Management's plans do not make it probable the conditions will be alleviated. Substantial doubt about ability to continue as going concern exists.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Concludes unalleviated substantial doubt, citing approximately ten months' runway, unsigned financing, and customer loss impact."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates runway, cites unsigned term sheet, and concludes substantial doubt exists and is not alleviated."
+    }
+   ]
+  },
+  {
+   "check": "Discloses the CEO loan as related party, questions its classification, flags missing board approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$75k loan to CEO John Doe advanced Sept 2024, unsecured, non-interest-bearing, no repayment date, board approval not formalized. Presented non-current.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discloses related-party terms, flags missing approval, and requests repayment evidence and possible expense or equity reclassification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discloses CEO loan as related party, notes lack of board approval, and evaluates classification."
+    }
+   ]
+  },
+  {
+   "check": "Treats the customer's non-renewal as a nonrecognized subsequent event",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "This is a Type II nonrecognized event: no 2024 adjustment; disclosed for concentration (ASC 275), receivables collectability, and going-concern impact.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly treats the customer's February non-renewal notice as a disclosed, nonrecognized subsequent event."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly classifies the customer non-renewal notification as a nonrecognized subsequent event."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02096955,
+ "date": "2026-10-11"
+}

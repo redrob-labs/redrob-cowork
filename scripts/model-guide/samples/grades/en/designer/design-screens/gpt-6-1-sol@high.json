@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/design-screens/gpt-6-1-sol@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-1-sol",
+ "effort": "high",
+ "scorecardSha": "8e2ba1f3f5ec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Primary buttons retain the mint background but use `color.ink`, approximately **7.7:1** contrast.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies white-on-mint as failing AA and explains the accessible dark-text exception."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies ~1.9:1 failing AA contrast and switches to ink/dark text on mint with rationale."
+    }
+   ]
+  },
+  {
+   "check": "Drops Miles's exotic slot, 12:30 (lunch), 11:30 dental (runs into lunch), 16:45 wellness (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Only two entries survive validation.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Filtering correctly removes all four invalid slots, retaining only Mary’s 11:00 exotic and Richard’s 14:00 wellness appointments."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Drops all four invalid slots in both code and table analysis."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The server must atomically recheck eligibility, schedule, price, and availability when booking",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains each invalid slot individually and requires authoritative API eligibility and full-interval schedule validation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains the reasons for dropping each slot and recommends API-side validation rules."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"from $280\" honestly, e.g. with a final-quote note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the prototype cannot confirm that service without a clinic-approved final estimate.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves “from $280” and resolves no-surprises tension by requiring an authoritative estimate before confirmation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Retains 'from $280', notes final estimate requirement, and addresses the tension with no-surprises pricing."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"Any available vet\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The prototype uses native radios, explicit labels, 48 px buttons, visible keyboard focus, logical focus movement, and polite summary announcements.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable single-file prototype fits 375 px, provides labelled keyboard controls and adequate targets, and offers Any available vet."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Functions at 375 px, includes keyboard focus styling, accessible target sizes, and defaults to 'Any available vet'."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Wellness and vaccination appear first. “Any available vet” is the default preference, reducing unnecessary vet selection without skipping the required vet step.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Connects the separate-step design to a faster common-service path through ordering and a default vet preference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Discusses both the step choice and fast path, but rationalizes steps by viewport width rather than tying them together."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.032471775,
+ "date": "2026-10-11"
+}

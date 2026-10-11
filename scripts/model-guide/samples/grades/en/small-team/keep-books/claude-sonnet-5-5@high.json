@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/keep-books/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "keep-books",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "f4fded430b72",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Reconciles the $1,385 gap: duplicate Nursery +$3,150, bank fee +$35, outstanding check #448 −$1,800",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The bank-to-book bridge is 20,301 − 1,800 + 3,150 + 35 = 21,686.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reconciles the $1,385 gap and specifies the necessary book corrections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies and reconciles all three items bridging the bank and book balances."
+    }
+   ]
+  },
+  {
+   "check": "Streamflix recoded as owner draw; March revenue $13,450, excluding the $10,000 draw and $360 sales tax",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Revenue (ex-sales tax):** $13,450 on a cash basis",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct revenue; Streamflix becomes owner draw, loan proceeds a liability, and sales tax a payable."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recodes Streamflix to owner's draw and excludes the line of credit draw and sales tax from revenue."
+    }
+   ]
+  },
+  {
+   "check": "Forecast excludes Birchwood and the Nursery refund, uses $11,200 payroll from 16 Apr, Hollis ~10 days late",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Hollis pays 10 days late.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes Birchwood and Nursery refund, applies $11,200 payroll from 16 April, and schedules Hollis around 25 April."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Forecast excludes both items, applies $11,200 payroll from 16 Apr, and schedules Hollis ~10 days late."
+    }
+   ]
+  },
+  {
+   "check": "Without the mower, cash bottoms ≈ $2,100 in the week of 29 Apr and ends near $12,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**2,137** | **4,312** | **10,687** | **12,022**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Without-mower forecast bottoms at $2,137 in the 29 April week and ends at $12,022."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Without mower, bottom is $2,137 in W5 (29 Apr) and ending balance is $12,022."
+    }
+   ]
+  },
+  {
+   "check": "Mower in cash gives ≈ −$15,900 that week, beyond $15,000 credit; advises financing, deferring or leasing",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The low point is about −$15,900 on 30 April, which is more than the $15,000 still available on the line of credit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies insufficient remaining credit and recommends financing, leasing, or delaying rather than paying cash."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates the deficit exceeding available credit and recommends financing, delaying, or leasing."
+    }
+   ]
+  },
+  {
+   "check": "Every computed column states its method, and the weekly arithmetic is consistent",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Weeks run Wed–Tue. The opening balance is the adjusted $18,501.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Weekly arithmetic is consistent, but methods for forecast totals, rolled openings, and mower-adjusted balances are not explicitly stated."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All weekly flows, subtotals, and cross-week roll-forwards are mathematically consistent."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024455025,
+ "date": "2026-10-11"
+}

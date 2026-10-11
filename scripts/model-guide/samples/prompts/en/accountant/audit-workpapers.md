@@ -50,3 +50,31 @@ Both invoices are for the same coolant concentrate, delivered on the same day.
 - Identifies the Brightwell invoices BW-7731 and BW-7732 ($49,400 combined, same goods, same day, same approval) as a likely split to avoid CFO approval, and recommends follow-up, such as a duplicate or split-invoice scan of the population.
 - Concludes the control cannot be relied on, says substantive testing of expenses and disbursements must increase, and gives a reasoned classification of the deficiency (at least significant, considered for material weakness) to communicate to those charged with governance.
 - The workpaper has a tickmark legend, a clear review trail and specific management-letter recommendations.
+
+## Card
+
+brief: Finish a first-year staff member's test of a disbursement-approval control on a manufacturer's audit, re-performing it before concluding.
+given:
+- Approval policy: approval levels by invoice size, three-way match, the 5% price-variance rule and PO exemptions
+- Population and plan: 1,240 H1 payments ($8.96m), the required sample size and how items were picked
+- Test results: 10 sampled payments with approver, approval date and match status
+- Staff conclusion: "No exceptions noted"
+- Vendor ledger excerpt: 2 invoices from one supplier in the 4 March payment run
+asked:
+- Objective
+- Population and sample, including whether the sample is adequate
+- Attributes tested and a results table with a tickmark legend
+- Exceptions with root cause
+- Conclusion on the control and its effect on the audit plan
+- Proposed management letter points
+limit: Up to about 1,200 words, as a Markdown workpaper
+hard: The staff's clean conclusion must be re-tested against a policy item by item, the sample design and the ledger excerpt need scrutiny, and the deficiency needs a reasoned classification.
+
+## Scorecard
+
+- Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)
+- Treats items 4 and 8 as correctly exempt from the PO requirement
+- Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate
+- Flags BW-7731 and BW-7732 ($49,400 combined) as a likely split to avoid CFO approval; proposes follow-up
+- Concludes no reliance, more substantive testing, deficiency at least significant with material weakness considered
+- Includes a tickmark legend, a review trail and specific management-letter recommendations

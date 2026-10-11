@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/draft/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "draft",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "618c96e604c9",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Milestones total $245,000, not $250,000; gap left as placeholder or assumption and raised in the email",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Your milestones total $245k, not $250k. Where does the $5k go?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the discrepancy, leaves allocation as an agreement placeholder, and raises it in the email."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The $5,000 gap is flagged as a placeholder in the contract and explicitly questioned in the cover email."
+    }
+   ]
+  },
+  {
+   "check": "App software fits no §101(2) category: present \"hereby assigns\" under §204(a), work for hire only as backstop",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Agency hereby irrevocably assigns to Fernhill all worldwide right, title and interest",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Present assignment operates independently under §204(a); work-for-hire is conditional, with personnel assignments and further assurances."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly utilizes a present assignment under §204(a) with work for hire acting solely as a backstop."
+    }
+   ]
+  },
+  {
+   "check": "Orbitmade Core licensed perpetual, irrevocable, royalty-free, transferable; GPL-3.0 barred or needs Fernhill's approval",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "SleepWave (GPL-3.0) is not approved.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Core license is perpetual, irrevocable, fully paid and transferable; GPL requires approval, and email explains copyleft risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Orbitmade Core is licensed perpetually and transferably, and the GPL-3.0 SleepWave library is expressly barred without approval."
+    }
+   ]
+  },
+  {
+   "check": "Balanced acceptance (e.g. 10 business days, written reasons, cure rounds) and cap with IP, data, misconduct exclusions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Agency's liability for breach of §6 and Security Incidents is limited to [$___].",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Acceptance is balanced; IP and misconduct are uncapped, but data liability has an unresolved separate cap rather than exclusion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides balanced acceptance mechanics with cure rounds and sets a liability cap with standard IP, data, and misconduct exclusions."
+    }
+   ]
+  },
+  {
+   "check": "Subcontractors need approval, flow-down and Orbitmade liability; source code on termination; New York law and venue",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Agency is liable for Subcontractors as for itself.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Requires subcontractor approval and flow-downs, delivers source and work in progress on termination, and specifies New York law and venue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Requires subcontractor approval, flow-down, and agency liability, delivers source code on termination, and specifies New York governing law and venue."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020623838,
+ "date": "2026-10-11"
+}

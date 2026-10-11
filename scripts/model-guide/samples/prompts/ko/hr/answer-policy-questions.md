@@ -62,3 +62,37 @@ deliverable: none
 - On job protection: 출산전후휴가 is protected by statute (same or equivalent job on return under 제74조⑥, no dismissal during the leave and 30 days after under 제23조②). She will also meet the 6-month test for 육아휴직, which is protected under 남녀고용평등법 §19. The company leave runs concurrently with the 90 days and is topped up to 100%.
 - Treats manager notice as a judgement call: 30 days' notice means telling her manager by mid-January (about Jan 16) for a Feb 16 start, so her January timing works, and HR keeps the matter confidential until then.
 - The internal note flags that the superseded 취업규칙 is still on the intranet (and that the change should be reflected in the 취업규칙 itself and filed under 근로기준법 §93). It also flags that PB-2025-04 doesn't say whether weeks 13–16 (after the 90-day 출산전후휴가 ends) count as 육아휴직 or are otherwise job-protected, and routes that to 법무/노무 instead of promising protection.
+
+## Card
+
+brief: 출산을 앞둔 직원의 휴가 문의 네 가지에 답하고, 자료의 보완점을 내부 메모로 정리합니다.
+given:
+- 직원 정보: 이영희의 근무지, 입사일, 근무 형태, 사용 연차, 복리후생 선택
+- 직원 메일: 출산 예정일, 본인이 이해한 자격 요건, 질문 4개
+- 취업규칙(2023년판) 제7.2조와 인사공지 PB-2025-04: 육아지원휴가 규정 2건
+- 연차휴가 규정 제6.1조: 입사 첫해 연차의 발생과 소멸
+- 선택적 복지 안내: 배분 변경 요건과 2026년 '보육지원' 한도
+- 법무팀 법령 요약: 출산전후휴가와 육아휴직의 요건과 보호
+asked:
+- 이영희 님에게 보내는 답장: 질문마다 날짜와 숫자, 연차 계산 과정 포함
+- 규정 담당자에게 보내는 내부 메모: 자료에서 고쳐야 할 점
+limit: 전체 약 2,500자 이내, 내부 메모는 약 300자 이내, Markdown
+hard: 충돌하는 자료의 우선순위를 가리고 규정과 법령을 직원의 날짜에 적용해야 하며, 자료로 답이 정해지지 않는 질문도 있습니다.
+
+## Scorecard
+
+- Applies PB-2025-04, not superseded 취업규칙 §7.2: 16 weeks at 100%; 출산전후휴가 needs no service
+- 연차: 4 days now, max 7 (11−4) by Feb 2, 2026; can't save 10; lapses Mar 2
+- 보육지원 can't change now; 30 days after the birth (about Mar 18, 2026); ₩3,000,000 is per household
+- 출산전후휴가 protected (§74⑥, §23②); 육아휴직 6-month test met; company leave concurrent, topped up to 100%
+- Manager notice: 30 days means telling her manager by mid-January (about Jan 16); her timing works, kept confidential
+- Note flags superseded 취업규칙 still posted (amend, §93 filing); weeks 13–16 protection routed to 법무/노무
+
+## Scorecard, shown
+
+- 대체된 취업규칙 제7.2조가 아닌 PB-2025-04 적용: 통상임금 100% 유급 16주 대상, 출산전후휴가는 근속 요건 없음
+- 연차: 현재 4일, 2026년 2월 2일까지 최대 7일(11−4), 10일은 모을 수 없고 3월 2일 소멸
+- '보육지원'은 지금 변경 불가, 출산 후 30일 이내(예정일 기준 2026년 3월 18일경), 300만원은 가구당 한도
+- 출산전후휴가는 법으로 보호(제74조 제6항, 제23조 제2항), 육아휴직 6개월 요건 충족, 회사 휴가는 동시 진행하며 100% 보전
+- 팀장 통지: 30일 전 신청이므로 1월 중순(1월 16일경)까지 알리면 되어 1월 계획 가능, 그때까지 HR이 비밀 유지
+- 내부 메모: 대체된 취업규칙이 아직 게시됨(개정 및 제93조 신고), 13~16주차 고용 보호 여부는 법무/노무에 확인 요청

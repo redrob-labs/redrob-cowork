@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/audit-workpapers/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "audit-workpapers",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "76bcf37eb34e",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Finds three missed deviations: item 2 (5.33% variance unapproved), item 5 (approved after payment), item 7 (wrong level)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "+640,000원(+5.33%)인데 재승인 증빙 없음",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies item 2’s unapproved variance, item 5’s late approval, and item 7’s insufficient approval authority."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately identifies deviations in item 2 (5.33% unapproved variance), item 5 (post-payment approval), and item 7 (wrong authority level)."
+    }
+   ]
+  },
+  {
+   "check": "Treats items 4 and 8 as correctly exempt from the PO requirement",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "N/A 적용 제외(공과금·서면 위임계약)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly treats legal services under written engagement and city gas as PO-exempt in the results table."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both items 4 and 8 are marked N/A and correctly treated as exempt from PO requirements."
+    }
+   ]
+  },
+  {
+   "check": "Flags 10 tested against 25 required; 3 deviations in 10 already exceed the 10% tolerable rate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "표본 이탈률은 30~40%로 허용이탈률 10%를 크게 넘습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags 10 versus 25 required, recognizes at least 30% deviations, and explains expansion cannot restore reliance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes 10 tested vs 25 required and explains that deviations found already surpass the 10% tolerable rate."
+    }
+   ]
+  },
+  {
+   "check": "Flags CS-7731 and CS-7732 (₩49,400,000 combined) as a likely split to avoid CFO approval; proposes follow-up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "합계 49.4M은 CFO 승인 대상(25M 초과)입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies both invoices as likely approval-threshold circumvention and proposes population scans and transaction-specific investigation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the 49.4M split to bypass CFO approval and proposes extensive follow-up procedures."
+    }
+   ]
+  },
+  {
+   "check": "Concludes no reliance, more substantive testing; deficiency at least significant, material weakness considered, reported to 감사/감사위원회",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "어느 경우든 지배기구(감사)에 서면으로 보고합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects reliance, increases substantive procedures, classifies a significant deficiency, and considers escalation to material weakness."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Concludes non-reliance, expands substantive tests, classifies as significant deficiency/considers material weakness, and reports to audit committee/auditor."
+    }
+   ]
+  },
+  {
+   "check": "Includes a tickmark legend, a review trail and specific management-letter recommendations",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "작성: 현장책임 시니어 (박영수 회계사 결과를 전건 재수행)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes tickmark legend, itemized senior reperformance and limitations, plus specific system, policy, monitoring, and remediation recommendations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a tickmark legend, reviewer documentation/coaching notes, and six concrete management letter recommendations."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024023738,
+ "date": "2026-10-11"
+}

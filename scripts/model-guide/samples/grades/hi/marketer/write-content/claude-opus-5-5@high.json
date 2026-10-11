@@ -1,0 +1,110 @@
+{
+ "key": "hi/marketer/write-content/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "c3defd4d74bf",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "No \"40% bill\" lead (best site, AC energy not bill; ASCI); e.g. median 18% AC use (~7% of bill), legible footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pilot में आधी sites पर AC की बिजली खपत 18% या ज़्यादा घटी।¹",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses defensible AC-energy savings instead of 40% bill savings, with the required legible Hindi footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids the misleading 40% bill claim; uses median 18% AC consumption reduction with a clear, legible footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: ₹9,999 launch (MRP ₹11,999, through 30 Apr 2026) plus ₹499/month per outlet subscription",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹9,999 + ₹499/माह प्रति outlet · Corbel Cloud ज़रूरी · GST सहित · Launch price 30 अप्रैल 2026 तक (MRP ₹11,999)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows launch price, MRP, deadline, and required monthly per-outlet subscription."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states launch price, MRP, validity date, and mandatory monthly subscription per outlet."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, Unicode counts accurate; no superlatives; Latin-script words in sentence case",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "display पर \"±1°C सीमा\" दिख रहा है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Most constrained copy fits, but device text exceeds the six-word image allowance; the price-line word count is inaccurate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All character and word counts respect the limits, counts are accurate, no superlatives are used, and Latin text is in sentence case."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid, self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`, Noto Sans Devanagari; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<tspan x=\"64\" y=\"212\">temperature पर बहस बंद।</tspan>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG uses all brand colours, declares Noto Sans Devanagari, and includes H1, subhead, CTA, and footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid self-contained SVG using brand colors, Noto Sans Devanagari, and displaying H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Testimonial रोका है।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains claim and price corrections, but unjustifiably rejects the approved quote and omits the 44-of-48 ease result."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes and discusses the quote, but fails to mention the 44-of-48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.037835963,
+ "date": "2026-10-11"
+}

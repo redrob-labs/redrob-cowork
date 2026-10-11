@@ -1,0 +1,110 @@
+{
+ "key": "en/marketer/write-content/gpt-6-astra@default",
+ "language": "en",
+ "profession": "marketer",
+ "task": "write-content",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "431d66feb3cc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Doesn't lead with \"40%\" (best site, HVAC not bill); e.g. median 18% HVAC (~7% of bill), footnoted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "18% median reduction in HVAC energy use in our pilot.*",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the defensible median HVAC reduction, not a 40% bill claim, with the required footnote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Replaces the 40% claim with the 18% median HVAC reduction and includes the required footnote."
+    }
+   ]
+  },
+  {
+   "check": "Price: $149 launch (list $179, through Jan 31, 2026) plus $8/month per location subscription",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "$149 device + $8/location/month for Corbel Cloud.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct launch price, deadline, and required subscription are shown, but the $179 list price is omitted."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Includes the $149 launch price, date, and $8/month subscription, but omits the $179 list price."
+    }
+   ]
+  },
+  {
+   "check": "Every line within its limit, with accurate counts; no superlatives; sentence case",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Headline 3 | Limit staff changes to ±2°F | 27 characters |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All constrained fields meet their limits; counts are accurate, with sentence case and no superlatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All character and word limits are respected and counted accurately, without superlatives and using sentence case."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<rect width=\"1200\" height=\"630\" fill=\"#F7F5F0\"/>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Valid, self-contained SVG uses all three brand colours and includes H1, subhead, CTA, and footnote with clear hierarchy."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The SVG is valid, self-contained, uses the specified brand colors, and includes the H1, subhead, CTA, and footnote."
+    }
+   ]
+  },
+  {
+   "check": "Note explains claim and price changes; points to the quote and the 44-of-48 ease result",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "I replaced “Cut your energy bills by 40%” with the pilot’s 18% median reduction in HVAC energy use.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes within 120 words, but omits the customer quote and 44-of-48 ease result."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Explains claim and price changes clearly, but fails to mention the customer quote or the 44-of-48 ease result."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029293163,
+ "date": "2026-10-11"
+}

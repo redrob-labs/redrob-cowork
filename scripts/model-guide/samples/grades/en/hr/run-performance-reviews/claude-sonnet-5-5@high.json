@@ -1,0 +1,128 @@
+{
+ "key": "en/hr/run-performance-reviews/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "39d97e5892e6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll $1,236,000; budget $43,260; submitted $44,890 (3.63%), $1,630 over; HRBP's \"3.4%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Submitted proposals total **$44,890, or 3.63% of payroll**. That is **$1,630 over** the 3.5% budget.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct payroll and budget figures; explicitly rejects the HRBP's 3.4% claim."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All figures (payroll, budget, submitted total, overrun) are correct and HRBP summary is called out as wrong."
+    }
+   ]
+  },
+  {
+   "check": "E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised to match",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Rating must use pro-rated goals (103%), not full-period goals.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies firm protected-leave policy issue; recommends anchor rating 4 and raises merit to 4.0%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "E07 is identified as a firm policy issue, anchored at 4 via pro-rated 103%, and merit raised."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E02 and E03 exceed the one-level deviation limit.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly flags both as policy issues, shows anchors 3 and 1, and rejects unsupported deviations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both E03 (5 vs anchor 1) and E02 (5 vs anchor 3) are flagged as unjustified policy violations."
+    }
+   ]
+  },
+  {
+   "check": "Shows Roe's leniency in the manager table: average submitted 4.75 vs anchor 3.25",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Richard Roe (Platform) | 4.75 | 3.25 | **+1.50** | 3.25 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct manager averages demonstrate Roe's leniency; explicitly identifies rating inflation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The table clearly shows Roe's submitted average of 4.75 versus anchor average of 3.25."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "For E09 I default to the anchor because no justification was submitted. For E10 I keep the manager's 4 pending the discussion.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags E09's underrating and retains E10's justified one-level deviation subject to discussion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "E10 stands at 4 for discussion, and E09 is flagged as under-rated against its anchor of 4."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ $43,260, every merit % inside its range, merit $ = base × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Recommended total | $39,855 | **3.22%** (under by $3,405) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended total is correct and within budget; all merit percentages and dollar calculations comply."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The recommended total is under budget, all merit percentages fall within band ranges, and formulas match."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025322588,
+ "date": "2026-10-11"
+}

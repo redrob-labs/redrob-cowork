@@ -1,0 +1,128 @@
+{
+ "key": "ko/founder/sell-customers/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "founder",
+ "task": "sell-customers",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "e0e1e29b505f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Doesn't present 40% as typical (18% average or credits 솔마루의원 네트워크); names only it and 잣나무헬스",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "도입 6개월 후 6개 고객사의 연장근로 시간은 평균 18% 감소했습니다. 솔마루의원 네트워크(9곳)는 40% 감소했고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "평균과 개별 성과를 구분하며, 공개 동의한 두 고객사만 실명으로 언급했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents 18% average and clearly attributes 40% to 솔마루, naming only 솔마루 and 잣나무헬스."
+    }
+   ]
+  },
+  {
+   "check": "Rejects 30% by Friday: breaks the 15% policy, not credible, premature; any discount later, within policy",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "‘금요일까지 계약하면 30% 할인’은 권한 밖이며 근거 없는 긴급성을 만듭니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "30% 할인을 거절하고 최대 15% 정책을 명시하며, 첫 접촉에서는 할인보다 적합성 확인을 우선합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects 30% offer explicitly, noting 15% policy, CFO approval requirement, and unsuitability."
+    }
+   ]
+  },
+  {
+   "check": "Uses the 30 November 2026 renewal and ~1 September 2026 notice; CTA is a short discovery call",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "현재 계약 갱신은 2026년 11월 30일이고, 해지 통보는 90일 전까지 필요한 것으로 알고 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "갱신일과 장기 검토, 짧은 데모는 반영했지만 약 2026년 9월 1일인 통보 기한을 명시하지 않았습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly references contract renewal date and 90-day notice; CTA focuses on timing/discovery."
+    }
+   ]
+  },
+  {
+   "check": "Personalizes to text and group-chat call-outs, overtime, float pool, 3 new clinics and 11 nurse roles",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "9월 3일 웨비나에서 플로팅 간호인력과, 매주 문자·단톡방으로 대체 인력을 구하는 수고를 말씀해 주셨지요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "문자·단톡방, 연장근로, 플로팅은 반영했으나 신규 의원 3곳과 간호사 채용공고 11건은 빠졌습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Personalized to webinar question, overtime, and float pool, but omitted the 3 new clinics and 11 nurse roles."
+    }
+   ]
+  },
+  {
+   "check": "Each email adds new value rather than just following up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "교대로는 기존 솔루션의 내보내기 데이터 이관을 지원하며, 도입에는 약 6주가 걸립니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "각 이메일이 충원 방식, 검증된 성과, 갱신 일정과 이관 정보라는 새로운 가치를 제공합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Email 1 offers demo/solution flow, Email 2 provides reference data/call, Email 3 addresses contract timeline and migration."
+    }
+   ]
+  },
+  {
+   "check": "Each email ≤~320 characters, one CTA, send days avoiding 3–9 October holidays; LinkedIn ≤300 characters; founder's tone",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "다음 주 15분간, 지점 간 결원을 채우는 흐름을 제가 직접 보여드려도 될까요?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "본문과 링크드인 길이가 제한 이내이고, 이메일별 CTA 하나이며, 발송일은 연휴를 피하고 창업자 어조를 유지합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All emails are under ~320 chars, send dates (Sep 16, 23, 30) avoid holidays, LinkedIn is under 300 chars, founder tone kept."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.016298888,
+ "date": "2026-10-11"
+}

@@ -50,3 +50,28 @@ You are a senior associate. The general counsel of Juniper Holdings, Inc. has as
 - Computes the recoverable amount with the closing-of-the-books allocation: $260,000 + $290,000 + $112,000 = $662,000 (not the pro-rata $106,667 for January–April). Excludes the post-closing May–December 2021 and 2022 tax, which is Juniper's own liability.
 - Notes that the 8.2(c) claim isn't subject to the Deductible, the Escrow cap or the released escrow. Splits the liability severally: $463,400 (Founders LLC) and $198,600 (Mary Major).
 - Recommends withdrawing or amending the $1,120,000 notice so it claims under 8.2(c) for $662,000, plus any related interest or penalties if documented, and preserving the appeal of the assessment.
+
+## Card
+
+brief: Write an objective memo on whether the buyer can recover a sales-tax assessment from the sellers under the stock purchase agreement, and how much.
+given:
+- Facts: closing, price, escrow, sellers' shares, the assessment by year, and the claim and reply
+- SPA excerpts: tax rep, straddle allocation, survival, indemnity, limits, notice and a definition
+- Statute: 10 Del. C. §8106(a) and (c)
+asked:
+- Question Presented
+- Brief Answer
+- Facts
+- Analysis: timeliness, the notice defense, the recoverable amount, collection from each seller
+- Recommendations, including correcting the claim notice
+- A table of the recoverable amount and each seller's share
+limit: Under about 1,200 words, as a Markdown memo with headed sections
+hard: The other side's defences must be tested against contract and statute, a straddle period must be allocated, and prejudice is a judgement call.
+
+## Scorecard
+
+- Rep claim under 8.2(a) expired Apr 30, 2024; 8.2(c) survives to Apr 30, 2028 under §8106(c); timely
+- Notice ~91 days after Aug 4 misses 30 days, but bars recovery only to the extent of actual prejudice
+- Recoverable $662,000 ($260,000 + $290,000 + $112,000), not pro-rata $106,667; post-closing tax excluded
+- 8.2(c) free of Deductible, escrow cap and released escrow; several shares $463,400 and $198,600
+- Amend the $1,120,000 notice to an 8.2(c) claim for $662,000; preserve the assessment appeal

@@ -53,3 +53,38 @@ deliverable: none
 - Excludes the Head of Sales's comment about 이영희's children from the decision, treats it as an inappropriate and legally risky remark (남녀고용평등법 제7조 on discrimination in hiring; 채용절차법 on collecting family information unrelated to the job), and sets out a follow-up (a conversation, interviewer training, documentation) without letting it bias the outcome either way.
 - Handles compensation within policy: 이영희's ₩120,000,000 ask is above the ₩110,000,000 band ceiling, so the answer proposes options such as the band maximum with more stock options or a sign-on bonus, or getting approval for an exception. It also notes 박영수's pending reference.
 - The memo and messages are concise and professional, the final recommendation is reasoned rather than based only on the averages, and the email uses placeholders where terms are not yet decided.
+
+## Card
+
+brief: 대표로서 CS 총괄 최종 후보 두 명 중 결정하고, 면접관 두 명의 평가 문제를 다루며 다음 이메일을 씁니다.
+given:
+- 평가표: 후보별 4개씩, 면접관 평가표 8개와 서술 의견
+- 배경: 각 후보의 현 직장
+- ATS 요약: 두 후보의 평균 점수와 추천
+- 기타 사항: 희망 기본연봉, 입사 가능 시점, 평판조회, 출장
+- 처우 범위: 승인된 기본연봉·스톡옵션 범위와 예산상 기본연봉
+asked:
+- 김철수 CTO에게 보내는 의사결정 메모: 권고안 또는 선행 절차, 근거, 점수 가중 방식, 리스크, 처우 조건
+- 시니어 CSM에게 보내는 평가표 관련 짧은 개인 메시지
+- 영업총괄 이사에게 보내는 의견 관련 짧은 개인 메시지와 채용 프로세스상 조치
+- 처우 제안 이메일, 또는 먼저 거칠 절차를 요청하는 이메일(미정 항목은 플레이스홀더)
+limit: 전체 약 2,500자 이내
+hard: 시스템 요약을 검증해야 하고, 면접관 의견의 신뢰성과 적절성을 따져야 하며, 연봉 요구를 처우 정책과 맞춰야 합니다.
+
+## Scorecard
+
+- Recomputes averages: 이영희 3.44 (13.75 ÷ 4), 박영수 3.50; the ATS recommendation is wrong as stated
+- Spots the Senior CSM's 박영수 note describing 이영희's 밝은길소프트 role; if swapped, 이영희 ~3.56, 박영수 ~3.38
+- Makes confirming the scores with the Senior CSM a prerequisite, not a guess
+- Excludes the Head of Sales's children comment as improper, legally risky (남녀고용평등법, 채용절차법); unbiased follow-up
+- Keeps 이영희's ₩120,000,000 ask (above the ₩110,000,000 ceiling) within policy; notes 박영수's pending reference
+- Concise, professional memo and messages; recommendation reasoned beyond averages; email uses placeholders
+
+## Scorecard, shown
+
+- 평균을 다시 계산한다: 이영희 3.44(13.75 ÷ 4), 박영수 3.50으로 ATS 추천은 그대로는 틀렸다
+- 시니어 CSM의 박영수 의견이 이영희 후보의 밝은길소프트 경력을 말한다는 점을 찾고, 뒤바뀌었다면 이영희 약 3.56, 박영수 약 3.38
+- 시니어 CSM에게 점수를 확인하는 것을 추측이 아닌 선행 조건으로 둔다
+- 영업총괄 이사의 자녀 관련 의견을 부적절하고 법적 위험이 있는 발언(남녀고용평등법, 채용절차법)으로 보고 결정에서 빼며, 편향 없이 후속 조치한다
+- 이영희 후보의 희망 연봉 1억 2,000만원(상한 1억 1,000만원 초과)을 정책 안에서 다루고, 박영수 후보의 평판조회 진행 중을 짚는다
+- 메모와 메시지가 간결하고 전문적이며, 권고는 평균만이 아닌 근거에 기반하고, 이메일에 플레이스홀더를 쓴다

@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/raise-funding/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "founder",
+ "task": "raise-funding",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "893d0e715439",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "ARR ₹8.16 crore (₹68 lakh × 12), excluding ₹2.84 crore one-time fees; notes MRR ₹41 lakh to ₹68 lakh (~66%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आवर्ती MRR: जनवरी 2025 में ₹41 लाख से जून 2025 में ₹68 लाख, यानी 5 महीनों में लगभग **10.6% मासिक** वृद्धि",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "ARR and fee exclusion are correct; five-month compounded growth is equivalent to approximately 66% total growth."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates ARR as ₹8.16 crore excluding one-time fees, and notes MRR growth from ₹41L to ₹68L."
+    }
+   ]
+  },
+  {
+   "check": "NRR 112% (₹33.6 lakh ÷ ₹30 lakh); 140% includes new customers; checks ₹33.6 + ₹34.4 = ₹68 lakh",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "NRR = 33.6 ÷ 30 = 112%। मिलान: 33.6 + 34.4 = ₹68 लाख।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct NRR and reconciliation, but does not explain that the draft’s 140% apparently includes new customers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates NRR 112%, explains exclusion of new customers, and verifies the ₹33.6L + ₹34.4L = ₹68L sum."
+    }
+   ]
+  },
+  {
+   "check": "TAM is ₹5,760 crore (12,000 × ₹48 lakh), not ₹57,600 crore; ₹48 lakh is current ACV, a SAM-style figure",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Top-down ऊपरी सीमा: 12,000 × ₹48 लाख = **₹5,760 करोड़**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correct arithmetic and current ACV; incorrectly labels this top-down rather than recognizing a bottom-up, SAM-style figure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Corrects TAM math to ₹5,760 crore, links ₹48 lakh to ACV, and notes bottom-up SAM considerations."
+    }
+   ]
+  },
+  {
+   "check": "Sizes the raise at ~₹57.6 crore (24 months averaging ~₹2.4 crore); defends ~₹60 crore; notes ~8 months' runway",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹13 + ₹55 − ₹57.6 = ₹10.4 करोड़ का buffer। मौजूदा runway: ₹13 ÷ ₹1.6 ≈ 8.1 महीने।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct burn budget and runway; ₹55 crore is a reasoned alternative, and ₹60 crore is explicitly considered acceptable."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sizes burn at ₹57.6 crore, evaluates ₹60 crore vs ₹55 crore, and notes ~8 months' current runway."
+    }
+   ]
+  },
+  {
+   "check": "Flags 58% gross margin as a risk; uses only given data; marks larger claims \"[स्रोत आवश्यक]\"",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "आवर्ती राजस्व पर gross margin **58%** (क्रेट का depreciation शामिल)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Uses supplied metrics and marks most broader claims, but never flags 58% gross margin as a risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Displays 58% gross margin and uses given data with '[स्रोत आवश्यक]' tags, but fails to explicitly flag 58% as a risk."
+    }
+   ]
+  },
+  {
+   "check": "Tells a coherent story with a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "*Speaker note:* प्रतिस्पर्धियों के नाम केवल सत्यापित स्रोत से जोड़ें; \"कोई प्रतिस्पर्धी नहीं\" का दावा कभी न करें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Coherent twelve-slide narrative covers the requested topics, with a speaker note on every slide."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "12 slides with coherent narrative structure, each having a one-line speaker note."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020455313000000003,
+ "date": "2026-10-11"
+}

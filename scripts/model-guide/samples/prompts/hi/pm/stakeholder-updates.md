@@ -57,3 +57,36 @@ Beta tickets के मुख्य विषय: "UPI payments पर round-up 
 - Reports the beta honestly: goal creation at 31% is below the 40% target and tickets at 22 per 1,000 exceed the limit of 15. Positives (₹2,300 first deposit vs ₹2,000 target, retention) are presented without spin, and the ticket themes (UPI round-up setting, deposit delay) are linked to fixes.
 - Ends with a clear decision request with options (for example, move the launch to mid-December or January, or a soft launch to a limited audience if Vasundhara Bank allows it, plus budget approval or descoping) and a justified recommendation.
 - Keeps to 6–8 slides with a speaker note on each. The deck reads at executive level with the bottom line first, and the note to Jane is factual and non-blaming.
+
+## Card
+
+brief: Team lead द्वारा green rate किए गए fintech savings feature पर steering committee deck बनाएँ, साथ में cover email और उसके लिए note।
+given:
+- Project तथ्य: 1 दिसंबर 2026 launch, 10 में से 7 महीने बीते, partner bank का 4 सप्ताह review नियम
+- Milestones: planned और forecast तारीख़ों वाले 5 milestones, सभी green
+- Budget: approved budget, अब तक खर्च, monthly run-rate और report में दिया forecast
+- Beta नतीजे: 2,400 users के 4 metrics बनाम target, और tickets के मुख्य विषय
+asked:
+- 6–8 slides का deck: शुरुआत में bottom line, ईमानदार RAG status, options और recommendation के साथ एक decision
+- Cover email (अधिकतम 120 शब्द)
+- जेन डो के लिए note (अधिकतम 100 शब्द): कौन-सा status बदला और क्यों
+limit: लगभग 1,200 शब्दों के भीतर, markdown में, slide by slide और हर slide पर speaker note
+hard: Status report को बताए गए नियम और आँकड़ों पर परखना है, और बुरी ख़बर executives को साफ़ और report लिखने वाली को संवेदनशीलता से देनी है।
+
+## Scorecard
+
+- Recomputes forecast at completion ≈ ₹5.20 crore (₹3.64 crore + 3 × ₹52 lakh), not ₹4.72 crore: ≈ ₹40 lakh (8%) over
+- Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green
+- Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000
+- Presents ₹2,300 first deposit and retention without spin, and links UPI round-up and deposit-delay themes to fixes
+- Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation
+- 6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming
+
+## Scorecard, shown
+
+- Forecast at completion दोबारा निकालता है ≈ ₹5.20 crore (₹3.64 crore + 3 × ₹52 lakh), ₹4.72 crore नहीं: ≈ ₹40 lakh (8%) ज़्यादा
+- 14 नवंबर का compliance pack और 4 सप्ताह का review: सबसे जल्दी launch ≈ 12 दिसंबर; वे milestones green नहीं
+- Beta की कमियाँ ईमानदारी से बताता है: goal creation 31% बनाम 40% target, tickets 22 बनाम ≤15 प्रति 1,000
+- ₹2,300 पहला deposit और retention बिना बढ़ा-चढ़ाकर रखता है, UPI round-up और deposit देरी को fixes से जोड़ता है
+- Decision के साथ खत्म: options (दिसंबर के मध्य या जनवरी, soft launch, budget या descoping) और recommendation
+- Speaker notes के साथ 6–8 slides, bottom line पहले; जेन के लिए note तथ्यपरक और दोषारोपण रहित

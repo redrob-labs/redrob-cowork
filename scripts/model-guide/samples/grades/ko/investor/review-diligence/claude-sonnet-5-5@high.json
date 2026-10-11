@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/review-diligence/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "review-diligence",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "7a2b49fbb2ea",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "C1 ₩360,000,000 (−₩60,000,000); C2 ₩260,000,000 (−₩50,000,000); C3 ₩0 (−₩275,000,000); C9 ₩112,800,000 (−₩7,200,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| C9 아이언우드 | 120.0 | 112.8 | -7.2 | 환율 | 12,000,000엔 × 9.4원 = 112.8 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "C1, C2, C3, and C9 adjusted values and reductions are all correct in the stated million-won units."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusts C1, C2, C3, and C9 to the specified amounts and variances."
+    }
+   ]
+  },
+  {
+   "check": "C8 ₩0 live, ₩132,000,000 separate; C6 ₩144,000,000 (alt. ₩180,000,000); C10 ₩66,000,000 (management's ₩75,000,000)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| (별도) 계약 체결·미개시 ARR (C8) | +132.0 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "C8 is zero live and separately disclosed; C6 and C10 use correct base values and discuss required alternatives."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly treats C8 separately, adjusts C6 to 144M with 180M alt, and C10 to 66M referencing 75M."
+    }
+   ]
+  },
+  {
+   "check": "Adjusted live ARR ₩1,530,800,000 (−₩569,200,000, −27.1%), ₩1,662,800,000 with C8; bridge ties to ₩2,100,000,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "15.31억원**으로 조정되었습니다(-5.69억원, -27.1%).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Exact bridge reconciles ₩2.1 billion to ₩1.5308 billion live and ₩1.6628 billion including C8."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates adjusted live ARR of ₩1,530.8M (−27.1%), ₩1,662.8M with C8, and bridge ties exactly."
+    }
+   ]
+  },
+  {
+   "check": "At risk: C4 (₩240,000,000, terminable for convenience after Sep 30, 2025) and C5 (renews Jun 2026)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| C4 | 9.30 이후 임의 해지 가능. 가장 빠르면 약 12월 말 효력 발생 | 240.0 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies C4’s termination exposure and C5’s June 2026 expiry, with correct exposed ARR amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies C4 (₩240M) and C5 (₩198M expiring Jun 2026) as at-risk."
+    }
+   ]
+  },
+  {
+   "check": "Top-3 concentration (C1, C2, C4) ≈56.2% of adjusted ARR; C1 ≈23.5%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "상위 3개 고객은 C1 360 + C2 260 + C4 240 = 860이며, 조정 ARR의 **56.2%**입니다. C1 단독은 23.5%입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct customers, numerator, adjusted-ARR denominator, and concentration percentages."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates top-3 concentration as 56.2% and C1 concentration as 23.5%."
+    }
+   ]
+  },
+  {
+   "check": "At 6.0×: ₩126억 vs ≈₩91.8억, a ≈₩34.2억 gap; recommends re-price, earn-out, escrow or special indemnity",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "회사 기준은 126.0억원, 조정 후는 **91.8억원**으로 -34.2억원입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct 6.0× valuation comparison; recommends conditional earn-out, escrow, and price adjustment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately compares ₩126억 vs ₩91.8억 (−₩34.2억 gap) and recommends price adjustment, earn-out, and escrow."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025032788,
+ "date": "2026-10-11"
+}

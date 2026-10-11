@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/prepare-tax/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "prepare-tax",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "47e703208d5c",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Removes ₩18,000,000 double count: receipts ₩141,200,000 = 144,062,500 − 6,000,000 − 1,400,000 + 1,221,000 + 3,316,500",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "블루핀 카드분 18,000,000은 지급명세서와 PayFlow 자료에 모두 잡혀 있으므로 한 번만 계상합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "중복을 제거하고 개인이체·환불·수수료·원천징수를 조정하여 총수입 141,200,000원을 정확히 대사했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly adjusts out the double-counted ₩18,000,000 and ties receipts of ₩141,200,000 to deposits."
+    }
+   ]
+  },
+  {
+   "check": "Rejects note 3 (pre-2023 brackets); software ₩3,460,000 net of refund; deducts ₩1,221,000 fees, ₩3,200,000 meals within limit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**메모 3 (세율표): 사용 불가.** 2022년 자료로 구간이 옛 기준입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "구세율표를 배제했고 소프트웨어 3,460,000원, 수수료 1,221,000원, 한도 내 식사비 3,200,000원을 반영했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects note 3, nets software refund (₩3,460,000), and deducts PG fees and meals within limit."
+    }
+   ]
+  },
+  {
+   "check": "Vehicle ₩2,814,000 (4,200/11,000), home office ₩1,200,000 (12/84); gym excluded; 국민연금 to 연금보험료공제",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**국민연금 5,400,000:** 필요경비가 아니며 종합소득공제(연금보험료공제)에서 반영합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "차량 2,814,000원과 자택 1,200,000원을 정확히 계산했고 헬스장을 제외하며 국민연금을 소득공제로 처리했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately computes vehicle and home office expenses, excludes gym, and moves national pension to deductions."
+    }
+   ]
+  },
+  {
+   "check": "Business income ₩115,775,000, tax base ₩108,875,000, computed tax ₩22,666,250 (35% − 15,440,000), determined ₩22,596,250",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "108,875,000 × 35% − 15,440,000 = 22,666,250.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "사업소득 115,775,000원, 과세표준 108,875,000원, 산출세액 22,666,250원, 결정세액 22,596,250원이 모두 정확합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly calculates business income, tax base, computed tax (35% − 15,440,000), and determined tax."
+    }
+   ]
+  },
+  {
+   "check": "Payable ₩19,581,250 after ₩3,015,000 withheld; local tax ~₩1,958,125; laptop expensed as PC, depreciation as alternative",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "개인용 컴퓨터는 100만원 초과여도 즉시상각 대상이므로, 결산에서 전액 비용으로 계상하는 것을 권고합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "원천징수 차감 후 소득세와 지방소득세가 정확하며, 노트북 즉시상각을 권고하고 5년 상각 대안도 제시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates payable taxes after withholding and recommends PC expensing with 5-year depreciation alternative."
+    }
+   ]
+  },
+  {
+   "check": "Flags unwithheld 3.3% (₩297,000) on 박영수's ₩9,000,000, unfiled 지급명세서, 가산세; asks 블루핀헬스 to correct",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**블루핀 지급명세서:** 카드분 18,000,000원이 포함된 것을 정정 요청하거나 중복을 제외한 사유를 보관해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "외주 원천징수 270,000원·27,000원, 명세서 미제출과 가산세를 지적하고 기한 후 제출 및 블루핀 정정을 요청했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies unwithheld 3.3% tax, unfiled statements, penalties, and requests correcting Bluefin's statement."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028700963000000003,
+ "date": "2026-10-11"
+}

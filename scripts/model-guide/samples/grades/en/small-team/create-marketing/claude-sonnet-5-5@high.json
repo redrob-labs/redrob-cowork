@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/create-marketing/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "create-marketing",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "f354ab1015a6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Savings fixed: $36 vs $40 (4 × $10) is 10%, $4 a month, not 25% (or \"$9 a loaf\")",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Four loaves at $10 is $40, so $36 is 10% off.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly replaces 25% with 10%, $4 monthly savings, and $9 per loaf."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the math error and fixes the copy to $9 a loaf / 10% saving."
+    }
+   ]
+  },
+  {
+   "check": "No \"100% organic\" (seed mix uncertified); uses wording like \"made with certified organic flour\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Baked with certified organic flours.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the supported flour claim rather than claiming all bread is 100% organic."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids '100% organic' and uses 'certified organic flours' throughout the copy and in Mary's note."
+    }
+   ]
+  },
+  {
+   "check": "No \"gluten-free\" (shared kitchen, no testing); allergen note included; note to Mary explains both risks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The loaf is baked alongside wheat and isn't tested, so \"gluten-free\" could harm coeliac customers.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Avoids gluten-free marketing, includes all five on-site allergens and shared-kitchen warnings, and explains both claim risks to Mary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Avoids 'gluten-free', provides full allergen disclosures in copy, and explains risks in Mary's note."
+    }
+   ]
+  },
+  {
+   "check": "Format from data: carousel best click-through (≈ 1.5% vs ≈ 0.6%), reel best reach; trade-off explicit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The reel reaches about 2.4× more people (6,400 vs 2,700).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct click-through calculations support carousel for sign-ups; explicitly contrasts reel reach and suggests supporting reel promotion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates click-through rates from data, notes reel's reach advantage, and explicitly details the trade-off."
+    }
+   ]
+  },
+  {
+   "check": "Both pieces carry 2 May, Saturday 8–11am pickup, $36/month for 4 loaves, URL, first-50 tote",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "From 2 May: one fresh sourdough loaf every Saturday, 4 loaves for $36 a month.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Instagram and flyer both include launch date, pickup window, monthly price and quantity, URL, and first-50 tote offer."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both the Instagram post and the flyer contain all five required elements."
+    }
+   ]
+  },
+  {
+   "check": "SVG valid at A5 proportions, brand colours, clear hierarchy, legible text sizes, sufficient contrast",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "<g font-family=\"Helvetica, Arial, sans-serif\" font-size=\"9\" fill=\"#2B2B2B\">",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Valid self-contained A5 SVG has brand colours, hierarchy and contrast, but essential text prints around 6–7 points."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Valid SVG using exact brand colours, A5 viewBox, clear hierarchy, and legible text with high contrast."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025164563,
+ "date": "2026-10-11"
+}

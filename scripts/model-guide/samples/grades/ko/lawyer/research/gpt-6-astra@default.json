@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/research/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "research",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "c75c2fa491ba",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Claim 1 covered (CFO conduct, mandatory \"지급하여야 한다\"); Claim 2 likely not; Claim 3 close call, allocated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "청구 1은 선지급 대상, 청구 2는 제외, 청구 3은 다툼이 있으나 포함 주장이 우세",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "청구별 직무 관련성, 정관상 의무적 선지급, 청구 3의 양측 논거와 비용 안분을 모두 설명한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "청구 1 대상, 2 제외, 3은 경합 및 비용 안분을 명확히 제시함."
+    }
+   ]
+  },
+  {
+   "check": "민법 §687 via 상법 §382② treated as a supporting argument only, with the counter-argument noted",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "상법상 위임관계와 민법상 비용선급 의무는 보강 근거이나",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "보강 근거로만 사용하고, 회사의 책임추궁에 대한 방어가 위임사무 처리비용인지 의문이라는 반론을 명시한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "민법 제687조를 보강 근거로 다루고 반론도 명시함."
+    }
+   ]
+  },
+  {
+   "check": "Amendment can't strip his right for 2023–2024 conduct under [6]; treatise [8] outdated",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "청구 1은 2023~2024년 행위이므로 개정 전 의무적 선지급 조항이 적용됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "소급 박탈 불가와 [6]의 우위를 설명하지만, [8]이 시대에 뒤떨어진 자료라는 평가는 빠졌다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "[6]에 따라 소급 적용을 부인하고 [8]과의 충돌을 적절히 지적함."
+    }
+   ]
+  },
+  {
+   "check": "Good-faith condition rejected on [4] and [6], not blog [7]; bank guarantee rejected, undertaking unsecured",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "선의나 은행 지급보증을 선지급 조건으로 추가할 수 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "[4]·[6]에 근거해 선의 조건을 배척하고, 사후 반환 판단과 무담보 약정의 효력을 설명한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "[4], [6]에 따라 선의 조건과 은행 지급보증 요구를 모두 배척함."
+    }
+   ]
+  },
+  {
+   "check": "Enforce: payment claim in district court plus §300② 가처분 (high bar); fees pro rata under [5], §109 cap",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "임시지위 가처분을 신청하되, 자동 인용되는 것은 아닙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "지방법원 이행청구, 가처분, 비례 비용회수와 보수 한도를 설명하지만 지급형 가처분의 높은 문턱은 명확히 지적하지 않는다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "지방법원 이행청구, 가처분 요건 엄격성, 승소비율 비례 회수 및 비용 한도를 다룸."
+    }
+   ]
+  },
+  {
+   "check": "Tender unsecured undertaking, written demand; source table separates [1]–[4], fictional [5]–[6], unreliable [7]–[8]",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "무담보 반환 약정서와 청구별 비용명세를 제출하여 지급을 최고한 뒤 이행청구를 제기합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "약정서 제출과 지급 최고를 권고하며, 표에서 법령·정관, 가상 판례, 신뢰도 낮은 보조자료를 구분한다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "무담보 반환 약정 제출 및 최고를 권고하고, 표에서 출처 유형을 명확히 구분함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025386375,
+ "date": "2026-10-11"
+}

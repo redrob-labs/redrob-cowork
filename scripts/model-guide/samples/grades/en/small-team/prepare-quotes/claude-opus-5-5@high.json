@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/prepare-quotes/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "prepare-quotes",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "aced8a614656",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Spots ~25% markup, not margin: PC (899 − 720) ÷ 899 ≈ 19.9%; every hardware line under 25%",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "At list sell price, every hardware item falls below our 25% minimum margin:",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies every hardware margin shortfall and correctly calculates the PC margin as 19.9%."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies that every hardware item falls below 25% margin and specifically calculates PC margin at 19.9%."
+    }
+   ]
+  },
+  {
+   "check": "Re-prices at cost ÷ 0.75 (PC $960, AP ≈ $347, firewall $640, switch $720, backup $1,200) or flags it",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I repriced each item to the 25% minimum, which adds $676 to the hardware total.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses correct policy prices: PC $960, AP $347, firewall $640, switch $720, and backup $1,200."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reprices all hardware items using cost / 0.75."
+    }
+   ]
+  },
+  {
+   "check": "Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Mary mentioned 10 PCs, but the office has 12. I excluded the 2 imaging PCs pending vendor sign-off.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Quotes ten staff replacements and explicitly explains why the two vendor-dependent imaging PCs are excluded."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quotes 10 PCs, excludes the 2 imaging PCs pending vendor approval, and explains the 10 vs 12 discrepancy."
+    }
+   ]
+  },
+  {
+   "check": "Labour $5,637.50 (41 h × $125 + 10% PM); one-off ≈ $18,838.50; recurring $1,045 + $150/month, $420/year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Labour subtotal** | | | **$5,637.50** |\n| **Total one-off** | | | **$18,838.50**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Labour, project total, and separate recurring charges of $1,045 plus $150 monthly and $420 annually are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Exactly matches labour ($5,637.50), one-off total ($18,838.50), and recurring costs ($1,045 + $150/mo, $420/yr)."
+    }
+   ]
+  },
+  {
+   "check": "Phases to the $15,000 budget, with backup appliance, cloud backup and firewall first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Phase 1: $14,927.25 / Phase 2: $3,911.25**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommended first phase fits $15,000 and includes backup appliance, cloud backup, and firewall; backup work is scheduled first."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Phases under the $15,000 budget ($14,927.25) prioritizing backup, firewall, and network."
+    }
+   ]
+  },
+  {
+   "check": "Offers a BAA, says \"supports HIPAA obligations\", never \"HIPAA compliant\"; 30-day validity, 50% hardware deposit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Together these support your HIPAA obligations. Bluewick will sign a Business Associate Agreement (BAA) with the practice",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses appropriate HIPAA language, offers a BAA, and includes 30-day validity and a 50% hardware deposit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Offers a BAA, uses compliant HIPAA language without saying compliant/certified, and includes 30-day validity and 50% deposit terms."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0218274,
+ "date": "2026-10-11"
+}

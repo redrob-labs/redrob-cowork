@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/design-screens/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "086b8168274f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "민트 배경과 흰 레이블의 대비는 약 **1.8:1**로 일반 텍스트 AA 기준 4.5:1에 미달합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the contrast failure and explains using dark ink labels while retaining the brand background."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "대비 실패(약 1.8:1)를 지적하고 어두운 ink 색상으로 대체한 이유를 설명함."
+    }
+   ]
+  },
+  {
+   "check": "Drops 박영수's exotic slot, 12:30 (lunch), 11:30 scaling (runs into lunch), 16:45 check-up (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const validSlots = apiSlots\n  .map((slot, index) => ({ ...slot, id: String(index) }))\n  .filter(isValidSlot);",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Validation excludes all four invalid slots and retains only the two valid appointments."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "네 가지 부적절한 시간대(특수동물 자격 없음, 점심시간 침범 및 시작, 영업종료 초과)를 모두 제외함."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "API는 진료별 담당 자격 검증",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The table explains each invalid slot; API recommendations cover qualifications, lunch overlap, and closing-time validation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "각 제외된 슬롯의 탈락 사유를 구체적으로 밝히고 API 단에서의 검증 처리 방안을 명시함."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"280,000원부터\" honestly, e.g. with a final-price note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "실제 운영에서는 병원의 추가 비용 기준을 받아 표시하고, 진료 전 총액 안내·동의 절차를 연결해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves the starting price, explains uncertainty, and addresses surprises through additional-cost disclosure and pre-treatment total-price consent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "시작 가격을 정직하게 밝히고 추가 비용 고지 및 동의 절차를 통해 가격 확정 요구사항과의 긴장을 해소함."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"아무 수의사나 가능\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "아무 수의사나 가능",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file responsive prototype supports 375px, native keyboard controls, visible focus, labels, sufficiently large targets, and any-vet selection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "375px 대응, 키보드 포커스 및 레이블/터치 타깃(≥48px) 충족, '아무 수의사나 가능' 옵션을 제공함."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% check-up and vaccination bookings",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "건강검진·예방접종을 첫 두 항목에 배치했습니다. 수의사는 ‘아무 수의사나 가능’을 기본 선택해 별도 선호가 없으면 바로 진행합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains the step-screen choice and connects frequent-service prioritization with a default any-vet fast path."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "375px 집중도와 빈도 높은 70% 항목을 기본 선택/순서 배치를 통해 빠르게 진행하도록 플로우를 구성함."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.036961838,
+ "date": "2026-10-11"
+}

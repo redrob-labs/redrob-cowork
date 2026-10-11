@@ -1,0 +1,128 @@
+{
+ "key": "hi/founder/plan-finances/gpt-6-astra@default",
+ "language": "hi",
+ "profession": "founder",
+ "task": "plan-finances",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "f2296cb55a40",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Names John's errors: unburdened payroll without hires, licence spread instead of paid in April, revenue not gross profit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "लाइसेंस को मासिक भुगतान मानना",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies omitted payroll burden and hires, April licence cash timing, and the missing 22% hosting/processing cost."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies unburdened payroll without hires, licence spread instead of upfront, and revenue instead of gross profit."
+    }
+   ]
+  },
+  {
+   "check": "April 2026 net burn about ₹26,21,900 (12,07,500 + 3,80,000 + 14,40,000 − 4,05,600)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹10,30,000 + ₹1,57,500 + ₹1,14,400 + ₹13,20,000 = **₹26,21,900**।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "April burn and its payroll, opex, licence, and gross-profit components are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates April 2026 net burn exactly as ₹26,21,900 with matching component breakdown."
+    }
+   ]
+  },
+  {
+   "check": "Burn settles near ₹14.5–15.8 lakh a month June–December 2026, easing as MRR grows",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| दिसंबर 2026 | 9,49,508 | 9,49,508 | 7,40,616 | 17,63,333 | 4,40,000 | 0 | 14,62,717 | 95,84,816 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "June–December table correctly shows roughly ₹14.5–15.8 lakh burn, easing with growing MRR between hiring increases."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Table accurately reflects monthly burn settling between ₹14.5L and ₹15.8L from June to December 2026, easing as MRR grows."
+    }
+   ]
+  },
+  {
+   "check": "Cash runs out in July 2027 (~₹4.9 lakh end-June, ~15 months), with the April 2027 licence as a cliff",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसलिए नकद **जुलाई 2027** में समाप्त होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct exhaustion month; table shows ₹4,93,648 end-June cash and April 2027’s ₹26,87,725 licence-driven burn cliff."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly identifies cash running out in July 2027 with ~₹4.9L left in June and notes the April licence impact."
+    }
+   ]
+  },
+  {
+   "check": "Raise must close by about December 2026 (~₹95.8 lakh left), so fundraising starts by about July 2026",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "raise **दिसंबर 2026 तक close** और प्रक्रिया **जुलाई 2026 तक शुरू** करनी होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct deadlines and December cash; explicitly discloses normalized-burn interpretation and confirms actual-burn testing yields the same deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies closing by December 2026 (~₹95.8L left) and starting fundraising by July 2026."
+    }
+   ]
+  },
+  {
+   "check": "MRR = opening × 0.98 + new; formulas for every column; quantified alternative and justified recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CS टालना risk buffer है, fundraising का विकल्प नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct MRR recurrence and all column formulas; quantified CS deferral extends runway to August, supporting earlier fundraising."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides precise formulas for every column, quantifies the alternative CS scenario, and gives a clear recommendation."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025684313,
+ "date": "2026-10-11"
+}

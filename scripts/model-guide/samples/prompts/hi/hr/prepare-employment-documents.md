@@ -61,3 +61,36 @@ deliverable: documents
 - Drops the post-employment non-compete under section 27 instead of keeping it (keeps in-employment exclusivity and a confidentiality/IP clause). Replaces Texas law and Travis County with Indian law and Pune courts per company practice, and replaces the at-will clause with the 30-day probation / 60-day post-confirmation notice clause.
 - Pro-rates the joining bonus by full months: after 7 months he would owe 5/12 × ₹4,00,000 = ₹1,66,666.67 (about ₹1,66,667), consistent with section 74's reasonable-compensation limit. States that it won't be deducted from the full-and-final settlement without separate written authorization.
 - Keeps the contingencies, the 6-month probation and the 1 December 2025 start date (feasible as his last day elsewhere is 28 November). The letter reads as a finished document, with placeholders limited to the open decisions.
+
+## Card
+
+brief: Recruiter ने बेंगलुरु के एक engineer से approved requisition से ज़्यादा शर्तों का मौखिक वादा किया; offer letter, cover note और joining-bonus उदाहरण तैयार कीजिए।
+given:
+- Approved requisition REQ-2291: title/level, CTC band, ESOP, joining bonus, classification और reporting
+- Recruiter के notes: जॉन स्टाइल्स द्वारा मौखिक रूप से स्वीकार की गई शर्तें, notice की स्थिति और non-compete हटाने का अनुरोध
+- Usual template (US parent से): 4 clauses (signing bonus, non-competition, governing law, at-will)
+- Legal के guidance notes: Indian Contract Act धारा 27, 28 और 74, at-will पर टिप्पणी और company practice
+asked:
+- भेजने के लिए तैयार offer letter, बताए गए headed sections के साथ
+- मैरी मेजर के लिए cover note: हर mismatch, उसे सुलझाने की सिफ़ारिश और sign-off किसका
+- 7 पूरे महीनों के बाद इस्तीफ़े पर joining-bonus वापसी का worked example
+limit: पूरा उत्तर लगभग 1,200 शब्दों के भीतर, cover note अधिकतम 300 शब्द, Markdown
+hard: वादा की गई शर्तों को approvals से मिलाना है, US template के clauses पर भारतीय क़ानून लागू करना है, और CTC के अंतर पर judgement call चाहिए।
+
+## Scorecard
+
+- Letter uses ₹38,00,000 or placeholder, 3,200 options, "Software Engineer II"; not ₹40,00,000, 4,000 or "Senior"
+- Takes a position on the CTC gap (band exception with sign-offs, or bridge); candidate told before sending
+- Post-employment non-compete dropped (s.27), exclusivity and confidentiality/IP kept; Indian law and Pune courts replace Texas
+- At-will replaced: 30 days' notice in probation, 60 days after confirmation (or salary in lieu)
+- Repayment after 7 months: 5/12 × ₹4,00,000 ≈ ₹1,66,667 (s.74); no full-and-final deduction without written authorization
+- Keeps contingencies, 6-month probation and 1 Dec 2025 start (feasible after 28 Nov); placeholders only for open decisions
+
+## Scorecard, shown
+
+- Letter में ₹38,00,000 या placeholder, 3,200 options, "Software Engineer II"; ₹40,00,000, 4,000 या "Senior" नहीं
+- CTC के अंतर पर स्पष्ट राय (sign-off के साथ band exception, या approved सीमा में bridge); letter से पहले उम्मीदवार को सूचना
+- नौकरी के बाद का non-compete हटाया (धारा 27), exclusivity और confidentiality/IP बरक़रार; Texas की जगह भारतीय क़ानून और पुणे की courts
+- At-will की जगह: probation में 30 दिन का notice, confirmation के बाद 60 दिन (या notice के बदले salary)
+- 7 महीने बाद वापसी: 5/12 × ₹4,00,000 ≈ ₹1,66,667 (धारा 74); अलग लिखित authorization के बिना full-and-final से कटौती नहीं
+- Contingencies, 6 महीने का probation और 1 दिसंबर 2025 की शुरुआत बरक़रार (28 नवंबर के बाद संभव); placeholders केवल खुले फ़ैसलों पर

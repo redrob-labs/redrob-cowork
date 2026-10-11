@@ -64,3 +64,28 @@ Keep the written parts under about 1,200 words. The SVG doesn't count toward the
 - Every line respects its limit, and the counts shown are accurate. No superlatives; sentence case throughout.
 - The SVG is valid and self-contained, uses `#1F4D3A`, `#F2A93B` and `#F7F5F0`, and carries the H1, subhead, CTA and footnote, with a clear hierarchy.
 - The note to product marketing explains the claim and price changes in terms of the pilot data and the legal rules, and points to the quote and the 44-of-48 ease result as stronger proof.
+
+## Card
+
+brief: Write launch creative for a small-business smart thermostat across three assets, checking the brief's claim and price against pilot data and legal rules.
+given:
+- Product marketing brief: headline idea, price, audience and key benefits
+- Pilot results: 5 metrics from 48 sites, and an approved customer quote
+- Price sheet: list price, launch price and the required subscription
+- Brand and legal rules: voice, colours, typeface, footnote and price rules
+- Assets needed: 3 assets with their copy limits
+asked:
+- Copy for each asset, with a count next to each line
+- Layout and visual direction for the hero and the Meta ad
+- An inline SVG mock-up of the hero (1200×630)
+- A note to product marketing, at most 120 words, on changes to the brief
+limit: Written parts under about 1,200 words, in Markdown; the SVG doesn't count
+hard: The brief's claims must be checked against data and legal rules, every line has a hard limit, and choosing honest proof is a judgement call.
+
+## Scorecard
+
+- Doesn't lead with "40%" (best site, HVAC not bill); e.g. median 18% HVAC (~7% of bill), footnoted
+- Price: $149 launch (list $179, through Jan 31, 2026) plus $8/month per location subscription
+- Every line within its limit, with accurate counts; no superlatives; sentence case
+- SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote
+- Note explains claim and price changes; points to the quote and the 44-of-48 ease result

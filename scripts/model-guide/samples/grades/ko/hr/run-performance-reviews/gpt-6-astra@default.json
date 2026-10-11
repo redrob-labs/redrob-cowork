@@ -1,0 +1,128 @@
+{
+ "key": "ko/hr/run-performance-reviews/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "hr",
+ "task": "run-performance-reviews",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "a2f161de171a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Payroll ₩865,200,000; budget ₩30,282,000; submitted ₩31,423,000 (3.63%), ₩1,141,000 over; HRBP's \"3.4%\" called wrong",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**HRBP 요약 정정:** 제출안은 연봉 총액의 **3.6314%**로, 예산을 **1,141,000원 초과**합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "연봉 총액, 예산, 제출액과 초과액이 모두 정확하며 HRBP 요약 오류를 명시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All figures (payroll, budget, submitted total, % and excess) and HRBP correction are accurate."
+    }
+   ]
+  },
+  {
+   "check": "E07 is a firm policy issue: rated on pro-rated 103% (anchor 4), merit raised; §19③ 불리한 처우",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**필수 시정**: 휴직 미달 사유 배제, 비례목표 103% 적용",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "E07을 필수 시정하고 등급·인상률을 올렸지만 남녀고용평등법 제19조 제3항의 불리한 처우 금지를 명시하지 않았습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly anchors E07 at grade 4 (103%), raises merit, and addresses maternity leave disadvantage."
+    }
+   ]
+  },
+  {
+   "check": "Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E02·E03은 제출 등급 유지가 불가능하다는 판단이 확정적입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "E02의 5 대 3과 사유 누락, E03의 5 대 1을 규정 위반으로 정확히 식별했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags both E02 and E03 as violations due to exceeding adjustment limits without proper justification."
+    }
+   ]
+  },
+  {
+   "check": "Shows 박영수's leniency in the manager table: average submitted 4.75 vs anchor 3.25",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 박영수 | 4.75 | 3.25 | E02·E03의 허용 한도 초과 상향 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "팀장별 표에서 정확한 평균과 박영수의 과도한 상향 패턴을 제시했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates submitted average 4.75 vs anchor 3.25 and highlights leniency."
+    }
+   ]
+  },
+  {
+   "check": "E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "E09는 사유 없으면 4등급, E10은 제시 사유를 확인해 유지합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "E09의 근거 없는 하향을 지적하고 E10의 사유 있는 한 단계 상향을 논의 후 유지하도록 했습니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies E09 as under-rated needing written rationale, and allows E10's justified grade 4 to stand."
+    }
+   ]
+  },
+  {
+   "check": "Recommended plan totals ≤ ₩30,282,000, every merit % inside its range, merit amount = base × %",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| 권고안 인상액 | Σ(기본 연봉 × 권고 인상률) | 28,199,500 | 3.2593% |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "권고 합계가 예산 이내이며 모든 인상률과 개별 인상액이 등급 범위 및 곱셈 산식에 부합합니다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Total is under budget (₩28,199,500 ≤ ₩30,282,000), formulas are specified, and all rates/amounts are within range."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.025159050000000002,
+ "date": "2026-10-11"
+}

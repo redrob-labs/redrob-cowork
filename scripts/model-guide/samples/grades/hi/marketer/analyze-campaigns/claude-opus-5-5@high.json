@@ -1,0 +1,110 @@
+{
+ "key": "hi/marketer/analyze-campaigns/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "marketer",
+ "task": "analyze-campaigns",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "3bb7c5ce4a76",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Platforms' 2,480/₹2,57,20,000 vs actual 1,640/₹1,70,56,000: 840 over-attributed (~51%); 2.37× invalid; Moj window flagged",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**840** | **51.22%**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly reconciles platform and actual totals, rejects draft ROAS, and flags Moj’s mismatched window."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles orders and revenue, identifies 840 over-attributed units (51%), invalidates 2.37×, and flags Moj window."
+    }
+   ]
+  },
+  {
+   "check": "True cost ₹1,11,60,000 with the ₹3,20,000 fee; blended ROAS ≈1.53×; contribution −₹17,79,200",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**₹1,11,60,000** | **1,640** | **₹1,70,56,000** | **1.53** | **₹6,805** | **−₹17,79,200**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes affiliate fee and correctly calculates total cost, blended ROAS, and negative contribution."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly includes ₹3,20,000 fee for ₹1,11,60,000 cost, yielding 1.53× ROAS and −₹17,79,200 contribution."
+    }
+   ]
+  },
+  {
+   "check": "ROAS: Meta 0.98, Search 1.58, PMax 1.19, Moj 0.55, Affiliate 2.13, Email 14.00",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹10,40,000 (₹7,20,000 commission + ₹3,20,000 fee) | 210 | ₹22,17,600 | 2.13",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All six channel ROAS figures match the required values."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All channel ROAS figures match the required values exactly."
+    }
+   ]
+  },
+  {
+   "check": "Uses the holdout to argue last-click under-credits Meta; discounts PMax for brand; Moj weakest",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Last-click पर घाटा है, पर holdout में असली lift दिखा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses Meta holdout evidence, identifies last-click under-credit, discounts PMax brand attribution, and ranks Moj weakest."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Meta holdout against last-click bias, discounts PMax for brand search, and identifies Moj as weakest."
+    }
+   ]
+  },
+  {
+   "check": "Q4 plan totals ₹1,11,60,000, follows the scorecard; tests e.g. Moj holdout, PMax brand exclusions, LTV; festive seasonality",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "PMax brand exclusion का A/B test और 2–3 हफ़्ते का brand-search holdout चलाएँ।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Budget totals correctly and tests follow findings; lacks LTV analysis and an explicit festive-season comparability caveat."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Totals ₹1,11,60,000, covers Moj holdout, PMax exclusions, and festive seasonality, but omits LTV/repeat-purchase analysis."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.032394338,
+ "date": "2026-10-11"
+}

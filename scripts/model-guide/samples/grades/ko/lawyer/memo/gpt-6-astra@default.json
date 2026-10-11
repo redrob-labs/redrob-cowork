@@ -1,0 +1,128 @@
+{
+ "key": "ko/lawyer/memo/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "4a4a04f44b9a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "8.2(a) rep claim expired Apr 30, 2024; 8.2(c) survives under 8.6 to Apr 30, 2028; timely",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "따라서 7년 이내라는 사실만으로 적기 청구라고 단정할 수 없다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "진술·보장 만료일과 2028년 최종기한은 맞지만, 제8.2조 (c) 청구가 적기라는 결론을 유보했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the expiry of the rep claim and the survival of the 8.2(c) claim."
+    }
+   ]
+  },
+  {
+   "check": "Answers §184②: 8.6 is a survival period, not an extended limitation; §64 runs from Aug 4, 2025 (§166①)",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "이 청구가 부과·손해 확정 또는 납부 때 행사 가능해지는지는 계약 전체와 사실관계에 달려 있다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "존속기간과 소멸시효를 구별했으나, 5년 시효의 기산점을 2025년 8월 4일로 확정하지 않았다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Properly explains that 8.6 is a contractual survival period and analyzes limitation under §166①."
+    }
+   ]
+  },
+  {
+   "check": "Notice 91 days after Aug 4 misses 30 days; bars recovery only for actual prejudice (e.g. §68① window)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "그러나 제8.7조는 실권이 아니라 **지연으로 발생한 실제 불이익 범위의 면책**만 허용한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "91일 후 통지의 기한 위반을 인정하고, 실제 불이익 및 90일 심판청구 기회 상실을 검토했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recognizes the missed 30-day deadline, limits defense to actual prejudice, and discusses the 90-day appeal window."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable ₩6억 6,200만 (2019, 2020, Jan–Apr 2021), not pro-rata ₩1억 667만; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "제6.9조에 따라 2021년분은 일수 안분이 아니라 종결일 종료 기준 장부마감으로 배분한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "2019·2020년과 2021년 1~4월분을 합산해 6억 6,200만원을 산정하고 종결 후 세액을 제외했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates recoverable ₩6억 6,200만 using closing-of-the-books rather than pro-rata, excluding post-closing."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares ₩4억 6,340만 and ₩1억 9,860만",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **합계** | **112,000** | **66,200** | **46,340** | **19,860** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "공제금액·에스크로 상한 미적용과 해제 후 의무 존속을 설명하고, 지분별 분할책임 금액을 정확히 계산했다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes exemption from deductible/cap/escrow release and correctly splits shares to ₩4억 6,340만 and ₩1억 9,860만."
+    }
+   ]
+  },
+  {
+   "check": "Amend the ₩11억 2천만 notice to an 8.2(c) claim for ₩6억 6,200만; preserve the assessment challenge",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "청구액을 6억 6,200만원으로 정정하여 위 배분표와 부과서·작업문서를 첨부한다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "제8.2조 (c) 청구로 정정하도록 권고했으나, 가능한 부과처분 불복수단의 보전을 명시적으로 권고하지 않았다."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends amending the notice to ₩6억 6,200만 under 8.2(c) and preserving appeal/assessment challenges."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028461300000000002,
+ "date": "2026-10-11"
+}

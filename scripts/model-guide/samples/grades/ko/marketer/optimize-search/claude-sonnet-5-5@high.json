@@ -1,0 +1,128 @@
+{
+ "key": "ko/marketer/optimize-search/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "marketer",
+ "task": "optimize-search",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "868c01474ff0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 3,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Fixes price (₩39,000 annual / ₩49,000 monthly, not \"월 29,000원부터\"), trial not free plan, 장부온 클라우드 only",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "필드노트는 연간 결제 시 사용자당 월 39,000원, 월간 결제 시 사용자당 월 49,000원이며 부가가치세는 별도입니다. 무료 요금제는 없습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct prices and trial terms; clearly limits integration to 장부온 클라우드 and excludes 장부온 PC."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Fixes pricing accurately, clarifies 14-day trial without free plan, and limits Jangbuon integration to cloud."
+    }
+   ]
+  },
+  {
+   "check": "Cuts unsubstantiated \"업계 1위\" and \"가장 똑똑한\" under 표시광고법 §§3, 5",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "\"업계 1위\"는 근거가 없고 \"월 29,000원부터\"는 사실과 달라 표시광고법 위험이 있어 뺐습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Removes both unsupported slogans, but does not explain §§3 and 5 or their substantiation requirements."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Removes unsubstantiated claims and explicitly justifies the removal under the Act on Fair Labeling and Advertising."
+    }
+   ]
+  },
+  {
+   "check": "Answers \"에어컨 일정관리 앱 무료\" honestly with the 14-day trial, explained in the rationale",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "\"무료\"는 무료 요금제가 없어 오해와 이탈만 부르므로 제외했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "FAQ honestly explains the 14-day trial, but rationale excludes the query rather than explaining trial-based targeting."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Answers the free query honestly via the 14-day trial in FAQ Q2 and explains the rationale."
+    }
+   ]
+  },
+  {
+   "check": "FAQ: technician app works offline, office web app doesn't; fact table has price, 장부온 클라우드, offline",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "필드노트의 기사용 모바일 앱은 오프라인에서도 작동하고 인터넷에 연결되면 동기화됩니다. 다만 사무실용 웹 앱은 인터넷 연결이 필요합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "FAQ distinguishes mobile and web connectivity; fact table includes both prices, cloud integration, and offline availability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "FAQ clearly separates mobile app and office web app offline capabilities; fact table lists price, Jangbuon Cloud, and offline support."
+    }
+   ]
+  },
+  {
+   "check": "Targets 설치 일정관리 and 기사 배차 queries in title, H1, H2s; blog made informational, exact-match link",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "도입부와 결론에 \"에어컨 설치 일정관리 프로그램 필드노트\" 앵커로 제품 페이지를 링크합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Informational blog repositioning and keyword anchor address cannibalisation; technician-dispatch query targeting in title and headings remains incomplete."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Targets queries in title/H1/H2, repositions blog to informational intent, and uses exact-match anchor text to product page."
+    }
+   ]
+  },
+  {
+   "check": "Title ≤30, meta ≤80, counts accurate; JSON-LD valid and matches page; survey attributed (n = 210, March 2025)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "2025년 3월 고객 설문(응답 210명)에서 배차 담당자의 일정 관리 시간이 주 9시간에서 4시간으로 줄었다고 답했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Title and meta counts are accurate at 23 and 70; JSON-LD matches page facts, with correctly attributed survey."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Title is 23 chars, meta is 70 chars, JSON-LD is valid and matches page, survey is properly attributed (n = 210, March 2025)."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024490463,
+ "date": "2026-10-11"
+}

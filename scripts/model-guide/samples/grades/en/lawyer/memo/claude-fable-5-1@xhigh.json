@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/memo/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "memo",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "c8f70aff2127",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Rep claim under 8.2(a) expired Apr 30, 2024; 8.2(c) survives to Apr 30, 2028 under §8106(c); timely",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "§8.2(c) (Pre-Closing Taxes) is alive.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Distinguishes expired April 30, 2024 representation from timely independent indemnity, with April 30, 2028 outer limit under §8106(c)."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly distinguishes the expired rep claim from the timely §8.2(c) claim enforceable under §8106(c)."
+    }
+   ]
+  },
+  {
+   "check": "Notice ~91 days after Aug 4 misses 30 days, but bars recovery only to the extent of actual prejudice",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "notice on November 3 was 61 days late.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies 91-day elapsed period and limits relief to actual prejudice, including lost appeal rights."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately notes the missed 30-day deadline (~91 days post-receipt) and correctly applies the actual prejudice standard."
+    }
+   ]
+  },
+  {
+   "check": "Recoverable $662,000 ($260,000 + $290,000 + $112,000), not pro-rata $106,667; post-closing tax excluded",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The auditor's Jan–Apr/May–Dec split coincides exactly with the Closing Date, so no further allocation is needed.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses closing-of-the-books $112,000 allocation; table totals $662,000 and excludes all post-closing tax."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates $662,000 using closing-of-the-books and excludes post-closing amounts."
+    }
+   ]
+  },
+  {
+   "check": "8.2(c) free of Deductible, escrow cap and released escrow; several shares $463,400 and $198,600",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**$662,000** (no Deductible or Escrow cap applies), collectible severally: **$463,400** from Founders LLC and **$198,600** from Ms. Major.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct exemptions and several shares; separately explains released escrow does not limit recovery."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms exemption from deductible and escrow cap, correctly calculating several liability shares."
+    }
+   ]
+  },
+  {
+   "check": "Amend the $1,120,000 notice to an 8.2(c) claim for $662,000; preserve the assessment appeal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "reduce the demand to **$662,000 of tax**, plus pre-closing interest and penalties",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends corrected §8.2(c) notice replacing full assessment demand and expressly protecting protest and appeal rights."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends amending the notice to §8.2(c) for $662,000 and protecting the appeal rights."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023664638,
+ "date": "2026-10-11"
+}

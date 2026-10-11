@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/write-tests/gpt-6-astra@default",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "write-tests",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "b9db34c3a698",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Shows `- 1` drops the change day: 15 February gives ₩14,000, not ₩15,000; last day ₩0, not ₩1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| leap-middle | ±15,000 | ±14,000 |\n| leap-first | ±29,000 | ±28,000 |\n| leap-last | ±1,000 | 0 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies change-day exclusion and both required incorrect actual amounts."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies that - 1 drops change day, giving 14,000 vs 15,000 and last day 0 vs 1,000."
+    }
+   ]
+  },
+  {
+   "check": "Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "변경 당일을 제외하는 `- 1` 때문에 주요 청구·환급 금액이 잘못됩니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends NO-GO, identifies the unimplemented headline fix, and supplies the minimal removal of minus one."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends NO-GO and provides the minimal fix removing '- 1'."
+    }
+   ]
+  },
+  {
+   "check": "Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "pytest.param(\"2024-01-31\", id=\"before-start\"),\n    pytest.param(\"2024-03-01\", id=\"exclusive-end\"),",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests full-difference starts, excluded boundaries, leap February, and 30/31-day months with correct expectations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests period start, ValueError outside bounds, leap year February, and 30/31-day months."
+    }
+   ]
+  },
+  {
+   "check": "Notes ROUND_HALF_UP takes −0.5 to −1, mirroring upgrades; half-won cases need custom test plans",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "따라서 `0.5 → 1`, `-0.5 → -1`로 정했습니다. 환급 대칭성에도 부합합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly adopts away-from-zero half-up and tests positive and negative half-won boundaries using custom plans."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes -0.5 rounds to -1 and designs custom test plans for half-won cases."
+    }
+   ]
+  },
+  {
+   "check": "Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "JSON 연동 요구에 따라 float를 거부하지 않고 `Decimal(str(value))`로 변환합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests float acceptance and conversion; correctly identifies mixed-type TypeError and two-float quantize AttributeError."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Defines a float-handling policy and identifies float-Decimal TypeError and float .quantize failure."
+    }
+   ]
+  },
+  {
+   "check": "Tests are runnable, well named and parametrized; any property test states a real invariant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "def test_rounding_at_half_won(delta, expected):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Runnable, descriptive, parametrized pytest tests with correct expected values; no optional property test requiring further assessment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The tests are runnable, idiomatic, well-named, and thoroughly parametrized."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.026092238,
+ "date": "2026-10-11"
+}

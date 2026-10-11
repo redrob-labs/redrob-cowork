@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/design-systems/gpt-6-astra@default",
+ "language": "en",
+ "profession": "engineer",
+ "task": "design-systems",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "d494dc3e01d4",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Computes ~23 events/s average, ~230/s peak, ~700/s peak after 3× growth; calls 2,300/s 10× high",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Today: `2,000,000 / 86,400 = 23.1 events/s` average; `× 10 = 231.5` peak.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct arithmetic gives today's rates and 694.4/s future peak; explicitly corrects 2,300/s, demonstrating the tenfold overestimate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates ~23/s average, ~231/s peak, ~694/s in 18 months, and notes draft's 2,300 is incorrect."
+    }
+   ]
+  },
+  {
+   "check": "Rejects exactly-once over HTTP; proposes at-least-once with stable event IDs and merchant dedup guidance",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "External HTTP cannot guarantee exactly-once. Offer **at-least-once attempts within 24 hours**, stable IDs, and deduplication guidance.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once and explains stable event IDs and transactional merchant deduplication."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects exactly-once over HTTP, proposes at-least-once with stable IDs and merchant deduplication guidance."
+    }
+   ]
+  },
+  {
+   "check": "Sizes storage ~5.2 GB/day (2.6M × 2 KB), ~156 GB/30 days, ~470 GB at 3×; partitions or TTL",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "History, decimal units: `2M × 1.3 × 2 KB × 30 = 156 GB`; future **468 GB**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct storage arithmetic implies 2.6M attempts and 5.2 GB daily; daily partitions enforce retention."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates 156 GB/30 days and ~468 GB at 3×, and specifies daily table partitioning."
+    }
+   ]
+  },
+  {
+   "check": "Per-endpoint isolation, short timeouts, jittered backoff over 24h, circuit breaking; per-shipment ordering by key or sequence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Full-jitter exponential backoff: `uniform(0, min(1 hour, 30 seconds × 2^retry))`.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes 24-hour expiry, short timeouts, endpoint quotas, circuit breakers, and sequence-based per-shipment gating."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Covers per-endpoint concurrency limits, short timeouts, jittered backoff over 24h, circuit breaking, and per-shipment sequence ordering."
+    }
+   ]
+  },
+  {
+   "check": "Recommends the managed queue or a Postgres outbox over a self-hosted log; HMAC signing with timestamp",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Sign `timestamp + \".\" + raw_body` using HMAC-SHA256 and an endpoint-specific secret.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends the existing managed queue over operationally costly logs; specifies timestamped HMAC and replay protection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends managed queue/Postgres outbox over distributed log, and specifies HMAC-SHA256 with timestamp."
+    }
+   ]
+  },
+  {
+   "check": "Gives a phased migration with SLOs, and a speaker note on every slide",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Weeks 10–12: canary endpoints, then staged expansion.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides phased shadow-to-canary migration, explicit latency SLO and alerts, and a speaker note on all twelve slides."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes a phased migration plan, defined SLOs, and speaker notes across all 12 slides."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0170499,
+ "date": "2026-10-10"
+}

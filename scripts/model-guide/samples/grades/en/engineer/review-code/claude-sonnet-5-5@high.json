@@ -1,0 +1,128 @@
+{
+ "key": "en/engineer/review-code/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "engineer",
+ "task": "review-code",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "ca04397b3b18",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Requests changes; blockers: cross-tenant export via ?tenantId= (IDOR) and SQL injection via ORDER BY ${sort}",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "## Verdict: Request changes",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies cross-tenant export through tenantId and SQL injection through interpolated sort as blockers."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly requests changes and categorizes both the cross-tenant query param and SQL injection as blockers."
+    }
+   ]
+  },
+  {
+   "check": "Fixes them by always using req.user.tenantId and allow-listing sort columns",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "const tenantId = req.user.tenantId;",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Revised handler ignores client tenantId and restricts sorting to fixed column mappings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides exact fixes using req.user.tenantId and an allowlist of sort columns."
+    }
+   ]
+  },
+  {
+   "check": "Flags SELECT * leaking password_hash, mfa_secret, date_of_birth, salary_band; requires explicit columns; flags stack-trace leak",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The table includes `password_hash`, `mfa_secret`, `date_of_birth`, and `salary_band`.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags all four sensitive columns, requires explicit selection, and identifies client-visible stack traces."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies all leaked columns, demands an explicit column list, and flags the stack trace leak in the catch block."
+    }
+   ]
+  },
+  {
+   "check": "Catches missing CSV escaping, formula injection via full_name, and the rows[0] crash for empty tenants",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**L53 `Object.keys(rows[0])`** throws a `TypeError` on a tenant with zero users",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Also explains CSV quoting failures and user-controlled formula injection; revised serialization addresses all three."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Catches missing escaping, formula injection in full_name, and the crash when rows is empty."
+    }
+   ]
+  },
+  {
+   "check": "Flags the un-awaited auditLog (compliance) and 140,000 rows in memory against the streaming convention",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Compliance requires a record for *every* export",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags unawaited audit writes and 140k-row buffering against the streaming convention; recommends awaited auditing and streaming."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags both the un-awaited audit call violating compliance and the 140k-row memory buffering violating streaming conventions."
+    }
+   ]
+  },
+  {
+   "check": "Revised handler and tests cover cross-tenant, sort injection, formula escaping and audit; tone is constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Also assert that the audit record's `tenantId` is A.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Handler and tests cover tenant isolation, malicious sorting, formula escaping, and auditing; tone remains constructive."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The revised code and test suite thoroughly cover all key issues with a supportive, constructive tone."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.031307063,
+ "date": "2026-10-11"
+}

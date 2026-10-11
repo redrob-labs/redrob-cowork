@@ -1,0 +1,110 @@
+{
+ "key": "ko/lawyer/review/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "577797990b7d",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "처리위탁 agreement is the blocker: 민감정보 shared, Exhibit C omitted, §26①; don't sign or go live first",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "별첨 C 체결 전에는 환자 데이터 연동을 하지 않는다는 조건을 명시해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Prioritizes missing processing agreement, identifies sensitive information and Article 26 requirements, and blocks signing or patient-data integration."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies missing processing agreement as blocker, cites §26/sensitive data, and advises not signing/going live."
+    }
+   ]
+  },
+  {
+   "check": "Cap is ₩4,500만 (3 months, implementation excluded) vs guideline ₩2억 4천만 in year 1, ₩5억 4천만 super-cap",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "1년차 2.4억원(구독료 1.8억 + 구축비 6천만). 개인정보 별도 상한 5.4억원(연 대금 1.8억 × 3).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates ₩45 million current cap, excluding implementation, ₩240 million first-year baseline, and ₩540 million privacy super-cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates current ₩4,500만 cap versus guideline ₩2억 4천만 cap and ₩5억 4천만 super-cap."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP defence is capped; 9.2 excludes notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "제9.1조의 예외로 인용된 제10.4조가 존재하지 않아, 예외 조항이 비어 있는 상태입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies missing cross-reference, notification-cost exclusion, and broad customer indemnity, but omits uncapped exposure and explicit IP-defence cap consequence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes missing §10.4 caps IP defence, §9.2 excludes breach notification costs, and §10.2 customer indemnity is overbroad."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, 대전 venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "1년 갱신, 60일 통지, 인상 3% 이하",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides guideline-aligned redlines for renewal, SLA and chronic-failure remedies, Seoul venue, and free export with 60-day retrieval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides redlines matching guidelines for renewal, 99.5% sole-remedy SLA, Daejeon venue, and exit terms."
+    }
+   ]
+  },
+  {
+   "check": "§29 makes 대전 venue valid; 약관규제법 §§12, 14 may help, but §4 limits it; calendar and negotiate",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "개별 교섭을 거친 조항은 약관성을 잃을 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly explains venue validity, potential statutory challenges, and negotiated-term limits, but omits calendaring the renewal deadline."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Analyzes §29, §§12, 14, and §4 well and stresses negotiation, but omits calendaring renewal deadlines."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024579713,
+ "date": "2026-10-11"
+}

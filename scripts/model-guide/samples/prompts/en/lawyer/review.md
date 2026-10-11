@@ -65,3 +65,27 @@ Quantify the cap. Keep it under about 1,200 words.
 - Notices that the carve-out cross-refers to a non-existent §10.4, so even the IP indemnity falls under the $45,000 cap. Also notes that 9.2 excludes breach-notification costs, and that the 10.2 customer indemnity is broad and uncapped.
 - Flags the renewal (3-year terms, 120 days' notice, +9%), the 99.5% SLA with credits as the sole remedy, the Delaware venue, and the exit terms (30-day deletion, paid export), each with redlines tied to the playbook.
 - Gets the statutes right. §5-1401 is satisfied (an aggregate of $600,000 or more), so the New York choice of law holds, but it doesn't fix the venue. Whether §5-903 applies to SaaS is uncertain (is SaaS "service … to or for … personal property"?), so the memo calendars the deadline and negotiates the clause rather than relying on the statute.
+
+## Card
+
+brief: A hospital system wants to sign a SaaS scheduling vendor's agreement by Friday; review its terms against the playbook and write the memo.
+given:
+- Deal facts: the patient census data the platform imports, and the order-form term and fees
+- Contracting playbook: 7 SaaS positions, from liability cap to exit
+- MSA excerpts: definitions, BAA, SLA, liability, indemnity, renewal, law and exit clauses
+- Statutes: N.Y. Gen. Oblig. Law §5-1401(1) and §5-903(2)
+asked:
+- Bottom line: sign or don't sign yet, and why
+- Issues table: clause, issue, risk, redline and fallback
+- The five points to win on Friday's call, in priority order
+- Notes on whether and how each statute helps
+limit: Under about 1,200 words, as a Markdown memo with headed sections; the cap quantified
+hard: Clauses interlock through definitions and cross-references, a regulatory requirement applies, and two statutes' reach needs judgement.
+
+## Scorecard
+
+- BAA is the blocker: PHI shared, Exhibit C omitted; don't sign or go live with census data until signed
+- Cap is $45,000 (3 months, implementation excluded) vs playbook $240,000 in year 1 and $540,000 super-cap
+- Carve-out cites non-existent §10.4, so IP indemnity is capped; 9.2 excludes notification costs; 10.2 broad, uncapped
+- Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Delaware venue and exit terms
+- §5-1401 met ($600,000+): NY law holds, venue not fixed; §5-903's reach to SaaS uncertain, so calendar and negotiate

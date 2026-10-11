@@ -58,3 +58,38 @@ deliverable: documents
 - The totals are correct for the prices used. Labour is 41 h × ₹1,500 = ₹61,500 plus 10% PM = ₹67,650. With policy pricing, hardware is ₹8,92,000 and the one-off total is ₹9,59,650 before GST (₹1,72,737 GST, ₹11,32,387 including GST). Recurring costs are shown separately: support at 11 × ₹1,500 = ₹16,500/month, cloud backup at ₹9,000/month and the firewall subscription at ₹30,000/year (plus GST).
 - Addresses the ₹8 lakh + GST budget with options or phases, and prioritises the backup appliance, cloud backup and firewall in phase 1, given the 4-month-old last backup and the patient data.
 - Uses compliant language (a DPA is offered, and the solution supports the clinic's DPDP Act obligations rather than being "DPDP compliant") and includes the 30-day validity and the 50% hardware deposit terms.
+
+## Card
+
+brief: IT firm की pricing policy और client के budget के भीतर dental clinic के PC, network, backup और managed-support project का quote बनाएँ।
+given:
+- Client का email: माँगा गया scope और लगभग ₹8 लाख + GST का budget
+- Site survey notes: users, इस्तेमाल में PCs, network, backup की स्थिति और monitors
+- Price list: 7 items की cost और list sell
+- Labour और services: hourly rate, हर काम के घंटे, project management और managed support
+- Quoting policy: न्यूनतम margin, GST, terms और DPDP शब्दावली के नियम
+asked:
+- Quote: summary, scope, one-off और recurring cost tables, GST सहित totals, assumptions, exclusions और terms
+- Scope budget से ज़्यादा हो तो options या phases, एक recommendation के साथ
+- मैरी मेजर को cover email (अधिकतम 150 शब्द)
+- Pricing या scope की समस्याओं पर owner के लिए internal note (अधिकतम 100 शब्द)
+limit: लगभग 1,200 शब्दों के भीतर, markdown में
+hard: Client का अनुरोध, survey और price list आपस में या policy से पूरी तरह मेल नहीं खाते, और budget की वजह से priority तय करनी पड़ती है।
+
+## Scorecard
+
+- Spots ~25% markup, not margin: PC (59,900 − 48,000) ÷ 59,900 ≈ 19.9%; every hardware line under 25%
+- Re-prices at cost ÷ 0.75 (PC ₹64,000, AP ₹20,000, firewall ₹48,000, switch ₹56,000, backup ₹88,000) or flags it
+- Quotes 10 staff PCs; imaging PCs excluded or optional pending vendor sign-off; 10 vs 12 explained
+- Labour ₹67,650 (41 h × ₹1,500 + 10% PM); one-off ₹9,59,650 + GST; recurring ₹16,500 + ₹9,000/month, ₹30,000/year
+- Phases to the ₹8 lakh + GST budget, with backup appliance, cloud backup and firewall first
+- Offers a DPA, says "supports DPDP Act obligations", never "DPDP compliant"; 30-day validity, 50% hardware deposit
+
+## Scorecard, shown
+
+- ~25% markup पकड़ता है, margin नहीं: PC (59,900 − 48,000) ÷ 59,900 ≈ 19.9%; हर hardware line 25% से कम
+- Cost ÷ 0.75 पर नई कीमत (PC ₹64,000, AP ₹20,000, firewall ₹48,000, switch ₹56,000, backup ₹88,000) या flag करता है
+- 10 staff PCs का quote; imaging PCs vendor sign-off तक बाहर या optional; 10 बनाम 12 समझाया
+- Labour ₹67,650 (41 घंटे × ₹1,500 + 10% PM); one-off ₹9,59,650 + GST; recurring ₹16,500 + ₹9,000/माह, ₹30,000/वर्ष
+- ₹8 लाख + GST budget के लिए phases, पहले backup appliance, cloud backup और firewall
+- DPA offer करता है, "DPDP Act की ज़िम्मेदारियों को support करता है" कहता है, कभी "DPDP compliant" नहीं; 30 दिन validity, 50% hardware deposit

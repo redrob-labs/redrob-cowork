@@ -1,0 +1,128 @@
+{
+ "key": "en/small-team/send-invoices/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "158190ffee34",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "INV-0152 totals $11,693.60: $9,000 balance + CO-1 $1,400 + expenses $1,176 × 1.10 = $1,293.60",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Expenses total $1,293.60. Check: $18,000 + $1,400 + $1,293.60 = $20,693.60. Less $9,000 = $11,693.60.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct balance, approved change order, and expenses including 10% handling."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "INV-0152 correctly totals $11,693.60 with all specified components accurately calculated."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the $212 meals; due 25 March (net 15); shows the $9,000 deposit as received",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Crew meals ($212) are not billable under the SOW.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets 25 March due date, and credits the $9,000 deposit received."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets due date to 25 March (net 15), and credits the $9,000 deposit."
+    }
+   ]
+  },
+  {
+   "check": "CO-2 not billed (no Jane Doe approval); email asks her to approve $700 for 0.5 day",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "If you'd like it, please reply confirming approval and we'll invoice it separately as CO-2.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes unapproved CO-2 and asks Jane for written approval of the stated $700 half-day charge."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CO-2 is excluded from the invoice, and the email requests Jane's written approval for $700 (0.5 day)."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't chase Tern: matches 3 Mar $2,300 to INV-0139, flags the \"0193\" reference mismatch",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Paid 3 Mar** (TERN ST PMT 0193). Closed",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Matches Tern’s $2,300 payment and avoids chasing, but does not flag the reference mismatch."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Matches the payment to INV-0139 and doesn't chase, but does not explicitly flag the '0193' reference mismatch."
+    }
+   ]
+  },
+  {
+   "check": "Pellworth firm with ≈ $126 late fee (1.5% × 2 months × $4,200); Saltgrass polite, no fee, PO 77-3310",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Under the late-fee clause in our agreement (1.5% per month), $126.00 has accrued so far",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Pellworth receives firm deadline and escalation; Saltgrass receives polite corrected invoice with PO 77-3310 and no fee."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Pellworth email is firm with a $126 fee; Saltgrass is polite, adds no fee, and includes PO 77-3310."
+    }
+   ]
+  },
+  {
+   "check": "Invoice complete and professional: unique number, dates, terms, payment details, figures add up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Bank transfer: [Bank name] · Account name: Halyard Films · Account/IBAN: [number] · Routing/SWIFT: [code] · Reference: INV-0152.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional complete invoice includes unique number, dates, bill-to, item calculations, credited deposit, payment instructions, and terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The invoice is complete and professional with all required details, terms, placeholders, and correct arithmetic."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022786837999999997,
+ "date": "2026-10-11"
+}

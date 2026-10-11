@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/stakeholder-updates/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "pm",
+ "task": "stakeholder-updates",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "beb3252399e6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Recomputes forecast at completion ≈ $650,000 ($455k + 3 × $65k), not $590,000: ≈ $50,000 (8%) over",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Three remaining months at run-rate = $195k → **~$650k at completion, $50k (8%) over**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly recomputes completion cost and overrun, and explicitly rejects the reported $590k forecast."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately recomputes the forecast at completion to ~$650,000, noting the $50k (8%) overrun versus approved budget."
+    }
+   ]
+  },
+  {
+   "check": "Compliance pack 14 Nov plus 4-week review puts earliest launch ≈ 12 Dec; those milestones not green",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "with the compliance pack and public launch milestones Red",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates 12 December earliest launch and explicitly changes both affected milestones from green to red."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates the 12 Dec earliest launch date from the 4-week review and marks milestones non-green."
+    }
+   ]
+  },
+  {
+   "check": "Reports beta misses honestly: goal creation 31% vs 40% target, tickets 22 vs ≤15 per 1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "31% create a goal vs 40% target.\n- **Support load is high**: 22 tickets/1,000 vs ≤15.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly reports both beta misses against their targets."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly and honestly reports both beta metric misses against targets."
+    }
+   ]
+  },
+  {
+   "check": "Presents deposit size and retention without spin, and links the ticket themes to fixes",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**Value is proven**: average first deposit $86 (+15% vs target); week-4 retention 64% (+4 pts).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Figures and theme-linked fixes are present, but “proven” overstates evidence; causal explanations are asserted without support."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents positive metrics straightforwardly and links ticket drivers to UX and ledger fixes."
+    }
+   ]
+  },
+  {
+   "check": "Ends with a decision: options (mid-December or January, soft launch, budget or descoping) and a recommendation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**C. Launch 19 Jan 2027 — recommended.**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Ends with explicit launch options, a justified January recommendation, and requests for option selection and budget approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Presents clear options including mid-December and January, with a justified recommendation and budget adjustment."
+    }
+   ]
+  },
+  {
+   "check": "6–8 slides with speaker notes, bottom line first; the note to Jane is factual and non-blaming",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The reason is arithmetic rather than execution",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Seven slides have speaker notes, open with the bottom line, and include a factual, constructive, non-blaming Jane note."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Deck contains 7 slides with speaker notes and opens with the bottom line; note to Jane is non-blaming."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019478288,
+ "date": "2026-10-11"
+}

@@ -54,3 +54,37 @@ deliverable: spreadsheets
 - Tailors by segment: price-led for A, convenience and skip-a-week for B, and a quality-led message for C built on the new menus and the 35% fall in complaints. D-대전·세종 gets a "이제 새벽배송 됩니다" message.
 - Forecasts with the correct base: 4,772 × 3.4% ≈ 162 plus (17,363 − 4,772) × 2.1% ≈ 264, about 427 reactivations, at an incentive cost of about ₩6,830,000 at ₩16,000 each.
 - SMS texts are 90 bytes or fewer with accurate byte counts, start with "(광고)" and the brand name, include the free opt-out number, and emails start the subject with "(광고)". All sends are scheduled between 08:00 and 21:00 KST, and every sequence has an exit-on-reactivation condition.
+
+## Card
+
+brief: 해지 고객 대상 1월 윈백 캠페인을 발송 제외, 배송 권역, 혜택 비용, 광고 규정에 맞춰 설계합니다.
+given:
+- CRM 추출: 해지 사유별 세그먼트 5개의 고객 수, 이메일·문자 수신 동의 수
+- CRM팀 메모: 발송 제외 건수, 대전·세종 배송 확대, 수신 동의 중복, 야간 동의
+- 업무 규칙: 매니저 혜택안, 재무 상한, 가격, 중복 적용, 정보통신망법·문자 규칙, QA 보고서, 과거 재구독률
+asked:
+- 대상자 표: 세그먼트별 이메일·문자 발송 대상 수와 산식
+- 시퀀스 계획: 발송 회차별 한 행
+- 혜택 표: 세그먼트별 혜택과 비용, 매니저 제안 포함
+- 예측: 예상 재구독 수와 총 혜택 비용, 산식 포함
+- CRM팀용 QA 체크리스트 최대 6개 항목
+limit: 약 2,500자 이내, Markdown 표
+hard: 원시 수치를 여러 규칙으로 걸러야 하고 혜택안을 비용 상한으로 검증하며, 메시지를 세그먼트와 광고·문자 규정에 맞춰야 합니다.
+
+## Scorecard
+
+- Eligible email: A 7,720, B 4,790, C 1,620, D 248 (대전·세종 only), E 2,985; total 17,363
+- Eligible SMS 4,772, with D reduced to 52; rest of D excluded
+- Rejects manager's offer: 50% of ₩64,000 = ₩32,000 before dessert, over ₩18,000; e.g. 25% off (₩16,000), unstacked
+- Tailored: price for A, convenience for B, new menus and 35% fewer complaints for C, 새벽배송 for D
+- Forecast: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427; cost ≈₩6,830,000
+- SMS ≤90 bytes, counts accurate, "(광고)", brand, 080 opt-out; email subjects "(광고)"; 08:00–21:00; exit on reactivation
+
+## Scorecard, shown
+
+- 이메일 대상: A 7,720, B 4,790, C 1,620, D 248(대전·세종만), E 2,985, 합계 17,363
+- 문자 대상 4,772, D는 52로 축소, 나머지 D는 제외
+- 매니저안 거부: 64,000원의 50%는 디저트 전에도 32,000원으로 18,000원 초과, 예: 첫 박스 25% 할인(16,000원), 중복 적용 없음
+- 세그먼트별 메시지: A는 가격, B는 편의성, C는 신메뉴와 불만 35% 감소, D는 '이제 새벽배송 됩니다'
+- 예측: 4,772 × 3.4% ≈ 162 + 12,591 × 2.1% ≈ 264 ≈ 427건, 비용 약 6,830,000원
+- 문자 90바이트 이내·바이트 수 정확, "(광고)"·브랜드·080 수신 거부 포함, 이메일 제목 "(광고)", 08:00~21:00 발송, 재구독 시 종료

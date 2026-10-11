@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/handoff-specs/gpt-6-astra@default",
+ "language": "en",
+ "profession": "designer",
+ "task": "handoff-specs",
+ "model": "gpt-6-astra",
+ "effort": "default",
+ "scorecardSha": "abed990b417f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags Pro: $15 × 12 = $180, not $190, and \"Save 20%\" fails (about 21% or 17%)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Pro shows $15/mo but bills $190/year; $15 × 12 = $180.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags the inconsistent total and separately rejects uniform 20% savings using Pro’s actual 16.7% discount."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the calculation mismatch for Pro and details that the 20% savings claim fails."
+    }
+   ]
+  },
+  {
+   "check": "Confirms Business is consistent ($39 × 12 = $468, about 20%); proposes a fix for Pro",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "or approve changing the annual charge to $180.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Proposes fixing Pro; Business’s $39 monthly equivalent, $468 annual total, and 20.4% savings are correctly represented."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms Business is around 20% and offers concrete fixes for Pro's price and badge copy."
+    }
+   ]
+  },
+  {
+   "check": "Maps #2F6FEB to --primary-600 (#2F6FED) and the 14px and 10px gaps to tokens, with reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Inspect primary differs from code; gaps fall off the spacing scale.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Maps blue to primary-600 and gaps to space-4/space-3, explaining alignment with existing codebase scales."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maps the color hex to --primary-600 and normalizes both 14px and 10px gaps to tokens."
+    }
+   ]
+  },
+  {
+   "check": "Accessible toggle (radio group or aria-pressed), keyboard support, visible focus, price changes announced; Annual default",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "native radio group inside a named fieldset—not tabs or an on/off switch.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Implements native keyboard support, visible focus, polite price announcements, and checked Annual default."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses native radio group defaulted to Annual, with focus states and live region announcements."
+    }
+   ]
+  },
+  {
+   "check": "No layout shift on toggle (reserved price area, billed line always present); Pro first when stacked",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Hidden—not removed—in monthly mode; prevents toggle-induced shifting",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Price geometry remains stable, yearly billing lines retain space, and actual DOM ordering puts Pro first when stacked."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses visibility:hidden to preserve space, and reorders cards to put Pro first when stacked."
+    }
+   ]
+  },
+  {
+   "check": "Single-file code runs on token custom properties; spec table is complete enough to build from",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`calc()` mappings reuse existing spacing tokens; they are not newly declared tokens.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides runnable single-file HTML/CSS/JS using supplied custom properties and a buildable spec documenting mappings and provisional deviations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides a valid, runnable single-file implementation alongside a comprehensive developer spec table."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.029726287999999997,
+ "date": "2026-10-11"
+}

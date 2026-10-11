@@ -58,3 +58,36 @@ deliverable: documents
 - Drops the non-compete (company policy plus 민법 §103 risk for an uncompensated, unspecific restraint) and keeps confidentiality/직무발명 language instead. Replaces Texas law and Travis County venue with Korean law and a Korean court (or removes the clause), since under 국제사법 §§43, 48 the choice of foreign law cannot strip Korean mandatory protections and a foreign forum clause agreed in advance won't bind him.
 - Replaces the at-will clause, which is unlawful under 근로기준법 §23① and §26, with a compliant termination clause (justified cause, 30 days' notice or pay in lieu, an optional probation period). Keeps the contingencies and the Dec 1, 2025 start date; the letter reads as a finished document, with placeholders limited to the open decisions.
 - Pro-rates the signing bonus by full months: after 7 months he would owe 5/12 × ₩12,000,000 = ₩5,000,000. Removes the final-pay deduction, citing §43 (and the §20 risk of a full-repayment penalty), and states the amount will be claimed separately.
+
+## Card
+
+brief: 리크루터가 승인 범위를 넘는 조건을 구두로 약속한 엔지니어의 오퍼레터와 메모를 준비합니다.
+given:
+- 승인된 채용 요청서 REQ-2291: 직무·레벨, 연봉 밴드, RSU, 사이닝 보너스, 고용 형태, 보고 대상
+- 리크루터 메모: 김철수가 구두로 수락한 조건과 경업금지 삭제 요청
+- 본사 템플릿 발췌: 조항 4개(사이닝 보너스, 경업금지, 준거법 및 관할, 임의고용)
+- 법무팀 가이드: 근로기준법·국제사법·민법 조문과 사이닝 보너스 반환 실무
+asked:
+- 바로 보낼 수 있는 오퍼레터: 지정된 섹션 포함
+- 이영희 매니저에게 보내는 메모: 불일치 사항별 해결 방안과 결재권자
+- 만 7개월 근무 후 자발적 퇴사 시 사이닝 보너스 반환 계산 예시
+limit: 전체 약 2,500자 이내, 메모는 약 600자 이내, Markdown
+hard: 약속한 조건을 승인 내용과 대조하고 미국식 템플릿 조항에 한국 법을 적용해야 하며, 연봉 차이에는 판단이 필요합니다.
+
+## Scorecard
+
+- Letter uses ₩100,000,000 or placeholder, 3,200 RSUs, "소프트웨어 엔지니어 II"; not ₩105,000,000, 4,000 or "Senior"
+- Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending
+- Non-compete dropped (민법 §103, policy), 직무발명/confidentiality kept; Korean law and court replace Texas (국제사법 §§43, 48)
+- At-will replaced: just cause, 30 days' notice or pay in lieu, optional probation (§23①, §26)
+- Keeps contingencies and the Dec 1, 2025 start; placeholders limited to open decisions
+- Repayment after 7 months: 5/12 × ₩12,000,000 = ₩5,000,000, claimed separately, no pay deduction (§43)
+
+## Scorecard, shown
+
+- 오퍼레터에 1억원 또는 자리표시자, RSU 3,200주, '소프트웨어 엔지니어 II' 사용, 1억 500만원·4,000주·'시니어'는 쓰지 않음
+- 기본 연봉 차이에 입장 제시(결재를 받은 밴드 예외 또는 승인 범위 내 보완), 발송 전 후보자에게 안내
+- 경업금지 삭제(민법 제103조, 회사 방침), 비밀유지·직무발명 유지, 텍사스 대신 한국 법·법원(국제사법 제43조·제48조)
+- 임의고용 조항을 정당한 이유, 30일 전 예고 또는 예고수당, 선택적 수습기간으로 교체(제23조 제1항, 제26조)
+- 채용 조건과 2025년 12월 1일 입사일 유지, 자리표시자는 미정 사항에만 사용
+- 7개월 근무 후 반환액 5/12 × 1,200만원 = 500만원, 급여 공제 없이 별도 청구(제43조)

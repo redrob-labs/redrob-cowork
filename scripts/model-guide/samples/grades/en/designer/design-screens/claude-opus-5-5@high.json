@@ -1,0 +1,128 @@
+{
+ "key": "en/designer/design-screens/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "8e2ba1f3f5ec",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "White on `#7FD1AE` is about **1.8:1**, which fails AA for any text size.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains the contrast failure and uses dark ink labels while retaining the brand fill."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly flags the contrast failure and switches to ink text, providing contrast ratios."
+    }
+   ]
+  },
+  {
+   "check": "Drops Miles's exotic slot, 12:30 (lunch), 11:30 dental (runs into lunch), 16:45 wellness (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Only 2 of the 6 Thursday slots are bookable: Dr. Major's exotic check-up at 11:00 and Dr. Miles's wellness exam at 14:00.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The validator excludes all four invalid slots and retains exactly the two valid slots."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies and drops all four invalid slots in both code and explanation."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The API is clearly not applying the clinic's rules. The client-side filter is a safety net, not the fix.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains each rejected slot's eligibility, lunch, or closing violation and recommends server-side enforcement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains why each dropped slot is invalid and recommends fixing validation in the API."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"from $280\" honestly, e.g. with a final-quote note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The final price depends on the treatment your pet needs. The vet discusses any extra cost with you before doing more work.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Consistently preserves the minimum price, explains uncertainty, and addresses surprises through advance cost discussion and price locking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Preserves 'from $280', provides an explanatory note, and discusses the tension with transparent pricing."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"Any available vet\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Any available vet",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file responsive prototype provides labelled native buttons, visible focus, sufficiently large targets, and an editable any-vet option."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Works at 375 px, includes visible focus states and accessible labels, and offers 'Any available vet'."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% wellness and vaccination bookings",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Choosing either one sets the vet to \"Any available vet\" automatically and goes straight to the times.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Progressive sections prioritize the two common services and eliminate an unnecessary vet-selection step for the 70% fast path."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Directly links the progressive one-screen architecture to streamlining the 70% wellness/vaccine booking flow."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.04028745,
+ "date": "2026-10-11"
+}

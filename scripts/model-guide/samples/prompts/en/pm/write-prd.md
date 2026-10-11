@@ -54,3 +54,28 @@ You are the PM for Basketful, a grocery delivery app. Personal shoppers pick ord
 - Excludes age-restricted and pharmacy items from substitution (refund only) in the requirements and edge cases.
 - Success metrics include the 23% door-rejection baseline and a guardrail on shopper time (34-minute median), plus a response-rate metric.
 - The prototype is a self-contained HTML file that renders on its own, shows every required element including the timeout default, and uses accessible patterns (buttons, labels, contrast).
+
+## Card
+
+brief: Write a PRD and a mobile prototype for in-app grocery substitution approvals, choosing the response window and default and settling stakeholder requests.
+given:
+- Current data: 4 metrics from the last 90 days on out-of-stocks, door rejections and shopper time
+- Pilot results: cumulative customer response times for 1,200 approval requests
+- Stakeholder input: requests from the Ops Lead and Finance
+- Customer Terms §7.3: the published substitution price promise
+- Compliance note: items restricted under the retail licences
+asked:
+- A PRD: problem, goals and metrics with baselines, non-goals, user stories, requirements, edge cases, open questions
+- A single-file HTML/CSS prototype of the customer's approval screen with all listed elements
+- A design rationale, up to 150 words
+limit: Up to about 1,200 words in Markdown excluding code, plus one self-contained HTML file
+hard: Stakeholder requests must be tested against the data and published terms, licence limits applied, and a timing default justified.
+
+## Scorecard
+
+- Rejects "median under a minute": only 38% respond within 1 minute; the median is 1–3 minutes
+- Picks a window (e.g. 3–5 minutes) and a no-response default, justified by the cumulative pilot data
+- Flags the shelf-price request as breaching Terms §7.3; caps at the ordered price or escalates to Legal
+- Excludes age-restricted and pharmacy items from substitution (refund only) in requirements and edge cases
+- Metrics include the 23% door-rejection baseline, a 34-minute shopper-time guardrail and a response rate
+- Prototype is self-contained HTML, shows every required element including the timeout default, and is accessible

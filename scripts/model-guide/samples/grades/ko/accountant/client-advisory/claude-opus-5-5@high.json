@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/client-advisory/claude-opus-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "cff26609e680",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit ₩453,200,000 vs ₩402,100,000; EBITDA ₩227,300,000 vs ₩163,800,000, a ₩63,500,000 miss, not ₩53,500,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "EBITDA 미달액은 5,350만원이 아니라 **6,350만원**입니다(227.3 → 163.8백만원).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct gross profit and EBITDA figures appear in the table; explicitly corrects the bookkeeper’s shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates gross profit (453.2 vs 402.1) and EBITDA (227.3 vs 163.8, miss 63.5)."
+    }
+   ]
+  },
+  {
+   "check": "Treats ₩27,000,000 of insurance as prepaid (선급비용): normalized EBITDA ₩190,800,000, ₩36,500,000 below budget",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**정상화 EBITDA** | **190.8** (이익률 18.8%, 예산 대비 −36.5, −16.1%)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reclassifies ₩27 million as prepaid insurance and correctly reports normalized EBITDA and budget shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats 27m as prepaid expense, yielding normalized EBITDA of 190.8m, 36.5m below budget."
+    }
+   ]
+  },
+  {
+   "check": "Calls the ₩18,500,000 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**광고비**: 18.5백만원 절감은 진짜 절감이 아닙니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies marketing underspend as timing and explains fourth-quarter expenditure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly designates the 18.5m marketing underspend as a timing difference, not a saving."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −₩43,700,000 into volume −₩57,000,000 (5,700 × ₩10,000) and price/mix about +₩13,300,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "물량차이: (55,300 − 61,000) × 10,000원 = **−57.0**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates volume −₩57 million and price/mix +₩13.3 million, totaling −₩43.7 million."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly splits retail shortfall into -57.0m volume and +13.3m price components."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~₩28,000,000 over 28% of actual revenue (₩284,900,000) to flour repricing; names overtime (1.5×) behind labor",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "원재료비율 상승(28.0% → 30.8%): −28.0",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculates the actual-revenue-adjusted ingredient overrun, links flour repricing, and explicitly identifies 1.5× overtime."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the 28m overrun from 28% of revenue tied to flour prices, and names 1.5x overtime."
+    }
+   ]
+  },
+  {
+   "check": "Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "도매는 원래 소매보다 매출총이익률이 약 12%p 낮습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendations address wholesale margin dilution and falling retail traffic; table signs and bridge impacts are consistently interpreted."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Data-driven recommendations address wholesale margins, falling retail traffic, and use consistent sign conventions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020071538,
+ "date": "2026-10-11"
+}

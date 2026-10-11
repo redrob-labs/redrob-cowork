@@ -60,3 +60,40 @@ deliverable: documents
 - Computes FY2024 ARR growth of 60% and a burn multiple of 90 ÷ 42 ≈ 2.14, and runway of about 10 months (₩80억 ÷ ₩8억). Notes the falling cohort NRR (124% → 112% → 103%).
 - Treats 브라이트스마일 (18% of ARR, considering an in-house build) as a top risk, with a specific mitigant or condition, for example a multi-year renewal signed at the network headquarters level before closing, or a valuation adjustment.
 - Gives a clear recommendation consistent with the analysis, for example invest with conditions, or pass at these terms. Diligence items tie back to the issues found, such as hosting costs, the 브라이트스마일 contract and support quality.
+
+## Card
+
+brief: 치과 소프트웨어 회사 시리즈 B 150억원 투자 건의 투심 메모를 쓰며 지분율과 지표를 검증합니다.
+given:
+- 딜 리드 요청: 박영수의 한 줄 투자 추천과 지분율 주장
+- 재무 요약: 3개 기간의 ARR, 매출, 매출원가, 매출총이익률, 순소진액과 주석 1건
+- 코호트별 NRR: 코호트 3개, 고객 이탈률, 최대 고객 비중
+- 레퍼런스 콜: 요약 3건
+- 텀시트 발췌: 투자금, 투자 전 기업가치, 주식매수선택권 풀, 우선권, 이사 지명권
+- 기타 사실: 현재 선택권 풀, 현금, 월 순소진액
+asked:
+- 투자 의견: 맨 앞 한 단락
+- 회사 개요와 투자 논리: 최대 3개 항목
+- 핵심 지표 표: 필요한 곳은 재작성, 산식 포함
+- 기업가치와 조건: 지분율과 실질 투자 전 기업가치
+- 주요 위험과 완화 방안
+- 계약 체결 전 마무리할 실사 항목
+- 투자하려면 믿어야 할 것
+limit: 약 2,500자 이내, 5분 안에 읽을 수 있는 Markdown 투심 메모
+hard: 텀시트 구조가 실제 경제적 조건을 가리고 비용 분류가 지표를 부풀리며, 투자 의견은 판단의 문제입니다.
+
+## Scorecard
+
+- Ownership ₩150억 ÷ ₩750억 = 20%, not 25%; pool ₩18억 → ₩75억; effective pre-money ≈₩543억
+- FY2024 gross margin restated ≈73.7% (72.4% if all ₩9억 moved); LTM ≈74.0%; reclassification flagged
+- FY2024 ARR growth 60%, burn multiple ≈2.14, runway ≈10 months; cohort NRR 124% → 112% → 103%
+- 브라이트스마일 (18% of ARR, weighing an in-house build) a top risk, with a specific mitigant or condition
+- Clear recommendation consistent with the analysis; diligence items tie to hosting, 브라이트스마일 and support
+
+## Scorecard, shown
+
+- 지분율 150억원 ÷ 750억원 = 20%(25% 아님), 선택권 풀 18억원 → 75억원, 실질 투자 전 기업가치 약 543억원
+- 2024 회계연도 매출총이익률 약 73.7%로 재작성(9억원 전액 이동 시 72.4%), 최근 12개월 약 74.0%, 재분류 문제 지적
+- 2024 회계연도 ARR 성장률 60%, 번 멀티플 약 2.14, 런웨이 약 10개월, 코호트 NRR 124% → 112% → 103%
+- 브라이트스마일(ARR의 18%, 자체 플랫폼 구축 검토)을 핵심 위험으로 보고 구체적 완화 방안이나 조건 제시
+- 분석과 일치하는 명확한 투자 의견, 실사 항목은 호스팅 비용, 브라이트스마일 계약, 고객지원 품질과 연결

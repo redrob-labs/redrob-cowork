@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/write-hr-policies/gpt-6-1-sol@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "gpt-6-1-sol",
+ "effort": "high",
+ "scorecardSha": "fa5b3785cf3a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" defined, state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "This policy applies to all employees and replaces Memos A, B, and C and any conflicting hybrid or remote-work guidance.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Expressly supersedes all memos, defines a 50-mile radius, requires Tuesday–Thursday attendance, and retains 60-day state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly supersedes Memos A–C, defines near office as 50 miles, sets Tue–Thu attendance, and keeps 60-day move approval."
+    }
+   ]
+  },
+  {
+   "check": "$50 stipend kept, with a CA/IL claim route above it (§2802, 820 ILCS 115/9.5) and documentation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "All employees receive a **$50 monthly home-office stipend**, without receipts for that payment. It is not a reimbursement ceiling.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves stipend and provides documented necessary-expense shortfall claims, with explicit California and Illinois protections."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps the $50 stipend, establishes a documented claim route for shortfalls under CA/IL rules."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: non-exempt boot-up and VPN login time is paid work, with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Begin recording time before required startup activities; use the approved alternative recording method if the timekeeping system is not yet accessible.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Required startup and VPN time are recorded and paid; alternative recording prevents off-clock startup."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Treats boot-up and VPN login as compensable work and establishes an actionable timekeeping rule."
+    }
+   ]
+  },
+  {
+   "check": "US remote stays limited; abroad only with pre-approval, in Canada or the UK, for immigration, tax, PE reasons",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Overseas work is limited to Canada and the UK, with counsel review, because even short stays can create immigration, tax, and corporate exposure.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Limits combined temporary stays to four weeks, requires advance approval, and addresses immigration, tax, and corporate risks."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Caps US stays at four weeks, limits abroad work to Canada/UK with pre-approval, citing tax, immigration, and corporate exposure."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision needed; state table matches headcount (NY, WA have no office)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Please approve the 50-mile definition, company-wide shortfall reimbursement and its budget, the overseas restrictions, and a handbook launch date.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "CEO note explains all departures and requests decisions; state table correctly identifies New York and Washington as remote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note explains departures and requests decisions; state table correctly marks NY and WA as remote without offices."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019645763,
+ "date": "2026-10-11"
+}

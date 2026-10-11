@@ -51,3 +51,40 @@ deliverable: documents
 - Spots the victimisation sequence: the draft moved three people before the complaint, but Roe cut it to Major alone about 17 hours after the IC served him the complaint. Marks it Substantiated (policy 4.6, and relevant under POSH s.3(2)(iii)/(iv)) or explains carefully why not, and doesn't accept the "operational" explanation without testing it against seniority records.
 - Gives Miles's unnamed second-hand account little or no weight, and says why.
 - Recommends concrete remedies: reverse Major's shift change, interim relief under Rule 8 (Roe not to supervise, schedule or assess her; transfer of the respondent rather than the complainant), action under service rules proportionate to the findings, and follow-up check-ins. Lists open items such as verifying seniority records, checking for further victimisation, and the employer's duty to act on the recommendations within 60 days.
+
+## Card
+
+brief: एक picker ने अपने supervisor पर यौन उत्पीड़न और victimisation की शिकायत की है; IC की inquiry report हर आरोप पर निष्कर्ष के साथ लिखिए।
+given:
+- शिकायत: मैरी मेजर की 22 सितंबर की लिखित शिकायत, दो घटनाओं का विवरण
+- Timeline और रिकॉर्ड: 6 entries, जिनमें expense bill, Slack DM और shift-change form के edits शामिल हैं
+- Interview notes: शिकायतकर्ता और respondent सहित 5 लोगों के सारांश
+- क़ानून और policy: POSH Act धारा 3(2), POSH Rules नियम 8, और Harbor Point POSH Policy 4.1, 4.6, 9.2
+asked:
+- Summary of findings
+- Scope and method
+- Allegations
+- Evidence and credibility assessment
+- Findings: 10 सितंबर की टिप्पणी, 18 सितंबर का आचरण और shift change द्वारा victimisation, हर एक का label और तर्क
+- Recommended actions, शिकायतकर्ता के लिए तात्कालिक राहत सहित
+- Open items
+limit: लगभग 1,200 शब्दों के भीतर, headed sections वाली Markdown report
+hard: बयान records से टकराते हैं, preponderance of probabilities पर विश्वसनीयता तौलनी है, असमान सबूतों के कारण हर label एक judgement call है, और गोपनीयता बनाए रखनी है।
+
+## Scorecard
+
+- Roe's own ₹18,450 dinner bill (9 attendees) and 19 Sept Slack DM disprove his denial; overall credibility hit
+- Sept 18 conduct Substantiated (policy 4.1 / s.2(n); Stiles, bill, DM); Sept 10 remark labelled with stated reasoning
+- Victimisation: Roe cut the move to Major alone ~17 hours after service; label reasoned (4.6, s.3(2)); seniority tested
+- Gives Miles's unnamed, second-hand account little or no weight, and says why
+- Remedies: reverse shift, Rule 8 relief (Roe off her supervision; move respondent, not her), proportionate action, check-ins
+- Open items: verify seniority records, check for further victimisation, employer acts on recommendations within 60 days
+
+## Scorecard, shown
+
+- रो का अपना ₹18,450 का dinner bill (9 attendees) और 19 सितंबर का Slack DM उनके इनकार को झुठलाते हैं; समग्र विश्वसनीयता घटी
+- 18 सितंबर का आचरण Substantiated (policy 4.1 / धारा 2(n); स्टाइल्स, bill, DM); 10 सितंबर की टिप्पणी पर तर्क सहित label
+- Victimisation: शिकायत मिलने के लगभग 17 घंटे बाद रो ने बदलाव केवल मेजर तक सीमित किया; तर्क सहित label (4.6, धारा 3(2)); seniority की जाँच
+- माइल्स के बेनाम, सुने-सुनाए बयान को बहुत कम या कोई महत्व नहीं, और कारण बताया
+- उपाय: shift वापस, नियम 8 की राहत (रो उनकी supervision से बाहर; transfer respondent का, उनका नहीं), अनुपातिक कार्रवाई, follow-up
+- Open items: seniority records की पुष्टि, आगे victimisation की जाँच, 60 दिनों में सिफ़ारिशों पर employer की कार्रवाई

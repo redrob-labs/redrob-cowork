@@ -1,0 +1,110 @@
+{
+ "key": "ko/investor/report-portfolio/muse-spark-1-3@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "report-portfolio",
+ "model": "muse-spark-1-3",
+ "effort": "high",
+ "scorecardSha": "50fe96aeb8c5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 0,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Paid-in ₩78.0B (780억원) at both dates, not ₩81.0B; the ₩3.0B call due Oct 15 disclosed separately",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "9월 26일 30억원 캐피탈콜을 통지했으며 납입기한은 10월 15일입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Both dates show 780억원 paid-in; the separate call section excludes the unpaid 30억원."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Paid-in capital is correctly stated as 780억원 at both dates, and the call is disclosed separately in Section 5."
+    }
+   ]
+  },
+  {
+   "check": "Marks per policy: 도브테일AI held at ₩6.0B, 클리어패스바이오 about ₩0.4B, 길드 ₩12.0B, 브라인 ₩4.5B",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "③클리어패스 80→4억원, 청산결의 반영 ④도브테일 180→60억원, SAFE만으로 상향 불가 ⑤브라인 45억원, 길드 120억원은 정책 부합으로 인정.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All four marks match policy and required values."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All valuation marks match the valuation policy requirements exactly."
+    }
+   ]
+  },
+  {
+   "check": "NAV ₩94.5B / ₩86.4B; TVPI 1.33x / 1.23x; DPI 0.12x; RVPI 1.21x / 1.11x",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| NAV(현금 0) | 945 | 864 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "The table correctly reports both NAVs, TVPIs, DPIs, and RVPIs, with formulas."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "NAV, TVPI, DPI, and RVPI figures for both dates match the required calculations exactly."
+    }
+   ]
+  },
+  {
+   "check": "States TVPI fell, contradicting \"1.43배 … 상승\"; explains 클리어패스 and 브라인 candidly",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "브라인로보틱스 90억원→45억원, 클리어패스바이오 80억원→4억원으로 하향했습니다. 정책상 할인 브릿지와 청산 결정은 명백한 손상 증거입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Clearly reports TVPI decline, corrects the headline, and candidly explains both impairments."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly states TVPI fell and candidly explains the write-downs for 클리어패스바이오 and 브라인로보틱스."
+    }
+   ]
+  },
+  {
+   "check": "Note to 홍길동 lists paid-in, 도브테일, 클리어패스 and headline corrections, each with its policy reason",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "①납입금 810→780억원, 9/26 통지 30억원은 10/15 납입예정으로 미포함 ②TVPI 1.43→1.23배, 전분기 1.33배 대비 하락으로 정정",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Memo includes all four corrections with unpaid-call timing, SAFE restriction, liquidation evidence, and corrected performance figures."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The internal memo lists paid-in capital, headline performance, 클리어패스, and 도브테일 corrections with policy reasons."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017546813,
+ "date": "2026-10-11"
+}

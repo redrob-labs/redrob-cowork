@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/research-prospects/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "sales",
+ "task": "research-prospects",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "22d74b135781",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Current facts: Jane Doe CEO (Jan 2026), Roe Executive Chair, FY2025 $240M; 2023 article treated as outdated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "CEO Jane Doe since Jan 2026 (previously CFO); founder Richard Roe now Executive Chair",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct current leadership and FY2025 revenue; explicitly quarantines stale 2023 leadership and revenue."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes current leadership, $240M revenue, and explicitly discards the 2023 article as stale."
+    }
+   ]
+  },
+  {
+   "check": "Discards source 5 (a UK company); uses Ridgeback's 22% return rate, not the 32% average",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Different company — a UK camping-equipment retailer sharing the name. Ignore entirely; don't let it contaminate firmographics or contacts.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Discards the UK entity and uses Ridgeback’s 22%, distinguishing the 32% industry benchmark."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Discards the UK company and relies on Ridgeback's 22% return rate over the 32% benchmark."
+    }
+   ]
+  },
+  {
+   "check": "Value math: $240M ÷ $96 ≈ 2.5M orders × 22% × $14 ≈ $7.7M; 20–30% ≈ $1.5–2.3M",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "$7.7M × 20–30%                         ≈ $1.5M – $2.3M / yr",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows the complete correct calculation: 2.5M orders, 550,000 returns, $7.7M costs, and $1.5–2.3M savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Shows the exact calculation yielding $7.7M in returns cost and $1.5M–$2.3M in processing savings."
+    }
+   ]
+  },
+  {
+   "check": "Inputs labelled, figures framed as estimates to validate; 15% exchange conversion noted as upside",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Parcelwise benchmarks (our case studies):** 20–30% processing-cost reduction; 15% of refunds converted to exchanges.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Separates company inputs, benchmarks, and assumptions; frames estimates for validation and includes exchange upside."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Inputs are clearly labelled, framed as estimates to validate, and exchange conversion is quantified."
+    }
+   ]
+  },
+  {
+   "check": "Addresses the 2024 loss and departed champion via new triggers: replacement job post, new CEO, resale launch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Handling the previous loss:** Treat it as a new opportunity, not a reheated one.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Addresses budget/tool objections and departed champion, connecting reopening to replacement hiring, new CEO, and resale."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Addresses the 2024 loss and departed champion using the job posting, resale launch, and new CEO."
+    }
+   ]
+  },
+  {
+   "check": "Enters via John Stiles and/or Mary Major (Tamarack link), justified; concrete first move; assumption-testing questions",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Stiles is the primary target; Major is the door-opener and influencer.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Justifies both contacts, specifies warm introduction and direct email, and asks five relevant assumption-testing discovery questions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends Stiles and Major with clear rationale, concrete first outreach, and assumption-testing discovery questions."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022385213,
+ "date": "2026-10-11"
+}

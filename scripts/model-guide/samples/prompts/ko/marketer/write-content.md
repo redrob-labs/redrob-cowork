@@ -64,3 +64,36 @@ deliverable: graphics
 - Every line respects its limit, and the counts shown are accurate. No superlatives.
 - The SVG is valid and self-contained, uses `#1F4D3A`, `#F2A93B` and `#F7F5F0`, and carries the H1, subhead, CTA and footnote, with a clear hierarchy (Pretendard with a sans-serif fallback).
 - The note to product marketing explains the claim and price changes in terms of the pilot data and the legal rules, and points to the quote and the 44-of-48 ease result as stronger proof.
+
+## Card
+
+brief: 소상공인용 냉난방 컨트롤러 출시 소재 3종을 쓰고, 브리프의 절감 문구와 가격을 검증합니다.
+given:
+- 제품 마케팅팀 브리프: 헤드라인 아이디어, 가격, 타깃, 핵심 혜택
+- 파일럿 결과: 48곳 대상 지표 5개와 사용 승인된 고객 인용
+- 가격표: 정가, 출시 기념가, 필수 구독료
+- 브랜드 및 법무 규칙: 톤, 색상, 서체, 표시광고법, 각주와 가격 표시 규칙
+- 필요한 소재: 소재 3종과 문구 제한
+asked:
+- 소재별 문구: 각 줄 옆에 글자 수 표기
+- 히어로와 메타 광고의 레이아웃·비주얼 방향
+- 랜딩 페이지 히어로(1200×630) 인라인 SVG 목업
+- 제품 마케팅팀에 보내는 메모: 브리프에서 바꾼 점과 이유
+limit: 글로 쓰는 부분 약 2,500자 이내, 메모는 약 250자 이내, Markdown, SVG는 분량 제외
+hard: 브리프의 주장을 데이터와 법무 규칙으로 검증해야 하고 모든 줄에 글자 수 제한이 있으며, 정직한 근거 선택은 판단의 문제입니다.
+
+## Scorecard
+
+- No "40%" lead (one site, HVAC not bill; §§3, 5); median 18% 냉난방 energy (~7.2% of bill), footnoted
+- Price: ₩199,000 launch (list ₩239,000, through Jan 31, 2026) plus ₩9,900/month per location subscription
+- Every line within its limit, with accurate counts; no superlatives
+- SVG valid and self-contained, uses `#1F4D3A`, `#F2A93B`, `#F7F5F0`; carries H1, subhead, CTA, footnote
+- Note explains claim and price changes; points to the quote and the 44-of-48 ease result
+
+## Scorecard, shown
+
+- "40%"를 앞세우지 않음(최고 단일 매장, 요금이 아닌 냉난방 에너지, 제3조·제5조), 냉난방 에너지 중앙값 18%(전체 요금의 약 7.2%)와 각주
+- 가격: 출시 기념가 199,000원(정가 239,000원, 2026년 1월 31일까지)과 매장당 월 9,900원 구독료
+- 모든 줄이 글자 수 제한을 지키고 표기가 정확, 최상급 표현 없음
+- SVG는 유효하고 독립적이며 `#1F4D3A`, `#F2A93B`, `#F7F5F0` 사용, H1·서브헤드·CTA·각주 포함
+- 메모에서 절감 문구와 가격 변경을 설명하고, 고객 인용과 48곳 중 44곳의 사용 편의성 결과를 제시

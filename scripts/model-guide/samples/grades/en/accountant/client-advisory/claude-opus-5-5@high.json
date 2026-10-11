@@ -1,0 +1,128 @@
+{
+ "key": "en/accountant/client-advisory/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "f022cea92ecc",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit $453,200 vs $402,100; EBITDA $227,300 vs $163,800, a $63,500 miss, not $53,500",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "the miss is **$63,500**, not $53,500 ($227,300 − $163,800).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct gross profit and EBITDA figures appear in the table; explicitly corrects the bookkeeper's miss."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes exact figures for gross profit, EBITDA, and corrects the bookkeeper's miss figure."
+    }
+   ]
+  },
+  {
+   "check": "Treats $27,000 of insurance as prepaid: normalized EBITDA $190,800, $36,500 below budget",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The other **$27,000** should be reclassified to prepaid insurance",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly records prepaid insurance and reports normalized EBITDA of $190,800, $36,500 below budget."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly reclassifies $27,000 to prepaid insurance, calculating normalized EBITDA of $190,800 ($36,500 below budget)."
+    }
+   ]
+  },
+  {
+   "check": "Calls the $18,500 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "This benefit reverses in Q4. Don't read it as a saving.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the $18,500 marketing underspend as timing rather than savings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the $18,500 marketing underspend as a timing difference rather than a saving."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −$43,700 into volume −$57,000 (5,700 × $10) and price/mix about +$13,300",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| Volume | (55,300 − 61,000) × $10.00 | (57,000) |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct method yields negative $57,000 volume and positive $13,300 price/ticket, totaling negative $43,700."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly splits retail revenue variance into -$57,000 volume and +$13,300 price/mix."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~$28,000 over 28% of actual revenue to flour repricing; names overtime behind labor",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Ingredients (−$24,500; −$28,000 after flexing for volume).** Ingredients ran at 30.8% of revenue against a 28% budget.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Links the flexed ingredient overrun to flour repricing and identifies Eastside's 1.5× overtime behind labor."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Ties the $28,000 ingredient overrun vs flex to flour repricing and identifies overtime behind direct labor."
+    }
+   ]
+  },
+  {
+   "check": "Notes wholesale growth lowers margin while retail traffic falls; keeps one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "At about 12 points lower margin, and with flour up 9%, it adds less profit than the revenue suggests.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes lower-margin wholesale growth alongside falling retail traffic; consistently uses favourable-positive variances."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes wholesale dilutes margins while retail traffic drops, and maintains a consistent sign convention throughout."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021396113,
+ "date": "2026-10-11"
+}

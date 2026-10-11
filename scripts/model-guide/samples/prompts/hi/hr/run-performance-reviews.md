@@ -54,3 +54,36 @@ Managers लिखित justification के साथ anchor से एक lev
 - Flags E03 (5 at 62% goal attainment, an anchor of 1, with no valid justification) and E02 (5 at 96%, an anchor of 3, two levels above with no note). Identifies Richard Roe's leniency pattern in the manager table (average submitted 4.75 vs anchor 3.25; Major 3.0 vs 3.5; Stiles 3.0 vs 3.0).
 - Handles the one-level deviations with judgement: E10's 4 has a justification and can stand for discussion, and E09 looks under-rated at 3 against a 104% anchor of 4.
 - The recommended plan totals no more than ₹22,24,800, keeps every merit % inside its rating's range, and every merit ₹ equals fixed salary × %.
+
+## Card
+
+brief: Calibration से पहले managers की ratings और merit प्रस्तावों को rating guide और budget से जाँचकर calibration workbook और चर्चा के बिंदु तैयार कीजिए।
+given:
+- HRBP summary: budget के मुक़ाबले प्रस्तावों पर एक पंक्ति का दावा
+- Rating guide: 5 ratings के anchors और merit ranges, साथ में deviation, protected leave और budget के नियम
+- Manager submissions: 3 managers के 12 कर्मचारी, fixed salary, rating, goal attainment, peer average, proposed merit और notes सहित
+asked:
+- Calibration table: हर कर्मचारी की row, recommended rating, merit % और merit ₹ सहित
+- Budget table: कुल payroll, budget, submitted और recommended कुल
+- Manager-pattern table: हर manager की औसत submitted और anchor rating
+- Discussion guide: अधिकतम 8 bullets
+limit: लगभग 1,200 शब्दों के भीतर, हर formula के साथ Markdown tables
+hard: Summary के दावे को जाँचना है, protected leave का नियम लागू करना है, rating deviations पर judgement चाहिए, और plan को budget और ranges दोनों में रहना है।
+
+## Scorecard
+
+- Payroll ₹2,47,20,000; budget ₹22,24,800; submitted ₹23,19,800 (9.38%), ₹95,000 over; HRBP's "8.8%" called wrong
+- E07 a firm policy issue: rated on pro-rated 103% (anchor 4), not marked down for maternity leave; merit 9–11%
+- Flags E03 (5 vs anchor 1) and E02 (5 vs anchor 3, no note) as unjustified
+- Manager table: Roe 4.75 submitted vs 3.25 anchor; Major 3.0 vs 3.5; Stiles 3.0 vs 3.0
+- E10's justified 4 can stand for discussion; E09 flagged as under-rated (3 vs anchor 4)
+- Recommended plan totals ≤ ₹22,24,800, every merit % inside its range, merit ₹ = fixed salary × %
+
+## Scorecard, shown
+
+- Payroll ₹2,47,20,000; budget ₹22,24,800; submitted ₹23,19,800 (9.38%), यानी ₹95,000 अधिक; HRBP का "8.8%" ग़लत बताया
+- E07 firm policy issue: pro-rated 103% (anchor 4) पर rating, maternity leave के कारण कम नहीं; merit 9–11% में
+- E03 (5 बनाम anchor 1) और E02 (5 बनाम anchor 3, कोई note नहीं) को बिना justification के रूप में flag किया
+- Manager table: रो औसत submitted 4.75 बनाम anchor 3.25; मेजर 3.0 बनाम 3.5; स्टाइल्स 3.0 बनाम 3.0
+- E10 का justified 4 चर्चा के लिए बना रह सकता है; E09 को कम rated (3 बनाम anchor 4) के रूप में flag किया
+- Recommended plan का कुल ₹22,24,800 या कम, हर merit % अपनी range में, merit ₹ = fixed salary × %

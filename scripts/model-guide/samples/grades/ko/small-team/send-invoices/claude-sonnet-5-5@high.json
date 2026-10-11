@@ -1,0 +1,128 @@
+{
+ "key": "ko/small-team/send-invoices/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "d13ec389feea",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "INV-0152 totals ₩14,198,800: ₩10,000,000 + CO-1 ₩1,500,000 + expenses ₩1,280,000 × 1.10, plus 10% VAT",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **합계** | **14,198,800원** | 12,908,000 + 1,290,800 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct balance, CO-1, eligible expenses with handling fee, and VAT produce the required total."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates the total of ₩14,198,800 with all components and VAT."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the ₩230,000 meals; due 25 March (15 days); shows the ₩11,000,000 deposit as received",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "스태프 식대 230,000원: 계약상 청구 불가입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets March 25 deadline, and records the ₩11,000,000 deposit as received."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets due date to 25 March, and notes the ₩11M deposit received."
+    }
+   ]
+  },
+  {
+   "check": "CO-2 not billed (no Lee Young-hee approval); email asks her to approve ₩750,000 for 0.5 day",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "진행을 원하시면 이 메일에 \"승인\" 회신을 주세요. 확인되는 대로 별도 청구서로 발행하겠습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes unapproved CO-2 and requests Lee’s written approval for 0.5 day at ₩750,000 supply value."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes CO-2 from billing and requests written approval for ₩750,000 for 0.5 day."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't chase Jebi Studio: matches 3 Mar ₩2,500,000 to INV-0139, flags the \"0193\" reference mismatch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "금액과 거래처가 일치하므로 완납 처리하되, 제비스튜디오에 0193번 청구서가 따로 없는지 확인하세요.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Matches March 3 payment to INV-0139, flags reference mismatch, and sends no collection demand."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Does not chase Jebi Studio, matches the deposit to INV-0139, and flags the reference mismatch."
+    }
+   ]
+  },
+  {
+   "check": "Hanjan Coffee firm with ≈ ₩138,000 late fee (1.5% × 2 months × ₩4.6M); Solseom County polite, no fee, 77-3310",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "3월 10일 기준 지연이자는 147,200원입니다(하루 2,300원).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Hanjan’s tone and deadline are appropriate, but fee differs from required ₩138,000; Solseom handling is correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Hanjan email is firm with prorated late fee; Solseom email is polite with no fee and includes 77-3310."
+    }
+   ]
+  },
+  {
+   "check": "Invoice complete and professional: unique number, dates, terms, VAT line, payment details, figures add up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**입금 안내:** [은행명] [계좌번호] (예금주: 돛줄필름)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Professional invoice includes unique number, parties, dates, terms, VAT, payment details, and consistent calculations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The invoice is complete, professional, properly formatted, and all figures reconcile."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.023411063,
+ "date": "2026-10-11"
+}

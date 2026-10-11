@@ -1,0 +1,128 @@
+{
+ "key": "ko/investor/research-companies/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "investor",
+ "task": "research-companies",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "2cc3437528d5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Base 281,960 full-service + 52,000 institutional = 333,960 locations; TAM about ₩8,683–9,184억; limited-service out of SAM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "742,000×38% = 281,960 + 52,000 | 333,960 | 333,960×268.5만원 = **8,967억원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct location base and blended-price TAM; SAM excludes limited-service and conservatively focuses on institutional kitchens."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 333,960 locations, TAM 8,967억원, and excludes limited-service."
+    }
+   ]
+  },
+  {
+   "check": "Current market: ≈8,459 + 5,720 ≈ 14,200 locations, about ₩369–390억 a year",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **현재 시장 합계** | | | 14,179 | **381억원** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly applies 3% and 11% penetration, producing 8,459 and 5,720 locations and annual revenue within range."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Calculates 8,459 + 5,720 = 14,179 locations and 381억원."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the ₩4.2조: global, covers hauling, composting and digestion, and is company-sourced",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "글로벌 수치이고, 수거·퇴비화·혐기성 소화 등 처리 시장을 포함하며, 측정 솔루션이 아닌 데다 회사 자체 주장입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects the figure for geographic mismatch, broader waste-management scope, and company sourcing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies all reasons: global, covers hauling/composting/digestion, and company-sourced."
+    }
+   ]
+  },
+  {
+   "check": "Annualizes 빈사이트 ₩2,280,000, 스크랩리스 ₩2,760,000 (2021 ₩129,000 stale), 키친레저 ₩3,000,000 plus hardware",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "빈사이트 228만원, 키친레저 300만원, 스크랩리스 276만원, 웨이스트와이즈 270만원",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct annual prices; separately identifies one-off hardware and excludes stale 2021 Scrapless pricing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly annualizes all prices, notes hardware, and discards stale 2021 figure."
+    }
+   ]
+  },
+  {
+   "check": "키친레저's Series B is ₩140억 from the press release, not the aggregator's ₩400억",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "140억원 시리즈 B, 2025.3 (보도자료, 리드 투자자 명시, **상**).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses the primary-source ₩140억 funding figure and explicitly rejects the aggregator’s ₩400억."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Adopts ₩140억 from the press release and rejects aggregator's ₩400억."
+    }
+   ]
+  },
+  {
+   "check": "Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "이탈률 14%는 고객사 기준인데, 매장·매출 기준(GRR/NRR)과 세그먼트별(집단급식소 vs 풀서비스) 수치는 어떻습니까? 풀서비스 이탈의 구체적 원인은 무엇입니까?",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Institutional concentration and independent-restaurant churn justify narrower SAM; founder questions probe segment churn and full-service expansion."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Links skew and churn to SAM scope, and forms a founder question."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.0225834,
+ "date": "2026-10-11"
+}

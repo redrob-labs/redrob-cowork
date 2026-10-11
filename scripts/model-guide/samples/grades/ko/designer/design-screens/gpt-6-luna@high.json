@@ -1,0 +1,128 @@
+{
+ "key": "ko/designer/design-screens/gpt-6-luna@high",
+ "language": "ko",
+ "profession": "designer",
+ "task": "design-screens",
+ "model": "gpt-6-luna",
+ "effort": "high",
+ "scorecardSha": "086b8168274f",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Flags white on #7FD1AE (about 1.8:1) as failing AA; uses dark text or a darker shade, explained",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "`#7FD1AE` 배경에 흰 글자는 WCAG AA 대비 기준을 만족하지 못합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the contrast failure and explains replacing white labels with dark #1D2B33 text."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identified failing contrast on primary button and switched text to dark ink color."
+    }
+   ]
+  },
+  {
+   "check": "Drops 박영수's exotic slot, 12:30 (lunch), 11:30 scaling (runs into lunch), 16:45 check-up (past 17:00)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**건강검진 진료 14:00(박영수)**와 **특수동물 진료 11:00(이영희)**만 표시합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Executable filtering removes all four invalid slots and retains only the two valid slots."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately dropped all four invalid slots and kept only the two valid ones."
+    }
+   ]
+  },
+  {
+   "check": "Explains why each dropped slot is invalid and recommends fixing them in the API",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**건강검진 16:45:** 30분 진료가 17:00 이후 끝나므로 제외합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explains all four exclusions, but does not recommend API closing-time validation for the 16:45 slot."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly explained why each slot was dropped and recommended API-level validation."
+    }
+   ]
+  },
+  {
+   "check": "Shows \"280,000원부터\" honestly, e.g. with a final-price note, and addresses the no-surprises tension",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "병원은 예약 전에 예상 총액 또는 추가 비용 기준을 안내해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Preserves the starting price, warns about additional costs, and proposes advance estimates to prevent surprises."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Honestly handles base pricing with user acknowledgement, balancing the no-surprise requirement."
+    }
+   ]
+  },
+  {
+   "check": "Prototype runs at 375 px, keyboard-usable (visible focus, labels, ≥24 px targets), offers \"아무 수의사나 가능\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "{ id: \"any\", label: \"아무 수의사나 가능\", detail: \"가능한 담당자 중 선택\" },",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Single-file prototype fits 375px, provides labelled keyboard controls, visible focus, sufficient targets, and any-vet selection."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Runs at 375px, includes visible focus and large tap targets, and provides '아무 수의사나 가능'."
+    }
+   ]
+  },
+  {
+   "check": "Ties the one-screen-or-steps choice to a fast path for the 70% check-up and vaccination bookings",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "건강검진과 예방접종을 먼저 배치하고 ‘빠른 선택’으로 강조했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Prioritizes common services, but justifies separate steps through cognitive load rather than explicitly linking them to faster common bookings."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Justifies the multi-step flow while explicitly addressing the fast path for top services."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.03826305,
+ "date": "2026-10-11"
+}

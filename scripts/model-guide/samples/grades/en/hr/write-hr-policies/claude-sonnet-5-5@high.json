@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/write-hr-policies/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "write-hr-policies",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "fa5b3785cf3a",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 1,
+ "of": 5,
+ "lines": [
+  {
+   "check": "One rule set expressly supersedes Memos A–C: attendance days, \"near an office\" defined, state-move approval kept",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "It applies to all US employees and replaces the 2023 and 2024 memos on state of residence, office attendance and phone/internet reimbursement.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Supersedes all three memos, defines proximity as 50 road miles, sets Tuesday–Thursday attendance, and retains state-move approval."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Expressly supersedes the prior memos, sets Tue–Thu attendance within 50 miles, and keeps 60-day state-move approval."
+    }
+   ]
+  },
+  {
+   "check": "$50 stipend kept, with a CA/IL claim route above it (§2802, 820 ILCS 115/9.5) and documentation",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "California and Illinois staff can also claim documented costs above it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Keeps the automatic $50 stipend and provides documented necessary-expense shortfall claims in California and Illinois."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Keeps $50 stipend, provides claim routes with receipts for CA and IL expenses above it, citing statutory requirements."
+    }
+   ]
+  },
+  {
+   "check": "Rejects instruction 4: non-exempt boot-up and VPN login time is paid work, with a timekeeping rule",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "That includes booting up, logging in to the VPN or required systems, and shutting down. Start your time record when you begin those tasks.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly pays required startup and login time and instructs employees when to start recording work."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects instruction 4 by treating boot-up and login as paid work, with an explicit timekeeping rule."
+    }
+   ]
+  },
+  {
+   "check": "US remote stays limited; abroad only with pre-approval, in Canada or the UK, for immigration, tax, PE reasons",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Working outside the US can create immigration, tax and corporate-registration problems for you and for us.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Limits US stays and requires overseas preapproval in Canada or UK, but substitutes corporate registration for permanent-establishment risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Limits US stays to 4 weeks, and restricts abroad work to Canada/UK with pre-approval due to tax/PE/immigration risks."
+    }
+   ]
+  },
+  {
+   "check": "CEO note lists each departure and decision needed; state table matches headcount (NY, WA have no office)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I also defined \"near an office\" as 50 miles (from Memo B) and kept Memo A's 60-day notice for moves.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "CEO note covers required departures and requests decisions; state table correctly identifies offices and New York/Washington as remote."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "CEO note covers departures and required decisions, while the table correctly reflects no offices for NY and WA."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.019580663,
+ "date": "2026-10-11"
+}

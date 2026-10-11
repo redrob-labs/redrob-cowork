@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/plan-roadmap/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "92c11c18f665",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F7만 일 단위라 45일 ÷ 5 = **9주**로 환산했고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly converts F7 to 9 weeks, scores it 33.3, and states the RICE formula."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Converts 45 days to 9 weeks, states RICE formula, and calculates F7 RICE as 33.3."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| F4 | 510 | 1 | 70% | 12주 | 12 | **29.8** | 4 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All other scores are correct; F4’s 29.8 is acceptable rounding of 29.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All listed RICE scores match the required values (F4 rounded to 29.8)."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (clear of 31 Oct, Hanbit contract) and F5 before 31 Dec, regardless of RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F3는 10/31 마감 때문에 3Q에 넣었고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Schedules F3 in Q3 and F5 in Q4 as mandatory contractual and cost-deadline work."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F3 is scheduled in Q3 before 31 Oct, and F5 in Q4 before 31 Dec."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F2는 F5 완료 후 2027년 1분기에 착수합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains the 50-week incompatibility, respects F5 dependency, and gives timing and evidence-based reconsideration conditions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is not placed before F5; memo explains capacity conflict with F1 and gives reversal conditions."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **합계** | 5개 항목 | **42주** | **48주** | **6주 (12.5%)** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 at 22/24, Q4 at 20/24, and H2 at 42/48 weeks, without splitting items."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quarterly and half-year totals are ≤24 and ≤48 weeks respectively, clearly displayed."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "RICE 29.8로 F7(33.3)에 뒤집니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Explicitly chooses F7 over F4, but relies on ranking without comparing total benefit, effort, and confidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Ranks mechanically by RICE score; mentions estimation risk but omits deeper R×I×C/reach trade-off analysis."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022732763,
+ "date": "2026-10-10"
+}

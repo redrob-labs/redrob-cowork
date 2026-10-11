@@ -1,0 +1,128 @@
+{
+ "key": "en/pm/plan-roadmap/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "pm",
+ "task": "plan-roadmap",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "b21b55aef6f0",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Converts F7's 45 engineer-days to 9 weeks: RICE ≈ 33.3, not 6.7; RICE formula stated",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "45 days ÷ 5 days/week = **9 eng-weeks**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly normalises F7 to nine weeks, scores it 33.3, and states the RICE formula."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F7 converted from days to 9 weeks, RICE is 33.3, and RICE formula is explicitly stated."
+    }
+   ]
+  },
+  {
+   "check": "Other scores correct: F6 90.0, F1 42.0, F4 29.75, F2 22.5, F3 ≈ 5.8",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| F4 | Customer self-booking portal | 510 | 1 | 70% | 12 wks | 12 | **29.8** | 4 |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All other scores are correct; F4's 29.8 is acceptable rounding of 29.75."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All other RICE scores match the required values (90.0, 42.0, 29.8, 22.5, 5.8)."
+    }
+   ]
+  },
+  {
+   "check": "Schedules F3 SSO in Q3 (clear of 31 Oct) and F5 before 31 Dec, regardless of RICE",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Start 1 July, target live mid-Sept → ~6 weeks slack before 31 Oct clause",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Schedules SSO in Q3 and migration by end October, treating both as mandatory rather than RICE-ranked."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F3 is scheduled in Q3 well ahead of October 31, and F5 is scheduled in Q4 before December 31."
+    }
+   ]
+  },
+  {
+   "check": "F2 not before F5; VP Sales told F2 can't fit with F3, F5 and F1, and when it could",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Doing the migration this year makes Route v2 the first unblocked item for Q1 2027.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly tells Richard F2 cannot fit alongside F3, F5 and F1; respects dependency and identifies Q1 2027."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "F2 is not before F5; memo explains why it cannot fit with F1, F3, F5, and when it could."
+    }
+   ]
+  },
+  {
+   "check": "Quarters ≤ 24 and H2 ≤ 48 weeks, totals shown; e.g. F3, F5, F6, F1 plus F4 or F7",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| **H2 total** | | | **45 / 48** | 3 spare; no item split across quarters |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Shows Q3 at 22/24, Q4 at 23/24, and H2 at 45/48; no work split."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Quarters are 22/24 and 23/24, H2 is 45/48, totals are clearly shown with valid packing."
+    }
+   ]
+  },
+  {
+   "check": "Justifies F4 vs F7 explicitly, e.g. R × I × C 357 vs 300 against effort and confidence",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "F4 delivers more absolute value (510×1×0.7 = 357 vs 300)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly chooses F4 over F7 using absolute value, effort utilisation, and confidence rather than mechanical RICE ranking."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly compares F4 vs F7 using R×I×C (357 vs 300), packing, and confidence/estimate risk."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.021349913,
+ "date": "2026-10-11"
+}

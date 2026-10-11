@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/review/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "dfe7be3b2901",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "BAA is the blocker: PHI shared, Exhibit C omitted; don't sign or go live with census data until signed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "An executed BAA attached as Exhibit C.** This is gating and non-negotiable. No census data moves without it.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies census PHI and omitted Exhibit C; blocks signing or PHI transfer until a BAA is executed."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies missing BAA as gating blocker; recommends not signing or barring PHI transfer until executed."
+    }
+   ]
+  },
+  {
+   "check": "Cap is $45,000 (3 months, implementation excluded) vs playbook $240,000 in year 1 and $540,000 super-cap",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "the cap in 9.1 is at most **$45,000** (3 × $15,000/month).",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Gives all required figures and excludes implementation, but contradicts its $45,000 maximum with a possible $180,000 cap."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly quantifies the $45,000 cap, $240,000 Year 1 cap, and $540,000 super-cap."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity is capped; 9.2 excludes notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "The 9.1 carve-out refers to a \"Section 10.4\" that does not exist, so nothing sits outside the cap.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies phantom carve-out, capped IP exposure, notification exclusion and broad customer indemnity, but does not identify customer indemnity as uncapped."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes phantom §10.4 capping indemnities, 9.2 excluding notification costs, and broad uncapped 10.2 customer indemnity."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Delaware venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Renewal increases are **≤3%**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides playbook-aligned redlines for renewal, uptime and chronic-failure remedies, New York County venue, and free 60-day data export."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides specific redlines addressing renewal terms, 99.5% sole-remedy SLA, Delaware venue, and exit terms."
+    }
+   ]
+  },
+  {
+   "check": "§5-1401 met ($600,000+): NY law holds, venue not fixed; §5-903's reach to SaaS uncertain, so calendar and negotiate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Calendar the non-renewal deadline regardless.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly applies $600,000 threshold, separates law from venue, and treats SaaS renewal-statute coverage as uncertain while negotiating and calendaring."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Analyzes §5-1401 as met but venue unaddressed, notes §5-903 SaaS uncertainty, and advises calendaring/negotiating."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.024090412999999998,
+ "date": "2026-10-11"
+}

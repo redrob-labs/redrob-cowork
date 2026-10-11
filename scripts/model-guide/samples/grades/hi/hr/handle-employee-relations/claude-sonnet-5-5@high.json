@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/handle-employee-relations/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "handle-employee-relations",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "d4e5e23c2caa",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Roe's own ₹18,450 dinner bill (9 attendees) and 19 Sept Slack DM disprove his denial; overall credibility hit",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Dinner में उपस्थिति से इनकार* तीन स्रोतों से विरोधाभासी है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Uses Roe’s ₹18,450 nine-attendee bill and Slack DM to contradict denial; also applies credibility damage to September 10."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Both the ₹18,450 bill and Slack DM are cited to disprove his denial, impacting his overall credibility."
+    }
+   ]
+  },
+  {
+   "check": "Sept 18 conduct Substantiated (policy 4.1 / s.2(n); Stiles, bill, DM); Sept 10 remark labelled with stated reasoning",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "### B. 18 सितंबर का आचरण: **Substantiated**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Substantiates September 18 under policy 4.1 using Stiles, bill and DM; September 10 receives a reasoned Substantiated finding."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Sept 18 conduct is substantiated using witness, bill, and DM; Sept 10 remark is labelled and reasoned."
+    }
+   ]
+  },
+  {
+   "check": "Victimisation: Roe cut the move to Major alone ~17 hours after service; label reasoned (4.6, s.3(2)); seniority tested",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अगली सुबह 9:10 पर R ने P-114 और P-127 हटाए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies approximately 17-hour sequence, substantiates victimisation, cites relevant provisions, challenges seniority explanation and requests records."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the ~17-hour timeline, tests seniority, applies policy 4.6 and Section 3(2), and reasons the finding."
+    }
+   ]
+  },
+  {
+   "check": "Gives Miles's unnamed, second-hand account little or no weight, and says why",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अनाम स्रोत से सुनी बात और सामान्य छवि पर आधारित है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects Miles’s account because it is unnamed hearsay, reputation-based, and not eyewitness evidence."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly discounts Miles's hearsay statement and explains why."
+    }
+   ]
+  },
+  {
+   "check": "Remedies: reverse shift, Rule 8 relief (Roe off her supervision; move respondent, not her), proportionate action, check-ins",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यदि किसी का transfer आवश्यक हो, तो वह R का हो।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Reverses shift, removes Roe’s authority, addresses Rule 8 written request, recommends proportionate discipline and scheduled check-ins."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends reversing the shift, Rule 8 interim relief, moving Roe not Major, proportionate sanctions, and follow-ups."
+    }
+   ]
+  },
+  {
+   "check": "Open items: verify seniority records, check for further victimisation, employer acts on recommendations within 60 days",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "**Seniority और coverage रिकॉर्ड:** तीनों pickers के लिए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Requests seniority verification and states 60-day duty, but does not explicitly require checking for further victimisation."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Seniority is included in open items; 60-day timeline and monitoring are placed in recommendations, but victimisation monitoring is omitted from open items."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.027102599999999998,
+ "date": "2026-10-11"
+}

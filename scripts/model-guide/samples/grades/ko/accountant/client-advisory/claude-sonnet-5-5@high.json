@@ -1,0 +1,128 @@
+{
+ "key": "ko/accountant/client-advisory/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "accountant",
+ "task": "client-advisory",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "cff26609e680",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Gross profit ₩453,200,000 vs ₩402,100,000; EBITDA ₩227,300,000 vs ₩163,800,000, a ₩63,500,000 miss, not ₩53,500,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "EBITDA 미달은 5,350만원이 아니라 **6,350만원(−27.9%)**입니다. 예산 227.3백만원, 실적 163.8백만원입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Gross profit and EBITDA figures are correct; explicitly corrects the bookkeeper’s shortfall."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies gross profit and EBITDA figures, correcting the bookkeeper's miss from 53.5M to 63.5M."
+    }
+   ]
+  },
+  {
+   "check": "Treats ₩27,000,000 of insurance as prepaid (선급비용): normalized EBITDA ₩190,800,000, ₩36,500,000 below budget",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "| **정상화 EBITDA** | **159.9** |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly identifies ₩27 million prepaid insurance, but marketing adjustment incorrectly reduces normalized EBITDA below ₩190.8 million."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Correctly treats 27M insurance as prepaid, but subtracts marketing, reaching 159.9M rather than 190.8M (-36.5M)."
+    }
+   ]
+  },
+  {
+   "check": "Calls the ₩18,500,000 marketing underspend timing, not a saving",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "18.5백만원 절감은 절약이 아니라 10월 집행으로 넘어간 것입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly identifies the marketing underspend as timing rather than a saving."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly states the 18.5M marketing underspend is a timing shift rather than actual savings."
+    }
+   ]
+  },
+  {
+   "check": "Splits retail −₩43,700,000 into volume −₩57,000,000 (5,700 × ₩10,000) and price/mix about +₩13,300,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**물량**: (55,300 − 61,000) × 10,000 = **−57.0백만원**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates volume −₩57 million and price/mix approximately +₩13.3 million, totaling −₩43.7 million."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly decomposes retail variance into volume (-57M) and price (+13.3M)."
+    }
+   ]
+  },
+  {
+   "check": "Ties ingredients ~₩28,000,000 over 28% of actual revenue (₩284,900,000) to flour repricing; names overtime (1.5×) behind labor",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "변동예산(실적 매출 × 28%)보다 약 28.0백만원 많습니다. 밀가루 9% 인상이 주원인이고,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct flexible-budget ingredients overrun and flour repricing linkage; also explicitly identifies overtime at 1.5× wages."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately attributes the ~28M ingredient overrun to flour prices and labor to 1.5x overtime."
+    }
+   ]
+  },
+  {
+   "check": "Recommendations follow the data: wholesale growth lowers margin as retail traffic falls; one sign convention throughout",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**도매 물량 확대는 보류**: 마진이 약 12%p 낮고, 인력이 부족해 추가 생산이 1.5배 연장근로로 이어지며,",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommendations address falling retail traffic and lower-margin wholesale growth; table signs and EBITDA bridge impacts are consistently defined."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommendations logically align with data, noting margin dilution and traffic drops with consistent sign convention."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028069125,
+ "date": "2026-10-11"
+}

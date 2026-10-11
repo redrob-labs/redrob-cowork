@@ -1,0 +1,128 @@
+{
+ "key": "ko/engineer/write-tests/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "engineer",
+ "task": "write-tests",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "b9db34c3a698",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Shows `- 1` drops the change day: 15 February gives ₩14,000, not ₩15,000; last day ₩0, not ₩1,000",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| spec-feb15-leap | 15000 | 14000 | A |\n| leap-last-day | 1000 | **0** (하루치 무료) | A |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct figures; explicitly identifies subtraction of one day as excluding the change date."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly shows -1 drops change day, yielding 14,000 vs 15,000 and 0 vs 1,000."
+    }
+   ]
+  },
+  {
+   "check": "Recommends no-go: the headline fix is not in the code; minimal fix removes `- 1`",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "remaining = (period_end - change_date).days   # \"- 1\" 제거",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recommends No-go because the headline fix is absent and supplies the minimal day-count correction."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends no-go with clear rationale and specifies removing '- 1' as minimal fix."
+    }
+   ]
+  },
+  {
+   "check": "Tests period start (full difference), ValueError at period_end and before start, 29-day February, 30/31-day months",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "def test_change_outside_period_raises(change):",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Tests full-price period starts, both excluded boundaries, leap February, and 30/31-day months with correct expectations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests period start, end ValueError, before start ValueError, leap Feb, and 30/31-day months."
+    }
+   ]
+  },
+  {
+   "check": "Notes ROUND_HALF_UP takes −0.5 to −1, mirroring upgrades; half-won cases need custom test plans",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "(-1, -1),   # -0.5 -> -1 (결정: 0에서 먼 쪽. 업/다운 대칭 요구와 일치)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Deliberately specifies negative ties away from zero and uses custom plans for exact half-won cases."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes ROUND_HALF_UP behavior on -0.5 (-1), upgrade mirroring, and sets up custom plans for half-won."
+    }
+   ]
+  },
+  {
+   "check": "Picks a float-price policy and tests it; notes float-Decimal TypeError and two floats failing at .quantize",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "| decimal-float, float-decimal | 15000 | `TypeError: unsupported operand` | B |",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Chooses float acceptance with Decimal(str(x)), tests mixed and float-only inputs, and identifies both current exception modes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Picks policy to accept floats, tests it, and notes both TypeError and quantize failure."
+    }
+   ]
+  },
+  {
+   "check": "Tests are runnable, well named and parametrized; any property test states a real invariant",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "hypothesis = pytest.importorskip(\"hypothesis\")",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Well-named parametrized tests and valid invariants, but module-level importorskip skips every test when optional Hypothesis is absent."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Tests are runnable, well-named/parametrized, and Hypothesis test states real invariants."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.02351265,
+ "date": "2026-10-11"
+}

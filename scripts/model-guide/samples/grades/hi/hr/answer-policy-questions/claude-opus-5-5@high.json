@@ -1,0 +1,128 @@
+{
+ "key": "hi/hr/answer-policy-questions/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "hr",
+ "task": "answer-policy-questions",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "5871f94d7fe2",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Applies PB-2025-04, not the superseded handbook: 26 weeks at 100% (80-day test met) plus 4 company weeks",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "कुल: 30 सप्ताह की paid leave।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies superseding bulletin, confirms 80-day eligibility, and grants 26 statutory plus four company weeks at full fixed salary."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly applies PB-2025-04 granting 26 statutory weeks plus 4 company transition weeks at 100% salary."
+    }
+   ]
+  },
+  {
+   "check": "PL: 8.5 days (or 7.25 if March doesn't count), reading stated; only 5 carry forward, 3.5 (or 2.25) lapse",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अप्रैल–दिसंबर 2025: 9 पूरे महीने × 1.25",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly excludes March; calculates 7.25 remaining, five carried forward and 2.25 lapsed, with correct alternative reading."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly calculates PL under both readings, confirming only 5 days carry forward."
+    }
+   ]
+  },
+  {
+   "check": "FBP: change only within 30 days of birth (~18 Mar 2026), re-elect in April; ₹1,00,000 per child, shared",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "बदलाव की window **18 मार्च 2026** तक रहेगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Rejects immediate change; gives birth window, fiscal-year boundary, April elections, and shared ₹1,00,000 per-child limit."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately details the 30-day window (~18 March), April re-election, ₹1,00,000 limit, and partner sharing."
+    }
+   ]
+  },
+  {
+   "check": "Job protected under Maternity Benefit Act s.12 for the 26 weeks; the old 12-month handbook rule is irrelevant",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "आपकी सेवा शर्तों में आपके अहित में कोई बदलाव, **अवैध** है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains section 12 statutory protection, distinguishes company leave, and explicitly dismisses the superseded 12-month requirement."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms statutory protection under section 12 and dismisses the old handbook's 12-month service rule."
+    }
+   ]
+  },
+  {
+   "check": "Manager notice: by mid-January for a mid-February start; by ~22 Nov if starting 8 weeks early (22 Dec); confidential",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "2 जनवरी के notice पर सबसे जल्दी शुरुआत लगभग 2 फ़रवरी 2026 होगी",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Provides early-start November deadline and confidential HR contact, but omits mid-January notice for a mid-February start."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains notice dates for mid-February vs. 22 December starts and offers confidentiality until notice."
+    }
+   ]
+  },
+  {
+   "check": "Note flags superseded, non-compliant handbook still posted; protection for the 4 company weeks after 26 routed to Legal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसकी लिखित पुष्टि Legal से करवाकर मैं आपको भेजूँगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Note flags posted, superseded, legally inconsistent handbook and unresolved transition protection; email explicitly routes protection confirmation to Legal."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags obsolete intranet handbook and routes the question of protection during company leave to Legal."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.037682138,
+ "date": "2026-10-11"
+}

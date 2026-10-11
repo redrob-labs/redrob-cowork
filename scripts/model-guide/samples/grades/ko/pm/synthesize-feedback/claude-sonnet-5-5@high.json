@@ -1,0 +1,128 @@
+{
+ "key": "ko/pm/synthesize-feedback/claude-sonnet-5-5@high",
+ "language": "ko",
+ "profession": "pm",
+ "task": "synthesize-feedback",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "5699745d66a5",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 5,
+ "partial": 1,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Dedupes by account, method stated: mobile logout 3 (₩68M), OCR 2, approvals 2 (₩46M), card feed 1 (₩26M)",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "고객사명 기준으로 중복을 제거했습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "States account-level deduplication; mobile, OCR, approvals, and card-feed counts and ARR are correct."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates deduplicated accounts and ARR, and clearly states the deduplication method."
+    }
+   ]
+  },
+  {
+   "check": "Flags Solsup Logistics' ARR conflict (₩96M vs ₩69M), picks one (e.g. OCR ₩170M), suggests checking the CRM",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "영업이나 재무에서 정확한 값을 확인해야 합니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Flags ₩96M versus ₩69M, uses ₩69M with an upper bound, and requests authoritative verification."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Flags the conflict, picks an ARR baseline with upper bound, and advises checking with sales/finance."
+    }
+   ]
+  },
+  {
+   "check": "Codes accounting-export rows 2, 9 and 13 as discoverability, since Jangbu-yeondong already shipped",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "기능은 3월에 이미 출시됐고 모든 플랜에서 쓸 수 있습니다. 문제는 개발이 아니라 발견성입니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Codes rows 2, 9, and 13 as discoverability, correctly citing the existing feature."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly classifies rows 2, 9, and 13 as discoverability because the export feature already shipped."
+    }
+   ]
+  },
+  {
+   "check": "Weighs OCR renewal risk (two Enterprise accounts) against the cheap, broad mobile fix, each call justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "순위가 ②인 이유는 명시적 이탈 위협이 없기 때문일 뿐, 착수 순서는 가장 빠릅니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Balances two Enterprise accounts’ OCR renewal exposure against the broader, two-week mobile fix; justifies both decisions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Weighs the enterprise OCR renewal risk against the fast, broad mobile fix and justifies each."
+    }
+   ]
+  },
+  {
+   "check": "Treats the card feed as a data-integrity risk despite only one account",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "누락은 눈에 띄지 않아서 다른 고객도 겪고 있을 수 있습니다.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Recognizes missing financial transactions and delayed closing despite one account; recommends diagnosis and vendor coordination."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Identifies the card feed issue as a critical stability/integrity risk despite impacting one visible account."
+    }
+   ]
+  },
+  {
+   "check": "Caveats: 16 rows, about 12 accounts, NPS from 10 survey responses, sales notes not comparable",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "16행은 12개 고객사이고",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies sample size and missing nonsurvey scores, but omits ten survey responses and explicit sales-versus-survey noncomparability."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Notes 16 rows, 12 accounts, and mixed sources, but omits that NPS comes from exactly 10 survey responses."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.030489375,
+ "date": "2026-10-11"
+}

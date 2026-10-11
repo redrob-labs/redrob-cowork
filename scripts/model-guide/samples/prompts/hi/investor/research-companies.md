@@ -52,3 +52,40 @@ Market figures को निकटतम ₹1 crore तक round कीजिए
 - Rejects the ₹35,000 crore figure because it is global, covers hauling, composting and digestion rather than software, and is quoted by the company itself.
 - Annualizes prices correctly (BinSight ₹4,499 × 12 = ₹53,988; Scrapless ₹5,499 × 12 = ₹65,988, with the 2021 ₹2,499 discarded as stale; Kitchen Ledger ₹72,000 plus the ₹45,000 kit), all ex-GST. Treats Kitchen Ledger's Series B as ₹115 crore from the primary press release, not the aggregator's ₹330 crore.
 - Draws a judgement from the data, for example that Wastewise's institutional skew suits the higher-penetration, lower-churn segment, and that its 14% churn among independent restaurants questions whether full-service belongs in SAM. Turns that into a founder question.
+
+## Card
+
+brief: Commercial kitchens को food-waste tracking software बेचने वाली seed-stage company के लिए भारत का market size और competitor snapshot, मिली-जुली गुणवत्ता की research से बनाइए।
+given:
+- Restaurant Census [1] और Institutional Foodservice Review [2]: segment के अनुसार भारत में outlets और kitchens की संख्या
+- Company blog [3]: market size का दावा और उसका footnote
+- Analyst note [4]: segment के अनुसार penetration और QSR/cloud kitchens की ख़रीद
+- Pricing pages और articles [5]: 4 companies की कीमतें, अलग-अलग वर्षों की, GST अतिरिक्त
+- Funding news [6]: 3 competitors के latest rounds, अलग-अलग sources से
+- Data room [7]: Wastewise की live locations, segment mix और churn
+asked:
+- Bottom-up TAM, SAM और current market: inputs, formulas और एक blended price
+- Source [3] पर top-down cross-check
+- Competitor table: वार्षिक pricing, hardware model, funding और उस पर confidence, Wastewise के लिए implication
+- Source reliability ratings
+- Founders के लिए अधिकतम 5 open questions
+limit: लगभग 1,200 शब्दों के भीतर, Markdown tables, market figures निकटतम ₹1 crore तक
+hard: Sources की विश्वसनीयता अलग-अलग है और वे कभी-कभी टकराते हैं, कीमतों को एक आधार पर लाना है, और segment का दायरा एक judgement call है।
+
+## Scorecard
+
+- Base 281,960 full-service + 96,000 institutional = 377,960; TAM ≈₹2,268–2,457 crore; QSR/cloud kitchens out of SAM
+- Current market: ≈8,459 + 10,560 ≈ 19,019 locations, about ₹114–124 crore a year
+- Rejects the ₹35,000 crore: global, covers hauling, composting and digestion, and is company-sourced
+- Annualizes ex-GST: BinSight ₹53,988, Scrapless ₹65,988 (2021 ₹2,499 stale), Kitchen Ledger ₹72,000 plus ₹45,000 kit
+- Kitchen Ledger's Series B is ₹115 crore from the press release, not the aggregator's ₹330 crore
+- Links institutional skew and 14% independent-restaurant churn to SAM scope; turns it into a founder question
+
+## Scorecard, shown
+
+- आधार 2,81,960 full-service + 96,000 institutional = 3,77,960; TAM ≈₹2,268–2,457 crore; QSR/cloud kitchens SAM से बाहर
+- Current market: ≈8,459 + 10,560 ≈ 19,019 locations, लगभग ₹114–124 crore प्रति वर्ष
+- ₹35,000 crore अस्वीकार: global है, hauling, composting और digestion शामिल, और company का अपना दावा
+- GST रहित वार्षिक कीमतें: BinSight ₹53,988, Scrapless ₹65,988 (2021 का ₹2,499 पुराना), Kitchen Ledger ₹72,000 और ₹45,000 kit
+- Kitchen Ledger का Series B press release के अनुसार ₹115 crore, aggregator का ₹330 crore नहीं
+- Institutional झुकाव और independent restaurants में 14% churn को SAM के दायरे से जोड़ा; इसे founders से सवाल बनाया

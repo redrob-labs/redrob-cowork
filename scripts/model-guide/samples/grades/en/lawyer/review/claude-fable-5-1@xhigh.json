@@ -1,0 +1,110 @@
+{
+ "key": "en/lawyer/review/claude-fable-5-1@xhigh",
+ "language": "en",
+ "profession": "lawyer",
+ "task": "review",
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "scorecardSha": "dfe7be3b2901",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 3,
+ "partial": 2,
+ "of": 5,
+ "lines": [
+  {
+   "check": "BAA is the blocker: PHI shared, Exhibit C omitted; don't sign or go live with census data until signed",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "If Calyx cannot produce a compliant BAA by Friday, we don't sign Friday.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies census data as PHI, omitted Exhibit C, and requires an executed BAA before sharing PHI."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies BAA omission as a blocker and advises against signing or going live without it."
+    }
+   ]
+  },
+  {
+   "check": "Cap is $45,000 (3 months, implementation excluded) vs playbook $240,000 in year 1 and $540,000 super-cap",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Playbook floor is $240,000 (12 months of all fees in year one) with a $540,000 super-cap (3× annual fees) for data breaches.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates $45,000 excluding implementation and both playbook caps; also identifies the paid-fees timing risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately quantifies the $45,000 cap against the playbook's $240,000 year 1 cap and $540,000 super-cap."
+    }
+   ]
+  },
+  {
+   "check": "Carve-out cites non-existent §10.4, so IP indemnity is capped; 9.2 excludes notification costs; 10.2 broad, uncapped",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "so *nothing* sits outside the cap – including indemnities.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Identifies phantom cross-reference, capped IP indemnity, excluded notification costs, and broad customer indemnity, but not its uncapped exposure."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Notes phantom §10.4 capping indemnities, §9.2's notification cost exclusion, and broad customer indemnity under §10.2."
+    }
+   ]
+  },
+  {
+   "check": "Redlines for renewal (3 years, 120 days, +9%), 99.5% sole-remedy SLA, Delaware venue and exit terms",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Renews for successive one-year terms unless either party gives 60 days' notice.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Provides playbook-aligned primary redlines for renewal, uptime and chronic failure, New York County venue, and free 60-day export."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Provides redlines addressing renewal terms, 99.5% sole-remedy SLA, Delaware venue, and exit provisions."
+    }
+   ]
+  },
+  {
+   "check": "§5-1401 met ($600,000+): NY law holds, venue not fixed; §5-903's reach to SaaS uncertain, so calendar and negotiate",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Separately, calendar the non-renewal deadline (currently ~8 months before each term end) regardless of outcome.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Correctly addresses statutory threshold, law versus venue, and uncertain SaaS coverage, but miscalculates the 120-day deadline as eight months."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recognizes §5-1401 secures NY law but not venue, and notes §5-903 SaaS uncertainty, recommending negotiation and calendaring."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.020963250000000003,
+ "date": "2026-10-11"
+}

@@ -1,0 +1,128 @@
+{
+ "key": "hi/pm/write-prd/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "pm",
+ "task": "write-prd",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "ad156993bbba",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 4,
+ "partial": 2,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Rejects \"median under a minute\": only 38% respond within 1 minute; the median is 1–3 minutes",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "सभी requests पर सिर्फ़ 38% ने 1 मिनट में जवाब दिया।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Rejects the claim for all requests, but never identifies the median as between one and three minutes."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly rejects the Ops claim, noting only 38% respond within 1 minute and median is between 1-3 minutes."
+    }
+   ]
+  },
+  {
+   "check": "Picks a window (e.g. 3–5 minutes) and a no-response default, justified by the cumulative pilot data",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "हम 5 मिनट + parallel picking लेते हैं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Chooses five minutes using cumulative response data; selects refund rather than auto-approval, explaining nonresponse and unwanted-substitute risk."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Selects a 5-minute window and auto-refund/remove default, clearly justified with cumulative pilot data."
+    }
+   ]
+  },
+  {
+   "check": "Flags the MRP/shelf-price request as breaching Terms §7.3; caps at the ordered price or escalates to Legal",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "यह लागू करना published terms का उल्लंघन होगा।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects Finance’s request, escalates to Legal, and caps charges at the lower original or substitute price."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Rejects Finance's request, flags violation of Terms §7.3, caps price, and escalates to Legal."
+    }
+   ]
+  },
+  {
+   "check": "Excludes tobacco and pharmacy items from substitution (refund only) in requirements and edge cases",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "Out of stock होने पर सीधे refund, approval screen नहीं।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Requirements prohibit tobacco and all pharmacy substitutions and mandate refunds, but edge cases omit these exclusions."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explicitly bars tobacco and pharmacy items from being substituted or proposed as substitutes, requiring refund only."
+    }
+   ]
+  },
+  {
+   "check": "Metrics include the 23% door-rejection baseline, a 34-minute shopper-time guardrail and a response rate",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "≤36 मिनट (guardrail)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Includes 23% door-rejection baseline, 34-minute shopper-time baseline with a guardrail, and a response-rate metric."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes all required metrics: 23% door-rejection baseline, 34-minute shopper time guardrail, and response rate target."
+    }
+   ]
+  },
+  {
+   "check": "Prototype is self-contained HTML, shows every required element including the timeout default and ₹ prices, and is accessible",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "<button class=\"other\" type=\"button\">कोई और चुनें</button>",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Self-contained HTML includes all required information and actions, ₹ prices, timeout default, semantic buttons, readable contrast, and language metadata."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Self-contained HTML prototype includes all required elements: original, substitute, ₹ prices, actions, timeout default, and accessible structure."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.028882088,
+ "date": "2026-10-11"
+}

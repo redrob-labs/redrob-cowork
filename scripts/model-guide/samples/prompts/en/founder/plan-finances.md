@@ -47,3 +47,27 @@ Round to the nearest dollar, and state any assumption you add.
 - Under the full plan, cash runs out around March 2027, about 14–15 months, not 23. The second license payment in January 2027 is a cliff.
 - Works back from the board policy: the raise must close by about August 2026 (about $1.03M left, roughly 6 months of burn), so fundraising has to start around March or April 2026, almost immediately and far earlier than mid-2027. The answer says this plainly.
 - MRR is computed correctly (opening × 0.98 + new MRR). Formulas are stated for every column, and the alternative scenario is modelled with a quantified runway effect and a clear, justified recommendation.
+
+## Card
+
+brief: Build an 18-month cash budget for an analytics startup, correct the co-founder's runway estimate, and decide hiring and fundraising timing.
+given:
+- Co-founder's estimate: payroll, license, opex, revenue, burn and a 23-month runway
+- Facts and assumptions: 11 rows on cash, MRR, churn, margin, payroll, hires, opex and the license
+- Board policy: 6 months of cash at close; raises take about 5 months
+asked:
+- A monthly table for January 2026 to June 2027, with the formula for each column
+- A reconciliation of John's errors and each one's effect on monthly burn
+- The month cash runs out, and the latest month to start fundraising
+- A hiring and fundraising recommendation, with at least one modelled alternative
+limit: Up to about 1,200 words, in Markdown
+hard: A simple estimate hides several modelling errors, cash timing differs from expense timing, and a board policy must be worked backwards into a deadline.
+
+## Scorecard
+
+- Names John's errors: unburdened payroll without hires, license spread instead of paid in January, revenue not gross profit
+- January 2026 net burn about $269,540 (128,100 + 38,000 + 144,000 − 40,560)
+- Burn settles near $155,000–$170,000 a month mid-2026, easing as MRR grows
+- Cash runs out around March 2027 (14–15 months), with the January 2027 license as a cliff
+- Raise must close by about August 2026 (~$1.03M left), so fundraising starts March–April 2026
+- MRR = opening × 0.98 + new; formulas for every column; quantified alternative and justified recommendation

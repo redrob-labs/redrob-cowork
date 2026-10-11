@@ -51,3 +51,38 @@ deliverable: graphics
 - Includes "DICGC द्वारा प्रति जमाकर्ता ₹5 लाख तक बीमित" and the badge at 120 px or wider, the logo at 160 px or wider with clear space, and a headline of at least 64 px on the 1080 px artboard, with Devanagari line height that keeps matras from clipping.
 - Provides two valid SVGs at 1080 × 1080 and 1200 × 627 with a clear hierarchy (headline, rate, CTA, disclosures) and brand colours only. The landscape version is recomposed, not just scaled down.
 - The photo direction follows the guide (real members, natural light) while keeping the brief's family idea, and the copy sounds right for 22–35-year-old first-time account holders.
+
+## Card
+
+brief: एक शहरी सहकारी बैंक के नए बचत खाते के लिए Instagram और LinkedIn लॉन्च ग्राफ़िक्स, compliance और ब्रांड नियमों के भीतर, डिज़ाइन करें।
+given:
+- फ़ॉर्मैट: 1080 × 1080 Instagram पोस्ट और 1200 × 627 LinkedIn इमेज, हिंदी (देवनागरी) में
+- जेन डो का ब्रीफ़: हेडलाइन, फ़ोटो का विचार, CTA, ब्याज दर का दावा और लक्षित दर्शक
+- प्रोडक्ट शीट: Compliance द्वारा अनुमोदित 7 विशेषताएँ और शुल्क
+- Compliance नियम: ब्याज दर, DICGC बीमा, निरपेक्ष और तुलनात्मक दावों की शर्तें
+- ब्रांड गाइड: रंग, टाइप, लोगो, DICGC बैज और फ़ोटोग्राफ़ी के नियम
+asked:
+- दोनों फ़ॉर्मैट की अंतिम कॉपी, हेडलाइन बदलने पर कारण और दो विकल्प
+- हर फ़ॉर्मैट का लेआउट और विज़ुअल दिशा, और वर्गाकार से landscape में बदलाव
+- हर फ़ॉर्मैट का असली पिक्सेल आकार पर inline SVG मॉक-अप
+- जेन के लिए छोटा नोट: कौन-से दावे इस्तेमाल नहीं हो सके, और क्यों
+limit: गद्य लगभग 1,200 शब्दों के भीतर, Markdown; SVG इससे लंबा हो सकता है
+hard: ब्रीफ़ की कॉपी को प्रोडक्ट तथ्यों और compliance नियमों से परखना है, ब्रांड के न्यूनतम आकार लेआउट को बाँधते हैं, और दो फ़ॉर्मैट को अलग-अलग composition चाहिए।
+
+## Scorecard
+
+- Rejects "कोई फ़ीस नहीं. कभी नहीं." given ₹50 paper-statement and ₹23 ATM charges; offers accurate alternatives
+- Shows 7.00% "प्रति वर्ष" with the ₹1 lakh tier and full disclosure; drops the unsupported "शहर में कोई और" claim
+- DICGC ₹5 lakh line, badge ≥120 px, logo ≥160 px with clear space, headline ≥64 px; matras not clipped
+- Two valid SVGs at 1080 × 1080 and 1200 × 627, clear hierarchy, brand colours only
+- Recomposes the landscape version rather than scaling the square one down
+- Photo direction uses real members in natural light, keeps the family; copy suits 22–35 first-timers
+
+## Scorecard, shown
+
+- ₹50 कागज़ी स्टेटमेंट और ₹23 ATM शुल्क के कारण "कोई फ़ीस नहीं. कभी नहीं." को अस्वीकार करता है और सटीक विकल्प देता है
+- 7.00% को "प्रति वर्ष", ₹1 लाख वाले स्लैब और पूरे disclosure के साथ दिखाता है; बिना प्रमाण वाला "शहर में कोई और" दावा हटाता है
+- DICGC ₹5 लाख वाली पंक्ति, बैज ≥120 px, clear space के साथ लोगो ≥160 px, हेडलाइन ≥64 px; मात्राएँ कटती नहीं
+- 1080 × 1080 और 1200 × 627 पर दो valid SVG, साफ़ hierarchy, केवल ब्रांड रंग
+- Landscape संस्करण को वर्गाकार का छोटा रूप बनाने के बजाय नए सिरे से compose करता है
+- फ़ोटो दिशा में असली सदस्य और प्राकृतिक रोशनी, परिवार का विचार बना रहता है; कॉपी 22–35 साल के पहली बार खाता खोलने वालों के अनुकूल

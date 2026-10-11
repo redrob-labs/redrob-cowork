@@ -1,0 +1,128 @@
+{
+ "key": "en/sales/answer-customers/claude-opus-5-5@high",
+ "language": "en",
+ "profession": "sales",
+ "task": "answer-customers",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "3181382aa2b6",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "§3.2 fixes price until 28 Feb 2027; $5,520 invoice is an error, corrected by $720 to $4,800",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Your contract (§3.2) fixes your price at $40/seat until 28 February 2027.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Identifies the invoice error and commits to correcting $5,520 by $720 to $4,800."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly identifies the price protection end date, explains the billing error, and specifies the $720 correction to $4,800."
+    }
+   ]
+  },
+  {
+   "check": "220 downtime minutes of 40,320 ≈ 99.45% uptime: 10% credit ≈ $480; claim within 30 days",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Downtime 13:05–16:45 UTC = 220 minutes.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly calculates 40,320 monthly minutes, 99.45% uptime and $480 credit; explicitly records the timely request."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates uptime minutes and percentage, derives the $480 credit, and logs the claim within 30 days."
+    }
+   ]
+  },
+  {
+   "check": "Explains degraded time isn't downtime vs \"9 hours\"; no full-month refund; goodwill labelled and justified",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "The degraded period of 105 minutes is excluded by the SLA definition.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explains the discrepancy, invites evidence, declines a full refund, and explicitly justifies offering no additional goodwill payment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Explains degraded performance vs downtime against the 9-hour claim, denies full refund, and justifies the goodwill stance."
+    }
+   ]
+  },
+  {
+   "check": "FHIR R4 API yes; no HL7 v2, no native Mediscribe integration; offers a next step",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "We have **no native integration** with Mediscribe or any other EHR.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Confirms FHIR R4, denies HL7 v2 and native Mediscribe integration, and offers a technical call."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately covers FHIR R4, denies HL7 v2 and native EHR integration, and offers a technical call."
+    }
+   ]
+  },
+  {
+   "check": "15 extra seats at $40 under §3.3: 135 seats, $5,400 a month from March",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "From March you'd have 135 seats × $40 = **$5,400/month**.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly applies §3.3 to the 15 additional seats at the protected $40 rate."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Confirms 15 additional seats at $40 under §3.3, totaling 135 seats for $5,400/month from March."
+    }
+   ]
+  },
+  {
+   "check": "Accountable, empathetic tone without grovelling; internal note lists each action with an amount",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "I'm sorry you had to catch this.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Accountable, respectful tone without grovelling; internal bullets specify corrections, credits, seat charges and supporting calculations."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Maintains an appropriate tone and clearly lists actionable items with specific amounts in the internal note."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.017238638,
+ "date": "2026-10-11"
+}

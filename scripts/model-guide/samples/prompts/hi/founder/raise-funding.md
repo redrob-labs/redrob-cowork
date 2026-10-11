@@ -50,3 +50,37 @@ deliverable: presentations
 - Fixes the TAM arithmetic: 12,000 × ₹48 lakh = ₹5,760 crore, not ₹57,600 crore. Notes that ₹48 lakh equals the current ACV (₹8.16 crore ÷ 17) and treats it as a bottom-up SAM-style figure. Larger market claims are marked "[स्रोत आवश्यक]".
 - Sizes the raise from the burn plan (24 months averaging about ₹2.4 crore a month ≈ ₹57.6 crore, before any revenue growth), defends roughly ₹60 crore or a reasoned alternative, and notes about 8 months of current runway (₹13 crore ÷ ₹1.6 crore).
 - The deck tells a coherent story, flags the 58% gross margin as a known risk to address, uses only the data given, and follows the slide format with speaker notes.
+
+## Card
+
+brief: एक CEO के ड्राफ़्ट आंकड़ों को diligence में टिकने वाले Series A pitch deck में बदलें, metrics सुधारते हुए और raise राशि का औचित्य देते हुए।
+given:
+- ड्राफ़्ट key metrics स्लाइड: ARR, NRR, TAM, ग्राहक और raise राशि
+- मूल डेटा: जून 2025 के 12 मद, MRR, एक-बार की फ़ीस, cohort, margin, नकद, burn और pipeline पर
+- Raise के बाद की योजना: टीम का विस्तार, बढ़ता burn और अगले raise का ARR लक्ष्य
+- ग्राहक का कथन: अनुमति सहित एक pilot परिणाम
+asked:
+- समस्या से milestones तक 10–12 स्लाइड का deck
+- निवेशक की परिभाषा से सुधारे गए metrics, गणना speaker notes में
+- Burn योजना पर आधारित raise राशि, और ₹60 करोड़ पर राय
+- जेन के लिए हर बदलाव समझाती "सुधार" सूची
+limit: 10 से 12 स्लाइड, लगभग 1,200 शब्दों के भीतर, Markdown स्लाइड फ़ॉर्मैट
+hard: मुख्य metrics को निवेशक की परिभाषाओं से दोबारा निकालना है, बाज़ार का गणित जाँचना है, और बिना डेटा गढ़े burn योजना से raise का आकार तय करना है।
+
+## Scorecard
+
+- ARR ₹8.16 crore (₹68 lakh × 12), excluding ₹2.84 crore one-time fees; notes MRR ₹41 lakh to ₹68 lakh (~66%)
+- NRR 112% (₹33.6 lakh ÷ ₹30 lakh); 140% includes new customers; checks ₹33.6 + ₹34.4 = ₹68 lakh
+- TAM is ₹5,760 crore (12,000 × ₹48 lakh), not ₹57,600 crore; ₹48 lakh is current ACV, a SAM-style figure
+- Sizes the raise at ~₹57.6 crore (24 months averaging ~₹2.4 crore); defends ~₹60 crore; notes ~8 months' runway
+- Flags 58% gross margin as a risk; uses only given data; marks larger claims "[स्रोत आवश्यक]"
+- Tells a coherent story with a speaker note on every slide
+
+## Scorecard, shown
+
+- ARR ₹8.16 करोड़ (₹68 लाख × 12), ₹2.84 करोड़ की एक-बार की फ़ीस को छोड़कर; MRR ₹41 लाख से ₹68 लाख (~66%) की वृद्धि बताता है
+- NRR 112% (₹33.6 लाख ÷ ₹30 लाख); 140% में नए ग्राहक शामिल हैं; ₹33.6 + ₹34.4 = ₹68 लाख जाँचता है
+- TAM ₹57,600 करोड़ नहीं, ₹5,760 करोड़ (12,000 × ₹48 लाख) है; ₹48 लाख मौजूदा ACV है, SAM जैसा आंकड़ा
+- Raise का आकार ~₹57.6 करोड़ (24 महीने, औसत ~₹2.4 करोड़ प्रति माह) आँकता है; ~₹60 करोड़ का बचाव करता है; ~8 महीने का मौजूदा runway बताता है
+- 58% gross margin को जोखिम बताता है; केवल दिया गया डेटा इस्तेमाल करता है; बड़े दावों पर "[स्रोत आवश्यक]" लगाता है
+- हर स्लाइड पर speaker note के साथ सुसंगत कहानी कहता है

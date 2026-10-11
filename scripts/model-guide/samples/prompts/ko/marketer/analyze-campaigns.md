@@ -58,3 +58,36 @@ ROAS는 소수점 둘째 자리, 금액은 원 단위로 반올림하세요. 분
 - Computes channel ROAS correctly: 메타 0.98, 네이버 검색 1.58, PMax 1.19 (and lower once brand cannibalisation is considered), 카카오모먼트 0.55, 제휴 2.13, CRM 14.00.
 - Shows judgement on attribution: uses the Meta holdout to argue that last-click under-credits Meta, discounts PMax for brand queries, and treats 카카오모먼트 as the weakest case. Doesn't cut purely on last-click ROAS.
 - The Q4 allocation sums to ₩139,500,000, follows from the scorecard, and proposes specific tests, such as a 카카오모먼트 holdout, PMax with brand exclusions, and a repeat-purchase or LTV view to complement first-order contribution.
+
+## Card
+
+brief: 플랫폼 자체 집계를 더한 CMO 수치를 실제 주문과 대사하고, 채널을 평가해 4분기 예산을 제안합니다.
+given:
+- CMO 슬라이드 초안: 전환, 매출, ROAS
+- 광고 플랫폼 리포트: 채널 6개의 광고비, 전환, 매출, 리포트 기간
+- 카페24 주문(GA4 마지막 클릭 채널 기준): 7개 행과 합계
+- 기타 사실: 공헌이익률, 제휴 이용료, PMax 브랜드 비중, 메타 홀드아웃 테스트, 카카오모먼트 담당자 의견
+asked:
+- 플랫폼 주장과 카페24 실적의 대사표
+- 채널 성과표: 실제 비용, 주문, 매출, ROAS, CAC, 공헌이익, 판정
+- 이사회 슬라이드용 정정 수치와 한 문장 헤드라인
+- 3분기 총액 안에서 재배분한 4분기 예산과 근거
+- 유의 사항과 다음 테스트 최대 5개
+limit: 약 2,500자 이내, 모든 산식을 밝힌 Markdown 표, ROAS는 소수점 둘째 자리
+hard: 자체 집계 수치가 겹치고 어긋나며 광고비 열 밖에 비용이 있고, 기여도 증거는 마지막 클릭을 넘어선 판단이 필요합니다.
+
+## Scorecard
+
+- Platforms' 2,480/₩321,500,000 vs actual 1,640/₩213,200,000: 840 over-attributed (~51%); 2.37× invalid; 카카오모먼트 window flagged
+- True cost ₩139,500,000 with the ₩4,000,000 fee; blended ROAS ≈1.53×; contribution −₩22,240,000
+- ROAS: 메타 0.98, 네이버 검색 1.58, PMax 1.19, 카카오모먼트 0.55, 제휴 2.13, CRM 14.00
+- Uses the holdout to argue last-click under-credits 메타; discounts PMax for brand; 카카오모먼트 weakest
+- Q4 plan totals ₩139,500,000, follows the scorecard; tests e.g. 카카오모먼트 holdout, PMax brand exclusions, LTV view
+
+## Scorecard, shown
+
+- 플랫폼 합계 2,480건/321,500,000원 대 실제 1,640건/213,200,000원: 840건(약 51%) 과대 집계, 2.37배는 무효, 카카오모먼트 기간 불일치 지적
+- 제휴 이용료 4,000,000원을 포함한 실제 비용 139,500,000원, 통합 ROAS 약 1.53배, 공헌이익 −22,240,000원
+- ROAS: 메타 0.98, 네이버 검색 1.58, PMax 1.19, 카카오모먼트 0.55, 제휴 2.13, CRM 14.00
+- 홀드아웃 결과로 마지막 클릭이 메타를 과소평가함을 논증, PMax는 브랜드 검색분만큼 할인, 카카오모먼트가 가장 약함
+- 4분기 안은 합계 139,500,000원이고 성과표에 근거, 테스트 예: 카카오모먼트 홀드아웃, PMax 브랜드 제외, LTV 관점

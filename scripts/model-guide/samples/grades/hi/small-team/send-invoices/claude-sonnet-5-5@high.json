@@ -1,0 +1,128 @@
+{
+ "key": "hi/small-team/send-invoices/claude-sonnet-5-5@high",
+ "language": "hi",
+ "profession": "small-team",
+ "task": "send-invoices",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "83d0aa578bd8",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "INV-0152 totals ₹6,89,533: ₹4,50,000 balance + CO-1 ₹70,000 + expenses ₹58,500 × 1.10 = ₹64,350, plus 18% GST ₹1,05,183",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इस पर GST 1,05,183 लगता है, यानी कुल 6,89,533।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct net amount and calculations; gross invoice presentation deducts the GST-inclusive deposit to reach the required balance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly calculates balance due of ₹6,89,533 including CO-1, marked-up expenses, and 18% GST."
+    }
+   ]
+  },
+  {
+   "check": "Excludes the ₹10,600 meals; due 25 March (net 15); shows the INV-0141 deposit (₹5,31,000) as received",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Crew meals ₹10,600 SOW में billable नहीं हैं, इसलिए शामिल नहीं किए।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets 25 March due date, and records INV-0141’s ₹5,31,000 deposit as received."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Excludes meals, sets due date to 25 March, and credits the ₹5,31,000 deposit."
+    }
+   ]
+  },
+  {
+   "check": "CO-2 not billed (no Jane Doe approval); email asks her to approve ₹35,000 + GST for 0.5 day",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "लागत 0.5 दिन × ₹70,000 = ₹35,000 + GST ₹6,300 = **₹41,300** होगी।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Excludes unapproved CO-2 and asks Jane for written approval before separate billing."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Omits CO-2 from invoice and explicitly requests Jane Doe's written approval for ₹35,000 + GST."
+    }
+   ]
+  },
+  {
+   "check": "Doesn't chase Tern: matches 3 Mar ₹1,15,000 to INV-0139, flags the \"INV0193\" reference mismatch",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**INV-0139 (Tern Studios) के लिए कोई email नहीं।**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Matches the 3 March ₹1,15,000 receipt, marks paid, and flags the transposed invoice reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Correctly omits chasing Tern, matches the receipt to INV-0139, and notes the typo in reference."
+    }
+   ]
+  },
+  {
+   "check": "Bhatti firm with ≈ ₹6,300 late fee (1.5% × 2 months × ₹2,10,000); Parishad polite, no fee, PO 77-3310",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "अब तक दो पूरे महीनों का fee ₹6,300 बनता है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Bhatti receives a firm contractual demand; Parishad receives a polite PO 77-3310 correction without late fees."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Bhatti email is firm with ₹6,300 late fee; Parishad email is polite, has no late fee, and includes PO 77-3310."
+    }
+   ]
+  },
+  {
+   "check": "Invoice complete and professional: unique number, dates, GST line, terms, payment details, figures add up",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "**Invoice no.:** INV-0152 | **Invoice date:** 10 मार्च 2026 | **Due date:** 25 मार्च 2026 (net 15)",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Complete professional invoice includes parties, item calculations, GST, deposit reconciliation, payment placeholders, and contractual terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "The invoice is complete with all required metadata, GST lines, terms, instructions, and correct math."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022920188,
+ "date": "2026-10-11"
+}

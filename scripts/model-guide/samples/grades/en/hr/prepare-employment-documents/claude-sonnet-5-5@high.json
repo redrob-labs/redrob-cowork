@@ -1,0 +1,110 @@
+{
+ "key": "en/hr/prepare-employment-documents/claude-sonnet-5-5@high",
+ "language": "en",
+ "profession": "hr",
+ "task": "prepare-employment-documents",
+ "model": "claude-sonnet-5-5",
+ "effort": "high",
+ "scorecardSha": "8e4daadb4377",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 2,
+ "partial": 3,
+ "of": 5,
+ "lines": [
+  {
+   "check": "Letter uses $175,000 or a placeholder, 3,200 RSUs, \"Software Engineer II\"; not $182,000, 4,000 or \"Senior\"",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "You will be a **Software Engineer II (L4)**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Letter uses Software Engineer II, a $175,000 placeholder, and a 3,200-RSU placeholder, not the unauthorized promised terms."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Uses Software Engineer II, and bracketed placeholders for approved $175,000 base and 3,200 RSUs."
+    }
+   ]
+  },
+  {
+   "check": "Takes a position on the base gap (band exception with sign-offs, or bridge); candidate told before sending",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "should call him before the letter arrives and explain the differences.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Defaults to $175,000 and identifies exception approvers, but requires notification before arrival rather than before sending."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Recommends exception sign-offs or approved limits, and explicitly instructs notifying the candidate beforehand."
+    }
+   ]
+  },
+  {
+   "check": "Non-compete dropped under §16600; California law and venue replace Texas under §925; confidentiality/IP kept",
+   "verdict": "partial",
+   "agreed": true,
+   "quote": "Changed to California law and venue, since Labor Code §925 bars the Texas clause.",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Drops non-compete under §16600 and replaces Texas law and venue under §925, but omits confidentiality/IP reference."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "partial",
+     "reason": "Drops non-compete and applies California law/venue, but omits a confidentiality/IP reference."
+    }
+   ]
+  },
+  {
+   "check": "Repayment after 7 months: 5/12 × $20,000 = $8,333.33; no final-pay deduction without written authorization",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "Repayment: $20,000 × 5/12 = **$8,333.33**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correct calculation; letter and example prohibit final-pay deduction without separate written authorization."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately calculates $8,333.33 and notes no deduction from final wages without separate written authorization."
+    }
+   ]
+  },
+  {
+   "check": "Keeps at-will, contingencies and the Dec 1, 2025 start; placeholders limited to open decisions",
+   "verdict": "partial",
+   "agreed": false,
+   "quote": "**[3,200 – RSU COUNT PENDING APPROVAL]**",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "partial",
+     "reason": "Keeps at-will, contingencies, and December 1 start, but unnecessarily marks already-approved equity pending and leaves signatory unfinished."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Includes at-will employment, background/work authorization contingencies, Dec 1 start date, and limited placeholders."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.018556388,
+ "date": "2026-10-11"
+}

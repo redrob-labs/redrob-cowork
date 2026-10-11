@@ -1,0 +1,128 @@
+{
+ "key": "hi/accountant/close-books/claude-opus-5-5@high",
+ "language": "hi",
+ "profession": "accountant",
+ "task": "close-books",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "scorecardSha": "d2bbc5dfbdb1",
+ "graders": [
+  "openai/gpt-6.1-sol@medium",
+  "google/gemini-3.8-flash@medium"
+ ],
+ "passed": 6,
+ "partial": 0,
+ "of": 6,
+ "lines": [
+  {
+   "check": "Splits ₹45,270.00 into a duplicated ₹45,000.00 Sagartat NEFT receipt and a ₹270.00 transposition on #2038",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹45,000 UTR 77310 की दोहरी प्रविष्टि (DEP0315) है और ₹270 चेक #2038 में अंकों की अदला-बदली है",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Correctly identifies both errors and their amounts, totaling ₹45,270.00."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Accurately splits ₹45,270 into the ₹45,000 duplicate NEFT and ₹270 transposition error."
+    }
+   ]
+  },
+  {
+   "check": "Rejects the Miscellaneous Expense plug",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "कृपया आगे से किसी अंतर को विविध व्यय में plug न करें",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Explicitly rejects the plug and explains why each error requires correction in its proper account."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Clearly rejects using miscellaneous expense to plug the reconciliation difference."
+    }
+   ]
+  },
+  {
+   "check": "Reconciles both sides to ₹8,65,620.50, moving to ₹8,69,720.50 if #2019 is voided",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "दोनों पक्ष बराबर बढ़ते हैं, इसलिए समायोजित शेष 8,69,720.50 पर मिलते हैं",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Calculations establish ₹8,65,620.50 before voiding and matching ₹8,69,720.50 balances after the ₹4,100 adjustment."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Reconciles to ₹8,69,720.50 with #2019 voided, having noted ₹8,65,620.50 before voiding."
+    }
+   ]
+  },
+  {
+   "check": "Returns the ₹3,500.00 bounced cheque to Richard Miles's receivable; charges and MDR to expense, FD interest to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "₹3,500 मरीज़ रिचर्ड माइल्स के प्राप्य खाते में वापस जाएगा",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Returns the bounced cheque to Richard’s receivable; entries expense charges and MDR and recognize FD interest income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Bounced cheque goes to receivable, fees/MDR to expense, and FD interest to income."
+    }
+   ]
+  },
+  {
+   "check": "Voids #2019 to Stale Cheques Payable under the 3-month policy, not back to income",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "इसे आय में write-back न करें। यह किसी तीसरे पक्ष का देय है।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "Applies the three-month policy, voids #2019, and credits Stale Cheques Payable rather than income."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "Voids #2019 to Stale Cheques Payable liability and explicitly forbids recognizing it as income."
+    }
+   ]
+  },
+  {
+   "check": "Journal entries balance, and the review note to John is specific and constructive",
+   "verdict": "pass",
+   "agreed": true,
+   "quote": "पोस्टिंग से पहले AJE 5 और 6 के समर्थक दस्तावेज़ जोड़ दें।",
+   "by": [
+    {
+     "grader": "openai/gpt-6.1-sol",
+     "verdict": "pass",
+     "reason": "All seven entries balance with sensible accounts; the review gives specific, constructive matching, documentation, and stale-cheque guidance."
+    },
+    {
+     "grader": "google/gemini-3.8-flash",
+     "verdict": "pass",
+     "reason": "All journal entries balance perfectly, and the review note to John is specific and constructive."
+    }
+   ]
+  }
+ ],
+ "costUsd": 0.022595738,
+ "date": "2026-10-11"
+}
