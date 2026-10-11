@@ -26,6 +26,7 @@ function list() {
       providerConnectedCount={1}
       dispatchAction={() => {}}
       setPrompt={() => {}}
+      onRetryMessage={() => {}}
       onRevertToUserMessage={() => {}}
       onForkAtMessage={() => {}}
       onEditUserMessage={() => {}}
