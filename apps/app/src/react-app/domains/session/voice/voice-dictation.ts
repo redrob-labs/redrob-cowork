@@ -1,7 +1,7 @@
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
 import { currentLocale, t } from "@/i18n";
 
-export type DictationClient = Pick<RedrobServerClient, "transcribeAudio" | "speakText">;
+export type DictationClient = Pick<RedrobServerClient, "transcribeAudio" | "speakText" | "whoami">;
 
 export function waitForDataChannelOpen(channel: RTCDataChannel) {
   if (channel.readyState === "open") return Promise.resolve();

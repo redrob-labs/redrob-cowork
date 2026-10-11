@@ -5,6 +5,7 @@ import type { UIMessage } from "ai";
 
 import { MessageList } from "../src/components/chat/message-list";
 import { MessageListProvider } from "../src/components/chat/message-list-provider";
+import { voiceAccessKey, type VoiceAccess } from "../src/react-app/domains/session/voice/read-aloud";
 import { createRedrobServerClient } from "../src/app/lib/redrob-server";
 import { WorkspaceProvider } from "../src/react-app/shell/workspace-provider";
 import en from "../src/i18n/locales/en";
@@ -35,10 +36,10 @@ function list() {
   );
 }
 
-/** The list inside a workspace whose privacy check has already answered `allowed`. */
-function inWorkspace(allowed: boolean | undefined) {
+/** The list inside a workspace whose voice check has already answered `access`. */
+function inWorkspace(access: VoiceAccess | undefined) {
   const queries = new QueryClient();
-  if (allowed !== undefined) queries.setQueryData(["voice-allowed", "ws"], allowed);
+  if (access !== undefined) queries.setQueryData(voiceAccessKey("ws"), access);
   const client = createRedrobServerClient({ baseUrl: "http://127.0.0.1:8787", token: "t" });
   return renderToStaticMarkup(
     <QueryClientProvider client={queries}>
@@ -51,11 +52,12 @@ function inWorkspace(allowed: boolean | undefined) {
 
 describe("read aloud button", () => {
   test("a finished reply offers read aloud when the workspace's privacy level allows voice", () => {
-    expect(inWorkspace(true)).toContain(`aria-label="${en["message.read_aloud"]}"`);
+    expect(inWorkspace("on")).toContain(`aria-label="${en["message.read_aloud"]}"`);
   });
 
-  test("it is not offered at High or Strict privacy, nor before the level is known", () => {
-    expect(inWorkspace(false)).not.toContain(en["message.read_aloud"]);
+  test("it is not offered to a collaborator, at High or Strict privacy, nor before the answer is known", () => {
+    expect(inWorkspace("not_owner")).not.toContain(en["message.read_aloud"]);
+    expect(inWorkspace("privacy")).not.toContain(en["message.read_aloud"]);
     expect(inWorkspace(undefined)).not.toContain(en["message.read_aloud"]);
   });
 

@@ -139,6 +139,28 @@ describe("push-to-talk transcription relay", () => {
     expect(engine.reached()).toBe(false);
   });
 
+  test("voice is the owner's: a collaborator is refused, and whoami tells the app which it is", async () => {
+    const engine = startStubEngine(() => Response.json(TRANSCRIPT));
+    const { base } = await boot(engine.baseUrl);
+    const issued = await fetch(`${base}/tokens`, {
+      method: "POST",
+      headers: { "x-redrob-host-token": HOST_TOKEN, "content-type": "application/json" },
+      body: JSON.stringify({ scope: "owner", label: "owner" }),
+    }).then((response) => response.json() as Promise<{ token: string }>);
+    const whoami = (token: string) =>
+      fetch(`${base}/whoami`, { headers: { authorization: `Bearer ${token}` } }).then(
+        (response) => response.json() as Promise<{ actor: { scope?: string } | null }>,
+      );
+
+    // The server's client token is a collaborator's.
+    expect((await whoami("owt_transcribe_client_token")).actor?.scope).toBe("collaborator");
+    expect((await transcribe(base, {}, { authorization: "Bearer owt_transcribe_client_token" })).status).toBe(401);
+    expect(engine.reached()).toBe(false);
+
+    expect((await whoami(issued.token)).actor?.scope).toBe("owner");
+    expect((await transcribe(base, {}, { authorization: `Bearer ${issued.token}` })).status).toBe(200);
+  });
+
   test("refuses missing, over-size or unsupported audio without asking the engine", async () => {
     const engine = startStubEngine(() => Response.json(TRANSCRIPT));
     const { base } = await boot(engine.baseUrl);

@@ -493,6 +493,8 @@ export type RedrobActor = {
   type: "remote" | "host";
   clientId?: string;
   tokenHash?: string;
+  /** What the token may do. Voice and other host routes take only "owner". */
+  scope?: "owner" | "collaborator" | "viewer";
 };
 
 export type RedrobAuditEntry = {
@@ -1111,6 +1113,8 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
     runtimeVersions: () =>
       requestJson<RedrobRuntimeSnapshot>(baseUrl, "/runtime/versions", { token, hostToken, timeoutMs: timeouts.status }),
     status: () => requestJson<RedrobServerDiagnostics>(baseUrl, "/status", { token, hostToken, timeoutMs: timeouts.status }),
+    /** Who this connection is to the server, including its token's scope. */
+    whoami: () => requestJson<{ ok: boolean; actor: RedrobActor | null }>(baseUrl, "/whoami", { token, hostToken, timeoutMs: timeouts.status }),
     capabilities: () => requestJson<RedrobServerCapabilities>(baseUrl, "/capabilities", { token, hostToken, timeoutMs: timeouts.capabilities }),
     // The memory bank is global, not workspace-scoped: it replaced an
     // organization-scoped hosted store that followed the user across projects.
