@@ -71,6 +71,7 @@ function createTestStore(workerType: "local" | "remote") {
       name: "OpenAI",
       env: ["OPENAI_API_KEY"],
       source: "env",
+      options: {},
       models: {},
     },
     {
@@ -78,6 +79,7 @@ function createTestStore(workerType: "local" | "remote") {
       name: REDROB_PROVIDER_NAME,
       env: [REDROB_API_KEY_ENV],
       source: "env",
+      options: {},
       models: {},
     },
     {
@@ -85,6 +87,7 @@ function createTestStore(workerType: "local" | "remote") {
       name: "OpenCode",
       env: [],
       source: "env",
+      options: {},
       models: {},
     },
     {
@@ -92,6 +95,7 @@ function createTestStore(workerType: "local" | "remote") {
       name: "Amazon Bedrock",
       env: ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"],
       source: "env",
+      options: {},
       models: {},
     },
   ];
@@ -109,7 +113,6 @@ function createTestStore(workerType: "local" | "remote") {
     providerDefaults: () => ({}),
     providerConnectedIds: () => [],
     disabledProviders: () => [],
-    checkDesktopAppRestriction: () => false,
     selectedWorkspaceDisplay: () => workspace,
     providerBaseUrl: () => "https://engine.example",
     selectedWorkspaceRoot: () => workspace.path,

@@ -5,7 +5,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { RedrobSessionSnapshot } from "../src/app/lib/redrob-server";
 import { formatTook, historyEntryFrom, stepsDone } from "../src/react-app/desk/history/history";
 import { HistoryView } from "../src/react-app/desk/preview/desk-history";
-import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 
 const session = (id: string, updated: number, extra: Partial<Session> = {}): Session => ({
   id,
@@ -49,11 +50,8 @@ describe("a chat as a History row", () => {
 describe("real History", () => {
   test("every project's root chats, newest first, with steps for the latest", async () => {
     const calls: string[] = [];
-    const unused = async (): Promise<never> => {
-      throw new Error("not used");
-    };
     const snapshot = (statuses: string[]): RedrobSessionSnapshot => ({ session: session("x", 0), messages: [], todos: todos(statuses), status: { type: "idle" } });
-    const client: DeskServerClient = {
+    const client = deskClient({
       listWorkspaces: async () => ({
         items: [
           { id: "ws_1", name: "seorin", path: "/a", preset: "starter", workspaceType: "local" },
@@ -70,19 +68,7 @@ describe("real History", () => {
         calls.push(`snapshot:${workspaceId}:${sessionId}`);
         return { item: snapshot(sessionId === "new" ? ["completed", "pending"] : []) };
       },
-      getSession: unused,
-      listMemories: unused,
-      saveMemory: unused,
-      updateMemory: unused,
-      deleteMemory: unused,
-      listArtifacts: unused,
-      listMcp: unused,
-      getConfig: unused,
-      patchConfig: unused,
-      listCommands: unused,
-      upsertCommand: unused,
-      deleteCommand: unused,
-    };
+    });
     const result = await createRealDeskServices({ client, workspaceId: "ws_1" }).history.list();
     expect(result.preview).toBe(false);
     expect(result.data.map((entry) => [entry.id, entry.projectId])).toEqual([["new", "ws_1"], ["mid", "ws_2"], ["old", "ws_1"]]);

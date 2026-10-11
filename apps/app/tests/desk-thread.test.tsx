@@ -40,6 +40,7 @@ function render(messages: UIMessage[], inFrame: boolean, status: "ready" | "stre
           onRevertToUserMessage={() => {}}
           onForkAtMessage={() => {}}
           onEditUserMessage={() => {}}
+          onRetryMessage={() => {}}
         >
           <DeskThreadContext value={thread}>
             <MessageList messages={messages} status={status} />
