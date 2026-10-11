@@ -37,6 +37,9 @@ describe("a chat as a History row", () => {
     expect(historyEntryFrom({ session: session("s2", 10_000), projectId: "w", mode: "run" }).kind).toBe("run");
     expect(historyEntryFrom({ session: session("s3", 10_000), projectId: "w", mode: null, snapshot: { todos: [], status: { type: "busy" } } })).toMatchObject({ state: "blocked", label: "Working" });
     expect(historyEntryFrom({ session: session("s4", 10_000), projectId: "w", mode: "plan" })).toMatchObject({ kind: "chat", state: "done", label: "Done" });
+    // A turn the console refused (out of credit, say) has ended: it is not still working.
+    const blocked = { type: "blocked" as const, message: "Out of credit." };
+    expect(historyEntryFrom({ session: session("s5", 10_000), projectId: "w", mode: null, snapshot: { todos: [], status: blocked } })).toMatchObject({ state: "done", label: "Done" });
   });
 
   test("took reads like a clock", () => {
