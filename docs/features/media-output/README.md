@@ -126,11 +126,10 @@ mixed-language check picks the final defaults and voice before the beta.
 - **Proof.** An end-to-end run of the real web app, Cowork server and engine, with only the gateway stood
   in for, passes all 16 checks (#186).
 
-### Open after the build
+### Settled after the build
 
-- **Speech model.** Spoken replies use the engine's `speech_generate` default,
-  `elevenlabs/eleven-multilingual-v2` with `sarah`, not the `eleven-flash-v2.5` chosen above:
-  `/voice/speech` does not pass a model yet. Settle it with VM6's voice choice.
-- **Who may use voice.** The relays are `host` routes, so only the host token or an owner-scoped token
-  reaches them. Desktop connects with the owner token; a web client on a collaborator token gets 401
-  (#185). Whether collaborators get voice is a policy decision.
+- **Speech model.** The engine's `/redrob/speech` defaults to `elevenlabs/eleven-flash-v2.5` with
+  `sarah` for played audio (engine #73); `speech_generate` keeps `eleven-multilingual-v2` for files.
+- **Who may use voice.** The owner only. The relays take only the host or an owner-scoped token, and
+  the app asks `GET /whoami`, so a collaborator or viewer is shown no mic, no voice conversation and no
+  read-aloud (#186).
