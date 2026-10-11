@@ -136,7 +136,7 @@ export async function startRecording(onLimit: () => void): Promise<Recording> {
 
 /** The words in a clip, transcribed in the app's language, or null when nothing was said. */
 export async function transcribeClip(
-  client: DictationClient,
+  client: Pick<RedrobServerClient, "transcribeAudio">,
   workspaceId: string,
   clip: RecordedClip,
 ): Promise<string | null> {
