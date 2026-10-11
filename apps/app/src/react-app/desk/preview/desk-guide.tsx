@@ -32,7 +32,7 @@ import {
 } from "../guide/model-guide";
 import { renderMarkdownHtml } from "../../../components/markdown/markdown-primitive";
 import { loadGuideSamples, sampleKey, type GuideSamples } from "../guide/guide-samples";
-import type { SampleFor } from "../guide/model-guide";
+import { effortName, type ResearchPick, type SampleFor } from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
 
 const DEFAULT_PROFESSION = "lawyer";
@@ -40,6 +40,20 @@ const DEFAULT_PROFESSION = "lawyer";
 /** A model's answer as the chat renders one: markdown, sanitised, in the chat's own type. */
 function SampleOutput(props: { text: string }) {
   return <div className="desk-guide__sample" dangerouslySetInnerHTML={{ __html: renderMarkdownHtml(props.text, "surface") }} />;
+}
+
+/** What one run took, as the page lists it: the model and level, how long, what it cost, when. */
+function runFacts(pick: ResearchPick, run: GuideSamples[string]["runs"][string], research: GuideResearch): Array<[string, string]> {
+  const model = research.models[pick.steps[0]?.model ?? ""] ?? pick.steps[0]?.model ?? "";
+  const level = effortName(run.effort);
+  const facts: Array<[string, string]> = [
+    [t("desk.guide_run_model"), model],
+    [t("desk.guide_run_thinking"), level],
+  ];
+  if (run.latencyMs) facts.push([t("desk.guide_run_time"), t("desk.guide_run_seconds", { count: Math.max(1, Math.round(run.latencyMs / 1000)) })]);
+  facts.push([t("desk.guide_run_cost"), formatUsdAmount(run.costUsd) ?? `$${run.costUsd.toFixed(2)}`]);
+  facts.push([t("desk.guide_run_date"), run.date]);
+  return facts;
 }
 
 /** The task's prompt, folded to its first sentence: it carries the task's data and runs to a page. */
@@ -100,16 +114,39 @@ export function ProfessionGuideView(props: {
     const first = pick.steps[0];
     const run = task && first ? task.runs[sampleKey(first.model, first.effort)] : undefined;
     if (!task || !run) return undefined;
+    const more = [
+      t("desk.guide_sample_more", { date: run.date }),
+      pick.steps.length > 1 ? t("desk.guide_sample_text_only") : null,
+      run.cut ? t("desk.guide_sample_cut") : null,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const card = task.card;
+    // Without a task card (an older bundle) the sample shows as the prompt and the answer, as it did.
+    if (!card?.brief) return { prompt: <SamplePrompt text={task.prompt} />, output: <SampleOutput text={run.output} />, more };
+    const checks = task.checks ?? [];
+    const verdicts = run.verdicts && run.verdicts.length === checks.length ? run.verdicts : null;
     return {
-      prompt: <SamplePrompt text={task.prompt} />,
+      prompt: <SampleOutput text={task.prompt} />,
       output: <SampleOutput text={run.output} />,
-      more: [
-        t("desk.guide_sample_more", { date: run.date }),
-        pick.steps.length > 1 ? t("desk.guide_sample_text_only") : null,
-        run.cut ? t("desk.guide_sample_cut") : null,
-      ]
-        .filter(Boolean)
-        .join(" "),
+      card: {
+        brief: card.brief,
+        given: card.given,
+        note: t("desk.guide_card_note"),
+        asked: card.asked,
+        limit: card.limit ?? undefined,
+        hard: card.hard ?? undefined,
+      },
+      ...(verdicts
+        ? {
+            scorecard: {
+              lines: checks.map((check, i) => ({ check, verdict: verdicts[i]?.verdict ?? "miss", quote: verdicts[i]?.quote || undefined })),
+              note: t("desk.guide_score_note"),
+            },
+          }
+        : {}),
+      run: runFacts(pick, run, props.research),
+      more,
     };
   };
   return (
@@ -125,6 +162,19 @@ export function ProfessionGuideView(props: {
         onLanguageChange={(next) => show(next, profession)}
         promptLabel={t("desk.guide_sample_prompt")}
         outputLabel={t("desk.guide_sample_output")}
+        sampleLabels={{
+          task: t("desk.guide_card_task"),
+          given: t("desk.guide_card_given"),
+          asked: t("desk.guide_card_asked"),
+          hard: t("desk.guide_card_hard"),
+          prompt: t("desk.guide_card_prompt"),
+          scorecard: t("desk.guide_score"),
+          score: (passed, of, partial) =>
+            partial ? t("desk.guide_score_partial", { passed, of, partial }) : t("desk.guide_score_of", { passed, of }),
+          verdicts: { pass: t("desk.guide_verdict_pass"), partial: t("desk.guide_verdict_partial"), miss: t("desk.guide_verdict_miss") },
+          fullAnswer: t("desk.guide_full_answer"),
+          run: t("desk.guide_run"),
+        }}
         title={t("desk.nav_guide")}
         lede={t("desk.guide_profession_lede")}
         method={t("desk.guide_method")}

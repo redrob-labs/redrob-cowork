@@ -147,7 +147,7 @@ function named(names: Record<string, () => string>, id: string): string {
   return names[id]?.() ?? id;
 }
 
-function effortName(effort: string): string {
+export function effortName(effort: string): string {
   return named(EFFORTS, effort);
 }
 

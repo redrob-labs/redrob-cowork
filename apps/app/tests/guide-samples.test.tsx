@@ -34,6 +34,59 @@ describe("the guide's sample runs", () => {
     expect(html).not.toContain("Sample output, illustrative");
   });
 
+  test("with a task card, the pick shows the card, its own scorecard and run, and the answer folded", async () => {
+    const research = await loadGuideResearch();
+    const task = research.professions.find((p) => p.id === "lawyer")?.tasks[0];
+    const first = task?.picks.en?.find((pick) => !pick.benchmark);
+    const key = sampleKey(first?.steps[0]?.model ?? "", first?.steps[0]?.effort);
+    const samples = {
+      "en/lawyer": GuideSamples.parse({
+        [task?.id ?? ""]: {
+          prompt: "The full prompt.",
+          card: { brief: "Advise the client on two offers.", given: ["Case summary", "Offer 1"], asked: ["The real deadline", "A recommendation"], limit: "About 1,200 words", hard: "A deadline to compute." },
+          checks: ["Objection due Nov 13", "Release wipes the guaranty", "Removes the consultant"],
+          runs: {
+            [key]: {
+              output: "## Advice", date: "2026-10-09", effort: "high", costUsd: 0.11, latencyMs: 48_000, cut: false,
+              verdicts: [{ verdict: "pass", quote: "by November 13" }, { verdict: "partial", quote: "" }, { verdict: "miss", quote: "" }],
+            },
+          },
+        },
+      }),
+    };
+    const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="en" samples={samples} />);
+    expect(html).toContain("Advise the client on two offers.");
+    expect(html).toContain("Everything was in the message");
+    expect(html).toContain("<b>1 of 3, 1 partly</b>");
+    expect(html).toContain("Scorecard 1 of 3, 1 partly");
+    expect(html).toContain("<q class=\"rr-guide__quote\">by November 13</q>");
+    expect(html).toContain("Graded by two models from different labs");
+    expect(html).toContain("<dt>Time to answer</dt><dd>48 s</dd>");
+    expect(html).toMatch(/<dt>Cost on Redrob<\/dt><dd>\$0\.11/);
+    expect(html).toContain("<summary>Read the full answer</summary>");
+    expect(html).toContain("<summary>See the exact prompt</summary>");
+  });
+
+  test("a run graded against an older scorecard shows no scorecard rather than misaligned marks", async () => {
+    const research = await loadGuideResearch();
+    const task = research.professions.find((p) => p.id === "lawyer")?.tasks[0];
+    const first = task?.picks.en?.find((pick) => !pick.benchmark);
+    const key = sampleKey(first?.steps[0]?.model ?? "", first?.steps[0]?.effort);
+    const samples = {
+      "en/lawyer": GuideSamples.parse({
+        [task?.id ?? ""]: {
+          prompt: "P",
+          card: { brief: "B", given: [], asked: [], limit: null, hard: null },
+          checks: ["One", "Two"],
+          runs: { [key]: { output: "A", date: "2026-10-09", effort: "high", costUsd: 0.1, cut: false, verdicts: [{ verdict: "pass", quote: "" }] } },
+        },
+      }),
+    };
+    const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="en" samples={samples} />);
+    expect(html).toContain("rr-guide__card");
+    expect(html).not.toContain("rr-guide__scorecard");
+  });
+
   test("with no samples, no empty prompt and output boxes", async () => {
     const research = await loadGuideResearch();
     const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="en" />);

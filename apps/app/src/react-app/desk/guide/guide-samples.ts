@@ -6,17 +6,38 @@ import { z } from "zod";
  * `scripts/model-guide/samples/outputs/`, one file per language and profession, so the guide loads only the
  * profession and language on screen.
  */
+const Verdict = z.object({ verdict: z.enum(["pass", "partial", "miss"]), quote: z.string() });
+
 const Run = z.object({
   output: z.string(),
   date: z.string(),
+  /** The thinking level the answer was written at. */
   effort: z.string(),
   costUsd: z.number(),
+  latencyMs: z.number().optional(),
   cut: z.boolean(),
+  /** One per check, in order: how two graders from different labs found this answer. */
+  verdicts: z.array(Verdict).optional(),
+});
+
+const Card = z.object({
+  brief: z.string().nullable(),
+  given: z.array(z.string()),
+  asked: z.array(z.string()),
+  limit: z.string().nullable(),
+  hard: z.string().nullable(),
 });
 
 export const GuideSamples = z.record(
   z.string(),
-  z.object({ prompt: z.string(), runs: z.record(z.string(), Run) }),
+  z.object({
+    prompt: z.string(),
+    /** The task as the page shows it, in the working language. */
+    card: Card.nullable().optional(),
+    /** The scorecard's checks, in the working language. */
+    checks: z.array(z.string()).optional(),
+    runs: z.record(z.string(), Run),
+  }),
 );
 export type GuideSamples = z.infer<typeof GuideSamples>;
 
