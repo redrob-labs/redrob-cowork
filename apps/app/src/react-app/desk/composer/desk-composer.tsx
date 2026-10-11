@@ -20,7 +20,7 @@ import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { t } from "../../../i18n";
 import { useLocal } from "../../kernel/local-provider";
 import { RedrobServerError } from "../../../app/lib/redrob-server";
-import { playCue, stopReadAloud, voiceAllowedForPrivacy } from "../../domains/session/voice/read-aloud";
+import { playCue, stopReadAloud, voiceAccess, voiceAccessKey, type VoiceAccess } from "../../domains/session/voice/read-aloud";
 import {
   MAX_RECORDING_MS,
   micPress,
@@ -51,18 +51,24 @@ const MIC_ICON = { width: 16, height: 16, "aria-hidden": true };
 const STALE_MS = 30_000;
 
 /**
- * Why the mic cannot listen here, or null when it can. `voiceAllowed` is the workspace's privacy
- * answer, undefined until it is known; the server refuses a recording at High or Strict anyway.
+ * Why the mic cannot listen here, or null when it can. `access` is this connection's voice answer,
+ * undefined until it is known; the server refuses a recording at High or Strict, or from a
+ * collaborator, anyway. A collaborator is never shown the mic (see `voiceOffered`).
  */
 export function micUnavailableReason(env: {
   media: boolean;
   connected: boolean;
-  voiceAllowed: boolean | undefined;
+  access: VoiceAccess | undefined;
 }): string | null {
   if (!env.media) return t("desk.mic_reason_device");
-  if (!env.connected || env.voiceAllowed === undefined) return t("desk.mic_reason_connecting");
-  if (!env.voiceAllowed) return t("desk.mic_reason_privacy");
+  if (!env.connected || env.access === undefined) return t("desk.mic_reason_connecting");
+  if (env.access === "privacy") return t("desk.mic_reason_privacy");
   return null;
+}
+
+/** Collaborators do not get voice, so for them the mic and the voice conversation are not offered. */
+export function voiceOffered(access: VoiceAccess | undefined): boolean {
+  return access !== "not_owner";
 }
 
 /**
@@ -102,6 +108,8 @@ export type DeskComposerToolsViewProps = {
   secondsLeft: number | null;
   /** Set when the mic cannot listen here; the button is disabled and says why. */
   micUnavailable: string | null;
+  /** False where this connection does not get voice: no mic and no voice conversation are shown. */
+  voice?: boolean;
   onMicPress: () => void;
   onMicRelease: () => void;
   /** Whether this chat is a voice conversation; null where a spoken message cannot be sent. */
@@ -125,6 +133,7 @@ export function DeskComposerToolsView(props: DeskComposerToolsViewProps) {
         : t("desk.mic_start");
   return (
     <span className="desk-composer-tools">
+      {props.voice === false ? null : <>
       <IconButton
         label={label}
         size="sm"
@@ -174,6 +183,7 @@ export function DeskComposerToolsView(props: DeskComposerToolsViewProps) {
           {props.talk ? icons.volume(MIC_ICON) : icons.volumeOff(MIC_ICON)}
         </IconButton>
       )}
+      </>}
       <ComposerMode
         label={t("desk.mode_label")}
         options={modeOptions()}
@@ -221,11 +231,10 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
   chatKeyRef.current = props.chatKey;
 
   // The same question, and the same cache entry, as read-aloud's button.
-  const { data: voiceAllowed } = useQuery({
-    queryKey: ["voice-allowed", workspaceId],
+  const { data: access } = useQuery({
+    queryKey: voiceAccessKey(workspaceId),
     enabled: Boolean(client && workspaceId),
-    queryFn: async () =>
-      client && workspaceId ? voiceAllowedForPrivacy((await client.getConfig(workspaceId)).redrob) : false,
+    queryFn: async (): Promise<VoiceAccess> => (client && workspaceId ? voiceAccess(client, workspaceId) : "not_owner"),
     staleTime: STALE_MS,
   });
   const micUnavailable = micUnavailableReason({
@@ -234,7 +243,7 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
       Boolean(navigator.mediaDevices?.getUserMedia) &&
       typeof MediaRecorder !== "undefined",
     connected: Boolean(client && workspaceId),
-    voiceAllowed,
+    access,
   });
 
   const [mic, setMic] = useState<MicPhase["kind"]>("idle");
@@ -334,6 +343,7 @@ export function DeskComposerTools(props: DeskComposerToolsProps) {
       mic={mic}
       secondsLeft={left}
       micUnavailable={micUnavailable}
+      voice={voiceOffered(access)}
       onMicPress={() => {
         if (micUnavailable) return;
         // In a conversation, talking over Desk stops it, as it would a person.

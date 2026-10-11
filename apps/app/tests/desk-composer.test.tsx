@@ -35,6 +35,7 @@ import {
   micFailureText,
   micUnavailableReason,
   secondsLeft,
+  voiceOffered,
   type DeskStatusInput,
 } from "../src/react-app/desk/composer/desk-composer";
 import { RedrobServerError } from "../src/app/lib/redrob-server";
@@ -231,11 +232,24 @@ describe("the mic", () => {
   });
 
   test("says why it cannot listen", () => {
-    expect(micUnavailableReason({ media: false, connected: true, voiceAllowed: true })).toBe(en["desk.mic_reason_device"]);
-    expect(micUnavailableReason({ media: true, connected: false, voiceAllowed: true })).toBe(en["desk.mic_reason_connecting"]);
-    expect(micUnavailableReason({ media: true, connected: true, voiceAllowed: undefined })).toBe(en["desk.mic_reason_connecting"]);
-    expect(micUnavailableReason({ media: true, connected: true, voiceAllowed: false })).toBe(en["desk.mic_reason_privacy"]);
-    expect(micUnavailableReason({ media: true, connected: true, voiceAllowed: true })).toBeNull();
+    expect(micUnavailableReason({ media: false, connected: true, access: "on" })).toBe(en["desk.mic_reason_device"]);
+    expect(micUnavailableReason({ media: true, connected: false, access: "on" })).toBe(en["desk.mic_reason_connecting"]);
+    expect(micUnavailableReason({ media: true, connected: true, access: undefined })).toBe(en["desk.mic_reason_connecting"]);
+    expect(micUnavailableReason({ media: true, connected: true, access: "privacy" })).toBe(en["desk.mic_reason_privacy"]);
+    expect(micUnavailableReason({ media: true, connected: true, access: "on" })).toBeNull();
+  });
+
+  test("a collaborator is not offered the mic or the voice conversation at all", () => {
+    expect(voiceOffered("not_owner")).toBe(false);
+    expect(voiceOffered("on")).toBe(true);
+    expect(voiceOffered("privacy")).toBe(true);
+    expect(voiceOffered(undefined)).toBe(true);
+    const html = renderToStaticMarkup(
+      <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={null} voice={false} onMicPress={noop} onMicRelease={noop} talk={false} onTalkChange={noop} mode="run" onModeChange={noop} />,
+    );
+    expect(html).not.toContain(en["desk.mic_start"]);
+    expect(html).not.toContain(en["desk.voice_chat_start"]);
+    expect(html).toContain(`aria-label="${en["desk.mode_plan"]}"`);
   });
 
   test("a privacy refusal reads in the app's language; other failures keep their message", () => {
