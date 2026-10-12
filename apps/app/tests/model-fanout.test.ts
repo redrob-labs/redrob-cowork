@@ -59,7 +59,7 @@ describe("paraphrase", () => {
     */
     const slots = resolveParaphraseSlots({ model: model("gpt-5") });
     expect(slots).toHaveLength(DEFAULT_PARAPHRASE_COUNT);
-    expect(new Set(slots.map(s => s.modelID ?? s.model.modelID))).toEqual(new Set(["gpt-5"]));
+    expect(new Set(slots.map(s => s.model.modelID))).toEqual(new Set(["gpt-5"]));
     expect(slots.map(s => s.label)).toEqual(["1", "2"]);
   });
 

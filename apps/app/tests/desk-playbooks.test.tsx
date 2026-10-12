@@ -10,7 +10,8 @@ import { humanizeName, parseTemplate, playbookFromCommand, playbookSlug, playboo
 import type { PendingDeskChat } from "../src/react-app/desk/playbooks/start-chat";
 import { PlaybookView, runPlaybook } from "../src/react-app/desk/preview/desk-playbook";
 import { PlaybooksView } from "../src/react-app/desk/preview/desk-playbooks";
-import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 
 const TEMPLATE = `# Weekly client update
 
@@ -62,22 +63,8 @@ describe("a command as a playbook", () => {
 describe("real playbooks", () => {
   function fakeClient() {
     const calls: string[] = [];
-    const unused = async (): Promise<never> => {
-      throw new Error("not used");
-    };
     const command = (name: string, scope: RedrobCommandItem["scope"]): RedrobCommandItem => ({ name, template: `# ${name}\n\nDo it.`, scope });
-    const client: DeskServerClient = {
-      listWorkspaces: unused,
-      listSessions: unused,
-      getSession: unused,
-      listMemories: unused,
-      saveMemory: unused,
-      updateMemory: unused,
-      deleteMemory: unused,
-      listArtifacts: unused,
-      listMcp: unused,
-      getConfig: unused,
-      patchConfig: unused,
+    const client = deskClient({
       listCommands: async (workspaceId, scope) => {
         calls.push(`list:${workspaceId}:${scope}`);
         return { items: scope === "global" ? [command("mine", "global"), command("shared", "global")] : [command("shared", "workspace")] };
@@ -90,7 +77,7 @@ describe("real playbooks", () => {
         calls.push(`delete:${workspaceId}:${name}`);
         return { ok: true };
       },
-    };
+    });
     return { client, calls };
   }
 

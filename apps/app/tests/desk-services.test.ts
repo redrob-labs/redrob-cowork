@@ -5,7 +5,8 @@ import type { Memory } from "@redrob/types/memory";
 import type { RedrobWorkspaceInfo } from "../src/app/lib/redrob-server";
 import type { DeskServices } from "../src/react-app/desk/services/desk-services";
 import { createFixtureDeskServices, runScripted } from "../src/react-app/desk/services/fixture-services";
-import { createDeskServices, createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createDeskServices, createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
 
 /** A manual clock: timers fire only when the test advances time. */
@@ -163,7 +164,7 @@ function fakeClient() {
   ];
   let nextMemory = 3;
   let redrob: Record<string, unknown> = {};
-  const client: DeskServerClient = {
+  const client = deskClient({
     listWorkspaces: async () => {
       calls.push("listWorkspaces");
       return { items: [workspace] };
@@ -215,7 +216,7 @@ function fakeClient() {
       calls.push(`listMcp:${workspaceId}`);
       return { items: [{ name: "notion", config: { type: "remote", url: "https://mcp.notion.com/mcp" }, source: "config.project" }] };
     },
-  };
+  });
   return { client, calls };
 }
 

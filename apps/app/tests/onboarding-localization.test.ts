@@ -44,9 +44,11 @@ describe("onboarding localization", () => {
   test("the onboarding steps exist and are read by this guard", () => {
     expect(sources.map((source) => source.name).sort()).toEqual([
       "attribution-step.tsx",
+      "connect-step.tsx",
       "engine-download-step.tsx",
       "language-step.tsx",
       "onboarding-brand-mark.tsx",
+      "onboarding-choice-view.tsx",
       "onboarding-wizard-shell.tsx",
       "redrob-key-step.tsx",
       "tutorial-step.tsx",

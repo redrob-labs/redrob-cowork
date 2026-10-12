@@ -24,7 +24,8 @@ import {
 import { applyFramePanelCommand, routeSidePanelRequest } from "../src/react-app/desk/panel/route-side-panel";
 import { FILES } from "../src/react-app/desk/services/fixtures/files";
 import { SAMPLE_NOW } from "../src/react-app/desk/services/fixtures/sample-day";
-import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 import type { DeskFile } from "../src/react-app/desk/services/types";
 import { formatNavTime } from "../src/react-app/desk/shell/nav";
 import { createFrameStore } from "../src/react-app/desk/store/frame-store";
@@ -52,29 +53,17 @@ const file = (patch: Partial<DeskFile> & Pick<DeskFile, "id" | "when">): DeskFil
 
 /** A server that lists two files Desk wrote, one under folders and one named by a full Windows path. */
 async function realFiles(): Promise<DeskFile[]> {
-  const unused = async (): Promise<never> => {
-    throw new Error("not used");
-  };
-  const client: DeskServerClient = {
+  const client = deskClient({
     listWorkspaces: async () => ({
       items: [{ id: "ws_1", name: "seorin", displayName: "Seorin MSA", path: "C:\\Users\\x\\Documents\\Seorin MSA", preset: "starter", workspaceType: "local" }],
     }),
-    listSessions: unused,
-    getSession: unused,
-    listMemories: unused,
-    saveMemory: unused,
-    updateMemory: unused,
-    deleteMemory: unused,
-    listMcp: unused,
-    getConfig: unused,
-    patchConfig: unused,
     listArtifacts: async () => ({
       items: [
         { id: "a1", path: "reports/q3/plan.md", updatedAt: NOW - 2 * HOUR },
         { id: "a2", name: "C:\\Users\\x\\Documents\\Seorin MSA\\notice.docx", path: "Seorin MSA/notice.docx", updatedAt: NOW - HOUR },
       ],
     }),
-  };
+  });
   return (await createRealDeskServices({ client, workspaceId: "ws_1" }).files.list()).data;
 }
 

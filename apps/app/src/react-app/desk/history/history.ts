@@ -39,7 +39,8 @@ export function historyEntryFrom(input: {
 }): HistoryEntry {
   const { session, snapshot } = input;
   const steps = snapshot?.todos.map(todoStep) ?? [];
-  const busy = snapshot ? snapshot.status.type !== "idle" : false;
+  // Working means running or retrying; a blocked turn has ended, as an idle one has.
+  const busy = snapshot ? snapshot.status.type === "busy" || snapshot.status.type === "retry" : false;
   const unfinished = steps.some((step) => step.state !== "done");
   const state = busy ? "blocked" : unfinished ? "stopped" : "done";
   const label = busy ? t("desk.history_working") : unfinished ? t("desk.history_unfinished") : t("desk.history_done");
