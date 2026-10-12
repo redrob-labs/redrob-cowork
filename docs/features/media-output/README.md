@@ -1,6 +1,7 @@
 # Media output: images, HTML, and voice
 
-Status: built, in review. Every slice below has an open pull request; none is merged, and none reaches
+Status: built, in review as one pull request, cowork #198. It supersedes the slice PRs in the tables
+below, which are kept because each description records its own decisions and tests. Nothing reaches
 users until the console endpoints deploy, an engine release ships, and `redrobCodeVersion` is bumped
 here. This is the plan of record for three outputs a model can produce in Redrob Cowork beyond text.
 
