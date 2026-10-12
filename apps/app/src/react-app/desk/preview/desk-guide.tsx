@@ -204,6 +204,11 @@ export const GUIDE_RESEARCH_KEY = ["desk-guide", "research"];
 
 export type GuideTab = "profession" | "price";
 
+/** "October 2026" from the research's `asOf` day: an edition is monthly, so the day says nothing to a reader. */
+export function guideEdition(asOf: string, locale: Language): string {
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${asOf}T00:00:00Z`));
+}
+
 /**
  * `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from.
  *
@@ -232,7 +237,7 @@ export function GuideScreen() {
   const count = pricing.data ? guideModelCount(pricing.data) : undefined;
   const meta =
     tab === "profession"
-      ? research.data && t("desk.guide_profession_meta", { date: research.data.asOf })
+      ? research.data && t("desk.guide_profession_meta", { edition: guideEdition(research.data.asOf, locale) })
       : count === undefined
         ? undefined
         : t("desk.guide_meta", { count });
