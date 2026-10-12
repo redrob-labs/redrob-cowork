@@ -11,8 +11,10 @@
 //
 // A checkout is read the way the Console builds its library: every
 // apps/api/src/skills/library/<profession>/<task>/<name>/SKILL.md, with the taxonomy from
-// apps/api/src/skills/taxonomy.ts and SKILL.md rendered by apps/api/src/skills/skill-format.ts
-// (both import-free, so Node loads them as they are).
+// apps/api/src/skills/taxonomy.ts (import-free, so Node loads it as it is).
+//
+// Each skill keeps its fields and body but not a rendered SKILL.md: redrob-server renders that on
+// install. The file is written one skill per line, so a refresh diffs by skill.
 
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -56,7 +58,6 @@ function findSkillFiles(dir) {
 async function fromCheckout(root) {
   const skillsDir = path.join(path.resolve(root), "apps/api/src/skills");
   const { SKILL_PROFESSIONS, SKILL_LANGUAGES, SKILL_LANGUAGE_IDS } = await import(pathToFileURL(path.join(skillsDir, "taxonomy.ts")).href);
-  const { renderSkillMd } = await import(pathToFileURL(path.join(skillsDir, "skill-format.ts")).href);
   const YAML = createRequire(path.join(repo, "apps/server/package.json"))("yaml");
 
   const skills = findSkillFiles(path.join(skillsDir, "library")).map((file) => {
@@ -90,7 +91,7 @@ async function fromCheckout(root) {
       })),
       languages: SKILL_LANGUAGES.map((language) => ({ id: language.id, label: { ...language.label } })),
     },
-    skills: skills.map((skill) => ({ ...skill, content: renderSkillMd({ ...skill, source: "library" }) })),
+    skills,
   };
 }
 
@@ -104,7 +105,7 @@ async function fromConsole(base) {
   const skills = [];
   for (const summary of list.skills) {
     const detail = await get(`/skill-library/${encodeURIComponent(summary.name)}`);
-    skills.push({ ...pick(detail), content: detail.content });
+    skills.push(pick(detail));
   }
   return { version: list.version, taxonomy, skills };
 }
@@ -114,5 +115,8 @@ const snapshot = from
   : await fromConsole((arg("--url") ?? process.env.REDROB_CONSOLE_API_URL ?? DEFAULT_URL).replace(/\/+$/, ""));
 if (!snapshot.skills.length) throw new Error("The library is empty; not writing a snapshot of nothing.");
 
-writeFileSync(outFile, `${JSON.stringify(snapshot, null, 2)}\n`);
+// One skill per line: a refresh then diffs by skill, without the indentation of a pretty-print.
+const { skills, ...head } = snapshot;
+const lines = skills.map((skill) => `    ${JSON.stringify(skill)}`).join(",\n");
+writeFileSync(outFile, `${JSON.stringify(head, null, 2).replace(/\n}$/, `,\n  "skills": [\n${lines}\n  ]\n}`)}\n`);
 console.log(`Wrote ${snapshot.skills.length} skills and ${snapshot.taxonomy.professions.length} professions to ${path.relative(repo, outFile)}`);

@@ -317,7 +317,7 @@ describe("real skills", () => {
       getLibrarySkill: async (workspaceId, name) => {
         calls.push(`library-get:${workspaceId}:${name}`);
         if (name !== "nda-review") throw new Error("404");
-        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: 1, body: "Check the term.", content: "", source: "console" };
+        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: 1, body: "Check the term.", source: "console" };
       },
       installLibrarySkill: async (workspaceId, name) => {
         calls.push(`install:${workspaceId}:${name}`);

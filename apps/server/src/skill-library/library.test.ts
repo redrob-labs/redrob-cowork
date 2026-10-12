@@ -35,7 +35,8 @@ describe("the bundled snapshot", () => {
     expect(snapshot.taxonomy.professions.map((profession) => profession.id)).toContain("lawyer");
     expect(snapshot.taxonomy.languages.map((language) => language.id)).toEqual(["en", "ko", "hi"]);
     for (const skill of snapshot.skills) {
-      expect(parseFrontmatter(skill.content).data.name).toBe(skill.name);
+      expect(skill.body.length).toBeGreaterThan(0);
+      expect(Object.keys(skill)).not.toContain("content");
     }
   });
 });
@@ -72,7 +73,7 @@ describe("filtering the library", () => {
 describe("the library proxy", () => {
   test("answers from the Console and revalidates with the ETag it was given", async () => {
     const calls: Array<{ url: string; ifNoneMatch: string | null }> = [];
-    const body = { version: "v1", skills: [snapshot.skills[0]].map(({ body: _body, content: _content, ...summary }) => summary) };
+    const body = { version: "v1", skills: [snapshot.skills[0]].map(({ body: _body, ...summary }) => summary) };
     const fetchImpl: SkillLibraryFetch = async (url, init) => {
       const ifNoneMatch = new Headers(init?.headers).get("if-none-match");
       calls.push({ url, ifNoneMatch });
@@ -95,7 +96,7 @@ describe("the library proxy", () => {
       const list = await library.list({ profession: "lawyer", language: "ko" });
       expect(list.source).toBe("snapshot");
       expect(list.skills).toEqual(
-        filterLibrary(snapshot.skills, { profession: "lawyer", language: "ko" }).map(({ body: _body, content: _content, ...summary }) => summary),
+        filterLibrary(snapshot.skills, { profession: "lawyer", language: "ko" }).map(({ body: _body, ...summary }) => summary),
       );
       expect((await library.taxonomy()).source).toBe("snapshot");
       const one = await library.get("legal-statute-tracer");

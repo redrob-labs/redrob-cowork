@@ -190,7 +190,7 @@ export type RedrobLibrarySkillSummary = {
   version: number;
 };
 
-export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; content: string; source: RedrobLibrarySource };
+export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; source: RedrobLibrarySource };
 
 export type RedrobLibraryFilter = { profession?: string; task?: string; language?: string; q?: string };
 

@@ -38,7 +38,9 @@ const summarySchema = z.object({
 
 const listSchema = z.object({ version: z.string(), skills: z.array(summarySchema) });
 
-const detailSchema = summarySchema.extend({ body: z.string(), content: z.string() });
+// Only the fields the server reads; the Console's rendered `content` is left out because the
+// server renders SKILL.md itself on install (installLibrarySkill), and it doubled the file.
+const detailSchema = summarySchema.extend({ body: z.string() });
 
 const snapshotSchema = z.object({ version: z.string(), taxonomy: taxonomySchema, skills: z.array(detailSchema) });
 
