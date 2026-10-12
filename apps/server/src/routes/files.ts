@@ -165,7 +165,28 @@ function decodeArtifactId(id: string): string {
   }
 }
 
-function contentTypeForPath(path: string): string {
+/**
+ * Audio and video by extension. Served as octet-stream before, which a media element can sometimes
+ * sniff and sometimes cannot, so a generated recording was a download rather than something to play.
+ */
+const MEDIA_CONTENT_TYPES: Record<string, string> = {
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
+  ".oga": "audio/ogg",
+  ".opus": "audio/ogg",
+  ".m4a": "audio/mp4",
+  ".aac": "audio/aac",
+  ".flac": "audio/flac",
+  ".weba": "audio/webm",
+  ".mp4": "video/mp4",
+  ".m4v": "video/mp4",
+  ".mov": "video/quicktime",
+  ".webm": "video/webm",
+  ".ogv": "video/ogg",
+};
+
+export function contentTypeForPath(path: string): string {
   const lowered = path.toLowerCase();
   if (lowered.endsWith(".html") || lowered.endsWith(".htm")) return "text/html; charset=utf-8";
   if (lowered.endsWith(".svg")) return "image/svg+xml";
@@ -174,6 +195,8 @@ function contentTypeForPath(path: string): string {
   if (lowered.endsWith(".gif")) return "image/gif";
   if (lowered.endsWith(".webp")) return "image/webp";
   if (lowered.endsWith(".pdf")) return "application/pdf";
+  const media = MEDIA_CONTENT_TYPES[lowered.slice(lowered.lastIndexOf("."))];
+  if (media) return media;
   if (lowered.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
   if (lowered.endsWith(".csv")) return "text/csv; charset=utf-8";
   if (lowered.endsWith(".tsv")) return "text/tab-separated-values; charset=utf-8";

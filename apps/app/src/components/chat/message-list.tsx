@@ -125,7 +125,7 @@ import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
 import { AnotherAnswerButton } from "./another-answer-button"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
-import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
+import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath, getPlayableMediaKind } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
@@ -315,6 +315,22 @@ function FileMessage({ part, tone }: FileMessageProps) {
 
   if (isImage && tone === "user") {
     return <ImageAttachmentBadge src={part.url} alt={title} />
+  }
+
+  const mediaKind = getPlayableMediaKind(part)
+  if (mediaKind === "audio") {
+    return <audio src={part.url} controls preload="metadata" aria-label={title} className="w-full max-w-sm" />
+  }
+  if (mediaKind === "video") {
+    return (
+      <video
+        src={part.url}
+        controls
+        preload="metadata"
+        aria-label={title}
+        className="max-h-80 max-w-full rounded-xl border border-border/70"
+      />
+    )
   }
 
   if (isImage) {
