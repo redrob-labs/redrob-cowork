@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
+import { readStoredPrivacy } from "@/react-app/desk/privacy/privacy-store";
 
 /**
  * Read a reply aloud.
@@ -9,6 +10,16 @@ import type { RedrobServerClient } from "@/app/lib/redrob-server";
  * so the app sends text and plays mp3 and never holds the key. One reply plays at a time across the
  * whole app: starting another stops the first, the way a person expects a speaker button to behave.
  */
+
+/**
+ * Whether voice may run for this privacy level. Speech cannot be labelled the way text is, so at High
+ * and Strict protection the reply would reach a speech vendor with its real values in it. The server
+ * refuses the same requests; this only keeps a button from being offered that would be refused.
+ */
+export function voiceAllowedForPrivacy(redrob: Record<string, unknown> | null | undefined): boolean {
+  const level = readStoredPrivacy(redrob).level;
+  return level !== "high" && level !== "strict";
+}
 
 /** The engine's limit for one request, in code points, which is how it counts. */
 export const MAX_SPEECH_CHUNK = 4_096;
@@ -108,6 +119,7 @@ export function stopReadAloud() {
  */
 export async function startReadAloud(
   client: Pick<RedrobServerClient, "speakText">,
+  workspaceId: string,
   id: string,
   markdown: string,
 ): Promise<void> {
@@ -116,7 +128,7 @@ export async function startReadAloud(
   const chunks = splitForSpeech(speakableText(markdown));
   if (!chunks.length) return;
   useReadAloudStore.setState({ activeId: id, status: "loading", error: null });
-  const fetchChunk = (chunk: string) => client.speakText(chunk);
+  const fetchChunk = (chunk: string) => client.speakText(workspaceId, chunk);
   try {
     let next = fetchChunk(chunks[0]);
     for (let index = 0; index < chunks.length; index += 1) {
