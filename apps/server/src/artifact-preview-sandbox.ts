@@ -1,3 +1,5 @@
+import { ARTIFACT_PREVIEW_LIBRARY_RULES } from "./artifact-preview-vendor.js";
+
 /**
  * The sandbox a model-written HTML page is previewed in.
  *
@@ -14,10 +16,16 @@
  * browser that did not inherit it would still apply it.
  */
 
-/** Deny by default. `'self'` is this server, which serves nothing a page can read without a token. */
+/**
+ * Deny by default. `'self'` is this server, which serves nothing a page can read without a token.
+ *
+ * `'unsafe-eval'` is allowed because Alpine.js evaluates its `x-data` expressions with `new Function`,
+ * and it grants nothing a page does not already have: inline scripts run, so a page can already run
+ * any code it likes. What the policy exists for, keeping that code off the network, is unchanged.
+ */
 export const ARTIFACT_PREVIEW_CSP = [
   "default-src 'none'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
@@ -44,17 +52,32 @@ function escapeAttribute(value: string): string {
 const PRELUDE = `<meta http-equiv="Content-Security-Policy" content="${escapeAttribute(ARTIFACT_PREVIEW_CSP)}">${BLOCKED_RESOURCE_REPORTER}`;
 
 /**
- * The page with the policy and the reporter placed first, after a leading doctype if there is one.
- * Plain JavaScript in a string because it runs inside the proxy document; the tests evaluate this
+ * The page with the policy and the reporter placed first, after a leading doctype if there is one,
+ * and any script tag naming a bundled library pointed at the copy this server ships
+ * (artifact-preview-vendor.ts). Its `integrity` and `crossorigin` go with it: they describe the CDN's
+ * file, and a hash for a different build would block the bundled one. Plain JavaScript in a string because it runs inside the proxy document; the tests evaluate this
  * same string, so there is one copy of it.
  *
  * Model-written HTML is not always well formed, so this does not look for `<head>`. A `<meta>` or
  * `<script>` before `<html>` is legal: the parser opens `<html>` and `<head>` implicitly and puts both
  * inside, ahead of anything the page itself declares.
  */
-export const SECURE_ARTIFACT_PREVIEW_HTML_SOURCE = String.raw`(html) => {
+export const SECURE_ARTIFACT_PREVIEW_HTML_SOURCE = String.raw`(source) => {
   const prelude = ${JSON.stringify(PRELUDE)};
-  const doctype = /^\uFEFF?\s*<!doctype[^>]*>/i.exec(html);
+  const rules = ${JSON.stringify(ARTIFACT_PREVIEW_LIBRARY_RULES)}.map((rule) => ({
+    file: rule.file,
+    matches: rule.matches.map((pattern) => new RegExp(pattern, "i")),
+  }));
+  const html = source.replace(/<script\b[^>]*>/gi, (tag) => {
+    const src = /\ssrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(tag);
+    const url = src ? (src[1] ?? src[2] ?? src[3] ?? "").trim() : "";
+    const rule = url ? rules.find((candidate) => candidate.matches.some((pattern) => pattern.test(url))) : null;
+    if (!rule) return tag;
+    return tag
+      .replace(src[0], ' src="/artifact-preview/vendor/' + rule.file + '"')
+      .replace(/\s(?:integrity|crossorigin)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/gi, "");
+  });
+  const doctype = /^﻿?\s*<!doctype[^>]*>/i.exec(html);
   if (!doctype) return prelude + html;
   const end = doctype.index + doctype[0].length;
   return html.slice(0, end) + prelude + html.slice(end);

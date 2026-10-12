@@ -33,6 +33,7 @@ import {
   ARTIFACT_PREVIEW_SANDBOX_HTML,
   ARTIFACT_PREVIEW_SANDBOX_SCRIPT,
 } from "./artifact-preview-sandbox.js";
+import { readArtifactPreviewLibrary } from "./artifact-preview-vendor.js";
 import {
   buildMcpAppSandboxCsp,
   MCP_APP_SANDBOX_PROXY_CSS,
@@ -3417,6 +3418,13 @@ function createRoutes(
       "X-Content-Type-Options": "nosniff",
     },
   }));
+  addRoute(routes, "GET", "/artifact-preview/vendor/:file", "none", async (ctx) => {
+    const source = readArtifactPreviewLibrary(ctx.params.file);
+    if (!source) throw new ApiError(404, "artifact_preview_library_not_found", "No bundled library by that name");
+    return new Response(await source, {
+      headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+    });
+  });
   addRoute(routes, "GET", "/artifact-preview/sandbox.js", "none", async () => new Response(ARTIFACT_PREVIEW_SANDBOX_SCRIPT, {
     headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
   }));
