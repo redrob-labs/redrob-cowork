@@ -124,7 +124,7 @@ import {
   getRemoteWorkspaceConnectionKey,
   testRemoteWorkspaceConnection,
 } from "@/react-app/domains/workspace/remote-workspace-diagnostics";
-import { ModelPickerModal } from "@/react-app/domains/session/modals/model-picker-modal";
+import { MODEL_PICKER_SETTINGS_SUBTITLE, ModelPickerModal } from "@/react-app/domains/session/modals/model-picker-modal";
 import type { ModelRef } from "@/app/types";
 import { workspaceSwatchColor } from "@/react-app/domains/session/sidebar/utils";
 import { recordInspectorEvent } from "../../app/lib/app-inspector";
@@ -835,6 +835,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
   const handleModelPickerLoadError = useCallback((error: unknown) => {
     toast.error(error instanceof Error ? error.message : t("app.unknown_error"));
   }, []);
+  /** Set when a provider's "Browse models" opened the list, so it shows that provider's models only. */
+  const [browseProvider, setBrowseProvider] = useState<{ id: string; name: string } | null>(null);
   const modelPicker = useModelPicker({
     client: opencodeClient,
     baseUrl: opencodeBaseUrl,
@@ -1640,13 +1642,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     ? `${local.prefs.defaultModel.providerID}/${local.prefs.defaultModel.modelID}`
     : t("settings.default_label");
   const defaultModelVariantLabel = local.prefs.modelVariant ?? t("settings.default_label");
-  const providerStatusLabel = providerConnectedIds.length > 0 ? t("status.connected") : t("status.disconnected_label");
-  const providerStatusStyle = providerConnectedIds.length > 0
-    ? "bg-success-soft/10 text-success-ink border-success-muted/20"
-    : "bg-accent-active/60 text-muted-foreground border-border-strong/50";
-  const providerSummary = providerConnectedIds.length > 0
-    ? t("status.providers_connected", { count: providerConnectedIds.length })
-    : t("settings.no_providers_connected");
+  /** How many models each provider offers, for its "Browse models" in Settings, AI. */
+  const modelCountsByProvider: Record<string, number> = {};
+  for (const option of modelPicker.options) {
+    modelCountsByProvider[option.providerID] = (modelCountsByProvider[option.providerID] ?? 0) + 1;
+  }
   const providerConnectedIdSet = new Set(providerConnectedIds);
   const disabledProviderIdSet = new Set(
     disabledProviders.map((id) => id.trim().toLowerCase()).filter(Boolean),
@@ -1961,16 +1961,16 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           <AiSettingsView
             busy={busy}
             providerAuthBusy={providerAuthSnapshot.providerAuthBusy}
-            providerStatusLabel={providerStatusLabel}
-            providerStatusStyle={providerStatusStyle}
-            providerSummary={providerSummary}
             connectedProviders={connectedProviders}
             disconnectingProviderId={null}
             providerConnectError={providerAuthSnapshot.providerAuthError}
             providerDisconnectStatus={configActionStatus}
             providerDisconnectError={null}
             onOpenProviderAuth={handleOpenProviderAuth}
-            onOpenAllModels={() => {
+            modelCounts={modelCountsByProvider}
+            onBrowseModels={(providerId) => {
+              const provider = providerId ? connectedProviders.find((entry) => entry.id === providerId) : undefined;
+              setBrowseProvider(provider ? { id: provider.id, name: provider.name } : null);
               modelPicker.setQuery("");
               modelPicker.setRecentProviderIds(new Set());
               modelPicker.setOpen(true);
@@ -2321,6 +2321,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
           navigate(target);
         }}
         onOpenModelPicker={() => {
+          setBrowseProvider(null);
           modelPicker.setQuery("");
           modelPicker.setRecentProviderIds(new Set());
           window.requestAnimationFrame(() => modelPicker.setOpen(true));
@@ -2406,6 +2407,10 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
         options={modelPicker.options}
         query={modelPicker.query}
         setQuery={modelPicker.setQuery}
+        // Every pick here changes the model new chats start with, so it says so, not "this session".
+        subtitle={MODEL_PICKER_SETTINGS_SUBTITLE}
+        providerId={browseProvider?.id ?? null}
+        providerName={browseProvider?.name}
         target="default"
         current={
           local.prefs.defaultModel ?? { providerID: "", modelID: "" }
