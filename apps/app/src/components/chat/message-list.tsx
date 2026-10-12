@@ -81,12 +81,7 @@ import {
 import { ImageAttachmentBadge } from "@/components/chat/image-attachment-badge"
 import { toast } from "@/components/ui/sonner"
 import { useOptionalWorkspace } from "@/react-app/shell/workspace-provider"
-import {
-  startReadAloud,
-  stopReadAloud,
-  useReadAloudStore,
-  voiceAllowedForPrivacy,
-} from "@/react-app/domains/session/voice/read-aloud"
+import { startReadAloud, stopReadAloud, useReadAloudStore, voiceAccess, voiceAccessKey } from "@/react-app/domains/session/voice/read-aloud"
 import { useQuery } from "@tanstack/react-query"
 import type { RedrobServerClient } from "@/app/lib/redrob-server"
 import { Image } from "@/components/ui/image"
@@ -478,14 +473,14 @@ interface ReadAloudControlProps {
 function ReadAloudControl({ id, text, client, workspaceId }: ReadAloudControlProps) {
   const active = useReadAloudStore((state) => state.activeId === id)
   const loading = useReadAloudStore((state) => state.activeId === id && state.status === "loading")
-  /* Off at High and Strict privacy, where the server refuses speech; hidden until the level is known. */
-  const { data: allowed } = useQuery({
-    queryKey: ["voice-allowed", workspaceId],
-    queryFn: async () => voiceAllowedForPrivacy((await client.getConfig(workspaceId)).redrob),
+  /* Only for the owner, and off at High and Strict privacy, where the server refuses speech; hidden until known. */
+  const { data: access } = useQuery({
+    queryKey: voiceAccessKey(workspaceId),
+    queryFn: () => voiceAccess(client, workspaceId),
     staleTime: 30_000,
   })
 
-  if (allowed !== true) return null
+  if (access !== "on") return null
 
   const onClick = () => {
     if (active) {

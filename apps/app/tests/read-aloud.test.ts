@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
+import { RedrobServerError } from "../src/app/lib/redrob-server";
 import { setLocale } from "../src/i18n";
 import en from "../src/i18n/locales/en";
 import ko from "../src/i18n/locales/ko";
@@ -12,6 +13,7 @@ import {
   startReadAloud,
   stopReadAloud,
   useReadAloudStore,
+  voiceAccess,
   voiceAllowedForPrivacy,
 } from "../src/react-app/domains/session/voice/read-aloud";
 
@@ -195,5 +197,34 @@ describe("read aloud", () => {
     expect(refusals).toBe(2);
     // The cue is not a reading: it never shows on a reply's button or reports an error.
     expect(useReadAloudStore.getState()).toMatchObject({ activeId: null, error: null });
+  });
+
+  test("voice is the owner's: a collaborator or viewer is not offered it, and privacy is asked only of the owner", async () => {
+    const asked: string[] = [];
+    const client = (scope: string | undefined, level = "standard") => ({
+      whoami: async () => ({ ok: true, actor: scope ? { type: "remote" as const, scope: scope as "owner" } : null }),
+      getConfig: async (workspaceId: string) => {
+        asked.push(workspaceId);
+        return { opencode: {}, redrob: { deskPrivacy: { level } } };
+      },
+    });
+    expect(await voiceAccess(client("owner"), "ws")).toBe("on");
+    expect(await voiceAccess(client("owner", "high"), "ws")).toBe("privacy");
+    expect(asked).toEqual(["ws", "ws"]);
+    expect(await voiceAccess(client("collaborator"), "ws")).toBe("not_owner");
+    expect(await voiceAccess(client("viewer"), "ws")).toBe("not_owner");
+    expect(await voiceAccess(client(undefined), "ws")).toBe("not_owner");
+    expect(asked).toHaveLength(2);
+  });
+
+  test("a refused whoami means no voice; a network failure is retried, not taken as an answer", async () => {
+    const failing = (error: Error) => ({
+      whoami: async () => {
+        throw error;
+      },
+      getConfig: async () => ({ opencode: {}, redrob: {} }),
+    });
+    expect(await voiceAccess(failing(new RedrobServerError(401, "unauthorized", "no")), "ws")).toBe("not_owner");
+    await expect(voiceAccess(failing(new Error("offline")), "ws")).rejects.toThrow("offline");
   });
 });

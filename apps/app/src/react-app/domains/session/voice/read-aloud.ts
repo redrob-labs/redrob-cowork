@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { RedrobServerClient } from "@/app/lib/redrob-server";
+import { RedrobServerError, type RedrobServerClient } from "@/app/lib/redrob-server";
 import { currentLocale, t, type Language } from "@/i18n";
 import { readStoredPrivacy } from "@/react-app/desk/privacy/privacy-store";
 
@@ -20,6 +20,28 @@ import { readStoredPrivacy } from "@/react-app/desk/privacy/privacy-store";
 export function voiceAllowedForPrivacy(redrob: Record<string, unknown> | null | undefined): boolean {
   const level = readStoredPrivacy(redrob).level;
   return level !== "high" && level !== "strict";
+}
+
+/**
+ * Whether this connection may use voice at all: `not_owner` for a collaborator or viewer, who do not
+ * get voice (the server's voice routes take only the owner), `privacy` at High or Strict protection,
+ * `on` otherwise. Shared by the mic, the voice conversation and read-aloud, under `voiceAccessKey`.
+ */
+export type VoiceAccess = "on" | "privacy" | "not_owner";
+
+export const voiceAccessKey = (workspaceId: string | null) => ["voice-access", workspaceId] as const;
+
+export async function voiceAccess(
+  client: Pick<RedrobServerClient, "whoami" | "getConfig">,
+  workspaceId: string,
+): Promise<VoiceAccess> {
+  // A refusal is an answer; any other failure throws, so the query tries again rather than hiding voice.
+  const who = await client.whoami().catch((error: unknown) => {
+    if (error instanceof RedrobServerError && (error.status === 401 || error.status === 403)) return null;
+    throw error;
+  });
+  if (who?.actor?.scope !== "owner") return "not_owner";
+  return voiceAllowedForPrivacy((await client.getConfig(workspaceId)).redrob) ? "on" : "privacy";
 }
 
 /** The engine's limit for one request, in code points, which is how it counts. */
