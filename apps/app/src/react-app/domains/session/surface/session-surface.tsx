@@ -65,7 +65,7 @@ import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permis
 import { DeskThreadContext, textDraft, type DeskThread } from "@/react-app/desk/thread/desk-thread-context";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
-import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
+import { completedWritesFingerprint, deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
 import { usePanelTabStore } from "@/react-app/domains/session/panel/panel-tab-store";
 import {
   markSessionSnapshotFetchStart,
@@ -87,6 +87,9 @@ import {
 } from "./composer-state-store";
 import { MessageList, type BlockedStatus } from "@/components/chat/message-list";
 import { getMessagesText } from "@/components/chat/utils";
+import { useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
+import { startReadAloud, useReadAloudStore } from "../voice/read-aloud";
+import { voiceReplyStep, type VoiceReplyWait } from "../voice/voice-conversation";
 import { contextUsagePercent, latestUsage } from "@/components/chat/message-usage";
 import { useRedrobPricingQuery } from "@/react-app/infra/redrob-pricing-query";
 import { MessageListProvider, type DispatchAction } from "@/components/chat/message-list-provider";
@@ -97,6 +100,8 @@ import {
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
+import { useHandoffLock } from "@/react-app/desk/handoff/handoff-open";
+import { ConnectedRoomQueue, useRoomQueue } from "@/react-app/desk/room/cowork";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
@@ -336,6 +341,8 @@ export type SessionSurfaceProps = {
   onModelPickerOpenChange: (open: boolean) => void;
   onModelChange: (model: ModelRef, variant?: string | null) => void;
   onSendDraft: (draft: ComposerDraft, sessionId: string) => Promise<SessionSendResult>;
+  /** The parts a draft would be sent as, files uploaded; for queueing one with attachments in a room. */
+  onBuildRoomParts?: (draft: ComposerDraft, sessionId: string) => Promise<ReadonlyArray<Record<string, unknown>>>;
   onDraftChange: (draft: ComposerDraft) => void;
   attachmentsEnabled: boolean;
   attachmentsDisabledReason: string | null;
@@ -713,6 +720,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
   // session B when the route swaps the same surface component to another
   // session.
   const queuedItems = useComposerStateStore((state) => getComposerQueuedDrafts(state, props.sessionId));
+  // In a live room, a message for later waits on the host's server where everyone can see it.
+  const roomQueue = useRoomQueue(props.sessionId);
+  const roomQueued = roomQueue?.items.length ?? 0;
   const appendQueuedDraft = useComposerStateStore((state) => state.appendQueuedDraft);
   const removeQueuedDraftFromStore = useComposerStateStore((state) => state.removeQueuedDraft);
   const updateQueuedDraftInStore = useComposerStateStore((state) => state.updateQueuedDraft);
@@ -993,6 +1003,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
     () => openTargets.map((target) => `${target.kind}:${target.value}:${target.confidence}`).join("|"),
     [openTargets],
   );
+  /* Re-verifying on each completed write is what refreshes an open preview mid-turn; see the function. */
+  const writesFingerprint = useMemo(() => completedWritesFingerprint(renderedMessages), [renderedMessages]);
   const autoOpenTarget = selectAutoOpenTarget(verifiedOpenTargets);
   const pendingSessionLoad = !snapshot && snapshotQuery.isLoading && renderedMessages.length === 0;
   const assistantOutputAfterAwaitStart = useMemo(() => {
@@ -1060,7 +1072,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     }
     void verifyTargets();
     return () => { cancelled = true; };
-  }, [chatStreaming, openTargetsFingerprint, props.client, props.sessionId, props.workspaceId]);
+  }, [chatStreaming, openTargetsFingerprint, writesFingerprint, props.client, props.sessionId, props.workspaceId]);
 
   useEffect(() => {
     usePanelTabStore.getState().syncTranscriptArtifacts(props.sessionId, verifiedOpenTargets);
@@ -1250,6 +1262,47 @@ export function SessionSurface(props: SessionSurfaceProps) {
     }
   }, [attachments, buildDraft, clearComposer, draft, props.onVariantRun, props.sessionId, sendDraft]);
 
+  /*
+    A spoken message in a Desk voice conversation. Built and sent directly, as retry does, rather than
+    seeded into the draft for `handleSend`, which would race the local draft state. While a turn is
+    running the message is refused, and the mic leaves it in the draft instead.
+  */
+  const handleSendText = useCallback(
+    (message: string) => {
+      if (chatStreaming || model.transitionState !== "idle" || props.modelUnavailable) return false;
+      const sentAttachments = attachments;
+      void sendDraft(buildDraft(message, sentAttachments)).then(
+        (result) => {
+          if (result.outcome === "cancelled") return;
+          clearComposer();
+          sentAttachments.forEach(revokeAttachmentPreview);
+        },
+        () => undefined,
+      );
+      return true;
+    },
+    [attachments, buildDraft, chatStreaming, clearComposer, model.transitionState, props.modelUnavailable, sendDraft],
+  );
+
+  // When the turn a spoken message started is over, its answer is read aloud.
+  const replyWaitRef = useRef<VoiceReplyWait>({ streaming: chatStreaming, due: false });
+  useEffect(() => {
+    replyWaitRef.current = { streaming: replyWaitRef.current.streaming, due: false };
+  }, [props.sessionId]);
+  useEffect(() => {
+    const step = voiceReplyStep(replyWaitRef.current, {
+      streaming: chatStreaming,
+      messages: renderedMessages,
+      takeReply: () => useDeskComposerStore.getState().takeReply(props.sessionId),
+    });
+    replyWaitRef.current = step.wait;
+    if (!step.read) return;
+    void startReadAloud(props.client, props.workspaceId, step.read.id, step.read.text).then(() => {
+      const { error } = useReadAloudStore.getState();
+      if (error) toast.error(error);
+    });
+  }, [chatStreaming, props.client, props.sessionId, props.workspaceId, renderedMessages]);
+
   // One-step run from the empty-state hero: the route seeds this session's
   // draft and marks it for auto-send. Fire the same send path as the send
   // button once the composer is usable; if these conditions never hold
@@ -1271,14 +1324,36 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // Queue: hold the draft locally and clear the composer. The drain effect
   // sends it once the session reports idle.
-  const handleQueue = useCallback(() => {
+  const handleQueue = useCallback(async () => {
     const text = draft.trim();
     if (!text && attachments.length === 0) return;
+    if (roomQueue && text && attachments.length === 0) {
+      if (await roomQueue.enqueue(text)) clearComposer();
+      return;
+    }
+    // With files, they are uploaded now (to the host, for a guest) and the message waits with them.
+    if (roomQueue && props.onBuildRoomParts) {
+      const draftToQueue = withoutRevertTarget(buildDraft(text, attachments));
+      if (!draftToQueue) return;
+      setAttachmentsUploading(true);
+      try {
+        const parts = await props.onBuildRoomParts(draftToQueue, props.sessionId);
+        if (await roomQueue.enqueue(parts)) {
+          clearComposer();
+          attachments.forEach(revokeAttachmentPreview);
+        }
+      } catch (reason) {
+        toast.error(reason instanceof Error ? reason.message : t("desk.cowork_queue_failed"));
+      } finally {
+        setAttachmentsUploading(false);
+      }
+      return;
+    }
     const queuedDraft = withoutRevertTarget(buildDraft(text, attachments));
     if (!queuedDraft) return;
     appendQueuedDraft(props.sessionId, queuedDraft);
     clearComposer();
-  }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.sessionId]);
+  }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.onBuildRoomParts, props.sessionId, roomQueue]);
 
   const removeQueuedDraft = useCallback((id: string) => {
     const target = queuedItems.find((item) => item.id === id);
@@ -1515,24 +1590,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
     replaceComposerDraft(props.sessionId, text, revertMessageId);
     await waitForControl(40);
   }, [props.sessionId, replaceComposerDraft]);
-
-  useEffect(() => {
-    const handleVoiceTranscript = (event: Event) => {
-      if (!(event instanceof CustomEvent)) return;
-      const detail: unknown = event.detail;
-      if (!detail || typeof detail !== "object" || Array.isArray(detail) || !("text" in detail) || typeof detail.text !== "string") return;
-      const text = detail.text;
-      void typeComposerText(text);
-      props.onDraftChange(buildDraft(text, attachments));
-      recordInspectorEvent("voice.transcript.applied", {
-        workspaceId: props.workspaceId,
-        sessionId: props.sessionId,
-        length: text.length,
-      });
-    };
-    window.addEventListener("redrob:voice-transcript", handleVoiceTranscript);
-    return () => window.removeEventListener("redrob:voice-transcript", handleVoiceTranscript);
-  }, [attachments, buildDraft, props.onDraftChange, props.sessionId, props.workspaceId, typeComposerText]);
 
   const composerSetTextControlAction = useMemo<RedrobControlAction>(() => ({
     id: "composer.set_text",
@@ -1975,13 +2032,16 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // The Desk thread's own controls (Plan's questions, Run this plan) reply through `sendDraft`,
   // the composer's path, so busy state, errors and the transcript behave as for a typed reply.
+  // A chat opened from a handoff takes no messages until the person presses Continue.
+  const handoffLocked = useHandoffLock((state) => Boolean(state.locked[props.sessionId]));
   const deskThread = useMemo<DeskThread>(() => ({
     sessionId: props.sessionId,
     busy: chatStreaming,
     sendText: async (text) => {
+      if (handoffLocked) throw new Error("This chat is a handoff under review; press Continue first.");
       await sendDraft(textDraft(text));
     },
-  }), [chatStreaming, props.sessionId, sendDraft]);
+  }), [chatStreaming, handoffLocked, props.sessionId, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">
@@ -2175,13 +2235,14 @@ export function SessionSurface(props: SessionSurfaceProps) {
           mentions={mentions}
           onDraftChange={handleComposerDraftChange}
         onSend={handleSend}
+        onSendText={handleSendText}
         onSteer={handleSteer}
         onQueue={handleQueue}
         onStop={handleAbort}
         busy={chatStreaming}
         steering={steering}
         queuedCount={queuedItems.length}
-        disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable)}
+        disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable) || handoffLocked}
         modelUnavailable={Boolean(props.modelUnavailable)}
         modelUnavailableMessage={props.modelUnavailableMessage}
         statusLabel={statusLabel(snapshot ?? undefined, chatStreaming)}
@@ -2227,10 +2288,11 @@ export function SessionSurface(props: SessionSurfaceProps) {
         isRemoteWorkspace={props.isRemoteWorkspace}
           isSandboxWorkspace={props.isSandboxWorkspace}
           onUploadInboxFiles={props.onUploadInboxFiles ?? handleUploadInboxFiles}
-          compactTopSpacing={Boolean(props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0)}
+          compactTopSpacing={Boolean(props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 || roomQueued > 0)}
           topAccessory={
-            props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 ? (
+            props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 || roomQueued > 0 ? (
               <div>
+                <ConnectedRoomQueue queue={roomQueue} sessionId={props.sessionId} />
                 {queuedItems.length > 0 ? (
                   <QueuedMessagesPanel
                     items={queuedItems}

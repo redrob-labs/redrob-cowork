@@ -4,20 +4,38 @@ description: "Use connections to reach a system and skills to make it usable, th
 ---
 
 Redrob Cowork gives agents a small set of building blocks. The connection reaches the
-system, the skill is the playbook, the plugin is the bundle, and the Library is where
-you see what you have. All four are local to your machine.
+system, the skill is how the work gets done, the plugin is the bundle, and the Library is
+where you see what you have. All four are local to your machine.
 
 ## Choose the right unit
 
 | Use | Means | Reach for it when |
 | --- | --- | --- |
 | Connection | An MCP server you add to a workspace, signed in as you. | The agent needs to act in that system. |
-| Skill | Written instructions the agent loads when a task matches. A file at `.opencode/skills/<name>/SKILL.md`. | One repeatable way of doing work needs a playbook. |
+| Skill | Written instructions the agent loads when a task matches. A file at `.opencode/skills/<name>/SKILL.md`. | One repeatable way of doing work should be written down once. |
 | Plugin | A bundle of skills, commands, agents, and MCP servers packaged as one installable thing. | Several related pieces should travel together. |
 | Library | The list of what this workspace actually has, in `Settings` > `Library`. | You want to see or manage what is already available. |
 
 MCP is the open standard underneath every connection. Day to day you can think in
 terms of connections, skills, plugins, and your Library.
+
+## Where skills come from
+
+The **Skills** screen lists every skill in the workspace and where it came from:
+
+- **Library**: the default skills from the Redrob Console, filed by profession, task and
+  language. Press **Add** to copy one into the workspace. When the Console cannot be reached,
+  the screen shows the copy of the library that ships with the app.
+- **Team**: the skills your team keeps in the Redrob Console for the workspace your Redrob
+  Key belongs to. They are installed and kept up to date on their own, about every 30
+  minutes, and are changed in the Console, not here. A skill of your own with the same name
+  always wins.
+- **Mine**: skills you write with **New skill**, or with **Save as skill** on a message you
+  sent.
+
+Every skill is a `SKILL.md` file in `.opencode/skills/<name>/`. Open one to read its
+instructions, **Run** it in a new chat in Plan mode, or put it on a schedule. Type `/` in
+the composer to use a skill in the chat you are in.
 
 ## Connect the system first
 

@@ -31,6 +31,8 @@ type MarkdownProfile = {
   listClassName: (ordered: boolean) => string;
   blockquoteClassName: string;
   codeBlockHtml: (text: string, lang: string | undefined) => string;
+  /** Whether a page or drawing fence gets a Preview button. Chat only. */
+  codePreview: boolean;
   codeSpanClassName: string;
   linkPresentation: "chat" | "simple";
   imagePresentation: "chat" | "simple";
@@ -113,6 +115,26 @@ function codeCopyButton() {
   return `<button type="button" data-redrob-code-copy="" class="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md border border-border/70 bg-background/95 text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="${label}" title="${label}">${CODE_COPY_ICON}${CODE_COPIED_ICON}<span data-redrob-code-copy-label="" class="sr-only" aria-live="polite">${label}</span></button>`;
 }
 
+/**
+ * Fence languages a chat code block can be previewed as: a page, or a drawing that is one. The preview
+ * runs in the artifact sandbox, offline (apps/server/src/artifact-preview-sandbox.ts).
+ */
+const PREVIEWABLE_CODE_LANGUAGES = new Set(["html", "htm", "svg", "xml+svg"]);
+
+export function previewableCodeLanguage(lang: string | undefined): "html" | "svg" | null {
+  const normalized = lang?.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  if (!PREVIEWABLE_CODE_LANGUAGES.has(normalized)) return null;
+  return normalized === "svg" || normalized === "xml+svg" ? "svg" : "html";
+}
+
+/** The Preview button, beside Copy, for a fence that is a page or a drawing. Empty for anything else. */
+function codePreviewButton(lang: string | undefined) {
+  const kind = previewableCodeLanguage(lang);
+  if (!kind) return "";
+  const label = escapeAttribute(t("message.preview_code_block"));
+  return `<button type="button" data-redrob-code-preview="${kind}" class="absolute right-11 top-2 z-10 inline-flex h-7 items-center justify-center rounded-md border border-border/70 bg-background/95 px-2 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="${label}" title="${label}">${escapeHtml(t("message.preview"))}</button>`;
+}
+
 function chatCodeBlockContainer(html: string, shiki: boolean) {
   const shikiAttribute = shiki ? ` data-redrob-shiki="true"` : "";
 
@@ -121,7 +143,7 @@ function chatCodeBlockContainer(html: string, shiki: boolean) {
 
 function chatCodeBlockHtml(text: string, lang: string | undefined) {
   return chatCodeBlockContainer(
-    `<pre class="overflow-x-auto px-4 pb-3 pt-11"><code${codeLanguageClass(lang)}>${escapeHtml(text)}</code></pre>`,
+    `${codePreviewButton(lang)}<pre class="overflow-x-auto px-4 pb-3 pt-11"><code${codeLanguageClass(lang)}>${escapeHtml(text)}</code></pre>`,
     false,
   );
 }
@@ -183,6 +205,7 @@ function sanitizeMarkdownHtml(value: string) {
       "data-redrob-code-copy-check-icon",
       "data-redrob-code-copy-icon",
       "data-redrob-code-copy-label",
+      "data-redrob-code-preview",
       "aria-label",
       "data-redrob-image-preview",
       "data-redrob-link-href",
@@ -212,6 +235,7 @@ function markdownProfileForPresentation(presentation: MarkdownPresentation): Mar
       listClassName: (ordered) => ordered ? "my-3 list-decimal pl-6" : "my-3 list-disc pl-6",
       blockquoteClassName: "my-4 rounded-r-lg border-l border-dls-border bg-dls-hover/40 pl-4 italic text-muted-foreground",
       codeBlockHtml: surfaceCodeBlockHtml,
+      codePreview: false,
       codeSpanClassName: "rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-sm text-foreground",
       linkPresentation: "simple",
       imagePresentation: "simple",
@@ -232,6 +256,7 @@ function markdownProfileForPresentation(presentation: MarkdownPresentation): Mar
     listClassName: (ordered) => ordered ? "my-3 pl-6 list-decimal" : "my-3 pl-6 list-disc",
     blockquoteClassName: "my-4 rounded-r-lg border-l border-border bg-muted/40 pl-4 italic text-muted-foreground",
     codeBlockHtml: chatCodeBlockHtml,
+    codePreview: true,
     codeSpanClassName: "rounded-md bg-muted/70 px-1.5 py-0.5 font-mono text-sm text-foreground",
     linkPresentation: "chat",
     imagePresentation: "chat",
@@ -388,9 +413,11 @@ function createMarkdownParsers(presentation: MarkdownPresentation) {
     markedShiki({
       async highlight(code, lang, props) {
         const language = parseShikiLanguage(lang);
+        /* Shiki's container has no language in it, so the button goes in with the highlighted block. */
+        const preview = profile.codePreview ? codePreviewButton(lang) : "";
 
         if (profile.shikiTheme.kind === "dual") {
-          return codeToHtml(code, {
+          return preview + await codeToHtml(code, {
             lang: language,
             meta: { __raw: props.join(" ") },
             themes: {
@@ -401,7 +428,7 @@ function createMarkdownParsers(presentation: MarkdownPresentation) {
           });
         }
 
-        return codeToHtml(code, {
+        return preview + await codeToHtml(code, {
           lang: language,
           meta: { __raw: props.join(" ") },
           theme: profile.shikiTheme.theme,

@@ -185,8 +185,7 @@ describe("the session page defers its side panel to the frame", () => {
     expect(routeSidePanelRequest("panel", true, { tab: "files", toggle: true })).toEqual({ kind: "toggle", tab: "files" });
   });
 
-  test("voice, extensions and closing stay with the session page, and nothing moves outside the frame", () => {
-    expect(routeSidePanelRequest("voice", true)).toBeNull();
+  test("extensions and closing stay with the session page, and nothing moves outside the frame", () => {
     expect(routeSidePanelRequest("extensions", true)).toBeNull();
     expect(routeSidePanelRequest(null, true)).toBeNull();
     expect(routeSidePanelRequest("panel", false)).toBeNull();

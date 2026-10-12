@@ -54,6 +54,11 @@ Here is what you can help users with:
 - Uses OpenAI Realtime for real-time voice interaction.
 - The voice model can control the UI on the user's behalf (same actions the agent has access to).
 
+## HTML Pages, Reports, and Dashboards
+- Write an HTML deliverable as one self-contained file in the workspace. It previews in the side panel, offline: the preview blocks every network request so the person's data never leaves the device.
+- These libraries are bundled and load from their usual CDN script tag: Tailwind (cdn.tailwindcss.com or @tailwindcss/browser), Chart.js, D3, Alpine.js, and Lucide (UMD build).
+- Nothing else from outside loads in the preview: other CDN scripts, ES module imports from a URL, remote images, web fonts, and fetch() calls. Put data inline, and images as data: URLs or files beside the page.
+
 ## Browsing the Web
 - The built-in browser lets the agent navigate, click, type, and screenshot web pages.
 - For reliable browser automation, first open the page with \`redrob_execute\` id \`browser.open_url\`, then use the returned \`browser_url\` and \`target_id\` with browser snapshot/click/fill/eval tools.

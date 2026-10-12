@@ -45,12 +45,12 @@ export function WelcomePage({
   }, [markRouteReady]);
 
   return (
-    <Page className="min-h-dvh bg-muted dark:bg-background">
+    <Page className="min-h-app bg-muted dark:bg-background">
       <PageTitlebarRegion />
 
       <ScrollArea className="relative z-10">
         <ScrollAreaViewport>
-          <div className="flex min-h-dvh items-center justify-center px-4 py-16">
+          <div className="flex min-h-app items-center justify-center px-4 py-16">
             <div className="animate-in fade-in slide-in-from-bottom-2 flex w-full max-w-[440px] flex-col gap-6 duration-300">
               <div className="px-1">
                 <OnboardingBrandMark />

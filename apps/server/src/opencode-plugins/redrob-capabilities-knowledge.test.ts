@@ -18,6 +18,9 @@ describe("Redrob Cowork capabilities knowledge plugin", () => {
     expect(knowledge).toContain("REDROB_API_KEY");
     expect(knowledge).toContain("Skill creation:");
     expect(knowledge).toContain("Memory Bank");
+    // HTML previews run offline, so the agent is told which libraries still load.
+    expect(knowledge).toContain("blocks every network request");
+    expect(knowledge).toContain("Tailwind (cdn.tailwindcss.com or @tailwindcss/browser), Chart.js, D3, Alpine.js, and Lucide");
 
     // Nothing may steer the agent at a control plane that no longer exists.
     expect(knowledge).not.toContain("api.redrob.io/mcp/agent");

@@ -60,12 +60,12 @@ export function TutorialStep({ workspacePath, onStart, crashReports, onCrashRepo
     // workspace -> Connect Redrob".
     //
     // Its two sibling steps in the same overlay stack were already fixed; this one was not.
-    <Page className="fixed inset-0 z-50 min-h-dvh overflow-y-auto bg-muted dark:bg-background">
+    <Page className="fixed inset-x-0 bottom-0 top-app z-50 min-h-app overflow-y-auto bg-muted dark:bg-background">
       <PageTitlebarRegion />
 
       <ScrollArea className="relative z-10">
         <ScrollAreaViewport>
-          <div className="flex min-h-dvh items-center justify-center px-4 py-16">
+          <div className="flex min-h-app items-center justify-center px-4 py-16">
             <div className="animate-in fade-in slide-in-from-bottom-2 flex w-full max-w-[520px] flex-col gap-6 duration-300">
               <div className="px-1">
                 <OnboardingBrandMark />

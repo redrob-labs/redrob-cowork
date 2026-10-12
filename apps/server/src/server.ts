@@ -29,6 +29,21 @@ import {
   resolveSameServerMcpAppResource,
 } from "./mcp-app-host.js";
 import {
+  ARTIFACT_PREVIEW_CSP,
+  ARTIFACT_PREVIEW_SANDBOX_HTML,
+  ARTIFACT_PREVIEW_SANDBOX_SCRIPT,
+} from "./artifact-preview-sandbox.js";
+import { normalizeWorkspaceRelativePath } from "./routes/files.js";
+import { readArtifactPreviewLibrary } from "./artifact-preview-vendor.js";
+import {
+  artifactPreviewBasePath,
+  artifactPreviewContentType,
+  grantArtifactPreviewFolder,
+  resolveArtifactPreviewFile,
+  resolveArtifactPreviewPage,
+  streamArtifactPreviewFile,
+} from "./artifact-preview-files.js";
+import {
   buildMcpAppSandboxCsp,
   MCP_APP_SANDBOX_PROXY_CSS,
   MCP_APP_SANDBOX_PROXY_HTML,
@@ -41,14 +56,16 @@ import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./co
 import {
   addSchedule,
   answerWaiting,
+  promptForTarget,
   readRule,
-  readSchedules,
+  readTarget,
   removeSchedule,
+  resolveLegacySchedules,
   startScheduler,
   updateSchedule,
   type ScheduleEngine,
 } from "./desk-schedules.js";
-import { DESK_RUN_AGENT } from "./redrob-desk-agents.js";
+import { DESK_PLAN_AGENT, DESK_RUN_AGENT } from "./redrob-desk-agents.js";
 import { ApiError, formatError } from "./errors.js";
 import { readJsoncFile, updateJsoncTopLevel, writeJsoncFile } from "./jsonc.js";
 import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
@@ -59,7 +76,7 @@ import { opencodeConfigPath, redrobConfigPath, projectCommandsDir, projectSkills
 import { migrateLegacyGlobalConfig } from "./engine-config-migrate.js";
 import { ensureDir, exists, hashToken, shortId } from "./utils.js";
 import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles, readRawOpencodeConfig } from "./workspace-init.js";
-import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./validators.js";
+import { sanitizeCommandName, validateMcpName, validateSkillName, validateUserMcpName } from "./validators.js";
 import { TokenService } from "./tokens.js";
 import { resetManagedProviderAuthCache, syncManagedProviderAuth } from "./managed-provider-auth.js";
 import {
@@ -100,7 +117,7 @@ import { serve, type ServeResult } from "./serve-node.js";
 import { serveStaticUi } from "./static-ui.js";
 import { externalFetch, loopbackFetch } from "./server-fetch.js";
 import { registerCoreRoutes } from "./routes/core.js";
-import { registerFileRoutes } from "./routes/files.js";
+import { registerFileRoutes, resolveInboxDir } from "./routes/files.js";
 import { registerOperationRoutes } from "./routes/operations.js";
 import { addRoute, matchRoute, type AuthMode, type RequestContext, type Route } from "./routes/registry.js";
 import { registerSessionRoutes } from "./routes/sessions.js";
@@ -140,6 +157,26 @@ import {
   writeRedrobWorkspaceConfig,
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
+import { normalizeDisplayName, readParticipantProfile, updateParticipantProfile } from "./participant-profile.js";
+import { actorAuthor, registerReviewRoutes } from "./routes/review.js";
+import { registerRoomRoutes } from "./routes/room.js";
+import { registerCoworkRelayRoutes } from "./routes/cowork-relay.js";
+import { activeRoom, broadcast, recordAuthorship, withServerMessageId } from "./cowork-room.js";
+import { claimAsk, releaseAsk } from "./cowork-queue.js";
+import { engineId } from "./engine-ids.js";
+import {
+  assertGuestEngineRequest,
+  assertGuestRoute,
+  engineSessionIdOf,
+  filterGuestEventStream,
+  filterJsonResponse,
+  assertGuestFileParts,
+  guestAttachmentDir,
+  planOnlyBody,
+  type GuestEngineAccess,
+} from "./guest-access.js";
+import { engineCliTemplate } from "./engine-cli.js";
+import { registerHandoffRoutes } from "./routes/handoff.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
 import {
   applyTeamPolicy,
@@ -164,9 +201,13 @@ import {
 import { readHarnessAvailability } from "./harness-availability.js";
 import { PrivacyGate } from "./privacy/gate.js";
 import { RouteLabelSource } from "./route/label-source.js";
+import { createSkillLibrary, installLibrarySkill, libraryFilterFrom } from "./skill-library/library.js";
+import { readTeamSkillsState, startTeamSkillsSync, syncTeamSkills, type TeamSkillsSyncDeps } from "./team-skills/sync.js";
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
+import { startInsightsSync } from "./insights/sync.js";
+import { WorkClassifierSource } from "@redrob-labs/work-labeller/node";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -182,8 +223,6 @@ export {
 const SERVER_VERSION = pkg.version;
 const REDROB_CODE_VERSION = constants.redrobCodeVersion.trim().replace(/^v/, "");
 
-const REDROB_VOICE_REALTIME_MODEL = "gpt-realtime-2";
-const REDROB_VOICE_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
 const agentDiagnosticsLastRunByServer = new WeakMap<ServerConfig, Map<string, number>>();
 const agentDiagnosticsInFlightByServer = new WeakMap<ServerConfig, Set<string>>();
 const AGENT_DIAGNOSTICS_RATE_LIMIT_CAPACITY = 1_000;
@@ -259,43 +298,8 @@ function reserveAgentDiagnosticsRun(
   };
 }
 
-const REDROB_VOICE_REALTIME_TOOLS = [
-  {
-    type: "function",
-    name: "redrob_snapshot",
-    description: "Read the current Redrob Cowork UI control snapshot: route, status, narration, and visible action metadata.",
-    parameters: { type: "object", properties: {}, additionalProperties: false },
-  },
-  {
-    type: "function",
-    name: "redrob_list_actions",
-    description: "List semantic Redrob Cowork UI actions. Call this before redrob_execute_action when you do not know the exact action id.",
-    parameters: { type: "object", properties: {}, additionalProperties: false },
-  },
-  {
-    type: "function",
-    name: "redrob_execute_action",
-    description: "Execute a semantic Redrob Cowork UI action by id. Prefer this over screen coordinates or DOM guessing.",
-    parameters: {
-      type: "object",
-      properties: {
-        actionId: { type: "string", description: "The action id from redrob_list_actions, such as composer.set_text or composer.send." },
-        args: { type: "object", description: "Optional JSON arguments for the action.", additionalProperties: true },
-      },
-      required: ["actionId"],
-      additionalProperties: false,
-    },
-  },
-];
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function readStringField(value: unknown, key: string): string {
-  if (!isRecord(value)) return "";
-  const field = value[key];
-  return typeof field === "string" ? field.trim() : "";
 }
 
 const LEGACY_RUNTIME_CONFIG_KEYS = ["plugin", "mcp", "permission", "provider"] as const;
@@ -529,236 +533,6 @@ function mergeLegacyRuntimeConfig(
   };
 }
 
-async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
-  const records = await env.list();
-  const storedKey =
-    records.find((entry) => entry.key === "OPENAI_REALTIME_API_KEY")?.value.trim() ||
-    records.find((entry) => entry.key === "OPENAI_API_KEY")?.value.trim() ||
-    "";
-  if (storedKey) return storedKey;
-
-  return process.env.REDROB_OPENAI_REALTIME_API_KEY?.trim() ||
-    process.env.OPENAI_REALTIME_API_KEY?.trim() ||
-    process.env.OPENAI_API_KEY?.trim() ||
-    "";
-}
-
-/**
- * Credentials for the Redrob Models voice broker.
- *
- * `REDROB_MODELS_API_KEY` is the canonical name: it names what it authenticates and pairs with
- * `REDROB_MODELS_BASE_URL`. `REDROB_CLOUD_API_KEY` is a legacy alias and has to stay readable —
- * it is the name this store has persisted since the OpenWork rebrand, so it is what an existing
- * install actually carries on disk. The cloud-removal sweep (`10b401c`) deleted the two lines that
- * read it, on the strength of the name alone, which left the broker branch unreachable for every
- * one of those installs: with no key it returned null, the request fell through to direct OpenAI,
- * and a managed-voice user got a raw OpenAI failure instead of the broker.
- */
-async function resolveRedrobWorkModelsVoiceConfig(env: EnvService): Promise<{ baseUrl: string; apiKey: string } | null> {
-  const records = await env.list();
-  const apiKey =
-    records.find((entry) => entry.key === "REDROB_MODELS_API_KEY")?.value.trim() ||
-    records.find((entry) => entry.key === "REDROB_CLOUD_API_KEY")?.value.trim() ||
-    process.env.REDROB_MODELS_API_KEY?.trim() ||
-    process.env.REDROB_CLOUD_API_KEY?.trim() ||
-    "";
-  if (!apiKey) return null;
-
-  const baseUrl =
-    records.find((entry) => entry.key === "REDROB_INFERENCE_BASE_URL")?.value.trim() ||
-    records.find((entry) => entry.key === "REDROB_MODELS_BASE_URL")?.value.trim() ||
-    process.env.REDROB_INFERENCE_BASE_URL?.trim() ||
-    process.env.REDROB_MODELS_BASE_URL?.trim() ||
-    "";
-  if (!baseUrl) return null;
-  return { apiKey, baseUrl: baseUrl.replace(/\/+$/, "") };
-}
-
-function redrobVoiceRealtimeInstructions(sessionContext: string) {
-  const trimmedContext = sessionContext.trim();
-  const contextSection = trimmedContext
-    ? `
-
-# Current Session Context
-
-Use this recent transcript context to answer questions about what was last discussed and to resolve references such as "this" or "that" when continuing the existing session. Do not treat it as a new user request.
-
-${trimmedContext}`
-    : "";
-  return `# Role and Objective
-
-You are Redrob Cowork Voice Mode, a voice-first control layer inside Redrob Cowork.
-Help the user control Redrob Cowork by using the semantic Redrob Cowork UI tools.
-
-# Tool Policy
-
-- Prefer redrob_snapshot, redrob_list_actions, and redrob_execute_action over visual guessing.
-- If the user asks to write or draft something, use composer.set_text.
-- If the user asks to send or run the current prompt, use composer.send.
-- For navigation, settings, session, transcript, and composer work, inspect the action list first if the action id is unknown.
-- Do not claim an action completed until the tool succeeds.
-- Ask for confirmation before destructive actions such as deleting a session.
-
-# Voice Style
-
-- Be concise, calm, and direct.
-- If audio is unclear, ask the user to repeat it instead of guessing.
-- Ignore background speech that is not addressed to Redrob Cowork.
-- Summarize tool results briefly and offer the next useful step.${contextSection}`;
-}
-
-function readOpenAiClientSecret(payload: unknown): { clientSecret: string; expiresAt: number | null } {
-  if (!isRecord(payload)) return { clientSecret: "", expiresAt: null };
-  const clientSecret = payload.client_secret;
-  if (typeof clientSecret === "string") return { clientSecret, expiresAt: null };
-  if (isRecord(clientSecret)) {
-    const value = typeof clientSecret.value === "string" ? clientSecret.value : "";
-    const expiresAt = typeof clientSecret.expires_at === "number" ? clientSecret.expires_at : null;
-    return { clientSecret: value, expiresAt };
-  }
-  const value = typeof payload.value === "string" ? payload.value : "";
-  return { clientSecret: value, expiresAt: null };
-}
-
-async function createOpenAiRealtimeVoiceSession(env: EnvService, input: unknown) {
-  const managedVoice = await resolveRedrobWorkModelsVoiceConfig(env);
-  if (managedVoice) {
-    try {
-      return await createManagedVoiceSession(managedVoice, input);
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 503) {
-        const fallbackKey = await resolveOpenAiRealtimeApiKey(env);
-        if (fallbackKey) {
-          console.warn("[voice] Redrob Models broker returned 503 - falling back to direct OpenAI Realtime.");
-          return createDirectOpenAiVoiceSession(fallbackKey, input);
-        }
-        throw new ApiError(
-          503,
-          "redrob_models_voice_unavailable",
-          "Redrob Models voice is active but the server is not fully configured. Ask your admin to add an OpenAI key, or save your own OPENAI_API_KEY in Environment settings.",
-        );
-      }
-      throw error;
-    }
-  }
-
-  const apiKey = await resolveOpenAiRealtimeApiKey(env);
-  if (!apiKey) {
-    throw new ApiError(
-      400,
-      "openai_api_key_missing",
-      "OpenAI API key missing. Save OPENAI_API_KEY in Redrob Environment Variables or configure the Voice Mode extension.",
-    );
-  }
-
-  return createDirectOpenAiVoiceSession(apiKey, input);
-}
-
-async function createManagedVoiceSession(config: { baseUrl: string; apiKey: string }, input: unknown) {
-  const response = await externalFetch(`${config.baseUrl}/voice/realtime/session`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(input ?? {}),
-  });
-  const text = await response.text();
-  let payload: unknown = null;
-  try {
-    payload = text ? JSON.parse(text) : null;
-  } catch {
-    payload = null;
-  }
-  if (!response.ok) {
-    const errorPayload = isRecord(payload) && isRecord(payload.error) ? payload.error : null;
-    const message = typeof errorPayload?.message === "string" ? errorPayload.message : response.statusText;
-    throw new ApiError(response.status, "redrob_models_voice_failed", message || "Redrob Models could not create a voice session");
-  }
-  if (
-    !isRecord(payload) ||
-    payload.ok !== true ||
-    typeof payload.clientSecret !== "string" ||
-    typeof payload.model !== "string" ||
-    !Array.isArray(payload.tools) ||
-    payload.tools.some((tool) => typeof tool !== "string")
-  ) {
-    throw new ApiError(502, "redrob_models_voice_invalid_response", "Redrob Models did not return a usable Realtime session payload");
-  }
-  return {
-    ok: true,
-    clientSecret: payload.clientSecret,
-    expiresAt: typeof payload.expiresAt === "number" ? payload.expiresAt : null,
-    model: payload.model,
-    transcriptionModel: typeof payload.transcriptionModel === "string" ? payload.transcriptionModel : REDROB_VOICE_TRANSCRIPTION_MODEL,
-    tools: payload.tools,
-    ...(typeof payload.source === "string" ? { source: payload.source } : {}),
-  };
-}
-
-async function createDirectOpenAiVoiceSession(apiKey: string, input: unknown) {
-  const model = readStringField(input, "model") || REDROB_VOICE_REALTIME_MODEL;
-  const sessionContext = readStringField(input, "sessionContext").slice(0, 6_000);
-  const response = await externalFetch("https://api.openai.com/v1/realtime/client_secrets", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      session: {
-        type: "realtime",
-        model,
-        output_modalities: ["audio"],
-        audio: {
-          input: {
-            transcription: { model: REDROB_VOICE_TRANSCRIPTION_MODEL, language: "en" },
-            turn_detection: {
-              type: "server_vad",
-              threshold: 0.58,
-              silence_duration_ms: 320,
-              prefix_padding_ms: 300,
-              create_response: true,
-              interrupt_response: true,
-            },
-          },
-        },
-        instructions: redrobVoiceRealtimeInstructions(sessionContext),
-        tool_choice: "auto",
-        tools: REDROB_VOICE_REALTIME_TOOLS,
-      },
-    }),
-  });
-
-  const text = await response.text();
-  let payload: unknown = null;
-  try {
-    payload = text ? JSON.parse(text) : null;
-  } catch {
-    payload = null;
-  }
-
-  if (!response.ok) {
-    const errorPayload = isRecord(payload) && isRecord(payload.error) ? payload.error : null;
-    const message = typeof errorPayload?.message === "string" ? errorPayload.message : response.statusText;
-    throw new ApiError(response.status, "openai_realtime_failed", message || "Failed to create OpenAI Realtime session");
-  }
-
-  const { clientSecret, expiresAt } = readOpenAiClientSecret(payload);
-  if (!clientSecret) {
-    throw new ApiError(502, "openai_realtime_invalid_response", "OpenAI did not return a usable Realtime client secret");
-  }
-
-  return {
-    ok: true,
-    clientSecret,
-    expiresAt,
-    model,
-    transcriptionModel: REDROB_VOICE_TRANSCRIPTION_MODEL,
-    tools: REDROB_VOICE_REALTIME_TOOLS.map((tool) => tool.name),
-  };
-}
-
 const reloadBaselineRefreshers = new WeakMap<
   ServerConfig,
   (workspaceId: string, reasons?: ReloadReason[]) => Promise<void>
@@ -984,6 +758,191 @@ export function assertOpencodeProxyAllowed(actor: Actor, method: string, proxyPa
   }
 }
 
+/** A call straight to this workspace's engine, for the room's own needs (status, queued sends, asks). */
+async function engineFetch(config: ServerConfig, workspace: WorkspaceInfo, path: string, init: { method: string; body?: string }): Promise<Response> {
+  const connection = resolveWorkspaceOpencodeConnection(config, workspace);
+  const baseUrl = connection.baseUrl?.trim();
+  if (!baseUrl) throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace");
+  const headers = new Headers({ "Content-Type": "application/json" });
+  if (connection.authHeader) headers.set("Authorization", connection.authHeader);
+  const directory = resolveOpencodeDirectory(workspace);
+  if (directory) headers.set(ENGINE_DIRECTORY_HEADER, buildEngineDirectoryHeader(directory));
+  return loopbackFetch(buildOpencodeProxyUrl(baseUrl, path, ""), { method: init.method, headers, ...(init.body ? { body: init.body } : {}) });
+}
+
+const ASK_REPLY_PATH = /^\/(?:(permission|question)\/([^/]+)\/(?:reply|reject)|session\/([^/]+)\/permissions\/([^/]+))$/;
+
+/**
+ * One answer per ask. For a guest the ask must belong to the shared chat; in a live room the first
+ * reply takes it and the others get 409 with who answered. Outside a room, for anyone but a guest,
+ * replies go through as before.
+ */
+async function arbitrateAsk(
+  config: ServerConfig,
+  workspace: WorkspaceInfo,
+  actor: Actor,
+  method: string,
+  proxyPath: string,
+): Promise<{ finish(response: Response): Promise<void> } | null> {
+  if (method.toUpperCase() !== "POST") return null;
+  const match = ASK_REPLY_PATH.exec(normalizeOpencodeProxyPath(proxyPath));
+  if (!match) return null;
+  const kind = match[1] === "question" ? "question" : "permission";
+  const requestId = decodeURIComponent(match[2] ?? match[4] ?? "");
+  let sessionId = match[3] ? decodeURIComponent(match[3]) : null;
+  if (!sessionId) {
+    const pending = await engineFetch(config, workspace, kind === "question" ? "/question" : "/permission", { method: "GET" }).catch(() => null);
+    const items = pending?.ok ? ((await pending.json().catch(() => [])) as unknown) : [];
+    const list = Array.isArray(items) ? items : isRecord(items) ? (Object.values(items).find(Array.isArray) as unknown[] | undefined) ?? [] : [];
+    const found = list.find((item) => isRecord(item) && [item.id, item.requestID, item.permissionID, item.questionID].includes(requestId));
+    sessionId = found ? engineSessionIdOf(found) : null;
+    if (actor.guest && !found) throw new ApiError(404, "ask_not_found", "That question is no longer waiting");
+  }
+  if (actor.guest && sessionId !== actor.guest.sessionId) throw new ApiError(403, "guest_forbidden", "Guests can only answer in the shared chat");
+  const room = sessionId ? await activeRoom(config, workspace.id, sessionId) : null;
+  if (!room) return null;
+  const by = await actorAuthor(config, { actor } as RequestContext);
+  const claim = claimAsk(requestId, by);
+  if (!claim.ok) {
+    throw new ApiError(409, "already_answered", `${claim.by.displayName || "Someone"} already answered this`, { by: claim.by });
+  }
+  return {
+    finish: async (response) => {
+      if (!response.ok) {
+        releaseAsk(requestId);
+        return;
+      }
+      broadcast(room.roomId, { type: "room.ask_answered", requestId, by });
+    },
+  };
+}
+
+/** In a live room, everyone sees who stopped the agent. */
+async function announceStop(config: ServerConfig, workspace: WorkspaceInfo, actor: Actor, method: string, proxyPath: string, response: Response) {
+  if (method.toUpperCase() !== "POST" || !response.ok) return;
+  const match = /^\/session\/([^/]+)\/abort$/.exec(normalizeOpencodeProxyPath(proxyPath));
+  if (!match) return;
+  const room = await activeRoom(config, workspace.id, decodeURIComponent(match[1] ?? ""));
+  if (room) broadcast(room.roomId, { type: "room.stopped", by: await actorAuthor(config, { actor } as RequestContext) });
+}
+
+const PROMPT_PATH = /^\/session\/([^/]+)\/(prompt_async|message|command)$/;
+
+/**
+ * In a live room the server picks each message's id, so it can record who sent it before the
+ * engine has the message. Outside a room the request goes through untouched.
+ */
+async function withRoomAuthorship(
+  config: ServerConfig,
+  workspace: WorkspaceInfo,
+  actor: Actor,
+  request: Request,
+  proxyPath: string,
+): Promise<{ request: Request; finish(response: Response): Promise<void> } | null> {
+  if (request.method.toUpperCase() !== "POST") return null;
+  const match = PROMPT_PATH.exec(normalizeOpencodeProxyPath(proxyPath));
+  if (!match) return null;
+  const sessionId = decodeURIComponent(match[1] ?? "");
+  const room = await activeRoom(config, workspace.id, sessionId);
+  // A guest's turn is always read: its files are checked, and a plan-only one is rewritten.
+  if (!room && !actor.guest) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await request.clone().text());
+  } catch {
+    if (actor.guest) throw new ApiError(400, "invalid_payload", "A message body is required");
+    return null;
+  }
+  if (actor.guest) assertGuestFileParts(parsed, guestAttachmentDir(resolveInboxDir(workspace.path), sessionId));
+  // Whatever agent a plan-only guest asked for, the turn runs in the read-only Plan agent.
+  parsed = planOnlyBody(actor.guest, parsed, DESK_PLAN_AGENT) ?? parsed;
+  const headers = new Headers(request.headers);
+  headers.delete("content-length");
+  if (!room) {
+    return { request: new Request(request.url, { method: "POST", headers, body: JSON.stringify(parsed), signal: request.signal }), finish: async () => {} };
+  }
+  const minted = withServerMessageId(parsed, () => engineId("msg", "ascending"));
+  if (!minted) return null;
+  const next = new Request(request.url, { method: "POST", headers, body: JSON.stringify(minted.body), signal: request.signal });
+  return {
+    request: next,
+    finish: async (response) => {
+      if (!response.ok) return;
+      const who = actor.guest ? actor.guest.participant : await actorAuthor(config, { actor } as RequestContext);
+      const entry = { messageId: minted.messageId, participantId: who.participantId, displayName: who.displayName, at: Date.now() };
+      await recordAuthorship(config, workspace.id, sessionId, entry);
+      broadcast(room.roomId, { type: "room.authorship", entry });
+    },
+  };
+}
+
+/** The header the host bridge (L4) sets to the guest's authenticated endpoint key. */
+const GUEST_ENDPOINT_HEADER = "x-redrob-endpoint-id";
+
+/** For a guest: what this engine call may do, or a 403. For anyone else: null. */
+function guestEngineAccess(actor: Actor, workspaceId: string, method: string, proxyPath: string): GuestEngineAccess | null {
+  if (!actor.guest) return null;
+  if (workspaceId !== actor.guest.workspaceId) throw new ApiError(403, "guest_forbidden", "Guests can only reach the shared chat");
+  return assertGuestEngineRequest(actor.guest, method, normalizeOpencodeProxyPath(proxyPath));
+}
+
+/** What a proxied engine call did, for the audit log, or null for a read. */
+function engineActionOf(method: string, proxyPath: string): { action: string; sessionId: string | null } | null {
+  if (method.toUpperCase() !== "POST") return null;
+  const path = normalizeOpencodeProxyPath(proxyPath);
+  const session = /^\/session\/([^/]+)\/(prompt_async|message|command|abort|permissions\/[^/]+)$/.exec(path);
+  if (session) {
+    const verb = session[2] ?? "";
+    const action = verb === "abort" ? "run.stopped" : verb.startsWith("permissions/") ? "permission.answered" : "message.sent";
+    return { action, sessionId: decodeURIComponent(session[1] ?? "") };
+  }
+  if (/^\/permission\/[^/]+\/reply$/.test(path)) return { action: "permission.answered", sessionId: null };
+  if (/^\/question\/[^/]+\/(reply|reject)$/.test(path)) return { action: "question.answered", sessionId: null };
+  return null;
+}
+
+/**
+ * After an engine call: a guest's response narrowed to the shared chat, and any action that sends,
+ * stops or answers recorded in the audit log with who did it.
+ */
+async function afterEngineProxy(input: {
+  config: ServerConfig;
+  workspace: WorkspaceInfo;
+  actor: Actor;
+  access: GuestEngineAccess | null;
+  method: string;
+  proxyPath: string;
+  response: Response;
+}): Promise<Response> {
+  const { access, actor } = input;
+  let response = input.response;
+  if (access?.kind === "events" && actor.guest && response.ok && response.body) {
+    const headers = new Headers(response.headers);
+    headers.delete("content-length");
+    response = new Response(filterGuestEventStream(response.body, actor.guest.sessionId), {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  } else if (access?.kind === "filter") {
+    response = await filterJsonResponse(response, access.filter);
+  }
+  const done = engineActionOf(input.method, input.proxyPath);
+  if (done && response.ok) {
+    const who = actor.guest?.participant.displayName;
+    await recordAudit(input.workspace.path, {
+      id: shortId(),
+      workspaceId: input.workspace.id,
+      actor,
+      action: done.action,
+      target: done.sessionId ?? normalizeOpencodeProxyPath(input.proxyPath),
+      summary: who ? `${done.action} by ${who}` : done.action,
+      timestamp: Date.now(),
+    }).catch(() => undefined);
+  }
+  return response;
+}
+
 function isSessionCommandProxyRequest(method: string, proxyPath: string) {
   return method === "POST" && /^\/session\/[^/]+\/command$/.test(normalizeOpencodeProxyPath(proxyPath));
 }
@@ -1089,11 +1048,17 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
         try {
           const actor = await requireClient(request, config, tokens);
           assertOpencodeProxyAllowed(actor, request.method, mount.restPath);
+          const access = guestEngineAccess(actor, mount.workspaceId, request.method, mount.restPath);
           const workspace = await resolveWorkspace(config, mount.workspaceId);
           proxyService = "opencode";
           proxyBaseUrl = workspace.baseUrl?.trim() || undefined;
-          const response = await proxyOpencodeRequest({ config, request, url, workspace, proxyPath: mount.restPath });
-          return finalize(response);
+          const authored = await withRoomAuthorship(config, workspace, actor, request, mount.restPath);
+          const ask = await arbitrateAsk(config, workspace, actor, request.method, mount.restPath);
+          const response = await proxyOpencodeRequest({ config, request: authored?.request ?? request, url, workspace, proxyPath: mount.restPath });
+          await authored?.finish(response);
+          await ask?.finish(response);
+          await announceStop(config, workspace, actor, request.method, mount.restPath, response);
+          return finalize(await afterEngineProxy({ config, workspace, actor, access, method: request.method, proxyPath: mount.restPath, response }));
         } catch (error) {
           const requestCanceled = isExpectedRequestCancellation(error, request.signal);
           if (!(error instanceof ApiError) && !requestCanceled) {
@@ -1146,9 +1111,20 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
         try {
           const actor = await requireClient(request, config, tokens);
           assertOpencodeProxyAllowed(actor, request.method, url.pathname);
+          const access = guestEngineAccess(actor, config.workspaces[0]?.id ?? "", request.method, url.pathname);
           proxyService = "opencode";
-          const response = await proxyOpencodeRequest({ config, request, url, workspace: config.workspaces[0] });
-          return finalize(response);
+          const rootWorkspace = config.workspaces[0];
+          const authored = rootWorkspace ? await withRoomAuthorship(config, rootWorkspace, actor, request, url.pathname) : null;
+          const ask = rootWorkspace ? await arbitrateAsk(config, rootWorkspace, actor, request.method, url.pathname) : null;
+          const response = await proxyOpencodeRequest({ config, request: authored?.request ?? request, url, workspace: rootWorkspace });
+          await authored?.finish(response);
+          await ask?.finish(response);
+          if (rootWorkspace) await announceStop(config, rootWorkspace, actor, request.method, url.pathname, response);
+          return finalize(
+            rootWorkspace
+              ? await afterEngineProxy({ config, workspace: rootWorkspace, actor, access, method: request.method, proxyPath: url.pathname, response })
+              : response,
+          );
         } catch (error) {
           const requestCanceled = isExpectedRequestCancellation(error, request.signal);
           if (!(error instanceof ApiError) && !requestCanceled) {
@@ -1182,7 +1158,8 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
               : route.auth === "client"
                 ? await requireClient(request, config, tokens)
                 : undefined;
-        const response = await route.handler({
+        const guestFilter = actor?.guest ? assertGuestRoute(actor.guest, request.method, url.pathname) : null;
+        const handled = await route.handler({
           request,
           url,
           params: route.params,
@@ -1192,6 +1169,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
           tokens,
           actor,
         });
+        const response = guestFilter ? await filterJsonResponse(handled, guestFilter) : handled;
         return finalize(response);
       } catch (error) {
         const requestCanceled = isExpectedRequestCancellation(error, request.signal);
@@ -1258,7 +1236,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   resetManagedProviderAuthCache();
   void syncManagedProviderAuth({ config, env, logger: toManagedProviderAuthLogger(logger) }).catch(() => undefined);
 
-  // Scheduled playbooks run while this server does; REDROB_DISABLE_SCHEDULER turns them off.
+  // Scheduled runs happen while this server does; REDROB_DISABLE_SCHEDULER turns them off.
   const stopScheduler = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startScheduler({ config, engine: createScheduleEngine(config), logger });
@@ -1301,12 +1279,22 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startTeamPolicySync(config, teamPolicySyncDeps(config), logger);
+  // Every local workspace gets its team's skills from the Console; see team-skills/sync.ts.
+  const stopTeamSkillsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startTeamSkillsSync(config, teamSkillsSyncDeps(config, reloadEvents), logger);
+  // Labeled sessions go to the console with the person's Redrob Key; see insights/sync.ts.
+  const stopInsightsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startInsightsSync(config, teamPolicySyncDeps(config), logger);
 
   return {
     ...server,
     stop: async () => {
       stopScheduler();
       stopTeamPolicySync();
+      stopTeamSkillsSync();
+      stopInsightsSync();
       stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
@@ -1319,6 +1307,14 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
 /** The key comes from the engine at the moment of each check; nothing here stores it. */
 function teamPolicySyncDeps(config: ServerConfig): TeamPolicySyncDeps {
   return { readKey: () => readRedrobEngineKey({ config }) };
+}
+
+/** Like the team policy's: the key comes from the engine at the moment of each check. */
+function teamSkillsSyncDeps(config: ServerConfig, reloadEvents: ReloadEventStore): TeamSkillsSyncDeps {
+  return {
+    readKey: () => readRedrobEngineKey({ config }),
+    onChange: (workspace) => reloadEvents.recordDebounced(workspace.id, "skills"),
+  };
 }
 
 function buildOpencodeProxyUrl(baseUrl: string, path: string, search: string) {
@@ -1410,9 +1406,12 @@ export function createWorkspaceOpencodeClient(
 /** The engine calls the scheduler makes, through the workspace's own engine client. */
 function createScheduleEngine(config: ServerConfig): ScheduleEngine {
   return {
-    template: async (workspace, playbookId) => {
-      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === playbookId);
-      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === playbookId);
+    resolvePrompt: (workspace, target) =>
+      promptForTarget(target, async (name) => (await listSkills(workspace.path, true)).some((skill) => skill.name === name)),
+    // Only for schedules saved before skills, which ran a playbook command by name.
+    legacyCommandTemplate: async (workspace, commandName) => {
+      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === commandName);
+      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === commandName);
       return own?.template ?? global?.template ?? null;
     },
     startRun: async (workspace, input) => {
@@ -1874,6 +1873,16 @@ async function requireClient(request: Request, config: ServerConfig, tokens: Tok
     throw new ApiError(401, "unauthorized", "Invalid bearer token");
   }
   const clientId = request.headers.get("x-redrob-client-id") ?? undefined;
+  const record = await tokens.recordForToken(token);
+  if (record?.guest) {
+    // A guest token is bound to the P2P endpoint it was issued to. The host bridge sets this header
+    // from the connection's authenticated key and drops any value the guest sent (L4).
+    const endpoint = request.headers.get(GUEST_ENDPOINT_HEADER) ?? "";
+    if (record.guest.endpointId && endpoint !== record.guest.endpointId) {
+      throw new ApiError(401, "unauthorized", "This guest token belongs to another device");
+    }
+    return { type: "remote", clientId, tokenHash: hashToken(token), scope, guest: record.guest };
+  }
   return { type: "remote", clientId, tokenHash: hashToken(token), scope };
 }
 
@@ -2189,7 +2198,6 @@ function createRoutes(
     createWorkspaceOpencodeClient,
     serializeWorkspace,
     resolveDevLogPath,
-    createOpenAiRealtimeVoiceSession,
   });
 
   registerWorkspaceRoutes({
@@ -2230,8 +2238,97 @@ function createRoutes(
     unwrapOpencodeResult,
   });
 
+  registerReviewRoutes({
+    routes,
+    config,
+    jsonResponse,
+    readJsonBody,
+    ensureWritable,
+    requireClientScope,
+    resolveWorkspaceWithoutBootstrap,
+    resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    onChange: async (workspaceId, sessionId) => {
+      const room = await activeRoom(config, workspaceId, sessionId);
+      if (room) broadcast(room.roomId, { type: "review.updated" });
+    },
+  });
+
+  registerCoworkRelayRoutes({ routes, jsonResponse, readJsonBody, readKey: () => readRedrobEngineKey({ config }) });
+
+  registerRoomRoutes({
+    routes,
+    config,
+    jsonResponse,
+    readJsonBody,
+    ensureWritable,
+    resolveWorkspaceWithoutBootstrap,
+    resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    attachments: { inboxDir: (workspace) => resolveInboxDir(workspace.path), maxBytes: resolveInboxMaxBytes, enabled: resolveInboxEnabled },
+    sessionMessages: async (workspace, sessionId) => {
+      const response = await engineFetch(config, workspace, `/session/${encodeURIComponent(sessionId)}/message`, { method: "GET" });
+      return response.ok ? response.json() : [];
+    },
+    queueEngine: (workspace, sessionId, room) => ({
+      busy: async () => {
+        const response = await engineFetch(config, workspace, "/session/status", { method: "GET" });
+        if (!response.ok) return true;
+        const statuses = (await response.json().catch(() => ({}))) as Record<string, { type?: string } | undefined>;
+        const type = statuses[sessionId]?.type;
+        return type !== undefined && type !== "idle";
+      },
+      send: async (body, item) => {
+        const messageId = engineId("msg", "ascending");
+        const response = await engineFetch(config, workspace, `/session/${encodeURIComponent(sessionId)}/prompt_async`, {
+          method: "POST",
+          body: JSON.stringify({ ...body, messageID: messageId }),
+        });
+        if (!response.ok) throw new Error(`Redrob Code refused the queued message (${response.status})`);
+        const entry = { messageId, participantId: item.author.participantId, displayName: item.author.displayName, at: Date.now() };
+        await recordAuthorship(config, workspace.id, sessionId, entry);
+        broadcast(room.roomId, { type: "room.authorship", entry });
+      },
+    }),
+  });
+
+  registerHandoffRoutes({
+    routes,
+    config,
+    jsonResponse,
+    readJsonBody,
+    ensureWritable,
+    requireClientScope,
+    resolveWorkspace,
+    resolveOpencodeDirectory,
+    resolveAuthor: (ctx) => actorAuthor(config, ctx),
+    redrobCodeVersion: REDROB_CODE_VERSION,
+  });
+
   addRoute(routes, "GET", "/memory", "client", async () => {
     return jsonResponse({ memories: await listMemories(config) });
+  });
+
+  // The install's participant profile: the stable id and the self-chosen name a handoff or a
+  // live room shows to teammates. Reading is open to any client so the app can label its own
+  // messages; only the person at this machine changes the name.
+  addRoute(routes, "GET", "/profile", "client", async (ctx) => {
+    // A guest is themselves here, not the host.
+    const guest = ctx.actor?.guest;
+    if (guest) return jsonResponse({ profile: { ...guest.participant, updatedAt: 0 } });
+    return jsonResponse({ profile: await readParticipantProfile(config) });
+  });
+
+  // What a handoff can do here: whether the engine's export/import commands are reachable, and
+  // which engine version a bundle made here will name.
+  addRoute(routes, "GET", "/handoff/capabilities", "client", async () => {
+    return jsonResponse({ engineCli: engineCliTemplate() !== null, redrobCodeVersion: REDROB_CODE_VERSION });
+  });
+
+  addRoute(routes, "PUT", "/profile", "host", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    const name = normalizeDisplayName(body.displayName);
+    if (!name.ok) throw new ApiError(400, "invalid_payload", name.error);
+    return jsonResponse({ profile: await updateParticipantProfile(config, { displayName: name.value }) });
   });
 
   // What local AI runtimes this machine has, for the onboarding choice screen. Reports
@@ -2928,7 +3025,20 @@ function createRoutes(
    * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
    * the chats whose labels this resolves, so restoring them reveals nothing new.
    */
-  const privacyGate = new PrivacyGate(config);
+  /*
+   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text,
+   * except each session's first message once, which the work classifier reads here and drops;
+   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
+   * Nothing is sent anywhere from these routes.
+   */
+  const insightsOutbox = new InsightsOutbox(config);
+  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
+  const workClassifier = new WorkClassifierSource({ directory: process.env.REDROB_INSIGHTS_MODEL_DIR?.trim() || null });
+  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
+  insightsSweep.unref?.();
+  const privacyGate = new PrivacyGate(config, undefined, undefined, (report) =>
+    insightsRecorder.observeSensitivity(report.sessionID, Date.now(), report.unmasked),
+  );
   addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -2952,15 +3062,6 @@ function createRoutes(
     }
   });
 
-  /*
-   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
-   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
-   * Nothing is sent anywhere from these routes.
-   */
-  const insightsOutbox = new InsightsOutbox(config);
-  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
-  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
-  insightsSweep.unref?.();
   addRoute(routes, "POST", "/insights/facts", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -2976,7 +3077,19 @@ function createRoutes(
   });
   addRoute(routes, "GET", "/insights/outbox", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
-    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount() });
+    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount(), workModel: workClassifier.status() });
+  });
+  // A session's first message, once, for the work classifier. The text is labeled in memory and
+  // dropped; the session keeps only the family.
+  addRoute(routes, "POST", "/insights/work", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const { sessionID, messageID, text } = body;
+    if (typeof sessionID !== "string" || typeof messageID !== "string" || typeof text !== "string") {
+      throw new ApiError(400, "invalid_payload", "sessionID, messageID and text (strings) are required");
+    }
+    const read = await insightsRecorder.observeFirstMessage(sessionID, messageID, text.slice(0, 4_000), (value) => workClassifier.label(value));
+    return jsonResponse({ read });
   });
 
   /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */
@@ -3037,7 +3150,7 @@ function createRoutes(
     if (outcome.status === "applied" || outcome.status === "removed") {
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+      if (outcome.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
     return jsonResponse({ outcome, ...(await describeTeamPolicy(workspace.id)) });
   });
@@ -3065,7 +3178,7 @@ function createRoutes(
     if (result.status === "applied") {
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+      if (result.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
     return jsonResponse({ status: result.status, ...(await describeTeamPolicy(workspace.id)) });
   });
@@ -3074,10 +3187,10 @@ function createRoutes(
     ensureWritable(config);
     requireClientScope(ctx, "owner");
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
+    const left = await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
     emitReloadEvent(ctx.reloadEvents, workspace, "config");
     emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-    emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    if (left.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     return jsonResponse(await describeTeamPolicy(workspace.id));
   });
 
@@ -3288,6 +3401,74 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
+  // The Console's default skill library; a bundled copy answers when the Console cannot.
+  const skillLibrary = createSkillLibrary();
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await skillLibrary.list(libraryFilterFrom(ctx.url.searchParams)));
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library/taxonomy", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await skillLibrary.taxonomy());
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library/:name", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    const skill = name ? await skillLibrary.get(name) : null;
+    if (!skill) throw new ApiError(404, "library_skill_not_found", `No library skill named ${name}`);
+    return jsonResponse(skill);
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    validateSkillName(name);
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "skills.install",
+      summary: `Add library skill ${name}`,
+      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+    });
+    const result = await installLibrarySkill(workspace.path, skillLibrary, name);
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "skills.install",
+      target: result.path,
+      summary: `Added library skill ${name}`,
+      timestamp: Date.now(),
+    });
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills", {
+      type: "skill",
+      name,
+      action: "added",
+      path: result.path,
+    });
+    return jsonResponse({ name, path: result.path, description: result.skill.description, scope: "project" });
+  });
+
+  // Team skills: what the last check of the Console installed, and why any were left out.
+  addRoute(routes, "GET", "/workspace/:id/skills/team", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await readTeamSkillsState(config, workspace.id));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/skills/team/sync", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    if (workspace.workspaceType === "remote") {
+      throw new ApiError(400, "remote_workspace", "Team skills are installed into local workspaces only");
+    }
+    return jsonResponse(await syncTeamSkills(config, workspace, teamSkillsSyncDeps(config, ctx.reloadEvents)));
+  });
+
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const includeGlobal = ctx.url.searchParams.get("includeGlobal") === "true";
@@ -3401,6 +3582,46 @@ function createRoutes(
     },
   }));
   addRoute(routes, "GET", "/mcp-apps/sandbox.js", "none", async () => new Response(MCP_APP_SANDBOX_PROXY_SCRIPT, {
+    headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+  }));
+  addRoute(routes, "GET", "/artifact-preview/sandbox.html", "none", async () => new Response(ARTIFACT_PREVIEW_SANDBOX_HTML, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Security-Policy": ARTIFACT_PREVIEW_CSP,
+      "Cache-Control": "no-store",
+      "Referrer-Policy": "strict-origin",
+      "X-Content-Type-Options": "nosniff",
+    },
+  }));
+  addRoute(routes, "GET", "/artifact-preview/vendor/:file", "none", async (ctx) => {
+    const source = readArtifactPreviewLibrary(ctx.params.file);
+    if (!source) throw new ApiError(404, "artifact_preview_library_not_found", "No bundled library by that name");
+    return new Response(await source, {
+      headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+    });
+  });
+  /*
+   * The folder a previewed page sits in, so its relative stylesheets, scripts and images load. The app
+   * asks for a grant with its own token; the page, which has none, reads through the grant. See
+   * artifact-preview-files.ts for why a grant reaches one folder and nothing above it.
+   */
+  addRoute(routes, "POST", "/workspace/:id/artifact-preview/grant", "client", async (ctx) => {
+    requireClientScope(ctx, "viewer");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const relativePath = normalizeWorkspaceRelativePath(String(body.path ?? ""), { allowSubdirs: true });
+    const pagePath = resolve(workspace.path, relativePath);
+    const page = await resolveArtifactPreviewPage(workspace.path, pagePath);
+    if (!page) throw new ApiError(404, "file_not_found", "File not found");
+    const grant = grantArtifactPreviewFolder(page);
+    return jsonResponse({ ok: true, basePath: artifactPreviewBasePath(grant) });
+  });
+  addRoute(routes, "GET", "/artifact-preview/files/:grant/*", "none", async (ctx) => {
+    const file = await resolveArtifactPreviewFile(ctx.params.grant, ctx.params["*"] ?? "");
+    if (!file) throw new ApiError(404, "file_not_found", "File not found");
+    return streamArtifactPreviewFile(file, artifactPreviewContentType(file));
+  });
+  addRoute(routes, "GET", "/artifact-preview/sandbox.js", "none", async () => new Response(ARTIFACT_PREVIEW_SANDBOX_SCRIPT, {
     headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
   }));
   addRoute(routes, "GET", "/mcp-apps/sandbox.css", "none", async () => new Response(MCP_APP_SANDBOX_PROXY_CSS, {
@@ -3818,10 +4039,10 @@ function createRoutes(
     return jsonResponse({ ok: true });
   });
 
-  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  // Scheduled runs of a prompt or a skill (desk-schedules.ts). They run here while the app is open.
   addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    return jsonResponse(await readSchedules(config, workspace.id));
+    return jsonResponse(await resolveLegacySchedules(config, workspace, createScheduleEngine(config), logger));
   });
 
   addRoute(routes, "POST", "/workspace/:id/schedules", "client", async (ctx) => {
@@ -3829,10 +4050,14 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const playbookId = typeof body.playbookId === "string" ? sanitizeCommandName(body.playbookId) : "";
-    if (!playbookId) throw new ApiError(400, "invalid_payload", "playbookId is required");
+    if (body.playbookId !== undefined) {
+      throw new ApiError(400, "invalid_payload", "playbookId is no longer supported: send a target, a prompt or a skill");
+    }
     const label = typeof body.label === "string" ? body.label.trim().slice(0, 200) : "";
-    return jsonResponse(await addSchedule(config, workspace.id, { playbookId, label, rule: readRule(body.rule) }), 201);
+    return jsonResponse(
+      await addSchedule(config, workspace.id, { target: readTarget(body.target), label, rule: readRule(body.rule) }),
+      201,
+    );
   });
 
   addRoute(routes, "PATCH", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
@@ -3840,8 +4065,18 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const enabled = typeof body.enabled === "boolean" ? body.enabled : undefined;
-    return jsonResponse(await updateSchedule(config, workspace.id, ctx.params.scheduleId, { enabled }));
+    if (body.enabled !== undefined && typeof body.enabled !== "boolean") {
+      throw new ApiError(400, "invalid_payload", "enabled must be true or false");
+    }
+    if (body.label !== undefined && typeof body.label !== "string") throw new ApiError(400, "invalid_payload", "label must be text");
+    return jsonResponse(
+      await updateSchedule(config, workspace.id, ctx.params.scheduleId, {
+        ...(typeof body.enabled === "boolean" ? { enabled: body.enabled } : {}),
+        ...(body.target !== undefined ? { target: readTarget(body.target) } : {}),
+        ...(typeof body.label === "string" ? { label: body.label.trim().slice(0, 200) } : {}),
+        ...(body.rule !== undefined ? { rule: readRule(body.rule) } : {}),
+      }),
+    );
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {

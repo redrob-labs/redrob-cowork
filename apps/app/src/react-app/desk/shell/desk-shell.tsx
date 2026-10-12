@@ -7,6 +7,7 @@ import { getInitialThemeMode, setThemeMode, subscribeToTheme } from "../../../ap
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import { DeskSidePanel } from "../panel/desk-side-panel";
+import { useUiStateStore } from "../../shell/ui-state-store";
 import { useFrameStore } from "../store/frame-store";
 import { AccountMenu } from "./account-menu";
 import { DeskFrameContext } from "./desk-frame";
@@ -76,6 +77,9 @@ export function DeskShellView(props: DeskShellViewProps) {
     toHref: (path) => `${root}${path}`,
   });
   const panelLabel = panelToggleLabel(panelOpen);
+  // One sidebar state for every screen, so the title bar's toggle and Ctrl+B fold this menu too.
+  const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
+  const setSidebarOpen = useUiStateStore((state) => state.setSidebarOpen);
 
   return (
     <DeskFrameContext value={true}>
@@ -84,6 +88,8 @@ export function DeskShellView(props: DeskShellViewProps) {
           mark={MARK_SRC}
           symbol={MARK_SRC}
           collapsible
+          collapsed={!sidebarOpen}
+          onCollapsedChange={(collapsed) => setSidebarOpen(!collapsed)}
           nav={nav}
           navLabel={t("desk.nav_label")}
           skipLabel={t("desk.skip_to_work")}

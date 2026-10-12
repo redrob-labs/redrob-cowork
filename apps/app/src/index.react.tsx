@@ -52,3 +52,9 @@ ReactDOM.createRoot(root).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+// Tell the launch splash (index.html) the app has painted its first frame.
+requestAnimationFrame(() => {
+  (window as Window & { __redrobAppReady?: boolean }).__redrobAppReady = true;
+  window.dispatchEvent(new Event("redrob:app-ready"));
+});

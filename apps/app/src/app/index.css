@@ -61,6 +61,24 @@
   app-region: no-drag;
 }
 
+/* A full-height surface that stops at the title bar (`WindowTitleBar`) rather than running under it.
+   `--app-titlebar-height` is 0 everywhere the bar is not drawn, so these are plain 100dvh/100svh there. */
+@utility h-app {
+  height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility min-h-app {
+  min-height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility h-app-svh {
+  height: calc(100svh - var(--app-titlebar-height));
+}
+@utility min-h-app-svh {
+  min-height: calc(100svh - var(--app-titlebar-height));
+}
+@utility top-app {
+  top: var(--app-titlebar-height);
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -423,7 +441,7 @@
 
   .desk-panel {
     position: fixed;
-    top: 0;
+    top: var(--app-titlebar-height);
     right: 0;
     bottom: 0;
     z-index: 50;
@@ -908,6 +926,65 @@
   color: var(--ink-secondary);
 }
 
+/* Search (desk/shell/search-dialog.tsx): a field and the places and chats it matches. */
+.desk-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-search__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--field-radius);
+  color: var(--ink-muted);
+}
+.desk-search__field:focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.desk-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink-primary);
+  font: var(--text-body);
+}
+.desk-search__results {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-search__result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--control-radius);
+  font: var(--text-body);
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.desk-search__result[aria-selected="true"] {
+  background: var(--surface-sunken);
+}
+.desk-search__meta,
+.desk-search__empty {
+  font: var(--text-body-sm);
+  color: var(--ink-muted);
+}
+.desk-search__empty {
+  padding: var(--space-2) var(--space-3);
+}
+
 .desk-hint {
   margin: 0;
   font: var(--text-body-sm);
@@ -1303,6 +1380,200 @@
   color: var(--ink-muted);
 }
 
+/* Handoff: what goes with a chat a teammate takes over. */
+.desk-handoff,
+.desk-handoff__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.desk-handoff__group {
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.desk-handoff__group legend,
+.desk-handoff__group > b {
+  margin-bottom: var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+/* Live co-working (desk/room/cowork.tsx). */
+.desk-cowork {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-cowork__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.desk-cowork__row,
+.desk-cowork__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-cowork__person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.desk-cowork__controls {
+  flex-basis: 100%;
+  padding-left: var(--space-6);
+}
+.desk-cowork__queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+.desk-cowork__author {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-end;
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.desk-handoff__facts > div {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-3);
+}
+
+.desk-handoff__facts dt {
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts dd {
+  margin: 0;
+  color: var(--ink-primary);
+}
+
+.desk-handoff__findings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Review: comments on a chat, its steps and claims, and the verdict above it. */
+.desk-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--border-subtle, var(--ink-muted));
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.desk-review__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.desk-review__comment {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.desk-review__comment[data-resolved] .desk-review__text {
+  color: var(--ink-muted);
+}
+
+.desk-review__body,
+.desk-review__form,
+.desk-review__group {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.desk-review__form {
+  gap: var(--space-2);
+}
+
+.desk-review__meta,
+.desk-review__item,
+.desk-review__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink-secondary);
+}
+
+.desk-review__meta b,
+.desk-review__item {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-review__text,
+.desk-review__note {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink-primary);
+}
+
+.desk-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.desk-review__bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .desk-settings__auto {
   display: flex;
   flex-direction: column;
@@ -1353,23 +1624,18 @@
   list-style: none;
 }
 
-/* Preview screens (Playbooks, a run, Scheduled, History, Model Guide) on sample data. */
+/* Desk screens that can show sample data: Skills, Scheduled, History, Model Guide. */
 .desk-preview--wide {
   max-width: none;
 }
 
-.desk-preview__list,
-.desk-preview__sources {
+.desk-preview__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.desk-preview__sources {
-  gap: var(--space-2);
 }
 
 .desk-preview__wait {
@@ -1387,38 +1653,6 @@
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
-}
-
-.desk-preview__worth {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-radius: --theme(--radius-lg);
-  background: var(--surface-raised);
-}
-
-.desk-preview__impact {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: 0;
-  color: var(--ink-secondary);
-}
-
-.desk-preview__impact b {
-  font-size: 24px;
-  line-height: 32px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-primary);
-}
-
-.desk-preview__status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
 }
 
 .desk-preview__figure {
@@ -1439,6 +1673,40 @@
 .desk-preview__what span {
   font-size: 13px;
   color: var(--ink-muted);
+}
+
+/* Skills: the filters above the list, and each row's name, tags and actions. */
+.desk-skills__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.desk-skills__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-skills__name {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.desk-skills__name:hover {
+  text-decoration: underline;
+}
+
+.desk-skills__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
 }
 
 @media (max-width: 900px) {
@@ -1574,6 +1842,11 @@ html[lang="ko"] {
  * unlayered `font-family` would beat the `:lang(ko)` rule and put Hangul back in
  * the Latin face. Smoothing is left to the platform, as the preflight asks.
  */
+
+/* A Preview button only where there is a sandbox to preview in; see MarkdownBlock. */
+.markdown-content[data-redrob-code-preview-available="false"] [data-redrob-code-preview] {
+  display: none;
+}
 
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
@@ -2027,6 +2300,111 @@ select:disabled {
   }
   #root {
     min-height: 100%;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--app-titlebar-height));
   }
+
+  /* Windows and Linux draw their title bar in the renderer (WindowTitleBar); the page starts below it. */
+  :root {
+    --app-titlebar-height: 0px;
+  }
+  html.redrob-electron.redrob-platform-windows,
+  html.redrob-electron.redrob-platform-linux {
+    --app-titlebar-height: 40px;
+  }
+  body {
+    padding-top: var(--app-titlebar-height);
+  }
+}
+
+/* The title bar (react-app/shell/window-title-bar.tsx), on design-system tokens. 40px is
+   --control-height-md and the height main.mjs gives the Windows caption buttons. It sits above
+   dialogs so the window can always be moved, minimised and closed. The ground is the sidebar's
+   (sunken on light, raised on dark), so the chrome reads as one band with the menu, as Slack's does. */
+.window-titlebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 480px) 1fr;
+  align-items: center;
+  height: var(--app-titlebar-height);
+  padding-inline-start: var(--space-2);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+}
+[data-theme="dark"] .window-titlebar {
+  background: var(--surface-raised);
+}
+.window-titlebar__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-self: start;
+}
+.window-titlebar__navbtn:disabled {
+  opacity: 0.4;
+}
+.window-titlebar__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding-inline: var(--space-3) var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--control-radius);
+  background: var(--surface-base);
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard);
+}
+.window-titlebar__search:hover {
+  border-color: var(--border-strong);
+}
+.window-titlebar__search:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.window-titlebar__search-label {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.window-titlebar__kbd {
+  padding: 0 var(--space-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font: var(--text-caption);
+  color: var(--ink-muted);
+}
+.window-titlebar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: end;
+  padding-inline-end: var(--space-3);
+}
+/* GNOME-style window buttons: 24px circles on a quiet fill. */
+.window-titlebar__winbtn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  background: var(--surface-base);
+  color: var(--ink-primary);
+}
+[data-theme="dark"] .window-titlebar__winbtn {
+  background: var(--surface-sunken);
+}
+.window-titlebar__winbtn.window-titlebar__close:hover {
+  background: var(--status-danger);
+  color: var(--ink-on-brand);
+}
+/* Room for the three caption buttons Windows draws over the bar (46px each). */
+.window-titlebar__caption-space {
+  justify-self: end;
+  width: 138px;
 }

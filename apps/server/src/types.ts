@@ -196,6 +196,17 @@ export interface McpItem {
   }>;
 }
 
+/** A SKILL.md's `metadata` block, as the Redrob Console writes it. Every field is optional. */
+export interface SkillMetadata {
+  profession?: string;
+  task?: string;
+  language?: string;
+  family?: string;
+  version?: number;
+  /** Where the file came from: the Console's library, or the person's team in the Console. */
+  source?: "team" | "library";
+}
+
 export interface SkillItem {
   name: string;
   path: string;
@@ -203,6 +214,7 @@ export interface SkillItem {
   scope: "project" | "global";
   trigger?: string;
   error?: string;
+  metadata?: SkillMetadata;
 }
 
 export interface CommandItem {
@@ -220,6 +232,8 @@ export interface Actor {
   clientId?: string;
   tokenHash?: string;
   scope?: TokenScope;
+  /** Set for a live-room guest: the one chat the token reaches, who holds it, and what they may do. */
+  guest?: import("./guest-access.js").GuestGrant;
 }
 
 export interface ApprovalRequest {

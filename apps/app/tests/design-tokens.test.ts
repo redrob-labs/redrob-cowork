@@ -664,23 +664,11 @@ describe("Redrob branding surfaces", () => {
 const VENDOR_STYLESHEETS = ["katex", "shadcn", "tw-animate-css"];
 
 async function compileAppStylesheet(): Promise<string> {
-  const { compile } = (await import("tailwindcss")) as {
-    compile: (
-      css: string,
-      options: {
-        base: string;
-        loadStylesheet: (
-          id: string,
-          base: string,
-        ) => { path: string; base: string; content: string };
-        loadModule: () => Promise<{ module: unknown; base: string }>;
-      },
-    ) => Promise<{ build: (candidates: string[]) => string }>;
-  };
+  const { compile } = await import("tailwindcss");
   const tailwindRoot = join(APP_ROOT, "node_modules/tailwindcss");
   const appBase = join(APP_ROOT, "src/app");
 
-  const loadStylesheet = (id: string, base: string) => {
+  const loadStylesheet = async (id: string, base: string) => {
     if (id === "tailwindcss" || id.startsWith("tailwindcss/")) {
       const path =
         id === "tailwindcss"
@@ -710,7 +698,7 @@ async function compileAppStylesheet(): Promise<string> {
   const compiler = await compile(readText(join(appBase, "index.css")), {
     base: appBase,
     loadStylesheet,
-    loadModule: async () => ({ module: {}, base: appBase }),
+    loadModule: async () => ({ path: appBase, module: {}, base: appBase }),
   });
 
   const candidates = new Set<string>();

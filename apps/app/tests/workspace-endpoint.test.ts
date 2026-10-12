@@ -6,9 +6,6 @@ describe("workspace endpoint resolution", () => {
   test("local workspaces use the local server and local workspace id", () => {
     const endpoint = resolveWorkspaceEndpoint({
       id: "ws_local",
-      name: "Local",
-      path: "/tmp/ws-local",
-      preset: "minimal",
       workspaceType: "local",
     }, {
       baseUrl: "http://127.0.0.1:4096",
@@ -24,9 +21,6 @@ describe("workspace endpoint resolution", () => {
   test("remote workspaces use the owning worker URL and server-side workspace id", () => {
     const endpoint = resolveWorkspaceEndpoint({
       id: "rem_ui-workspace-b",
-      name: "Remote",
-      path: "/workspace/server-workspace-b",
-      preset: "minimal",
       workspaceType: "remote",
       baseUrl: "https://worker.example.test",
       redrobToken: "remote-token",
@@ -45,9 +39,6 @@ describe("workspace endpoint resolution", () => {
   test("remote workspace ids fall back to stripping rem_ when no explicit server id exists", () => {
     expect(workspaceServerId({
       id: "rem_workspace-c",
-      name: "Remote fallback",
-      path: "/workspace/workspace-c",
-      preset: "minimal",
       workspaceType: "remote",
       baseUrl: "https://worker.example.test",
     })).toBe("workspace-c");

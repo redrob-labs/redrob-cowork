@@ -1,0 +1,56 @@
+name: model-guide-samples
+
+# Runs the Model Guide's example prompts on every ranked model, through the Redrob API, and commits the
+# outputs back to the branch. Started by a push that changes run-request.json, so it runs from the branch
+# it lives on. Spend is capped in run.mjs at $150, cumulative over every output on the branch, and the
+# request can only lower that.
+on:
+  push:
+    branches: [feat/guide-samples]
+    paths: [scripts/model-guide/samples/run-request.json]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: model-guide-samples
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Run in batches, committing each
+        env:
+          REDROB_API_KEY: ${{ secrets.REDROB_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${REDROB_API_KEY:-}" ]; then
+            echo "::error::REDROB_API_KEY is not set for this repository." >&2
+            exit 1
+          fi
+          cap="$(node -p 'require("./scripts/model-guide/samples/run-request.json").capUsd')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          for batch in $(seq 1 40); do
+            node scripts/model-guide/samples/run.mjs --cap "$cap" --max-runs 30 --concurrency 6
+            git add scripts/model-guide/samples/outputs scripts/model-guide/samples/run-summary.json
+            if ! git diff --cached --quiet; then
+              git commit -q -m "chore(guide): sample outputs, batch $batch"
+              git push -q origin HEAD:${GITHUB_REF_NAME}
+            fi
+            node -e 'const s=require("./scripts/model-guide/samples/run-summary.json"); console.log(JSON.stringify(s)); process.exit(s.stopped || s.complete ? 1 : 0)' || break
+          done
+
+      - name: Summary
+        if: always()
+        run: cat scripts/model-guide/samples/run-summary.json >> "$GITHUB_STEP_SUMMARY" || true

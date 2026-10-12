@@ -1,0 +1,67 @@
+name: Co-working binding for Intel Macs
+
+# Upstream publishes no Intel Mac build of @number0/iroh, so the release builds one
+# (apps/desktop/scripts/build-iroh-darwin-x64.sh). This proves it builds and works before a
+# release depends on it: cross-built and tested under Rosetta on Apple silicon, the way the
+# release job does it, and built and tested natively on GitHub's last Intel image while it lasts
+# (macos-15-intel goes away in August 2027; drop that row then).
+'on':
+  # Any base branch, so stacked pull requests are checked too.
+  pull_request:
+    paths:
+      - apps/desktop/scripts/build-iroh-darwin-x64.sh
+      - apps/desktop/scripts/test-iroh-darwin-x64.sh
+      - apps/desktop/electron/cowork/**
+      - apps/desktop/package.json
+      - pnpm-lock.yaml
+      - .github/workflows/ci-iroh-darwin-x64.yml
+  workflow_dispatch:
+
+concurrency:
+  group: iroh-darwin-x64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  binding:
+    name: Build and test (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Apple silicon, under Rosetta
+            runner: macos-15
+          - name: Intel, native
+            runner: macos-15-intel
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.4.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install the desktop app's dependencies
+        run: pnpm --filter @redrob/desktop... install --frozen-lockfile
+        env:
+          PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
+
+      - name: Cache the Rust build
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ${{ runner.temp }}/iroh-ffi-*/target
+          key: iroh-darwin-x64-${{ runner.arch }}-${{ hashFiles('apps/desktop/scripts/build-iroh-darwin-x64.sh') }}
+
+      - name: Build the Intel binding
+        run: bash apps/desktop/scripts/build-iroh-darwin-x64.sh
+
+      - name: Run the co-working tests on it
+        run: bash apps/desktop/scripts/test-iroh-darwin-x64.sh

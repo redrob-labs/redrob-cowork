@@ -11,12 +11,15 @@ import {
   FileIcon,
   FolderOpen,
   LoaderCircle,
+  MessageSquare,
   MoreHorizontal,
   Pencil,
   RotateCcw,
   Scissors,
   Split,
+  Square,
   Undo2,
+  Volume2,
 } from "lucide-react"
 import { PaperGrainGradient } from "@redrob/ui/react"
 import {
@@ -77,6 +80,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { ImageAttachmentBadge } from "@/components/chat/image-attachment-badge"
+import { toast } from "@/components/ui/sonner"
+import { useOptionalWorkspace } from "@/react-app/shell/workspace-provider"
+import { startReadAloud, stopReadAloud, useReadAloudStore, voiceAccess, voiceAccessKey } from "@/react-app/domains/session/voice/read-aloud"
+import { useQuery } from "@tanstack/react-query"
+import type { RedrobServerClient } from "@/app/lib/redrob-server"
 import { Image } from "@/components/ui/image"
 import {
   Message,
@@ -125,11 +133,14 @@ import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
 import { AnotherAnswerButton } from "./another-answer-button"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
-import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
+import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath, getPlayableMediaKind } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
+import { DeskReviewBar, MessageReview, useReviewUi } from "@/react-app/desk/review/review-thread"
+import { MessageAuthor } from "@/react-app/desk/room/cowork"
+import { DeskHandoffBanner } from "@/react-app/desk/handoff/handoff-open"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
 import { useFrameStore } from "@/react-app/desk/store/frame-store"
@@ -317,6 +328,22 @@ function FileMessage({ part, tone }: FileMessageProps) {
     return <ImageAttachmentBadge src={part.url} alt={title} />
   }
 
+  const mediaKind = getPlayableMediaKind(part)
+  if (mediaKind === "audio") {
+    return <audio src={part.url} controls preload="metadata" aria-label={title} className="w-full max-w-sm" />
+  }
+  if (mediaKind === "video") {
+    return (
+      <video
+        src={part.url}
+        controls
+        preload="metadata"
+        aria-label={title}
+        className="max-h-80 max-w-full rounded-xl border border-border/70"
+      />
+    )
+  }
+
   if (isImage) {
     return (
       <Image
@@ -420,6 +447,66 @@ function CopyMessageButton({ messages }: CopyMessageButtonProps) {
   )
 }
 
+interface ReadAloudButtonProps {
+  id: string
+  messages: UIMessage[]
+}
+
+/**
+ * Speak this reply. Shown only where there is a server to ask, since the engine behind it holds the
+ * Redrob key; one reply plays at a time, and pressing it again stops it.
+ */
+function ReadAloudButton({ id, messages }: ReadAloudButtonProps) {
+  const workspace = useOptionalWorkspace()
+  const client = workspace?.redrobServerClient ?? null
+  const workspaceId = workspace?.workspaceId ?? ""
+  const text = React.useMemo(() => getMessagesText(messages), [messages])
+  /* No server, nothing to speak with. Checked before any query, so a list rendered outside a workspace
+     (and outside a query provider) never reaches one. */
+  if (!client || !workspaceId || !text) return null
+  return <ReadAloudControl id={id} text={text} client={client} workspaceId={workspaceId} />
+}
+
+interface ReadAloudControlProps {
+  id: string
+  text: string
+  client: RedrobServerClient
+  workspaceId: string
+}
+
+function ReadAloudControl({ id, text, client, workspaceId }: ReadAloudControlProps) {
+  const active = useReadAloudStore((state) => state.activeId === id)
+  const loading = useReadAloudStore((state) => state.activeId === id && state.status === "loading")
+  /* Only for the owner, and off at High and Strict privacy, where the server refuses speech; hidden until known. */
+  const { data: access } = useQuery({
+    queryKey: voiceAccessKey(workspaceId),
+    queryFn: () => voiceAccess(client, workspaceId),
+    staleTime: 30_000,
+  })
+
+  if (access !== "on") return null
+
+  const onClick = () => {
+    if (active) {
+      stopReadAloud()
+      return
+    }
+    void startReadAloud(client, workspaceId, id, text).then(() => {
+      const { error } = useReadAloudStore.getState()
+      if (error) toast.error(error)
+    })
+  }
+
+  const label = active ? t("message.stop_reading") : t("message.read_aloud")
+  return (
+    <MessageAction tooltip={label}>
+      <Button variant="ghost" size="icon" aria-label={label} aria-pressed={active} onClick={onClick}>
+        {loading ? <LoaderCircle className="animate-spin" /> : active ? <Square /> : <Volume2 />}
+      </Button>
+    </MessageAction>
+  )
+}
+
 type AssistantMessageProps = {
   message: UIMessage
   isLastMessage: boolean
@@ -514,7 +601,7 @@ const AssistantMessage = React.memo(
                   >
                     {body}
                   </MessageContent>}
-                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} /> : null}
+                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} messageId={message.id} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -567,7 +654,8 @@ type UserMessageProps = {
   isStreaming: boolean
 }
 
-const USER_SKILL_TOKEN_RE = /(Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
+// A skill picked in the composer is sent as "Use the `name` skill."; older chats sent the Load form.
+const USER_SKILL_TOKEN_RE = /(Use the `[^`]+` skill\.|Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
 
 function UserSkillChip(props: { name: string }) {
   return (
@@ -670,7 +758,7 @@ function renderUserTextWithSkillChips(text: string, highlightQuery: string | und
   return text.split(USER_SKILL_TOKEN_RE).map((segment) => {
     const key = `${offset}:${segment}`
     offset += segment.length
-    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/)
+    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/) ?? segment.match(/^Use the `([^`]+)` skill\.$/)
     if (skillMatch?.[1]) return <UserSkillChip key={key} name={skillMatch[1]} />
     return <React.Fragment key={key}>{renderPlainTextWithLinks(segment, highlightQuery, key)}</React.Fragment>
   })
@@ -682,7 +770,7 @@ const UserMessage = React.memo(
     // What the person wrote, with the real details where placeholders were sent.
     const placeholders = usePlaceholderMap(sessionId)
     const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
-    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    // Inside the Desk frame a prompt worth repeating can become a skill.
     const inDeskFrame = useInDeskFrame()
     const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
@@ -756,17 +844,18 @@ const UserMessage = React.memo(
                       </MessageAction>
                     ) : null}
                     {inDeskFrame && messageText ? (
-                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                      <MessageAction tooltip={t("desk.skill_save_from_message")}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("desk.playbook_save_from_message")}
-                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                          aria-label={t("desk.skill_save_from_message")}
+                          onClick={() => openModal({ kind: "skill", instructions: messageText })}
                         >
                           <BookmarkPlus />
                         </Button>
                       </MessageAction>
                     ) : null}
+                    {inDeskFrame ? <CommentMessageAction messageId={message.id} /> : null}
                     <MessageAction tooltip={t("message.branch_new_chat")}>
                       <Button
                         variant="ghost"
@@ -815,6 +904,8 @@ const UserMessage = React.memo(
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        {inDeskFrame ? <MessageAuthor sessionId={sessionId} messageId={message.id} /> : null}
+        {inDeskFrame ? <MessageReview sessionId={sessionId} messageId={message.id} /> : null}
       </Message>
     )
   }
@@ -1076,7 +1167,7 @@ function MessageGroup({
   messages,
   isStreaming,
 }: AssistantMessageGroupProps) {
-  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
+  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking, sessionId } = useMessageList()
   const inDeskFrame = useInDeskFrame()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
@@ -1313,6 +1404,11 @@ function MessageGroup({
           <DeskMemoryNote text={text} />
         </div>
       ))}
+      {inDeskFrame && lastRealItem && !isStreaming ? (
+        <div className={CHAT_COLUMN}>
+          <MessageReview sessionId={sessionId} messageId={lastRealItem.message.id} />
+        </div>
+      ) : null}
       {showDeskReceipt && lastRealItem ? (
         <div className={CHAT_COLUMN}>
           <DeskAnswerFooter
@@ -1343,6 +1439,10 @@ function MessageGroup({
           <div className="flex flex-wrap items-center gap-2 opacity-0 transition-opacity duration-150 group-hover/message-group:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100">
           <MessageActions className="flex gap-0">
             <CopyMessageButton messages={renderableItems.map((item) => item.message)} />
+            <ReadAloudButton
+              id={lastTextMessage.id}
+              messages={renderableItems.map((item) => item.message)}
+            />
             {lastRealItem ? (
               <>
                 <MessageAction tooltip={t("message.retry")}>
@@ -1382,6 +1482,7 @@ function MessageGroup({
                     <Undo2 />
                   </Button>
                 </MessageAction>
+                {inDeskFrame ? <CommentMessageAction messageId={lastRealItem.message.id} /> : null}
               </>
             ) : null}
           </MessageActions>
@@ -1530,6 +1631,18 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
   )
 }
 
+/** Opens or closes the comment box under one message. */
+function CommentMessageAction({ messageId }: { messageId: string }) {
+  const toggle = useReviewUi((state) => state.toggle)
+  return (
+    <MessageAction tooltip={t("desk.review_comment")}>
+      <Button variant="ghost" size="icon" aria-label={t("desk.review_comment")} onClick={() => toggle(messageId)}>
+        <MessageSquare />
+      </Button>
+    </MessageAction>
+  )
+}
+
 export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
@@ -1558,6 +1671,12 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
+      {inDeskFrame && messages.length > 0 ? (
+        <div className={CHAT_COLUMN}>
+          <DeskHandoffBanner />
+          <DeskReviewBar />
+        </div>
+      ) : null}
       {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
 
       {items.map((item) => {

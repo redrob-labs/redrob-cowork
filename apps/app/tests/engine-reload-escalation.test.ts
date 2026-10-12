@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { RedrobServerError } from "../src/app/lib/redrob-server";
+import { RedrobServerError, type RedrobServerClient } from "../src/app/lib/redrob-server";
 import { reloadEngineWithDesktopFallback } from "../src/react-app/shell/engine-reload-escalation";
 
 function unreachableError() {
@@ -14,7 +14,7 @@ function unconfiguredError() {
 type Harness = {
   reloadCalls: number;
   restartCalls: number;
-  client: { reloadEngine: (workspaceId: string) => Promise<void> };
+  client: Pick<RedrobServerClient, "reloadEngine">;
   options: {
     retryDelayMs: number;
     restartEngine: () => Promise<void>;
@@ -31,6 +31,7 @@ function makeHarness(reloadResults: Array<Error | null>, isDesktop = true): Harn
         const result = reloadResults[harness.reloadCalls];
         harness.reloadCalls += 1;
         if (result) throw result;
+        return { ok: true };
       },
     },
     options: {

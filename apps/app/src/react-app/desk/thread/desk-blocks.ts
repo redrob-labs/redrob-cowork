@@ -30,7 +30,10 @@ const questionSchema = z.object({
 
 const questionsSchema = z.array(questionSchema).min(1).max(8);
 
-const planItemSchema = z.union([text, z.object({ lead: optionalText, text })]);
+/** A short id the agent gives an item (`s1`, `c2`) so a comment can point at it. Optional. */
+const itemId = z.string().trim().min(1).max(40).regex(/^[A-Za-z0-9_-]+$/).optional().catch(undefined);
+
+const planItemSchema = z.union([text, z.object({ id: itemId, lead: optionalText, text })]);
 
 const planSchema = z.object({
   title: optionalText,
@@ -45,7 +48,7 @@ const planSchema = z.object({
       }),
     )
     .default([]),
-  todo: z.array(z.object({ label: text, who: optionalText })).default([]),
+  todo: z.array(z.object({ id: itemId, label: text, who: optionalText })).default([]),
   note: optionalText,
 });
 
@@ -54,6 +57,7 @@ const factSchema = z.object({
   claims: z
     .array(
       z.object({
+        id: itemId,
         verdict: z.enum(["holds", "partly", "wrong"]),
         claim: text,
         source: optionalText,
@@ -82,13 +86,13 @@ export type PlanQuestionData = {
   multi?: boolean;
   defaultValue?: number | number[];
 };
-export type PlanItemData = string | { lead?: string; text: string };
+export type PlanItemData = string | { id?: string; lead?: string; text: string };
 export type PlanSectionData = { heading: string; ordered?: boolean; body?: string; items?: PlanItemData[] };
 export type PlanDoc = {
   title?: string;
   summary?: string;
   sections: PlanSectionData[];
-  todo: Array<{ label: string; who?: string }>;
+  todo: Array<{ id?: string; label: string; who?: string }>;
   note?: string;
 };
 export type FactCheckData = z.infer<typeof factSchema>;
@@ -183,4 +187,33 @@ export function parseDeskBlocks(source: string, options: { streaming?: boolean }
 /** Whether an answer carries a block the Desk renders itself. */
 export function hasDeskBlocks(blocks: DeskBlocks): boolean {
   return Boolean(blocks.questions || blocks.plan || blocks.check || blocks.pending);
+}
+
+/** Where a synthesised id starts. Never a prefix the prompts ask the agent to use. */
+export const SYNTHETIC_ID_PREFIX = "idx-";
+
+/**
+ * A stable id for each item, in order: the agent's own when it gave one, otherwise `idx-<n>`
+ * from the item's position. A repeated or synthetic-looking id is replaced by the position one,
+ * so two items never share an anchor and an agent cannot claim another item's comments.
+ * Positions are 1-based, matching how the plan reads.
+ */
+export function anchorIds(items: ReadonlyArray<{ id?: string }>): string[] {
+  const seen = new Set<string>();
+  return items.map((item, index) => {
+    const own = item.id?.trim();
+    const id = own && !own.startsWith(SYNTHETIC_ID_PREFIX) && !seen.has(own) ? own : `${SYNTHETIC_ID_PREFIX}${index + 1}`;
+    seen.add(id);
+    return id;
+  });
+}
+
+/** The anchors a plan's steps take comments on. */
+export function planStepIds(plan: Pick<PlanDoc, "todo">): string[] {
+  return anchorIds(plan.todo);
+}
+
+/** The anchors a fact check's claims take comments on. */
+export function claimIds(fact: Pick<FactCheckData, "claims">): string[] {
+  return anchorIds(fact.claims);
 }

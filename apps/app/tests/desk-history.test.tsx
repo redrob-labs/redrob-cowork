@@ -1,11 +1,12 @@
-import { describe, expect, test } from "bun:test";
+﻿import { describe, expect, test } from "bun:test";
 import type { Session } from "@redrob-labs/sdk/v2/client";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import type { RedrobSessionSnapshot } from "../src/app/lib/redrob-server";
 import { formatTook, historyEntryFrom, stepsDone } from "../src/react-app/desk/history/history";
 import { HistoryView } from "../src/react-app/desk/preview/desk-history";
-import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 
 const session = (id: string, updated: number, extra: Partial<Session> = {}): Session => ({
   id,
@@ -37,6 +38,9 @@ describe("a chat as a History row", () => {
     expect(historyEntryFrom({ session: session("s2", 10_000), projectId: "w", mode: "run" }).kind).toBe("run");
     expect(historyEntryFrom({ session: session("s3", 10_000), projectId: "w", mode: null, snapshot: { todos: [], status: { type: "busy" } } })).toMatchObject({ state: "blocked", label: "Working" });
     expect(historyEntryFrom({ session: session("s4", 10_000), projectId: "w", mode: "plan" })).toMatchObject({ kind: "chat", state: "done", label: "Done" });
+    // A turn the console refused (out of credit, say) has ended: it is not still working.
+    const blocked = { type: "blocked" as const, message: "Out of credit." };
+    expect(historyEntryFrom({ session: session("s5", 10_000), projectId: "w", mode: null, snapshot: { todos: [], status: blocked } })).toMatchObject({ state: "done", label: "Done" });
   });
 
   test("took reads like a clock", () => {
@@ -49,11 +53,8 @@ describe("a chat as a History row", () => {
 describe("real History", () => {
   test("every project's root chats, newest first, with steps for the latest", async () => {
     const calls: string[] = [];
-    const unused = async (): Promise<never> => {
-      throw new Error("not used");
-    };
     const snapshot = (statuses: string[]): RedrobSessionSnapshot => ({ session: session("x", 0), messages: [], todos: todos(statuses), status: { type: "idle" } });
-    const client: DeskServerClient = {
+    const client = deskClient({
       listWorkspaces: async () => ({
         items: [
           { id: "ws_1", name: "seorin", path: "/a", preset: "starter", workspaceType: "local" },
@@ -79,10 +80,7 @@ describe("real History", () => {
       listMcp: unused,
       getConfig: unused,
       patchConfig: unused,
-      listCommands: unused,
-      upsertCommand: unused,
-      deleteCommand: unused,
-    };
+    });
     const result = await createRealDeskServices({ client, workspaceId: "ws_1" }).history.list();
     expect(result.preview).toBe(false);
     expect(result.data.map((entry) => [entry.id, entry.projectId])).toEqual([["new", "ws_1"], ["mid", "ws_2"], ["old", "ws_1"]]);

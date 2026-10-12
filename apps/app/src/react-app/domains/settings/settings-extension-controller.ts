@@ -33,13 +33,6 @@ type SettingsExtensionControllerInput = {
     onInstall: (apiKey: string) => void | Promise<void>;
     onTestGenerate: (input: { apiKey: string; prompt: string }) => void | Promise<void>;
   };
-  voiceExtension: {
-    busy: boolean;
-    status: string | null;
-    error: string | null;
-    onSaveApiKey: (apiKey: string) => void | Promise<void>;
-    onTestSession: () => void | Promise<void>;
-  };
   localProvider: {
     busy: boolean;
     status: string | null;
@@ -49,8 +42,7 @@ type SettingsExtensionControllerInput = {
 };
 
 function hasOpenAiEnv(input: Pick<SettingsExtensionControllerInput, "providers" | "providerConnectedIds" | "userEnvKeys">) {
-  return input.userEnvKeys.includes("OPENAI_REALTIME_API_KEY") ||
-    input.userEnvKeys.includes("OPENAI_API_KEY") ||
+  return input.userEnvKeys.includes("OPENAI_API_KEY") ||
     input.userEnvKeys.includes("REDROB_OPENAI_IMAGE_API_KEY") ||
     input.providers.some((provider) => provider.id === "openai" && provider.source === "env") ||
     input.providerConnectedIds.includes("openai");
@@ -70,10 +62,6 @@ export function useSettingsExtensionController(input: SettingsExtensionControlle
     },
     imageExtension: {
       ...input.imageExtension,
-      envKeyDetected: hasOpenAiEnv(input),
-    },
-    voiceExtension: {
-      ...input.voiceExtension,
       envKeyDetected: hasOpenAiEnv(input),
     },
     localProvider: input.localProvider,

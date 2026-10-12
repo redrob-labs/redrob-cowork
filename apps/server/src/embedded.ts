@@ -21,6 +21,7 @@ import {
   type EnginePoolSnapshot,
   type EngineSpawnTemplate,
 } from "./engine-pool.js";
+import { setEngineCliTemplate } from "./engine-cli.js";
 import { createManagedOpencodeServer, resolveRedrobCodeBinEnv, type ManagedOpencodeServer, type OpencodeExecutionSnapshot } from "./managed-opencode.js";
 import {
   clearTrustedOpencodeProcess,
@@ -267,6 +268,8 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
           return [...new Set([config.port, ...poolPorts, startupPort].filter((port) => port > 0))];
         },
       };
+      // One-off engine commands (handoff export and import) must see the same binary and data.
+      setEngineCliTemplate({ bin: opencodeBin, env: engineEnv });
       managedOpencode = await duringStartup(() => createManagedOpencodeServer({
         bin: opencodeBin,
         cwd,

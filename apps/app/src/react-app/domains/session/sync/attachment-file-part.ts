@@ -411,3 +411,35 @@ export async function composerAttachmentToFilePart(attachment: ComposerAttachmen
     mime: modelMime,
   };
 }
+
+/** The one call a guest's upload needs: the room's own attachment route on the host. */
+export type RoomAttachmentUploadClient = {
+  uploadRoomAttachment(workspaceId: string, sessionId: string, file: File): Promise<{ filename: string; mime: string; bytes: number; url: string; workspacePath: string }>;
+};
+
+/**
+ * The same parts as composerAttachmentsToWorkspaceFileParts, for a guest in a live room: each
+ * file goes to the room's chat folder on the host, which answers with where it put it. A guest's
+ * app has no host folder of its own to name, so the host's answer is the only path used.
+ */
+export async function composerAttachmentsToRoomFileParts(input: {
+  attachments: ComposerAttachment[];
+  client: RoomAttachmentUploadClient;
+  workspaceId: string;
+  sessionId: string;
+}): Promise<Array<TextPartInput | FilePartInput>> {
+  if (input.attachments.length === 0) return [];
+  const uploaded: UploadedChatAttachment[] = [];
+  for (const attachment of input.attachments) {
+    const file = await compressImageFile(attachment.file);
+    const metadata = resolveAttachmentFileMetadata(file);
+    let result;
+    try {
+      result = await input.client.uploadRoomAttachment(input.workspaceId, input.sessionId, new File([file], metadata.filename, { type: metadata.mime }));
+    } catch (error) {
+      throw new Error(uploadErrorMessage(metadata.filename, error));
+    }
+    uploaded.push({ filename: result.filename, mime: metadata.mime, bytes: result.bytes, workspacePath: result.workspacePath, url: result.url, file });
+  }
+  return [attachmentPathNotePart(uploaded), ...(await Promise.all(uploaded.map(uploadedAttachmentFilePart)))];
+}

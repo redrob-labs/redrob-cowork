@@ -14,7 +14,7 @@ You do not need to rebuild your setup to move from Claude Cowork to Redrob Cowor
 | Claude-compatible plugins | Plugins | Import the plugin from its public GitHub repository; Redrob Cowork normalizes its skills, commands, agents, and MCP dependencies. |
 | MCP servers | Workspace MCP connections | Add the server URL to the workspace and sign in again. |
 | Claude models | Anthropic provider | Add your own Anthropic API key. |
-| Scheduled tasks | Not available | Redrob Cowork has no scheduler. Trigger the work from chat, or drive it from outside with your own cron plus an MCP client. |
+| Scheduled tasks | Scheduled | Put a prompt or a skill on a schedule from the Scheduled screen. Schedules run on this computer, and only while Redrob Cowork is open. |
 
 <Note>
   Conversation history does not transfer automatically. Keep any important instructions in workspace files or skills rather than relying on an old thread.
@@ -61,12 +61,18 @@ Credentials do not move between products. Reconnect each service so Redrob Cowor
 
 Test read-only actions first. Then test actions that modify data, such as sending a message or updating a record, with a disposable example.
 
-## 5. Replace schedules and move browser tasks
+## 5. Move schedules and browser tasks
 
-Redrob Cowork does not run work on a schedule. For every recurring Cowork task, decide
-whether it becomes a skill you trigger from chat, or a job you drive from outside the
-app. For the second option, your own scheduler can start an MCP client that calls
-Redrob Cowork through [redrob-ui-mcp](/model-context-protocol/overview).
+Redrob Cowork runs scheduled work locally. For every recurring Cowork task, open
+**Scheduled**, press **New schedule**, and pick what runs: a prompt as you would type it, or
+a skill with optional extra instructions. Then pick when: once, or on a repeat such as every
+weekday at 08:00.
+
+A schedule runs on this computer and only while Redrob Cowork is open. Nothing wakes the
+computer: a time missed while the app was closed is recorded and skipped, not run late. When a
+run needs your permission it stops and waits for you on the Scheduled screen. For work that must
+run while the app is closed, drive it from your own scheduler through
+[redrob-ui-mcp](/model-context-protocol/overview).
 
 For browser-driven work, follow
 [Control the browser](/start-here/do-work-with-it/control-the-browser) and verify the

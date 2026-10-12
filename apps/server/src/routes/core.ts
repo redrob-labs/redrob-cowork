@@ -4,6 +4,8 @@ import type { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService } from "../env-file.js";
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
+import { speakWithRedrobEngine, transcribeWithRedrobEngine } from "../redrob-auth.js";
+import { assertVoiceAllowed } from "../voice-privacy.js";
 import {
   createGoogleWorkspaceConnectFlowManager,
   googleWorkspaceDisconnect,
@@ -15,6 +17,8 @@ import {
 import { callExperimentalExtensionAction, listExperimentalExtensionActions } from "../extensions/index.js";
 import type { TokenService } from "../tokens.js";
 import type { Capabilities, ServerConfig, WorkspaceInfo } from "../types.js";
+import { DEFAULT_GUEST_CAPABILITIES, readCapabilities, type GuestGrant } from "../guest-access.js";
+import { isParticipantId, normalizeDisplayName } from "../participant-profile.js";
 import { addRoute, type Route } from "./registry.js";
 
 type JsonResponse = (data: unknown, status?: number) => Response;
@@ -42,7 +46,6 @@ interface RegisterCoreRoutesOptions {
   createWorkspaceOpencodeClient: (config: ServerConfig, workspace: WorkspaceInfo) => WorkspaceOpencodeClient;
   serializeWorkspace: (workspace: ServerConfig["workspaces"][number]) => unknown;
   resolveDevLogPath: () => string | null;
-  createOpenAiRealtimeVoiceSession: (env: EnvService, input: unknown) => Promise<unknown>;
   managedProviderAuthLogger?: {
     warn: (message: string, attributes?: Record<string, unknown>) => void;
     error: (message: string, attributes?: Record<string, unknown>) => void;
@@ -77,7 +80,6 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     createWorkspaceOpencodeClient,
     serializeWorkspace,
     resolveDevLogPath,
-    createOpenAiRealtimeVoiceSession,
     managedProviderAuthLogger,
   } = options;
   const googleWorkspaceConnectFlows = createGoogleWorkspaceConnectFlowManager(config);
@@ -308,8 +310,21 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
       throw new ApiError(400, "invalid_scope", "Token scope must be owner, collaborator, or viewer");
     }
     const label = typeof body.label === "string" ? body.label.trim() : undefined;
-    const issued = await tokens.create(scope, { label });
+    const guest = body.guest === undefined ? undefined : readGuestRequest(body.guest);
+    const expiresAt = typeof body.expiresAt === "number" && Number.isFinite(body.expiresAt) ? body.expiresAt : undefined;
+    const issued = await tokens.create(scope, { label, ...(guest ? { guest } : {}), ...(expiresAt !== undefined ? { expiresAt } : {}) });
     return jsonResponse(issued, 201);
+  });
+
+  // What a live-room guest may do: send, approve, stop. Host only; takes effect on their next call.
+  addRoute(routes, "PATCH", "/tokens/:id", "host", async (ctx) => {
+    ensureWritable(config);
+    const body = await readJsonBody(ctx.request);
+    const capabilities = readCapabilities(body.capabilities);
+    if (!capabilities) throw new ApiError(400, "invalid_payload", "capabilities must be a list of send, approve and stop");
+    const updated = await tokens.updateGuest(ctx.params.id, { capabilities });
+    if (!updated) throw new ApiError(404, "token_not_found", "Guest token not found");
+    return jsonResponse({ token: updated });
   });
 
   addRoute(routes, "DELETE", "/tokens/:id", "host", async (ctx) => {
@@ -454,8 +469,61 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     return jsonResponse({ ok: true });
   });
 
-  addRoute(routes, "POST", "/voice/realtime/session", "host", async (ctx) => {
+  /* Read-aloud: the engine speaks on its own Redrob credential; see speakWithRedrobEngine. */
+  addRoute(routes, "POST", "/voice/speech", "host", async (ctx) => {
     const body = await readJsonBody(ctx.request);
-    return jsonResponse(await createOpenAiRealtimeVoiceSession(env, body));
+    const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId : "";
+    if (!workspaceId) throw new ApiError(400, "workspace_required", "workspaceId is required");
+    const workspace = await resolveWorkspace(config, workspaceId);
+    await assertVoiceAllowed(config, workspace.id);
+    const text = typeof body.text === "string" ? body.text : "";
+    const voice = typeof body.voice === "string" ? body.voice : undefined;
+    const spoken = await speakWithRedrobEngine({ config }, { text, ...(voice ? { voice } : {}) });
+    return new Response(spoken.audio, {
+      headers: { "Content-Type": spoken.contentType, "Cache-Control": "no-store" },
+    });
   });
+
+  addRoute(routes, "POST", "/voice/transcribe", "host", async (ctx) => {
+    const body = await readJsonBody(ctx.request);
+    const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId : "";
+    if (!workspaceId) throw new ApiError(400, "workspace_required", "workspaceId is required");
+    const workspace = await resolveWorkspace(config, workspaceId);
+    await assertVoiceAllowed(config, workspace.id);
+    const audio = typeof body.audio === "string" ? body.audio : "";
+    const format = typeof body.format === "string" ? body.format : "";
+    const language = typeof body.language === "string" ? body.language : undefined;
+    return jsonResponse(
+      await transcribeWithRedrobEngine({ config }, { audio, format, ...(language ? { language } : {}) }),
+    );
+  });
+}
+
+/** A guest grant from a host's request, or a 400. */
+function readGuestRequest(value: unknown): GuestGrant {
+  const record = value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+  const participant = record?.participant && typeof record.participant === "object" ? (record.participant as Record<string, unknown>) : null;
+  const name = normalizeDisplayName(participant?.displayName ?? "");
+  const capabilities = record?.capabilities === undefined ? [...DEFAULT_GUEST_CAPABILITIES] : readCapabilities(record.capabilities);
+  if (
+    !record ||
+    typeof record.workspaceId !== "string" ||
+    !record.workspaceId.trim() ||
+    typeof record.sessionId !== "string" ||
+    !/^[A-Za-z0-9_-]{1,128}$/.test(record.sessionId) ||
+    !participant ||
+    !isParticipantId(participant.participantId) ||
+    !name.ok ||
+    !capabilities
+  ) {
+    throw new ApiError(400, "invalid_payload", "guest needs workspaceId, sessionId, a participant and valid capabilities");
+  }
+  return {
+    workspaceId: record.workspaceId.trim(),
+    sessionId: record.sessionId,
+    participant: { participantId: participant.participantId as string, displayName: name.value },
+    capabilities,
+    ...(typeof record.endpointId === "string" && record.endpointId.trim() ? { endpointId: record.endpointId.trim() } : {}),
+    ...(typeof record.roomId === "string" && record.roomId.trim() ? { roomId: record.roomId.trim() } : {}),
+  };
 }

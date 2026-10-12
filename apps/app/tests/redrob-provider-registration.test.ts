@@ -182,14 +182,12 @@ function createStore(providers: ProviderListItem[]) {
     providerDefaults: () => ({}),
     providerConnectedIds: () => [],
     disabledProviders: () => disabledProviders,
-    checkDesktopAppRestriction: () => false,
     selectedWorkspaceDisplay: () => workspace,
     providerBaseUrl: () => "https://engine.example",
     selectedWorkspaceRoot: () => "/tmp/workspace_test",
     runtimeWorkspaceId: () => "ws_1",
     redrobServer: createSessionRedrobServer({
       endpoint: () => makeEndpoint(),
-      hostToken: () => "host-token-live",
     }),
     setProviders: (value) => {
       providerList = value;
@@ -256,6 +254,7 @@ describe("Redrob provider registration", () => {
         name: "Redrob",
         env: ["REDROB_API_KEY"],
         source: "env",
+        options: {},
         models: {},
       },
     ]);

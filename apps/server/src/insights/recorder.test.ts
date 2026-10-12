@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { RedrobWorkInsightsRecorder } from "../opencode-plugins/redrob-insights-recorder.js";
+import { DetectorSource } from "../privacy/detector-source.js";
+import { PrivacyGate, type SensitivityReport } from "../privacy/gate.js";
 import type { ServerConfig } from "../types.js";
 import { factsOf, parseFact, toolEffect, type Fact } from "./facts.js";
 import { externalIdOf, labelSession, modeOf, type LabeledSession, type SessionTally } from "./labeler.js";
@@ -35,7 +37,10 @@ const ev = {
   busy: (sessionID: string, busy: boolean) => ({ type: "session.status", properties: { sessionID, status: { type: busy ? "busy" : "idle" } } }),
   abort: (sessionID: string) => ({ type: "session.error", properties: { sessionID, error: { name: "MessageAbortedError", data: { message: SECRET } } } }),
   idle: (sessionID: string) => ({ type: "session.idle", properties: { sessionID } }),
-  text: (sessionID: string) => ({ type: "message.part.updated", properties: { part: { id: "t", sessionID, messageID: "m", type: "text", text: SECRET } } }),
+  text: (sessionID: string, messageID = "m", text = SECRET, synthetic = false) => ({
+    type: "message.part.updated",
+    properties: { part: { id: "t", sessionID, messageID, type: "text", text, synthetic } },
+  }),
 };
 
 /** Runs events through the plugin-side reduction and the server-side guard, as in production. */
@@ -94,7 +99,7 @@ describe("modes", () => {
   const tally = (over: Partial<SessionTally>): SessionTally => ({
     rootSessionID: "s", startedAt: 0, lastActivityAt: 0, userTurns: 1, firstAttachedSource: false, assistantMessages: 1,
     toolCalls: 0, artifacts: 0, checks: 0, sends: 0, delegations: 0, peakConcurrentAgents: 0, subagentMinutes: 0,
-    busyMinutes: 0, attentionMinutes: 0, permissionsAsked: 0, permissionsAlways: 0, aborted: 0, redirected: 0, ...over,
+    busyMinutes: 0, attentionMinutes: 0, permissionsAsked: 0, permissionsAlways: 0, aborted: 0, redirected: 0, sensitiveSends: 0, unmaskedSends: 0, ...over,
   });
   test("one question, nothing produced, is a look-up", () => expect(modeOf(tally({}))).toBe(0));
   test("a back and forth with nothing produced is learning", () => expect(modeOf(tally({ userTurns: 3 }))).toBe(1));
@@ -190,6 +195,7 @@ describe("the recorder, from engine events", () => {
       rootSessionID: "s", startedAt: 0, lastActivityAt: 0, userTurns: 1, firstAttachedSource: false, assistantMessages: 1,
       toolCalls: 9, artifacts: 1, checks: 0, sends: 0, delegations: 0, peakConcurrentAgents: 0, subagentMinutes: 0,
       busyMinutes: 1.234, attentionMinutes: 0.5, permissionsAsked: 2, permissionsAlways: 0, aborted: 0, redirected: 0,
+      sensitiveSends: 0, unmaskedSends: 0,
     });
     expect(Object.keys(s).sort()).toEqual(
       ["agent", "brief", "checked", "context", "externalId", "labelerId", "labelerVersion", "mode", "outward", "producedOutput", "sensitiveOk",
@@ -200,15 +206,62 @@ describe("the recorder, from engine events", () => {
   });
 });
 
+describe("the work family", () => {
+  const labels: string[] = [];
+  const label = async (text: string) => {
+    labels.push(text);
+    return { action: "reply", family: "write" as const, confidence: 0.9 };
+  };
+
+  test("only the first message of the session the person wrote in is read, once, and only the family is kept", async () => {
+    labels.length = 0;
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.created("s")], [0, ev.created("kid", "s")], [0, ev.user("s", "m1", 0)], [1, ev.user("s", "m2", 1)], [1, ev.user("kid", "k1", 1)]]);
+    expect(await recorder.observeFirstMessage("s", "m2", "later", label)).toBe(false);
+    expect(await recorder.observeFirstMessage("kid", "k1", "subagent", label)).toBe(false);
+    expect(await recorder.observeFirstMessage("s", "m1", SECRET, label)).toBe(true);
+    expect(await recorder.observeFirstMessage("s", "m1", SECRET, label)).toBe(false);
+    expect(await recorder.observeFirstMessage("unknown", "m1", "x", label)).toBe(false);
+    expect(labels).toEqual([SECRET]);
+    await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
+    expect(out[0]!.familyKey).toBe("write");
+    expect(out[0]!.actionKey).toBe("reply");
+    expect(JSON.stringify(out)).not.toContain("김지원");
+  });
+
+  test("a session the classifier named nothing for, or could not read, carries no family", async () => {
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.user("a", "m1", 0)], [0, ev.user("b", "m1", 0)]]);
+    await recorder.observeFirstMessage("a", "m1", "hi", async () => ({ action: null, family: null, confidence: 0.4 }));
+    await recorder.observeFirstMessage("b", "m1", "hi", async () => null);
+    await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
+    expect(out.map((s) => "familyKey" in s || "actionKey" in s)).toEqual([false, false]);
+  });
+
+  test("a family the classifier named without a kind of work is sent alone", async () => {
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.user("c", "m1", 0)]]);
+    await recorder.observeFirstMessage("c", "m1", "hi", async () => ({ action: null, family: "code", confidence: 0.97 }));
+    await recorder.sweep(Date.now() + 365 * 24 * 60 * MINUTE);
+    expect([out[0]!.familyKey, "actionKey" in out[0]!]).toEqual(["code", false]);
+  });
+});
+
 describe("the engine plugin", () => {
   let posted: unknown[] = [];
+  let paths: string[] = [];
   let serverHandle: ReturnType<typeof Bun.serve> | null = null;
   const saved = { url: process.env.REDROB_SERVER_URL, token: process.env.REDROB_SERVER_TOKEN };
   beforeEach(() => {
     posted = [];
+    paths = [];
     serverHandle = Bun.serve({
       port: 0,
       fetch: async (request) => {
+        paths.push(new URL(request.url).pathname);
         posted.push(await request.json());
         return Response.json({ accepted: 1 });
       },
@@ -244,6 +297,24 @@ describe("the engine plugin", () => {
     expect(facts.map((f) => f.kind)).toEqual(["user-turn", "tool", "idle"]);
   });
 
+  test("the first message's text goes once to the local classifier, after the facts; no other text does", async () => {
+    const hooks = await RedrobWorkInsightsRecorder();
+    await hooks.event({ event: ev.created("kid", "s") });
+    await hooks.event({ event: ev.user("s", "m1", 1) });
+    await hooks.event({ event: ev.text("s", "m1", "added by the engine", true) });
+    await hooks.event({ event: ev.text("s", "m1") });
+    await hooks.event({ event: ev.text("s", "m1", "edited") });
+    await hooks.event({ event: ev.user("s", "m2", 2) });
+    await hooks.event({ event: ev.text("s", "m2", "second message") });
+    await hooks.event({ event: ev.user("kid", "k1", 3) });
+    await hooks.event({ event: ev.text("kid", "k1", "subagent instruction") });
+    await hooks.event({ event: ev.idle("s") });
+    expect(paths).toEqual(["/insights/facts", "/insights/work", "/insights/facts"]);
+    expect(posted[1]).toEqual({ sessionID: "s", messageID: "m1", text: SECRET });
+    expect((posted[0] as { facts: Fact[] }).facts.map((f) => f.kind)).toEqual(["session", "user-turn"]);
+    for (const body of [posted[0], posted[2]]) expect(JSON.stringify(body)).not.toMatch(/김지원|second message|subagent instruction/);
+  });
+
   test("an unreachable server never breaks the chat", async () => {
     process.env.REDROB_SERVER_URL = "http://127.0.0.1:1";
     const hooks = await RedrobWorkInsightsRecorder();
@@ -276,6 +347,7 @@ describe("the outbox", () => {
     rootSessionID: id, startedAt: 0, lastActivityAt: 0, userTurns: 1, firstAttachedSource: false, assistantMessages: 1,
     toolCalls: 0, artifacts: 0, checks: 0, sends: 0, delegations: 0, peakConcurrentAgents: 0, subagentMinutes: 0,
     busyMinutes: 0, attentionMinutes: 0, permissionsAsked: 0, permissionsAlways: 0, aborted: 0, redirected: 0,
+    sensitiveSends: 0, unmaskedSends: 0,
   });
 
   test("keeps what is queued, once each, and drops what was sent", async () => {
@@ -292,5 +364,66 @@ describe("the outbox", () => {
     const entries = await outbox.list();
     expect(entries).toHaveLength(OUTBOX_LIMIT);
     expect(entries[0]?.session.externalId).toBe(externalIdOf("s3"));
+  });
+});
+
+describe("sensitive data, from the privacy gate", () => {
+  const gate = (reports: SensitivityReport[], level: "off" | "standard") => {
+    const config: ServerConfig = {
+      host: "127.0.0.1", port: 0, token: "t", hostToken: "h", configPath: "/nonexistent/config.json",
+      approval: { mode: "auto", timeoutMs: 1000 }, corsOrigins: [], workspaces: [], authorizedRoots: [], readOnly: false,
+      startedAt: 0, tokenSource: "generated", hostTokenSource: "generated", logFormat: "pretty", logRequests: false,
+    };
+    const instance = new PrivacyGate(
+      config,
+      () => null,
+      new DetectorSource({ directory: null, pinnedManifestSha256: null, allowUnpinned: false }),
+      (report) => reports.push(report),
+    );
+    // A directory no workspace owns gets the default level; "off" is reached through the rules.
+    if (level === "off") instance.rules = async () => ({ level: "off", names: [] });
+    return instance;
+  };
+
+  test("an email at Standard is touched and masked; an account number is touched and not", async () => {
+    const reports: SensitivityReport[] = [];
+    const g = gate(reports, "standard");
+    const masked = await g.label({ sessionID: "s1", directory: null, texts: ["Write to jiwon@acme.test about the renewal"] });
+    expect(masked.texts[0]).not.toContain("jiwon@acme.test");
+    await g.label({ sessionID: "s2", directory: null, texts: ["Pay into 110-234-567890 today"] });
+    await g.label({ sessionID: "s3", directory: null, texts: ["Summarize this thread"] });
+    expect(reports).toEqual([
+      { sessionID: "s1", touched: true, unmasked: false },
+      { sessionID: "s2", touched: true, unmasked: true },
+    ]);
+  });
+
+  test("with protection off, anything sensitive went out unmasked", async () => {
+    const reports: SensitivityReport[] = [];
+    await gate(reports, "off").label({ sessionID: "s", directory: null, texts: ["Call 010-1234-5678"] });
+    expect(reports).toEqual([{ sessionID: "s", touched: true, unmasked: true }]);
+  });
+
+  test("a report carries no value, and the chat's own labels are untouched", async () => {
+    const reports: SensitivityReport[] = [];
+    const g = gate(reports, "standard");
+    const first = await g.label({ sessionID: "s", directory: null, texts: ["Pay into 110-234-567890, mail kim@acme.test"] });
+    expect(JSON.stringify(reports)).not.toContain("110-234");
+    expect(first.texts[0]).toContain("[EMAIL_1]");
+    expect(first.texts[0]).toContain("110-234-567890");
+  });
+
+  test("the session's labels follow: touched, and safe only when nothing went out unmasked", async () => {
+    const out: LabeledSession[] = [];
+    const recorder = new InsightsRecorder((s) => void out.push(s), 15 * MINUTE);
+    play(recorder, [[0, ev.user("safe", "m1", 0)], [0, ev.user("leaky", "m2", 0)], [0, ev.user("none", "m3", 0)]]);
+    recorder.observeSensitivity("safe", 1, false);
+    recorder.observeSensitivity("leaky", 1, false);
+    recorder.observeSensitivity("leaky", 2, true);
+    await recorder.sweep(60 * MINUTE);
+    const by = Object.fromEntries(out.map((s) => [s.externalId, s]));
+    expect(by[externalIdOf("safe")]).toMatchObject({ sensitiveTouched: true, sensitiveOk: true });
+    expect(by[externalIdOf("leaky")]).toMatchObject({ sensitiveTouched: true, sensitiveOk: false });
+    expect(by[externalIdOf("none")]).toMatchObject({ sensitiveTouched: false, sensitiveOk: false });
   });
 });

@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { File, FileCode, FileImage, FileSpreadsheet, FileText, FileType, Globe, Presentation } from "lucide-react";
+import { File, FileAudio, FileCode, FileImage, FileSpreadsheet, FileText, FileType, FileVideo, Globe, Presentation } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { OpenTargetPreview } from "./open-target";
@@ -32,6 +32,14 @@ export function ArtifactIcon({ type, className }: ArtifactIconProps) {
 
   if (type === "image") {
     return <FileImage className={cn("size-3.5 shrink-0 text-spectrum-violet", className)} />;
+  }
+
+  if (type === "audio") {
+    return <FileAudio className={cn("size-3.5 shrink-0 text-spectrum-sky", className)} />;
+  }
+
+  if (type === "video") {
+    return <FileVideo className={cn("size-3.5 shrink-0 text-spectrum-violet", className)} />;
   }
 
   if (type === "pdf") {

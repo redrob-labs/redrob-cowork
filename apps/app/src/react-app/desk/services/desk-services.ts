@@ -2,18 +2,23 @@ import type {
   Chat,
   Connector,
   DeskFile,
+  DeskSkill,
+  LibrarySkill,
   DeskResult,
   HistoryEntry,
   MemoryNote,
   ModelCatalog,
   NewMemoryNote,
   NewSchedule,
-  Playbook,
-  PlaybookDraft,
   PrivacyLevel,
   PrivacyState,
   Project,
   ScheduleBoard,
+  SkillDetail,
+  SkillDraft,
+  SkillFilters,
+  SkillTaxonomy,
+  TeamSkillsState,
 } from "./types";
 
 type Async<T> = Promise<DeskResult<T>>;
@@ -32,20 +37,33 @@ export interface DeskServices {
     remove(id: string): Async<null>;
     edit(id: string, text: string): Async<MemoryNote>;
   };
-  playbooks: {
-    list(): Async<Playbook[]>;
-    get(id: string): Async<Playbook | null>;
-    /** Creates a playbook, or replaces the one with this id. */
-    save(input: PlaybookDraft): Async<Playbook>;
-    remove(id: string): Async<null>;
-  };
   schedules: {
     list(): Async<ScheduleBoard>;
     /** Answers a run waiting for a person; it leaves the waiting list either way. */
     answer(waitingId: string, approved: boolean): Async<ScheduleBoard>;
     setEnabled(scheduleId: string, enabled: boolean): Async<ScheduleBoard>;
-    /** Puts a playbook on a schedule in a project, replacing the one it had there. */
+    /** Puts a prompt or a skill on a new schedule. A target can have more than one. */
     save(schedule: NewSchedule): Async<ScheduleBoard>;
+    /** Changes what a schedule runs, its name or when it runs. */
+    update(scheduleId: string, patch: Partial<NewSchedule>): Async<ScheduleBoard>;
+    remove(scheduleId: string): Async<ScheduleBoard>;
+  };
+  skills: {
+    /** The installed skills: the workspace's, then the person's own folder's. */
+    list(): Async<DeskSkill[]>;
+    /** The Console's library, filtered; the copy that ships with the app when the Console cannot answer. */
+    library(filters?: SkillFilters): Async<LibrarySkill[]>;
+    taxonomy(): Async<SkillTaxonomy>;
+    /** An installed skill, or else the library's. Null when neither has it. */
+    get(name: string): Async<SkillDetail | null>;
+    /** Adds a library skill to the workspace. */
+    install(name: string): Async<null>;
+    /** Creates a skill of the person's own, or changes one. */
+    save(draft: SkillDraft): Async<DeskSkill>;
+    /** Removes the person's own skill or an added library skill. Team skills are the Console's to remove. */
+    remove(name: string): Async<null>;
+    /** What the last check of the team's skills found; null where there is no server to ask. */
+    teamState(): Async<TeamSkillsState | null>;
   };
   history: { list(): Async<HistoryEntry[]> };
   connectors: { list(): Async<Connector[]> };
