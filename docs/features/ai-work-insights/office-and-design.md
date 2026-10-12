@@ -106,7 +106,7 @@ Each app maps its own events to the package's facts. Only that mapping is app-sp
 - a recorded session that reaches the outbox with its labels and no text;
 - the Console accepting the batch.
 
-Cowork's work labeller (PR_SELF, which replaced #135, #136, #153 and #154) and Console's #224 land first.
+Cowork's work labeller (#194, which replaced #135, #136, #153 and #154) and Console's #224 land first.
 
 ## Decisions (2026-10-08)
 
@@ -130,7 +130,7 @@ O1 and O2 are Office's own move to engine-held credentials, which its `AGENTS.md
 
 ## Still needed from outside these repositories
 
-- **The package on npm.** Merge PR_SELF, then push a `work-labeller-v1.0.0` tag; `ci-work-labeller.yml` publishes it with `NPM_TOKEN`.
+- **The package on npm.** Merge #194, then push a `work-labeller-v1.0.0` tag; `ci-work-labeller.yml` publishes it with `NPM_TOKEN`.
 - **The model release:** `insights-model-e5-base-2026.10`.
 
 ## Design spike: the classifier on onnxruntime-web (PR 4, 2026-10-09)
@@ -164,7 +164,7 @@ Harness: `packages/work-labeller/bench/webview`. It runs the package's runtime-n
 
 | Step | Where | State |
 | --- | --- | --- |
-| Shared package, download on first use, and the webview harness | cowork PR_SELF | Open |
+| Shared package, download on first use, and the webview harness | cowork #194 | Open |
 | E1: engine sends insights. Also: `/v1/chat/completions` fixed (it answered 500, and streamed empty) and forwards `x-redrob-session` | redrob-code #67 | Open |
 | JS SDK regenerated (split out of #67) | redrob-code #68 | Open |
 | E2: engine release | redrob-code | After #67 |
