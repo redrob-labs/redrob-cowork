@@ -12,6 +12,17 @@
       "override": null
     },
     {
+      "host": "ai.google.dev",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
+    },
+    {
       "host": "api.github.com",
       "kind": "fetched",
       "components": [
@@ -481,6 +492,17 @@
       "requirement": "optional",
       "blockedEffect": "Analytics events are dropped silently; user-facing app behavior is unaffected.",
       "override": "VITE_REDROB_POSTHOG_HOST; users can disable analytics with the analyticsEnabled preference"
+    },
+    {
+      "host": "www.alibabacloud.com",
+      "kind": "link-only",
+      "components": [
+        "renderer"
+      ],
+      "purpose": "Benchmark or price source cited by the Model Guide's rankings; opened only if the person clicks it.",
+      "requirement": "optional",
+      "blockedEffect": "The cited source link does not open. The rankings still show.",
+      "override": null
     },
     {
       "host": "www.google.com",
