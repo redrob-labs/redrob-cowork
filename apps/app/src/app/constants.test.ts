@@ -24,11 +24,11 @@ describe("Redrob Cowork extension catalog platform filter", () => {
   });
 
   test("hides desktop-only extensions in web", () => {
-    expect(filteredIds("web")).toEqual(["redrob-voice", "ollama", "redrob"]);
+    expect(filteredIds("web")).toEqual(["ollama", "redrob"]);
   });
 
   test("keeps Redrob Cowork Browser desktop-only and Computer Use mac-only", () => {
-    expect(filteredIds("darwin")).toEqual(["redrob-browser", "computer-use", "redrob-voice", "ollama", "redrob"]);
-    expect(filteredIds("linux")).toEqual(["redrob-browser", "redrob-voice", "ollama", "redrob"]);
+    expect(filteredIds("darwin")).toEqual(["redrob-browser", "computer-use", "ollama", "redrob"]);
+    expect(filteredIds("linux")).toEqual(["redrob-browser", "ollama", "redrob"]);
   });
 });

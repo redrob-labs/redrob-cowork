@@ -2123,23 +2123,6 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: { workspaceId, ...recording },
         timeoutMs: timeouts.binary,
       }),
-
-    createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string }) =>
-      requestJson<{
-        ok: true;
-        clientSecret: string;
-        expiresAt: number | null;
-        model: string;
-        transcriptionModel: string;
-        tools: string[];
-        source?: string;
-      }>(baseUrl, "/voice/realtime/session", {
-        token,
-        hostToken,
-        method: "POST",
-        body: payload ?? {},
-        timeoutMs: timeouts.config,
-      }),
   };
 }
 
