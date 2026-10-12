@@ -123,9 +123,11 @@ function MarkdownBlockInner({
    * there the Preview buttons are hidden rather than left to do nothing.
    */
   const serverClient = useOptionalWorkspace()?.redrobServerClient ?? null;
+  // Resolved only once a preview is open: `window` is not there while the list renders on a server
+  // or in a test, and a closed preview needs no sandbox.
   const codePreviewSandbox = useMemo(
-    () => serverClient?.artifactPreviewSandbox(window.location.origin) ?? null,
-    [serverClient],
+    () => (codePreview !== null ? serverClient?.artifactPreviewSandbox(window.location.origin) ?? null : null),
+    [serverClient, codePreview],
   );
   const syncHtml = useMemo(() => {
     return renderMarkdownHtml(text);
@@ -307,7 +309,7 @@ function MarkdownBlockInner({
         ref={rootRef}
         className={cn("markdown-content max-w-none select-text text-foreground", className)}
         dangerouslySetInnerHTML={stableInnerHtml}
-        data-redrob-code-preview-available={codePreviewSandbox ? "true" : "false"}
+        data-redrob-code-preview-available={serverClient ? "true" : "false"}
         {...props}
       />
       {linkMenu && onOpenTarget ? (
@@ -318,7 +320,7 @@ function MarkdownBlockInner({
           onClose={() => setLinkMenu(null)}
         />
       ) : null}
-      {codePreviewSandbox ? (
+      {serverClient ? (
         <Dialog
           open={codePreview !== null}
           onOpenChange={(open) => {
@@ -329,7 +331,7 @@ function MarkdownBlockInner({
             <DialogTitle className="shrink-0 border-b border-border px-4 py-2.5 text-sm font-medium">
               {t("message.preview")}
             </DialogTitle>
-            {codePreview !== null ? (
+            {codePreview !== null && codePreviewSandbox ? (
               <HTMLPreview title={t("message.preview")} content={codePreview} sandbox={codePreviewSandbox} className="min-h-0 flex-1" />
             ) : null}
           </DialogContent>
