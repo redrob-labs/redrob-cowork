@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { deleteSkill, listSkills, renderSkillContentForResponse } from "./skills.js";
+import { buildSkillContent, deleteSkill, listSkills, renderSkillContentForResponse, renderSkillDocument, skillMetadataFrom } from "./skills.js";
 import { exists } from "./utils.js";
 
 let workspace: string;
@@ -81,5 +81,48 @@ describe("listSkills", () => {
     } finally {
       console.warn = originalWarn;
     }
+  });
+});
+
+describe("skill metadata", () => {
+  test("lists the Console's metadata from the frontmatter", async () => {
+    const dir = join(workspace, ".opencode", "skills", "nda-review");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      join(dir, "SKILL.md"),
+      [
+        "---",
+        "name: nda-review",
+        'description: "Reviews an NDA: term, scope, carve-outs."',
+        "metadata:",
+        "  profession: lawyer",
+        "  task: review",
+        "  language: ko",
+        "  family: nda-review",
+        "  version: 3",
+        "  source: team",
+        "  unknown: kept on disk, not listed",
+        "---",
+        "",
+        "Body",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    const [item] = await listSkills(workspace, false);
+    expect(item?.metadata).toEqual({ profession: "lawyer", task: "review", language: "ko", family: "nda-review", version: 3, source: "team" });
+  });
+
+  test("leaves metadata out when there is none, and ignores a source it does not know", () => {
+    expect(skillMetadataFrom(undefined)).toBeUndefined();
+    expect(skillMetadataFrom("lawyer")).toBeUndefined();
+    expect(skillMetadataFrom({ source: "somewhere" })).toBeUndefined();
+    expect(skillMetadataFrom({ profession: " lawyer ", version: "2" })).toEqual({ profession: "lawyer" });
+  });
+
+  test("a written skill keeps its metadata", () => {
+    const content = renderSkillDocument({ name: "nda-review", description: "Reviews an NDA", body: "Body", metadata: { task: "review", source: "library" } });
+    const built = buildSkillContent({ name: "nda-review", content });
+    expect(built.content).toContain("metadata:\n  task: review\n  source: library\n");
   });
 });

@@ -4,6 +4,7 @@ import {
   ArrowUp,
   Braces,
   Check,
+  ArrowRight,
   FileText,
   Image as ImageIcon,
   Mic,
@@ -11,6 +12,7 @@ import {
   Sparkles,
   Wrench,
 } from "lucide-react";
+import { useInRouterContext, useNavigate } from "react-router";
 
 import {
   Dialog,
@@ -22,7 +24,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { t } from "@/i18n";
+import { currentLocale, t } from "@/i18n";
+import { recommendedModels } from "@/app/lib/featured-models";
+import { MODEL_GUIDE_PATH } from "@/components/model-select";
 import { cn } from "@/lib/utils";
 import { modelEquals } from "../../../../app/utils";
 import type { ModelOption, ModelRef } from "../../../../app/types";
@@ -34,12 +38,15 @@ import {
 } from "../../../../app/lib/redrob-pricing";
 import { useRedrobPricingQuery } from "../../../infra/redrob-pricing-query";
 import { ProviderIcon } from "../../../design-system/provider-icon";
+import { abilityWords, bandWord, goodFor, questionCost, readsAtOnce } from "./model-words";
 import {
   CAPABILITY_FLAGS,
   DEFAULT_MODEL_SORT,
   EMPTY_FILTERS,
+  NEED_FLAGS,
   bandFacets,
   buildModelRows,
+  friendlyGroups,
   nextSort,
   orderedRows,
   vendorFacets,
@@ -58,6 +65,8 @@ import {
 // `resolveModelPickerSubtitle`, at render time.
 export const MODEL_PICKER_DEFAULT_SUBTITLE = "model_picker.session_subtitle";
 export const MODEL_PICKER_UNAVAILABLE_SUBTITLE = "model_picker.unavailable_subtitle";
+/** Opened from Settings, where a pick changes the model new chats start with, not this chat's. */
+export const MODEL_PICKER_SETTINGS_SUBTITLE = "model_picker.settings_subtitle";
 
 export function resolveModelPickerSubtitle(subtitle: string | undefined) {
   return t(subtitle ?? MODEL_PICKER_DEFAULT_SUBTITLE);
@@ -77,6 +86,10 @@ export type ModelPickerModalProps = {
   onToggleProvider?: (providerId: string, enabled: boolean) => void;
   onOpenSettings: () => void;
   onClose: (options?: { restorePromptFocus?: boolean }) => void;
+  /** Show only this provider's models, as a provider's "Browse models" in Settings does. */
+  providerId?: string | null;
+  /** That provider's name, for the title. */
+  providerName?: string;
 };
 
 export type ModelPickerEmptyState = {
@@ -103,7 +116,7 @@ export function resolveModelPickerEmptyState(input: {
   return { messageKey: "models.no_models_available", showConnectProvider: true };
 }
 
-const CAPABILITY_ICONS: Record<ModelCapabilityFlag, typeof Wrench> = {
+const CAPABILITY_ICONS: Partial<Record<ModelCapabilityFlag, typeof Wrench>> = {
   tools: Wrench,
   reasoning: Sparkles,
   imageInput: ImageIcon,
@@ -119,6 +132,16 @@ const CAPABILITY_LABEL_KEYS: Record<ModelCapabilityFlag, string> = {
   fileInput: "model_table.cap_file",
   audioInput: "model_table.cap_audio",
   structuredOutputs: "model_table.cap_structured",
+  longContext: "model_words.need_long",
+};
+
+/** "What do you need?", in the reader's words rather than the spec sheet's. */
+const NEED_LABEL_KEYS: Partial<Record<ModelCapabilityFlag, string>> = {
+  tools: "model_words.need_tools",
+  reasoning: "model_words.need_reason",
+  imageInput: "model_words.need_images",
+  longContext: "model_words.need_long",
+  audioInput: "model_words.need_audio",
 };
 
 const BAND_LABEL_KEYS: Record<RedrobPriceBand, string> = {
@@ -132,6 +155,12 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [sort, setSort] = useState<ModelSort>(DEFAULT_MODEL_SORT);
   const [filters, setFilters] = useState<ModelFilters>(EMPTY_FILTERS);
+  /**
+   * Off by default: the list leads with what a model is for, what it roughly costs and how much it
+   * reads, in words. The switch brings back the spec-sheet table, with tokens and dollars, for whoever
+   * is comparing figures.
+   */
+  const [technical, setTechnical] = useState(false);
 
   const disabledSet = useMemo(
     () => new Set(props.disabledProviders ?? []),
@@ -143,6 +172,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
     props.setQuery("");
     setSort(DEFAULT_MODEL_SORT);
     setFilters(EMPTY_FILTERS);
+    setTechnical(false);
   }, [props.open]);
 
   useEffect(() => {
@@ -153,13 +183,20 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
 
   const { data: pricing } = useRedrobPricingQuery({ enabled: props.open });
 
+  const scope = props.providerId ?? null;
   const rows = useMemo(
     () =>
-      buildModelRows(props.options, pricing).map((row) =>
-        disabledSet.has(row.providerId) ? { ...row, disabled: true } : row,
-      ),
-    [props.options, pricing, disabledSet],
+      buildModelRows(
+        scope ? props.options.filter((option) => option.providerID === scope) : props.options,
+        pricing,
+      ).map((row) => (disabledSet.has(row.providerId) ? { ...row, disabled: true } : row)),
+    [props.options, pricing, disabledSet, scope],
   );
+  const recommended = useMemo(
+    () => recommendedModels(pricing?.featured ?? [], currentLocale()),
+    [pricing],
+  );
+  const notes = useMemo(() => new Map(recommended.map((entry) => [entry.modelId, entry])), [recommended]);
 
   // Facets come from the WHOLE set, not from what is currently showing: a rail whose options vanish as
   // you tick them cannot be un-ticked back to where you were.
@@ -168,6 +205,10 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
 
   const shown = useMemo(() => visibleRows(rows, filters, props.query), [rows, filters, props.query]);
   const { auto, rest } = useMemo(() => orderedRows(shown, sort), [shown, sort]);
+  const groups = useMemo(
+    () => friendlyGroups(shown, recommended.map((entry) => entry.modelId)),
+    [shown, recommended],
+  );
 
   const emptyState = resolveModelPickerEmptyState({
     providerGroupCount: shown.length,
@@ -235,8 +276,27 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
       */}
       <DialogContent className="flex max-h-[calc(100vh-2rem)] min-h-0 w-full max-w-[min(94vw,80rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(94vw,80rem)] lg:w-[min(94vw,80rem)] lg:max-w-[min(94vw,80rem)]">
         <DialogHeader className="shrink-0 border-b border-border px-5 py-4">
-          <DialogTitle>{t("models.title")}</DialogTitle>
-          <DialogDescription>{resolveModelPickerSubtitle(props.subtitle)}</DialogDescription>
+          <div className="flex flex-wrap items-start justify-between gap-3 pe-8">
+            <div className="min-w-0">
+              <DialogTitle>
+                {scope && props.providerName ? t("model_words.title_provider", { provider: props.providerName }) : t("models.title")}
+              </DialogTitle>
+              <DialogDescription>{resolveModelPickerSubtitle(props.subtitle)}</DialogDescription>
+            </div>
+            <div className="flex shrink-0 items-center gap-4">
+              <GuideLink onNavigate={() => props.onClose()} />
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  className="size-3.5 accent-[var(--dls-accent)]"
+                  checked={technical}
+                  onChange={(event) => setTechnical(event.target.checked)}
+                  data-testid="model-picker-technical"
+                />
+                {t("model_words.technical")}
+              </label>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1">
@@ -257,12 +317,30 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
               ) : null}
             </div>
 
-            <FacetGroup title={t("model_table.price_band")}>
+            {technical ? null : (
+              <FacetGroup title={t("model_words.ask_need")}>
+                {NEED_FLAGS.map((flag) => (
+                  <FacetCheck
+                    key={flag}
+                    checked={filters.capabilities.has(flag)}
+                    label={t(NEED_LABEL_KEYS[flag] ?? CAPABILITY_LABEL_KEYS[flag])}
+                    onToggle={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        capabilities: toggleIn(prev.capabilities, flag),
+                      }))
+                    }
+                  />
+                ))}
+              </FacetGroup>
+            )}
+
+            <FacetGroup title={technical ? t("model_table.price_band") : t("model_words.ask_spend")}>
               {bands.map(({ band, count }) => (
                 <FacetCheck
                   key={band}
                   checked={filters.bands.has(band)}
-                  label={t(BAND_LABEL_KEYS[band])}
+                  label={technical ? t(BAND_LABEL_KEYS[band]) : (bandWord(band) ?? band)}
                   count={count}
                   onToggle={() =>
                     setFilters((prev) => ({ ...prev, bands: toggleIn(prev.bands, band) }))
@@ -271,6 +349,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
               ))}
             </FacetGroup>
 
+            {technical ? (
             <FacetGroup title={t("model_table.capabilities")}>
               {CAPABILITY_FLAGS.map((flag) => (
                 <FacetCheck
@@ -286,8 +365,9 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                 />
               ))}
             </FacetGroup>
+            ) : null}
 
-            <FacetGroup title={t("model_table.vendor")}>
+            <FacetGroup title={technical ? t("model_table.vendor") : t("model_words.ask_lab")}>
               {vendors.map((vendor) => (
                 <FacetCheck
                   key={vendor.id}
@@ -313,7 +393,7 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                   ref={searchInputRef}
                   type="text"
                   className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[rgba(var(--dls-accent-rgb),0.2)]"
-                  placeholder={t("models.search_placeholder")}
+                  placeholder={technical ? t("models.search_placeholder") : t("model_words.search")}
                   value={props.query}
                   onChange={(event) => props.setQuery(event.target.value)}
                 />
@@ -330,6 +410,13 @@ export function ModelPickerModal(props: ModelPickerModalProps) {
                     </Button>
                   ) : null}
                 </div>
+              ) : !technical ? (
+                <FriendlyModelList
+                  groups={groups}
+                  notes={notes}
+                  current={props.current}
+                  onSelect={handleSelect}
+                />
               ) : (
                 <table className="w-full min-w-full table-fixed caption-bottom border-separate border-spacing-0 text-sm">
                   <thead className="sticky top-0 z-10 bg-popover">
@@ -466,7 +553,8 @@ function FacetCheck({
       >
         {checked ? <Check size={11} strokeWidth={3} /> : null}
       </span>
-      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {/* Wraps rather than truncating: the friendly labels are short questions, and "Work with my files..." hid the point. */}
+      <span className="min-w-0 flex-1 leading-snug">{label}</span>
       {count === undefined ? null : (
         <span className="shrink-0 text-2xs tabular-nums text-muted-foreground">{count}</span>
       )}
@@ -579,6 +667,7 @@ function ModelTableRow({
         <span className="flex items-center gap-1.5">
           {CAPABILITY_FLAGS.filter((flag) => row.capabilities.has(flag)).map((flag) => {
             const Icon = CAPABILITY_ICONS[flag];
+            if (!Icon) return null;
             return (
               <Icon
                 key={flag}
@@ -594,5 +683,150 @@ function ModelTableRow({
         {cost ?? "—"}
       </td>
     </tr>
+  );
+}
+
+/** "Recommended best models", to the Model Guide. A plain link outside a router, so a test can render the dialog. */
+function GuideLink(props: { onNavigate: () => void }) {
+  const inRouter = useInRouterContext();
+  const className = "inline-flex items-center gap-1 text-xs font-medium text-[var(--dls-accent)] hover:underline";
+  const label = (
+    <>
+      {t("model_words.not_sure")} {t("model_select.guide_link")}
+      <ArrowRight size={13} aria-hidden />
+    </>
+  );
+  if (!inRouter) {
+    return (
+      <a className={className} href={`#${MODEL_GUIDE_PATH}`} onClick={props.onNavigate}>
+        {label}
+      </a>
+    );
+  }
+  return <RoutedGuideLink className={className} onNavigate={props.onNavigate}>{label}</RoutedGuideLink>;
+}
+
+function RoutedGuideLink(props: { className: string; onNavigate: () => void; children: React.ReactNode }) {
+  const navigate = useNavigate();
+  return (
+    <button
+      type="button"
+      className={props.className}
+      onClick={() => {
+        props.onNavigate();
+        navigate(MODEL_GUIDE_PATH);
+      }}
+    >
+      {props.children}
+    </button>
+  );
+}
+
+type RecommendedEntry = { modelId: string; name?: string; lab: string; note: string };
+
+/**
+ * The default view: Auto, the recommended models, then every other model under the lab that makes it.
+ *
+ * Each row says what the model is for, roughly what a question costs, and how much it can read, in
+ * words. The table with the figures is behind "Show technical details".
+ */
+function FriendlyModelList(props: {
+  groups: ReturnType<typeof friendlyGroups>;
+  notes: ReadonlyMap<string, RecommendedEntry>;
+  current: ModelRef;
+  onSelect: (row: ModelRow) => void;
+}) {
+  const row = (item: ModelRow) => (
+    <FriendlyModelRow
+      key={item.key}
+      row={item}
+      entry={props.notes.get(item.modelId)}
+      selected={modelEquals(props.current, { providerID: item.providerId, modelID: item.modelId })}
+      onSelect={props.onSelect}
+    />
+  );
+  return (
+    <div className="flex flex-col pb-3" role="listbox" aria-label={t("models.title")}>
+      {props.groups.auto.map(row)}
+      {props.groups.recommended.length ? (
+        <>
+          <GroupHeading>{t("model_words.group_recommended")}</GroupHeading>
+          {props.groups.recommended.map(row)}
+        </>
+      ) : null}
+      {props.groups.labs.map((lab) => (
+        <div key={lab.id}>
+          <GroupHeading>{lab.id === "other" ? t("model_words.group_misc") : lab.name}</GroupHeading>
+          {lab.rows.map(row)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GroupHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="sticky top-0 z-10 border-b border-border/60 bg-popover px-5 pb-1.5 pt-4 text-2xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+      {children}
+    </div>
+  );
+}
+
+function FriendlyModelRow(props: {
+  row: ModelRow;
+  entry?: RecommendedEntry;
+  selected: boolean;
+  onSelect: (row: ModelRow) => void;
+}) {
+  const { row } = props;
+  const band = bandWord(row.priceBand);
+  const cost = questionCost(row.questionCostUsd);
+  const reads = readsAtOnce(row.contextTokens);
+  const abilities = abilityWords(row);
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={props.selected}
+      aria-disabled={row.disabled || undefined}
+      data-model={row.modelId}
+      onClick={() => props.onSelect(row)}
+      className={cn(
+        "flex w-full items-start gap-3 border-b border-border/40 px-5 py-3 text-start transition-colors",
+        props.selected ? "bg-[rgba(var(--dls-accent-rgb),0.10)]" : "hover:bg-foreground/[0.04]",
+        row.disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
+      <ProviderIcon providerId={row.isAuto ? row.providerId : row.vendorId || row.modelId} size={18} className="mt-0.5 shrink-0" />
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-baseline gap-x-2">
+          <span className="font-medium text-foreground">{props.entry?.name ?? row.title}</span>
+          <span className="text-xs text-muted-foreground">{props.entry?.lab ?? row.vendorName}</span>
+          {row.isAuto ? (
+            <span className="rounded bg-[var(--dls-accent)] px-1.5 py-px text-2xs font-medium text-[var(--dls-accent-fg)]">
+              {t("model_table.recommended")}
+            </span>
+          ) : null}
+        </span>
+        <span className="mt-0.5 block text-sm text-muted-foreground">{goodFor(row, props.entry?.note)}</span>
+        {abilities.length || reads ? (
+          <span className="mt-1.5 flex flex-wrap gap-1.5">
+            {abilities.map((word) => (
+              <span key={word} className="rounded-full border border-border/70 px-2 py-px text-2xs text-muted-foreground">
+                {word}
+              </span>
+            ))}
+            {reads ? (
+              <span className="rounded-full border border-border/70 px-2 py-px text-2xs text-muted-foreground">{reads}</span>
+            ) : null}
+          </span>
+        ) : null}
+      </span>
+      <span className="flex shrink-0 flex-col items-end gap-0.5 pt-0.5 text-end">
+        {band ? <span className="text-xs font-medium text-foreground">{band}</span> : null}
+        {cost ? <span className="text-2xs text-muted-foreground">{cost}</span> : null}
+        {props.selected ? <Check size={14} className="mt-1 text-[var(--dls-accent)]" aria-hidden /> : null}
+      </span>
+    </button>
   );
 }

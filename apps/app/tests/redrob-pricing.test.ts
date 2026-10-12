@@ -135,6 +135,8 @@ describe("formatters", () => {
       formatModelPriceRange({
         id: "x",
         inputPricePerMillionUsd: 5,
+        estimatedCosts: [],
+        strengths: [],
         capabilities: { thinkingLevels: [] },
       }),
     ).toBe(null);

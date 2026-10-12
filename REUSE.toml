@@ -19,3 +19,12 @@ SPDX-FileCopyrightText = [
   "2026-present Janghoon Lee (Redrob) and contributors",
 ]
 SPDX-License-Identifier = "MIT"
+
+# The Gemini, Meta, Qwen and Grok paths in this file are copied from Lobe Icons
+# (@lobehub/icons-static-svg 1.95.1, https://github.com/lobehub/lobe-icons), which
+# is MIT licensed. The marks themselves remain their owners' trademarks.
+[[annotations]]
+path = "apps/app/src/react-app/design-system/brand-marks.tsx"
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2023-present LobeHub"]
+SPDX-License-Identifier = "MIT"

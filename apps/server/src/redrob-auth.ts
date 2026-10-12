@@ -208,9 +208,10 @@ export function deriveRedrobAuthStatus(providerList: unknown): RedrobAuthStatus 
 }
 
 /**
- * The Redrob Key the engine resolved, for the one in-process caller that has to present it to the
- * console itself: team policy sync (team-policy/sync.ts), which fetches the workspace's signed
- * policy with it. The same gate as status applies, so the engine's "public" sentinel is never
+ * The Redrob Key the engine resolved, for the in-process callers that have to present it to the
+ * console themselves: team policy sync (team-policy/sync.ts), which fetches the workspace's signed
+ * policy with it, and team skills sync (team-skills/sync.ts), which fetches the team's skills. The
+ * same gate as status applies, so the engine's "public" sentinel is never
  * mistaken for a key. The value is read at the moment it is needed and never stored, logged or
  * returned to a client; ownership stays with the engine.
  */

@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { upsertCommand } from "../commands.js";
 import { startServer } from "../server.js";
-import type { ServerConfig } from "../types.js";
-import { PRODUCTION_KEYS, TEST_KEYS, trustedKeys, verifyTeamPolicyJws } from "./index.js";
+import type { ReloadEvent, ServerConfig } from "../types.js";
+import { createWorkspaceKvStore } from "../workspace-kv-store.js";
+import { PRODUCTION_KEYS, readTeamPolicyState, TEST_KEYS, trustedKeys, verifyTeamPolicyJws } from "./index.js";
 import { samplePolicy, signTestPolicy } from "./test-signer.js";
 import vectorFile from "./vectors/vectors.json" with { type: "json" };
 
@@ -85,7 +87,8 @@ async function startPolicyServer() {
   process.env.REDROB_RUNTIME_DB = join(dataDir, "runtime.sqlite");
   process.env.REDROB_DISABLE_SCHEDULER = "1";
   process.env.REDROB_TEAM_POLICY_TEST_KEYS = "1";
-  const server = (await startServer(serverConfig(workspace, dataDir))) as { port: number; stop: (force?: boolean) => void };
+  const config = serverConfig(workspace, dataDir);
+  const server = (await startServer(config)) as { port: number; stop: (force?: boolean) => void };
   const base = `http://127.0.0.1:${server.port}`;
   const issued = await fetch(`${base}/tokens`, {
     method: "POST",
@@ -102,7 +105,7 @@ async function startPolicyServer() {
     const json = (await response.json().catch(() => null)) as Record<string, any> | null;
     return { status: response.status, body: json ?? {} };
   };
-  return { server, workspace, owner: as(ownerToken), collaborator: as("test-token") };
+  return { server, workspace, config, owner: as(ownerToken), collaborator: as("test-token") };
 }
 
 const apply = (call: Awaited<ReturnType<typeof startPolicyServer>>["owner"], jws: string, accountId?: string) =>
@@ -117,7 +120,7 @@ const teamNotes = async (call: Awaited<ReturnType<typeof startPolicyServer>>["ow
   );
 
 describe("applying a team policy in redrob-server", () => {
-  test("applies privacy, notes, playbooks and skills, and records it", async () => {
+  test("applies privacy, notes and skills, and records it", async () => {
     const { server, workspace, owner } = await startPolicyServer();
     try {
       const applied = await apply(owner, await signTestPolicy(samplePolicy()), "acc_vectors");
@@ -135,18 +138,26 @@ describe("applying a team policy in redrob-server", () => {
       const notes = await teamNotes(owner);
       expect(notes.map((note) => note.content)).toEqual(["House style: numbered clauses"]);
       expect(notes[0]!.tags).toEqual(expect.arrayContaining(["desk-locked", "desk-scope:team", "team-policy:acc_vectors"]));
-      expect(await readFile(join(workspace, ".opencode", "commands", "weekly-update.md"), "utf8")).toContain(
-        "Write this week's update.",
-      );
       expect(await readFile(join(workspace, ".opencode", "skills", "house-style", "SKILL.md"), "utf8")).toContain(
         "Use numbered clauses.",
       );
+      // Schema v2 has no playbooks: nothing is written as a command, and the status has no such field.
+      await expect(readFile(join(workspace, ".opencode", "commands", "weekly-update.md"), "utf8")).rejects.toThrow();
+      expect(applied.body.skills).toEqual(["house-style"]);
+      expect(applied.body).not.toHaveProperty("playbooks");
 
       const audit = (await owner("GET", "/workspace/workspace/audit")).body.items as Array<{ action: string; summary: string }>;
       expect(audit[0]).toMatchObject({ action: "policy.applied" });
       expect(audit[0]!.summary).toContain("version 1 set by Park Hyunjin (test key)");
 
-      expect((await owner("GET", "/workspace/workspace/team-policy")).body).toMatchObject({ joined: true, version: 1 });
+      const status = (await owner("GET", "/workspace/workspace/team-policy")).body;
+      expect(status).toMatchObject({ joined: true, version: 1, skills: ["house-style"] });
+      expect(status).not.toHaveProperty("playbooks");
+
+      // Nothing touched the commands, so no commands reload is announced.
+      const reasons = ((await owner("GET", "/workspace/workspace/events")).body.items as ReloadEvent[]).map((event) => event.reason);
+      expect(reasons).toEqual(expect.arrayContaining(["config", "skills"]));
+      expect(reasons).not.toContain("commands");
     } finally {
       server.stop(true);
     }
@@ -174,7 +185,7 @@ describe("applying a team policy in redrob-server", () => {
     }
   });
 
-  test("a newer policy replaces the notes, playbooks and skills as a whole set", async () => {
+  test("a newer policy replaces the notes and skills as a whole set", async () => {
     const { server, workspace, owner } = await startPolicyServer();
     try {
       await apply(owner, await signTestPolicy(samplePolicy()));
@@ -184,13 +195,11 @@ describe("applying a team policy in redrob-server", () => {
           samplePolicy({
             version: 2,
             notes: [{ id: "note_2", text: "Cite the clause number" }],
-            playbooks: [],
             skills: [{ name: "clause-check", description: "Clause check", content: "Check every clause." }],
           }),
         ),
       );
       expect((await teamNotes(owner)).map((note) => note.content)).toEqual(["Cite the clause number"]);
-      await expect(readFile(join(workspace, ".opencode", "commands", "weekly-update.md"), "utf8")).rejects.toThrow();
       await expect(readFile(join(workspace, ".opencode", "skills", "house-style", "SKILL.md"), "utf8")).rejects.toThrow();
       expect(await readFile(join(workspace, ".opencode", "skills", "clause-check", "SKILL.md"), "utf8")).toContain(
         "Check every clause.",
@@ -217,6 +226,25 @@ describe("applying a team policy in redrob-server", () => {
       expect(bad.status).toBe(422);
       expect(bad.body.code).toBe("team_policy_bad_signature");
       expect((await owner("GET", "/workspace/workspace/team-policy")).body.version).toBe(1);
+    } finally {
+      server.stop(true);
+    }
+  });
+
+  test("refuses a schema v1 policy, playbooks and all, and keeps what was applied", async () => {
+    const { server, workspace, owner } = await startPolicyServer();
+    try {
+      await apply(owner, await signTestPolicy(samplePolicy()));
+      const v1 = await signTestPolicy({
+        ...samplePolicy({ version: 2 }),
+        v: 1,
+        playbooks: [{ name: "weekly-update", template: "Write this week's update." }],
+      });
+      const refused = await apply(owner, v1);
+      expect(refused.status).toBe(422);
+      expect(refused.body.code).toBe("team_policy_unsupported_version");
+      expect((await owner("GET", "/workspace/workspace/team-policy")).body.version).toBe(1);
+      await expect(readFile(join(workspace, ".opencode", "commands", "weekly-update.md"), "utf8")).rejects.toThrow();
     } finally {
       server.stop(true);
     }
@@ -308,7 +336,7 @@ describe("leaving a team", () => {
       expect(left.body).toMatchObject({ joined: false, accountId: "acc_vectors", version: 5 });
 
       expect(await teamNotes(owner)).toEqual([]);
-      await expect(readFile(join(workspace, ".opencode", "commands", "weekly-update.md"), "utf8")).rejects.toThrow();
+      await expect(readFile(join(workspace, ".opencode", "skills", "house-style", "SKILL.md"), "utf8")).rejects.toThrow();
       expect(await privacyOf(owner)).toEqual({ level: "high", names: [], setBy: null, locked: false });
       const audit = (await owner("GET", "/workspace/workspace/audit")).body.items as Array<{ action: string }>;
       expect(audit[0]!.action).toBe("policy.left");
@@ -323,6 +351,85 @@ describe("leaving a team", () => {
       const older = await apply(owner, await signTestPolicy(samplePolicy({ version: 4 })));
       expect(older.body.code).toBe("team_policy_not_newer");
       expect((await apply(owner, await signTestPolicy(samplePolicy({ version: 5 })))).body.status).toBe("applied");
+    } finally {
+      server.stop(true);
+    }
+  });
+});
+
+/*
+ * A state stored by a schema v1 build records the commands its policy installed as playbooks
+ * (installed.playbooks). v2 no longer installs any, but still removes those once.
+ */
+describe("a state left by a schema v1 policy", () => {
+  const rawStates = createWorkspaceKvStore<string>({
+    tableName: "team_policy_states",
+    valueColumn: "state_json",
+    parse: (json) => json,
+    serialize: (json) => json,
+  });
+
+  async function seedV1State(config: ServerConfig, workspace: string) {
+    const stored = JSON.parse((await rawStates.get(config, "workspace")) ?? "null") as { installed: Record<string, unknown> };
+    stored.installed = { ...stored.installed, playbooks: ["weekly-update"] };
+    await rawStates.set(config, "workspace", JSON.stringify(stored));
+    await upsertCommand(workspace, { name: "weekly-update", template: "Write this week's update." });
+    // A command the person wrote themselves, which no policy cleanup may touch.
+    await writeFile(join(workspace, ".opencode", "commands", "mine.md"), "My own command.\n");
+  }
+
+  const commandFile = (workspace: string, name: string) => readFile(join(workspace, ".opencode", "commands", `${name}.md`), "utf8");
+  const storedJson = async (config: ServerConfig) => (await rawStates.get(config, "workspace")) ?? "";
+
+  test("reads tolerantly, and never reports playbooks", async () => {
+    const { server, workspace, config, owner } = await startPolicyServer();
+    try {
+      await apply(owner, await signTestPolicy(samplePolicy()));
+      await seedV1State(config, workspace);
+      expect(await readTeamPolicyState(config, "workspace")).toMatchObject({
+        installed: { skills: ["house-style"] },
+        legacyPlaybooks: ["weekly-update"],
+      });
+      const status = (await owner("GET", "/workspace/workspace/team-policy")).body;
+      expect(status).toMatchObject({ joined: true, skills: ["house-style"] });
+      expect(status).not.toHaveProperty("playbooks");
+    } finally {
+      server.stop(true);
+    }
+  });
+
+  test("the next apply deletes those commands, announces it, and drops the field", async () => {
+    const { server, workspace, config, owner } = await startPolicyServer();
+    try {
+      await apply(owner, await signTestPolicy(samplePolicy()));
+      await seedV1State(config, workspace);
+      // Let the debounce from the first apply pass, so the next commands event is this apply's.
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      expect((await apply(owner, await signTestPolicy(samplePolicy({ version: 2 })))).body.status).toBe("applied");
+      await expect(commandFile(workspace, "weekly-update")).rejects.toThrow();
+      expect(await commandFile(workspace, "mine")).toBe("My own command.\n");
+      expect(await storedJson(config)).not.toContain("playbooks");
+      expect(await readTeamPolicyState(config, "workspace")).not.toHaveProperty("legacyPlaybooks");
+      const reasons = ((await owner("GET", "/workspace/workspace/events")).body.items as ReloadEvent[]).map((event) => event.reason);
+      expect(reasons).toContain("commands");
+    } finally {
+      server.stop(true);
+    }
+  });
+
+  test("leaving deletes those commands and drops the field", async () => {
+    const { server, workspace, config, owner } = await startPolicyServer();
+    try {
+      await apply(owner, await signTestPolicy(samplePolicy()));
+      await seedV1State(config, workspace);
+
+      expect((await owner("DELETE", "/workspace/workspace/team-policy")).status).toBe(200);
+      await expect(commandFile(workspace, "weekly-update")).rejects.toThrow();
+      expect(await commandFile(workspace, "mine")).toBe("My own command.\n");
+      expect(await storedJson(config)).not.toContain("playbooks");
+      expect(await readTeamPolicyState(config, "workspace")).toMatchObject({ left: true, installed: { skills: [] } });
+      expect(await readTeamPolicyState(config, "workspace")).not.toHaveProperty("legacyPlaybooks");
     } finally {
       server.stop(true);
     }

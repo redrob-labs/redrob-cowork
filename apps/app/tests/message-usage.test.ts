@@ -46,7 +46,7 @@ describe("message usage plumbing", () => {
 
   it("round-trips through metadata", () => {
     expect(readMessageUsage(assistant(0.5, { input: 1 }))).toEqual({ cost: 0.5, tokens: { input: 1 } });
-    expect(readMessageUsage({ role: "assistant" })).toBeUndefined();
+    expect(readMessageUsage({})).toBeUndefined();
   });
 });
 

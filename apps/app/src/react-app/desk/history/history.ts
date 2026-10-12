@@ -27,7 +27,7 @@ function todoStep(todo: Pick<Todo, "content" | "status">): HistoryStep {
 }
 
 /**
- * A chat as a History row. A chat in Run mode, or one a playbook or a schedule started, is a
+ * A chat as a History row. A chat in Run mode, or one a skill or a schedule started, is a
  * run; the rest are chats. Who approved what and whether anything left the computer are not
  * recorded, so they stay empty and the screen leaves them out.
  */
@@ -39,7 +39,8 @@ export function historyEntryFrom(input: {
 }): HistoryEntry {
   const { session, snapshot } = input;
   const steps = snapshot?.todos.map(todoStep) ?? [];
-  const busy = snapshot ? snapshot.status.type !== "idle" : false;
+  // Working means running or retrying; a blocked turn has ended, as an idle one has.
+  const busy = snapshot ? snapshot.status.type === "busy" || snapshot.status.type === "retry" : false;
   const unfinished = steps.some((step) => step.state !== "done");
   const state = busy ? "blocked" : unfinished ? "stopped" : "done";
   const label = busy ? t("desk.history_working") : unfinished ? t("desk.history_unfinished") : t("desk.history_done");

@@ -4,6 +4,7 @@ import { firstLineLocalFileParts } from "../src/react-app/domains/session/sync/p
 import {
   connectSkillSlashCommandOptions,
   getSlashCommandQuery,
+  isComposerSlashOption,
   parseSlashCommandInvocation,
   skillMenuSlashCommandName,
   skillSlashCommandName,
@@ -102,23 +103,23 @@ describe("Connect skill slash commands", () => {
   });
 
   test("falls back to a slash-safe slug when a skill has no trigger", () => {
-    expect(skillSlashCommandName({ name: "Renewal Playbook" })).toBe("renewal-playbook");
+    expect(skillSlashCommandName({ name: "Renewal Sweep" })).toBe("renewal-sweep");
   });
 
   test("does not normalize local skill labels", () => {
     expect(skillMenuSlashCommandName({
-      name: "Local Playbook",
-      trigger: "local-playbook",
+      name: "Local Review",
+      trigger: "local-review",
       origin: "local",
-    })).toBe("Local Playbook");
+    })).toBe("Local Review");
   });
 
   test("excludes local skills and Connect skills missing a capability identity", () => {
     expect(
       connectSkillSlashCommandOptions([
         {
-          name: "Local Playbook",
-          trigger: "local-playbook",
+          name: "Local Review",
+          trigger: "local-review",
           path: "skill://local",
           origin: "local",
           connectCapabilityName: "plugin:plugin_1:skill_1",
@@ -158,5 +159,18 @@ describe("Connect skill slash commands", () => {
       connectCapabilityName: "plugin:plugin_1:skill_1",
     }]);
     expect(withoutProvenance?.description).toBe("");
+  });
+});
+
+describe("what / offers", () => {
+  test("skills, MCP prompts and the built-in compact; workspace commands are no longer offered", () => {
+    const options = [
+      { id: "builtin:compact", name: "compact", source: "command" as const },
+      { id: "cmd:weekly", name: "weekly-update", source: "command" as const },
+      { id: "cmd:legacy", name: "legacy" },
+      { id: "skill:nda", name: "nda-review", source: "skill" as const },
+      { id: "mcp:prompt", name: "github:review", source: "mcp" as const },
+    ];
+    expect(options.filter(isComposerSlashOption).map((option) => option.name)).toEqual(["compact", "nda-review", "github:review"]);
   });
 });

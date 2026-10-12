@@ -41,9 +41,11 @@ import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./co
 import {
   addSchedule,
   answerWaiting,
+  promptForTarget,
   readRule,
-  readSchedules,
+  readTarget,
   removeSchedule,
+  resolveLegacySchedules,
   startScheduler,
   updateSchedule,
   type ScheduleEngine,
@@ -59,7 +61,7 @@ import { opencodeConfigPath, redrobConfigPath, projectCommandsDir, projectSkills
 import { migrateLegacyGlobalConfig } from "./engine-config-migrate.js";
 import { ensureDir, exists, hashToken, shortId } from "./utils.js";
 import { defaultWorkspaceRedrobConfig, ensureWorkspaceFiles, readRawOpencodeConfig } from "./workspace-init.js";
-import { sanitizeCommandName, validateMcpName, validateUserMcpName } from "./validators.js";
+import { sanitizeCommandName, validateMcpName, validateSkillName, validateUserMcpName } from "./validators.js";
 import { TokenService } from "./tokens.js";
 import { resetManagedProviderAuthCache, syncManagedProviderAuth } from "./managed-provider-auth.js";
 import {
@@ -184,9 +186,13 @@ import {
 import { readHarnessAvailability } from "./harness-availability.js";
 import { PrivacyGate } from "./privacy/gate.js";
 import { RouteLabelSource } from "./route/label-source.js";
+import { createSkillLibrary, installLibrarySkill, libraryFilterFrom } from "./skill-library/library.js";
+import { readTeamSkillsState, startTeamSkillsSync, syncTeamSkills, type TeamSkillsSyncDeps } from "./team-skills/sync.js";
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
+import { startInsightsSync } from "./insights/sync.js";
+import { WorkClassifierSource } from "@redrob-labs/work-labeller/node";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -1482,7 +1488,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   resetManagedProviderAuthCache();
   void syncManagedProviderAuth({ config, env, logger: toManagedProviderAuthLogger(logger) }).catch(() => undefined);
 
-  // Scheduled playbooks run while this server does; REDROB_DISABLE_SCHEDULER turns them off.
+  // Scheduled runs happen while this server does; REDROB_DISABLE_SCHEDULER turns them off.
   const stopScheduler = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startScheduler({ config, engine: createScheduleEngine(config), logger });
@@ -1525,12 +1531,22 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   const stopTeamPolicySync = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startTeamPolicySync(config, teamPolicySyncDeps(config), logger);
+  // Every local workspace gets its team's skills from the Console; see team-skills/sync.ts.
+  const stopTeamSkillsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startTeamSkillsSync(config, teamSkillsSyncDeps(config, reloadEvents), logger);
+  // Labeled sessions go to the console with the person's Redrob Key; see insights/sync.ts.
+  const stopInsightsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startInsightsSync(config, teamPolicySyncDeps(config), logger);
 
   return {
     ...server,
     stop: async () => {
       stopScheduler();
       stopTeamPolicySync();
+      stopTeamSkillsSync();
+      stopInsightsSync();
       stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
@@ -1543,6 +1559,14 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
 /** The key comes from the engine at the moment of each check; nothing here stores it. */
 function teamPolicySyncDeps(config: ServerConfig): TeamPolicySyncDeps {
   return { readKey: () => readRedrobEngineKey({ config }) };
+}
+
+/** Like the team policy's: the key comes from the engine at the moment of each check. */
+function teamSkillsSyncDeps(config: ServerConfig, reloadEvents: ReloadEventStore): TeamSkillsSyncDeps {
+  return {
+    readKey: () => readRedrobEngineKey({ config }),
+    onChange: (workspace) => reloadEvents.recordDebounced(workspace.id, "skills"),
+  };
 }
 
 function buildOpencodeProxyUrl(baseUrl: string, path: string, search: string) {
@@ -1634,9 +1658,12 @@ export function createWorkspaceOpencodeClient(
 /** The engine calls the scheduler makes, through the workspace's own engine client. */
 function createScheduleEngine(config: ServerConfig): ScheduleEngine {
   return {
-    template: async (workspace, playbookId) => {
-      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === playbookId);
-      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === playbookId);
+    resolvePrompt: (workspace, target) =>
+      promptForTarget(target, async (name) => (await listSkills(workspace.path, true)).some((skill) => skill.name === name)),
+    // Only for schedules saved before skills, which ran a playbook command by name.
+    legacyCommandTemplate: async (workspace, commandName) => {
+      const own = (await listCommands(workspace.path, "workspace")).find((command) => command.name === commandName);
+      const global = own ? undefined : (await listCommands(workspace.path, "global")).find((command) => command.name === commandName);
       return own?.template ?? global?.template ?? null;
     },
     startRun: async (workspace, input) => {
@@ -3251,7 +3278,20 @@ function createRoutes(
    * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
    * the chats whose labels this resolves, so restoring them reveals nothing new.
    */
-  const privacyGate = new PrivacyGate(config);
+  /*
+   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text,
+   * except each session's first message once, which the work classifier reads here and drops;
+   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
+   * Nothing is sent anywhere from these routes.
+   */
+  const insightsOutbox = new InsightsOutbox(config);
+  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
+  const workClassifier = new WorkClassifierSource({ directory: process.env.REDROB_INSIGHTS_MODEL_DIR?.trim() || null });
+  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
+  insightsSweep.unref?.();
+  const privacyGate = new PrivacyGate(config, undefined, undefined, (report) =>
+    insightsRecorder.observeSensitivity(report.sessionID, Date.now(), report.unmasked),
+  );
   addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -3275,15 +3315,6 @@ function createRoutes(
     }
   });
 
-  /*
-   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
-   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
-   * Nothing is sent anywhere from these routes.
-   */
-  const insightsOutbox = new InsightsOutbox(config);
-  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
-  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
-  insightsSweep.unref?.();
   addRoute(routes, "POST", "/insights/facts", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -3299,7 +3330,19 @@ function createRoutes(
   });
   addRoute(routes, "GET", "/insights/outbox", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
-    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount() });
+    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount(), workModel: workClassifier.status() });
+  });
+  // A session's first message, once, for the work classifier. The text is labeled in memory and
+  // dropped; the session keeps only the family.
+  addRoute(routes, "POST", "/insights/work", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const { sessionID, messageID, text } = body;
+    if (typeof sessionID !== "string" || typeof messageID !== "string" || typeof text !== "string") {
+      throw new ApiError(400, "invalid_payload", "sessionID, messageID and text (strings) are required");
+    }
+    const read = await insightsRecorder.observeFirstMessage(sessionID, messageID, text.slice(0, 4_000), (value) => workClassifier.label(value));
+    return jsonResponse({ read });
   });
 
   /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */
@@ -3360,7 +3403,7 @@ function createRoutes(
     if (outcome.status === "applied" || outcome.status === "removed") {
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+      if (outcome.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
     return jsonResponse({ outcome, ...(await describeTeamPolicy(workspace.id)) });
   });
@@ -3388,7 +3431,7 @@ function createRoutes(
     if (result.status === "applied") {
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-      emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+      if (result.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     }
     return jsonResponse({ status: result.status, ...(await describeTeamPolicy(workspace.id)) });
   });
@@ -3397,10 +3440,10 @@ function createRoutes(
     ensureWritable(config);
     requireClientScope(ctx, "owner");
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
+    const left = await leaveTeamPolicy(config, workspace, { actor: ctx.actor ?? { type: "remote" } });
     emitReloadEvent(ctx.reloadEvents, workspace, "config");
     emitReloadEvent(ctx.reloadEvents, workspace, "skills");
-    emitReloadEvent(ctx.reloadEvents, workspace, "commands");
+    if (left.removedLegacyCommands) emitReloadEvent(ctx.reloadEvents, workspace, "commands");
     return jsonResponse(await describeTeamPolicy(workspace.id));
   });
 
@@ -3609,6 +3652,74 @@ function createRoutes(
     const includeGlobal = ctx.url.searchParams.get("includeGlobal") === "true";
     const items = await listSkills(workspace.path, includeGlobal);
     return jsonResponse({ items });
+  });
+
+  // The Console's default skill library; a bundled copy answers when the Console cannot.
+  const skillLibrary = createSkillLibrary();
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await skillLibrary.list(libraryFilterFrom(ctx.url.searchParams)));
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library/taxonomy", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await skillLibrary.taxonomy());
+  });
+
+  addRoute(routes, "GET", "/workspace/:id/skills/library/:name", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    const skill = name ? await skillLibrary.get(name) : null;
+    if (!skill) throw new ApiError(404, "library_skill_not_found", `No library skill named ${name}`);
+    return jsonResponse(skill);
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    validateSkillName(name);
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "skills.install",
+      summary: `Add library skill ${name}`,
+      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+    });
+    const result = await installLibrarySkill(workspace.path, skillLibrary, name);
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "skills.install",
+      target: result.path,
+      summary: `Added library skill ${name}`,
+      timestamp: Date.now(),
+    });
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills", {
+      type: "skill",
+      name,
+      action: "added",
+      path: result.path,
+    });
+    return jsonResponse({ name, path: result.path, description: result.skill.description, scope: "project" });
+  });
+
+  // Team skills: what the last check of the Console installed, and why any were left out.
+  addRoute(routes, "GET", "/workspace/:id/skills/team", "client", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse(await readTeamSkillsState(config, workspace.id));
+  });
+
+  addRoute(routes, "POST", "/workspace/:id/skills/team/sync", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    if (workspace.workspaceType === "remote") {
+      throw new ApiError(400, "remote_workspace", "Team skills are installed into local workspaces only");
+    }
+    return jsonResponse(await syncTeamSkills(config, workspace, teamSkillsSyncDeps(config, ctx.reloadEvents)));
   });
 
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
@@ -4141,10 +4252,10 @@ function createRoutes(
     return jsonResponse({ ok: true });
   });
 
-  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  // Scheduled runs of a prompt or a skill (desk-schedules.ts). They run here while the app is open.
   addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
-    return jsonResponse(await readSchedules(config, workspace.id));
+    return jsonResponse(await resolveLegacySchedules(config, workspace, createScheduleEngine(config), logger));
   });
 
   addRoute(routes, "POST", "/workspace/:id/schedules", "client", async (ctx) => {
@@ -4152,10 +4263,14 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const playbookId = typeof body.playbookId === "string" ? sanitizeCommandName(body.playbookId) : "";
-    if (!playbookId) throw new ApiError(400, "invalid_payload", "playbookId is required");
+    if (body.playbookId !== undefined) {
+      throw new ApiError(400, "invalid_payload", "playbookId is no longer supported: send a target, a prompt or a skill");
+    }
     const label = typeof body.label === "string" ? body.label.trim().slice(0, 200) : "";
-    return jsonResponse(await addSchedule(config, workspace.id, { playbookId, label, rule: readRule(body.rule) }), 201);
+    return jsonResponse(
+      await addSchedule(config, workspace.id, { target: readTarget(body.target), label, rule: readRule(body.rule) }),
+      201,
+    );
   });
 
   addRoute(routes, "PATCH", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {
@@ -4163,8 +4278,18 @@ function createRoutes(
     requireClientScope(ctx, "collaborator");
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const body = await readJsonBody(ctx.request);
-    const enabled = typeof body.enabled === "boolean" ? body.enabled : undefined;
-    return jsonResponse(await updateSchedule(config, workspace.id, ctx.params.scheduleId, { enabled }));
+    if (body.enabled !== undefined && typeof body.enabled !== "boolean") {
+      throw new ApiError(400, "invalid_payload", "enabled must be true or false");
+    }
+    if (body.label !== undefined && typeof body.label !== "string") throw new ApiError(400, "invalid_payload", "label must be text");
+    return jsonResponse(
+      await updateSchedule(config, workspace.id, ctx.params.scheduleId, {
+        ...(typeof body.enabled === "boolean" ? { enabled: body.enabled } : {}),
+        ...(body.target !== undefined ? { target: readTarget(body.target) } : {}),
+        ...(typeof body.label === "string" ? { label: body.label.trim().slice(0, 200) } : {}),
+        ...(body.rule !== undefined ? { rule: readRule(body.rule) } : {}),
+      }),
+    );
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/schedules/:scheduleId", "client", async (ctx) => {

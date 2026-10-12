@@ -1,4 +1,4 @@
-import type { Message, Part, Session, Todo } from "@redrob-labs/sdk/v2/client";
+import type { Message, Part, Session, SessionStatus, Todo } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 import { normalizeBaseUrl } from "@redrob/types/url";
 import { t } from "../../i18n";
@@ -101,7 +101,7 @@ export type RedrobSessionMessage = {
   parts: Part[];
 };
 
-/** When a scheduled playbook runs (apps/server/src/desk-schedules.ts). */
+/** When a scheduled run happens (apps/server/src/desk-schedules.ts). */
 export type RedrobScheduleRule = {
   mode: "once" | "repeat";
   date?: string;
@@ -115,17 +115,20 @@ export type RedrobScheduleRule = {
 
 export type RedrobScheduleRunState = "running" | "waiting" | "done" | "missed" | "failed";
 
+/** What a schedule runs: a prompt as written, or a skill with optional extra instructions. */
+export type RedrobScheduleTarget = { kind: "prompt"; text: string } | { kind: "skill"; name: string; instructions?: string };
+
 export type RedrobScheduleState = {
   schedules: Array<{
     id: string;
-    playbookId: string;
+    target: RedrobScheduleTarget;
     label: string;
     rule: RedrobScheduleRule;
     nextRunAt: number | null;
     enabled: boolean;
-    lastRun: { state: RedrobScheduleRunState; at: number; sessionId?: string } | null;
+    lastRun: { state: RedrobScheduleRunState; at: number; sessionId?: string; reason?: string } | null;
   }>;
-  runs: Array<{ id: string; scheduleId: string; sessionId: string | null; at: number; state: RedrobScheduleRunState }>;
+  runs: Array<{ id: string; scheduleId: string; sessionId: string | null; at: number; state: RedrobScheduleRunState; reason?: string }>;
   waiting: Array<{
     id: string;
     scheduleId: string;
@@ -141,10 +144,8 @@ export type RedrobSessionSnapshot = {
   session: Session;
   messages: RedrobSessionMessage[];
   todos: Todo[];
-  status:
-    | { type: "idle" }
-    | { type: "busy" }
-    | { type: "retry"; attempt: number; message: string; next: number };
+  /** The engine's status, `blocked` included: a turn the console refused with an action to take. */
+  status: SessionStatus;
 };
 
 export type RedrobPluginItem = {
@@ -154,6 +155,16 @@ export type RedrobPluginItem = {
   path?: string;
 };
 
+/** A SKILL.md's `metadata`, as redrob-server lists it. */
+export type RedrobSkillMetadata = {
+  profession?: string;
+  task?: string;
+  language?: string;
+  family?: string;
+  version?: number;
+  source?: "team" | "library";
+};
+
 export type RedrobSkillItem = {
   name: string;
   path: string;
@@ -161,6 +172,41 @@ export type RedrobSkillItem = {
   scope: "project" | "global";
   trigger?: string;
   error?: string;
+  metadata?: RedrobSkillMetadata;
+};
+
+/** Where a library answer came from: the Console, or the copy bundled with redrob-server. */
+export type RedrobLibrarySource = "console" | "snapshot";
+
+export type RedrobLibrarySkillSummary = {
+  name: string;
+  description: string;
+  profession: string;
+  task: string;
+  language: string;
+  family: string;
+  version: number;
+};
+
+export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; source: RedrobLibrarySource };
+
+export type RedrobLibraryFilter = { profession?: string; task?: string; language?: string; q?: string };
+
+export type RedrobSkillLabel = { en: string; ko: string };
+
+export type RedrobSkillTaxonomy = {
+  professions: Array<{ id: string; label: RedrobSkillLabel; tasks: Array<{ id: string; label: RedrobSkillLabel }> }>;
+  languages: Array<{ id: string; label: RedrobSkillLabel }>;
+  source: RedrobLibrarySource;
+};
+
+/** GET /workspace/:id/skills/team: what the last check of the Console installed. */
+export type RedrobTeamSkillsState = {
+  etag: string | null;
+  installed: string[];
+  conflicts: string[];
+  lastSyncAt: number | null;
+  status: "synced" | "not_connected" | "not_member" | "unreachable" | null;
 };
 
 export type RedrobSkillContent = {
@@ -1094,7 +1140,6 @@ export type RedrobTeamPolicyStatus = {
   signedWithTestKey?: boolean;
   privacy?: { level: "off" | "standard" | "high" | "strict"; locked: boolean };
   notes?: number;
-  playbooks?: string[];
   skills?: string[];
   sync: {
     checkedAt: number | null;
@@ -1908,7 +1953,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         hostToken,
         timeoutMs: timeouts.config,
       }),
-    addSchedule: (workspaceId: string, payload: { playbookId: string; label: string; rule: RedrobScheduleRule }) =>
+    addSchedule: (workspaceId: string, payload: { target: RedrobScheduleTarget; label: string; rule: RedrobScheduleRule }) =>
       requestJson<RedrobScheduleState>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/schedules`, {
         token,
         hostToken,
@@ -1916,11 +1961,21 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: payload,
         timeoutMs: timeouts.config,
       }),
-    updateSchedule: (workspaceId: string, scheduleId: string, payload: { enabled: boolean }) =>
+    updateSchedule: (
+      workspaceId: string,
+      scheduleId: string,
+      payload: { enabled?: boolean; target?: RedrobScheduleTarget; label?: string; rule?: RedrobScheduleRule },
+    ) =>
       requestJson<RedrobScheduleState>(
         baseUrl,
         `/workspace/${encodeURIComponent(workspaceId)}/schedules/${encodeURIComponent(scheduleId)}`,
         { token, hostToken, method: "PATCH", body: payload, timeoutMs: timeouts.config },
+      ),
+    deleteSchedule: (workspaceId: string, scheduleId: string) =>
+      requestJson<RedrobScheduleState>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/schedules/${encodeURIComponent(scheduleId)}`,
+        { token, hostToken, method: "DELETE", timeoutMs: timeouts.config },
       ),
     answerScheduleWaiting: (workspaceId: string, waitingId: string, approve: boolean) =>
       requestJson<RedrobScheduleState>(
@@ -2089,6 +2144,35 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken },
       );
     },
+    listLibrarySkills: (workspaceId: string, filter: RedrobLibraryFilter = {}) => {
+      const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => Boolean(value))).toString();
+      return requestJson<{ version: string; skills: RedrobLibrarySkillSummary[]; source: RedrobLibrarySource }>(
+        baseUrl,
+        `/workspace/${workspaceId}/skills/library${query ? `?${query}` : ""}`,
+        { token, hostToken },
+      );
+    },
+    getSkillTaxonomy: (workspaceId: string) =>
+      requestJson<RedrobSkillTaxonomy>(baseUrl, `/workspace/${workspaceId}/skills/library/taxonomy`, { token, hostToken }),
+    getLibrarySkill: (workspaceId: string, name: string) =>
+      requestJson<RedrobLibrarySkill>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}`, {
+        token,
+        hostToken,
+      }),
+    installLibrarySkill: (workspaceId: string, name: string) =>
+      requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}/install`, {
+        token,
+        hostToken,
+        method: "POST",
+      }),
+    getTeamSkills: (workspaceId: string) =>
+      requestJson<RedrobTeamSkillsState>(baseUrl, `/workspace/${workspaceId}/skills/team`, { token, hostToken }),
+    syncTeamSkills: (workspaceId: string) =>
+      requestJson<RedrobTeamSkillsState>(baseUrl, `/workspace/${workspaceId}/skills/team/sync`, {
+        token,
+        hostToken,
+        method: "POST",
+      }),
     upsertSkill: (workspaceId: string, payload: { name: string; content: string; description?: string }) =>
       requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills`, {
         token,

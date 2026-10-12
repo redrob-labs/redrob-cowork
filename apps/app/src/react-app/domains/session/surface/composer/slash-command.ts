@@ -38,6 +38,15 @@ export function connectSkillSlashCommandOptions(skills: SkillCard[]): ComposerSl
   });
 }
 
+/**
+ * What `/` offers: skills, MCP prompts and the built-in `compact`. Workspace commands
+ * (`.opencode/commands`, source "command") are not offered; skills replaced them in the Desk.
+ * Their files stay on disk and Settings still lists them.
+ */
+export function isComposerSlashOption(option: Pick<SlashCommandOption, "name" | "source">) {
+  return option.source === "skill" || option.source === "mcp" || option.name === "compact";
+}
+
 export function getSlashCommandQuery(value: string) {
   const match = value.match(SLASH_COMMAND_QUERY_RE);
   return match ? match[1] : null;

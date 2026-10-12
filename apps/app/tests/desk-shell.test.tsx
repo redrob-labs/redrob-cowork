@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { isValidElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Routes, createRoutesFromElements, matchRoutes } from "react-router";
+import { MemoryRouter, Navigate, Routes, createRoutesFromElements, matchRoutes } from "react-router";
 
 import { CHATS } from "../src/react-app/desk/services/fixtures/chats";
 import { at } from "../src/react-app/desk/services/fixtures/sample-day";
@@ -49,7 +49,7 @@ describe("buildDeskNav", () => {
     expect(nav.map((item) => item.heading ?? item.label)).toEqual([
       "New chat",
       "Projects",
-      "Playbooks",
+      "Skills",
       "Scheduled",
       "History",
       "Recent",
@@ -107,7 +107,7 @@ describe("buildDeskNav", () => {
     expect(hrefs).toEqual([
       "#/chat",
       "#/projects",
-      "#/playbooks",
+      "#/skills",
       "#/scheduled",
       "#/history",
       "#/chat/notice",
@@ -242,11 +242,18 @@ describe("Desk routes", () => {
     expect(leaf("/workspace/w1/session/abc")?.params).toMatchObject({ workspaceId: "w1", sessionId: "abc" });
   });
 
+  test("the old Playbooks paths land on Skills", () => {
+    for (const path of ["/playbooks", "/playbook/weekly-update", "/run"]) {
+      const element = leaf(path)?.route.element;
+      expect(isValidElement(element) && element.type === Navigate).toBe(true);
+      expect(isValidElement<{ to: string }>(element) ? element.props.to : null).toBe("/skills");
+    }
+  });
+
   test("the Preview screens render their own screen inside the shell, with no placeholder left", () => {
     const screens: Array<[string, string, string, string]> = [
-      ["/playbooks", "Playbooks", "playbooks", "Preview: sample playbooks."],
-      ["/playbook/notice", "Playbook", "playbooks", "Preview: sample playbooks."],
-      ["/run", "Playbook run", "playbooks", "Preview: a sample run."],
+      ["/skills", "Skills", "skills", "Preview: sample skills."],
+      ["/skill/notice", "notice", "skills", "Preview: sample skills."],
       ["/scheduled", "Scheduled", "scheduled", "Preview: sample schedules."],
       ["/history", "History", "history", "Preview: sample history."],
     ];

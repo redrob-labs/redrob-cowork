@@ -7,7 +7,7 @@ import type { Chat, PrivacyLevel } from "../services/types";
 export type DeskNavId =
   | "chat"
   | "projects"
-  | "playbooks"
+  | "skills"
   | "scheduled"
   | "history"
   | "guide"
@@ -91,7 +91,7 @@ export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
   return [
     place("chat", t("desk.nav_new_chat"), icons.plus),
     place("projects", t("desk.nav_projects"), icons.folder),
-    place("playbooks", t("desk.nav_playbooks"), icons.checklist),
+    place("skills", t("desk.nav_skills"), icons.sparkle),
     place("scheduled", t("desk.nav_scheduled"), icons.calendarClock, count(input.waiting)),
     place("history", t("desk.nav_history"), icons.history),
     { heading: t("desk.nav_recent") },

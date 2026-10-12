@@ -12,10 +12,11 @@
     <title>Redrob Cowork</title>
 
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" type="image/svg+xml" href="/redrob-mark.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <!-- Redrob Design System 2026 product icon. favicon.svg switches to the dark tile itself. -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/splash/redrob-splash.css" />
     <script>
       (function () {
         try {
@@ -37,6 +38,23 @@
   </head>
   <body class="bg-background text-foreground mac:bg-transparent">
     <div id="root"></div>
+    <!-- Launch splash: the Redrob lockup, then the Cowork icon. Once per session; it waits
+         for the app's "redrob:app-ready" event (dispatched by index.react.tsx). -->
+    <script src="/splash/redrob-splash.iife.js"></script>
+    <script>
+      (function () {
+        if (!window.showRedrobSplash) return;
+        var ready = new Promise(function (resolve) {
+          if (window.__redrobAppReady) return resolve();
+          window.addEventListener("redrob:app-ready", resolve, { once: true });
+        });
+        window.showRedrobSplash({
+          logoLight: "/splash/redrob-logo-primary.png",
+          logoDark: "/splash/redrob-logo-primary-white.png",
+          ready: ready,
+        });
+      })();
+    </script>
     <script type="module" src="/src/index.react.tsx"></script>
   </body>
 </html>
