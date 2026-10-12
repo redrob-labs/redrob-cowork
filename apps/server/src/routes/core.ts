@@ -4,7 +4,7 @@ import type { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { EnvStoreReadError, InvalidEnvKeyError, isValidEnvKey, type EnvService } from "../env-file.js";
 import { syncManagedProviderAuth } from "../managed-provider-auth.js";
 import { ApiError } from "../errors.js";
-import { speakWithRedrobEngine } from "../redrob-auth.js";
+import { speakWithRedrobEngine, transcribeWithRedrobEngine } from "../redrob-auth.js";
 import { assertVoiceAllowed } from "../voice-privacy.js";
 import {
   createGoogleWorkspaceConnectFlowManager,
@@ -469,6 +469,20 @@ export function registerCoreRoutes(options: RegisterCoreRoutesOptions): void {
     return new Response(spoken.audio, {
       headers: { "Content-Type": spoken.contentType, "Cache-Control": "no-store" },
     });
+  });
+
+  addRoute(routes, "POST", "/voice/transcribe", "host", async (ctx) => {
+    const body = await readJsonBody(ctx.request);
+    const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId : "";
+    if (!workspaceId) throw new ApiError(400, "workspace_required", "workspaceId is required");
+    const workspace = await resolveWorkspace(config, workspaceId);
+    await assertVoiceAllowed(config, workspace.id);
+    const audio = typeof body.audio === "string" ? body.audio : "";
+    const format = typeof body.format === "string" ? body.format : "";
+    const language = typeof body.language === "string" ? body.language : undefined;
+    return jsonResponse(
+      await transcribeWithRedrobEngine({ config }, { audio, format, ...(language ? { language } : {}) }),
+    );
   });
 
   addRoute(routes, "POST", "/voice/realtime/session", "host", async (ctx) => {
