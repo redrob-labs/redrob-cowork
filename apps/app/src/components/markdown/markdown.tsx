@@ -9,6 +9,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useOpenTargets } from "@/lib/target-provider";
 import type { OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
+import { HTMLPreview } from "@/react-app/domains/session/artifacts/preview";
+import { useOptionalWorkspace } from "@/react-app/shell/workspace-provider";
+import { t } from "@/i18n";
 
 import { applyTextHighlights } from "./text-highlights";
 import {
@@ -26,6 +29,15 @@ export { renderHighlightedMarkdownHtml, renderMarkdownHtml } from "./markdown-pr
 const WORKSPACES_PREFIX_PATTERN = /^workspaces\/[^/]+\//i;
 const WORKSPACE_ID_PREFIX_PATTERN = /^workspace\/(?:ws_[^/]+|\d+|[0-9a-f-]{6,})\//i;
 const CODE_COPY_RESET_DELAY_MS = 2000;
+
+/**
+ * A fence as a document the sandbox can render. An SVG is wrapped in a page that centres it, since a
+ * bare `<svg>` would render at the top left of a blank frame at whatever size it declared.
+ */
+export function previewDocument(code: string, kind: string | undefined): string {
+  if (kind !== "svg") return code;
+  return `<!doctype html><html><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#fff">${code}</body></html>`;
+}
 
 function localPathFromHref(href: string) {
   const trimmed = href.trim();
@@ -104,6 +116,17 @@ function MarkdownBlockInner({
   const { openTargets, onOpenTarget } = useOpenTargets();
   const [linkMenu, setLinkMenu] = useState<{ target: OpenTarget; rect: DOMRect } | null>(null);
   const [imagePreview, setImagePreview] = useState<{ src: string; alt: string } | null>(null);
+  const [codePreview, setCodePreview] = useState<string | null>(null);
+  /*
+   * The preview needs the server's sandbox, so it is offered only where there is a server to ask.
+   * Markdown also renders outside a workspace (the artifact panel's own Markdown preview, for one), and
+   * there the Preview buttons are hidden rather than left to do nothing.
+   */
+  const serverClient = useOptionalWorkspace()?.redrobServerClient ?? null;
+  const codePreviewSandbox = useMemo(
+    () => serverClient?.artifactPreviewSandbox(window.location.origin) ?? null,
+    [serverClient],
+  );
   const syncHtml = useMemo(() => {
     return renderMarkdownHtml(text);
   }, [text]);
@@ -211,6 +234,15 @@ function MarkdownBlockInner({
         return;
       }
 
+      const previewButton = event.target.closest("[data-redrob-code-preview]");
+      if (previewButton instanceof HTMLButtonElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        const code = previewButton.closest("[data-redrob-code-block]")?.querySelector("code")?.textContent ?? "";
+        setCodePreview(previewDocument(code, previewButton.dataset.redrobCodePreview));
+        return;
+      }
+
       const chevron = event.target.closest("[data-redrob-link-chevron]");
       if (chevron instanceof HTMLElement) {
         event.preventDefault();
@@ -275,6 +307,7 @@ function MarkdownBlockInner({
         ref={rootRef}
         className={cn("markdown-content max-w-none select-text text-foreground", className)}
         dangerouslySetInnerHTML={stableInnerHtml}
+        data-redrob-code-preview-available={codePreviewSandbox ? "true" : "false"}
         {...props}
       />
       {linkMenu && onOpenTarget ? (
@@ -284,6 +317,23 @@ function MarkdownBlockInner({
           onOpenTarget={onOpenTarget}
           onClose={() => setLinkMenu(null)}
         />
+      ) : null}
+      {codePreviewSandbox ? (
+        <Dialog
+          open={codePreview !== null}
+          onOpenChange={(open) => {
+            if (!open) setCodePreview(null);
+          }}
+        >
+          <DialogContent className="flex h-[85vh] w-[min(92vw,72rem)] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none">
+            <DialogTitle className="shrink-0 border-b border-border px-4 py-2.5 text-sm font-medium">
+              {t("message.preview")}
+            </DialogTitle>
+            {codePreview !== null ? (
+              <HTMLPreview title={t("message.preview")} content={codePreview} sandbox={codePreviewSandbox} className="min-h-0 flex-1" />
+            ) : null}
+          </DialogContent>
+        </Dialog>
       ) : null}
       <Dialog
         open={imagePreview !== null}

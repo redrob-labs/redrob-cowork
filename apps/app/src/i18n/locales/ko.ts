@@ -1480,6 +1480,8 @@ const ko = {
   "message.copied": "복사됨",
   "message.copy": "메시지 복사",
   "message.copy_code_block": "코드 블록 복사",
+  "message.preview": "미리보기",
+  "message.preview_code_block": "이 코드가 실제로 보이는 모습 미리보기",
   "message.download": "다운로드",
   "message.edit": "메시지 편집",
   "message.expand_item": "{text} 확대",
