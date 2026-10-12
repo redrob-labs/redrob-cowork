@@ -46,6 +46,8 @@ type ComposerProps = {
   mentions: Record<string, ComposerMentionKind>;
   onDraftChange: (value: string) => void;
   onSend: () => void | Promise<void>;
+  /** Sends a spoken message as Send would; true when it went. Enables the Desk voice conversation. */
+  onSendText?: (message: string) => boolean;
   onSteer: () => void | Promise<void>;
   onQueue: () => void | Promise<void>;
   onStop: () => void | Promise<void>;
@@ -1561,7 +1563,12 @@ export function ReactSessionComposer(props: ComposerProps) {
               */}
               <div className="ml-auto flex shrink-0 items-center gap-1.5">
                 {inDeskFrame ? (
-                  <DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
+                  <DeskComposerTools
+                    chatKey={deskChatKey}
+                    draft={props.draft}
+                    onDraftChange={props.onDraftChange}
+                    onSendText={props.onSendText}
+                  >
                     {modelControls}
                   </DeskComposerTools>
                 ) : null}

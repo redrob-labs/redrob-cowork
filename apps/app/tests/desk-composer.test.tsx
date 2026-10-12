@@ -22,10 +22,13 @@ import {
   modeFor,
   NEW_CHAT_KEY,
   resolvePromptAgent,
+  talkFor,
   transcriptHandler,
 } from "../src/react-app/desk/composer/composer-state";
+import { replyToRead, voiceReplyStep } from "../src/react-app/domains/session/voice/voice-conversation";
 import {
   crossCheckStatusValue,
+  deliverTranscript,
   deskStatusItems,
   DeskComposerStatusView,
   DeskComposerToolsView,
@@ -163,10 +166,12 @@ describe("the mic", () => {
     expect(draft).toBe("Note: first second");
     expect(setDraft).toHaveBeenCalledTimes(2);
     expect(send).not.toHaveBeenCalled();
-    // The wired tools are given the draft and its setter, and nothing that sends.
+    // Outside a voice conversation the transcript only joins the draft, even where sending is offered.
+    expect(deliverTranscript({ talk: false, draft: "Note:", text: "first", send: () => true })).toBe("drafted");
+    // The wired tools send only through the one callback a voice conversation uses.
     const tools = read("react-app/desk/composer/desk-composer.tsx");
     const wired = tools.slice(tools.indexOf("export function DeskComposerTools("), tools.indexOf("function crossCheckLevels"));
-    expect(wired).not.toMatch(/onSend|promptAsync|onSubmit/);
+    expect(wired).not.toMatch(/onSend\b|onSend\(|promptAsync|onSubmit/);
     expect(read("react-app/domains/session/voice/voice-dictation.ts")).not.toContain("response.create");
   });
 
@@ -249,12 +254,119 @@ describe("the mic", () => {
   });
 });
 
+describe("a voice conversation", () => {
+  test("sends what was said with what was typed, and falls back to the draft when the chat is busy", () => {
+    const sent: string[] = [];
+    const send = (message: string) => {
+      sent.push(message);
+      return true;
+    };
+    expect(deliverTranscript({ talk: true, draft: "Re: Q3.", text: " 요약해 줘 ", send })).toBe("sent");
+    expect(sent).toEqual(["Re: Q3. 요약해 줘"]);
+    expect(deliverTranscript({ talk: true, draft: "", text: "Hi", send: () => false })).toBe("drafted");
+    expect(deliverTranscript({ talk: true, draft: "", text: "Hi" })).toBe("drafted");
+  });
+
+  test("is off by default, per chat, and moves from the new chat screen to the chat it starts", () => {
+    const store = createDeskComposerStore();
+    expect(talkFor(store.getState().chats, NEW_CHAT_KEY)).toBe(false);
+    store.getState().setTalk(NEW_CHAT_KEY, true);
+    store.getState().awaitReply(NEW_CHAT_KEY);
+    store.getState().claimNewChat("s1");
+    expect(talkFor(store.getState().chats, "s1")).toBe(true);
+    expect(talkFor(store.getState().chats, "s2")).toBe(false);
+    // The answer is awaited by the chat that was started, once.
+    expect(store.getState().takeReply("s2")).toBe(false);
+    expect(store.getState().takeReply("s1")).toBe(true);
+    expect(store.getState().takeReply("s1")).toBe(false);
+  });
+
+  test("the toggle is kept across a restart, a pending answer is not", () => {
+    const memory = new Map<string, string>();
+    const storage = () => ({
+      getItem: (key: string) => memory.get(key) ?? null,
+      setItem: (key: string, value: string) => void memory.set(key, value),
+      removeItem: (key: string) => void memory.delete(key),
+    });
+    const store = createDeskComposerStore({ storage });
+    store.getState().setTalk("s1", true);
+    store.getState().awaitReply("s1");
+    const saved = memory.get(DESK_COMPOSER_STORE_KEY) ?? "";
+    expect(JSON.parse(saved).state).toEqual({ chats: { s1: { talk: true } } });
+  });
+
+  test("reads the whole answer to the last thing said, and nothing before it has one", () => {
+    const message = (id: string, role: "user" | "assistant", text?: string) => ({
+      id,
+      role,
+      parts: text === undefined ? [] : [{ type: "text" as const, text }],
+    });
+    expect(replyToRead([message("u1", "user", "Hi")])).toBeNull();
+    expect(replyToRead([message("u1", "user", "Hi"), message("a1", "assistant")])).toBeNull();
+    expect(
+      replyToRead([
+        message("u0", "user", "Earlier"),
+        message("a0", "assistant", "Old answer"),
+        message("u1", "user", "Summarise"),
+        message("a1", "assistant", "Revenue is up."),
+        message("a2", "assistant", "Costs are flat."),
+      ]),
+    ).toEqual({ id: "a2", text: "Revenue is up.\n\nCosts are flat." });
+  });
+
+  test("the toggle shows only where a spoken message can be sent, and says whether it is on", () => {
+    const view = (talk: boolean | null, micUnavailable: string | null = null) =>
+      renderToStaticMarkup(
+        <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={micUnavailable} onMicPress={noop} onMicRelease={noop} talk={talk} onTalkChange={noop} mode="run" onModeChange={noop} />,
+      );
+    expect(view(null)).not.toContain(en["desk.voice_chat_start"]);
+    expect(view(false)).toMatch(new RegExp(`aria-label="${en["desk.voice_chat_start"]}"[^>]*aria-pressed="false"|aria-pressed="false"[^>]*aria-label="${en["desk.voice_chat_start"]}"`));
+    expect(view(true)).toContain(`aria-label="${en["desk.voice_chat_stop"]}"`);
+    const off = view(false, en["desk.mic_reason_privacy"]);
+    expect(off).toMatch(new RegExp(`aria-label="${en["desk.voice_chat_start"]}. ${en["desk.mic_reason_privacy"]}"[^>]*disabled=""`));
+  });
+
+  test("the answer is read once, after the spoken turn ends and its words have arrived", () => {
+    const user = { id: "u1", role: "user" as const, parts: [{ type: "text" as const, text: "Summarise" }] };
+    const answer = { id: "a1", role: "assistant" as const, parts: [{ type: "text" as const, text: "Revenue is up." }] };
+    let awaited = true;
+    const takeReply = () => {
+      const was = awaited;
+      awaited = false;
+      return was;
+    };
+    // Running: nothing is read, and nobody is asked yet.
+    let step = voiceReplyStep({ streaming: false, due: false }, { streaming: true, messages: [user], takeReply });
+    expect(step.read).toBeNull();
+    expect(awaited).toBe(true);
+    // The turn ends before the answer's words have arrived: the wait goes on.
+    step = voiceReplyStep(step.wait, { streaming: false, messages: [user], takeReply });
+    expect(step).toEqual({ wait: { streaming: false, due: true }, read: null });
+    // They arrive: read once.
+    step = voiceReplyStep(step.wait, { streaming: false, messages: [user, answer], takeReply });
+    expect(step.read).toEqual({ id: "a1", text: "Revenue is up." });
+    step = voiceReplyStep(step.wait, { streaming: false, messages: [user, answer], takeReply });
+    expect(step.read).toBeNull();
+    // A typed message's turn is not read: nobody was waiting for it.
+    step = voiceReplyStep({ streaming: true, due: false }, { streaming: false, messages: [user, answer], takeReply });
+    expect(step.read).toBeNull();
+  });
+
+  test("the session sends a spoken message itself, and runs the wait on every look", () => {
+    const surface = read("react-app/domains/session/surface/session-surface.tsx");
+    expect(surface).toContain("onSendText={handleSendText}");
+    expect(surface).toContain("useDeskComposerStore.getState().takeReply(props.sessionId)");
+    expect(surface).toContain("voiceReplyStep(replyWaitRef.current");
+    expect(read("react-app/domains/session/chat/new-task-composer.tsx")).toContain("onSendText={handleSendText}");
+  });
+});
+
 const markupOf = (html: string, pattern: string) => html.search(new RegExp(pattern));
 
 describe("the tools row", () => {
   test("is Mic, then Plan or Run, then the model", () => {
     const html = renderToStaticMarkup(
-      <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={null} onMicPress={noop} onMicRelease={noop} mode="run" onModeChange={noop}>
+      <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={null} onMicPress={noop} onMicRelease={noop} talk={null} onTalkChange={noop} mode="run" onModeChange={noop}>
         <button type="button" data-model="1">Redrob Auto</button>
       </DeskComposerToolsView>,
     );
@@ -278,6 +390,8 @@ describe("the tools row", () => {
           micUnavailable={props.micUnavailable ?? null}
           onMicPress={noop}
           onMicRelease={noop}
+          talk={null}
+          onTalkChange={noop}
           mode="plan"
           onModeChange={noop}
         />,
@@ -433,7 +547,7 @@ describe("the new chat screen", () => {
   test("the composer puts the Desk tools before Send and the status under the field, only in the frame", () => {
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain("{inDeskFrame ? null : modelControls}");
-    expect(composer).toContain("<DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>\n                    {modelControls}");
+    expect(composer).toMatch(/<DeskComposerTools\s+chatKey=\{deskChatKey\}\s+draft=\{props.draft\}\s+onDraftChange=\{props.onDraftChange\}\s+onSendText=\{props.onSendText\}\s*>\s+\{modelControls\}/);
     expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}");
     expect(composer).toContain("const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;");
   });
