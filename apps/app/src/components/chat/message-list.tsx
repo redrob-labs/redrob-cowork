@@ -11,6 +11,7 @@ import {
   FileIcon,
   FolderOpen,
   LoaderCircle,
+  MessageSquare,
   MoreHorizontal,
   Pencil,
   RotateCcw,
@@ -137,6 +138,9 @@ import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
+import { DeskReviewBar, MessageReview, useReviewUi } from "@/react-app/desk/review/review-thread"
+import { MessageAuthor } from "@/react-app/desk/room/cowork"
+import { DeskHandoffBanner } from "@/react-app/desk/handoff/handoff-open"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
 import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
 import { useFrameStore } from "@/react-app/desk/store/frame-store"
@@ -597,7 +601,7 @@ const AssistantMessage = React.memo(
                   >
                     {body}
                   </MessageContent>}
-                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} /> : null}
+                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} messageId={message.id} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -650,7 +654,8 @@ type UserMessageProps = {
   isStreaming: boolean
 }
 
-const USER_SKILL_TOKEN_RE = /(Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
+// A skill picked in the composer is sent as "Use the `name` skill."; older chats sent the Load form.
+const USER_SKILL_TOKEN_RE = /(Use the `[^`]+` skill\.|Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
 
 function UserSkillChip(props: { name: string }) {
   return (
@@ -753,7 +758,7 @@ function renderUserTextWithSkillChips(text: string, highlightQuery: string | und
   return text.split(USER_SKILL_TOKEN_RE).map((segment) => {
     const key = `${offset}:${segment}`
     offset += segment.length
-    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/)
+    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/) ?? segment.match(/^Use the `([^`]+)` skill\.$/)
     if (skillMatch?.[1]) return <UserSkillChip key={key} name={skillMatch[1]} />
     return <React.Fragment key={key}>{renderPlainTextWithLinks(segment, highlightQuery, key)}</React.Fragment>
   })
@@ -765,7 +770,7 @@ const UserMessage = React.memo(
     // What the person wrote, with the real details where placeholders were sent.
     const placeholders = usePlaceholderMap(sessionId)
     const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
-    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    // Inside the Desk frame a prompt worth repeating can become a skill.
     const inDeskFrame = useInDeskFrame()
     const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
@@ -839,17 +844,18 @@ const UserMessage = React.memo(
                       </MessageAction>
                     ) : null}
                     {inDeskFrame && messageText ? (
-                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                      <MessageAction tooltip={t("desk.skill_save_from_message")}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("desk.playbook_save_from_message")}
-                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                          aria-label={t("desk.skill_save_from_message")}
+                          onClick={() => openModal({ kind: "skill", instructions: messageText })}
                         >
                           <BookmarkPlus />
                         </Button>
                       </MessageAction>
                     ) : null}
+                    {inDeskFrame ? <CommentMessageAction messageId={message.id} /> : null}
                     <MessageAction tooltip={t("message.branch_new_chat")}>
                       <Button
                         variant="ghost"
@@ -898,6 +904,8 @@ const UserMessage = React.memo(
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        {inDeskFrame ? <MessageAuthor sessionId={sessionId} messageId={message.id} /> : null}
+        {inDeskFrame ? <MessageReview sessionId={sessionId} messageId={message.id} /> : null}
       </Message>
     )
   }
@@ -1159,7 +1167,7 @@ function MessageGroup({
   messages,
   isStreaming,
 }: AssistantMessageGroupProps) {
-  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
+  const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking, sessionId } = useMessageList()
   const inDeskFrame = useInDeskFrame()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
@@ -1396,6 +1404,11 @@ function MessageGroup({
           <DeskMemoryNote text={text} />
         </div>
       ))}
+      {inDeskFrame && lastRealItem && !isStreaming ? (
+        <div className={CHAT_COLUMN}>
+          <MessageReview sessionId={sessionId} messageId={lastRealItem.message.id} />
+        </div>
+      ) : null}
       {showDeskReceipt && lastRealItem ? (
         <div className={CHAT_COLUMN}>
           <DeskAnswerFooter
@@ -1469,6 +1482,7 @@ function MessageGroup({
                     <Undo2 />
                   </Button>
                 </MessageAction>
+                {inDeskFrame ? <CommentMessageAction messageId={lastRealItem.message.id} /> : null}
               </>
             ) : null}
           </MessageActions>
@@ -1617,6 +1631,18 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
   )
 }
 
+/** Opens or closes the comment box under one message. */
+function CommentMessageAction({ messageId }: { messageId: string }) {
+  const toggle = useReviewUi((state) => state.toggle)
+  return (
+    <MessageAction tooltip={t("desk.review_comment")}>
+      <Button variant="ghost" size="icon" aria-label={t("desk.review_comment")} onClick={() => toggle(messageId)}>
+        <MessageSquare />
+      </Button>
+    </MessageAction>
+  )
+}
+
 export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
@@ -1645,6 +1671,12 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
+      {inDeskFrame && messages.length > 0 ? (
+        <div className={CHAT_COLUMN}>
+          <DeskHandoffBanner />
+          <DeskReviewBar />
+        </div>
+      ) : null}
       {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
 
       {items.map((item) => {

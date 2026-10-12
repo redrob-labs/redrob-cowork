@@ -2,7 +2,7 @@
  * Domain types for Redrob Desk screens. Every time is epoch milliseconds; the
  * screens format it. Every service result says whether it is sample data.
  */
-import type { RedrobScheduleRule } from "../../../app/lib/redrob-server";
+import type { RedrobScheduleRule, RedrobSkillTaxonomy, RedrobTeamSkillsState } from "../../../app/lib/redrob-server";
 
 /** A service result. `preview` is true when the data comes from fixtures. */
 export type DeskResult<T> = { data: T; preview: boolean };
@@ -25,7 +25,6 @@ export type Project = {
   about: string | null;
   fileCount: number | null;
   chatCount: number | null;
-  playbookIds: string[];
   /** A short label for the last activity, e.g. "2h ago". */
   active: string | null;
   people: string[];
@@ -47,59 +46,35 @@ export type MemoryNote = {
 
 export type NewMemoryNote = { text: string; scope: MemoryNoteScope; chatId?: string };
 
-export type PlaybookStep = {
-  label: string;
-  detail?: string;
-  /** Set when the step stops for a person; the label says who approves what. */
-  approval?: string;
-};
-
-export type Playbook = {
-  id: string;
-  name: string;
-  icon: string;
-  profession: string;
-  highStakes: boolean;
-  purpose: string;
-  summary: string;
-  gets: string;
-  needs: string;
-  impact: { figure: string; label: string };
-  stake: string;
-  sources: Array<{ label: string; url: string }>;
-  steps: PlaybookStep[];
-  owner: string;
-  runCount: number;
-  lastRunAt: number;
-  team: boolean;
-  cadence: string;
-  /** What Run sends: the saved template. Sample playbooks have none. */
-  prompt?: string;
-};
-
-/** What the playbook dialog saves. Without an id it is a new playbook. */
-export type PlaybookDraft = { id?: string; name: string; description: string; steps: string[]; prompt: string };
-
 export type RunState = "done" | "blocked" | "stopped";
+
+/** What a schedule runs: a prompt as written, or a skill with optional extra instructions. */
+export type ScheduleTarget = { kind: "prompt"; text: string } | { kind: "skill"; name: string; instructions?: string };
 
 export type Schedule = {
   id: string;
-  playbookId: string;
+  target: ScheduleTarget;
+  /** The target in a few words: the skill's name, or the prompt's first line. */
+  name: string;
   projectId: string;
   cadence: string;
   nextRunAt: number | null;
   /** Null until the schedule has run once. */
   lastRun: { state: RunState | "running" | "failed"; at: number; label: string } | null;
   enabled: boolean;
+  /** What the server runs on, to start an edit from. Sample schedules have none. */
+  rule?: RedrobScheduleRule;
 };
 
 /** A schedule to save. `rule` is what the server runs on; sample schedules have none. */
-export type NewSchedule = Pick<Schedule, "playbookId" | "projectId" | "cadence" | "nextRunAt"> & { rule?: RedrobScheduleRule };
+export type NewSchedule = Pick<Schedule, "target" | "projectId" | "cadence" | "nextRunAt"> & { rule?: RedrobScheduleRule };
 
 /** A scheduled run stopped at a step that asks a person first. */
 export type WaitingRun = {
   id: string;
-  playbookId: string;
+  scheduleId: string;
+  target: ScheduleTarget;
+  name: string;
   projectId: string;
   title: string;
   description: string;
@@ -108,6 +83,53 @@ export type WaitingRun = {
 };
 
 export type ScheduleBoard = { schedules: Schedule[]; waiting: WaitingRun[] };
+
+/** Where a skill came from: the Console's library, the person's team in the Console, or the person. */
+export type SkillOrigin = "library" | "team" | "mine";
+
+/** What a skill is filed under, as taxonomy ids. Every one is optional. */
+export type SkillTags = { profession?: string; task?: string; language?: string };
+
+/** An installed skill: what the assistant can use, and what a schedule can run. */
+export type DeskSkill = {
+  name: string;
+  description: string;
+  origin: SkillOrigin;
+  tags: SkillTags;
+  /** `global` is the person's own folder, outside the project: shown, never changed here. */
+  scope: "project" | "global";
+};
+
+/** A skill in the Console's library, installed or not. */
+export type LibrarySkill = { name: string; description: string; tags: SkillTags };
+
+/** The Skills screen's filters. Empty means all. */
+export type SkillFilters = SkillTags & { q?: string };
+
+/** The professions, their tasks and the languages skills are filed under, in English and Korean. */
+export type SkillTaxonomy = Omit<RedrobSkillTaxonomy, "source">;
+
+/** One skill to read: installed (with its origin), or one the library has and this workspace has not. */
+export type SkillDetail = {
+  name: string;
+  description: string;
+  tags: SkillTags;
+  /** The instructions, in markdown. */
+  body: string;
+  /** Null for a library skill that is not installed. */
+  installed: Pick<DeskSkill, "origin" | "scope"> | null;
+};
+
+/** What the skill dialog saves: a new skill of the person's own, or a change to one. */
+export type SkillDraft = SkillTags & {
+  name: string;
+  description: string;
+  instructions: string;
+  /** True when changing an existing skill, whose name then stays as it is. */
+  editing: boolean;
+};
+
+export type TeamSkillsState = RedrobTeamSkillsState;
 
 export type HistoryStep = { label: string; state: "done" | "active" | "todo"; meta?: string };
 

@@ -16,7 +16,15 @@ import {
   type CrossCheckDeps,
   type TranscriptMessage,
 } from "../src/react-app/desk/thread/cross-check";
-import { DESK_BLOCK_TAGS, hasDeskBlocks, parseDeskBlocks, type CheckResult } from "../src/react-app/desk/thread/desk-blocks";
+import {
+  DESK_BLOCK_TAGS,
+  anchorIds,
+  claimIds,
+  hasDeskBlocks,
+  parseDeskBlocks,
+  planStepIds,
+  type CheckResult,
+} from "../src/react-app/desk/thread/desk-blocks";
 import { challengeReportProps, factReportProps } from "../src/react-app/desk/thread/desk-thread";
 import { deskSystemText, MEMORY_OFF_INSTRUCTION } from "../src/react-app/desk/thread/memory-off";
 import { permissionAsk, toTranscript } from "../src/react-app/desk/thread/use-desk-cross-check";
@@ -95,6 +103,30 @@ describe("parseDeskBlocks", () => {
     expect(blocks.prose).toBe("");
     expect(blocks.plan).toEqual({ title: "A plan", sections: [], todo: [] });
     expect(parseDeskBlocks(fence("redrob-plan", PLAN)).plan?.sections[0]?.items?.[1]).toBe("Draft the notice.");
+  });
+
+  test("keeps the agent's step and claim ids", () => {
+    const plan = parseDeskBlocks(fence("redrob-plan", { ...PLAN, todo: [{ id: "s1", label: "Read" }, { id: "s2", label: "Write" }] })).plan;
+    expect(plan ? planStepIds(plan) : []).toEqual(["s1", "s2"]);
+    const check = parseDeskBlocks(fence("redrob-check", { fact: { claims: [{ id: "c1", verdict: "holds", claim: "x" }] } })).check;
+    expect(check?.fact ? claimIds(check.fact) : []).toEqual(["c1"]);
+  });
+
+  test("an answer without ids still gets one anchor per item", () => {
+    const plan = parseDeskBlocks(fence("redrob-plan", PLAN)).plan;
+    expect(plan ? planStepIds(plan) : []).toEqual(["idx-1", "idx-2"]);
+    const check = parseDeskBlocks(fence("redrob-check", CHECK)).check;
+    expect(check?.fact ? claimIds(check.fact) : []).toEqual(["idx-1", "idx-2", "idx-3"]);
+  });
+
+  test("a bad id is dropped, not the block", () => {
+    const plan = parseDeskBlocks(fence("redrob-plan", { todo: [{ id: "has space", label: "Read" }, { id: "", label: "Write" }] })).plan;
+    expect(plan?.todo).toHaveLength(2);
+    expect(plan ? planStepIds(plan) : []).toEqual(["idx-1", "idx-2"]);
+  });
+
+  test("repeated and synthetic-looking ids cannot share or take an anchor", () => {
+    expect(anchorIds([{ id: "s1" }, { id: "s1" }, { id: "idx-1" }, {}])).toEqual(["s1", "idx-2", "idx-3", "idx-4"]);
   });
 
   test("reads a check", () => {

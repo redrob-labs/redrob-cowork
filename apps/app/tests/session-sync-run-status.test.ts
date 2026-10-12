@@ -34,7 +34,7 @@ const sessionId = "session-run-status";
 const syncInputs: SyncInput[] = [];
 const subscriptions: Subscription[] = [];
 
-function createSnapshot(status: SessionStatus): RedrobSessionSnapshot {
+function createSnapshot(status: RedrobSessionSnapshot["status"]): RedrobSessionSnapshot {
   return {
     session: {
       id: sessionId,
@@ -144,7 +144,7 @@ describe("session run status ordering", () => {
     seedSessionState(workspaceId, snapshot);
 
     expect(useSessionActivityStore.getState().recordsByWorkspaceId[workspaceId]?.[sessionId]?.status).toBe("idle");
-    expect(getReactQueryClient().getQueryData(statusKey(workspaceId, sessionId))).toEqual({ type: "idle" });
+    expect(getReactQueryClient().getQueryData<SessionStatus>(statusKey(workspaceId, sessionId))).toEqual({ type: "idle" });
 
     releaseSession();
     cleanup();
@@ -188,7 +188,7 @@ describe("session run status ordering", () => {
     seedSessionState(workspaceId, createSnapshot({ type: "busy" }));
 
     expect(useSessionActivityStore.getState().recordsByWorkspaceId[workspaceId]?.[sessionId]?.status).toBe("idle");
-    expect(getReactQueryClient().getQueryData(statusKey(workspaceId, sessionId))).toEqual({ type: "idle" });
+    expect(getReactQueryClient().getQueryData<SessionStatus>(statusKey(workspaceId, sessionId))).toEqual({ type: "idle" });
   });
 
   test("preserves assistant output when an active seed omits it", () => {

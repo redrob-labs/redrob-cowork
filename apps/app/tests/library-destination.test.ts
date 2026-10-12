@@ -70,9 +70,9 @@ describe("library destination", () => {
   });
 
   test("Library agents exclude hidden and subagent entries", () => {
-    expect(isLibraryAgent({ name: "redrob" })).toBe(true);
-    expect(isLibraryAgent({ name: "reviewer", hidden: true })).toBe(false);
-    expect(isLibraryAgent({ name: "explore", mode: "subagent" })).toBe(false);
+    expect(isLibraryAgent({})).toBe(true);
+    expect(isLibraryAgent({ hidden: true })).toBe(false);
+    expect(isLibraryAgent({ mode: "subagent" })).toBe(false);
     expect(
       libraryAgentsFromOpencode([
         { name: "redrob" },

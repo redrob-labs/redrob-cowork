@@ -74,7 +74,7 @@ export function ConnectStep({
           redrobConnected,
         }),
       );
-      setError("Could not check what is installed on this computer. You can still choose below.");
+      setError(t("onboarding.connect_detect_failed"));
     }
   }, [fetchAvailability, redrobConnected]);
 

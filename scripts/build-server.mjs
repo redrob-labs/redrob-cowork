@@ -29,6 +29,12 @@ run(
   [...packageManager.args, "--filter", "@redrob-labs/route-labeller", "build"],
   repoRoot,
 );
+// So is the work labeller (insights: the work classifier, the session recorder, the sync).
+run(
+  packageManager.command,
+  [...packageManager.args, "--filter", "@redrob-labs/work-labeller", "build"],
+  repoRoot,
+);
 run(
   packageManager.command,
   [...packageManager.args, "--filter", "redrob-server", "exec", "tsc", "-p", "tsconfig.json"],

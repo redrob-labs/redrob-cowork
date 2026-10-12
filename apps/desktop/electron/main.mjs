@@ -1,3 +1,4 @@
+import { handoffLinkForPath, handoffLinksFromArgv, isHandoffFilePath } from "./handoff-file-links.mjs";
 import { processBlankSlateProfile, resolveBlankSlateLaunch } from "./blank-slate-profile.mjs";
 import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -38,6 +39,7 @@ import { createApplicationMenu } from "./app-menu.mjs";
 import { applyBrandAppName } from "./brand-app-name.mjs";
 import { createBrowserPanel } from "./browser-panel.mjs";
 import { createWorkspaceStore } from "./workspace-store.mjs";
+import { createCoworkBridge, createJoinStore, loadEndpointKey, registerCoworkIpc } from "./cowork/bridge.mjs";
 import {
   buildNukeManifest,
   executeNukeFreshStart,
@@ -1042,6 +1044,44 @@ const browserPanel = createBrowserPanel({
 
 const workspaceStore = createWorkspaceStore({ app });
 
+/*
+ * Live co-working's bridge (see cowork/bridge.mjs). Nothing runs until the renderer asks: the iroh
+ * binding is loaded lazily so an Intel Mac, which has none, still boots.
+ */
+/** @type {(event: object) => void} */
+let emitCoworkEvent = () => {};
+const coworkBridge = createCoworkBridge({
+  loadIroh: async () => {
+    try {
+      return require("@number0/iroh");
+    } catch {
+      return null;
+    }
+  },
+  platform: process.platform,
+  arch: process.arch,
+  packaged: app.isPackaged,
+  scheme: DESKTOP_PROTOCOL_SCHEME,
+  schemes: app.isPackaged ? [DESKTOP_PROTOCOL_SCHEME] : [DESKTOP_PROTOCOL_SCHEME, "redrob-dev"],
+  serverInfo: async () => {
+    const boot = await ensureRuntimeBootstrap();
+    if (!boot?.ok) throw Object.assign(new Error(boot?.error ?? "Redrob Cowork is still starting"), { code: "server_unavailable" });
+    return assertRedrobServerReady(await runtimeManager.redrobServerInfo());
+  },
+  // loopback-fetch: only ever this machine's redrob-server, at the base URL it reported.
+  localFetch: (url, init) => fetch(url, init),
+  endpointKey: () => loadEndpointKey(path.join(app.getPath("userData"), "cowork")),
+  addRemoteWorkspace: (input) => workspaceStore.createRemoteWorkspace(input),
+  // Joined chats survive a restart: the bridge redials them and moves the workspace if its port did.
+  joinStore: createJoinStore(path.join(app.getPath("userData"), "cowork")),
+  updateRemoteWorkspace: (input) => workspaceStore.updateRemoteWorkspace(input),
+  remoteToken: async (remoteWorkspaceId) =>
+    (await workspaceStore.readWorkspaceState()).workspaces.find((entry) => entry.id === remoteWorkspaceId)?.redrobToken ?? null,
+  emit: (event) => emitCoworkEvent(event),
+  // Two dev instances on one machine with no relay: invites carry socket addresses.
+  directAddresses: !app.isPackaged && process.env.REDROB_COWORK_DIRECT_ADDRESSES === "1",
+});
+
 
 function normalizePlatform(value) {
   if (value === "darwin" || value === "linux") return value;
@@ -1050,7 +1090,7 @@ function normalizePlatform(value) {
 }
 
 function forwardedDeepLinks(argv) {
-  return argv
+  const links = argv
     .slice(1)
     .map((entry) => entry.trim())
     .filter(
@@ -1060,6 +1100,8 @@ function forwardedDeepLinks(argv) {
         entry.startsWith("https://") ||
         entry.startsWith("http://"),
     );
+  // A double-clicked .redrobhandoff on Windows and Linux arrives as a path in argv.
+  return [...links, ...handoffLinksFromArgv(argv, { scheme: DESKTOP_PROTOCOL_SCHEME, exists: existsSync })];
 }
 
 function queueDeepLinks(urls) {
@@ -2552,6 +2594,7 @@ ipcMain.handle("redrob:terminal:kill", (event, terminalId) => {
 });
 
 browserPanel.registerIpc(ipcMain);
+emitCoworkEvent = registerCoworkIpc({ ipcMain, bridge: coworkBridge, getWindow: () => mainWindow });
 
 registerMigrationIpc({ app, ipcMain });
 const { ensureAutoUpdater } = registerUpdaterIpc({
@@ -2587,6 +2630,7 @@ or use: pnpm dev:worktree`);
     void Promise.all([
       disposeRuntimeBeforeQuit(),
       uiControlServer.stop(),
+      coworkBridge.close().catch(() => undefined),
     ]).finally(() => {
       scheduleBlankSlateProfileCleanup();
       app.quit();
@@ -2601,6 +2645,19 @@ or use: pnpm dev:worktree`);
     win.show();
     win.focus();
     queueDeepLinks(forwardedDeepLinks(argv));
+  });
+
+  // macOS hands a double-clicked .redrobhandoff over as open-file, before or after launch.
+  app.on("open-file", async (event, filePath) => {
+    if (!isHandoffFilePath(filePath)) return;
+    event.preventDefault();
+    const win = await createMainWindow();
+    if (win.isMinimized()) {
+      win.restore();
+    }
+    win.show();
+    win.focus();
+    queueDeepLinks([handoffLinkForPath(filePath, DESKTOP_PROTOCOL_SCHEME)]);
   });
 
   app.on("open-url", async (event, url) => {
@@ -2660,6 +2717,8 @@ or use: pnpm dev:worktree`);
     }));
 
     queueDeepLinks(forwardedDeepLinks(process.argv));
+    // Reach the hosts of chats joined before the restart. Nothing loads when there are none.
+    void coworkBridge.rejoin().catch(() => undefined);
     const win = await createMainWindow();
     if (process.platform === "linux" && !BLANK_SLATE_LAUNCH.enabled) {
       await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);

@@ -1303,6 +1303,200 @@
   color: var(--ink-muted);
 }
 
+/* Handoff: what goes with a chat a teammate takes over. */
+.desk-handoff,
+.desk-handoff__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.desk-handoff__group {
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.desk-handoff__group legend,
+.desk-handoff__group > b {
+  margin-bottom: var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+/* Live co-working (desk/room/cowork.tsx). */
+.desk-cowork {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-cowork__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.desk-cowork__row,
+.desk-cowork__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-cowork__person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.desk-cowork__controls {
+  flex-basis: 100%;
+  padding-left: var(--space-6);
+}
+.desk-cowork__queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+.desk-cowork__author {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-end;
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.desk-handoff__facts > div {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-3);
+}
+
+.desk-handoff__facts dt {
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts dd {
+  margin: 0;
+  color: var(--ink-primary);
+}
+
+.desk-handoff__findings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Review: comments on a chat, its steps and claims, and the verdict above it. */
+.desk-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--border-subtle, var(--ink-muted));
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.desk-review__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.desk-review__comment {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.desk-review__comment[data-resolved] .desk-review__text {
+  color: var(--ink-muted);
+}
+
+.desk-review__body,
+.desk-review__form,
+.desk-review__group {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.desk-review__form {
+  gap: var(--space-2);
+}
+
+.desk-review__meta,
+.desk-review__item,
+.desk-review__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink-secondary);
+}
+
+.desk-review__meta b,
+.desk-review__item {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-review__text,
+.desk-review__note {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink-primary);
+}
+
+.desk-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.desk-review__bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .desk-settings__auto {
   display: flex;
   flex-direction: column;
@@ -1353,23 +1547,18 @@
   list-style: none;
 }
 
-/* Preview screens (Playbooks, a run, Scheduled, History, Model Guide) on sample data. */
+/* Desk screens that can show sample data: Skills, Scheduled, History, Model Guide. */
 .desk-preview--wide {
   max-width: none;
 }
 
-.desk-preview__list,
-.desk-preview__sources {
+.desk-preview__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.desk-preview__sources {
-  gap: var(--space-2);
 }
 
 .desk-preview__wait {
@@ -1387,38 +1576,6 @@
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
-}
-
-.desk-preview__worth {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-radius: --theme(--radius-lg);
-  background: var(--surface-raised);
-}
-
-.desk-preview__impact {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: 0;
-  color: var(--ink-secondary);
-}
-
-.desk-preview__impact b {
-  font-size: 24px;
-  line-height: 32px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-primary);
-}
-
-.desk-preview__status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
 }
 
 .desk-preview__figure {
@@ -1439,6 +1596,40 @@
 .desk-preview__what span {
   font-size: 13px;
   color: var(--ink-muted);
+}
+
+/* Skills: the filters above the list, and each row's name, tags and actions. */
+.desk-skills__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.desk-skills__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-skills__name {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.desk-skills__name:hover {
+  text-decoration: underline;
+}
+
+.desk-skills__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
 }
 
 @media (max-width: 900px) {

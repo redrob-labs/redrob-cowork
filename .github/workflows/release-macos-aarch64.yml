@@ -581,6 +581,20 @@ jobs:
           echo "macOS Electron release assets must be notarized. Re-run with notarize=true or set MACOS_NOTARIZE=true." >&2
           exit 1
 
+      # Upstream ships no Intel Mac build of the co-working library (@number0/iroh), so we build
+      # it from the same tag the installed package came from, and prove it under Rosetta before
+      # packaging. electron-builder unpacks and signs it with the rest of node_modules/@number0.
+      # A recovery rerun of a tag from before this existed skips it: that app predates Intel co-working.
+      - name: Build the co-working binding (Intel Mac)
+        if: matrix.target_triple == 'x86_64-apple-darwin' && hashFiles('apps/desktop/scripts/build-iroh-darwin-x64.sh') != ''
+        shell: bash
+        run: bash apps/desktop/scripts/build-iroh-darwin-x64.sh
+
+      - name: Test the co-working binding (Intel Mac, under Rosetta)
+        if: matrix.target_triple == 'x86_64-apple-darwin' && hashFiles('apps/desktop/scripts/test-iroh-darwin-x64.sh') != ''
+        shell: bash
+        run: bash apps/desktop/scripts/test-iroh-darwin-x64.sh
+
       - name: Build Electron app
         shell: bash
         env:
@@ -664,6 +678,22 @@ jobs:
             --config ${{ matrix.builder_config }} \
             ${{ matrix.electron_args }} \
             --publish never
+
+      # The binding built above must reach the Intel app, unpacked from the asar and signed,
+      # or Intel Macs quietly fall back to "co-working needs Apple silicon".
+      - name: Verify the co-working binding is packaged (Intel Mac)
+        if: matrix.target_triple == 'x86_64-apple-darwin' && hashFiles('apps/desktop/scripts/build-iroh-darwin-x64.sh') != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          found="$(find apps/desktop/dist-electron -path '*.app/Contents/Resources/app.asar.unpacked/*' -name iroh.darwin-x64.node | head -1)"
+          if [ -z "$found" ]; then
+            echo "The Intel app has no iroh.darwin-x64.node under app.asar.unpacked" >&2
+            exit 1
+          fi
+          test "$(lipo -archs "$found")" = "x86_64"
+          codesign --verify --strict "$found"
+          echo "co-working binding packaged and signed: $found"
 
       # The engine reaches the app through an electron-builder `extraResources`
       # filter that names files exactly. A filter naming a file that is not

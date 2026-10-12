@@ -28,7 +28,7 @@ export async function signTestPolicy(
 
 export function samplePolicy(overrides: Partial<TeamPolicy> = {}): TeamPolicy {
   return {
-    v: 1,
+    v: 2,
     accountId: "acc_vectors",
     version: 1,
     issuedAt: "2026-10-06T00:00:00.000Z",
@@ -42,7 +42,6 @@ export function samplePolicy(overrides: Partial<TeamPolicy> = {}): TeamPolicy {
     },
     notes: [{ id: "note_1", text: "House style: numbered clauses" }],
     connectors: { allow: [{ name: "notes", type: "remote", url: "https://notes.example.com/mcp" }], allowLocalPrograms: false },
-    playbooks: [{ name: "weekly-update", description: "Weekly update", template: "Write this week's update." }],
     skills: [{ name: "house-style", description: "House style", content: "Use numbered clauses." }],
     ...overrides,
   };

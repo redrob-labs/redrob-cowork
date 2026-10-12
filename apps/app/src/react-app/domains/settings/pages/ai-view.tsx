@@ -28,17 +28,16 @@ type ConnectedProvider = {
 export type AiSettingsViewProps = {
   busy: boolean;
   providerAuthBusy: boolean;
-  providerStatusLabel: string;
-  providerStatusStyle: string;
-  providerSummary: string;
   connectedProviders: ConnectedProvider[];
   disconnectingProviderId: string | null;
   providerConnectError: string | null;
   providerDisconnectStatus: string | null;
   providerDisconnectError: string | null;
   onOpenProviderAuth: () => void | Promise<void>;
-  /** Opens the full model list, with search, across every connected provider. */
-  onOpenAllModels: () => void;
+  /** Opens the model list: one provider's models, or every connected provider's when no id is given. */
+  onBrowseModels: (providerId?: string) => void;
+  /** How many models each connected provider offers, by provider id. */
+  modelCounts: Record<string, number>;
   onDisconnectProvider: (providerId: string) => void | Promise<void>;
   canDisconnectProvider: (provider: ConnectedProvider) => boolean;
   canAddProviders: boolean;
@@ -59,123 +58,108 @@ function providerSourceBadgeClassName(input: { source?: ConnectedProvider["sourc
   return "shrink-0 rounded-full border border-dls-border bg-dls-sidebar/40 px-2 py-0.5 text-2xs font-medium text-muted-foreground";
 }
 
-function providerStatusTone(label: string): "ready" | "warning" | "neutral" {
-  if (label.toLowerCase().includes("connected")) return "ready";
-  if (label.toLowerCase().includes("error") || label.toLowerCase().includes("fail")) return "warning";
-  return "neutral";
+/** What a provider is to the person reading, in a sentence, instead of its id. */
+function providerLine(provider: ConnectedProvider): string {
+  if (provider.id === "redrob") return t("settings.ai_redrob_line");
+  return t("settings.ai_account_line", { provider: provider.name });
 }
 
+/**
+ * Settings, AI: where the models come from, and what each source gives you.
+ *
+ * Providers are the parent and models belong to them, so the page reads as "your accounts, and what
+ * each one gives you". The full model list used to be a section of its own beside the providers; it is
+ * now each provider's "Browse models", plus one "Browse all models" for every connected provider at once.
+ */
 export function AiSettingsView(props: AiSettingsViewProps) {
+  const total = Object.values(props.modelCounts).reduce((sum, count) => sum + count, 0);
+  // Redrob leads: it is included and is where Redrob Auto lives. The rest keep the order they came in.
+  const providers = [...props.connectedProviders].sort((a, b) => Number(b.id === "redrob") - Number(a.id === "redrob"));
   return (
     <LayoutStack>
-      {/*
-        ---- Models ----
-        The composer's model menu shows Redrob Auto and one recommended model per lab. Every model from
-        every connected provider, with search, is here, for whoever wants to pick one by name.
-      */}
       <LayoutSection>
         <LayoutSectionHeader>
-          <LayoutSectionTitle>{t("settings.models_title")}</LayoutSectionTitle>
-          <LayoutSectionDescription>{t("settings.models_desc")}</LayoutSectionDescription>
-        </LayoutSectionHeader>
-        <LayoutSectionItem>
-          <LayoutSectionItemHeader>
-            <LayoutSectionItemTitle>{t("model_picker.all_models")}</LayoutSectionItemTitle>
-            <LayoutSectionItemHeaderActions>
-              <Button onClick={props.onOpenAllModels} disabled={props.busy} data-testid="ai-settings-all-models">
-                {t("settings.models_open")}
-              </Button>
-            </LayoutSectionItemHeaderActions>
-          </LayoutSectionItemHeader>
-        </LayoutSectionItem>
-      </LayoutSection>
-
-      {/* ---- Providers ---- */}
-      <LayoutSection>
-        <LayoutSectionHeader>
-          <LayoutSectionTitle>{t("settings.providers_title")}</LayoutSectionTitle>
-          <LayoutSectionDescription>{t("settings.providers_desc")}</LayoutSectionDescription>
+          <LayoutSectionTitle>{t("settings.ai_title")}</LayoutSectionTitle>
+          <LayoutSectionDescription>{t("settings.ai_desc")}</LayoutSectionDescription>
         </LayoutSectionHeader>
 
-        <LayoutSectionItem>
-          <LayoutSectionItemHeader>
-            <LayoutSectionItemTitle>
-              {props.providerSummary}
-              <SettingsStatusBadge
-                tone={providerStatusTone(props.providerStatusLabel)}
-                label={props.providerStatusLabel}
-              />
-            </LayoutSectionItemTitle>
-            {props.canAddProviders ? (
-              <LayoutSectionItemHeaderActions>
-                <Button
-                  onClick={() => void props.onOpenProviderAuth()}
-                  disabled={props.busy || props.providerAuthBusy}
-                >
-                  {/*
-                    The label has to answer to what is directly above it. This
-                    button opens the provider picker, which adds a provider and
-                    re-authenticates an existing one — but sitting under a row
-                    that already reads "Connected", the word "Connect" looked
-                    like the app had failed to notice its own state. So it says
-                    "Connect" only while nothing is connected, and "Manage"
-                    once something is.
-                  */}
-                  {props.providerAuthBusy
-                    ? t("settings.loading_providers")
-                    : props.connectedProviders.length > 0
-                      ? t("settings.manage_providers")
-                      : t("settings.connect_provider")}
-                </Button>
-              </LayoutSectionItemHeaderActions>
-            ) : null}
-          </LayoutSectionItemHeader>
-        </LayoutSectionItem>
-
-        {props.connectedProviders.length > 0 ? (
-          <div className="space-y-2">
-            {props.connectedProviders.map((provider) => {
-              const sourceLabel = providerSourceLabel(provider.source);
-              return (
-                <LayoutSectionItem
-                  key={provider.id}
-                  className="flex-row flex-wrap items-center justify-between gap-3 rounded-2xl border border-dls-border px-4 py-3"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <ProviderIcon providerId={provider.id} size={20} className="text-dls-text" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium text-dls-text">{provider.name}</span>
-                        {sourceLabel ? (
-                          <span className={providerSourceBadgeClassName({ source: provider.source })}>
-                            {sourceLabel}
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="truncate font-mono text-xs text-muted-foreground">{provider.id}</div>
+        <div className="space-y-2">
+          {providers.map((provider) => {
+            const sourceLabel = providerSourceLabel(provider.source);
+            const count = props.modelCounts[provider.id] ?? 0;
+            return (
+              <LayoutSectionItem
+                key={provider.id}
+                className="flex-row flex-wrap items-center justify-between gap-3 rounded-2xl border border-dls-border px-4 py-3"
+              >
+                <div className="flex min-w-0 flex-1 basis-80 items-center gap-3" data-provider={provider.id}>
+                  <ProviderIcon providerId={provider.id} size={22} className="text-dls-text" />
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="truncate text-sm font-medium text-dls-text">{provider.name}</span>
+                      <SettingsStatusBadge tone="ready" label={t("settings.ai_connected")} />
+                      {sourceLabel ? (
+                        <span className={providerSourceBadgeClassName({ source: provider.source })}>{sourceLabel}</span>
+                      ) : null}
                     </div>
+                    <div className="text-xs text-muted-foreground">{providerLine(provider)}</div>
+                    {count > 0 ? (
+                      <div className="text-xs text-muted-foreground">{t("settings.ai_model_count", { count })}</div>
+                    ) : null}
                   </div>
-                  <Button
-                      variant="destructive"
-                      onClick={() => void props.onDisconnectProvider(provider.id)}
-                      disabled={
-                        props.busy ||
-                        props.providerAuthBusy ||
-                        props.disconnectingProviderId !== null ||
-                        !props.canDisconnectProvider(provider)
-                      }
+                </div>
+                <div className="flex items-center gap-2">
+                  {count > 0 ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => props.onBrowseModels(provider.id)}
+                      disabled={props.busy}
+                      data-testid={`ai-browse-${provider.id}`}
                     >
-                      {props.disconnectingProviderId === provider.id
-                        ? t("settings.disconnecting")
-                        : props.canDisconnectProvider(provider)
-                          ? t("settings.disconnect")
-                          : t("settings.managed_by_env")}
+                      {t("settings.ai_browse")}
                     </Button>
-                </LayoutSectionItem>
-              );
-            })}
-          </div>
-        ) : null}
+                  ) : null}
+                  <Button
+                    variant="ghost"
+                    onClick={() => void props.onDisconnectProvider(provider.id)}
+                    disabled={
+                      props.busy ||
+                      props.providerAuthBusy ||
+                      props.disconnectingProviderId !== null ||
+                      !props.canDisconnectProvider(provider)
+                    }
+                  >
+                    {props.disconnectingProviderId === provider.id
+                      ? t("settings.disconnecting")
+                      : props.canDisconnectProvider(provider)
+                        ? t("settings.disconnect")
+                        : t("settings.managed_by_env")}
+                  </Button>
+                </div>
+              </LayoutSectionItem>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {props.canAddProviders ? (
+            <Button
+              variant="outline"
+              onClick={() => void props.onOpenProviderAuth()}
+              disabled={props.busy || props.providerAuthBusy}
+              data-testid="ai-connect-account"
+            >
+              {props.providerAuthBusy ? t("settings.loading_providers") : t("settings.ai_connect")}
+            </Button>
+          ) : (
+            <span />
+          )}
+          {total > 0 ? (
+            <Button onClick={() => props.onBrowseModels()} disabled={props.busy} data-testid="ai-browse-all">
+              {t("settings.ai_browse_all", { count: total })}
+            </Button>
+          ) : null}
+        </div>
 
         {props.providerConnectError ? (
           <SettingsNotice tone="error">{props.providerConnectError}</SettingsNotice>
@@ -187,7 +171,7 @@ export function AiSettingsView(props: AiSettingsViewProps) {
           <SettingsNotice tone="error">{props.providerDisconnectError}</SettingsNotice>
         ) : null}
 
-        <LayoutSectionItemFootnote>{t("settings.api_keys_info")}</LayoutSectionItemFootnote>
+        <LayoutSectionItemFootnote>{t("settings.ai_keys_footnote")}</LayoutSectionItemFootnote>
       </LayoutSection>
 
       {/* ---- Credit and payment ---- */}

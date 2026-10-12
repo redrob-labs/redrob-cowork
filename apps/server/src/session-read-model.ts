@@ -32,6 +32,21 @@ export const sessionStatusSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("idle") }),
   z.object({ type: z.literal("busy") }),
   z.object({ type: z.literal("retry"), attempt: z.number(), message: z.string(), next: z.number() }),
+  // A turn the console refused with something the user can act on (top up, sign in). It has ended.
+  z.object({
+    type: z.literal("blocked"),
+    message: z.string(),
+    action: z
+      .object({
+        reason: z.string(),
+        provider: z.string(),
+        title: z.string(),
+        message: z.string(),
+        label: z.string(),
+        link: z.string().optional(),
+      })
+      .optional(),
+  }),
 ]);
 
 export const sessionTodoSchema = z

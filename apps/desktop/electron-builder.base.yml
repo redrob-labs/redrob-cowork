@@ -26,6 +26,14 @@ extraResources:
       - "*.onnx"
       - tokenizer.json
       - NOTICE.md
+  # The work classifier's encoder, pinned the same way; scripts/prepare-insights-model.mjs fills it in.
+  - from: resources/insights-model
+    to: insights-model
+    filter:
+      - manifest.json
+      - "*.onnx"
+      - tokenizer.json
+      - NOTICE.md
   # The route model redrob-server labels requests to Redrob Auto with, pinned by the manifest in
   # @redrob-labs/route-labeller. scripts/prepare-route-model.mjs fetches and verifies it.
   - from: resources/route-model
@@ -52,6 +60,10 @@ asarUnpack:
   - node_modules/node-pty/**
   # dlopen cannot read inside app.asar: the binding and the libonnxruntime beside it stay on disk.
   - node_modules/onnxruntime-node/bin/**
+  # The iroh binding for live co-working (docs/features/handoff-and-live-coworking): the main
+  # package and the one platform package npm installed beside it.
+  - node_modules/@number0/**
+  - node_modules/.pnpm/@number0+iroh*/**
 npmRebuild: false
 afterPack: scripts/electron-after-pack.cjs
 afterSign: scripts/electron-after-sign.cjs

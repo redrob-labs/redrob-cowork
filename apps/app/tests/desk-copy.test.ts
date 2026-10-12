@@ -43,6 +43,7 @@ const pathLike = [/[A-Za-z]:\\/, /\/Users\//, /\/home\//, /\\\\/, /\.opencode\//
 const allowedCaps = new Set([
   "HTML", // a file type, if the Files panel ever names one
   "JSON", // a file type, if the Files panel ever names one
+  "REDACTED", // the literal marker a handoff writes in place of a secret, shown as it will appear
 ]);
 
 function violations(check: (value: string) => string | null) {

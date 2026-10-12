@@ -219,6 +219,9 @@ describe("supported locales", () => {
       // the message names the thing the user has to go and fix. Kept as an
       // explicit list rather than allowing bare "name"/"version" everywhere.
       /\b(server_name|workspaceId|eval)\b/g,
+      // The literal marker a handoff writes in place of a secret (REDACTED in
+      // apps/server/src/text-secrets.ts). The copy shows it as it will appear.
+      /\[REDACTED\]/g,
       // The support address, matched as a whole so the generic word rules do
       // not tear "team" and "io" out of it and report them as leftover English.
       /team@redrob\.io/g,

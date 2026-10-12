@@ -100,6 +100,8 @@ import {
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
+import { useHandoffLock } from "@/react-app/desk/handoff/handoff-open";
+import { ConnectedRoomQueue, useRoomQueue } from "@/react-app/desk/room/cowork";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
@@ -339,6 +341,8 @@ export type SessionSurfaceProps = {
   onModelPickerOpenChange: (open: boolean) => void;
   onModelChange: (model: ModelRef, variant?: string | null) => void;
   onSendDraft: (draft: ComposerDraft, sessionId: string) => Promise<SessionSendResult>;
+  /** The parts a draft would be sent as, files uploaded; for queueing one with attachments in a room. */
+  onBuildRoomParts?: (draft: ComposerDraft, sessionId: string) => Promise<ReadonlyArray<Record<string, unknown>>>;
   onDraftChange: (draft: ComposerDraft) => void;
   attachmentsEnabled: boolean;
   attachmentsDisabledReason: string | null;
@@ -716,6 +720,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
   // session B when the route swaps the same surface component to another
   // session.
   const queuedItems = useComposerStateStore((state) => getComposerQueuedDrafts(state, props.sessionId));
+  // In a live room, a message for later waits on the host's server where everyone can see it.
+  const roomQueue = useRoomQueue(props.sessionId);
+  const roomQueued = roomQueue?.items.length ?? 0;
   const appendQueuedDraft = useComposerStateStore((state) => state.appendQueuedDraft);
   const removeQueuedDraftFromStore = useComposerStateStore((state) => state.removeQueuedDraft);
   const updateQueuedDraftInStore = useComposerStateStore((state) => state.updateQueuedDraft);
@@ -1317,14 +1324,36 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // Queue: hold the draft locally and clear the composer. The drain effect
   // sends it once the session reports idle.
-  const handleQueue = useCallback(() => {
+  const handleQueue = useCallback(async () => {
     const text = draft.trim();
     if (!text && attachments.length === 0) return;
+    if (roomQueue && text && attachments.length === 0) {
+      if (await roomQueue.enqueue(text)) clearComposer();
+      return;
+    }
+    // With files, they are uploaded now (to the host, for a guest) and the message waits with them.
+    if (roomQueue && props.onBuildRoomParts) {
+      const draftToQueue = withoutRevertTarget(buildDraft(text, attachments));
+      if (!draftToQueue) return;
+      setAttachmentsUploading(true);
+      try {
+        const parts = await props.onBuildRoomParts(draftToQueue, props.sessionId);
+        if (await roomQueue.enqueue(parts)) {
+          clearComposer();
+          attachments.forEach(revokeAttachmentPreview);
+        }
+      } catch (reason) {
+        toast.error(reason instanceof Error ? reason.message : t("desk.cowork_queue_failed"));
+      } finally {
+        setAttachmentsUploading(false);
+      }
+      return;
+    }
     const queuedDraft = withoutRevertTarget(buildDraft(text, attachments));
     if (!queuedDraft) return;
     appendQueuedDraft(props.sessionId, queuedDraft);
     clearComposer();
-  }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.sessionId]);
+  }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.onBuildRoomParts, props.sessionId, roomQueue]);
 
   const removeQueuedDraft = useCallback((id: string) => {
     const target = queuedItems.find((item) => item.id === id);
@@ -2003,13 +2032,16 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // The Desk thread's own controls (Plan's questions, Run this plan) reply through `sendDraft`,
   // the composer's path, so busy state, errors and the transcript behave as for a typed reply.
+  // A chat opened from a handoff takes no messages until the person presses Continue.
+  const handoffLocked = useHandoffLock((state) => Boolean(state.locked[props.sessionId]));
   const deskThread = useMemo<DeskThread>(() => ({
     sessionId: props.sessionId,
     busy: chatStreaming,
     sendText: async (text) => {
+      if (handoffLocked) throw new Error("This chat is a handoff under review; press Continue first.");
       await sendDraft(textDraft(text));
     },
-  }), [chatStreaming, props.sessionId, sendDraft]);
+  }), [chatStreaming, handoffLocked, props.sessionId, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">
@@ -2210,7 +2242,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
         busy={chatStreaming}
         steering={steering}
         queuedCount={queuedItems.length}
-        disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable)}
+        disabled={model.transitionState !== "idle" || Boolean(props.modelUnavailable) || handoffLocked}
         modelUnavailable={Boolean(props.modelUnavailable)}
         modelUnavailableMessage={props.modelUnavailableMessage}
         statusLabel={statusLabel(snapshot ?? undefined, chatStreaming)}
@@ -2256,10 +2288,11 @@ export function SessionSurface(props: SessionSurfaceProps) {
         isRemoteWorkspace={props.isRemoteWorkspace}
           isSandboxWorkspace={props.isSandboxWorkspace}
           onUploadInboxFiles={props.onUploadInboxFiles ?? handleUploadInboxFiles}
-          compactTopSpacing={Boolean(props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0)}
+          compactTopSpacing={Boolean(props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 || roomQueued > 0)}
           topAccessory={
-            props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 ? (
+            props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 || roomQueued > 0 ? (
               <div>
+                <ConnectedRoomQueue queue={roomQueue} sessionId={props.sessionId} />
                 {queuedItems.length > 0 ? (
                   <QueuedMessagesPanel
                     items={queuedItems}

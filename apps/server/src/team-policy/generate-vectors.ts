@@ -51,9 +51,23 @@ const vectors = [
     expect: { ok: false, code: "team_policy_invalid" },
   },
   {
-    name: "signed but schema version 2",
-    jws: await signTestPolicy({ ...samplePolicy(), v: 2 }),
-    expect: { ok: false, code: "team_policy_invalid" },
+    name: "signed but schema version 1, with playbooks",
+    jws: await signTestPolicy({
+      ...samplePolicy(),
+      v: 1,
+      playbooks: [{ name: "weekly-update", description: "Weekly update", template: "Write this week's update." }],
+    }),
+    expect: { ok: false, code: "team_policy_unsupported_version" },
+  },
+  {
+    name: "signed but schema version 3",
+    jws: await signTestPolicy({ ...samplePolicy(), v: 3 }),
+    expect: { ok: false, code: "team_policy_unsupported_version" },
+  },
+  {
+    name: "schema version 2 but still carries playbooks",
+    jws: await signTestPolicy({ ...samplePolicy(), playbooks: [] }),
+    expect: { ok: false, code: "team_policy_unsupported_version" },
   },
   { name: "two segments", jws: `${validHeader}.${validPayload}`, expect: { ok: false, code: "team_policy_malformed" } },
 ];

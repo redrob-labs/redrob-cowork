@@ -2,7 +2,7 @@ import { readdir, readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import type { Dirent } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
-import type { SkillItem } from "./types.js";
+import type { SkillItem, SkillMetadata } from "./types.js";
 import { parseFrontmatter, buildFrontmatter } from "./frontmatter.js";
 import { exists } from "./utils.js";
 import { validateDescription, validateSkillName } from "./validators.js";
@@ -73,6 +73,26 @@ const extractTriggerFromBody = (body: string) => {
   return "";
 };
 
+/** The frontmatter's `metadata` fields this app reads; anything else in it is left alone. */
+export function skillMetadataFrom(value: unknown): SkillMetadata | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const field = (key: string) => {
+    const entry: unknown = Reflect.get(value, key);
+    return typeof entry === "string" && entry.trim() ? entry.trim() : undefined;
+  };
+  const version: unknown = Reflect.get(value, "version");
+  const source = field("source");
+  const metadata: SkillMetadata = {
+    ...(field("profession") ? { profession: field("profession") } : {}),
+    ...(field("task") ? { task: field("task") } : {}),
+    ...(field("language") ? { language: field("language") } : {}),
+    ...(field("family") ? { family: field("family") } : {}),
+    ...(typeof version === "number" && Number.isFinite(version) ? { version } : {}),
+    ...(source === "team" || source === "library" ? { source } : {}),
+  };
+  return Object.keys(metadata).length ? metadata : undefined;
+}
+
 async function parseSkillEntry(
   skillPath: string,
   entryName: string,
@@ -133,12 +153,14 @@ async function parseSkillEntry(
     return null;
   }
   if (name !== entryName) return null;
+  const metadata = skillMetadataFrom(data.metadata);
   return {
     name,
     description,
     path: skillPath,
     scope,
     trigger: trigger.trim() || undefined,
+    ...(metadata ? { metadata } : {}),
   };
 }
 
@@ -215,6 +237,14 @@ export async function listSkills(workspaceRoot: string, includeGlobal: boolean):
     seen.add(item.name);
     return true;
   });
+}
+
+/** A skill as its parts, for a SKILL.md this server writes itself (library and team skills). */
+export type SkillDocument = { name: string; description: string; body: string; metadata: SkillMetadata };
+
+/** The SKILL.md for a skill: frontmatter with its metadata, a blank line, the instructions. */
+export function renderSkillDocument(doc: SkillDocument): string {
+  return `${buildFrontmatter({ name: doc.name, description: doc.description, metadata: doc.metadata })}\n${doc.body.trim()}\n`;
 }
 
 export type UpsertSkillPayload = {

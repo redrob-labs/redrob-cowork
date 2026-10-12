@@ -97,6 +97,12 @@ describe("privacy model location", () => {
     assert.equal(resolvePrivacyModelDir({ resourcesPath: "/App/Resources", runtimeDir, devMode: false, exists: () => false }), null);
     assert.equal(resolvePrivacyModelDir({ resourcesPath: undefined, runtimeDir, devMode: false, exists: manifestIn(devDir) }), devDir);
   });
+
+  it("finds the work model in its own folder the same way", () => {
+    const work = path.join("/App", "Resources", "insights-model");
+    assert.equal(resolvePrivacyModelDir({ resourcesPath: "/App/Resources", runtimeDir, devMode: false, exists: manifestIn(work), folder: "insights-model" }), work);
+    assert.equal(resolvePrivacyModelDir({ resourcesPath: "/App/Resources", runtimeDir, devMode: false, exists: manifestIn(packagedDir), folder: "insights-model" }), null);
+  });
 });
 
 describe("bundled Redrob Code runtime", () => {
